@@ -5060,6 +5060,104 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f8593ca2ec1a3477227be5f80c69b7c676718d653f199435ec49f54a4ef3de24"
+    },
+    {
+      "taskId": "database-safety-fixture-line-ending-portability-20260729",
+      "reviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "reviewedAt": "2026-07-29T21:41:00-04:00",
+      "status": "local_candidate_scope_complete",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Makes the complete rejected Replit database-preview fixture hash portable across Windows CRLF and Linux LF checkouts without weakening any destructive SQL detection or count assertion.",
+      "immediateFindings": [
+        {
+          "category": "field_acceptance_contradicts_automation",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "The accepted Windows proof and the Replit Linux preflight disagreed because one fixture hash covered platform-specific line endings; canonical LF hashing restores identical fail-closed evidence on both hosts."
+        }
+      ],
+      "workstreams": [
+        "database-publication-safety",
+        "platform-portability",
+        "living-brief-governance"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/test-database-safety.mjs",
+          "type": "focused_portability_proof",
+          "result": "passed",
+          "boundary": "The database-safety fixture suite passes after canonical LF normalization; all destructive SQL operation counts and detection assertions remain unchanged, with no database, provider, schema, package, lockfile, or product-runtime action."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, human authority, or permanent organizational doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed database publication and cross-platform evidence rules already govern this correction."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves every destructive SQL assertion and makes the same focused proof deterministic across line-ending conventions."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, market direction, or strategic relationship changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime, schema, provider, hosting, tenancy, dependency, or database behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, synchronization, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, workbook, report layout, typography, identity, or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory claim, compliance citation, or edition changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-candidate and provider truth remain separate; the correction only restores a portable preflight assertion."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new product scope or deferred implementation obligation is introduced by the portable fixture proof."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The observed Linux gate mismatch and bounded proof correction are captured here without database, publication, deployment, or customer-data action."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json",
+        "scripts/test-database-safety.mjs"
+      ],
+      "reviewedChangeSha256": "a928b2d643870af1d0d7646dbb3ef912af6f7b98fa8605f051a0fcb6f6f81e3c"
     }
   ]
 }

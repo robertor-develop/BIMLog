@@ -1,18 +1,17 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
+  "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
   "bundleSha256": "d4aaeeebb6d0abb7b7f34d95e592f40b71634f98f6e4169c8ff2dc2d61526b70",
   "impact": {
-    "baselineCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
+    "baselineCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
     "changedPaths": [
-      "artifacts/api-server/src/lib/project-analytics-current-view-export.ts",
-      "living-brief/impact-declarations.json"
+      "living-brief/impact-declarations.json",
+      "scripts/test-database-safety.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -23,11 +22,11 @@
       "sha256": "50d6dd43aca6faeb0109e6037e700844acad9ad67671d3195e270baca49fe4f9",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "claude",
@@ -35,11 +34,11 @@
       "sha256": "38f20b93c6d5ef1263c725538e8ca81b9999674de5bac0a4d4921db3f2d170c9",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "quality",
@@ -47,11 +46,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "vision",
@@ -59,11 +58,11 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "platform",
@@ -71,11 +70,11 @@
       "sha256": "39eb32d23c04cefb474cc39675e151a6d12932b96611f36ec0d7d5c04230881e",
       "sourceChangedAt": "2026-07-29T01:07:42-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "plugin",
@@ -83,11 +82,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "report_design_system",
@@ -95,11 +94,11 @@
       "sha256": "bb35982aa33e0f95b5c5ff473d2bd5105887af0fb7714fc44e4d52354a38552e",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "standards_register",
@@ -107,11 +106,11 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "status",
@@ -119,11 +118,11 @@
       "sha256": "6bbbf6b9ecd97f6ee794c8dfedd0c2a9c8f2deca4b927eeb77ee932a4d841d6c",
       "sourceChangedAt": "2026-07-29T18:07:30-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "open_loop",
@@ -131,11 +130,11 @@
       "sha256": "18f34e0387e64be8783394abf94d154560eb9d43d7455f4085527ffd31c322f4",
       "sourceChangedAt": "2026-07-29T18:07:30-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     },
     {
       "key": "audit",
@@ -143,11 +142,11 @@
       "sha256": "81e6a10e3157c34ada153b2c82ecce95df18fb64cd4ff586e655217156c4549e",
       "sourceChangedAt": "2026-07-25T09:08:17-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewedThroughCommit": "7fd0e06c90b427aeca26d6a3e9cddfdbe31c8a50",
-      "semanticReviewTask": "project-insights-active-summary-wrap-20260729",
+      "reconciledThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewedThroughCommit": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+      "semanticReviewTask": "database-safety-fixture-line-ending-portability-20260729",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-07-29T18:25:00-04:00"
+      "semanticReviewedAt": "2026-07-29T21:41:00-04:00"
     }
   ]
 }
