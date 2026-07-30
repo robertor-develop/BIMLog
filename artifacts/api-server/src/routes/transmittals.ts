@@ -156,7 +156,7 @@ export function renderTransmittalsCurrentViewPdf(args: {
       fontSize: 7,
       headerFontSize: 7,
       rowMinHeight: 26,
-      pageBottom: 704,
+      pageBottom: 720,
       headerFill: theme.primary,
       onPageBreak: () => {
         doc.addPage();
