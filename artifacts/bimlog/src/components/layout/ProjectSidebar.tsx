@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link, useLocation } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
@@ -60,11 +60,46 @@ type NavGroup = {
   }>;
 };
 
-function SidebarModal({ onClose, children }: { onClose: () => void; children: React.ReactNode }) {
+function SidebarModal({
+  onClose,
+  titleId,
+  descriptionId,
+  closeLabel,
+  children,
+}: {
+  onClose: () => void;
+  titleId: string;
+  descriptionId: string;
+  closeLabel: string;
+  children: React.ReactNode;
+}) {
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const previouslyFocused = document.activeElement instanceof HTMLElement
+      ? document.activeElement
+      : null;
+
+    closeButtonRef.current?.focus();
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onClose();
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      previouslyFocused?.focus();
+    };
+  }, [onClose]);
+
   return (
     <div style={{ position: "fixed", inset: 0, zIndex: 1000, background: "rgba(0,0,0,0.45)", display: "flex", alignItems: "center", justifyContent: "center" }} onClick={onClose}>
-      <div style={{ background: "white", borderRadius: 12, padding: "28px 28px 24px", maxWidth: 400, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.18)", position: "relative" }} onClick={e => e.stopPropagation()}>
-        <button onClick={onClose} style={{ position: "absolute", top: 14, right: 14, background: "none", border: "none", cursor: "pointer", color: "#6B7280", padding: 4, borderRadius: 4 }}>
+      <div role="dialog" aria-modal="true" aria-labelledby={titleId} aria-describedby={descriptionId} style={{ background: "white", borderRadius: 12, padding: "28px 28px 24px", maxWidth: 400, width: "90%", boxShadow: "0 20px 60px rgba(0,0,0,0.18)", position: "relative" }} onClick={e => e.stopPropagation()}>
+        <button ref={closeButtonRef} type="button" aria-label={closeLabel} onClick={onClose} style={{ position: "absolute", top: 14, right: 14, background: "none", border: "none", cursor: "pointer", color: "#6B7280", padding: 4, borderRadius: 4 }}>
           <X style={{ width: 16, height: 16 }} />
         </button>
         {children}
@@ -127,7 +162,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
     {
       id: "planning",
       labelEn: "Planning",
-      labelEs: "Planificacion",
+      labelEs: "Planificación",
       descriptionEn: "Schedule and model coordination views.",
       descriptionEs: "Cronograma y coordinacion de modelo.",
       items: byId(["schedule", "clash-reports"]),
@@ -149,15 +184,15 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       labelEn: "Insights & Reports",
       labelEs: "Informes e inteligencia",
       descriptionEn: "Analytics, governed reports, and project intelligence.",
-      descriptionEs: "Analitica, reportes gobernados e inteligencia del proyecto.",
+      descriptionEs: "Analítica, reportes gobernados e inteligencia del proyecto.",
       items: byId(["analytics", "reports"]),
     },
     {
       id: "admin",
       labelEn: "Directory & Admin",
-      labelEs: "Directorio y administracion",
+      labelEs: "Directorio y administración",
       descriptionEn: "People, project administration, and naming tools.",
-      descriptionEs: "Personas, administracion del proyecto y herramientas de nombres.",
+      descriptionEs: "Personas, administración del proyecto y herramientas de nombres.",
       items: byId(["directory", "team", "generator", "convention"]),
     },
     {
@@ -251,11 +286,16 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
   return (
     <>
       {showSyncAgent && (
-        <SidebarModal onClose={() => setShowSyncAgent(false)}>
+        <SidebarModal
+          onClose={() => setShowSyncAgent(false)}
+          titleId={`sync-agent-dialog-title-${projectId}`}
+          descriptionId={`sync-agent-dialog-description-${projectId}`}
+          closeLabel={tr("Close Sync Agent dialog", "Cerrar diálogo de Sync Agent")}
+        >
           <div style={{ marginBottom: 16 }}>
-            <div style={{ fontSize: 15, fontWeight: 700, color: "#1E293B", marginBottom: 6 }}>BIMLog Sync Agent</div>
-            <div style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>
-              {tr("BIMLog Sync Agent is available on", "BIMLog Sync Agent esta disponible en")} <strong>{tr("Professional plans and up", "planes Profesionales y superiores")}</strong>. {tr("Download the installer or upgrade your plan.", "Descarga el instalador o mejora tu plan.")}
+            <div id={`sync-agent-dialog-title-${projectId}`} style={{ fontSize: 15, fontWeight: 700, color: "#1E293B", marginBottom: 6 }}>BIMLog Sync Agent</div>
+            <div id={`sync-agent-dialog-description-${projectId}`} style={{ fontSize: 12, color: "#6B7280", lineHeight: 1.6 }}>
+              {tr("BIMLog Sync Agent is available on", "BIMLog Sync Agent está disponible en")} <strong>{tr("Professional plans and up", "planes Profesionales y superiores")}</strong>. {tr("Download the installer or upgrade your plan.", "Descarga el instalador o mejora tu plan.")}
             </div>
           </div>
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
@@ -265,7 +305,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
             </a>
             <a href="mailto:info@ignitesmart.ai" style={{ display: "inline-flex", alignItems: "center", gap: 6, padding: "8px 16px", borderRadius: 7, border: "1.5px solid #E2E8F0", color: "#374151", fontSize: 12, fontWeight: 600, textDecoration: "none" }}>
               <Mail style={{ width: 13, height: 13 }} />
-              {tr("Contact Us", "Contactanos")}
+              {tr("Contact Us", "Contáctanos")}
             </a>
           </div>
         </SidebarModal>
