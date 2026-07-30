@@ -33,6 +33,8 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   const [providers, setProviders] = useState<CatalogProvider[]>([]);
   const [connections, setConnections] = useState<SafeConnection[]>([]);
   const [loading, setLoading] = useState(true);
+  const [catalogLoadFailed, setCatalogLoadFailed] = useState(false);
+  const [catalogRequest, setCatalogRequest] = useState(0);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
   const [availability, setAvailability] = useState("all");
@@ -41,6 +43,11 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
 
   useEffect(() => {
     if (!token) return;
+
+    let active = true;
+    setLoading(true);
+    setCatalogLoadFailed(false);
+
     Promise.all([
       fetch("/api/v1/me/provider-catalog", {
         headers: { Authorization: `Bearer ${token}` },
@@ -56,12 +63,24 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
       }),
     ])
       .then(([catalog, current]) => {
+        if (!active) return;
         setProviders(catalog.providers);
         setConnections(current);
       })
-      .catch((error) => logClientError("governed provider catalog load", error))
-      .finally(() => setLoading(false));
-  }, [token]);
+      .catch((error) => {
+        if (!active) return;
+        logClientError("governed provider catalog load", error);
+        setProviders([]);
+        setConnections([]);
+        setCatalogLoadFailed(true);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [catalogRequest, token]);
 
   const connected = (key: string) =>
     connections.some((connection) => connection.provider === key && connection.status === "connected");
@@ -127,7 +146,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   }
 
   return (
-    <div id="integrations-current-view" className="px-4 py-5 sm:px-8 sm:py-7" style={{ maxWidth: 1120 }}>
+    <div id="integrations-current-view" className="px-4 py-5 sm:px-8 sm:py-7" aria-busy={loading} style={{ maxWidth: 1120 }}>
       <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-5">
         <div className="min-w-0">
           <h1 style={{ margin: 0, fontSize: 24, color: "hsl(var(--foreground))" }}>
@@ -144,7 +163,7 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
           <PrintPdfButton
             lang={lang}
             onClick={() => void exportCurrentView()}
-            disabled={loading}
+            disabled={loading || catalogLoadFailed}
             loading={exporting}
             currentViewSummary={[
               `${tr("Search", "Busqueda")}: ${search.trim() || tr("None", "Ninguna")}`,
@@ -181,15 +200,37 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
           <label style={{ display: "grid", gap: 4, fontSize: 11 }}>{tr("Availability", "Disponibilidad")}<select value={availability} onChange={(event) => setAvailability(event.target.value)}><option value="all">{tr("All availability", "Toda")}</option><option value="available">{tr("Available", "Disponible")}</option><option value="setup_required">{tr("Setup required", "Configuracion requerida")}</option><option value="review_required">{tr("Review required", "Revision requerida")}</option></select></label>
           <label style={{ display: "grid", gap: 4, fontSize: 11 }}>{tr("Connection", "Conexion")}<select value={connection} onChange={(event) => setConnection(event.target.value)}><option value="all">{tr("All connection states", "Todos")}</option><option value="connected">{tr("Connected", "Conectado")}</option><option value="not_connected">{tr("Not connected", "No conectado")}</option></select></label>
         </div>
-        <div style={{ marginTop: 9, fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>{tr("Visible", "Visibles")}: {visibleProviders.length}/{providers.length}</div>
+        <div style={{ marginTop: 9, fontSize: 11, fontWeight: 700, color: "hsl(var(--muted-foreground))" }}>{tr("Visible", "Visibles")}: {catalogLoadFailed ? tr("Unavailable", "No disponible") : `${visibleProviders.length}/${providers.length}`}</div>
       </section>
 
-      {loading ? (
-        <div style={{ display: "flex", gap: 8, alignItems: "center", color: "hsl(var(--muted-foreground))", fontSize: 13 }}>
-          <RefreshCw style={{ width: 15, height: 15 }} />
-          {tr("Loading approved capabilities…", "Cargando capacidades aprobadas…")}
-        </div>
-      ) : (
+      <div aria-live="polite" aria-atomic="true">
+        {loading ? (
+          <div role="status" style={{ display: "flex", gap: 8, alignItems: "center", color: "hsl(var(--muted-foreground))", fontSize: 13 }}>
+            <RefreshCw aria-hidden="true" style={{ width: 15, height: 15 }} />
+            {tr("Loading approved capabilities…", "Cargando capacidades aprobadas…")}
+          </div>
+        ) : catalogLoadFailed ? (
+          <div role="status" style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "center", padding: 18, border: "1px solid #FCA5A5", borderRadius: 10, background: "#FEF2F2", color: "#991B1B" }}>
+            <div>
+              <strong style={{ display: "block", marginBottom: 4, fontSize: 13 }}>
+                {tr("Unable to load approved integrations", "No se pudieron cargar las integraciones aprobadas")}
+              </strong>
+              <div style={{ fontSize: 12, lineHeight: 1.5 }}>
+                {tr("The catalog request failed. Try again; this is not an empty catalog.", "La solicitud del catálogo falló. Inténtalo de nuevo; esto no es un catálogo vacío.")}
+              </div>
+            </div>
+            <button
+              type="button"
+              onClick={() => setCatalogRequest((current) => current + 1)}
+              style={{ display: "inline-flex", alignItems: "center", gap: 6, flexShrink: 0, padding: "7px 11px", borderRadius: 7, border: "1px solid #FCA5A5", background: "white", color: "#991B1B", fontSize: 11, fontWeight: 750, cursor: "pointer" }}
+            >
+              <RefreshCw aria-hidden="true" style={{ width: 14, height: 14 }} />
+              {tr("Try again", "Intentar de nuevo")}
+            </button>
+          </div>
+        ) : null}
+      </div>
+      {!loading && !catalogLoadFailed && (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 14 }}>
           {visibleProviders.map((provider) => {
             const isConnected = connected(provider.key);
