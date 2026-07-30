@@ -1,4 +1,4 @@
-import { type ReactNode, useId, useRef, useState } from "react";
+import { type ReactNode, useEffect, useId, useRef, useState } from "react";
 import { Loader2, Printer } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -108,6 +108,7 @@ export function PrintPdfButton({
   const disabledReasonId = useId();
   const cancelRef = useRef<HTMLButtonElement>(null);
   const triggerRef = useRef<HTMLButtonElement>(null);
+  const restoreAfterActionRef = useRef(false);
   const isSpanish = lang === "es";
   const label = loading
     ? isSpanish ? "Preparando PDF..." : "Preparing PDF..."
@@ -117,13 +118,27 @@ export function PrintPdfButton({
     : isSpanish
       ? "Imprime o descarga un PDF de la vista visible actual."
       : "Print or download a PDF of the current visible view.";
-  const confirm = () => {
-    setOpen(false);
-    onClick();
+  const restoreTriggerFocus = () => {
+    window.requestAnimationFrame(() => triggerRef.current?.focus());
   };
+  const handleOpenChange = (nextOpen: boolean) => {
+    setOpen(nextOpen);
+    if (!nextOpen) restoreTriggerFocus();
+  };
+  const confirm = () => {
+    restoreAfterActionRef.current = true;
+    onClick();
+    setOpen(false);
+  };
+  useEffect(() => {
+    if (!open && !loading && restoreAfterActionRef.current) {
+      restoreAfterActionRef.current = false;
+      restoreTriggerFocus();
+    }
+  }, [loading, open]);
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <Button
         ref={triggerRef}
         type="button"
@@ -201,7 +216,7 @@ export function PrintPdfButton({
           )}
         </div>
         <DialogFooter className="flex-row flex-wrap gap-2 border-t border-slate-200 bg-slate-50 px-5 py-3.5 sm:space-x-0">
-          <Button ref={cancelRef} type="button" variant="outline" size="sm" className="min-w-0 flex-1 sm:flex-none" onClick={() => setOpen(false)}>
+          <Button ref={cancelRef} type="button" variant="outline" size="sm" className="min-w-0 flex-1 sm:flex-none" onClick={() => handleOpenChange(false)}>
             {isSpanish ? "Cancelar" : "Cancel"}
           </Button>
           <Button

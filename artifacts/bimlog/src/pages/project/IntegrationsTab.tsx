@@ -127,9 +127,9 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
   }
 
   return (
-    <div id="integrations-current-view" style={{ padding: "28px 32px", maxWidth: 1120 }}>
-      <div style={{ display: "flex", justifyContent: "space-between", gap: 20, alignItems: "flex-start", marginBottom: 24 }}>
-        <div>
+    <div id="integrations-current-view" className="px-4 py-5 sm:px-8 sm:py-7" style={{ maxWidth: 1120 }}>
+      <div className="mb-6 grid grid-cols-1 gap-4 sm:grid-cols-[minmax(0,1fr)_auto] sm:items-start sm:gap-5">
+        <div className="min-w-0">
           <h1 style={{ margin: 0, fontSize: 24, color: "hsl(var(--foreground))" }}>
             {tr("Integrations and file exchange", "Integraciones e intercambio de archivos")}
           </h1>
@@ -140,25 +140,28 @@ export function IntegrationsTab({ projectId }: IntegrationsTabProps) {
             )}
           </p>
         </div>
-        <PrintPdfButton
-          lang={lang}
-          onClick={() => void exportCurrentView()}
-          disabled={loading}
-          loading={exporting}
-          currentViewSummary={[
-            `${tr("Search", "Busqueda")}: ${search.trim() || tr("None", "Ninguna")}`,
-            `${tr("Category", "Categoria")}: ${category}`,
-            `${tr("Availability", "Disponibilidad")}: ${availability}`,
-            `${tr("Connection", "Conexion")}: ${connection}`,
-            `${tr("Visible", "Visibles")}: ${visibleProviders.length}/${providers.length}`,
-          ]}
-        />
-        <button
-          onClick={() => navigate("/contact")}
-          style={{ padding: "9px 14px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontWeight: 700, cursor: "pointer" }}
-        >
-          {tr("Request an integration review", "Solicitar revisión de integración")}
-        </button>
+        <div className="flex min-w-0 flex-wrap items-start gap-2 sm:flex-nowrap sm:justify-end">
+          <PrintPdfButton
+            lang={lang}
+            onClick={() => void exportCurrentView()}
+            disabled={loading}
+            loading={exporting}
+            currentViewSummary={[
+              `${tr("Search", "Busqueda")}: ${search.trim() || tr("None", "Ninguna")}`,
+              `${tr("Category", "Categoria")}: ${category}`,
+              `${tr("Availability", "Disponibilidad")}: ${availability}`,
+              `${tr("Connection", "Conexion")}: ${connection}`,
+              `${tr("Visible", "Visibles")}: ${visibleProviders.length}/${providers.length}`,
+            ]}
+          />
+          <button
+            className="min-w-0 flex-[1_1_180px] whitespace-normal sm:flex-none"
+            onClick={() => navigate("/contact")}
+            style={{ padding: "9px 14px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontWeight: 700, cursor: "pointer" }}
+          >
+            {tr("Request an integration review", "Solicitar revisión de integración")}
+          </button>
+        </div>
       </div>
 
       <div style={{ padding: "12px 14px", border: "1px solid #BFDBFE", background: "#EFF6FF", borderRadius: 9, color: "#1E40AF", fontSize: 12, lineHeight: 1.55, marginBottom: 20 }}>

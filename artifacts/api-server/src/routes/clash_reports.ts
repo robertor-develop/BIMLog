@@ -75,7 +75,7 @@ function applyLensWorkbookOoxmlStyles(output: Buffer): Buffer {
     <border><left/><right/><top/><bottom style="thin"><color rgb="FFD7DEE7"/></bottom><diagonal/></border>
   </borders>
   <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-  <cellXfs count="8">
+  <cellXfs count="9">
     <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
     <xf numFmtId="0" fontId="1" fillId="2" borderId="0" xfId="0" applyFont="1" applyFill="1" applyAlignment="1"><alignment vertical="center"/></xf>
     <xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center"/></xf>
@@ -84,6 +84,7 @@ function applyLensWorkbookOoxmlStyles(output: Buffer): Buffer {
     <xf numFmtId="0" fontId="0" fillId="4" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
     <xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>
     <xf numFmtId="164" fontId="0" fillId="4" borderId="1" xfId="0" applyNumberFormat="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center"/></xf>
+    <xf numFmtId="0" fontId="2" fillId="0" borderId="0" xfId="0" applyFont="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
   </cellXfs>
   <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
   <dxfs count="0"/>
@@ -101,6 +102,7 @@ function applyLensWorkbookOoxmlStyles(output: Buffer): Buffer {
         const row = Number(rowText);
         let style = 0;
         if (row === 1) style = 1;
+        else if (index === 7 && row === 3) style = 8;
         else if (row < headerRow) style = 2;
         else if (row === headerRow) style = 3;
         else {
@@ -1392,7 +1394,11 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
         ["Floor", ...floorTradeKeys, "Total"],
         ...floorRows,
       ]);
-      matrixSheet["!merges"] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: Math.max(1, floorTradeKeys.length + 1) } }];
+      const matrixEndColumn = Math.max(1, floorTradeKeys.length + 1);
+      matrixSheet["!merges"] = [
+        { s: { r: 0, c: 0 }, e: { r: 0, c: matrixEndColumn } },
+        { s: { r: 2, c: 0 }, e: { r: 2, c: matrixEndColumn } },
+      ];
       matrixSheet["!cols"] = [{ wch: 22 }, ...floorTradeKeys.map(() => ({ wch: 16 })), { wch: 12 }];
       matrixSheet["!autofilter"] = { ref: XLSX.utils.encode_range({ s: { r: 4, c: 0 }, e: { r: Math.max(4, floorRows.length + 4), c: floorTradeKeys.length + 1 } }) };
       matrixSheet["!freeze"] = { xSplit: 1, ySplit: 5 };
@@ -1473,7 +1479,8 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       applyReportPresentation(tradeSummary, 4, 14);
       applyReportPresentation(companySummary, 4, 14);
       applyReportPresentation(statusSummary, 4, 14);
-      applyReportPresentation(matrixSheet, 4, Math.max(1, floorTradeKeys.length + 1));
+      applyReportPresentation(matrixSheet, 4, matrixEndColumn);
+      matrixSheet["!rows"]![2] = { ...(matrixSheet["!rows"]![2] ?? {}), hpt: 30 };
 
       const workbook = XLSX.utils.book_new();
       XLSX.utils.book_append_sheet(workbook, worksheet, "Lens Viewpoints");
