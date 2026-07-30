@@ -4,19 +4,27 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 import { readFileSync } from "fs";
 
-const rawPort = process.env.PORT;
+const isBuild = process.argv.includes("build");
 
-if (!rawPort) {
-  throw new Error(
-    "PORT environment variable is required but was not provided.",
-  );
+function resolveServePort() {
+  if (isBuild) return undefined;
+
+  const rawPort = process.env.PORT;
+  if (!rawPort) {
+    throw new Error(
+      "PORT environment variable is required but was not provided.",
+    );
+  }
+
+  const port = Number(rawPort);
+  if (Number.isNaN(port) || port <= 0) {
+    throw new Error(`Invalid PORT value: "${rawPort}"`);
+  }
+
+  return port;
 }
 
-const port = Number(rawPort);
-
-if (Number.isNaN(port) || port <= 0) {
-  throw new Error(`Invalid PORT value: "${rawPort}"`);
-}
+const port = resolveServePort();
 
 const PRODUCTION_BASE_PATH = "/";
 
@@ -25,17 +33,16 @@ const basePath = process.env.BASE_PATH ?? PRODUCTION_BASE_PATH;
 if (basePath !== PRODUCTION_BASE_PATH) {
   console.warn(
     `[vite] WARNING: BASE_PATH="${basePath}" differs from production path "${PRODUCTION_BASE_PATH}". ` +
-    `Built assets will NOT work in production. Only use non-"/" BASE_PATH for local dev proxy.`
+      `Built assets will NOT work in production. Only use non-"/" BASE_PATH for local dev proxy.`,
   );
 }
 
-const isBuild = process.argv.includes("build");
 const isProduction = process.env.NODE_ENV === "production" || isBuild;
 if (isBuild && basePath !== PRODUCTION_BASE_PATH) {
   throw new Error(
     `BUILD BLOCKED: BASE_PATH="${basePath}" but production serves at "${PRODUCTION_BASE_PATH}". ` +
-    `Production builds MUST use BASE_PATH="${PRODUCTION_BASE_PATH}". ` +
-    `Remove or fix the BASE_PATH env var and retry.`
+      `Production builds MUST use BASE_PATH="${PRODUCTION_BASE_PATH}". ` +
+      `Remove or fix the BASE_PATH env var and retry.`,
   );
 }
 
@@ -44,8 +51,7 @@ export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
-    ...(!isProduction &&
-    process.env.REPL_ID !== undefined
+    ...(!isProduction && process.env.REPL_ID !== undefined
       ? [
           await import("@replit/vite-plugin-runtime-error-modal").then((m) =>
             m.default(),
@@ -64,7 +70,12 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(import.meta.dirname, "src"),
-      "@assets": path.resolve(import.meta.dirname, "..", "..", "attached_assets"),
+      "@assets": path.resolve(
+        import.meta.dirname,
+        "..",
+        "..",
+        "attached_assets",
+      ),
     },
     dedupe: ["react", "react-dom"],
   },

@@ -5158,6 +5158,111 @@
         "scripts/test-database-safety.mjs"
       ],
       "reviewedChangeSha256": "a928b2d643870af1d0d7646dbb3ef912af6f7b98fa8605f051a0fcb6f6f81e3c"
+    },
+    {
+      "taskId": "mockup-sandbox-build-port-separation-20260729",
+      "reviewedThroughCommit": "1ba874f0e3f17361d49c7111d4de21775d3542c4",
+      "reviewedAt": "2026-07-29T22:12:00-04:00",
+      "status": "local_candidate_scope_complete",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Separates both Vite production-build configurations from their required development and preview server ports without changing application UX, reports, dependencies, runtime port validation, or provider configuration.",
+      "immediateFindings": [
+        {
+          "category": "field_acceptance_contradicts_automation",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "The clean Replit Linux gate exposed that both tracked Vite configs required a dev-server PORT during production builds; command-aware configuration now preserves serve-time validation while removing that unrelated build dependency."
+        }
+      ],
+      "workstreams": [
+        "platform-portability",
+        "release-preflight",
+        "living-brief-governance"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/mockup-sandbox/vite.config.ts",
+          "type": "focused_port_contract_proof",
+          "result": "passed",
+          "boundary": "Mockup Vite config resolution proves build succeeds without PORT, serve rejects missing or invalid PORT, and serve preserves an explicit valid port; its isolated production build passes without provider or runtime action."
+        },
+        {
+          "path": "artifacts/bimlog/vite.config.ts",
+          "type": "focused_port_contract_proof",
+          "result": "passed",
+          "boundary": "Main BIMLog Vite config contract proves build succeeds without PORT, serve rejects missing or invalid PORT, and serve preserves an explicit valid port; typecheck and an isolated 2,257-module production build pass without provider or runtime action."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, human authority, or permanent organizational doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing provider-neutral build, fail-closed preflight, and bounded-correction rules already govern this fix."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction adds a focused command-aware Vite contract proof and preserves strict development and preview port validation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, market direction, or strategic relationship changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No hosting, provider configuration, dependency, runtime topology, schema, database, or production port behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, synchronization, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, workbook, report layout, typography, identity, or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory claim, compliance citation, or edition changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release-candidate and deployed truth remain separate; this only removes an ambient dev-port requirement from production build configuration."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new product scope or deferred implementation obligation is introduced by the build portability fix."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The observed Linux gate blocker and bounded source correction are captured without provider mutation, database action, publication, deployment, or customer data."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/vite.config.ts",
+        "artifacts/mockup-sandbox/vite.config.ts",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "392d36109068c0a9f8dd4a16c3b3093c43ffbedc6b58211ab5c3d61c995a44bc"
     }
   ]
 }
