@@ -198,6 +198,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/living-brief-source.ts
 - artifacts/api-server/src/lib/meeting-canonical-links.ts
 - artifacts/api-server/src/lib/oauth.ts
+- artifacts/api-server/src/lib/operational-register-table.ts
 - artifacts/api-server/src/lib/overdue-notifier.ts
 - artifacts/api-server/src/lib/pdf-kit.ts
 - artifacts/api-server/src/lib/pdf-logo.ts
