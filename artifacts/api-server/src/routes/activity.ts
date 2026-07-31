@@ -5,6 +5,7 @@ import { eq } from "drizzle-orm";
 import { ListActivityParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeader, PALETTE, REPORT_THEMES } from "../lib/pdf-kit";
+import { drawOperationalRegisterTable } from "../lib/operational-register-table";
 
 const router: IRouter = Router();
 
@@ -195,13 +196,6 @@ async function activityProjectContext(projectId: number) {
   return project ?? { id: projectId, name: `Project ${projectId}`, code: String(projectId) };
 }
 
-function ensurePdfSpace(doc: PDFKit.PDFDocument, y: number, needed = 44) {
-  const bottom = doc.page.height - doc.page.margins.bottom;
-  if (y + needed <= bottom) return y;
-  doc.addPage();
-  return doc.page.margins.top;
-}
-
 export function sendActivityPdf(res: import("express").Response, input: {
   project: { id: number; name: string; code: string };
   companyName: string;
@@ -220,15 +214,12 @@ export function sendActivityPdf(res: import("express").Response, input: {
   const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
   const generatedAt = new Date();
   const title = label("Activity Log", "Registro de Actividad");
-  const reportNumber = `ACT-${input.project.code || input.project.id}-${generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
   const pageHeader = () => drawBrandedHeader(doc, {
     margin: 36,
     companyName: input.companyName,
     title,
-    subtitle: label("Immutable project activity register", "Registro inmutable de actividad del proyecto"),
     projectName: input.project.name,
     projectCode: input.project.code,
-    reportNumber,
     reportDate: generatedAt,
     theme: REPORT_THEMES.platform.standard,
   }) + 10;
@@ -256,44 +247,37 @@ export function sendActivityPdf(res: import("express").Response, input: {
       .fontSize(11)
       .text(label("No activity events match the current filters.", "Ningún evento de actividad coincide con los filtros actuales."), doc.page.margins.left + 12, y + 14, { width: width - 24 });
   } else {
-    const cols = [
-      { title: label("Timestamp", "Fecha/hora"), x: 0, w: 104 },
-      { title: label("User", "Usuario"), x: 108, w: 112 },
-      { title: label("Company", "Empresa"), x: 224, w: 100 },
-      { title: label("Action", "Acción"), x: 328, w: 70 },
-      { title: label("Entity", "Entidad"), x: 402, w: 60 },
-      { title: label("Details", "Detalles"), x: 466, w: 210 },
-      { title: label("File", "Archivo"), x: 680, w: 58 },
-    ];
     const left = doc.page.margins.left;
-    const drawHeader = () => {
-      doc.rect(left, y, width, 18).fill(PALETTE.NAVY);
-      doc.fillColor(PALETTE.WHITE).font("Helvetica-Bold").fontSize(7);
-      for (const col of cols) doc.text(col.title, left + col.x + 3, y + 5, { width: col.w - 6, ellipsis: true });
-      y += 20;
-    };
-    drawHeader();
-    input.rows.forEach((row, index) => {
-      y = ensurePdfSpace(doc, y, 38);
-      if (y === doc.page.margins.top) {
-        y = pageHeader();
-        drawHeader();
-      }
-      const rowY = y;
-      const rowHeight = 34;
-      doc.rect(left, rowY, width, rowHeight).fill(index % 2 ? PALETTE.WHITE : PALETTE.ROW_ALT);
-      doc.fillColor(PALETTE.TEXT).font("Helvetica").fontSize(7);
-      const values = [
-        row.createdAt.toISOString().replace("T", " ").slice(0, 19),
-        row.userFullName,
-        row.userCompanyName,
-        row.actionType,
-        row.entityType,
-        [presentActivityDetailsForExport(row.details, { actionType: row.actionType, entityType: row.entityType }).summary, ...presentActivityDetailsForExport(row.details, { actionType: row.actionType, entityType: row.entityType }).meta].filter(Boolean).join(" | "),
-        row.fileNameAfter || row.fileNameBefore,
-      ];
-      values.forEach((value, colIndex) => doc.text(safeText(value) || "—", left + cols[colIndex].x + 3, rowY + 5, { width: cols[colIndex].w - 6, height: 24, ellipsis: true }));
-      y += rowHeight;
+    y = drawOperationalRegisterTable(doc, {
+      x: left,
+      startY: y,
+      columns: [
+        { label: label("Timestamp", "Fecha/hora"), width: 96, format: (row) => row.createdAt.toISOString().replace("T", " ").slice(0, 19) },
+        { label: label("User", "Usuario"), width: 92, format: (row) => safeText(row.userFullName) || "—" },
+        { label: label("Company", "Empresa"), width: 88, format: (row) => safeText(row.userCompanyName) || "—" },
+        { label: label("Action", "Acción"), width: 62, format: (row) => safeText(row.actionType) || "—" },
+        { label: label("Entity", "Entidad"), width: 66, format: (row) => safeText(row.entityType) || "—" },
+        {
+          label: label("Details", "Detalles"),
+          width: 210,
+          format: (row) => {
+            const detail = presentActivityDetailsForExport(row.details, { actionType: row.actionType, entityType: row.entityType });
+            return safeText([detail.summary, ...detail.meta].filter(Boolean).join(" | ")) || "—";
+          },
+        },
+        { label: label("File", "Archivo"), width: 106, format: (row) => safeText(row.fileNameAfter || row.fileNameBefore) || "—" },
+      ],
+      rows: input.rows,
+      fontSize: 8.5,
+      headerFontSize: 8.5,
+      rowMinHeight: 30,
+      cellPadX: 4,
+      cellPadY: 5,
+      pageBottom: doc.page.height - 52,
+      onPageBreak: () => {
+        doc.addPage({ size: "LETTER", layout: "landscape", margins: { top: 36, right: 36, bottom: 36, left: 36 } });
+        return pageHeader();
+      },
     });
   }
   addPageNumbers(doc, {
@@ -302,7 +286,6 @@ export function sendActivityPdf(res: import("express").Response, input: {
     fingerprintY: doc.page.height - 36,
     companyName: input.companyName,
     projectName: input.project.name,
-    reportNumber,
     timestamp: generatedAt.toISOString(),
     contentHash: computeContentHash({ projectId: input.project.id, filters, rows: input.rows }),
   });

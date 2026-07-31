@@ -3,6 +3,7 @@ import { db } from "@workspace/db";
 import { projectsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeader, PALETTE, REPORT_THEMES } from "../lib/pdf-kit";
+import { drawOperationalRegisterTable } from "../lib/operational-register-table";
 import { authMiddleware } from "../middlewares/auth";
 import {
   CoordinatorRegisterError,
@@ -43,13 +44,6 @@ const pdfValue = (value: unknown) => safeText(value) || "—";
 function writeWrapped(doc: PDFKit.PDFDocument, text: string, x: number, y: number, width: number, options: PDFKit.Mixins.TextOptions = {}) {
   doc.text(text, x, y, { width, lineGap: 2, ...options });
   return doc.y;
-}
-
-function ensurePdfSpace(doc: PDFKit.PDFDocument, y: number, needed = 48) {
-  const bottom = doc.page.height - doc.page.margins.bottom;
-  if (y + needed <= bottom) return y;
-  doc.addPage();
-  return doc.page.margins.top;
 }
 
 async function coordinatorProjectContext(projectId: number) {
@@ -108,15 +102,12 @@ export function sendCoordinatorPdf(res: Response, input: {
 
   const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
   const title = label("Coordinator Command Center", "Centro de Control de Coordinación");
-  const reportNumber = `CCC-${input.project.code || input.project.id}-${input.generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;
   const pageHeader = () => drawBrandedHeader(doc, {
     margin: 36,
     companyName: input.companyName,
     title,
-    subtitle: label("Authorized coordination action register", "Registro autorizado de acciones de coordinación"),
     projectName: input.project.name,
     projectCode: input.project.code,
-    reportNumber,
     reportDate: input.generatedAt,
     theme: REPORT_THEMES.platform.standard,
   }) + 10;
@@ -149,51 +140,39 @@ export function sendCoordinatorPdf(res: Response, input: {
       .fontSize(11)
       .text(label("No actions match the current filters.", "Ninguna acción coincide con los filtros actuales."), doc.page.margins.left + 12, y + 14, { width: width - 24 });
   } else {
-    const cols = [
-      { title: label("Source", "Fuente"), x: 0, w: 70 },
-      { title: label("ID", "ID"), x: 74, w: 72 },
-      { title: label("Action", "Acción"), x: 150, w: 190 },
-      { title: label("Status", "Estado"), x: 344, w: 80 },
-      { title: label("Responsible", "Responsable"), x: 428, w: 120 },
-      { title: label("Floor / discipline", "Piso / disciplina"), x: 552, w: 110 },
-      { title: label("Deadline", "Fecha límite"), x: 666, w: 72 },
-    ];
     const left = doc.page.margins.left;
-    const drawHeader = () => {
-      doc.rect(left, y, width, 18).fill(PALETTE.NAVY);
-      doc.fillColor(PALETTE.WHITE).font("Helvetica-Bold").fontSize(7);
-      for (const col of cols) doc.text(col.title, left + col.x + 3, y + 5, { width: col.w - 6, ellipsis: true });
-      y += 20;
-    };
-    drawHeader();
-    for (const item of input.result.items) {
-      y = ensurePdfSpace(doc, y, 42);
-      if (y === doc.page.margins.top) {
-        y = pageHeader();
-        drawHeader();
-      }
-      const rowY = y;
-      const rowHeight = 38;
-      doc.rect(left, rowY, width, rowHeight).fill(input.result.items.indexOf(item) % 2 ? PALETTE.WHITE : PALETTE.ROW_ALT);
-      doc.fillColor(PALETTE.TEXT).font("Helvetica").fontSize(7);
-      const relatedLens = item.related.lens;
-      const floorDiscipline = [item.floor, item.discipline].filter(Boolean).join(" / ");
-      const responsible = [item.responsibility.company, item.responsibility.person].filter(Boolean).join(" · ");
-      const values = [
-        item.sourceModule,
-        item.displayIdentifier,
-        item.title,
-        item.presentationStatus,
-        responsible || "—",
-        floorDiscipline || "—",
-        item.dueAt ?? "—",
-      ];
-      values.forEach((value, index) => doc.text(pdfValue(value), left + cols[index].x + 3, rowY + 5, { width: cols[index].w - 6, height: 28, ellipsis: true }));
-      if (relatedLens) {
-        doc.fillColor(PALETTE.MUTED).fontSize(6).text(`Lens server ${relatedLens.serverId} · rev ${relatedLens.revisionNumber}`, left + cols[1].x + 3, rowY + 26, { width: cols[1].w + 120, ellipsis: true });
-      }
-      y += rowHeight;
-    }
+    y = drawOperationalRegisterTable(doc, {
+      x: left,
+      startY: y,
+      columns: [
+        { label: label("Source", "Fuente"), width: 70, format: (item) => pdfValue(item.sourceModule) },
+        { label: label("ID", "ID"), width: 80, format: (item) => pdfValue(item.displayIdentifier) },
+        { label: label("Action", "Acción"), width: 190, format: (item) => pdfValue(item.title) },
+        { label: label("Status", "Estado"), width: 75, format: (item) => pdfValue(item.presentationStatus) },
+        {
+          label: label("Responsible", "Responsable"),
+          width: 125,
+          format: (item) => pdfValue([item.responsibility.company, item.responsibility.person].filter(Boolean).join(" · ")),
+        },
+        {
+          label: label("Floor / discipline", "Piso / disciplina"),
+          width: 105,
+          format: (item) => pdfValue([item.floor, item.discipline].filter(Boolean).join(" / ")),
+        },
+        { label: label("Deadline", "Fecha límite"), width: 75, format: (item) => pdfValue(item.dueAt) },
+      ],
+      rows: input.result.items,
+      fontSize: 8.5,
+      headerFontSize: 8.5,
+      rowMinHeight: 30,
+      cellPadX: 4,
+      cellPadY: 5,
+      pageBottom: doc.page.height - 52,
+      onPageBreak: () => {
+        doc.addPage({ size: "LETTER", layout: "landscape", margins: { top: 36, right: 36, bottom: 36, left: 36 } });
+        return pageHeader();
+      },
+    });
   }
   addPageNumbers(doc, {
     margin: 36,
@@ -201,7 +180,6 @@ export function sendCoordinatorPdf(res: Response, input: {
     fingerprintY: doc.page.height - 36,
     companyName: input.companyName,
     projectName: input.project.name,
-    reportNumber,
     timestamp: input.generatedAt.toISOString(),
     contentHash: computeContentHash({ projectId: input.project.id, filters: input.filters, rows: input.result.items }),
   });
