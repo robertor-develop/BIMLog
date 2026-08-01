@@ -5492,6 +5492,122 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "58424a58e9f49f77a25308240f976a457a2fd296f398db0b18c194d82f7282c4"
+    },
+    {
+      "taskId": "ui-pdf-release-readiness-reconciliation-20260801",
+      "reviewedThroughCommit": "dd884f09e1a8e289b03ef59712121680e9c380c3",
+      "reviewedAt": "2026-08-01T10:57:00-04:00",
+      "status": "local_candidate_scope_complete",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Reconciles six previously accepted UI-only corrections into the current PDF/report descendant while excluding unrelated runtime and security commits and preserving final build, browser, artifact, and independent-review gates.",
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Project access, sidebar requests, Integrations catalog loading, and public bilingual presentation require explicit accessible failure and responsive states in the same release candidate as the governed PDF family."
+        }
+      ],
+      "workstreams": [
+        "accessibility-localization",
+        "ui-release-readiness",
+        "living-brief-governance"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/bimlog/src/pages/ProjectDetail.tsx",
+          "type": "accepted_ui_state_reconciliation",
+          "result": "implemented_pending_final_proof",
+          "boundary": "The reconciled component preserves distinct loading, denied, missing, and retryable failure states while retaining the current project shell and access authority."
+        },
+        {
+          "path": "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
+          "type": "accepted_responsive_error_state_reconciliation",
+          "result": "implemented_pending_final_proof",
+          "boundary": "The catalog error and retry semantics are combined with the accepted responsive exact-390 header and single governed Print PDF action."
+        },
+        {
+          "path": "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+          "type": "accepted_sidebar_state_reconciliation",
+          "result": "implemented_pending_final_proof",
+          "boundary": "Sanitized request failures and stale-notification sequencing are preserved without changing navigation authority or provider behavior."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, human authority, organizational doctrine, or permanent relationship changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing accessible-state, evidence, provider-boundary, and serialized-release rules already govern these UI corrections."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established desktop, exact-390, bilingual, state, console, request, and independent-review gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Localization and state feedback preserve existing product meaning and introduce no roadmap, tier, or market promise."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime topology, hosting, provider, dependency, schema, database, or deployment behavior is changed by this UI-only integration."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, synchronization, installation, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The report contract remains unchanged; Integrations retains the existing governed Print PDF surface and responsive layout."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory claim, compliance citation, or edition changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status now records the reconciled six-path UI candidate and keeps it separate from build, push, deployment, and live acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The exact desktop, mobile, bilingual, async-state, console, request, artifact, and independent acceptance work remains open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "The separate historical branch, accepted UI subset, excluded runtime/security scope, and release limitations are durably recorded."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
+        "artifacts/bimlog/src/pages/Features.tsx",
+        "artifacts/bimlog/src/pages/Pricing.tsx",
+        "artifacts/bimlog/src/pages/ProjectDetail.tsx",
+        "artifacts/bimlog/src/pages/project/IntegrationsTab.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0d204c401a12a9e8e69e1aceea010bd24df9c80680a05a261b42cc7ce0d2084e"
     }
   ]
 }

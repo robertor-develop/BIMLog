@@ -13,6 +13,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 3. Obtain independent review of the exact immutable commit/tree/evidence before
    any separate push, publication, deployment, production, or live-acceptance
    decision. Source completion must not be reported as live acceptance.
+4. Exercise the reconciled ProjectDetail, sidebar, Integrations, Pricing, and
+   Features paths in English desktop and Spanish exact-390 browser states,
+   including load failure, retry, denied, disabled, stale-response, focus, live
+   announcement, console, request, and horizontal-overflow gates.
 
 ## Recovery control loop - 2026-07-28
 

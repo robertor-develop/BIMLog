@@ -763,6 +763,14 @@ production runtime-closure build, complete original-evidence traceability,
 regenerated every-page inspection, and independent review of the exact sealed
 candidate.
 
+The August 1 continuation reconciles only the six previously accepted UI paths
+from the historical `2af082ba` branch into this descendant: ProjectDetail,
+ProjectSidebar, MasterSidebar, Integrations, Pricing, and Features. Its unrelated
+runtime, security, dependency, schema, provider, and database commits remain
+outside this UI/PDF owner. The reconciled UI paths remain subject to candidate-
+bound type/build/browser evidence and independent acceptance; no push,
+publication, deployment, provider action, or customer-data access occurred.
+
 ---
 
 ## Five-index publication-preview correction audit - July 24, 2026

@@ -12,6 +12,21 @@
   final production-build closure receipt, complete denominator binding, and
   independent every-page acceptance remain release gates.
 
+### Reconciled UI acceptance paths - 2026-08-01
+
+- The same local descendant now also carries the previously accepted UI-only
+  corrections for ProjectDetail, ProjectSidebar, MasterSidebar, Integrations,
+  Pricing, and Features. The reconciliation excludes the separate runtime and
+  security commits from the historical `2af082ba` branch.
+- Project access states distinguish loading, denied, missing, and retryable
+  failures; sidebar and integration requests expose accessible sanitized error
+  states; stale notification results cannot replace a newer request; and the
+  existing Pricing and Features presentation is bilingual.
+- This remains a local candidate pending the single successful production-build
+  closure, complete browser/artifact QA, and independent acceptance. It is not
+  pushed by this task, published, deployed, production verified, or customer
+  accepted.
+
 ## Current recovery truth - 2026-07-28
 
 This section supersedes any conflicting current-state wording below. Older
