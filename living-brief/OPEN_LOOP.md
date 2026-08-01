@@ -2,6 +2,18 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## Operational-register field acceptance - 2026-07-31
+
+1. Preserve the local Activity Log and Coordinator Command Center correction
+   until a candidate-bound production runtime-closure build exits successfully.
+2. Bind Roberto's complete original PDF/UI evidence denominator to final
+   artifacts; regenerate the affected families and inspect every affected page
+   at original size, including all nine Activity Log pages and every
+   Coordinator continuation page.
+3. Obtain independent review of the exact immutable commit/tree/evidence before
+   any separate push, publication, deployment, production, or live-acceptance
+   decision. Source completion must not be reported as live acceptance.
+
 ## Recovery control loop - 2026-07-28
 
 1. Register `F:\BIMLog\Repositories\bimlog` as the saved Codex BIMLog project.

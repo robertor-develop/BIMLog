@@ -743,6 +743,28 @@ inspection, and Roberto's explicit Publish approval.
 
 ---
 
+## Operational-register field-acceptance correction audit - July 31, 2026
+
+Status: local bounded correction; not pushed by this task, published, deployed,
+production verified, customer accepted, or live accepted.
+
+Roberto's downloaded Activity Log and Coordinator Command Center screenshots
+contradicted the prior automated acceptance: customer-visible PDFs exposed
+internal governance wording and trace IDs, and long Activity details/file values
+could clip or overlap. The correction removes those visible implementation
+labels while retaining internal audit data outside customer presentation, and
+introduces a dedicated measured-row operational-register table helper with
+deterministic continuation geometry and repeated customer identity.
+
+The correction does not alter authorization, tenancy, domain records,
+Commercial/Financial binding, schema, dependencies, provider state, or customer
+data. Final acceptance remains contingent on a successful candidate-bound
+production runtime-closure build, complete original-evidence traceability,
+regenerated every-page inspection, and independent review of the exact sealed
+candidate.
+
+---
+
 ## Five-index publication-preview correction audit - July 24, 2026
 
 Status: accepted source correction; not synchronized in Replit, previewed again, published, deployed, or

@@ -1,5 +1,17 @@
 # STATUS.md - Current Accepted Platform State
 
+## Operational-register live-acceptance correction - 2026-07-31
+
+- Local branch `codex/platform-pdf-consistency-20260730` contains a bounded
+  descendant correction for the customer-visible Activity Log and Coordinator
+  Command Center PDFs. It removes internal/governance labels and visible trace
+  IDs and uses a dedicated measured-row table helper for long operational text.
+- The correction is local only. It is not pushed by this task, published,
+  deployed, production verified, customer accepted, or live accepted.
+- Focused source checks and regenerated affected artifacts pass locally. The
+  final production-build closure receipt, complete denominator binding, and
+  independent every-page acceptance remain release gates.
+
 ## Current recovery truth - 2026-07-28
 
 This section supersedes any conflicting current-state wording below. Older

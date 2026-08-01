@@ -5375,6 +5375,123 @@
         "scripts/test-database-safety.mjs"
       ],
       "reviewedChangeSha256": "970a2631171a617c61b5ae21cf188abdd9880ca281431cf66a4cbd2b500d71c2"
+    },
+    {
+      "taskId": "operational-register-live-acceptance-correction-20260731",
+      "reviewedThroughCommit": "ec5111a2cae6753bb5c3a9f83b13db9ee5da4a45",
+      "reviewedAt": "2026-07-31T10:40:00-04:00",
+      "status": "local_candidate_scope_complete",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Reconciles Roberto's field rejection of customer-visible Activity Log and Coordinator Command Center PDFs with the bounded presentation correction, measured continuation-row layout, and the still-pending immutable build and independent acceptance gates.",
+      "immediateFindings": [
+        {
+          "category": "field_acceptance_contradicts_automation",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "report_design_system",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Roberto's downloaded artifacts exposed internal labels, visible trace IDs, and long operational text clipping that prior automated evidence had accepted; field evidence controls and requires regeneration plus every-page review."
+        }
+      ],
+      "workstreams": [
+        "pdf-report-quality",
+        "field-acceptance",
+        "living-brief-governance"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/api-server/src/lib/operational-register-table.ts",
+          "type": "measured_operational_table_contract",
+          "result": "passed",
+          "boundary": "The dedicated helper measures wrapped cell content, grows rows, repeats customer identity and table headers, and preserves deterministic continuation geometry without changing authorization or domain data."
+        },
+        {
+          "path": "artifacts/api-server/src/routes/activity.ts",
+          "type": "customer_visible_activity_correction",
+          "result": "passed",
+          "boundary": "The Activity PDF removes internal labels and trace IDs and delegates long details and file values to the measured operational-register table."
+        },
+        {
+          "path": "artifacts/api-server/src/routes/coordinator-actions.ts",
+          "type": "customer_visible_coordinator_correction",
+          "result": "passed",
+          "boundary": "The Coordinator PDF removes internal implementation language and trace IDs while preserving customer-visible action data and existing permission boundaries."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, human authority, organizational doctrine, or permanent relationship changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing field-acceptance, fail-closed release, and evidence-separation requirements already govern the correction."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction follows existing visual, every-page, build-closure, and independent-review quality gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, market direction, strategic outcome, or customer relationship changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated platform inventory records one new presentation helper but runtime topology and provider behavior do not change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, synchronization, installation, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Customer-visible reports now explicitly exclude internal labels and trace IDs and require measured wrapping for operational tables."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, statutory claim, compliance citation, or edition changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status now records the bounded local correction and separates it from push, deployment, production verification, and live acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The exact remaining build, denominator-binding, every-page, and independent acceptance gates are preserved as open work."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "The field contradiction, bounded correction, non-overlap boundary, and release limitations are captured for durable audit."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/operational-register-table.ts",
+        "artifacts/api-server/src/routes/activity.ts",
+        "artifacts/api-server/src/routes/coordinator-actions.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/REPORT_DESIGN_SYSTEM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "58424a58e9f49f77a25308240f976a457a2fd296f398db0b18c194d82f7282c4"
     }
   ]
 }

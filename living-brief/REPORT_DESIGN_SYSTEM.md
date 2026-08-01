@@ -2,6 +2,19 @@
 
 Audit date: 2026-07-10 (Phase 2)
 
+## Customer-visible operational register language - 2026-07-31
+
+- Customer PDFs must not expose internal governance phrases, implementation
+  labels, route trace identifiers, or generator diagnostics. Internal audit
+  identifiers may remain in non-visible metadata and governed audit records.
+- Activity Log and Coordinator Command Center tables must allocate measured,
+  growing rows for long action, details, source, and file values. Wrapped text
+  must stay inside its column on every continuation page while preserving the
+  repeated customer identity, report title, table header, and page footer.
+- Field screenshots and downloaded artifacts remain authoritative acceptance
+  evidence when they contradict a source-only or automated pass. The affected
+  family must be regenerated and every page inspected before release readiness.
+
 ## Current platform-wide PDF UX authority - 2026-07-28
 
 This section supersedes conflicting interaction guidance below.
