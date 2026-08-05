@@ -221,6 +221,55 @@ evidence exists, the precise claim scope is documented, and Roberto has explicit
 claim. Never invent a standard's title, edition, meaning, applicability, or certification effect.
 Until a standard is verified and registered, it is not an implementation requirement.
 
+## Ruben-supplied data usage
+
+When Ruben provides real project data, including CSVs, PDFs, exports, or documents from his real
+live project, that data is being shared for one or both of two legitimate purposes without further
+general clarification each time:
+
+1. Direct work on Ruben's real project using that real data.
+2. Roberto using that same real data to build or test a platform change in a separate test project,
+   specifically so untested changes never hit Ruben's real project first and cannot negatively
+   affect his live work.
+
+This is a permanent standing pattern. No task, agent, or session may ask Roberto to reconfirm this
+general workflow. What must still be confirmed per instance is only the concrete target: which
+specific project ID a specific write operation is authorized against at that time for the data.
+
+When Ruben-sourced data arrives with no explicit target stated, the default target is Roberto's
+designated test project, not Ruben's live project, unless Roberto explicitly names Ruben's live
+project as the target for that specific write.
+
+Do not ask Roberto whether the data is real or test data as a general question. Ask only which
+project ID the specific write targets when a write is about to occur and the target has not already
+been stated.
+
+## Consolidation, not accumulation
+
+An independently accepted candidate is not a terminal state. Acceptance for clean integration
+must trigger the next consolidation attempt onto the current target within the same work cycle. An
+accepted candidate must not sit indefinitely as a standalone entry that is repeatedly referenced
+but never merged.
+
+1. When a candidate passes independent review, the next action is attempting to merge it onto the
+   current clean target, not opening an unrelated lane while it waits.
+2. If an unrelated uncommitted change makes the target dirty and blocks a clean merge, the first
+   priority is sealing or reverting that unrelated change, not starting more work on top of the
+   dirty target.
+3. `OPEN_LOOP.md` sections named `Watching` and `Active Now` must not accumulate candidates faster
+   than they are consolidated. If more than three candidates are accepted but not integrated at
+   once, all new lane starts pause until that backlog is reduced below three.
+4. A status report that calls a candidate accepted is incomplete unless it also states whether the
+   candidate has been merged into the current consolidation target and, if it has not, names the
+   exact blocker preventing that merge.
+5. This rule does not weaken any evidence, security, or fail-closed gate. It prevents accepted work
+   from sitting idle when no real safety blocker prevents its merge.
+
+Independently accepted work must keep advancing toward one publishable lineage rather than
+accumulating as separate permanent accepted-history entries. Bureaucracy is a gate that repeats
+after it has already been satisfied; safety is a gate that catches something real. This rule
+targets the former without weakening the latter.
+
 ## Document boundaries
 
 - ECOSYSTEM_DOCTRINE.md owns ecosystem identity, authority, permanent product laws, and the
