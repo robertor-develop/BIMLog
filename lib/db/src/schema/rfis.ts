@@ -1,7 +1,7 @@
-import { pgTable, serial, text, timestamp, integer, json, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
+import { boolean, char, check, foreignKey, integer, json, jsonb, pgTable, primaryKey, serial, text, timestamp, unique, uniqueIndex } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
-import { usersTable } from "./users";
+import { companiesTable, usersTable } from "./users";
 
 export const rfisTable = pgTable("rfis", {
   id: serial("id").primaryKey(),
@@ -120,3 +120,142 @@ export const rfisTable = pgTable("rfis", {
 }));
 
 export type Rfi = typeof rfisTable.$inferSelect;
+
+// A binding is intentionally provisioned outside the customer import flow. Its
+// presence is the audited proof that a provider project belongs to this exact
+// BIMLog project/company; imports fail closed when it is absent.
+export const rfiImportBindingsTable = pgTable("rfi_import_bindings", {
+  id: serial("id").notNull(),
+  version: integer("version").notNull(),
+  auditIdentity: text("audit_identity").notNull(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  companyId: integer("company_id").references(() => companiesTable.id).notNull(),
+  provider: text("provider").notNull(),
+  sourceProjectCode: text("source_project_code").notNull(),
+  sourceProjectIdentityDigest: char("source_project_identity_digest", { length: 64 }).notNull(),
+  capability: text("capability").notNull(),
+  current: boolean("current").default(true).notNull(),
+  revokedAt: timestamp("revoked_at"),
+  createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  primaryKey({ name: "rfi_import_binding_pk", columns: [table.id, table.version] }),
+  unique("rfi_import_binding_capability_uq").on(table.id, table.version, table.capability),
+  unique("rfi_import_binding_reference_uq").on(
+    table.id, table.version, table.projectId, table.provider,
+    table.auditIdentity, table.sourceProjectCode, table.sourceProjectIdentityDigest,
+  ),
+  unique("rfi_import_binding_identity_version_uq").on(
+    table.projectId, table.companyId, table.provider, table.sourceProjectCode, table.capability, table.version,
+  ),
+  uniqueIndex("rfi_import_single_current_binding_uq").on(
+    table.projectId, table.companyId, table.provider, table.sourceProjectCode, table.capability,
+  ).where(sql`${table.current} = true and ${table.revokedAt} is null`),
+  check("rfi_import_binding_version_positive", sql`${table.version} > 0`),
+  check("rfi_import_binding_digest_format", sql`${table.sourceProjectIdentityDigest} ~ '^[0-9a-f]{64}$'`),
+  check("rfi_import_binding_audit_identity_bounded", sql`octet_length(${table.auditIdentity}) between 1 and 256`),
+  check("rfi_import_binding_project_26", sql`${table.projectId} = 26`),
+  check("rfi_import_binding_source_project_bounded", sql`octet_length(${table.sourceProjectCode}) between 1 and 128`),
+  check("rfi_import_binding_provider_procore", sql`${table.provider} = 'procore'`),
+  check("rfi_import_binding_capability_rfi_import", sql`${table.capability} = 'RFI_IMPORT'`),
+  check("rfi_import_binding_lifecycle_chk", sql`(${table.current} = true and ${table.revokedAt} is null) or (${table.current} = false and ${table.revokedAt} is not null)`),
+]);
+
+export const rfiImportAuthorizationsTable = pgTable("rfi_import_authorizations", {
+  id: serial("id").primaryKey(),
+  bindingId: integer("binding_id").notNull(),
+  bindingVersion: integer("binding_version").notNull(),
+  userId: integer("user_id").references(() => usersTable.id).notNull(),
+  capability: text("capability").notNull(),
+  current: boolean("current").default(true).notNull(),
+  revokedAt: timestamp("revoked_at"),
+  grantedById: integer("granted_by_id").references(() => usersTable.id).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  foreignKey({
+    name: "rfi_import_authorization_binding_fk",
+    columns: [table.bindingId, table.bindingVersion, table.capability],
+    foreignColumns: [rfiImportBindingsTable.id, rfiImportBindingsTable.version, rfiImportBindingsTable.capability],
+  }),
+  uniqueIndex("rfi_import_single_current_authorization_uq").on(
+    table.bindingId, table.bindingVersion, table.userId, table.capability,
+  ).where(sql`${table.current} = true and ${table.revokedAt} is null`),
+  check("rfi_import_authorization_binding_version_positive", sql`${table.bindingVersion} > 0`),
+  check("rfi_import_authorization_capability_rfi_import", sql`${table.capability} = 'RFI_IMPORT'`),
+  check("rfi_import_authorization_lifecycle_chk", sql`(${table.current} = true and ${table.revokedAt} is null) or (${table.current} = false and ${table.revokedAt} is not null)`),
+]);
+
+export const rfiImportsTable = pgTable("rfi_imports", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  provider: text("provider").notNull(),
+  bindingId: integer("binding_id").notNull(),
+  bindingVersion: integer("binding_version").notNull(),
+  bindingAuditIdentity: text("binding_audit_identity").notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  sourceDigest: char("source_digest", { length: 64 }).notNull(),
+  sourceProjectCode: text("source_project_code").notNull(),
+  sourceProjectIdentityDigest: char("source_project_identity_digest", { length: 64 }).notNull(),
+  actorUserId: integer("actor_user_id").references(() => usersTable.id).notNull(),
+  rowCount: integer("row_count").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  foreignKey({
+    name: "rfi_import_binding_identity_fk",
+    columns: [
+      table.bindingId, table.bindingVersion, table.projectId, table.provider,
+      table.bindingAuditIdentity, table.sourceProjectCode, table.sourceProjectIdentityDigest,
+    ],
+    foreignColumns: [
+      rfiImportBindingsTable.id, rfiImportBindingsTable.version,
+      rfiImportBindingsTable.projectId, rfiImportBindingsTable.provider, rfiImportBindingsTable.auditIdentity,
+      rfiImportBindingsTable.sourceProjectCode, rfiImportBindingsTable.sourceProjectIdentityDigest,
+    ],
+  }),
+  unique("rfi_import_composite_identity_uq").on(
+    table.id, table.projectId, table.provider, table.sourceProjectCode, table.bindingId, table.bindingVersion,
+  ),
+  unique("rfi_import_replay_uq").on(table.projectId, table.provider, table.sourceProjectCode, table.idempotencyKey),
+  check("rfi_import_project_26", sql`${table.projectId} = 26`),
+  check("rfi_import_row_count_exact", sql`${table.rowCount} = 43`),
+  check("rfi_import_binding_version_positive", sql`${table.bindingVersion} > 0`),
+  check("rfi_import_source_digest_format", sql`${table.sourceDigest} ~ '^[0-9a-f]{64}$'`),
+  check("rfi_import_project_digest_format", sql`${table.sourceProjectIdentityDigest} ~ '^[0-9a-f]{64}$'`),
+  check("rfi_import_idempotency_key_bounded", sql`octet_length(${table.idempotencyKey}) between 1 and 128`),
+  check("rfi_import_idempotency_key_format", sql`${table.idempotencyKey} ~ '^[A-Za-z0-9._:-]+$'`),
+  check("rfi_import_source_project_bounded", sql`octet_length(${table.sourceProjectCode}) between 1 and 128`),
+  check("rfi_import_provider_procore", sql`${table.provider} = 'procore'`),
+]);
+
+export const rfiImportRowsTable = pgTable("rfi_import_rows", {
+  id: serial("id").primaryKey(),
+  importId: integer("import_id").notNull(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  provider: text("provider").notNull(),
+  sourceProjectCode: text("source_project_code").notNull(),
+  bindingId: integer("binding_id").notNull(),
+  bindingVersion: integer("binding_version").notNull(),
+  sourceNumber: text("source_number").notNull(),
+  sourceRevision: integer("source_revision").notNull(),
+  sourcePayload: jsonb("source_payload").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => [
+  foreignKey({
+    name: "rfi_import_row_composite_fk",
+    columns: [table.importId, table.projectId, table.provider, table.sourceProjectCode, table.bindingId, table.bindingVersion],
+    foreignColumns: [
+      rfiImportsTable.id, rfiImportsTable.projectId, rfiImportsTable.provider,
+      rfiImportsTable.sourceProjectCode, rfiImportsTable.bindingId, rfiImportsTable.bindingVersion,
+    ],
+  }),
+  unique("rfi_import_source_identity_uq").on(
+    table.projectId, table.provider, table.sourceProjectCode, table.sourceNumber, table.sourceRevision,
+  ),
+  check("rfi_import_row_project_26", sql`${table.projectId} = 26`),
+  check("rfi_import_row_binding_version_positive", sql`${table.bindingVersion} > 0`),
+  check("rfi_import_source_revision_nonnegative", sql`${table.sourceRevision} >= 0`),
+  check("rfi_import_source_number_bounded", sql`octet_length(${table.sourceNumber}) between 1 and 8192`),
+  check("rfi_import_source_payload_bounded", sql`octet_length(${table.sourcePayload}::text) <= 65536`),
+  check("rfi_import_row_source_project_bounded", sql`octet_length(${table.sourceProjectCode}) between 1 and 128`),
+  check("rfi_import_row_provider_procore", sql`${table.provider} = 'procore'`),
+]);
