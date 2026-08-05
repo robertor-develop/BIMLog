@@ -2,6 +2,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { builtinModules } from "node:module";
 import { createHash } from "node:crypto";
+import { execFileSync } from "node:child_process";
 import { createReadStream, createWriteStream } from "node:fs";
 import { tmpdir } from "node:os";
 import { pipeline } from "node:stream/promises";
@@ -22,6 +23,101 @@ import { generatePlatformMd } from "./scripts/generate-platform-md";
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const workspaceRoot = path.resolve(__dirname, "../..");
+const livingBriefSourceRoot = path.join(workspaceRoot, "living-brief");
+
+type LivingBriefBuildInput = {
+  sourceRoot: string;
+  sourceCommit: string;
+  catalogSha256: string;
+  bundleSha256: string;
+  files: string[];
+};
+
+function canonicalText(value: Buffer | string): string {
+  return (Buffer.isBuffer(value) ? value.toString("utf8") : value).replace(/\r\n?/g, "\n");
+}
+
+function sha256(value: Buffer | string): string {
+  return createHash("sha256").update(canonicalText(value)).digest("hex");
+}
+
+async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInput> {
+  const catalogBytes = await readFile(path.join(livingBriefSourceRoot, "catalog.json"));
+  const stateBytes = await readFile(path.join(livingBriefSourceRoot, "state.json"));
+  const catalog = JSON.parse(catalogBytes.toString("utf8")) as {
+    schemaVersion: number;
+    documents: Array<{ key: string; file: string }>;
+  };
+  const state = JSON.parse(stateBytes.toString("utf8")) as {
+    schemaVersion: number;
+    reconciledThroughCommit: string;
+    catalogSha256: string;
+    bundleSha256: string;
+    documents: Array<{ key: string; file: string; sha256: string }>;
+  };
+  if (catalog.schemaVersion !== 1 || state.schemaVersion !== 1) {
+    throw new Error("Unsupported Living Brief metadata schema.");
+  }
+  if (catalog.documents.length !== 11 || state.documents.length !== 11) {
+    throw new Error("Production Living Brief closure requires exactly 11 documents.");
+  }
+  if (sha256(catalogBytes) !== state.catalogSha256) {
+    throw new Error("Living Brief catalog hash does not match state.json.");
+  }
+  const metadataByKey = new Map(state.documents.map(document => [document.key, document]));
+  for (const document of catalog.documents) {
+    if (!/^[A-Z0-9_]+\.md$/.test(document.file) || path.basename(document.file) !== document.file) {
+      throw new Error(`Unsafe Living Brief document path: ${document.file}`);
+    }
+    const metadata = metadataByKey.get(document.key);
+    if (!metadata || metadata.file !== document.file) {
+      throw new Error(`Living Brief state metadata is missing for ${document.key}.`);
+    }
+    const content = await readFile(path.join(livingBriefSourceRoot, document.file));
+    if (sha256(content) !== metadata.sha256) {
+      throw new Error(`Living Brief document hash mismatch: ${document.file}.`);
+    }
+  }
+  const calculatedBundleSha256 = createHash("sha256")
+    .update(state.documents.map(document => `${document.key}:${document.sha256}`).join("\n"))
+    .digest("hex");
+  if (calculatedBundleSha256 !== state.bundleSha256) {
+    throw new Error("Living Brief bundle hash does not match state.json.");
+  }
+  const sourceCommit = execFileSync(
+    "git",
+    ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "rev-parse", "HEAD"],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+  ).trim().toLowerCase();
+  if (!/^[0-9a-f]{40}$/.test(sourceCommit)) throw new Error("Build source commit is not a full Git commit.");
+  try {
+    execFileSync(
+      "git",
+      ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "diff-index", "--quiet", "HEAD", "--"],
+      { stdio: "ignore" },
+    );
+    const untracked = execFileSync(
+      "git",
+      ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "ls-files", "--others", "--exclude-standard"],
+      { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+    ).trim();
+    if (untracked) throw new Error("untracked files are present");
+  } catch {
+    throw new Error("Production runtime assembly requires a clean, committed source tree.");
+  }
+  execFileSync(
+    "git",
+    ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "merge-base", "--is-ancestor", state.reconciledThroughCommit, sourceCommit],
+    { stdio: "ignore" },
+  );
+  return {
+    sourceRoot: livingBriefSourceRoot,
+    sourceCommit,
+    catalogSha256: state.catalogSha256,
+    bundleSha256: state.bundleSha256,
+    files: ["catalog.json", "state.json", ...catalog.documents.map(document => document.file)],
+  };
+}
 
 // server deps to bundle to reduce openat(2) syscalls
 // which helps cold start times without risking some
@@ -90,6 +186,7 @@ async function assembleRuntimeFromInstalledGraph(
   sourceWorkspaceRoot: string,
   runtimeDir: string,
   requiredPackages: string[],
+  livingBrief: LivingBriefBuildInput,
   signal?: AbortSignal,
   onPhaseChange?: (phase: "assembly-copy" | "assembly-hash") => void | Promise<void>,
 ) {
@@ -521,6 +618,15 @@ async function assembleRuntimeFromInstalledGraph(
   await mkdir(path.join(runtimeDir, "dist"), { recursive: true });
   await copyAbortableFile(path.join(apiRoot, "dist", "index.cjs"), path.join(runtimeDir, "dist", "index.cjs"));
   await copyAbortableFile(path.join(apiRoot, "dist", "index.meta.json"), path.join(runtimeDir, "dist", "index.meta.json"));
+  const runtimeLivingBrief = path.join(runtimeDir, "living-brief");
+  await mkdir(runtimeLivingBrief, { recursive: false });
+  for (const file of livingBrief.files) {
+    await copyAbortableFile(path.join(livingBrief.sourceRoot, file), path.join(runtimeLivingBrief, file));
+  }
+  await writeFile(
+    path.join(runtimeDir, "deployment-source.json"),
+    `${JSON.stringify({ schemaVersion: 1, sourceCommit: livingBrief.sourceCommit, livingBriefCatalogSha256: livingBrief.catalogSha256, livingBriefBundleSha256: livingBrief.bundleSha256 }, null, 2)}\n`,
+  );
   const sourceManifest = JSON.parse(await readFile(path.join(apiRoot, "package.json"), "utf8"));
   const runtimeDependencies: Record<string, string> = {};
   for (const packageName of requiredPackages) {
@@ -561,6 +667,7 @@ export async function deployRuntimeClosure(
     signal?: AbortSignal;
     workspaceRoot?: string;
     evidenceDir?: string;
+    livingBrief?: LivingBriefBuildInput;
     onPhaseChange?: (phase: "assembly-copy" | "assembly-hash" | "validation") => void | Promise<void>;
   } = {},
 ) {
@@ -625,6 +732,30 @@ export async function deployRuntimeClosure(
     await assertRegularDirectory(nodeModules, "Runtime node_modules");
     await assertRegularFile(path.join(root, "dist", "index.cjs"), "Runtime server bundle");
     await assertRegularFile(path.join(root, "dist", "index.meta.json"), "Runtime server metafile");
+    const deploymentSourcePath = path.join(root, "deployment-source.json");
+    await assertRegularFile(deploymentSourcePath, "Runtime deployment source identity");
+    const deploymentSource = JSON.parse(await readFile(deploymentSourcePath, "utf8"));
+    if (!/^[0-9a-f]{40}$/.test(deploymentSource.sourceCommit ?? "")) {
+      throw new Error("Runtime deployment source identity is not a full Git commit.");
+    }
+    const packagedLivingBrief = path.join(root, "living-brief");
+    await assertRegularDirectory(packagedLivingBrief, "Runtime Living Brief bundle");
+    const packagedCatalog = await readFile(path.join(packagedLivingBrief, "catalog.json"));
+    const packagedState = JSON.parse(await readFile(path.join(packagedLivingBrief, "state.json"), "utf8"));
+    const packagedCatalogJson = JSON.parse(packagedCatalog.toString("utf8"));
+    if (packagedCatalogJson.documents?.length !== 11 || packagedState.documents?.length !== 11) {
+      throw new Error("Runtime Living Brief bundle must contain exactly 11 documents.");
+    }
+    if (sha256(packagedCatalog) !== deploymentSource.livingBriefCatalogSha256) {
+      throw new Error("Runtime Living Brief catalog does not match deployment source identity.");
+    }
+    for (const document of packagedCatalogJson.documents) {
+      const metadata = packagedState.documents.find((entry: { key: string }) => entry.key === document.key);
+      if (!metadata || metadata.file !== document.file) throw new Error(`Runtime Living Brief metadata is missing for ${document.key}.`);
+      if (sha256(await readFile(path.join(packagedLivingBrief, document.file))) !== metadata.sha256) {
+        throw new Error(`Runtime Living Brief document hash mismatch: ${document.file}.`);
+      }
+    }
 
     const visited = new Set<string>();
     let materialFileCount = 0;
@@ -750,6 +881,7 @@ export async function deployRuntimeClosure(
       sourceWorkspaceRoot,
       runtimeDir,
       requiredPackages,
+      options.livingBrief ?? await loadVerifiedLivingBriefBuildInput(),
       assemblyController.signal,
       phase => options.onPhaseChange?.(phase),
     );
@@ -829,6 +961,7 @@ async function buildAll() {
   generatePlatformMd();
 
   console.log("building server...");
+  const livingBrief = await loadVerifiedLivingBriefBuildInput();
   const pkgPath = path.resolve(__dirname, "package.json");
   const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));
   const allDeps = [
@@ -852,6 +985,7 @@ async function buildAll() {
     outfile: path.resolve(distDir, "index.cjs"),
     define: {
       "process.env.NODE_ENV": '"production"',
+      "process.env.BIMLOG_BUILD_SOURCE_COMMIT": JSON.stringify(livingBrief.sourceCommit),
     },
     minify: true,
     external: [...new Set(externals)],
@@ -868,7 +1002,7 @@ async function buildAll() {
         .map((entry) => entry.path),
     ),
   ].sort();
-  await deployRuntimeClosure(runtimeDir, externalSpecifiers);
+  await deployRuntimeClosure(runtimeDir, externalSpecifiers, { livingBrief });
 }
 
 if (path.resolve(process.argv[1] ?? "") === __filename) {

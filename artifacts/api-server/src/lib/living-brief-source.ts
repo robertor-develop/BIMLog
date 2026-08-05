@@ -138,7 +138,16 @@ export function loadLivingBriefSource(): LivingBriefSourceBundle {
 }
 
 export function resolveDeployedSourceCommit(manifest: LivingBriefManifest, directory = findLivingBriefDirectory()): string {
+  const buildBound = process.env.BIMLOG_BUILD_SOURCE_COMMIT;
   const provided = process.env.BIMLOG_SOURCE_COMMIT || process.env.REPLIT_GIT_COMMIT_SHA || process.env.GIT_COMMIT_SHA;
+  if (buildBound) {
+    if (!/^[0-9a-f]{40}$/i.test(buildBound)) throw new Error("Build-bound source commit is invalid");
+    if (provided && provided.toLowerCase() !== buildBound.toLowerCase()) {
+      throw new Error("Runtime source commit claim does not match the build-bound source commit");
+    }
+    assertCommitClaim(buildBound, "build-bound source commit", directory, manifest.reconciledThroughCommit);
+    return buildBound.toLowerCase();
+  }
   if (provided) {
     assertCommitClaim(provided, "BIMLOG_SOURCE_COMMIT", directory, manifest.reconciledThroughCommit);
     return provided.toLowerCase();
