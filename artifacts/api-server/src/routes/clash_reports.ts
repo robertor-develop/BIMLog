@@ -3330,6 +3330,9 @@ router.patch("/projects/:projectId/clash-reports/:reportId/rename", authMiddlewa
 router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const reportId = Number(req.params.reportId);
+  const reason = typeof req.body?.reason === "string"
+    ? req.body.reason.trim().slice(0, 2000) || null
+    : null;
   try {
     const [report] = await db.select().from(clashReportsTable).where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
     if (!report) { res.status(404).json({ error: "not_found" }); return; }
@@ -3343,7 +3346,12 @@ router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, re
       actionType: "delete",
       entityType: "clash_report",
       entityId: reportId,
-      details: `Deleted clash report: ${report.fileName}`,
+      details: JSON.stringify({
+        reason,
+        fileName: report.fileName,
+        reportNumber: report.reportNumber,
+        totalClashes: report.totalClashes,
+      }),
     });
     res.json({ success: true });
   } catch (err) {
