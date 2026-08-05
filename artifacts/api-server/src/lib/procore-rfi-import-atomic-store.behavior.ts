@@ -47,13 +47,24 @@ type ImportRecord = {
   projectDigest: string;
   rowCount: number;
 };
-type State = { imports: Map<string, ImportRecord>; identities: Set<string>; nextId: number };
+type State = {
+  imports: Map<string, ImportRecord>;
+  identities: Set<string>;
+  rfis: Map<number, string>;
+  activities: number;
+  notifications: number;
+  nextId: number;
+  nextRfiId: number;
+};
 
 class FakePgPool implements ProcoreRfiPgPool {
-  state: State = { imports: new Map(), identities: new Set(), nextId: 1 };
+  state: State = { imports: new Map(), identities: new Set(), rfis: new Map(), activities: 0, notifications: 0, nextId: 1, nextRfiId: 1 };
   authorization: VerifiedRfiImportAuthorization | null = authorization;
   trace: string[] = [];
   failRows = false;
+  failMaterialization = false;
+  failActivity = false;
+  failNotification = false;
   serializationFailuresRemaining = 0;
   uniqueConstraint: string | null = null;
   replayRaceDigest: string | null = null;
@@ -86,7 +97,11 @@ class FakePgClient implements ProcoreRfiPgClient {
       this.draft = {
         imports: new Map(this.pool.state.imports),
         identities: new Set(this.pool.state.identities),
+        rfis: new Map(this.pool.state.rfis),
+        activities: this.pool.state.activities,
+        notifications: this.pool.state.notifications,
         nextId: this.pool.state.nextId,
+        nextRfiId: this.pool.state.nextRfiId,
       };
       return { rows: [], rowCount: 0 };
     }
@@ -179,6 +194,28 @@ class FakePgClient implements ProcoreRfiPgClient {
       }
       return { rows: incoming.map((_, index) => ({ id: index + 1 }) as unknown as Row), rowCount: incoming.length };
     }
+    if (normalized.includes("INSERT INTO rfis")) {
+      if (this.pool.failMaterialization) throw new Error("INJECTED_RFI_MATERIALIZATION_FAILURE");
+      const incoming = JSON.parse(String(values[2])) as Array<{ source_number: string; source_payload: ProcoreRfiRow }>;
+      const materialized = incoming.map((row) => {
+        const id = this.draft!.nextRfiId++;
+        this.draft!.rfis.set(id, row.source_number);
+        return { id, number: row.source_number };
+      });
+      return { rows: materialized as unknown as Row[], rowCount: materialized.length };
+    }
+    if (normalized.startsWith("INSERT INTO activity_log")) {
+      if (this.pool.failActivity) throw new Error("INJECTED_ACTIVITY_FAILURE");
+      const events = JSON.parse(String(values[3])) as Array<{ id: number; number: string }>;
+      this.draft.activities += events.length;
+      return { rows: [], rowCount: events.length };
+    }
+    if (normalized.startsWith("INSERT INTO notifications")) {
+      if (this.pool.failNotification) throw new Error("INJECTED_NOTIFICATION_FAILURE");
+      const events = JSON.parse(String(values[2])) as Array<{ id: number; number: string }>;
+      this.draft.notifications += events.length;
+      return { rows: [], rowCount: events.length };
+    }
     throw new Error(`UNEXPECTED_SQL:${normalized.slice(0, 60)}`);
   }
 
@@ -205,10 +242,16 @@ const [first, concurrent] = await Promise.all([store.atomicImport(request), stor
 assert.deepEqual([first.outcome, concurrent.outcome].sort(), ["created", "replay"]);
 assert.equal(pool.state.imports.size, 1);
 assert.equal(pool.state.identities.size, rows.length);
+assert.equal(pool.state.rfis.size, rows.length);
+assert.equal(pool.state.activities, rows.length);
+assert.equal(pool.state.notifications, rows.length);
 assert.equal(pool.trace.some((sql) => sql === "BEGIN ISOLATION LEVEL SERIALIZABLE"), true);
 assert.equal(pool.trace.some((sql) => sql.includes("FOR UPDATE OF b, a")), true);
 assert.equal(pool.trace.some((sql) => sql.startsWith("INSERT INTO rfi_imports")), true);
 assert.equal(pool.trace.some((sql) => sql.startsWith("INSERT INTO rfi_import_rows")), true);
+assert.equal(pool.trace.some((sql) => sql.includes("INSERT INTO rfis")), true);
+assert.equal(pool.trace.some((sql) => sql.startsWith("INSERT INTO activity_log")), true);
+assert.equal(pool.trace.some((sql) => sql.startsWith("INSERT INTO notifications")), true);
 
 pool.authorization = { ...authorization, bindingId: 8, bindingVersion: 4, bindingAuditIdentity: "audit:project-26:procore:v4" };
 assert.equal((await store.atomicImport(request)).outcome, "replay");
@@ -221,6 +264,20 @@ rollbackPool.failRows = true;
 await assert.rejects(createPostgresProcoreRfiImportStore(rollbackPool).atomicImport(request), /INJECTED_ROW_INSERT_FAILURE/);
 assert.equal(rollbackPool.state.imports.size, 0);
 assert.equal(rollbackPool.state.identities.size, 0);
+assert.equal(rollbackPool.state.rfis.size, 0);
+assert.equal(rollbackPool.state.activities, 0);
+assert.equal(rollbackPool.state.notifications, 0);
+
+for (const failure of ["failMaterialization", "failActivity", "failNotification"] as const) {
+  const downstreamRollbackPool = new FakePgPool();
+  downstreamRollbackPool[failure] = true;
+  await assert.rejects(createPostgresProcoreRfiImportStore(downstreamRollbackPool).atomicImport(request), /INJECTED_/);
+  assert.equal(downstreamRollbackPool.state.imports.size, 0, failure);
+  assert.equal(downstreamRollbackPool.state.identities.size, 0, failure);
+  assert.equal(downstreamRollbackPool.state.rfis.size, 0, failure);
+  assert.equal(downstreamRollbackPool.state.activities, 0, failure);
+  assert.equal(downstreamRollbackPool.state.notifications, 0, failure);
+}
 
 // This is a DB-free SQLSTATE injection, not a claim of reproducing real PostgreSQL contention.
 const serializationRetryPool = new FakePgPool();
@@ -230,6 +287,9 @@ assert.deepEqual(await createPostgresProcoreRfiImportStore(serializationRetryPoo
 });
 assert.equal(serializationRetryPool.state.imports.size, 1);
 assert.equal(serializationRetryPool.state.identities.size, PROCORE_RFI_ALLOWED_ROW_COUNT);
+assert.equal(serializationRetryPool.state.rfis.size, PROCORE_RFI_ALLOWED_ROW_COUNT);
+assert.equal(serializationRetryPool.state.activities, PROCORE_RFI_ALLOWED_ROW_COUNT);
+assert.equal(serializationRetryPool.state.notifications, PROCORE_RFI_ALLOWED_ROW_COUNT);
 assert.equal(serializationRetryPool.trace.filter((sql) => sql === "BEGIN ISOLATION LEVEL SERIALIZABLE").length, 2);
 assert.equal(serializationRetryPool.trace.filter((sql) => sql === "ROLLBACK").length, 1);
 assert.equal(serializationRetryPool.trace.filter((sql) => sql === "COMMIT").length, 1);
@@ -285,6 +345,9 @@ console.log(JSON.stringify({
   rowLockVerified: true,
   singleTransactionVerified: true,
   rollbackVerified: true,
+  rfiMaterializationVerified: true,
+  activityAndNotificationEventsVerified: true,
+  downstreamRollbackVerified: true,
   concurrentSerializationVerified: true,
   uniqueConflictReconciliationVerified: true,
   synthetic40001RollbackRetryVerified: true,

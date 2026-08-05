@@ -38,7 +38,100 @@ import {
 } from "./lib/living-brief-migration";
 import { startCoordinatorSavedViewMigration } from "./lib/coordinator-saved-view-migration";
 import { startCoordinatorBulkActionMigration } from "./lib/coordinator-bulk-action-migration";
+import { PROCORE_RFI_IMPORT_MIGRATION_SQL } from "./lib/procore-rfi-import-migration";
 import { pool } from "@workspace/db";
+
+const PROCORE_RFI_IMPORT_TABLES = [
+  "rfi_import_bindings",
+  "rfi_import_authorizations",
+  "rfi_imports",
+  "rfi_import_rows",
+] as const;
+const PROCORE_RFI_IMPORT_CONSTRAINTS = [
+  ["rfi_import_bindings", "rfi_import_binding_reference_uq"],
+  ["rfi_import_bindings", "rfi_import_binding_capability_uq"],
+  ["rfi_import_bindings", "rfi_import_binding_identity_version_uq"],
+  ["rfi_import_bindings", "rfi_import_binding_lifecycle_chk"],
+  ["rfi_import_authorizations", "rfi_import_authorization_binding_fk"],
+  ["rfi_import_authorizations", "rfi_import_authorization_lifecycle_chk"],
+  ["rfi_imports", "rfi_import_binding_identity_fk"],
+  ["rfi_imports", "rfi_import_composite_identity_uq"],
+  ["rfi_imports", "rfi_import_replay_uq"],
+  ["rfi_import_rows", "rfi_import_row_composite_fk"],
+  ["rfi_import_rows", "rfi_import_source_identity_uq"],
+] as const;
+const PROCORE_RFI_IMPORT_INDEXES = [
+  ["rfi_import_bindings", "rfi_import_single_current_binding_uq", ["project_id", "company_id", "provider", "source_project_code", "capability"]],
+  ["rfi_import_authorizations", "rfi_import_single_current_authorization_uq", ["binding_id", "binding_version", "user_id", "capability"]],
+] as const;
+
+async function ensureProcoreRfiImportSchema(): Promise<void> {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:procore-rfi-import-schema'))");
+    const existing = await client.query<{ table_name: string }>(`
+      SELECT table_name
+        FROM unnest($1::text[]) AS requested(table_name)
+       WHERE to_regclass('public.' || table_name) IS NOT NULL
+    `, [PROCORE_RFI_IMPORT_TABLES]);
+    if (existing.rowCount === 0) {
+      await client.query(PROCORE_RFI_IMPORT_MIGRATION_SQL);
+    } else if (existing.rowCount !== PROCORE_RFI_IMPORT_TABLES.length) {
+      throw new Error("PROCORE_RFI_IMPORT_SCHEMA_PARTIAL");
+    }
+    const constraints = await client.query<{ table_name: string; constraint_name: string }>(`
+      SELECT target.relname AS table_name, constraint_record.conname AS constraint_name
+        FROM pg_constraint constraint_record
+        JOIN pg_class target ON target.oid = constraint_record.conrelid
+        JOIN pg_namespace namespace ON namespace.oid = target.relnamespace
+       WHERE namespace.nspname = 'public' AND constraint_record.conname = ANY($1::text[])
+    `, [PROCORE_RFI_IMPORT_CONSTRAINTS.map(([, name]) => name)]);
+    const actualConstraints = new Set(constraints.rows.map(row => `${row.table_name}:${row.constraint_name}`));
+    const constraintsValid = PROCORE_RFI_IMPORT_CONSTRAINTS.every(([table, name]) => actualConstraints.has(`${table}:${name}`));
+    const indexes = await client.query<{
+      table_name: string;
+      index_name: string;
+      key_columns: string[];
+      predicate: string | null;
+      is_unique: boolean;
+    }>(`
+      SELECT target.relname AS table_name,
+             index_class.relname AS index_name,
+             index_record.indisunique AS is_unique,
+             pg_get_expr(index_record.indpred, index_record.indrelid) AS predicate,
+             array_agg(attribute.attname ORDER BY key.ordinality) AS key_columns
+        FROM pg_index index_record
+        JOIN pg_class target ON target.oid = index_record.indrelid
+        JOIN pg_namespace namespace ON namespace.oid = target.relnamespace
+        JOIN pg_class index_class ON index_class.oid = index_record.indexrelid
+        JOIN unnest(index_record.indkey) WITH ORDINALITY AS key(attribute_number, ordinality) ON true
+        JOIN pg_attribute attribute
+          ON attribute.attrelid = target.oid AND attribute.attnum = key.attribute_number
+       WHERE namespace.nspname = 'public' AND index_class.relname = ANY($1::text[])
+       GROUP BY target.relname, index_class.relname, index_record.indisunique,
+                index_record.indpred, index_record.indrelid
+    `, [PROCORE_RFI_IMPORT_INDEXES.map(([, name]) => name)]);
+    const normalizePredicate = (value: string | null) => (value ?? "")
+      .toLowerCase()
+      .replace(/[()\s]/g, "");
+    const indexesValid = PROCORE_RFI_IMPORT_INDEXES.every(([table, name, expectedColumns]) => indexes.rows.some(row => (
+      row.table_name === table && row.index_name === name
+      && row.is_unique
+      && row.key_columns.join(",") === expectedColumns.join(",")
+      && ["current=trueandrevoked_atisnull", "currentandrevoked_atisnull"].includes(normalizePredicate(row.predicate))
+    )));
+    if (!constraintsValid || !indexesValid) {
+      throw new Error("PROCORE_RFI_IMPORT_SCHEMA_INTEGRITY_FAILED");
+    }
+    await client.query("COMMIT");
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 
 const ENV_MODE =
   process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -64,6 +157,16 @@ console.log(`[ENV] NODE_ENV: ${process.env.NODE_ENV || "not set"}`);
 console.log("========================================");
 
 const app: Express = express();
+let procoreRfiImportSchemaState: "starting" | "ready" | "failed" = "starting";
+void ensureProcoreRfiImportSchema()
+  .then(() => {
+    procoreRfiImportSchemaState = "ready";
+    console.log("[migration] Procore RFI import tables ensured");
+  })
+  .catch((error: unknown) => {
+    procoreRfiImportSchemaState = "failed";
+    console.error("[migration] Procore RFI import migration failed:", error);
+  });
 
 (async () => {
   try {
@@ -78,6 +181,10 @@ const app: Express = express();
 app.disable("etag");
 app.set("trust proxy", 1);
 app.use(cors());
+app.use("/api/v1/projects/:projectId/rfis/import/procore", (_req: Request, res: Response, next: NextFunction) => {
+  if (procoreRfiImportSchemaState === "ready") { next(); return; }
+  res.status(503).json({ error: "PROCORE_RFI_IMPORT_SCHEMA_UNAVAILABLE" });
+});
 const captureRawBody = (req: Request, _res: Response, buf: Buffer) => {
   if (buf && buf.length) (req as unknown as { rawBody?: Buffer }).rawBody = buf;
 };
@@ -291,6 +398,7 @@ app.use("/api/v1", router);
     console.error("[migration] financial budget migration failed");
   }
 })();
+
 
 (async () => {
   try {

@@ -185,6 +185,34 @@ export function getRfiDistributionCcProof() {
 type RfiDirectoryContact = { fullName: string; email: string; companyName?: string | null };
 type RfiAttachmentSource = "reference" | "attachment";
 
+type ProcoreRfiPreviewRow = {
+  row: number;
+  identity: string;
+  sourceNumber: string;
+  revision: number;
+  subject: string;
+  status: "Open" | "Closed";
+  initiatedAt: string;
+  dueDate: string;
+  closedDate: string | null;
+};
+
+type ProcoreRfiPreview = {
+  provider: "procore";
+  project: { code: string; name: string; address?: string };
+  digest: string;
+  rowCount: number;
+  valid: boolean;
+  errors: string[];
+  rows: ProcoreRfiPreviewRow[];
+};
+
+async function sha256File(file: File): Promise<string> {
+  const bytes = await file.arrayBuffer();
+  const digest = await crypto.subtle.digest("SHA-256", bytes);
+  return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
+}
+
 type RfiPackageItem = {
   key: string;
   label: string;
@@ -1040,6 +1068,10 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const [createPreload, setCreatePreload] = useState<{ subject?: string; question?: string; location?: string } | undefined>(undefined);
   const [importing, setImporting] = useState(false);
   const [importMsg, setImportMsg] = useState("");
+  const [procoreFile, setProcoreFile] = useState<File | null>(null);
+  const [procorePreview, setProcorePreview] = useState<ProcoreRfiPreview | null>(null);
+  const [procoreSelected, setProcoreSelected] = useState<Set<string>>(new Set());
+  const importFileInputRef = useRef<HTMLInputElement>(null);
   const [deleteRfi, setDeleteRfi] = useState<{ id: number; label: string; projectId: number } | null>(null);
   const [exportingRegister, setExportingRegister] = useState(false);
   const [exportingViewPdf, setExportingViewPdf] = useState(false);
@@ -1135,6 +1167,98 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
       }
     } catch { setImportMsg("Import failed"); }
     finally { setImporting(false); e.target.value = ""; }
+  };
+
+  const procoreForm = (file: File, digest: string) => {
+    const companyId = Number((user as { companyId?: number } | null)?.companyId);
+    if (!Number.isSafeInteger(companyId) || companyId < 1) throw new Error("company_binding_unavailable");
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("expectedSourceSha256", digest);
+    formData.append("expectedRowCount", "43");
+    formData.append("expectedProjectCode", "ELA01");
+    formData.append("expectedCompanyId", String(companyId));
+    formData.append("sourceProjectCode", "50250001");
+    formData.append("sourceProjectName", "Elara East");
+    formData.append("sourceProjectAddress", "35-45 41st Street, Queens, New York 11101");
+    return formData;
+  };
+
+  const handleProcorePreview = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = "";
+    if (!file) return;
+    if (projectId !== 26 || !file.name.toLowerCase().endsWith(".csv")) {
+      setImportMsg(w("Project 26 Procore import accepts CSV files only.", "La importación Procore del Proyecto 26 solo acepta archivos CSV.", lang));
+      return;
+    }
+    setImporting(true);
+    setImportMsg(w("Validating all 43 Procore rows...", "Validando las 43 filas de Procore...", lang));
+    setProcorePreview(null);
+    setProcoreSelected(new Set());
+    try {
+      const digest = await sha256File(file);
+      const response = await fetch(`/api/v1/projects/${projectId}/rfis/import/procore/preview`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: procoreForm(file, digest),
+      });
+      const payload = await response.json() as ProcoreRfiPreview & { error?: string };
+      if (response.status === 403) {
+        setImportMsg(w("You do not have the active RFI_IMPORT authorization for this Project 26 binding.", "No tiene la autorización RFI_IMPORT activa para este vínculo del Proyecto 26.", lang));
+        return;
+      }
+      if (!response.ok || !payload.valid || payload.rowCount !== 43 || payload.rows?.length !== 43) {
+        throw new Error(payload.error || payload.errors?.join(",") || "preview_rejected");
+      }
+      setProcoreFile(file);
+      setProcorePreview(payload);
+      setProcoreSelected(new Set(payload.rows.map(row => row.identity)));
+      setImportMsg(w("Preview ready. Review and confirm all 43 rows.", "Vista previa lista. Revise y confirme las 43 filas.", lang));
+    } catch {
+      setProcoreFile(null);
+      setImportMsg(w("Procore CSV validation failed. No RFIs were created.", "Falló la validación del CSV de Procore. No se crearon RFI.", lang));
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const commitProcoreImport = async () => {
+    if (!procoreFile || !procorePreview || procorePreview.rowCount !== 43 || procoreSelected.size !== 43) return;
+    if (!confirm(w(
+      "Create all 43 RFIs atomically? If any row fails, none will be created.",
+      "¿Crear las 43 RFI de forma atómica? Si una fila falla, no se creará ninguna.",
+      lang,
+    ))) return;
+    setImporting(true);
+    setImportMsg(w("Creating 43 RFIs atomically...", "Creando 43 RFI de forma atómica...", lang));
+    try {
+      const formData = procoreForm(procoreFile, procorePreview.digest);
+      formData.append("idempotencyKey", `procore-50250001-${procorePreview.digest.slice(0, 32)}`);
+      formData.append("selectedRowIdentities", JSON.stringify(procorePreview.rows.map(row => row.identity)));
+      const response = await fetch(`/api/v1/projects/${projectId}/rfis/import/procore/commit`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: formData,
+      });
+      const result = await response.json() as { outcome?: "created" | "replay" | "duplicate"; rowCount?: number; duplicateCount?: number; error?: string };
+      if (response.status === 403) {
+        setImportMsg(w("Your Project 26 RFI_IMPORT authorization is no longer active. No RFIs were created.", "Su autorización RFI_IMPORT del Proyecto 26 ya no está activa. No se crearon RFI.", lang));
+        return;
+      }
+      if (!response.ok) throw new Error(result.error || "commit_rejected");
+      if (result.outcome === "created") setImportMsg(w("43 Procore RFIs created.", "Se crearon 43 RFI de Procore.", lang));
+      else if (result.outcome === "replay") setImportMsg(w("This Procore file was already imported; no duplicates were created.", "Este archivo de Procore ya fue importado; no se crearon duplicados.", lang));
+      else setImportMsg(w("Matching Procore RFIs already exist; no records were changed.", "Ya existen RFI de Procore coincidentes; no se modificaron registros.", lang));
+      await rfisQueryClient.invalidateQueries();
+      setProcoreFile(null);
+      setProcorePreview(null);
+      setProcoreSelected(new Set());
+    } catch {
+      setImportMsg(w("Atomic Procore import failed. No RFIs were created.", "Falló la importación atómica de Procore. No se crearon RFI.", lang));
+    } finally {
+      setImporting(false);
+    }
   };
 
   const handleExportAllExcel = async () => {
@@ -1424,15 +1548,26 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             </Button>
           )}
           {canWrite && (
-            <label style={{ cursor: importing ? "not-allowed" : "pointer" }}>
-              <input type="file" onChange={handleImport} disabled={importing} style={{ display: "none" }} />
-              <span className="btn btn-outline btn-sm" style={{ fontSize: 12, opacity: importing ? 0.6 : 1, pointerEvents: importing ? "none" : "auto" }}>
-                {importing ? w("Importing...","Importando...",lang) : w("Import","Importar",lang)}
-              </span>
-            </label>
+            <>
+              <input
+                ref={importFileInputRef}
+                type="file"
+                accept={projectId === 26 ? ".csv,text/csv" : undefined}
+                onChange={projectId === 26 ? handleProcorePreview : handleImport}
+                disabled={importing}
+                style={{ display: "none" }}
+              />
+              <Button type="button" variant="outline" size="sm" onClick={() => importFileInputRef.current?.click()} disabled={importing} style={{ fontSize: 12 }}>
+                {importing
+                  ? w("Importing...", "Importando...", lang)
+                  : projectId === 26
+                    ? w("Import Procore CSV", "Importar CSV de Procore", lang)
+                    : w("Import", "Importar", lang)}
+              </Button>
+            </>
           )}
           {importMsg && (
-            <div style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", color: "#1D4ED8", fontSize: 13, marginTop: 10 }}>
+            <div role="status" aria-live="polite" style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", color: "#1D4ED8", fontSize: 13, marginTop: 10 }}>
               {importMsg}
             </div>
           )}
@@ -1443,6 +1578,60 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
           )}
         </div>
       </div>
+
+      {projectId === 26 && procorePreview && (
+        <section data-testid="procore-rfi-import-preview" style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, padding: 14, marginBottom: 14, background: "hsl(var(--card))" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: 12, flexWrap: "wrap" }}>
+            <div>
+              <strong>{w("Procore import preview", "Vista previa de importación Procore", lang)}</strong>
+              <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))", marginTop: 3 }}>
+                {procorePreview.project.code} · {procorePreview.project.name} · {procorePreview.rowCount} {w("validated rows", "filas validadas", lang)}
+              </div>
+              <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))", marginTop: 2, overflowWrap: "anywhere" }}>
+                SHA-256: {procorePreview.digest}
+              </div>
+            </div>
+            <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <Button type="button" size="sm" variant="outline" onClick={() => setProcoreSelected(new Set(procorePreview.rows.map(row => row.identity)))}>
+                {w("Select all", "Seleccionar todo", lang)}
+              </Button>
+              <Button type="button" size="sm" variant="outline" onClick={() => setProcoreSelected(new Set())}>
+                {w("Clear", "Limpiar", lang)}
+              </Button>
+              <Button type="button" size="sm" onClick={() => void commitProcoreImport()} disabled={importing || procoreSelected.size !== 43}>
+                {w(`Create all 43 (${procoreSelected.size} selected)`, `Crear las 43 (${procoreSelected.size} seleccionadas)`, lang)}
+              </Button>
+            </div>
+          </div>
+          {procoreSelected.size !== 43 && (
+            <div style={{ marginTop: 10, padding: "8px 10px", borderRadius: 7, background: "#FFF7ED", color: "#9A3412", fontSize: 12 }}>
+              {w("Project 26 import is atomic: all 43 validated rows must be selected.", "La importación del Proyecto 26 es atómica: deben seleccionarse las 43 filas validadas.", lang)}
+            </div>
+          )}
+          <div style={{ overflowX: "auto", marginTop: 12, maxHeight: 360, overflowY: "auto" }}>
+            <table style={{ width: "100%", minWidth: 720, borderCollapse: "collapse", fontSize: 12 }}>
+              <thead><tr style={{ textAlign: "left", borderBottom: "1px solid hsl(var(--border))" }}>
+                <th style={{ padding: 7 }}>{w("Use", "Usar", lang)}</th>
+                <th style={{ padding: 7 }}>{w("Number", "Número", lang)}</th>
+                <th style={{ padding: 7 }}>{w("Rev.", "Rev.", lang)}</th>
+                <th style={{ padding: 7 }}>{w("Subject", "Asunto", lang)}</th>
+                <th style={{ padding: 7 }}>{w("Status", "Estado", lang)}</th>
+                <th style={{ padding: 7 }}>{w("Due", "Vence", lang)}</th>
+              </tr></thead>
+              <tbody>{procorePreview.rows.map(row => (
+                <tr key={row.identity} style={{ borderBottom: "1px solid hsl(var(--border))" }}>
+                  <td style={{ padding: 7 }}><input type="checkbox" checked={procoreSelected.has(row.identity)} onChange={() => setProcoreSelected(current => { const next = new Set(current); if (next.has(row.identity)) next.delete(row.identity); else next.add(row.identity); return next; })} aria-label={`${w("Select", "Seleccionar", lang)} ${row.sourceNumber}`} /></td>
+                  <td style={{ padding: 7, whiteSpace: "nowrap" }}>{row.sourceNumber}</td>
+                  <td style={{ padding: 7 }}>{row.revision}</td>
+                  <td style={{ padding: 7 }}>{row.subject}</td>
+                  <td style={{ padding: 7 }}>{row.status}</td>
+                  <td style={{ padding: 7, whiteSpace: "nowrap" }}>{fmt(row.dueDate)}</td>
+                </tr>
+              ))}</tbody>
+            </table>
+          </div>
+        </section>
+      )}
 
       {showReportSettings && canManageReportSettings && (
         <RfiReportSettingsPanel projectId={projectId} lang={lang} onClose={() => setShowReportSettings(false)} />

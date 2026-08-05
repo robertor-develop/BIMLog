@@ -1,5 +1,5 @@
 import { Router, type IRouter } from "express";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
 import { rfisTable, usersTable, companiesTable, activityLogTable, projectsTable, projectCompanyBindingVersionsTable, namingConventionsTable, namingFieldsTable, filesTable, rfiViewEventsTable, rfiResponsesTable, projectMembersTable, linkedItemsTable, agentInsightsTable, rfiBallInCourtHistoryTable, lensViewpointsTable, userConnectionsTable, emailLogTable, configOptionsTable, rfiReportSettingsTable } from "@workspace/db/schema";
 import { getNextAvailableNumber } from "../lib/import-intelligence";
 import { storage } from "../lib/storage-adapter";
@@ -50,6 +50,22 @@ import {
 } from "../lib/rfi-complete-package";
 import { buildRfiRegisterWorkbook } from "../lib/rfi-register-export";
 import { recordRfiNotificationSourceEvent } from "../lib/telegram-rfi-notifications";
+import {
+  PROCORE_RFI_LIMITS,
+  previewProcoreRfiCsv,
+  toProcoreRfiPreviewResponse,
+  type ProcoreProjectIdentity,
+} from "../lib/procore-rfi-import";
+import {
+  commitProcoreRfiImport,
+  PROCORE_RFI_ALLOWED_ROW_COUNT,
+  PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID,
+  RFI_IMPORT_CAPABILITY,
+} from "../lib/procore-rfi-import-commit";
+import {
+  createPostgresProcoreRfiImportStore,
+  type ProcoreRfiPgPool,
+} from "../lib/procore-rfi-import-atomic-store";
 const router: IRouter = Router();
 
 class RfiReportSettingsOverrideError extends Error {
@@ -3621,6 +3637,160 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
     res.status(500).json({ error: "RFI DOCX could not be generated." });
   }
 });
+
+const PROJECT_26_PROCORE_SOURCE_SHA256 = "cb0088dcf3b603138148d23cfeeb66a4dced930cb2d602ee2ed17c1ef0988959";
+
+type Project26ProcoreImportFields = {
+  expectedSourceSha256: string;
+  expectedRowCount: number;
+  expectedProjectCode: string;
+  expectedCompanyId: number;
+  sourceProject: ProcoreProjectIdentity;
+};
+
+function parseProject26ProcoreImportFields(body: Record<string, unknown> | undefined): Project26ProcoreImportFields {
+  const value = (name: string): string => typeof body?.[name] === "string" ? body[name].trim() : "";
+  const expectedRowCount = Number(value("expectedRowCount"));
+  const expectedCompanyId = Number(value("expectedCompanyId"));
+  const fields = {
+    expectedSourceSha256: value("expectedSourceSha256"),
+    expectedRowCount,
+    expectedProjectCode: value("expectedProjectCode"),
+    expectedCompanyId,
+    sourceProject: {
+      code: value("sourceProjectCode"),
+      name: value("sourceProjectName"),
+      ...(value("sourceProjectAddress") ? { address: value("sourceProjectAddress") } : {}),
+    },
+  };
+  if (fields.expectedSourceSha256 !== PROJECT_26_PROCORE_SOURCE_SHA256
+    || fields.expectedRowCount !== PROCORE_RFI_ALLOWED_ROW_COUNT
+    || fields.expectedProjectCode !== "ELA01"
+    || !Number.isSafeInteger(fields.expectedCompanyId) || fields.expectedCompanyId < 1
+    || fields.sourceProject.code !== "50250001"
+    || !fields.sourceProject.name) {
+    throw new Error("PROCORE_RFI_IMPORT_REQUEST_INVALID");
+  }
+  return fields;
+}
+
+async function requireCurrentProject26ProcoreImportBinding(input: {
+  projectId: number;
+  fields: Project26ProcoreImportFields;
+  sourceProjectIdentityDigest: string;
+  actorUserId: number;
+  actorCompanyId: number;
+}): Promise<void> {
+  if (input.projectId !== PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID
+    || input.actorCompanyId !== input.fields.expectedCompanyId) {
+    throw new Error("PROCORE_RFI_IMPORT_AUTHORIZATION_DENIED");
+  }
+  const result = await pool.query(`
+    SELECT 1
+      FROM rfi_import_bindings b
+      JOIN projects p ON p.id = b.project_id
+      JOIN rfi_import_authorizations a
+        ON a.binding_id = b.id AND a.binding_version = b.version
+       AND a.capability = b.capability
+     WHERE b.project_id = $1 AND p.code = $2 AND b.company_id = $3
+       AND b.provider = 'procore' AND b.source_project_code = $4
+       AND b.source_project_identity_digest = $5 AND b.capability = $6
+       AND a.user_id = $7 AND b.current = true AND b.revoked_at IS NULL
+       AND a.current = true AND a.revoked_at IS NULL
+     ORDER BY b.version DESC LIMIT 1
+  `, [
+    input.projectId, input.fields.expectedProjectCode, input.fields.expectedCompanyId,
+    input.fields.sourceProject.code, input.sourceProjectIdentityDigest,
+    RFI_IMPORT_CAPABILITY, input.actorUserId,
+  ]);
+  if (result.rowCount !== 1) throw new Error("PROCORE_RFI_IMPORT_AUTHORIZATION_DENIED");
+}
+
+const acceptProject26ProcoreCsv = singleFileUpload({
+  fileSize: PROCORE_RFI_LIMITS.csvBytes,
+  files: 1,
+  fields: 9,
+  parts: 10,
+  fieldSize: 2_048,
+});
+
+router.post("/projects/:projectId/rfis/import/procore/preview",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  acceptProject26ProcoreCsv,
+  async (req, res) => {
+    try {
+      const projectId = Number(req.params.projectId);
+      if (!req.file || !req.user) { res.status(400).json({ error: "PROCORE_RFI_IMPORT_FILE_REQUIRED" }); return; }
+      const fields = parseProject26ProcoreImportFields(req.body);
+      const preview = previewProcoreRfiCsv(req.file.buffer.toString("utf8"), {
+        sha256: fields.expectedSourceSha256,
+        rowCount: fields.expectedRowCount,
+        project: fields.sourceProject,
+      });
+      if (!preview.valid) { res.status(422).json(toProcoreRfiPreviewResponse(preview)); return; }
+      await requireCurrentProject26ProcoreImportBinding({
+        projectId, fields, sourceProjectIdentityDigest: preview.projectIdentityDigest,
+        actorUserId: req.user.userId, actorCompanyId: req.user.companyId,
+      });
+      res.json(toProcoreRfiPreviewResponse(preview));
+    } catch (error) {
+      const denied = error instanceof Error && error.message === "PROCORE_RFI_IMPORT_AUTHORIZATION_DENIED";
+      res.status(denied ? 403 : 422).json({ error: denied ? "PROCORE_RFI_IMPORT_AUTHORIZATION_DENIED" : "PROCORE_RFI_IMPORT_REQUEST_INVALID" });
+    }
+  },
+);
+
+router.post("/projects/:projectId/rfis/import/procore/commit",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  acceptProject26ProcoreCsv,
+  async (req, res) => {
+    try {
+      const projectId = Number(req.params.projectId);
+      if (!req.file || !req.user) { res.status(400).json({ error: "PROCORE_RFI_IMPORT_FILE_REQUIRED" }); return; }
+      const fields = parseProject26ProcoreImportFields(req.body);
+      const csvText = req.file.buffer.toString("utf8");
+      const preview = previewProcoreRfiCsv(csvText, {
+        sha256: fields.expectedSourceSha256,
+        rowCount: fields.expectedRowCount,
+        project: fields.sourceProject,
+      });
+      if (!preview.valid) { res.status(422).json({ error: "PROCORE_RFI_IMPORT_INVALID", errors: preview.errors }); return; }
+      const selectedRowIdentities = JSON.parse(typeof req.body?.selectedRowIdentities === "string" ? req.body.selectedRowIdentities : "[]") as unknown;
+      const allIdentities = preview.rows.map((row) => row.identity);
+      if (!Array.isArray(selectedRowIdentities)
+        || selectedRowIdentities.length !== allIdentities.length
+        || selectedRowIdentities.some((identity, index) => identity !== allIdentities[index])) {
+        res.status(422).json({ error: "PROCORE_RFI_IMPORT_SELECTION_MUST_MATCH_FROZEN_SOURCE" });
+        return;
+      }
+      await requireCurrentProject26ProcoreImportBinding({
+        projectId, fields, sourceProjectIdentityDigest: preview.projectIdentityDigest,
+        actorUserId: req.user.userId, actorCompanyId: req.user.companyId,
+      });
+      const result = await commitProcoreRfiImport({
+        projectId,
+        expectedProjectCode: fields.expectedProjectCode,
+        expectedCompanyId: fields.expectedCompanyId,
+        expectedSourceSha256: fields.expectedSourceSha256,
+        expectedRowCount: fields.expectedRowCount,
+        sourceProject: fields.sourceProject,
+        idempotencyKey: typeof req.body?.idempotencyKey === "string" ? req.body.idempotencyKey : "",
+        csvText,
+        actorUserId: req.user.userId,
+      }, createPostgresProcoreRfiImportStore(pool as unknown as ProcoreRfiPgPool));
+      res.status(result.outcome === "created" ? 201 : 200).json(result);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "PROCORE_RFI_IMPORT_FAILED";
+      const denied = message.includes("AUTHORIZATION_DENIED");
+      const conflict = message.includes("CONFLICT");
+      res.status(denied ? 403 : conflict ? 409 : 422).json({
+        error: denied ? "PROCORE_RFI_IMPORT_AUTHORIZATION_DENIED" : conflict ? "PROCORE_RFI_IMPORT_CONFLICT" : "PROCORE_RFI_IMPORT_INVALID",
+      });
+    }
+  },
+);
 
 router.post("/projects/:projectId/rfis/import",
   authMiddleware,

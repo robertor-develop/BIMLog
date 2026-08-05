@@ -37,6 +37,7 @@ type ReplayRow = {
 };
 type CountRow = { duplicate_count: string | number };
 type InsertRow = { id: number };
+type MaterializedRfiRow = { id: number; number: string };
 type PgConstraintError = Error & { code?: string; constraint?: string };
 const MAX_TRANSACTION_ATTEMPTS = 3;
 
@@ -194,6 +195,80 @@ export function createPostgresProcoreRfiImportStore(pool: ProcoreRfiPgPool): Pro
           JSON.stringify(rowPayload),
         ]);
             if (insertedRows.rowCount !== request.rowCount) throw new Error("RFI_IMPORT_PERSISTED_ROW_COUNT_MISMATCH");
+
+            // Materialization deliberately consumes only known Procore columns from the
+            // already-bounded source payload. The complete payload remains governed by
+            // rfi_import_rows; it is never copied into user-visible RFI fields wholesale.
+            const materializedRfis = await client.query<MaterializedRfiRow>(`
+          WITH incoming AS (
+            SELECT source_number, source_revision, source_payload
+              FROM jsonb_to_recordset($3::jsonb)
+                AS source(source_number text, source_revision integer, source_payload jsonb)
+          )
+          INSERT INTO rfis (
+            project_id, number, subject, description, status, priority,
+            created_by_id, due_date, date_requested, date_required,
+            submitted_by_company, submitted_by_contact, submitted_to_company,
+            submitted_to_person, location_description, cost_impact, schedule_impact,
+            distribution_list, revision_number, ball_in_court, closed_at
+          )
+          SELECT $1, incoming.source_number,
+                 incoming.source_payload->>'Subject', NULL,
+                 CASE lower(incoming.source_payload->>'Status')
+                   WHEN 'closed' THEN 'closed' ELSE 'open'
+                 END,
+                 'medium', $2,
+                 CASE WHEN incoming.source_payload->>'Due Date' ~ '^\\d{2}/\\d{2}/\\d{4}$'
+                   THEN to_date(incoming.source_payload->>'Due Date', 'MM/DD/YYYY')::timestamp END,
+                 CASE WHEN incoming.source_payload->>'Initiated At' ~ '^\\d{2}/\\d{2}/\\d{4}$'
+                   THEN to_date(incoming.source_payload->>'Initiated At', 'MM/DD/YYYY')::timestamp END,
+                 CASE WHEN incoming.source_payload->>'Due Date' ~ '^\\d{2}/\\d{2}/\\d{4}$'
+                   THEN to_date(incoming.source_payload->>'Due Date', 'MM/DD/YYYY')::timestamp END,
+                 NULLIF(incoming.source_payload->>'Responsible Contractor Id', ''),
+                 NULLIF(incoming.source_payload->>'Received From Id', ''),
+                 NULLIF(incoming.source_payload->>'RFI Manager', ''),
+                 NULLIF(incoming.source_payload->>'Assigned Id', ''),
+                 NULLIF(incoming.source_payload->>'Location Id', ''),
+                 NULLIF(incoming.source_payload->>'Cost Impact', ''),
+                 NULLIF(incoming.source_payload->>'Schedule Impact', ''),
+                 CASE WHEN coalesce(incoming.source_payload->>'Distribution List', '') = ''
+                   THEN '[]'::json
+                   ELSE to_json(string_to_array(incoming.source_payload->>'Distribution List', ';')) END,
+                 incoming.source_revision,
+                 NULLIF(incoming.source_payload->>'Ball In Court', ''),
+                 CASE WHEN incoming.source_payload->>'Closed Date' ~ '^\\d{2}/\\d{2}/\\d{4}$'
+                   THEN to_date(incoming.source_payload->>'Closed Date', 'MM/DD/YYYY')::timestamp END
+            FROM incoming
+          RETURNING id, number
+        `, [
+          request.authorization.projectId, request.authorization.actorUserId,
+          JSON.stringify(rowPayload),
+        ]);
+            if (materializedRfis.rowCount !== request.rowCount) throw new Error("RFI_IMPORT_MATERIALIZED_ROW_COUNT_MISMATCH");
+
+            const rfiEvents = materializedRfis.rows.map((rfi) => ({ id: Number(rfi.id), number: rfi.number }));
+            const insertedActivity = await client.query(`
+          INSERT INTO activity_log (
+            project_id, user_id, user_full_name, user_company_name,
+            action_type, entity_type, entity_id, details
+          )
+          SELECT $1, $2, actor.full_name, company.name,
+                 'procore_rfi_imported', 'rfi', event.id,
+                 json_build_object('rfiNumber', event.number, 'importId', $3)::text
+            FROM jsonb_to_recordset($4::jsonb) AS event(id integer, number text)
+            JOIN users actor ON actor.id = $2
+            JOIN companies company ON company.id = actor.company_id
+        `, [request.authorization.projectId, request.authorization.actorUserId, importId, JSON.stringify(rfiEvents)]);
+            if (insertedActivity.rowCount !== request.rowCount) throw new Error("RFI_IMPORT_ACTIVITY_ROW_COUNT_MISMATCH");
+
+            const insertedNotifications = await client.query(`
+          INSERT INTO notifications (user_id, project_id, type, title, message, action_url)
+          SELECT $1, $2, 'rfi_imported', 'RFI imported from Procore',
+                 'RFI ' || event.number || ' was imported.',
+                 '/projects/' || $2::text || '/rfis/' || event.id::text
+            FROM jsonb_to_recordset($3::jsonb) AS event(id integer, number text)
+        `, [request.authorization.actorUserId, request.authorization.projectId, JSON.stringify(rfiEvents)]);
+            if (insertedNotifications.rowCount !== request.rowCount) throw new Error("RFI_IMPORT_NOTIFICATION_ROW_COUNT_MISMATCH");
             await client.query("COMMIT");
             return { outcome: "created", importId, rowCount: request.rowCount, digest: request.sourceDigest };
           } catch (error) {
