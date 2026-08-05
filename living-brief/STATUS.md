@@ -526,3 +526,6 @@ import, clash-report delete-reason auditing, and the accepted delete-confirmatio
 plus the clean six-path Generic APU UI are integrated locally. Focused source checks are reconciled against this exact lineage. Nothing in this line
 is pushed, published, deployed, or applied to a customer database; the live Living Brief failure remains open
 until a separately authorized replacement build and deployment are accepted.
+
+The clean-build reconciliation regenerated the deterministic platform inventory for the integrated Linked
+Items, Procore RFI import, and Generic APU paths; this is local build metadata, not deployment evidence.

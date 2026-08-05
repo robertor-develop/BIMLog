@@ -5880,9 +5880,9 @@
     },
     {
       "taskId": "living-brief-consolidated-release-reconciliation-20260805",
-      "reviewedThroughCommit": "e39d8299059d4cfad4c11d458ae41ff7a65b5e2a",
+      "reviewedThroughCommit": "9c317e85ac233e894f3244ebe75516538dbf0108",
       "reviewedAt": "2026-08-05T19:08:00-04:00",
-      "status": "local_reconciliation_and_release_proofs_pending",
+      "status": "local_reconciliation_focused_pass_clean_build_in_progress",
       "captureTiming": "immediate_same_task_chain",
       "summary": "Reconciles the Living Brief runtime-closure release lineage with accepted Linked Items, Project-26 Procore RFI import, clash delete-reason, delete-confirmation, and meeting-autocomplete and clean six-path Generic APU UI changes while preserving provider, database, publication, deployment, and live acceptance as separate gates.",
       "capabilityPreflight": {
@@ -5932,7 +5932,7 @@
         {
           "path": "scripts/test-living-brief-architecture.mjs",
           "type": "architecture_assertion_reconciliation",
-          "result": "pending_rerun",
+          "result": "architecture_39_of_39_pass",
           "boundary": "The assertion follows the current credential-version snapshot and comparison without weakening authorization."
         },
         {
@@ -6024,21 +6024,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/bimlog/apu-project-26-harness.html",
-        "artifacts/bimlog/src/App.tsx",
-        "artifacts/bimlog/src/components/DeleteConfirmModal.tsx",
-        "artifacts/bimlog/src/components/layout/FinancialProjectShell.tsx",
-        "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
-        "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
-        "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
-        "artifacts/bimlog/src/project-26-apu-harness.tsx",
         "living-brief/OPEN_LOOP.md",
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "scripts/test-living-brief-architecture.mjs"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "88e16e5c34cc1cefe2054a3103461f85657eef074152a74c8b2cafbef2192674"
+      "reviewedChangeSha256": "691bde482f1fb8891c8bd6e8b774c805976253a56034d8e29e8ea9f99d57f45e"
     }
   ]
 }
