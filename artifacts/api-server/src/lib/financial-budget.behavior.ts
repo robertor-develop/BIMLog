@@ -487,6 +487,35 @@ assert.match(service, /ORDER BY approved_at DESC LIMIT 1/);
 check("current budget is latest approved", "latest approval query");
 assert.match(service, /approved_budget_snapshot_lines/);
 check("complete immutable snapshot lines", "labels and values copied");
+assert.match(
+  service,
+  /l\.projectCode,\s*l\.projectName,\s*l\.hierarchicalPath,/,
+);
+check(
+  "snapshot line identity fields preserve column order",
+  "project code, project name, and hierarchy path stay distinct",
+);
+assert.match(service, /`budget-approval:\$\{projectId\}`/);
+assert.doesNotMatch(service, /`budget-approval:\$\{budgetVersionId\}`/);
+check(
+  "budget approval serializes per project",
+  "concurrent candidate versions cannot fork the approved baseline",
+);
+const approvalStart = service.indexOf("export async function approveBudget");
+const approvalAuthorization = service.indexOf(
+  'featureKey: "cost.budget.approve"',
+  approvalStart,
+);
+const approvedRetryReturn = service.indexOf(
+  "if (isApprovedRetry)",
+  approvalAuthorization,
+);
+assert.ok(approvalAuthorization > approvalStart);
+assert.ok(approvedRetryReturn > approvalAuthorization);
+check(
+  "approved retry reauthorizes current approver",
+  "idempotent response cannot bypass current financial authority",
+);
 assert.match(migration, /approved_budget_snapshots.*BEFORE UPDATE OR DELETE/s);
 check("snapshot update/delete database defense", "append-only trigger");
 assert.match(migration, /guard_budget_line_mutation/);
@@ -531,7 +560,7 @@ assert.match(service, /ROLLBACK/);
 check("failed snapshot or audit rolls back", "single transaction helper");
 assert.match(service, /financial_authority_journal/);
 check("accepted append-only audit reused", "no second audit system");
-assert.equal(checks.length, 64);
+assert.equal(checks.length, 67);
 console.log(
   JSON.stringify(
     { suite: "cost-financial-control-build-2-pure", status: "passed", checks },

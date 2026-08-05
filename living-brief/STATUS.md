@@ -529,3 +529,7 @@ until a separately authorized replacement build and deployment are accepted.
 
 The clean-build reconciliation regenerated the deterministic platform inventory for the integrated Linked
 Items, Procore RFI import, and Generic APU paths; this is local build metadata, not deployment evidence.
+
+The accepted 12-path Commercial/Financial backend set is also integrated locally: Financial Budget import,
+service, HTTP behavior, and Generic APU engine/persistence/schema paths. Its supporting proofs are local and
+credential-free; no customer or production database execution occurred.

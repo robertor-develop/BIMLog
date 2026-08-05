@@ -719,7 +719,7 @@ export async function approveBudget(input: {
     );
   return tx(async (client) => {
     await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, [
-      `budget-approval:${budgetVersionId}`,
+      `budget-approval:${projectId}`,
     ]);
     const row = (
       await client.query(
@@ -733,22 +733,17 @@ export async function approveBudget(input: {
         "BUDGET_NOT_FOUND",
         "Budget version not found.",
       );
-    if (row.status === "approved") {
-      const existing = (
-        await client.query(
-          `SELECT * FROM approved_budget_snapshots WHERE budget_version_id=$1`,
-          [budgetVersionId],
-        )
-      ).rows[0];
-      return snapshotResponse(existing, true);
-    }
-    if (row.status !== "under_review")
+    const isApprovedRetry = row.status === "approved";
+    if (!isApprovedRetry && row.status !== "under_review")
       throw new FinancialControlError(
         409,
         "BUDGET_APPROVAL_STATE_INVALID",
         "Only a budget under review may be approved.",
       );
-    if (Number(input.expectedRevision) !== Number(row.revision))
+    const expectedRevision = isApprovedRetry
+      ? Number(row.revision) - 1
+      : Number(row.revision);
+    if (Number(input.expectedRevision) !== expectedRevision)
       throw new FinancialControlError(
         409,
         "BUDGET_STALE_VERSION",
@@ -768,7 +763,13 @@ export async function approveBudget(input: {
         [projectId],
       )
     ).rows[0];
-    const category = previous ? "budget_revision" : "original_budget";
+    const category = isApprovedRetry
+      ? row.previous_approved_id
+        ? "budget_revision"
+        : "original_budget"
+      : previous
+        ? "budget_revision"
+        : "original_budget";
     const lines = (
       await client.query(
         `SELECT l.*,n.project_code,n.project_name,n.stable_project_node_id,n.parent_project_node_id FROM project_budget_lines l JOIN project_cost_nodes n ON n.id=l.project_cost_node_id WHERE l.budget_version_id=$1 ORDER BY l.sort_order,l.stable_line_id`,
@@ -792,6 +793,21 @@ export async function approveBudget(input: {
       trustedConfirmations: ["confirm_exact_budget"],
       client,
     });
+    if (isApprovedRetry) {
+      const existing = (
+        await client.query(
+          `SELECT * FROM approved_budget_snapshots WHERE budget_version_id=$1`,
+          [budgetVersionId],
+        )
+      ).rows[0];
+      if (!existing)
+        throw new FinancialControlError(
+          409,
+          "BUDGET_SNAPSHOT_MISSING",
+          "The approved budget snapshot is unavailable.",
+        );
+      return snapshotResponse(existing, true);
+    }
     if (!auth.decision.policyId)
       throw new FinancialControlError(
         403,
@@ -900,9 +916,9 @@ export async function approveBudget(input: {
           snapshotId,
           l.stableLineId,
           l.projectCostNodeId,
-          l.hierarchicalPath,
-          l.projectName,
           l.projectCode,
+          l.projectName,
+          l.hierarchicalPath,
           l.description,
           l.amount,
           l.quantity,

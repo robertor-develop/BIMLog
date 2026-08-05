@@ -187,6 +187,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-control-migration.ts
 - artifacts/api-server/src/lib/financial-control-service.ts
 - artifacts/api-server/src/lib/financial-control.behavior.ts
+- artifacts/api-server/src/lib/generic-apu-engine-edge.behavior.ts
+- artifacts/api-server/src/lib/generic-apu-engine.ts
+- artifacts/api-server/src/lib/generic-apu-persistence-db-harness.behavior.ts
+- artifacts/api-server/src/lib/generic-apu-persistence-db-harness.ts
+- artifacts/api-server/src/lib/generic-apu-persistence-db.behavior.ts
+- artifacts/api-server/src/lib/generic-apu-persistence-migration.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
@@ -257,6 +263,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/financial-budgets.ts
 - lib/db/src/schema/financial-contracts.ts
 - lib/db/src/schema/financial-controls.ts
+- lib/db/src/schema/generic-apu.ts
 - lib/db/src/schema/index.ts
 - lib/db/src/schema/invitations.ts
 - lib/db/src/schema/lens-imports.ts

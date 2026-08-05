@@ -35,7 +35,7 @@ await pool.query(
 );
 for (const authority of ["financial_viewer", "cost_preparer"]) {
   await pool.query(
-    `INSERT INTO financial_authority_grants(id,user_id,company_id,project_id,scope_type,authority,version,effective_from,reason,granted_by_id) VALUES($1,$2,$3,$4,'project',$5,1,now()-interval '1 hour','Disposable HTTP proof',$2) ON CONFLICT(id) DO NOTHING`,
+    `INSERT INTO financial_authority_grants(id,user_id,company_id,project_id,scope_type,authority,version,effective_from,reason,granted_by_id) VALUES($1,$2,$3,$4,'project',$5,1,now()-interval '1 hour','Disposable HTTP proof',$2) ON CONFLICT DO NOTHING`,
     [
       `http-${authority}`,
       ids.user_id,
@@ -45,19 +45,26 @@ for (const authority of ["financial_viewer", "cost_preparer"]) {
     ],
   );
 }
-const approver = (
-  await pool.query(
-    `INSERT INTO users(email,full_name,company_id) VALUES('approver@example.test','Independent Approver',$1) RETURNING id`,
-    [ids.company_id],
-  )
-).rows[0];
+const approver =
+  (
+    await pool.query(
+      `SELECT id FROM users WHERE email='approver@example.test' AND company_id=$1 ORDER BY id LIMIT 1`,
+      [ids.company_id],
+    )
+  ).rows[0] ??
+  (
+    await pool.query(
+      `INSERT INTO users(email,full_name,company_id) VALUES('approver@example.test','Independent Approver',$1) RETURNING id`,
+      [ids.company_id],
+    )
+  ).rows[0];
 await pool.query(
-  `INSERT INTO project_members(project_id,user_id,role,status) VALUES($1,$2,'admin','active')`,
+  `INSERT INTO project_members(project_id,user_id,role,status) SELECT $1,$2,'admin','active' WHERE NOT EXISTS(SELECT 1 FROM project_members WHERE project_id=$1 AND user_id=$2)`,
   [ids.project_id, approver.id],
 );
 for (const authority of ["cost_reviewer", "cost_approver"]) {
   await pool.query(
-    `INSERT INTO financial_authority_grants(id,user_id,company_id,project_id,scope_type,authority,version,effective_from,reason,granted_by_id) VALUES($1,$2,$3,$4,'project',$5,1,now()-interval '1 hour','Disposable negative-offset proof',$2)`,
+    `INSERT INTO financial_authority_grants(id,user_id,company_id,project_id,scope_type,authority,version,effective_from,reason,granted_by_id) VALUES($1,$2,$3,$4,'project',$5,1,now()-interval '1 hour','Disposable negative-offset proof',$2) ON CONFLICT DO NOTHING`,
     [
       `http-${authority}`,
       approver.id,
@@ -68,7 +75,7 @@ for (const authority of ["cost_reviewer", "cost_approver"]) {
   );
 }
 await pool.query(
-  `INSERT INTO financial_approval_policy_versions(id,company_id,project_id,scope_type,transaction_category,currency,max_amount,version,effective_from,state,reason,created_by_id) VALUES('http-budget-revision-policy',$1,$2,'project','budget_revision','USD',100.1,1,now()-interval '1 hour','active','Disposable exact limit',$3)`,
+  `INSERT INTO financial_approval_policy_versions(id,company_id,project_id,scope_type,transaction_category,currency,max_amount,version,effective_from,state,reason,created_by_id) VALUES('http-budget-revision-policy',$1,$2,'project','budget_revision','USD',100.1,1,now()-interval '1 hour','active','Disposable exact limit',$3) ON CONFLICT DO NOTHING`,
   [ids.company_id, ids.project_id, approver.id],
 );
 const app = express();

@@ -1687,3 +1687,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   publication/deployment, and bounded live browser acceptance. None has occurred in this reconciliation.
 - Seal the deterministic regenerated platform inventory with the final clean artifact receipt before any
   separately authorized provider or publication action.
+- Retain the accepted Commercial/Financial backend set in the consolidated build while keeping migration and
+  customer/production database execution outside this local release step.

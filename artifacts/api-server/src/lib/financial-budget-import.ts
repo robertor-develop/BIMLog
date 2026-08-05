@@ -297,18 +297,18 @@ export async function confirmBudgetImport(input: {
         "BUDGET_IMPORT_NOT_FOUND",
         "Import preview not found.",
       );
-    if (row.confirmed_budget_version_id) {
-      await client.query("COMMIT");
-      return {
-        budgetVersionId: row.confirmed_budget_version_id,
-        idempotent: true,
-      };
-    }
-    if (row.rejected_count > 0)
+    const auth = await authorizeFinancialOperation({
+      actorUserId: input.actorUserId,
+      projectId,
+      featureKey: "cost.budget.prepare",
+      operation: "prepare",
+      client,
+    });
+    if (Number(row.actor_user_id) !== auth.actor.userId)
       throw new FinancialControlError(
-        409,
-        "BUDGET_IMPORT_HAS_ERRORS",
-        "Resolve all rejected rows before confirmation.",
+        403,
+        "BUDGET_IMPORT_ACTOR_MISMATCH",
+        "Only the preparer who created the preview may confirm it.",
       );
     if (
       String(input.fileHash) !== row.file_hash ||
@@ -321,6 +321,47 @@ export async function confirmBudgetImport(input: {
         409,
         "BUDGET_IMPORT_CONFIRMATION_MISMATCH",
         "Confirmation must match the exact preview evidence.",
+      );
+    if (row.confirmed_budget_version_id) {
+      const confirmedBudget = (
+        await client.query(
+          `SELECT structure_version_id,currency,purpose,calculated_total,source_file_id,prepared_by_id FROM project_budget_versions WHERE id=$1 AND project_id=$2`,
+          [row.confirmed_budget_version_id, projectId],
+        )
+      ).rows[0];
+      if (!confirmedBudget)
+        throw new FinancialControlError(
+          409,
+          "BUDGET_IMPORT_CONFIRMED_DRAFT_MISSING",
+          "The confirmed import draft is unavailable.",
+        );
+      if (
+        String(confirmedBudget.structure_version_id) !==
+          boundedText(input.structureVersionId, "structureVersionId", 3, 100) ||
+        String(confirmedBudget.currency) !== row.currency ||
+        String(confirmedBudget.purpose) !==
+          boundedText(input.purpose, "purpose", 3, 1000) ||
+        exactSignedDecimal(String(confirmedBudget.calculated_total), "total") !==
+          exactSignedDecimal(String(row.total), "total") ||
+        Number(confirmedBudget.source_file_id) !== Number(row.source_file_id) ||
+        Number(confirmedBudget.prepared_by_id) !== auth.actor.userId
+      )
+        throw new FinancialControlError(
+          409,
+          "BUDGET_IMPORT_CONFIRMATION_CONFLICT",
+          "This import was already confirmed with different budget inputs.",
+        );
+      await client.query("COMMIT");
+      return {
+        budgetVersionId: row.confirmed_budget_version_id,
+        idempotent: true,
+      };
+    }
+    if (row.rejected_count > 0)
+      throw new FinancialControlError(
+        409,
+        "BUDGET_IMPORT_HAS_ERRORS",
+        "Resolve all rejected rows before confirmation.",
       );
     const draft = await createBudgetDraftWithClient({
       actorUserId: input.actorUserId,

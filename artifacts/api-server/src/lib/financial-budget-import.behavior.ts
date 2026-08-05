@@ -15,12 +15,30 @@ if (!url || new URL(url).port !== "55436")
 await startFeaturePolicyMigration();
 await startFinancialControlMigration();
 await startFinancialBudgetMigration();
+await pool.query(
+  `CREATE TABLE IF NOT EXISTS config_options(id serial PRIMARY KEY,category text NOT NULL,value text NOT NULL,meta jsonb);CREATE TABLE IF NOT EXISTS project_members(id serial PRIMARY KEY,project_id integer NOT NULL REFERENCES projects(id),user_id integer NOT NULL REFERENCES users(id),role text NOT NULL,status text NOT NULL DEFAULT 'active')`,
+);
 const ids = (
     await pool.query(
-      `SELECT u.id user_id,p.id project_id FROM users u JOIN projects p ON p.created_by_id=u.id WHERE u.email='builder@example.test'`,
+      `SELECT u.id user_id,u.company_id,p.id project_id FROM users u JOIN projects p ON p.created_by_id=u.id WHERE u.email='builder@example.test'`,
     )
-  ).rows[0],
-  csv = Buffer.from(
+  ).rows[0];
+await pool.query(
+  `INSERT INTO project_company_binding_versions(id,project_id,company_id,version,bound_by_id,reason_code,explanation_en,explanation_es,audit_evidence) VALUES('import-binding',$1,$2,1,$3,'DISPOSABLE_IMPORT','Disposable import scope.','Alcance desechable de importacion.','{}') ON CONFLICT(project_id,version) DO NOTHING`,
+  [ids.project_id, ids.company_id, ids.user_id],
+);
+await pool.query(
+  `INSERT INTO financial_authority_grants(id,user_id,company_id,project_id,scope_type,authority,version,effective_from,reason,granted_by_id) VALUES('import-cost-preparer',$1,$2,$3,'project','cost_preparer',1,now()-interval '1 hour','Disposable import proof',$1) ON CONFLICT(id) DO NOTHING`,
+  [ids.user_id, ids.company_id, ids.project_id],
+);
+await pool.query(
+  `INSERT INTO config_options(category,value,meta) SELECT 'member_role','admin','{"permission":"admin"}' WHERE NOT EXISTS(SELECT 1 FROM config_options WHERE category='member_role' AND value='admin')`,
+);
+await pool.query(
+  `INSERT INTO project_members(project_id,user_id,role,status) SELECT $1,$2,'admin','active' WHERE NOT EXISTS(SELECT 1 FROM project_members WHERE project_id=$1 AND user_id=$2)`,
+  [ids.project_id, ids.user_id],
+);
+const csv = Buffer.from(
     "stableLineId,costNode,description,amount,currency\nimport-line,pn1,Imported exact line,25.000001,USD\n",
     "utf8",
   ),
@@ -179,6 +197,13 @@ assert.equal(
 const duplicateRetry = await confirmBudgetImport(confirmation);
 assert.equal(duplicateRetry.budgetVersionId, confirmed[0].budgetVersionId);
 assert.equal(duplicateRetry.idempotent, true);
+await assert.rejects(
+  confirmBudgetImport({
+    ...confirmation,
+    purpose: "Changed confirmation payload",
+  }),
+  (error: any) => error?.code === "BUDGET_IMPORT_CONFIRMATION_CONFLICT",
+);
 const formula = Buffer.from(
     "stableLineId,costNode,description,amount,currency\nformula-line,pn1,Formula,=1+1,USD\n",
     "utf8",
@@ -213,6 +238,7 @@ const result = {
     "failed confirmation rolled back draft and session state atomically",
     "concurrent duplicate confirmation returned one draft",
     "duplicate retry returned the same committed draft",
+    "changed confirmation payload after commit returned conflict",
     "source evidence linked by stable file identity",
     "formula cell rejected",
     "native XLSX preview accepted exact literal",

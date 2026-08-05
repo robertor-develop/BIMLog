@@ -6030,6 +6030,133 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "691bde482f1fb8891c8bd6e8b774c805976253a56034d8e29e8ea9f99d57f45e"
+    },
+    {
+      "taskId": "commercial-financial-backend-release-integration-20260805",
+      "reviewedThroughCommit": "0217ec59ca258321752584338095e1f07a9ff18d",
+      "reviewedAt": "2026-08-05T19:18:45-04:00",
+      "status": "local_integration_focused_receipts_accepted_final_artifact_proof_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Integrates the exact accepted 12-path Financial Budget and Generic APU backend set into the existing local Release lineage without database, provider, publication, or deployment action.",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "F-root exact-path integration",
+          "credential-free focused and typecheck evidence",
+          "local deterministic build"
+        ],
+        "operatorOnly": [
+          "customer or production database execution",
+          "provider target and credential verification",
+          "push, publication, and deployment"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Generic APU persistence and schema definitions remain source-only; no migration or customer/production database execution is part of this integration."
+        }
+      ],
+      "workstreams": [
+        "financial-budget-backend",
+        "generic-apu-engine",
+        "generic-apu-persistence"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/api-server/src/lib/financial-budget-http.behavior.ts",
+          "type": "financial_engine_http_receipts",
+          "result": "accepted_f417e7eb_and_42167eb9",
+          "boundary": "Credential-free local proof only; no customer or production database."
+        },
+        {
+          "path": "artifacts/api-server/src/lib/generic-apu-persistence-db.behavior.ts",
+          "type": "generic_apu_persistence_receipt",
+          "result": "accepted_78011ae3",
+          "boundary": "Local harness evidence only; no production migration or customer mutation."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or authority change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution and release boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing focused proof, typecheck, build, and acceptance requirements remain."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or commercial promise change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform inventory will include the integrated Financial Budget and Generic APU backend paths."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering or design rule change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact 12-path local integration and no-database boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps migration, database, provider, and publication gates explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical record is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/financial-budget-http.behavior.ts",
+        "artifacts/api-server/src/lib/financial-budget-import.behavior.ts",
+        "artifacts/api-server/src/lib/financial-budget-import.ts",
+        "artifacts/api-server/src/lib/financial-budget-service.ts",
+        "artifacts/api-server/src/lib/financial-budget.behavior.ts",
+        "artifacts/api-server/src/lib/generic-apu-engine-edge.behavior.ts",
+        "artifacts/api-server/src/lib/generic-apu-engine.ts",
+        "artifacts/api-server/src/lib/generic-apu-persistence-db-harness.behavior.ts",
+        "artifacts/api-server/src/lib/generic-apu-persistence-db-harness.ts",
+        "artifacts/api-server/src/lib/generic-apu-persistence-db.behavior.ts",
+        "artifacts/api-server/src/lib/generic-apu-persistence-migration.ts",
+        "lib/db/src/schema/generic-apu.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e14c7905b74a0550b8143cb290b8c9adba178628c07dd31e4bdd422ebefb0bb3"
     }
   ]
 }
