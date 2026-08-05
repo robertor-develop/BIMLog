@@ -7,8 +7,9 @@ import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
   BookOpen, Send, RefreshCw, CalendarDays, GitMerge, Gauge,
-  ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Menu
+  ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Menu, Calculator
 } from "lucide-react";
+import type { LucideIcon } from "lucide-react";
 
 interface SidebarProps {
   projectId: number;
@@ -43,6 +44,18 @@ const NAV_ITEMS = [
 
 type NavItem = typeof NAV_ITEMS[number];
 
+type NavAction = {
+  id: string;
+  labelEn: string;
+  labelEs: string;
+  icon?: LucideIcon;
+  adminOnly?: boolean;
+  superOnly?: boolean;
+} & (
+  | { kind: "link"; href: string }
+  | { kind: "button"; onClick: () => void }
+);
+
 type NavGroup = {
   id: string;
   labelEn: string;
@@ -50,14 +63,7 @@ type NavGroup = {
   descriptionEn: string;
   descriptionEs: string;
   items: NavItem[];
-  actions?: Array<{
-    id: string;
-    labelEn: string;
-    labelEs: string;
-    onClick: () => void;
-    adminOnly?: boolean;
-    superOnly?: boolean;
-  }>;
+  actions?: NavAction[];
 };
 
 function SidebarModal({
@@ -142,7 +148,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
 
   const visibleItems = NAV_ITEMS.filter(item => !item.adminOnly || isAdmin);
   const byId = (ids: string[]) => ids.map(id => visibleItems.find(item => item.id === id)).filter(Boolean) as NavItem[];
-  const navGroups: NavGroup[] = [
+  const allNavGroups: NavGroup[] = [
     {
       id: "command",
       labelEn: "Command",
@@ -175,8 +181,15 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       descriptionEs: "Presupuesto, contratos y controles financieros.",
       items: [],
       actions: [
-        { id: "budget", labelEn: "Project Budget", labelEs: "Presupuesto del Proyecto", onClick: () => navigate(`/projects/${projectId}/financial/budget`) },
-        { id: "contracts", labelEn: "Contracts & Commitments", labelEs: "Contratos y Compromisos", onClick: () => navigate(`/projects/${projectId}/financial/contracts`) },
+        { id: "budget", kind: "button", labelEn: "Project Budget", labelEs: "Presupuesto del Proyecto", onClick: () => navigate(`/projects/${projectId}/financial/budget`) },
+        { id: "contracts", kind: "button", labelEn: "Contracts & Commitments", labelEs: "Contratos y Compromisos", onClick: () => navigate(`/projects/${projectId}/financial/contracts`) },
+        {
+          id: "apu",
+          kind: "link",
+          labelEn: "Generic APU", labelEs: "APU genérico",
+          href: `/projects/${projectId}/financial/apu`,
+          icon: Calculator,
+        },
       ],
     },
     {
@@ -203,10 +216,11 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       descriptionEs: "Integraciones aprobadas y BIMLog Sync Agent.",
       items: byId(["integrations"]),
       actions: [
-        { id: "sync-agent", labelEn: "BIMLog Sync Agent", labelEs: "BIMLog Sync Agent", onClick: () => setShowSyncAgent(true) },
+        { id: "sync-agent", kind: "button", labelEn: "BIMLog Sync Agent", labelEs: "BIMLog Sync Agent", onClick: () => setShowSyncAgent(true) },
       ],
     },
-  ].filter(group => group.items.length || group.actions?.length);
+  ];
+  const navGroups = allNavGroups.filter(group => group.items.length || group.actions?.length);
 
   const activeGroup = navGroups.find(
     group =>
@@ -264,18 +278,36 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
           })}
           {group.actions?.map(action => {
             const isActive = activeTab === action.id;
+            const ActionIcon = action.icon;
+            if (action.kind === "link") {
+              return (
+                <Link
+                  key={action.id}
+                  href={action.href}
+                  className={`sidebar-nav-item phasea-nav-item${isActive ? " active" : ""}`}
+                  aria-current={isActive ? "page" : undefined}
+                  title={tr(action.labelEn, action.labelEs)}
+                  onClick={closeMobile}
+                >
+                  <div className="nav-dot" />
+                  {ActionIcon && <ActionIcon className="phasea-nav-icon" />}
+                  <span className="phasea-nav-text">{tr(action.labelEn, action.labelEs)}</span>
+                </Link>
+              );
+            }
             return (
-            <button
-              key={action.id}
-              type="button"
-              className={`sidebar-nav-item phasea-nav-item phasea-nav-button${isActive ? " active" : ""}`}
-              aria-current={isActive ? "page" : undefined}
-              title={tr(action.labelEn, action.labelEs)}
-              onClick={() => { action.onClick(); closeMobile(); }}
-            >
-              <div className="nav-dot" />
-              <span className="phasea-nav-text">{tr(action.labelEn, action.labelEs)}</span>
-            </button>
+              <button
+                key={action.id}
+                type="button"
+                className={`sidebar-nav-item phasea-nav-item phasea-nav-button${isActive ? " active" : ""}`}
+                aria-current={isActive ? "page" : undefined}
+                title={tr(action.labelEn, action.labelEs)}
+                onClick={() => { action.onClick(); closeMobile(); }}
+              >
+                <div className="nav-dot" />
+                {ActionIcon && <ActionIcon className="phasea-nav-icon" />}
+                <span className="phasea-nav-text">{tr(action.labelEn, action.labelEs)}</span>
+              </button>
             );
           })}
         </div>

@@ -5055,6 +5055,8 @@ export function MeetingsTab({
               <tbody>
                 {attendees.map((a, i) => {
                   const people = companyPeople(a.company);
+                  const companyListId =
+                    `meeting-${projectId}-attendee-${i}-companies`;
                   const isFreeTextPerson =
                     freeTextPersons.includes(i) ||
                     (a.company !== "" && people.length === 0);
@@ -5088,37 +5090,44 @@ export function MeetingsTab({
                           />
                         </td>
                         <td style={CELL_STYLE}>
-                          <select
+                          <input
+                            list={companyListId}
                             value={a.company}
                             onChange={(e) => {
-                              const company = e.target.value;
+                              const typedCompany = e.target.value;
+                              const canonicalCompany = companyMap.get(
+                                companyKey(typedCompany),
+                              );
                               const arr = [...attendees];
                               arr[i] = {
                                 ...arr[i],
-                                company,
-                                companyId:
-                                  companyIdByName.get(companyKey(company)) ||
-                                  null,
+                                company: canonicalCompany || typedCompany,
+                                companyId: canonicalCompany
+                                  ? companyIdByName.get(
+                                      companyKey(canonicalCompany),
+                                    ) || null
+                                  : null,
+                                directoryEntryId: null,
                                 fullName: "",
                                 email: "",
                               };
                               setAttendees(arr);
                             }}
                             style={selectStyle}
-                          >
-                            <option value="">
-                              {t("? Select ?", "? Seleccionar ?")}
-                            </option>
+                            aria-label={t("Company", "Empresa")}
+                            placeholder={t(
+                              "Select or type a company",
+                              "Seleccione o escriba una empresa",
+                            )}
+                            autoComplete="off"
+                          />
+                          <datalist id={companyListId}>
                             {uniqueCompanies.map((c) => (
                               <option key={c} value={c}>
                                 {c}
                               </option>
                             ))}
-                            {a.company &&
-                              !uniqueCompanies.includes(a.company) && (
-                                <option value={a.company}>{a.company}</option>
-                              )}
-                          </select>
+                          </datalist>
                           <button
                             type="button"
                             onClick={() => {

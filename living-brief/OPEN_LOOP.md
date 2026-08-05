@@ -1671,3 +1671,17 @@ Remote master includes the Replit work plus Codex's Replit branding removal comm
 
 ### Replit Branding Removal
 Production no longer depends on old bim-log-ignite.replit.app references in searched source paths. Continue to prefer bimlog.app in user-facing URLs and OAuth callback docs.
+
+## Consolidated Living Brief release lineage
+
+- Complete the exact clean local build and artifact-level authenticated Living Brief proof for the current
+  consolidated commit after Living Brief metadata reconciliation.
+- Preserve server-side eligibility, user identity, and credential-version/revocation checks; eligible access
+  remains passwordless and ineligible access remains denied.
+- Verify the isolated production artifact contains every authoritative Living Brief asset, binds its source
+  commit, and loads all 11 documents through the authenticated API.
+- Keep the accepted Linked Items, Project-26 Procore RFI import, clash delete-reason, delete-confirmation, and
+  meeting-autocomplete changes plus the clean six-path Generic APU UI in the same local lineage without
+  customer database execution.
+- Remaining operator gates are explicit: normal push, exact provider target/revision verification, authorized
+  publication/deployment, and bounded live browser acceptance. None has occurred in this reconciliation.

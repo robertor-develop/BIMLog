@@ -10,7 +10,7 @@ import { getRole } from "@/lib/roles";
 
 type FinancialProjectShellProps = {
   projectId: number;
-  activeTab: "budget" | "contracts";
+  activeTab: "budget" | "contracts" | "apu";
   children: ReactNode;
 };
 
@@ -27,7 +27,9 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
   const activeLabel =
     activeTab === "budget"
       ? lang === "es" ? "Presupuesto del Proyecto" : "Project Budget"
-      : lang === "es" ? "Contratos y Compromisos" : "Contracts & Commitments";
+      : activeTab === "contracts"
+        ? lang === "es" ? "Contratos y Compromisos" : "Contracts & Commitments"
+        : lang === "es" ? "APU genérico" : "Generic APU";
 
   if (isLoading) {
     return (

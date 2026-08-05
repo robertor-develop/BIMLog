@@ -518,3 +518,11 @@ is reserved for genuine completion.
 - RFI Build 8, Entitlements Step 3, Meeting Minutes M5, and Finance Build 4: not started.
 
 See [OPEN_LOOP.md](./OPEN_LOOP.md) for actions and [AUDIT.md](./AUDIT.md) for dated evidence.
+
+## 2026-08-05 consolidated local Release lineage
+
+Living Brief runtime-source packaging and commit identity, Linked Items creation UX, Project-26 Procore RFI
+import, clash-report delete-reason auditing, and the accepted delete-confirmation/meeting-autocomplete paths
+plus the clean six-path Generic APU UI are integrated locally. Focused source checks are reconciled against this exact lineage. Nothing in this line
+is pushed, published, deployed, or applied to a customer database; the live Living Brief failure remains open
+until a separately authorized replacement build and deployment are accepted.

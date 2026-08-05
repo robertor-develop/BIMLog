@@ -50,9 +50,19 @@ check("credential reset writes immutable audit", gateService.includes("living_br
 check("credential reset rejects stale observed version", gateService.includes("STALE_GATE_CREDENTIAL_VERSION") && route.includes("observedCredentialVersion"));
 check("locked-out super admin recovery status is admin-only", route.includes('router.get("/living-brief/password/recovery", authMiddleware, isSuperAdminMiddleware') && route.includes("expectedCredentialVersion"));
 check("locked-out recovery can observe version without brief token", route.includes("RECOVERY_VERSION_REQUIRED") && route.includes("req.body?.expectedCredentialVersion") && route.includes("!token"));
-check("brief access tokens carry credential version", auth.includes("credentialVersion") && route.includes("payload.credentialVersion !== credential.version"));
+check(
+  "brief access tokens carry credential version",
+  auth.includes("credentialVersion") &&
+    route.includes("const credentialVersion = (await getLivingBriefGateCredential())?.version ?? 0;") &&
+    route.includes("payload.credentialVersion !== credentialVersion"),
+);
 check("locked screen has no forgot/reset form", !ui.includes("Forgot it? Reset the gate password") && !ui.includes("New password (min 4 chars)"));
-check("locked screen recovery form is super-admin gated", ui.includes("Super Administrator recovery") && ui.includes("isSuperAdmin &&") && ui.includes("/living-brief/password/recovery"));
+check(
+  "locked screen recovery remains super-admin gated",
+  ui.includes("if (!token || !isSuperAdmin) return null;") &&
+    ui.includes("/living-brief/password/recovery") &&
+    ui.includes("showAdmin && isSuperAdmin"),
+);
 check("admin reset form requires revalidation fields", ui.includes("currentAccountPassword") && ui.includes("resetReason") && ui.includes("RESET_LIVING_BRIEF_GATE"));
 
 console.log(`Living Brief architecture matrix passed: ${checks.length}/${checks.length}`);

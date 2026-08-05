@@ -390,3 +390,18 @@ It changes only when the code structure or curated architectural facts change.
   data or Lens/Viewpoint source identity.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
+
+## 2026-08-05 local release-lineage reconciliation
+
+- The local Release lineage packages the authoritative `living-brief` source bundle and deployment-source
+  commit identity into the API runtime. The live deployment remains a separate operator-controlled gate;
+  no publication or deployment is implied by this local reconciliation.
+- Linked-item creation UX is integrated as an exact two-path change with its focused 6/6 behavior proof.
+- Project-26 Procore RFI import is integrated as the accepted seven-path additive binding, authorization,
+  import, and schema-definition change. No database connection, migration, or customer mutation was run.
+- Clash-report deletion now persists the trimmed, bounded deletion reason and report identity/count in the
+  structured activity log before hard deletion. Its focused proof passed without a database connection.
+- The accepted delete-confirmation and meeting-autocomplete UI paths are integrated byte-exactly. All
+  provider, push, publication, deployment, and live/customer acceptance gates remain separate.
+- The accepted Generic APU UI is integrated as its exact clean six-path reconstruction; its prohibited
+  behavior-test artifact is absent, and browser/provider acceptance remains a separate gate.

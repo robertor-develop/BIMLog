@@ -5877,6 +5877,168 @@
         "scripts/test-living-brief-passwordless-access.mjs"
       ],
       "reviewedChangeSha256": "4ef460beda6bccfe51576866bd9c4b172bdb0b4fcceed0969f2de8c5f55b3f35"
+    },
+    {
+      "taskId": "living-brief-consolidated-release-reconciliation-20260805",
+      "reviewedThroughCommit": "e39d8299059d4cfad4c11d458ae41ff7a65b5e2a",
+      "reviewedAt": "2026-08-05T19:08:00-04:00",
+      "status": "local_reconciliation_and_release_proofs_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Reconciles the Living Brief runtime-closure release lineage with accepted Linked Items, Project-26 Procore RFI import, clash delete-reason, delete-confirmation, and meeting-autocomplete and clean six-path Generic APU UI changes while preserving provider, database, publication, deployment, and live acceptance as separate gates.",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "F-root source integration and semantic reconciliation",
+          "focused source proofs and local build evidence",
+          "commit-bound local release acceptance"
+        ],
+        "operatorOnly": [
+          "provider target and credential verification",
+          "push, publication, and deployment",
+          "production and customer-account verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Living Brief artifact packaging must retain authenticated eligibility, token identity, credential-version revocation, and 11-document source authority; Procore and clash-report integrations remain local with no customer database execution."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The consolidated local lineage is not the live deployed revision. Provider verification, push, publication, deployment, and bounded live acceptance remain separate operator-controlled gates."
+        }
+      ],
+      "workstreams": [
+        "living-brief-runtime-closure",
+        "linked-items-creation-ux",
+        "procore-project-26-rfi-import",
+        "clash-report-delete-reason",
+        "ui-release-consistency",
+        "generic-apu-ui"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/test-living-brief-architecture.mjs",
+          "type": "architecture_assertion_reconciliation",
+          "result": "pending_rerun",
+          "boundary": "The assertion follows the current credential-version snapshot and comparison without weakening authorization."
+        },
+        {
+          "path": "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+          "type": "isolated_artifact_acceptance",
+          "result": "pending_clean_rebuild",
+          "boundary": "Must prove source bundle, deployment identity, authenticated eligible access, ineligible denial, and all 11 documents without provider or customer mutation."
+        },
+        {
+          "path": "artifacts/api-server/src/lib/procore-rfi-import.behavior.ts",
+          "type": "focused_procore_source_proof",
+          "result": "accepted_43_rows",
+          "boundary": "Local synthetic proof only; no database connection, migration, provider call, or customer mutation."
+        },
+        {
+          "path": "artifacts/api-server/src/routes/clash_reports.ts",
+          "type": "focused_delete_reason_proof",
+          "result": "accepted_7_assertions",
+          "boundary": "Local source proof only; no database connection or customer mutation."
+        },
+        {
+          "path": "artifacts/api-server/src/lib/linked-items-creation-ux.behavior.ts",
+          "type": "focused_linked_items_proof",
+          "result": "accepted_6_assertions",
+          "boundary": "Local source behavior proof only; no provider, publication, or deployment."
+        },
+        {
+          "path": "artifacts/bimlog/src/project-26-apu-harness.tsx",
+          "type": "focused_generic_apu_ui_contract",
+          "result": "accepted_8_assertions",
+          "boundary": "Exact six-path UI reconstruction only; no prohibited behavior artifact, browser claim, provider action, or customer mutation."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The newly committed doctrine remains authoritative; this release reconciliation does not change ecosystem identity or decision authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution, authorization, and operator-controlled release boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing focused proof, clean build, isolated artifact, and independent acceptance requirements remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, billing model, or unrelated workflow change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the consolidated local runtime packaging, integrations, database boundary, and separate live deployment gate."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, install, or field workflow change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed PDF identity, rendering, pagination, or report-design rule change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or regulated claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact local integrated scope and that live failure remains open pending authorized replacement deployment."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records clean build, artifact proof, provider, publication, deployment, and live browser gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/apu-project-26-harness.html",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/components/DeleteConfirmModal.tsx",
+        "artifacts/bimlog/src/components/layout/FinancialProjectShell.tsx",
+        "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
+        "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+        "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+        "artifacts/bimlog/src/project-26-apu-harness.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/test-living-brief-architecture.mjs"
+      ],
+      "reviewedChangeSha256": "88e16e5c34cc1cefe2054a3103461f85657eef074152a74c8b2cafbef2192674"
     }
   ]
 }
