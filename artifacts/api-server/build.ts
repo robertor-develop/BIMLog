@@ -93,7 +93,7 @@ async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInpu
   try {
     execFileSync(
       "git",
-      ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "diff-index", "--quiet", "HEAD", "--"],
+      ["-c", `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`, "-C", workspaceRoot, "diff", "--quiet", "HEAD", "--"],
       { stdio: "ignore" },
     );
     const untracked = execFileSync(
