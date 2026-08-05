@@ -5608,6 +5608,275 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0d204c401a12a9e8e69e1aceea010bd24df9c80680a05a261b42cc7ce0d2084e"
+    },
+    {
+      "taskId": "platform-pdf-runtime-closure-recovery-20260804",
+      "reviewedThroughCommit": "9506e5e3139665dd53fc519fea17f3ebc9603a0c",
+      "reviewedAt": "2026-08-04T10:45:00-04:00",
+      "status": "local_strict_offline_build_pass_release_actions_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Reconciles the deterministic in-process runtime closure and removes the reproduced nested-pnpm typecheck runner failure while preserving the exact checks and all separate release and field-acceptance gates.",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "F-root Living Brief reconciliation",
+          "strict-offline local production build",
+          "local Git and hash verification"
+        ],
+        "operatorOnly": [
+          "Replit workspace preservation and realignment",
+          "push, publication, and deployment",
+          "production and customer verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Runtime deployment assembly must remain bound to the installed graph and frozen lockfile without child package-manager, install, network, C-root, or Replit mutation fallback."
+        }
+      ],
+      "workstreams": [
+        "platform-pdf-consistency",
+        "ui-release-readiness",
+        "replit-runtime-closure"
+      ],
+      "evidence": [
+        {
+          "path": "package.json",
+          "type": "build_runner_nesting_correction",
+          "result": "strict_offline_full_build_pass",
+          "boundary": "The root build invokes the same library compiler through its portable Node entrypoint and artifact typechecks directly, removing nested pnpm and bare-shim failure modes without changing dependencies, lockfile bytes, or acceptance gates."
+        },
+        {
+          "path": "artifacts/api-server/build.ts",
+          "type": "deterministic_runtime_closure_assembly",
+          "result": "strict_offline_focused_and_full_build_pass",
+          "boundary": "In-process installed-package graph materialization now binds workspace dependency edges to pnpm importers, resolves scoped and unscoped virtual-store siblings inside the approved graph, distinguishes missing dependency sections from present invalid edges, and preserves the established 13-package production artifact contract. Focused and full strict-offline proofs passed with 10,777 contained files, isolated capability coverage, and readiness 200."
+        },
+        {
+          "path": "artifacts/api-server/scripts/test-deploy-runtime-closure.ts",
+          "type": "focused_runtime_closure_regression",
+          "result": "implemented_in_candidate",
+          "boundary": "Synthetic fixtures cover success, lock and graph mismatch, path escape, peer/file bindings, cooperative cancellation, timeout, and nonzero failure without install or network use."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership, organizational relationship, human authority, or customer role changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing strict release, offline supply-chain, F-root, evidence, Replit, and operator-only boundaries already govern this correction."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction strengthens fail-closed build evidence without changing PDF, UI, artifact-layout, browser, or independent-review acceptance requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, user workflow, product capability, or market-positioning change is introduced."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Runtime topology, workspace structure, API routes, dependencies, and generated platform facts remain unchanged; only deterministic packaging implementation is corrected."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, installation, synchronization, configuration, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report identity, layout, branding, title, pagination, data scope, or generated PDF behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, edition, applicability, certification, compliance citation, or external claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the exact F-root runtime-closure candidate, its bounded semantics, and the separate build, Replit, release, and acceptance states."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The completed strict-offline build is recorded while all later Replit, publication, deployment, health, customer, and independent acceptance gates remain explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical event is rewritten; this bounded recovery candidate is recorded in current status and unfinished-work authorities only."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/build.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "57acaa002353853bc987b9ed8eebb9c2a322d9ca1fdc8d930d65f93d0e97982c"
+    },
+    {
+      "taskId": "living-brief-passwordless-f5-integration-20260805",
+      "reviewedThroughCommit": "9506e5e3139665dd53fc519fea17f3ebc9603a0c",
+      "reviewedAt": "2026-08-05T11:08:00-04:00",
+      "status": "local_strict_offline_build_pass_release_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Integrates accepted passwordless F5 source while preserving current eligibility enforcement, token identity and revocation checks, all 11 authoritative documents, and separate operator-controlled release gates.",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "F-root source integration and semantic reconciliation",
+          "focused source proof and affected TypeScript checks",
+          "one strict-offline local production build",
+          "local exact-source and release preflight"
+        ],
+        "operatorOnly": [
+          "Replit workspace access and exact-target verification",
+          "push, publication, and deployment",
+          "production and customer-account verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Removing the separate BIMAI360 read password must not weaken current server-side eligibility, authenticated-user token binding, revocation-version checks, or denial for users without an explicit grant."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The local integrated candidate must remain distinct from Replit source, publication, deployment, live F5 verification, and customer acceptance until each operator-controlled gate is independently proven."
+        }
+      ],
+      "workstreams": [
+        "living-brief-f5",
+        "platform-pdf-consistency",
+        "ui-release-readiness"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/test-living-brief-passwordless-access.mjs",
+          "type": "focused_passwordless_source_proof",
+          "result": "seven_assertions_pass",
+          "boundary": "Local source proof verifies F5 eligibility, authenticated unlock, absence of read-password handling, user/version-bound tokens, denial behavior, and passwordless UI bootstrap without production or database access."
+        },
+        {
+          "path": "artifacts/api-server/src/routes/living_brief.ts",
+          "type": "passwordless_eligible_unlock",
+          "result": "focused_typecheck_pass",
+          "boundary": "Unlock remains authenticated and eligibility-gated, while document reads revalidate token identity, current eligibility, and durable revocation version."
+        },
+        {
+          "path": "artifacts/bimlog/src/pages/LivingBrief.tsx",
+          "type": "passwordless_ui_bootstrap",
+          "result": "focused_typecheck_pass",
+          "boundary": "Eligible users obtain access without sending a separate gate password; failure remains visible and retryable, while live browser behavior remains a deployment gate."
+        },
+        {
+          "path": "package.json",
+          "type": "replacement_strict_offline_full_build",
+          "result": "pass",
+          "boundary": "The single authorized replacement build passed with F-root temp and artifact-proof directories, offline flags, PORT 3000, all source gates and typechecks, both bundles, deterministic 13-package/10,777-file runtime closure, isolated artifact capabilities, and readiness 200."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership, organizational relationship, customer role, or human decision authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Execution doctrine now distinguishes passwordless eligible-user read access from durable Super Administrator credential and revocation administration."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing real-behavior, responsive UI, error-state, build, deployment, and independent acceptance requirements continue unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, ecosystem positioning, billing model, or unrelated product workflow changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform authority will record passwordless eligible-user token issuance and retained Super Administrator administration boundaries."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, synchronization, packaging, configuration, installation, or field workflow changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF identity, report data scope, branding, title, pagination, rendering, or artifact-layout behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, applicability, certification, compliance citation, or regulated claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the exact accepted F5 source integration, focused evidence, preserved authorization properties, and remaining gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The strict-offline build, exact Replit source gate, publication, deployment, live F5 states, all-section load, and independent acceptance remain explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical record is rewritten; this current local candidate is captured in status, open work, and semantic-impact authorities."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/build.ts",
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/routes/living_brief.ts",
+        "artifacts/bimlog/src/pages/LivingBrief.tsx",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-living-brief-passwordless-access.mjs"
+      ],
+      "reviewedChangeSha256": "4ef460beda6bccfe51576866bd9c4b172bdb0b4fcceed0969f2de8c5f55b3f35"
     }
   ]
 }

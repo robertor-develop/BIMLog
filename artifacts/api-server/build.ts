@@ -61,6 +61,20 @@ const allowlist = [
 
 const explicitRuntimeExternals = ["pg"];
 const requiredWorkspacePackages = ["@workspace/api-zod", "@workspace/db"];
+const requiredRuntimePackages = [
+  "@anthropic-ai/sdk",
+  "@napi-rs/canvas",
+  "@sendgrid/mail",
+  ...requiredWorkspacePackages,
+  "adm-zip",
+  "bcryptjs",
+  "docx",
+  "pdf-lib",
+  "pdf-parse",
+  "pdfkit",
+  "pg",
+  "sharp",
+];
 
 function packageRoot(specifier: string): string {
   const parts = specifier.split("/");
@@ -116,10 +130,16 @@ async function assembleRuntimeFromInstalledGraph(
   const resolveInstalledPackage = async (packageName: string, issuer?: string) => {
     assertPackageName(packageName);
     const explicitWorkspace = workspaceSources.get(packageName);
+    const issuerNodeModules = issuer
+      ? path.basename(path.dirname(issuer)).startsWith("@")
+        ? path.dirname(path.dirname(issuer))
+        : path.dirname(issuer)
+      : undefined;
     const candidates = explicitWorkspace
       ? [explicitWorkspace]
       : [
           ...(issuer ? [path.join(issuer, "node_modules", packageName)] : []),
+          ...(issuerNodeModules ? [path.join(issuerNodeModules, packageName)] : []),
           path.join(installedNodeModules, packageName),
         ];
     for (const candidate of candidates) {
@@ -133,7 +153,9 @@ async function assembleRuntimeFromInstalledGraph(
         if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error;
       }
     }
-    throw new Error(`Installed package is missing from the approved graph: ${packageName}`);
+    throw new Error(
+      `Installed package is missing from the approved graph: ${packageName}; issuer ${issuer ?? "root"}; tried ${candidates.join(", ")}`,
+    );
   };
 
   let materialFileCount = 0;
@@ -274,10 +296,13 @@ async function assembleRuntimeFromInstalledGraph(
     if (!issuerSnapshot) throw new Error(`pnpm-lock.yaml issuer snapshot is missing: ${issuer.lockKey}.`);
     for (const sectionName of ["dependencies", "optionalDependencies"]) {
       const section = findYamlBlock(issuerSnapshot, 4, sectionName);
-      const lockedEdge = section && readYamlScalar(section, 6, packageName);
+      if (!section) continue;
+      const lockedEdge = readYamlScalar(section, 6, packageName);
       if (lockedEdge === undefined) continue;
       if (!lockedEdge || (!lockedEdge.startsWith("link:") && !lockedEdge.startsWith("file:") && !lockedReferenceMatchesVersion(lockedEdge, version))) {
-        throw new Error(`pnpm-lock.yaml dependency edge mismatch: ${issuer.lockKey} -> ${packageName}@${version}.`);
+        throw new Error(
+          `pnpm-lock.yaml dependency edge mismatch: ${issuer.lockKey} -> ${packageName}; locked ${JSON.stringify(lockedEdge)}, installed ${JSON.stringify(version)}.`,
+        );
       }
       return lockedEdge;
     }
@@ -463,6 +488,12 @@ async function assembleRuntimeFromInstalledGraph(
       });
       const dependencies = Object.keys(manifest.dependencies ?? {}).sort();
       const optionalDependencies = new Set(Object.keys(manifest.optionalDependencies ?? {}));
+      const dependencyIssuer: IssuerBinding = workspaceSources.has(packageName)
+        ? {
+            type: "importer",
+            key: path.relative(sourceWorkspaceRoot, workspaceSources.get(packageName)!).split(path.sep).join("/"),
+          }
+        : { type: "package", lockKey: lockBinding.snapshotLockKey };
       for (const dependencyName of [...new Set([...dependencies, ...optionalDependencies])].sort()) {
         let dependencySource: string;
         try {
@@ -476,7 +507,7 @@ async function assembleRuntimeFromInstalledGraph(
           dependencySource,
           path.join(destinationPackage, "node_modules", dependencyName),
           manifest.dependencies?.[dependencyName] ?? manifest.optionalDependencies?.[dependencyName],
-          { type: "package", lockKey: lockBinding.snapshotLockKey },
+          dependencyIssuer,
         );
       }
     } finally {
@@ -712,7 +743,7 @@ export async function deployRuntimeClosure(
     const requiredPackages = [
       ...new Set([
         ...externalSpecifiers.map(packageRoot),
-        ...requiredWorkspacePackages,
+        ...requiredRuntimePackages,
       ]),
     ].sort();
     assembly = await assembleRuntimeFromInstalledGraph(

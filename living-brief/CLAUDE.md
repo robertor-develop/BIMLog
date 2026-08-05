@@ -230,11 +230,13 @@ idempotency, delivery-time authorization/preference/watch rechecks, restart/no-r
 and 390px browser behavior, privacy, cleanup, and zero automatic AI use. Local evidence can make a candidate Ready
 for independent review; it cannot mark the build accepted, pushed, published, deployed, or customer-verified.
 
-Living Brief gate recovery must not be circular. A currently authenticated and transaction-time revalidated Super
-Administrator who has lost the gate password must be able to recover without already holding a Living Brief access
-token. Recovery still requires current BIMLog account-password revalidation, exact confirmation, bounded reason,
-rate limiting, advisory/row locking, stale observed-version protection, immutable audit, rollback safety, and
-invalidation of prior brief sessions. Ordinary users, Project Admins, and Company Admins remain denied.
+Living Brief read access is passwordless for a currently authenticated user only after the server confirms current
+eligibility as a Super Administrator or through the explicit `can_access_living_brief` grant. The short-lived brief
+token remains bound to the authenticated user, current eligibility, and durable credential/revocation version; it
+must not bypass or cache eligibility. Credential administration remains Super-Administrator-only and requires
+current BIMLog account-password revalidation, exact confirmation, bounded reason, rate limiting, advisory/row
+locking, stale observed-version protection, immutable audit, rollback safety, and invalidation of prior brief
+sessions. Ordinary users, Project Admins, and Company Admins without the explicit grant remain denied.
 
 ### Mandatory capability preflight
 
@@ -526,7 +528,7 @@ inline badge. If one side's design changes, the other side must be reviewed too.
 ## Living Brief specifics
 - All 11 catalog documents are Git-controlled authorities. Database content is an exact verified
   mirror of the deployed source bundle, never an independent doctrine authority.
-- Living Brief gate credentials are durable database security state. A build, startup, restart,
+- Living Brief gate credentials are durable database revocation and administration state. A build, startup, restart,
   migration, source mirror reconciliation, or Replit publication must never create, replace,
   rotate, clear, reseed, or invalidate an existing gate credential. Startup may migrate an
   existing legacy hash into the dedicated gate table once; otherwise it fails closed until a
@@ -542,8 +544,9 @@ inline badge. If one side's design changes, the other side must be reviewed too.
   writes only when those facts change; builds must not create timestamp-only churn. Do not hand-edit
   PLATFORM.md. Edit the generator instead.
 - Living Brief docs are served by `artifacts/api-server/src/routes/living_brief.ts` under
-  `/api/v1/living-brief/*`, gated by password plus eligibility check:
-  super admin OR `users.can_access_living_brief`.
+  `/api/v1/living-brief/*`. Read access requires current BIMLog authentication and a fresh
+  server-side eligibility check: super admin OR `users.can_access_living_brief`. Eligible users
+  receive a short-lived brief token without entering a separate BIMAI360 gate password.
 - Only a currently authenticated, currently revalidated Super Administrator can change the gate
   credential. Project Admin and Company Admin authority never imply this power. Reset requires
   bounded input, explicit confirmation, rate limiting, a reason, immutable audit history, and

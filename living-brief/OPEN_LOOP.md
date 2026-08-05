@@ -17,6 +17,23 @@ This is the operating register for unfinished BIMLog work. It exists so customer
    Features paths in English desktop and Spanish exact-390 browser states,
    including load failure, retry, denied, disabled, stale-response, focus, live
    announcement, console, request, and horizontal-overflow gates.
+5. Preserve the F-root runtime-closure candidate
+   `9506e5e3139665dd53fc519fea17f3ebc9603a0c` and its tree
+   `0169ddd2d7ffa069f4ce135703e8e1db7af8b768` with the reconciled local runner
+   and runtime-closure corrections. The strict-offline production build passed
+   on 2026-08-04; do not rerun it unless candidate bytes change, install or
+   fetch dependencies, alter protected lock bytes, or substitute a C-root
+   checkout.
+6. Treat a local build PASS as local build evidence only. Replit workspace
+   preservation and exact source equality, Linux build/promotion, separately
+   authorized publish/deploy, deployed health, customer workflow, and
+   independent PDF/UI acceptance remain open and operator-gated.
+7. The passwordless F5 candidate passed its single replacement strict-offline
+   full build locally. Preserve the frozen commit and build receipt. Replit
+   exact-target/credential/source verification, publication, and bounded live
+   verification remain operator-owned: prove an eligible user needs no separate
+   BIMAI360 password, a user without current eligibility remains denied, and
+   all 11 authoritative sections load from the deployed source bundle.
 
 ## Recovery control loop - 2026-07-28
 

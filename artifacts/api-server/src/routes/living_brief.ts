@@ -12,7 +12,6 @@ import {
   getLivingBriefGateCredential,
   LivingBriefGateError,
   resetLivingBriefGateCredential,
-  verifyLivingBriefGatePassword,
 } from "../lib/living-brief-gate";
 import { loadLivingBriefSource, resolveDeployedSourceCommit, sha256 } from "../lib/living-brief-source";
 import {
@@ -87,12 +86,8 @@ async function briefAccessMiddleware(req: Request, res: Response, next: NextFunc
       res.status(401).json({ error: "Invalid brief access token" });
       return;
     }
-    const credential = await getLivingBriefGateCredential();
-    if (!credential) {
-      res.status(503).json({ error: "Living Brief gate is not configured" });
-      return;
-    }
-    if (payload.credentialVersion !== credential.version) {
+    const credentialVersion = (await getLivingBriefGateCredential())?.version ?? 0;
+    if (payload.credentialVersion !== credentialVersion) {
       res.status(401).json({ error: "Invalid or expired brief access token" });
       return;
     }
@@ -118,27 +113,14 @@ router.get("/living-brief/eligibility", authMiddleware, async (req: Request, res
   res.json({ eligible, isSuperAdmin: !!u?.isSuperAdmin, credentialConfigured: !!(await getLivingBriefGateCredential()) });
 });
 
-// Verify the gate password and issue a short-lived brief-access token.
+// Issue a short-lived token only after the independent eligibility check.
 router.post("/living-brief/unlock", authMiddleware, async (req: Request, res: Response) => {
   if (!(await isEligible(req.user!.userId))) {
     res.status(403).json({ error: "Living Brief access not granted" });
     return;
   }
-  const password = typeof req.body?.password === "string" ? req.body.password : "";
-  if (!password) {
-    res.status(400).json({ error: "Password required" });
-    return;
-  }
-  const credential = await verifyLivingBriefGatePassword(password);
-  if (!credential) {
-    if (!(await getLivingBriefGateCredential())) {
-      res.status(503).json({ error: "Living Brief gate is not configured" });
-      return;
-    }
-    res.status(401).json({ error: "Incorrect password" });
-    return;
-  }
-  res.json({ briefToken: signBriefAccessToken(req.user!.userId, credential.version) });
+  const credentialVersion = (await getLivingBriefGateCredential())?.version ?? 0;
+  res.json({ briefToken: signBriefAccessToken(req.user!.userId, credentialVersion) });
 });
 
 // Return the verified deployed source bundle. Database rows are status-bearing mirrors only;

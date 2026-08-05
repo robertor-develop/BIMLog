@@ -381,8 +381,9 @@ It changes only when the code structure or curated architectural facts change.
 - Living Brief: all documents in living-brief/catalog.json are served in authority order through
   /api/v1/living-brief/* from the verified deployed source bundle. living_brief_documents is an
   exact, metadata-bearing database mirror; it never overrides source doctrine. Controlled admin
-  reconciliation requires observed mirror hashes. Only super admins change the password, grant
-  access, or reconcile a mismatched mirror.
+  reconciliation requires observed mirror hashes. Eligible authenticated users receive a
+  short-lived brief token without a separate gate password; only super admins administer the
+  durable credential/revocation state, grant access, or reconcile a mismatched mirror.
 - RFI report template settings: accepted source integration uses one project-scoped report settings
   snapshot for Standard PDF, DOCX, and Complete PDF embedded canonical pages. Settings live in
   rfi_report_settings, are added through additive startup/schema wiring, and never mutate canonical RFI

@@ -97,9 +97,7 @@ export function LivingBrief() {
 
   const [eligible, setEligible] = useState<boolean | null>(null);
   const [isSuperAdmin, setIsSuperAdmin] = useState(false);
-  const [credentialConfigured, setCredentialConfigured] = useState(true);
   const [unlocked, setUnlocked] = useState(false);
-  const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [docs, setDocs] = useState<Doc[]>([]);
   const [activeDoc, setActiveDoc] = useState(0);
@@ -129,8 +127,23 @@ export function LivingBrief() {
     } else {
       sessionStorage.removeItem(BRIEF_TOKEN_KEY);
       setUnlocked(false);
+      setError("Living Brief access could not be loaded.");
     }
   }, [token]);
+
+  const unlock = useCallback(async () => {
+    if (!token) return;
+    setError("");
+    const r = await apiFetch("/living-brief/unlock", token, { method: "POST" });
+    if (r.ok) {
+      const d = await r.json();
+      sessionStorage.setItem(BRIEF_TOKEN_KEY, d.briefToken);
+      await loadDocs();
+    } else {
+      const d = await r.json().catch(() => ({}));
+      setError(d.error || "Living Brief access could not be opened.");
+    }
+  }, [loadDocs, token]);
 
   useEffect(() => {
     if (!token) { setLocation("/login"); return; }
@@ -141,27 +154,14 @@ export function LivingBrief() {
         if (!active) return;
         setEligible(!!d.eligible);
         setIsSuperAdmin(!!d.isSuperAdmin);
-        setCredentialConfigured(d.credentialConfigured !== false);
-        if (d.eligible && briefToken()) loadDocs();
+        if (d.eligible) {
+          if (briefToken()) loadDocs();
+          else unlock();
+        }
       })
       .catch(() => { if (active) setEligible(false); });
     return () => { active = false; };
-  }, [token, loadDocs, setLocation]);
-
-  const unlock = async () => {
-    if (!token) return;
-    setError("");
-    const r = await apiFetch("/living-brief/unlock", token, { method: "POST", body: JSON.stringify({ password }) });
-    if (r.ok) {
-      const d = await r.json();
-      sessionStorage.setItem(BRIEF_TOKEN_KEY, d.briefToken);
-      setPassword("");
-      await loadDocs();
-    } else {
-      const d = await r.json().catch(() => ({}));
-      setError(d.error || "Unlock failed");
-    }
-  };
+  }, [token, loadDocs, setLocation, unlock]);
 
   const loadAccess = async () => {
     if (!token) return;
@@ -276,6 +276,7 @@ export function LivingBrief() {
       setResetConfirmation("");
       setAdminMsg(tt("Gate credential updated; existing Living Brief sessions were invalidated.", "Credencial de puerta actualizada; las sesiones existentes del Living Brief fueron invalidadas."));
       setUnlocked(false);
+      await unlock();
     } else {
       const d = await r.json().catch(() => ({}));
       setAdminMsg(d.error || tt("Update failed", "Actualizacion fallida"));
@@ -308,49 +309,13 @@ export function LivingBrief() {
       <div style={{ width: "100%", maxWidth: 480, margin: "80px auto", padding: 24, boxSizing: "border-box" }}>
         <div style={card}>
           <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-            <Lock size={18} /> <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Living Brief - Locked</h1>
+            <Lock size={18} /> <h1 style={{ fontSize: 18, fontWeight: 700, margin: 0 }}>Opening Living Brief</h1>
           </div>
-          <input
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            onKeyDown={(e) => { if (e.key === "Enter") unlock(); }}
-            placeholder="Enter password"
-            autoFocus
-            style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 14, marginBottom: 10 }}
-          />
           {error && <div style={{ color: "#DC2626", fontSize: 13, marginBottom: 10 }}>{error}</div>}
-          {!credentialConfigured && (
-            <div style={{ color: "#B45309", fontSize: 13, lineHeight: 1.5, marginBottom: 10 }}>
-              {tt(
-                "The Living Brief gate has no durable credential configured. Super Administrator recovery requires authenticated account revalidation and an audit reason through the controlled admin endpoint.",
-                "La puerta del Living Brief no tiene una credencial duradera configurada. La recuperacion de Super Administrador requiere revalidacion de cuenta autenticada y un motivo auditado mediante el endpoint administrativo controlado.",
-              )}
-            </div>
-          )}
+          {!error && <div style={{ color: "hsl(var(--muted-foreground))", fontSize: 13 }}>Verifying your authorized access...</div>}
           <button onClick={unlock} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "10px 12px", borderRadius: 8, border: "none", background: "hsl(var(--primary))", color: "hsl(var(--primary-foreground))", fontWeight: 700, fontSize: 14, cursor: "pointer" }}>
-            Unlock
+            Retry
           </button>
-          {isSuperAdmin && (
-            <div style={{ marginTop: 16, paddingTop: 14, borderTop: "1px solid hsl(var(--border))", display: "grid", gap: 8 }}>
-              <div style={{ fontSize: 13, fontWeight: 700 }}>{tt("Super Administrator recovery", "Recuperacion de Super Administrador")}</div>
-              <div style={{ fontSize: 12.5, color: "hsl(var(--muted-foreground))", lineHeight: 1.45 }}>
-                {tt(
-                  "If the gate password is unavailable, a current Super Administrator may set a new gate password after revalidating the BIMLog account password, exact confirmation, and an audited reason.",
-                  "Si la contrasena de puerta no esta disponible, un Super Administrador actual puede establecer una nueva contrasena despues de revalidar la contrasena de cuenta BIMLog, la confirmacion exacta y un motivo auditado.",
-                )}
-              </div>
-              <input type="password" value={currentAccountPassword} onChange={(e) => setCurrentAccountPassword(e.target.value)} placeholder={tt("Confirm account password", "Confirme la contrasena de cuenta")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder={tt("New gate password (12+ chars)", "Nueva contrasena de puerta (12+ caracteres)")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
-              <input value={resetReason} onChange={(e) => setResetReason(e.target.value)} placeholder={tt("Audit reason", "Motivo de auditoria")} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
-              <input value={resetConfirmation} onChange={(e) => setResetConfirmation(e.target.value)} placeholder="RESET_LIVING_BRIEF_GATE" style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "8px 10px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--background))", color: "hsl(var(--foreground))", fontSize: 13 }} />
-              <button onClick={changePassword} style={{ width: "100%", minWidth: 0, boxSizing: "border-box", padding: "9px 12px", borderRadius: 8, border: "1px solid hsl(var(--border))", background: "hsl(var(--card))", color: "hsl(var(--foreground))", fontWeight: 700, fontSize: 13, cursor: "pointer" }}>
-                {tt("Recover gate access", "Recuperar acceso de puerta")}
-              </button>
-              {recoveryVersion !== null && <div style={{ fontSize: 11.5, color: "hsl(var(--muted-foreground))" }}>{tt("Recovery state observed for this request.", "Estado de recuperacion observado para esta solicitud.")}</div>}
-              {adminMsg && <div style={{ fontSize: 12.5, color: "hsl(var(--muted-foreground))" }}>{adminMsg}</div>}
-            </div>
-          )}
         </div>
       </div>
     );

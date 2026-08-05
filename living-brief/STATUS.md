@@ -27,6 +27,54 @@
   pushed by this task, published, deployed, production verified, or customer
   accepted.
 
+### Deterministic runtime-closure recovery candidate - 2026-08-03
+
+- The clean F-root descendant at
+  `9506e5e3139665dd53fc519fea17f3ebc9603a0c` replaces child-process package
+  staging with an in-process, lockfile-bound installed-package graph assembly.
+  It materializes regular files only, records deterministic content hashes and
+  exact importer/package/snapshot bindings, and fails closed on incomplete,
+  mismatched, escaping, cancelled, or timed-out closure assembly.
+- The focused proof covers direct, transitive, workspace, file-descriptor, and
+  peer-qualified lock bindings plus cooperative copy/hash/validation timeout
+  paths, with zero package-manager, install, or network invocation. The
+  correction changes no PDF or UI behavior, dependency or lockfile bytes,
+  schema, database, provider, credential, or customer data.
+- This source remains a local candidate. The corrected F-root source and
+  reconciled Living Brief passed the strict-offline production build on
+  2026-08-04, including all gates, typechecks, UI verification, deterministic
+  13-package runtime closure, isolated capability proof, and readiness 200.
+  Replit Linux build/promotion, push, publication, deployment, production
+  verification, customer verification, and independent UI/artifact acceptance
+  remain separate gates.
+- The root build runner now invokes the library TypeScript compiler through its
+  portable Node entrypoint and runs artifact typechecks directly instead of
+  nesting the same workflow through an additional pnpm process or relying on a
+  shell-specific bare `tsc` shim. This preserves the exact checks while
+  removing the locally reproduced silent runner failure; package dependencies
+  and the lockfile are unchanged.
+
+### Passwordless eligible-user Living Brief candidate - 2026-08-05
+
+- Accepted source commit `06f2dfbdd5f9ca504cefacdeeb914deb961f7ab3`
+  is integrated into this F-root candidate. A currently authenticated eligible
+  user receives the short-lived Living Brief token without entering a separate
+  BIMAI360 gate password. Eligibility remains server-derived from current
+  Super Administrator state or the explicit `can_access_living_brief` grant.
+- The document middleware still binds the brief token to the authenticated
+  user, rechecks current eligibility, and rejects stale revocation versions.
+  Ineligible users continue to receive 403. The 11-document source bundle,
+  ordering, mirror reconciliation, and Super Administrator access-management
+  controls are unchanged.
+- The focused seven-assertion passwordless source proof, affected API and
+  BIMLog UI TypeScript checks, and the single authorized replacement
+  strict-offline full build pass locally. The build includes tracked-secret,
+  database-safety, mojibake, 11-document Living Brief, all-workspace
+  typecheck/build, deterministic 13-package/10,777-file runtime closure,
+  isolated production-artifact capability, and readiness-200 evidence.
+  Exact Replit-source verification, publication, deployment, live F5
+  verification, and independent acceptance remain separate operator gates.
+
 ## Current recovery truth - 2026-07-28
 
 This section supersedes any conflicting current-state wording below. Older
