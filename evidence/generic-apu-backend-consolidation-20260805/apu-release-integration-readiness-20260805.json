@@ -1,0 +1,68 @@
+{
+  "schemaVersion": 1,
+  "receiptType": "apu-release-integration-readiness",
+  "createdAtUtc": "2026-08-05T23:44:14.8849072Z",
+  "state": "PASS",
+  "lineage": {
+    "acceptedBackendCommit": "e79c799bb397d0a1390d67f5cc863791125e304d",
+    "releaseHeadInspected": "f33295dd3621e6bfde8941f418d7ade27c2f8ee8",
+    "mergeBase": "7cc3d10c2a835ee3a6c7e671d1270fc4f96bffdd",
+    "acceptedTwelveBlobsIdenticalInRelease": true
+  },
+  "remediatedDefects": [
+    {
+      "code": "APU_ENGINE_CONTRACT_MISSING",
+      "resolution": "Restore the independently accepted type contract required by the committed engine."
+    },
+    {
+      "code": "APU_SCHEMA_BARREL_EXPORT_MISSING",
+      "resolution": "Export generic-apu through lib/db/src/schema/index.ts so package exports and Drizzle discovery include all six tables."
+    },
+    {
+      "code": "APU_AUTHORITY_ROUTE_UNREGISTERED",
+      "resolution": "Add the Security-accepted authority service/router slice and register its router through routes/index.ts."
+    }
+  ],
+  "integrationFiles": [
+    {"path":"artifacts/api-server/src/lib/generic-apu-contract.ts","bytes":5957,"sha256":"3438f2e0fc0a18cf68b690b90a5145b7dee321e7eb4fb994b536fa4be08460a1"},
+    {"path":"artifacts/api-server/src/lib/generic-apu.behavior.ts","bytes":13605,"sha256":"ec004d8490bd3b3e2333497653d70387c63ae9a63d9cacc5c3ac6a2c6e2292ef"},
+    {"path":"artifacts/api-server/src/lib/generic-apu-budget-control.ts","bytes":13070,"sha256":"df455294ab2e935c12c45b285b2fb9cc1f72856aadf62dc6bec75470be5b1865"},
+    {"path":"artifacts/api-server/src/lib/apu-budget-authority-service.ts","bytes":26018,"sha256":"0c1df6c2e7ca66cd84f271688f45a49e81726d92c470e70e5fa138a811620a44"},
+    {"path":"artifacts/api-server/src/routes/generic-apu-budget-controls.ts","bytes":4078,"sha256":"d5dcd77ac44b9af791a8f9cb30c12eb84106fb2178febc90ae86a636ba9d1842"},
+    {"path":"artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts","bytes":16383,"sha256":"041f91f7239268f6063a8d7ee81f10d23775c8c4ff52bcb03a8a040a1865ec34"},
+    {"path":"artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts","bytes":4621,"sha256":"c9ecd186e700752c7910bd7ba46a2ccb2e8e8adda030fae3ac14fb68c7d856c3"},
+    {"path":"artifacts/api-server/src/routes/index.ts","bytes":4174,"sha256":"33245c4081550228450f90e110dc1e1a42b49dc22f55200a5795e2cc492f67cb"},
+    {"path":"lib/db/src/schema/index.ts","bytes":1921,"sha256":"1d272b0dd21426b43289db15a3d7edf2dd0226a3b1ddcf976cb4015e45162feb"}
+  ],
+  "focusedProofs": [
+    {"suite":"generic-apu.behavior","result":"22/22 PASS"},
+    {"suite":"generic-apu-engine-edge.behavior","result":"7/7 PASS; databaseNetworkBrowserIo=false"},
+    {"suite":"generic-apu-budget-authority-http","result":"3/3 PASS"},
+    {"suite":"generic-apu-budget-authority-real-boundary","result":"PASS; transactions 16 started, 4 committed, 12 rolled back"},
+    {"suite":"generic-apu-schema-barrel","result":"6/6 required table symbols visible"},
+    {"suite":"scoped-strict-typescript","result":"exit 0 for contract, engine, budget control, authority service/router, and APU schema"},
+    {"suite":"budget-control-bounded-review","result":"5/5 PASS"}
+  ],
+  "independentReviews": [
+    {"worker":"/root/apu_engine_independent_review","result":"PASS; contract and evaluator support accepted; engine and edge unchanged"},
+    {"worker":"/root/apu_schema_migration_compat","result":"PASS; one-line schema export and six-symbol barrel proof"},
+    {"worker":"/root/apu_service_route_compat","result":"PASS; exact Security service/router hashes, narrow route registration, fresh budget-control acceptance"}
+  ],
+  "budgetControlProvenance": {
+    "priorManifestHash": "9098dba54b42cc64454b7260624a42d0cedeef55fe62cde6600f407550303b1f",
+    "priorManifestBytes": 12631,
+    "supersedingAcceptedHash": "df455294ab2e935c12c45b285b2fb9cc1f72856aadf62dc6bec75470be5b1865",
+    "supersedingAcceptedBytes": 13070,
+    "basis": "Fresh independent source review plus evaluator, HTTP, real-boundary, and bounded pure-control proofs; no direct route exposes the pure evaluator outside the accepted authority service."
+  },
+  "remainingEnvironmentLimits": [
+    "Full repository/API typecheck still depends on missing prebuilt api-zod/db declaration artifacts and broad pre-existing diagnostics.",
+    "No startup, deployment, browser, customer database, or production database acceptance is claimed."
+  ],
+  "mutations": {
+    "customerOrProductionDatabase": 0,
+    "network": 0,
+    "provider": 0,
+    "pushPublishDeploy": 0
+  }
+}
