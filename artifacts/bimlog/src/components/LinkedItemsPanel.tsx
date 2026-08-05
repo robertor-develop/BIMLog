@@ -3,6 +3,17 @@ import { useAuthStore } from "@/store/auth";
 
 const API = "/api/v1";
 
+const LINK_TARGET_REFRESH_ERROR =
+  "Items could not be refreshed. Your existing selections were kept. Check your access and try again.";
+
+type TargetListResponse = Readonly<Pick<Response, "ok" | "status">>;
+
+export function requireSuccessfulTargetLists(responses: readonly TargetListResponse[]) {
+  if (responses.some(response => !response.ok)) {
+    throw new Error(LINK_TARGET_REFRESH_ERROR);
+  }
+}
+
 type LinkType = "clash" | "submittal" | "transmittal" | "change_order" | "meeting" | "file";
 
 const TYPE_LABELS: Record<LinkType, string> = {
@@ -51,6 +62,8 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
   const [selId, setSelId] = useState("");
   const [selClashId, setSelClashId] = useState("");
   const [busy, setBusy] = useState(false);
+  const [itemsLoading, setItemsLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ tone: "info" | "error"; message: string } | null>(null);
 
   const loadLinks = async () => {
     const r = await fetch(`${API}/projects/${projectId}/links/${entityType}/${entityId}`, { headers });
@@ -61,6 +74,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
     o.number || o.subject || o.title || o.fileName || o.reportNumber || `${fallbackPrefix} #${o.id}`;
 
   const loadItems = async () => {
+    setItemsLoading(true);
     try {
       const [subRes, transRes, coRes, meetRes, fileRes, reportRes] = await Promise.all([
         fetch(`${API}/projects/${projectId}/submittals`, { headers }),
@@ -70,6 +84,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
         fetch(`${API}/projects/${projectId}/files`, { headers }),
         fetch(`${API}/projects/${projectId}/clash-reports`, { headers }),
       ]);
+      requireSuccessfulTargetLists([subRes, transRes, coRes, meetRes, fileRes, reportRes]);
       const submittalsRaw = subRes.ok ? await subRes.json() : [];
       const transRaw = transRes.ok ? await transRes.json() : [];
       const coRaw = coRes.ok ? await coRes.json() : [];
@@ -97,12 +112,22 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
       const clashes = clashArrays.flat();
 
       setItems({ clash: clashes, submittal: submittals, transmittal: transmittals, change_order: changeOrders, meeting: meetings, file: files });
+      setFeedback(current => current?.tone === "error" ? null : current);
     } catch (e) {
       console.error("[LinkedItemsPanel.loadItems]", e);
+      setFeedback({ tone: "error", message: LINK_TARGET_REFRESH_ERROR });
+    } finally {
+      setItemsLoading(false);
     }
   };
 
-  useEffect(() => { loadLinks(); loadItems(); }, [projectId, entityType, entityId]);
+  useEffect(() => {
+    loadLinks();
+    loadItems();
+    const refreshAfterCreate = () => loadItems();
+    window.addEventListener("focus", refreshAfterCreate);
+    return () => window.removeEventListener("focus", refreshAfterCreate);
+  }, [projectId, entityType, entityId]);
 
   const otherSide = (l: LinkRow) => {
     const isFrom = l.fromType === entityType && l.fromId === entityId;
@@ -124,18 +149,37 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
         headers: { ...headers, "Content-Type": "application/json" },
         body: JSON.stringify({ fromType: entityType, fromId: entityId, toType, toId, linkType: "related" }),
       });
-      if (r.ok) { clearSel(); await loadLinks(); }
+      if (!r.ok) {
+        const body = await r.json().catch(() => ({}));
+        throw new Error(typeof body?.error === "string" ? body.error : "This item could not be attached.");
+      }
+      clearSel();
+      await loadLinks();
+      setFeedback({ tone: "info", message: `${TYPE_LABELS[toType]} attached.` });
+    } catch (error) {
+      setFeedback({ tone: "error", message: error instanceof Error ? error.message : "This item could not be attached." });
     } finally { setBusy(false); }
   };
 
   const removeLink = async (linkId: number) => {
-    await fetch(`${API}/projects/${projectId}/links/${linkId}`, { method: "DELETE", headers });
+    const r = await fetch(`${API}/projects/${projectId}/links/${linkId}`, { method: "DELETE", headers });
+    if (!r.ok) {
+      setFeedback({ tone: "error", message: "This link could not be removed." });
+      return;
+    }
     await loadLinks();
+    setFeedback({ tone: "info", message: "Link removed." });
   };
 
   // Open the target module's create page in a new tab so this RFI stays open;
   // the user creates the item there, returns here, and picks it to link.
-  const openCreate = (type: LinkType) => window.open(`/projects/${projectId}/${CREATE_ROUTES[type]}`, "_blank");
+  const openCreate = (type: LinkType) => {
+    const opened = window.open(`/projects/${projectId}/${CREATE_ROUTES[type]}`, "_blank");
+    if (opened) opened.opener = null;
+    setFeedback(opened
+      ? { tone: "info", message: `Create the ${TYPE_LABELS[type]} in the new tab. Return here and the list will refresh automatically.` }
+      : { tone: "error", message: `The new tab was blocked. Allow pop-ups, then try Create ${TYPE_LABELS[type]} again.` });
+  };
 
   const docOptions = items[selType].filter(o => !(selType === entityType && o.id === entityId));
   const clashOptions = items.clash;
@@ -158,6 +202,12 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
 
   return (
     <div style={{ marginTop: 12, borderTop: "1px solid #E5E7EB", paddingTop: 12 }}>
+      {feedback && (
+        <div role={feedback.tone === "error" ? "alert" : "status"} aria-live="polite"
+          style={{ marginBottom: 10, padding: "8px 10px", borderRadius: 6, fontSize: 12, color: feedback.tone === "error" ? "#991B1B" : "#1E3A8A", background: feedback.tone === "error" ? "#FEF2F2" : "#EFF6FF" }}>
+          {feedback.message}
+        </div>
+      )}
       {/* Documents */}
       <div style={{ fontSize: 10, color: "#6B7280", fontWeight: 700, textTransform: "uppercase", marginBottom: 8 }}>Linked Documents</div>
       {docLinks.length === 0 && <div style={{ fontSize: 12, color: "#9CA3AF", marginBottom: 8 }}>No linked documents yet</div>}
@@ -175,6 +225,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
           </select>
           <button className="btn btn-sm btn-primary" disabled={busy || !selId} onClick={() => createLink(selType, selId, () => setSelId(""))}>+ Attach</button>
           <button className="btn btn-sm" onClick={() => openCreate(selType)} title={`Create a new ${TYPE_LABELS[selType]} in a new tab, then attach it here`}>+ Create {TYPE_LABELS[selType]}</button>
+          <button className="btn btn-sm" disabled={itemsLoading} onClick={loadItems}>{itemsLoading ? "Refreshing..." : "Refresh items"}</button>
         </div>
       )}
 
@@ -191,6 +242,7 @@ export function LinkedItemsPanel({ projectId, entityType, entityId, canWrite = t
           </select>
           <button className="btn btn-sm btn-primary" disabled={busy || !selClashId} onClick={() => createLink("clash", selClashId, () => setSelClashId(""))}>+ Attach</button>
           <button className="btn btn-sm" onClick={() => openCreate("clash")} title="Open clash reports in a new tab">+ Open Clashes</button>
+          <button className="btn btn-sm" disabled={itemsLoading} onClick={loadItems}>{itemsLoading ? "Refreshing..." : "Refresh clashes"}</button>
         </div>
       )}
     </div>
