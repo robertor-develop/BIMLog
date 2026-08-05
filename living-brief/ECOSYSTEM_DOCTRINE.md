@@ -270,6 +270,26 @@ accumulating as separate permanent accepted-history entries. Bureaucracy is a ga
 after it has already been satisfied; safety is a gate that catches something real. This rule
 targets the former without weakening the latter.
 
+## No unrequested gates, checks, or process steps
+
+No agent, task, coordinator, MAIN, or AI assistant Roberto is talking to, including Claude, may
+introduce a verification step, approval gate, audit, hold, confirmation requirement, reporting
+field, or process rule that Roberto did not explicitly request, regardless of how small or
+well-intentioned it may be.
+
+This prohibition includes requiring one task to clear another before activation, adding a new
+reporting field, adding a new check before a build, or introducing any other self-invented safety
+or process step.
+
+If an agent believes a new check is genuinely necessary, it must ask Roberto in one plain sentence
+and wait. It may not silently add the check or behave as though the check were already authorized.
+
+This rule applies retroactively. Any existing gate, hold, or check added without Roberto's explicit
+request must be identified and listed for Roberto to keep or remove. It must not be assumed to
+remain merely because it already exists.
+
+Adding unrequested process is scope creep. A violation must be reverted, not defended.
+
 ## Document boundaries
 
 - ECOSYSTEM_DOCTRINE.md owns ecosystem identity, authority, permanent product laws, and the
