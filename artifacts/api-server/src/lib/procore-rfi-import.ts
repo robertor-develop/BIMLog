@@ -56,7 +56,10 @@ export type ProcoreRfiPreviewResponse = Omit<ProcoreRfiPreview, "rows"> & {
   rows: Array<Omit<ProcoreRfiPreviewRow, "raw">>;
 };
 
-const CONTROL_CHARACTER_PATTERN = /[\u0000-\u001f\u007f]/;
+// CSV cells may legitimately contain tabs and quoted line breaks. Reject only
+// control characters that cannot be represented safely in an RFI text field.
+const CONTROL_CHARACTER_PATTERN = /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/;
+const REQUIRED_PROCORE_RFI_HEADERS = ["Number", "Subject", "Status", "Initiated At", "Due Date", "Private"] as const;
 
 function sha256(value: string): string {
   return createHash("sha256").update(value, "utf8").digest("hex");
@@ -176,15 +179,22 @@ export function previewProcoreRfiCsv(
     return { provider: "procore", project, projectIdentityDigest, digest, expectedRowCount: expectation.rowCount, rowCount: 0, valid: false, errors: [...errors, (error as Error).message], rows };
   }
   const headers = records.shift() ?? [];
-  if (headers.length !== PROCORE_RFI_HEADERS.length || headers.some((h, i) => h !== PROCORE_RFI_HEADERS[i])) errors.push("HEADER_MISMATCH");
+  const knownHeaders = new Set<string>(PROCORE_RFI_HEADERS);
+  const headerSet = new Set(headers);
+  if (headers.length !== headerSet.size
+    || headers.some((header) => !knownHeaders.has(header))
+    || REQUIRED_PROCORE_RFI_HEADERS.some((header) => !headerSet.has(header))) errors.push("HEADER_MISMATCH");
   if (records.length > PROCORE_RFI_LIMITS.rows) errors.push("ROW_LIMIT_EXCEEDED");
   if (records.length !== expectation.rowCount) errors.push("SOURCE_ROW_COUNT_MISMATCH");
   const seen = new Set<string>();
   let retainedPayloadBytes = 0;
   records.forEach((values, index) => {
     const rowNumber = index + 2;
-    if (values.length !== PROCORE_RFI_HEADERS.length) { errors.push(`ROW_${rowNumber}_FIELD_COUNT_MISMATCH`); return; }
-    const raw = Object.fromEntries(PROCORE_RFI_HEADERS.map((header, i) => [header, values[i]])) as ProcoreRfiRow;
+    if (values.length !== headers.length) { errors.push(`ROW_${rowNumber}_FIELD_COUNT_MISMATCH`); return; }
+    const source = Object.fromEntries(headers.map((header, i) => [header, values[i]]));
+    const raw = Object.fromEntries(PROCORE_RFI_HEADERS.map((header) => [header, source[header] ?? ""])) as ProcoreRfiRow;
+    raw.Revision = raw.Revision.trim() || "0";
+    raw.Private = raw.Private.trim().toLowerCase();
     try {
       assertBoundedRaw(raw, rowNumber);
       retainedPayloadBytes += Buffer.byteLength(JSON.stringify(raw), "utf8");

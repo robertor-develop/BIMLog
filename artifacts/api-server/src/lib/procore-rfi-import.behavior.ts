@@ -63,6 +63,25 @@ const platformPreview = previewUploadedProcoreRfiCsv(csv, { code: "ANY-001", nam
 assert.equal(platformPreview.valid, true, platformPreview.errors.join("\n"));
 assert.equal(platformPreview.rowCount, 43);
 assert.equal(platformPreview.rows[0]?.identity, "ANY-001/East-043/0");
+
+const currentHeaders = [
+  "Number", "Subject", "Status", "Responsible Contractor Id", "Received From Id",
+  "Initiated At", "RFI Manager", "Assigned Id", "Ball In Court", "Due Date",
+  "Closed Date", "Location Id", "Schedule Impact", "Cost Impact", "Cost Code",
+  "Sub Job", "RFI Stage", "Distribution List", "Private",
+];
+const currentProcoreExport = [
+  currentHeaders.join(","),
+  '116,"Current Procore export",Open,"Example Contractor",Example User,8/6/2026,"Example Manager","Engineer A; Engineer B","Engineer A",8/20/2026,,,,,N/A,,Course of Construction,"First Recipient, Second Recipient\nThird Recipient",FALSE',
+].join("\n");
+const currentPreview = previewUploadedProcoreRfiCsv(currentProcoreExport, { code: "ANY-002", name: "Another BIMLog Project" });
+assert.equal(currentPreview.valid, true, currentPreview.errors.join("\n"));
+assert.equal(currentPreview.rowCount, 1);
+assert.equal(currentPreview.rows[0]?.revision, 0);
+assert.equal(currentPreview.rows[0]?.raw.Private, "false");
+assert.match(currentPreview.rows[0]?.raw["Distribution List"] ?? "", /\nThird Recipient$/);
+const missingRequiredHeader = currentProcoreExport.replace("Number,", "");
+assert.equal(previewUploadedProcoreRfiCsv(missingRequiredHeader, { code: "P", name: "Project" }).errors.includes("HEADER_MISMATCH"), true);
 const routesSource = await readFile(new URL("../routes/rfis.ts", import.meta.url), "utf8");
 const uiSource = await readFile(new URL("../../../bimlog/src/pages/project/RfisTab.tsx", import.meta.url), "utf8");
 const platformRoute = routesSource.slice(routesSource.indexOf('router.post("/projects/:projectId/rfis/import",'));
