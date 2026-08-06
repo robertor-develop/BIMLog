@@ -18,6 +18,7 @@ import {
   PROCORE_RFI_HEADERS,
   PROCORE_RFI_LIMITS,
   previewProcoreRfiCsv,
+  previewUploadedProcoreRfiCsv,
   procoreProjectIdentityDigest,
   toProcoreRfiPreviewResponse,
 } from "./procore-rfi-import";
@@ -57,6 +58,21 @@ assert.equal(preview.rows[0].identity, "50250001/East-043/0");
 assert.equal(preview.rows.at(-1)?.identity, "50250001/East-001/0");
 assert.equal(preview.rows.find((row) => row.sourceNumber === "East-7")?.revision, 1);
 assert.equal(preview.projectIdentityDigest, procoreProjectIdentityDigest(project));
+
+const platformPreview = previewUploadedProcoreRfiCsv(csv, { code: "ANY-001", name: "Any BIMLog Project" });
+assert.equal(platformPreview.valid, true, platformPreview.errors.join("\n"));
+assert.equal(platformPreview.rowCount, 43);
+assert.equal(platformPreview.rows[0]?.identity, "ANY-001/East-043/0");
+const routesSource = await readFile(new URL("../routes/rfis.ts", import.meta.url), "utf8");
+const uiSource = await readFile(new URL("../../../bimlog/src/pages/project/RfisTab.tsx", import.meta.url), "utf8");
+const platformRoute = routesSource.slice(routesSource.indexOf('router.post("/projects/:projectId/rfis/import",'));
+assert.match(platformRoute, /requireProjectMember\(\)/);
+assert.match(platformRoute, /previewUploadedProcoreRfiCsv/);
+assert.match(platformRoute, /await db\.transaction\(async tx =>/);
+const platformInput = uiSource.slice(uiSource.indexOf('ref={importFileInputRef}'), uiSource.indexOf('ref={importFileInputRef}') + 500);
+assert.match(platformInput, /accept="\.csv,text\/csv,\.pdf,application\/pdf"/);
+assert.match(platformInput, /onChange=\{handleImport\}/);
+assert.doesNotMatch(platformInput, /projectId === 26/);
 
 assert.equal(previewProcoreRfiCsv(csv, { ...expectation, sha256: "0".repeat(64) }).valid, false);
 assert.deepEqual(previewProcoreRfiCsv(csv, { ...expectation, sha256: "0".repeat(64) }).errors, ["SOURCE_SHA256_MISMATCH"]);
@@ -412,7 +428,7 @@ const duplicateResult = await commitProcoreRfiImport(
 assert.deepEqual(duplicateResult, { outcome: "duplicate", duplicateCount: 43, rowCount: 0, digest });
 assert.equal(JSON.stringify(duplicateResult).includes("East-043"), false);
 
-const schema = await readFile("lib/db/src/schema/rfis.ts", "utf8");
+const schema = await readFile(new URL("../../../../lib/db/src/schema/rfis.ts", import.meta.url), "utf8");
 assert.match(schema, /rfi_import_binding_identity_fk/);
 assert.match(schema, /rfi_import_row_composite_fk/);
 assert.match(schema, /rfi_import_single_current_binding_uq/);

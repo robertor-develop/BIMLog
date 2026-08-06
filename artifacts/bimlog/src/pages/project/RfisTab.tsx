@@ -1140,7 +1140,11 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
         const data = await res.json();
         if (data.requiresConfirmation) {
           const warningText = data.warnings.slice(0,3).map((w: any) => `${w.message}`).join("\n");
-          const proceed = confirm(`AI found potential issues:\n\n${warningText}\n\n${data.safeCount ?? 0} records are safe to import.\n\nProceed with safe records only?`);
+          const previewText = (data.preview ?? []).slice(0, 10)
+            .map((row: any) => `${row.number ?? "RFI"}: ${row.subject ?? "Imported RFI"}`)
+            .join("\n");
+          const warningSection = warningText ? `\nIssues found:\n${warningText}\n` : "";
+          const proceed = confirm(`${data.format === "csv" ? "Validated Procore CSV" : "Extracted PDF"}: ${data.total ?? 0} RFI(s).\n\n${previewText}${warningSection}\nCreate ${data.safeCount ?? 0} RFI(s) in this project?`);
           if (proceed) {
             const fd2 = new FormData();
             fd2.append("file", e.target.files![0]);
@@ -1547,25 +1551,21 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
               {w("RFI Report Settings", "Ajustes Reporte RFI", lang)}
             </Button>
           )}
-          {canWrite && (
-            <>
+          <>
               <input
                 ref={importFileInputRef}
                 type="file"
-                accept={projectId === 26 ? ".csv,text/csv" : undefined}
-                onChange={projectId === 26 ? handleProcorePreview : handleImport}
+                accept=".csv,text/csv,.pdf,application/pdf"
+                onChange={handleImport}
                 disabled={importing}
                 style={{ display: "none" }}
               />
               <Button type="button" variant="outline" size="sm" onClick={() => importFileInputRef.current?.click()} disabled={importing} style={{ fontSize: 12 }}>
                 {importing
                   ? w("Importing...", "Importando...", lang)
-                  : projectId === 26
-                    ? w("Import Procore CSV", "Importar CSV de Procore", lang)
-                    : w("Import", "Importar", lang)}
+                  : w("Import CSV or PDF", "Importar CSV o PDF", lang)}
               </Button>
-            </>
-          )}
+          </>
           {importMsg && (
             <div role="status" aria-live="polite" style={{ background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 8, padding: "10px 14px", color: "#1D4ED8", fontSize: 13, marginTop: 10 }}>
               {importMsg}

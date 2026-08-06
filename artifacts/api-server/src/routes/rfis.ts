@@ -53,6 +53,7 @@ import { recordRfiNotificationSourceEvent } from "../lib/telegram-rfi-notificati
 import {
   PROCORE_RFI_LIMITS,
   previewProcoreRfiCsv,
+  previewUploadedProcoreRfiCsv,
   toProcoreRfiPreviewResponse,
   type ProcoreProjectIdentity,
 } from "../lib/procore-rfi-import";
@@ -3794,7 +3795,7 @@ router.post("/projects/:projectId/rfis/import/procore/commit",
 
 router.post("/projects/:projectId/rfis/import",
   authMiddleware,
-  requirePermission("admin", "write"),
+  requireProjectMember(),
   singleFileUpload({
     fileSize: 50 * 1024 * 1024,
     files: 1,
@@ -3806,13 +3807,51 @@ router.post("/projects/:projectId/rfis/import",
     const projectId = Number(req.params.projectId);
     try {
       if (!req.file) { res.status(400).json({ error: "no_file" }); return; }
+      const uploadedFile = req.file;
+      let records: any[] = [];
+      const isCsv = uploadedFile.originalname.toLowerCase().endsWith(".csv")
+        || uploadedFile.mimetype === "text/csv";
+      if (isCsv) {
+        const [project] = await db.select({ code: projectsTable.code, name: projectsTable.name, location: projectsTable.location })
+          .from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+        if (!project) { res.status(404).json({ error: "project_not_found" }); return; }
+        const preview = previewUploadedProcoreRfiCsv(uploadedFile.buffer.toString("utf8"), {
+          code: project.code,
+          name: project.name,
+          ...(project.location ? { address: project.location } : {}),
+        });
+        if (!preview.valid) {
+          res.status(422).json({ error: "invalid_procore_csv", errors: preview.errors });
+          return;
+        }
+        records = preview.rows.map(row => ({
+          number: row.sourceNumber,
+          revisionNumber: row.revision,
+          subject: row.subject,
+          status: row.status.toLowerCase(),
+          submittedByCompany: row.raw["Responsible Contractor Id"] || null,
+          submittedByContact: row.raw["Received From Id"] || null,
+          submittedToCompany: row.raw["RFI Manager"] || null,
+          submittedToPerson: row.raw["Assigned Id"] || null,
+          ballInCourt: row.raw["Ball In Court"] || null,
+          locationDescription: row.raw["Location Id"] || null,
+          scheduleImpact: row.raw["Schedule Impact"] || null,
+          costImpact: row.raw["Cost Impact"] || null,
+          distributionList: row.raw["Distribution List"]
+            ? row.raw["Distribution List"].split(";").map(value => value.trim()).filter(Boolean)
+            : [],
+          dueDate: row.dueDate,
+          dateRequested: row.initiatedAt,
+          closedAt: row.closedDate,
+          sourceDigest: preview.digest,
+        }));
+      } else {
       const anthropicClient = await getAnthropicClientForUser({
         userId: req.user!.userId,
         projectId,
         feature: "rfi_import",
       });
-      const { chunks, isPdf, pdfBase64 } = await extractFileText(req.file.buffer, req.file.originalname);
-      let records: any[] = [];
+      const { chunks, isPdf, pdfBase64 } = await extractFileText(uploadedFile.buffer, uploadedFile.originalname);
       if (isPdf && pdfBase64) {
         try {
           const extractMsg = await anthropicClient.messages.create({
@@ -3855,14 +3894,36 @@ ${chunk}`
         }
       }
       } // end else (non-PDF)
+      }
 
       const forceImport = req.body?.forceImport === "true";
-      if (!forceImport && records.length > 0) {
-        const { checkImportIntelligence } = await import("../lib/import-intelligence");
-        const intelligence = await checkImportIntelligence(req.user!.userId, projectId, records, "rfi");
-        if (intelligence.warnings.length > 0) {
-          res.json({ requiresConfirmation: true, warnings: intelligence.warnings, crossLinks: intelligence.crossLinks, safeCount: intelligence.safeIndices.length, total: records.length });
+      if (records.length > 0) {
+        const intelligence = isCsv
+          ? { warnings: [], crossLinks: [], safeIndices: records.map((_record, index) => index) }
+          : await (async () => {
+              const { checkImportIntelligence } = await import("../lib/import-intelligence");
+              return checkImportIntelligence(req.user!.userId, projectId, records, "rfi");
+            })();
+        if (!forceImport) {
+          res.json({
+            requiresConfirmation: true,
+            format: isCsv ? "csv" : "pdf",
+            warnings: intelligence.warnings,
+            crossLinks: intelligence.crossLinks,
+            safeCount: intelligence.safeIndices.length,
+            total: records.length,
+            preview: records.slice(0, 100).map(record => ({
+              number: record.number ?? null,
+              revisionNumber: record.revisionNumber ?? 0,
+              subject: record.subject ?? "Imported RFI",
+              status: record.status ?? "open",
+              dueDate: record.dueDate ?? null,
+            })),
+          });
           return;
+        }
+        if (!isCsv && intelligence.warnings.length > 0) {
+          records = intelligence.safeIndices.map(index => records[index]).filter(Boolean);
         }
       }
 
@@ -3879,25 +3940,38 @@ ${chunk}`
 
       let imported = 0;
       const renamedItems: { original: string; renamed: string }[] = [];
-      for (const r of records) {
-        if (!r.subject && !r.number) continue;
-        const proposed = r.number || `RFI-${String(imported + 1).padStart(3, "0")}`;
-        const finalNum = getDrfNumber(proposed);
-        if (finalNum !== proposed) renamedItems.push({ original: proposed, renamed: finalNum });
-        usedNumbers.add(finalNum);
-        await db.transaction(async tx=>{const [created]=await tx.insert(rfisTable).values({
-          projectId, number: finalNum, subject: r.subject || "Imported RFI", description: r.description || null,
-          status: r.status || "open", priority: r.priority || "medium", createdById: req.user!.userId,
-          submittedByCompany: r.submittedByCompany || null, submittedByContact: r.submittedByContact || null,
-          dueDate: r.dueDate ? new Date(r.dueDate) : null,
-        }).returning();await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${created.id}:created`,companyId:req.user!.companyId,projectId,rfiId:created.id,eventKey:"rfi_created",actorUserId:req.user!.userId});});
-        imported++;
-      }
-      await db.insert(activityLogTable).values({
-        projectId, userId: req.user!.userId,
-        userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
-        actionType: "import", entityType: "rfi", entityId: projectId,
-        details: `Imported ${imported} RFIs from ${req.file.originalname}`,
+      await db.transaction(async tx => {
+        for (const r of records) {
+          if (!r.subject && !r.number) continue;
+          const proposed = r.number || `RFI-${String(imported + 1).padStart(3, "0")}`;
+          const finalNum = getDrfNumber(proposed);
+          if (finalNum !== proposed) renamedItems.push({ original: proposed, renamed: finalNum });
+          usedNumbers.add(finalNum);
+          const [created] = await tx.insert(rfisTable).values({
+            projectId, number: finalNum, subject: r.subject || "Imported RFI", description: r.description || null,
+            status: r.status || "open", priority: r.priority || "medium", createdById: req.user!.userId,
+            submittedByCompany: r.submittedByCompany || null, submittedByContact: r.submittedByContact || null,
+            submittedToCompany: r.submittedToCompany || null, submittedToPerson: r.submittedToPerson || null,
+            dateRequested: r.dateRequested ? new Date(r.dateRequested) : new Date(),
+            revisionNumber: Number.isInteger(r.revisionNumber) ? r.revisionNumber : 0,
+            ballInCourt: r.ballInCourt || null, locationDescription: r.locationDescription || null,
+            costImpact: r.costImpact || null, scheduleImpact: r.scheduleImpact || null,
+            distributionList: Array.isArray(r.distributionList) ? r.distributionList : [],
+            closedAt: r.closedAt ? new Date(r.closedAt) : null,
+            dueDate: r.dueDate ? new Date(r.dueDate) : null,
+          }).returning();
+          await recordRfiNotificationSourceEvent(tx, {
+            canonicalEventId: `rfi:${created.id}:created`, companyId: req.user!.companyId,
+            projectId, rfiId: created.id, eventKey: "rfi_created", actorUserId: req.user!.userId,
+          });
+          imported++;
+        }
+        await tx.insert(activityLogTable).values({
+          projectId, userId: req.user!.userId,
+          userFullName: req.user!.fullName ?? "", userCompanyName: req.user!.companyName ?? "",
+          actionType: "import", entityType: "rfi", entityId: projectId,
+          details: `Imported ${imported} RFIs from ${uploadedFile.originalname}`,
+        });
       });
       res.json({
         imported,

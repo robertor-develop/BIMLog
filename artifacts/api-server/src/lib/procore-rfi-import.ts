@@ -217,6 +217,31 @@ export function previewProcoreRfiCsv(
   return { provider: "procore", project, projectIdentityDigest, digest, expectedRowCount: expectation.rowCount, rowCount: records.length, valid: errors.length === 0, errors, rows };
 }
 
+/**
+ * Preview an ordinary Procore CSV upload without requiring a caller-supplied
+ * digest or a pre-agreed row count. The digest and row count are derived from
+ * the uploaded bytes, while the same strict header and row validation remains
+ * in force.
+ */
+export function previewUploadedProcoreRfiCsv(
+  csvText: string,
+  project: ProcoreProjectIdentity,
+): ProcoreRfiPreview {
+  const normalized = csvText.replace(/^\uFEFF/, "");
+  let rowCount = 0;
+  try {
+    const records = parseCsv(normalized);
+    rowCount = Math.max(0, records.length - 1);
+  } catch {
+    // previewProcoreRfiCsv returns the precise parse error.
+  }
+  return previewProcoreRfiCsv(csvText, {
+    sha256: sha256(csvText),
+    rowCount,
+    project,
+  });
+}
+
 export function toProcoreRfiPreviewResponse(preview: ProcoreRfiPreview): ProcoreRfiPreviewResponse {
   return {
     ...preview,
