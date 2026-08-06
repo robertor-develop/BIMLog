@@ -278,6 +278,33 @@ export const genericCostValuePerformanceVersionsTable = pgTable(
   ],
 );
 
+export const genericCostValueForecastVersionsTable = pgTable(
+  "generic_cost_value_forecast_versions",
+  {
+    id: text("id").primaryKey(),
+    projectId: integer("project_id").notNull(),
+    planVersionId: text("plan_version_id").notNull(),
+    performanceVersionId: text("performance_version_id").notNull(),
+    version: integer("version").notNull(),
+    content: jsonb("content").$type<Record<string, unknown>>().notNull(),
+    evaluation: jsonb("evaluation").$type<Record<string, unknown>>().notNull(),
+    contentFingerprint: text("content_fingerprint").notNull(),
+    supersedesId: text("supersedes_id"),
+    createdById: integer("created_by_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({ name: "generic_cost_value_forecast_versions_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),
+    foreignKey({ name: "generic_cost_value_forecast_versions_plan_version_id_fkey", columns: [table.planVersionId], foreignColumns: [genericCostValuePlanVersionsTable.id] }),
+    foreignKey({ name: "generic_cost_value_forecast_versions_performance_version_id_fkey", columns: [table.performanceVersionId], foreignColumns: [genericCostValuePerformanceVersionsTable.id] }),
+    foreignKey({ name: "generic_cost_value_forecast_versions_created_by_id_fkey", columns: [table.createdById], foreignColumns: [usersTable.id] }),
+    foreignKey({ columns: [table.supersedesId], foreignColumns: [table.id], name: "generic_cost_value_forecast_versions_supersedes_id_fkey" }),
+    uniqueIndex("generic_cost_value_forecast_project_version_uidx").on(table.projectId, table.version),
+    index("generic_cost_value_forecast_project_latest_idx").on(table.projectId, table.version.desc().nullsFirst()),
+    check("generic_cost_value_forecast_version_positive_chk", sql`${table.version} > 0`),
+  ],
+);
+
 export const genericProjectApuLinesTable = pgTable(
   "generic_project_apu_lines",
   {

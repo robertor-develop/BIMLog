@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+const forecastStyles = `.forecast-scenarios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}.scenario{display:grid;gap:5px;border:1px solid hsl(var(--border));border-radius:10px;padding:12px}.scenario strong{text-transform:capitalize}.scenario span{font-size:12px}.forecast-status{margin-top:12px!important;padding:8px 10px;border-radius:8px;font-weight:800;text-transform:capitalize}.forecast-status.healthy{background:#DCFCE7;color:#166534}.forecast-status.warning{background:#FEF3C7;color:#92400E}.forecast-status.critical{background:#FEE2E2;color:#991B1B}.mode-switch{display:flex;gap:6px}.mode-switch .selected{background:#1D4ED8!important;color:white!important}.calculated-amounts{font-size:12px;color:hsl(var(--muted-foreground));margin-top:10px}@media(max-width:760px){.forecast-scenarios{grid-template-columns:1fr}}`;
 type Line = { id: string; name: string; amount: string };
 type Plan = {
   name: string; currency: string; sellingPrice: string; fixedCompanyCost: string;
@@ -25,6 +26,7 @@ type PerformanceSnapshot = PerformanceInput & {
   version: number; savedAt: string;
   evaluation: { cpi: string | null; spi: string | null; spiAvailabilityReason: string | null; bonusPayoutPercent: string; bonusEligibleAmount: string };
 };
+type ForecastSnapshot = { label: string; sourceNote: string; forecastDate: string; version: number; savedAt: string; evaluation: { budgetAtCompletion: string; costVariance: string; scheduleVariance: string; cpi: string | null; spi: string | null; tcpi: string | null; status: string; scenarios: Array<{ name: string; eac: string; etc: string; vac: string; forecastCpi: string | null; projectedMargin: string; projectedBonusPercent: string; projectedBonusAmount: string }> } };
 const emptyPlan = (): Plan => ({
   name: "", currency: "USD", sellingPrice: "0.00", fixedCompanyCost: "0.00",
   allocationMode: "amount", allocationPercentages: { labor: "0.00", bonus: "0.00", taskEarnings: "0.00" },
@@ -65,6 +67,10 @@ export function FinancialApuWorkspace() {
   const [latestPerformance, setLatestPerformance] = useState<PerformanceSnapshot | null>(null);
   const [performanceHistory, setPerformanceHistory] = useState<PerformanceSnapshot[]>([]);
   const [performanceSaving, setPerformanceSaving] = useState(false);
+  const [forecast, setForecast] = useState({ label: "", sourceNote: "" });
+  const [latestForecast, setLatestForecast] = useState<ForecastSnapshot | null>(null);
+  const [forecastHistory, setForecastHistory] = useState<ForecastSnapshot[]>([]);
+  const [forecastSaving, setForecastSaving] = useState(false);
 
   const load = useCallback(async () => {
     setLoading(true); setError("");
@@ -92,6 +98,16 @@ export function FinancialApuWorkspace() {
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Performance history could not be loaded."); }
   }, [projectId, token]);
   useEffect(() => { void loadPerformance(); }, [loadPerformance]);
+  const loadForecast = useCallback(async () => {
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/apu/forecast`, { headers: { Authorization: `Bearer ${token}` } });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body?.error?.en || body?.error || "Forecast history could not be loaded.");
+      setLatestForecast(body?.data?.latest ?? null); setForecastHistory(body?.data?.history ?? []);
+      if (body?.data?.latest) setForecast({ label: body.data.latest.label, sourceNote: body.data.latest.sourceNote });
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Forecast history could not be loaded."); }
+  }, [projectId, token]);
+  useEffect(() => { void loadForecast(); }, [loadForecast]);
 
   const values = useMemo(() => {
     const selling = cents(plan.sellingPrice), fixed = cents(plan.fixedCompanyCost);
@@ -140,6 +156,26 @@ export function FinancialApuWorkspace() {
       anchor.href = url; anchor.download = `cost-value-performance-project-${projectId}.csv`; anchor.click(); URL.revokeObjectURL(url);
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Performance export could not be created."); }
   };
+  const saveForecast = async () => {
+    setForecastSaving(true); setMessage(""); setError("");
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/apu/forecast`, { method: "PUT", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(forecast) });
+      const body = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(body?.error?.en || body?.error || "The forecast could not be saved.");
+      setLatestForecast(body.data.latest); setForecastHistory(body.data.history ?? []);
+      setMessage(tt("Forecast calculated and preserved from the latest plan and performance snapshot.", "Pronóstico calculado y preservado desde el plan y la instantánea de rendimiento más recientes."));
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "The forecast could not be saved."); }
+    finally { setForecastSaving(false); }
+  };
+  const exportForecast = async () => {
+    setError("");
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/apu/forecast.csv`, { headers: { Authorization: `Bearer ${token}` } });
+      if (!response.ok) throw new Error("Forecast export could not be created.");
+      const url = URL.createObjectURL(await response.blob()), anchor = document.createElement("a");
+      anchor.href = url; anchor.download = `cost-value-forecast-project-${projectId}.csv`; anchor.click(); URL.revokeObjectURL(url);
+    } catch (reason) { setError(reason instanceof Error ? reason.message : "Forecast export could not be created."); }
+  };
   const setAllocation = (key: keyof Plan["allocations"], value: string) => setPlan((current) => ({ ...current, allocations: { ...current.allocations, [key]: value } }));
   const setAllocationPercent = (key: keyof Plan["allocationPercentages"], value: string) => setPlan((current) => {
     const allocationPercentages = { ...current.allocationPercentages, [key]: value };
@@ -156,7 +192,7 @@ export function FinancialApuWorkspace() {
 
   return <FinancialProjectShell projectId={projectId} activeTab="apu">
     <main className="cvp" data-testid="financial-apu-workspace">
-      <style>{styles}</style><style>{allocationStyles}</style>
+      <style>{styles}</style><style>{allocationStyles}</style><style>{forecastStyles}</style>
       <header><div><p className="eyebrow">{tt("Commercial", "Comercial")}</p><h1>{tt("Cost & Value Planner", "Planificador de Costos y Valor")}</h1><p>{tt("Build and preserve the complete value allocation for this project.", "Cree y conserve la distribución completa de valor para este proyecto.")}</p></div>{plan.version && <span className="version">v{plan.version}</span>}</header>
       {loading ? <section className="panel">{tt("Loading planner…", "Cargando planificador…")}</section> : error && !projectName ? <section className="panel error" role="alert">{error}<button onClick={() => void load()}>{tt("Retry", "Reintentar")}</button></section> : <>
         {error && <div className="notice error" role="alert">{error}</div>}{message && <div className="notice success">{message}</div>}
@@ -188,6 +224,13 @@ export function FinancialApuWorkspace() {
           </div>}
           {latestPerformance?.evaluation.spiAvailabilityReason && <p className="balance">{tt("SPI unavailable until a credible baseline and Planned Value are supplied.", "SPI no disponible hasta proporcionar una línea base creíble y el Valor Planificado.")}</p>}
           <div className="performance-actions"><small>{tt("Policy: CPI ≥ 1.00 pays 100%; CPI ≤ 0.60 pays 0%; values between are weighted linearly.", "Política: CPI ≥ 1.00 paga 100%; CPI ≤ 0.60 paga 0%; los valores intermedios se ponderan linealmente.")}</small><button className="primary" disabled={!plan.version || performanceSaving || !performance.label.trim()} onClick={() => void savePerformance()}><Save size={16}/>{performanceSaving ? tt("Saving…", "Guardando…") : tt("Save snapshot", "Guardar instantánea")}</button></div>
+        </section>
+        <section className="panel performance forecast" data-testid="cost-value-forecast-module">
+          <div className="section-title"><div><p className="eyebrow">{tt("Module 3 · Layer 1", "Módulo 3 · Capa 1")}</p><h2>{tt("Forecasting & Early Warning", "Pronóstico y Alerta Temprana")}</h2></div><button onClick={() => void exportForecast()} disabled={forecastHistory.length === 0}><Download size={15}/>{tt("Forecast CSV", "CSV de pronóstico")}</button></div>
+          <p className="module-copy">{tt("Deterministic forecasts from the latest saved plan and performance snapshot. No AI is used in this layer.", "Pronósticos determinísticos desde el plan y la instantánea de rendimiento más recientes. Esta capa no utiliza IA.")}</p>
+          <div className="fields three performance-fields"><Field label={tt("Forecast label", "Nombre del pronóstico")} value={forecast.label} onChange={(value) => setForecast({ ...forecast, label: value })}/><Field label={tt("Assumption / source note", "Supuesto / nota de fuente")} value={forecast.sourceNote} onChange={(value) => setForecast({ ...forecast, sourceNote: value })}/><div><span className="label">{tt("Saved forecasts", "Pronósticos guardados")}</span><strong>{forecastHistory.length}</strong></div></div>
+          {latestForecast && <><div className="performance-results"><Metric label="BAC" value={latestForecast.evaluation.budgetAtCompletion} currency={plan.currency}/><Metric label="TCPI" value={latestForecast.evaluation.tcpi ?? "—"} currency=""/><Metric label={tt("Cost variance", "Variación de costo")} value={latestForecast.evaluation.costVariance} currency={plan.currency}/><Metric label={tt("Schedule variance", "Variación de cronograma")} value={latestForecast.evaluation.scheduleVariance} currency={plan.currency}/></div><div className="forecast-scenarios">{latestForecast.evaluation.scenarios.map((scenario) => <article key={scenario.name} className={`scenario ${scenario.name}`}><strong>{scenario.name}</strong><span>EAC: {scenario.eac} {plan.currency}</span><span>ETC: {scenario.etc} {plan.currency}</span><span>VAC: {scenario.vac} {plan.currency}</span><span>{tt("Margin", "Margen")}: {scenario.projectedMargin} {plan.currency}</span><span>{tt("Bonus", "Bono")}: {scenario.projectedBonusPercent}% · {scenario.projectedBonusAmount} {plan.currency}</span></article>)}</div><p className={`forecast-status ${latestForecast.evaluation.status}`}>{tt("Early-warning status", "Estado de alerta temprana")}: {latestForecast.evaluation.status}</p></>}
+          <div className="performance-actions"><small>{tt("Expected uses current CPI; optimistic assumes remaining work meets budget; conservative combines CPI and SPI when available.", "El esperado usa el CPI actual; el optimista supone que el trabajo restante cumple el presupuesto; el conservador combina CPI y SPI cuando están disponibles.")}</small><button className="primary" disabled={!plan.version || !latestPerformance || forecastSaving || !forecast.label.trim()} onClick={() => void saveForecast()}><Save size={16}/>{forecastSaving ? tt("Calculating…", "Calculando…") : tt("Calculate & save forecast", "Calcular y guardar pronóstico")}</button></div>
         </section>
         <div className="savebar"><div><strong>{values.balanced ? tt("Plan balanced", "Plan balanceado") : tt("Finish balancing before saving", "Complete el balance antes de guardar")}</strong>{plan.savedAt && <small>{tt("Last saved", "Último guardado")}: {new Date(plan.savedAt).toLocaleString()}</small>}</div><button className="primary" disabled={!values.balanced || saving || !plan.name.trim()} onClick={() => void save()}><Save size={16}/>{saving ? tt("Saving…", "Guardando…") : tt("Save plan", "Guardar plan")}</button></div>
       </>}
