@@ -6505,9 +6505,9 @@
     },
     {
       "taskId": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
-      "reviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "reviewedThroughCommit": "1f6c8671f457128f5b6e5ff7e6bd476820abb226",
       "reviewedAt": "2026-08-05T20:41:20-04:00",
-      "status": "focused_auth_and_startup_proofs_pass_consolidated_build_pending",
+      "status": "focused_auth_startup_and_apu_type_proofs_pass_consolidated_build_pending",
       "captureTiming": "immediate_same_task_chain",
       "summary": "Reconciles the passwordless Living Brief authentication regression harness and the narrow Generic APU persistence startup registration while preserving current authorization and release boundaries.",
       "capabilityPreflight": {
@@ -6602,7 +6602,7 @@
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Keeps remaining APU harness type errors, exact-current build, and authenticated artifact proof explicit."
+          "reason": "Records the resolved APU harness type errors while keeping the exact-current build and authenticated artifact proof explicit."
         },
         {
           "key": "audit",
@@ -6612,12 +6612,10 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "scripts/test-living-brief-auth-regression.mjs"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d4c39d9b799e55955e14c7f0956f66f2445d62fa103da1c046b223343b5faf99"
+      "reviewedChangeSha256": "51da5c90b55699256147c0b1e2f222dcc64cf7b97d1f6c5c934f220c39794e0a"
     }
   ]
 }

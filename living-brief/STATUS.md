@@ -553,3 +553,8 @@ checks, and no password read or verification. Its focused matrix passes 14/14.
 The narrow Generic APU persistence startup registration is integrated in `7a410c7ab794776a7d8320f8299c50c4ad560246`.
 Its focused startup behavior passes 13/13 with zero network connections and zero database mutations; the
 registration preserves current `app.ts` changes and does not imply migration execution.
+
+The three pre-existing APU test TypeScript blockers are narrowly corrected in commits `c94bfe261440f5fa738e6c5b4a04304ac448cae2`
+and `1f6c8671f457128f5b6e5ff7e6bd476820abb226`. The persistence harness import now follows the extensionless
+repository convention, and the authority-state journal property supports transactional replacement while
+retaining a readonly event array. Focused proofs pass 19/19 and scoped API TypeScript passes without database access.

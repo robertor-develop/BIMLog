@@ -1700,3 +1700,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   a separate approved-database-fixture gate.
 - Preserve the exact two-path APU startup registration and its 13/13 proof while resolving the remaining
   pre-existing APU harness type errors before the exact-current API build.
+- Preserve the narrow APU harness TypeScript corrections and their focused proofs while completing the
+  exact-current consolidated build; the DB-backed authority harness remains a separate approved-database gate.
