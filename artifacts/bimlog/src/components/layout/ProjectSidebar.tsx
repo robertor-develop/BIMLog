@@ -129,6 +129,10 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
     return labels[role] ?? role.replace(/_/g, " ");
   };
   const { user } = useAuthStore();
+  const entitledUser = user as (typeof user & { commercialAccess?: boolean; isSuperAdmin?: boolean; is_super_admin?: boolean });
+  const canUseCommercial = entitledUser?.commercialAccess === true
+    || entitledUser?.isSuperAdmin === true
+    || entitledUser?.is_super_admin === true;
   const [, navigate] = useLocation();
   const [showSyncAgent, setShowSyncAgent] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -186,7 +190,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
         {
           id: "apu",
           kind: "link",
-          labelEn: "Generic APU", labelEs: "APU genérico",
+          labelEn: "Cost & Value Planner", labelEs: "Planificador de Costos y Valor",
           href: `/projects/${projectId}/financial/apu`,
           icon: Calculator,
         },
@@ -220,7 +224,10 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       ],
     },
   ];
-  const navGroups = allNavGroups.filter(group => group.items.length || group.actions?.length);
+  const navGroups = allNavGroups.filter(group => {
+    if (group.id === "commercial" && !canUseCommercial) return false;
+    return group.items.length || group.actions?.length;
+  });
 
   const activeGroup = navGroups.find(
     group =>

@@ -546,6 +546,7 @@ function TCUsersTab({ token }: { token: string }) {
   const [showPw, setShowPw] = useState(false);
   const [projectsList, setProjectsList] = useState<{ id: number; code: string; name: string }[]>([]);
   const [msg, setMsg] = useState("");
+  const [commercialSavingId, setCommercialSavingId] = useState<number | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -578,6 +579,27 @@ function TCUsersTab({ token }: { token: string }) {
     else setMsg(d.error || "Failed");
   };
 
+  const setCommercialAccess = async (userId: number, enabled: boolean) => {
+    setCommercialSavingId(userId);
+    setMsg("");
+    try {
+      const response = await apiFetch(`/admin/users/${userId}`, token, {
+        method: "PATCH",
+        body: JSON.stringify({ commercialAccess: enabled }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error || "Unable to update Commercial access.");
+      setUsers(current => current.map(user => user.id === userId
+        ? { ...user, commercialAccess: enabled }
+        : user));
+      setMsg(`Commercial access ${enabled ? "enabled" : "disabled"}.`);
+    } catch (error) {
+      setMsg(error instanceof Error ? error.message : "Unable to update Commercial access.");
+    } finally {
+      setCommercialSavingId(null);
+    }
+  };
+
   return (
     <div>
       {msg && <div style={{ background: "#16A34A22", border: "1px solid #16A34A44", borderRadius: 8, padding: "8px 14px", marginBottom: 12, fontSize: 13, color: "#16A34A" }}>{msg}</div>}
@@ -588,7 +610,7 @@ function TCUsersTab({ token }: { token: string }) {
       </div>
       <div style={{ border: "1px solid #E5E7EB", borderRadius: 10, overflow: "hidden" }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
-          <thead><tr><TCTh>Name</TCTh><TCTh>Email</TCTh><TCTh>Company</TCTh><TCTh>Projects</TCTh><TCTh>Joined</TCTh><TCTh>Actions</TCTh></tr></thead>
+          <thead><tr><TCTh>Name</TCTh><TCTh>Email</TCTh><TCTh>Company</TCTh><TCTh>Projects</TCTh><TCTh>Commercial</TCTh><TCTh>Joined</TCTh><TCTh>Actions</TCTh></tr></thead>
           <tbody>
             {users.map((u: Record<string, unknown>) => (
               <tr key={String(u.id)}>
@@ -596,6 +618,20 @@ function TCUsersTab({ token }: { token: string }) {
                 <TCTd style={{ fontSize: 12 }}>{String(u.email || "")}</TCTd>
                 <TCTd style={{ fontSize: 12 }}>{String(u.companyName || "")}</TCTd>
                 <TCTd>{String(u.projectCount || 0)}</TCTd>
+                <TCTd>
+                  <label style={{ display: "inline-flex", alignItems: "center", gap: 7, cursor: commercialSavingId === u.id ? "wait" : "pointer", whiteSpace: "nowrap" }}>
+                    <input
+                      type="checkbox"
+                      checked={u.commercialAccess === true}
+                      disabled={commercialSavingId === u.id}
+                      onChange={event => setCommercialAccess(u.id as number, event.target.checked)}
+                      aria-label={`${u.commercialAccess === true ? "Disable" : "Enable"} Commercial access for ${String(u.fullName || u.email || "user")}`}
+                    />
+                    <span style={{ fontSize: 11, fontWeight: 700, color: u.commercialAccess === true ? "#16A34A" : "#6B7280" }}>
+                      {commercialSavingId === u.id ? "Saving..." : u.commercialAccess === true ? "Cost & Value Planner on" : "Off"}
+                    </span>
+                  </label>
+                </TCTd>
                 <TCTd style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(String(u.createdAt)).toLocaleDateString()}</TCTd>
                 <TCTd>
                   <div style={{ display: "flex", gap: 6 }}>
