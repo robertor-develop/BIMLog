@@ -6272,6 +6272,120 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "8f268bb6150541b26602a57a33bacd0835788ae3a775b39598797882f6908673"
+    },
+    {
+      "taskId": "project-26-procore-rfi-end-to-end-release-integration-20260805",
+      "reviewedThroughCommit": "0643e999aef5b000e01c8b3e57ab20ce3f9a9a02",
+      "reviewedAt": "2026-08-05T20:07:30-04:00",
+      "status": "local_integration_and_scoped_proofs_pass_consolidated_build_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Integrates the frozen five-path Project-26 Procore RFI end-to-end handoff and records credential-free 43-row and 43-check proof results without database, provider, customer, publication, or deployment action.",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "F-root exact commit integration",
+          "credential-free scoped RFI source proofs",
+          "Living Brief semantic reconciliation"
+        ],
+        "operatorOnly": [
+          "customer or production database execution",
+          "provider target verification",
+          "push, publication, and deployment"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "RFI import retains project/company binding, authorization, transactional materialization, activity and notification evidence, rollback, and concurrency controls; synthetic proofs made zero database connections."
+        }
+      ],
+      "workstreams": [
+        "project-26-procore-rfi-import",
+        "living-brief-runtime-closure",
+        "consolidated-release-build"
+      ],
+      "evidence": [
+        {
+          "path": "artifacts/api-server/src/lib/procore-rfi-import.behavior.ts",
+          "type": "scoped_rfi_source_proof",
+          "result": "pass_43_rows",
+          "boundary": "Synthetic local proof; no database connection or customer mutation."
+        },
+        {
+          "path": "artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts",
+          "type": "scoped_atomic_store_proof",
+          "result": "pass_43_checks",
+          "boundary": "Synthetic local proof with materialization, events, rollback, and concurrency; zero database connections and customer mutations."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or authority change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution and release boundaries remain."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing scoped proof, typecheck, build, and acceptance gates remain."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or commercial promise change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new structural inventory path beyond already recorded RFI and Procore source surfaces."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design behavior change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact five-path integration and scoped proof results."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records consolidated build and retained database/provider/publication gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "25ead4cf13dc18d1d864f98b11939ff69356b7323da0983b5125cc21842406ff"
     }
   ]
 }

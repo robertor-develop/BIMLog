@@ -537,3 +537,7 @@ credential-free; no customer or production database execution occurred.
 The frozen Generic APU backend readiness follow-up is integrated as exact commit `384ffcb8c8aa5f6d9780648ae211b175f5a30b63`.
 It adds only the accepted service, contract, budget-control route, behavior evidence, and schema/route exports;
 no database, provider, publication, or deployment action occurred.
+
+The frozen Project-26 Procore RFI end-to-end five-path handoff is integrated locally as `0643e999aef5b000e01c8b3e57ab20ce3f9a9a02`.
+Its 43-row and 43-check atomic-store proofs pass with RFI materialization, activity/notification evidence,
+rollback, and concurrency coverage; database connections and customer mutations remain zero.

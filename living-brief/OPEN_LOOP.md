@@ -1691,3 +1691,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   customer/production database execution outside this local release step.
 - Re-run the scoped APU proofs and consolidated clean build against `384ffcb8…` after the active RFI schema
   reservation is resolved; keep database execution and provider/publication gates separate.
+- Run the consolidated clean build and exact-current-artifact acceptance after the Project-26 RFI five-path
+  integration; live database, provider, push, publication, and deployment remain separate gates.
