@@ -6846,6 +6846,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0ba7570a9f1dff2333d9caaa28776c85c90a77a268c5f1977b7241b1e53ab632"
+    },
+    {
+      "taskId": "cost-value-planner-scroll-and-save-20260806",
+      "reviewedThroughCommit": "738743e8306ac5de0f8499d9736d62ed84e65a2c",
+      "reviewedAt": "2026-08-06T11:20:00-04:00",
+      "status": "local_ui_correction_validated",
+      "captureTiming": "same_apu_task",
+      "summary": "Restores vertical scrolling across Financial workspaces and keeps the Cost & Value Planner save bar from obscuring editable production and administrative lines.",
+      "workstreams": [
+        "generic-apu-ui",
+        "cost-value-planner-save-workflow"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority, or product doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, release, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing APU acceptance command now asserts the corrected scroll and save-bar layout contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, or product scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, schema, source inventory, or platform topology changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or browser plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report generation, formatting, or delivery behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This focused local UI correction does not change accepted product status."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction fixes the reported APU usability defect without changing the approved backlog."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted incident record is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/cost-value-plan.behavior.ts",
+        "artifacts/bimlog/src/components/layout/FinancialProjectShell.tsx",
+        "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "318ea033c0ec112d6edaff80b010f78634406365c1ca4349e00db639f2964fad"
     }
   ]
 }

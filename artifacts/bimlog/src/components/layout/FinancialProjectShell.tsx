@@ -104,7 +104,9 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
             )}
           </div>
         </div>
-        {children}
+        <div className="page-content financial-page-content">
+          {children}
+        </div>
       </div>
     </div>
   );

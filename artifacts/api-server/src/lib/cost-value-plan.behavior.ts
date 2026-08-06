@@ -1,4 +1,6 @@
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
 
 process.env.PROD_DATABASE_URL = process.env.PROD_DATABASE_URL ?? "postgresql://apu-test:apu-test@127.0.0.1:1/apu-test";
 const { CostValuePlanError, validateCostValuePlan } = await import("./cost-value-plan-service");
@@ -42,5 +44,12 @@ const zeroLabor = validateCostValuePlan({
 });
 assert.equal(zeroLabor.evaluation.productionPhaseTotal, "0.00");
 assert.equal(zeroLabor.evaluation.administrativeLineTotal, "0.00");
+
+const uiRoot = path.resolve("../bimlog/src");
+const financialShell = fs.readFileSync(path.join(uiRoot, "components/layout/FinancialProjectShell.tsx"), "utf8");
+const plannerWorkspace = fs.readFileSync(path.join(uiRoot, "pages/FinancialApuWorkspace.tsx"), "utf8");
+assert.match(financialShell, /className="page-content financial-page-content"/);
+assert.match(plannerWorkspace, /padding:24px 24px 104px/);
+assert.match(plannerWorkspace, /\.savebar\{position:sticky;bottom:12px/);
 
 console.log("Cost & Value Planner validation: passed.");
