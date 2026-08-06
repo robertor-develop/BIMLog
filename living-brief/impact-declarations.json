@@ -6922,6 +6922,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "318ea033c0ec112d6edaff80b010f78634406365c1ca4349e00db639f2964fad"
+    },
+    {
+      "taskId": "cost-value-performance-module-2-20260806",
+      "reviewedThroughCommit": "cf3d8762ab729a92d6d8853178dc18e98ae46f9f",
+      "reviewedAt": "2026-08-06T16:30:00-04:00",
+      "status": "local_module_2_candidate_validated",
+      "captureTiming": "same_apu_task",
+      "summary": "Adds platform-wide earned-value performance snapshots, CPI/SPI evaluation, Ruben's CPI bonus curve, immutable history, and Power BI-ready CSV export to Cost & Value Planner.",
+      "workstreams": [
+        "generic-apu-module-2",
+        "cost-value-performance",
+        "power-bi-export"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or authority doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Development and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The APU acceptance command now includes CPI, SPI, bonus, persistence-schema, and export behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation advances the already-approved Commercial performance objective."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "New performance service, append-only table, routes, export, and UI module extend the platform structure."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or browser plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The CSV export does not alter governed PDF or document report design."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto completes publication."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The user explicitly selected APU Module 2 as the active problem."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted incident record is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/generic-apu-persistence-migration.ts",
+        "artifacts/api-server/src/routes/financial-apu.ts",
+        "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx",
+        "lib/db/src/schema/generic-apu.ts",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "686edda4eeab45d71931f6b20ed235e914e60315fb92159439954232f1696fb9"
     }
   ]
 }

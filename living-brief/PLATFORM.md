@@ -156,6 +156,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordinator-bulk-actions.ts
 - artifacts/api-server/src/lib/coordinator-saved-view-migration.ts
 - artifacts/api-server/src/lib/coordinator-saved-views.ts
+- artifacts/api-server/src/lib/cost-value-performance-service.ts
+- artifacts/api-server/src/lib/cost-value-performance.behavior.ts
 - artifacts/api-server/src/lib/cost-value-plan-service.ts
 - artifacts/api-server/src/lib/cost-value-plan.behavior.ts
 - artifacts/api-server/src/lib/email.ts

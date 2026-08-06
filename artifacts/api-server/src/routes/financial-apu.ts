@@ -2,6 +2,7 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import { CostValuePlanError, getCostValuePlan, saveCostValuePlan } from "../lib/cost-value-plan-service";
+import { exportCostValuePerformanceCsv, getCostValuePerformance, saveCostValuePerformance } from "../lib/cost-value-performance-service";
 
 const router = Router();
 router.use("/projects/:projectId/financial/apu", authMiddleware);
@@ -26,6 +27,18 @@ router.get("/projects/:projectId/financial/apu", run(async (req, res) => {
 }));
 router.put("/projects/:projectId/financial/apu", run(async (req, res) => {
   res.json(await saveCostValuePlan(req.user.userId, projectId(req.params.projectId), req.body));
+}));
+router.get("/projects/:projectId/financial/apu/performance", run(async (req, res) => {
+  res.json(await getCostValuePerformance(req.user.userId, projectId(req.params.projectId)));
+}));
+router.put("/projects/:projectId/financial/apu/performance", run(async (req, res) => {
+  res.json(await saveCostValuePerformance(req.user.userId, projectId(req.params.projectId), req.body));
+}));
+router.get("/projects/:projectId/financial/apu/performance.csv", run(async (req, res) => {
+  const csv = await exportCostValuePerformanceCsv(req.user.userId, projectId(req.params.projectId));
+  res.setHeader("Content-Type", "text/csv; charset=utf-8");
+  res.setHeader("Content-Disposition", `attachment; filename="cost-value-performance-project-${projectId(req.params.projectId)}.csv"`);
+  res.send(csv);
 }));
 
 export default router;
