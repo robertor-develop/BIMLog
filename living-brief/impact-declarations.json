@@ -6693,6 +6693,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3c0629403a31eca77db426244aad71be7447ead4448f868c069ffc5c41ece3f9"
+    },
+    {
+      "taskId": "cost-value-planner-entitlement-and-mvp-20260806",
+      "reviewedThroughCommit": "d8872d080c75644f2e7448f8a78778839ccff7c4",
+      "reviewedAt": "2026-08-06T08:45:00-04:00",
+      "status": "apu_mvp_implemented_and_focused_acceptance_passed",
+      "captureTiming": "same_apu_task",
+      "summary": "Adds platform-wide per-user Commercial entitlement, Total Control switching, and the authenticated Cost & Value Planner create, calculate, save, and reload workflow.",
+      "workstreams": [
+        "generic-apu-engine",
+        "generic-apu-security",
+        "generic-apu-persistence",
+        "generic-apu-ui"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem authority change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating instruction change."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The APU command now covers Cost & Value Planner validation and both TypeScript applications."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Implements the approved Commercial product behavior without changing roadmap authority."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Adds the financial APU API route, persistence table, entitlement service, and interactive UI."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or other plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard change."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No separate status narrative is required for this focused implementation unit."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No separate backlog narrative is changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
