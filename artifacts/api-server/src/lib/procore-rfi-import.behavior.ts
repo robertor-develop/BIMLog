@@ -455,6 +455,8 @@ assert.match(schema, /rfi_import_binding_version_positive/);
 assert.match(schema, /rfi_import_source_payload_bounded/);
 assert.match(schema, /bindingAuditIdentity/);
 assert.match(schema, /sourceProjectIdentityDigest/);
+assert.match(schema, /rfiImportsTable[\s\S]*?bindingId:[\s\S]*?bindingVersion:[\s\S]*?bindingAuditIdentity:[\s\S]*?projectId:[\s\S]*?provider:[\s\S]*?sourceProjectCode:[\s\S]*?sourceProjectIdentityDigest:/);
+assert.match(schema, /rfiImportRowsTable[\s\S]*?importId:[\s\S]*?bindingId:[\s\S]*?bindingVersion:[\s\S]*?projectId:[\s\S]*?provider:[\s\S]*?sourceProjectCode:/);
 assert.doesNotMatch(schema, /rfiId: integer\("rfi_id"\)/);
 
 console.log(JSON.stringify({

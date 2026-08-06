@@ -187,15 +187,18 @@ export const rfiImportAuthorizationsTable = pgTable("rfi_import_authorizations",
 
 export const rfiImportsTable = pgTable("rfi_imports", {
   id: serial("id").primaryKey(),
-  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
-  provider: text("provider").notNull(),
+  // Keep composite-identity columns in the same physical order as their
+  // referenced columns. Replit's publisher serializes composite foreign keys
+  // by table ordinal, so this ordering prevents it from changing the mapping.
   bindingId: integer("binding_id").notNull(),
   bindingVersion: integer("binding_version").notNull(),
   bindingAuditIdentity: text("binding_audit_identity").notNull(),
-  idempotencyKey: text("idempotency_key").notNull(),
-  sourceDigest: char("source_digest", { length: 64 }).notNull(),
+  projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+  provider: text("provider").notNull(),
   sourceProjectCode: text("source_project_code").notNull(),
   sourceProjectIdentityDigest: char("source_project_identity_digest", { length: 64 }).notNull(),
+  idempotencyKey: text("idempotency_key").notNull(),
+  sourceDigest: char("source_digest", { length: 64 }).notNull(),
   actorUserId: integer("actor_user_id").references(() => usersTable.id).notNull(),
   rowCount: integer("row_count").notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -230,11 +233,13 @@ export const rfiImportsTable = pgTable("rfi_imports", {
 export const rfiImportRowsTable = pgTable("rfi_import_rows", {
   id: serial("id").primaryKey(),
   importId: integer("import_id").notNull(),
+  // Mirror the selected parent-column ordinal so managed migration generators
+  // cannot silently pair integer identifiers with provider/source text.
+  bindingId: integer("binding_id").notNull(),
+  bindingVersion: integer("binding_version").notNull(),
   projectId: integer("project_id").references(() => projectsTable.id).notNull(),
   provider: text("provider").notNull(),
   sourceProjectCode: text("source_project_code").notNull(),
-  bindingId: integer("binding_id").notNull(),
-  bindingVersion: integer("binding_version").notNull(),
   sourceNumber: text("source_number").notNull(),
   sourceRevision: integer("source_revision").notNull(),
   sourcePayload: jsonb("source_payload").notNull(),
