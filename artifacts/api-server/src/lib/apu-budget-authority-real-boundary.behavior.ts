@@ -20,7 +20,7 @@ interface AuthorityState {
   readonly approvalsByEntity: Map<string, GenericApuAuthorityStoredReceipt>;
   readonly approvalsById: Map<string, GenericApuAuthorityStoredReceipt>;
   readonly reversalsByOriginal: Map<string, GenericApuAuthorityReversalReceipt>;
-  readonly journal: readonly JournalEvent[];
+  journal: readonly JournalEvent[];
 }
 
 const binding: GenericApuAuthorityBinding = Object.freeze({
