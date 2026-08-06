@@ -31,6 +31,10 @@ import { startFeaturePolicyMigration } from "./lib/feature-policy-migration";
 import { startFinancialControlMigration } from "./lib/financial-control-migration";
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { startFinancialContractMigration } from "./lib/financial-contract-migration";
+import {
+  startGenericApuPersistenceMigration,
+  waitForGenericApuPersistenceMigration,
+} from "./lib/generic-apu-persistence-migration";
 import { synchronizeLivingBriefMirror } from "./lib/living-brief-mirror";
 import {
   ensureLivingBriefGateSchema,
@@ -314,6 +318,20 @@ app.get("/api/v1/env-check", (_req: Request, res: Response) => {
 });
 
 app.use("/api/v1", router);
+
+(async () => {
+  try {
+    startGenericApuPersistenceMigration();
+    await waitForGenericApuPersistenceMigration();
+    console.log("[migration] Generic APU persistence tables ensured");
+  } catch (error) {
+    console.error(
+      "[migration] Generic APU persistence migration failed:",
+      error,
+    );
+    throw error;
+  }
+})();
 
 (async () => {
   try {
