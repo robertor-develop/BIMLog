@@ -278,6 +278,29 @@ export const genericCostValuePerformanceVersionsTable = pgTable(
   ],
 );
 
+export const genericCostValueForecastVersionsTable = pgTable(
+  "generic_cost_value_forecast_versions",
+  {
+    id: text("id").primaryKey(),
+    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+    planVersionId: text("plan_version_id").references(() => genericCostValuePlanVersionsTable.id).notNull(),
+    performanceVersionId: text("performance_version_id").references(() => genericCostValuePerformanceVersionsTable.id).notNull(),
+    version: integer("version").notNull(),
+    content: jsonb("content").$type<Record<string, unknown>>().notNull(),
+    evaluation: jsonb("evaluation").$type<Record<string, unknown>>().notNull(),
+    contentFingerprint: text("content_fingerprint").notNull(),
+    supersedesId: text("supersedes_id"),
+    createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({ columns: [table.supersedesId], foreignColumns: [table.id], name: "generic_cost_value_forecast_supersedes_fk" }),
+    uniqueIndex("generic_cost_value_forecast_project_version_uidx").on(table.projectId, table.version),
+    index("generic_cost_value_forecast_project_latest_idx").on(table.projectId, table.version),
+    check("generic_cost_value_forecast_version_positive_chk", sql`${table.version} > 0`),
+  ],
+);
+
 export const genericProjectApuLinesTable = pgTable(
   "generic_project_apu_lines",
   {
