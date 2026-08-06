@@ -2,12 +2,11 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "d9869477354aee8c0d5e03e146137044231897ac",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "007fdadefd1d7cec6a83e5872b1554a0b7f13901943fb40ebde0144434fe8821",
+  "bundleSha256": "290900200dbd09968f1e020e48ba7cc7214bed64fa41ab3fcf8fff97123991e5",
   "impact": {
     "baselineCommit": "d9869477354aee8c0d5e03e146137044231897ac",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -69,13 +68,13 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "3a2b68c2c705394b1a6134f9b7f0af987de1c3a66a693df6440f32acd06e6e9c",
-      "sourceChangedAt": "2026-08-06T03:00:00.000Z",
-      "changeState": "candidate",
+      "sha256": "ca7c582d9861759c194b8c61eb2d9f3fd0fc3d45bb6ec25a940605571e5b5d80",
+      "sourceChangedAt": "2026-08-05T20:43:57-04:00",
+      "changeState": "accepted",
       "reconciledThroughCommit": "d9869477354aee8c0d5e03e146137044231897ac",
       "semanticReviewedThroughCommit": "d9869477354aee8c0d5e03e146137044231897ac",
       "semanticReviewTask": "generic-apu-unified-acceptance-and-build-20260805",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-08-05T23:00:00-04:00"
     },
     {

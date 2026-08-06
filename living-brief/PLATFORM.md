@@ -415,6 +415,3 @@ It changes only when the code structure or curated architectural facts change.
   data or Lens/Viewpoint source identity.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
-- Generic APU acceptance: `pnpm --filter @workspace/api-server test:generic-apu` runs the calculation,
-  edge, persistence, startup, authority HTTP/transaction, disposable PostgreSQL, API TypeScript, and UI
-  TypeScript checks as one repeatable command.

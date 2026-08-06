@@ -6653,8 +6653,8 @@
         },
         {
           "key": "platform",
-          "result": "updated",
-          "reason": "Records the repeatable Generic APU acceptance command."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The package-script addition changes no generated route, source, schema, or architectural inventory."
         },
         {
           "key": "plugin",
@@ -6689,11 +6689,10 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "7ef3fcf1df6da5d4b54e1e83c1e3f8bfcfe96553a8f9882d8becfa11b9695ffc"
+      "reviewedChangeSha256": "3c0629403a31eca77db426244aad71be7447ead4448f868c069ffc5c41ece3f9"
     }
   ]
 }
