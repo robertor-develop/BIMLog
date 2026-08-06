@@ -9,6 +9,7 @@ export const commercialEntitlementEventsTable = pgTable("commercial_entitlement_
   reason: text("reason").notNull(),
   actorUserId: integer("actor_user_id").references(() => usersTable.id),
   source: text("source").notNull(),
+  featureKey: text("feature_key").notNull().default("package"),
   occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
 }, (table) => [index("commercial_entitlement_user_sequence_idx").on(table.userId, table.sequence)]);
 

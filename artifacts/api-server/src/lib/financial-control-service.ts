@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { pool } from "@workspace/db";
 import { resolveEffectiveEntitlement } from "./feature-catalog-service";
 import { waitForFinancialControlMigration } from "./financial-control-migration";
-import { commercialEntitlementForUser } from "./commercial-entitlement";
+import { commercialEntitlementForUser, type CommercialFeature } from "./commercial-entitlement";
 import { resolveCommercialProjectScope } from "./commercial-project-scope";
 import {
   FINANCIAL_AUTHORITIES,
@@ -18,7 +18,7 @@ import {
   type FinancialOperation,
 } from "./financial-control-contract";
 
-type Actor = { userId: number; companyId: number; isSuperAdmin: boolean; commercialEnabled: boolean };
+type Actor = { userId: number; companyId: number; isSuperAdmin: boolean; commercialEnabled: boolean; commercialFeatures: Record<CommercialFeature, boolean> };
 type Scope = {
   companyId: number;
   projectId: number | null;
@@ -80,12 +80,18 @@ export async function financialActor(
       "FIN_ACTOR_MISSING",
       "The authenticated user no longer exists.",
     );
-  const commercial = await commercialEntitlementForUser(Number(row.id), client);
+  const [commercial, budget, contracts, planner] = await Promise.all([
+    commercialEntitlementForUser(Number(row.id), client, "package"),
+    commercialEntitlementForUser(Number(row.id), client, "budget"),
+    commercialEntitlementForUser(Number(row.id), client, "contracts"),
+    commercialEntitlementForUser(Number(row.id), client, "cost_value_planner"),
+  ]);
   return {
     userId: Number(row.id),
     companyId: Number(row.company_id),
     isSuperAdmin: row.is_super_admin === true,
     commercialEnabled: commercial.enabled,
+    commercialFeatures: { package: commercial.enabled, budget: budget.enabled, contracts: contracts.enabled, cost_value_planner: planner.enabled },
   };
 }
 async function scopeFor(
@@ -101,7 +107,15 @@ async function scopeFor(
     return { companyId, projectId: null, scopeType: "company" };
   }
   const projectId = positive(projectIdValue, "projectId");
-  const project = await client.query(`SELECT owner.company_id,EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=$2 AND pm.status='active') AS member FROM projects p JOIN users owner ON owner.id=p.created_by_id WHERE p.id=$1 AND p.status<>'archived'`, [projectId, actor.userId]);
+  const project = await client.query(`SELECT COALESCE(binding.company_id,creator.company_id) AS company_id,
+    EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=$2 AND pm.status='active') AS member
+    FROM projects p
+    LEFT JOIN LATERAL(
+      SELECT company_id FROM project_company_binding_versions
+      WHERE project_id=p.id ORDER BY version DESC LIMIT 1
+    ) binding ON true
+    LEFT JOIN users creator ON creator.id=p.created_by_id
+    WHERE p.id=$1 AND p.status<>'archived'`, [projectId, actor.userId]);
   const resolution = resolveCommercialProjectScope({ projectId, requestedCompanyId: companyIdValue == null ? undefined : positive(companyIdValue, "companyId"), isSuperAdmin: actor.isSuperAdmin, row: project.rows[0] });
   if (!resolution.allowed) throw new FinancialControlError(resolution.status, resolution.code, resolution.message);
   companyId = resolution.companyId;
@@ -210,7 +224,8 @@ export async function authorizeFinancialOperation(input: {
     projectId: scope.projectId ?? undefined,
     trustedConfirmations: input.trustedConfirmations,
   });
-  const commercialAccess = actor.isSuperAdmin || actor.commercialEnabled;
+  const commercialFeature: CommercialFeature = input.featureKey.startsWith("cost.value_planner.") ? "cost_value_planner" : input.featureKey.startsWith("cost.contract.") || input.featureKey.startsWith("cost.commitment.") ? "contracts" : "budget";
+  const commercialAccess = actor.isSuperAdmin || actor.commercialFeatures[commercialFeature];
   const entitlement = commercialAccess ? { ...catalogEntitlement, decision: "allow" as const, code: "COMMERCIAL_USER_ENTITLED" } : catalogEntitlement;
   const policiesResult = await client.query(
     `SELECT * FROM financial_approval_policy_versions WHERE company_id=$1 AND (project_id IS NULL OR project_id=$2)`,

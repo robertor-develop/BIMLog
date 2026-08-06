@@ -546,7 +546,7 @@ function TCUsersTab({ token }: { token: string }) {
   const [showPw, setShowPw] = useState(false);
   const [projectsList, setProjectsList] = useState<{ id: number; code: string; name: string }[]>([]);
   const [msg, setMsg] = useState("");
-  const [commercialSavingId, setCommercialSavingId] = useState<number | null>(null);
+  const [commercialSavingKey, setCommercialSavingKey] = useState<string | null>(null);
 
   const load = useCallback(() => {
     setLoading(true);
@@ -579,24 +579,32 @@ function TCUsersTab({ token }: { token: string }) {
     else setMsg(d.error || "Failed");
   };
 
-  const setCommercialAccess = async (userId: number, enabled: boolean) => {
-    setCommercialSavingId(userId);
+  const setCommercialAccess = async (userId: number, featureKey: "package" | "budget" | "contracts" | "cost_value_planner", enabled: boolean) => {
+    setCommercialSavingKey(`${userId}:${featureKey}`);
     setMsg("");
     try {
-      const response = await apiFetch(`/admin/users/${userId}/commercial-entitlement`, token, {
-        method: "POST",
-        body: JSON.stringify({ enabled, reason: `Commercial access ${enabled ? "enabled" : "disabled"} in Total Control` }),
-      });
-      const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || "Unable to update Commercial access.");
-      setUsers(current => current.map(user => user.id === userId
-        ? { ...user, commercialAccess: enabled }
-        : user));
-      setMsg(`Commercial access ${enabled ? "enabled" : "disabled"}.`);
+      const affected = featureKey === "package" ? ["package", "budget", "contracts", "cost_value_planner"] as const : [featureKey] as const;
+      for (const key of affected) {
+        const response = await apiFetch(`/admin/users/${userId}/commercial-entitlement`, token, {
+          method: "POST",
+          body: JSON.stringify({ featureKey: key, enabled, reason: `${key} access ${enabled ? "enabled" : "disabled"} in Total Control` }),
+        });
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.error || "Unable to update Commercial access.");
+      }
+      setUsers(current => current.map(user => {
+        if (user.id !== userId) return user;
+        const prior = (user.commercialFeatures ?? {}) as Record<string, boolean>;
+        const next = { ...prior };
+        for (const key of affected) next[key] = enabled;
+        next.package = next.budget === true && next.contracts === true && next.cost_value_planner === true;
+        return { ...user, commercialAccess: next.package, commercialFeatures: next };
+      }));
+      setMsg(`${featureKey === "package" ? "Commercial package" : featureKey.replaceAll("_", " ")} ${enabled ? "enabled" : "disabled"}.`);
     } catch (error) {
       setMsg(error instanceof Error ? error.message : "Unable to update Commercial access.");
     } finally {
-      setCommercialSavingId(null);
+      setCommercialSavingKey(null);
     }
   };
 
@@ -619,18 +627,16 @@ function TCUsersTab({ token }: { token: string }) {
                 <TCTd style={{ fontSize: 12 }}>{String(u.companyName || "")}</TCTd>
                 <TCTd>{String(u.projectCount || 0)}</TCTd>
                 <TCTd>
-                  <label style={{ display: "inline-flex", alignItems: "center", gap: 7, cursor: commercialSavingId === u.id ? "wait" : "pointer", whiteSpace: "nowrap" }}>
-                    <input
-                      type="checkbox"
-                      checked={u.commercialAccess === true}
-                      disabled={commercialSavingId === u.id}
-                      onChange={event => setCommercialAccess(u.id as number, event.target.checked)}
-                      aria-label={`${u.commercialAccess === true ? "Disable" : "Enable"} Commercial access for ${String(u.fullName || u.email || "user")}`}
-                    />
-                    <span style={{ fontSize: 11, fontWeight: 700, color: u.commercialAccess === true ? "#16A34A" : "#6B7280" }}>
-                      {commercialSavingId === u.id ? "Saving..." : u.commercialAccess === true ? "Cost & Value Planner on" : "Off"}
-                    </span>
-                  </label>
+                  <div style={{ display: "grid", gap: 4, minWidth: 170 }}>
+                    {([['package','Commercial package'],['budget','Project Budget'],['contracts','Contracts'],['cost_value_planner','Cost & Value Planner']] as const).map(([key, label]) => {
+                      const enabled = ((u.commercialFeatures ?? {}) as Record<string, boolean>)[key] === true;
+                      const saving = commercialSavingKey === `${u.id}:${key}`;
+                      return <label key={key} style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: commercialSavingKey ? "wait" : "pointer", whiteSpace: "nowrap" }}>
+                        <input type="checkbox" checked={enabled} disabled={commercialSavingKey !== null} onChange={event => void setCommercialAccess(u.id as number, key, event.target.checked)} aria-label={`${enabled ? "Disable" : "Enable"} ${label} for ${String(u.fullName || u.email || "user")}`}/>
+                        <span style={{ fontSize: 10, fontWeight: key === "package" ? 800 : 600, color: enabled ? "#16A34A" : "#6B7280" }}>{saving ? "Saving..." : `${label}: ${enabled ? "On" : "Off"}`}</span>
+                      </label>;
+                    })}
+                  </div>
                 </TCTd>
                 <TCTd style={{ fontSize: 11, color: "#9CA3AF" }}>{new Date(String(u.createdAt)).toLocaleDateString()}</TCTd>
                 <TCTd>

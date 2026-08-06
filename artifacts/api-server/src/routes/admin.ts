@@ -376,7 +376,20 @@ router.get("/admin/users", async (req, res) => {
       : await db.select({ total: count() }).from(usersTable);
     const commercialEntitlements = await commercialEntitlementsForUsers(users.map(user => user.id));
     res.json({
-      data: users.map(u => ({ ...u, companyName: companyMap[u.companyId] || "", projectCount: projectCounts[u.id] || 0, commercialAccess: commercialEntitlements.get(u.id)?.enabled ?? false, commercialEnabled: commercialEntitlements.get(u.id)?.enabled ?? false, commercialEntitlement: commercialEntitlements.get(u.id) ?? null, createdAt: u.createdAt.toISOString() })),
+      data: users.map(u => {
+        const features = commercialEntitlements.get(u.id);
+        const packageEnabled = (features?.budget?.enabled ?? false) && (features?.contracts?.enabled ?? false) && (features?.cost_value_planner?.enabled ?? false);
+        return { ...u, companyName: companyMap[u.companyId] || "", projectCount: projectCounts[u.id] || 0,
+          commercialAccess: packageEnabled,
+          commercialEnabled: packageEnabled,
+          commercialFeatures: {
+            package: packageEnabled,
+            budget: features?.budget?.enabled ?? false,
+            contracts: features?.contracts?.enabled ?? false,
+            cost_value_planner: features?.cost_value_planner?.enabled ?? false,
+          },
+          commercialEntitlement: features?.package ?? null, createdAt: u.createdAt.toISOString() };
+      }),
       total: Number(total), page, pages: Math.ceil(Number(total) / limit),
     });
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }
@@ -389,9 +402,10 @@ router.post("/admin/users/:id/commercial-entitlement", isSuperAdminMiddleware, a
       res.status(400).json({ error: "A valid user id and boolean enabled value are required." });
       return;
     }
-    const entitlement = await setCommercialEntitlement({ actorUserId: req.user!.userId, userId, enabled: req.body.enabled, reason: req.body.reason });
-    await logAdminAction({ adminUserId: req.user!.userId, adminEmail: req.user!.email, action: req.body.enabled ? "grant_commercial_entitlement" : "revoke_commercial_entitlement", targetType: "user", targetId: String(userId), details: { enabled: req.body.enabled, reason: req.body.reason, eventKey: entitlement.eventKey, unchanged: entitlement.unchanged } });
-    res.json({ userId, commercialEntitlement: entitlement });
+    const featureKey = req.body.featureKey ?? "package";
+    const entitlement = await setCommercialEntitlement({ actorUserId: req.user!.userId, userId, enabled: req.body.enabled, reason: req.body.reason, featureKey });
+    await logAdminAction({ adminUserId: req.user!.userId, adminEmail: req.user!.email, action: req.body.enabled ? "grant_commercial_entitlement" : "revoke_commercial_entitlement", targetType: "user", targetId: String(userId), details: { featureKey, enabled: req.body.enabled, reason: req.body.reason, eventKey: entitlement.eventKey, unchanged: entitlement.unchanged } });
+    res.json({ userId, featureKey, commercialEntitlement: entitlement });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Failed to update Commercial access.";
     res.status(message === "User not found." ? 404 : 400).json({ error: message });

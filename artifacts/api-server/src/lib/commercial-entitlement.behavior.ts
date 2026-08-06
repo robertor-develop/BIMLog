@@ -9,18 +9,19 @@ const financial = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/
 const admin = fs.readFileSync(path.join(root, "artifacts/api-server/src/routes/admin.ts"), "utf8");
 const schema = fs.readFileSync(path.join(root, "lib/db/src/schema/commercial-entitlements.ts"), "utf8");
 const projectScope = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/commercial-project-scope.ts"), "utf8");
+const totalControl = fs.readFileSync(path.join(root, "artifacts/bimlog/src/pages/TotalControl.tsx"), "utf8");
 
 const checks: string[] = [];
-for (const email of ["robertor@rryasociados.com", "robertor@bimcorpinc.com", "rubenc@bimcorpgroup.com", "leidyp@bimcorpgroup.com"]) {
-  assert.match(migration, new RegExp(email.replace(".", "\\.")));
-}
-checks.push("exact four initial users are idempotently enabled");
+assert.match(migration, /FROM users u ON CONFLICT\(event_key\) DO NOTHING/);
+for (const feature of ["package", "budget", "contracts", "cost_value_planner"]) assert.match(migration, new RegExp(`"${feature}"`));
+checks.push("all users existing at migration time are idempotently enabled for the package and three Commercial products");
 assert.match(migration, /ON CONFLICT\(event_key\) DO NOTHING/);
 assert.match(migration, /BEFORE UPDATE OR DELETE/);
 assert.match(migration, /pg_advisory_xact_lock/);
 checks.push("grant and revoke history is append-only, idempotent, and concurrency serialized");
 assert.match(admin, /commercialEnabled/);
 assert.match(admin, /\/admin\/users\/:id\/commercial-entitlement.*isSuperAdminMiddleware/);
+for (const label of ["Commercial package", "Project Budget", "Contracts", "Cost & Value Planner"]) assert.match(totalControl, new RegExp(label.replace("&", "&")));
 checks.push("Total Control users API exposes and controls Commercial entitlement through super-admin only");
 assert.doesNotMatch(financial, /FIN_PROJECT_BINDING_REQUIRED/);
 assert.match(projectScope, /Current active project membership is required/);
@@ -30,8 +31,11 @@ checks.push("entitled users receive Commercial authority while active membership
 assert.deepEqual(resolveCommercialProjectScope({ projectId: 26, isSuperAdmin: false, row: { company_id: 8, member: true } }), { allowed: true, projectId: 26, companyId: 8 });
 assert.equal(resolveCommercialProjectScope({ projectId: 26, isSuperAdmin: false, row: { company_id: 8, member: false } }).code, "FIN_SCOPE_MEMBERSHIP_DENIED");
 assert.deepEqual(resolveCommercialProjectScope({ projectId: 26, isSuperAdmin: true, row: { company_id: 8, member: false } }), { allowed: true, projectId: 26, companyId: 8 });
-checks.push("Project 26-style unbound membership resolves from creator company, rejects non-members, and preserves super-admin all-project access");
+assert.match(financial, /project_company_binding_versions/);
+assert.match(financial, /COALESCE\(binding\.company_id,creator\.company_id\)/);
+checks.push("every active project resolves through its latest company binding with legacy creator fallback, rejects non-members, and preserves super-admin all-project access");
 assert.match(schema, /commercialEntitlementEventsTable/);
+assert.match(schema, /featureKey: text\("feature_key"\)/);
 assert.match(migration, /CREATE TABLE IF NOT EXISTS commercial_entitlement_events/);
 checks.push("Drizzle and startup migration both define the entitlement ledger");
 

@@ -106,7 +106,7 @@ export function validateCostValuePerformance(
 
 export async function getCostValuePerformance(actorUserId: number, projectId: number) {
   await waitForGenericApuPersistenceMigration();
-  await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.budget.view", operation: "read" });
+  await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.value_planner.view", operation: "read" });
   const project = (await pool.query(`SELECT id,name,code FROM projects WHERE id=$1`, [projectId])).rows[0];
   if (!project) throw new CostValuePlanError(404, "PROJECT_NOT_FOUND", "Project not found.");
   const rows = (await pool.query(`SELECT version,content,evaluation,content_fingerprint,created_at FROM generic_cost_value_performance_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 24`, [projectId])).rows;
@@ -116,7 +116,7 @@ export async function getCostValuePerformance(actorUserId: number, projectId: nu
 
 export async function saveCostValuePerformance(actorUserId: number, projectId: number, input: unknown) {
   await waitForGenericApuPersistenceMigration();
-  await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.budget.prepare", operation: "prepare" });
+  await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.value_planner.prepare", operation: "prepare" });
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
