@@ -1,16 +1,18 @@
 import assert from "node:assert/strict";
 import express from "express";
-import { FinancialControlError } from "./financial-control-contract";
-import {
-  createGenericApuBudgetAuthorityService,
-  type GenericApuAuthorityBinding,
-  type GenericApuAuthorityReceipt,
-  type GenericApuAuthorityReversalReceipt,
-  type GenericApuAuthorityStoredReceipt,
-  type GenericApuBudgetAuthorityDependencies,
-  type GenericApuBudgetAuthorityTransaction,
+import type {
+  GenericApuAuthorityBinding,
+  GenericApuAuthorityReceipt,
+  GenericApuAuthorityReversalReceipt,
+  GenericApuAuthorityStoredReceipt,
+  GenericApuBudgetAuthorityDependencies,
+  GenericApuBudgetAuthorityTransaction,
 } from "./apu-budget-authority-service";
-import { createGenericApuBudgetControlsRouter } from "../routes/generic-apu-budget-controls";
+
+process.env.PROD_DATABASE_URL = process.env.PROD_DATABASE_URL ?? "postgresql://apu-test:apu-test@127.0.0.1:1/apu-test";
+const { FinancialControlError } = await import("./financial-control-contract");
+const { createGenericApuBudgetAuthorityService } = await import("./apu-budget-authority-service");
+const { createGenericApuBudgetControlsRouter } = await import("../routes/generic-apu-budget-controls");
 
 type JournalEvent =
   | Readonly<{ kind: "approval"; receipt: GenericApuAuthorityStoredReceipt }>

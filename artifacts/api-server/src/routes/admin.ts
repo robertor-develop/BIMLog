@@ -376,7 +376,7 @@ router.get("/admin/users", async (req, res) => {
       : await db.select({ total: count() }).from(usersTable);
     const commercialEntitlements = await commercialEntitlementsForUsers(users.map(user => user.id));
     res.json({
-      data: users.map(u => ({ ...u, companyName: companyMap[u.companyId] || "", projectCount: projectCounts[u.id] || 0, commercialEnabled: commercialEntitlements.get(u.id)?.enabled ?? false, commercialEntitlement: commercialEntitlements.get(u.id) ?? null, createdAt: u.createdAt.toISOString() })),
+      data: users.map(u => ({ ...u, companyName: companyMap[u.companyId] || "", projectCount: projectCounts[u.id] || 0, commercialAccess: commercialEntitlements.get(u.id)?.enabled ?? false, commercialEnabled: commercialEntitlements.get(u.id)?.enabled ?? false, commercialEntitlement: commercialEntitlements.get(u.id) ?? null, createdAt: u.createdAt.toISOString() })),
       total: Number(total), page, pages: Math.ceil(Number(total) / limit),
     });
   } catch (err) { res.status(500).json({ error: err instanceof Error ? err.message : "Internal error" }); }

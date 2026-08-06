@@ -191,6 +191,21 @@ CREATE TABLE IF NOT EXISTS generic_apu_overrun_approvals(
 );
 CREATE UNIQUE INDEX IF NOT EXISTS generic_apu_overrun_fingerprint_uidx ON generic_apu_overrun_approvals(commitment_version_id,content_fingerprint);
 CREATE INDEX IF NOT EXISTS generic_apu_overrun_scope_idx ON generic_apu_overrun_approvals(company_id,project_id,approved_at);
+
+CREATE TABLE IF NOT EXISTS generic_cost_value_plan_versions(
+  id text PRIMARY KEY,
+  project_id integer NOT NULL REFERENCES projects(id),
+  version integer NOT NULL,
+  content jsonb NOT NULL,
+  evaluation jsonb NOT NULL,
+  content_fingerprint text NOT NULL,
+  supersedes_id text REFERENCES generic_cost_value_plan_versions(id),
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT generic_cost_value_plan_version_positive_chk CHECK(version > 0)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS generic_cost_value_plan_project_version_uidx ON generic_cost_value_plan_versions(project_id,version);
+CREATE INDEX IF NOT EXISTS generic_cost_value_plan_project_latest_idx ON generic_cost_value_plan_versions(project_id,version DESC);
 `);
     await client.query(`
 CREATE OR REPLACE FUNCTION reject_generic_apu_history_mutation() RETURNS trigger LANGUAGE plpgsql AS $$
@@ -358,6 +373,9 @@ DO $generic_apu_triggers$ BEGIN
   END IF;
   IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='generic_apu_overrun_approvals_immutable' AND tgrelid='generic_apu_overrun_approvals'::regclass) THEN
     CREATE TRIGGER generic_apu_overrun_approvals_immutable BEFORE UPDATE OR DELETE ON generic_apu_overrun_approvals FOR EACH ROW EXECUTE FUNCTION reject_generic_apu_history_mutation();
+  END IF;
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='generic_cost_value_plan_versions_immutable' AND tgrelid='generic_cost_value_plan_versions'::regclass) THEN
+    CREATE TRIGGER generic_cost_value_plan_versions_immutable BEFORE UPDATE OR DELETE ON generic_cost_value_plan_versions FOR EACH ROW EXECUTE FUNCTION reject_generic_apu_history_mutation();
   END IF;
 END $generic_apu_triggers$;
 `);

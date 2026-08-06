@@ -62,6 +62,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/features.ts
 - artifacts/api-server/src/routes/feedback.ts
 - artifacts/api-server/src/routes/files.ts
+- artifacts/api-server/src/routes/financial-apu.ts
 - artifacts/api-server/src/routes/financial-budgets.ts
 - artifacts/api-server/src/routes/financial-contracts.ts
 - artifacts/api-server/src/routes/financial-controls.ts
@@ -128,6 +129,7 @@ It changes only when the code structure or curated architectural facts change.
 - financialBudgetsRouter
 - financialContractsRouter
 - genericApuBudgetControlsRouter
+- financialApuRouter
 - coordinatorActionsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
@@ -146,11 +148,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-service.ts
 - artifacts/api-server/src/lib/cloud-files.ts
+- artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
+- artifacts/api-server/src/lib/commercial-entitlement.ts
+- artifacts/api-server/src/lib/commercial-project-scope.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
 - artifacts/api-server/src/lib/coordinator-bulk-action-migration.ts
 - artifacts/api-server/src/lib/coordinator-bulk-actions.ts
 - artifacts/api-server/src/lib/coordinator-saved-view-migration.ts
 - artifacts/api-server/src/lib/coordinator-saved-views.ts
+- artifacts/api-server/src/lib/cost-value-plan-service.ts
+- artifacts/api-server/src/lib/cost-value-plan.behavior.ts
 - artifacts/api-server/src/lib/email.ts
 - artifacts/api-server/src/lib/entitlement-contract.ts
 - artifacts/api-server/src/lib/entitlement-resolver.behavior.ts
@@ -256,6 +263,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/ai-usage-events.ts
 - lib/db/src/schema/change-orders.ts
 - lib/db/src/schema/clash_reports.ts
+- lib/db/src/schema/commercial-entitlements.ts
 - lib/db/src/schema/company_profiles.ts
 - lib/db/src/schema/config.ts
 - lib/db/src/schema/contact-submissions.ts

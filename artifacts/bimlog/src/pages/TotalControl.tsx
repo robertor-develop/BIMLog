@@ -583,9 +583,9 @@ function TCUsersTab({ token }: { token: string }) {
     setCommercialSavingId(userId);
     setMsg("");
     try {
-      const response = await apiFetch(`/admin/users/${userId}`, token, {
-        method: "PATCH",
-        body: JSON.stringify({ commercialAccess: enabled }),
+      const response = await apiFetch(`/admin/users/${userId}/commercial-entitlement`, token, {
+        method: "POST",
+        body: JSON.stringify({ enabled, reason: `Commercial access ${enabled ? "enabled" : "disabled"} in Total Control` }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Unable to update Commercial access.");

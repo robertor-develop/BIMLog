@@ -41,6 +41,7 @@ import financialControlsRouter from "./financial-controls";
 import financialBudgetsRouter from "./financial-budgets";
 import financialContractsRouter from "./financial-contracts";
 import genericApuBudgetControlsRouter from "./generic-apu-budget-controls";
+import financialApuRouter from "./financial-apu";
 import coordinatorActionsRouter from "./coordinator-actions";
 
 const router: IRouter = Router();
@@ -87,6 +88,7 @@ router.use(financialControlsRouter);
 router.use(financialBudgetsRouter);
 router.use(financialContractsRouter);
 router.use(genericApuBudgetControlsRouter);
+router.use(financialApuRouter);
 router.use(coordinatorActionsRouter);
 
 // Soft-delete routes are appended inside their existing route files:
