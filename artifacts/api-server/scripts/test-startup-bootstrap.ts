@@ -44,6 +44,12 @@ async function response(
 }
 
 const application: RequestListener = (request, result) => {
+  if (request.url === "/api") {
+    result.statusCode = 200;
+    result.setHeader("Content-Type", "application/json");
+    result.end(JSON.stringify({ status: "ok", service: "bimlog-api" }));
+    return;
+  }
   if (request.url === "/api/v1/healthz") {
     result.statusCode = 200;
     result.setHeader("Content-Type", "application/json");
@@ -90,6 +96,10 @@ assert.equal(delayed.getState(), "ready" satisfies StartupState);
 assert.deepEqual(await response(delayedListener.url, "/api/v1/healthz"), {
   status: 200,
   body: JSON.stringify({ status: "ok" }),
+});
+assert.deepEqual(await response(delayedListener.url, "/api"), {
+  status: 200,
+  body: JSON.stringify({ status: "ok", service: "bimlog-api" }),
 });
 assert(
   delayedLogs.some((entry) => entry.message.includes("phase=app_import_begin")),
@@ -164,8 +174,9 @@ assert.equal(discoveryCalls, 1);
 console.log(
   JSON.stringify({
     listenerBoundWithinMs: Number(delayedListener.elapsedMs.toFixed(1)),
-    apiHistoricalNon5xxDuringImport: true,
-    readinessStayed503UntilReady: true,
+    apiProbeStayedNonSuccessUntilReady: true,
+    healthzProbeStayedNonSuccessUntilReady: true,
+    apiAndHealthzSucceededAfterReady: true,
     readyAfterImport: true,
     failedAndTimedOutImportsStayedNonReady: true,
     phaseTelemetryComplete: true,

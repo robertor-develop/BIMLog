@@ -74,6 +74,12 @@ async function waitForReady(): Promise<number> {
 try {
   const portBoundMs = await waitForPort();
   const readyMs = await waitForReady();
+  const deploymentHealth = await fetch(`http://127.0.0.1:${port}/api`);
+  assert.equal(deploymentHealth.status, 200);
+  assert.deepEqual(await deploymentHealth.json(), {
+    status: "ok",
+    service: "bimlog-api",
+  });
   assert(portBoundMs < 2_500);
   assert(readyMs < 5_000);
   assert.match(stdout, /phase=bootstrap_bound/);
@@ -87,6 +93,7 @@ try {
       readyMs: Number(readyMs.toFixed(1)),
       noTopLevelFfmpegDiscovery: true,
       phaseTelemetryComplete: true,
+      deploymentHealthPath: "/api",
     }),
   );
 } finally {

@@ -162,6 +162,9 @@ console.log(`[ENV] NODE_ENV: ${process.env.NODE_ENV || "not set"}`);
 console.log("========================================");
 
 const app: Express = express();
+app.get("/api", (_req: Request, res: Response) => {
+  res.status(200).json({ status: "ok", service: "bimlog-api" });
+});
 let procoreRfiImportSchemaState: "starting" | "ready" | "failed" = "starting";
 void ensureProcoreRfiImportSchema()
   .then(() => {

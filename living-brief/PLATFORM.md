@@ -397,6 +397,9 @@ It changes only when the code structure or curated architectural facts change.
 ## Curated interconnections and gotchas (maintained in the generator)
 - All API routes are served under the /api/v1 prefix. res.redirect in route files MUST
   include /api/v1 or it 404s.
+- Replit monorepo deployments probe GET /api. The early-bound startup listener keeps both
+  /api and /api/v1/healthz non-successful until initialization completes; the ready app returns
+  HTTP 200 from both paths.
 - Auth: JWT Bearer; payload carries isSuperAdmin. authMiddleware verifies; requireProjectMember
   / requirePermission gate project access (super admins bypass membership);
   isSuperAdminMiddleware re-checks users.is_super_admin.

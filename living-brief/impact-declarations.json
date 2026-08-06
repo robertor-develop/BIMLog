@@ -6768,6 +6768,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "replit-api-probe-compatibility-20260806",
+      "reviewedThroughCommit": "13be3f3a91654eb956bcdf68b469580e07944fba",
+      "reviewedAt": "2026-08-06T10:00:00-04:00",
+      "status": "local_compatibility_fix_validation_pending",
+      "captureTiming": "same_apu_task",
+      "summary": "Preserves the accepted early-port startup behavior while supporting Replit artifact mode's GET /api readiness probe alongside /api/v1/healthz.",
+      "workstreams": [
+        "generic-apu-ui-publication",
+        "replit-startup-health-compatibility"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority, or product doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing startup, release, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing build and startup requirements now have explicit two-path regression coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, commercial promise, or customer-facing capability changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the Replit artifact-mode GET /api probe compatibility contract alongside the canonical health endpoint."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or browser plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report generation, formatting, or delivery behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation, or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This local deployment compatibility correction does not change accepted product status."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This correction resolves the current probe mismatch without changing the approved backlog."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or previously accepted incident record is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/scripts/test-startup-bootstrap.ts",
+        "artifacts/api-server/scripts/test-startup-bundle.ts",
+        "artifacts/api-server/src/app.ts",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0ba7570a9f1dff2333d9caaa28776c85c90a77a268c5f1977b7241b1e53ab632"
     }
   ]
 }
