@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import {
   GENERIC_APU_PERSISTENCE_COMMAND,
   prepareGenericApuPersistenceHarness,
-} from "./generic-apu-persistence-db-harness.ts";
+} from "./generic-apu-persistence-db-harness";
 
 const refuses = (url: string | undefined, code: RegExp) =>
   assert.throws(
