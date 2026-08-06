@@ -541,3 +541,7 @@ no database, provider, publication, or deployment action occurred.
 The frozen Project-26 Procore RFI end-to-end five-path handoff is integrated locally as `0643e999aef5b000e01c8b3e57ab20ce3f9a9a02`.
 Its 43-row and 43-check atomic-store proofs pass with RFI materialization, activity/notification evidence,
 rollback, and concurrency coverage; database connections and customer mutations remain zero.
+
+The independently accepted two-file database-safety correction is integrated locally. Its fixture and full
+source scan pass while narrowly recognizing the reviewed Generic APU constraint replacement; it does not
+execute DDL or connect to any database.

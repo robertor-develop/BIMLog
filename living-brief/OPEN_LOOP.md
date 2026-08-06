@@ -1693,3 +1693,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   reservation is resolved; keep database execution and provider/publication gates separate.
 - Run the consolidated clean build and exact-current-artifact acceptance after the Project-26 RFI five-path
   integration; live database, provider, push, publication, and deployment remain separate gates.
+- Preserve the exact reviewed database-safety allowlist and regression fixture while running the consolidated
+  build; any different destructive DDL remains fail-closed.

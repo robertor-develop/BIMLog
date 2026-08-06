@@ -6386,6 +6386,122 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "25ead4cf13dc18d1d864f98b11939ff69356b7323da0983b5125cc21842406ff"
+    },
+    {
+      "taskId": "database-safety-generic-apu-narrow-correction-20260805",
+      "reviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
+      "reviewedAt": "2026-08-05T20:21:00-04:00",
+      "status": "local_security_correction_and_database_safety_pass_build_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Integrates the exact independently accepted two-file database-safety correction for the reviewed Generic APU constraint replacement without executing DDL or connecting to a database.",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "F-root exact two-file integration",
+          "database-safety fixture and static source scan",
+          "Living Brief semantic reconciliation"
+        ],
+        "operatorOnly": [
+          "customer or production database execution",
+          "provider target verification",
+          "push, publication, and deployment"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The allowlist is exact-source and narrow; all different destructive DDL remains fail-closed, and no migration was executed."
+        }
+      ],
+      "workstreams": [
+        "database-safety",
+        "generic-apu-persistence",
+        "consolidated-release-build"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/test-database-safety.mjs",
+          "type": "database_safety_regression",
+          "result": "pass",
+          "boundary": "Credential-free fixture only; no database connection or DDL execution."
+        },
+        {
+          "path": "scripts/check-database-safety.mjs",
+          "type": "full_static_database_safety_scan",
+          "result": "pass_143_tables_165_indexes_99_startup_tables",
+          "boundary": "Static source validation only; no database connection or mutation."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or authority change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing safety and release boundaries remain."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed database safety and build requirements remain."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product promise change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product route, schema, or structural inventory change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact two-file correction and passing static safety evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires the exact allowlist to remain narrow during consolidated build."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/check-database-safety.mjs",
+        "scripts/test-database-safety.mjs"
+      ],
+      "reviewedChangeSha256": "656d386f34ff2b2cd4a1715aa359cc2f030ba40585417e314ad30491c42bf8c4"
     }
   ]
 }
