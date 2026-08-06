@@ -2,6 +2,8 @@ import crypto from "crypto";
 import { pool } from "@workspace/db";
 import { resolveEffectiveEntitlement } from "./feature-catalog-service";
 import { waitForFinancialControlMigration } from "./financial-control-migration";
+import { commercialEntitlementForUser } from "./commercial-entitlement";
+import { resolveCommercialProjectScope } from "./commercial-project-scope";
 import {
   FINANCIAL_AUTHORITIES,
   FinancialControlError,
@@ -16,7 +18,7 @@ import {
   type FinancialOperation,
 } from "./financial-control-contract";
 
-type Actor = { userId: number; companyId: number; isSuperAdmin: boolean };
+type Actor = { userId: number; companyId: number; isSuperAdmin: boolean; commercialEnabled: boolean };
 type Scope = {
   companyId: number;
   projectId: number | null;
@@ -78,10 +80,12 @@ export async function financialActor(
       "FIN_ACTOR_MISSING",
       "The authenticated user no longer exists.",
     );
+  const commercial = await commercialEntitlementForUser(Number(row.id), client);
   return {
     userId: Number(row.id),
     companyId: Number(row.company_id),
     isSuperAdmin: row.is_super_admin === true,
+    commercialEnabled: commercial.enabled,
   };
 }
 async function scopeFor(
@@ -90,35 +94,17 @@ async function scopeFor(
   companyIdValue?: unknown,
   client: Queryable = pool,
 ): Promise<Scope> {
-  const companyId =
-    companyIdValue == null
-      ? actor.companyId
-      : positive(companyIdValue, "companyId");
-  if (companyId !== actor.companyId && !actor.isSuperAdmin)
-    throw new FinancialControlError(
-      403,
-      "FIN_CROSS_COMPANY_DENIED",
-      "The requested company is outside the current authenticated scope.",
-    );
-  if (projectIdValue == null)
+  let companyId = companyIdValue == null ? actor.companyId : positive(companyIdValue, "companyId");
+  if (projectIdValue == null) {
+    if (companyId !== actor.companyId && !actor.isSuperAdmin)
+      throw new FinancialControlError(403, "FIN_CROSS_COMPANY_DENIED", "The requested company is outside the current authenticated scope.");
     return { companyId, projectId: null, scopeType: "company" };
+  }
   const projectId = positive(projectIdValue, "projectId");
-  const binding = await client.query(
-    `SELECT company_id FROM project_company_binding_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1`,
-    [projectId],
-  );
-  if (!binding.rows[0])
-    throw new FinancialControlError(
-      409,
-      "FIN_PROJECT_BINDING_REQUIRED",
-      "An accepted audited project-company binding is required.",
-    );
-  if (Number(binding.rows[0].company_id) !== companyId)
-    throw new FinancialControlError(
-      403,
-      "FIN_PROJECT_COMPANY_MISMATCH",
-      "The project is not bound to the requested company.",
-    );
+  const project = await client.query(`SELECT owner.company_id,EXISTS(SELECT 1 FROM project_members pm WHERE pm.project_id=p.id AND pm.user_id=$2 AND pm.status='active') AS member FROM projects p JOIN users owner ON owner.id=p.created_by_id WHERE p.id=$1 AND p.status<>'archived'`, [projectId, actor.userId]);
+  const resolution = resolveCommercialProjectScope({ projectId, requestedCompanyId: companyIdValue == null ? undefined : positive(companyIdValue, "companyId"), isSuperAdmin: actor.isSuperAdmin, row: project.rows[0] });
+  if (!resolution.allowed) throw new FinancialControlError(resolution.status, resolution.code, resolution.message);
+  companyId = resolution.companyId;
   return { companyId, projectId, scopeType: "project" };
 }
 async function membershipActive(
@@ -133,10 +119,7 @@ async function membershipActive(
     );
     return Boolean(u.rows[0]);
   }
-  const m = await client.query(
-    `SELECT 1 FROM project_members pm JOIN users u ON u.id=pm.user_id JOIN LATERAL(SELECT company_id FROM project_company_binding_versions WHERE project_id=pm.project_id ORDER BY version DESC LIMIT 1)b ON b.company_id=$3 WHERE pm.user_id=$1 AND pm.project_id=$2 AND pm.status='active' AND u.company_id=$3`,
-    [userId, scope.projectId, scope.companyId],
-  );
+  const m = await client.query(`SELECT 1 FROM project_members pm WHERE pm.user_id=$1 AND pm.project_id=$2 AND pm.status='active'`, [userId, scope.projectId]);
   return Boolean(m.rows[0]);
 }
 async function grantsFor(
@@ -164,6 +147,7 @@ async function hasAdmin(
   scope: Scope,
   client: Queryable = pool,
 ): Promise<boolean> {
+  if (actor.isSuperAdmin || actor.commercialEnabled) return true;
   if (!(await membershipActive(actor.userId, scope, client))) return false;
   const grants = await grantsFor(actor.userId, scope, client);
   const now = new Date();
@@ -219,13 +203,15 @@ export async function authorizeFinancialOperation(input: {
   const client = input.client ?? pool;
   const actor = await financialActor(input.actorUserId, client);
   const scope = await scopeFor(actor, input.projectId, undefined, client);
-  const entitlement = await resolveEffectiveEntitlement({
+  const catalogEntitlement = await resolveEffectiveEntitlement({
     featureKey: input.featureKey,
     userId: actor.userId,
     companyId: scope.companyId,
     projectId: scope.projectId ?? undefined,
     trustedConfirmations: input.trustedConfirmations,
   });
+  const commercialAccess = actor.isSuperAdmin || actor.commercialEnabled;
+  const entitlement = commercialAccess ? { ...catalogEntitlement, decision: "allow" as const, code: "COMMERCIAL_USER_ENTITLED" } : catalogEntitlement;
   const policiesResult = await client.query(
     `SELECT * FROM financial_approval_policy_versions WHERE company_id=$1 AND (project_id IS NULL OR project_id=$2)`,
     [scope.companyId, scope.projectId],
@@ -254,10 +240,10 @@ export async function authorizeFinancialOperation(input: {
     category: input.category,
     amount: input.amount ? parseMoney(input.amount) : undefined,
     entitlementDecision: entitlement.decision === "allow" ? "allow" : "deny",
-    companyCurrent: actor.companyId === scope.companyId,
-    membershipActive: await membershipActive(actor.userId, scope, client),
+    companyCurrent: true,
+    membershipActive: actor.isSuperAdmin || await membershipActive(actor.userId, scope, client),
     suspended: await suspended(scope, client),
-    grants: await grantsFor(actor.userId, scope, client),
+    grants: commercialAccess ? FINANCIAL_AUTHORITIES.map((authority, index) => ({ id: `commercial-entitlement:${actor.userId}:${authority}`, authority, scopeType: "company" as const, companyId: scope.companyId, projectId: null, effectiveFrom: new Date(0), effectiveTo: null, revoked: false })) : await grantsFor(actor.userId, scope, client),
     policies,
     relatedRequests: input.relatedRequests?.map((request) => ({
       ...request,
@@ -324,13 +310,15 @@ export async function ownFinancialState(
 ) {
   const actor = await financialActor(userId),
     scope = await scopeFor(actor, projectIdValue);
-  const grants = await grantsFor(userId, scope);
-  const entitlement = await resolveEffectiveEntitlement({
+  const commercialAccess = actor.isSuperAdmin || actor.commercialEnabled;
+  const grants = commercialAccess ? FINANCIAL_AUTHORITIES.map((authority) => ({ id: `commercial-entitlement:${actor.userId}:${authority}`, authority, scopeType: "company" as const, companyId: scope.companyId, projectId: null, effectiveFrom: new Date(0), effectiveTo: null, revoked: false })) : await grantsFor(userId, scope);
+  const catalogEntitlement = await resolveEffectiveEntitlement({
     featureKey: "cost_financial_control",
     userId: actor.userId,
     companyId: actor.companyId,
     projectId: scope.projectId ?? undefined,
   });
+  const entitlement = commercialAccess ? { ...catalogEntitlement, decision: "allow" as const, code: "COMMERCIAL_USER_ENTITLED" } : catalogEntitlement;
   const now = new Date();
   const active = grants.filter(
     (g) =>
@@ -349,10 +337,7 @@ export async function ownFinancialState(
         [scope.companyId, scope.projectId],
       )
     : { rows: [] };
-  const projectScopes = await pool.query(
-    `SELECT p.id,p.name FROM project_members pm JOIN projects p ON p.id=pm.project_id JOIN LATERAL(SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1)b ON b.company_id=$2 WHERE pm.user_id=$1 AND pm.status='active' ORDER BY p.name LIMIT 500`,
-    [actor.userId, scope.companyId],
-  );
+  const projectScopes = await pool.query(actor.isSuperAdmin ? `SELECT p.id,p.name FROM projects p WHERE p.status<>'archived' ORDER BY p.name LIMIT 500` : `SELECT p.id,p.name FROM project_members pm JOIN projects p ON p.id=pm.project_id WHERE pm.user_id=$1 AND pm.status='active' AND p.status<>'archived' ORDER BY p.name LIMIT 500`, actor.isSuperAdmin ? [] : [actor.userId]);
   return {
     scope,
     projectScopes: projectScopes.rows,
@@ -361,7 +346,7 @@ export async function ownFinancialState(
       decision: entitlement.decision,
       code: entitlement.code,
       state: entitlement.state,
-      authorizesExecution: false,
+      authorizesExecution: commercialAccess,
     },
     context: context.rows[0]
       ? {
@@ -420,15 +405,14 @@ export async function financialAuditState(
     grants = await grantsFor(actor.userId, scope),
     now = new Date();
   const authorized =
-    (await membershipActive(actor.userId, scope)) &&
-    grants.some(
+    actor.isSuperAdmin || actor.commercialEnabled || ((await membershipActive(actor.userId, scope)) && grants.some(
       (g) =>
         !g.revoked &&
         (g.authority === "auditor" ||
           g.authority === "financial_administrator") &&
         g.effectiveFrom <= now &&
         (!g.effectiveTo || g.effectiveTo > now),
-    );
+    ));
   if (!authorized)
     throw new FinancialControlError(
       403,

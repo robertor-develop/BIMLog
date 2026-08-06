@@ -29,6 +29,7 @@ import { ensureAiControlPlaneSchema } from "./lib/ai-control-plane-migration";
 import { startFeatureCatalogMigration } from "./lib/feature-catalog-migration";
 import { startFeaturePolicyMigration } from "./lib/feature-policy-migration";
 import { startFinancialControlMigration } from "./lib/financial-control-migration";
+import { startCommercialEntitlementMigration } from "./lib/commercial-entitlement";
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { startFinancialContractMigration } from "./lib/financial-contract-migration";
 import {
@@ -408,6 +409,7 @@ app.use("/api/v1", router);
 
 (async () => {
   try {
+    await startCommercialEntitlementMigration();
     await startFinancialControlMigration();
     await startFinancialBudgetMigration();
     await startFinancialContractMigration();

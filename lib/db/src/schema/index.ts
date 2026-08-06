@@ -51,3 +51,4 @@ export * from "./living-brief-documents";
 export * from "./living-brief-gate";
 export * from "./coordinator-saved-views";
 export * from "./coordinator-bulk-operations";
+export * from "./commercial-entitlements";
