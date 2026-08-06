@@ -6996,6 +6996,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "cost-value-forecast-module-3-layer-1-20260806",
+      "reviewedThroughCommit": "5d448f1a37cad45bd5ba915e1c4547ea3cb43e4d",
+      "reviewedAt": "2026-08-06T17:10:00-04:00",
+      "status": "local_module_3_layer_1_candidate_validated",
+      "captureTiming": "same_apu_task",
+      "summary": "Adds deterministic Cost & Value forecasting, three completion scenarios, early warnings, immutable history, CSV export, percentage allocation entry, and exact two-decimal monetary normalization.",
+      "workstreams": [
+        "generic-apu-module-3",
+        "cost-value-forecast",
+        "percentage-allocation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or operating-authority doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Development and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "APU acceptance now covers deterministic forecasting and percentage rounding behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation advances the approved Commercial forecasting objective."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "A forecast service, append-only table, routes, export, and UI panel extend the platform."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or browser plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The CSV export does not change governed PDF or document report design."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The user explicitly selected APU Module 3 Layer 1 as active work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted incident record is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a32371b0f24aebddd4ff4ea708f790e981f763dd8a6668e6bff3337c72ccc6d2"
     }
   ]
 }
