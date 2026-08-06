@@ -2,12 +2,12 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import bcrypt from "bcryptjs";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const gate = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/living-brief-gate.ts"), "utf8");
 const migration = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/living-brief-migration.ts"), "utf8");
 const route = fs.readFileSync(path.join(root, "artifacts/api-server/src/routes/living_brief.ts"), "utf8");
+const auth = fs.readFileSync(path.join(root, "artifacts/api-server/src/middlewares/auth.ts"), "utf8");
 const checks = [];
 
 async function check(name, fn) {
@@ -60,23 +60,34 @@ await check("controlled recovery/reset remains audited without logging secret va
   assert.doesNotMatch(auditBlock, /newPassword|currentAccountPassword|password_hash/i);
 });
 
-await check("unlock remains value-blind and exposes neither hash nor configured credential internals", () => {
-  assert.match(route, /verifyLivingBriefGatePassword\(password\)/);
-  assert.doesNotMatch(route, /password_hash|living_brief_password_hash|BIMAI360/);
+await check("passwordless unlock remains authenticated and limited to eligible users", () => {
+  assert.match(route, /router\.post\("\/living-brief\/unlock", authMiddleware/);
+  assert.match(route, /if \(!\(await isEligible\(req\.user!\.userId\)\)\)[^]*res\.status\(403\)/);
 });
 
-const fixturePassword = "fixture-correct-gate-password";
-const fixtureWrongPassword = "fixture-wrong-gate-password";
-const fixtureHash = await bcrypt.hash(fixturePassword, 10);
-
-await check("correct fixture credential verifies and wrong fixture credential fails safely", async () => {
-  assert.equal(await bcrypt.compare(fixturePassword, fixtureHash), true);
-  assert.equal(await bcrypt.compare(fixtureWrongPassword, fixtureHash), false);
+await check("passwordless unlock reads and verifies no gate password", () => {
+  const start = route.indexOf('router.post("/living-brief/unlock"');
+  const end = route.indexOf("// Return the verified deployed source bundle", start);
+  const unlock = route.slice(start, end);
+  assert.ok(unlock.length > 0);
+  assert.doesNotMatch(unlock, /password|verifyLivingBriefGatePassword|Incorrect password|Password required/i);
 });
 
-await check("proof output contains no credential material", () => {
-  const serialized = JSON.stringify({ checks });
-  assert.doesNotMatch(serialized, /fixture-correct-gate-password|fixture-wrong-gate-password|\$2[aby]\$/i);
+await check("brief token is bound to the eligible user and current credential version", () => {
+  assert.match(route, /const credentialVersion = \(await getLivingBriefGateCredential\(\)\)\?\.version \?\? 0;/);
+  assert.match(route, /signBriefAccessToken\(req\.user!\.userId, credentialVersion\)/);
+  assert.match(auth, /jwt\.sign\(\{ userId, scope: "living_brief", credentialVersion \}/);
+});
+
+await check("brief middleware rejects wrong-user and stale-version tokens", () => {
+  assert.match(route, /payload\.scope !== "living_brief" \|\| payload\.userId !== req\.user!\.userId/);
+  assert.match(route, /payload\.credentialVersion !== credentialVersion/);
+  assert.match(route, /res\.status\(401\)\.json\(\{ error: "Invalid or expired brief access token" \}\)/);
+});
+
+await check("brief middleware rechecks current eligibility and denies revoked access", () => {
+  assert.match(route, /if \(!\(await isEligible\(req\.user!\.userId\)\)\)[^]*res\.status\(403\)[^]*Living Brief access not granted/);
+  assert.match(route, /router\.get\("\/living-brief\/docs", authMiddleware, briefAccessMiddleware/);
 });
 
 await check("first initialization failure clears request-side promise for retry", () => {

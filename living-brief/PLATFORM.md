@@ -200,6 +200,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/generic-apu-persistence-db-harness.ts
 - artifacts/api-server/src/lib/generic-apu-persistence-db.behavior.ts
 - artifacts/api-server/src/lib/generic-apu-persistence-migration.ts
+- artifacts/api-server/src/lib/generic-apu-persistence-startup.behavior.ts
 - artifacts/api-server/src/lib/generic-apu.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts

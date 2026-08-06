@@ -545,3 +545,11 @@ rollback, and concurrency coverage; database connections and customer mutations 
 The independently accepted two-file database-safety correction is integrated locally. Its fixture and full
 source scan pass while narrowly recognizing the reviewed Generic APU constraint replacement; it does not
 execute DDL or connect to any database.
+
+The Living Brief authentication regression harness now reflects the accepted passwordless architecture:
+eligible authenticated unlock, ineligible denial, user-bound tokens, current credential-version/revocation
+checks, and no password read or verification. Its focused matrix passes 14/14.
+
+The narrow Generic APU persistence startup registration is integrated in `7a410c7ab794776a7d8320f8299c50c4ad560246`.
+Its focused startup behavior passes 13/13 with zero network connections and zero database mutations; the
+registration preserves current `app.ts` changes and does not imply migration execution.

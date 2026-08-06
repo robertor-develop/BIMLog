@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
+  "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "d2ff8e5a47a83214831584704417c077dc6bc866bc427a82ee54b8c4ab1e1293",
+  "bundleSha256": "ed63aa4ac58fc2e934dbdb2b7fe1b7f294c2ca47395903b06411825ad5140b3b",
   "impact": {
-    "baselineCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
+    "baselineCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
-      "scripts/check-database-safety.mjs",
-      "scripts/test-database-safety.mjs"
+      "scripts/test-living-brief-auth-regression.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -25,11 +25,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "claude",
@@ -37,11 +37,11 @@
       "sha256": "b8efc974142d81e72ec01cf72a1d180f5e3c5a346a5dbb390b2c3a7651f906e9",
       "sourceChangedAt": "2026-08-05T11:26:11-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "quality",
@@ -49,11 +49,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "vision",
@@ -61,23 +61,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "040b5b81f80f134d0e8e23d59f06e250c4503af2204d9b79b4225866a4871457",
-      "sourceChangedAt": "2026-08-05T20:01:08-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "sha256": "ca7c582d9861759c194b8c61eb2d9f3fd0fc3d45bb6ec25a940605571e5b5d80",
+      "sourceChangedAt": "2026-08-06T00:41:20.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "plugin",
@@ -85,11 +85,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "report_design_system",
@@ -97,11 +97,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "standards_register",
@@ -109,35 +109,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "0b11ff9a64c152a34b05c5844f7942d17f5aa402093910ae59de92f35fe00f37",
-      "sourceChangedAt": "2026-08-06T00:21:00.000Z",
+      "sha256": "92bb4abecc8924010d9adb793544bc1cc7ea3c28fffed533af86075c0e015c31",
+      "sourceChangedAt": "2026-08-06T00:41:20.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "4b9cf991c2bf8de70fb6f7be2085cfcb8955fd2e34a336ae96e8f07a68b0d6c4",
-      "sourceChangedAt": "2026-08-06T00:21:00.000Z",
+      "sha256": "890ffdbf722a73e39578fd9ddc271dc50027fab5d671038efb8c67a8b552c984",
+      "sourceChangedAt": "2026-08-06T00:41:20.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     },
     {
       "key": "audit",
@@ -145,11 +145,11 @@
       "sha256": "c64878fb9aec6abbef080bb1da14f09dd92af10407b31ac6c4b4710eb42446cc",
       "sourceChangedAt": "2026-08-01T10:59:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewedThroughCommit": "3fee1622a844db27582da1acf054ea0ae1282635",
-      "semanticReviewTask": "database-safety-generic-apu-narrow-correction-20260805",
+      "reconciledThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "semanticReviewTask": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-05T20:21:00-04:00"
+      "semanticReviewedAt": "2026-08-05T20:41:20-04:00"
     }
   ]
 }

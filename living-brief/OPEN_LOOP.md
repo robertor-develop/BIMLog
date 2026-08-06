@@ -1695,3 +1695,8 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   integration; live database, provider, push, publication, and deployment remain separate gates.
 - Preserve the exact reviewed database-safety allowlist and regression fixture while running the consolidated
   build; any different destructive DDL remains fail-closed.
+- Retain the reconciled passwordless authentication regression in final acceptance; the exact-current API
+  build remains blocked on separately owned APU TypeScript defects and the authenticated HTTP proof remains
+  a separate approved-database-fixture gate.
+- Preserve the exact two-path APU startup registration and its 13/13 proof while resolving the remaining
+  pre-existing APU harness type errors before the exact-current API build.

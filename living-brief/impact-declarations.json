@@ -6502,6 +6502,122 @@
         "scripts/test-database-safety.mjs"
       ],
       "reviewedChangeSha256": "656d386f34ff2b2cd4a1715aa359cc2f030ba40585417e314ad30491c42bf8c4"
+    },
+    {
+      "taskId": "passwordless-auth-regression-and-apu-startup-reconciliation-20260805",
+      "reviewedThroughCommit": "7a410c7ab794776a7d8320f8299c50c4ad560246",
+      "reviewedAt": "2026-08-05T20:41:20-04:00",
+      "status": "focused_auth_and_startup_proofs_pass_consolidated_build_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Reconciles the passwordless Living Brief authentication regression harness and the narrow Generic APU persistence startup registration while preserving current authorization and release boundaries.",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "F-root focused test reconciliation",
+          "exact two-path startup integration acceptance",
+          "Living Brief semantic reconciliation"
+        ],
+        "operatorOnly": [
+          "customer or production database execution",
+          "authenticated artifact database proof",
+          "provider, push, publication, and deployment"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The auth regression now asserts passwordless eligibility, ineligible denial, user identity, credential-version/revocation checks, and no password handling; startup proof makes zero network connections and database mutations."
+        }
+      ],
+      "workstreams": [
+        "living-brief-passwordless-auth",
+        "generic-apu-persistence-startup",
+        "consolidated-release-build"
+      ],
+      "evidence": [
+        {
+          "path": "scripts/test-living-brief-auth-regression.mjs",
+          "type": "passwordless_auth_regression",
+          "result": "pass_14_of_14",
+          "boundary": "Credential-free source regression; no database, provider, or customer access."
+        },
+        {
+          "path": "artifacts/api-server/src/lib/generic-apu-persistence-startup.behavior.ts",
+          "type": "apu_startup_behavior",
+          "result": "pass_13_of_13",
+          "boundary": "Zero network connections and zero database mutations; no migration execution."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or authority change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing authorization and release boundaries remain."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing focused regression, typecheck, build, and artifact acceptance gates remain."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or commercial promise change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Deterministic platform inventory includes the new APU startup behavior source."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact auth regression and APU startup proof outcomes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps remaining APU harness type errors, exact-current build, and authenticated artifact proof explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/test-living-brief-auth-regression.mjs"
+      ],
+      "reviewedChangeSha256": "d4c39d9b799e55955e14c7f0956f66f2445d62fa103da1c046b223343b5faf99"
     }
   ]
 }
