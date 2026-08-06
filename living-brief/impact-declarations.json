@@ -6616,6 +6616,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "51da5c90b55699256147c0b1e2f222dcc64cf7b97d1f6c5c934f220c39794e0a"
+    },
+    {
+      "taskId": "generic-apu-unified-acceptance-and-build-20260805",
+      "reviewedThroughCommit": "d9869477354aee8c0d5e03e146137044231897ac",
+      "reviewedAt": "2026-08-05T23:00:00-04:00",
+      "status": "local_apu_command_and_production_builds_pass",
+      "captureTiming": "same_apu_task",
+      "summary": "Adds one Generic APU acceptance command and records successful calculation, security, persistence, database, API TypeScript, UI TypeScript, API production, and UI production checks.",
+      "workstreams": [
+        "generic-apu-engine",
+        "generic-apu-security",
+        "generic-apu-persistence",
+        "generic-apu-ui"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem authority change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating instruction change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing test and build requirements are consolidated into one command."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or commercial promise change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the repeatable Generic APU acceptance command."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the passing unified APU command and production builds."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining push and publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7ef3fcf1df6da5d4b54e1e83c1e3f8bfcfe96553a8f9882d8becfa11b9695ffc"
     }
   ]
 }

@@ -558,3 +558,9 @@ The three pre-existing APU test TypeScript blockers are narrowly corrected in co
 and `1f6c8671f457128f5b6e5ff7e6bd476820abb226`. The persistence harness import now follows the extensionless
 repository convention, and the authority-state journal property supports transactional replacement while
 retaining a readonly event array. Focused proofs pass 19/19 and scoped API TypeScript passes without database access.
+
+The Generic APU now has one repeatable package command, `test:generic-apu`, at local commit
+`d9869477354aee8c0d5e03e146137044231897ac`. It runs the calculation, edge, persistence, startup,
+authority HTTP, authority transaction, disposable PostgreSQL, API TypeScript, and UI TypeScript checks.
+The complete command, API production build with isolated artifact proof, and UI production build pass locally.
+No push, publication, deployment, or production/customer database change is included.

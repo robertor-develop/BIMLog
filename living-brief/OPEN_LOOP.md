@@ -1702,3 +1702,6 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   pre-existing APU harness type errors before the exact-current API build.
 - Preserve the narrow APU harness TypeScript corrections and their focused proofs while completing the
   exact-current consolidated build; the DB-backed authority harness remains a separate approved-database gate.
+- Use `pnpm --filter @workspace/api-server test:generic-apu` as the single Generic APU calculation, security,
+  persistence, and UI TypeScript acceptance command. The exact local source at `d9869477354aee8c0d5e03e146137044231897ac`
+  passes this command plus the API and UI production builds; normal push and separately authorized publication remain.
