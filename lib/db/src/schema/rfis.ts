@@ -154,9 +154,8 @@ export const rfiImportBindingsTable = pgTable("rfi_import_bindings", {
   check("rfi_import_binding_version_positive", sql`${table.version} > 0`),
   check("rfi_import_binding_digest_format", sql`${table.sourceProjectIdentityDigest} ~ '^[0-9a-f]{64}$'`),
   check("rfi_import_binding_audit_identity_bounded", sql`octet_length(${table.auditIdentity}) between 1 and 256`),
-  check("rfi_import_binding_project_26", sql`${table.projectId} = 26`),
   check("rfi_import_binding_source_project_bounded", sql`octet_length(${table.sourceProjectCode}) between 1 and 128`),
-  check("rfi_import_binding_provider_procore", sql`${table.provider} = 'procore'`),
+  check("rfi_import_binding_provider_bounded", sql`octet_length(${table.provider}) between 1 and 64`),
   check("rfi_import_binding_capability_rfi_import", sql`${table.capability} = 'RFI_IMPORT'`),
   check("rfi_import_binding_lifecycle_chk", sql`(${table.current} = true and ${table.revokedAt} is null) or (${table.current} = false and ${table.revokedAt} is not null)`),
 ]);
@@ -219,15 +218,14 @@ export const rfiImportsTable = pgTable("rfi_imports", {
     table.id, table.projectId, table.provider, table.sourceProjectCode, table.bindingId, table.bindingVersion,
   ),
   unique("rfi_import_replay_uq").on(table.projectId, table.provider, table.sourceProjectCode, table.idempotencyKey),
-  check("rfi_import_project_26", sql`${table.projectId} = 26`),
-  check("rfi_import_row_count_exact", sql`${table.rowCount} = 43`),
+  check("rfi_import_row_count_positive", sql`${table.rowCount} > 0`),
   check("rfi_import_binding_version_positive", sql`${table.bindingVersion} > 0`),
   check("rfi_import_source_digest_format", sql`${table.sourceDigest} ~ '^[0-9a-f]{64}$'`),
   check("rfi_import_project_digest_format", sql`${table.sourceProjectIdentityDigest} ~ '^[0-9a-f]{64}$'`),
   check("rfi_import_idempotency_key_bounded", sql`octet_length(${table.idempotencyKey}) between 1 and 128`),
   check("rfi_import_idempotency_key_format", sql`${table.idempotencyKey} ~ '^[A-Za-z0-9._:-]+$'`),
   check("rfi_import_source_project_bounded", sql`octet_length(${table.sourceProjectCode}) between 1 and 128`),
-  check("rfi_import_provider_procore", sql`${table.provider} = 'procore'`),
+  check("rfi_import_provider_bounded", sql`octet_length(${table.provider}) between 1 and 64`),
 ]);
 
 export const rfiImportRowsTable = pgTable("rfi_import_rows", {
@@ -256,11 +254,10 @@ export const rfiImportRowsTable = pgTable("rfi_import_rows", {
   unique("rfi_import_source_identity_uq").on(
     table.projectId, table.provider, table.sourceProjectCode, table.sourceNumber, table.sourceRevision,
   ),
-  check("rfi_import_row_project_26", sql`${table.projectId} = 26`),
   check("rfi_import_row_binding_version_positive", sql`${table.bindingVersion} > 0`),
   check("rfi_import_source_revision_nonnegative", sql`${table.sourceRevision} >= 0`),
   check("rfi_import_source_number_bounded", sql`octet_length(${table.sourceNumber}) between 1 and 8192`),
   check("rfi_import_source_payload_bounded", sql`octet_length(${table.sourcePayload}::text) <= 65536`),
   check("rfi_import_row_source_project_bounded", sql`octet_length(${table.sourceProjectCode}) between 1 and 128`),
-  check("rfi_import_row_provider_procore", sql`${table.provider} = 'procore'`),
+  check("rfi_import_row_provider_bounded", sql`octet_length(${table.provider}) between 1 and 64`),
 ]);

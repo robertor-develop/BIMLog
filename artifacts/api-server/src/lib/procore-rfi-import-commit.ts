@@ -7,8 +7,6 @@ import {
 } from "./procore-rfi-import";
 
 export const RFI_IMPORT_CAPABILITY = "RFI_IMPORT" as const;
-export const PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID = 26 as const;
-export const PROCORE_RFI_ALLOWED_ROW_COUNT = 43 as const;
 const MAX_IDEMPOTENCY_KEY_BYTES = 128;
 const MAX_PROJECT_CODE_BYTES = 128;
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
@@ -120,7 +118,7 @@ export function assertAtomicImportRequest(request: AtomicImportRequest): void {
   const sourceProjectCode = authorization?.sourceProjectCode;
   const rows = request?.rows;
   const valid = authorization
-    && authorization.projectId === PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID
+    && Number.isSafeInteger(authorization.projectId) && authorization.projectId > 0
     && authorization.provider === "procore"
     && authorization.capability === RFI_IMPORT_CAPABILITY
     && Number.isSafeInteger(authorization.companyId) && authorization.companyId > 0
@@ -139,8 +137,9 @@ export function assertAtomicImportRequest(request: AtomicImportRequest): void {
     && Buffer.byteLength(idempotencyKey, "utf8") <= MAX_IDEMPOTENCY_KEY_BYTES
     && SAFE_KEY_PATTERN.test(idempotencyKey)
     && typeof request.sourceDigest === "string" && SHA256_PATTERN.test(request.sourceDigest)
-    && request.rowCount === PROCORE_RFI_ALLOWED_ROW_COUNT
-    && Array.isArray(rows) && rows.length === PROCORE_RFI_ALLOWED_ROW_COUNT
+    && Number.isSafeInteger(request.rowCount) && request.rowCount > 0
+    && request.rowCount <= PROCORE_RFI_LIMITS.rows
+    && Array.isArray(rows) && rows.length === request.rowCount
     && rows.every((row) => row && typeof row.sourceNumber === "string"
       && row.sourceNumber.length > 0 && row.sourceNumber === row.sourceNumber.trim()
       && !CONTROL_CHARACTER_PATTERN.test(row.sourceNumber)
@@ -153,7 +152,7 @@ export function assertAtomicImportRequest(request: AtomicImportRequest): void {
     ? new Set(rows.map((row) => `${row.sourceNumber}\u0000${row.sourceRevision}`))
     : new Set<string>();
   if (!valid
-    || identities.size !== PROCORE_RFI_ALLOWED_ROW_COUNT
+    || identities.size !== request.rowCount
     || retainedPayloadBytes > PROCORE_RFI_LIMITS.retainedPayloadBytes) {
     throw new Error("RFI_IMPORT_REQUEST_INVALID");
   }
@@ -228,8 +227,9 @@ export async function commitProcoreRfiImport(
     throw new Error("RFI_IMPORT_IDEMPOTENCY_KEY_INVALID");
   }
   const expectedProjectCode = input.expectedProjectCode.trim();
-  if (input.projectId !== PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID
-    || input.expectedRowCount !== PROCORE_RFI_ALLOWED_ROW_COUNT
+  if (!Number.isSafeInteger(input.projectId) || input.projectId < 1
+    || !Number.isSafeInteger(input.expectedRowCount) || input.expectedRowCount < 1
+    || input.expectedRowCount > PROCORE_RFI_LIMITS.rows
     || !Number.isInteger(input.expectedCompanyId) || input.expectedCompanyId < 1
     || !Number.isInteger(input.actorUserId) || input.actorUserId < 1
     || !expectedProjectCode

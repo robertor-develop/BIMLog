@@ -23,8 +23,8 @@ CREATE TABLE rfi_import_bindings (
   CONSTRAINT rfi_import_binding_version_positive CHECK (version > 0),
   CONSTRAINT rfi_import_binding_audit_identity_bounded CHECK
     (octet_length(audit_identity) BETWEEN 1 AND 256),
-  CONSTRAINT rfi_import_binding_project_26 CHECK (project_id = 26),
-  CONSTRAINT rfi_import_binding_provider_procore CHECK (provider = 'procore'),
+  CONSTRAINT rfi_import_binding_provider_bounded CHECK
+    (octet_length(provider) BETWEEN 1 AND 64),
   CONSTRAINT rfi_import_binding_source_project_bounded CHECK
     (octet_length(source_project_code) BETWEEN 1 AND 128),
   CONSTRAINT rfi_import_binding_digest_format CHECK
@@ -83,10 +83,10 @@ CREATE TABLE rfi_imports (
     (id, project_id, provider, source_project_code, binding_id, binding_version),
   CONSTRAINT rfi_import_replay_uq UNIQUE
     (project_id, provider, source_project_code, idempotency_key),
-  CONSTRAINT rfi_import_project_26 CHECK (project_id = 26),
-  CONSTRAINT rfi_import_row_count_exact CHECK (row_count = 43),
+  CONSTRAINT rfi_import_row_count_positive CHECK (row_count > 0),
   CONSTRAINT rfi_import_binding_version_positive CHECK (binding_version > 0),
-  CONSTRAINT rfi_import_provider_procore CHECK (provider = 'procore'),
+  CONSTRAINT rfi_import_provider_bounded CHECK
+    (octet_length(provider) BETWEEN 1 AND 64),
   CONSTRAINT rfi_import_source_digest_format CHECK (source_digest ~ '^[a-f0-9]{64}$'),
   CONSTRAINT rfi_import_project_digest_format CHECK
     (source_project_identity_digest ~ '^[a-f0-9]{64}$'),
@@ -117,7 +117,6 @@ CREATE TABLE rfi_import_rows (
   ),
   CONSTRAINT rfi_import_source_identity_uq UNIQUE
     (project_id, provider, source_project_code, source_number, source_revision),
-  CONSTRAINT rfi_import_row_project_26 CHECK (project_id = 26),
   CONSTRAINT rfi_import_row_binding_version_positive CHECK (binding_version > 0),
   CONSTRAINT rfi_import_source_revision_nonnegative CHECK (source_revision >= 0),
   CONSTRAINT rfi_import_source_number_bounded CHECK
@@ -126,6 +125,7 @@ CREATE TABLE rfi_import_rows (
     (octet_length(source_payload::text) <= 65536),
   CONSTRAINT rfi_import_row_source_project_bounded CHECK
     (octet_length(source_project_code) BETWEEN 1 AND 128),
-  CONSTRAINT rfi_import_row_provider_procore CHECK (provider = 'procore')
+  CONSTRAINT rfi_import_row_provider_bounded CHECK
+    (octet_length(provider) BETWEEN 1 AND 64)
 );
 `;

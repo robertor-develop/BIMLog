@@ -5,8 +5,6 @@ import {
   commitProcoreRfiImport,
   createProductionProcoreRfiImportStore,
   assertAtomicImportRequest,
-  PROCORE_RFI_ALLOWED_ROW_COUNT,
-  PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID,
   RFI_IMPORT_CAPABILITY,
   type CommitProcoreRfiImportInput,
   type ProductionRfiImportDatabase,
@@ -14,6 +12,7 @@ import {
   type StoredRfiImportReplay,
   type VerifiedRfiImportAuthorization,
 } from "./procore-rfi-import-commit";
+
 import {
   PROCORE_RFI_HEADERS,
   PROCORE_RFI_LIMITS,
@@ -22,6 +21,9 @@ import {
   procoreProjectIdentityDigest,
   toProcoreRfiPreviewResponse,
 } from "./procore-rfi-import";
+
+const SAMPLE_TARGET_PROJECT_ID = 26;
+const SAMPLE_ROW_COUNT = 43;
 
 const csvPath = process.argv[2];
 function authorizedSyntheticFixture(): string {
@@ -267,8 +269,8 @@ const input: CommitProcoreRfiImportInput = {
 };
 const controlSubjectCsv = csv.replace(firstSubject, `${firstSubject}\u0000Ruben`);
 
-assert.equal(input.projectId, PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID);
-assert.equal(input.expectedRowCount, PROCORE_RFI_ALLOWED_ROW_COUNT);
+assert.equal(input.projectId, SAMPLE_TARGET_PROJECT_ID);
+assert.equal(input.expectedRowCount, SAMPLE_ROW_COUNT);
 let rejectedStoreCalls = 0;
 const rejectedStore = {
   atomicImport: async () => {
@@ -277,7 +279,6 @@ const rejectedStore = {
   },
 };
 for (const rejectedInput of [
-  { ...input, projectId: 27 },
   { ...input, expectedRowCount: 42 },
   { ...input, expectedProjectCode: " ELA01" },
   { ...input, expectedProjectCode: `ELA01\u0000RUBEN` },
@@ -348,6 +349,10 @@ const validAtomicRequest = {
   })),
 };
 assert.doesNotThrow(() => assertAtomicImportRequest(validAtomicRequest));
+assert.doesNotThrow(() => assertAtomicImportRequest({
+  ...validAtomicRequest,
+  authorization: { ...validAtomicRequest.authorization, projectId: 27, projectCode: "ANY27" },
+}));
 const invalidAtomicRequests = [
   { ...validAtomicRequest, sourceDigest: validAtomicRequest.sourceDigest.toUpperCase() },
   {
@@ -458,6 +463,14 @@ assert.match(schema, /sourceProjectIdentityDigest/);
 assert.match(schema, /rfiImportsTable[\s\S]*?bindingId:[\s\S]*?bindingVersion:[\s\S]*?bindingAuditIdentity:[\s\S]*?projectId:[\s\S]*?provider:[\s\S]*?sourceProjectCode:[\s\S]*?sourceProjectIdentityDigest:/);
 assert.match(schema, /rfiImportRowsTable[\s\S]*?importId:[\s\S]*?bindingId:[\s\S]*?bindingVersion:[\s\S]*?projectId:[\s\S]*?provider:[\s\S]*?sourceProjectCode:/);
 assert.doesNotMatch(schema, /rfiId: integer\("rfi_id"\)/);
+assert.doesNotMatch(schema, /projectId\} = 26|provider\} = 'procore'|rowCount\} = 43/);
+assert.match(schema, /rfi_import_row_count_positive/);
+assert.match(schema, /rfi_import_provider_bounded/);
+
+const migration = await readFile(new URL("./procore-rfi-import-migration.ts", import.meta.url), "utf8");
+assert.doesNotMatch(migration, /project_id = 26|provider = 'procore'|row_count = 43/);
+assert.match(migration, /rfi_import_row_count_positive/);
+assert.match(migration, /rfi_import_provider_bounded/);
 
 console.log(JSON.stringify({
   status: "PASS",

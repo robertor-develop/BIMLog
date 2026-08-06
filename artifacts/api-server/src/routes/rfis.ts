@@ -59,8 +59,6 @@ import {
 } from "../lib/procore-rfi-import";
 import {
   commitProcoreRfiImport,
-  PROCORE_RFI_ALLOWED_ROW_COUNT,
-  PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID,
   RFI_IMPORT_CAPABILITY,
 } from "../lib/procore-rfi-import-commit";
 import {
@@ -3639,8 +3637,6 @@ router.get("/projects/:projectId/rfis/:rfiId/export-word", authMiddleware, requi
   }
 });
 
-const PROJECT_26_PROCORE_SOURCE_SHA256 = "cb0088dcf3b603138148d23cfeeb66a4dced930cb2d602ee2ed17c1ef0988959";
-
 type Project26ProcoreImportFields = {
   expectedSourceSha256: string;
   expectedRowCount: number;
@@ -3664,11 +3660,12 @@ function parseProject26ProcoreImportFields(body: Record<string, unknown> | undef
       ...(value("sourceProjectAddress") ? { address: value("sourceProjectAddress") } : {}),
     },
   };
-  if (fields.expectedSourceSha256 !== PROJECT_26_PROCORE_SOURCE_SHA256
-    || fields.expectedRowCount !== PROCORE_RFI_ALLOWED_ROW_COUNT
-    || fields.expectedProjectCode !== "ELA01"
+  if (!/^[a-f0-9]{64}$/.test(fields.expectedSourceSha256)
+    || !Number.isSafeInteger(fields.expectedRowCount) || fields.expectedRowCount < 1
+    || fields.expectedRowCount > PROCORE_RFI_LIMITS.rows
+    || !fields.expectedProjectCode
     || !Number.isSafeInteger(fields.expectedCompanyId) || fields.expectedCompanyId < 1
-    || fields.sourceProject.code !== "50250001"
+    || !fields.sourceProject.code
     || !fields.sourceProject.name) {
     throw new Error("PROCORE_RFI_IMPORT_REQUEST_INVALID");
   }
@@ -3682,7 +3679,7 @@ async function requireCurrentProject26ProcoreImportBinding(input: {
   actorUserId: number;
   actorCompanyId: number;
 }): Promise<void> {
-  if (input.projectId !== PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID
+  if (!Number.isSafeInteger(input.projectId) || input.projectId < 1
     || input.actorCompanyId !== input.fields.expectedCompanyId) {
     throw new Error("PROCORE_RFI_IMPORT_AUTHORIZATION_DENIED");
   }

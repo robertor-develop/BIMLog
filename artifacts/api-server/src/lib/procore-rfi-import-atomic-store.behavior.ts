@@ -1,17 +1,19 @@
 import assert from "node:assert/strict";
 import { PROCORE_RFI_HEADERS, type ProcoreRfiRow } from "./procore-rfi-import";
 import {
-  PROCORE_RFI_ALLOWED_ROW_COUNT,
-  PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID,
   type AtomicImportRequest,
   type VerifiedRfiImportAuthorization,
 } from "./procore-rfi-import-commit";
+
 import {
   createPostgresProcoreRfiImportStore,
   type ProcoreRfiPgClient,
   type ProcoreRfiPgPool,
 } from "./procore-rfi-import-atomic-store";
 import { PROCORE_RFI_IMPORT_MIGRATION_SQL } from "./procore-rfi-import-migration";
+
+const SAMPLE_TARGET_PROJECT_ID = 26;
+const SAMPLE_ROW_COUNT = 43;
 
 const digest = "a".repeat(64);
 const projectDigest = "b".repeat(64);
@@ -36,7 +38,7 @@ function createSyntheticRow(index: number): AtomicImportRequest["rows"][number] 
   sourcePayload.Private = "false";
   return { sourceNumber, sourceRevision, sourcePayload };
 }
-const rows = Array.from({ length: PROCORE_RFI_ALLOWED_ROW_COUNT }, (_, index) => createSyntheticRow(index));
+const rows = Array.from({ length: SAMPLE_ROW_COUNT }, (_, index) => createSyntheticRow(index));
 const request: AtomicImportRequest = {
   authorization, idempotencyKey: "procore-50250001-20260805", sourceDigest: digest, rowCount: rows.length, rows,
 };
@@ -236,8 +238,8 @@ class FakePgClient implements ProcoreRfiPgClient {
 
 const pool = new FakePgPool();
 const store = createPostgresProcoreRfiImportStore(pool);
-assert.equal(request.authorization.projectId, PROCORE_RFI_ALLOWED_TARGET_PROJECT_ID);
-assert.equal(request.rows.length, PROCORE_RFI_ALLOWED_ROW_COUNT);
+assert.equal(request.authorization.projectId, SAMPLE_TARGET_PROJECT_ID);
+assert.equal(request.rows.length, SAMPLE_ROW_COUNT);
 const [first, concurrent] = await Promise.all([store.atomicImport(request), store.atomicImport(request)]);
 assert.deepEqual([first.outcome, concurrent.outcome].sort(), ["created", "replay"]);
 assert.equal(pool.state.imports.size, 1);
@@ -283,13 +285,13 @@ for (const failure of ["failMaterialization", "failActivity", "failNotification"
 const serializationRetryPool = new FakePgPool();
 serializationRetryPool.serializationFailuresRemaining = 1;
 assert.deepEqual(await createPostgresProcoreRfiImportStore(serializationRetryPool).atomicImport(request), {
-  outcome: "created", importId: 1, rowCount: PROCORE_RFI_ALLOWED_ROW_COUNT, digest,
+  outcome: "created", importId: 1, rowCount: SAMPLE_ROW_COUNT, digest,
 });
 assert.equal(serializationRetryPool.state.imports.size, 1);
-assert.equal(serializationRetryPool.state.identities.size, PROCORE_RFI_ALLOWED_ROW_COUNT);
-assert.equal(serializationRetryPool.state.rfis.size, PROCORE_RFI_ALLOWED_ROW_COUNT);
-assert.equal(serializationRetryPool.state.activities, PROCORE_RFI_ALLOWED_ROW_COUNT);
-assert.equal(serializationRetryPool.state.notifications, PROCORE_RFI_ALLOWED_ROW_COUNT);
+assert.equal(serializationRetryPool.state.identities.size, SAMPLE_ROW_COUNT);
+assert.equal(serializationRetryPool.state.rfis.size, SAMPLE_ROW_COUNT);
+assert.equal(serializationRetryPool.state.activities, SAMPLE_ROW_COUNT);
+assert.equal(serializationRetryPool.state.notifications, SAMPLE_ROW_COUNT);
 assert.equal(serializationRetryPool.trace.filter((sql) => sql === "BEGIN ISOLATION LEVEL SERIALIZABLE").length, 2);
 assert.equal(serializationRetryPool.trace.filter((sql) => sql === "ROLLBACK").length, 1);
 assert.equal(serializationRetryPool.trace.filter((sql) => sql === "COMMIT").length, 1);
