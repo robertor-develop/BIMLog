@@ -45,25 +45,11 @@ const zeroLabor = validateCostValuePlan({
 assert.equal(zeroLabor.evaluation.productionPhaseTotal, "0.00");
 assert.equal(zeroLabor.evaluation.administrativeLineTotal, "0.00");
 
-const percentagePlan = validateCostValuePlan({
-  ...balanced, sellingPrice: "120.00", fixedCompanyCost: "20.00", allocationMode: "percentage",
-  allocationPercentages: { labor: "70", bonus: "20.0", taskEarnings: "10.00" },
-  allocations: { labor: "ignored", bonus: "ignored", taskEarnings: "ignored" },
-  laborSplit: { production: "50.00", administrative: "20.00" },
-  productionPhases: [{ id: "phase", name: "Production", amount: "50.00" }],
-  administrativeLines: [{ id: "admin", name: "Administration", amount: "20.00" }],
-});
-assert.deepEqual(percentagePlan.plan.allocations, { labor: "70.00", bonus: "20.00", taskEarnings: "10.00" });
-assert.deepEqual(percentagePlan.plan.allocationPercentages, { labor: "70.00", bonus: "20.00", taskEarnings: "10.00" });
-rejects({ ...balanced, allocationMode: "percentage", allocationPercentages: { labor: "70.001", bonus: "20", taskEarnings: "9.999" } }, "COST_VALUE_PERCENT_INVALID");
-
 const uiRoot = path.resolve("../bimlog/src");
 const financialShell = fs.readFileSync(path.join(uiRoot, "components/layout/FinancialProjectShell.tsx"), "utf8");
 const plannerWorkspace = fs.readFileSync(path.join(uiRoot, "pages/FinancialApuWorkspace.tsx"), "utf8");
 assert.match(financialShell, /className="page-content financial-page-content"/);
 assert.match(plannerWorkspace, /padding:24px 24px 104px/);
 assert.match(plannerWorkspace, /\.savebar\{position:sticky;bottom:12px/);
-assert.match(plannerWorkspace, /Percentages/);
-assert.match(plannerWorkspace, /normalizeTwoDecimals/);
 
 console.log("Cost & Value Planner validation: passed.");

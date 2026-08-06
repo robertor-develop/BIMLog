@@ -3,7 +3,6 @@ import { authMiddleware } from "../middlewares/auth";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import { CostValuePlanError, getCostValuePlan, saveCostValuePlan } from "../lib/cost-value-plan-service";
 import { exportCostValuePerformanceCsv, getCostValuePerformance, saveCostValuePerformance } from "../lib/cost-value-performance-service";
-import { exportCostValueForecastCsv, getCostValueForecast, saveCostValueForecast } from "../lib/cost-value-forecast-service";
 
 const router = Router();
 router.use("/projects/:projectId/financial/apu", authMiddleware);
@@ -39,18 +38,6 @@ router.get("/projects/:projectId/financial/apu/performance.csv", run(async (req,
   const csv = await exportCostValuePerformanceCsv(req.user.userId, projectId(req.params.projectId));
   res.setHeader("Content-Type", "text/csv; charset=utf-8");
   res.setHeader("Content-Disposition", `attachment; filename="cost-value-performance-project-${projectId(req.params.projectId)}.csv"`);
-  res.send(csv);
-}));
-router.get("/projects/:projectId/financial/apu/forecast", run(async (req, res) => {
-  res.json(await getCostValueForecast(req.user.userId, projectId(req.params.projectId)));
-}));
-router.put("/projects/:projectId/financial/apu/forecast", run(async (req, res) => {
-  res.json(await saveCostValueForecast(req.user.userId, projectId(req.params.projectId), req.body));
-}));
-router.get("/projects/:projectId/financial/apu/forecast.csv", run(async (req, res) => {
-  const csv = await exportCostValueForecastCsv(req.user.userId, projectId(req.params.projectId));
-  res.setHeader("Content-Type", "text/csv; charset=utf-8");
-  res.setHeader("Content-Disposition", `attachment; filename="cost-value-forecast-project-${projectId(req.params.projectId)}.csv"`);
   res.send(csv);
 }));
 
