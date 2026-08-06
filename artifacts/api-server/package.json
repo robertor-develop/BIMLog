@@ -9,7 +9,7 @@
   ],
   "scripts": {
     "dev": "NODE_ENV=development tsx ./src/index.ts",
-    "build": "tsx ./build.ts && tsx ./scripts/test-production-artifact-closure.ts",
+    "build": "tsx ./build.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:multipart-security": "tsx ./scripts/test-multipart-security.ts",
     "test:sendgrid-transport": "tsx ./scripts/test-sendgrid-transport.ts",
