@@ -533,3 +533,7 @@ Items, Procore RFI import, and Generic APU paths; this is local build metadata, 
 The accepted 12-path Commercial/Financial backend set is also integrated locally: Financial Budget import,
 service, HTTP behavior, and Generic APU engine/persistence/schema paths. Its supporting proofs are local and
 credential-free; no customer or production database execution occurred.
+
+The frozen Generic APU backend readiness follow-up is integrated as exact commit `384ffcb8c8aa5f6d9780648ae211b175f5a30b63`.
+It adds only the accepted service, contract, budget-control route, behavior evidence, and schema/route exports;
+no database, provider, publication, or deployment action occurred.

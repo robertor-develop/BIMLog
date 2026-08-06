@@ -6157,6 +6157,121 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e14c7905b74a0550b8143cb290b8c9adba178628c07dd31e4bdd422ebefb0bb3"
+    },
+    {
+      "taskId": "generic-apu-backend-readiness-integration-20260805",
+      "reviewedThroughCommit": "384ffcb8c8aa5f6d9780648ae211b175f5a30b63",
+      "reviewedAt": "2026-08-05T20:00:20-04:00",
+      "status": "local_integration_accepted_consolidated_build_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Reconciles the frozen Generic APU backend readiness follow-up while preserving the exact Commercial backend and clean-six APU UI identities; no database, provider, publication, or deployment action occurred.",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "F-root exact commit integration",
+          "credential-free scoped source acceptance",
+          "Living Brief semantic reconciliation"
+        ],
+        "operatorOnly": [
+          "customer or production database execution",
+          "provider target verification",
+          "push, publication, and deployment"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "APU persistence and schema exports remain source-only until separately authorized database and deployment gates."
+        }
+      ],
+      "workstreams": [
+        "generic-apu-backend-readiness",
+        "generic-apu-ui",
+        "commercial-financial-backend"
+      ],
+      "evidence": [
+        {
+          "path": "evidence/generic-apu-backend-consolidation-20260805/apu-release-integration-readiness-20260805.json",
+          "type": "accepted_readiness_packet",
+          "result": "preserved_external_receipt_2c8068ac",
+          "boundary": "Local source readiness only; no database, provider, customer, publication, or deployment action."
+        },
+        {
+          "path": "artifacts/bimlog/src/project-26-apu-harness.tsx",
+          "type": "apu_ui_clean_six",
+          "result": "accepted_8_of_8_and_frontend_tsc_pass",
+          "boundary": "Chrome helper proof remains separate due unavailable helper; no visual claim added."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or authority change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution and release boundaries remain."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing scoped proof, typecheck, build, and independent acceptance gates remain."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or commercial promise change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Deterministic platform inventory includes the accepted APU service, contract, budget-control route, behaviors, and exports."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design behavior change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact local readiness integration and retained no-database boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps scoped proof, consolidated build, RFI reservation, database, and provider gates explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "8f268bb6150541b26602a57a33bacd0835788ae3a775b39598797882f6908673"
     }
   ]
 }

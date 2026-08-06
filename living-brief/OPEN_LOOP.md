@@ -1689,3 +1689,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   separately authorized provider or publication action.
 - Retain the accepted Commercial/Financial backend set in the consolidated build while keeping migration and
   customer/production database execution outside this local release step.
+- Re-run the scoped APU proofs and consolidated clean build against `384ffcb8…` after the active RFI schema
+  reservation is resolved; keep database execution and provider/publication gates separate.

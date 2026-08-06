@@ -65,6 +65,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/financial-budgets.ts
 - artifacts/api-server/src/routes/financial-contracts.ts
 - artifacts/api-server/src/routes/financial-controls.ts
+- artifacts/api-server/src/routes/generic-apu-budget-controls.ts
 - artifacts/api-server/src/routes/health.ts
 - artifacts/api-server/src/routes/index.ts
 - artifacts/api-server/src/routes/intelligence.ts
@@ -126,6 +127,7 @@ It changes only when the code structure or curated architectural facts change.
 - financialControlsRouter
 - financialBudgetsRouter
 - financialContractsRouter
+- genericApuBudgetControlsRouter
 - coordinatorActionsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
@@ -140,6 +142,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/ai-control-plane.ts
 - artifacts/api-server/src/lib/ai-control-plane.ui-fixture.ts
 - artifacts/api-server/src/lib/ai-usage.ts
+- artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts
+- artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts
+- artifacts/api-server/src/lib/apu-budget-authority-service.ts
 - artifacts/api-server/src/lib/cloud-files.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
 - artifacts/api-server/src/lib/coordinator-bulk-action-migration.ts
@@ -187,12 +192,15 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-control-migration.ts
 - artifacts/api-server/src/lib/financial-control-service.ts
 - artifacts/api-server/src/lib/financial-control.behavior.ts
+- artifacts/api-server/src/lib/generic-apu-budget-control.ts
+- artifacts/api-server/src/lib/generic-apu-contract.ts
 - artifacts/api-server/src/lib/generic-apu-engine-edge.behavior.ts
 - artifacts/api-server/src/lib/generic-apu-engine.ts
 - artifacts/api-server/src/lib/generic-apu-persistence-db-harness.behavior.ts
 - artifacts/api-server/src/lib/generic-apu-persistence-db-harness.ts
 - artifacts/api-server/src/lib/generic-apu-persistence-db.behavior.ts
 - artifacts/api-server/src/lib/generic-apu-persistence-migration.ts
+- artifacts/api-server/src/lib/generic-apu.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
