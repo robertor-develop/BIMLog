@@ -17,8 +17,8 @@ export const commercialEntitlementEventsTable = pgTable("commercial_entitlement_
   foreignKey({ name: "commercial_entitlement_events_actor_user_id_fkey", columns: [table.actorUserId], foreignColumns: [usersTable.id] }),
   check("commercial_entitlement_reason_chk", sql`length(${table.reason}) between 3 and 1000`),
   check("commercial_entitlement_source_chk", sql`${table.source} in ('super_admin','initial_bootstrap')`),
-  index("commercial_entitlement_user_sequence_idx").on(table.userId, table.sequence.desc()),
-  index("commercial_entitlement_user_feature_sequence_idx").on(table.userId, table.featureKey, table.sequence.desc()),
+  index("commercial_entitlement_user_sequence_idx").on(table.userId, table.sequence.desc().nullsFirst()),
+  index("commercial_entitlement_user_feature_sequence_idx").on(table.userId, table.featureKey, table.sequence.desc().nullsFirst()),
 ]);
 
 export type CommercialEntitlementEvent = typeof commercialEntitlementEventsTable.$inferSelect;

@@ -244,7 +244,7 @@ export const genericCostValuePlanVersionsTable = pgTable(
       name: "generic_cost_value_plan_versions_supersedes_id_fkey",
     }),
     uniqueIndex("generic_cost_value_plan_project_version_uidx").on(table.projectId, table.version),
-    index("generic_cost_value_plan_project_latest_idx").on(table.projectId, table.version.desc()),
+    index("generic_cost_value_plan_project_latest_idx").on(table.projectId, table.version.desc().nullsFirst()),
     check("generic_cost_value_plan_version_positive_chk", sql`${table.version} > 0`),
   ],
 );
@@ -273,7 +273,7 @@ export const genericCostValuePerformanceVersionsTable = pgTable(
       name: "generic_cost_value_performance_versions_supersedes_id_fkey",
     }),
     uniqueIndex("generic_cost_value_performance_project_version_uidx").on(table.projectId, table.version),
-    index("generic_cost_value_performance_project_latest_idx").on(table.projectId, table.version.desc()),
+    index("generic_cost_value_performance_project_latest_idx").on(table.projectId, table.version.desc().nullsFirst()),
     check("generic_cost_value_performance_version_positive_chk", sql`${table.version} > 0`),
   ],
 );
