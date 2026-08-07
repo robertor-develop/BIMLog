@@ -26,10 +26,8 @@ export const genericApuTemplateVersionsTable = pgTable(
   {
     id: text("id").primaryKey(),
     templateId: text("template_id").notNull(),
-    companyId: integer("company_id")
-      .references(() => companiesTable.id)
-      .notNull(),
-    projectId: integer("project_id").references(() => projectsTable.id),
+    companyId: integer("company_id").notNull(),
+    projectId: integer("project_id"),
     version: integer("version").notNull(),
     name: text("name").notNull(),
     industry: text("industry").notNull(),
@@ -42,16 +40,18 @@ export const genericApuTemplateVersionsTable = pgTable(
       .$type<Record<string, unknown>>()
       .notNull()
       .default({}),
-    createdById: integer("created_by_id")
-      .references(() => usersTable.id)
-      .notNull(),
-    publishedById: integer("published_by_id").references(() => usersTable.id),
+    createdById: integer("created_by_id").notNull(),
+    publishedById: integer("published_by_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
     publishedAt: timestamp("published_at", { withTimezone: true }),
   },
   (table) => [
+    foreignKey({ name: "generic_apu_template_versions_company_id_fkey", columns: [table.companyId], foreignColumns: [companiesTable.id] }),
+    foreignKey({ name: "generic_apu_template_versions_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),
+    foreignKey({ name: "generic_apu_template_versions_created_by_id_fkey", columns: [table.createdById], foreignColumns: [usersTable.id] }),
+    foreignKey({ name: "generic_apu_template_versions_published_by_id_fkey", columns: [table.publishedById], foreignColumns: [usersTable.id] }),
     foreignKey({
       columns: [table.supersedesId],
       foreignColumns: [table.id],
@@ -98,9 +98,7 @@ export const genericApuTemplateNodesTable = pgTable(
   "generic_apu_template_nodes",
   {
     id: text("id").primaryKey(),
-    templateVersionId: text("template_version_id")
-      .references(() => genericApuTemplateVersionsTable.id)
-      .notNull(),
+    templateVersionId: text("template_version_id").notNull(),
     stableNodeId: text("stable_node_id").notNull(),
     parentNodeId: text("parent_node_id"),
     method: text("method").notNull(),
@@ -124,6 +122,7 @@ export const genericApuTemplateNodesTable = pgTable(
       .notNull(),
   },
   (table) => [
+    foreignKey({ name: "generic_apu_template_nodes_template_version_id_fkey", columns: [table.templateVersionId], foreignColumns: [genericApuTemplateVersionsTable.id] }),
     foreignKey({
       columns: [table.parentNodeId],
       foreignColumns: [table.id],
@@ -169,15 +168,9 @@ export const genericProjectApuVersionsTable = pgTable(
   {
     id: text("id").primaryKey(),
     projectApuId: text("project_apu_id").notNull(),
-    projectId: integer("project_id")
-      .references(() => projectsTable.id)
-      .notNull(),
-    companyId: integer("company_id")
-      .references(() => companiesTable.id)
-      .notNull(),
-    templateVersionId: text("template_version_id")
-      .references(() => genericApuTemplateVersionsTable.id)
-      .notNull(),
+    projectId: integer("project_id").notNull(),
+    companyId: integer("company_id").notNull(),
+    templateVersionId: text("template_version_id").notNull(),
     version: integer("version").notNull(),
     status: text("status").notNull(),
     currency: text("currency").notNull(),
@@ -190,9 +183,7 @@ export const genericProjectApuVersionsTable = pgTable(
       .$type<Record<string, unknown>>()
       .notNull()
       .default({}),
-    appliedById: integer("applied_by_id")
-      .references(() => usersTable.id)
-      .notNull(),
+    appliedById: integer("applied_by_id").notNull(),
     appliedAt: timestamp("applied_at", { withTimezone: true }).notNull(),
     lockedAt: timestamp("locked_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
@@ -200,6 +191,10 @@ export const genericProjectApuVersionsTable = pgTable(
       .notNull(),
   },
   (table) => [
+    foreignKey({ name: "generic_project_apu_versions_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),
+    foreignKey({ name: "generic_project_apu_versions_company_id_fkey", columns: [table.companyId], foreignColumns: [companiesTable.id] }),
+    foreignKey({ name: "generic_project_apu_versions_template_version_id_fkey", columns: [table.templateVersionId], foreignColumns: [genericApuTemplateVersionsTable.id] }),
+    foreignKey({ name: "generic_project_apu_versions_applied_by_id_fkey", columns: [table.appliedById], foreignColumns: [usersTable.id] }),
     foreignKey({
       columns: [table.supersedesId],
       foreignColumns: [table.id],
@@ -231,23 +226,25 @@ export const genericCostValuePlanVersionsTable = pgTable(
   "generic_cost_value_plan_versions",
   {
     id: text("id").primaryKey(),
-    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
+    projectId: integer("project_id").notNull(),
     version: integer("version").notNull(),
     content: jsonb("content").$type<Record<string, unknown>>().notNull(),
     evaluation: jsonb("evaluation").$type<Record<string, unknown>>().notNull(),
     contentFingerprint: text("content_fingerprint").notNull(),
     supersedesId: text("supersedes_id"),
-    createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+    createdById: integer("created_by_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    foreignKey({ name: "generic_cost_value_plan_versions_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),
+    foreignKey({ name: "generic_cost_value_plan_versions_created_by_id_fkey", columns: [table.createdById], foreignColumns: [usersTable.id] }),
     foreignKey({
       columns: [table.supersedesId],
       foreignColumns: [table.id],
-      name: "generic_cost_value_plan_supersedes_fk",
+      name: "generic_cost_value_plan_versions_supersedes_id_fkey",
     }),
     uniqueIndex("generic_cost_value_plan_project_version_uidx").on(table.projectId, table.version),
-    index("generic_cost_value_plan_project_latest_idx").on(table.projectId, table.version),
+    index("generic_cost_value_plan_project_latest_idx").on(table.projectId, table.version.desc()),
     check("generic_cost_value_plan_version_positive_chk", sql`${table.version} > 0`),
   ],
 );
@@ -256,24 +253,27 @@ export const genericCostValuePerformanceVersionsTable = pgTable(
   "generic_cost_value_performance_versions",
   {
     id: text("id").primaryKey(),
-    projectId: integer("project_id").references(() => projectsTable.id).notNull(),
-    planVersionId: text("plan_version_id").references(() => genericCostValuePlanVersionsTable.id).notNull(),
+    projectId: integer("project_id").notNull(),
+    planVersionId: text("plan_version_id").notNull(),
     version: integer("version").notNull(),
     content: jsonb("content").$type<Record<string, unknown>>().notNull(),
     evaluation: jsonb("evaluation").$type<Record<string, unknown>>().notNull(),
     contentFingerprint: text("content_fingerprint").notNull(),
     supersedesId: text("supersedes_id"),
-    createdById: integer("created_by_id").references(() => usersTable.id).notNull(),
+    createdById: integer("created_by_id").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
+    foreignKey({ name: "generic_cost_value_performance_versions_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),
+    foreignKey({ name: "generic_cost_value_performance_versions_plan_version_id_fkey", columns: [table.planVersionId], foreignColumns: [genericCostValuePlanVersionsTable.id] }),
+    foreignKey({ name: "generic_cost_value_performance_versions_created_by_id_fkey", columns: [table.createdById], foreignColumns: [usersTable.id] }),
     foreignKey({
       columns: [table.supersedesId],
       foreignColumns: [table.id],
-      name: "generic_cost_value_performance_supersedes_fk",
+      name: "generic_cost_value_performance_versions_supersedes_id_fkey",
     }),
     uniqueIndex("generic_cost_value_performance_project_version_uidx").on(table.projectId, table.version),
-    index("generic_cost_value_performance_project_latest_idx").on(table.projectId, table.version),
+    index("generic_cost_value_performance_project_latest_idx").on(table.projectId, table.version.desc()),
     check("generic_cost_value_performance_version_positive_chk", sql`${table.version} > 0`),
   ],
 );
@@ -282,12 +282,8 @@ export const genericProjectApuLinesTable = pgTable(
   "generic_project_apu_lines",
   {
     id: text("id").primaryKey(),
-    projectApuVersionId: text("project_apu_version_id")
-      .references(() => genericProjectApuVersionsTable.id)
-      .notNull(),
-    templateNodeId: text("template_node_id")
-      .references(() => genericApuTemplateNodesTable.id)
-      .notNull(),
+    projectApuVersionId: text("project_apu_version_id").notNull(),
+    templateNodeId: text("template_node_id").notNull(),
     stableLineId: text("stable_line_id").notNull(),
     method: text("method").notNull(),
     rawInputs: jsonb("raw_inputs")
@@ -308,6 +304,8 @@ export const genericProjectApuLinesTable = pgTable(
       .notNull(),
   },
   (table) => [
+    foreignKey({ name: "generic_project_apu_lines_project_apu_version_id_fkey", columns: [table.projectApuVersionId], foreignColumns: [genericProjectApuVersionsTable.id] }),
+    foreignKey({ name: "generic_project_apu_lines_template_node_id_fkey", columns: [table.templateNodeId], foreignColumns: [genericApuTemplateNodesTable.id] }),
     uniqueIndex("generic_project_apu_line_stable_uidx").on(
       table.projectApuVersionId,
       table.stableLineId,
@@ -335,18 +333,10 @@ export const genericApuCommitmentVersionsTable = pgTable(
     id: text("id").primaryKey(),
     commitmentId: text("commitment_id").notNull(),
     version: integer("version").notNull(),
-    projectApuVersionId: text("project_apu_version_id")
-      .references(() => genericProjectApuVersionsTable.id)
-      .notNull(),
-    projectApuLineId: text("project_apu_line_id")
-      .references(() => genericProjectApuLinesTable.id)
-      .notNull(),
-    companyId: integer("company_id")
-      .references(() => companiesTable.id)
-      .notNull(),
-    projectId: integer("project_id")
-      .references(() => projectsTable.id)
-      .notNull(),
+    projectApuVersionId: text("project_apu_version_id").notNull(),
+    projectApuLineId: text("project_apu_line_id").notNull(),
+    companyId: integer("company_id").notNull(),
+    projectId: integer("project_id").notNull(),
     assignmentRef: text("assignment_ref").notNull(),
     amount: exactAmount("amount").notNull(),
     currency: text("currency").notNull(),
@@ -359,16 +349,20 @@ export const genericApuCommitmentVersionsTable = pgTable(
       .$type<Record<string, unknown>>()
       .notNull()
       .default({}),
-    createdById: integer("created_by_id")
-      .references(() => usersTable.id)
-      .notNull(),
-    approvedById: integer("approved_by_id").references(() => usersTable.id),
+    createdById: integer("created_by_id").notNull(),
+    approvedById: integer("approved_by_id"),
     createdAt: timestamp("created_at", { withTimezone: true })
       .defaultNow()
       .notNull(),
     approvedAt: timestamp("approved_at", { withTimezone: true }),
   },
   (table) => [
+    foreignKey({ name: "generic_apu_commitment_versions_project_apu_version_id_fkey", columns: [table.projectApuVersionId], foreignColumns: [genericProjectApuVersionsTable.id] }),
+    foreignKey({ name: "generic_apu_commitment_versions_project_apu_line_id_fkey", columns: [table.projectApuLineId], foreignColumns: [genericProjectApuLinesTable.id] }),
+    foreignKey({ name: "generic_apu_commitment_versions_company_id_fkey", columns: [table.companyId], foreignColumns: [companiesTable.id] }),
+    foreignKey({ name: "generic_apu_commitment_versions_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),
+    foreignKey({ name: "generic_apu_commitment_versions_created_by_id_fkey", columns: [table.createdById], foreignColumns: [usersTable.id] }),
+    foreignKey({ name: "generic_apu_commitment_versions_approved_by_id_fkey", columns: [table.approvedById], foreignColumns: [usersTable.id] }),
     foreignKey({
       columns: [table.supersedesId],
       foreignColumns: [table.id],
@@ -408,21 +402,13 @@ export const genericApuOverrunApprovalsTable = pgTable(
   "generic_apu_overrun_approvals",
   {
     id: text("id").primaryKey(),
-    commitmentVersionId: text("commitment_version_id")
-      .references(() => genericApuCommitmentVersionsTable.id)
-      .notNull(),
-    companyId: integer("company_id")
-      .references(() => companiesTable.id)
-      .notNull(),
-    projectId: integer("project_id")
-      .references(() => projectsTable.id)
-      .notNull(),
+    commitmentVersionId: text("commitment_version_id").notNull(),
+    companyId: integer("company_id").notNull(),
+    projectId: integer("project_id").notNull(),
     amount: exactAmount("amount").notNull(),
     currency: text("currency").notNull(),
     reason: text("reason").notNull(),
-    approverId: integer("approver_id")
-      .references(() => usersTable.id)
-      .notNull(),
+    approverId: integer("approver_id").notNull(),
     contentFingerprint: text("content_fingerprint").notNull(),
     provenance: jsonb("provenance")
       .$type<Record<string, unknown>>()
@@ -434,6 +420,10 @@ export const genericApuOverrunApprovalsTable = pgTable(
       .notNull(),
   },
   (table) => [
+    foreignKey({ name: "generic_apu_overrun_approvals_commitment_version_id_fkey", columns: [table.commitmentVersionId], foreignColumns: [genericApuCommitmentVersionsTable.id] }),
+    foreignKey({ name: "generic_apu_overrun_approvals_company_id_fkey", columns: [table.companyId], foreignColumns: [companiesTable.id] }),
+    foreignKey({ name: "generic_apu_overrun_approvals_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),
+    foreignKey({ name: "generic_apu_overrun_approvals_approver_id_fkey", columns: [table.approverId], foreignColumns: [usersTable.id] }),
     uniqueIndex("generic_apu_overrun_fingerprint_uidx").on(
       table.commitmentVersionId,
       table.contentFingerprint,
