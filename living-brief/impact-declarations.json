@@ -7071,6 +7071,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a32371b0f24aebddd4ff4ea708f790e981f763dd8a6668e6bff3337c72ccc6d2"
+    },
+    {
+      "taskId": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
+      "reviewedAt": "2026-08-07T14:20:00-04:00",
+      "status": "local_contract_workspace_candidate_validated",
+      "captureTiming": "same_commercial_task",
+      "summary": "Exposes the existing contract detail, Schedule of Values, amendment lifecycle, immutable history, responsive browser proof, and rendered PDF evidence in the Commercial user interface.",
+      "workstreams": [
+        "commercial-contracts",
+        "contract-detail-workspace",
+        "amendment-workflow"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or operating-authority doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Development and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Contract acceptance now covers detail expansion, responsive rendering, and retained PDF fidelity."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation advances the approved Commercial contracts objective."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The Commercial interface now exposes existing contract detail and amendment capabilities."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks or browser plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The governed contract PDF implementation remains unchanged and was visually reverified."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The user explicitly selected Commercial Contracts and Commitments expansion as active work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted incident record is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
