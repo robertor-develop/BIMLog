@@ -16,10 +16,10 @@ CREATE TABLE rfi_import_bindings (
   created_at timestamp NOT NULL DEFAULT now(),
   CONSTRAINT rfi_import_binding_pk PRIMARY KEY (id, version),
   CONSTRAINT rfi_import_binding_reference_uq UNIQUE
-    (id, version, project_id, provider, audit_identity, source_project_code, source_project_identity_digest),
+    (id, version, audit_identity, project_id, provider, source_project_code, source_project_identity_digest),
   CONSTRAINT rfi_import_binding_capability_uq UNIQUE (id, version, capability),
   CONSTRAINT rfi_import_binding_identity_version_uq UNIQUE
-    (project_id, company_id, provider, source_project_code, capability, version),
+    (version, project_id, company_id, provider, source_project_code, capability),
   CONSTRAINT rfi_import_binding_version_positive CHECK (version > 0),
   CONSTRAINT rfi_import_binding_audit_identity_bounded CHECK
     (octet_length(audit_identity) BETWEEN 1 AND 256),
@@ -73,14 +73,14 @@ CREATE TABLE rfi_imports (
   row_count integer NOT NULL,
   created_at timestamp NOT NULL DEFAULT now(),
   CONSTRAINT rfi_import_binding_identity_fk FOREIGN KEY(
-    binding_id, binding_version, project_id, provider,
-    binding_audit_identity, source_project_code, source_project_identity_digest
+    binding_id, binding_version, binding_audit_identity, project_id,
+    provider, source_project_code, source_project_identity_digest
   ) REFERENCES rfi_import_bindings(
-    id, version, project_id, provider,
-    audit_identity, source_project_code, source_project_identity_digest
+    id, version, audit_identity, project_id,
+    provider, source_project_code, source_project_identity_digest
   ),
   CONSTRAINT rfi_import_composite_identity_uq UNIQUE
-    (id, project_id, provider, source_project_code, binding_id, binding_version),
+    (id, binding_id, binding_version, project_id, provider, source_project_code),
   CONSTRAINT rfi_import_replay_uq UNIQUE
     (project_id, provider, source_project_code, idempotency_key),
   CONSTRAINT rfi_import_row_count_positive CHECK (row_count > 0),
@@ -111,9 +111,9 @@ CREATE TABLE rfi_import_rows (
   source_payload jsonb NOT NULL,
   created_at timestamp NOT NULL DEFAULT now(),
   CONSTRAINT rfi_import_row_composite_fk FOREIGN KEY(
-    import_id, project_id, provider, source_project_code, binding_id, binding_version
+    import_id, binding_id, binding_version, project_id, provider, source_project_code
   ) REFERENCES rfi_imports(
-    id, project_id, provider, source_project_code, binding_id, binding_version
+    id, binding_id, binding_version, project_id, provider, source_project_code
   ),
   CONSTRAINT rfi_import_source_identity_uq UNIQUE
     (project_id, provider, source_project_code, source_number, source_revision),

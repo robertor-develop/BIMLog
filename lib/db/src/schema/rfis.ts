@@ -142,11 +142,11 @@ export const rfiImportBindingsTable = pgTable("rfi_import_bindings", {
   primaryKey({ name: "rfi_import_binding_pk", columns: [table.id, table.version] }),
   unique("rfi_import_binding_capability_uq").on(table.id, table.version, table.capability),
   unique("rfi_import_binding_reference_uq").on(
-    table.id, table.version, table.projectId, table.provider,
-    table.auditIdentity, table.sourceProjectCode, table.sourceProjectIdentityDigest,
+    table.id, table.version, table.auditIdentity, table.projectId,
+    table.provider, table.sourceProjectCode, table.sourceProjectIdentityDigest,
   ),
   unique("rfi_import_binding_identity_version_uq").on(
-    table.projectId, table.companyId, table.provider, table.sourceProjectCode, table.capability, table.version,
+    table.version, table.projectId, table.companyId, table.provider, table.sourceProjectCode, table.capability,
   ),
   uniqueIndex("rfi_import_single_current_binding_uq").on(
     table.projectId, table.companyId, table.provider, table.sourceProjectCode, table.capability,
@@ -205,17 +205,17 @@ export const rfiImportsTable = pgTable("rfi_imports", {
   foreignKey({
     name: "rfi_import_binding_identity_fk",
     columns: [
-      table.bindingId, table.bindingVersion, table.projectId, table.provider,
-      table.bindingAuditIdentity, table.sourceProjectCode, table.sourceProjectIdentityDigest,
+      table.bindingId, table.bindingVersion, table.bindingAuditIdentity, table.projectId,
+      table.provider, table.sourceProjectCode, table.sourceProjectIdentityDigest,
     ],
     foreignColumns: [
-      rfiImportBindingsTable.id, rfiImportBindingsTable.version,
-      rfiImportBindingsTable.projectId, rfiImportBindingsTable.provider, rfiImportBindingsTable.auditIdentity,
+      rfiImportBindingsTable.id, rfiImportBindingsTable.version, rfiImportBindingsTable.auditIdentity,
+      rfiImportBindingsTable.projectId, rfiImportBindingsTable.provider,
       rfiImportBindingsTable.sourceProjectCode, rfiImportBindingsTable.sourceProjectIdentityDigest,
     ],
   }),
   unique("rfi_import_composite_identity_uq").on(
-    table.id, table.projectId, table.provider, table.sourceProjectCode, table.bindingId, table.bindingVersion,
+    table.id, table.bindingId, table.bindingVersion, table.projectId, table.provider, table.sourceProjectCode,
   ),
   unique("rfi_import_replay_uq").on(table.projectId, table.provider, table.sourceProjectCode, table.idempotencyKey),
   check("rfi_import_row_count_positive", sql`${table.rowCount} > 0`),
@@ -245,10 +245,10 @@ export const rfiImportRowsTable = pgTable("rfi_import_rows", {
 }, (table) => [
   foreignKey({
     name: "rfi_import_row_composite_fk",
-    columns: [table.importId, table.projectId, table.provider, table.sourceProjectCode, table.bindingId, table.bindingVersion],
+    columns: [table.importId, table.bindingId, table.bindingVersion, table.projectId, table.provider, table.sourceProjectCode],
     foreignColumns: [
-      rfiImportsTable.id, rfiImportsTable.projectId, rfiImportsTable.provider,
-      rfiImportsTable.sourceProjectCode, rfiImportsTable.bindingId, rfiImportsTable.bindingVersion,
+      rfiImportsTable.id, rfiImportsTable.bindingId, rfiImportsTable.bindingVersion,
+      rfiImportsTable.projectId, rfiImportsTable.provider, rfiImportsTable.sourceProjectCode,
     ],
   }),
   unique("rfi_import_source_identity_uq").on(
