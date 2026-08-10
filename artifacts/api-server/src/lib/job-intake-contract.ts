@@ -104,7 +104,40 @@ export function normalizeJobIntakeData(raw: unknown) {
 }
 
 const ratio = (checks: boolean[]) => checks.length ? checks.filter(Boolean).length / checks.length : 0;
-export function jobIntakeCompletion(data: JobIntakeData, documents: Array<{ category: string; removedAt?: unknown }>) {
+export type JobIntakeCapabilities = {
+  package: boolean;
+  budget: boolean;
+  contracts: boolean;
+  costValuePlanner: boolean;
+  anyCommercial: boolean;
+  fullCommercialActivation: boolean;
+};
+
+export const FULL_JOB_INTAKE_CAPABILITIES: JobIntakeCapabilities = {
+  package: true,
+  budget: true,
+  contracts: true,
+  costValuePlanner: true,
+  anyCommercial: true,
+  fullCommercialActivation: true,
+};
+
+export function jobIntakeCoreFingerprint(data: JobIntakeData) {
+  return crypto.createHash("sha256").update(JSON.stringify({
+    identity: data.identity,
+    scopeItems: data.scopeItems.map(({ billingHourlyRate: _billingHourlyRate, apuPlanVersion: _apuPlanVersion, budgetSnapshotLineId: _budgetSnapshotLineId, projectCostNodeId: _projectCostNodeId, contractValue: _contractValue, ...item }) => item),
+    delivery: data.delivery,
+    team: {
+      projectLeaderUserId: data.team.projectLeaderUserId,
+      assignments: data.team.assignments.map((entry: (typeof data.team.assignments)[number]) => {
+        const { internalHourlyRate: _internalHourlyRate, plannedLaborCost: _plannedLaborCost, ...assignment } = entry;
+        return assignment;
+      }),
+    },
+  })).digest("hex");
+}
+
+export function jobIntakeCompletion(data: JobIntakeData, documents: Array<{ category: string; removedAt?: unknown }>, capabilities: JobIntakeCapabilities = FULL_JOB_INTAKE_CAPABILITIES) {
   const activeDocuments = documents.filter((document) => !document.removedAt);
   const hasCommercialSource = activeDocuments.some((document) => ["quotation", "contract", "proposal"].includes(document.category));
   const hasQuantitySource = activeDocuments.some((document) => ["takeoff", "estimate"].includes(document.category));
@@ -113,37 +146,61 @@ export function jobIntakeCompletion(data: JobIntakeData, documents: Array<{ cate
   const contractItemsReady = data.scopeItems.length > 0 && data.scopeItems.every((item) => item.budgetSnapshotLineId && item.projectCostNodeId);
   const plannedHours = data.scopeItems.reduce((sum, item) => sum + scaledSignedDecimal(item.plannedHours), 0n);
   const assignedHours = data.team.assignments.reduce((sum: bigint, assignment: any) => sum + scaledSignedDecimal(assignment.plannedHours), 0n);
-  const teamRatesReady = data.team.assignments.length > 0 && data.team.assignments.every((assignment: any) => (assignment.userId != null || assignment.personName) && assignment.role && positive(assignment.plannedHours) && positive(assignment.internalHourlyRate));
+  const teamReady = data.team.assignments.length > 0 && data.team.assignments.every((assignment: any) => (assignment.userId != null || assignment.personName) && assignment.role && assignment.scopeItemId && data.scopeItems.some((item) => item.id === assignment.scopeItemId) && positive(assignment.plannedHours));
+  const teamRatesReady = teamReady && data.team.assignments.every((assignment: any) => positive(assignment.internalHourlyRate));
+  const contractTermsReady = !!data.commercial.contractNumber && !!data.commercial.counterpartyName;
+  const budgetReady = !!data.commercial.budgetSnapshotId && contractItemsReady;
   const stageChecks: Record<JobIntakeStage, boolean[]> = {
     documents: [hasCommercialSource, hasQuantitySource],
     identity: [!!data.identity.jobName, !!data.identity.jobCode, !!data.identity.clientName, !!data.identity.currency],
     scope: [data.scopeItems.length > 0, scopeReady, data.review.scopeConfirmed],
-    pricing: [pricingReady, data.review.pricingConfirmed],
-    contract: [!!data.commercial.contractNumber, !!data.commercial.counterpartyName, !!data.commercial.budgetSnapshotId, contractItemsReady, data.review.contractConfirmed],
+    pricing: capabilities.costValuePlanner ? [pricingReady, data.review.pricingConfirmed] : [],
+    contract: [
+      ...(capabilities.contracts ? [contractTermsReady, data.review.contractConfirmed] : []),
+      ...(capabilities.budget ? [budgetReady] : []),
+    ],
     delivery: [!!data.delivery.workflowTemplate, !!data.delivery.submittalStrategy, data.review.deliveryConfirmed],
-    team: [data.team.projectLeaderUserId != null, teamRatesReady, assignedHours >= plannedHours && plannedHours > 0n, data.review.teamConfirmed],
-    review: [data.review.sourceConfirmed, data.review.scopeConfirmed, data.review.pricingConfirmed, data.review.contractConfirmed, data.review.deliveryConfirmed, data.review.teamConfirmed],
+    team: [data.team.projectLeaderUserId != null, teamReady, ...(capabilities.budget ? [teamRatesReady] : []), assignedHours >= plannedHours && plannedHours > 0n, data.review.teamConfirmed],
+    review: [data.review.sourceConfirmed, data.review.scopeConfirmed, ...(capabilities.costValuePlanner ? [data.review.pricingConfirmed] : []), ...(capabilities.contracts ? [data.review.contractConfirmed] : []), data.review.deliveryConfirmed, data.review.teamConfirmed],
   };
-  const weights: Record<JobIntakeStage, number> = { documents: 10, identity: 10, scope: 20, pricing: 20, contract: 15, delivery: 10, team: 10, review: 5 };
+  const baseWeights: Record<JobIntakeStage, number> = { documents: 10, identity: 10, scope: 20, pricing: 20, contract: 15, delivery: 10, team: 10, review: 5 };
+  const requiredWeight = JOB_INTAKE_STAGES.reduce((sum, key) => sum + (stageChecks[key].length ? baseWeights[key] : 0), 0);
   const stages = JOB_INTAKE_STAGES.map((key) => {
+    const required = stageChecks[key].length > 0;
     const progress = Math.round(ratio(stageChecks[key]) * 100);
-    return { key, weight: weights[key], progress, status: progress === 100 ? "complete" : progress === 0 ? "not_started" : "in_progress" };
+    return { key, required, weight: required ? baseWeights[key] : 0, progress: required ? progress : 100, status: required ? progress === 100 ? "complete" : progress === 0 ? "not_started" : "in_progress" : "optional" };
   });
-  const percent = Math.round(stages.reduce((sum, stage) => sum + stage.weight * stage.progress / 100, 0));
-  const missing = [
-    !hasCommercialSource && "Upload a quotation, proposal, or contract.", !hasQuantitySource && "Upload a takeoff or estimate.",
-    !data.identity.jobName && "Enter the job name.", !data.identity.jobCode && "Enter the job code.", !data.identity.clientName && "Enter the client.",
-    !scopeReady && "Add scope items with planned hours.", !pricingReady && "Select an APU and billing hourly rate for every scope item.",
-    !contractItemsReady && "Map every scope item to an approved budget line.", !data.commercial.contractNumber && "Enter the negotiated contract number.",
-    !data.commercial.counterpartyName && "Enter the contracting counterparty.", !data.commercial.budgetSnapshotId && "Select the approved budget snapshot.",
-    !data.delivery.submittalStrategy && "Describe the Submittal delivery strategy.", data.team.projectLeaderUserId == null && "Assign a project leader.",
-    !teamRatesReady && "Assign planned hours and internal hourly costs.", assignedHours < plannedHours && "Assign all planned scope hours to the team.",
-    !Object.values(data.review).every(Boolean) && "Complete the final confirmations.",
-  ].filter(Boolean) as string[];
+  const percent = requiredWeight ? Math.round(stages.reduce((sum, stage) => sum + stage.weight * stage.progress / 100, 0) * 100 / requiredWeight) : 100;
+  const missingItems = [
+    !hasCommercialSource && { code: "source_commercial", en: "Upload a quotation, proposal, or contract.", es: "Cargue una cotización, propuesta o contrato." },
+    !hasQuantitySource && { code: "source_quantity", en: "Upload a takeoff or estimate.", es: "Cargue un cómputo de cantidades o estimado." },
+    !data.identity.jobName && { code: "job_name", en: "Enter the job name.", es: "Ingrese el nombre del trabajo." },
+    !data.identity.jobCode && { code: "job_code", en: "Enter the job code.", es: "Ingrese el código del trabajo." },
+    !data.identity.clientName && { code: "client", en: "Enter the client.", es: "Ingrese el cliente." },
+    !scopeReady && { code: "scope", en: "Add scope items with planned hours.", es: "Agregue partidas de alcance con horas planificadas." },
+    capabilities.costValuePlanner && !pricingReady && { code: "pricing", en: "Select an APU and billing hourly rate for every scope item.", es: "Seleccione un APU y una tarifa facturable para cada partida." },
+    capabilities.budget && !contractItemsReady && { code: "budget_mapping", en: "Map every scope item to an approved budget line.", es: "Vincule cada partida con una línea de presupuesto aprobada." },
+    capabilities.contracts && !data.commercial.contractNumber && { code: "contract_number", en: "Enter the negotiated contract number.", es: "Ingrese el número de contrato negociado." },
+    capabilities.contracts && !data.commercial.counterpartyName && { code: "counterparty", en: "Enter the contracting counterparty.", es: "Ingrese la contraparte contractual." },
+    capabilities.budget && !data.commercial.budgetSnapshotId && { code: "budget_snapshot", en: "Select the approved budget snapshot.", es: "Seleccione el presupuesto aprobado." },
+    !data.delivery.submittalStrategy && { code: "delivery", en: "Describe the Submittal delivery strategy.", es: "Describa la estrategia de entrega de submittals." },
+    data.team.projectLeaderUserId == null && { code: "leader", en: "Assign a project leader.", es: "Asigne un líder del proyecto." },
+    !teamReady && { code: "team", en: "Assign every team member to a scope item with planned hours.", es: "Asigne cada miembro a una partida con horas planificadas." },
+    capabilities.budget && !teamRatesReady && { code: "internal_rates", en: "Enter internal hourly costs for the resource plan.", es: "Ingrese los costos horarios internos del plan de recursos." },
+    assignedHours < plannedHours && { code: "hours", en: "Assign all planned scope hours to the team.", es: "Asigne al equipo todas las horas planificadas." },
+    !(data.review.sourceConfirmed && data.review.scopeConfirmed && data.review.deliveryConfirmed && data.review.teamConfirmed && (!capabilities.costValuePlanner || data.review.pricingConfirmed) && (!capabilities.contracts || data.review.contractConfirmed)) && { code: "confirmations", en: "Complete the required final confirmations.", es: "Complete las confirmaciones finales requeridas." },
+  ].filter(Boolean) as Array<{ code: string; en: string; es: string }>;
+  const missing = missingItems.map((item) => item.en);
   const totals = {
     plannedHours: decimalFromScaled(plannedHours), assignedHours: decimalFromScaled(assignedHours), unassignedHours: decimalFromScaled(plannedHours > assignedHours ? plannedHours - assignedHours : 0n),
     contractValue: decimalFromScaled(data.scopeItems.reduce((sum, item) => sum + scaledSignedDecimal(item.contractValue), 0n)),
     plannedLaborCost: decimalFromScaled(data.team.assignments.reduce((sum: bigint, item: any) => sum + scaledSignedDecimal(item.plannedLaborCost), 0n)),
   };
-  return { percent, stages, missing, ready: percent === 100 && missing.length === 0, totals, fingerprint: crypto.createHash("sha256").update(JSON.stringify({ data, documents: activeDocuments.map((d) => d.category), percent, totals })).digest("hex") };
+  const overlayReadiness = {
+    costValuePlanner: !capabilities.costValuePlanner ? "not_entitled" : pricingReady ? "ready" : "requires_input",
+    budget: !capabilities.budget ? "not_entitled" : budgetReady ? "ready" : "requires_input",
+    contracts: !capabilities.contracts ? "not_entitled" : contractTermsReady ? "ready" : "requires_input",
+    automaticCommercialActivation: !capabilities.fullCommercialActivation ? "not_entitled" : pricingReady && budgetReady && contractTermsReady ? "ready" : "requires_input",
+  };
+  return { percent, stages, missing, missingItems, ready: percent === 100 && missing.length === 0, totals, capabilities, overlayReadiness, coreFingerprint: jobIntakeCoreFingerprint(data), fingerprint: crypto.createHash("sha256").update(JSON.stringify({ data, documents: activeDocuments.map((d) => d.category), percent, totals, capabilities })).digest("hex") };
 }

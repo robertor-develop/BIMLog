@@ -1,14 +1,14 @@
-import { check, index, integer, jsonb, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
+import { check, index, integer, jsonb, numeric, pgTable, text, timestamp, uniqueIndex } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { companiesTable, usersTable } from "./users";
 import { projectsTable } from "./projects";
 import { filesTable } from "./files";
-import { financialContractsTable } from "./financial-contracts";
+import { financialContractsTable, financialContractVersionsTable } from "./financial-contracts";
 
 export const jobIntakesTable = pgTable("job_intakes", {
   id: text("id").primaryKey(), companyId: integer("company_id").notNull().references(() => companiesTable.id), projectId: integer("project_id").notNull().references(() => projectsTable.id),
   status: text("status").notNull().default("draft"), revision: integer("revision").notNull().default(1), data: jsonb("data").$type<Record<string, unknown>>().notNull().default({}), completion: jsonb("completion").$type<Record<string, unknown>>().notNull().default({}),
-  activatedContractId: text("activated_contract_id").references(() => financialContractsTable.id), createdById: integer("created_by_id").notNull().references(() => usersTable.id), updatedById: integer("updated_by_id").notNull().references(() => usersTable.id),
+  activatedContractId: text("activated_contract_id").references(() => financialContractsTable.id), activationMode: text("activation_mode"), activationSummary: jsonb("activation_summary").$type<Record<string, unknown>>().notNull().default({}), createdById: integer("created_by_id").notNull().references(() => usersTable.id), updatedById: integer("updated_by_id").notNull().references(() => usersTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(), updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(), activatedAt: timestamp("activated_at", { withTimezone: true }),
 }, (table) => [uniqueIndex("job_intake_project_uidx").on(table.projectId), index("job_intake_company_status_idx").on(table.companyId, table.status, table.updatedAt), check("job_intake_status_chk", sql`${table.status} IN ('draft','ready','activated')`), check("job_intake_revision_positive_chk", sql`${table.revision} > 0`)]);
 
@@ -21,3 +21,22 @@ export const jobIntakeDocumentsTable = pgTable("job_intake_documents", {
 export const jobIntakeEventsTable = pgTable("job_intake_events", {
   id: text("id").primaryKey(), intakeId: text("intake_id").notNull().references(() => jobIntakesTable.id), projectId: integer("project_id").notNull().references(() => projectsTable.id), actorUserId: integer("actor_user_id").notNull().references(() => usersTable.id), eventType: text("event_type").notNull(), beforeRevision: integer("before_revision"), afterRevision: integer("after_revision"), evidence: jsonb("evidence").$type<Record<string, unknown>>().notNull().default({}), createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [index("job_intake_event_idx").on(table.intakeId, table.createdAt, table.id)]);
+
+export const jobActivationWorkItemsTable = pgTable("job_activation_work_items", {
+  id: text("id").primaryKey(), intakeId: text("intake_id").notNull().references(() => jobIntakesTable.id), projectId: integer("project_id").notNull().references(() => projectsTable.id), stableScopeItemId: text("stable_scope_item_id").notNull(),
+  name: text("name").notNull(), description: text("description").notNull().default(""), unit: text("unit").notNull(), plannedHours: numeric("planned_hours", { precision: 30, scale: 6 }).notNull(), workflowTemplate: text("workflow_template").notNull(), status: text("status").notNull().default("active"),
+  billingHourlyRate: numeric("billing_hourly_rate", { precision: 30, scale: 6 }), plannedBillableValue: numeric("planned_billable_value", { precision: 30, scale: 6 }), apuPlanVersion: integer("apu_plan_version"), budgetSnapshotLineId: text("budget_snapshot_line_id"), projectCostNodeId: text("project_cost_node_id"),
+  contractId: text("contract_id").references(() => financialContractsTable.id), contractVersionId: text("contract_version_id").references(() => financialContractVersionsTable.id), commercialCapabilities: jsonb("commercial_capabilities").$type<Record<string, unknown>>().notNull().default({}), createdById: integer("created_by_id").notNull().references(() => usersTable.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(), updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [uniqueIndex("job_activation_work_item_uidx").on(table.intakeId, table.stableScopeItemId), index("job_activation_work_item_project_idx").on(table.projectId, table.status, table.createdAt), check("job_activation_work_item_status_chk", sql`${table.status} IN ('active','completed','cancelled')`), check("job_activation_work_item_hours_chk", sql`${table.plannedHours} > 0`)]);
+
+export const jobActivationTasksTable = pgTable("job_activation_tasks", {
+  id: text("id").primaryKey(), workItemId: text("work_item_id").notNull().references(() => jobActivationWorkItemsTable.id), taskKey: text("task_key").notNull(), nameEn: text("name_en").notNull(), nameEs: text("name_es").notNull(), sequence: integer("sequence").notNull().default(1), status: text("status").notNull().default("not_started"),
+  plannedHours: numeric("planned_hours", { precision: 30, scale: 6 }).notNull(), assigneeUserId: integer("assignee_user_id").references(() => usersTable.id), createdById: integer("created_by_id").notNull().references(() => usersTable.id), createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(), updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [uniqueIndex("job_activation_task_uidx").on(table.workItemId, table.taskKey), index("job_activation_task_work_item_idx").on(table.workItemId, table.sequence), check("job_activation_task_status_chk", sql`${table.status} IN ('not_started','in_progress','blocked','complete','cancelled')`), check("job_activation_task_hours_chk", sql`${table.plannedHours} > 0`)]);
+
+export const jobActivationResourceAssignmentsTable = pgTable("job_activation_resource_assignments", {
+  id: text("id").primaryKey(), intakeId: text("intake_id").notNull().references(() => jobIntakesTable.id), workItemId: text("work_item_id").notNull().references(() => jobActivationWorkItemsTable.id), taskId: text("task_id").notNull().references(() => jobActivationTasksTable.id), sourceAssignmentId: text("source_assignment_id").notNull(),
+  userId: integer("user_id").references(() => usersTable.id), personName: text("person_name").notNull(), role: text("role").notNull(), employmentType: text("employment_type").notNull(), plannedHours: numeric("planned_hours", { precision: 30, scale: 6 }).notNull(), internalHourlyRate: numeric("internal_hourly_rate", { precision: 30, scale: 6 }), billingHourlyRate: numeric("billing_hourly_rate", { precision: 30, scale: 6 }), plannedInternalCost: numeric("planned_internal_cost", { precision: 30, scale: 6 }), plannedBillableValue: numeric("planned_billable_value", { precision: 30, scale: 6 }),
+  createdById: integer("created_by_id").notNull().references(() => usersTable.id), createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [uniqueIndex("job_activation_resource_uidx").on(table.intakeId, table.sourceAssignmentId), index("job_activation_resource_work_item_idx").on(table.workItemId, table.userId), check("job_activation_resource_hours_chk", sql`${table.plannedHours} > 0`)]);

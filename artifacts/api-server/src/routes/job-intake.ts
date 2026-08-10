@@ -15,15 +15,34 @@ const router = Router();
 const upload = singleFileUpload({ fileSize: 25 * 1024 * 1024, files: 1, fields: 2, parts: 3, fieldSize: 2 * 1024 });
 router.use("/projects/:projectId/intake", authMiddleware);
 
+const errorEs: Record<string, string> = {
+  JOB_INTAKE_PROJECT_NOT_FOUND: "No se encontró el proyecto.",
+  JOB_INTAKE_PROJECT_ACCESS_REQUIRED: "Debe ser miembro activo del proyecto.",
+  JOB_INTAKE_COMPANY_MISMATCH: "El proyecto pertenece a otra empresa.",
+  JOB_INTAKE_NOT_FOUND: "Primero debe iniciar el ingreso del trabajo.",
+  JOB_INTAKE_REVISION_INVALID: "Se requiere una revisión esperada válida.",
+  JOB_INTAKE_STALE: "El ingreso cambió. Recargue la página antes de continuar.",
+  JOB_INTAKE_ACTIVATED: "El ingreso ya fue activado y no puede modificarse.",
+  JOB_INTAKE_CORE_IMMUTABLE: "El alcance, la entrega y las horas operativas no pueden cambiar después de activar; solamente puede completar datos comerciales recién habilitados.",
+  JOB_INTAKE_NOT_READY: "Complete todos los requisitos visibles antes de activar el trabajo.",
+  JOB_INTAKE_DOCUMENT_REQUIRED: "Seleccione un documento PDF, Word, Excel o CSV.",
+  JOB_INTAKE_DOCUMENT_CATEGORY_INVALID: "Seleccione una categoría de documento reconocida.",
+  JOB_INTAKE_DOCUMENT_TYPE_INVALID: "Solamente se aceptan documentos PDF, Word, Excel y CSV.",
+  JOB_INTAKE_DOCUMENT_SIZE_INVALID: "El documento debe tener entre 1 byte y 25 MB.",
+  JOB_INTAKE_DOCUMENT_NOT_FOUND: "No se encontró el documento activo.",
+  JOB_ACTIVATION_ASSIGNMENT_SCOPE_INVALID: "Cada asignación debe corresponder a una partida activada.",
+  JOB_INTAKE_ID_INVALID: "El identificador proporcionado no es válido.",
+};
+
 const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any, res: any) => {
   try { await handler(req, res); }
   catch (error) {
     if (error instanceof FinancialControlError) {
-      res.status(error.status).json({ code: error.code, error: { en: error.message, es: error.message } });
+      res.status(error.status).json({ code: error.code, error: { en: error.message, es: errorEs[error.code] ?? "No se pudo completar la operación de ingreso del trabajo." } });
       return;
     }
     console.error("[job-intake] request failed", error);
-    res.status(500).json({ code: "JOB_INTAKE_INTERNAL_ERROR", error: { en: "Job Intake is temporarily unavailable.", es: "El ingreso de trabajo no esta disponible temporalmente." } });
+    res.status(500).json({ code: "JOB_INTAKE_INTERNAL_ERROR", error: { en: "Job Intake is temporarily unavailable.", es: "El ingreso de trabajo no está disponible temporalmente." } });
   }
 };
 

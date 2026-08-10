@@ -60,9 +60,77 @@ CREATE TABLE IF NOT EXISTS job_intake_events(
   evidence jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE job_intakes ADD COLUMN IF NOT EXISTS activation_mode text;
+ALTER TABLE job_intakes ADD COLUMN IF NOT EXISTS activation_summary jsonb NOT NULL DEFAULT '{}'::jsonb;
+CREATE TABLE IF NOT EXISTS job_activation_work_items(
+  id text PRIMARY KEY,
+  intake_id text NOT NULL REFERENCES job_intakes(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  stable_scope_item_id text NOT NULL,
+  name text NOT NULL,
+  description text NOT NULL DEFAULT '',
+  unit text NOT NULL,
+  planned_hours numeric(30,6) NOT NULL,
+  workflow_template text NOT NULL,
+  status text NOT NULL DEFAULT 'active',
+  billing_hourly_rate numeric(30,6),
+  planned_billable_value numeric(30,6),
+  apu_plan_version integer,
+  budget_snapshot_line_id text,
+  project_cost_node_id text,
+  contract_id text REFERENCES financial_contracts(id),
+  contract_version_id text REFERENCES financial_contract_versions(id),
+  commercial_capabilities jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_work_item_status_chk CHECK(status IN('active','completed','cancelled')),
+  CONSTRAINT job_activation_work_item_hours_chk CHECK(planned_hours>0),
+  CONSTRAINT job_activation_work_item_uidx UNIQUE(intake_id,stable_scope_item_id)
+);
+CREATE TABLE IF NOT EXISTS job_activation_tasks(
+  id text PRIMARY KEY,
+  work_item_id text NOT NULL REFERENCES job_activation_work_items(id),
+  task_key text NOT NULL,
+  name_en text NOT NULL,
+  name_es text NOT NULL,
+  sequence integer NOT NULL DEFAULT 1,
+  status text NOT NULL DEFAULT 'not_started',
+  planned_hours numeric(30,6) NOT NULL,
+  assignee_user_id integer REFERENCES users(id),
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_task_status_chk CHECK(status IN('not_started','in_progress','blocked','complete','cancelled')),
+  CONSTRAINT job_activation_task_hours_chk CHECK(planned_hours>0),
+  CONSTRAINT job_activation_task_uidx UNIQUE(work_item_id,task_key)
+);
+CREATE TABLE IF NOT EXISTS job_activation_resource_assignments(
+  id text PRIMARY KEY,
+  intake_id text NOT NULL REFERENCES job_intakes(id),
+  work_item_id text NOT NULL REFERENCES job_activation_work_items(id),
+  task_id text NOT NULL REFERENCES job_activation_tasks(id),
+  source_assignment_id text NOT NULL,
+  user_id integer REFERENCES users(id),
+  person_name text NOT NULL,
+  role text NOT NULL,
+  employment_type text NOT NULL,
+  planned_hours numeric(30,6) NOT NULL,
+  internal_hourly_rate numeric(30,6),
+  billing_hourly_rate numeric(30,6),
+  planned_internal_cost numeric(30,6),
+  planned_billable_value numeric(30,6),
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_resource_hours_chk CHECK(planned_hours>0),
+  CONSTRAINT job_activation_resource_uidx UNIQUE(intake_id,source_assignment_id)
+);
 CREATE INDEX IF NOT EXISTS job_intake_company_status_idx ON job_intakes(company_id,status,updated_at DESC);
 CREATE INDEX IF NOT EXISTS job_intake_document_active_idx ON job_intake_documents(intake_id,created_at) WHERE removed_at IS NULL;
 CREATE INDEX IF NOT EXISTS job_intake_event_idx ON job_intake_events(intake_id,created_at,id);
+CREATE INDEX IF NOT EXISTS job_activation_work_item_project_idx ON job_activation_work_items(project_id,status,created_at);
+CREATE INDEX IF NOT EXISTS job_activation_task_work_item_idx ON job_activation_tasks(work_item_id,sequence);
+CREATE INDEX IF NOT EXISTS job_activation_resource_work_item_idx ON job_activation_resource_assignments(work_item_id,user_id);
 `);
     await client.query("COMMIT");
   } catch (error) { await client.query("ROLLBACK"); throw error; }

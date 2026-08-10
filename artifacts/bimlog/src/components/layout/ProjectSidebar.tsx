@@ -129,10 +129,14 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
     return labels[role] ?? role.replace(/_/g, " ");
   };
   const { user } = useAuthStore();
-  const entitledUser = user as (typeof user & { commercialAccess?: boolean; isSuperAdmin?: boolean; is_super_admin?: boolean });
-  const canUseCommercial = entitledUser?.commercialAccess === true
-    || entitledUser?.isSuperAdmin === true
-    || entitledUser?.is_super_admin === true;
+  const entitledUser = user as (typeof user & { commercialAccess?: boolean; commercialFeatures?: Record<string, boolean>; isSuperAdmin?: boolean; is_super_admin?: boolean });
+  const superAdmin = entitledUser?.isSuperAdmin === true || entitledUser?.is_super_admin === true;
+  const legacyCommercialSession = entitledUser?.commercialAccess === true && entitledUser?.commercialFeatures == null;
+  const packageEnabled = legacyCommercialSession || entitledUser?.commercialFeatures?.package === true;
+  const canUseBudget = superAdmin || packageEnabled || entitledUser?.commercialFeatures?.budget === true;
+  const canUseContracts = superAdmin || packageEnabled || entitledUser?.commercialFeatures?.contracts === true;
+  const canUsePlanner = superAdmin || packageEnabled || entitledUser?.commercialFeatures?.cost_value_planner === true;
+  const canUseCommercial = entitledUser?.commercialAccess === true || canUseBudget || canUseContracts || canUsePlanner;
   const [, navigate] = useLocation();
   const [showSyncAgent, setShowSyncAgent] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -188,15 +192,15 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       descriptionEs: "Presupuesto, contratos y controles financieros.",
       items: [],
       actions: [
-        { id: "budget", kind: "button", labelEn: "Project Budget", labelEs: "Presupuesto del Proyecto", onClick: () => navigate(`/projects/${projectId}/financial/budget`) },
-        { id: "contracts", kind: "button", labelEn: "Contracts & Commitments", labelEs: "Contratos y Compromisos", onClick: () => navigate(`/projects/${projectId}/financial/contracts`) },
-        {
+        ...(canUseBudget ? [{ id: "budget", kind: "button" as const, labelEn: "Project Budget", labelEs: "Presupuesto del Proyecto", onClick: () => navigate(`/projects/${projectId}/financial/budget`) }] : []),
+        ...(canUseContracts ? [{ id: "contracts", kind: "button" as const, labelEn: "Contracts & Commitments", labelEs: "Contratos y Compromisos", onClick: () => navigate(`/projects/${projectId}/financial/contracts`) }] : []),
+        ...(canUsePlanner ? [{
           id: "apu",
-          kind: "link",
+          kind: "link" as const,
           labelEn: "Cost & Value Planner", labelEs: "Planificador de Costos y Valor",
           href: `/projects/${projectId}/financial/apu`,
           icon: Calculator,
-        },
+        }] : []),
       ],
     },
     {

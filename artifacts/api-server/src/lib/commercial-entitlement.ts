@@ -12,6 +12,10 @@ export type CommercialEntitlementState = {
 
 export const COMMERCIAL_FEATURES = ["package", "budget", "contracts", "cost_value_planner"] as const;
 export type CommercialFeature = (typeof COMMERCIAL_FEATURES)[number];
+export type EffectiveCommercialAccess = Record<CommercialFeature, boolean> & {
+  any: boolean;
+  fullActivation: boolean;
+};
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[] }> };
 
@@ -73,6 +77,27 @@ export async function commercialEntitlementForUser(userId: number, client: Query
   const result = await client.query(`SELECT event_key,enabled,reason,actor_user_id,source,occurred_at FROM commercial_entitlement_events WHERE user_id=$1 AND feature_key=$2 ORDER BY sequence DESC LIMIT 1`, [userId, feature(featureKey)]);
   const row = result.rows[0];
   return row ? { enabled: row.enabled === true, eventKey: row.event_key, reason: row.reason, actorUserId: row.actor_user_id == null ? null : Number(row.actor_user_id), source: row.source, occurredAt: new Date(row.occurred_at).toISOString() } : { enabled: false, eventKey: null, reason: null, actorUserId: null, source: null, occurredAt: null };
+}
+
+export async function effectiveCommercialAccessForUser(userId: number, client: Queryable = pool): Promise<EffectiveCommercialAccess> {
+  const [packageState, budgetState, contractsState, plannerState] = await Promise.all([
+    commercialEntitlementForUser(userId, client, "package"),
+    commercialEntitlementForUser(userId, client, "budget"),
+    commercialEntitlementForUser(userId, client, "contracts"),
+    commercialEntitlementForUser(userId, client, "cost_value_planner"),
+  ]);
+  const packageEnabled = packageState.enabled;
+  const budget = packageEnabled || budgetState.enabled;
+  const contracts = packageEnabled || contractsState.enabled;
+  const costValuePlanner = packageEnabled || plannerState.enabled;
+  return {
+    package: packageEnabled,
+    budget,
+    contracts,
+    cost_value_planner: costValuePlanner,
+    any: budget || contracts || costValuePlanner,
+    fullActivation: budget && contracts && costValuePlanner,
+  };
 }
 
 export async function setCommercialEntitlement(input: { actorUserId: number; userId: number; enabled: boolean; reason: unknown; featureKey?: unknown }) {

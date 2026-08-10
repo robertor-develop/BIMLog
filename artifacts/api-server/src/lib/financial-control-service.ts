@@ -2,7 +2,7 @@ import crypto from "crypto";
 import { pool } from "@workspace/db";
 import { resolveEffectiveEntitlement } from "./feature-catalog-service";
 import { waitForFinancialControlMigration } from "./financial-control-migration";
-import { commercialEntitlementForUser, type CommercialFeature } from "./commercial-entitlement";
+import { effectiveCommercialAccessForUser, type CommercialFeature } from "./commercial-entitlement";
 import { resolveCommercialProjectScope } from "./commercial-project-scope";
 import {
   FINANCIAL_AUTHORITIES,
@@ -80,18 +80,13 @@ export async function financialActor(
       "FIN_ACTOR_MISSING",
       "The authenticated user no longer exists.",
     );
-  const [commercial, budget, contracts, planner] = await Promise.all([
-    commercialEntitlementForUser(Number(row.id), client, "package"),
-    commercialEntitlementForUser(Number(row.id), client, "budget"),
-    commercialEntitlementForUser(Number(row.id), client, "contracts"),
-    commercialEntitlementForUser(Number(row.id), client, "cost_value_planner"),
-  ]);
+  const commercial = await effectiveCommercialAccessForUser(Number(row.id), client);
   return {
     userId: Number(row.id),
     companyId: Number(row.company_id),
     isSuperAdmin: row.is_super_admin === true,
-    commercialEnabled: commercial.enabled,
-    commercialFeatures: { package: commercial.enabled, budget: budget.enabled, contracts: contracts.enabled, cost_value_planner: planner.enabled },
+    commercialEnabled: commercial.package,
+    commercialFeatures: { package: commercial.package, budget: commercial.budget, contracts: commercial.contracts, cost_value_planner: commercial.cost_value_planner },
   };
 }
 async function scopeFor(
@@ -325,7 +320,7 @@ export async function ownFinancialState(
 ) {
   const actor = await financialActor(userId),
     scope = await scopeFor(actor, projectIdValue);
-  const commercialAccess = actor.isSuperAdmin || actor.commercialEnabled;
+  const commercialAccess = actor.isSuperAdmin || actor.commercialEnabled || actor.commercialFeatures.budget || actor.commercialFeatures.contracts || actor.commercialFeatures.cost_value_planner;
   const grants = commercialAccess ? FINANCIAL_AUTHORITIES.map((authority) => ({ id: `commercial-entitlement:${actor.userId}:${authority}`, authority, scopeType: "company" as const, companyId: scope.companyId, projectId: null, effectiveFrom: new Date(0), effectiveTo: null, revoked: false })) : await grantsFor(userId, scope);
   const catalogEntitlement = await resolveEffectiveEntitlement({
     featureKey: "cost_financial_control",

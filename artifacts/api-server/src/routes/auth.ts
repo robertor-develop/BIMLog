@@ -7,7 +7,7 @@ import { sendEmail, makePasswordResetEmail } from "../lib/email";
 import { eq, and, sql } from "drizzle-orm";
 import { RegisterBody, LoginBody } from "@workspace/api-zod";
 import { signToken, authMiddleware, type AuthPayload } from "../middlewares/auth";
-import { commercialEntitlementForUser } from "../lib/commercial-entitlement";
+import { effectiveCommercialAccessForUser } from "../lib/commercial-entitlement";
 
 const router: IRouter = Router();
 
@@ -64,7 +64,7 @@ router.post("/auth/register", async (req, res) => {
     };
 
     const token = signToken(payload);
-    const commercialAccess = (await commercialEntitlementForUser(user.id)).enabled;
+    const commercial = await effectiveCommercialAccessForUser(user.id);
 
     res.status(201).json({
       token,
@@ -75,7 +75,8 @@ router.post("/auth/register", async (req, res) => {
         companyName,
         companyId: user.companyId,
         createdAt: user.createdAt.toISOString(),
-        commercialAccess,
+        commercialAccess: commercial.any,
+        commercialFeatures: commercial,
       },
     });
   } catch (error) {
@@ -114,7 +115,7 @@ router.post("/auth/login", async (req, res) => {
     };
 
     const token = signToken(payload);
-    const commercialAccess = (await commercialEntitlementForUser(user.id)).enabled;
+    const commercial = await effectiveCommercialAccessForUser(user.id);
 
     res.json({
       token,
@@ -126,7 +127,8 @@ router.post("/auth/login", async (req, res) => {
         companyId: user.companyId,
         createdAt: user.createdAt.toISOString(),
         isSuperAdmin: user.isSuperAdmin,
-        commercialAccess,
+        commercialAccess: commercial.any,
+        commercialFeatures: commercial,
       },
     });
   } catch (error) {
@@ -146,7 +148,7 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
   const u = users[0];
   const companies = await db.select().from(companiesTable).where(eq(companiesTable.id, u.companyId)).limit(1);
   const c = companies[0];
-  const commercialAccess = (await commercialEntitlementForUser(u.id)).enabled;
+  const commercial = await effectiveCommercialAccessForUser(u.id);
 
   res.json({
     id: u.id,
@@ -162,7 +164,8 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
     apiToken: u.apiToken || null,
     notificationPreferences: u.notificationPreferences || null,
     isSuperAdmin: u.isSuperAdmin,
-    commercialAccess,
+    commercialAccess: commercial.any,
+    commercialFeatures: commercial,
     openai_api_key: u.openaiApiKey ? "configured" : null,
     company: c ? {
       id: c.id,
