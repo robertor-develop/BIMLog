@@ -72,6 +72,30 @@ export async function initializeContractItemWorkflow(input: { actorUserId: numbe
   });
 }
 
+export async function initializeContractItemWorkflowsWithClient(input: {
+  actorUserId: number;
+  projectId: number;
+  contractId: string;
+  contractVersionId: string;
+  items: Array<{ stableLineId: string; displayName: string; templateKey: string }>;
+}, client: any) {
+  await waitForContractItemWorkflowMigration();
+  let created = 0;
+  for (const item of input.items) {
+    const stableLineId = boundedText(item.stableLineId, "stableLineId", 1, 100);
+    const displayName = boundedText(item.displayName, "displayName", 1, 300);
+    const templateKey = boundedText(item.templateKey || "generic", "templateKey", 1, 100);
+    const workflowId = uuid();
+    const inserted = (await client.query(`INSERT INTO contract_item_workflows(id,project_id,contract_id,contract_version_id,stable_line_id,display_name,template_key,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT(contract_version_id,stable_line_id) DO NOTHING RETURNING *`, [workflowId, input.projectId, input.contractId, input.contractVersionId, stableLineId, displayName, templateKey, input.actorUserId])).rows[0];
+    if (!inserted) continue;
+    created += 1;
+    const phases = defaultWorkflowPhases(templateKey);
+    for (let index = 0; index < phases.length; index++) await client.query(`INSERT INTO contract_item_workflow_nodes(id,workflow_id,parent_id,node_type,name,sequence,created_by_id) VALUES($1,$2,NULL,'phase',$3,$4,$5)`, [uuid(), workflowId, phases[index], index + 1, input.actorUserId]);
+    await client.query(`INSERT INTO contract_item_workflow_events(id,workflow_id,actor_user_id,event_type,after_state,reason) VALUES($1,$2,$3,'workflow_initialized','active','Job activation created the Contract Item execution baseline')`, [uuid(), workflowId, input.actorUserId]);
+  }
+  return { requested: input.items.length, created };
+}
+
 export async function addContractItemWorkflowNode(input: { actorUserId: number; projectId: unknown; contractId: unknown; stableLineId: unknown; parentId?: unknown; nodeType: unknown; name: unknown; dueDate?: unknown; assigneeUserId?: unknown }) {
   const projectId = positiveId(input.projectId, "projectId"), contractId = boundedText(input.contractId, "contractId", 1, 100), stableLineId = boundedText(input.stableLineId, "stableLineId", 1, 100);
   const nodeType = workflowNodeType(input.nodeType);

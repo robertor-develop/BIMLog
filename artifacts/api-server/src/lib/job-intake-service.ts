@@ -6,6 +6,8 @@ import { extractFileText } from "./extract-file-text";
 import { FinancialControlError } from "./financial-control-contract";
 import { boundedText, positiveId } from "./financial-budget-contract";
 import { createContractDraftWithClient } from "./financial-contract-service";
+import { initializeContractItemWorkflowsWithClient } from "./contract-item-workflow-service";
+import { waitForContractItemWorkflowMigration } from "./contract-item-workflow-migration";
 import { waitForFinancialContractMigration } from "./financial-contract-migration";
 import { jobIntakeCompletion, normalizeJobIntakeData } from "./job-intake-contract";
 import { waitForJobIntakeMigration } from "./job-intake-migration";
@@ -164,7 +166,7 @@ export async function removeJobIntakeDocument(input: { actorUserId: number; proj
 }
 
 export async function activateJobIntake(input: { actorUserId: number; projectId: unknown; expectedRevision: unknown; confirmationFingerprint: unknown }) {
-  await Promise.all([waitForJobIntakeMigration(), waitForFinancialContractMigration()]);
+  await Promise.all([waitForJobIntakeMigration(), waitForFinancialContractMigration(), waitForContractItemWorkflowMigration()]);
   const projectId = positiveId(input.projectId, "projectId"); await scope(input.actorUserId, projectId);
   const client = await pool.connect();
   try {
@@ -180,10 +182,11 @@ export async function activateJobIntake(input: { actorUserId: number; projectId:
       .map((assignment: any) => ({ userId: assignment.userId, permission: "view" }));
     if (data.team.projectLeaderUserId) grants.push({ userId: data.team.projectLeaderUserId, permission: "manage" });
     const draft = await createContractDraftWithClient({ actorUserId: input.actorUserId, projectId, legalNumber: data.commercial.contractNumber, perspective: data.commercial.perspective, contractType: data.commercial.contractType, counterpartyName: data.commercial.counterpartyName, title: data.identity.jobName, currency: data.identity.currency, originalValue: completion.totals.contractValue, budgetSnapshotId: data.commercial.budgetSnapshotId, effectiveDate: data.commercial.effectiveDate || undefined, completionDate: data.commercial.completionDate || undefined, paymentTerms: data.commercial.paymentTerms || undefined, commercialMetadata: { intakeId: intake.id, quotationNumber: data.commercial.quotationNumber, plannedHours: completion.totals.plannedHours, assignedHours: completion.totals.assignedHours, plannedLaborCost: completion.totals.plannedLaborCost }, initialGrants: grants, lines: data.scopeItems.map((item, index) => ({ stableLineId: item.id, budgetSnapshotLineId: item.budgetSnapshotLineId, projectCostNodeId: item.projectCostNodeId, scheduleItemPlacementId: item.scheduleItemPlacementId, description: item.name, amount: item.contractValue, sortOrder: index, contractItem: { displayName: item.name, quantity: item.plannedHours, unit: item.unit, unitRate: item.billingHourlyRate, apuPlanVersion: item.apuPlanVersion, workflowTemplate: data.delivery.workflowTemplate, industryTemplate: "bim-services" } })) }, client);
+    const workflowBaseline = await initializeContractItemWorkflowsWithClient({ actorUserId: input.actorUserId, projectId, contractId: draft.id, contractVersionId: draft.versionId, items: data.scopeItems.map((item) => ({ stableLineId: item.id, displayName: item.name, templateKey: data.delivery.workflowTemplate })) }, client);
     const revision = Number(intake.revision) + 1;
     await client.query(`UPDATE job_intakes SET status='activated',revision=$2,activated_contract_id=$3,activated_at=now(),updated_by_id=$4,updated_at=now() WHERE id=$1`, [intake.id, revision, draft.id, input.actorUserId]);
     await client.query(`UPDATE projects SET client_name=$2,client_company=$3,location=$4,contract_value=$5,start_date=$6,expected_end_date=$7,entry_type='job_intake',updated_at=now() WHERE id=$1`, [projectId, data.identity.clientName, data.identity.clientCompany || data.commercial.counterpartyName, data.identity.location || null, completion.totals.contractValue, data.identity.startDate || null, data.identity.targetCompletionDate || null]);
-    await event(client, { intakeId: intake.id, projectId, actorUserId: input.actorUserId, eventType: "job_activated", beforeRevision: Number(intake.revision), afterRevision: revision, evidence: { contractId: draft.id, contractVersionId: draft.versionId, completionFingerprint: completion.fingerprint, plannedHours: completion.totals.plannedHours, plannedLaborCost: completion.totals.plannedLaborCost } });
+    await event(client, { intakeId: intake.id, projectId, actorUserId: input.actorUserId, eventType: "job_activated", beforeRevision: Number(intake.revision), afterRevision: revision, evidence: { contractId: draft.id, contractVersionId: draft.versionId, workflowInstancesCreated: workflowBaseline.created, completionFingerprint: completion.fingerprint, plannedHours: completion.totals.plannedHours, plannedLaborCost: completion.totals.plannedLaborCost } });
     await client.query("COMMIT"); return { intakeId: intake.id, contractId: draft.id, contractVersionId: draft.versionId, status: "activated", idempotent: false };
   } catch (error) { try { await client.query("ROLLBACK"); } catch {} throw error; }
   finally { client.release(); }

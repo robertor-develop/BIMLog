@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
+import { fileURLToPath } from "node:url";
 import AdmZip from "adm-zip";
 import { PDFParse } from "pdf-parse";
 import { evaluateFinancialAuthorization, type ApprovalPolicy, type EffectiveGrant } from "./financial-control-contract";
@@ -67,7 +68,8 @@ check("Contract Item zero quantity denied", "items must represent a positive mea
 assert.deepEqual(safeCommercialMetadata({ retainage: "10% metadata", tax: null, bond: "on file", insurance: "on file", calculation: "forbidden" }), { retainage: "10% metadata", tax: null, bond: "on file", insurance: "on file" });
 check("commercial fields metadata only", "no retainage/tax calculation field");
 
-const root = process.cwd(), migration = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/financial-contract-migration.ts"), "utf8"), service = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/financial-contract-service.ts"), "utf8"), routes = fs.readFileSync(path.join(root, "artifacts/api-server/src/routes/financial-contracts.ts"), "utf8"), browser = fs.readFileSync(path.join(root, "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx"), "utf8");
+const here = path.dirname(fileURLToPath(import.meta.url));
+const migration = fs.readFileSync(path.resolve(here, "./financial-contract-migration.ts"), "utf8"), service = fs.readFileSync(path.resolve(here, "./financial-contract-service.ts"), "utf8"), routes = fs.readFileSync(path.resolve(here, "../routes/financial-contracts.ts"), "utf8"), browser = fs.readFileSync(path.resolve(here, "../../../bimlog/src/pages/FinancialContractWorkspace.tsx"), "utf8");
 for (const table of ["financial_contracts", "financial_contract_versions", "financial_contract_sov_lines", "financial_contract_amendments", "financial_contract_amendment_versions", "financial_contract_amendment_lines", "financial_contract_import_sessions", "financial_contract_record_grants", "financial_contract_history"]) assert.match(migration, new RegExp(`CREATE TABLE IF NOT EXISTS ${table}`));
 check("nine additive table families", "approved Build 3 data boundary");
 assert.doesNotMatch(migration, /\bDROP\b/i); check("migration additive", "no DROP operation");

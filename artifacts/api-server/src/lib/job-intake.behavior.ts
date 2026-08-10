@@ -37,6 +37,8 @@ for (const table of ["job_intakes", "job_intake_documents", "job_intake_events"]
 assert.match(routes, /singleFileUpload\(\{ fileSize: 25 \* 1024 \* 1024, files: 1, fields: 2, parts: 3/);
 assert.match(routes, /authMiddleware/);
 assert.match(service, /createContractDraftWithClient/);
+assert.match(service, /initializeContractItemWorkflowsWithClient/);
+assert.match(service, /workflowInstancesCreated/);
 assert.match(service, /plannedHours[\s\S]*billingHourlyRate/);
 assert.match(contract, /internalHourlyRate/);
 assert.match(app, /startJobIntakeMigration\(\)/);
@@ -47,4 +49,4 @@ assert.match(ui, /Save & continue later/);
 assert.match(ui, /Activate job/);
 assert.match(ui, /@media\(max-width:900px\)/);
 
-console.log(JSON.stringify({ status: "PASS", exactBillingValue: data.scopeItems[0]?.contractValue, exactPlannedLaborCost: data.team.assignments[0]?.plannedLaborCost, completion: completion.percent, tests: ["hourly-joining-factor", "separate-internal-cost", "completion", "additive-migration", "bounded-upload", "contract-activation", "startup", "guided-responsive-ui"] }));
+console.log(JSON.stringify({ status: "PASS", exactBillingValue: data.scopeItems[0]?.contractValue, exactPlannedLaborCost: data.team.assignments[0]?.plannedLaborCost, completion: completion.percent, tests: ["hourly-joining-factor", "separate-internal-cost", "completion", "additive-migration", "bounded-upload", "contract-activation", "automatic-workflow-baseline", "startup", "guided-responsive-ui"] }));
