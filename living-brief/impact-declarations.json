@@ -7747,6 +7747,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "job-operations-resource-execution-20260810",
+      "reviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "reviewedAt": "2026-08-10T13:09:00-04:00",
+      "status": "local_job_operations_validated",
+      "captureTiming": "same_job_operations_task",
+      "summary": "Adds the bilingual Job Operations workspace that runs activated Intake work items, controls task progress and reassignment, records actual hours, links project deliverables, and exposes financial totals only when the user's Commercial entitlements allow them.",
+      "workstreams": [
+        "job-operations",
+        "resource-execution",
+        "actual-hours",
+        "deliverable-links",
+        "commercial-entitlements",
+        "bilingual-ui"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority hierarchy, or cross-company doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, verification, database-safety, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing additive-schema, authorization, concurrency, audit-event, bilingual UI, responsive-layout, and test standards cover the build."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The build implements the approved Intake-to-operations execution direction without changing product doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the Job Operations service, route, behavior proof, page, and project route."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior or provider integration changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document rendering template changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved future-work ordering is changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e63d7ebbfb7985c788044d1e7ae1887c86788fbb1b08f2bc21c15e48f16dca08"
     }
   ]
 }

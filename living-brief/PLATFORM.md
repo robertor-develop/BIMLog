@@ -72,6 +72,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/index.ts
 - artifacts/api-server/src/routes/intelligence.ts
 - artifacts/api-server/src/routes/job-intake.ts
+- artifacts/api-server/src/routes/job-operations.ts
 - artifacts/api-server/src/routes/linked_items.ts
 - artifacts/api-server/src/routes/living_brief.ts
 - artifacts/api-server/src/routes/meeting_minutes.ts
@@ -135,6 +136,7 @@ It changes only when the code structure or curated architectural facts change.
 - coordinatorActionsRouter
 - jobIntakeRouter
 - contractItemWorkflowsRouter
+- jobOperationsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -227,6 +229,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-migration.ts
 - artifacts/api-server/src/lib/job-intake-service.ts
 - artifacts/api-server/src/lib/job-intake.behavior.ts
+- artifacts/api-server/src/lib/job-operations-service.ts
+- artifacts/api-server/src/lib/job-operations.behavior.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
 - artifacts/api-server/src/lib/linked-items-creation-ux.behavior.ts
 - artifacts/api-server/src/lib/living-brief-gate.behavior.ts
@@ -343,6 +347,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialControlsSettings.tsx
 - artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx
+- artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx
 - artifacts/bimlog/src/pages/Landing.tsx
 - artifacts/bimlog/src/pages/LivingBrief.tsx
 - artifacts/bimlog/src/pages/Login.tsx
@@ -400,6 +405,7 @@ It changes only when the code structure or curated architectural facts change.
 - /projects/:id/financial/contracts
 - /projects/:id/financial/apu
 - /projects/:id/intake
+- /projects/:id/operations
 - /projects/:id/:tab?
 - /setup-guide
 - /profile

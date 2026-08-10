@@ -1,11 +1,12 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
+  "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "e4f5a0a73866cede08276dd068ccf22e9e8541c80a7ca4fffed5e815a55f15f1",
+  "bundleSha256": "b60bfbd95d0d1906ca0e97e1fec1825c4911cd411c3e9675e351cb3a2f2c3f8f",
   "impact": {
-    "baselineCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
+    "baselineCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
     "changedPaths": [
+      "living-brief/PLATFORM.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
@@ -21,11 +22,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "claude",
@@ -33,11 +34,11 @@
       "sha256": "b8efc974142d81e72ec01cf72a1d180f5e3c5a346a5dbb390b2c3a7651f906e9",
       "sourceChangedAt": "2026-08-05T11:26:11-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "quality",
@@ -45,11 +46,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "vision",
@@ -57,23 +58,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "dfdbac1bd9fb57175187afa673a0917358edc2dd71a8267dda314f73ac59d66d",
-      "sourceChangedAt": "2026-08-10T10:09:00-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "sha256": "84e6da42ae35a87da6cb0c8e4af714e673ca3982bb95c2bbb23750f22db99c72",
+      "sourceChangedAt": "2026-08-10T17:09:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "plugin",
@@ -81,11 +82,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "report_design_system",
@@ -93,11 +94,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "standards_register",
@@ -105,11 +106,11 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "status",
@@ -117,11 +118,11 @@
       "sha256": "d035d573e9e58867cac44c0e287ccdf289cdf27ccfb0114e7d744fbb3fe6ac04",
       "sourceChangedAt": "2026-08-05T22:59:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "open_loop",
@@ -129,11 +130,11 @@
       "sha256": "1e22f7bb61c3e58cd021adf7cbcf1cb70afc957f5362859cf6767ea9e9bcd7a1",
       "sourceChangedAt": "2026-08-05T22:59:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     },
     {
       "key": "audit",
@@ -141,11 +142,11 @@
       "sha256": "c64878fb9aec6abbef080bb1da14f09dd92af10407b31ac6c4b4710eb42446cc",
       "sourceChangedAt": "2026-08-01T10:59:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
-      "semanticReviewTask": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reconciledThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewedThroughCommit": "1e1ef37e8e74ad9735ed10f3bf15f36cdfc31441",
+      "semanticReviewTask": "job-operations-resource-execution-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-10T12:04:35-04:00"
+      "semanticReviewedAt": "2026-08-10T13:09:00-04:00"
     }
   ]
 }
