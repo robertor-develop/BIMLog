@@ -8137,6 +8137,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "073c146013e4d67efbe328dd1872cd96621782ce983aeac2b4445240e41c262e"
+    },
+    {
+      "taskId": "team-performance-full-user-manual-20260810",
+      "reviewedThroughCommit": "6ff3f9862ae872c759f8ff7a0b93384439b79059",
+      "reviewedAt": "2026-08-10T18:00:45-04:00",
+      "status": "local_team_performance_and_manual_validated",
+      "captureTiming": "same_product_task",
+      "summary": "Adds platform-wide Team Performance and Skills with transparent Job Operations evidence, user-level Commercial entitlement, bilingual filters and exports, and replaces the shallow help catalog with a detailed bilingual printable manual for every released workspace.",
+      "workstreams": [
+        "commercial-entitlements",
+        "team-performance",
+        "job-operations",
+        "bilingual-ui",
+        "help-center",
+        "user-documentation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership hierarchy, company boundary, or portfolio doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, testing, operator handoff, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows current deterministic evidence, bilingual, responsive, authorization, and build standards."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Evidence-based team performance and professional user documentation advance the accepted platform vision without changing doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the Team Performance service, route, behavior proof, and user-interface workspace."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin, cached runtime, browser bridge, connector, provider, or external integration behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "CSV and browser print outputs follow the existing application presentation and introduce no governed report-template change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulatory obligation, or compliance interpretation is added or changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto performs the separate push and publication workflow."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved future-build ordering, preserved backlog item, or owner decision is removed or rewritten."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence, incident record, accepted audit conclusion, or prior validation is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3363aeeb118b5a12553d814d6e929eb929b65ef0f260d3e89ae762bba192f48e"
     }
   ]
 }

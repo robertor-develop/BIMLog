@@ -86,6 +86,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/search.ts
 - artifacts/api-server/src/routes/submittal_reports.ts
 - artifacts/api-server/src/routes/submittals.ts
+- artifacts/api-server/src/routes/team-performance.ts
 - artifacts/api-server/src/routes/telegram-product.ts
 - artifacts/api-server/src/routes/transmittals.ts
 
@@ -137,6 +138,7 @@ It changes only when the code structure or curated architectural facts change.
 - jobIntakeRouter
 - contractItemWorkflowsRouter
 - jobOperationsRouter
+- teamPerformanceRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -266,6 +268,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/scoped-authority.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts
 - artifacts/api-server/src/lib/storage-adapter.ts
+- artifacts/api-server/src/lib/team-performance-service.ts
+- artifacts/api-server/src/lib/team-performance.behavior.ts
 - artifacts/api-server/src/lib/telegram-product-delivery.ts
 - artifacts/api-server/src/lib/telegram-product-notifications.ts
 - artifacts/api-server/src/lib/telegram-product-provider-broker.ts
@@ -365,6 +369,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/Register.tsx
 - artifacts/bimlog/src/pages/ResetPassword.tsx
 - artifacts/bimlog/src/pages/SetupGuide.tsx
+- artifacts/bimlog/src/pages/TeamPerformanceWorkspace.tsx
 - artifacts/bimlog/src/pages/Terms.tsx
 - artifacts/bimlog/src/pages/TotalControl.tsx
 - artifacts/bimlog/src/pages/not-found.tsx
@@ -409,6 +414,7 @@ It changes only when the code structure or curated architectural facts change.
 - /projects/:id/financial/snapshots/:snapshotId
 - /projects/:id/financial/contracts
 - /projects/:id/financial/apu
+- /projects/:id/commercial/team-performance
 - /projects/:id/intake
 - /projects/:id/operations
 - /projects/:id/:tab?
