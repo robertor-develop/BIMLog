@@ -145,6 +145,11 @@ ${appRoutes()}
   Optional section guidance, automatic detail-line remainder/equal splits, and exact save-readiness
   explanations make the complete allocation actionable. Draft and saved plans can be exported as CSV
   or printed/saved as PDF; saved plan versions remain immutable.
+- Commercial Contract Items turn an approved budget line and saved APU version into an operational
+  contract scope. Quantity multiplied by the frozen APU selling price calculates the contractual value;
+  the immutable item snapshot preserves the APU content, evaluation, fingerprint, BIM Submittal display,
+  and Phase to Revision to Version to Task workflow selection. Contract detail, searchable PDF, and native
+  XLSX exports expose the same Contract Item quantities, rates, values, APU identity, and workflow metadata.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
 `;

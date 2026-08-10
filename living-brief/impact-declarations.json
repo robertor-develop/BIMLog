@@ -7297,6 +7297,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "23b8d6f9c23890b150455e930e9e23f3bed64e56e3b48b4a0513f9bc9b06760b"
+    },
+    {
+      "taskId": "apu-backed-contract-item-engine-20260810",
+      "reviewedThroughCommit": "0c4a082d675c31f8b94fdcde8944cb8a93bdc570",
+      "reviewedAt": "2026-08-10T07:43:50-04:00",
+      "status": "local_contract_item_engine_validated",
+      "captureTiming": "same_commercial_apu_task",
+      "summary": "Builds the Contract Item Engine on the existing Commercial contract workspace: quantity and frozen APU rate calculate exact value, the complete APU snapshot is preserved, BIM workflow metadata is visible, and PDF/XLSX exports carry the operational item fields.",
+      "workstreams": [
+        "generic-apu",
+        "commercial-contract-items",
+        "contract-exports"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or operating-authority doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Acceptance covers exact item arithmetic, required saved APU identity, immutable snapshots, additive persistence, responsive UI, and faithful exports."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "This advances the approved APU-to-contract-item product sequence from Ruben's Phase 2 architecture."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the operational Contract Item model, frozen APU linkage, BIM workflow metadata, and export behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior or plugin-owned interface changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed contract PDF and XLSX exports are extended without establishing a new report system."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The active objective remains the user-requested Commercial/APU build."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted incident record is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "bcc2dd1f1d935341fb9f933e3d7709ec12a5016b63024a0cd11667c5cf256864"
     }
   ]
 }
