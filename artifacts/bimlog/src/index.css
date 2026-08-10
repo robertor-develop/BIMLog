@@ -69,6 +69,23 @@ iframe[aria-label*="Replit" i],
   --sidebar-border: rgba(255,255,255,0.07);
 }
 
+.dark {
+  color-scheme: dark;
+  --background: 222 28% 9%;
+  --foreground: 210 30% 96%;
+  --card: 222 24% 12%;
+  --card-foreground: 210 30% 96%;
+  --popover: 222 24% 12%;
+  --popover-foreground: 210 30% 96%;
+  --secondary: 220 20% 17%;
+  --secondary-foreground: 210 30% 96%;
+  --muted: 220 20% 17%;
+  --muted-foreground: 215 16% 68%;
+  --border: 218 18% 24%;
+  --input: 218 18% 24%;
+  --sidebar: 222 34% 7%;
+}
+
 @layer base {
   * { @apply border-border; }
   html { font-size: 14px; }
@@ -227,6 +244,28 @@ iframe[aria-label*="Replit" i],
 }
 .phasea-project-sidebar.collapsed {
   width: 78px;
+}
+.collapsed-sidebar-expand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  margin: 10px 8px 4px;
+  min-height: 52px;
+  border: 1px solid rgba(147,197,253,0.45);
+  border-radius: 9px;
+  background: rgba(37,99,235,0.22);
+  color: #FFFFFF;
+  cursor: pointer;
+  font-size: 9px;
+  font-weight: 800;
+}
+.collapsed-sidebar-expand:hover,
+.collapsed-sidebar-expand:focus-visible {
+  background: rgba(37,99,235,0.42);
+  outline: 2px solid rgba(147,197,253,0.95);
+  outline-offset: 2px;
 }
 .phasea-sidebar-collapse {
   display: flex;

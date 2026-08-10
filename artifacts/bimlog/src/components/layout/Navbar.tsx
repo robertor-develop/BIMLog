@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { logClientError } from "@/lib/client-log";
 import { useAuthStore } from "@/store/auth";
+import { Moon, Sun } from "lucide-react";
 
 export function Navbar() {
   const { t, tt } = useI18n();
@@ -14,6 +15,21 @@ export function Navbar() {
   const isDashboard = location === "/dashboard";
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
+  const [darkMode, setDarkMode] = useState(false);
+
+  useEffect(() => {
+    const saved = localStorage.getItem("bimlog-theme");
+    const dark = saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    document.documentElement.classList.toggle("dark", dark);
+    setDarkMode(dark);
+  }, []);
+
+  function toggleTheme() {
+    const dark = !darkMode;
+    document.documentElement.classList.toggle("dark", dark);
+    localStorage.setItem("bimlog-theme", dark ? "dark" : "light");
+    setDarkMode(dark);
+  }
 
   useEffect(() => {
     if (!user || !token) {
@@ -98,6 +114,16 @@ export function Navbar() {
 
             <Button variant="ghost" size="sm" onClick={logout} style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
               {t("nav.logout")}
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleTheme}
+              aria-label={darkMode ? tt("Use light mode", "Usar modo claro") : tt("Use dark mode", "Usar modo oscuro")}
+              title={darkMode ? tt("Light mode", "Modo claro") : tt("Dark mode", "Modo oscuro")}
+              style={{ width: 32, height: 32, color: "hsl(var(--muted-foreground))" }}
+            >
+              {darkMode ? <Sun size={16} /> : <Moon size={16} />}
             </Button>
           </>
         ) : isLanding ? (

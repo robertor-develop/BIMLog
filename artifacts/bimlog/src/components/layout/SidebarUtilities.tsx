@@ -5,7 +5,6 @@ import { useI18n } from "@/lib/i18n";
 import { LangToggle } from "@/components/layout/LangToggle";
 
 const INFO_LINKS = [
-  { en: "User Manual", es: "Manual del usuario", href: "/help?view=manual" },
   { en: "Pricing", es: "Precios", href: "/pricing" },
   { en: "Features", es: "Funcionalidades", href: "/features" },
   { en: "About", es: "Acerca de", href: "/about" },

@@ -9,6 +9,9 @@ const content = read("../../../../artifacts/bimlog/src/lib/help-content.ts");
 const page = read("../../../../artifacts/bimlog/src/pages/HelpCenter.tsx");
 const guide = read("../../../../artifacts/bimlog/src/components/layout/SmartGuide.tsx");
 const sidebar = read("../../../../artifacts/bimlog/src/components/layout/SidebarUtilities.tsx");
+const projectSidebar = read("../../../../artifacts/bimlog/src/components/layout/ProjectSidebar.tsx");
+const navbar = read("../../../../artifacts/bimlog/src/components/layout/Navbar.tsx");
+const styles = read("../../../../artifacts/bimlog/src/index.css");
 const app = read("../../../../artifacts/bimlog/src/App.tsx");
 const legacy = read("../../../../artifacts/bimlog/src/pages/SetupGuide.tsx");
 
@@ -26,9 +29,19 @@ assert.match(page, /@media\(max-width:850px\)/, "Help Center must be responsive"
 assert.match(guide, /helpTopicForContext/, "quick guide must use the canonical documentation catalog");
 assert.match(guide, /Open complete instructions/);
 assert.match(guide, /Abrir instrucciones completas/);
-assert.match(sidebar, /\/help\?view=manual/);
+assert.match(sidebar, /\/help\?topic=getting-started&view=manual/);
+const infoLinks = sidebar.match(/const INFO_LINKS = \[([\s\S]*?)\];/)?.[1] ?? "";
+assert.doesNotMatch(infoLinks, /User Manual|Manual del usuario/, "Info must not duplicate the manual housed in Help Center");
+assert.match(projectSidebar, /collapsed-sidebar-expand/);
+assert.match(projectSidebar, /Expand navigation/);
+assert.match(projectSidebar, /Expandir navegación/);
+assert.match(navbar, /bimlog-theme/);
+assert.match(navbar, /Use dark mode/);
+assert.match(navbar, /Usar modo oscuro/);
+assert.match(styles, /\.dark \{/);
+assert.match(styles, /\.collapsed-sidebar-expand/);
 assert.match(app, /path="\/help"/);
 assert.match(app, /ProtectedRoute component=\{HelpCenter\}/);
 assert.match(legacy, /HelpCenter as SetupGuide/, "legacy setup-guide source must not retain a second documentation catalog");
 
-console.log(JSON.stringify({ status: "PASS", tests: ["canonical-source", "released-feature-coverage", "bilingual-manual", "quick-guides", "troubleshooting", "release-information", "contextual-guide", "accent-insensitive-search", "responsive-layout", "protected-route", "legacy-convergence"] }));
+console.log(JSON.stringify({ status: "PASS", tests: ["canonical-source", "released-feature-coverage", "bilingual-manual", "quick-guides", "troubleshooting", "release-information", "contextual-guide", "manual-not-duplicated-in-info", "collapsed-navigation-recovery", "persistent-day-night-mode", "accent-insensitive-search", "responsive-layout", "protected-route", "legacy-convergence"] }));

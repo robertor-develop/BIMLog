@@ -131,6 +131,66 @@ async function budgetGovernanceView(client: Queryable, access: Awaited<ReturnTyp
   return { enabled, latestBaseline, history, metrics, reviews, unresolvedOverruns: metrics.filter((metric) => metric.overrun && !openMetrics.has(metric.metric)).length };
 }
 
+const fixed = (value: unknown) => Number(value ?? 0).toFixed(2);
+const ratio = (numerator: number, denominator: number) => denominator > 0 ? Number((numerator / denominator).toFixed(2)) : null;
+const forecast = (actual: number, progressFraction: number) => actual > 0 && progressFraction > 0 ? Number((actual / progressFraction).toFixed(2)) : null;
+
+function controlRow(row: any) {
+  const progressPercent = Math.max(0, Math.min(100, Number(row.progressPercent ?? 0)));
+  const progressFraction = progressPercent / 100;
+  const plannedHours = Number(row.plannedHours ?? 0), actualHours = Number(row.actualHours ?? 0);
+  const plannedInternalCost = Number(row.plannedInternalCost ?? 0), actualInternalCost = Number(row.actualInternalCost ?? 0);
+  const plannedBillableValue = Number(row.plannedBillableValue ?? 0), earnedBillableValue = Number(row.earnedBillableValue ?? 0);
+  const earnedInternalValue = plannedInternalCost * progressFraction;
+  const estimatedHoursAtCompletion = forecast(actualHours, progressFraction);
+  const estimatedCostAtCompletion = forecast(actualInternalCost, progressFraction);
+  const cpi = ratio(earnedInternalValue, actualInternalCost);
+  let status = "healthy";
+  if (progressPercent === 0 && actualHours === 0) status = "not_started";
+  else if (Number(row.blockedPackages ?? 0) > 0 || (cpi != null && cpi < 0.8) || (plannedInternalCost > 0 && actualInternalCost > plannedInternalCost)) status = "critical";
+  else if (Number(row.overduePackages ?? 0) > 0 || (cpi != null && cpi < 1) || (estimatedCostAtCompletion != null && plannedInternalCost > 0 && estimatedCostAtCompletion > plannedInternalCost) || (estimatedHoursAtCompletion != null && plannedHours > 0 && estimatedHoursAtCompletion > plannedHours)) status = "warning";
+  return {
+    id: row.id, name: row.name, progressPercent: Number(progressPercent.toFixed(2)), status,
+    packageIds: row.packageIds ?? [], memberIds: (row.memberIds ?? []).map(Number),
+    packageCount: Number(row.packageCount ?? 0), overduePackages: Number(row.overduePackages ?? 0), blockedPackages: Number(row.blockedPackages ?? 0),
+    plannedHours: fixed(plannedHours), actualHours: fixed(actualHours), remainingHours: fixed(Math.max(0, plannedHours - actualHours)), estimatedHoursAtCompletion: estimatedHoursAtCompletion?.toFixed(2) ?? null, hoursVarianceAtCompletion: estimatedHoursAtCompletion == null ? null : fixed(plannedHours - estimatedHoursAtCompletion),
+    plannedInternalCost: fixed(plannedInternalCost), actualInternalCost: fixed(actualInternalCost), earnedInternalValue: fixed(earnedInternalValue), remainingInternalBudget: fixed(Math.max(0, plannedInternalCost - actualInternalCost)), cpi,
+    estimatedCostAtCompletion: estimatedCostAtCompletion?.toFixed(2) ?? null, estimatedCostToComplete: estimatedCostAtCompletion == null ? null : fixed(Math.max(0, estimatedCostAtCompletion - actualInternalCost)), costVarianceAtCompletion: estimatedCostAtCompletion == null ? null : fixed(plannedInternalCost - estimatedCostAtCompletion),
+    plannedBillableValue: fixed(plannedBillableValue), earnedBillableValue: fixed(earnedBillableValue),
+  };
+}
+
+async function projectControlsView(client: Queryable, access: Awaited<ReturnType<typeof scope>>, capabilities: any) {
+  const budgetVisible = capabilities.budget === true, valueVisible = capabilities.cost_value_planner === true;
+  const enabled = budgetVisible || valueVisible;
+  if (!enabled || !access.intakeId) return { enabled, budgetVisible, valueVisible, rows: [], totals: null, alerts: { critical: 0, warning: 0, overduePackages: 0, blockedPackages: 0 }, spi: null };
+  const sourceRows = (await client.query(`SELECT w.id,w.name,w.planned_hours::text "plannedHours",COALESCE(pr.progress_percent,0)::text "progressPercent",COALESCE(ac.actual_hours,0)::text "actualHours",COALESCE(rp.planned_internal_cost,0)::text "plannedInternalCost",COALESCE(ac.actual_internal_cost,0)::text "actualInternalCost",COALESCE(w.planned_billable_value,0)::text "plannedBillableValue",COALESCE(ac.earned_billable_value,0)::text "earnedBillableValue",COALESCE(rp.member_ids,'{}'::integer[]) "memberIds",COALESCE(pk.package_ids,'{}'::text[]) "packageIds",COALESCE(pk.package_count,0)::int "packageCount",COALESCE(pk.overdue_packages,0)::int "overduePackages",COALESCE(pk.blocked_packages,0)::int "blockedPackages"
+    FROM job_activation_work_items w
+    LEFT JOIN LATERAL (SELECT COALESCE(SUM(planned_hours*progress_percent)/NULLIF(SUM(planned_hours),0),AVG(progress_percent),0) progress_percent FROM job_activation_tasks WHERE work_item_id=w.id AND status<>'cancelled') pr ON true
+    LEFT JOIN LATERAL (SELECT SUM(planned_internal_cost) planned_internal_cost,COALESCE(array_agg(DISTINCT user_id) FILTER(WHERE user_id IS NOT NULL),'{}'::integer[]) member_ids FROM job_activation_resource_assignments WHERE work_item_id=w.id) rp ON true
+    LEFT JOIN LATERAL (SELECT SUM(e.hours) actual_hours,SUM(e.hours*r.internal_hourly_rate) actual_internal_cost,SUM(e.hours*COALESCE(r.billing_hourly_rate,w.billing_hourly_rate)) earned_billable_value FROM job_activation_time_entries e LEFT JOIN job_activation_resource_assignments r ON r.id=e.assignment_id WHERE e.work_item_id=w.id) ac ON true
+    LEFT JOIN LATERAL (SELECT COALESCE(array_agg(id ORDER BY id),'{}'::text[]) package_ids,COUNT(*) package_count,COUNT(*) FILTER(WHERE due_date<CURRENT_DATE AND status NOT IN('approved','cancelled')) overdue_packages,COUNT(*) FILTER(WHERE EXISTS(SELECT 1 FROM job_activation_work_package_tasks pt JOIN job_activation_tasks t ON t.id=pt.task_id WHERE pt.package_id=job_activation_work_packages.id AND t.status='blocked')) blocked_packages FROM job_activation_work_packages WHERE work_item_id=w.id AND status<>'cancelled') pk ON true
+    WHERE w.intake_id=$1 AND w.status<>'cancelled' ORDER BY w.created_at,w.id`, [access.intakeId])).rows;
+  const rows = sourceRows.map(controlRow);
+  const totalsSource = rows.reduce((total, row) => ({
+    plannedHours: total.plannedHours + Number(row.plannedHours), actualHours: total.actualHours + Number(row.actualHours),
+    plannedInternalCost: total.plannedInternalCost + Number(row.plannedInternalCost), actualInternalCost: total.actualInternalCost + Number(row.actualInternalCost),
+    plannedBillableValue: total.plannedBillableValue + Number(row.plannedBillableValue), earnedBillableValue: total.earnedBillableValue + Number(row.earnedBillableValue),
+    earnedHours: total.earnedHours + Number(row.plannedHours) * Number(row.progressPercent) / 100,
+    packageCount: total.packageCount + row.packageCount, overduePackages: total.overduePackages + row.overduePackages, blockedPackages: total.blockedPackages + row.blockedPackages,
+  }), { plannedHours: 0, actualHours: 0, plannedInternalCost: 0, actualInternalCost: 0, plannedBillableValue: 0, earnedBillableValue: 0, earnedHours: 0, packageCount: 0, overduePackages: 0, blockedPackages: 0 });
+  const totals = controlRow({ id: "project", name: access.projectName, progressPercent: ratio(totalsSource.earnedHours * 100, totalsSource.plannedHours) ?? 0, ...totalsSource });
+  const protect = (row: ReturnType<typeof controlRow>) => ({ ...row,
+    plannedInternalCost: budgetVisible ? row.plannedInternalCost : null, actualInternalCost: budgetVisible ? row.actualInternalCost : null, earnedInternalValue: budgetVisible ? row.earnedInternalValue : null, remainingInternalBudget: budgetVisible ? row.remainingInternalBudget : null, cpi: budgetVisible ? row.cpi : null, estimatedCostAtCompletion: budgetVisible ? row.estimatedCostAtCompletion : null, estimatedCostToComplete: budgetVisible ? row.estimatedCostToComplete : null, costVarianceAtCompletion: budgetVisible ? row.costVarianceAtCompletion : null,
+    plannedBillableValue: valueVisible ? row.plannedBillableValue : null, earnedBillableValue: valueVisible ? row.earnedBillableValue : null,
+  });
+  return {
+    enabled, budgetVisible, valueVisible, rows: rows.map(protect), totals: protect(totals), spi: null,
+    alerts: { critical: rows.filter((row) => row.status === "critical").length, warning: rows.filter((row) => row.status === "warning").length, overduePackages: totalsSource.overduePackages, blockedPackages: totalsSource.blockedPackages },
+    methodology: { progress: "planned-task-hours weighted completion", cpi: "earned internal value / actual internal cost", forecast: "actual / physical progress", spi: "unavailable until an authoritative schedule baseline exists" },
+  };
+}
+
 export async function getJobOperations(input: { actorUserId: number; projectId: unknown }) {
   await waitForJobIntakeMigration();
   const projectId = positiveInt(input.projectId, "projectId"), access = await scope(input.actorUserId, projectId);
@@ -201,8 +261,8 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     blocked: safePackages.filter((row) => Number(row.blockedCount) > 0).length,
     approved: safePackages.filter((row) => row.status === "approved").length,
   };
-  const budgetGovernance = await budgetGovernanceView(pool, access, capabilities);
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, budgetGovernance, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, totals: safeTotals };
+  const [budgetGovernance, projectControls] = await Promise.all([budgetGovernanceView(pool, access, capabilities), projectControlsView(pool, access, capabilities)]);
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, budgetGovernance, projectControls, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, totals: safeTotals };
 }
 
 export async function createJobBudgetBaseline(input: { actorUserId: number; projectId: unknown; baselineId: unknown; revisionReason?: unknown }) {

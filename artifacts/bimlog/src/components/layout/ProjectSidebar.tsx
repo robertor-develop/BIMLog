@@ -7,7 +7,7 @@ import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
   BookOpen, Send, RefreshCw, CalendarDays, GitMerge, Gauge,
-  ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness
+  ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness, PanelLeftOpen
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -401,6 +401,18 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
             typeof window === "undefined" ? `/projects/${projectId}` : `${window.location.pathname}${window.location.search}`,
           )}`}
         />
+        {collapsed && (
+          <button
+            type="button"
+            className="collapsed-sidebar-expand"
+            onClick={() => setCollapsed(false)}
+            aria-label={tr("Expand navigation", "Expandir navegación")}
+            title={tr("Expand navigation", "Expandir navegación")}
+          >
+            <PanelLeftOpen size={17} />
+            <span>{tr("Expand", "Expandir")}</span>
+          </button>
+        )}
         <div style={{ padding: "10px 10px 0" }}>
           <div className="sidebar-project">
             <div className="sidebar-project-code">{projectCode}</div>
