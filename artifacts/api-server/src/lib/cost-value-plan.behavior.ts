@@ -26,6 +26,9 @@ assert.equal(result.evaluation.allocationTotal, "900.00");
 assert.equal(result.evaluation.productionPhaseTotal, "450.00");
 assert.equal(result.evaluation.administrativeLineTotal, "150.00");
 assert.deepEqual(result.plan.allocationPercentages, { labor: "66.67", bonus: "11.11", taskEarnings: "22.22" });
+assert.deepEqual(result.plan.laborSplitPercentages, { production: "75.00", administrative: "25.00" });
+assert.deepEqual(result.plan.productionPhases.map((line) => line.percentage), ["33.33", "66.67"]);
+assert.deepEqual(result.plan.administrativeLines.map((line) => line.percentage), ["66.67", "33.33"]);
 
 const rejects = (value: unknown, code: string) => assert.throws(
   () => validateCostValuePlan(value),

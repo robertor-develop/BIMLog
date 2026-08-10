@@ -4,7 +4,7 @@ import { authorizeFinancialOperation } from "./financial-control-service";
 import { evaluateGenericApu } from "./generic-apu-engine";
 import { waitForGenericApuPersistenceMigration } from "./generic-apu-persistence-migration";
 
-type Line = { id: string; name: string; amount: string };
+type Line = { id: string; name: string; amount: string; percentage: string };
 export type CostValuePlanInput = {
   name: string;
   currency: string;
@@ -13,6 +13,7 @@ export type CostValuePlanInput = {
   allocationMode: "amount" | "percentage";
   allocationPercentages: { labor: string; bonus: string; taskEarnings: string };
   allocations: { labor: string; bonus: string; taskEarnings: string };
+  laborSplitPercentages: { production: string; administrative: string };
   laborSplit: { production: string; administrative: string };
   productionPhases: Line[];
   administrativeLines: Line[];
@@ -59,10 +60,20 @@ const lineList = (value: unknown, field: string): Line[] => {
     const id = text(row.id, `${field}[${index}].id`, 80);
     if (ids.has(id)) throw new CostValuePlanError(400, "COST_VALUE_LINES_INVALID", `${field} contains a duplicate id.`);
     ids.add(id);
-    return { id, name: text(row.name, `${field}[${index}].name`), amount: money(cents(row.amount, `${field}[${index}].amount`)) };
+    const percentage = row.percentage == null ? "0.00" : percentText(basisPoints(row.percentage, `${field}[${index}].percentage`));
+    return { id, name: text(row.name, `${field}[${index}].name`), amount: money(cents(row.amount, `${field}[${index}].amount`)), percentage };
   });
 };
 const sum = (values: bigint[]) => values.reduce((total, value) => total + value, 0n);
+const withDerivedPercentages = (lines: Line[], whole: bigint) => {
+  if (whole === 0n || lines.length === 0) return lines;
+  let used = 0n;
+  return lines.map((line, index) => {
+    const points = index === lines.length - 1 && used <= 10_000n ? 10_000n - used : percentageOf(cents(line.amount, "line.amount"), whole);
+    used += points;
+    return { ...line, percentage: percentText(points) };
+  });
+};
 const digest = (value: unknown) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 
 export function validateCostValuePlan(input: unknown): { plan: CostValuePlanInput; evaluation: Record<string, unknown> } {
@@ -109,6 +120,10 @@ export function validateCostValuePlan(input: unknown): { plan: CostValuePlanInpu
     throw new CostValuePlanError(400, "COST_VALUE_PHASES_UNBALANCED", "Production phases must equal Production labor.");
   if (sum(adminLines.map((line) => cents(line.amount, "administrativeLines.amount"))) !== administrative)
     throw new CostValuePlanError(400, "COST_VALUE_ADMIN_UNBALANCED", "Administrative budget lines must equal Administrative labor.");
+  const productionPercent = percentageOf(production, labor);
+  const laborSplitPercentages = labor === 0n ? { production: "0.00", administrative: "0.00" } : { production: percentText(productionPercent), administrative: percentText(10_000n - productionPercent) };
+  const phasesWithPercentages = withDerivedPercentages(phases, production);
+  const adminLinesWithPercentages = withDerivedPercentages(adminLines, administrative);
 
   const evaluate = (lines: Line[]) => lines.length === 0 ? { roundedTotal: "0.00" } : evaluateGenericApu({
     currency,
@@ -116,19 +131,20 @@ export function validateCostValuePlan(input: unknown): { plan: CostValuePlanInpu
     rootNodeIds: lines.map((line) => line.id),
   });
   const allocationResult = evaluate([
-    { id: "labor", name: "Labor Operating Pool", amount: money(labor) },
-    { id: "bonus", name: "Project Incentive Reserve", amount: money(bonus) },
-    { id: "task-earnings", name: "Project Earnings", amount: money(taskEarnings) },
+    { id: "labor", name: "Labor Operating Pool", amount: money(labor), percentage: allocationPercentages.labor },
+    { id: "bonus", name: "Project Incentive Reserve", amount: money(bonus), percentage: allocationPercentages.bonus },
+    { id: "task-earnings", name: "Project Earnings", amount: money(taskEarnings), percentage: allocationPercentages.taskEarnings },
   ]);
-  const phaseResult = evaluate(phases);
-  const administrativeResult = evaluate(adminLines);
+  const phaseResult = evaluate(phasesWithPercentages);
+  const administrativeResult = evaluate(adminLinesWithPercentages);
   const plan: CostValuePlanInput = {
     name: text(raw.name, "name"), currency,
     sellingPrice: money(selling), fixedCompanyCost: money(fixed),
     allocationMode, allocationPercentages,
     allocations: { labor: money(labor), bonus: money(bonus), taskEarnings: money(taskEarnings) },
+    laborSplitPercentages,
     laborSplit: { production: money(production), administrative: money(administrative) },
-    productionPhases: phases, administrativeLines: adminLines,
+    productionPhases: phasesWithPercentages, administrativeLines: adminLinesWithPercentages,
   };
   return { plan, evaluation: {
     netDistributableValue: money(net),

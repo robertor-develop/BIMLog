@@ -7,12 +7,13 @@ import { useI18n } from "@/lib/i18n";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const forecastStyles = `.forecast-scenarios{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:16px}.scenario{display:grid;gap:5px;border:1px solid hsl(var(--border));border-radius:10px;padding:12px}.scenario strong{text-transform:capitalize}.scenario span{font-size:12px}.forecast-status{margin-top:12px!important;padding:8px 10px;border-radius:8px;font-weight:800;text-transform:capitalize}.forecast-status.healthy{background:#DCFCE7;color:#166534}.forecast-status.warning{background:#FEF3C7;color:#92400E}.forecast-status.critical{background:#FEE2E2;color:#991B1B}.mode-switch{display:flex;gap:6px}.mode-switch .selected{background:#1D4ED8!important;color:white!important}.calculated-amounts{font-size:12px;color:hsl(var(--muted-foreground));margin-top:10px}@media(max-width:760px){.forecast-scenarios{grid-template-columns:1fr}}`;
-type Line = { id: string; name: string; amount: string };
+type Line = { id: string; name: string; amount: string; percentage: string };
 type Plan = {
   name: string; currency: string; sellingPrice: string; fixedCompanyCost: string;
   allocationMode: "amount" | "percentage";
   allocationPercentages: { labor: string; bonus: string; taskEarnings: string };
   allocations: { labor: string; bonus: string; taskEarnings: string };
+  laborSplitPercentages: { production: string; administrative: string };
   laborSplit: { production: string; administrative: string };
   productionPhases: Line[]; administrativeLines: Line[];
   evaluation?: { netDistributableValue: string };
@@ -31,9 +32,10 @@ const emptyPlan = (): Plan => ({
   name: "", currency: "USD", sellingPrice: "0.00", fixedCompanyCost: "0.00",
   allocationMode: "amount", allocationPercentages: { labor: "0.00", bonus: "0.00", taskEarnings: "0.00" },
   allocations: { labor: "0.00", bonus: "0.00", taskEarnings: "0.00" },
+  laborSplitPercentages: { production: "0.00", administrative: "0.00" },
   laborSplit: { production: "0.00", administrative: "0.00" },
-  productionPhases: [{ id: crypto.randomUUID(), name: "", amount: "0.00" }],
-  administrativeLines: [{ id: crypto.randomUUID(), name: "", amount: "0.00" }],
+  productionPhases: [{ id: crypto.randomUUID(), name: "", amount: "0.00", percentage: "0.00" }],
+  administrativeLines: [{ id: crypto.randomUUID(), name: "", amount: "0.00", percentage: "0.00" }],
 });
 const emptyPerformance = (): PerformanceInput => ({
   snapshotDate: new Date().toISOString().slice(0, 10), label: "",
@@ -58,7 +60,7 @@ const amountForPercent = (base: bigint | null, percent: string) => {
 const percentForAmount = (amount: string, base: bigint | null) => {
   const amountValue = cents(amount);
   if (amountValue == null || base == null || base <= 0n) return "0.00";
-  return (Number((amountValue * 1_000_000n + base / 2n) / base) / 100).toFixed(2);
+  return format((amountValue * 10_000n + base / 2n) / base);
 };
 const derivedTopPercentages = (labor: string, bonus: string, net: bigint | null) => {
   if (net == null || net <= 0n) return { labor: "0.00", bonus: "0.00", taskEarnings: "0.00" };
@@ -66,6 +68,29 @@ const derivedTopPercentages = (labor: string, bonus: string, net: bigint | null)
   const bonusPoints = percentBasisPoints(percentForAmount(bonus, net)) ?? 0n;
   const earningsPoints = laborPoints + bonusPoints <= 10_000n ? 10_000n - laborPoints - bonusPoints : 0n;
   return { labor: format(laborPoints), bonus: format(bonusPoints), taskEarnings: format(earningsPoints) };
+};
+const reallocateLines = (lines: Line[], base: bigint) => {
+  let used = 0n;
+  const points = lines.map((line) => percentBasisPoints(line.percentage) ?? 0n);
+  const balanced = points.reduce((sum, value) => sum + value, 0n) === 10_000n;
+  return lines.map((line, index) => {
+    const amount = balanced && index === lines.length - 1 ? base - used : (base * points[index]! + 5_000n) / 10_000n;
+    used += amount;
+    return { ...line, amount: format(amount) };
+  });
+};
+const cascadeLaborAllocation = (plan: Plan, laborAmount: bigint) => {
+  const productionPoints = percentBasisPoints(plan.laborSplitPercentages.production) ?? 0n;
+  const administrativePoints = percentBasisPoints(plan.laborSplitPercentages.administrative) ?? 0n;
+  if (productionPoints + administrativePoints !== 10_000n) return plan;
+  const production = (laborAmount * productionPoints + 5_000n) / 10_000n;
+  const administrative = laborAmount - production;
+  return {
+    ...plan,
+    laborSplit: { production: format(production), administrative: format(administrative) },
+    productionPhases: reallocateLines(plan.productionPhases, production),
+    administrativeLines: reallocateLines(plan.administrativeLines, administrative),
+  };
 };
 const csvCell = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
 
@@ -101,7 +126,19 @@ export function FinancialApuWorkspace() {
         const loaded = { ...emptyPlan(), ...body.data.plan, allocationPercentages: { ...emptyPlan().allocationPercentages, ...(body.data.plan.allocationPercentages ?? {}) } };
         const selling = cents(loaded.sellingPrice), fixed = cents(loaded.fixedCompanyCost);
         const net = selling != null && fixed != null ? selling - fixed : null;
-        setPlan({ ...loaded, allocationPercentages: derivedTopPercentages(loaded.allocations.labor, loaded.allocations.bonus, net) });
+        const laborBase = cents(loaded.allocations.labor);
+        const productionBase = cents(loaded.laborSplit.production);
+        const administrativeBase = cents(loaded.laborSplit.administrative);
+        setPlan({
+          ...loaded,
+          allocationPercentages: derivedTopPercentages(loaded.allocations.labor, loaded.allocations.bonus, net),
+          laborSplitPercentages: {
+            production: percentForAmount(loaded.laborSplit.production, laborBase),
+            administrative: percentForAmount(loaded.laborSplit.administrative, laborBase),
+          },
+          productionPhases: loaded.productionPhases.map((line: Line) => ({ ...line, percentage: line.percentage ?? percentForAmount(line.amount, productionBase) })),
+          administrativeLines: loaded.administrativeLines.map((line: Line) => ({ ...line, percentage: line.percentage ?? percentForAmount(line.amount, administrativeBase) })),
+        });
       } else setPlan(emptyPlan());
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Cost & Value Planner could not be loaded."); }
     finally { setLoading(false); }
@@ -208,7 +245,7 @@ export function FinancialApuWorkspace() {
       const laborPoints = percentBasisPoints(next.allocationPercentages.labor), bonusPoints = percentBasisPoints(next.allocationPercentages.bonus);
       if (laborPoints == null || bonusPoints == null || laborPoints + bonusPoints > 10_000n) return next;
       const labor = (net * laborPoints + 5_000n) / 10_000n, bonus = (net * bonusPoints + 5_000n) / 10_000n;
-      return { ...next, allocations: { labor: format(labor), bonus: format(bonus), taskEarnings: format(net - labor - bonus) } };
+      return cascadeLaborAllocation({ ...next, allocations: { labor: format(labor), bonus: format(bonus), taskEarnings: format(net - labor - bonus) } }, labor);
     }
     const labor = cents(next.allocations.labor), bonus = cents(next.allocations.bonus);
     if (labor == null || bonus == null || labor + bonus > net) return next;
@@ -220,12 +257,13 @@ export function FinancialApuWorkspace() {
     const edited = cents(value), other = cents(current.allocations[otherKey]);
     const remainder = net != null && edited != null && other != null && edited + other <= net ? net - edited - other : null;
     const allocations = { ...current.allocations, [key]: value, ...(remainder == null ? {} : { taskEarnings: format(remainder) }) };
-    return {
+    const next: Plan = {
       ...current,
       allocationMode: "amount",
       allocations,
       allocationPercentages: derivedTopPercentages(allocations.labor, allocations.bonus, net),
     };
+    return key === "labor" && edited != null ? cascadeLaborAllocation(next, edited) : next;
   });
   const setAllocationPercent = (key: keyof Plan["allocationPercentages"], value: string) => setPlan((current) => {
     if (key === "taskEarnings") return current;
@@ -237,28 +275,37 @@ export function FinancialApuWorkspace() {
     const net = cents(current.sellingPrice) != null && cents(current.fixedCompanyCost) != null ? cents(current.sellingPrice)! - cents(current.fixedCompanyCost)! : null;
     if (net == null || parts.some((part) => part == null) || parts.reduce<bigint>((sum, part) => sum + (part ?? 0n), 0n) !== 10_000n) return { ...current, allocationMode: "percentage", allocationPercentages };
     const labor = (net * parts[0]! + 5_000n) / 10_000n, bonus = (net * parts[1]! + 5_000n) / 10_000n, taskEarnings = net - labor - bonus;
-    return { ...current, allocationMode: "percentage", allocationPercentages, allocations: { labor: format(labor), bonus: format(bonus), taskEarnings: format(taskEarnings) } };
+    return cascadeLaborAllocation({ ...current, allocationMode: "percentage", allocationPercentages, allocations: { labor: format(labor), bonus: format(bonus), taskEarnings: format(taskEarnings) } }, labor);
   });
   const setSplitAmount = (key: keyof Plan["laborSplit"], value: string) => setPlan((current) => {
     const base = cents(current.allocations.labor), edited = cents(value);
     const otherKey = key === "production" ? "administrative" : "production";
     const remainder = base != null && edited != null && edited <= base ? base - edited : null;
-    return { ...current, laborSplit: { ...current.laborSplit, [key]: value, ...(remainder == null ? {} : { [otherKey]: format(remainder) }) } };
+    const laborSplit = { ...current.laborSplit, [key]: value, ...(remainder == null ? {} : { [otherKey]: format(remainder) }) };
+    const percentages = base == null ? current.laborSplitPercentages : { production: percentForAmount(laborSplit.production, base), administrative: percentForAmount(laborSplit.administrative, base) };
+    const next = { ...current, laborSplit, laborSplitPercentages: percentages };
+    return key === "production" && edited != null ? { ...next, productionPhases: reallocateLines(next.productionPhases, edited) } : key === "administrative" && edited != null ? { ...next, administrativeLines: reallocateLines(next.administrativeLines, edited) } : next;
   });
   const setSplitPercent = (key: keyof Plan["laborSplit"], value: string) => setPlan((current) => {
     const base = cents(current.allocations.labor), amount = amountForPercent(base, value);
     if (base == null || amount == null || amount > base) return current;
     const otherKey = key === "production" ? "administrative" : "production";
-    return { ...current, laborSplit: { ...current.laborSplit, [key]: format(amount), [otherKey]: format(base - amount) } };
+    const otherPoints = 10_000n - (percentBasisPoints(value) ?? 0n);
+    const laborSplitPercentages = { ...current.laborSplitPercentages, [key]: normalizeTwoDecimals(value), [otherKey]: format(otherPoints) };
+    const next = { ...current, laborSplit: { ...current.laborSplit, [key]: format(amount), [otherKey]: format(base - amount) }, laborSplitPercentages };
+    return { ...next, productionPhases: reallocateLines(next.productionPhases, cents(next.laborSplit.production) ?? 0n), administrativeLines: reallocateLines(next.administrativeLines, cents(next.laborSplit.administrative) ?? 0n) };
   });
-  const setLine = (key: "productionPhases" | "administrativeLines", id: string, field: "name" | "amount", value: string) => setPlan((current) => ({ ...current, [key]: current[key].map((line) => line.id === id ? { ...line, [field]: value } : line) }));
+  const setLine = (key: "productionPhases" | "administrativeLines", id: string, field: "name" | "amount", value: string) => setPlan((current) => {
+    const base = cents(key === "productionPhases" ? current.laborSplit.production : current.laborSplit.administrative);
+    return { ...current, [key]: current[key].map((line) => line.id === id ? { ...line, [field]: value, ...(field === "amount" ? { percentage: percentForAmount(value, base) } : {}) } : line) };
+  });
   const setLinePercent = (key: "productionPhases" | "administrativeLines", id: string, value: string) => setPlan((current) => {
     const base = cents(key === "productionPhases" ? current.laborSplit.production : current.laborSplit.administrative);
     const amount = amountForPercent(base, value);
     if (amount == null) return current;
-    return { ...current, [key]: current[key].map((line) => line.id === id ? { ...line, amount: format(amount) } : line) };
+    return { ...current, [key]: current[key].map((line) => line.id === id ? { ...line, amount: format(amount), percentage: value } : line) };
   });
-  const addLine = (key: "productionPhases" | "administrativeLines") => setPlan((current) => ({ ...current, [key]: [...current[key], { id: crypto.randomUUID(), name: "", amount: "0.00" }] }));
+  const addLine = (key: "productionPhases" | "administrativeLines") => setPlan((current) => ({ ...current, [key]: [...current[key], { id: crypto.randomUUID(), name: "", amount: "0.00", percentage: "0.00" }] }));
   const removeLine = (key: "productionPhases" | "administrativeLines", id: string) => setPlan((current) => ({ ...current, [key]: current[key].filter((line) => line.id !== id) }));
   const loadSampleTemplate = () => setPlan((current) => {
     const selling = cents(current.sellingPrice), fixed = cents(current.fixedCompanyCost);
@@ -276,9 +323,10 @@ export function FinancialApuWorkspace() {
       allocationMode: "percentage",
       allocationPercentages: { labor: "70.00", bonus: "20.00", taskEarnings: "10.00" },
       allocations: { labor: format(labor), bonus: format(incentive), taskEarnings: format(earnings) },
+      laborSplitPercentages: { production: "85.00", administrative: "15.00" },
       laborSplit: { production: format(production), administrative: format(administrative) },
-      productionPhases: ["Preliminary", "Coordination", "For Record", "As-Built"].map((name, index) => ({ id: crypto.randomUUID(), name, amount: format(phaseAmounts[index]!) })),
-      administrativeLines: [{ id: crypto.randomUUID(), name: "Project administration", amount: format(administrative) }],
+      productionPhases: ["Preliminary", "Coordination", "For Record", "As-Built"].map((name, index) => ({ id: crypto.randomUUID(), name, amount: format(phaseAmounts[index]!), percentage: ["45.00", "35.00", "15.00", "5.00"][index]! })),
+      administrativeLines: [{ id: crypto.randomUUID(), name: "Project administration", amount: format(administrative), percentage: "100.00" }],
     };
   });
   const exportPlanCsv = () => {
@@ -353,6 +401,6 @@ function Percent({ label, value, onChange }: { label: string; value: string; onC
 function AllocationRow({ label, amount, percent, onAmount, onPercent, readOnly = false }: { label: string; amount: string; percent: string; onAmount?: (value: string) => void; onPercent?: (value: string) => void; readOnly?: boolean }) { return <div className="allocation-row"><strong>{label}</strong><label><span className="label">Amount</span><input aria-label={`${label} amount`} inputMode="decimal" value={amount} readOnly={readOnly} onChange={(event) => onAmount?.(event.target.value)} onBlur={() => onAmount?.(normalizeTwoDecimals(amount))}/></label><label><span className="label">%</span><div className="percent-input"><input aria-label={`${label} percentage`} inputMode="decimal" value={percent} readOnly={readOnly} onChange={(event) => onPercent?.(event.target.value)} onBlur={() => onPercent?.(normalizeTwoDecimals(percent))}/><span>%</span></div></label></div>; }
 function Metric({ label, value, currency }: { label: string; value: string; currency: string }) { return <div className="metric"><span className="label">{label}</span><strong>{value} {currency}</strong></div>; }
 function Balance({ actual, expected }: { actual: bigint | null; expected: bigint | null }) { const ok = actual != null && expected != null && actual === expected; return <p className={ok ? "balance ok" : "balance"}>{ok ? "Balanced" : `Total ${format(actual)} / Required ${format(expected)}`}</p>; }
-function LineEditor({ title, rows, base, onAdd, onChange, onPercent, onRemove, actual, expected, tt }: { title: string; rows: Line[]; base: bigint | null; onAdd: () => void; onChange: (id: string, field: "name" | "amount", value: string) => void; onPercent: (id: string, value: string) => void; onRemove: (id: string) => void; actual: bigint | null; expected: bigint | null; tt: (en: string, es: string) => string }) { return <section className="panel"><div className="section-title"><h2>{title}</h2><button onClick={onAdd}><Plus size={15}/>{tt("Add line", "Agregar línea")}</button></div><div className="line-head"><span>{tt("Name", "Nombre")}</span><span>{tt("Amount", "Monto")}</span><span>%</span><span/></div><div className="lines">{rows.map((line) => <div className="line" key={line.id}><input aria-label={tt("Line name", "Nombre de línea")} placeholder={tt("Name", "Nombre")} value={line.name} onChange={(event) => onChange(line.id, "name", event.target.value)}/><input aria-label={tt("Line amount", "Monto de línea")} inputMode="decimal" value={line.amount} onChange={(event) => onChange(line.id, "amount", event.target.value)} onBlur={() => onChange(line.id, "amount", normalizeTwoDecimals(line.amount))}/><div className="percent-input"><input aria-label={tt("Line percentage", "Porcentaje de línea")} inputMode="decimal" value={percentForAmount(line.amount, base)} onChange={(event) => onPercent(line.id, event.target.value)}/><span>%</span></div><button aria-label={tt("Remove line", "Eliminar línea")} onClick={() => onRemove(line.id)}><Trash2 size={15}/></button></div>)}</div><Balance actual={actual} expected={expected}/></section>; }
+function LineEditor({ title, rows, base: _base, onAdd, onChange, onPercent, onRemove, actual, expected, tt }: { title: string; rows: Line[]; base: bigint | null; onAdd: () => void; onChange: (id: string, field: "name" | "amount", value: string) => void; onPercent: (id: string, value: string) => void; onRemove: (id: string) => void; actual: bigint | null; expected: bigint | null; tt: (en: string, es: string) => string }) { return <section className="panel"><div className="section-title"><h2>{title}</h2><button onClick={onAdd}><Plus size={15}/>{tt("Add line", "Agregar línea")}</button></div><div className="line-head"><span>{tt("Name", "Nombre")}</span><span>{tt("Amount", "Monto")}</span><span>%</span><span/></div><div className="lines">{rows.map((line) => <div className="line" key={line.id}><input aria-label={tt("Line name", "Nombre de línea")} placeholder={tt("Name", "Nombre")} value={line.name} onChange={(event) => onChange(line.id, "name", event.target.value)}/><input aria-label={tt("Line amount", "Monto de línea")} inputMode="decimal" value={line.amount} onChange={(event) => onChange(line.id, "amount", event.target.value)} onBlur={() => onChange(line.id, "amount", normalizeTwoDecimals(line.amount))}/><div className="percent-input"><input aria-label={tt("Line percentage", "Porcentaje de línea")} inputMode="decimal" value={line.percentage} onChange={(event) => onPercent(line.id, event.target.value)}/><span>%</span></div><button aria-label={tt("Remove line", "Eliminar línea")} onClick={() => onRemove(line.id)}><Trash2 size={15}/></button></div>)}</div><Balance actual={actual} expected={expected}/></section>; }
 
 const styles = `.cvp{max-width:1100px;margin:0 auto;padding:24px 24px 104px;display:grid;gap:16px}.cvp header{display:flex;justify-content:space-between;gap:16px}.cvp header button,.save-actions button,.text-action{display:inline-flex;align-items:center;gap:6px;border:1px solid hsl(var(--border));background:hsl(var(--background));color:hsl(var(--foreground));border-radius:7px;padding:7px 9px;cursor:pointer}.header-actions,.save-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.text-action{margin-bottom:12px}.cvp h1{margin:2px 0 6px;font-size:29px}.cvp h2{font-size:17px;margin:0 0 14px}.cvp p{margin:0;color:hsl(var(--muted-foreground))}.eyebrow,.label{display:block;font-size:11px;text-transform:uppercase;letter-spacing:.06em;font-weight:800;color:hsl(var(--muted-foreground));margin-bottom:6px}.version{border:1px solid hsl(var(--border));border-radius:99px;padding:7px 10px;height:max-content}.panel{border:1px solid hsl(var(--border));border-radius:12px;background:hsl(var(--card));padding:18px}.guide{border-color:#2563EB66;background:#EFF6FF}.guide ol{margin:14px 0;padding-left:22px;display:grid;gap:7px}.fields{display:grid;gap:12px}.fields.three{grid-template-columns:repeat(3,minmax(0,1fr))}.fields.two{grid-template-columns:repeat(2,minmax(0,1fr))}input{width:100%;box-sizing:border-box;border:1px solid hsl(var(--border));background:hsl(var(--background));color:hsl(var(--foreground));border-radius:8px;padding:10px 11px;font:inherit}input[readonly]{background:hsl(var(--muted)/.55);font-weight:700}.metric{border-radius:9px;background:hsl(var(--muted)/.55);padding:10px 12px}.metric strong{font-size:18px}.balance{margin-top:10px!important;font-size:12px;color:#B45309!important}.balance.ok{color:#15803D!important}.section-title,.savebar,.performance-actions{display:flex;justify-content:space-between;align-items:center;gap:12px}.section-title h2{margin:0}.section-title button,.line button,.panel button{display:inline-flex;align-items:center;gap:6px;border:1px solid hsl(var(--border));background:hsl(var(--background));color:hsl(var(--foreground));border-radius:7px;padding:7px 9px;cursor:pointer}.allocation-grid{display:grid;gap:9px}.allocation-row{display:grid;grid-template-columns:minmax(220px,1fr) 180px 130px;gap:10px;align-items:end;padding:10px;border:1px solid hsl(var(--border));border-radius:9px}.allocation-row>strong{align-self:center}.percent-input{position:relative}.percent-input input{padding-right:30px}.percent-input span{position:absolute;right:11px;top:50%;transform:translateY(-50%);font-weight:700}.lines{display:grid;gap:8px;margin-top:8px}.line,.line-head{display:grid;grid-template-columns:1fr 180px 120px auto;gap:8px}.line-head{font-size:11px;text-transform:uppercase;font-weight:800;color:hsl(var(--muted-foreground));padding:12px 0 0}.notice{padding:11px 13px;border-radius:8px}.notice.error,.panel.error{border:1px solid #DC262666;background:#FEF2F2;color:#991B1B}.notice.success{border:1px solid #16A34A55;background:#F0FDF4;color:#166534}.module-copy{margin-bottom:16px!important}.performance-fields{margin-top:16px}.performance-results{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:16px}.performance-actions{margin-top:16px;border-top:1px solid hsl(var(--border));padding-top:14px}.performance-actions small{max-width:650px;color:hsl(var(--muted-foreground))}.savebar{position:sticky;bottom:12px;background:hsl(var(--card));border:1px solid hsl(var(--border));box-shadow:0 8px 24px #0002;border-radius:12px;padding:14px 16px;z-index:2}.savebar>div:first-child{display:grid}.savebar small{color:hsl(var(--muted-foreground));margin-top:4px}.primary{display:inline-flex;align-items:center;gap:7px;background:#1D4ED8!important;color:white!important;border:0!important;border-radius:8px;padding:10px 14px!important;font-weight:750;cursor:pointer}.primary:disabled,.save-actions button:disabled{opacity:.45;cursor:not-allowed}@media print{.financial-page-content>aside,.text-action,.header-actions,.save-actions,.performance-actions button{display:none!important}.cvp{padding:0;max-width:none}.savebar{position:static;box-shadow:none}}@media(max-width:760px){.cvp{padding:15px 15px 32px}.fields.three,.fields.two,.performance-results{grid-template-columns:1fr}.allocation-row{grid-template-columns:1fr 1fr}.allocation-row>strong{grid-column:1/-1}.line,.line-head{grid-template-columns:1fr 110px 90px auto}.savebar,.performance-actions{position:static;align-items:flex-start;flex-direction:column}}`;
