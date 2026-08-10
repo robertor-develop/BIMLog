@@ -7449,6 +7449,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d9ca3c177251bc74380fd9ef57a31a08d6b455f811c684b5857916d56a6b9381"
+    },
+    {
+      "taskId": "commercial-legacy-project-resolution-fix-20260810",
+      "reviewedThroughCommit": "fb23d7d3cebf04bdaa19b263f3ab2427f1e0b0f3",
+      "reviewedAt": "2026-08-10T09:14:16-04:00",
+      "status": "local_commercial_resolution_fix_validated",
+      "captureTiming": "same_commercial_defect_task",
+      "summary": "Corrects the repeated Contracts and Commitments Project not found failure by making budget workspace and contract export project resolution use the same latest-binding with legacy creator-company fallback already accepted by the shared authorization service.",
+      "workstreams": [
+        "commercial-access",
+        "financial-budget",
+        "financial-contracts"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or operating-authority doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction is covered by existing authorization consistency and regression standards."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The fix restores already approved Commercial behavior without expanding product scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, schema, module, or structural platform map changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior or plugin-owned interface changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report design or rendering contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local correction until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The fix directly resolves the active reported Commercial access defect."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted incident record is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
