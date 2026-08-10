@@ -1042,7 +1042,7 @@ export async function getFinancialBudgetWorkspace(input: {
       );
     const lines = (
       await pool.query(
-        `SELECT stable_line_id,project_code,project_name,hierarchical_path,description,amount,quantity,unit,unit_rate,notes,sort_order FROM approved_budget_snapshot_lines WHERE snapshot_id=$1 ORDER BY sort_order,stable_line_id`,
+        `SELECT id,stable_line_id,project_cost_node_id,project_code,project_name,hierarchical_path,description,amount,quantity,unit,unit_rate,notes,sort_order FROM approved_budget_snapshot_lines WHERE snapshot_id=$1 ORDER BY sort_order,stable_line_id`,
         [row.id],
       )
     ).rows;

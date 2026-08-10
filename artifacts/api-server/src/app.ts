@@ -32,6 +32,7 @@ import { startFinancialControlMigration } from "./lib/financial-control-migratio
 import { startCommercialEntitlementMigration } from "./lib/commercial-entitlement";
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { startFinancialContractMigration } from "./lib/financial-contract-migration";
+import { startJobIntakeMigration, waitForJobIntakeMigration } from "./lib/job-intake-migration";
 import {
   startGenericApuPersistenceMigration,
   waitForGenericApuPersistenceMigration,
@@ -333,6 +334,17 @@ app.use("/api/v1", router);
       "[migration] Generic APU persistence migration failed:",
       error,
     );
+    throw error;
+  }
+})();
+
+(async () => {
+  try {
+    startJobIntakeMigration();
+    await waitForJobIntakeMigration();
+    console.log("[migration] Job Intake tables ensured");
+  } catch (error) {
+    console.error("[migration] Job Intake migration failed:", error);
     throw error;
   }
 })();

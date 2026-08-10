@@ -10,7 +10,7 @@ import { getRole } from "@/lib/roles";
 
 type FinancialProjectShellProps = {
   projectId: number;
-  activeTab: "budget" | "contracts" | "apu";
+  activeTab: "budget" | "contracts" | "apu" | "intake";
   children: ReactNode;
 };
 
@@ -25,6 +25,9 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
   const role = getRole(memberRole);
   const roleLabel = role ? (lang === "es" ? role.labelEs : role.label) : "";
   const activeLabel =
+    activeTab === "intake"
+      ? lang === "es" ? "Ingreso y Configuracion de Trabajo" : "Job Intake & Setup"
+      :
     activeTab === "budget"
       ? lang === "es" ? "Presupuesto del Proyecto" : "Project Budget"
       : activeTab === "contracts"
@@ -87,7 +90,7 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
               {project.name}
             </Link>
             <span style={{ color: "hsl(var(--border))" }}>/</span>
-            <span>{lang === "es" ? "Comercial" : "Commercial"}</span>
+            <span>{activeTab === "intake" ? (lang === "es" ? "Comando" : "Command") : (lang === "es" ? "Comercial" : "Commercial")}</span>
             <span style={{ color: "hsl(var(--border))" }}>/</span>
             <span className="breadcrumb-active">{activeLabel}</span>
           </div>

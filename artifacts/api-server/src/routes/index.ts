@@ -43,6 +43,7 @@ import financialContractsRouter from "./financial-contracts";
 import genericApuBudgetControlsRouter from "./generic-apu-budget-controls";
 import financialApuRouter from "./financial-apu";
 import coordinatorActionsRouter from "./coordinator-actions";
+import jobIntakeRouter from "./job-intake";
 
 const router: IRouter = Router();
 
@@ -90,6 +91,7 @@ router.use(financialContractsRouter);
 router.use(genericApuBudgetControlsRouter);
 router.use(financialApuRouter);
 router.use(coordinatorActionsRouter);
+router.use(jobIntakeRouter);
 
 // Soft-delete routes are appended inside their existing route files:
 //   clash_reports.ts → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId

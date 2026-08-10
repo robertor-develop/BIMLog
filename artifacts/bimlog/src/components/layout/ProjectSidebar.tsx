@@ -7,7 +7,7 @@ import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
   BookOpen, Send, RefreshCw, CalendarDays, GitMerge, Gauge,
-  ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Menu, Calculator
+  ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Menu, Calculator, ClipboardList
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -160,6 +160,9 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       descriptionEn: "Daily project command surfaces and activity.",
       descriptionEs: "Superficies diarias de comando y actividad del proyecto.",
       items: byId(["command-center", "coordination", "activity"]),
+      actions: [
+        { id: "intake", kind: "link", labelEn: "Job Intake & Setup", labelEs: "Ingreso y Configuracion de Trabajo", href: `/projects/${projectId}/intake`, icon: ClipboardList },
+      ],
     },
     {
       id: "documents",

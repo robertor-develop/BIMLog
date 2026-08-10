@@ -28,7 +28,8 @@
     "test:provider-governance-browser": "tsx ./scripts/provider-governance-browser-evidence.ts",
     "test:rfi-report-settings": "tsx ./scripts/rfi-report-settings-proof.ts",
     "test:rfi-import": "tsx ./src/lib/procore-rfi-import.behavior.ts",
-    "test:generic-apu": "tsx ./src/lib/cost-value-plan.behavior.ts && tsx ./src/lib/cost-value-performance.behavior.ts && tsx ./src/lib/cost-value-forecast.behavior.ts && tsx ./src/lib/generic-apu.behavior.ts && tsx ./src/lib/generic-apu-engine-edge.behavior.ts && tsx ./src/lib/generic-apu-persistence-db-harness.behavior.ts && tsx ./src/lib/generic-apu-persistence-startup.behavior.ts && tsx ./src/lib/apu-budget-authority-http.behavior.ts && tsx ./src/lib/apu-budget-authority-real-boundary.behavior.ts && tsc -p tsconfig.json --noEmit && tsc -p ../bimlog/tsconfig.json --noEmit"
+    "test:generic-apu": "tsx ./src/lib/cost-value-plan.behavior.ts && tsx ./src/lib/cost-value-performance.behavior.ts && tsx ./src/lib/cost-value-forecast.behavior.ts && tsx ./src/lib/generic-apu.behavior.ts && tsx ./src/lib/generic-apu-engine-edge.behavior.ts && tsx ./src/lib/generic-apu-persistence-db-harness.behavior.ts && tsx ./src/lib/generic-apu-persistence-startup.behavior.ts && tsx ./src/lib/apu-budget-authority-http.behavior.ts && tsx ./src/lib/apu-budget-authority-real-boundary.behavior.ts && tsx ./src/lib/job-intake.behavior.ts && tsc -p tsconfig.json --noEmit && tsc -p ../bimlog/tsconfig.json --noEmit",
+    "test:job-intake": "tsx ./src/lib/job-intake.behavior.ts && tsc -p tsconfig.json --noEmit && tsc -p ../bimlog/tsconfig.json --noEmit"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",
