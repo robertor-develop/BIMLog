@@ -1,16 +1,19 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
+  "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "60b7a8a224b3308676ed57d61b7a4e66e062a95c4512254f434b5e610e17551a",
+  "bundleSha256": "b374abefb02fc429df9ad8131f64438c3444885e23f25a6b6dc089f4b3c55b62",
   "impact": {
-    "baselineCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
+    "baselineCommit": "789d56b1217f95c573afd315210f680b10829a23",
     "changedPaths": [
+      "artifacts/api-server/scripts/generate-platform-md.ts",
+      "living-brief/PLATFORM.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -21,11 +24,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "claude",
@@ -33,11 +36,11 @@
       "sha256": "b8efc974142d81e72ec01cf72a1d180f5e3c5a346a5dbb390b2c3a7651f906e9",
       "sourceChangedAt": "2026-08-05T11:26:11-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "quality",
@@ -45,11 +48,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "vision",
@@ -57,23 +60,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "7358dffa02629109d7e4c3507c0539ead267b6bef8a85437532f6e249af04e4d",
-      "sourceChangedAt": "2026-08-07T13:30:41-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "sha256": "cb930d5b42fac8a00657aadc2bb76ceb52dbd3f5a61ea9a399744fc02d11a2a1",
+      "sourceChangedAt": "2026-08-10T10:15:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "plugin",
@@ -81,11 +84,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "report_design_system",
@@ -93,11 +96,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "standards_register",
@@ -105,11 +108,11 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "status",
@@ -117,11 +120,11 @@
       "sha256": "d035d573e9e58867cac44c0e287ccdf289cdf27ccfb0114e7d744fbb3fe6ac04",
       "sourceChangedAt": "2026-08-05T22:59:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "open_loop",
@@ -129,11 +132,11 @@
       "sha256": "1e22f7bb61c3e58cd021adf7cbcf1cb70afc957f5362859cf6767ea9e9bcd7a1",
       "sourceChangedAt": "2026-08-05T22:59:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     },
     {
       "key": "audit",
@@ -141,11 +144,11 @@
       "sha256": "c64878fb9aec6abbef080bb1da14f09dd92af10407b31ac6c4b4710eb42446cc",
       "sourceChangedAt": "2026-08-01T10:59:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewedThroughCommit": "a179d697d6d245e5ac6c49611f782569b5a35e4e",
-      "semanticReviewTask": "commercial-contract-detail-and-amendment-workspace-20260807",
+      "reconciledThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "semanticReviewTask": "cost-value-planner-allocation-ux-20260810",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-07T14:20:00-04:00"
+      "semanticReviewedAt": "2026-08-10T06:15:00-04:00"
     }
   ]
 }

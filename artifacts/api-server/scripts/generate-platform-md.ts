@@ -138,6 +138,10 @@ ${appRoutes()}
   snapshot for Standard PDF, DOCX, and Complete PDF embedded canonical pages. Settings live in
   rfi_report_settings, are added through additive startup/schema wiring, and never mutate canonical RFI
   data or Lens/Viewpoint source identity.
+- Cost & Value Planner presents stored compatible allocation keys as Labor Operating Pool, Project
+  Incentive Reserve, and Project Earnings. Amount and percentage inputs stay synchronized across the
+  allocation tree; the included BIM-services sample is configurable, not a platform-hardcoded policy.
+  Saved plan versions remain immutable and can be exported as CSV or printed/saved as PDF.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
 `;
