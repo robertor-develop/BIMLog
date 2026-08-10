@@ -25,6 +25,7 @@ assert.equal(result.evaluation.netDistributableValue, "900.00");
 assert.equal(result.evaluation.allocationTotal, "900.00");
 assert.equal(result.evaluation.productionPhaseTotal, "450.00");
 assert.equal(result.evaluation.administrativeLineTotal, "150.00");
+assert.deepEqual(result.plan.allocationPercentages, { labor: "66.67", bonus: "11.11", taskEarnings: "22.22" });
 
 const rejects = (value: unknown, code: string) => assert.throws(
   () => validateCostValuePlan(value),
@@ -65,5 +66,13 @@ assert.match(plannerWorkspace, /padding:24px 24px 104px/);
 assert.match(plannerWorkspace, /\.savebar\{position:sticky;bottom:12px/);
 assert.match(plannerWorkspace, /Percentages/);
 assert.match(plannerWorkspace, /normalizeTwoDecimals/);
+assert.match(plannerWorkspace, /Labor Operating Pool/);
+assert.match(plannerWorkspace, /Project Incentive Reserve/);
+assert.match(plannerWorkspace, /Project Earnings \(automatic remainder\)/);
+assert.match(plannerWorkspace, /Use BIM services sample/);
+assert.match(plannerWorkspace, /Print \/ Save PDF/);
+assert.match(plannerWorkspace, /Export CSV/);
+assert.match(plannerWorkspace, /data-testid="cost-value-guide"/);
+assert.match(plannerWorkspace, /AllocationRow/);
 
 console.log("Cost & Value Planner validation: passed.");

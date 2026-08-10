@@ -47,6 +47,7 @@ const basisPoints = (value: unknown, field: string) => {
   return BigInt(whole) * 100n + BigInt(fraction.padEnd(2, "0"));
 };
 const percentText = (value: bigint) => `${value / 100n}.${(value % 100n).toString().padStart(2, "0")}`;
+const percentageOf = (part: bigint, whole: bigint) => whole === 0n ? 0n : (part * 10_000n + whole / 2n) / whole;
 const lineList = (value: unknown, field: string): Line[] => {
   if (!Array.isArray(value) || value.length > 100)
     throw new CostValuePlanError(400, "COST_VALUE_LINES_INVALID", `${field} must be a bounded list.`);
@@ -89,13 +90,19 @@ export function validateCostValuePlan(input: unknown): { plan: CostValuePlanInpu
     labor = cents(raw.allocations?.labor, "allocations.labor");
     bonus = cents(raw.allocations?.bonus, "allocations.bonus");
     taskEarnings = cents(raw.allocations?.taskEarnings, "allocations.taskEarnings");
+    if (net > 0n) {
+      const laborPercent = percentageOf(labor, net);
+      const bonusPercent = percentageOf(bonus, net);
+      const taskPercent = laborPercent + bonusPercent <= 10_000n ? 10_000n - laborPercent - bonusPercent : percentageOf(taskEarnings, net);
+      allocationPercentages = { labor: percentText(laborPercent), bonus: percentText(bonusPercent), taskEarnings: percentText(taskPercent) };
+    }
   }
   const production = cents(raw.laborSplit?.production, "laborSplit.production");
   const administrative = cents(raw.laborSplit?.administrative, "laborSplit.administrative");
   const phases = lineList(raw.productionPhases, "productionPhases");
   const adminLines = lineList(raw.administrativeLines, "administrativeLines");
   if (labor + bonus + taskEarnings !== net)
-    throw new CostValuePlanError(400, "COST_VALUE_ALLOCATION_UNBALANCED", "Labor, bonus, and task earnings must equal Net Distributable Value.");
+    throw new CostValuePlanError(400, "COST_VALUE_ALLOCATION_UNBALANCED", "Labor Operating Pool, Project Incentive Reserve, and Project Earnings must equal Net Distributable Value.");
   if (production + administrative !== labor)
     throw new CostValuePlanError(400, "COST_VALUE_LABOR_UNBALANCED", "Production and administrative labor must equal Labor.");
   if (sum(phases.map((line) => cents(line.amount, "productionPhases.amount"))) !== production)
@@ -109,9 +116,9 @@ export function validateCostValuePlan(input: unknown): { plan: CostValuePlanInpu
     rootNodeIds: lines.map((line) => line.id),
   });
   const allocationResult = evaluate([
-    { id: "labor", name: "Labor", amount: money(labor) },
-    { id: "bonus", name: "Bonus", amount: money(bonus) },
-    { id: "task-earnings", name: "Task Earnings", amount: money(taskEarnings) },
+    { id: "labor", name: "Labor Operating Pool", amount: money(labor) },
+    { id: "bonus", name: "Project Incentive Reserve", amount: money(bonus) },
+    { id: "task-earnings", name: "Project Earnings", amount: money(taskEarnings) },
   ]);
   const phaseResult = evaluate(phases);
   const administrativeResult = evaluate(adminLines);
