@@ -187,6 +187,42 @@ CREATE TABLE IF NOT EXISTS job_activation_work_package_tasks(
   linked_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT job_activation_work_package_task_uidx UNIQUE(package_id,task_id)
 );
+CREATE TABLE IF NOT EXISTS job_activation_budget_baselines(
+  id text PRIMARY KEY,
+  intake_id text NOT NULL REFERENCES job_intakes(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  version integer NOT NULL,
+  supersedes_id text REFERENCES job_activation_budget_baselines(id),
+  content jsonb NOT NULL,
+  content_fingerprint text NOT NULL,
+  revision_reason text NOT NULL DEFAULT '',
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_budget_baseline_version_chk CHECK(version>0),
+  CONSTRAINT job_activation_budget_baseline_project_version_uidx UNIQUE(project_id,version)
+);
+CREATE TABLE IF NOT EXISTS job_activation_budget_variance_reviews(
+  id text PRIMARY KEY,
+  baseline_id text NOT NULL REFERENCES job_activation_budget_baselines(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  work_item_id text REFERENCES job_activation_work_items(id),
+  metric text NOT NULL,
+  planned_value numeric(30,6) NOT NULL,
+  actual_value numeric(30,6) NOT NULL,
+  variance_value numeric(30,6) NOT NULL,
+  reason text NOT NULL,
+  corrective_action text NOT NULL,
+  status text NOT NULL DEFAULT 'open',
+  version integer NOT NULL DEFAULT 1,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  reviewed_by_id integer REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  reviewed_at timestamptz,
+  CONSTRAINT job_activation_budget_variance_metric_chk CHECK(metric IN('hours','internal_cost','billable_value')),
+  CONSTRAINT job_activation_budget_variance_status_chk CHECK(status IN('open','acknowledged','resolved','rejected')),
+  CONSTRAINT job_activation_budget_variance_positive_chk CHECK(variance_value>0),
+  CONSTRAINT job_activation_budget_variance_version_chk CHECK(version>0)
+);
 CREATE TABLE IF NOT EXISTS job_activation_operation_events(
   id text PRIMARY KEY,
   project_id integer NOT NULL REFERENCES projects(id),
@@ -211,6 +247,9 @@ CREATE INDEX IF NOT EXISTS job_activation_deliverable_task_idx ON job_activation
 CREATE INDEX IF NOT EXISTS job_activation_work_package_project_idx ON job_activation_work_packages(project_id,status,due_date,updated_at DESC);
 CREATE INDEX IF NOT EXISTS job_activation_work_package_item_idx ON job_activation_work_packages(work_item_id,created_at,id);
 CREATE INDEX IF NOT EXISTS job_activation_work_package_task_idx ON job_activation_work_package_tasks(task_id,package_id);
+CREATE INDEX IF NOT EXISTS job_activation_budget_baseline_project_idx ON job_activation_budget_baselines(project_id,version DESC);
+CREATE INDEX IF NOT EXISTS job_activation_budget_baseline_fingerprint_idx ON job_activation_budget_baselines(project_id,content_fingerprint);
+CREATE INDEX IF NOT EXISTS job_activation_budget_variance_project_idx ON job_activation_budget_variance_reviews(project_id,status,created_at DESC);
 CREATE INDEX IF NOT EXISTS job_activation_operation_event_idx ON job_activation_operation_events(project_id,created_at,id);
 `);
     await client.query("COMMIT");

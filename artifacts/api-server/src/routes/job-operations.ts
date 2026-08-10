@@ -3,6 +3,8 @@ import { authMiddleware } from "../middlewares/auth";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import {
   addJobOperationTime,
+  createJobBudgetBaseline,
+  createJobBudgetVarianceReview,
   createJobOperationPackage,
   getJobOperations,
   linkJobOperationDeliverable,
@@ -10,6 +12,7 @@ import {
   unlinkJobOperationDeliverable,
   updateJobOperationPackage,
   updateJobOperationTask,
+  updateJobBudgetVarianceReview,
 } from "../lib/job-operations-service";
 
 const router = Router();
@@ -44,6 +47,14 @@ const errorEs: Record<string, string> = {
   JOB_OPERATIONS_DELIVERABLE_TYPE_INVALID: "El tipo de entregable no es válido.",
   JOB_OPERATIONS_ID_INVALID: "El identificador proporcionado no es válido.",
   JOB_OPERATIONS_TEXT_INVALID: "El texto proporcionado no es válido.",
+  JOB_BUDGET_MANAGE_DENIED: "Solamente el líder del proyecto puede administrar la gobernanza del presupuesto.",
+  JOB_BUDGET_INTAKE_REQUIRED: "Active el Ingreso del Trabajo antes de congelar la línea base.",
+  JOB_BUDGET_ENTITLEMENT_REQUIRED: "La Gobernanza del Presupuesto requiere acceso a Presupuesto o al Planificador de Costos y Valor.",
+  JOB_BUDGET_REVISION_REASON_REQUIRED: "Una revisión requiere una justificación de al menos 10 caracteres.",
+  JOB_BUDGET_BASELINE_REQUIRED: "Primero congele la línea base del presupuesto de ejecución.",
+  JOB_BUDGET_METRIC_INVALID: "La métrica de variación no es válida.",
+  JOB_BUDGET_OVERRUN_REQUIRED: "La métrica seleccionada no excede actualmente su línea base.",
+  JOB_BUDGET_REVIEW_STATUS_INVALID: "El estado de revisión no es válido.",
 };
 
 const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any, res: any) => {
@@ -81,6 +92,15 @@ router.post("/projects/:projectId/operations/packages", run(async (req, res) => 
 }));
 router.patch("/projects/:projectId/operations/packages/:packageId", run(async (req, res) => {
   res.json(await updateJobOperationPackage({ actorUserId: req.user.userId, projectId: req.params.projectId, packageId: req.params.packageId, expectedVersion: req.body?.expectedVersion, status: req.body?.status, title: req.body?.title, description: req.body?.description, packageType: req.body?.packageType, responsibleUserId: req.body?.responsibleUserId, dueDate: req.body?.dueDate, taskIds: req.body?.taskIds }));
+}));
+router.post("/projects/:projectId/operations/budget/baselines", run(async (req, res) => {
+  res.status(201).json(await createJobBudgetBaseline({ actorUserId: req.user.userId, projectId: req.params.projectId, baselineId: req.body?.baselineId, revisionReason: req.body?.revisionReason }));
+}));
+router.post("/projects/:projectId/operations/budget/variance-reviews", run(async (req, res) => {
+  res.status(201).json(await createJobBudgetVarianceReview({ actorUserId: req.user.userId, projectId: req.params.projectId, reviewId: req.body?.reviewId, metric: req.body?.metric, reason: req.body?.reason, correctiveAction: req.body?.correctiveAction }));
+}));
+router.patch("/projects/:projectId/operations/budget/variance-reviews/:reviewId", run(async (req, res) => {
+  res.json(await updateJobBudgetVarianceReview({ actorUserId: req.user.userId, projectId: req.params.projectId, reviewId: req.params.reviewId, expectedVersion: req.body?.expectedVersion, status: req.body?.status }));
 }));
 
 export default router;

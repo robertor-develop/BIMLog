@@ -7,7 +7,7 @@ import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
   BookOpen, Send, RefreshCw, CalendarDays, GitMerge, Gauge,
-  ChevronDown, ChevronRight, PanelLeftClose, PanelLeftOpen, Menu, Calculator, ClipboardList, BriefcaseBusiness
+  ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -395,21 +395,12 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       <div className={`sidebar phasea-project-sidebar${collapsed ? " collapsed" : ""}`}>
         <SidebarUtilities
           activeTab={activeTab}
+          collapsed={collapsed}
+          onToggleCollapse={() => setCollapsed((previous) => !previous)}
           helpHref={`/help?context=${encodeURIComponent(activeTab)}&view=manual&from=${encodeURIComponent(
             typeof window === "undefined" ? `/projects/${projectId}` : `${window.location.pathname}${window.location.search}`,
           )}`}
         />
-        <button
-          type="button"
-          className="phasea-sidebar-collapse"
-          aria-pressed={collapsed}
-          title={collapsed ? tr("Expand navigation", "Expandir navegación") : tr("Collapse navigation", "Contraer navegación")}
-          onClick={() => setCollapsed(prev => !prev)}
-        >
-          {collapsed ? <PanelLeftOpen style={{ width: 14, height: 14 }} /> : <PanelLeftClose style={{ width: 14, height: 14 }} />}
-          <span>{collapsed ? tr("Expand", "Expandir") : tr("Collapse", "Contraer")}</span>
-        </button>
-
         <div style={{ padding: "10px 10px 0" }}>
           <div className="sidebar-project">
             <div className="sidebar-project-code">{projectCode}</div>

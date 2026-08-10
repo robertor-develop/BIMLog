@@ -1,9 +1,8 @@
 import { useEffect, useRef, useState } from "react";
 import { Link } from "wouter";
-import { BookOpen, ChevronDown, HelpCircle, Info } from "lucide-react";
+import { BookOpen, ChevronDown, HelpCircle, Info, PanelLeftClose, PanelLeftOpen } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
 import { LangToggle } from "@/components/layout/LangToggle";
-import { SmartGuideSidebarButton } from "@/components/layout/SmartGuide";
 
 const INFO_LINKS = [
   { en: "User Manual", es: "Manual del usuario", href: "/help?view=manual" },
@@ -20,9 +19,13 @@ const INFO_LINKS = [
 export function SidebarUtilities({
   activeTab,
   helpHref = "/help?topic=getting-started&view=manual",
+  collapsed,
+  onToggleCollapse,
 }: {
   activeTab: string;
   helpHref?: string;
+  collapsed?: boolean;
+  onToggleCollapse?: () => void;
 }) {
   const { lang } = useI18n();
   const [infoOpen, setInfoOpen] = useState(false);
@@ -40,7 +43,7 @@ export function SidebarUtilities({
   }, []);
 
   return (
-    <div className="sidebar-utilities" aria-label="Sidebar utilities">
+    <div className="sidebar-utilities" aria-label={`Sidebar utilities: ${activeTab}`}>
       <div className="sidebar-utility-grid">
         <div ref={infoRef} style={{ position: "relative" }}>
           <button
@@ -79,11 +82,13 @@ export function SidebarUtilities({
             </div>
           )}
         </div>
+        {onToggleCollapse && <button type="button" className="sidebar-utility-button" aria-pressed={collapsed} title={collapsed ? label("Expand navigation", "Expandir navegación") : label("Collapse navigation", "Contraer navegación")} onClick={onToggleCollapse}>
+          {collapsed ? <PanelLeftOpen style={{ width: 13, height: 13 }}/> : <PanelLeftClose style={{ width: 13, height: 13 }}/>} {collapsed ? label("Expand", "Expandir") : label("Collapse", "Contraer")}
+        </button>}
         <Link href={helpHref} className="sidebar-utility-button" title={label("Help Center", "Centro de ayuda")}>
           <HelpCircle style={{ width: 13, height: 13 }} />
           {label("Help", "Ayuda")}
         </Link>
-        <SmartGuideSidebarButton activeTab={activeTab} />
         <LangToggle />
       </div>
     </div>

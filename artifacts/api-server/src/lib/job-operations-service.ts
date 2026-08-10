@@ -9,6 +9,8 @@ const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complet
 const DELIVERABLE_TYPES = new Set(["shop_drawing", "submittal", "deliverable", "supporting"]);
 const PACKAGE_TYPES = new Set(["shop_drawing", "submittal", "mixed", "deliverable"]);
 const PACKAGE_STATUSES = new Set(["draft", "internal_review", "submitted", "returned", "approved", "cancelled"]);
+const BUDGET_METRICS = new Set(["hours", "internal_cost", "billable_value"]);
+const BUDGET_REVIEW_STATUSES = new Set(["acknowledged", "resolved", "rejected"]);
 const PACKAGE_TRANSITIONS: Record<string, Set<string>> = {
   draft: new Set(["draft", "internal_review", "cancelled"]),
   internal_review: new Set(["draft", "internal_review", "submitted", "returned", "cancelled"]),
@@ -93,6 +95,42 @@ async function validatePackageTasks(client: Queryable, workItemId: string, taskI
   if (rows.length !== taskIds.length) throw new FinancialControlError(400, "JOB_OPERATIONS_PACKAGE_TASKS_INVALID", "Every package task must belong to the selected activated work item.");
 }
 
+async function liveBudgetSnapshot(client: Queryable, intakeId: string) {
+  const items = (await client.query(`SELECT w.id,w.name,w.planned_hours::text "plannedHours",COALESCE(t.actual_hours,0)::text "actualHours",COALESCE(p.planned_internal_cost,0)::text "plannedInternalCost",COALESCE(a.actual_internal_cost,0)::text "actualInternalCost",COALESCE(w.planned_billable_value,0)::text "plannedBillableValue",COALESCE(a.earned_billable_value,0)::text "earnedBillableValue"
+    FROM job_activation_work_items w
+    LEFT JOIN LATERAL (SELECT SUM(hours) actual_hours FROM job_activation_time_entries WHERE work_item_id=w.id) t ON true
+    LEFT JOIN LATERAL (SELECT SUM(planned_internal_cost) planned_internal_cost FROM job_activation_resource_assignments WHERE work_item_id=w.id) p ON true
+    LEFT JOIN LATERAL (SELECT SUM(e.hours*r.internal_hourly_rate) actual_internal_cost,SUM(e.hours*COALESCE(r.billing_hourly_rate,w.billing_hourly_rate)) earned_billable_value FROM job_activation_time_entries e LEFT JOIN job_activation_resource_assignments r ON r.id=e.assignment_id WHERE e.work_item_id=w.id) a ON true
+    WHERE w.intake_id=$1 AND w.status<>'cancelled' ORDER BY w.id`, [intakeId])).rows;
+  const sum = (key: string) => items.reduce((total, item) => total + Number(item[key] ?? 0), 0).toFixed(6);
+  return { items, totals: { plannedHours: sum("plannedHours"), actualHours: sum("actualHours"), plannedInternalCost: sum("plannedInternalCost"), actualInternalCost: sum("actualInternalCost"), plannedBillableValue: sum("plannedBillableValue"), earnedBillableValue: sum("earnedBillableValue") } };
+}
+
+function baselineContent(snapshot: Awaited<ReturnType<typeof liveBudgetSnapshot>>) {
+  return { items: snapshot.items.map(({ id, name, plannedHours, plannedInternalCost, plannedBillableValue }) => ({ id, name, plannedHours, plannedInternalCost, plannedBillableValue })), totals: { plannedHours: snapshot.totals.plannedHours, plannedInternalCost: snapshot.totals.plannedInternalCost, plannedBillableValue: snapshot.totals.plannedBillableValue } };
+}
+
+function varianceMetrics(baseline: any, live: Awaited<ReturnType<typeof liveBudgetSnapshot>>) {
+  const values = [
+    ["hours", baseline?.totals?.plannedHours, live.totals.actualHours],
+    ["internal_cost", baseline?.totals?.plannedInternalCost, live.totals.actualInternalCost],
+    ["billable_value", baseline?.totals?.plannedBillableValue, live.totals.earnedBillableValue],
+  ];
+  return values.map(([metric, planned, actual]) => ({ metric, planned: Number(planned ?? 0).toFixed(6), actual: Number(actual ?? 0).toFixed(6), variance: (Number(actual ?? 0) - Number(planned ?? 0)).toFixed(6), overrun: Number(actual ?? 0) > Number(planned ?? 0) }));
+}
+
+async function budgetGovernanceView(client: Queryable, access: Awaited<ReturnType<typeof scope>>, capabilities: any) {
+  const enabled = capabilities.budget === true || capabilities.cost_value_planner === true;
+  if (!enabled || !access.intakeId) return { enabled, latestBaseline: null, history: [], metrics: [], reviews: [], unresolvedOverruns: 0 };
+  const live = await liveBudgetSnapshot(client, access.intakeId);
+  const history = (await client.query(`SELECT b.id,b.version,b.supersedes_id "supersedesId",b.content,b.revision_reason "revisionReason",b.created_at "createdAt",u.full_name "createdBy" FROM job_activation_budget_baselines b JOIN users u ON u.id=b.created_by_id WHERE b.project_id=$1 ORDER BY b.version DESC`, [access.projectId])).rows;
+  const latestBaseline = history[0] ?? null;
+  const metrics = latestBaseline ? varianceMetrics(latestBaseline.content, live) : [];
+  const reviews = (await client.query(`SELECT r.id,r.baseline_id "baselineId",r.work_item_id "workItemId",r.metric,r.planned_value::text planned,r.actual_value::text actual,r.variance_value::text variance,r.reason,r.corrective_action "correctiveAction",r.status,r.version,r.created_at "createdAt",r.reviewed_at "reviewedAt",u.full_name "createdBy" FROM job_activation_budget_variance_reviews r JOIN users u ON u.id=r.created_by_id WHERE r.project_id=$1 ORDER BY r.created_at DESC,r.id DESC`, [access.projectId])).rows;
+  const openMetrics = new Set(reviews.filter((review) => review.status === "open" || review.status === "acknowledged").map((review) => review.metric));
+  return { enabled, latestBaseline, history, metrics, reviews, unresolvedOverruns: metrics.filter((metric) => metric.overrun && !openMetrics.has(metric.metric)).length };
+}
+
 export async function getJobOperations(input: { actorUserId: number; projectId: unknown }) {
   await waitForJobIntakeMigration();
   const projectId = positiveInt(input.projectId, "projectId"), access = await scope(input.actorUserId, projectId);
@@ -163,7 +201,67 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     blocked: safePackages.filter((row) => Number(row.blockedCount) > 0).length,
     approved: safePackages.filter((row) => row.status === "approved").length,
   };
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, totals: safeTotals };
+  const budgetGovernance = await budgetGovernanceView(pool, access, capabilities);
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, budgetGovernance, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, totals: safeTotals };
+}
+
+export async function createJobBudgetBaseline(input: { actorUserId: number; projectId: unknown; baselineId: unknown; revisionReason?: unknown }) {
+  await waitForJobIntakeMigration();
+  const projectId = positiveInt(input.projectId, "projectId"), baselineId = id(input.baselineId, "baselineId"), revisionReason = text(input.revisionReason, 1000, "revisionReason");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`bimlog:job-budget:${projectId}`]);
+    const access = await scope(input.actorUserId, projectId, client);
+    if (!access.canManage) throw new FinancialControlError(403, "JOB_BUDGET_MANAGE_DENIED", "Only the project leader may freeze or revise the execution budget baseline.");
+    if (!access.intakeId) throw new FinancialControlError(409, "JOB_BUDGET_INTAKE_REQUIRED", "Activate Job Intake before freezing a budget baseline.");
+    const capabilities = await effectiveCommercialAccessForUser(input.actorUserId, client as any);
+    if (capabilities.budget !== true && capabilities.cost_value_planner !== true) throw new FinancialControlError(403, "JOB_BUDGET_ENTITLEMENT_REQUIRED", "Budget Governance requires Project Budget or Cost & Value Planner access.");
+    const previous = (await client.query(`SELECT id,version,content_fingerprint FROM job_activation_budget_baselines WHERE project_id=$1 ORDER BY version DESC LIMIT 1`, [projectId])).rows[0];
+    if (previous && revisionReason.length < 10) throw new FinancialControlError(400, "JOB_BUDGET_REVISION_REASON_REQUIRED", "A budget revision requires a reason of at least 10 characters.");
+    const content = baselineContent(await liveBudgetSnapshot(client, access.intakeId));
+    const fingerprint = crypto.createHash("sha256").update(JSON.stringify(content)).digest("hex");
+    if (previous?.content_fingerprint === fingerprint) { await client.query("COMMIT"); return { id: previous.id, version: Number(previous.version), idempotent: true }; }
+    const version = Number(previous?.version ?? 0) + 1;
+    await client.query(`INSERT INTO job_activation_budget_baselines(id,intake_id,project_id,version,supersedes_id,content,content_fingerprint,revision_reason,created_by_id) VALUES($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$9)`, [baselineId, access.intakeId, projectId, version, previous?.id ?? null, JSON.stringify(content), fingerprint, revisionReason, input.actorUserId]);
+    await event(client, { projectId, actorUserId: input.actorUserId, eventType: previous ? "budget_baseline_revised" : "budget_baseline_frozen", evidence: { baselineId, version, supersedesId: previous?.id ?? null, revisionReason, fingerprint } });
+    await client.query("COMMIT"); return { id: baselineId, version, idempotent: false };
+  } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
+}
+
+export async function createJobBudgetVarianceReview(input: { actorUserId: number; projectId: unknown; reviewId: unknown; metric: unknown; reason: unknown; correctiveAction: unknown }) {
+  await waitForJobIntakeMigration();
+  const projectId = positiveInt(input.projectId, "projectId"), reviewId = id(input.reviewId, "reviewId"), metric = String(input.metric ?? ""), reason = requiredText(input.reason, 1000, "reason"), correctiveAction = requiredText(input.correctiveAction, 2000, "correctiveAction");
+  if (!BUDGET_METRICS.has(metric)) throw new FinancialControlError(400, "JOB_BUDGET_METRIC_INVALID", "Budget variance metric is invalid.");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext($1))", [`bimlog:job-budget-review:${projectId}:${metric}`]);
+    const access = await scope(input.actorUserId, projectId, client);
+    if (!access.canManage) throw new FinancialControlError(403, "JOB_BUDGET_MANAGE_DENIED", "Only the project leader may explain a budget variance.");
+    const baseline = (await client.query(`SELECT id,content FROM job_activation_budget_baselines WHERE project_id=$1 ORDER BY version DESC LIMIT 1`, [projectId])).rows[0];
+    if (!baseline || !access.intakeId) throw new FinancialControlError(409, "JOB_BUDGET_BASELINE_REQUIRED", "Freeze the execution budget baseline first.");
+    const current = varianceMetrics(baseline.content, await liveBudgetSnapshot(client, access.intakeId)).find((item) => item.metric === metric)!;
+    if (!current.overrun) throw new FinancialControlError(409, "JOB_BUDGET_OVERRUN_REQUIRED", "The selected metric does not currently exceed its baseline.");
+    const existing = (await client.query(`SELECT id,status FROM job_activation_budget_variance_reviews WHERE id=$1 OR (baseline_id=$2 AND metric=$3 AND status IN('open','acknowledged')) ORDER BY CASE WHEN id=$1 THEN 0 ELSE 1 END LIMIT 1`, [reviewId, baseline.id, metric])).rows[0];
+    if (!existing) {
+      await client.query(`INSERT INTO job_activation_budget_variance_reviews(id,baseline_id,project_id,metric,planned_value,actual_value,variance_value,reason,corrective_action,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`, [reviewId, baseline.id, projectId, metric, current.planned, current.actual, current.variance, reason, correctiveAction, input.actorUserId]);
+      await event(client, { projectId, actorUserId: input.actorUserId, eventType: "budget_variance_explained", evidence: { reviewId, baselineId: baseline.id, metric, planned: current.planned, actual: current.actual, variance: current.variance } });
+    }
+    await client.query("COMMIT"); return { id: existing?.id ?? reviewId, status: existing?.status ?? "open", idempotent: Boolean(existing) };
+  } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
+}
+
+export async function updateJobBudgetVarianceReview(input: { actorUserId: number; projectId: unknown; reviewId: unknown; expectedVersion: unknown; status: unknown }) {
+  await waitForJobIntakeMigration();
+  const projectId = positiveInt(input.projectId, "projectId"), reviewId = id(input.reviewId, "reviewId"), expectedVersion = positiveInt(input.expectedVersion, "expectedVersion"), status = String(input.status ?? "");
+  if (!BUDGET_REVIEW_STATUSES.has(status)) throw new FinancialControlError(400, "JOB_BUDGET_REVIEW_STATUS_INVALID", "Budget review status is invalid.");
+  const client = await pool.connect();
+  try { await client.query("BEGIN"); const access = await scope(input.actorUserId, projectId, client); if (!access.canManage) throw new FinancialControlError(403, "JOB_BUDGET_MANAGE_DENIED", "Only the project leader may close a budget variance review.");
+    const updated = (await client.query(`UPDATE job_activation_budget_variance_reviews SET status=$4,version=version+1,reviewed_by_id=$5,reviewed_at=now() WHERE id=$1 AND project_id=$2 AND version=$3 RETURNING version,metric`, [reviewId, projectId, expectedVersion, status, input.actorUserId])).rows[0];
+    if (!updated) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This budget review changed in another session. Reload before saving.");
+    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "budget_variance_reviewed", evidence: { reviewId, status, version: updated.version, metric: updated.metric } }); await client.query("COMMIT"); return { id: reviewId, status, version: Number(updated.version) };
+  } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 
 export async function createJobOperationPackage(input: { actorUserId: number; projectId: unknown; packageId: unknown; workItemId: unknown; packageCode: unknown; title: unknown; description?: unknown; packageType: unknown; responsibleUserId?: unknown; dueDate?: unknown; taskIds: unknown }) {
