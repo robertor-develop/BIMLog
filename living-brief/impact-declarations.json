@@ -7981,6 +7981,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "215eb865c4a93babb28fdb4a92a20103fabbc12a9a24b737223ff358c2400196"
+    },
+    {
+      "taskId": "job-budget-governance-20260810",
+      "reviewedThroughCommit": "149b085ed96d1b1b4f53562bf896dfa33adbe22f",
+      "reviewedAt": "2026-08-10T16:39:05-04:00",
+      "status": "local_budget_governance_validated",
+      "captureTiming": "same_budget_governance_task",
+      "summary": "Adds bilingual budget governance to Job Operations with immutable approved baselines, controlled revisions, live planned-versus-actual metrics, required overrun explanations, corrective actions, and a simplified two-row sidebar utility layout.",
+      "workstreams": [
+        "job-operations",
+        "budget-governance",
+        "change-control",
+        "commercial-entitlements",
+        "bilingual-ui",
+        "help-center"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership hierarchy, or cross-company doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, testing, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows existing additive-schema, immutable-event, bilingual, responsive, concurrency, and build standards."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Budget governance advances the accepted Intake-to-operations workflow without changing product doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the budget-governance behavior proof alongside its service, route, schema, and user interface components."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior, cached runtime, or provider integration changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report, PDF, spreadsheet, or exported-document template changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved future-build ordering or preserved backlog item is changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence, incident record, or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a83ba9b35838fb0e69996eb0629c75d25db2498f5d0421c211ac85d3730361bb"
     }
   ]
 }
