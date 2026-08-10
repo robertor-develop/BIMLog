@@ -7373,6 +7373,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "bcc2dd1f1d935341fb9f933e3d7709ec12a5016b63024a0cd11667c5cf256864"
+    },
+    {
+      "taskId": "job-intake-hourly-rate-joining-factor-20260810",
+      "reviewedThroughCommit": "e544e9405ee3099008221744c816033a0f0aaecd",
+      "reviewedAt": "2026-08-10T09:06:00-04:00",
+      "status": "local_job_intake_validated",
+      "captureTiming": "same_job_intake_task",
+      "summary": "Adds a guided Job Intake and Setup workflow that preserves negotiated source documents and uses planned hours plus billing and internal hourly rates to connect APU pricing, Contract Items, approved budget lines, delivery workflow, team assignments, labor cost, and activation.",
+      "workstreams": [
+        "job-intake",
+        "generic-apu",
+        "commercial-contract-items",
+        "team-planning"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority hierarchy, or cross-company doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, database safety, and operator publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing UI, additive persistence, exact arithmetic, responsive design, and verification standards cover this implementation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The guided intake advances the already approved APU-to-contract delivery direction without changing product doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform map now includes the Job Intake route, UI, service, migration, schema, and behavior proof."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior, provider integration, or plugin-owned interface changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The intake adds no new governed report or document rendering template."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto chooses to push and publish it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation fulfills the active user-requested intake build without changing other backlog priorities."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence, incident record, or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d9ca3c177251bc74380fd9ef57a31a08d6b455f811c684b5857916d56a6b9381"
     }
   ]
 }

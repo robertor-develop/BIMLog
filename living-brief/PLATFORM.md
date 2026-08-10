@@ -70,6 +70,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/health.ts
 - artifacts/api-server/src/routes/index.ts
 - artifacts/api-server/src/routes/intelligence.ts
+- artifacts/api-server/src/routes/job-intake.ts
 - artifacts/api-server/src/routes/linked_items.ts
 - artifacts/api-server/src/routes/living_brief.ts
 - artifacts/api-server/src/routes/meeting_minutes.ts
@@ -131,6 +132,7 @@ It changes only when the code structure or curated architectural facts change.
 - genericApuBudgetControlsRouter
 - financialApuRouter
 - coordinatorActionsRouter
+- jobIntakeRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -215,6 +217,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/generic-apu.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
+- artifacts/api-server/src/lib/job-intake-contract.ts
+- artifacts/api-server/src/lib/job-intake-migration.ts
+- artifacts/api-server/src/lib/job-intake-service.ts
+- artifacts/api-server/src/lib/job-intake.behavior.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
 - artifacts/api-server/src/lib/linked-items-creation-ux.behavior.ts
 - artifacts/api-server/src/lib/living-brief-gate.behavior.ts
@@ -287,6 +293,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/generic-apu.ts
 - lib/db/src/schema/index.ts
 - lib/db/src/schema/invitations.ts
+- lib/db/src/schema/job-intakes.ts
 - lib/db/src/schema/lens-imports.ts
 - lib/db/src/schema/lens-viewpoint-reports.ts
 - lib/db/src/schema/lens-viewpoint-sequence-counters.ts
@@ -328,6 +335,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialControlsSettings.tsx
+- artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx
 - artifacts/bimlog/src/pages/Landing.tsx
 - artifacts/bimlog/src/pages/LivingBrief.tsx
 - artifacts/bimlog/src/pages/Login.tsx
@@ -384,6 +392,7 @@ It changes only when the code structure or curated architectural facts change.
 - /projects/:id/financial/snapshots/:snapshotId
 - /projects/:id/financial/contracts
 - /projects/:id/financial/apu
+- /projects/:id/intake
 - /projects/:id/:tab?
 - /setup-guide
 - /profile
