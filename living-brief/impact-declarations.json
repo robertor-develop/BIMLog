@@ -7148,11 +7148,11 @@
     },
     {
       "taskId": "cost-value-planner-allocation-ux-20260810",
-      "reviewedThroughCommit": "789d56b1217f95c573afd315210f680b10829a23",
+      "reviewedThroughCommit": "d376bc976bd0354d0b6fcad3380111c3ebca9cca",
       "reviewedAt": "2026-08-10T06:15:00-04:00",
       "status": "local_apu_allocation_ux_validated",
       "captureTiming": "same_apu_task",
-      "summary": "Makes Cost & Value allocation self-calculating and self-explanatory with synchronized amounts and percentages, corrected financial names, reusable BIM sample, guidance, exports, and immutable saved-version feedback.",
+      "summary": "Makes Cost & Value allocation self-calculating and self-explanatory with persisted cascading amounts and percentages, corrected financial names, reusable BIM sample, guidance, exports, and immutable saved-version feedback.",
       "workstreams": [
         "generic-apu-ui",
         "cost-value-plan",
@@ -7220,7 +7220,7 @@
         "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "6bd2a78987c53926fa2e5fc77ec2af48459081b2c8e595aaa51fd14d012b706d"
+      "reviewedChangeSha256": "5c613b3d1685b71bd4ea647492de1080ab4aadb9d79c69e9bb8595763079fb09"
     }
   ]
 }

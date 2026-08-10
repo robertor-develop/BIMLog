@@ -140,7 +140,8 @@ ${appRoutes()}
   data or Lens/Viewpoint source identity.
 - Cost & Value Planner presents stored compatible allocation keys as Labor Operating Pool, Project
   Incentive Reserve, and Project Earnings. Amount and percentage inputs stay synchronized across the
-  allocation tree; the included BIM-services sample is configurable, not a platform-hardcoded policy.
+  allocation tree, and saved labor/phase/administrative percentages cascade when parent values change;
+  the included BIM-services sample is configurable, not a platform-hardcoded policy.
   Saved plan versions remain immutable and can be exported as CSV or printed/saved as PDF.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
