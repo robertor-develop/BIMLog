@@ -7903,6 +7903,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0e65e775a9e7a50651bbe0d18f9d4432454906423392072a2df11f56634da6f5"
+    },
+    {
+      "taskId": "unified-bilingual-help-center-20260810",
+      "reviewedThroughCommit": "414bd27d7d8d8752d2c2df706fec849e7e07677a",
+      "reviewedAt": "2026-08-10T15:15:00-04:00",
+      "status": "local_help_center_validated",
+      "captureTiming": "same_help_center_task",
+      "summary": "Replaces scattered and duplicated product help with one protected, searchable, responsive Help Center containing a bilingual user manual, contextual quick guides, troubleshooting, and current release information through Job Operations Work Packages.",
+      "workstreams": [
+        "help-center",
+        "user-manual",
+        "quick-guides",
+        "troubleshooting",
+        "bilingual-ui",
+        "product-documentation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority hierarchy, or cross-company doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, verification, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing bilingual, responsive, protected-route, regression, and build standards cover the Help Center."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Help Center documents already accepted product capabilities without changing roadmap or product doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the Help Center page, canonical content catalog, and focused behavior proof."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior or provider integration changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or exported-document template changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local Help Center build until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved future-build ordering is changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence, incident record, or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "215eb865c4a93babb28fdb4a92a20103fabbc12a9a24b737223ff358c2400196"
     }
   ]
 }

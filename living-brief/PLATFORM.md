@@ -223,6 +223,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/generic-apu-persistence-migration.ts
 - artifacts/api-server/src/lib/generic-apu-persistence-startup.behavior.ts
 - artifacts/api-server/src/lib/generic-apu.behavior.ts
+- artifacts/api-server/src/lib/help-center.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
@@ -347,6 +348,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialControlsSettings.tsx
+- artifacts/bimlog/src/pages/HelpCenter.tsx
 - artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx
 - artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx
 - artifacts/bimlog/src/pages/Landing.tsx
@@ -408,6 +410,7 @@ It changes only when the code structure or curated architectural facts change.
 - /projects/:id/intake
 - /projects/:id/operations
 - /projects/:id/:tab?
+- /help
 - /setup-guide
 - /profile
 - /settings/company-profile
