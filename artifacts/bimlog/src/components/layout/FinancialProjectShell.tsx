@@ -10,7 +10,7 @@ import { getRole } from "@/lib/roles";
 
 type FinancialProjectShellProps = {
   projectId: number;
-  activeTab: "budget" | "contracts" | "apu" | "intake";
+  activeTab: "budget" | "contracts" | "apu" | "intake" | "operations";
   children: ReactNode;
 };
 
@@ -25,8 +25,10 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
   const role = getRole(memberRole);
   const roleLabel = role ? (lang === "es" ? role.labelEs : role.label) : "";
   const activeLabel =
-    activeTab === "intake"
-      ? lang === "es" ? "Ingreso y Configuracion de Trabajo" : "Job Intake & Setup"
+    activeTab === "operations"
+      ? lang === "es" ? "Operaciones del Trabajo" : "Job Operations"
+      : activeTab === "intake"
+      ? lang === "es" ? "Ingreso y Configuración del Trabajo" : "Job Intake & Setup"
       :
     activeTab === "budget"
       ? lang === "es" ? "Presupuesto del Proyecto" : "Project Budget"
@@ -90,7 +92,7 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
               {project.name}
             </Link>
             <span style={{ color: "hsl(var(--border))" }}>/</span>
-            <span>{activeTab === "intake" ? (lang === "es" ? "Comando" : "Command") : (lang === "es" ? "Comercial" : "Commercial")}</span>
+            <span>{activeTab === "intake" || activeTab === "operations" ? (lang === "es" ? "Comando" : "Command") : (lang === "es" ? "Comercial" : "Commercial")}</span>
             <span style={{ color: "hsl(var(--border))" }}>/</span>
             <span className="breadcrumb-active">{activeLabel}</span>
           </div>

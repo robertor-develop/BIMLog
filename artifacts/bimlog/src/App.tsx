@@ -23,6 +23,7 @@ import { FinancialApuWorkspace } from "@/pages/FinancialApuWorkspace";
 import { FinancialBudgetWorkspace } from "@/pages/FinancialBudgetWorkspace";
 import { FinancialContractWorkspace } from "@/pages/FinancialContractWorkspace";
 import { JobIntakeWorkspace } from "@/pages/JobIntakeWorkspace";
+import { JobOperationsWorkspace } from "@/pages/JobOperationsWorkspace";
 import { Privacy } from "@/pages/Privacy";
 import { Terms } from "@/pages/Terms";
 import { Disclaimer } from "@/pages/Disclaimer";
@@ -130,6 +131,9 @@ function Router() {
       </Route>
       <Route path="/projects/:id/intake">
         {() => <ProtectedRoute component={JobIntakeWorkspace} />}
+      </Route>
+      <Route path="/projects/:id/operations">
+        {() => <ProtectedRoute component={JobOperationsWorkspace} />}
       </Route>
       <Route path="/projects/:id/:tab?">
         {() => <ProtectedRoute component={ProjectDetail} />}

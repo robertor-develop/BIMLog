@@ -125,12 +125,61 @@ CREATE TABLE IF NOT EXISTS job_activation_resource_assignments(
   CONSTRAINT job_activation_resource_hours_chk CHECK(planned_hours>0),
   CONSTRAINT job_activation_resource_uidx UNIQUE(intake_id,source_assignment_id)
 );
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS progress_percent integer NOT NULL DEFAULT 0;
+ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1;
+DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_version_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_version_chk CHECK(version>0); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_progress_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_progress_chk CHECK(progress_percent>=0 AND progress_percent<=100); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_resource_version_chk') THEN ALTER TABLE job_activation_resource_assignments ADD CONSTRAINT job_activation_resource_version_chk CHECK(version>0); END IF; END $$;
+CREATE TABLE IF NOT EXISTS job_activation_time_entries(
+  id text PRIMARY KEY,
+  intake_id text NOT NULL REFERENCES job_intakes(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  work_item_id text NOT NULL REFERENCES job_activation_work_items(id),
+  task_id text NOT NULL REFERENCES job_activation_tasks(id),
+  assignment_id text REFERENCES job_activation_resource_assignments(id),
+  user_id integer NOT NULL REFERENCES users(id),
+  work_date date NOT NULL,
+  hours numeric(30,6) NOT NULL,
+  note text NOT NULL DEFAULT '',
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_time_hours_chk CHECK(hours>0 AND hours<=24)
+);
+CREATE TABLE IF NOT EXISTS job_activation_task_deliverables(
+  id text PRIMARY KEY,
+  project_id integer NOT NULL REFERENCES projects(id),
+  work_item_id text NOT NULL REFERENCES job_activation_work_items(id),
+  task_id text NOT NULL REFERENCES job_activation_tasks(id),
+  file_id integer NOT NULL REFERENCES files(id),
+  deliverable_type text NOT NULL,
+  note text NOT NULL DEFAULT '',
+  linked_by_id integer NOT NULL REFERENCES users(id),
+  linked_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_deliverable_type_chk CHECK(deliverable_type IN('shop_drawing','submittal','deliverable','supporting')),
+  CONSTRAINT job_activation_task_deliverable_uidx UNIQUE(task_id,file_id,deliverable_type)
+);
+CREATE TABLE IF NOT EXISTS job_activation_operation_events(
+  id text PRIMARY KEY,
+  project_id integer NOT NULL REFERENCES projects(id),
+  work_item_id text REFERENCES job_activation_work_items(id),
+  task_id text REFERENCES job_activation_tasks(id),
+  assignment_id text REFERENCES job_activation_resource_assignments(id),
+  actor_user_id integer NOT NULL REFERENCES users(id),
+  event_type text NOT NULL,
+  evidence jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
 CREATE INDEX IF NOT EXISTS job_intake_company_status_idx ON job_intakes(company_id,status,updated_at DESC);
 CREATE INDEX IF NOT EXISTS job_intake_document_active_idx ON job_intake_documents(intake_id,created_at) WHERE removed_at IS NULL;
 CREATE INDEX IF NOT EXISTS job_intake_event_idx ON job_intake_events(intake_id,created_at,id);
 CREATE INDEX IF NOT EXISTS job_activation_work_item_project_idx ON job_activation_work_items(project_id,status,created_at);
 CREATE INDEX IF NOT EXISTS job_activation_task_work_item_idx ON job_activation_tasks(work_item_id,sequence);
 CREATE INDEX IF NOT EXISTS job_activation_resource_work_item_idx ON job_activation_resource_assignments(work_item_id,user_id);
+CREATE INDEX IF NOT EXISTS job_activation_time_task_idx ON job_activation_time_entries(task_id,work_date,created_at);
+CREATE INDEX IF NOT EXISTS job_activation_time_user_idx ON job_activation_time_entries(project_id,user_id,work_date);
+CREATE INDEX IF NOT EXISTS job_activation_deliverable_task_idx ON job_activation_task_deliverables(task_id,linked_at);
+CREATE INDEX IF NOT EXISTS job_activation_operation_event_idx ON job_activation_operation_events(project_id,created_at,id);
 `);
     await client.query("COMMIT");
   } catch (error) { await client.query("ROLLBACK"); throw error; }

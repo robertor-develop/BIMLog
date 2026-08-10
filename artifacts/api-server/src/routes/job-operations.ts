@@ -1,0 +1,69 @@
+import { Router } from "express";
+import { authMiddleware } from "../middlewares/auth";
+import { FinancialControlError } from "../lib/financial-control-contract";
+import {
+  addJobOperationTime,
+  getJobOperations,
+  linkJobOperationDeliverable,
+  reassignJobOperationResource,
+  unlinkJobOperationDeliverable,
+  updateJobOperationTask,
+} from "../lib/job-operations-service";
+
+const router = Router();
+router.use("/projects/:projectId/operations", authMiddleware);
+
+const errorEs: Record<string, string> = {
+  JOB_OPERATIONS_PROJECT_NOT_FOUND: "No se encontró el proyecto.",
+  JOB_OPERATIONS_MEMBERSHIP_REQUIRED: "Debe ser miembro activo del proyecto.",
+  JOB_OPERATIONS_TASK_NOT_FOUND: "No se encontró la tarea.",
+  JOB_OPERATIONS_TASK_CONTROL_DENIED: "Solamente el líder del proyecto o los miembros asignados pueden actualizar esta tarea.",
+  JOB_OPERATIONS_REASSIGN_DENIED: "Solamente el líder del proyecto puede reasignar recursos.",
+  JOB_OPERATIONS_ASSIGNEE_INVALID: "La persona asignada debe ser miembro activo del proyecto.",
+  JOB_OPERATIONS_ASSIGNMENT_INVALID: "La asignación seleccionada no corresponde a esta tarea.",
+  JOB_OPERATIONS_TIME_DENIED: "Los miembros del equipo solamente pueden registrar sus propias horas.",
+  JOB_OPERATIONS_FILE_INVALID: "Seleccione un archivo activo de este proyecto.",
+  JOB_OPERATIONS_DELIVERABLE_DENIED: "Solamente el líder del proyecto o el miembro asignado puede administrar este entregable.",
+  JOB_OPERATIONS_DELIVERABLE_NOT_FOUND: "No se encontró el vínculo del entregable.",
+  JOB_OPERATIONS_STALE: "Este registro cambió en otra sesión. Recargue antes de guardar.",
+  JOB_OPERATIONS_HOURS_INVALID: "Las horas deben ser mayores que cero y no pueden exceder 24.",
+  JOB_OPERATIONS_DATE_INVALID: "La fecha de trabajo no es válida.",
+  JOB_OPERATIONS_PROGRESS_INVALID: "El progreso debe ser un número entero de 0 a 100.",
+  JOB_OPERATIONS_STATUS_INVALID: "El estado de la tarea no es válido.",
+  JOB_OPERATIONS_DELIVERABLE_TYPE_INVALID: "El tipo de entregable no es válido.",
+  JOB_OPERATIONS_ID_INVALID: "El identificador proporcionado no es válido.",
+  JOB_OPERATIONS_TEXT_INVALID: "El texto proporcionado no es válido.",
+};
+
+const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any, res: any) => {
+  try { await handler(req, res); }
+  catch (error) {
+    if (error instanceof FinancialControlError) {
+      res.status(error.status).json({ code: error.code, error: { en: error.message, es: errorEs[error.code] ?? "No se pudo completar la operación." } });
+      return;
+    }
+    console.error("[job-operations] request failed", error);
+    res.status(500).json({ code: "JOB_OPERATIONS_INTERNAL_ERROR", error: { en: "Job Operations is temporarily unavailable.", es: "Las operaciones del trabajo no están disponibles temporalmente." } });
+  }
+};
+
+router.get("/projects/:projectId/operations", run(async (req, res) => {
+  res.json(await getJobOperations({ actorUserId: req.user.userId, projectId: req.params.projectId }));
+}));
+router.patch("/projects/:projectId/operations/tasks/:taskId", run(async (req, res) => {
+  res.json(await updateJobOperationTask({ actorUserId: req.user.userId, projectId: req.params.projectId, taskId: req.params.taskId, expectedVersion: req.body?.expectedVersion, status: req.body?.status, progressPercent: req.body?.progressPercent, assigneeUserId: req.body?.assigneeUserId }));
+}));
+router.patch("/projects/:projectId/operations/assignments/:assignmentId", run(async (req, res) => {
+  res.json(await reassignJobOperationResource({ actorUserId: req.user.userId, projectId: req.params.projectId, assignmentId: req.params.assignmentId, expectedVersion: req.body?.expectedVersion, userId: req.body?.userId }));
+}));
+router.post("/projects/:projectId/operations/time", run(async (req, res) => {
+  res.status(201).json(await addJobOperationTime({ actorUserId: req.user.userId, projectId: req.params.projectId, entryId: req.body?.entryId, taskId: req.body?.taskId, assignmentId: req.body?.assignmentId, workDate: req.body?.workDate, hours: req.body?.hours, note: req.body?.note }));
+}));
+router.post("/projects/:projectId/operations/deliverables", run(async (req, res) => {
+  res.status(201).json(await linkJobOperationDeliverable({ actorUserId: req.user.userId, projectId: req.params.projectId, linkId: req.body?.linkId, taskId: req.body?.taskId, fileId: req.body?.fileId, deliverableType: req.body?.deliverableType, note: req.body?.note }));
+}));
+router.delete("/projects/:projectId/operations/deliverables/:deliverableId", run(async (req, res) => {
+  res.json(await unlinkJobOperationDeliverable({ actorUserId: req.user.userId, projectId: req.params.projectId, deliverableId: req.params.deliverableId }));
+}));
+
+export default router;
