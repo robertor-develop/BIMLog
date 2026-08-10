@@ -8293,6 +8293,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "professional-operating-manual-completion-20260810",
+      "reviewedThroughCommit": "5bd6d8f1cd4d1f20c309e8952b9265238dc01ab7",
+      "reviewedAt": "2026-08-10T18:47:00-04:00",
+      "status": "full_bilingual_operating_reference_validated",
+      "captureTiming": "same_product_task",
+      "summary": "Replaces summary-grade manual coverage with a professional bilingual operating reference across all 16 released chapters, adding exact entry points, prerequisites, controls, lifecycle states, validation rules, audit behavior, important boundaries, workspace handoffs, searchable content, printable presentation, and enforced coverage tests.",
+      "workstreams": [
+        "help-center",
+        "user-documentation",
+        "bilingual-ui",
+        "operating-reference",
+        "team-performance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The manual explains released behavior without changing ecosystem identity, ownership, or company boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Development, verification, handoff, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The expanded manual implements existing bilingual, responsive, searchable, printable, traceable documentation standards."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Professional user documentation advances the accepted platform vision without changing product doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The platform inventory reflects expanded Help Center content and behavior proof."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin, browser bridge, connector, provider, or external integration changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The manual uses the existing printable Help Center design and introduces no governed report template."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The combined build remains local until Roberto performs the separate push and publication workflow."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved product backlog item is removed or silently reclassified."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence and accepted audit conclusions are preserved."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
