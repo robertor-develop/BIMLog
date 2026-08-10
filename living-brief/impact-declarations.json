@@ -8215,6 +8215,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3363aeeb118b5a12553d814d6e929eb929b65ef0f260d3e89ae762bba192f48e"
+    },
+    {
+      "taskId": "team-performance-capacity-assignment-layer-20260810",
+      "reviewedThroughCommit": "10362e3a4044911ac71200f69b562e5eb6813008",
+      "reviewedAt": "2026-08-10T18:28:00-04:00",
+      "status": "local_team_capacity_and_assignment_planning_validated",
+      "captureTiming": "same_product_task",
+      "summary": "Extends Team Performance with remaining-work capacity scenarios, transparent assignment support, workload-conflict warnings, category experience matrices, monthly operational trends, source-record drilldowns, direct Intake and Operations links, bilingual responsive UX, and complete manual coverage without AI ranking or automatic assignment.",
+      "workstreams": [
+        "team-performance",
+        "capacity-planning",
+        "assignment-planning",
+        "job-intake",
+        "job-operations",
+        "bilingual-ui",
+        "user-documentation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership, company boundary, or portfolio doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, verification, operator handoff, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation uses explicit source evidence, honest unavailable states, bilingual responsive UX, and deterministic formulas."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Evidence-based assignment planning advances the accepted platform vision without changing doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The platform inventory reflects the extended Team Performance service, behavior proof, planning interface, evidence explorer, and manual."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin, browser bridge, connector, provider, or external integration changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing CSV and browser Print/PDF conventions remain in use."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a local validated candidate until Roberto performs the separate push and publication workflow."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved future-build ordering or preserved backlog item is removed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
