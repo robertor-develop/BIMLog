@@ -7523,6 +7523,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "contract-item-workflow-engine-20260810",
+      "reviewedThroughCommit": "9116c6fd45b6404925869c97fa06d83da66de1ab",
+      "reviewedAt": "2026-08-10T10:09:00-04:00",
+      "status": "local_contract_item_workflow_validated",
+      "captureTiming": "same_contract_item_workflow_task",
+      "summary": "Connects activated Intake and APU-backed Contract Items to an operational Phase, Revision, internal Version, and Task hierarchy. BIM Contract Items receive configurable default phases, users can add nested execution records and update progress, and every workflow event explicitly preserves the frozen Contract Item budget.",
+      "workstreams": [
+        "job-intake",
+        "commercial-contract-items",
+        "workflow-engine",
+        "generic-apu"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority hierarchy, or cross-company doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, database-safety, and operator publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing additive-schema, authorization, bilingual UI, responsive-layout, immutable-budget, and verification standards cover the workflow engine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The build implements the already approved Intake to Contract Item to execution direction from Ruben's three requirements documents."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform map now includes the Contract Item workflow route, service, migration, contract, behavior proof, UI component, and database schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior, provider integration, or plugin-owned interface changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document rendering template changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local workflow candidate until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The next approved build remains Budget Governance after the workflow engine is accepted."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence, incident record, or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
