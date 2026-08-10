@@ -26,8 +26,9 @@ assert.match(page, /HELP_CATEGORIES/);
 assert.match(page, /HELP_TROUBLESHOOTING/);
 assert.match(page, /HELP_RELEASES/);
 assert.match(page, /@media\(max-width:850px\)/, "Help Center must be responsive");
-for (const field of ["purpose", "keyConcepts", "permissions", "fields", "calculations", "savedRecords", "outputs", "example"]) assert.match(content, new RegExp(field), `full manual must define ${field}`);
-for (const heading of ["Purpose and when to use it", "Access and permissions", "Fields and what they mean", "Calculations and formulas", "What BIMLog saves", "Outputs and exports", "Worked example"]) assert.match(page, new RegExp(heading));
+for (const field of ["purpose", "entryPoint", "beforeYouBegin", "keyConcepts", "permissions", "controls", "statusLifecycle", "validationRules", "fields", "calculations", "savedRecords", "auditTrail", "boundaries", "relatedWorkspaces", "outputs", "example"]) assert.match(content, new RegExp(field), `full manual must define ${field}`);
+for (const heading of ["Purpose and when to use it", "Where to find it", "Before you begin", "Access and permissions", "Controls and actions", "Statuses and lifecycle", "Validation rules", "Fields and what they mean", "Calculations and formulas", "What BIMLog saves", "Audit trail and history", "Important boundaries", "Related workspaces and handoffs", "Outputs and exports", "Worked example"]) assert.match(page, new RegExp(heading));
+for (const phrase of ["Full operational reference", "Referencia operativa completa", "optimistic concurrency", "Scenario capacity", "Controlled import", "Hourly-rate bridge", "Audit trail and history"]) assert.ok(content.includes(phrase) || page.includes(phrase), `${phrase} must be present in the professional operating manual`);
 assert.match(page, /Print this manual section/);
 assert.match(page, /@media print/);
 assert.match(guide, /helpTopicForContext/, "quick guide must use the canonical documentation catalog");
@@ -48,4 +49,4 @@ assert.match(app, /path="\/help"/);
 assert.match(app, /ProtectedRoute component=\{HelpCenter\}/);
 assert.match(legacy, /HelpCenter as SetupGuide/, "legacy setup-guide source must not retain a second documentation catalog");
 
-console.log(JSON.stringify({ status: "PASS", tests: ["canonical-source", "released-feature-coverage", "bilingual-manual", "quick-guides", "troubleshooting", "release-information", "contextual-guide", "manual-not-duplicated-in-info", "collapsed-navigation-recovery", "persistent-day-night-mode", "accent-insensitive-search", "responsive-layout", "protected-route", "legacy-convergence"] }));
+console.log(JSON.stringify({ status: "PASS", tests: ["canonical-source", "released-feature-coverage", "bilingual-manual", "entry-points", "prerequisites", "control-reference", "state-lifecycles", "validation-rules", "audit-history", "boundaries", "workspace-handoffs", "quick-guides", "troubleshooting", "release-information", "contextual-guide", "manual-not-duplicated-in-info", "collapsed-navigation-recovery", "persistent-day-night-mode", "accent-insensitive-search", "responsive-layout", "printable-operating-reference", "protected-route", "legacy-convergence"] }));

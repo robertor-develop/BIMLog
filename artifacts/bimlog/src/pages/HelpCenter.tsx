@@ -47,10 +47,17 @@ export function HelpCenter() {
       return normalize([
         topic.title.en, topic.title.es, topic.summary.en, topic.summary.es,
         ...topic.keywords, ...topic.steps.flatMap((step) => [step.title.en, step.title.es, step.body.en, step.body.es]),
-        topic.purpose.en, topic.purpose.es,
+        topic.purpose.en, topic.purpose.es, topic.entryPoint.en, topic.entryPoint.es,
+        ...topic.beforeYouBegin.flatMap((item) => [item.en, item.es]),
         ...topic.keyConcepts.flatMap((item) => [item.name.en, item.name.es, item.meaning.en, item.meaning.es]),
+        ...topic.controls.flatMap((item) => [item.name.en, item.name.es, item.meaning.en, item.meaning.es]),
+        ...topic.statusLifecycle.flatMap((item) => [item.name.en, item.name.es, item.meaning.en, item.meaning.es]),
+        ...topic.validationRules.flatMap((item) => [item.en, item.es]),
         ...topic.fields.flatMap((item) => [item.name.en, item.name.es, item.meaning.en, item.meaning.es]),
         ...topic.calculations.flatMap((item) => [item.name.en, item.name.es, item.meaning.en, item.meaning.es]),
+        ...topic.auditTrail.flatMap((item) => [item.en, item.es]),
+        ...topic.boundaries.flatMap((item) => [item.en, item.es]),
+        ...topic.relatedWorkspaces.flatMap((item) => [item.name.en, item.name.es, item.meaning.en, item.meaning.es]),
       ].join(" ")).includes(needle);
     });
   }, [category, query]);
@@ -90,7 +97,7 @@ export function HelpCenter() {
         <header className="hc-hero">
             <div className="hc-hero-row">
             <div><div className="hc-kicker">BIMLog {label("Support", "Soporte")}</div><h1>{label("Help Center", "Centro de ayuda")}</h1><p>{label("One place for quick reminders, guided workflows, the complete user manual, troubleshooting, and release information.", "Un solo lugar para recordatorios, flujos guiados, el manual completo, solución de problemas e información de versiones.")}</p></div>
-            <div className="hc-version">{label("Manual 2026.08 · Current through Team Performance", "Manual 2026.08 · Actualizado hasta Rendimiento del Equipo")}</div>
+            <div className="hc-version">{label("Manual 2026.08 · Full operational reference", "Manual 2026.08 · Referencia operativa completa")}</div>
           </div>
           <div className="hc-search"><Search/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={label("Search features, actions, errors, or terms", "Buscar funciones, acciones, errores o términos")} aria-label={label("Search Help Center", "Buscar en Centro de ayuda")}/></div>
         </header>
@@ -113,8 +120,13 @@ export function HelpCenter() {
             <h2>{text(topic.title)}</h2><p className="hc-summary">{text(topic.summary)}</p>
             <div className="hc-badges"><span className="hc-badge">{label("Audience", "Usuarios")}: {text(topic.audience)}</span><span className="hc-badge">{text(topic.availability)}</span></div>
             <h3 className="hc-section-title"><Info/>{label("Purpose and when to use it", "Propósito y cuándo usarlo")}</h3><div className="hc-purpose">{text(topic.purpose)}</div>
+            <h3 className="hc-section-title"><Compass/>{label("Where to find it", "Dónde encontrarlo")}</h3><div className="hc-purpose">{text(topic.entryPoint)}</div>
+            {topic.beforeYouBegin.length > 0 && <><h3 className="hc-section-title"><CheckCircle2/>{label("Before you begin", "Antes de comenzar")}</h3><ul className="hc-list">{topic.beforeYouBegin.map((item,index)=><li key={index}>{text(item)}</li>)}</ul></>}
             {topic.keyConcepts.length > 0 && <><h3 className="hc-section-title"><BookOpen/>{label("Key concepts and terminology", "Conceptos y terminología")}</h3><dl className="hc-definitions">{topic.keyConcepts.map((item,index)=><div className="hc-definition" key={index}><dt>{text(item.name)}</dt><dd>{text(item.meaning)}</dd></div>)}</dl></>}
             {topic.permissions.length > 0 && <><h3 className="hc-section-title"><KeyRound/>{label("Access and permissions", "Acceso y permisos")}</h3><ul className="hc-list">{topic.permissions.map((item,index)=><li key={index}>{text(item)}</li>)}</ul></>}
+            {topic.controls.length > 0 && <><h3 className="hc-section-title"><Compass/>{label("Controls and actions", "Controles y acciones")}</h3><dl className="hc-definitions">{topic.controls.map((item,index)=><div className="hc-definition" key={index}><dt>{text(item.name)}</dt><dd>{text(item.meaning)}</dd></div>)}</dl></>}
+            {topic.statusLifecycle.length > 0 && <><h3 className="hc-section-title"><History/>{label("Statuses and lifecycle", "Estados y ciclo de vida")}</h3><dl className="hc-definitions">{topic.statusLifecycle.map((item,index)=><div className="hc-definition" key={index}><dt>{text(item.name)}</dt><dd>{text(item.meaning)}</dd></div>)}</dl></>}
+            {topic.validationRules.length > 0 && <><h3 className="hc-section-title"><ShieldCheck/>{label("Validation rules", "Reglas de validación")}</h3><ul className="hc-list">{topic.validationRules.map((item,index)=><li key={index}>{text(item)}</li>)}</ul></>}
             {topic.fields.length > 0 && <><h3 className="hc-section-title"><Compass/>{label("Fields and what they mean", "Campos y su significado")}</h3><dl className="hc-definitions">{topic.fields.map((item,index)=><div className="hc-definition" key={index}><dt>{text(item.name)}</dt><dd>{text(item.meaning)}</dd></div>)}</dl></>}
             {topic.calculations.length > 0 && <><h3 className="hc-section-title"><Calculator/>{label("Calculations and formulas", "Cálculos y fórmulas")}</h3><dl className="hc-definitions">{topic.calculations.map((item,index)=><div className="hc-definition" key={index}><dt>{text(item.name)}</dt><dd>{text(item.meaning)}</dd></div>)}</dl></>}
             <div className="hc-tip"><strong>{label("Quick help:", "Ayuda rápida:")}</strong> {text(topic.quickTip)}</div>
@@ -122,6 +134,9 @@ export function HelpCenter() {
             <div className="hc-steps">{topic.steps.map((step, index) => <section className="hc-step" key={`${topic.id}-${index}`}><div className="hc-step-number">{index + 1}</div><div><h3>{text(step.title)}</h3><p>{text(step.body)}</p></div></section>)}</div>
             <h3 className="hc-section-title"><CheckCircle2/>{label("Expected result", "Resultado esperado")}</h3><div className="hc-result">{text(topic.result)}</div>
             <h3 className="hc-section-title"><Database/>{label("What BIMLog saves", "Qué guarda BIMLog")}</h3><ul className="hc-list">{topic.savedRecords.map((item,index)=><li key={index}>{text(item)}</li>)}</ul>
+            {topic.auditTrail.length > 0 && <><h3 className="hc-section-title"><History/>{label("Audit trail and history", "Auditoría e historial")}</h3><ul className="hc-list">{topic.auditTrail.map((item,index)=><li key={index}>{text(item)}</li>)}</ul></>}
+            {topic.boundaries.length > 0 && <><h3 className="hc-section-title"><ShieldCheck/>{label("Important boundaries", "Límites importantes")}</h3><ul className="hc-list">{topic.boundaries.map((item,index)=><li key={index}>{text(item)}</li>)}</ul></>}
+            {topic.relatedWorkspaces.length > 0 && <><h3 className="hc-section-title"><ChevronRight/>{label("Related workspaces and handoffs", "Espacios relacionados y entregas")}</h3><dl className="hc-definitions">{topic.relatedWorkspaces.map((item,index)=><div className="hc-definition" key={index}><dt>{text(item.name)}</dt><dd>{text(item.meaning)}</dd></div>)}</dl></>}
             <h3 className="hc-section-title"><FileOutput/>{label("Outputs and exports", "Resultados y exportaciones")}</h3><ul className="hc-list">{topic.outputs.map((item,index)=><li key={index}>{text(item)}</li>)}</ul>
             <h3 className="hc-section-title"><Lightbulb/>{label("Worked example", "Ejemplo práctico")}</h3><div className="hc-example"><strong>{label("Scenario", "Escenario")}</strong>{text(topic.example.scenario)}<strong style={{marginTop:8}}>{label("What happens", "Qué sucede")}</strong>{text(topic.example.outcome)}</div>
             <h3 className="hc-section-title"><AlertCircle/>{label("Common problems", "Problemas comunes")}</h3><div className="hc-issues">{topic.troubleshooting.map((item, index) => <div className="hc-issue" key={index}><AlertCircle/>{text(item)}</div>)}</div>
