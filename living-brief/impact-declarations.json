@@ -7825,6 +7825,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e63d7ebbfb7985c788044d1e7ae1887c86788fbb1b08f2bc21c15e48f16dca08"
+    },
+    {
+      "taskId": "job-operations-work-packages-20260810",
+      "reviewedThroughCommit": "5f7919de8d66cc5832969503d957e6ac3d156986",
+      "reviewedAt": "2026-08-10T14:19:25-04:00",
+      "status": "local_work_packages_validated",
+      "captureTiming": "same_work_packages_task",
+      "summary": "Adds bilingual controlled work packages to Job Operations, including project-unique package codes, responsible members, due dates, task membership, lifecycle status, automatic task-progress rollups, overdue and blocker summaries, and immutable operation events.",
+      "workstreams": [
+        "job-operations",
+        "work-packages",
+        "shop-drawings",
+        "submittals",
+        "task-rollups",
+        "bilingual-ui"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority hierarchy, or cross-company doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, verification, database-safety, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows existing additive-schema, active-membership, optimistic-concurrency, immutable-event, bilingual UI, and responsive-layout standards."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Controlled packages advance the approved Intake-to-operations workflow without changing product doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the work-package behavior proof alongside the existing Job Operations service, route, and page."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior or provider integration changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document-rendering template changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved future-work ordering is changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0e65e775a9e7a50651bbe0d18f9d4432454906423392072a2df11f56634da6f5"
     }
   ]
 }

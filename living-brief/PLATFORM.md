@@ -231,6 +231,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake.behavior.ts
 - artifacts/api-server/src/lib/job-operations-service.ts
 - artifacts/api-server/src/lib/job-operations.behavior.ts
+- artifacts/api-server/src/lib/job-work-packages.behavior.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
 - artifacts/api-server/src/lib/linked-items-creation-ux.behavior.ts
 - artifacts/api-server/src/lib/living-brief-gate.behavior.ts
