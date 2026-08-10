@@ -993,7 +993,12 @@ export async function getFinancialBudgetWorkspace(input: {
   });
   const project = (
     await pool.query(
-      `SELECT p.id,p.name,p.code,c.name company_name,b.company_id FROM projects p JOIN LATERAL(SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1)b ON true JOIN companies c ON c.id=b.company_id WHERE p.id=$1`,
+      `SELECT p.id,p.name,p.code,c.name company_name,COALESCE(b.company_id,creator.company_id) company_id
+       FROM projects p
+       LEFT JOIN LATERAL(SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1)b ON true
+       LEFT JOIN users creator ON creator.id=p.created_by_id
+       JOIN companies c ON c.id=COALESCE(b.company_id,creator.company_id)
+       WHERE p.id=$1 AND p.status<>'archived'`,
       [projectId],
     )
   ).rows[0];

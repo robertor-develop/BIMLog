@@ -10,6 +10,8 @@ const admin = fs.readFileSync(path.join(root, "artifacts/api-server/src/routes/a
 const schema = fs.readFileSync(path.join(root, "lib/db/src/schema/commercial-entitlements.ts"), "utf8");
 const projectScope = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/commercial-project-scope.ts"), "utf8");
 const totalControl = fs.readFileSync(path.join(root, "artifacts/bimlog/src/pages/TotalControl.tsx"), "utf8");
+const budgets = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/financial-budget-service.ts"), "utf8");
+const contracts = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/financial-contract-service.ts"), "utf8");
 
 const checks: string[] = [];
 assert.match(migration, /FROM users u ON CONFLICT\(event_key\) DO NOTHING/);
@@ -34,6 +36,11 @@ assert.deepEqual(resolveCommercialProjectScope({ projectId: 26, isSuperAdmin: tr
 assert.match(financial, /project_company_binding_versions/);
 assert.match(financial, /COALESCE\(binding\.company_id,creator\.company_id\)/);
 checks.push("every active project resolves through its latest company binding with legacy creator fallback, rejects non-members, and preserves super-admin all-project access");
+assert.match(budgets, /LEFT JOIN LATERAL\(SELECT company_id FROM project_company_binding_versions/);
+assert.match(budgets, /COALESCE\(b\.company_id,creator\.company_id\)/);
+assert.match(contracts, /LEFT JOIN LATERAL\(SELECT company_id FROM project_company_binding_versions/);
+assert.equal((contracts.match(/COALESCE\(b\.company_id,creator\.company_id\)/g) ?? []).length >= 2, true);
+checks.push("budget workspace and contract exports use the same bound-company with legacy creator fallback as authorization");
 assert.match(schema, /commercialEntitlementEventsTable/);
 assert.match(schema, /featureKey: text\("feature_key"\)/);
 assert.match(migration, /CREATE TABLE IF NOT EXISTS commercial_entitlement_events/);

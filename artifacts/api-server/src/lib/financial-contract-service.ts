@@ -468,7 +468,7 @@ export async function contractCurrentViewExportData(input: { actorUserId: number
   const projectId = positiveId(input.projectId, "projectId");
   await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.export", operation: "export" });
   const workspace = await getContractWorkspace({ actorUserId: input.actorUserId, projectId });
-  const project = (await pool.query(`SELECT p.name,p.code,c.name company_name FROM projects p JOIN project_company_binding_versions b ON b.project_id=p.id JOIN companies c ON c.id=b.company_id WHERE p.id=$1 ORDER BY b.version DESC LIMIT 1`, [projectId])).rows[0];
+  const project = (await pool.query(`SELECT p.name,p.code,c.name company_name FROM projects p LEFT JOIN LATERAL(SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1)b ON true LEFT JOIN users creator ON creator.id=p.created_by_id JOIN companies c ON c.id=COALESCE(b.company_id,creator.company_id) WHERE p.id=$1 AND p.status<>'archived'`, [projectId])).rows[0];
   return { project: { name: project.name, code: project.code, companyName: project.company_name }, contracts: workspace.contracts, totals: workspace.totals, generatedAt: new Date().toISOString() };
 }
 
@@ -478,6 +478,6 @@ export async function contractExportData(input: { actorUserId: number; projectId
   await requireRecordPermission(pool, { contractId, userId: auth.actor.userId, permission: "view" });
   const workspace = await getContractWorkspace({ actorUserId: input.actorUserId, projectId, contractId });
   if (!workspace.detail) throw new FinancialControlError(404, "CONTRACT_NOT_FOUND", "Financial contract not found.");
-  const project = (await pool.query(`SELECT p.name,p.code,c.name company_name FROM projects p JOIN project_company_binding_versions b ON b.project_id=p.id JOIN companies c ON c.id=b.company_id WHERE p.id=$1 ORDER BY b.version DESC LIMIT 1`, [projectId])).rows[0];
+  const project = (await pool.query(`SELECT p.name,p.code,c.name company_name FROM projects p LEFT JOIN LATERAL(SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1)b ON true LEFT JOIN users creator ON creator.id=p.created_by_id JOIN companies c ON c.id=COALESCE(b.company_id,creator.company_id) WHERE p.id=$1 AND p.status<>'archived'`, [projectId])).rows[0];
   return { project: { name: project.name, code: project.code, companyName: project.company_name }, contract: workspace.detail, generatedAt: new Date().toISOString() };
 }
