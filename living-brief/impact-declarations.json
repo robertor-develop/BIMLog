@@ -7598,6 +7598,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "job-activation-workflow-baseline-20260810",
+      "reviewedThroughCommit": "ee6fafdcc69944cdbfe1fa2af31619aca169f1a1",
+      "reviewedAt": "2026-08-10T10:42:02-04:00",
+      "status": "local_job_activation_workflow_baseline_validated",
+      "captureTiming": "same_job_activation_task",
+      "summary": "Makes Job Intake activation create an execution workflow for every accepted Contract Item in the same transaction as the frozen contract version. It also makes the financial contract behavior proof independent of the caller's working directory so the existing Replit package-scoped command runs reliably.",
+      "workstreams": [
+        "job-intake",
+        "commercial-contract-items",
+        "workflow-engine"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority hierarchy, or cross-company doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, verification, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing transaction, idempotency, additive-schema, and verification standards cover the change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Automatic workflow creation implements the already approved Intake to activation to execution direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, service, schema, component, or package boundary was added or removed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior or provider integration changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or document rendering template changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved future-work ordering is changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
