@@ -579,11 +579,11 @@ function TCUsersTab({ token }: { token: string }) {
     else setMsg(d.error || "Failed");
   };
 
-  const setCommercialAccess = async (userId: number, featureKey: "package" | "budget" | "contracts" | "cost_value_planner", enabled: boolean) => {
+  const setCommercialAccess = async (userId: number, featureKey: "package" | "budget" | "contracts" | "cost_value_planner" | "team_performance", enabled: boolean) => {
     setCommercialSavingKey(`${userId}:${featureKey}`);
     setMsg("");
     try {
-      const affected = featureKey === "package" ? ["package", "budget", "contracts", "cost_value_planner"] as const : [featureKey] as const;
+      const affected = featureKey === "package" ? ["package", "budget", "contracts", "cost_value_planner", "team_performance"] as const : [featureKey] as const;
       for (const key of affected) {
         const response = await apiFetch(`/admin/users/${userId}/commercial-entitlement`, token, {
           method: "POST",
@@ -597,7 +597,7 @@ function TCUsersTab({ token }: { token: string }) {
         const prior = (user.commercialFeatures ?? {}) as Record<string, boolean>;
         const next = { ...prior };
         for (const key of affected) next[key] = enabled;
-        next.package = next.budget === true && next.contracts === true && next.cost_value_planner === true;
+        next.package = next.budget === true && next.contracts === true && next.cost_value_planner === true && next.team_performance === true;
         return { ...user, commercialAccess: next.package, commercialFeatures: next };
       }));
       setMsg(`${featureKey === "package" ? "Commercial package" : featureKey.replaceAll("_", " ")} ${enabled ? "enabled" : "disabled"}.`);
@@ -628,7 +628,7 @@ function TCUsersTab({ token }: { token: string }) {
                 <TCTd>{String(u.projectCount || 0)}</TCTd>
                 <TCTd>
                   <div style={{ display: "grid", gap: 4, minWidth: 170 }}>
-                    {([['package','Commercial package'],['budget','Project Budget'],['contracts','Contracts'],['cost_value_planner','Cost & Value Planner']] as const).map(([key, label]) => {
+                    {([['package','Commercial package'],['budget','Project Budget'],['contracts','Contracts'],['cost_value_planner','Cost & Value Planner'],['team_performance','Team Performance & Skills']] as const).map(([key, label]) => {
                       const enabled = ((u.commercialFeatures ?? {}) as Record<string, boolean>)[key] === true;
                       const saving = commercialSavingKey === `${u.id}:${key}`;
                       return <label key={key} style={{ display: "inline-flex", alignItems: "center", gap: 6, cursor: commercialSavingKey ? "wait" : "pointer", whiteSpace: "nowrap" }}>

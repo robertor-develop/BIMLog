@@ -86,7 +86,7 @@ export async function financialActor(
     companyId: Number(row.company_id),
     isSuperAdmin: row.is_super_admin === true,
     commercialEnabled: commercial.package,
-    commercialFeatures: { package: commercial.package, budget: commercial.budget, contracts: commercial.contracts, cost_value_planner: commercial.cost_value_planner },
+    commercialFeatures: { package: commercial.package, budget: commercial.budget, contracts: commercial.contracts, cost_value_planner: commercial.cost_value_planner, team_performance: commercial.team_performance },
   };
 }
 async function scopeFor(

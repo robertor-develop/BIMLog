@@ -15,7 +15,7 @@ const styles = read("../../../../artifacts/bimlog/src/index.css");
 const app = read("../../../../artifacts/bimlog/src/App.tsx");
 const legacy = read("../../../../artifacts/bimlog/src/pages/SetupGuide.tsx");
 
-for (const id of ["getting-started", "command-center", "coordination-files", "job-intake", "job-operations", "rfis", "submittals-transmittals", "changes-meetings", "planning", "commercial-overview", "budget-contracts", "cost-value-planner", "insights-reports", "directory-administration", "integrations"]) {
+for (const id of ["getting-started", "command-center", "coordination-files", "job-intake", "job-operations", "rfis", "submittals-transmittals", "changes-meetings", "planning", "commercial-overview", "budget-contracts", "cost-value-planner", "team-performance", "insights-reports", "directory-administration", "integrations"]) {
   assert.match(content, new RegExp(`id: "${id}"`), `${id} must be covered by the canonical manual`);
 }
 for (const phrase of ["Help Center", "Centro de ayuda", "User Manual", "Manual del usuario", "Quick Guides", "Guías rápidas", "Troubleshooting", "Solución de problemas", "What's New", "Novedades"]) {
@@ -26,6 +26,10 @@ assert.match(page, /HELP_CATEGORIES/);
 assert.match(page, /HELP_TROUBLESHOOTING/);
 assert.match(page, /HELP_RELEASES/);
 assert.match(page, /@media\(max-width:850px\)/, "Help Center must be responsive");
+for (const field of ["purpose", "keyConcepts", "permissions", "fields", "calculations", "savedRecords", "outputs", "example"]) assert.match(content, new RegExp(field), `full manual must define ${field}`);
+for (const heading of ["Purpose and when to use it", "Access and permissions", "Fields and what they mean", "Calculations and formulas", "What BIMLog saves", "Outputs and exports", "Worked example"]) assert.match(page, new RegExp(heading));
+assert.match(page, /Print this manual section/);
+assert.match(page, /@media print/);
 assert.match(guide, /helpTopicForContext/, "quick guide must use the canonical documentation catalog");
 assert.match(guide, /Open complete instructions/);
 assert.match(guide, /Abrir instrucciones completas/);

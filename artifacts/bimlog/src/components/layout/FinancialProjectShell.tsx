@@ -10,7 +10,7 @@ import { getRole } from "@/lib/roles";
 
 type FinancialProjectShellProps = {
   projectId: number;
-  activeTab: "budget" | "contracts" | "apu" | "intake" | "operations";
+  activeTab: "budget" | "contracts" | "apu" | "team-performance" | "intake" | "operations";
   children: ReactNode;
 };
 
@@ -25,7 +25,9 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
   const role = getRole(memberRole);
   const roleLabel = role ? (lang === "es" ? role.labelEs : role.label) : "";
   const activeLabel =
-    activeTab === "operations"
+    activeTab === "team-performance"
+      ? lang === "es" ? "Rendimiento y Habilidades del Equipo" : "Team Performance & Skills"
+      : activeTab === "operations"
       ? lang === "es" ? "Operaciones del Trabajo" : "Job Operations"
       : activeTab === "intake"
       ? lang === "es" ? "Ingreso y Configuración del Trabajo" : "Job Intake & Setup"

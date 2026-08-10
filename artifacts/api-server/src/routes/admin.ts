@@ -378,7 +378,7 @@ router.get("/admin/users", async (req, res) => {
     res.json({
       data: users.map(u => {
         const features = commercialEntitlements.get(u.id);
-        const packageEnabled = (features?.budget?.enabled ?? false) && (features?.contracts?.enabled ?? false) && (features?.cost_value_planner?.enabled ?? false);
+        const packageEnabled = (features?.budget?.enabled ?? false) && (features?.contracts?.enabled ?? false) && (features?.cost_value_planner?.enabled ?? false) && (features?.team_performance?.enabled ?? false);
         return { ...u, companyName: companyMap[u.companyId] || "", projectCount: projectCounts[u.id] || 0,
           commercialAccess: packageEnabled,
           commercialEnabled: packageEnabled,
@@ -387,6 +387,7 @@ router.get("/admin/users", async (req, res) => {
             budget: features?.budget?.enabled ?? false,
             contracts: features?.contracts?.enabled ?? false,
             cost_value_planner: features?.cost_value_planner?.enabled ?? false,
+            team_performance: features?.team_performance?.enabled ?? false,
           },
           commercialEntitlement: features?.package ?? null, createdAt: u.createdAt.toISOString() };
       }),

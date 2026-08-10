@@ -7,7 +7,7 @@ import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
   BookOpen, Send, RefreshCw, CalendarDays, GitMerge, Gauge,
-  ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness, PanelLeftOpen
+  ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness, PanelLeftOpen, UsersRound
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -136,7 +136,8 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
   const canUseBudget = superAdmin || packageEnabled || entitledUser?.commercialFeatures?.budget === true;
   const canUseContracts = superAdmin || packageEnabled || entitledUser?.commercialFeatures?.contracts === true;
   const canUsePlanner = superAdmin || packageEnabled || entitledUser?.commercialFeatures?.cost_value_planner === true;
-  const canUseCommercial = entitledUser?.commercialAccess === true || canUseBudget || canUseContracts || canUsePlanner;
+  const canUseTeamPerformance = superAdmin || packageEnabled || entitledUser?.commercialFeatures?.team_performance === true;
+  const canUseCommercial = entitledUser?.commercialAccess === true || canUseBudget || canUseContracts || canUsePlanner || canUseTeamPerformance;
   const [, navigate] = useLocation();
   const [showSyncAgent, setShowSyncAgent] = useState(false);
   const [collapsed, setCollapsed] = useState(false);
@@ -201,6 +202,13 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
           labelEn: "Cost & Value Planner", labelEs: "Planificador de Costos y Valor",
           href: `/projects/${projectId}/financial/apu`,
           icon: Calculator,
+        }] : []),
+        ...(canUseTeamPerformance ? [{
+          id: "team-performance",
+          kind: "link" as const,
+          labelEn: "Team Performance & Skills", labelEs: "Rendimiento y Habilidades",
+          href: `/projects/${projectId}/commercial/team-performance`,
+          icon: UsersRound,
         }] : []),
       ],
     },

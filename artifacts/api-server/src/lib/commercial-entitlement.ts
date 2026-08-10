@@ -10,7 +10,7 @@ export type CommercialEntitlementState = {
   occurredAt: string | null;
 };
 
-export const COMMERCIAL_FEATURES = ["package", "budget", "contracts", "cost_value_planner"] as const;
+export const COMMERCIAL_FEATURES = ["package", "budget", "contracts", "cost_value_planner", "team_performance"] as const;
 export type CommercialFeature = (typeof COMMERCIAL_FEATURES)[number];
 export type EffectiveCommercialAccess = Record<CommercialFeature, boolean> & {
   any: boolean;
@@ -80,23 +80,26 @@ export async function commercialEntitlementForUser(userId: number, client: Query
 }
 
 export async function effectiveCommercialAccessForUser(userId: number, client: Queryable = pool): Promise<EffectiveCommercialAccess> {
-  const [packageState, budgetState, contractsState, plannerState] = await Promise.all([
+  const [packageState, budgetState, contractsState, plannerState, teamPerformanceState] = await Promise.all([
     commercialEntitlementForUser(userId, client, "package"),
     commercialEntitlementForUser(userId, client, "budget"),
     commercialEntitlementForUser(userId, client, "contracts"),
     commercialEntitlementForUser(userId, client, "cost_value_planner"),
+    commercialEntitlementForUser(userId, client, "team_performance"),
   ]);
   const packageEnabled = packageState.enabled;
   const budget = packageEnabled || budgetState.enabled;
   const contracts = packageEnabled || contractsState.enabled;
   const costValuePlanner = packageEnabled || plannerState.enabled;
+  const teamPerformance = packageEnabled || teamPerformanceState.enabled;
   return {
     package: packageEnabled,
     budget,
     contracts,
     cost_value_planner: costValuePlanner,
-    any: budget || contracts || costValuePlanner,
-    fullActivation: budget && contracts && costValuePlanner,
+    team_performance: teamPerformance,
+    any: budget || contracts || costValuePlanner || teamPerformance,
+    fullActivation: budget && contracts && costValuePlanner && teamPerformance,
   };
 }
 

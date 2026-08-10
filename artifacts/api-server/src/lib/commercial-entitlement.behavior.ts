@@ -15,8 +15,8 @@ const contracts = fs.readFileSync(path.join(root, "artifacts/api-server/src/lib/
 
 const checks: string[] = [];
 assert.match(migration, /FROM users u ON CONFLICT\(event_key\) DO NOTHING/);
-for (const feature of ["package", "budget", "contracts", "cost_value_planner"]) assert.match(migration, new RegExp(`"${feature}"`));
-checks.push("all users existing at migration time are idempotently enabled for the package and three Commercial products");
+for (const feature of ["package", "budget", "contracts", "cost_value_planner", "team_performance"]) assert.match(migration, new RegExp(`"${feature}"`));
+checks.push("all users existing at migration time are idempotently enabled for the package and four Commercial products");
 assert.match(migration, /ON CONFLICT\(event_key\) DO NOTHING/);
 assert.match(migration, /BEFORE UPDATE OR DELETE/);
 assert.match(migration, /pg_advisory_xact_lock/);
@@ -25,10 +25,11 @@ assert.match(migration, /effectiveCommercialAccessForUser/);
 assert.match(migration, /packageEnabled \|\| budgetState\.enabled/);
 assert.match(migration, /packageEnabled \|\| contractsState\.enabled/);
 assert.match(migration, /packageEnabled \|\| plannerState\.enabled/);
+assert.match(migration, /packageEnabled \|\| teamPerformanceState\.enabled/);
 checks.push("the Commercial package grants every feature while individual feature toggles remain independently effective");
 assert.match(admin, /commercialEnabled/);
 assert.match(admin, /\/admin\/users\/:id\/commercial-entitlement.*isSuperAdminMiddleware/);
-for (const label of ["Commercial package", "Project Budget", "Contracts", "Cost & Value Planner"]) assert.match(totalControl, new RegExp(label.replace("&", "&")));
+for (const label of ["Commercial package", "Project Budget", "Contracts", "Cost & Value Planner", "Team Performance & Skills"]) assert.match(totalControl, new RegExp(label.replace("&", "&")));
 checks.push("Total Control users API exposes and controls Commercial entitlement through super-admin only");
 assert.doesNotMatch(financial, /FIN_PROJECT_BINDING_REQUIRED/);
 assert.match(projectScope, /Current active project membership is required/);
