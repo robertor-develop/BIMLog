@@ -8059,6 +8059,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a83ba9b35838fb0e69996eb0629c75d25db2498f5d0421c211ac85d3730361bb"
+    },
+    {
+      "taskId": "project-controls-dashboard-20260810",
+      "reviewedThroughCommit": "ccabff88d58863ba5877e59c0b86fc65eaa3f4e2",
+      "reviewedAt": "2026-08-10T17:06:15-04:00",
+      "status": "local_project_controls_validated",
+      "captureTiming": "same_project_controls_task",
+      "summary": "Adds a bilingual Project Controls Dashboard with weighted physical progress, operational CPI, deterministic completion forecasts, entitlement-safe financial visibility, scoped filters, early warnings, CSV and print exports, persistent day/night mode, and recoverable collapsed navigation.",
+      "workstreams": [
+        "job-operations",
+        "project-controls",
+        "forecasting",
+        "commercial-entitlements",
+        "bilingual-ui",
+        "help-center"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership hierarchy, or cross-company doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, testing, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows existing deterministic calculation, fail-closed data, bilingual, responsive, and build standards."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Project controls advance the accepted Intake-to-operations workflow without changing product doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the project-controls behavior proof and user-interface component."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior, cached runtime, browser bridge, or provider integration changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "CSV and browser-print actions use the existing application presentation and do not change a governed report template."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved future-build ordering or preserved backlog item is changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence, incident record, or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "073c146013e4d67efbe328dd1872cd96621782ce983aeac2b4445240e41c262e"
     }
   ]
 }
