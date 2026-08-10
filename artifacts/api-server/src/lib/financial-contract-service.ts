@@ -110,10 +110,38 @@ async function validateFile(client: Client, projectId: number, value: unknown, r
   return id;
 }
 
+async function pinContractItemApuSnapshots(client: Client, projectId: number, lines: ContractLineInput[]) {
+  const versions = [...new Set(lines.flatMap((line) => line.contractItem.apuPlanVersion == null ? [] : [line.contractItem.apuPlanVersion]))];
+  const rows = versions.length === 0 ? [] : (await client.query(
+    `SELECT version,content,evaluation,content_fingerprint FROM generic_cost_value_plan_versions WHERE project_id=$1 AND version=ANY($2::integer[])`,
+    [projectId, versions],
+  )).rows;
+  const byVersion = new Map(rows.map((row: any) => [Number(row.version), row]));
+  return lines.map((line) => {
+    if (line.contractItem.industryTemplate === "legacy") return line;
+    const version = line.contractItem.apuPlanVersion;
+    if (version == null) throw new FinancialControlError(400, "CONTRACT_ITEM_APU_REQUIRED", "Each new Contract Item requires a saved APU version.");
+    const source = byVersion.get(version);
+    if (!source) throw new FinancialControlError(400, "CONTRACT_ITEM_APU_INVALID", "The selected APU version does not exist in this project.");
+    const unitRate = exactPositiveAmount(String(source.content?.sellingPrice ?? ""), "apu.sellingPrice");
+    if (scaledSignedDecimal(unitRate) !== scaledSignedDecimal(line.contractItem.unitRate))
+      throw new FinancialControlError(400, "CONTRACT_ITEM_APU_RATE_MISMATCH", "Contract Item Unit Rate must equal the selected APU selling price.");
+    return {
+      ...line,
+      contractItem: {
+        ...line.contractItem,
+        apuFingerprint: String(source.content_fingerprint),
+        apuContent: source.content as Record<string, unknown>,
+        apuEvaluation: source.evaluation as Record<string, unknown>,
+      },
+    };
+  });
+}
+
 async function insertSovLines(client: Client, versionId: string, lines: ContractLineInput[]) {
   for (const line of lines) await client.query(
-    `INSERT INTO financial_contract_sov_lines(id,contract_version_id,stable_line_id,budget_snapshot_line_id,project_cost_node_id,schedule_item_placement_id,description,amount,sort_order) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`,
-    [uuid(), versionId, line.stableLineId, line.budgetSnapshotLineId, line.projectCostNodeId, line.scheduleItemPlacementId, line.description, line.amount, line.sortOrder],
+    `INSERT INTO financial_contract_sov_lines(id,contract_version_id,stable_line_id,budget_snapshot_line_id,project_cost_node_id,schedule_item_placement_id,description,amount,contract_item_snapshot,sort_order) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb,$10)`,
+    [uuid(), versionId, line.stableLineId, line.budgetSnapshotLineId, line.projectCostNodeId, line.scheduleItemPlacementId, line.description, line.amount, JSON.stringify(line.contractItem), line.sortOrder],
   );
 }
 
@@ -161,10 +189,11 @@ export async function createContractDraftWithClient(input: CreateContractDraftIn
   const counterpartyName = boundedText(input.counterpartyName, "counterpartyName", 1, 200);
   const title = boundedText(input.title, "title", 1, 300), currency = contractCurrency(input.currency);
   const originalValue = exactPositiveAmount(input.originalValue, "originalValue");
-  const lines = normalizeContractLines(input.lines);
+  let lines = normalizeContractLines(input.lines);
   assertReconciledTotal(lines, originalValue, "the original contract value");
   const budgetSnapshotId = boundedText(input.budgetSnapshotId, "budgetSnapshotId", 3, 100);
   const auth = await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.prepare", operation: "prepare", client });
+  lines = await pinContractItemApuSnapshots(client, projectId, lines);
   await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, [`financial-contract:${projectId}:${perspective}:${legalNumber}`]);
   let contractId = input.contractId == null ? uuid() : boundedText(input.contractId, "contractId", 3, 100);
   let root = (await client.query(`SELECT * FROM financial_contracts WHERE id=$1 AND project_id=$2`, [contractId, projectId])).rows[0];
@@ -429,7 +458,7 @@ export async function getContractWorkspace(input: { actorUserId: number; project
     const lines = await pool.query(`SELECT l.*,b.project_code,b.project_name,b.amount budget_amount,s.source_type schedule_source_type,s.source_id schedule_source_id FROM financial_contract_sov_lines l JOIN approved_budget_snapshot_lines b ON b.id=l.budget_snapshot_line_id LEFT JOIN schedule_item_placements s ON s.id=l.schedule_item_placement_id WHERE l.contract_version_id=$1 ORDER BY l.sort_order,l.stable_line_id`, [contracts[0].versionId]);
     const amendments = await pool.query(`SELECT a.id,a.bimlog_id,a.legal_number,v.id version_id,v.version,v.status,v.title,v.currency,v.amount_delta,v.content_fingerprint,v.revision,v.approved_at,v.executed_at FROM financial_contract_amendments a JOIN LATERAL(SELECT * FROM financial_contract_amendment_versions WHERE amendment_id=a.id ORDER BY version DESC LIMIT 1)v ON true WHERE a.contract_id=$1 ORDER BY a.created_at`, [contractId]);
     const historyRows = await pool.query(`SELECT event_type,before_state,after_state,reason_code,evidence,occurred_at FROM financial_contract_history WHERE contract_id=$1 ORDER BY occurred_at,id`, [contractId]);
-    detail = { ...contracts[0], lines: lines.rows.map((r: any) => ({ stableLineId: r.stable_line_id, budgetSnapshotLineId: r.budget_snapshot_line_id, projectCostNodeId: r.project_cost_node_id, projectCode: r.project_code, projectName: r.project_name, description: r.description, amount: exactPositiveAmount(String(r.amount)), budgetAmount: exactDelta(String(r.budget_amount)), schedule: r.schedule_item_placement_id == null ? null : { placementId: Number(r.schedule_item_placement_id), sourceType: r.schedule_source_type, sourceId: Number(r.schedule_source_id) } })), amendments: amendments.rows.map((r: any) => ({ id: r.id, bimlogId: r.bimlog_id, legalNumber: r.legal_number, versionId: r.version_id, version: Number(r.version), status: r.status, title: r.title, currency: r.currency, amountDelta: exactDelta(String(r.amount_delta)), contentFingerprint: r.content_fingerprint, revision: Number(r.revision), approvedAt: r.approved_at ? iso(r.approved_at) : null, executedAt: r.executed_at ? iso(r.executed_at) : null })), history: historyRows.rows.map((r: any) => ({ eventType: r.event_type, beforeState: r.before_state, afterState: r.after_state, reasonCode: r.reason_code, evidence: r.evidence, occurredAt: iso(r.occurred_at) })) };
+    detail = { ...contracts[0], lines: lines.rows.map((r: any) => ({ stableLineId: r.stable_line_id, budgetSnapshotLineId: r.budget_snapshot_line_id, projectCostNodeId: r.project_cost_node_id, projectCode: r.project_code, projectName: r.project_name, description: r.description, amount: exactPositiveAmount(String(r.amount)), contractItem: r.contract_item_snapshot ?? {}, budgetAmount: exactDelta(String(r.budget_amount)), schedule: r.schedule_item_placement_id == null ? null : { placementId: Number(r.schedule_item_placement_id), sourceType: r.schedule_source_type, sourceId: Number(r.schedule_source_id) } })), amendments: amendments.rows.map((r: any) => ({ id: r.id, bimlogId: r.bimlog_id, legalNumber: r.legal_number, versionId: r.version_id, version: Number(r.version), status: r.status, title: r.title, currency: r.currency, amountDelta: exactDelta(String(r.amount_delta)), contentFingerprint: r.content_fingerprint, revision: Number(r.revision), approvedAt: r.approved_at ? iso(r.approved_at) : null, executedAt: r.executed_at ? iso(r.executed_at) : null })), history: historyRows.rows.map((r: any) => ({ eventType: r.event_type, beforeState: r.before_state, afterState: r.after_state, reasonCode: r.reason_code, evidence: r.evidence, occurredAt: iso(r.occurred_at) })) };
   }
   const totals = contracts.reduce((acc, c) => { if (c.status === "executed") acc = acc + scaledSignedDecimal(c.currentCommitment); return acc; }, 0n);
   return { projectId, boundary: { operationalOnly: true, accounting: false, payments: false, externalPortal: false, automaticAi: false }, totals: { executedCommitments: decimalFromScaled(totals), currencies: [...new Set(contracts.map((c) => c.currency))] }, contracts, detail };

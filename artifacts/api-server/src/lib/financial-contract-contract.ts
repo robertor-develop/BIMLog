@@ -14,8 +14,27 @@ export type ContractLineInput = {
   scheduleItemPlacementId: number | null;
   description: string;
   amount: string;
+  contractItem: ContractItemSnapshot;
   sortOrder: number;
 };
+
+export type ContractItemSnapshot = {
+  displayName: string;
+  quantity: string;
+  unit: string;
+  unitRate: string;
+  contractValue: string;
+  apuPlanVersion: number | null;
+  apuFingerprint: string | null;
+  apuContent: Record<string, unknown> | null;
+  apuEvaluation: Record<string, unknown> | null;
+  workflowTemplate: string;
+  industryTemplate: string;
+  status: "draft";
+};
+
+const exactProduct = (quantity: string, unitRate: string) =>
+  decimalFromScaled((scaledDecimal(quantity) * scaledDecimal(unitRate) + 500_000n) / 1_000_000n);
 
 const oneOf = <T extends readonly string[]>(value: unknown, values: T, field: string): T[number] => {
   const text = String(value ?? "");
@@ -42,13 +61,43 @@ export function normalizeContractLines(input: unknown, signed = false): Contract
     const schedule = r.scheduleItemPlacementId == null || r.scheduleItemPlacementId === "" ? null : Number(r.scheduleItemPlacementId);
     if (schedule != null && (!Number.isSafeInteger(schedule) || schedule <= 0))
       throw new FinancialControlError(400, "CONTRACT_SCHEDULE_LINK_INVALID", "Schedule links must identify a canonical project schedule item.");
+    const amount = signed ? exactDelta(r.amount ?? r.amountDelta) : exactPositiveAmount(r.amount);
+    const item = r.contractItem && typeof r.contractItem === "object" && !Array.isArray(r.contractItem)
+      ? r.contractItem as Record<string, unknown>
+      : null;
+    const quantity = item ? exactPositiveAmount(item.quantity, "contractItem.quantity") : "1";
+    const unitRate = item ? exactPositiveAmount(item.unitRate, "contractItem.unitRate") : amount;
+    if (item && scaledDecimal(quantity) <= 0n)
+      throw new FinancialControlError(400, "CONTRACT_ITEM_QUANTITY_INVALID", "Contract Item quantity must be greater than zero.");
+    if (item && scaledDecimal(unitRate) <= 0n)
+      throw new FinancialControlError(400, "CONTRACT_ITEM_RATE_INVALID", "Contract Item APU unit rate must be greater than zero.");
+    const contractValue = signed ? amount : exactProduct(quantity, unitRate);
+    if (!signed && scaledDecimal(contractValue) !== scaledDecimal(amount))
+      throw new FinancialControlError(400, "CONTRACT_ITEM_VALUE_MISMATCH", "Contract Item value must equal Quantity multiplied by Unit Rate.");
+    const apuPlanVersion = item?.apuPlanVersion == null || item.apuPlanVersion === "" ? null : Number(item.apuPlanVersion);
+    if (apuPlanVersion != null && (!Number.isSafeInteger(apuPlanVersion) || apuPlanVersion <= 0))
+      throw new FinancialControlError(400, "CONTRACT_ITEM_APU_INVALID", "Contract Item APU version must be a positive saved version.");
     return {
       stableLineId,
       budgetSnapshotLineId: boundedText(r.budgetSnapshotLineId, "budgetSnapshotLineId", 3, 100),
       projectCostNodeId: boundedText(r.projectCostNodeId, "projectCostNodeId", 3, 100),
       scheduleItemPlacementId: schedule,
       description: boundedText(r.description, "description", 1, 500),
-      amount: signed ? exactDelta(r.amount ?? r.amountDelta) : exactPositiveAmount(r.amount),
+      amount,
+      contractItem: {
+        displayName: item ? boundedText(item.displayName ?? r.description, "contractItem.displayName", 1, 300) : boundedText(r.description, "description", 1, 300),
+        quantity,
+        unit: item ? boundedText(item.unit, "contractItem.unit", 1, 40) : "LS",
+        unitRate,
+        contractValue,
+        apuPlanVersion,
+        apuFingerprint: null,
+        apuContent: null,
+        apuEvaluation: null,
+        workflowTemplate: item ? boundedText(item.workflowTemplate ?? "generic", "contractItem.workflowTemplate", 1, 100) : "legacy",
+        industryTemplate: item ? boundedText(item.industryTemplate ?? "generic", "contractItem.industryTemplate", 1, 100) : "legacy",
+        status: "draft",
+      },
       sortOrder: Number.isSafeInteger(Number(r.sortOrder)) ? Number(r.sortOrder) : index,
     };
   });

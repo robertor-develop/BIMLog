@@ -55,6 +55,15 @@ throws(() => normalizeContractLines([...lines, { ...lines[0] }]), "CONTRACT_LINE
 check("stable SOV identities unique", "duplicate retry cannot duplicate lines");
 throws(() => normalizeContractLines([{ ...lines[0], scheduleItemPlacementId: -1 }]), "CONTRACT_SCHEDULE_LINK_INVALID");
 check("Schedule link identifier bounded", "positive canonical placement only");
+const contractItem = normalizeContractLines([{ stableLineId: "ITEM-1", budgetSnapshotLineId: "snapshot-line-1", projectCostNodeId: "project-node-1", description: "Basement Composite", amount: "5531.40", sortOrder: 0, contractItem: { displayName: "Basement Composite", quantity: "180", unit: "Hours", unitRate: "30.73", apuPlanVersion: 2, workflowTemplate: "bim-submittal", industryTemplate: "bim-services" } }])[0];
+assert.equal(contractItem.contractItem.contractValue, "5531.4");
+assert.equal(contractItem.contractItem.displayName, "Basement Composite");
+assert.equal(contractItem.contractItem.unit, "Hours");
+check("Contract Item exact value", "180 Hours multiplied by 30.73 equals 5531.40 without floating arithmetic");
+throws(() => normalizeContractLines([{ stableLineId: "ITEM-BAD", budgetSnapshotLineId: "snapshot-line-1", projectCostNodeId: "project-node-1", description: "Mismatch", amount: "1", sortOrder: 0, contractItem: { displayName: "Mismatch", quantity: "2", unit: "Hours", unitRate: "2", apuPlanVersion: 1, workflowTemplate: "bim-submittal", industryTemplate: "bim-services" } }]), "CONTRACT_ITEM_VALUE_MISMATCH");
+check("Contract Item mismatch denied", "quantity multiplied by unit rate is authoritative");
+throws(() => normalizeContractLines([{ stableLineId: "ITEM-ZERO", budgetSnapshotLineId: "snapshot-line-1", projectCostNodeId: "project-node-1", description: "Zero quantity", amount: "0", sortOrder: 0, contractItem: { displayName: "Zero quantity", quantity: "0", unit: "Hours", unitRate: "30.73", apuPlanVersion: 1, workflowTemplate: "bim-submittal", industryTemplate: "bim-services" } }]), "CONTRACT_ITEM_QUANTITY_INVALID");
+check("Contract Item zero quantity denied", "items must represent a positive measurable scope");
 assert.deepEqual(safeCommercialMetadata({ retainage: "10% metadata", tax: null, bond: "on file", insurance: "on file", calculation: "forbidden" }), { retainage: "10% metadata", tax: null, bond: "on file", insurance: "on file" });
 check("commercial fields metadata only", "no retainage/tax calculation field");
 
@@ -65,6 +74,7 @@ assert.doesNotMatch(migration, /\bDROP\b/i); check("migration additive", "no DRO
 assert.match(migration, /append-only/); assert.match(migration, /immutable/); check("database immutability triggers", "history and executed records protected");
 assert.match(migration, /financial line does not match pinned budget snapshot and structure/); check("snapshot and structure pins database enforced", "line-scope trigger");
 assert.match(migration, /schedule relationship is outside the financial project/); check("Schedule tenancy database enforced", "link-only same-project guard");
+assert.match(migration, /contract_item_snapshot jsonb NOT NULL DEFAULT/); check("Contract Item snapshot additive", "existing SOV rows remain compatible while new items freeze metadata");
 assert.match(service, /pg_advisory_xact_lock/); assert.match(service, /FOR UPDATE/); check("concurrency serialized", "advisory and row locks");
 assert.match(service, /ROLLBACK/); check("atomic rollback", "single transaction helper");
 assert.match(service, /CONTRACT_APPROVAL_EXECUTION_SEPARATION/); check("approver cannot attest execution", "second actor enforced");
@@ -76,6 +86,7 @@ assert.doesNotMatch(service + routes, /\b(?:openai|anthropic|bank_account|bank_t
 assert.match(routes, /singleFileUpload/); assert.match(routes, /10 \* 1024 \* 1024/); check("central bounded upload reused", "Security Batch A middleware");
 assert.match(browser, /@media\(max-width:720px\)/); assert.match(browser, /overflow-x:hidden/); check("390px responsive control", "mobile overflow prevented");
 assert.match(browser, /Contratos y Compromisos/); assert.match(browser, /Attest signed execution/); check("bilingual execution UI", "English desktop and Spanish mobile strings");
+assert.match(browser, /Quantity × the selected saved APU unit rate/); assert.match(browser, /Create contract with frozen APU items/); check("Contract Item builder visible", "quantity, unit, rate, APU snapshot, and BIM workflow are user-facing");
 
 const exportData: any = { project: { name: "Project", code: "P-1", companyName: "Company" }, contract: { id: "c", bimlogId: "BIMLOG-CON-c", legalNumber: "SC-001", title: "Concrete", status: "executed", counterpartyName: "Internal Test Trade", perspective: "downstream", contractType: "subcontract", originalValue: "100", currency: "USD", executedAmendmentTotal: "-1.000001", currentCommitment: "98.999999", versionId: "v", version: 1, contentFingerprint: "a".repeat(64), lines: [{ stableLineId: "SOV-1", projectCode: "03", projectName: "Concrete", description: "Foundations", amount: "100", budgetAmount: "120", schedule: null }], amendments: [{ legalNumber: "A-1", title: "Credit", version: 1, status: "executed", amountDelta: "-1.000001", currency: "USD", approvedAt: now.toISOString(), executedAt: now.toISOString() }] }, generatedAt: now.toISOString() };
 const pdf = await buildContractPdf(exportData), parsed = await new PDFParse({ data: pdf }).getText(); assert.match(parsed.text, /Operational contract and commitment record/i); assert.match(parsed.text, /SC-001/); assert.match(parsed.text, /98\.999999/);

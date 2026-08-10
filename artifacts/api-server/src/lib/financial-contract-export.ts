@@ -192,13 +192,15 @@ export async function buildContractPdf(data: ContractExport): Promise<Buffer> {
   doc.text(`${safe(data.contract.legalNumber)} | ${safe(data.contract.title)} | ${safe(data.contract.status)}`);
   doc.text(`${safe(data.contract.counterpartyName)} | ${safe(data.contract.perspective)} | ${safe(data.contract.contractType)}`);
   doc.text(`Original: ${data.contract.originalValue} ${data.contract.currency} | Executed amendments: ${data.contract.executedAmendmentTotal} | Current commitment: ${data.contract.currentCommitment}`).moveDown();
-  doc.fontSize(12).text("Schedule of Values").fontSize(9);
+  doc.fontSize(12).text("Contract Items / Schedule of Values").fontSize(9);
   for (const line of data.contract.lines) {
     if (doc.y > 680) {
       doc.addPage();
       drawHeader();
     }
-    doc.text(`${safe(line.projectCode)} — ${safe(line.description)}`, 42, doc.y, { continued: true, width: 400 }).text(`${line.amount} ${data.contract.currency}`, { align: "right" });
+    const item = (line as any).contractItem ?? {};
+    doc.text(`${safe(line.projectCode)} — ${safe(item.displayName, line.description)}`, 42, doc.y, { continued: true, width: 400 }).text(`${line.amount} ${data.contract.currency}`, { align: "right" });
+    doc.fontSize(7).fillColor("#64748b").text(`${safe(item.quantity, "1")} ${safe(item.unit, "LS")} × ${safe(item.unitRate, line.amount)} | APU ${item.apuPlanVersion ? `v${item.apuPlanVersion}` : "legacy"} | ${safe(item.workflowTemplate, "legacy")}`, 58, doc.y, { width: 470 }).fontSize(9).fillColor("#111827");
   }
   if (data.contract.amendments.length) {
     doc.moveDown().fontSize(12).text("Amendments").fontSize(9);
@@ -220,11 +222,11 @@ export async function buildContractPdf(data: ContractExport): Promise<Buffer> {
 
 export function buildContractXlsx(data: ContractExport): Buffer {
   const wb = XLSX.utils.book_new();
-  const sov = XLSX.utils.json_to_sheet(data.contract.lines.map((line: any) => ({ "SOV Line": safe(line.stableLineId), "Cost Code": safe(line.projectCode), "Cost Name": safe(line.projectName), Description: safe(line.description), Amount: exactPositiveAmount(line.amount), Currency: data.contract.currency, "Budget Amount": exactDelta(line.budgetAmount), "Schedule Item": line.schedule ? `${safe(line.schedule.sourceType)}:${line.schedule.sourceId}` : "" })), canonicalSpreadsheetWriteOptions({}));
+  const sov = XLSX.utils.json_to_sheet(data.contract.lines.map((line: any) => ({ "Contract Item ID": safe(line.stableLineId), "Cost Code": safe(line.projectCode), "Cost Name": safe(line.projectName), "Display Name": safe(line.contractItem?.displayName, line.description), Quantity: safe(line.contractItem?.quantity, "1"), Unit: safe(line.contractItem?.unit, "LS"), "Unit Rate": safe(line.contractItem?.unitRate, line.amount), "Contract Value": exactPositiveAmount(line.amount), Currency: data.contract.currency, "APU Version": line.contractItem?.apuPlanVersion ?? "Legacy", "APU Fingerprint": safe(line.contractItem?.apuFingerprint), "Workflow Template": safe(line.contractItem?.workflowTemplate, "legacy"), "Industry Template": safe(line.contractItem?.industryTemplate, "legacy"), "Budget Amount": exactDelta(line.budgetAmount), "Schedule Item": line.schedule ? `${safe(line.schedule.sourceType)}:${line.schedule.sourceId}` : "" })), canonicalSpreadsheetWriteOptions({}));
   const amendments = XLSX.utils.json_to_sheet(data.contract.amendments.map((a: any) => ({ Number: safe(a.legalNumber), Title: safe(a.title), Version: a.version, Status: safe(a.status), Delta: exactDelta(a.amountDelta), Currency: a.currency, Approved: a.approvedAt ?? "", Executed: a.executedAt ?? "" })), canonicalSpreadsheetWriteOptions({}));
   const info = XLSX.utils.aoa_to_sheet([["Contract & Commitment Record"], ["Project", safe(data.project.name)], ["Project Code", safe(data.project.code)], ["Company", safe(data.project.companyName)], ["BIMLog ID", safe(data.contract.bimlogId)], ["Legal Number", safe(data.contract.legalNumber)], ["Perspective", data.contract.perspective], ["Type", data.contract.contractType], ["Counterparty", safe(data.contract.counterpartyName)], ["Status", data.contract.status], ["Currency", data.contract.currency], ["Original Value", data.contract.originalValue], ["Executed Amendment Total", data.contract.executedAmendmentTotal], ["Current Commitment", data.contract.currentCommitment], ["Content Fingerprint", data.contract.contentFingerprint], ["Generated", data.generatedAt], ["Boundary", "Operational record only; no accounting posting, invoice payment, money movement, or bank behavior."]], canonicalSpreadsheetWriteOptions({}));
-  sov["!autofilter"] = { ref: sov["!ref"] ?? "A1:H1" }; sov["!cols"] = [{wch:16},{wch:16},{wch:24},{wch:42},{wch:16},{wch:10},{wch:16},{wch:20}];
-  XLSX.utils.book_append_sheet(wb, sov, "Schedule of Values"); XLSX.utils.book_append_sheet(wb, amendments, "Amendments"); XLSX.utils.book_append_sheet(wb, info, "Contract Information");
+  sov["!autofilter"] = { ref: sov["!ref"] ?? "A1:O1" }; sov["!cols"] = [{wch:18},{wch:14},{wch:22},{wch:34},{wch:12},{wch:12},{wch:14},{wch:16},{wch:10},{wch:12},{wch:20},{wch:20},{wch:18},{wch:16},{wch:20}];
+  XLSX.utils.book_append_sheet(wb, sov, "Contract Items"); XLSX.utils.book_append_sheet(wb, amendments, "Amendments"); XLSX.utils.book_append_sheet(wb, info, "Contract Information");
   const output: Buffer = XLSX.write(wb, canonicalSpreadsheetWriteOptions({ type: "buffer", bookType: "xlsx", compression: true }));
   const zip = new AdmZip(output), entry = zip.getEntry("xl/worksheets/sheet1.xml");
   if (!entry) throw new FinancialControlError(500, "CONTRACT_EXPORT_SHEET_MISSING", "Contract worksheet could not be finalized.");

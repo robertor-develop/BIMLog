@@ -201,6 +201,10 @@ export const financialContractSovLinesTable = pgTable(
     scheduleItemPlacementId: integer("schedule_item_placement_id"),
     description: text("description").notNull(),
     amount: numeric("amount", { precision: 30, scale: 6 }).notNull(),
+    contractItemSnapshot: jsonb("contract_item_snapshot")
+      .$type<Record<string, unknown>>()
+      .notNull()
+      .default({}),
     sortOrder: integer("sort_order").notNull(),
   },
   (t) => [
