@@ -52,6 +52,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/config.ts
 - artifacts/api-server/src/routes/connections.ts
 - artifacts/api-server/src/routes/contact.ts
+- artifacts/api-server/src/routes/contract-item-workflows.ts
 - artifacts/api-server/src/routes/conventions.ts
 - artifacts/api-server/src/routes/coordination.ts
 - artifacts/api-server/src/routes/coordinator-actions.ts
@@ -133,6 +134,7 @@ It changes only when the code structure or curated architectural facts change.
 - financialApuRouter
 - coordinatorActionsRouter
 - jobIntakeRouter
+- contractItemWorkflowsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -153,6 +155,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
 - artifacts/api-server/src/lib/commercial-entitlement.ts
 - artifacts/api-server/src/lib/commercial-project-scope.ts
+- artifacts/api-server/src/lib/contract-item-workflow-contract.ts
+- artifacts/api-server/src/lib/contract-item-workflow-migration.ts
+- artifacts/api-server/src/lib/contract-item-workflow-service.ts
+- artifacts/api-server/src/lib/contract-item-workflow.behavior.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
 - artifacts/api-server/src/lib/coordinator-bulk-action-migration.ts
 - artifacts/api-server/src/lib/coordinator-bulk-actions.ts
@@ -277,6 +283,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/company_profiles.ts
 - lib/db/src/schema/config.ts
 - lib/db/src/schema/contact-submissions.ts
+- lib/db/src/schema/contract-item-workflows.ts
 - lib/db/src/schema/conventions.ts
 - lib/db/src/schema/coordination_intake_events.ts
 - lib/db/src/schema/coordinator-bulk-operations.ts

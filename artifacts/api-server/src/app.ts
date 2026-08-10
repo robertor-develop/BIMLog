@@ -33,6 +33,7 @@ import { startCommercialEntitlementMigration } from "./lib/commercial-entitlemen
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { startFinancialContractMigration } from "./lib/financial-contract-migration";
 import { startJobIntakeMigration, waitForJobIntakeMigration } from "./lib/job-intake-migration";
+import { startContractItemWorkflowMigration } from "./lib/contract-item-workflow-migration";
 import {
   startGenericApuPersistenceMigration,
   waitForGenericApuPersistenceMigration,
@@ -428,6 +429,7 @@ app.use("/api/v1", router);
     await startFinancialControlMigration();
     await startFinancialBudgetMigration();
     await startFinancialContractMigration();
+    await startContractItemWorkflowMigration();
     console.log("[migration] financial cost structure, budget, and contract tables ensured");
   } catch {
     console.error("[migration] financial budget migration failed");
