@@ -159,6 +159,34 @@ CREATE TABLE IF NOT EXISTS job_activation_task_deliverables(
   CONSTRAINT job_activation_deliverable_type_chk CHECK(deliverable_type IN('shop_drawing','submittal','deliverable','supporting')),
   CONSTRAINT job_activation_task_deliverable_uidx UNIQUE(task_id,file_id,deliverable_type)
 );
+CREATE TABLE IF NOT EXISTS job_activation_work_packages(
+  id text PRIMARY KEY,
+  intake_id text NOT NULL REFERENCES job_intakes(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  work_item_id text NOT NULL REFERENCES job_activation_work_items(id),
+  package_code text NOT NULL,
+  title text NOT NULL,
+  description text NOT NULL DEFAULT '',
+  package_type text NOT NULL,
+  status text NOT NULL DEFAULT 'draft',
+  responsible_user_id integer REFERENCES users(id),
+  due_date date,
+  version integer NOT NULL DEFAULT 1,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_work_package_type_chk CHECK(package_type IN('shop_drawing','submittal','mixed','deliverable')),
+  CONSTRAINT job_activation_work_package_status_chk CHECK(status IN('draft','internal_review','submitted','returned','approved','cancelled')),
+  CONSTRAINT job_activation_work_package_version_chk CHECK(version>0),
+  CONSTRAINT job_activation_work_package_code_uidx UNIQUE(project_id,package_code)
+);
+CREATE TABLE IF NOT EXISTS job_activation_work_package_tasks(
+  package_id text NOT NULL REFERENCES job_activation_work_packages(id),
+  task_id text NOT NULL REFERENCES job_activation_tasks(id),
+  linked_by_id integer NOT NULL REFERENCES users(id),
+  linked_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_work_package_task_uidx UNIQUE(package_id,task_id)
+);
 CREATE TABLE IF NOT EXISTS job_activation_operation_events(
   id text PRIMARY KEY,
   project_id integer NOT NULL REFERENCES projects(id),
@@ -170,6 +198,7 @@ CREATE TABLE IF NOT EXISTS job_activation_operation_events(
   evidence jsonb NOT NULL DEFAULT '{}'::jsonb,
   created_at timestamptz NOT NULL DEFAULT now()
 );
+ALTER TABLE job_activation_operation_events ADD COLUMN IF NOT EXISTS package_id text REFERENCES job_activation_work_packages(id);
 CREATE INDEX IF NOT EXISTS job_intake_company_status_idx ON job_intakes(company_id,status,updated_at DESC);
 CREATE INDEX IF NOT EXISTS job_intake_document_active_idx ON job_intake_documents(intake_id,created_at) WHERE removed_at IS NULL;
 CREATE INDEX IF NOT EXISTS job_intake_event_idx ON job_intake_events(intake_id,created_at,id);
@@ -179,6 +208,9 @@ CREATE INDEX IF NOT EXISTS job_activation_resource_work_item_idx ON job_activati
 CREATE INDEX IF NOT EXISTS job_activation_time_task_idx ON job_activation_time_entries(task_id,work_date,created_at);
 CREATE INDEX IF NOT EXISTS job_activation_time_user_idx ON job_activation_time_entries(project_id,user_id,work_date);
 CREATE INDEX IF NOT EXISTS job_activation_deliverable_task_idx ON job_activation_task_deliverables(task_id,linked_at);
+CREATE INDEX IF NOT EXISTS job_activation_work_package_project_idx ON job_activation_work_packages(project_id,status,due_date,updated_at DESC);
+CREATE INDEX IF NOT EXISTS job_activation_work_package_item_idx ON job_activation_work_packages(work_item_id,created_at,id);
+CREATE INDEX IF NOT EXISTS job_activation_work_package_task_idx ON job_activation_work_package_tasks(task_id,package_id);
 CREATE INDEX IF NOT EXISTS job_activation_operation_event_idx ON job_activation_operation_events(project_id,created_at,id);
 `);
     await client.query("COMMIT");

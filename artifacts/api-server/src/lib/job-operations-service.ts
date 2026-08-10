@@ -7,6 +7,16 @@ import { waitForJobIntakeMigration } from "./job-intake-migration";
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complete", "cancelled"]);
 const DELIVERABLE_TYPES = new Set(["shop_drawing", "submittal", "deliverable", "supporting"]);
+const PACKAGE_TYPES = new Set(["shop_drawing", "submittal", "mixed", "deliverable"]);
+const PACKAGE_STATUSES = new Set(["draft", "internal_review", "submitted", "returned", "approved", "cancelled"]);
+const PACKAGE_TRANSITIONS: Record<string, Set<string>> = {
+  draft: new Set(["draft", "internal_review", "cancelled"]),
+  internal_review: new Set(["draft", "internal_review", "submitted", "returned", "cancelled"]),
+  submitted: new Set(["submitted", "returned", "approved", "cancelled"]),
+  returned: new Set(["returned", "internal_review", "submitted", "cancelled"]),
+  approved: new Set(["approved", "returned", "cancelled"]),
+  cancelled: new Set(["cancelled", "draft"]),
+};
 const MANAGER_ROLES = new Set(["owner", "admin", "project_admin", "project_manager", "bim_manager", "manager"]);
 
 function id(value: unknown, field: string) {
@@ -22,6 +32,23 @@ function positiveInt(value: unknown, field: string) {
 function text(value: unknown, max: number, field: string) {
   const parsed = String(value ?? "").trim();
   if (parsed.length > max || /[\u0000-\u0008\u000b\u000c\u000e-\u001f\u007f]/.test(parsed)) throw new FinancialControlError(400, "JOB_OPERATIONS_TEXT_INVALID", `${field} is invalid.`);
+  return parsed;
+}
+function requiredText(value: unknown, max: number, field: string) {
+  const parsed = text(value, max, field);
+  if (!parsed) throw new FinancialControlError(400, "JOB_OPERATIONS_TEXT_INVALID", `${field} is required.`);
+  return parsed;
+}
+function optionalDate(value: unknown, field: string) {
+  if (value == null || value === "") return null;
+  const parsed = String(value);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(parsed) || Number.isNaN(Date.parse(`${parsed}T00:00:00Z`))) throw new FinancialControlError(400, "JOB_OPERATIONS_DATE_INVALID", `${field} is invalid.`);
+  return parsed;
+}
+function packageTaskIds(value: unknown) {
+  if (!Array.isArray(value) || value.length < 1 || value.length > 100) throw new FinancialControlError(400, "JOB_OPERATIONS_PACKAGE_TASKS_INVALID", "Choose between 1 and 100 tasks for the package.");
+  const parsed = [...new Set(value.map((item) => id(item, "taskId")))];
+  if (parsed.length !== value.length) throw new FinancialControlError(400, "JOB_OPERATIONS_PACKAGE_TASKS_INVALID", "Package tasks must be unique.");
   return parsed;
 }
 function workHours(value: unknown) {
@@ -42,8 +69,8 @@ async function scope(actorUserId: number, projectId: number, client: Queryable =
   return { projectId, projectName: row.name, projectCode: row.code, intakeId: row.intake_id ?? null, leaderId, canManage: row.is_super_admin === true || leaderId === actorUserId || MANAGER_ROLES.has(String(row.role ?? "").toLowerCase()) };
 }
 
-async function event(client: Queryable, input: { projectId: number; actorUserId: number; eventType: string; workItemId?: string | null; taskId?: string | null; assignmentId?: string | null; evidence?: Record<string, unknown> }) {
-  await client.query(`INSERT INTO job_activation_operation_events(id,project_id,work_item_id,task_id,assignment_id,actor_user_id,event_type,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb)`, [crypto.randomUUID(), input.projectId, input.workItemId ?? null, input.taskId ?? null, input.assignmentId ?? null, input.actorUserId, input.eventType, JSON.stringify(input.evidence ?? {})]);
+async function event(client: Queryable, input: { projectId: number; actorUserId: number; eventType: string; workItemId?: string | null; taskId?: string | null; assignmentId?: string | null; packageId?: string | null; evidence?: Record<string, unknown> }) {
+  await client.query(`INSERT INTO job_activation_operation_events(id,project_id,work_item_id,task_id,assignment_id,package_id,actor_user_id,event_type,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)`, [crypto.randomUUID(), input.projectId, input.workItemId ?? null, input.taskId ?? null, input.assignmentId ?? null, input.packageId ?? null, input.actorUserId, input.eventType, JSON.stringify(input.evidence ?? {})]);
 }
 
 async function taskAccess(client: Queryable, actorUserId: number, projectId: number, taskId: string) {
@@ -54,12 +81,24 @@ async function taskAccess(client: Queryable, actorUserId: number, projectId: num
   return { access, task, canControl: access.canManage || assigned };
 }
 
+async function packageAccess(client: Queryable, actorUserId: number, projectId: number, packageId: string) {
+  const access = await scope(actorUserId, projectId, client);
+  const workPackage = (await client.query(`SELECT p.* FROM job_activation_work_packages p WHERE p.id=$1 AND p.project_id=$2`, [packageId, projectId])).rows[0];
+  if (!workPackage) throw new FinancialControlError(404, "JOB_OPERATIONS_PACKAGE_NOT_FOUND", "Work package not found.");
+  return { access, workPackage, canControl: access.canManage || Number(workPackage.responsible_user_id) === actorUserId };
+}
+
+async function validatePackageTasks(client: Queryable, workItemId: string, taskIds: string[]) {
+  const rows = (await client.query(`SELECT id FROM job_activation_tasks WHERE work_item_id=$1 AND id=ANY($2::text[])`, [workItemId, taskIds])).rows;
+  if (rows.length !== taskIds.length) throw new FinancialControlError(400, "JOB_OPERATIONS_PACKAGE_TASKS_INVALID", "Every package task must belong to the selected activated work item.");
+}
+
 export async function getJobOperations(input: { actorUserId: number; projectId: unknown }) {
   await waitForJobIntakeMigration();
   const projectId = positiveInt(input.projectId, "projectId"), access = await scope(input.actorUserId, projectId);
   const capabilities = await effectiveCommercialAccessForUser(input.actorUserId);
   if (!access.intakeId) return { available: false, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, capabilities };
-  const [workItems, tasks, assignments, timeEntries, deliverables, members, files, totals] = await Promise.all([
+  const [workItems, tasks, assignments, timeEntries, deliverables, packages, packageTasks, members, files, totals] = await Promise.all([
     pool.query(`SELECT id,stable_scope_item_id "stableScopeItemId",name,description,unit,planned_hours "plannedHours",workflow_template "workflowTemplate",status,billing_hourly_rate "billingHourlyRate",planned_billable_value "plannedBillableValue",contract_id "contractId" FROM job_activation_work_items WHERE intake_id=$1 ORDER BY created_at,id`, [access.intakeId]),
     pool.query(`SELECT t.id,t.work_item_id "workItemId",t.task_key "taskKey",t.name_en "nameEn",t.name_es "nameEs",t.status,t.version,t.progress_percent "progressPercent",t.planned_hours "plannedHours",t.assignee_user_id "assigneeUserId",COALESCE(e.actual_hours,0)::text "actualHours",COALESCE(d.deliverable_count,0)::int "deliverableCount"
       FROM job_activation_tasks t
@@ -70,6 +109,14 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     pool.query(`SELECT r.id,r.work_item_id "workItemId",r.task_id "taskId",r.user_id "userId",r.person_name "personName",r.role,r.employment_type "employmentType",r.planned_hours "plannedHours",r.internal_hourly_rate "internalHourlyRate",r.billing_hourly_rate "billingHourlyRate",r.planned_internal_cost "plannedInternalCost",r.planned_billable_value "plannedBillableValue",r.version,COALESCE(SUM(e.hours),0)::text "actualHours" FROM job_activation_resource_assignments r LEFT JOIN job_activation_time_entries e ON e.assignment_id=r.id WHERE r.intake_id=$1 GROUP BY r.id ORDER BY r.created_at,r.id`, [access.intakeId]),
     pool.query(`SELECT e.id,e.task_id "taskId",e.assignment_id "assignmentId",e.user_id "userId",u.full_name "userName",e.work_date "workDate",e.hours::text,e.note,e.created_at "createdAt" FROM job_activation_time_entries e JOIN users u ON u.id=e.user_id WHERE e.intake_id=$1 ORDER BY e.work_date DESC,e.created_at DESC,e.id DESC LIMIT 500`, [access.intakeId]),
     pool.query(`SELECT d.id,d.task_id "taskId",d.work_item_id "workItemId",d.file_id "fileId",f.file_name "fileName",d.deliverable_type "deliverableType",d.note,d.linked_by_id "linkedById",d.linked_at "linkedAt" FROM job_activation_task_deliverables d JOIN files f ON f.id=d.file_id JOIN job_activation_work_items w ON w.id=d.work_item_id WHERE w.intake_id=$1 ORDER BY d.linked_at DESC,d.id`, [access.intakeId]),
+    pool.query(`SELECT p.id,p.work_item_id "workItemId",p.package_code "packageCode",p.title,p.description,p.package_type "packageType",p.status,p.responsible_user_id "responsibleUserId",u.full_name "responsibleName",p.due_date "dueDate",p.version,p.created_at "createdAt",p.updated_at "updatedAt",
+      COALESCE(s.task_count,0)::int "taskCount",COALESCE(s.completed_count,0)::int "completedCount",COALESCE(s.blocked_count,0)::int "blockedCount",COALESCE(s.progress_percent,0)::int "progressPercent",
+      (p.due_date<CURRENT_DATE AND p.status NOT IN('approved','cancelled')) "overdue"
+      FROM job_activation_work_packages p
+      LEFT JOIN users u ON u.id=p.responsible_user_id
+      LEFT JOIN LATERAL (SELECT COUNT(*) task_count,COUNT(*) FILTER(WHERE t.status='complete') completed_count,COUNT(*) FILTER(WHERE t.status='blocked') blocked_count,ROUND(AVG(t.progress_percent)) progress_percent FROM job_activation_work_package_tasks pt JOIN job_activation_tasks t ON t.id=pt.task_id WHERE pt.package_id=p.id) s ON true
+      WHERE p.intake_id=$1 ORDER BY p.updated_at DESC,p.id`, [access.intakeId]),
+    pool.query(`SELECT pt.package_id "packageId",pt.task_id "taskId",pt.linked_at "linkedAt" FROM job_activation_work_package_tasks pt JOIN job_activation_work_packages p ON p.id=pt.package_id WHERE p.intake_id=$1 ORDER BY pt.package_id,pt.linked_at,pt.task_id`, [access.intakeId]),
     pool.query(`SELECT u.id,u.full_name "fullName",u.email,pm.role FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 AND pm.status='active' ORDER BY u.full_name,u.email`, [projectId]),
     pool.query(`SELECT id,file_name "fileName",file_type "fileType",status,version FROM files WHERE project_id=$1 AND COALESCE(status,'')<>'deleted' AND is_superseded=false ORDER BY updated_at DESC,id DESC LIMIT 500`, [projectId]),
     pool.query(`SELECT
@@ -109,7 +156,74 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     plannedBillableValue: showPlanner ? totals.rows[0].plannedBillableValue : null,
     earnedBillableValue: showPlanner ? totals.rows[0].earnedBillableValue : null,
   };
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, members: members.rows, files: files.rows, totals: safeTotals };
+  const safePackages = packages.rows.map((row) => ({ ...row, canControl: access.canManage || Number(row.responsibleUserId) === input.actorUserId }));
+  const packageSummary = {
+    total: safePackages.length,
+    overdue: safePackages.filter((row) => row.overdue).length,
+    blocked: safePackages.filter((row) => Number(row.blockedCount) > 0).length,
+    approved: safePackages.filter((row) => row.status === "approved").length,
+  };
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, totals: safeTotals };
+}
+
+export async function createJobOperationPackage(input: { actorUserId: number; projectId: unknown; packageId: unknown; workItemId: unknown; packageCode: unknown; title: unknown; description?: unknown; packageType: unknown; responsibleUserId?: unknown; dueDate?: unknown; taskIds: unknown }) {
+  await waitForJobIntakeMigration();
+  const projectId = positiveInt(input.projectId, "projectId"), packageId = id(input.packageId, "packageId"), workItemId = id(input.workItemId, "workItemId");
+  const packageCode = requiredText(input.packageCode, 50, "packageCode"), title = requiredText(input.title, 160, "title"), description = text(input.description, 2000, "description");
+  const packageType = String(input.packageType ?? ""), responsibleUserId = input.responsibleUserId == null || input.responsibleUserId === "" ? null : positiveInt(input.responsibleUserId, "responsibleUserId"), dueDate = optionalDate(input.dueDate, "dueDate"), taskIds = packageTaskIds(input.taskIds);
+  if (!PACKAGE_TYPES.has(packageType)) throw new FinancialControlError(400, "JOB_OPERATIONS_PACKAGE_TYPE_INVALID", "Work package type is invalid.");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const access = await scope(input.actorUserId, projectId, client);
+    if (!access.canManage) throw new FinancialControlError(403, "JOB_OPERATIONS_PACKAGE_MANAGE_DENIED", "Only the project leader may create work packages.");
+    const workItem = (await client.query(`SELECT id,intake_id FROM job_activation_work_items WHERE id=$1 AND project_id=$2 AND status='active'`, [workItemId, projectId])).rows[0];
+    if (!workItem) throw new FinancialControlError(404, "JOB_OPERATIONS_WORK_ITEM_NOT_FOUND", "Activated work item not found.");
+    if ((await client.query(`SELECT 1 FROM job_activation_work_packages WHERE project_id=$1 AND package_code=$2 AND id<>$3`, [projectId, packageCode, packageId])).rows[0]) throw new FinancialControlError(409, "JOB_OPERATIONS_PACKAGE_CODE_CONFLICT", "Work package code already exists in this project.");
+    if (responsibleUserId && !(await client.query(`SELECT 1 FROM project_members WHERE project_id=$1 AND user_id=$2 AND status='active'`, [projectId, responsibleUserId])).rows[0]) throw new FinancialControlError(400, "JOB_OPERATIONS_ASSIGNEE_INVALID", "The responsible person must be an active project member.");
+    await validatePackageTasks(client, workItemId, taskIds);
+    const existing = (await client.query(`SELECT id FROM job_activation_work_packages WHERE id=$1 AND project_id=$2`, [packageId, projectId])).rows[0];
+    if (!existing) {
+      await client.query(`INSERT INTO job_activation_work_packages(id,intake_id,project_id,work_item_id,package_code,title,description,package_type,status,responsible_user_id,due_date,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10,$11)`, [packageId, workItem.intake_id, projectId, workItemId, packageCode, title, description, packageType, responsibleUserId, dueDate, input.actorUserId]);
+      await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id) SELECT $1,task_id,$3 FROM unnest($2::text[]) task_id`, [packageId, taskIds, input.actorUserId]);
+      await event(client, { projectId, actorUserId: input.actorUserId, eventType: "work_package_created", workItemId, packageId, evidence: { packageCode, packageType, responsibleUserId, dueDate, taskIds } });
+    }
+    await client.query("COMMIT");
+    return { id: packageId, version: 1, status: "draft", idempotent: Boolean(existing) };
+  } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
+}
+
+export async function updateJobOperationPackage(input: { actorUserId: number; projectId: unknown; packageId: unknown; expectedVersion: unknown; status: unknown; title?: unknown; description?: unknown; packageType?: unknown; responsibleUserId?: unknown; dueDate?: unknown; taskIds?: unknown }) {
+  await waitForJobIntakeMigration();
+  const projectId = positiveInt(input.projectId, "projectId"), packageId = id(input.packageId, "packageId"), expectedVersion = positiveInt(input.expectedVersion, "expectedVersion"), status = String(input.status ?? "");
+  if (!PACKAGE_STATUSES.has(status)) throw new FinancialControlError(400, "JOB_OPERATIONS_PACKAGE_STATUS_INVALID", "Work package status is invalid.");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const control = await packageAccess(client, input.actorUserId, projectId, packageId);
+    if (!control.canControl) throw new FinancialControlError(403, "JOB_OPERATIONS_PACKAGE_CONTROL_DENIED", "Only the project leader or responsible person may update this work package.");
+    if (!PACKAGE_TRANSITIONS[String(control.workPackage.status)]?.has(status)) throw new FinancialControlError(409, "JOB_OPERATIONS_PACKAGE_TRANSITION_INVALID", "The requested work package status transition is not allowed.");
+    const metadataChange = input.title !== undefined || input.description !== undefined || input.packageType !== undefined || input.responsibleUserId !== undefined || input.dueDate !== undefined || input.taskIds !== undefined;
+    if (metadataChange && !control.access.canManage) throw new FinancialControlError(403, "JOB_OPERATIONS_PACKAGE_MANAGE_DENIED", "Only the project leader may change package definition, responsibility, due date, or tasks.");
+    const title = input.title === undefined ? control.workPackage.title : requiredText(input.title, 160, "title");
+    const description = input.description === undefined ? control.workPackage.description : text(input.description, 2000, "description");
+    const packageType = input.packageType === undefined ? control.workPackage.package_type : String(input.packageType);
+    if (!PACKAGE_TYPES.has(packageType)) throw new FinancialControlError(400, "JOB_OPERATIONS_PACKAGE_TYPE_INVALID", "Work package type is invalid.");
+    const responsibleUserId = input.responsibleUserId === undefined ? control.workPackage.responsible_user_id : input.responsibleUserId == null || input.responsibleUserId === "" ? null : positiveInt(input.responsibleUserId, "responsibleUserId");
+    const dueDate = input.dueDate === undefined ? control.workPackage.due_date : optionalDate(input.dueDate, "dueDate");
+    if (responsibleUserId && !(await client.query(`SELECT 1 FROM project_members WHERE project_id=$1 AND user_id=$2 AND status='active'`, [projectId, responsibleUserId])).rows[0]) throw new FinancialControlError(400, "JOB_OPERATIONS_ASSIGNEE_INVALID", "The responsible person must be an active project member.");
+    const taskIds = input.taskIds === undefined ? null : packageTaskIds(input.taskIds);
+    if (taskIds) await validatePackageTasks(client, control.workPackage.work_item_id, taskIds);
+    const updated = (await client.query(`UPDATE job_activation_work_packages SET title=$3,description=$4,package_type=$5,status=$6,responsible_user_id=$7,due_date=$8,version=version+1,updated_at=now() WHERE id=$1 AND version=$2 RETURNING version`, [packageId, expectedVersion, title, description, packageType, status, responsibleUserId, dueDate])).rows[0];
+    if (!updated) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This work package changed in another session. Reload before saving.");
+    if (taskIds) {
+      await client.query(`DELETE FROM job_activation_work_package_tasks WHERE package_id=$1`, [packageId]);
+      await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id) SELECT $1,task_id,$3 FROM unnest($2::text[]) task_id`, [packageId, taskIds, input.actorUserId]);
+    }
+    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "work_package_updated", workItemId: control.workPackage.work_item_id, packageId, evidence: { status, title, packageType, responsibleUserId, dueDate, taskIds, version: updated.version } });
+    await client.query("COMMIT");
+    return { id: packageId, version: Number(updated.version), status };
+  } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 
 export async function updateJobOperationTask(input: { actorUserId: number; projectId: unknown; taskId: unknown; expectedVersion: unknown; status: unknown; progressPercent: unknown; assigneeUserId?: unknown }) {

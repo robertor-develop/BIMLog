@@ -3,10 +3,12 @@ import { authMiddleware } from "../middlewares/auth";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import {
   addJobOperationTime,
+  createJobOperationPackage,
   getJobOperations,
   linkJobOperationDeliverable,
   reassignJobOperationResource,
   unlinkJobOperationDeliverable,
+  updateJobOperationPackage,
   updateJobOperationTask,
 } from "../lib/job-operations-service";
 
@@ -25,6 +27,15 @@ const errorEs: Record<string, string> = {
   JOB_OPERATIONS_FILE_INVALID: "Seleccione un archivo activo de este proyecto.",
   JOB_OPERATIONS_DELIVERABLE_DENIED: "Solamente el líder del proyecto o el miembro asignado puede administrar este entregable.",
   JOB_OPERATIONS_DELIVERABLE_NOT_FOUND: "No se encontró el vínculo del entregable.",
+  JOB_OPERATIONS_WORK_ITEM_NOT_FOUND: "No se encontró la partida de trabajo activada.",
+  JOB_OPERATIONS_PACKAGE_NOT_FOUND: "No se encontró el paquete de trabajo.",
+  JOB_OPERATIONS_PACKAGE_MANAGE_DENIED: "Solamente el líder del proyecto puede definir paquetes de trabajo.",
+  JOB_OPERATIONS_PACKAGE_CONTROL_DENIED: "Solamente el líder del proyecto o la persona responsable puede actualizar este paquete.",
+  JOB_OPERATIONS_PACKAGE_CODE_CONFLICT: "El código del paquete ya existe en este proyecto.",
+  JOB_OPERATIONS_PACKAGE_TASKS_INVALID: "Seleccione tareas válidas de la misma partida activada.",
+  JOB_OPERATIONS_PACKAGE_TYPE_INVALID: "El tipo de paquete no es válido.",
+  JOB_OPERATIONS_PACKAGE_STATUS_INVALID: "El estado del paquete no es válido.",
+  JOB_OPERATIONS_PACKAGE_TRANSITION_INVALID: "Ese cambio de estado no está permitido para el paquete.",
   JOB_OPERATIONS_STALE: "Este registro cambió en otra sesión. Recargue antes de guardar.",
   JOB_OPERATIONS_HOURS_INVALID: "Las horas deben ser mayores que cero y no pueden exceder 24.",
   JOB_OPERATIONS_DATE_INVALID: "La fecha de trabajo no es válida.",
@@ -64,6 +75,12 @@ router.post("/projects/:projectId/operations/deliverables", run(async (req, res)
 }));
 router.delete("/projects/:projectId/operations/deliverables/:deliverableId", run(async (req, res) => {
   res.json(await unlinkJobOperationDeliverable({ actorUserId: req.user.userId, projectId: req.params.projectId, deliverableId: req.params.deliverableId }));
+}));
+router.post("/projects/:projectId/operations/packages", run(async (req, res) => {
+  res.status(201).json(await createJobOperationPackage({ actorUserId: req.user.userId, projectId: req.params.projectId, packageId: req.body?.packageId, workItemId: req.body?.workItemId, packageCode: req.body?.packageCode, title: req.body?.title, description: req.body?.description, packageType: req.body?.packageType, responsibleUserId: req.body?.responsibleUserId, dueDate: req.body?.dueDate, taskIds: req.body?.taskIds }));
+}));
+router.patch("/projects/:projectId/operations/packages/:packageId", run(async (req, res) => {
+  res.json(await updateJobOperationPackage({ actorUserId: req.user.userId, projectId: req.params.projectId, packageId: req.params.packageId, expectedVersion: req.body?.expectedVersion, status: req.body?.status, title: req.body?.title, description: req.body?.description, packageType: req.body?.packageType, responsibleUserId: req.body?.responsibleUserId, dueDate: req.body?.dueDate, taskIds: req.body?.taskIds }));
 }));
 
 export default router;
