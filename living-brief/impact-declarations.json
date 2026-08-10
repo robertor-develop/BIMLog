@@ -7672,6 +7672,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "entitlement-aware-job-intake-resource-activation-20260810",
+      "reviewedThroughCommit": "d3ff9bd0b7dddcc35ffad415aeac0dcf14b71547",
+      "reviewedAt": "2026-08-10T12:04:35-04:00",
+      "status": "local_entitlement_aware_job_intake_validated",
+      "captureTiming": "same_job_intake_activation_task",
+      "summary": "Makes the operational Job Intake available without paid Commercial features, creates durable work items, bilingual delivery tasks, and resource assignments, and conditionally adds rates, budget mappings, and controlled contract records according to each user's Total Control entitlements. Completes the English and Spanish Intake experience and preserves legacy Commercial sessions.",
+      "workstreams": [
+        "job-intake",
+        "resource-planning",
+        "commercial-entitlements",
+        "bilingual-ui"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority hierarchy, or cross-company doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development, verification, database-safety, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing additive-schema, authorization, bilingual UI, responsive-layout, transaction, and test standards cover the build."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The build implements the approved Intake, resource planning, hourly-rate, and optional Commercial package direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Job Intake, Commercial entitlement, database schema, route, service, and UI boundaries are extended without adding a new platform boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior or provider integration changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document rendering template changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved future-work ordering is changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted audit conclusion is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
