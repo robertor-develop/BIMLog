@@ -6,6 +6,7 @@ import { LangToggle } from "@/components/layout/LangToggle";
 import { SmartGuideSidebarButton } from "@/components/layout/SmartGuide";
 
 const INFO_LINKS = [
+  { en: "User Manual", es: "Manual del usuario", href: "/help?view=manual" },
   { en: "Pricing", es: "Precios", href: "/pricing" },
   { en: "Features", es: "Funcionalidades", href: "/features" },
   { en: "About", es: "Acerca de", href: "/about" },
@@ -18,7 +19,7 @@ const INFO_LINKS = [
 
 export function SidebarUtilities({
   activeTab,
-  helpHref = "/setup-guide",
+  helpHref = "/help?topic=getting-started&view=manual",
 }: {
   activeTab: string;
   helpHref?: string;
@@ -78,7 +79,7 @@ export function SidebarUtilities({
             </div>
           )}
         </div>
-        <Link href={helpHref} className="sidebar-utility-button">
+        <Link href={helpHref} className="sidebar-utility-button" title={label("Help Center", "Centro de ayuda")}>
           <HelpCircle style={{ width: 13, height: 13 }} />
           {label("Help", "Ayuda")}
         </Link>

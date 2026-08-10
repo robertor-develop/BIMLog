@@ -393,7 +393,12 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
       )}
 
       <div className={`sidebar phasea-project-sidebar${collapsed ? " collapsed" : ""}`}>
-        <SidebarUtilities activeTab={activeTab} helpHref={`/setup-guide?from=${encodeURIComponent(`/projects/${projectId}/${activeTab}`)}`} />
+        <SidebarUtilities
+          activeTab={activeTab}
+          helpHref={`/help?context=${encodeURIComponent(activeTab)}&view=manual&from=${encodeURIComponent(
+            typeof window === "undefined" ? `/projects/${projectId}` : `${window.location.pathname}${window.location.search}`,
+          )}`}
+        />
         <button
           type="button"
           className="phasea-sidebar-collapse"

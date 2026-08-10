@@ -14,7 +14,7 @@ import { Register } from "@/pages/Register";
 import { Dashboard } from "@/pages/Dashboard";
 import { PendingItems } from "@/pages/PendingItems";
 import { ProjectDetail } from "@/pages/ProjectDetail";
-import { SetupGuide } from "@/pages/SetupGuide";
+import { HelpCenter } from "@/pages/HelpCenter";
 import { Profile } from "@/pages/Profile";
 import { CompanyProfile } from "@/pages/CompanyProfile";
 import { NotificationSettings } from "@/pages/NotificationSettings";
@@ -138,7 +138,12 @@ function Router() {
       <Route path="/projects/:id/:tab?">
         {() => <ProtectedRoute component={ProjectDetail} />}
       </Route>
-      <Route path="/setup-guide" component={SetupGuide} />
+      <Route path="/help">
+        {() => <ProtectedRoute component={HelpCenter} />}
+      </Route>
+      <Route path="/setup-guide">
+        {() => <ProtectedRoute component={HelpCenter} />}
+      </Route>
       <Route path="/profile">
         {() => <ProtectedRoute component={Profile} />}
       </Route>
