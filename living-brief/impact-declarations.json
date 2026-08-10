@@ -7221,6 +7221,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5c613b3d1685b71bd4ea647492de1080ab4aadb9d79c69e9bb8595763079fb09"
+    },
+    {
+      "taskId": "cost-value-planner-meeting-ux-correction-20260810",
+      "reviewedThroughCommit": "91257da22859b923a440812b7e57ba12ca70c8a9",
+      "reviewedAt": "2026-08-10T07:17:03-04:00",
+      "status": "local_apu_meeting_ux_validated",
+      "captureTiming": "same_apu_task",
+      "summary": "Makes the current Cost & Value Planner understandable and actionable with optional section guidance, direct percentage editing, automatic detail-line balancing, exact save corrections, and draft exports before the first saved version.",
+      "workstreams": [
+        "generic-apu-ui",
+        "cost-value-plan",
+        "meeting-readiness"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or operating-authority doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing development and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "APU acceptance now covers optional guidance, automatic detail balancing, exact save diagnostics, and draft exports."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction advances the approved Commercial planning workflow without expanding product scope."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The platform record now describes optional section help, detail-line balancing actions, save readiness, and draft exports."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior or plugin-owned interface changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Draft browser printing and CSV export do not establish a new governed report template."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains a validated local candidate until Roberto pushes and publishes it."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The active objective remains the user-requested APU usability correction."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence or accepted incident record is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "23b8d6f9c23890b150455e930e9e23f3bed64e56e3b48b4a0513f9bc9b06760b"
     }
   ]
 }

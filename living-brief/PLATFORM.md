@@ -432,6 +432,8 @@ It changes only when the code structure or curated architectural facts change.
   Incentive Reserve, and Project Earnings. Amount and percentage inputs stay synchronized across the
   allocation tree, and saved labor/phase/administrative percentages cascade when parent values change;
   the included BIM-services sample is configurable, not a platform-hardcoded policy.
-  Saved plan versions remain immutable and can be exported as CSV or printed/saved as PDF.
+  Optional section guidance, automatic detail-line remainder/equal splits, and exact save-readiness
+  explanations make the complete allocation actionable. Draft and saved plans can be exported as CSV
+  or printed/saved as PDF; saved plan versions remain immutable.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
