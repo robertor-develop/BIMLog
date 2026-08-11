@@ -8883,6 +8883,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "21b2bbcadfe71c7483a336bd95300156a9f1ebc14700cbf097d83a5dc19cc5be"
+    },
+    {
+      "taskId": "smart-intake-navigation-recovery-repair-20260811",
+      "reviewedThroughCommit": "ffa864185753840a7416f145065d763c34e13c43",
+      "reviewedAt": "2026-08-11T15:43:09-04:00",
+      "status": "local_release_candidate_repair",
+      "captureTiming": "same_product_task",
+      "summary": "Closes the Smart Intake route-away loss gap with per-project browser recovery, preserves original spreadsheet paste row numbers, and adds row-specific accessible names throughout the bulk Contract Item editor.",
+      "workstreams": [
+        "smart-intake",
+        "contract-items",
+        "draft-recovery",
+        "bilingual-ui",
+        "accessibility"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair preserves existing BIMLog system-of-record boundaries and adds no duplicate Intake or Contract Item authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The local verification, publication, deployment, and provider boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing no-loss, bilingual, accessibility, concurrency, and verification requirements govern this focused repair without changing policy."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved Smart Intake outcome is unchanged; this repair closes candidate acceptance gaps."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The documented Smart Intake mapping, autosave, provenance, and activation semantics remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin, desktop integration, provider, browser bridge, or external connector behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Help Center page, print surface, report template, PDF renderer, or governed report artifact changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, contractual interpretation, regulatory rule, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The current Smart Intake candidate status remains accurate; only candidate robustness improved."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing runtime browser and database evidence gates remain open and are not reclassified by source-level repair."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence and accepted conclusions remain untouched; focused local source evidence is added."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
