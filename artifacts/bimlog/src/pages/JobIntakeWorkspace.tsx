@@ -90,6 +90,19 @@ const blank = {
   },
   scopeItems: [] as any[],
   commercial: {
+    contracts: [
+      {
+        id: "PRIMARY",
+        quotationNumber: "",
+        contractNumber: "",
+        counterpartyName: "",
+        perspective: "downstream",
+        contractType: "subcontract",
+        paymentTerms: "",
+        effectiveDate: "",
+        completionDate: "",
+      },
+    ],
     quotationNumber: "",
     contractNumber: "",
     counterpartyName: "",
@@ -368,6 +381,70 @@ export function JobIntakeWorkspace() {
         pricingConfirmed: false,
       },
     }));
+  const setContracts = (updater: (contracts: any[]) => any[]) =>
+    setData((old: any) => ({
+      ...old,
+      commercial: {
+        ...old.commercial,
+        contracts: updater(old.commercial.contracts || []),
+      },
+      review: { ...old.review, contractConfirmed: false },
+    }));
+  const changeContract = (index: number, field: string, value: unknown) =>
+    setData((old: any) => {
+      const contracts = (old.commercial.contracts || []).map(
+        (contract: any, contractIndex: number) =>
+          contractIndex === index ? { ...contract, [field]: value } : contract,
+      );
+      return {
+        ...old,
+        commercial: {
+          ...old.commercial,
+          ...(index === 0 ? { [field]: value } : {}),
+          contracts,
+        },
+        review: { ...old.review, contractConfirmed: false },
+      };
+    });
+  const addContract = () => {
+    if ((data.commercial.contracts || []).length >= 50) {
+      setError(
+        tt(
+          "An Intake accepts up to 50 contract profiles.",
+          "Un Ingreso acepta hasta 50 perfiles de contrato.",
+        ),
+      );
+      return;
+    }
+    setContracts((contracts) => [
+      ...contracts,
+      {
+        id: `CONTRACT-${crypto.randomUUID()}`,
+        quotationNumber: "",
+        contractNumber: "",
+        counterpartyName: "",
+        perspective: "downstream",
+        contractType: "subcontract",
+        paymentTerms: "",
+        effectiveDate: "",
+        completionDate: "",
+      },
+    ]);
+  };
+  const removeContract = (contractId: string) => {
+    if (data.scopeItems.some((item: any) => item.contractId === contractId)) {
+      setError(
+        tt(
+          "Reassign this contract's Contract Items before removing it.",
+          "Reasigne las Partidas de Contrato de este contrato antes de eliminarlo.",
+        ),
+      );
+      return;
+    }
+    setContracts((contracts) =>
+      contracts.filter((contract) => contract.id !== contractId),
+    );
+  };
   const assignmentChange = (index: number, field: string, value: unknown) =>
     setData((old: any) => ({
       ...old,
@@ -543,11 +620,16 @@ export function JobIntakeWorkspace() {
           confirmationFingerprint: saved.completion.fingerprint,
         }),
       });
+      const createdContracts = Array.isArray(result.contractIds)
+        ? result.contractIds.length
+        : result.contractId
+          ? 1
+          : 0;
       setNotice(
-        result.contractId
+        createdContracts > 0
           ? tt(
-              `Job activated with Commercial contract ${result.contractId}.`,
-              `Trabajo activado con el contrato comercial ${result.contractId}.`,
+              `Job activated with ${createdContracts} Commercial contract(s).`,
+              `Trabajo activado con ${createdContracts} contrato(s) comercial(es).`,
             )
           : tt(
               "Operational job activated with work items, tasks, and resource assignments.",
@@ -799,8 +881,11 @@ export function JobIntakeWorkspace() {
             {intake.activatedContractId ? (
               <div className="ji-actions">
                 <CheckCircle2 size={16} />
-                {tt("Commercial contract created", "Contrato comercial creado")}
-                : {intake.activatedContractId}
+                {tt(
+                  "Commercial contracts created",
+                  "Contratos comerciales creados",
+                )}
+                : {intake.activationSummary?.contracts?.length || 1}
               </div>
             ) : (
               <div className="ji-small">
@@ -1330,6 +1415,10 @@ export function JobIntakeWorkspace() {
                   }
                   defaultWorkflow={data.delivery.workflowTemplate}
                   capabilities={capabilities}
+                  contracts={data.commercial.contracts || []}
+                  defaultContractId={
+                    data.commercial.contracts?.[0]?.id || "PRIMARY"
+                  }
                   budgetSnapshotId={data.commercial.budgetSnapshotId}
                   budgetLines={budgetLines}
                   onBudgetSnapshotChange={(id) => void selectSnapshot(id)}
@@ -1356,11 +1445,17 @@ export function JobIntakeWorkspace() {
                     {guide && (
                       <div className="ji-guide">
                         {tt(
-                          "Capture the negotiated contract terms. When the complete Commercial package is enabled, activation creates a controlled draft contract and Contract Items without overwriting the source document.",
-                          "Registre los términos contractuales negociados. Cuando el paquete Comercial completo está habilitado, la activación crea un borrador controlado del contrato y sus ítems sin sobrescribir el documento fuente.",
+                          "Capture one profile per negotiated contract or purchase order. Activation groups each assigned Contract Item into its canonical draft contract without overwriting source documents.",
+                          "Registre un perfil por cada contrato u orden de compra negociado. La activaci\u00f3n agrupa cada Partida de Contrato asignada en su contrato borrador can\u00f3nico sin sobrescribir los documentos fuente.",
                         )}
                       </div>
                     )}
+                    <p className="ji-small">
+                      {tt(
+                        "Primary contract profile",
+                        "Perfil de contrato principal",
+                      )}
+                    </p>
                     <div className="ji-grid three">
                       {[
                         [
@@ -1385,7 +1480,7 @@ export function JobIntakeWorkspace() {
                           <input
                             value={data.commercial[field]}
                             onChange={(e) =>
-                              change("commercial", field, e.target.value)
+                              changeContract(0, field, e.target.value)
                             }
                           />
                         </label>
@@ -1395,7 +1490,7 @@ export function JobIntakeWorkspace() {
                         <select
                           value={data.commercial.perspective}
                           onChange={(e) =>
-                            change("commercial", "perspective", e.target.value)
+                            changeContract(0, "perspective", e.target.value)
                           }
                         >
                           <option value="downstream">
@@ -1417,7 +1512,7 @@ export function JobIntakeWorkspace() {
                         <select
                           value={data.commercial.contractType}
                           onChange={(e) =>
-                            change("commercial", "contractType", e.target.value)
+                            changeContract(0, "contractType", e.target.value)
                           }
                         >
                           <option value="subcontract">
@@ -1443,6 +1538,140 @@ export function JobIntakeWorkspace() {
                           </option>
                         </select>
                       </label>
+                    </div>
+                    {(data.commercial.contracts || [])
+                      .slice(1)
+                      .map((contract: any, offset: number) => {
+                        const index = offset + 1;
+                        return (
+                          <div className="ji-row" key={contract.id}>
+                            <div className="ji-actions">
+                              <strong>
+                                {tt(
+                                  `Additional contract ${index + 1}`,
+                                  `Contrato adicional ${index + 1}`,
+                                )}
+                              </strong>
+                              <button
+                                type="button"
+                                className="danger"
+                                onClick={() => removeContract(contract.id)}
+                              >
+                                <Trash2 size={14} /> {tt("Remove", "Eliminar")}
+                              </button>
+                            </div>
+                            <div className="ji-grid three">
+                              {[
+                                [
+                                  "quotationNumber",
+                                  tt(
+                                    "Quotation number",
+                                    "N\u00famero de cotizaci\u00f3n",
+                                  ),
+                                ],
+                                [
+                                  "contractNumber",
+                                  tt(
+                                    "Contract / PO number",
+                                    "N\u00famero de contrato / orden de compra",
+                                  ),
+                                ],
+                                [
+                                  "counterpartyName",
+                                  tt("Counterparty", "Contraparte"),
+                                ],
+                                [
+                                  "paymentTerms",
+                                  tt("Payment terms", "T\u00e9rminos de pago"),
+                                ],
+                              ].map(([field, label]) => (
+                                <label key={field}>
+                                  {label}
+                                  <input
+                                    value={contract[field] || ""}
+                                    onChange={(event) =>
+                                      changeContract(
+                                        index,
+                                        field,
+                                        event.target.value,
+                                      )
+                                    }
+                                  />
+                                </label>
+                              ))}
+                              <label>
+                                {tt("Perspective", "Perspectiva")}
+                                <select
+                                  value={contract.perspective}
+                                  onChange={(event) =>
+                                    changeContract(
+                                      index,
+                                      "perspective",
+                                      event.target.value,
+                                    )
+                                  }
+                                >
+                                  <option value="downstream">
+                                    {tt(
+                                      "Commitment / subcontract",
+                                      "Compromiso / subcontrato",
+                                    )}
+                                  </option>
+                                  <option value="upstream">
+                                    {tt(
+                                      "Owner / prime contract",
+                                      "Cliente / contrato principal",
+                                    )}
+                                  </option>
+                                </select>
+                              </label>
+                              <label>
+                                {tt("Contract type", "Tipo de contrato")}
+                                <select
+                                  value={contract.contractType}
+                                  onChange={(event) =>
+                                    changeContract(
+                                      index,
+                                      "contractType",
+                                      event.target.value,
+                                    )
+                                  }
+                                >
+                                  <option value="subcontract">
+                                    {tt("Subcontract", "Subcontrato")}
+                                  </option>
+                                  <option value="purchase_order">
+                                    {tt("Purchase order", "Orden de compra")}
+                                  </option>
+                                  <option value="consultant_agreement">
+                                    {tt(
+                                      "Consultant agreement",
+                                      "Contrato de consultor\u00eda",
+                                    )}
+                                  </option>
+                                  <option value="owner_prime">
+                                    {tt(
+                                      "Owner prime contract",
+                                      "Contrato principal con el cliente",
+                                    )}
+                                  </option>
+                                  <option value="other_commitment">
+                                    {tt("Other commitment", "Otro compromiso")}
+                                  </option>
+                                </select>
+                              </label>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    <div className="ji-actions">
+                      <button type="button" onClick={addContract}>
+                        <Plus size={14} />
+                        {tt(
+                          "Add contract profile",
+                          "Agregar perfil de contrato",
+                        )}
+                      </button>
                     </div>
                   </>
                 ) : (
@@ -1733,8 +1962,8 @@ export function JobIntakeWorkspace() {
                 {guide && (
                   <div className="ji-guide">
                     {tt(
-                      "Save first, review each applicable statement, then activate. Core activation creates operational work items, delivery tasks, and resource assignments. With the complete Commercial package it also creates a controlled draft contract and Contract Items; it never approves or executes the contract.",
-                      "Guarde primero, revise cada declaración aplicable y luego active. La activación básica crea partidas operativas, tareas de entrega y asignaciones de recursos. Con el paquete Comercial completo también crea un borrador controlado del contrato y sus ítems; nunca aprueba ni ejecuta el contrato.",
+                      "Save first, review each applicable statement, then activate. Core activation creates operational work items, delivery tasks, and resource assignments. With the complete Commercial package it creates one controlled draft per contract profile and its assigned Contract Items; it never approves or executes contracts.",
+                      "Guarde primero, revise cada declaraci\u00f3n aplicable y luego active. La activaci\u00f3n b\u00e1sica crea partidas operativas, tareas de entrega y asignaciones de recursos. Con el paquete Comercial completo crea un borrador controlado por perfil de contrato y sus Partidas de Contrato asignadas; nunca aprueba ni ejecuta contratos.",
                     )}
                   </div>
                 )}
@@ -1787,13 +2016,23 @@ export function JobIntakeWorkspace() {
                           "Activar trabajo operativo",
                         )}
                   </button>
-                  {intake.activatedContractId && (
-                    <Link
-                      href={`/projects/${projectId}/financial/contracts?contractId=${intake.activatedContractId}`}
-                    >
-                      {tt("Open created contract", "Abrir contrato creado")}
-                    </Link>
-                  )}
+                  {(
+                    intake.activationSummary?.contracts || [
+                      { contractId: intake.activatedContractId },
+                    ]
+                  )
+                    .filter((contract: any) => contract.contractId)
+                    .map((contract: any, index: number) => (
+                      <Link
+                        key={contract.contractId}
+                        href={`/projects/${projectId}/financial/contracts?contractId=${contract.contractId}`}
+                      >
+                        {tt(
+                          `Open created contract ${index + 1}`,
+                          `Abrir contrato creado ${index + 1}`,
+                        )}
+                      </Link>
+                    ))}
                 </div>
               </section>
               <div className="ji-footer">

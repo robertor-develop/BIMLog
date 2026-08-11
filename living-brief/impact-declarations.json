@@ -9033,6 +9033,94 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-build3-multicontract-release-v1602803-20260811",
+      "reviewedThroughCommit": "bf2b5eeb1a0d926ee8ab3c447cfb94b96cb503e0",
+      "reviewedAt": "2026-08-11T18:24:05-04:00",
+      "status": "local_release_candidate",
+      "captureTiming": "same_product_task",
+      "summary": "Reconciles BIMLog v1.60.28.03 with Smart Intake Build 3: up to 50 contract profiles, item-to-contract ownership, canonical activation with per-contract APU or pricing snapshots, workflow inheritance, budget relationships, optional documents, ordered draft persistence, and English/Spanish guidance.",
+      "workstreams": [
+        "smart-intake",
+        "multi-contract-activation",
+        "help-center",
+        "release-version",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The candidate keeps one canonical project-contract-item record chain and changes no ecosystem identity or permanent product law."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation, evidence, release, and publication boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bilingual guidance, validation, audit, and persistence expectations use the existing quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 3 implements the already approved guided Intake and canonical multi-contract direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform map now records the canonical multi-contract activation, snapshot, workflow, and budget relationships."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin, Lens synchronization, packaging, or installation behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed project report layout or PDF renderer changed; Help Center release documentation only reflects the product candidate."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, regulatory interpretation, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status now distinguishes the v1.60.28.03 local Build 3 candidate from pushed, published, deployed, and field-accepted states."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop now records the isolated database, browser, idempotency, and release gates that remain after local implementation."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence remains append-only and untouched; this local candidate has not reached accepted-history status."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5b10e9504bb22f7a37d00d30d5ff7d7cbab6d52d0e13b57273eb0a23f2bb590f"
     }
   ]
 }

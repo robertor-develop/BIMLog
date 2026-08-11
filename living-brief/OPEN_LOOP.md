@@ -2,6 +2,23 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## BIMLog v1.60.28.03 Smart Intake multi-contract activation gates - 2026-08-11
+
+1. Verify one through 50 contract profiles, independent APU or pricing
+   selections, item-to-contract assignments, currency compatibility, workflow
+   inheritance, and budget relationships across save, reload, edit, and
+   activation.
+2. Exercise idempotent activation and stale-revision refusal in an isolated
+   database. Confirm that the same canonical Contracts & Commitments records
+   appear after activation and that retry creates no duplicate contract,
+   snapshot, Contract Item, budget, or operational baseline.
+3. Verify desktop and narrow-width English/Spanish behavior with optional
+   documents, imported and pasted rows, contract assignment controls, missing
+   contract validation, autosave recovery, and the final activation summary.
+4. Treat local source, test, typecheck, and build success as local evidence
+   only. Commit, push, publication, deployment, production/database
+   verification, and customer acceptance remain separate actions.
+
 ## Smart Intake and Contract Item editor release gates - 2026-08-11
 
 1. Exercise XLSX, XLSM, and CSV sources with multiple sheets, preambles,
@@ -15,9 +32,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
    replace, preserve document/hash/cell provenance, inherit only currency-
    compatible saved APU/rate defaults, and activate through the existing shared
    operational and Commercial records without a duplicate Intake authority.
-4. Keep canonical multi-contract activation, per-contract APU snapshots,
-   workflow inheritance, and consolidated budgets as the following phase. Do
-   not introduce a duplicate contract, item, APU, workflow, or budget store.
+4. Preserve the Build 3 local candidate's canonical multi-contract activation,
+   per-contract APU or pricing snapshots, workflow inheritance, and connected
+   budget relationships. Do not introduce a duplicate contract, item, APU,
+   workflow, or budget store.
 5. Treat local source, test, typecheck, and build success as local evidence
    only. Push, publication, deployment, production/database verification, and
    customer acceptance require separate authorization and remain open.
@@ -35,9 +53,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 3. The flexible Smart Intake mapping and 100-plus Contract Item editor are now
    a separate local candidate described above; they are not part of pushed
    commit `1a45653691c750a5929ba6acd25ec415b66ef26b`.
-4. Keep canonical multi-contract activation, per-contract APU snapshots,
-   workflow inheritance, and consolidated budgets as the following phase. Do
-   not introduce a duplicate contract, item, APU, workflow, or budget store.
+4. Preserve the Build 3 local candidate's canonical multi-contract activation,
+   per-contract APU or pricing snapshots, workflow inheritance, and connected
+   budget relationships. Do not introduce a duplicate contract, item, APU,
+   workflow, or budget store.
 5. Treat local source, test, typecheck, and build success as local evidence
    only. Push, publication, deployment, production/database verification, and
    customer acceptance require separate authorization and remain open.

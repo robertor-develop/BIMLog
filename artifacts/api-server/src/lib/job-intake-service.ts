@@ -407,7 +407,11 @@ async function extraction(buffer: Buffer, fileName: string) {
   try {
     extracted = await extractFileText(buffer, fileName);
   } catch (error) {
-    if (![".xls", ".xlsx", ".xlsm", ".csv"].includes(path.extname(fileName).toLowerCase()))
+    if (
+      ![".xls", ".xlsx", ".xlsm", ".csv"].includes(
+        path.extname(fileName).toLowerCase(),
+      )
+    )
       throw error;
     throw new FinancialControlError(
       400,
@@ -634,6 +638,7 @@ export async function applyJobIntakeDocumentMapping(input: {
           assumptions: "",
           exclusions: "",
           workflowTemplate: data.delivery.workflowTemplate,
+          contractId: data.commercial.contracts[0].id,
         }),
         name: mapped.name,
         plannedHours: mapped.quantity,
@@ -967,7 +972,7 @@ async function createCoreActivationWithClient(
           item.description,
           item.unit,
           item.plannedHours,
-          input.data.delivery.workflowTemplate,
+          item.workflowTemplate || input.data.delivery.workflowTemplate,
           input.capabilities.costValuePlanner ? item.billingHourlyRate : null,
           input.capabilities.costValuePlanner ? item.contractValue : null,
           input.capabilities.costValuePlanner ? item.apuPlanVersion : null,
@@ -1117,6 +1122,11 @@ export async function activateJobIntake(input: {
       return {
         intakeId: intake.id,
         contractId: intake.activated_contract_id,
+        contractIds: Array.isArray(intake.activation_summary?.contracts)
+          ? intake.activation_summary.contracts.map((contract: any) =>
+              String(contract.contractId),
+            )
+          : [intake.activated_contract_id],
         status: "activated",
         activationMode: "commercial",
         idempotent: true,
@@ -1163,9 +1173,13 @@ export async function activateJobIntake(input: {
       },
       client,
     );
-    let draft: Awaited<
-      ReturnType<typeof createContractDraftWithClient>
-    > | null = null;
+    const drafts: Array<{
+      profileId: string;
+      contractId: string;
+      contractVersionId: string;
+      contractItems: number;
+      contractValue: string;
+    }> = [];
     let workflowBaseline = { requested: data.scopeItems.length, created: 0 };
     if (capabilities.fullCommercialActivation) {
       const grants: Array<{ userId: number; permission: string }> =
@@ -1180,72 +1194,103 @@ export async function activateJobIntake(input: {
           userId: data.team.projectLeaderUserId,
           permission: "manage",
         });
-      draft = await createContractDraftWithClient(
-        {
-          actorUserId: input.actorUserId,
-          projectId,
-          legalNumber: data.commercial.contractNumber,
-          perspective: data.commercial.perspective,
-          contractType: data.commercial.contractType,
-          counterpartyName: data.commercial.counterpartyName,
-          title: data.identity.jobName,
-          currency: data.identity.currency,
-          originalValue: completion.totals.contractValue,
-          budgetSnapshotId: data.commercial.budgetSnapshotId,
-          effectiveDate: data.commercial.effectiveDate || undefined,
-          completionDate: data.commercial.completionDate || undefined,
-          paymentTerms: data.commercial.paymentTerms || undefined,
-          commercialMetadata: {
-            intakeId: intake.id,
-            quotationNumber: data.commercial.quotationNumber,
-            plannedHours: completion.totals.plannedHours,
-            assignedHours: completion.totals.assignedHours,
-            plannedLaborCost: completion.totals.plannedLaborCost,
-          },
-          initialGrants: grants,
-          lines: data.scopeItems.map((item, index) => ({
-            stableLineId: item.id,
-            budgetSnapshotLineId: item.budgetSnapshotLineId,
-            projectCostNodeId: item.projectCostNodeId,
-            scheduleItemPlacementId: item.scheduleItemPlacementId,
-            description: item.name,
-            amount: item.contractValue,
-            sortOrder: index,
-            contractItem: {
-              displayName: item.name,
-              quantity: item.plannedHours,
-              unit: item.unit,
-              unitRate: item.billingHourlyRate,
-              apuPlanVersion: item.apuPlanVersion,
-              workflowTemplate:
-                item.workflowTemplate || data.delivery.workflowTemplate,
-              industryTemplate: "bim-services",
-              sourceProvenance: item.provenance,
+      workflowBaseline = { requested: data.scopeItems.length, created: 0 };
+      for (const contract of data.commercial.contracts) {
+        const contractItems = data.scopeItems.filter(
+          (item) => item.contractId === contract.id,
+        );
+        const contractValue = decimalFromScaled(
+          contractItems.reduce(
+            (sum, item) => sum + scaledSignedDecimal(item.contractValue),
+            0n,
+          ),
+        );
+        const draft = await createContractDraftWithClient(
+          {
+            actorUserId: input.actorUserId,
+            projectId,
+            legalNumber: contract.contractNumber,
+            perspective: contract.perspective,
+            contractType: contract.contractType,
+            counterpartyName: contract.counterpartyName,
+            title: `${data.identity.jobName} - ${contract.contractNumber}`,
+            currency: data.identity.currency,
+            originalValue: contractValue,
+            budgetSnapshotId: data.commercial.budgetSnapshotId,
+            effectiveDate: contract.effectiveDate || undefined,
+            completionDate: contract.completionDate || undefined,
+            paymentTerms: contract.paymentTerms || undefined,
+            commercialMetadata: {
+              intakeId: intake.id,
+              contractProfileId: contract.id,
+              quotationNumber: contract.quotationNumber,
+              contractItems: contractItems.length,
+              plannedHours: decimalFromScaled(
+                contractItems.reduce(
+                  (sum, item) => sum + scaledSignedDecimal(item.plannedHours),
+                  0n,
+                ),
+              ),
             },
-          })),
-        },
-        client,
-      );
-      workflowBaseline = await initializeContractItemWorkflowsWithClient(
-        {
-          actorUserId: input.actorUserId,
-          projectId,
+            initialGrants: grants,
+            lines: contractItems.map((item, index) => ({
+              stableLineId: item.id,
+              budgetSnapshotLineId: item.budgetSnapshotLineId,
+              projectCostNodeId: item.projectCostNodeId,
+              scheduleItemPlacementId: item.scheduleItemPlacementId,
+              description: item.name,
+              amount: item.contractValue,
+              sortOrder: index,
+              contractItem: {
+                displayName: item.name,
+                quantity: item.plannedHours,
+                unit: item.unit,
+                unitRate: item.billingHourlyRate,
+                apuPlanVersion: item.apuPlanVersion,
+                workflowTemplate:
+                  item.workflowTemplate || data.delivery.workflowTemplate,
+                industryTemplate: "bim-services",
+                sourceProvenance: item.provenance,
+              },
+            })),
+          },
+          client,
+        );
+        const initialized = await initializeContractItemWorkflowsWithClient(
+          {
+            actorUserId: input.actorUserId,
+            projectId,
+            contractId: draft.id,
+            contractVersionId: draft.versionId,
+            items: contractItems.map((item) => ({
+              stableLineId: item.id,
+              displayName: item.name,
+              templateKey:
+                item.workflowTemplate || data.delivery.workflowTemplate,
+            })),
+          },
+          client,
+        );
+        workflowBaseline.created += initialized.created;
+        await client.query(
+          `UPDATE job_activation_work_items SET contract_id=$2,contract_version_id=$3,updated_at=now() WHERE intake_id=$1 AND stable_scope_item_id=ANY($4::text[])`,
+          [
+            intake.id,
+            draft.id,
+            draft.versionId,
+            contractItems.map((item) => item.id),
+          ],
+        );
+        drafts.push({
+          profileId: contract.id,
           contractId: draft.id,
           contractVersionId: draft.versionId,
-          items: data.scopeItems.map((item) => ({
-            stableLineId: item.id,
-            displayName: item.name,
-            templateKey:
-              item.workflowTemplate || data.delivery.workflowTemplate,
-          })),
-        },
-        client,
-      );
-      await client.query(
-        `UPDATE job_activation_work_items SET contract_id=$2,contract_version_id=$3,updated_at=now() WHERE intake_id=$1`,
-        [intake.id, draft.id, draft.versionId],
-      );
+          contractItems: contractItems.length,
+          contractValue,
+        });
+      }
     }
+    const draft = drafts[0] ?? null;
     const activationMode = draft ? "commercial" : "core";
     const activationSummary = {
       activationMode,
@@ -1254,7 +1299,8 @@ export async function activateJobIntake(input: {
       tasks: data.scopeItems.length,
       resourceAssignments: data.team.assignments.length,
       contractCreated: Boolean(draft),
-      contractId: draft?.id ?? null,
+      contractId: draft?.contractId ?? null,
+      contracts: drafts,
       commercialWorkflowInstances: workflowBaseline.created,
     };
     const revision = Number(intake.revision) + 1;
@@ -1263,7 +1309,7 @@ export async function activateJobIntake(input: {
       [
         intake.id,
         revision,
-        draft?.id ?? null,
+        draft?.contractId ?? null,
         activationMode,
         JSON.stringify(activationSummary),
         input.actorUserId,
@@ -1294,7 +1340,8 @@ export async function activateJobIntake(input: {
       afterRevision: revision,
       evidence: {
         ...activationSummary,
-        contractVersionId: draft?.versionId ?? null,
+        contractVersionId: draft?.contractVersionId ?? null,
+        contractIds: drafts.map((contract) => contract.contractId),
         coreWorkItemsCreated: core.workItemsCreated,
         coreTasksCreated: core.tasksCreated,
         resourceAssignmentsCreated: core.assignmentsCreated,
@@ -1308,8 +1355,10 @@ export async function activateJobIntake(input: {
     await client.query("COMMIT");
     return {
       intakeId: intake.id,
-      contractId: draft?.id ?? null,
-      contractVersionId: draft?.versionId ?? null,
+      contractId: draft?.contractId ?? null,
+      contractIds: drafts.map((contract) => contract.contractId),
+      contractVersionId: draft?.contractVersionId ?? null,
+      contractVersionIds: drafts.map((contract) => contract.contractVersionId),
       status: "activated",
       activationMode,
       activationSummary,

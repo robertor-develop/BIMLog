@@ -7,7 +7,7 @@ import { logClientError } from "@/lib/client-log";
 import { useAuthStore } from "@/store/auth";
 import { Moon, Printer, Sun } from "lucide-react";
 
-export const BIMLOG_RELEASE_VERSION = "v1.60.27.01";
+export const BIMLOG_RELEASE_VERSION = "v1.60.28.03";
 
 export function Navbar() {
   const { t, tt } = useI18n();

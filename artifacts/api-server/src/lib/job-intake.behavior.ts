@@ -110,6 +110,90 @@ assert.equal(completion.totals.unassignedHours, "0");
 assert.equal(completion.percent, 100);
 assert.equal(completion.ready, true);
 assert.match(completion.fingerprint, /^[a-f0-9]{64}$/);
+const multiContractData = normalizeJobIntakeData({
+  ...data,
+  commercial: {
+    ...data.commercial,
+    contracts: [
+      {
+        id: "OWNER",
+        contractNumber: "OWNER-100",
+        counterpartyName: "Example Client LLC",
+        perspective: "upstream",
+        contractType: "owner_prime",
+      },
+      {
+        id: "SUPPLIER",
+        contractNumber: "PO-200",
+        counterpartyName: "Example Supplier LLC",
+        perspective: "downstream",
+        contractType: "purchase_order",
+      },
+    ],
+  },
+  scopeItems: [
+    { ...data.scopeItems[0], id: "OWNER-ITEM", contractId: "OWNER" },
+    { ...data.scopeItems[0], id: "SUPPLIER-ITEM", contractId: "SUPPLIER" },
+  ],
+  team: {
+    ...data.team,
+    assignments: [
+      { ...data.team.assignments[0], id: "OWNER-A", scopeItemId: "OWNER-ITEM" },
+      {
+        ...data.team.assignments[0],
+        id: "SUPPLIER-A",
+        scopeItemId: "SUPPLIER-ITEM",
+      },
+    ],
+  },
+});
+const multiContractCompletion = jobIntakeCompletion(multiContractData, []);
+assert.equal(multiContractData.commercial.contracts.length, 2);
+assert.deepEqual(
+  multiContractData.scopeItems.map((item) => item.contractId),
+  ["OWNER", "SUPPLIER"],
+);
+assert.equal(multiContractCompletion.ready, true);
+assert.throws(
+  () =>
+    normalizeJobIntakeData({
+      ...data,
+      commercial: { ...data.commercial, contracts: [{ id: "ONLY" }] },
+      scopeItems: [{ ...data.scopeItems[0], contractId: "MISSING" }],
+    }),
+  /Every Contract Item must reference a contract profile/,
+);
+assert.throws(
+  () =>
+    normalizeJobIntakeData({
+      ...data,
+      commercial: {
+        ...data.commercial,
+        contracts: Array.from({ length: 51 }, (_, index) => ({
+          id: `CONTRACT-${index + 1}`,
+        })),
+      },
+    }),
+  /No more than 50 contract profiles/,
+);
+assert.throws(
+  () =>
+    normalizeJobIntakeData({
+      ...data,
+      commercial: {
+        ...data.commercial,
+        contracts: [
+          { id: "FIRST", perspective: "downstream", contractNumber: "PO-200" },
+          {
+            id: "SECOND",
+            perspective: "downstream",
+            contractNumber: " po-200 ",
+          },
+        ],
+      },
+    }),
+  /Contract profiles must use unique numbers within each perspective/,
+);
 assert.equal(
   coreCompletion.ready,
   true,
@@ -179,6 +263,9 @@ assert.match(routes, /expectedRevision: req\.body\.expectedRevision/);
 assert.match(service, /createContractDraftWithClient/);
 assert.match(service, /initializeContractItemWorkflowsWithClient/);
 assert.match(service, /commercialWorkflowInstances: workflowBaseline\.created/);
+assert.match(service, /for \(const contract of data\.commercial\.contracts\)/);
+assert.match(service, /stable_scope_item_id=ANY\(\$4::text\[\]\)/);
+assert.match(service, /contractIds: drafts\.map/);
 assert.match(service, /plannedHours[\s\S]*billingHourlyRate/);
 assert.match(service, /createCoreActivationWithClient/);
 assert.match(service, /fullCommercialActivation/);
@@ -207,6 +294,8 @@ assert.match(ui, /missingItems\.map/);
 assert.match(ui, /capabilities\.costValuePlanner/);
 assert.match(ui, /capabilities\.budget/);
 assert.match(ui, /capabilities\.contracts/);
+assert.match(ui, /Add contract profile/);
+assert.match(ui, /Reassign this contract's Contract Items/);
 assert.match(ui, /All changes saved/);
 assert.match(ui, /window\.setTimeout\([\s\S]*void persist\(dataRef\.current\)/);
 assert.doesNotMatch(
@@ -233,6 +322,7 @@ assert.match(ui, /@media\(max-width:900px\)/);
 assert.match(bulkEditor, /Paste Excel range/);
 assert.match(bulkEditor, /Check row\(s\):/);
 assert.match(bulkEditor, /Advanced overrides for row/);
+assert.match(bulkEditor, /Contract profile row/);
 assert.match(bulkEditor, /MAX_ITEMS = 500/);
 assert.match(bulkEditor, /Contract Item Name/);
 assert.match(bulkEditor, /Advanced overrides/);
@@ -259,6 +349,7 @@ console.log(
       "resource-activation",
       "bounded-upload",
       "contract-activation",
+      "multi-contract-canonical-activation",
       "automatic-workflow-baseline",
       "startup",
       "bilingual-entitlement-aware-ui",

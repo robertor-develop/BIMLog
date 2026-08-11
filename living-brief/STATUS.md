@@ -1,5 +1,24 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.60.28.03 Smart Intake multi-contract activation local candidate - 2026-08-11
+
+- Build 3 extends the one canonical Job Intake draft with up to 50 independent
+  contract profiles. Each profile preserves its own legal identity,
+  counterparty, dates, currency, selected APU or pricing version, optional
+  workflow override, and budget mode. Every Contract Item is assigned to one
+  owning contract rather than inheriting one project-wide APU.
+- Activation creates or reuses the canonical Commercial contracts, freezes the
+  selected APU or pricing snapshot independently for each contract, applies
+  project-to-contract-to-item workflow inheritance, and records the related
+  Contract Item and budget relationships. It remains idempotent and does not
+  create a second Intake, contract, APU, workflow, or budget authority.
+- The Smart Intake spreadsheet mapping, 100-plus-row bulk editor, optional
+  source documents, original provenance, and ordered draft persistence remain
+  in the same English/Spanish guided workflow.
+- This is local candidate truth for web release `v1.60.28.03`. It is not yet
+  committed, pushed, published, deployed, production verified, customer
+  accepted, or live accepted.
+
 ## Smart Intake and bulk Contract Item local candidate - 2026-08-11
 
 - The current local candidate extends the one canonical Job Intake draft with

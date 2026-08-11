@@ -11,6 +11,8 @@ type Props = {
   defaultApuVersion: number | null;
   defaultWorkflow: string;
   capabilities: { costValuePlanner: boolean; budget: boolean };
+  contracts: any[];
+  defaultContractId: string;
   budgetSnapshotId: string;
   budgetLines: any[];
   onBudgetSnapshotChange: (id: string) => void;
@@ -23,7 +25,13 @@ type Props = {
 const MAX_ITEMS = 500;
 
 function newItem(
-  props: Pick<Props, "defaultRate" | "defaultApuVersion" | "defaultWorkflow">,
+  props: Pick<
+    Props,
+    | "defaultRate"
+    | "defaultApuVersion"
+    | "defaultWorkflow"
+    | "defaultContractId"
+  >,
 ) {
   return {
     id: `CI-${crypto.randomUUID()}`,
@@ -34,6 +42,7 @@ function newItem(
     unit: "Hours",
     apuPlanVersion: props.defaultApuVersion,
     workflowTemplate: props.defaultWorkflow,
+    contractId: props.defaultContractId,
     budgetSnapshotLineId: "",
     projectCostNodeId: "",
     scheduleItemPlacementId: null,
@@ -323,6 +332,27 @@ export function ContractItemBulkEditor(props: Props) {
               )}
             </summary>
             <div className="ji-grid three">
+              <label>
+                {props.tt("Contract profile", "Perfil de contrato")}
+                <select
+                  value={item.contractId || props.defaultContractId}
+                  aria-label={props.tt(
+                    `Contract profile row ${index + 1}`,
+                    `Perfil de contrato fila ${index + 1}`,
+                  )}
+                  onChange={(event) =>
+                    update(index, { contractId: event.target.value })
+                  }
+                >
+                  {props.contracts.map((contract) => (
+                    <option key={contract.id} value={contract.id}>
+                      {contract.contractNumber ||
+                        contract.counterpartyName ||
+                        props.tt("Draft contract", "Contrato borrador")}
+                    </option>
+                  ))}
+                </select>
+              </label>
               <label>
                 {props.tt("Contract Item ID", "ID de Partida de Contrato")}
                 <input

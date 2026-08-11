@@ -253,6 +253,9 @@ export function normalizeJobIntakeData(raw: unknown) {
     input.review && typeof input.review === "object" ? input.review : {};
   const scopeItems = Array.isArray(input.scopeItems) ? input.scopeItems : [];
   const assignments = Array.isArray(team.assignments) ? team.assignments : [];
+  const contractInputs = Array.isArray(commercial.contracts)
+    ? commercial.contracts
+    : [];
   if (scopeItems.length > 500)
     throw new FinancialControlError(
       400,
@@ -265,6 +268,103 @@ export function normalizeJobIntakeData(raw: unknown) {
       "JOB_INTAKE_ASSIGNMENT_LIMIT",
       "No more than 500 assignments are accepted.",
     );
+  if (contractInputs.length > 50)
+    throw new FinancialControlError(
+      400,
+      "JOB_INTAKE_CONTRACT_LIMIT",
+      "No more than 50 contract profiles are accepted.",
+    );
+  const contractIds = new Set<string>();
+  const normalizedContracts = (
+    contractInputs.length
+      ? contractInputs
+      : [
+          {
+            id: "PRIMARY",
+            quotationNumber: commercial.quotationNumber,
+            contractNumber: commercial.contractNumber,
+            counterpartyName: commercial.counterpartyName,
+            perspective: commercial.perspective,
+            contractType: commercial.contractType,
+            paymentTerms: commercial.paymentTerms,
+            effectiveDate: commercial.effectiveDate,
+            completionDate: commercial.completionDate,
+          },
+        ]
+  ).map((rawContract: any, index: number) => {
+    const contract =
+      rawContract && typeof rawContract === "object" ? rawContract : {};
+    const id =
+      optionalText(contract.id, `commercial.contracts[${index}].id`, 100) ||
+      `CONTRACT-${index + 1}`;
+    if (contractIds.has(id))
+      throw new FinancialControlError(
+        400,
+        "JOB_INTAKE_CONTRACT_ID_DUPLICATE",
+        "Contract profile IDs must be unique within the Intake.",
+      );
+    contractIds.add(id);
+    return {
+      id,
+      quotationNumber: optionalText(
+        contract.quotationNumber,
+        `commercial.contracts[${index}].quotationNumber`,
+        100,
+      ),
+      contractNumber: optionalText(
+        contract.contractNumber,
+        `commercial.contracts[${index}].contractNumber`,
+        100,
+      ),
+      counterpartyName: optionalText(
+        contract.counterpartyName,
+        `commercial.contracts[${index}].counterpartyName`,
+        200,
+      ),
+      perspective: ["upstream", "downstream"].includes(
+        String(contract.perspective),
+      )
+        ? String(contract.perspective)
+        : "downstream",
+      contractType: [
+        "owner_prime",
+        "subcontract",
+        "purchase_order",
+        "consultant_agreement",
+        "other_commitment",
+      ].includes(String(contract.contractType))
+        ? String(contract.contractType)
+        : "subcontract",
+      paymentTerms: optionalText(
+        contract.paymentTerms,
+        `commercial.contracts[${index}].paymentTerms`,
+        1000,
+      ),
+      effectiveDate: optionalText(
+        contract.effectiveDate,
+        `commercial.contracts[${index}].effectiveDate`,
+        20,
+      ),
+      completionDate: optionalText(
+        contract.completionDate,
+        `commercial.contracts[${index}].completionDate`,
+        20,
+      ),
+    };
+  });
+  const contractLegalKeys = new Set<string>();
+  for (const contract of normalizedContracts) {
+    if (!contract.contractNumber) continue;
+    const legalKey = `${contract.perspective}:${contract.contractNumber.toLowerCase()}`;
+    if (contractLegalKeys.has(legalKey))
+      throw new FinancialControlError(
+        400,
+        "JOB_INTAKE_CONTRACT_LEGAL_ID_DUPLICATE",
+        "Contract profiles must use unique numbers within each perspective.",
+      );
+    contractLegalKeys.add(legalKey);
+  }
+  const primaryContract = normalizedContracts[0];
   const scopeItemIds = new Set<string>();
   const normalizedItems = scopeItems.map((rawItem: any, index: number) => {
     const item = rawItem && typeof rawItem === "object" ? rawItem : {};
@@ -340,6 +440,9 @@ export function normalizeJobIntakeData(raw: unknown) {
         `scopeItems[${index}].workflowTemplate`,
         100,
       ),
+      contractId:
+        optionalText(item.contractId, `scopeItems[${index}].contractId`, 100) ||
+        primaryContract.id,
       provenance:
         item.provenance &&
         typeof item.provenance === "object" &&
@@ -392,6 +495,12 @@ export function normalizeJobIntakeData(raw: unknown) {
           : null,
     };
   });
+  if (normalizedItems.some((item) => !contractIds.has(item.contractId)))
+    throw new FinancialControlError(
+      400,
+      "JOB_INTAKE_CONTRACT_ITEM_PROFILE_INVALID",
+      "Every Contract Item must reference a contract profile in this Intake.",
+    );
   const normalizedAssignments = assignments.map(
     (rawAssignment: any, index: number) => {
       const assignment =
@@ -463,52 +572,41 @@ export function normalizeJobIntakeData(raw: unknown) {
     },
     scopeItems: normalizedItems,
     commercial: {
+      contracts: normalizedContracts,
       quotationNumber: optionalText(
-        commercial.quotationNumber,
+        primaryContract.quotationNumber,
         "commercial.quotationNumber",
         100,
       ),
       contractNumber: optionalText(
-        commercial.contractNumber,
+        primaryContract.contractNumber,
         "commercial.contractNumber",
         100,
       ),
       counterpartyName: optionalText(
-        commercial.counterpartyName,
+        primaryContract.counterpartyName,
         "commercial.counterpartyName",
         200,
       ),
-      perspective: ["upstream", "downstream"].includes(
-        String(commercial.perspective),
-      )
-        ? String(commercial.perspective)
-        : "downstream",
-      contractType: [
-        "owner_prime",
-        "subcontract",
-        "purchase_order",
-        "consultant_agreement",
-        "other_commitment",
-      ].includes(String(commercial.contractType))
-        ? String(commercial.contractType)
-        : "subcontract",
+      perspective: primaryContract.perspective,
+      contractType: primaryContract.contractType,
       budgetSnapshotId: optionalText(
         commercial.budgetSnapshotId,
         "commercial.budgetSnapshotId",
         100,
       ),
       paymentTerms: optionalText(
-        commercial.paymentTerms,
+        primaryContract.paymentTerms,
         "commercial.paymentTerms",
         1000,
       ),
       effectiveDate: optionalText(
-        commercial.effectiveDate,
+        primaryContract.effectiveDate,
         "commercial.effectiveDate",
         20,
       ),
       completionDate: optionalText(
-        commercial.completionDate,
+        primaryContract.completionDate,
         "commercial.completionDate",
         20,
       ),
@@ -582,6 +680,7 @@ export function jobIntakeCoreFingerprint(data: JobIntakeData) {
             budgetSnapshotLineId: _budgetSnapshotLineId,
             projectCostNodeId: _projectCostNodeId,
             contractValue: _contractValue,
+            contractId: _contractId,
             ...item
           }) => item,
         ),
@@ -647,8 +746,17 @@ export function jobIntakeCompletion(
     data.team.assignments.every((assignment: any) =>
       positive(assignment.internalHourlyRate),
     );
+  const assignedContractIds = new Set(
+    data.scopeItems.map((item) => item.contractId),
+  );
   const contractTermsReady =
-    !!data.commercial.contractNumber && !!data.commercial.counterpartyName;
+    data.commercial.contracts.length > 0 &&
+    data.commercial.contracts.every(
+      (contract: any) =>
+        contract.contractNumber &&
+        contract.counterpartyName &&
+        assignedContractIds.has(contract.id),
+    );
   const budgetReady = !!data.commercial.budgetSnapshotId && contractItemsReady;
   const stageChecks: Record<JobIntakeStage, boolean[]> = {
     documents: activeDocuments.length ? [data.review.sourceConfirmed] : [],
@@ -764,16 +872,28 @@ export function jobIntakeCompletion(
         es: "Vincule cada partida con una línea de presupuesto aprobada.",
       },
     capabilities.contracts &&
-      !data.commercial.contractNumber && {
+      data.commercial.contracts.some(
+        (contract: any) => !contract.contractNumber,
+      ) && {
         code: "contract_number",
-        en: "Enter the negotiated contract number.",
+        en: "Enter the negotiated number for every contract profile.",
         es: "Ingrese el número de contrato negociado.",
       },
     capabilities.contracts &&
-      !data.commercial.counterpartyName && {
+      data.commercial.contracts.some(
+        (contract: any) => !contract.counterpartyName,
+      ) && {
         code: "counterparty",
-        en: "Enter the contracting counterparty.",
+        en: "Enter the counterparty for every contract profile.",
         es: "Ingrese la contraparte contractual.",
+      },
+    capabilities.contracts &&
+      data.commercial.contracts.some(
+        (contract: any) => !assignedContractIds.has(contract.id),
+      ) && {
+        code: "contract_assignment",
+        en: "Assign at least one Contract Item to every contract profile.",
+        es: "Asigne al menos una Partida de Contrato a cada perfil de contrato.",
       },
     capabilities.budget &&
       !data.commercial.budgetSnapshotId && {

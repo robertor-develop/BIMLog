@@ -156,6 +156,13 @@ ${appRoutes()}
   exposes only Contract Item Name and Quantity for 100-plus rows; unit, currency, APU/rate, calculated
   value, workflow, budget, and descriptive overrides remain explicit Advanced controls. Activation,
   rather than import preview, creates shared operational and entitled Commercial records.
+- Build 3 multi-contract activation keeps up to 50 independent contract profiles in the same
+  canonical Intake draft. Every Contract Item references one owning contract. Activation creates
+  or reuses the canonical Commercial contract records, freezes the selected APU or pricing snapshot
+  separately for each contract, applies project-to-contract-to-item workflow inheritance, and writes
+  the connected Contract Item and budget relationships idempotently. Source documents remain
+  optional, ordered draft persistence remains intact, and no duplicate Intake, contract, APU,
+  workflow, or budget authority is created.
 - Commercial Contract Items turn an approved budget line and saved APU version into an operational
   contract scope. Quantity multiplied by the frozen APU selling price calculates the contractual value;
   the immutable item snapshot preserves the APU content, evaluation, fingerprint, BIM Submittal display,
