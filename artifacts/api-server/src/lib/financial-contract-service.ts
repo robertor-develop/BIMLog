@@ -110,7 +110,7 @@ async function validateFile(client: Client, projectId: number, value: unknown, r
   return id;
 }
 
-async function pinContractItemApuSnapshots(client: Client, projectId: number, lines: ContractLineInput[]) {
+async function pinContractItemApuSnapshots(client: Client, projectId: number, currency: string, lines: ContractLineInput[]) {
   const versions = [...new Set(lines.flatMap((line) => line.contractItem.apuPlanVersion == null ? [] : [line.contractItem.apuPlanVersion]))];
   const rows = versions.length === 0 ? [] : (await client.query(
     `SELECT version,content,evaluation,content_fingerprint FROM generic_cost_value_plan_versions WHERE project_id=$1 AND version=ANY($2::integer[])`,
@@ -123,6 +123,8 @@ async function pinContractItemApuSnapshots(client: Client, projectId: number, li
     if (version == null) throw new FinancialControlError(400, "CONTRACT_ITEM_APU_REQUIRED", "Each new Contract Item requires a saved APU version.");
     const source = byVersion.get(version);
     if (!source) throw new FinancialControlError(400, "CONTRACT_ITEM_APU_INVALID", "The selected APU version does not exist in this project.");
+    if (contractCurrency(source.content?.currency) !== currency)
+      throw new FinancialControlError(400, "CONTRACT_ITEM_APU_CURRENCY_MISMATCH", "Contract Item APU currency must match the Contract currency.");
     const unitRate = exactPositiveAmount(String(source.content?.sellingPrice ?? ""), "apu.sellingPrice");
     if (scaledSignedDecimal(unitRate) !== scaledSignedDecimal(line.contractItem.unitRate))
       throw new FinancialControlError(400, "CONTRACT_ITEM_APU_RATE_MISMATCH", "Contract Item Unit Rate must equal the selected APU selling price.");
@@ -193,7 +195,7 @@ export async function createContractDraftWithClient(input: CreateContractDraftIn
   assertReconciledTotal(lines, originalValue, "the original contract value");
   const budgetSnapshotId = boundedText(input.budgetSnapshotId, "budgetSnapshotId", 3, 100);
   const auth = await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.prepare", operation: "prepare", client });
-  lines = await pinContractItemApuSnapshots(client, projectId, lines);
+  lines = await pinContractItemApuSnapshots(client, projectId, currency, lines);
   await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, [`financial-contract:${projectId}:${perspective}:${legalNumber}`]);
   let contractId = input.contractId == null ? uuid() : boundedText(input.contractId, "contractId", 3, 100);
   let root = (await client.query(`SELECT * FROM financial_contracts WHERE id=$1 AND project_id=$2`, [contractId, projectId])).rows[0];

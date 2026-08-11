@@ -142,9 +142,13 @@ assert.equal(
 const migration = read("./job-intake-migration.ts");
 const contract = read("./job-intake-contract.ts");
 const service = read("./job-intake-service.ts");
+const financialContractService = read("./financial-contract-service.ts");
 const routes = read("../routes/job-intake.ts");
 const app = read("../app.ts");
 const ui = read("../../../bimlog/src/pages/JobIntakeWorkspace.tsx");
+const bulkEditor = read(
+  "../../../bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+);
 const schema = read("../../../../lib/db/src/schema/job-intakes.ts");
 assert.doesNotMatch(
   migration,
@@ -183,11 +187,19 @@ assert.match(service, /client_name/);
 assert.match(service, /\.xlsm/);
 assert.match(service, /uploadJobIntakeDocument[\s\S]*FOR UPDATE/);
 assert.match(service, /Reload the intake before uploading this document/);
+assert.match(service, /previewJobIntakeDocumentMapping/);
+assert.match(service, /applyJobIntakeDocumentMapping/);
+assert.match(service, /contract_items_imported/);
+assert.match(service, /existingById/);
+assert.match(service, /provenance: mapped\.provenance/);
+assert.match(financialContractService, /CONTRACT_ITEM_APU_CURRENCY_MISMATCH/);
+assert.match(routes, /mapping-preview/);
+assert.match(routes, /mapping-apply/);
 assert.match(contract, /internalHourlyRate/);
 assert.match(app, /startJobIntakeMigration\(\)/);
 assert.match(app, /await waitForJobIntakeMigration\(\)/);
 assert.match(ui, /Core included/);
-assert.match(ui, /Las horas planificadas conectan el alcance/);
+assert.match(ui, /La Cantidad conecta cada Partida de Contrato/);
 assert.match(ui, /Los costos horarios internos son una función opcional/);
 assert.match(ui, /Cómputo de cantidades/);
 assert.match(ui, /Aún falta/);
@@ -197,13 +209,27 @@ assert.match(ui, /capabilities\.budget/);
 assert.match(ui, /capabilities\.contracts/);
 assert.match(ui, /All changes saved/);
 assert.match(ui, /window\.setTimeout\([\s\S]*void persist\(dataRef\.current\)/);
+assert.match(ui, /\(\) => \(\) => \{[\s\S]*void persist\(dataRef\.current\)/);
+assert.doesNotMatch(ui, /financial\/apu`\)\.catch\(\(\) => null\)/);
+assert.doesNotMatch(ui, /financial\/workspace`\)\.catch\(\(\) => null\)/);
 assert.match(ui, /saveState === "error"/);
+assert.match(ui, /aria-live="polite"/);
 assert.match(ui, /formData\.set\("expectedRevision"/);
 assert.match(ui, /confirmationFingerprint: saved\.completion\.fingerprint/);
 assert.match(ui, /<fieldset className="ji-workspace" disabled=\{busy\}>/);
 assert.match(ui, /\.xlsm/);
+assert.match(ui, /Inspect & map Contract Items/);
+assert.match(ui, /Confirm and append to draft/);
+assert.match(ui, /mappingFingerprint: mappingPreview\.mappingFingerprint/);
+assert.match(ui, /<ContractItemBulkEditor/);
 assert.match(ui, /Activate operational job/);
 assert.match(ui, /@media\(max-width:900px\)/);
+assert.match(bulkEditor, /Paste Excel range/);
+assert.match(bulkEditor, /MAX_ITEMS = 500/);
+assert.match(bulkEditor, /Contract Item Name/);
+assert.match(bulkEditor, /Advanced overrides/);
+assert.match(bulkEditor, /exactProduct/);
+assert.match(bulkEditor, /CI-\$\{crypto\.randomUUID\(\)\}/);
 
 console.log(
   JSON.stringify({

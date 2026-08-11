@@ -11,6 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import { FinancialProjectShell } from "@/components/layout/FinancialProjectShell";
+import { ContractItemBulkEditor } from "@/components/job-intake/ContractItemBulkEditor";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
@@ -71,6 +72,7 @@ const blank = {
 const css = `
 .ji-workspace{border:0;padding:0;margin:0;min-width:0}
 .ji{max-width:1180px;margin:0 auto;padding:24px 0 80px}.ji *{box-sizing:border-box}.ji-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;margin-bottom:18px}.ji h1{font-size:30px;margin:4px 0}.ji p{color:#536174}.ji-progress{min-width:260px;padding:16px;border:1px solid #d9e1ec;border-radius:14px;background:#fff}.ji-progress strong{font-size:26px}.ji-bar{height:9px;background:#e8edf5;border-radius:99px;overflow:hidden;margin-top:8px}.ji-bar span{display:block;height:100%;background:#2563eb}.ji-layout{display:grid;grid-template-columns:220px minmax(0,1fr);gap:18px}.ji-nav{position:sticky;top:16px;align-self:start;background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:10px}.ji-nav button{width:100%;border:0;background:transparent;padding:10px;border-radius:9px;text-align:left;display:flex;justify-content:space-between;cursor:pointer}.ji-nav button.on{background:#eaf1ff;color:#1649ad;font-weight:700}.ji-card{background:#fff;border:1px solid #d9e1ec;border-radius:14px;padding:20px;margin-bottom:16px;scroll-margin-top:20px}.ji-card h2{margin:0 0 4px;font-size:19px}.ji-guide{background:#eff6ff;border-left:4px solid #2563eb;padding:12px;margin:12px 0;border-radius:6px;color:#334155}.ji-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.ji-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}.ji label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#475569}.ji input,.ji select,.ji textarea{width:100%;border:1px solid #cbd5e1;border-radius:8px;padding:10px;background:#fff;color:#0f172a}.ji textarea{min-height:78px;resize:vertical}.ji button{border:1px solid #cbd5e1;border-radius:8px;padding:9px 12px;background:#fff;cursor:pointer}.ji button.primary{background:#1d4ed8;color:#fff;border-color:#1d4ed8;font-weight:700}.ji button.danger{color:#b42318}.ji button:disabled{opacity:.5;cursor:not-allowed}.ji-row{border:1px solid #e2e8f0;border-radius:10px;padding:14px;margin-top:10px}.ji-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px}.ji-rate{background:#f0fdf4;border:1px solid #bbf7d0;border-radius:12px;padding:14px;margin:12px 0}.ji-rate strong{display:block;color:#166534}.ji-total{font-size:15px;font-weight:800;color:#0f3f9f}.ji-missing{background:#fff7ed;border:1px solid #fed7aa;border-radius:10px;padding:12px}.ji-check{display:flex!important;grid-template-columns:18px 1fr!important;align-items:flex-start;gap:8px!important;font-size:14px!important}.ji-check input{width:auto;margin-top:2px}.ji-doc{display:flex;justify-content:space-between;gap:12px;border-bottom:1px solid #e2e8f0;padding:10px 0}.ji-footer{position:sticky;bottom:10px;display:flex;justify-content:space-between;gap:10px;padding:12px 14px;border:1px solid #cbd5e1;background:rgba(255,255,255,.96);border-radius:12px;box-shadow:0 8px 30px rgba(15,23,42,.12)}.ji-save-state{font-size:12px;font-weight:700;color:#475569}.ji-save-state.saving,.ji-save-state.unsaved{color:#9a3412}.ji-save-state.error{color:#b42318}.ji-error{background:#fff1f2;color:#9f1239;border:1px solid #fecdd3;padding:12px;border-radius:10px;margin-bottom:12px}.ji-ok{background:#ecfdf5;color:#166534;padding:10px;border-radius:9px}.ji-small{font-size:12px;color:#64748b}.ji-upload{display:grid;grid-template-columns:1fr 160px 140px auto;gap:8px;align-items:end}.ji-paid{display:inline-flex;align-items:center;border-radius:999px;padding:3px 8px;background:#fff7ed;color:#9a3412;font-size:10px;font-weight:800;margin-left:8px}.ji-lock{background:#f8fafc;border:1px dashed #94a3b8;border-radius:10px;padding:14px;color:#475569;margin:10px 0}.ji-activation{background:#ecfdf5;border:1px solid #86efac;border-radius:12px;padding:16px;margin-bottom:16px}.ji-activation-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:10px}.ji-stat{background:#fff;border:1px solid #d1fae5;border-radius:8px;padding:10px}.ji-nav em{font-size:9px;color:#9a3412;font-style:normal}@media(max-width:900px){.ji-layout{grid-template-columns:1fr}.ji-nav{position:static;display:flex;overflow:auto}.ji-nav button{min-width:145px}.ji-grid,.ji-grid.three,.ji-activation-grid{grid-template-columns:1fr}.ji-upload{grid-template-columns:1fr}.ji-head{display:block}.ji-progress{margin-top:12px}}
+.ji-mapper{margin:14px 0;padding:16px;border:1px solid #93c5fd;border-radius:12px;background:#f8fbff}.ji-mapper-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.ji-mapper-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}.ji-preview{overflow:auto;margin-top:12px}.ji-preview table{width:100%;border-collapse:collapse;font-size:12px}.ji-preview th,.ji-preview td{padding:7px;border:1px solid #dbe4f0;text-align:left}.ji-preview th{background:#eaf1ff}.ji-issues{color:#9f1239;font-weight:700}@media(max-width:900px){.ji-mapper-grid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.ji-mapper-grid{grid-template-columns:1fr}.ji-mapper-head{display:block}}
 `;
 
 export function JobIntakeWorkspace() {
@@ -88,6 +90,15 @@ export function JobIntakeWorkspace() {
     [apu, setApu] = useState<any>(null),
     [workspace, setWorkspace] = useState<any>(null),
     [budgetLines, setBudgetLines] = useState<any[]>([]),
+    [mappingDocument, setMappingDocument] = useState<any>(null),
+    [mappingForm, setMappingForm] = useState({
+      sheetName: "",
+      headerRow: 1,
+      nameColumn: 0,
+      quantityColumn: 1,
+    }),
+    [mappingPreview, setMappingPreview] = useState<any>(null),
+    [mappingBusy, setMappingBusy] = useState(false),
     [saveState, setSaveState] = useState<
       "saved" | "unsaved" | "saving" | "error"
     >("saved");
@@ -132,10 +143,10 @@ export function JobIntakeWorkspace() {
           : found;
       const [plan, budget] = await Promise.all([
         current.capabilities?.costValuePlanner
-          ? api(`/projects/${projectId}/financial/apu`).catch(() => null)
+          ? api(`/projects/${projectId}/financial/apu`)
           : Promise.resolve(null),
         current.capabilities?.budget
-          ? api(`/projects/${projectId}/financial/workspace`).catch(() => null)
+          ? api(`/projects/${projectId}/financial/workspace`)
           : Promise.resolve(null),
       ]);
       revisionRef.current = current.revision;
@@ -255,6 +266,24 @@ export function JobIntakeWorkspace() {
       if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     };
   }, [data, intake, persist]);
+  useEffect(
+    () => () => {
+      if (saveTimerRef.current) {
+        window.clearTimeout(saveTimerRef.current);
+        saveTimerRef.current = null;
+      }
+      if (
+        intakeRef.current &&
+        JSON.stringify(dataRef.current) !== lastSavedRef.current &&
+        !(
+          intakeRef.current.status === "activated" &&
+          intakeRef.current.activatedContractId
+        )
+      )
+        void persist(dataRef.current).catch(() => undefined);
+    },
+    [persist],
+  );
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
       if (
@@ -273,12 +302,15 @@ export function JobIntakeWorkspace() {
       ...old,
       [section]: { ...old[section], [field]: value },
     }));
-  const scopeChange = (index: number, field: string, value: unknown) =>
+  const setScopeItems = (updater: (items: any[]) => any[]) =>
     setData((old: any) => ({
       ...old,
-      scopeItems: old.scopeItems.map((item: any, i: number) =>
-        i === index ? { ...item, [field]: value } : item,
-      ),
+      scopeItems: updater(old.scopeItems),
+      review: {
+        ...old.review,
+        scopeConfirmed: false,
+        pricingConfirmed: false,
+      },
     }));
   const assignmentChange = (index: number, field: string, value: unknown) =>
     setData((old: any) => ({
@@ -292,8 +324,8 @@ export function JobIntakeWorkspace() {
     }));
   const latestRate = String(apu?.sellingPrice ?? "0.00"),
     latestApuVersion = apu?.version ?? null;
-  const money = (hours: unknown, rate: unknown) =>
-    (Number(hours || 0) * Number(rate || 0)).toFixed(2);
+  const money = (quantity: unknown, rate: unknown) =>
+    (Number(quantity || 0) * Number(rate || 0)).toFixed(2);
   const save = async () => {
     setError("");
     setNotice("");
@@ -349,24 +381,91 @@ export function JobIntakeWorkspace() {
       setError(cause instanceof Error ? cause.message : String(cause));
     }
   };
-  const applySuggestions = (doc: any) => {
-    const suggestions = doc.extractionSummary?.suggestedScopeItems ?? [];
-    if (!suggestions.length) return;
-    setData((old: any) => ({
-      ...old,
-      scopeItems: suggestions.map((item: any, i: number) => ({
-        ...item,
-        id: item.id || crypto.randomUUID(),
-        billingHourlyRate: item.billingHourlyRate || latestRate,
-        apuPlanVersion: latestApuVersion,
-        budgetSnapshotLineId: "",
-        projectCostNodeId: "",
-        description: "",
-        assumptions: "",
-        exclusions: "",
-      })),
-    }));
-    document.getElementById("ji-scope")?.scrollIntoView({ behavior: "smooth" });
+  const openMapper = (doc: any) => {
+    const sheet = doc.extractionSummary?.sheets?.[0];
+    if (!sheet) return;
+    setMappingDocument(doc);
+    setMappingForm({
+      sheetName: sheet.name,
+      headerRow: 1,
+      nameColumn: 0,
+      quantityColumn: Math.min(1, Math.max(0, sheet.columnCount - 1)),
+    });
+    setMappingPreview(null);
+    setError("");
+  };
+  const previewMapping = async () => {
+    if (!mappingDocument) return;
+    setMappingBusy(true);
+    setError("");
+    try {
+      setMappingPreview(
+        await api(
+          `/projects/${projectId}/intake/documents/${mappingDocument.id}/mapping-preview`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(mappingForm),
+          },
+        ),
+      );
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setMappingBusy(false);
+    }
+  };
+  const applyMapping = async () => {
+    if (!mappingDocument || !mappingPreview) return;
+    setBusy(true);
+    setMappingBusy(true);
+    setError("");
+    try {
+      const saved = await persist(dataRef.current);
+      if (!saved)
+        throw new Error(
+          tt(
+            "The Intake is not ready to save.",
+            "El ingreso no está listo para guardar.",
+          ),
+        );
+      const result = await api(
+        `/projects/${projectId}/intake/documents/${mappingDocument.id}/mapping-apply`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            ...mappingForm,
+            expectedRevision: saved.revision,
+            mappingFingerprint: mappingPreview.mappingFingerprint,
+          }),
+        },
+      );
+      revisionRef.current = result.revision;
+      intakeRef.current = result;
+      dataRef.current = result.data;
+      lastSavedRef.current = JSON.stringify(result.data);
+      pendingSaveRef.current = null;
+      setIntake(result);
+      setData(result.data);
+      setSaveState("saved");
+      setMappingDocument(null);
+      setMappingPreview(null);
+      setNotice(
+        tt(
+          `${mappingPreview.rows.length} Contract Items imported and saved.`,
+          `Se importaron y guardaron ${mappingPreview.rows.length} Partidas de Contrato.`,
+        ),
+      );
+      document
+        .getElementById("ji-scope")
+        ?.scrollIntoView({ behavior: "smooth" });
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setBusy(false);
+      setMappingBusy(false);
+    }
   };
   const activate = async () => {
     setBusy(true);
@@ -446,7 +545,7 @@ export function JobIntakeWorkspace() {
       ({
         documents: tt("Source documents", "Documentos fuente"),
         identity: tt("Job identity", "Identidad del trabajo"),
-        scope: tt("Scope & hours", "Alcance y horas"),
+        scope: tt("Contract Items", "Partidas de Contrato"),
         pricing: tt("APU pricing", "Precios APU"),
         contract:
           !capabilities.contracts && capabilities.budget
@@ -537,6 +636,20 @@ export function JobIntakeWorkspace() {
       true,
     ],
   ].filter(([, , visible]) => visible) as Array<[string, string, boolean]>;
+  const mappingSheet = mappingDocument?.extractionSummary?.sheets?.find(
+    (sheet: any) => sheet.name === mappingForm.sheetName,
+  );
+  const headerCells = mappingSheet?.rows?.[mappingForm.headerRow - 1] ?? [];
+  const columnLabel = (index: number) => {
+    let value = index + 1,
+      label = "";
+    while (value > 0) {
+      value -= 1;
+      label = String.fromCharCode(65 + (value % 26)) + label;
+      value = Math.floor(value / 26);
+    }
+    return `${label} · ${headerCells[index] || tt("Unnamed column", "Columna sin nombre")}`;
+  };
   return (
     <FinancialProjectShell projectId={projectId} activeTab="intake">
       <style>{css}</style>
@@ -592,7 +705,11 @@ export function JobIntakeWorkspace() {
             {error}
           </div>
         )}
-        {notice && <div className="ji-ok">{notice}</div>}
+        {notice && (
+          <div className="ji-ok" role="status" aria-live="polite">
+            {notice}
+          </div>
+        )}
         {intake.activation && (
           <section className="ji-activation">
             <strong>
@@ -688,8 +805,8 @@ export function JobIntakeWorkspace() {
                 {guide && (
                   <div className="ji-guide">
                     {tt(
-                      "Optional: upload a quotation, proposal, contract, takeoff, or estimate when it helps. Originals remain preserved. Excel, XLSM, and CSV rows can seed the scope below; PDF and Word require your confirmation.",
-                      "Opcional: cargue una cotización, propuesta, contrato, cómputo de cantidades o estimado cuando sea útil. Los originales quedan preservados. Las filas de Excel, XLSM y CSV pueden iniciar el alcance; los archivos PDF y Word requieren su confirmación.",
+                      "Optional: upload a quotation, proposal, contract, takeoff, or estimate when it helps. Originals remain preserved. Inspect and map Excel, XLSM, or CSV sheets before adding Contract Items; PDF and Word remain manual-review evidence only.",
+                      "Opcional: cargue una cotización, propuesta, contrato, cómputo de cantidades o estimado cuando sea útil. Los originales quedan preservados. Inspeccione y mapee hojas de Excel, XLSM o CSV antes de agregar Partidas de Contrato; PDF y Word permanecen solamente como evidencia para revisión manual.",
                     )}
                   </div>
                 )}
@@ -750,10 +867,15 @@ export function JobIntakeWorkspace() {
                           </div>
                         </div>
                         <div className="ji-actions">
-                          {doc.extractionSummary?.suggestedScopeItems?.length >
-                            0 && (
-                            <button onClick={() => applySuggestions(doc)}>
-                              {tt("Use extracted rows", "Usar filas extraídas")}
+                          {doc.extractionSummary?.sheets?.length > 0 && (
+                            <button
+                              type="button"
+                              onClick={() => openMapper(doc)}
+                            >
+                              {tt(
+                                "Inspect & map Contract Items",
+                                "Inspeccionar y mapear Partidas de Contrato",
+                              )}
                             </button>
                           )}
                           <button
@@ -795,6 +917,246 @@ export function JobIntakeWorkspace() {
                         </div>
                       </div>
                     ),
+                )}
+                {mappingDocument && mappingSheet && (
+                  <div
+                    className="ji-mapper"
+                    role="region"
+                    aria-label={tt(
+                      "Spreadsheet import mapper",
+                      "Mapeador de importación de hoja de cálculo",
+                    )}
+                  >
+                    <div className="ji-mapper-head">
+                      <div>
+                        <strong>
+                          {tt(
+                            "Confirm the source mapping",
+                            "Confirme el mapeo de origen",
+                          )}
+                        </strong>
+                        <div className="ji-small">
+                          {mappingDocument.fileName} · SHA{" "}
+                          {mappingDocument.sourceHash?.slice(0, 12)}…
+                        </div>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setMappingDocument(null);
+                          setMappingPreview(null);
+                        }}
+                      >
+                        {tt("Close", "Cerrar")}
+                      </button>
+                    </div>
+                    <p>
+                      {tt(
+                        "Choose the sheet, header row, Contract Item Name column, and Quantity column. Previewing never creates financial records; confirmed rows append to this autosaved Intake draft.",
+                        "Elija la hoja, la fila de encabezado, la columna Nombre de la Partida y la columna Cantidad. La vista previa nunca crea registros financieros; las filas confirmadas se agregan a este borrador de Ingreso con guardado automático.",
+                      )}
+                    </p>
+                    <div className="ji-mapper-grid">
+                      <label>
+                        {tt("Sheet", "Hoja")}
+                        <select
+                          value={mappingForm.sheetName}
+                          onChange={(event) => {
+                            const sheetName = event.target.value;
+                            const selectedSheet =
+                              mappingDocument.extractionSummary.sheets.find(
+                                (sheet: any) => sheet.name === sheetName,
+                              );
+                            setMappingForm((old) => ({
+                              ...old,
+                              sheetName,
+                              headerRow: 1,
+                              nameColumn: 0,
+                              quantityColumn: Math.min(
+                                1,
+                                Math.max(
+                                  0,
+                                  Number(selectedSheet?.columnCount || 1) - 1,
+                                ),
+                              ),
+                            }));
+                            setMappingPreview(null);
+                          }}
+                        >
+                          {mappingDocument.extractionSummary.sheets.map(
+                            (sheet: any) => (
+                              <option key={sheet.name} value={sheet.name}>
+                                {sheet.name} · {sheet.rowCount} ×{" "}
+                                {sheet.columnCount}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                      </label>
+                      <label>
+                        {tt("Header row", "Fila de encabezado")}
+                        <select
+                          value={mappingForm.headerRow}
+                          onChange={(event) => {
+                            setMappingForm((old) => ({
+                              ...old,
+                              headerRow: Number(event.target.value),
+                            }));
+                            setMappingPreview(null);
+                          }}
+                        >
+                          {mappingSheet.rows
+                            .slice(0, 25)
+                            .map((row: unknown[], index: number) => (
+                              <option key={index} value={index + 1}>
+                                {index + 1} ·{" "}
+                                {row.filter(Boolean).slice(0, 3).join(" | ") ||
+                                  tt("Blank", "Vacía")}
+                              </option>
+                            ))}
+                        </select>
+                      </label>
+                      <label>
+                        {tt(
+                          "Contract Item Name column",
+                          "Columna Nombre de la Partida",
+                        )}
+                        <select
+                          value={mappingForm.nameColumn}
+                          onChange={(event) => {
+                            setMappingForm((old) => ({
+                              ...old,
+                              nameColumn: Number(event.target.value),
+                            }));
+                            setMappingPreview(null);
+                          }}
+                        >
+                          {Array.from(
+                            { length: mappingSheet.columnCount },
+                            (_, index) => (
+                              <option key={index} value={index}>
+                                {columnLabel(index)}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                      </label>
+                      <label>
+                        {tt("Quantity column", "Columna Cantidad")}
+                        <select
+                          value={mappingForm.quantityColumn}
+                          onChange={(event) => {
+                            setMappingForm((old) => ({
+                              ...old,
+                              quantityColumn: Number(event.target.value),
+                            }));
+                            setMappingPreview(null);
+                          }}
+                        >
+                          {Array.from(
+                            { length: mappingSheet.columnCount },
+                            (_, index) => (
+                              <option key={index} value={index}>
+                                {columnLabel(index)}
+                              </option>
+                            ),
+                          )}
+                        </select>
+                      </label>
+                    </div>
+                    <div className="ji-actions">
+                      <button
+                        type="button"
+                        className="primary"
+                        disabled={
+                          mappingBusy ||
+                          mappingForm.nameColumn === mappingForm.quantityColumn
+                        }
+                        onClick={() => void previewMapping()}
+                      >
+                        {mappingBusy
+                          ? tt("Inspecting…", "Inspeccionando…")
+                          : tt(
+                              "Preview mapped rows",
+                              "Previsualizar filas mapeadas",
+                            )}
+                      </button>
+                    </div>
+                    {mappingPreview && (
+                      <div className="ji-preview">
+                        <p>
+                          <strong>
+                            {tt(
+                              `${mappingPreview.rows.length} valid rows`,
+                              `${mappingPreview.rows.length} filas válidas`,
+                            )}
+                          </strong>
+                        </p>
+                        {mappingPreview.issues?.length > 0 && (
+                          <div className="ji-issues" role="alert">
+                            {mappingPreview.issues.map(
+                              (issue: any, index: number) => (
+                                <div key={index}>
+                                  {tt("Row", "Fila")} {issue.sourceRow}:{" "}
+                                  {tt(issue.en, issue.es)}
+                                </div>
+                              ),
+                            )}
+                          </div>
+                        )}
+                        <table>
+                          <thead>
+                            <tr>
+                              <th>{tt("Source row", "Fila fuente")}</th>
+                              <th>
+                                {tt(
+                                  "Contract Item Name",
+                                  "Nombre de la Partida",
+                                )}
+                              </th>
+                              <th>{tt("Quantity", "Cantidad")}</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {mappingPreview.rows
+                              .slice(0, 25)
+                              .map((row: any) => (
+                                <tr key={row.id}>
+                                  <td>{row.provenance.sourceRow}</td>
+                                  <td>{row.name}</td>
+                                  <td>{row.quantity}</td>
+                                </tr>
+                              ))}
+                          </tbody>
+                        </table>
+                        {mappingPreview.rows.length > 25 && (
+                          <p className="ji-small">
+                            {tt(
+                              `Showing 25 of ${mappingPreview.rows.length} rows.`,
+                              `Mostrando 25 de ${mappingPreview.rows.length} filas.`,
+                            )}
+                          </p>
+                        )}
+                        <div className="ji-actions">
+                          <button
+                            type="button"
+                            className="primary"
+                            disabled={
+                              busy ||
+                              mappingPreview.issues?.length > 0 ||
+                              mappingPreview.rows.length === 0
+                            }
+                            onClick={() => void applyMapping()}
+                          >
+                            {tt(
+                              "Confirm and append to draft",
+                              "Confirmar y agregar al borrador",
+                            )}
+                          </button>
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 )}
               </section>
               <section className="ji-card" id="ji-identity">
@@ -875,230 +1237,51 @@ export function JobIntakeWorkspace() {
                 <div className="ji-rate">
                   <strong>
                     {tt(
-                      "Planned hours connect scope, staffing, and Commercial value.",
-                      "Las horas planificadas conectan el alcance, el personal y el valor comercial.",
+                      "Quantity connects each Contract Item to its inherited unit, staffing plan, and Commercial value.",
+                      "La Cantidad conecta cada Partida de Contrato con su unidad heredada, el plan de personal y el valor comercial.",
                     )}
                   </strong>
                   {capabilities.costValuePlanner
                     ? tt(
-                        "Planned hours × billing hourly rate = billable value. The latest saved Cost & Value plan supplies the default billing rate.",
-                        "Horas planificadas × tarifa facturable = valor facturable. El último plan de costo y valor guardado suministra la tarifa predeterminada.",
+                        "Quantity × inherited APU/unit rate = calculated value. The latest compatible saved Cost & Value plan supplies the default rate.",
+                        "Cantidad × tarifa APU/unitaria heredada = valor calculado. El último plan compatible de costo y valor guardado suministra la tarifa predeterminada.",
                       )
                     : tt(
-                        "Every user can define scope and planned hours. Billing rates and APU links are optional Commercial features.",
-                        "Todo usuario puede definir el alcance y las horas planificadas. Las tarifas facturables y los vínculos APU son funciones comerciales opcionales.",
+                        "Every user can define Contract Item Name and Quantity. Rates and APU links are optional Commercial features.",
+                        "Todo usuario puede definir Nombre y Cantidad de la Partida de Contrato. Las tarifas y los vínculos APU son funciones comerciales opcionales.",
                       )}
                 </div>
                 {guide && (
                   <div className="ji-guide">
                     {capabilities.costValuePlanner
                       ? tt(
-                          "Each row becomes an operational work item and can also become an APU-backed Contract Item when the complete Commercial package is enabled.",
-                          "Cada fila se convierte en una partida operativa y también puede convertirse en un ítem contractual respaldado por APU cuando el paquete Comercial completo está habilitado.",
+                          "Each draft row has a stable Contract Item ID. Activation creates the shared operational item and, when entitled, its APU-backed Commercial snapshot without a duplicate Intake store.",
+                          "Cada fila del borrador tiene un ID estable de Partida de Contrato. La activación crea la partida operativa compartida y, cuando corresponde, su instantánea Comercial respaldada por APU sin duplicar el almacén de Ingreso.",
                         )
                       : tt(
-                          "Add one row for each deliverable or scope package. Activation creates operational work items even without paid Commercial features.",
-                          "Agregue una fila por cada entregable o paquete de alcance. La activación crea partidas operativas aun sin funciones comerciales pagadas.",
+                          "Add one Contract Item per deliverable or work package. Activation creates operational work items even without paid Commercial features.",
+                          "Agregue una Partida de Contrato por cada entregable o paquete de trabajo. La activación crea partidas operativas aun sin funciones comerciales pagadas.",
                         )}
                   </div>
                 )}
-                {data.scopeItems.map((item: any, index: number) => (
-                  <div className="ji-row" key={item.id}>
-                    <div className="ji-grid three">
-                      <label>
-                        {tt("Scope item", "Partida de alcance")}
-                        <input
-                          value={item.name}
-                          onChange={(e) =>
-                            scopeChange(index, "name", e.target.value)
-                          }
-                        />
-                      </label>
-                      <label>
-                        {tt("Planned hours", "Horas planificadas")}
-                        <input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.plannedHours}
-                          onChange={(e) =>
-                            scopeChange(index, "plannedHours", e.target.value)
-                          }
-                        />
-                      </label>
-                      {capabilities.costValuePlanner && (
-                        <>
-                          <label>
-                            {tt(
-                              "Billing hourly rate",
-                              "Tarifa facturable por hora",
-                            )}
-                            <input
-                              type="number"
-                              min="0"
-                              step="0.01"
-                              value={item.billingHourlyRate}
-                              onChange={(e) =>
-                                scopeChange(
-                                  index,
-                                  "billingHourlyRate",
-                                  e.target.value,
-                                )
-                              }
-                            />
-                          </label>
-                          <label>
-                            {tt(
-                              "Cost & Value plan version",
-                              "Versión del plan de costo y valor",
-                            )}
-                            <select
-                              value={item.apuPlanVersion ?? ""}
-                              onChange={(e) =>
-                                scopeChange(
-                                  index,
-                                  "apuPlanVersion",
-                                  e.target.value
-                                    ? Number(e.target.value)
-                                    : null,
-                                )
-                              }
-                            >
-                              <option value="">
-                                {tt(
-                                  "Select saved plan",
-                                  "Seleccione un plan guardado",
-                                )}
-                              </option>
-                              {latestApuVersion && (
-                                <option value={latestApuVersion}>
-                                  v{latestApuVersion} · {latestRate}/
-                                  {tt("hr", "h")}
-                                </option>
-                              )}
-                            </select>
-                          </label>
-                        </>
-                      )}
-                      {capabilities.budget && (
-                        <>
-                          <label>
-                            {tt(
-                              "Approved budget snapshot",
-                              "Versión aprobada del presupuesto",
-                            )}
-                            <select
-                              value={data.commercial.budgetSnapshotId}
-                              onChange={(e) =>
-                                void selectSnapshot(e.target.value)
-                              }
-                            >
-                              <option value="">
-                                {tt("Select version", "Seleccione una versión")}
-                              </option>
-                              {workspace?.snapshots?.map((s: any) => (
-                                <option key={s.id} value={s.id}>
-                                  v{s.budgetVersion || s.version} · {s.total}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                          <label>
-                            {tt("Budget line", "Línea presupuestaria")}
-                            <select
-                              value={item.budgetSnapshotLineId}
-                              onChange={(e) => {
-                                const line = budgetLines.find(
-                                  (l: any) => String(l.id) === e.target.value,
-                                );
-                                scopeChange(
-                                  index,
-                                  "budgetSnapshotLineId",
-                                  e.target.value,
-                                );
-                                scopeChange(
-                                  index,
-                                  "projectCostNodeId",
-                                  line?.project_cost_node_id || "",
-                                );
-                              }}
-                            >
-                              <option value="">
-                                {tt("Select line", "Seleccione una línea")}
-                              </option>
-                              {budgetLines.map((line: any) => (
-                                <option key={line.id} value={line.id}>
-                                  {line.project_code} · {line.project_name} ·{" "}
-                                  {line.amount}
-                                </option>
-                              ))}
-                            </select>
-                          </label>
-                        </>
-                      )}
-                    </div>
-                    <div className="ji-actions">
-                      {capabilities.costValuePlanner && (
-                        <span className="ji-total">
-                          {tt("Billable value", "Valor facturable")}:{" "}
-                          {money(item.plannedHours, item.billingHourlyRate)}{" "}
-                          {data.identity.currency}
-                        </span>
-                      )}
-                      <button
-                        className="danger"
-                        onClick={() =>
-                          setData((old: any) => ({
-                            ...old,
-                            scopeItems: old.scopeItems.filter(
-                              (_: any, i: number) => i !== index,
-                            ),
-                          }))
-                        }
-                      >
-                        <Trash2 size={14} /> {tt("Remove", "Eliminar")}
-                      </button>
-                    </div>
-                  </div>
-                ))}
-                {!capabilities.costValuePlanner && (
-                  <div className="ji-lock">
-                    {tt(
-                      "Cost & Value Planner is not enabled for this user. Scope and planned hours remain fully available.",
-                      "El Planificador de costo y valor no está habilitado para este usuario. El alcance y las horas planificadas permanecen totalmente disponibles.",
-                    )}
-                  </div>
-                )}
-                <button
-                  onClick={() =>
-                    setData((old: any) => ({
-                      ...old,
-                      scopeItems: [
-                        ...old.scopeItems,
-                        {
-                          id: crypto.randomUUID(),
-                          name: "",
-                          description: "",
-                          plannedHours: "0.00",
-                          billingHourlyRate: capabilities.costValuePlanner
-                            ? latestRate
-                            : "0.00",
-                          apuPlanVersion: capabilities.costValuePlanner
-                            ? latestApuVersion
-                            : null,
-                          budgetSnapshotLineId: "",
-                          projectCostNodeId: "",
-                          scheduleItemPlacementId: null,
-                          unit: "Hours",
-                          assumptions: "",
-                          exclusions: "",
-                        },
-                      ],
-                    }))
+                <ContractItemBulkEditor
+                  items={data.scopeItems}
+                  setItems={setScopeItems}
+                  currency={data.identity.currency}
+                  defaultRate={capabilities.costValuePlanner ? latestRate : "0"}
+                  defaultApuVersion={
+                    capabilities.costValuePlanner ? latestApuVersion : null
                   }
-                >
-                  <Plus size={14} /> {tt("Add scope item", "Agregar partida")}
-                </button>
+                  defaultWorkflow={data.delivery.workflowTemplate}
+                  capabilities={capabilities}
+                  budgetSnapshotId={data.commercial.budgetSnapshotId}
+                  budgetLines={budgetLines}
+                  onBudgetSnapshotChange={(id) => void selectSnapshot(id)}
+                  snapshots={workspace?.snapshots ?? []}
+                  tt={tt}
+                  onError={setError}
+                  onNotice={setNotice}
+                />
               </section>
               <section className="ji-card" id="ji-contract">
                 <h2>
@@ -1561,7 +1744,11 @@ export function JobIntakeWorkspace() {
                 <span>
                   <strong>{completion.percent}%</strong> ·{" "}
                   {firstMissing || tt("Ready", "Listo")} ·{" "}
-                  <span className={`ji-save-state ${saveState}`}>
+                  <span
+                    className={`ji-save-state ${saveState}`}
+                    role="status"
+                    aria-live="polite"
+                  >
                     {saveState === "saving"
                       ? tt("Saving...", "Guardando...")
                       : saveState === "unsaved"

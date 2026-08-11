@@ -61,6 +61,31 @@ assert.equal(contractItem.contractItem.contractValue, "5531.4");
 assert.equal(contractItem.contractItem.displayName, "Basement Composite");
 assert.equal(contractItem.contractItem.unit, "Hours");
 check("Contract Item exact value", "180 Hours multiplied by 30.73 equals 5531.40 without floating arithmetic");
+const provenanceItem = normalizeContractLines([
+  {
+    ...contractItem,
+    contractItem: {
+      ...contractItem.contractItem,
+      sourceProvenance: {
+        source: "clipboard",
+        sourceRow: 3,
+        nested: { unbounded: "must not survive" },
+      },
+    },
+  },
+])[0];
+assert.deepEqual(provenanceItem.contractItem.sourceProvenance, {
+  source: "clipboard",
+  sourceDocumentId: null,
+  sourceHash: null,
+  fileName: null,
+  sheetName: null,
+  headerRow: null,
+  sourceRow: 3,
+  nameColumn: null,
+  quantityColumn: null,
+});
+check("Contract Item provenance bounded", "only known bounded provenance fields survive normalization");
 throws(() => normalizeContractLines([{ stableLineId: "ITEM-BAD", budgetSnapshotLineId: "snapshot-line-1", projectCostNodeId: "project-node-1", description: "Mismatch", amount: "1", sortOrder: 0, contractItem: { displayName: "Mismatch", quantity: "2", unit: "Hours", unitRate: "2", apuPlanVersion: 1, workflowTemplate: "bim-submittal", industryTemplate: "bim-services" } }]), "CONTRACT_ITEM_VALUE_MISMATCH");
 check("Contract Item mismatch denied", "quantity multiplied by unit rate is authoritative");
 throws(() => normalizeContractLines([{ stableLineId: "ITEM-ZERO", budgetSnapshotLineId: "snapshot-line-1", projectCostNodeId: "project-node-1", description: "Zero quantity", amount: "0", sortOrder: 0, contractItem: { displayName: "Zero quantity", quantity: "0", unit: "Hours", unitRate: "30.73", apuPlanVersion: 1, workflowTemplate: "bim-submittal", industryTemplate: "bim-services" } }]), "CONTRACT_ITEM_QUANTITY_INVALID");

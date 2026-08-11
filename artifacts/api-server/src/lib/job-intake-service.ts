@@ -19,6 +19,7 @@ import {
   jobIntakeCompletion,
   jobIntakeCoreFingerprint,
   normalizeJobIntakeData,
+  previewSmartIntakeMapping,
   type JobIntakeCapabilities,
   type JobIntakeData,
 } from "./job-intake-contract";
@@ -401,54 +402,28 @@ export async function saveJobIntake(input: {
   }
 }
 
-function column(row: unknown[], headers: string[], aliases: string[]) {
-  const normalized = headers.map((header) =>
-    header.toLowerCase().replace(/[^a-z0-9]/g, ""),
-  );
-  const index = normalized.findIndex((header) => aliases.includes(header));
-  return index < 0 ? "" : String(row[index] ?? "").trim();
-}
 async function extraction(buffer: Buffer, fileName: string) {
-  const extracted = await extractFileText(buffer, fileName);
-  if (extracted.isSpreadsheet && extracted.rows?.length) {
-    const headers = extracted.rows[0].map((value) => String(value));
-    const suggestedScopeItems = extracted.rows
-      .slice(1, 101)
-      .map((row, index) => ({
-        id: `IMPORTED-${index + 1}`,
-        name: column(row, headers, [
-          "name",
-          "description",
-          "scope",
-          "item",
-          "submittal",
-          "workitem",
-        ]),
-        plannedHours: column(row, headers, [
-          "hours",
-          "plannedhours",
-          "laborhours",
-          "quantity",
-          "qty",
-        ]),
-        billingHourlyRate: column(row, headers, [
-          "billingrate",
-          "hourlyrate",
-          "rate",
-          "unitrate",
-          "price",
-        ]),
-        unit: column(row, headers, ["unit", "uom"]) || "Hours",
-      }))
-      .filter(
-        (item) => item.name || item.plannedHours || item.billingHourlyRate,
-      );
+  let extracted: Awaited<ReturnType<typeof extractFileText>>;
+  try {
+    extracted = await extractFileText(buffer, fileName);
+  } catch (error) {
+    if (![".xls", ".xlsx", ".xlsm", ".csv"].includes(path.extname(fileName).toLowerCase()))
+      throw error;
+    throw new FinancialControlError(
+      400,
+      "JOB_INTAKE_SPREADSHEET_PARSE_FAILED",
+      "The spreadsheet source could not be parsed safely. Confirm its file type and export it again.",
+    );
+  }
+  if (extracted.isSpreadsheet && extracted.sheets?.length) {
     return {
       status: "structured_preview",
       summary: {
-        rowCount: Math.max(0, extracted.rows.length - 1),
-        headers: headers.slice(0, 50),
-        suggestedScopeItems,
+        workbookType: path.extname(fileName).slice(1).toLowerCase(),
+        sheetCount: extracted.workbookSheetCount ?? extracted.sheets.length,
+        sheetsTruncated: extracted.sheetsTruncated === true,
+        sheets: extracted.sheets,
+        requiresExplicitMapping: true,
       },
     };
   }
@@ -470,6 +445,260 @@ async function extraction(buffer: Buffer, fileName: string) {
     status: "text_preview",
     summary: { preview: extracted.text.slice(0, 2000) },
   };
+}
+
+export async function previewJobIntakeDocumentMapping(input: {
+  actorUserId: number;
+  projectId: unknown;
+  documentId: unknown;
+  sheetName: unknown;
+  headerRow: unknown;
+  nameColumn: unknown;
+  quantityColumn: unknown;
+}) {
+  await waitForJobIntakeMigration();
+  const projectId = positiveId(input.projectId, "projectId");
+  await scope(input.actorUserId, projectId);
+  const documentId = boundedText(input.documentId, "documentId", 1, 100);
+  const row = (
+    await pool.query(
+      `SELECT d.id,d.source_hash,d.extraction_status,d.extraction_summary,d.removed_at,f.file_name
+       FROM job_intake_documents d
+       JOIN job_intakes i ON i.id=d.intake_id
+       JOIN files f ON f.id=d.file_id
+       WHERE d.id=$1 AND d.project_id=$2 AND i.project_id=$2`,
+      [documentId, projectId],
+    )
+  ).rows[0];
+  if (!row || row.removed_at)
+    throw new FinancialControlError(
+      404,
+      "JOB_INTAKE_DOCUMENT_NOT_FOUND",
+      "The active intake source document was not found.",
+    );
+  if (row.extraction_status !== "structured_preview")
+    throw new FinancialControlError(
+      400,
+      "JOB_INTAKE_MAPPING_SOURCE_INVALID",
+      "Only a preserved spreadsheet source can be mapped to Contract Items.",
+    );
+  return previewSmartIntakeMapping({
+    documentId: row.id,
+    sourceHash: row.source_hash,
+    fileName: row.file_name,
+    sheets: row.extraction_summary?.sheets,
+    sheetsTruncated: row.extraction_summary?.sheetsTruncated,
+    sheetName: input.sheetName,
+    headerRow: input.headerRow,
+    nameColumn: input.nameColumn,
+    quantityColumn: input.quantityColumn,
+  });
+}
+
+export async function applyJobIntakeDocumentMapping(input: {
+  actorUserId: number;
+  projectId: unknown;
+  documentId: unknown;
+  expectedRevision: unknown;
+  mappingFingerprint: unknown;
+  sheetName: unknown;
+  headerRow: unknown;
+  nameColumn: unknown;
+  quantityColumn: unknown;
+}) {
+  await waitForJobIntakeMigration();
+  const projectId = positiveId(input.projectId, "projectId");
+  await scope(input.actorUserId, projectId);
+  const documentId = boundedText(input.documentId, "documentId", 1, 100);
+  const expectedRevision = Number(input.expectedRevision);
+  if (!Number.isSafeInteger(expectedRevision) || expectedRevision < 1)
+    throw new FinancialControlError(
+      400,
+      "JOB_INTAKE_REVISION_INVALID",
+      "A valid expected revision is required.",
+    );
+  const mappingFingerprint = boundedText(
+    input.mappingFingerprint,
+    "mappingFingerprint",
+    64,
+    64,
+  );
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const intake = (
+      await client.query(
+        `SELECT * FROM job_intakes WHERE project_id=$1 FOR UPDATE`,
+        [projectId],
+      )
+    ).rows[0];
+    if (!intake)
+      throw new FinancialControlError(
+        404,
+        "JOB_INTAKE_NOT_FOUND",
+        "Initialize this job intake before importing Contract Items.",
+      );
+    if (intake.status === "activated")
+      throw new FinancialControlError(
+        409,
+        "JOB_INTAKE_ACTIVATED",
+        "An activated intake is immutable.",
+      );
+    if (Number(intake.revision) !== expectedRevision)
+      throw new FinancialControlError(
+        409,
+        "JOB_INTAKE_STALE",
+        "Reload the intake before importing mapped Contract Items.",
+      );
+    const document = (
+      await client.query(
+        `SELECT d.id,d.source_hash,d.extraction_status,d.extraction_summary,d.removed_at,f.file_name
+         FROM job_intake_documents d JOIN files f ON f.id=d.file_id
+         WHERE d.id=$1 AND d.intake_id=$2 AND d.project_id=$3 FOR SHARE`,
+        [documentId, intake.id, projectId],
+      )
+    ).rows[0];
+    if (!document || document.removed_at)
+      throw new FinancialControlError(
+        404,
+        "JOB_INTAKE_DOCUMENT_NOT_FOUND",
+        "The active intake source document was not found.",
+      );
+    if (document.extraction_status !== "structured_preview")
+      throw new FinancialControlError(
+        400,
+        "JOB_INTAKE_MAPPING_SOURCE_INVALID",
+        "Only a preserved spreadsheet source can be mapped to Contract Items.",
+      );
+    const preview = previewSmartIntakeMapping({
+      documentId: document.id,
+      sourceHash: document.source_hash,
+      fileName: document.file_name,
+      sheets: document.extraction_summary?.sheets,
+      sheetsTruncated: document.extraction_summary?.sheetsTruncated,
+      sheetName: input.sheetName,
+      headerRow: input.headerRow,
+      nameColumn: input.nameColumn,
+      quantityColumn: input.quantityColumn,
+    });
+    if (preview.mappingFingerprint !== mappingFingerprint)
+      throw new FinancialControlError(
+        409,
+        "JOB_INTAKE_MAPPING_STALE",
+        "The confirmed mapping no longer matches the preserved preview.",
+      );
+    if (preview.issues.length)
+      throw new FinancialControlError(
+        409,
+        "JOB_INTAKE_MAPPING_HAS_ISSUES",
+        "Resolve every mapped source-row issue before importing Contract Items.",
+      );
+    if (!preview.rows.length)
+      throw new FinancialControlError(
+        400,
+        "JOB_INTAKE_MAPPING_EMPTY",
+        "The confirmed mapping contains no Contract Item rows.",
+      );
+    const data = normalizeJobIntakeData(intake.data);
+    const capabilities = await capabilitiesFor(input.actorUserId, client);
+    const latestPlan = capabilities.costValuePlanner
+      ? ((
+          await client.query(
+            `SELECT version,content FROM generic_cost_value_plan_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1`,
+            [projectId],
+          )
+        ).rows[0] ?? null)
+      : null;
+    const inheritedRate =
+      latestPlan?.content?.currency === data.identity.currency
+        ? String(latestPlan.content.sellingPrice ?? "0")
+        : "0";
+    const inheritedApuVersion =
+      inheritedRate !== "0" ? Number(latestPlan.version) : null;
+    const existingById = new Map(
+      data.scopeItems.map((item) => [item.id, item]),
+    );
+    for (const mapped of preview.rows as Array<any>) {
+      const existing = existingById.get(String(mapped.id));
+      existingById.set(String(mapped.id), {
+        ...(existing ?? {
+          id: mapped.id,
+          description: "",
+          billingHourlyRate: inheritedRate,
+          contractValue: "0",
+          unit: "Hours",
+          apuPlanVersion: inheritedApuVersion,
+          budgetSnapshotLineId: "",
+          projectCostNodeId: "",
+          scheduleItemPlacementId: null,
+          assumptions: "",
+          exclusions: "",
+          workflowTemplate: data.delivery.workflowTemplate,
+        }),
+        name: mapped.name,
+        plannedHours: mapped.quantity,
+        provenance: mapped.provenance,
+      });
+    }
+    const mergedItems = [...existingById.values()];
+    if (mergedItems.length > 500)
+      throw new FinancialControlError(
+        400,
+        "JOB_INTAKE_SCOPE_LIMIT",
+        "No more than 500 Contract Items are accepted.",
+      );
+    const nextData = normalizeJobIntakeData({
+      ...data,
+      scopeItems: mergedItems,
+      review: {
+        ...data.review,
+        scopeConfirmed: false,
+        pricingConfirmed: false,
+      },
+    });
+    const docs = await documents(intake.id, client);
+    const completion = jobIntakeCompletion(nextData, docs, capabilities);
+    const revision = expectedRevision + 1;
+    await client.query(
+      `UPDATE job_intakes SET data=$2::jsonb,completion=$3::jsonb,status=$4,revision=$5,updated_by_id=$6,updated_at=now() WHERE id=$1`,
+      [
+        intake.id,
+        JSON.stringify(nextData),
+        JSON.stringify(completion),
+        completion.ready ? "ready" : "draft",
+        revision,
+        input.actorUserId,
+      ],
+    );
+    await event(client, {
+      intakeId: intake.id,
+      projectId,
+      actorUserId: input.actorUserId,
+      eventType: "contract_items_imported",
+      beforeRevision: expectedRevision,
+      afterRevision: revision,
+      evidence: {
+        documentId,
+        sourceHash: document.source_hash,
+        sheetName: preview.sheetName,
+        headerRow: preview.headerRow,
+        nameColumn: preview.nameColumn,
+        quantityColumn: preview.quantityColumn,
+        mappingFingerprint,
+        importedRows: preview.rows.length,
+        totalRows: mergedItems.length,
+      },
+    });
+    await client.query("COMMIT");
+  } catch (error) {
+    try {
+      await client.query("ROLLBACK");
+    } catch {}
+    throw error;
+  } finally {
+    client.release();
+  }
+  return getJobIntake({ actorUserId: input.actorUserId, projectId });
 }
 
 export async function uploadJobIntakeDocument(input: {
@@ -988,8 +1217,10 @@ export async function activateJobIntake(input: {
               unit: item.unit,
               unitRate: item.billingHourlyRate,
               apuPlanVersion: item.apuPlanVersion,
-              workflowTemplate: data.delivery.workflowTemplate,
+              workflowTemplate:
+                item.workflowTemplate || data.delivery.workflowTemplate,
               industryTemplate: "bim-services",
+              sourceProvenance: item.provenance,
             },
           })),
         },
@@ -1004,7 +1235,8 @@ export async function activateJobIntake(input: {
           items: data.scopeItems.map((item) => ({
             stableLineId: item.id,
             displayName: item.name,
-            templateKey: data.delivery.workflowTemplate,
+            templateKey:
+              item.workflowTemplate || data.delivery.workflowTemplate,
           })),
         },
         client,
