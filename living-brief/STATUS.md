@@ -1,8 +1,31 @@
 # STATUS.md - Current Accepted Platform State
 
-## Invitation and Job Intake release candidate - 2026-08-11
+## Smart Intake and bulk Contract Item local candidate - 2026-08-11
 
-- The local `codex/living-brief-runtime-closure-20260805` candidate repairs
+- The current local candidate extends the one canonical Job Intake draft with
+  bounded XLS/XLSX/XLSM/CSV workbook inspection. The user explicitly selects
+  the sheet and header row and maps Contract Item Name and Quantity before any
+  rows are appended. Ambiguous or truncated previews cannot be confirmed.
+  Original document identity, source hash, sheet, row, header, and mapped
+  columns remain attached as provenance; PDF and Word extraction remains
+  manual-review evidence and cannot silently create financial records.
+- The responsive bulk editor defaults to only Contract Item Name and Quantity,
+  accepts pasted two-column Excel ranges and more than 100 rows, supports row
+  add/remove and quantity-wide edits, and hides generated stable IDs, inherited
+  unit/currency/APU/rate/workflow, calculated value, and per-row overrides under
+  Advanced. Confirmed imports append to the existing autosaved revision and
+  never replace unrelated entered or imported rows.
+- This phase adds no Intake, contract, APU, workflow, or budget store. Drafts
+  remain in `job_intakes.data`; activation continues creating the shared
+  operational baseline and, when entitled, canonical Commercial Contract Item
+  snapshots with source provenance and per-item workflow inheritance.
+- This is local source-candidate truth only. It is not pushed, published,
+  deployed, production verified, customer accepted, or live accepted.
+
+## Invitation and Job Intake accepted source - 2026-08-11
+
+- Pushed commit `1a45653691c750a5929ba6acd25ec415b66ef26b`, present on both
+  GitHub `main` and `master` per the authorized operator report, repairs
   project membership onboarding around one canonical company-bound invitation
   path. Existing BIMLog users are added directly; new-user invitations retain
   the inviting company and project; normalized-email registration accepts all
@@ -16,9 +39,9 @@
   draft and bind mutations to the saved revision so stale work cannot silently
   replace a newer revision.
 - The Team, registration, Intake, Help Center, and operating-manual wording is
-  maintained in English and Spanish. This is source-candidate truth only. It is
-  not pushed, published, deployed, production verified, customer accepted, or
-  live accepted; those actions remain outside this task.
+  maintained in English and Spanish. This is accepted pushed-source truth, not
+  publication, deployment, production verification, customer acceptance, or
+  live acceptance.
 
 ## Operational-register live-acceptance correction - 2026-07-31
 

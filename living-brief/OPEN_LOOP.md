@@ -2,6 +2,26 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## Smart Intake and Contract Item editor release gates - 2026-08-11
+
+1. Exercise XLSX, XLSM, and CSV sources with multiple sheets, preambles,
+   non-first headers, reordered columns, blank and ambiguous rows, 100-plus
+   valid rows, stale revisions, stale fingerprints, reload, and repeated apply.
+2. Verify desktop and narrow-width English/Spanish keyboard and screen-reader
+   behavior for sheet/header/column selection, issue presentation, Excel paste,
+   row add/remove, quantity-wide edits, Advanced disclosure, autosave status,
+   and reload without lost rows.
+3. Verify in an isolated database that confirmed mappings append rather than
+   replace, preserve document/hash/cell provenance, inherit only currency-
+   compatible saved APU/rate defaults, and activate through the existing shared
+   operational and Commercial records without a duplicate Intake authority.
+4. Keep canonical multi-contract activation, per-contract APU snapshots,
+   workflow inheritance, and consolidated budgets as the following phase. Do
+   not introduce a duplicate contract, item, APU, workflow, or budget store.
+5. Treat local source, test, typecheck, and build success as local evidence
+   only. Push, publication, deployment, production/database verification, and
+   customer acceptance require separate authorization and remain open.
+
 ## Invitation and Job Intake release gates - 2026-08-11
 
 1. Preserve the canonical company-bound invitation and direct-member path;
@@ -12,9 +32,9 @@ This is the operating register for unfinished BIMLog work. It exists so customer
    upload, ordered autosave recovery, document removal, stale-revision refusal,
    reload, and activation in English desktop and Spanish narrow-width browser
    states before live acceptance.
-3. Keep Smart Intake flexible import/mapping and the spreadsheet-style editor
-   for 100-plus contract items as the next product phase; this candidate does
-   not claim that phase is implemented.
+3. The flexible Smart Intake mapping and 100-plus Contract Item editor are now
+   a separate local candidate described above; they are not part of pushed
+   commit `1a45653691c750a5929ba6acd25ec415b66ef26b`.
 4. Keep canonical multi-contract activation, per-contract APU snapshots,
    workflow inheritance, and consolidated budgets as the following phase. Do
    not introduce a duplicate contract, item, APU, workflow, or budget store.

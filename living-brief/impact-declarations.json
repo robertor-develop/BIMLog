@@ -8622,157 +8622,153 @@
       "reviewedChangeSha256": "bf5949da23a7d341e26a92341bccdcd64942078a1bf4f59c3b6bae6b98730dd1"
     },
     {
-      "taskId": "release-whitespace-seal-reconciliation-20260811",
-      "reviewedThroughCommit": "1a45653691c750a5929ba6acd25ec415b66ef26b",
-      "reviewedAt": "2026-08-11T14:03:00-04:00",
-      "status": "whitespace_only_release_seal",
-      "captureTiming": "same_release_task",
-      "summary": "Reconciles the final whitespace-only Team Performance source commit after the prior Living Brief seal without changing application behavior, schema, tests, or release scope.",
-      "workstreams": [
-        "release-seal",
-        "living-brief"
-      ],
-      "authorities": [
-        {
-          "key": "ecosystem_doctrine",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Removing trailing whitespace does not change product ownership, organizational boundaries, or ecosystem doctrine."
-        },
-        {
-          "key": "claude",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The operating, verification, and publication boundaries remain unchanged by this bookkeeping reconciliation."
-        },
-        {
-          "key": "quality",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The whitespace-only source commit preserves the already-passing application, schema, test, typecheck, and build evidence."
-        },
-        {
-          "key": "vision",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No user workflow, product objective, or accepted product behavior changed."
-        },
-        {
-          "key": "platform",
-          "result": "updated",
-          "reason": "The platform record now binds the final whitespace-only source identity to the exact release commit."
-        },
-        {
-          "key": "plugin",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No Navisworks plugin, desktop integration, connector, or provider behavior changed."
-        },
-        {
-          "key": "report_design_system",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No report template, printable artifact, PDF renderer, or governed report layout changed."
-        },
-        {
-          "key": "standards_register",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No standard, regulatory rule, contractual interpretation, or compliance claim changed."
-        },
-        {
-          "key": "status",
-          "result": "updated",
-          "reason": "Status records that the final source commit is whitespace-only and does not reopen product verification."
-        },
-        {
-          "key": "open_loop",
-          "result": "updated",
-          "reason": "Open Loop preserves the existing push and publication boundaries while recording the sealed source identity."
-        },
-        {
-          "key": "audit",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Historical evidence remains untouched and no prior acceptance conclusion is rewritten."
-        }
-      ],
-      "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
-        "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
-      ],
-      "reviewedChangeSha256": "f8baaf924a72a8ff0bf9c70d45d9464844cccd3ed433e85a73008b7dce252ff4"
+        "taskId":  "schema-parity-release-seal-20260811",
+        "reviewedThroughCommit":  "08151f39e0db79c0196d50e64cd60b651c4f4992",
+        "reviewedAt":  "2026-08-11T14:36:00-04:00",
+        "status":  "local_schema_parity_release_seal",
+        "captureTiming":  "same_release_task",
+        "summary":  "Reconciles the declarative schema parity repair that preserves existing Team Resource Planning and Project Invitation constraints, foreign keys, unique identities, indexes, and data without executing a migration.",
+        "workstreams":  [
+                            "database-safety",
+                            "schema-parity",
+                            "release-seal"
+                        ],
+        "authorities":  [
+                            {
+                                "key":  "ecosystem_doctrine",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "The repair preserves existing platform ownership and database authority without introducing another system of record."
+                            },
+                            {
+                                "key":  "claude",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "Verification, provider, publication, and deployment boundaries remain unchanged and no database mutation was performed."
+                            },
+                            {
+                                "key":  "quality",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "The repair adds fail-closed regression evidence for exact constraint and index identity while preserving existing behavior."
+                            },
+                            {
+                                "key":  "vision",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "No user workflow, product objective, or accepted visible behavior changed."
+                            },
+                            {
+                                "key":  "platform",
+                                "result":  "updated",
+                                "reason":  "Drizzle declarations now match established startup and production schema names and descending-index semantics."
+                            },
+                            {
+                                "key":  "plugin",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "No Navisworks plugin, desktop integration, provider connector, or external interface changed."
+                            },
+                            {
+                                "key":  "report_design_system",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "No report template, printable layout, PDF renderer, or governed report artifact changed."
+                            },
+                            {
+                                "key":  "standards_register",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "No standard, regulatory rule, contractual interpretation, certification, or compliance claim changed."
+                            },
+                            {
+                                "key":  "status",
+                                "result":  "updated",
+                                "reason":  "Status records the local schema-parity repair and its completed safety and TypeScript verification."
+                            },
+                            {
+                                "key":  "open_loop",
+                                "result":  "updated",
+                                "reason":  "Open Loop preserves destructive provider schema churn as a no-go and keeps publication separately authorized."
+                            },
+                            {
+                                "key":  "audit",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "Historical evidence and prior acceptance conclusions remain untouched."
+                            }
+                        ],
+        "reviewedChangedPaths":  [
+                                     "living-brief/OPEN_LOOP.md",
+                                     "living-brief/PLATFORM.md",
+                                     "living-brief/STATUS.md",
+                                     "living-brief/impact-declarations.json"
+                                 ],
+        "reviewedChangeSha256":  "8d926ed1e47cbbac008468b762449cec124b4f26c5915143fe641e2f8a5cf384"
     },
     {
-      "taskId": "schema-parity-release-seal-20260811",
-      "reviewedThroughCommit": "08151f39e0db79c0196d50e64cd60b651c4f4992",
-      "reviewedAt": "2026-08-11T14:36:00-04:00",
-      "status": "local_schema_parity_release_seal",
-      "captureTiming": "same_release_task",
-      "summary": "Reconciles the declarative schema parity repair that preserves existing Team Resource Planning and Project Invitation constraints, foreign keys, unique identities, indexes, and data without executing a migration.",
-      "workstreams": [
-        "database-safety",
-        "schema-parity",
-        "release-seal"
-      ],
-      "authorities": [
-        {
-          "key": "ecosystem_doctrine",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The repair preserves existing platform ownership and database authority without introducing another system of record."
-        },
-        {
-          "key": "claude",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Verification, provider, publication, and deployment boundaries remain unchanged and no database mutation was performed."
-        },
-        {
-          "key": "quality",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The repair adds fail-closed regression evidence for exact constraint and index identity while preserving existing behavior."
-        },
-        {
-          "key": "vision",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No user workflow, product objective, or accepted visible behavior changed."
-        },
-        {
-          "key": "platform",
-          "result": "updated",
-          "reason": "Drizzle declarations now match established startup and production schema names and descending-index semantics."
-        },
-        {
-          "key": "plugin",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No Navisworks plugin, desktop integration, provider connector, or external interface changed."
-        },
-        {
-          "key": "report_design_system",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No report template, printable layout, PDF renderer, or governed report artifact changed."
-        },
-        {
-          "key": "standards_register",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No standard, regulatory rule, contractual interpretation, certification, or compliance claim changed."
-        },
-        {
-          "key": "status",
-          "result": "updated",
-          "reason": "Status records the local schema-parity repair and its completed safety and TypeScript verification."
-        },
-        {
-          "key": "open_loop",
-          "result": "updated",
-          "reason": "Open Loop preserves destructive provider schema churn as a no-go and keeps publication separately authorized."
-        },
-        {
-          "key": "audit",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Historical evidence and prior acceptance conclusions remain untouched."
-        }
-      ],
-      "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
-        "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
-      ],
-      "reviewedChangeSha256": "8d926ed1e47cbbac008468b762449cec124b4f26c5915143fe641e2f8a5cf384"
+        "taskId":  "smart-intake-contract-item-editor-20260811",
+        "reviewedThroughCommit":  "d735094546212de62844c68f3ff3d4a3858fefc2",
+        "reviewedAt":  "2026-08-11T18:30:00-04:00",
+        "status":  "local_release_candidate",
+        "captureTiming":  "same_product_task",
+        "summary":  "Adds explicit multi-sheet spreadsheet inspection and mapping plus a bilingual 100-plus-row Contract Item editor inside the canonical autosaved Job Intake draft, preserving source provenance and activation authority boundaries.",
+        "workstreams":  [
+                            "smart-intake",
+                            "contract-items",
+                            "spreadsheet-import",
+                            "bilingual-ui",
+                            "user-documentation"
+                        ],
+        "authorities":  [
+                            {
+                                "key":  "ecosystem_doctrine",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "The candidate preserves BIMLog ownership and keeps Company, Project, Intake, Contract, APU, workflow, and budget authority in their existing shared records."
+                            },
+                            {
+                                "key":  "claude",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "Development, evidence, publication boundaries, and terminal handoff requirements remain unchanged for this local candidate."
+                            },
+                            {
+                                "key":  "quality",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "Existing bilingual, accessibility, concurrency, database-safety, exact-decimal, and no-silent-overwrite requirements govern the implementation without changing policy."
+                            },
+                            {
+                                "key":  "vision",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "The accepted product vision is unchanged; this candidate implements the already approved Smart Intake phase."
+                            },
+                            {
+                                "key":  "platform",
+                                "result":  "updated",
+                                "reason":  "Platform semantics now document explicit spreadsheet sheet/header/column mapping, deterministic Contract Item provenance, bulk editing, and the canonical Intake-to-activation boundary."
+                            },
+                            {
+                                "key":  "plugin",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "No plugin, browser bridge, provider, desktop integration, macro execution, or external connector behavior changed."
+                            },
+                            {
+                                "key":  "report_design_system",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "No governed report family, printable artifact template, PDF renderer, or report acceptance denominator changed."
+                            },
+                            {
+                                "key":  "standards_register",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "No standard, contractual interpretation, regulatory rule, certification, or compliance claim changed."
+                            },
+                            {
+                                "key":  "status",
+                                "result":  "updated",
+                                "reason":  "Status records the pushed invitation baseline separately from this local Smart Intake and Contract Item editor candidate."
+                            },
+                            {
+                                "key":  "open_loop",
+                                "result":  "updated",
+                                "reason":  "Open Loop replaces the future-phase placeholder with concrete database, browser, provenance, reload, and concurrency acceptance gates while preserving multi-contract work as the next phase."
+                            },
+                            {
+                                "key":  "audit",
+                                "result":  "reviewed_no_semantic_change",
+                                "reason":  "Historical audit evidence and production claims are preserved; this task adds local source evidence only."
+                            }
+                        ]
     }
   ]
 }
