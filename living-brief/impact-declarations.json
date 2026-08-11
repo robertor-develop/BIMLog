@@ -8369,6 +8369,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "team-resource-scheduling-layer-3-20260811",
+      "reviewedThroughCommit": "0cf6a345b784e5723f80c3e213207c12e66983e7",
+      "reviewedAt": "2026-08-11T10:54:10-04:00",
+      "status": "resource_scheduling_execution_validated",
+      "captureTiming": "same_product_task",
+      "summary": "Adds bilingual versioned resource availability, leave-aware capacity, authorized cross-project workload, immutable what-if staffing scenarios, hourly cost and billing forecasts, atomic reviewed application to Job Operations, global page Print/PDF, full and filtered manual PDF generation, and release label v1.60.27.01.",
+      "workstreams": [
+        "team-performance",
+        "resource-scheduling",
+        "job-operations",
+        "help-center",
+        "print-pdf"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The feature remains inside BIMLog Commercial and preserves existing company, project, and product ownership boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Development, verification, operator handoff, and publication responsibilities remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The build implements existing bilingual, responsive, auditable, printable, fail-closed, and versioned quality standards."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Resource planning advances the accepted integrated job-intake-to-execution product vision without changing doctrine."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The platform inventory now includes the resource-planning migration, service, behavior proof, and database schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin, browser bridge, provider, external connector, or desktop integration changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The build uses the accepted browser Print/PDF and Help Center print presentation without changing governed report templates."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification interpretation, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The build remains locally committed until Roberto performs the separate push and publication workflow."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved backlog item is removed, silently closed, or reclassified by this implementation."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing history is preserved and new profiles, scenarios, and applications use attributable append-only records."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e9e00712de9ade176cb1c97fa8eed6706a5ab1f9f4b39be774833bdeb8c1fa19"
     }
   ]
 }

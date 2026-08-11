@@ -270,6 +270,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/storage-adapter.ts
 - artifacts/api-server/src/lib/team-performance-service.ts
 - artifacts/api-server/src/lib/team-performance.behavior.ts
+- artifacts/api-server/src/lib/team-resource-planning-migration.ts
+- artifacts/api-server/src/lib/team-resource-planning-service.ts
+- artifacts/api-server/src/lib/team-resource-planning.behavior.ts
 - artifacts/api-server/src/lib/telegram-product-delivery.ts
 - artifacts/api-server/src/lib/telegram-product-notifications.ts
 - artifacts/api-server/src/lib/telegram-product-provider-broker.ts
@@ -336,6 +339,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/submittal-view-events.ts
 - lib/db/src/schema/submittal_reports.ts
 - lib/db/src/schema/submittals.ts
+- lib/db/src/schema/team-resource-planning.ts
 - lib/db/src/schema/telegram-product.ts
 - lib/db/src/schema/transmittals.ts
 - lib/db/src/schema/user-connections.ts
