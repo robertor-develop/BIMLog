@@ -486,3 +486,6 @@ It changes only when the code structure or curated architectural facts change.
   esbuild and this generator runs as a pre-build step.
 - Release seal `1a45653691c750a5929ba6acd25ec415b66ef26b` changes only trailing whitespace in
   `TeamPerformanceWorkspace.tsx`; it does not change platform behavior, schema, or runtime composition.
+- Declarative database authority at `08151f39e0db79c0196d50e64cd60b651c4f4992` now preserves the
+  established Team Resource Planning and Project Invitation constraint, foreign-key, unique, and index identities,
+  including production `DESC NULLS FIRST` ordering, so provider schema comparison does not propose destructive churn.

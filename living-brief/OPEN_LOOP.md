@@ -1727,3 +1727,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   passes this command plus the API and UI production builds; normal push and separately authorized publication remain.
 - Preserve the whitespace-only `TeamPerformanceWorkspace.tsx` release seal at
   `1a45653691c750a5929ba6acd25ec415b66ef26b`; no product behavior or schema gate is reopened by this reconciliation.
+- Preserve the exact schema object names and `DESC NULLS FIRST` semantics sealed at
+  `08151f39e0db79c0196d50e64cd60b651c4f4992`; any provider preview containing DROP/recreate churn remains a hard no-go.

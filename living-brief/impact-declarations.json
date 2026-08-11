@@ -8696,6 +8696,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f8baaf924a72a8ff0bf9c70d45d9464844cccd3ed433e85a73008b7dce252ff4"
+    },
+    {
+      "taskId": "schema-parity-release-seal-20260811",
+      "reviewedThroughCommit": "08151f39e0db79c0196d50e64cd60b651c4f4992",
+      "reviewedAt": "2026-08-11T14:36:00-04:00",
+      "status": "local_schema_parity_release_seal",
+      "captureTiming": "same_release_task",
+      "summary": "Reconciles the declarative schema parity repair that preserves existing Team Resource Planning and Project Invitation constraints, foreign keys, unique identities, indexes, and data without executing a migration.",
+      "workstreams": [
+        "database-safety",
+        "schema-parity",
+        "release-seal"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair preserves existing platform ownership and database authority without introducing another system of record."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Verification, provider, publication, and deployment boundaries remain unchanged and no database mutation was performed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair adds fail-closed regression evidence for exact constraint and index identity while preserving existing behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No user workflow, product objective, or accepted visible behavior changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Drizzle declarations now match established startup and production schema names and descending-index semantics."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin, desktop integration, provider connector, or external interface changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report template, printable layout, PDF renderer, or governed report artifact changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, regulatory rule, contractual interpretation, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the local schema-parity repair and its completed safety and TypeScript verification."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop preserves destructive provider schema churn as a no-go and keeps publication separately authorized."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence and prior acceptance conclusions remain untouched."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "8d926ed1e47cbbac008468b762449cec124b4f26c5915143fe641e2f8a5cf384"
     }
   ]
 }
