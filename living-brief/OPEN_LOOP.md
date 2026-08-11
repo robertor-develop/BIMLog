@@ -1749,3 +1749,4 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   `1a45653691c750a5929ba6acd25ec415b66ef26b`; no product behavior or schema gate is reopened by this reconciliation.
 - Preserve the exact schema object names and `DESC NULLS FIRST` semantics sealed at
   `08151f39e0db79c0196d50e64cd60b651c4f4992`; any provider preview containing DROP/recreate churn remains a hard no-go.
+- Keep `PLATFORM.md` generator-owned and require API build followed by `check:living-brief` to leave the release tree clean.

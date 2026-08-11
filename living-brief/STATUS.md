@@ -614,3 +614,7 @@ Release candidate `1a45653691c750a5929ba6acd25ec415b66ef26b` is reconciled as a 
 Schema-parity repair `08151f39e0db79c0196d50e64cd60b651c4f4992` binds the existing Team Resource Planning
 and Project Invitation constraints and indexes into Drizzle without changing migration SQL or data. Focused behavior,
 database-safety, schema inventory, API TypeScript, and diff checks pass; publication remains separately authorized.
+
+The PLATFORM generator is now the sole authority for generated platform content. Commit
+`3a137aec83283e29c1a6661c3af2812b31ff1768` removes manual commit-specific PLATFORM prose and emits the
+schema-parity rule deterministically, preventing API builds from dirtying the tracked Living Brief.
