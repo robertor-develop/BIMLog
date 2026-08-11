@@ -484,3 +484,5 @@ It changes only when the code structure or curated architectural facts change.
   XLSX exports expose the same Contract Item quantities, rates, values, APU identity, and workflow metadata.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
+- Release seal `1a45653691c750a5929ba6acd25ec415b66ef26b` changes only trailing whitespace in
+  `TeamPerformanceWorkspace.tsx`; it does not change platform behavior, schema, or runtime composition.

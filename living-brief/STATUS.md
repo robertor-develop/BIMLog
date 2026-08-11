@@ -584,3 +584,6 @@ The Generic APU now has one repeatable package command, `test:generic-apu`, at l
 authority HTTP, authority transaction, disposable PostgreSQL, API TypeScript, and UI TypeScript checks.
 The complete command, API production build with isolated artifact proof, and UI production build pass locally.
 No push, publication, deployment, or production/customer database change is included.
+
+Release candidate `1a45653691c750a5929ba6acd25ec415b66ef26b` is reconciled as a whitespace-only
+`TeamPerformanceWorkspace.tsx` source change. Application behavior, schema, tests, and build results are unchanged.

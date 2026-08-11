@@ -1725,3 +1725,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Use `pnpm --filter @workspace/api-server test:generic-apu` as the single Generic APU calculation, security,
   persistence, and UI TypeScript acceptance command. The exact local source at `d9869477354aee8c0d5e03e146137044231897ac`
   passes this command plus the API and UI production builds; normal push and separately authorized publication remain.
+- Preserve the whitespace-only `TeamPerformanceWorkspace.tsx` release seal at
+  `1a45653691c750a5929ba6acd25ec415b66ef26b`; no product behavior or schema gate is reopened by this reconciliation.
