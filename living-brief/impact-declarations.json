@@ -8446,6 +8446,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e9e00712de9ade176cb1c97fa8eed6706a5ab1f9f4b39be774833bdeb8c1fa19"
+    },
+    {
+      "taskId": "help-center-bilingual-utf8-repair-20260811",
+      "reviewedThroughCommit": "8158522c10d6242045c284eb947e621ecb21665c",
+      "reviewedAt": "2026-08-11T11:25:38-04:00",
+      "status": "bilingual_help_utf8_validated",
+      "captureTiming": "same_product_task",
+      "summary": "Restores valid UTF-8 Spanish accents, punctuation, and navigation symbols throughout the bilingual Help Center and operating manual without changing product behavior or documented operating meaning.",
+      "workstreams": [
+        "help-center",
+        "user-documentation",
+        "bilingual-ui",
+        "encoding-quality"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair changes text encoding only and preserves ecosystem identity, ownership, and company boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Development, verification, handoff, and publication instructions remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair enforces the existing UTF-8, bilingual, and mojibake-free quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted product vision is unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, module, schema, service, or platform capability changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin, browser bridge, provider, connector, or desktop integration changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report template or printable layout changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, compliance interpretation, or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The local release state and separate Roberto push and publication workflow remain unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No backlog item was removed, closed, or reclassified."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence and accepted audit conclusions remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
