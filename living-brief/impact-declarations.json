@@ -8773,6 +8773,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "8d926ed1e47cbbac008468b762449cec124b4f26c5915143fe641e2f8a5cf384"
+    },
+    {
+      "taskId": "platform-generator-idempotence-repair-20260811",
+      "reviewedThroughCommit": "3a137aec83283e29c1a6661c3af2812b31ff1768",
+      "reviewedAt": "2026-08-11T14:46:00-04:00",
+      "status": "local_generator_idempotence_repair",
+      "captureTiming": "same_release_task",
+      "summary": "Makes the PLATFORM generator the sole source of generated platform truth so API build no longer rewrites the sealed Living Brief before source verification.",
+      "workstreams": [
+        "living-brief",
+        "release-build",
+        "schema-parity"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction changes generated documentation ownership only and preserves platform system-of-record boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing verification, publication, provider, and deployment authority boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Build ordering is now deterministic because generator output and sealed Living Brief content are byte-consistent."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No user workflow, product objective, or visible application behavior changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generator now emits the durable schema-parity statement and owns all generated PLATFORM content."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin, desktop integration, connector, or provider behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report template, printable layout, PDF renderer, or governed report artifact changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, contractual interpretation, regulatory rule, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the deterministic generator correction and its release-build purpose."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop requires sequential API build and Living Brief verification to remain clean."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence and accepted conclusions remain untouched."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cd3e726aa132aee2062dfa2905c0ce65f20080496e01c3eac8944f35c99f919c"
     }
   ]
 }
