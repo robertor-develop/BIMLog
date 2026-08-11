@@ -31,6 +31,7 @@ assert.throws(
 );
 
 const migration = read("./project-invitation-migration.ts");
+const schema = read("../../../../lib/db/src/schema/invitations.ts");
 const auth = read("../routes/auth.ts");
 const members = read("../routes/members.ts");
 const directory = read("../routes/project_directory.ts");
@@ -44,6 +45,13 @@ assert.doesNotMatch(
 );
 assert.match(migration, /ADD COLUMN IF NOT EXISTS company_id/);
 assert.match(migration, /SET company_id = inviter\.company_id/);
+for (const name of [
+  "project_invitations_project_id_fkey",
+  "project_invitations_invited_by_user_id_fkey",
+  "project_invitations_company_id_fkey",
+  "project_invitation_email_status_idx",
+  "project_invitation_project_status_idx",
+]) assert.match(schema, new RegExp(name));
 assert.match(auth, /db\.transaction/);
 assert.match(auth, /acceptedProjectIds/);
 assert.match(auth, /lower\(trim\(/);
