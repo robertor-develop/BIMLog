@@ -119,6 +119,8 @@ ${appRoutes()}
   isSuperAdminMiddleware re-checks users.is_super_admin.
 - Schema changes go in BOTH the drizzle schema file AND the idempotent startup migration block
   in artifacts/api-server/src/app.ts (ALTER TABLE / CREATE TABLE ... IF NOT EXISTS).
+- Declarative schemas preserve established production constraint, foreign-key, unique, check, and index names
+  plus ordering semantics so provider comparison cannot replace compatible objects through destructive churn.
 - Direct schema force-push is disabled. The guarded development sync requires exact authoritative
   master attestation, a Replit Helium target distinct from the runtime production identity, and
   read-only table/index parity. Publish additionally requires the complete generated SQL, a

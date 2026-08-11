@@ -451,6 +451,8 @@ It changes only when the code structure or curated architectural facts change.
   isSuperAdminMiddleware re-checks users.is_super_admin.
 - Schema changes go in BOTH the drizzle schema file AND the idempotent startup migration block
   in artifacts/api-server/src/app.ts (ALTER TABLE / CREATE TABLE ... IF NOT EXISTS).
+- Declarative schemas preserve established production constraint, foreign-key, unique, check, and index names
+  plus ordering semantics so provider comparison cannot replace compatible objects through destructive churn.
 - Direct schema force-push is disabled. The guarded development sync requires exact authoritative
   master attestation, a Replit Helium target distinct from the runtime production identity, and
   read-only table/index parity. Publish additionally requires the complete generated SQL, a
@@ -493,8 +495,3 @@ It changes only when the code structure or curated architectural facts change.
   XLSX exports expose the same Contract Item quantities, rates, values, APU identity, and workflow metadata.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
-- Release seal `1a45653691c750a5929ba6acd25ec415b66ef26b` changes only trailing whitespace in
-  `TeamPerformanceWorkspace.tsx`; it does not change platform behavior, schema, or runtime composition.
-- Declarative database authority at `08151f39e0db79c0196d50e64cd60b651c4f4992` now preserves the
-  established Team Resource Planning and Project Invitation constraint, foreign-key, unique, and index identities,
-  including production `DESC NULLS FIRST` ordering, so provider schema comparison does not propose destructive churn.
