@@ -147,6 +147,15 @@ ${appRoutes()}
   Optional section guidance, automatic detail-line remainder/equal splits, and exact save-readiness
   explanations make the complete allocation actionable. Draft and saved plans can be exported as CSV
   or printed/saved as PDF; saved plan versions remain immutable.
+- Smart Intake uses the existing project-scoped \`job_intakes.data\` draft as its only pre-activation
+  authority. Preserved XLS/XLSX/XLSM/CSV sources expose bounded multi-sheet previews; the user must
+  explicitly choose the sheet, header row, Contract Item Name column, and Quantity column. A
+  fingerprint- and revision-bound confirmation appends deterministic-ID rows with document/hash/
+  sheet/row/column provenance. Ambiguous or truncated previews fail closed, and PDF/DOCX extraction
+  remains manual-review evidence that cannot silently create financial records. The default editor
+  exposes only Contract Item Name and Quantity for 100-plus rows; unit, currency, APU/rate, calculated
+  value, workflow, budget, and descriptive overrides remain explicit Advanced controls. Activation,
+  rather than import preview, creates shared operational and entitled Commercial records.
 - Commercial Contract Items turn an approved budget line and saved APU version into an operational
   contract scope. Quantity multiplied by the frozen APU selling price calculates the contractual value;
   the immutable item snapshot preserves the APU content, evaluation, fingerprint, BIM Submittal display,

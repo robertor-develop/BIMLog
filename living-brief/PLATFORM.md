@@ -232,6 +232,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-contract.ts
 - artifacts/api-server/src/lib/job-intake-migration.ts
 - artifacts/api-server/src/lib/job-intake-service.ts
+- artifacts/api-server/src/lib/job-intake-spreadsheet.behavior.ts
 - artifacts/api-server/src/lib/job-intake.behavior.ts
 - artifacts/api-server/src/lib/job-operations-service.ts
 - artifacts/api-server/src/lib/job-operations.behavior.ts
