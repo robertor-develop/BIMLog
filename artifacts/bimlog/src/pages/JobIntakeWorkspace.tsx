@@ -16,6 +16,56 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+const recoveryKey = (projectId: number) =>
+  `bimlog:job-intake-recovery:${projectId}`;
+
+function readRecovery(projectId: number) {
+  try {
+    const parsed = JSON.parse(
+      window.localStorage.getItem(recoveryKey(projectId)) || "null",
+    );
+    return parsed &&
+      typeof parsed === "object" &&
+      Number.isInteger(parsed.revision) &&
+      parsed.data &&
+      typeof parsed.data === "object"
+      ? parsed
+      : null;
+  } catch {
+    return null;
+  }
+}
+
+function preserveRecovery(projectId: number, revision: number, data: unknown) {
+  try {
+    window.localStorage.setItem(
+      recoveryKey(projectId),
+      JSON.stringify({ revision, data, preservedAt: new Date().toISOString() }),
+    );
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function clearMatchingRecovery(projectId: number, data: unknown) {
+  const recovered = readRecovery(projectId);
+  if (recovered && JSON.stringify(recovered.data) === JSON.stringify(data)) {
+    try {
+      window.localStorage.removeItem(recoveryKey(projectId));
+    } catch {
+      // A completed server save remains authoritative if browser storage is unavailable.
+    }
+  }
+}
+
+function removeRecovery(projectId: number) {
+  try {
+    window.localStorage.removeItem(recoveryKey(projectId));
+  } catch {
+    // The next load safely ignores unreadable browser storage.
+  }
+}
 const stages = [
   "documents",
   "identity",
@@ -149,14 +199,28 @@ export function JobIntakeWorkspace() {
           ? api(`/projects/${projectId}/financial/workspace`)
           : Promise.resolve(null),
       ]);
+      const recovered = readRecovery(projectId);
+      const canRecover =
+        recovered?.revision === current.revision &&
+        JSON.stringify(recovered.data) !== JSON.stringify(current.data);
+      const loadedData = canRecover ? recovered.data : current.data;
       revisionRef.current = current.revision;
-      dataRef.current = current.data;
+      dataRef.current = loadedData;
       lastSavedRef.current = JSON.stringify(current.data);
       pendingSaveRef.current = null;
       intakeRef.current = current;
       setIntake(current);
-      setData(current.data);
-      setSaveState("saved");
+      setData(loadedData);
+      setSaveState(canRecover ? "unsaved" : "saved");
+      if (canRecover)
+        setNotice(
+          tt(
+            "Recovered unsaved Contract Items from this browser. Autosave is retrying now.",
+            "Se recuperaron Partidas de Contrato no guardadas de este navegador. El guardado autom\u00e1tico se reintenta ahora.",
+          ),
+        );
+      else if (recovered && recovered.revision < current.revision)
+        removeRecovery(projectId);
       setApu(plan?.data?.plan ?? null);
       setWorkspace(budget);
     } catch (cause) {
@@ -164,7 +228,7 @@ export function JobIntakeWorkspace() {
     } finally {
       setBusy(false);
     }
-  }, [api, projectId]);
+  }, [api, projectId, tt]);
   useEffect(() => {
     void load();
   }, [load]);
@@ -207,6 +271,7 @@ export function JobIntakeWorkspace() {
               intakeRef.current = result;
               saveRetryRef.current = 0;
               lastSavedRef.current = JSON.stringify(result.data);
+              clearMatchingRecovery(projectId, next);
               lastResult = result;
               setIntake(result);
               if (JSON.stringify(dataRef.current) === JSON.stringify(next)) {
@@ -257,6 +322,15 @@ export function JobIntakeWorkspace() {
     )
       return;
     setSaveState("unsaved");
+    if (!preserveRecovery(projectId, revisionRef.current, data)) {
+      setSaveState("error");
+      setError(
+        tt(
+          "This browser could not preserve a local recovery copy. Keep this page open while autosave retries.",
+          "Este navegador no pudo conservar una copia local de recuperaci\u00f3n. Mantenga esta p\u00e1gina abierta mientras se reintenta el guardado autom\u00e1tico.",
+        ),
+      );
+    }
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     saveTimerRef.current = window.setTimeout(
       () => void persist(dataRef.current).catch(() => undefined),
@@ -265,25 +339,7 @@ export function JobIntakeWorkspace() {
     return () => {
       if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     };
-  }, [data, intake, persist]);
-  useEffect(
-    () => () => {
-      if (saveTimerRef.current) {
-        window.clearTimeout(saveTimerRef.current);
-        saveTimerRef.current = null;
-      }
-      if (
-        intakeRef.current &&
-        JSON.stringify(dataRef.current) !== lastSavedRef.current &&
-        !(
-          intakeRef.current.status === "activated" &&
-          intakeRef.current.activatedContractId
-        )
-      )
-        void persist(dataRef.current).catch(() => undefined);
-    },
-    [persist],
-  );
+  }, [data, intake, persist, projectId, tt]);
   useEffect(() => {
     const warn = (event: BeforeUnloadEvent) => {
       if (

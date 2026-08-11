@@ -209,10 +209,16 @@ assert.match(ui, /capabilities\.budget/);
 assert.match(ui, /capabilities\.contracts/);
 assert.match(ui, /All changes saved/);
 assert.match(ui, /window\.setTimeout\([\s\S]*void persist\(dataRef\.current\)/);
-assert.match(ui, /\(\) => \(\) => \{[\s\S]*void persist\(dataRef\.current\)/);
+assert.doesNotMatch(
+  ui,
+  /\(\) => \(\) => \{[\s\S]*void persist\(dataRef\.current\)/,
+);
 assert.doesNotMatch(ui, /financial\/apu`\)\.catch\(\(\) => null\)/);
 assert.doesNotMatch(ui, /financial\/workspace`\)\.catch\(\(\) => null\)/);
 assert.match(ui, /saveState === "error"/);
+assert.match(ui, /bimlog:job-intake-recovery/);
+assert.match(ui, /preserveRecovery\(projectId, revisionRef\.current, data\)/);
+assert.match(ui, /clearMatchingRecovery\(projectId, next\)/);
 assert.match(ui, /aria-live="polite"/);
 assert.match(ui, /formData\.set\("expectedRevision"/);
 assert.match(ui, /confirmationFingerprint: saved\.completion\.fingerprint/);
@@ -225,6 +231,8 @@ assert.match(ui, /<ContractItemBulkEditor/);
 assert.match(ui, /Activate operational job/);
 assert.match(ui, /@media\(max-width:900px\)/);
 assert.match(bulkEditor, /Paste Excel range/);
+assert.match(bulkEditor, /Check row\(s\):/);
+assert.match(bulkEditor, /Advanced overrides for row/);
 assert.match(bulkEditor, /MAX_ITEMS = 500/);
 assert.match(bulkEditor, /Contract Item Name/);
 assert.match(bulkEditor, /Advanced overrides/);

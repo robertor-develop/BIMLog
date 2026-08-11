@@ -71,7 +71,6 @@ export function parseContractItemPaste(source: string) {
   return source
     .replace(/\r\n?/g, "\n")
     .split("\n")
-    .filter((line) => line.trim())
     .map((line, index) => {
       const cells = line.split("\t");
       return {
@@ -79,7 +78,8 @@ export function parseContractItemPaste(source: string) {
         name: String(cells[0] ?? "").trim(),
         quantity: String(cells[1] ?? "").trim(),
       };
-    });
+    })
+    .filter((row) => row.name || row.quantity);
 }
 
 export function ContractItemBulkEditor(props: Props) {
@@ -108,11 +108,21 @@ export function ContractItemBulkEditor(props: Props) {
       (row) => !row.name || !validQuantity(row.quantity),
     );
     if (!parsed.length || invalid.length) {
+      const invalidRows = invalid
+        .slice(0, 10)
+        .map((row) => row.sourceRow)
+        .join(", ");
+      const rowDetail = invalidRows
+        ? props.tt(
+            ` Check row(s): ${invalidRows}.`,
+            ` Revise la(s) fila(s): ${invalidRows}.`,
+          )
+        : "";
       props.onError(
         props.tt(
           `Paste two Excel columns: Contract Item Name and a positive Quantity. ${invalid.length || 1} row(s) need correction.`,
           `Pegue dos columnas de Excel: Nombre de la Partida y una Cantidad positiva. ${invalid.length || 1} fila(s) requieren corrección.`,
-        ),
+        ) + rowDetail,
       );
       return;
     }
@@ -307,17 +317,31 @@ export function ContractItemBulkEditor(props: Props) {
           </button>
           <details className="ji-advanced">
             <summary>
-              {props.tt("Advanced overrides", "Opciones avanzadas")}
+              {props.tt(
+                `Advanced overrides for row ${index + 1}${item.name ? `: ${item.name}` : ""}`,
+                `Opciones avanzadas para la fila ${index + 1}${item.name ? `: ${item.name}` : ""}`,
+              )}
             </summary>
             <div className="ji-grid three">
               <label>
                 {props.tt("Contract Item ID", "ID de Partida de Contrato")}
-                <input value={item.id} readOnly />
+                <input
+                  value={item.id}
+                  readOnly
+                  aria-label={props.tt(
+                    `Contract Item ID row ${index + 1}`,
+                    `ID de Partida de Contrato fila ${index + 1}`,
+                  )}
+                />
               </label>
               <label>
                 {props.tt("Unit", "Unidad")}
                 <input
                   value={item.unit}
+                  aria-label={props.tt(
+                    `Unit row ${index + 1}`,
+                    `Unidad fila ${index + 1}`,
+                  )}
                   onChange={(event) =>
                     update(index, { unit: event.target.value })
                   }
@@ -333,6 +357,10 @@ export function ContractItemBulkEditor(props: Props) {
                     <input
                       inputMode="decimal"
                       value={item.billingHourlyRate}
+                      aria-label={props.tt(
+                        `Inherited APU unit rate row ${index + 1}`,
+                        `Tarifa unitaria APU heredada fila ${index + 1}`,
+                      )}
                       onChange={(event) =>
                         update(index, { billingHourlyRate: event.target.value })
                       }
@@ -343,6 +371,10 @@ export function ContractItemBulkEditor(props: Props) {
                     <input
                       value={`${exactProduct(item.plannedHours, item.billingHourlyRate)} ${props.currency}`}
                       readOnly
+                      aria-label={props.tt(
+                        `Calculated value row ${index + 1}`,
+                        `Valor calculado fila ${index + 1}`,
+                      )}
                     />
                   </label>
                   <label>
@@ -352,6 +384,10 @@ export function ContractItemBulkEditor(props: Props) {
                         item.apuPlanVersion ? `v${item.apuPlanVersion}` : "—"
                       }
                       readOnly
+                      aria-label={props.tt(
+                        `APU version row ${index + 1}`,
+                        `Versi\u00f3n APU fila ${index + 1}`,
+                      )}
                     />
                   </label>
                 </>
@@ -360,6 +396,10 @@ export function ContractItemBulkEditor(props: Props) {
                 {props.tt("Workflow", "Flujo")}
                 <select
                   value={item.workflowTemplate || props.defaultWorkflow}
+                  aria-label={props.tt(
+                    `Workflow row ${index + 1}`,
+                    `Flujo fila ${index + 1}`,
+                  )}
                   onChange={(event) =>
                     update(index, { workflowTemplate: event.target.value })
                   }
@@ -383,6 +423,10 @@ export function ContractItemBulkEditor(props: Props) {
                   {props.tt("Budget line", "Línea presupuestaria")}
                   <select
                     value={item.budgetSnapshotLineId}
+                    aria-label={props.tt(
+                      `Budget line row ${index + 1}`,
+                      `L\u00ednea presupuestaria fila ${index + 1}`,
+                    )}
                     onChange={(event) => {
                       const line = props.budgetLines.find(
                         (entry: any) => String(entry.id) === event.target.value,
@@ -409,6 +453,10 @@ export function ContractItemBulkEditor(props: Props) {
                 {props.tt("Description", "Descripción")}
                 <textarea
                   value={item.description}
+                  aria-label={props.tt(
+                    `Description row ${index + 1}`,
+                    `Descripci\u00f3n fila ${index + 1}`,
+                  )}
                   onChange={(event) =>
                     update(index, { description: event.target.value })
                   }
@@ -418,6 +466,10 @@ export function ContractItemBulkEditor(props: Props) {
                 {props.tt("Assumptions", "Supuestos")}
                 <textarea
                   value={item.assumptions}
+                  aria-label={props.tt(
+                    `Assumptions row ${index + 1}`,
+                    `Supuestos fila ${index + 1}`,
+                  )}
                   onChange={(event) =>
                     update(index, { assumptions: event.target.value })
                   }
@@ -427,6 +479,10 @@ export function ContractItemBulkEditor(props: Props) {
                 {props.tt("Exclusions", "Exclusiones")}
                 <textarea
                   value={item.exclusions}
+                  aria-label={props.tt(
+                    `Exclusions row ${index + 1}`,
+                    `Exclusiones fila ${index + 1}`,
+                  )}
                   onChange={(event) =>
                     update(index, { exclusions: event.target.value })
                   }

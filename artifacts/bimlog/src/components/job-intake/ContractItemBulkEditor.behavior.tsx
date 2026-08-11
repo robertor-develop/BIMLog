@@ -19,7 +19,7 @@ assert.deepEqual(rows[124], {
 });
 assert.deepEqual(parseContractItemPaste("Door\t2\n\nFrame\t3.5\n"), [
   { sourceRow: 1, name: "Door", quantity: "2" },
-  { sourceRow: 2, name: "Frame", quantity: "3.5" },
+  { sourceRow: 3, name: "Frame", quantity: "3.5" },
 ]);
 
 console.log("ContractItemBulkEditor.behavior: PASS");
