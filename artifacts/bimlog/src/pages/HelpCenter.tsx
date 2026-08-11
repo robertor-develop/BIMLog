@@ -27,6 +27,15 @@ function requestedView(): View {
   return HELP_VIEWS.includes(value as View) ? (value as View) : "manual";
 }
 
+function printManualTopics(topics: typeof HELP_TOPICS, language: "en" | "es", title: string) {
+  const escape=(value:unknown)=>String(value??"").replace(/[&<>\"]/g,char=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[char]!));
+  const tx=(value:HelpText)=>escape(value[language]);
+  const definitions=(heading:string,items:Array<{name:HelpText;meaning:HelpText}>)=>items.length?`<h2>${escape(heading)}</h2>${items.map(item=>`<section><h3>${tx(item.name)}</h3><p>${tx(item.meaning)}</p></section>`).join("")}`:"";
+  const lists=(heading:string,items:HelpText[])=>items.length?`<h2>${escape(heading)}</h2><ul>${items.map(item=>`<li>${tx(item)}</li>`).join("")}</ul>`:"";
+  const body=topics.map(topic=>`<article><h1>${tx(topic.title)}</h1><p class="summary">${tx(topic.summary)}</p><p><b>${language==="es"?"PropÃ³sito":"Purpose"}:</b> ${tx(topic.purpose)}</p><p><b>${language==="es"?"DÃ³nde abrir":"Entry point"}:</b> ${tx(topic.entryPoint)}</p>${lists(language==="es"?"Antes de comenzar":"Before you begin",topic.beforeYouBegin)}${definitions(language==="es"?"Conceptos clave":"Key concepts",topic.keyConcepts)}${definitions(language==="es"?"Controles":"Controls",topic.controls)}${definitions(language==="es"?"Estados":"Status lifecycle",topic.statusLifecycle)}${lists(language==="es"?"Reglas de validaciÃ³n":"Validation rules",topic.validationRules)}${definitions(language==="es"?"Campos":"Fields",topic.fields)}${definitions(language==="es"?"CÃ¡lculos":"Calculations",topic.calculations)}${lists(language==="es"?"AuditorÃ­a":"Audit trail",topic.auditTrail)}${lists(language==="es"?"LÃ­mites":"Boundaries",topic.boundaries)}${definitions(language==="es"?"Espacios relacionados":"Related workspaces",topic.relatedWorkspaces)}<h2>${language==="es"?"Procedimiento":"Procedure"}</h2><ol>${topic.steps.map(step=>`<li><b>${tx(step.title)}</b><p>${tx(step.body)}</p></li>`).join("")}</ol><p class="result"><b>${language==="es"?"Resultado":"Result"}:</b> ${tx(topic.result)}</p></article>`).join("");
+  const popup=window.open("","_blank","noopener,noreferrer");if(!popup)return;popup.document.write(`<!doctype html><html lang="${language}"><head><meta charset="utf-8"><title>${escape(title)}</title><style>@page{size:auto;margin:16mm}body{font:11pt/1.5 Arial,sans-serif;color:#172033;max-width:900px;margin:auto}header{border-bottom:3px solid #2455a4;margin-bottom:24px}header small{color:#526178}article{break-before:page}article:first-of-type{break-before:auto}h1{font-size:22pt;color:#173f83;margin-bottom:4px}h2{font-size:14pt;margin:18px 0 7px;border-bottom:1px solid #dce3ed}h3{font-size:11pt;margin:10px 0 2px}p{margin:4px 0 9px}.summary{font-size:12pt;color:#526178}.result{padding:10px;background:#edf9f2;border:1px solid #bfe7cf}section,li,.result{break-inside:avoid}footer{position:fixed;bottom:0;font-size:8pt;color:#758197}</style></head><body><header><h1>${escape(title)}</h1><small>BIMLog v1.60.27.01 Â· ${escape(new Date().toLocaleDateString(language))}</small></header>${body}<footer>BIMLog by IgniteSmart Â· v1.60.27.01</footer><script>window.onload=()=>window.print()<\/script></body></html>`);popup.document.close();
+}
+
 export function HelpCenter() {
   const { lang } = useI18n();
   const text = (value: HelpText) => value[lang === "es" ? "es" : "en"];
@@ -97,7 +106,7 @@ export function HelpCenter() {
         <header className="hc-hero">
             <div className="hc-hero-row">
             <div><div className="hc-kicker">BIMLog {label("Support", "Soporte")}</div><h1>{label("Help Center", "Centro de ayuda")}</h1><p>{label("One place for quick reminders, guided workflows, the complete user manual, troubleshooting, and release information.", "Un solo lugar para recordatorios, flujos guiados, el manual completo, solución de problemas e información de versiones.")}</p></div>
-            <div className="hc-version">{label("Manual 2026.08 · Full operational reference", "Manual 2026.08 · Referencia operativa completa")}</div>
+            <div className="hc-article-actions"><button className="hc-print" onClick={() => printManualTopics(HELP_TOPICS, lang === "es" ? "es" : "en", label("BIMLog Complete User Manual", "Manual Completo de BIMLog"))}><Printer size={14}/>{label("Print complete manual", "Imprimir manual completo")}</button><div className="hc-version">v1.60.27.01 · {label("Full operational reference", "Referencia operativa completa")}</div></div>
           </div>
           <div className="hc-search"><Search/><input value={query} onChange={(event) => setQuery(event.target.value)} placeholder={label("Search features, actions, errors, or terms", "Buscar funciones, acciones, errores o términos")} aria-label={label("Search Help Center", "Buscar en Centro de ayuda")}/></div>
         </header>
@@ -116,7 +125,7 @@ export function HelpCenter() {
             {filteredTopics.length === 0 && <div className="hc-empty">{label("No manual section matches this search.", "Ninguna sección coincide con la búsqueda.")}</div>}
           </aside>
           <article className="hc-article">
-            <div className="hc-article-actions"><button className="hc-print" onClick={() => window.print()}><Printer size={14}/>{label("Print this manual section", "Imprimir esta sección")}</button></div>
+            <div className="hc-article-actions"><button className="hc-print" onClick={() => printManualTopics(filteredTopics, lang === "es" ? "es" : "en", label("BIMLog Filtered User Manual", "Manual Filtrado de BIMLog"))}><Printer size={14}/>{label("Print filtered manual", "Imprimir manual filtrado")}</button><button className="hc-print" onClick={() => window.print()}><Printer size={14}/>{label("Print this manual section", "Imprimir esta sección")}</button></div>
             <h2>{text(topic.title)}</h2><p className="hc-summary">{text(topic.summary)}</p>
             <div className="hc-badges"><span className="hc-badge">{label("Audience", "Usuarios")}: {text(topic.audience)}</span><span className="hc-badge">{text(topic.availability)}</span></div>
             <h3 className="hc-section-title"><Info/>{label("Purpose and when to use it", "Propósito y cuándo usarlo")}</h3><div className="hc-purpose">{text(topic.purpose)}</div>

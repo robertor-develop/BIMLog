@@ -5,7 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { logClientError } from "@/lib/client-log";
 import { useAuthStore } from "@/store/auth";
-import { Moon, Sun } from "lucide-react";
+import { Moon, Printer, Sun } from "lucide-react";
+
+export const BIMLOG_RELEASE_VERSION = "v1.60.27.01";
 
 export function Navbar() {
   const { t, tt } = useI18n();
@@ -57,12 +59,12 @@ export function Navbar() {
 
   return (
     <header className="topbar app-topbar">
-      <style>{`@media (max-width:520px){.app-topbar{padding-left:10px;padding-right:10px;gap:6px}.app-topbar-actions{margin-right:0!important;gap:2px}.app-topbar-byline,.app-topbar-profile-label{display:none}.app-topbar-actions button{padding-left:7px;padding-right:7px}}`}</style>
+      <style>{`@media (max-width:520px){.app-topbar{padding-left:10px;padding-right:10px;gap:6px}.app-topbar-actions{margin-right:0!important;gap:2px}.app-topbar-byline,.app-topbar-profile-label,.app-topbar-version{display:none}.app-topbar-actions button{padding-left:7px;padding-right:7px}}@media print{.app-topbar,.sidebar,.feedback-widget,[data-print-hidden="true"]{display:none!important}body{background:#fff!important;color:#111!important}.main-area,.financial-page-content{margin:0!important;padding:0!important;max-width:none!important}*{print-color-adjust:exact;-webkit-print-color-adjust:exact}}`}</style>
       <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-2.5" style={{ textDecoration: "none" }}>
         <div className="sidebar-logo-mark" style={{ width: 28, height: 28, fontSize: 12 }}>B</div>
-        <div className="flex items-baseline gap-1.5">
-          <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "hsl(var(--foreground))" }}>BIMLog</span>
-          <span className="app-topbar-byline" style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>by IgniteSmart</span>
+        <div style={{display:"grid",lineHeight:1.05}}>
+          <div className="flex items-baseline gap-1.5"><span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "hsl(var(--foreground))" }}>BIMLog</span><span className="app-topbar-byline" style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>by IgniteSmart</span></div>
+          <span className="app-topbar-version" style={{fontSize:8,color:"hsl(var(--muted-foreground))",letterSpacing:'.04em'}}>{BIMLOG_RELEASE_VERSION}</span>
         </div>
       </Link>
 
@@ -115,6 +117,7 @@ export function Navbar() {
             <Button variant="ghost" size="sm" onClick={logout} style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
               {t("nav.logout")}
             </Button>
+            <Button variant="ghost" size="icon" onClick={() => window.print()} aria-label={tt("Print or save page as PDF", "Imprimir o guardar página como PDF")} title={tt("Print / PDF", "Imprimir / PDF")} style={{width:32,height:32,color:"hsl(var(--muted-foreground))"}}><Printer size={16}/></Button>
             <Button
               variant="ghost"
               size="icon"
