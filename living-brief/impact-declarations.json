@@ -8601,6 +8601,10 @@
         "artifacts/api-server/src/lib/job-intake-contract.ts",
         "artifacts/api-server/src/lib/job-intake-service.ts",
         "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "artifacts/api-server/src/lib/project-invitation-contract.ts",
+        "artifacts/api-server/src/lib/project-invitation-migration.ts",
+        "artifacts/api-server/src/lib/project-invitation-service.ts",
+        "artifacts/api-server/src/lib/project-invitation.behavior.ts",
         "artifacts/api-server/src/routes/auth.ts",
         "artifacts/api-server/src/routes/job-intake.ts",
         "artifacts/api-server/src/routes/members.ts",
@@ -8615,7 +8619,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "f868435484edd1f07b72d17fc35432f8bafa3eee599c83855abb3060db5fcd2a"
+      "reviewedChangeSha256": "bf5949da23a7d341e26a92341bccdcd64942078a1bf4f59c3b6bae6b98730dd1"
     }
   ]
 }
