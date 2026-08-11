@@ -8959,6 +8959,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "smart-intake-platform-generator-closure-20260811",
+      "reviewedThroughCommit": "36eb03a479982f4c82c506b0c4608c93f8f91959",
+      "reviewedAt": "2026-08-11T16:04:22-04:00",
+      "status": "local_release_build_repair",
+      "captureTiming": "same_product_task",
+      "summary": "Makes the generated PLATFORM source list and curated Smart Intake semantics byte-consistent so API build verification is deterministic after flexible import and bulk editor integration.",
+      "workstreams": [
+        "smart-intake",
+        "living-brief",
+        "release-build"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Generated documentation now reflects the existing Smart Intake authority boundary without changing system-of-record ownership."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The local verification, publication, deployment, and provider boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The build now verifies an idempotent generator output against the sealed source bundle."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No user workflow or approved Smart Intake objective changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generator now owns the already-approved Smart Intake platform paragraph and complete source inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin, desktop integration, provider, browser bridge, or external connector behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Help Center page, print surface, report template, PDF renderer, or governed report artifact changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, contractual interpretation, regulatory rule, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Candidate status remains unchanged; this is release-build closure only."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing runtime browser and database evidence gates remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence and accepted conclusions remain untouched; the deterministic build result is local evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
