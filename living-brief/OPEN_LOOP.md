@@ -2,6 +2,26 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## Invitation and Job Intake release gates - 2026-08-11
+
+1. Preserve the canonical company-bound invitation and direct-member path;
+   exercise existing-user, new-user, multiple-pending-invitation, concurrent,
+   cancelled, and ambiguous-legacy-email cases in an isolated database before
+   any release decision.
+2. Exercise Job Intake metadata prefill, optional PDF/DOCX/XLS/XLSX/XLSM/CSV
+   upload, ordered autosave recovery, document removal, stale-revision refusal,
+   reload, and activation in English desktop and Spanish narrow-width browser
+   states before live acceptance.
+3. Keep Smart Intake flexible import/mapping and the spreadsheet-style editor
+   for 100-plus contract items as the next product phase; this candidate does
+   not claim that phase is implemented.
+4. Keep canonical multi-contract activation, per-contract APU snapshots,
+   workflow inheritance, and consolidated budgets as the following phase. Do
+   not introduce a duplicate contract, item, APU, workflow, or budget store.
+5. Treat local source, test, typecheck, and build success as local evidence
+   only. Push, publication, deployment, production/database verification, and
+   customer acceptance require separate authorization and remain open.
+
 ## Operational-register field acceptance - 2026-07-31
 
 1. Preserve the local Activity Log and Coordinator Command Center correction

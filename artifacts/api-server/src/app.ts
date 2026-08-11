@@ -33,6 +33,7 @@ import { startCommercialEntitlementMigration } from "./lib/commercial-entitlemen
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { startFinancialContractMigration } from "./lib/financial-contract-migration";
 import { startJobIntakeMigration, waitForJobIntakeMigration } from "./lib/job-intake-migration";
+import { startProjectInvitationMigration, waitForProjectInvitationMigration } from "./lib/project-invitation-migration";
 import { startTeamResourcePlanningMigration, waitForTeamResourcePlanningMigration } from "./lib/team-resource-planning-migration";
 import { startContractItemWorkflowMigration } from "./lib/contract-item-workflow-migration";
 import {
@@ -347,6 +348,17 @@ app.use("/api/v1", router);
     console.log("[migration] Team resource planning tables ensured");
   } catch (error) {
     console.error("[migration] Team resource planning migration failed:", error);
+    throw error;
+  }
+})();
+
+(async () => {
+  try {
+    startProjectInvitationMigration();
+    await waitForProjectInvitationMigration();
+    console.log("[migration] Project invitation company bindings ensured");
+  } catch (error) {
+    console.error("[migration] Project invitation migration failed:", error);
     throw error;
   }
 })();

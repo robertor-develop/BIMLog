@@ -139,8 +139,6 @@ export function jobIntakeCoreFingerprint(data: JobIntakeData) {
 
 export function jobIntakeCompletion(data: JobIntakeData, documents: Array<{ category: string; removedAt?: unknown }>, capabilities: JobIntakeCapabilities = FULL_JOB_INTAKE_CAPABILITIES) {
   const activeDocuments = documents.filter((document) => !document.removedAt);
-  const hasCommercialSource = activeDocuments.some((document) => ["quotation", "contract", "proposal"].includes(document.category));
-  const hasQuantitySource = activeDocuments.some((document) => ["takeoff", "estimate"].includes(document.category));
   const scopeReady = data.scopeItems.length > 0 && data.scopeItems.every((item) => item.name && positive(item.plannedHours));
   const pricingReady = data.scopeItems.length > 0 && data.scopeItems.every((item) => positive(item.billingHourlyRate) && item.apuPlanVersion != null);
   const contractItemsReady = data.scopeItems.length > 0 && data.scopeItems.every((item) => item.budgetSnapshotLineId && item.projectCostNodeId);
@@ -151,7 +149,7 @@ export function jobIntakeCompletion(data: JobIntakeData, documents: Array<{ cate
   const contractTermsReady = !!data.commercial.contractNumber && !!data.commercial.counterpartyName;
   const budgetReady = !!data.commercial.budgetSnapshotId && contractItemsReady;
   const stageChecks: Record<JobIntakeStage, boolean[]> = {
-    documents: [hasCommercialSource, hasQuantitySource],
+    documents: activeDocuments.length ? [data.review.sourceConfirmed] : [],
     identity: [!!data.identity.jobName, !!data.identity.jobCode, !!data.identity.clientName, !!data.identity.currency],
     scope: [data.scopeItems.length > 0, scopeReady, data.review.scopeConfirmed],
     pricing: capabilities.costValuePlanner ? [pricingReady, data.review.pricingConfirmed] : [],
@@ -161,7 +159,7 @@ export function jobIntakeCompletion(data: JobIntakeData, documents: Array<{ cate
     ],
     delivery: [!!data.delivery.workflowTemplate, !!data.delivery.submittalStrategy, data.review.deliveryConfirmed],
     team: [data.team.projectLeaderUserId != null, teamReady, ...(capabilities.budget ? [teamRatesReady] : []), assignedHours >= plannedHours && plannedHours > 0n, data.review.teamConfirmed],
-    review: [data.review.sourceConfirmed, data.review.scopeConfirmed, ...(capabilities.costValuePlanner ? [data.review.pricingConfirmed] : []), ...(capabilities.contracts ? [data.review.contractConfirmed] : []), data.review.deliveryConfirmed, data.review.teamConfirmed],
+    review: [...(activeDocuments.length ? [data.review.sourceConfirmed] : []), data.review.scopeConfirmed, ...(capabilities.costValuePlanner ? [data.review.pricingConfirmed] : []), ...(capabilities.contracts ? [data.review.contractConfirmed] : []), data.review.deliveryConfirmed, data.review.teamConfirmed],
   };
   const baseWeights: Record<JobIntakeStage, number> = { documents: 10, identity: 10, scope: 20, pricing: 20, contract: 15, delivery: 10, team: 10, review: 5 };
   const requiredWeight = JOB_INTAKE_STAGES.reduce((sum, key) => sum + (stageChecks[key].length ? baseWeights[key] : 0), 0);
@@ -172,8 +170,6 @@ export function jobIntakeCompletion(data: JobIntakeData, documents: Array<{ cate
   });
   const percent = requiredWeight ? Math.round(stages.reduce((sum, stage) => sum + stage.weight * stage.progress / 100, 0) * 100 / requiredWeight) : 100;
   const missingItems = [
-    !hasCommercialSource && { code: "source_commercial", en: "Upload a quotation, proposal, or contract.", es: "Cargue una cotización, propuesta o contrato." },
-    !hasQuantitySource && { code: "source_quantity", en: "Upload a takeoff or estimate.", es: "Cargue un cómputo de cantidades o estimado." },
     !data.identity.jobName && { code: "job_name", en: "Enter the job name.", es: "Ingrese el nombre del trabajo." },
     !data.identity.jobCode && { code: "job_code", en: "Enter the job code.", es: "Ingrese el código del trabajo." },
     !data.identity.clientName && { code: "client", en: "Enter the client.", es: "Ingrese el cliente." },
@@ -188,7 +184,7 @@ export function jobIntakeCompletion(data: JobIntakeData, documents: Array<{ cate
     !teamReady && { code: "team", en: "Assign every team member to a scope item with planned hours.", es: "Asigne cada miembro a una partida con horas planificadas." },
     capabilities.budget && !teamRatesReady && { code: "internal_rates", en: "Enter internal hourly costs for the resource plan.", es: "Ingrese los costos horarios internos del plan de recursos." },
     assignedHours < plannedHours && { code: "hours", en: "Assign all planned scope hours to the team.", es: "Asigne al equipo todas las horas planificadas." },
-    !(data.review.sourceConfirmed && data.review.scopeConfirmed && data.review.deliveryConfirmed && data.review.teamConfirmed && (!capabilities.costValuePlanner || data.review.pricingConfirmed) && (!capabilities.contracts || data.review.contractConfirmed)) && { code: "confirmations", en: "Complete the required final confirmations.", es: "Complete las confirmaciones finales requeridas." },
+    !((!activeDocuments.length || data.review.sourceConfirmed) && data.review.scopeConfirmed && data.review.deliveryConfirmed && data.review.teamConfirmed && (!capabilities.costValuePlanner || data.review.pricingConfirmed) && (!capabilities.contracts || data.review.contractConfirmed)) && { code: "confirmations", en: "Complete the required final confirmations.", es: "Complete las confirmaciones finales requeridas." },
   ].filter(Boolean) as Array<{ code: string; en: string; es: string }>;
   const missing = missingItems.map((item) => item.en);
   const totals = {

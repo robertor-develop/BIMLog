@@ -8521,6 +8521,101 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "invitation-job-intake-runtime-closure-20260811",
+      "reviewedThroughCommit": "46570da75dbcb6428ced7ee21e340571f2500031",
+      "reviewedAt": "2026-08-11T12:00:00-04:00",
+      "status": "local_release_candidate",
+      "captureTiming": "same_product_task",
+      "summary": "Repairs canonical company-bound project invitations and membership acceptance, and hardens Job Intake metadata prefill, optional source documents, revision-bound mutations, ordered autosave, bilingual user guidance, and release-state truth.",
+      "workstreams": [
+        "project-invitations",
+        "project-membership",
+        "job-intake",
+        "bilingual-ui",
+        "user-documentation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation preserves BIMLog ownership and binds invitations to canonical company and project records without creating another organizational store."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Development, verification, publication boundaries, and handoff requirements remain unchanged and are followed by this local candidate."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing bilingual, concurrency, database-safety, evidence, and no-silent-overwrite requirements govern the implementation without changing the quality policy."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted product vision is unchanged; this candidate completes part of the already agreed onboarding and Intake experience."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "API routes, shared invitation services, additive invitation schema migration, file support, and the Job Intake and Team user-interface surfaces changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin, browser bridge, provider, desktop integration, or external connector behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report family, printable artifact template, PDF renderer, or report acceptance denominator changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, contractual interpretation, regulatory rule, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status now records the local invitation and Job Intake candidate while explicitly separating it from pushed, published, deployed, or live-accepted state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop now records remaining isolated-database and browser acceptance gates and preserves the agreed Smart Intake and canonical multi-contract phases."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit evidence is preserved; this source candidate does not rewrite prior production or customer observations."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/extract-file-text.ts",
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "artifacts/api-server/src/routes/auth.ts",
+        "artifacts/api-server/src/routes/job-intake.ts",
+        "artifacts/api-server/src/routes/members.ts",
+        "artifacts/api-server/src/routes/project_directory.ts",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/Register.tsx",
+        "artifacts/bimlog/src/pages/project/TeamTab.tsx",
+        "lib/db/src/schema/invitations.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f868435484edd1f07b72d17fc35432f8bafa3eee599c83855abb3060db5fcd2a"
     }
   ]
 }

@@ -260,6 +260,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-controls-dashboard.behavior.ts
 - artifacts/api-server/src/lib/project-insights-metrics.ts
 - artifacts/api-server/src/lib/project-intelligence.ts
+- artifacts/api-server/src/lib/project-invitation-contract.ts
+- artifacts/api-server/src/lib/project-invitation-migration.ts
+- artifacts/api-server/src/lib/project-invitation-service.ts
+- artifacts/api-server/src/lib/project-invitation.behavior.ts
 - artifacts/api-server/src/lib/provider-governance.ts
 - artifacts/api-server/src/lib/rfi-complete-package.behavior.ts
 - artifacts/api-server/src/lib/rfi-complete-package.ts

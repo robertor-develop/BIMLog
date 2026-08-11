@@ -16,7 +16,7 @@ export async function extractFileText(
   filename: string
 ): Promise<{ text: string; isSpreadsheet: boolean; rows?: any[][]; chunks: string[]; isPdf: boolean; pdfBase64?: string }> {
   const ext = filename.split(".").pop()?.toLowerCase() ?? "";
-  const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
+  const isSpreadsheet = ["xlsx", "xlsm", "xls", "csv"].includes(ext);
   const isPdf = ext === "pdf";
 
   if (isSpreadsheet) {

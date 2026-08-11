@@ -1,5 +1,25 @@
 # STATUS.md - Current Accepted Platform State
 
+## Invitation and Job Intake release candidate - 2026-08-11
+
+- The local `codex/living-brief-runtime-closure-20260805` candidate repairs
+  project membership onboarding around one canonical company-bound invitation
+  path. Existing BIMLog users are added directly; new-user invitations retain
+  the inviting company and project; normalized-email registration accepts all
+  matching pending project invitations transactionally. Registration,
+  membership, and directory invite paths serialize competing identity and
+  membership work and fail closed on ambiguous legacy identities.
+- Job Intake now prefills available project metadata, treats source documents
+  as optional, accepts PDF, DOCX, XLS, XLSX, XLSM, and CSV sources up to 25 MB,
+  and exposes ordered draft autosave with visible pending, saving, saved, and
+  attention-required states. Upload, removal, and activation flush the latest
+  draft and bind mutations to the saved revision so stale work cannot silently
+  replace a newer revision.
+- The Team, registration, Intake, Help Center, and operating-manual wording is
+  maintained in English and Spanish. This is source-candidate truth only. It is
+  not pushed, published, deployed, production verified, customer accepted, or
+  live accepted; those actions remain outside this task.
+
 ## Operational-register live-acceptance correction - 2026-07-31
 
 - Local branch `codex/platform-pdf-consistency-20260730` contains a bounded

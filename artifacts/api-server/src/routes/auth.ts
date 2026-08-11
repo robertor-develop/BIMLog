@@ -2,59 +2,163 @@ import { Router, type IRouter } from "express";
 import bcrypt from "bcryptjs";
 import { randomBytes } from "crypto";
 import { db } from "@workspace/db";
-import { usersTable, companiesTable, projectInvitations, projectMembersTable, filesTable, rfisTable, submittalsTable } from "@workspace/db/schema";
+import {
+  usersTable,
+  companiesTable,
+  projectInvitations,
+  projectMembersTable,
+  filesTable,
+  rfisTable,
+  submittalsTable,
+} from "@workspace/db/schema";
 import { sendEmail, makePasswordResetEmail } from "../lib/email";
 import { eq, and, sql } from "drizzle-orm";
 import { RegisterBody, LoginBody } from "@workspace/api-zod";
-import { signToken, authMiddleware, type AuthPayload } from "../middlewares/auth";
+import {
+  signToken,
+  authMiddleware,
+  type AuthPayload,
+} from "../middlewares/auth";
 import { effectiveCommercialAccessForUser } from "../lib/commercial-entitlement";
+import { waitForProjectInvitationMigration } from "../lib/project-invitation-migration";
+import {
+  invitationEmailLockKey,
+  normalizeInvitationEmail,
+  resolveInvitationCompanyId,
+} from "../lib/project-invitation-contract";
 
 const router: IRouter = Router();
+
+class RegistrationConflictError extends Error {}
 
 router.post("/auth/register", async (req, res) => {
   try {
     const body = RegisterBody.parse(req.body);
-
-    const existing = await db.select().from(usersTable).where(eq(usersTable.email, body.email)).limit(1);
+    const email = normalizeInvitationEmail(body.email);
+    await waitForProjectInvitationMigration();
+    const existing = await db
+      .select()
+      .from(usersTable)
+      .where(sql`lower(trim(${usersTable.email})) = ${email}`)
+      .limit(1);
     if (existing.length > 0) {
       res.status(409).json({ error: "Email already exists" });
       return;
     }
-
-    let company = await db.select().from(companiesTable).where(eq(companiesTable.name, body.companyName)).limit(1);
-    let companyId: number;
-    if (company.length > 0) {
-      companyId = company[0].id;
-    } else {
-      const [newCompany] = await db.insert(companiesTable).values({ name: body.companyName }).returning();
-      companyId = newCompany.id;
-    }
-
     const passwordHash = await bcrypt.hash(body.password, 10);
-    const [user] = await db.insert(usersTable).values({
-      email: body.email,
-      passwordHash,
-      fullName: body.fullName,
-      companyId,
-    }).returning();
-
-    // Auto-accept any pending invitations for this email
-    try {
-      const pending = await db.select().from(projectInvitations)
-        .where(and(eq(projectInvitations.email, body.email), eq(projectInvitations.status, "pending")));
-      for (const inv of pending) {
-        const alreadyMember = await db.select().from(projectMembersTable)
-          .where(and(eq(projectMembersTable.projectId, inv.projectId), eq(projectMembersTable.userId, user.id))).limit(1);
-        if (alreadyMember.length === 0) {
-          await db.insert(projectMembersTable).values({ projectId: inv.projectId, userId: user.id, role: inv.role });
+    const registered = await db.transaction(async (tx) => {
+      await tx.execute(
+        sql`SELECT pg_advisory_xact_lock(hashtext(${invitationEmailLockKey(email)}))`,
+      );
+      const concurrentExisting = await tx
+        .select({ id: usersTable.id })
+        .from(usersTable)
+        .where(sql`lower(trim(${usersTable.email})) = ${email}`)
+        .limit(1);
+      if (concurrentExisting.length)
+        throw new RegistrationConflictError("Email already exists");
+      const pending = await tx
+        .select()
+        .from(projectInvitations)
+        .where(
+          and(
+            sql`lower(trim(${projectInvitations.email})) = ${email}`,
+            eq(projectInvitations.status, "pending"),
+          ),
+        );
+      const boundCompanyIds = new Set<number>();
+      for (const invitation of pending) {
+        if (invitation.companyId) {
+          boundCompanyIds.add(invitation.companyId);
+          continue;
         }
-        await db.update(projectInvitations).set({ status: "accepted", acceptedAt: new Date() }).where(eq(projectInvitations.id, inv.id));
+        const inviter = await tx
+          .select({ companyId: usersTable.companyId })
+          .from(usersTable)
+          .where(eq(usersTable.id, invitation.invitedByUserId))
+          .limit(1);
+        if (inviter[0]?.companyId) boundCompanyIds.add(inviter[0].companyId);
       }
-    } catch (inviteError) {
-      console.error("[auth/register] Failed to auto-accept pending invitations:", inviteError instanceof Error ? inviteError.message : inviteError);
-    }
+      const boundCompanyId = resolveInvitationCompanyId([...boundCompanyIds]);
 
-    const companyName = company.length > 0 ? company[0].name : body.companyName;
+      let company = boundCompanyId
+        ? await tx
+            .select()
+            .from(companiesTable)
+            .where(eq(companiesTable.id, boundCompanyId))
+            .limit(1)
+        : await tx
+            .select()
+            .from(companiesTable)
+            .where(
+              sql`lower(trim(${companiesTable.name})) = lower(trim(${body.companyName}))`,
+            )
+            .limit(1);
+      if (!company.length) {
+        if (pending.length)
+          throw new Error(
+            "The company assigned by this invitation no longer exists.",
+          );
+        const [createdCompany] = await tx
+          .insert(companiesTable)
+          .values({ name: body.companyName.trim() })
+          .returning();
+        company = [createdCompany];
+      }
+
+      const [user] = await tx
+        .insert(usersTable)
+        .values({
+          email,
+          passwordHash,
+          fullName: body.fullName.trim(),
+          companyId: company[0]!.id,
+        })
+        .returning();
+      for (const invitation of pending) {
+        const alreadyMember = await tx
+          .select({ id: projectMembersTable.id })
+          .from(projectMembersTable)
+          .where(
+            and(
+              eq(projectMembersTable.projectId, invitation.projectId),
+              eq(projectMembersTable.userId, user.id),
+            ),
+          )
+          .limit(1);
+        if (!alreadyMember.length) {
+          await tx.insert(projectMembersTable).values({
+            projectId: invitation.projectId,
+            userId: user.id,
+            role: invitation.role,
+            status: "active",
+          });
+        }
+      }
+      if (pending.length) {
+        await tx
+          .update(projectInvitations)
+          .set({
+            status: "accepted",
+            acceptedAt: new Date(),
+            companyId: company[0]!.id,
+          })
+          .where(
+            and(
+              sql`lower(trim(${projectInvitations.email})) = ${email}`,
+              eq(projectInvitations.status, "pending"),
+            ),
+          );
+      }
+      return {
+        user,
+        company: company[0]!,
+        acceptedProjectIds: pending.map((invitation) => invitation.projectId),
+      };
+    });
+
+    const { user, company } = registered;
+    const companyName = company.name;
     const payload: AuthPayload = {
       userId: user.id,
       email: user.email,
@@ -77,20 +181,32 @@ router.post("/auth/register", async (req, res) => {
         createdAt: user.createdAt.toISOString(),
         commercialAccess: commercial.any,
         commercialFeatures: commercial,
+        acceptedProjectIds: registered.acceptedProjectIds,
       },
     });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Registration failed";
-    res.status(400).json({ error: message });
+    const message =
+      error instanceof Error ? error.message : "Registration failed";
+    res
+      .status(error instanceof RegistrationConflictError ? 409 : 400)
+      .json({ error: message });
   }
 });
 
 router.post("/auth/login", async (req, res) => {
   try {
     const body = LoginBody.parse(req.body);
-
-    const users = await db.select().from(usersTable).where(eq(usersTable.email, body.email)).limit(1);
-    if (users.length === 0) {
+    const email = body.email.trim().toLowerCase();
+    const users = await db
+      .select()
+      .from(usersTable)
+      .where(sql`lower(trim(${usersTable.email})) = ${email}`)
+      .limit(2);
+    if (users.length !== 1) {
+      if (users.length > 1)
+        console.error(
+          "[auth/login] Duplicate normalized email identities require administrator repair",
+        );
       res.status(401).json({ error: "Invalid credentials" });
       return;
     }
@@ -102,7 +218,11 @@ router.post("/auth/login", async (req, res) => {
       return;
     }
 
-    const companies = await db.select().from(companiesTable).where(eq(companiesTable.id, user.companyId)).limit(1);
+    const companies = await db
+      .select()
+      .from(companiesTable)
+      .where(eq(companiesTable.id, user.companyId))
+      .limit(1);
     const companyName = companies[0]?.name || "";
 
     const payload: AuthPayload = {
@@ -139,14 +259,22 @@ router.post("/auth/login", async (req, res) => {
 
 router.get("/auth/me", authMiddleware, async (req, res) => {
   const user = req.user!;
-  const users = await db.select().from(usersTable).where(eq(usersTable.id, user.userId)).limit(1);
+  const users = await db
+    .select()
+    .from(usersTable)
+    .where(eq(usersTable.id, user.userId))
+    .limit(1);
   if (users.length === 0) {
     res.status(404).json({ error: "User not found" });
     return;
   }
 
   const u = users[0];
-  const companies = await db.select().from(companiesTable).where(eq(companiesTable.id, u.companyId)).limit(1);
+  const companies = await db
+    .select()
+    .from(companiesTable)
+    .where(eq(companiesTable.id, u.companyId))
+    .limit(1);
   const c = companies[0];
   const commercial = await effectiveCommercialAccessForUser(u.id);
 
@@ -167,20 +295,29 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
     commercialAccess: commercial.any,
     commercialFeatures: commercial,
     openai_api_key: u.openaiApiKey ? "configured" : null,
-    company: c ? {
-      id: c.id,
-      name: c.name,
-      website: c.website || null,
-      address: c.address || null,
-      phone: c.phone || null,
-      companyLogoUrl: c.companyLogoUrl || null,
-    } : null,
+    company: c
+      ? {
+          id: c.id,
+          name: c.name,
+          website: c.website || null,
+          address: c.address || null,
+          phone: c.phone || null,
+          companyLogoUrl: c.companyLogoUrl || null,
+        }
+      : null,
   });
 });
 
 router.patch("/users/me", authMiddleware, async (req, res) => {
   try {
-    const { fullName, jobTitle, phone, avatarUrl, signatureUrl, notificationPreferences } = req.body;
+    const {
+      fullName,
+      jobTitle,
+      phone,
+      avatarUrl,
+      signatureUrl,
+      notificationPreferences,
+    } = req.body;
     const userId = req.user!.userId;
 
     const updates: Partial<typeof usersTable.$inferInsert> = {};
@@ -189,13 +326,22 @@ router.patch("/users/me", authMiddleware, async (req, res) => {
     if (phone !== undefined) updates.phone = phone;
     if (avatarUrl !== undefined) updates.avatarUrl = avatarUrl;
     if (signatureUrl !== undefined) updates.signatureUrl = signatureUrl;
-    if (notificationPreferences !== undefined) updates.notificationPreferences = notificationPreferences;
+    if (notificationPreferences !== undefined)
+      updates.notificationPreferences = notificationPreferences;
 
     await db.update(usersTable).set(updates).where(eq(usersTable.id, userId));
 
-    const updated = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
+    const updated = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
     const u = updated[0];
-    const companies = await db.select().from(companiesTable).where(eq(companiesTable.id, u.companyId)).limit(1);
+    const companies = await db
+      .select()
+      .from(companiesTable)
+      .where(eq(companiesTable.id, u.companyId))
+      .limit(1);
     const c = companies[0];
 
     res.json({
@@ -211,14 +357,16 @@ router.patch("/users/me", authMiddleware, async (req, res) => {
       signatureUrl: u.signatureUrl || null,
       apiToken: u.apiToken || null,
       notificationPreferences: u.notificationPreferences || null,
-      company: c ? {
-        id: c.id,
-        name: c.name,
-        website: c.website || null,
-        address: c.address || null,
-        phone: c.phone || null,
-        companyLogoUrl: c.companyLogoUrl || null,
-      } : null,
+      company: c
+        ? {
+            id: c.id,
+            name: c.name,
+            website: c.website || null,
+            address: c.address || null,
+            phone: c.phone || null,
+            companyLogoUrl: c.companyLogoUrl || null,
+          }
+        : null,
     });
   } catch (error) {
     const message = error instanceof Error ? error.message : "Update failed";
@@ -231,8 +379,15 @@ router.patch("/users/me/company", authMiddleware, async (req, res) => {
     const { name, website, address, phone, companyLogoUrl } = req.body;
     const userId = req.user!.userId;
 
-    const users = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-    if (!users.length) { res.status(404).json({ error: "User not found" }); return; }
+    const users = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+    if (!users.length) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
 
     const companyId = users[0].companyId;
     const updates: Partial<typeof companiesTable.$inferInsert> = {};
@@ -242,9 +397,16 @@ router.patch("/users/me/company", authMiddleware, async (req, res) => {
     if (phone !== undefined) updates.phone = phone;
     if (companyLogoUrl !== undefined) updates.companyLogoUrl = companyLogoUrl;
 
-    await db.update(companiesTable).set(updates).where(eq(companiesTable.id, companyId));
+    await db
+      .update(companiesTable)
+      .set(updates)
+      .where(eq(companiesTable.id, companyId));
 
-    const updated = await db.select().from(companiesTable).where(eq(companiesTable.id, companyId)).limit(1);
+    const updated = await db
+      .select()
+      .from(companiesTable)
+      .where(eq(companiesTable.id, companyId))
+      .limit(1);
     res.json(updated[0]);
   } catch (error) {
     const message = error instanceof Error ? error.message : "Update failed";
@@ -256,38 +418,63 @@ router.patch("/users/me/password", authMiddleware, async (req, res) => {
   try {
     const { currentPassword, newPassword } = req.body;
     if (!currentPassword || !newPassword) {
-      res.status(400).json({ error: "currentPassword and newPassword are required" });
+      res
+        .status(400)
+        .json({ error: "currentPassword and newPassword are required" });
       return;
     }
     if (newPassword.length < 8) {
-      res.status(400).json({ error: "New password must be at least 8 characters" });
+      res
+        .status(400)
+        .json({ error: "New password must be at least 8 characters" });
       return;
     }
 
     const userId = req.user!.userId;
-    const users = await db.select().from(usersTable).where(eq(usersTable.id, userId)).limit(1);
-    if (!users.length) { res.status(404).json({ error: "User not found" }); return; }
+    const users = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.id, userId))
+      .limit(1);
+    if (!users.length) {
+      res.status(404).json({ error: "User not found" });
+      return;
+    }
 
     const ok = await bcrypt.compare(currentPassword, users[0].passwordHash);
-    if (!ok) { res.status(400).json({ error: "Current password is incorrect" }); return; }
+    if (!ok) {
+      res.status(400).json({ error: "Current password is incorrect" });
+      return;
+    }
 
     const newHash = await bcrypt.hash(newPassword, 10);
-    await db.update(usersTable).set({ passwordHash: newHash }).where(eq(usersTable.id, userId));
+    await db
+      .update(usersTable)
+      .set({ passwordHash: newHash })
+      .where(eq(usersTable.id, userId));
 
     res.json({ success: true });
   } catch (error) {
-    const message = error instanceof Error ? error.message : "Password update failed";
+    const message =
+      error instanceof Error ? error.message : "Password update failed";
     res.status(400).json({ error: message });
   }
 });
 
 router.post("/auth/openai-key", authMiddleware, async (req, res) => {
-  res.status(410).json({ error: "LEGACY_AI_KEY_RETIRED", message: "Use /api/v1/ai-control/provider-connections. Existing legacy values are preserved pending audited migration." });
+  res.status(410).json({
+    error: "LEGACY_AI_KEY_RETIRED",
+    message:
+      "Use /api/v1/ai-control/provider-connections. Existing legacy values are preserved pending audited migration.",
+  });
 });
 
 router.delete("/auth/openai-key", authMiddleware, async (req, res) => {
   try {
-    await db.update(usersTable).set({ openaiApiKey: null }).where(eq(usersTable.id, req.user!.userId));
+    await db
+      .update(usersTable)
+      .set({ openaiApiKey: null })
+      .where(eq(usersTable.id, req.user!.userId));
     res.json({ success: true });
   } catch (error) {
     res.status(500).json({ error: "Failed to remove OpenAI key" });
@@ -298,7 +485,10 @@ router.post("/users/me/api-token", authMiddleware, async (req, res) => {
   try {
     const userId = req.user!.userId;
     const token = randomBytes(32).toString("hex");
-    await db.update(usersTable).set({ apiToken: token }).where(eq(usersTable.id, userId));
+    await db
+      .update(usersTable)
+      .set({ apiToken: token })
+      .where(eq(usersTable.id, userId));
     res.json({ apiToken: token });
   } catch (error) {
     res.status(500).json({ error: "Failed to generate token" });
@@ -319,7 +509,8 @@ router.get("/users/me/performance-score", authMiddleware, async (req, res) => {
 
     const totalFiles = Number(namingComplianceResult[0]?.total ?? 0);
     const passedFiles = Number(namingComplianceResult[0]?.passed ?? 0);
-    const namingCompliance = totalFiles > 0 ? Math.round((passedFiles / totalFiles) * 100) : null;
+    const namingCompliance =
+      totalFiles > 0 ? Math.round((passedFiles / totalFiles) * 100) : null;
 
     const rfiResult = await db
       .select({
@@ -331,7 +522,8 @@ router.get("/users/me/performance-score", authMiddleware, async (req, res) => {
 
     const totalRfis = Number(rfiResult[0]?.total ?? 0);
     const closedRfis = Number(rfiResult[0]?.closed ?? 0);
-    const rfiCloseRate = totalRfis > 0 ? Math.round((closedRfis / totalRfis) * 100) : null;
+    const rfiCloseRate =
+      totalRfis > 0 ? Math.round((closedRfis / totalRfis) * 100) : null;
 
     const submittalsResult = await db
       .select({
@@ -343,16 +535,38 @@ router.get("/users/me/performance-score", authMiddleware, async (req, res) => {
 
     const totalSubmittals = Number(submittalsResult[0]?.total ?? 0);
     const approvedSubmittals = Number(submittalsResult[0]?.approved ?? 0);
-    const submittalsApprovalRate = totalSubmittals > 0 ? Math.round((approvedSubmittals / totalSubmittals) * 100) : null;
+    const submittalsApprovalRate =
+      totalSubmittals > 0
+        ? Math.round((approvedSubmittals / totalSubmittals) * 100)
+        : null;
 
-    const scores = [namingCompliance, rfiCloseRate, submittalsApprovalRate].filter(s => s !== null) as number[];
-    const overallScore = scores.length > 0 ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null;
+    const scores = [
+      namingCompliance,
+      rfiCloseRate,
+      submittalsApprovalRate,
+    ].filter((s) => s !== null) as number[];
+    const overallScore =
+      scores.length > 0
+        ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length)
+        : null;
 
     res.json({
       overallScore,
-      namingCompliance: { rate: namingCompliance, passed: passedFiles, total: totalFiles },
-      rfiCloseRate: { rate: rfiCloseRate, closed: closedRfis, total: totalRfis },
-      submittalsApprovalRate: { rate: submittalsApprovalRate, approved: approvedSubmittals, total: totalSubmittals },
+      namingCompliance: {
+        rate: namingCompliance,
+        passed: passedFiles,
+        total: totalFiles,
+      },
+      rfiCloseRate: {
+        rate: rfiCloseRate,
+        closed: closedRfis,
+        total: totalRfis,
+      },
+      submittalsApprovalRate: {
+        rate: submittalsApprovalRate,
+        approved: approvedSubmittals,
+        total: totalSubmittals,
+      },
     });
   } catch (error) {
     res.status(500).json({ error: "Failed to compute performance score" });
@@ -362,24 +576,53 @@ router.get("/users/me/performance-score", authMiddleware, async (req, res) => {
 // ─── POST /auth/forgot-password ──────────────────────────────────────────────
 router.post("/auth/forgot-password", async (req, res) => {
   try {
-    const { email } = req.body as { email?: string };
-    if (!email) { res.status(400).json({ error: "Email is required" }); return; }
-    const [user] = await db.select().from(usersTable).where(eq(usersTable.email, email.toLowerCase())).limit(1);
+    const { email: rawEmail } = req.body as { email?: string };
+    if (!rawEmail) {
+      res.status(400).json({ error: "Email is required" });
+      return;
+    }
+    const email = normalizeInvitationEmail(rawEmail);
+    const matchingUsers = await db
+      .select()
+      .from(usersTable)
+      .where(sql`lower(trim(${usersTable.email})) = ${email}`)
+      .limit(2);
+    if (matchingUsers.length > 1)
+      console.error(
+        "[auth/forgot-password] Duplicate normalized email identities require administrator repair",
+      );
+    const user = matchingUsers.length === 1 ? matchingUsers[0] : undefined;
     // Always respond with success to avoid email enumeration
-    if (!user) { res.json({ message: "If an account with that email exists, a reset link has been sent." }); return; }
+    if (!user) {
+      res.json({
+        message:
+          "If an account with that email exists, a reset link has been sent.",
+      });
+      return;
+    }
     const token = randomBytes(32).toString("hex");
     const expires = new Date(Date.now() + 60 * 60 * 1000); // 1 hour
-    await db.update(usersTable).set({
-      passwordResetToken: token,
-      passwordResetExpires: expires,
-    }).where(eq(usersTable.id, user.id));
+    await db
+      .update(usersTable)
+      .set({
+        passwordResetToken: token,
+        passwordResetExpires: expires,
+      })
+      .where(eq(usersTable.id, user.id));
     const resetLink = `${process.env.BIMLOG_URL || "https://bimlog.app"}/reset-password?token=${token}`;
     await sendEmail({
       to: user.email,
       subject: "Reset your BIMLog password",
-      html: makePasswordResetEmail({ lang: "en", recipientName: user.fullName, token }),
+      html: makePasswordResetEmail({
+        lang: "en",
+        recipientName: user.fullName,
+        token,
+      }),
     });
-    res.json({ message: "If an account with that email exists, a reset link has been sent." });
+    res.json({
+      message:
+        "If an account with that email exists, a reset link has been sent.",
+    });
   } catch (error) {
     res.status(500).json({ error: "Failed to process request" });
   }
@@ -388,22 +631,41 @@ router.post("/auth/forgot-password", async (req, res) => {
 // ─── POST /auth/reset-password ────────────────────────────────────────────────
 router.post("/auth/reset-password", async (req, res) => {
   try {
-    const { token, password } = req.body as { token?: string; password?: string };
-    if (!token || !password) { res.status(400).json({ error: "Token and password are required" }); return; }
-    if (password.length < 8) { res.status(400).json({ error: "Password must be at least 8 characters" }); return; }
+    const { token, password } = req.body as {
+      token?: string;
+      password?: string;
+    };
+    if (!token || !password) {
+      res.status(400).json({ error: "Token and password are required" });
+      return;
+    }
+    if (password.length < 8) {
+      res.status(400).json({ error: "Password must be at least 8 characters" });
+      return;
+    }
     const now = new Date();
-    const [user] = await db.select().from(usersTable)
-      .where(eq(usersTable.passwordResetToken, token)).limit(1);
-    if (!user || !user.passwordResetExpires || user.passwordResetExpires < now) {
+    const [user] = await db
+      .select()
+      .from(usersTable)
+      .where(eq(usersTable.passwordResetToken, token))
+      .limit(1);
+    if (
+      !user ||
+      !user.passwordResetExpires ||
+      user.passwordResetExpires < now
+    ) {
       res.status(400).json({ error: "Invalid or expired reset token" });
       return;
     }
     const hashed = await bcrypt.hash(password, 10);
-    await db.update(usersTable).set({
-      passwordHash: hashed,
-      passwordResetToken: null,
-      passwordResetExpires: null,
-    }).where(eq(usersTable.id, user.id));
+    await db
+      .update(usersTable)
+      .set({
+        passwordHash: hashed,
+        passwordResetToken: null,
+        passwordResetExpires: null,
+      })
+      .where(eq(usersTable.id, user.id));
     res.json({ message: "Password updated successfully" });
   } catch (error) {
     res.status(500).json({ error: "Failed to reset password" });
