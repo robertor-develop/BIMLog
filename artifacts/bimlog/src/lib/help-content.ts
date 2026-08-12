@@ -328,6 +328,27 @@ const BASE_HELP_TOPICS: Array<Omit<HelpTopic, keyof HelpManualDetail>> = [
     keywords: ["integration", "sync", "api", "csv", "pdf", "integración", "sincronización", "importación"],
   },
   {
+    id: "lens-next", category: "integrations",
+    title: { en: "BIMLog Lens Next — Phase 1", es: "BIMLog Lens Next — Fase 1" },
+    summary: { en: "Review live BIMLog Lens issues in a compact Navisworks panel and open one exact working view without changing platform or SavedViewpoint records.", es: "Revise incidencias vivas de BIMLog Lens en un panel compacto de Navisworks y abra una vista de trabajo exacta sin cambiar registros de la plataforma ni SavedViewpoints." },
+    audience: { en: "Approved Lens Next pilot users", es: "Usuarios piloto aprobados de Lens Next" },
+    availability: { en: "Isolated local Phase 1 candidate; not installed or released", es: "Candidato local aislado de Fase 1; no instalado ni publicado" },
+    quickTip: { en: "Confirm both the BIMLog project and active Navisworks model before using Open working view. Missing or ambiguous identity blocks instead of guessing.", es: "Confirme el proyecto BIMLog y el modelo activo de Navisworks antes de Abrir vista de trabajo. Una identidad faltante o ambigua bloquea la acción en vez de adivinar." },
+    steps: [
+      { title: { en: "Open Lens Next", es: "Abrir Lens Next" }, body: { en: "Sign in to BIMLog and open the protected Lens Next workspace. The isolated native shell is not installed in this local candidate.", es: "Inicie sesión en BIMLog y abra el espacio protegido Lens Next. El host nativo aislado no está instalado en este candidato local." } },
+      { title: { en: "Select the authorized project", es: "Seleccionar el proyecto autorizado" }, body: { en: "Choose only from projects returned for your authenticated account. Lens Next does not accept a project identity typed into the URL or inferred from a model label.", es: "Elija solo entre proyectos devueltos para su cuenta autenticada. Lens Next no acepta una identidad escrita en la URL ni inferida de una etiqueta del modelo." } },
+      { title: { en: "Filter the live issue list", es: "Filtrar la lista viva" }, body: { en: "Use search, status, trade, floor, and priority. Refresh preserves exact BIMLog identity and does not create duplicate issues.", es: "Use búsqueda, estado, especialidad, piso y prioridad. Actualizar conserva la identidad exacta y no crea incidencias duplicadas." } },
+      { title: { en: "Review details and history", es: "Revisar detalles e historial" }, body: { en: "Open a card to inspect its immutable server/viewpoint identity, current fields, revision, and read-only history.", es: "Abra una tarjeta para revisar su identidad inmutable de servidor/vista, campos actuales, revisión e historial de solo lectura." } },
+      { title: { en: "Open the exact working view", es: "Abrir la vista de trabajo exacta" }, body: { en: "When the short-lived local bridge session and model/project context agree, Open working view locates the one exact identity. Missing, mismatched, or ambiguous identity remains blocked.", es: "Cuando coinciden la sesión local de corta duración y el contexto modelo/proyecto, Abrir vista de trabajo localiza la identidad exacta. Una identidad faltante, distinta o ambigua permanece bloqueada." } },
+    ],
+    result: { en: "The intended live issue is reviewed and, when exact identity resolves, opened ephemerally in Navisworks without a platform write or SavedViewpoint mutation.", es: "La incidencia viva prevista se revisa y, cuando resuelve la identidad exacta, se abre temporalmente en Navisworks sin escritura en la plataforma ni mutación de SavedViewpoint." },
+    troubleshooting: [
+      { en: "If the bridge is unavailable, keep reviewing issues in read-only mode and have the approved native host/session checked; never copy a token into browser storage.", es: "Si el puente no está disponible, continúe revisando en solo lectura y haga revisar el host/sesión nativa aprobada; nunca copie un token al almacenamiento del navegador." },
+      { en: "If Open working view is blocked, confirm the selected BIMLog project, active model fingerprint, and immutable identity. Do not use label, folder, tree position, or active view as a fallback.", es: "Si Abrir vista está bloqueado, confirme proyecto, huella del modelo e identidad inmutable. No use etiqueta, carpeta, posición del árbol ni vista activa como alternativa." },
+    ],
+    keywords: ["lens next", "navisworks", "working view", "immutable identity", "vista de trabajo", "identidad inmutable"],
+  },
+  {
     id: "team-performance", category: "commercial",
     title: { en: "Team Performance & Skills", es: "Rendimiento y Habilidades del Equipo" },
     summary: { en: "Review verified capacity, delivery, quality signals, work categories, hours, rates, and outcomes per team member.", es: "Revise capacidad, entrega, señales de calidad, categorías, horas, tarifas y resultados verificados por miembro." },
@@ -617,7 +638,7 @@ export const HELP_CONTEXT_ALIASES: Record<string, string> = {
   intake: "job-intake", operations: "job-operations", rfis: "rfis", submittals: "submittals-transmittals", "submittal-tracker": "submittals-transmittals", transmittals: "submittals-transmittals",
   "change-orders": "changes-meetings", meetings: "changes-meetings", schedule: "planning", "clash-reports": "planning", budget: "budget-contracts", contracts: "budget-contracts", apu: "cost-value-planner", "team-performance": "team-performance",
   analytics: "insights-reports", reports: "insights-reports", directory: "directory-administration", team: "directory-administration", generator: "directory-administration", convention: "directory-administration",
-  integrations: "integrations", "sync-agent": "integrations",
+  integrations: "integrations", "sync-agent": "integrations", "lens-next": "lens-next",
 };
 
 export function helpTopicForContext(context: string | null | undefined) {

@@ -1,0 +1,44 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "bimlog.lens_next.config.v1",
+  "title": "BIMLog Lens Next isolated configuration",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schemaVersion", "bridge", "featureFlags"],
+  "properties": {
+    "schemaVersion": { "const": 1 },
+    "bridge": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["origin", "requestTimeoutMilliseconds"],
+      "properties": {
+        "origin": { "const": "http://127.0.0.1:8766" },
+        "requestTimeoutMilliseconds": { "type": "integer", "minimum": 100, "maximum": 5000 }
+      }
+    },
+    "featureFlags": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "lens_next.platform_metadata_writes",
+        "lens_next.status_updates",
+        "lens_next.comments",
+        "lens_next.camera_capture",
+        "lens_next.visual_state_updates",
+        "lens_next.viewpoint_publishing",
+        "lens_next.project_migration",
+        "lens_next.duplicate_recovery"
+      ],
+      "properties": {
+        "lens_next.platform_metadata_writes": { "const": false },
+        "lens_next.status_updates": { "const": false },
+        "lens_next.comments": { "const": false },
+        "lens_next.camera_capture": { "const": false },
+        "lens_next.visual_state_updates": { "const": false },
+        "lens_next.viewpoint_publishing": { "const": false },
+        "lens_next.project_migration": { "const": false },
+        "lens_next.duplicate_recovery": { "const": false }
+      }
+    }
+  }
+}

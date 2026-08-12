@@ -1,0 +1,302 @@
+{
+  "contract": "BIMLog Lens Next identity and isolation contract",
+  "version": 1,
+  "status": "assessment_bound_phase1_may_proceed",
+  "date": "2026-08-12",
+  "authoritativeWorktree": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-20260812",
+  "base": {
+    "branch": "codex/bimlog-lens-next-20260812",
+    "commit": "2cea97f985f3167c601dfd3df4c78813676f5680",
+    "tree": "9cfd03aeb5e1fe78227a8c9e3eebad3202fb8a44"
+  },
+  "legacy": {
+    "policy": "untouched_and_available_side_by_side",
+    "assembly": "BIMLogNavisPlugin",
+    "dll": "BIMLogNavisPlugin.dll",
+    "rootNamespace": "BIMLogNavisPlugin",
+    "dockPluginId": "BIMLogLens.IgniteSmart",
+    "buttonPluginId": "BIMLogLensButton.IgniteSmart",
+    "bridge": "http://localhost:8765",
+    "metadataSource": "BIMLogLens",
+    "configurationRoot": "%APPDATA%\\BIMLog",
+    "protectedConfigurationFiles": [
+      "config.json",
+      "synced_viewpoints.json",
+      "sequence.json",
+      "trade_floor_sequence.json",
+      "levels_cache.json",
+      "project_locks.json"
+    ],
+    "readOnlyEvidenceRoots": [
+      "F:\\BIMLog\\Repositories\\BIMLogPlugin2025-emergency-1.60.21",
+      "F:\\BIMLog\\Repositories\\bimlog\\.worktrees\\lens-reconcile-screenshot-repair-20260811"
+    ]
+  },
+  "nextIsolation": {
+    "assembly": "BIMLogLensNext",
+    "dll": "BIMLogLensNext.dll",
+    "rootNamespace": "BIMLogLensNext",
+    "dockPluginId": "BIMLogLensNext.IgniteSmart",
+    "buttonPluginId": "BIMLogLensNextButton.IgniteSmart",
+    "dockPanelId": "BIMLogLensNext.IgniteSmart",
+    "installationFolderName": "BIMLogLensNext",
+    "installerDefinition": "Install-BIMLogLensNext",
+    "uninstallerDefinition": "Uninstall-BIMLogLensNext",
+    "configurationRoot": "%LOCALAPPDATA%\\BIMLog\\LensNext",
+    "configurationFile": "lens-next.config.json",
+    "cacheRoot": "%LOCALAPPDATA%\\BIMLog\\LensNext\\cache",
+    "logRoot": "%LOCALAPPDATA%\\BIMLog\\LensNext\\logs",
+    "featureFlagPrefix": "lens_next.",
+    "metadataNamespace": "bimlog.lens_next.v1",
+    "metadataSource": "BIMLogLensNext",
+    "commandPrefix": "BIMLogLensNext",
+    "bridgeDefault": "http://127.0.0.1:8766",
+    "publishedFolder": "BIMLog Lens Next Published",
+    "publishedMarker": "bimlog.lens_next.published.v1",
+    "forbiddenSharedSurfaces": [
+      "Legacy assembly or DLL",
+      "Legacy plugin IDs or dock panel",
+      "Legacy installation folder or installer/uninstaller",
+      "Legacy port 8765",
+      "Legacy %APPDATA%\\BIMLog configuration/cache files",
+      "Legacy metadata source BIMLogLens",
+      "Legacy commands",
+      "Legacy SavedViewpoint folders or markers"
+    ]
+  },
+  "identityModel": {
+    "bimlogIssue": {
+      "authority": "BIMLog platform",
+      "phase1RequiredFields": [
+        "projectId",
+        "serverId",
+        "viewpointId",
+        "lifecycleStatus",
+        "revisionNumber"
+      ],
+      "stableIssueFamilyUuid": "schema_gap_must_be_resolved_before_cross_revision_write_workflows",
+      "rules": [
+        "serverId identifies the exact platform row/revision",
+        "viewpointId and projectId must accompany the row identity",
+        "issueGroupId must not be treated as a universal issue-family identity",
+        "missing or ambiguous identity blocks"
+      ]
+    },
+    "workingView": {
+      "persistence": "ephemeral_only",
+      "requiredFields": [
+        "sessionId",
+        "projectId",
+        "serverId",
+        "viewpointId",
+        "modelFingerprint"
+      ],
+      "createsSavedViewpoint": false,
+      "mayMutatePlatformInPhase1": false
+    },
+    "publishedViewpoint": {
+      "authority": "future BIMLog publication registry",
+      "requiredFields": [
+        "publicationId",
+        "projectId",
+        "issueIdentity",
+        "publicationProfile",
+        "modelFingerprint",
+        "bimlogPhysicalId",
+        "navisworksGuid",
+        "payloadRevision"
+      ],
+      "duplicatePreventionKey": [
+        "projectId",
+        "issueIdentity",
+        "publicationProfile",
+        "modelFingerprint"
+      ],
+      "removePublishedCopyDeletesIssue": false
+    },
+    "forbiddenResolvers": [
+      "label",
+      "display name",
+      "displayId alone",
+      "folder path",
+      "tree position",
+      "current active viewpoint",
+      "first match",
+      "best guess"
+    ]
+  },
+  "visualWorkflowSeparation": {
+    "workflowMetadata": [
+      "status",
+      "assignment",
+      "responsibleCompany",
+      "trade",
+      "floor",
+      "phase",
+      "priority",
+      "comments",
+      "history",
+      "approvals",
+      "resolutions"
+    ],
+    "visualState": [
+      "camera",
+      "projection",
+      "fieldOfView",
+      "selection",
+      "visibility",
+      "sectionPlanes",
+      "appearanceOverrides",
+      "redlines",
+      "screenshot",
+      "modelTransforms",
+      "referenceContext",
+      "modelFingerprint"
+    ],
+    "rule": "workflow metadata changes must never alter visual state",
+    "currentPlatformCompleteness": "incomplete_visual_payload",
+    "phase1VisualRule": "navigate only to one existing exact physical identity; do not claim reconstruction"
+  },
+  "bridge": {
+    "transport": "isolated loopback HTTP JSON protocol",
+    "protocolVersion": 1,
+    "security": [
+      "bind loopback only",
+      "distinct Next port",
+      "pinned approved origin",
+      "short-lived per-session bridge token",
+      "request ID and idempotency key",
+      "bounded payload and timeout",
+      "structured non-sensitive errors",
+      "no credentials in URL or logs"
+    ],
+    "nativeThreadRule": "all Navisworks API actions marshal to the Navisworks UI or Idle thread",
+    "phase1Commands": [
+      "ping",
+      "capabilities",
+      "project-context",
+      "open-working-view"
+    ],
+    "phase1ForbiddenCommands": [
+      "status-write",
+      "comment-write",
+      "assignment-write",
+      "visual-capture",
+      "visual-update",
+      "publish",
+      "migrate",
+      "recover-duplicate"
+    ]
+  },
+  "featureFlags": {
+    "productionDefault": "read_only",
+    "writesRequireSandboxOrPilot": true,
+    "separateFlags": [
+      "lens_next.platform_metadata_writes",
+      "lens_next.status_updates",
+      "lens_next.comments",
+      "lens_next.camera_capture",
+      "lens_next.visual_state_updates",
+      "lens_next.viewpoint_publishing",
+      "lens_next.project_migration",
+      "lens_next.duplicate_recovery"
+    ],
+    "installOrOpenMayEnableMigration": false
+  },
+  "publishing": {
+    "phase": 4,
+    "serverRegistryRequired": true,
+    "transactionAndLockRequired": true,
+    "clientIdempotencyKeyRequired": true,
+    "zeroMatches": "create_once",
+    "oneExactMatch": "update_exact_publication",
+    "multipleMatches": "block_for_manual_recovery",
+    "unresolvedDuplicateMayCreateSuccessor": false,
+    "automaticDelete": false
+  },
+  "migration": {
+    "automaticOnInstallOrOpen": false,
+    "phases": [
+      "read_only_inventory",
+      "dry_run_classification",
+      "human_review",
+      "apply_with_journal",
+      "verify_exactly_one_identity_owner",
+      "commit_or_rollback"
+    ],
+    "dryRunClasses": [
+      "one_platform_to_one_physical",
+      "one_platform_to_multiple_physical",
+      "platform_to_no_physical",
+      "physical_to_no_platform",
+      "physical_missing_identity",
+      "physical_conflicting_identity"
+    ],
+    "cleanAutoEligibility": "one_to_one_complete_immutable_identity_only",
+    "ambiguityChoices": [
+      "keep_as_canonical",
+      "quarantine_as_duplicate",
+      "leave_unresolved"
+    ],
+    "beforeConfirmationForbiddenMutations": [
+      "rename",
+      "move",
+      "recreate",
+      "delete"
+    ],
+    "rollback": "restore every recorded object and metadata field to its journaled before-state",
+    "failureRule": "preserve every object exactly and report unresolved"
+  },
+  "phase1": {
+    "decision": "proceed_bounded",
+    "allowed": [
+      "compact responsive issue list or cards",
+      "live authenticated BIMLog reads",
+      "search and filters",
+      "issue details",
+      "project selection",
+      "connection and refresh indicators",
+      "honest missing-thumbnail state",
+      "immutable-identity open or jump",
+      "isolated Legacy non-regression tests"
+    ],
+    "forbidden": [
+      "production writes",
+      "platform metadata writes",
+      "status or comment writes",
+      "SavedViewpoint creation or mutation",
+      "visual capture or update",
+      "publishing",
+      "migration",
+      "duplicate recovery",
+      "Legacy configuration or viewpoint processing"
+    ],
+    "jumpOutcome": {
+      "exactlyOne": "open_exact_working_view",
+      "zero": "block_identity_missing",
+      "multiple": "block_identity_ambiguous"
+    }
+  },
+  "acceptance": {
+    "legacyBytesAndIdentifiersUnchanged": true,
+    "phase1RequiresTests": [
+      "Legacy and Next assembly/plugin/config/port/metadata/folder identifiers are disjoint",
+      "Next never scans or mutates Legacy SavedViewpoints during ordinary operation",
+      "read-only mode exposes no write bridge command",
+      "missing or ambiguous immutable identity blocks",
+      "label, folder, tree, and active-view fallback attempts are rejected",
+      "status metadata and visual state are separate",
+      "refresh is idempotent",
+      "hundreds-of-issues performance fixture",
+      "Next install/update/uninstall definitions contain no Legacy target"
+    ],
+    "laterPhaseGates": [
+      "stable issue-family identity",
+      "complete versioned visual payload",
+      "publication registry",
+      "2021 and 2025 native round-trip proof",
+      "migration dry-run/manual-review/rollback proof",
+      "independent acceptance and approved pilot"
+    ]
+  }
+}

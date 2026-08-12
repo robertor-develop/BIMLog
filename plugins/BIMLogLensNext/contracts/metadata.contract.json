@@ -1,0 +1,14 @@
+{
+  "schemaVersion": 1,
+  "metadataNamespace": "bimlog.lens_next.v1",
+  "metadataSource": "BIMLogLensNext",
+  "publishedViewpointFolder": "BIMLog Lens Next Published",
+  "publishedViewpointMarker": "bimlog.lens_next.published.v1",
+  "phase1": {
+    "readExistingMetadata": false,
+    "writeMetadata": false,
+    "createPublishedViewpoints": false,
+    "scanSavedViewpoints": false,
+    "migrateLegacyMetadata": false
+  }
+}

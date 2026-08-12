@@ -1,5 +1,25 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## BIMLog Lens Next Phase 1 remaining gates - 2026-08-12
+
+1. Bind the isolated native shell to authoritative F-root Navisworks references
+   for the explicitly selected Navisworks version. No qualifying SDK reference
+   is currently present in the authorized F-root candidate, so do not infer one
+   from Legacy or any C-root path.
+2. Complete independent acceptance of the exact current candidate after the
+   protected route, authenticated project adapter, ephemeral bridge-session
+   adapter, web/native protocol correction, and executable narrow-panel render
+   proof are frozen together.
+3. With separate explicit authorization, install the exact accepted build into
+   an approved Navisworks test environment and verify exact project/model
+   binding, exact issue open, missing/ambiguous fail-closed behavior, repeated
+   refresh idempotence, and complete Legacy isolation. No install is authorized
+   by the current local build task.
+4. Keep Phase 2 comments, assignment, status actions, auto-refresh write
+   semantics, feature-flag enablement, database changes, production access,
+   migration, recovery, publishing, push, and deployment outside this Phase 1
+   candidate until separately approved.
+
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
 ## BIMLog v1.60.28.03 Smart Intake multi-contract activation gates - 2026-08-11

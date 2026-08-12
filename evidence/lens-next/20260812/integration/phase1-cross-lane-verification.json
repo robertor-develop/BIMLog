@@ -1,0 +1,1027 @@
+{
+  "schemaVersion": "bimlog-lens-next-phase1-cross-lane-verification-v1",
+  "generatedAtUtc": "2026-08-12T19:10:40.090Z",
+  "status": "PASS",
+  "worktree": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
+  "harness": {
+    "path": "tests/lens-next-phase1/verify-phase1-source.mjs",
+    "sha256": "7F621CFF39745612B6D7A1797A16C7856FCEFDFAAEA9F0DB415B490AECCB3E00"
+  },
+  "contracts": {
+    "identity": {
+      "path": "evidence/lens-next/20260812/identity-isolation-contract.json",
+      "sha256": "E22E953EFF210FF189D635BF34A16D6E9954E5B51F234728179DDD8A2F45A317"
+    },
+    "acceptance": {
+      "path": "evidence/lens-next/20260812/phase1-readonly-acceptance-contract.json",
+      "sha256": "83154183F6E0E7B81BB897D2E687562C8116A047FC9F4DBB5BB8FF8BE40626E5"
+    }
+  },
+  "implementationInputs": {
+    "app": {
+      "path": "artifacts/bimlog/src/App.tsx",
+      "symbolicLink": false,
+      "bytes": 8317,
+      "sha256": "85B6AAB418C74C6C1CA31D92ECD2CC69089E2CF4F10C7225CB227F8E71DFD8A1"
+    },
+    "webRoot": "artifacts/bimlog/src/features/lens-next",
+    "webScriptRoot": "artifacts/bimlog/scripts/lens-next",
+    "nativeRoot": "plugins/BIMLogLensNext",
+    "webFiles": [
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/index.ts",
+        "symbolicLink": false,
+        "bytes": 1193,
+        "sha256": "16C72546A001AC3A4AF549397A939CA5912B84F4A6E2E3826D877A5E5D9EA6EE"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+        "symbolicLink": false,
+        "bytes": 8153,
+        "sha256": "77F143FBC7F9DDFC142B2AE1CA6E4F76AA7A7F611B5A0D7339C4D0FF66FD773F"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
+        "symbolicLink": false,
+        "bytes": 13692,
+        "sha256": "C576B3CC28AA4FBA432F555DF906ED386E2CC15A35A964F6C1C2D9E473A98289"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "symbolicLink": false,
+        "bytes": 8738,
+        "sha256": "F183B9E9CA134615106810AD7F193B2ACE616360F1242DDBFC1FEB2B0E4D077F"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-session.ts",
+        "symbolicLink": false,
+        "bytes": 3773,
+        "sha256": "3584DC14B046E81CF5AFC5D5AB1B32B43EC0AEC1B9107B586D8416E7438E76A3"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-types.ts",
+        "symbolicLink": false,
+        "bytes": 3215,
+        "sha256": "4046A94E361B4FB32CBEB0333C89F3216101E5148360D4D4FA0CBE7E5E952FA2"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "symbolicLink": false,
+        "bytes": 9774,
+        "sha256": "9DD43F2921195C1FDE8E79770D09DC72E29C39A57B3CA4DB738A5F7F0E1274BD"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "symbolicLink": false,
+        "bytes": 13567,
+        "sha256": "59EFEB66FB2B21163C19D533939B78974AFECB52A3136F10790C8CC15BD17598"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextWorkspace.tsx",
+        "symbolicLink": false,
+        "bytes": 2551,
+        "sha256": "BB94078F5FA439978AC47D8EE8A04F4D41D305627BC97C0C1524919655A73A3B"
+      }
+    ],
+    "webScriptFiles": [
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-panel-render.behavior.tsx",
+        "symbolicLink": false,
+        "bytes": 7445,
+        "sha256": "7BE5435E4B3EE6AEAEA724D2C83887455BC551AA76E5AA38BAE9850FA2E76E6E"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase1.behavior.ts",
+        "symbolicLink": false,
+        "bytes": 14194,
+        "sha256": "4FBCC98DA2632419691050B57778D03AC994337E334E8428D6D48E81E9C26B81"
+      }
+    ],
+    "nativeFiles": [
+      {
+        "path": "plugins/BIMLogLensNext/.gitignore",
+        "symbolicLink": false,
+        "bytes": 54,
+        "sha256": "EBCDE870B7CAC693D02EACFB8A6089F28FE832A3E37E848548420FDC389FB129"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
+        "symbolicLink": false,
+        "bytes": 632,
+        "sha256": "BD405124B1BC4DB35F3311C50660F153DC1AF026C5BDE395F7FB7295B9E54203"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/config/lens-next.config.schema.json",
+        "symbolicLink": false,
+        "bytes": 1580,
+        "sha256": "63E066192B0D2CE6B280CC24728413E4B86E136E829E39735A309DA99AF1D3BA"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/contracts/metadata.contract.json",
+        "symbolicLink": false,
+        "bytes": 423,
+        "sha256": "FA6AE3B4819112CF46D4F6A09413AA09C25FB730FDE85FD7947A30A50718BA11"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/contracts/plugin-registration.contract.json",
+        "symbolicLink": false,
+        "bytes": 432,
+        "sha256": "0EF459EBC9F3FB818E3F2F13BD08CF23F9982C8D5E2BDFB207A9D6500E3CD62D"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/install/Install-BIMLogLensNext.contract.json",
+        "symbolicLink": false,
+        "bytes": 441,
+        "sha256": "4BF731A3EC213386A88AE4AAE102F6099D1E011770B9233F16F44E196E461632"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/install/Uninstall-BIMLogLensNext.contract.json",
+        "symbolicLink": false,
+        "bytes": 369,
+        "sha256": "EBD6765396C14D97B8396B15A968C97EFE0E788E818F181418AAFA8D9B81DEA1"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/src/BridgeContracts.cs",
+        "symbolicLink": false,
+        "bytes": 3821,
+        "sha256": "C244462D64F212F922B2C5DF32930E33EC9C1864E14EA74EE7978F5B75FC4D51"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/src/BridgeRequestValidator.cs",
+        "symbolicLink": false,
+        "bytes": 5946,
+        "sha256": "A89FF1C8C0D17AA2062F9B007AD089416D8247A50B756A0A1ABF337CCD3E6B27"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/src/ImmutableIdentity.cs",
+        "symbolicLink": false,
+        "bytes": 6050,
+        "sha256": "F6554452D7175CFB698A1535E44B6EE2722C75CE60791ABB779350BAA312DB87"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/src/LensNextConstants.cs",
+        "symbolicLink": false,
+        "bytes": 2436,
+        "sha256": "5D53A163D3B3C4507B7747C21056D8C46B6ECECDDF4C00399C0F58D43373DFFA"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/src/LensNextFeatureFlags.cs",
+        "symbolicLink": false,
+        "bytes": 1052,
+        "sha256": "5EF8B69AB7BD5B33A8B9579002FA29CC57BDDFDD7D23DD9ED22C990495047313"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/src/LensNextReadOnlyBridge.cs",
+        "symbolicLink": false,
+        "bytes": 6550,
+        "sha256": "4F3C0955B7DF9AA9A556706AC2D6C497A208D813197B1C81DCDD518B4D1F2919"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/src/LensNextStateContract.cs",
+        "symbolicLink": false,
+        "bytes": 2339,
+        "sha256": "E7E4DBCDF7CB9B7B0A6B4C5B2CC5BB7BBD3E0F67A31149DAB2FECC4D87B30F31"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/src/NativeAbstractions.cs",
+        "symbolicLink": false,
+        "bytes": 1063,
+        "sha256": "DB059DA8F4C7D37062AC7D778F8AA8442ED6038FC00E438FE27A6975F9C87A18"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/src/PluginRegistrationContract.cs",
+        "symbolicLink": false,
+        "bytes": 763,
+        "sha256": "FA85C02244762BA414C6226A0960062E408B87D178659960F9E07F4B02335B65"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/tests/BIMLogLensNext.Tests.csproj",
+        "symbolicLink": false,
+        "bytes": 545,
+        "sha256": "D42A4F7EA5A5632F9F70C847DC44F73B13866EA7F5925099A8C537B1FDF45F21"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/tests/Program.cs",
+        "symbolicLink": false,
+        "bytes": 17760,
+        "sha256": "2EA966FC0F850256370E93E9CD61CADE43DAB75F03C43C0E8D32A50629F2B835"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/tests/Run-IsolationContract.ps1",
+        "symbolicLink": false,
+        "bytes": 4439,
+        "sha256": "6808F9D9AFA3512E75063B917AAAC5B1FDD1DBCDADF04C294A237731F9EDC4F5"
+      }
+    ]
+  },
+  "totals": {
+    "assertions": 102,
+    "passed": 102,
+    "failed": 0
+  },
+  "failedAssertionIds": [],
+  "results": [
+    {
+      "id": "contract.identity.sha256",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "E22E953EFF210FF189D635BF34A16D6E9954E5B51F234728179DDD8A2F45A317",
+        "expected": "E22E953EFF210FF189D635BF34A16D6E9954E5B51F234728179DDD8A2F45A317"
+      }
+    },
+    {
+      "id": "contract.acceptance.sha256",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "83154183F6E0E7B81BB897D2E687562C8116A047FC9F4DBB5BB8FF8BE40626E5",
+        "expected": "83154183F6E0E7B81BB897D2E687562C8116A047FC9F4DBB5BB8FF8BE40626E5"
+      }
+    },
+    {
+      "id": "contract.identity.status",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "assessment_bound_phase1_may_proceed",
+        "expected": "assessment_bound_phase1_may_proceed"
+      }
+    },
+    {
+      "id": "contract.acceptance.status",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "PHASE1_SOURCE_READY_IDENTITY_CONTRACT_CONSUMED",
+        "expected": "PHASE1_SOURCE_READY_IDENTITY_CONTRACT_CONSUMED"
+      }
+    },
+    {
+      "id": "contract.worktree.root",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "f:\\bimlog\\worktrees\\bimlog-lens-next-20260812",
+        "expected": "f:\\bimlog\\worktrees\\bimlog-lens-next-20260812"
+      }
+    },
+    {
+      "id": "identity.assembly",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "BIMLogLensNext",
+        "expected": "BIMLogLensNext"
+      }
+    },
+    {
+      "id": "identity.dll",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "BIMLogLensNext.dll",
+        "expected": "BIMLogLensNext.dll"
+      }
+    },
+    {
+      "id": "identity.rootNamespace",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "BIMLogLensNext",
+        "expected": "BIMLogLensNext"
+      }
+    },
+    {
+      "id": "identity.dockPluginId",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "BIMLogLensNext.IgniteSmart",
+        "expected": "BIMLogLensNext.IgniteSmart"
+      }
+    },
+    {
+      "id": "identity.dockPanelId",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "BIMLogLensNext.IgniteSmart",
+        "expected": "BIMLogLensNext.IgniteSmart"
+      }
+    },
+    {
+      "id": "identity.buttonPluginId",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "BIMLogLensNextButton.IgniteSmart",
+        "expected": "BIMLogLensNextButton.IgniteSmart"
+      }
+    },
+    {
+      "id": "identity.installationFolder",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "BIMLogLensNext",
+        "expected": "BIMLogLensNext"
+      }
+    },
+    {
+      "id": "identity.installerDefinition",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "Install-BIMLogLensNext",
+        "expected": "Install-BIMLogLensNext"
+      }
+    },
+    {
+      "id": "identity.uninstallerDefinition",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "Uninstall-BIMLogLensNext",
+        "expected": "Uninstall-BIMLogLensNext"
+      }
+    },
+    {
+      "id": "identity.configurationRoot",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "%LOCALAPPDATA%\\BIMLog\\LensNext",
+        "expected": "%LOCALAPPDATA%\\BIMLog\\LensNext"
+      }
+    },
+    {
+      "id": "identity.configurationFile",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "lens-next.config.json",
+        "expected": "lens-next.config.json"
+      }
+    },
+    {
+      "id": "identity.cacheRoot",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "%LOCALAPPDATA%\\BIMLog\\LensNext\\cache",
+        "expected": "%LOCALAPPDATA%\\BIMLog\\LensNext\\cache"
+      }
+    },
+    {
+      "id": "identity.logRoot",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "%LOCALAPPDATA%\\BIMLog\\LensNext\\logs",
+        "expected": "%LOCALAPPDATA%\\BIMLog\\LensNext\\logs"
+      }
+    },
+    {
+      "id": "identity.featureFlagPrefix",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "lens_next.",
+        "expected": "lens_next."
+      }
+    },
+    {
+      "id": "identity.metadataNamespace",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "bimlog.lens_next.v1",
+        "expected": "bimlog.lens_next.v1"
+      }
+    },
+    {
+      "id": "identity.metadataSource",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "BIMLogLensNext",
+        "expected": "BIMLogLensNext"
+      }
+    },
+    {
+      "id": "identity.bridgeOrigin",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "http://127.0.0.1:8766",
+        "expected": "http://127.0.0.1:8766"
+      }
+    },
+    {
+      "id": "identity.bridgeProtocolVersion",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": 1,
+        "expected": 1
+      }
+    },
+    {
+      "id": "identity.publishedFolder",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "BIMLog Lens Next Published",
+        "expected": "BIMLog Lens Next Published"
+      }
+    },
+    {
+      "id": "identity.publishedMarker",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": "bimlog.lens_next.published.v1",
+        "expected": "bimlog.lens_next.published.v1"
+      }
+    },
+    {
+      "id": "contract.read-only-command-allowlist",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": [
+          "ping",
+          "capabilities",
+          "project-context",
+          "open-working-view"
+        ],
+        "expected": [
+          "ping",
+          "capabilities",
+          "project-context",
+          "open-working-view"
+        ]
+      }
+    },
+    {
+      "id": "contract.forbidden-command-set",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": [
+          "status-write",
+          "comment-write",
+          "assignment-write",
+          "visual-capture",
+          "visual-update",
+          "publish",
+          "migrate",
+          "recover-duplicate"
+        ],
+        "expected": [
+          "status-write",
+          "comment-write",
+          "assignment-write",
+          "visual-capture",
+          "visual-update",
+          "publish",
+          "migrate",
+          "recover-duplicate"
+        ]
+      }
+    },
+    {
+      "id": "source.app.present",
+      "kind": "readiness",
+      "passed": true,
+      "detail": "artifacts/bimlog/src/App.tsx"
+    },
+    {
+      "id": "source.web.present",
+      "kind": "readiness",
+      "passed": true,
+      "detail": "9 file(s)"
+    },
+    {
+      "id": "source.web-scripts.present",
+      "kind": "readiness",
+      "passed": true,
+      "detail": "2 file(s)"
+    },
+    {
+      "id": "source.native.present",
+      "kind": "readiness",
+      "passed": true,
+      "detail": "19 file(s)"
+    },
+    {
+      "id": "source.app.path-allowlist",
+      "kind": "assertion",
+      "passed": true,
+      "detail": [
+        "artifacts/bimlog/src/App.tsx"
+      ]
+    },
+    {
+      "id": "source.web.path-allowlist",
+      "kind": "assertion",
+      "passed": true,
+      "detail": [
+        "artifacts/bimlog/src/features/lens-next/index.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/features/lens-next/lens-next-session.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-types.ts",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextWorkspace.tsx"
+      ]
+    },
+    {
+      "id": "source.web-scripts.path-allowlist",
+      "kind": "assertion",
+      "passed": true,
+      "detail": [
+        "artifacts/bimlog/scripts/lens-next/lens-next-panel-render.behavior.tsx",
+        "artifacts/bimlog/scripts/lens-next/lens-next-phase1.behavior.ts"
+      ]
+    },
+    {
+      "id": "source.native.path-allowlist",
+      "kind": "assertion",
+      "passed": true,
+      "detail": [
+        "plugins/BIMLogLensNext/.gitignore",
+        "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
+        "plugins/BIMLogLensNext/config/lens-next.config.schema.json",
+        "plugins/BIMLogLensNext/contracts/metadata.contract.json",
+        "plugins/BIMLogLensNext/contracts/plugin-registration.contract.json",
+        "plugins/BIMLogLensNext/install/Install-BIMLogLensNext.contract.json",
+        "plugins/BIMLogLensNext/install/Uninstall-BIMLogLensNext.contract.json",
+        "plugins/BIMLogLensNext/src/BridgeContracts.cs",
+        "plugins/BIMLogLensNext/src/BridgeRequestValidator.cs",
+        "plugins/BIMLogLensNext/src/ImmutableIdentity.cs",
+        "plugins/BIMLogLensNext/src/LensNextConstants.cs",
+        "plugins/BIMLogLensNext/src/LensNextFeatureFlags.cs",
+        "plugins/BIMLogLensNext/src/LensNextReadOnlyBridge.cs",
+        "plugins/BIMLogLensNext/src/LensNextStateContract.cs",
+        "plugins/BIMLogLensNext/src/NativeAbstractions.cs",
+        "plugins/BIMLogLensNext/src/PluginRegistrationContract.cs",
+        "plugins/BIMLogLensNext/tests/BIMLogLensNext.Tests.csproj",
+        "plugins/BIMLogLensNext/tests/Program.cs",
+        "plugins/BIMLogLensNext/tests/Run-IsolationContract.ps1"
+      ]
+    },
+    {
+      "id": "native.identity.BIMLogLensNext",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "BIMLogLensNext"
+    },
+    {
+      "id": "native.identity.BIMLogLensNext.dll",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "BIMLogLensNext.dll"
+    },
+    {
+      "id": "native.identity.BIMLogLensNext",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "BIMLogLensNext"
+    },
+    {
+      "id": "native.identity.BIMLogLensNext.IgniteSmart",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "BIMLogLensNext.IgniteSmart"
+    },
+    {
+      "id": "native.identity.BIMLogLensNext.IgniteSmart",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "BIMLogLensNext.IgniteSmart"
+    },
+    {
+      "id": "native.identity.BIMLogLensNextButton.IgniteSmart",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "BIMLogLensNextButton.IgniteSmart"
+    },
+    {
+      "id": "native.identity.%LOCALAPPDATA%\\BIMLog\\LensNext",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "%LOCALAPPDATA%\\BIMLog\\LensNext"
+    },
+    {
+      "id": "native.identity.%LOCALAPPDATA%\\BIMLog\\LensNext\\cache",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "%LOCALAPPDATA%\\BIMLog\\LensNext\\cache"
+    },
+    {
+      "id": "native.identity.%LOCALAPPDATA%\\BIMLog\\LensNext\\logs",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "%LOCALAPPDATA%\\BIMLog\\LensNext\\logs"
+    },
+    {
+      "id": "native.identity.bimlog.lens_next.v1",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "bimlog.lens_next.v1"
+    },
+    {
+      "id": "native.identity.http://127.0.0.1:8766",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "http://127.0.0.1:8766"
+    },
+    {
+      "id": "native.bridge.protocol-version",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "BridgeProtocolVersion must be exactly 1"
+    },
+    {
+      "id": "native.command.allowlist.exact",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": [
+          "ping",
+          "capabilities",
+          "project-context",
+          "open-working-view"
+        ],
+        "expected": [
+          "ping",
+          "capabilities",
+          "project-context",
+          "open-working-view"
+        ]
+      }
+    },
+    {
+      "id": "native.command.reject.status-write",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "status-write"
+    },
+    {
+      "id": "native.command.reject.comment-write",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "comment-write"
+    },
+    {
+      "id": "native.command.reject.assignment-write",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "assignment-write"
+    },
+    {
+      "id": "native.command.reject.visual-capture",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "visual-capture"
+    },
+    {
+      "id": "native.command.reject.visual-update",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "visual-update"
+    },
+    {
+      "id": "native.command.reject.publish",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "publish"
+    },
+    {
+      "id": "native.command.reject.migrate",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "migrate"
+    },
+    {
+      "id": "native.command.reject.recover-duplicate",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "recover-duplicate"
+    },
+    {
+      "id": "native.fallback.reject.label",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "label must be named by the validator deny set"
+    },
+    {
+      "id": "native.fallback.reject.displayName",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "displayName must be named by the validator deny set"
+    },
+    {
+      "id": "native.fallback.reject.displayId",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "displayId must be named by the validator deny set"
+    },
+    {
+      "id": "native.fallback.reject.folderPath",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "folderPath must be named by the validator deny set"
+    },
+    {
+      "id": "native.fallback.reject.treePosition",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "treePosition must be named by the validator deny set"
+    },
+    {
+      "id": "native.fallback.reject.activeView",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "activeView must be named by the validator deny set"
+    },
+    {
+      "id": "native.fallback.reject.firstMatch",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "firstMatch must be named by the validator deny set"
+    },
+    {
+      "id": "native.fallback.reject.bestGuess",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "bestGuess must be named by the validator deny set"
+    },
+    {
+      "id": "native.fallback.fail-closed-code",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "fallback_resolver_forbidden"
+    },
+    {
+      "id": "native.identity.missing-and-ambiguous-block",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Both exact-resolution failure states must be explicit"
+    },
+    {
+      "id": "native.read-only.capability-flags",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Writes and SavedViewpoint mutation must both be disabled"
+    },
+    {
+      "id": "native.saved-viewpoint-mutation-api.absent",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "No SavedViewpoint collection or mutation API may appear in Phase 1 source"
+    },
+    {
+      "id": "native.legacy-identifiers.absent-from-runtime",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Legacy assembly/plugin IDs/port must not appear in native runtime source"
+    },
+    {
+      "id": "native.legacy-state-reference.is-deny-only",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "A Legacy state path may appear only in the explicit deny classifier"
+    },
+    {
+      "id": "native.idempotency-key-equals-request-id",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Every accepted request requires idempotencyKey == requestId"
+    },
+    {
+      "id": "native.active-session-binding",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "open-working-view must bind to the active native session ID"
+    },
+    {
+      "id": "native.strict-positive-identifiers-and-revision",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "projectId, serverId and revisionNumber are strict positive integers; lifecycle is closed"
+    },
+    {
+      "id": "native.bridge-token-memory-only",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "The bounded bridge token remains private in memory with no persistence API"
+    },
+    {
+      "id": "web.bridge.origin",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "expected": "http://127.0.0.1:8766",
+        "forbidden": "http://localhost:8765"
+      }
+    },
+    {
+      "id": "web.bridge.protocol-version",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Web bridge protocol must be exactly 1"
+    },
+    {
+      "id": "web.command.subset-of-native-read-only-allowlist",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "actual": [
+          "open-working-view",
+          "open-working-view"
+        ],
+        "allowed": [
+          "ping",
+          "capabilities",
+          "project-context",
+          "open-working-view"
+        ]
+      }
+    },
+    {
+      "id": "web.command.reject.status-write",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "status-write"
+    },
+    {
+      "id": "web.command.reject.comment-write",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "comment-write"
+    },
+    {
+      "id": "web.command.reject.assignment-write",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "assignment-write"
+    },
+    {
+      "id": "web.command.reject.visual-capture",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "visual-capture"
+    },
+    {
+      "id": "web.command.reject.visual-update",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "visual-update"
+    },
+    {
+      "id": "web.command.reject.publish",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "publish"
+    },
+    {
+      "id": "web.command.reject.migrate",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "migrate"
+    },
+    {
+      "id": "web.command.reject.recover-duplicate",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "recover-duplicate"
+    },
+    {
+      "id": "web.live-read.endpoint",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Phase 1 live issue retrieval must use the read-only Lens pull endpoint"
+    },
+    {
+      "id": "web.platform-write-endpoints.absent",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "No platform write endpoint may appear in Lens Next Phase 1 source"
+    },
+    {
+      "id": "web.mutating-api-methods.absent-outside-loopback-bridge",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Mutating HTTP verbs are permitted only for the isolated loopback command bridge"
+    },
+    {
+      "id": "web.identity.blocked-states",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Native emits exact blocked codes and the web client/UI preserves the structured server message"
+    },
+    {
+      "id": "web.no-fallback-contract",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "No forbidden resolver fallback may be enabled"
+    },
+    {
+      "id": "web.saved-viewpoint-mutation.absent",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "No SavedViewpoint mutation command may appear in web source"
+    },
+    {
+      "id": "web.read-only-issue-details",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Issue details must expose no workflow write handler"
+    },
+    {
+      "id": "web.idempotency-key-equals-request-id",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "The web request builder derives requestId and idempotencyKey from one exact value"
+    },
+    {
+      "id": "web.active-session-context-bound",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "The web request binds active session, project, and model context"
+    },
+    {
+      "id": "web.strict-positive-identifiers-and-revision",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Web input rejects non-positive IDs/revision and unsupported lifecycle values"
+    },
+    {
+      "id": "web.bridge-token-memory-only",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Feature-local bridge token is bounded and memory-only"
+    },
+    {
+      "id": "web.lucide-icons",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "UI controls and empty-thumbnail state use Lucide icons"
+    },
+    {
+      "id": "web.protected-route",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Exactly one /lens-next route must be wrapped by the existing ProtectedRoute"
+    },
+    {
+      "id": "web.executable-ssr-view-harness",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "Executable SSR harness renders the production view and verifies its protected route"
+    },
+    {
+      "id": "cross-lane.bridge.origin-agreement",
+      "kind": "assertion",
+      "passed": true,
+      "detail": "http://127.0.0.1:8766"
+    },
+    {
+      "id": "cross-lane.bridge.protocol-agreement",
+      "kind": "assertion",
+      "passed": true,
+      "detail": 1
+    },
+    {
+      "id": "cross-lane.command-agreement",
+      "kind": "assertion",
+      "passed": true,
+      "detail": {
+        "webInvokedSubset": [
+          "open-working-view",
+          "open-working-view"
+        ],
+        "nativeAllowlist": [
+          "ping",
+          "capabilities",
+          "project-context",
+          "open-working-view"
+        ]
+      }
+    }
+  ],
+  "safety": {
+    "productFilesWritten": false,
+    "legacyFilesWritten": false,
+    "databaseAction": false,
+    "networkAction": false,
+    "installAction": false,
+    "gitAction": false
+  }
+}

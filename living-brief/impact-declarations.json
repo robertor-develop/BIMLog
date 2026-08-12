@@ -9280,6 +9280,191 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3b6c1f30bb0a01007b1bf1b719a74c062070e9fef1ab6cdf2fd13a88c46db12a"
+    },
+    {
+      "taskId": "bimlog-lens-next-phase1-isolated-candidate-20260812",
+      "reviewedThroughCommit": "2cea97f985f3167c601dfd3df4c78813676f5680",
+      "reviewedAt": "2026-08-12T15:13:15-04:00",
+      "status": "local_phase1_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "summary": "Establishes the isolated BIMLog Lens Next Phase 1 source candidate with a protected read-only web workspace, exact immutable-identity open contract, separate native assembly and state boundaries, executable focused proofs, and no Legacy, installation, production, provider, customer, publication, or deployment action.",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "F-root isolated source implementation and focused acceptance",
+          "credential-free web and native contract verification",
+          "Living Brief semantic reconciliation and local Git commit"
+        ],
+        "operatorOnly": [
+          "authoritative Navisworks SDK/reference selection when no approved F-root reference exists",
+          "plugin installation and live Navisworks field acceptance",
+          "push, publication, deployment, production, provider, and customer action"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "plugin",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Lens Next is side-by-side and isolated: Legacy identities, files, state, configuration, cache, logs, SavedViewpoints, installation, and runtime behavior remain untouched."
+        },
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "plugin",
+            "status"
+          ],
+          "summary": "The local bridge requires an active in-memory session, request-bound idempotency, authenticated project context, positive immutable identity and revision values, an allowed lifecycle, and fail-closed exact candidate resolution before any native read."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "plugin",
+            "status",
+            "open_loop"
+          ],
+          "summary": "No authoritative F-root Navisworks SDK binding, installation, migration, push, publication, deployment, production access, or Phase 2 write is included in this local Phase 1 candidate."
+        }
+      ],
+      "workstreams": [
+        "bimlog-lens-next",
+        "phase1-readonly-workspace",
+        "native-plugin-isolation",
+        "living-brief"
+      ],
+      "evidence": [
+        {
+          "path": "evidence/lens-next/20260812/technical-assessment.md",
+          "type": "section_16_technical_assessment",
+          "result": "pass_all_10_required_answers",
+          "boundary": "Read-only evidence bound to exact F-root source; no Legacy, installation, or external action."
+        },
+        {
+          "path": "evidence/lens-next/20260812/identity-isolation-contract.json",
+          "type": "immutable_identity_and_isolation_contract",
+          "result": "phase1_proceed_bounded",
+          "boundary": "Frozen Lens Next identities and read-only commands remain separate from all Legacy identities and paths."
+        },
+        {
+          "path": "evidence/lens-next/20260812/integration/phase1-integration-terminal-receipt.json",
+          "type": "cross_lane_source_acceptance",
+          "result": "pass_102_of_102_terminal_receipt_b40f5b05",
+          "boundary": "Focused local source and executable-view evidence only; no installed Navisworks or field claim."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The candidate keeps BIMLog as the single source of truth and adds no competing canonical record or authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "F-root execution, bounded local evidence, operator-controlled external actions, and fail-closed authority rules remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Phase 1 now has explicit executable web, protocol, native build, runtime, isolation, encoding, and Legacy non-interference acceptance requirements."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "The approved Lens Next direction begins with a separate mobile-style read-only issue workspace and exact immutable-identity open workflow."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The platform structure now includes the protected /lens-next route and its isolated frontend feature surface."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "The plugin reference now records the separate Lens Next assembly, IDs, state root, bridge, metadata namespace, read-only command set, and abstract-adapter boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed PDF, document, spreadsheet, report renderer, print surface, or report-design rule changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, regulatory interpretation, citation, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status distinguishes the isolated local Phase 1 source candidate from SDK binding, installation, live acceptance, release, and external states."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop records the remaining authoritative SDK, exact-candidate acceptance, install, live Navisworks, and later-phase gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical accepted evidence remains append-only and no production, provider, customer, installed-plugin, or field result is claimed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/scripts/lens-next/lens-next-panel-render.behavior.tsx",
+        "artifacts/bimlog/scripts/lens-next/lens-next-phase1.behavior.ts",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextWorkspace.tsx",
+        "artifacts/bimlog/src/features/lens-next/index.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/features/lens-next/lens-next-session.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-types.ts",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "evidence/lens-next/20260812/foundation-isolation-inventory.md",
+        "evidence/lens-next/20260812/identity-isolation-contract.json",
+        "evidence/lens-next/20260812/integration/phase1-cross-lane-verification.json",
+        "evidence/lens-next/20260812/integration/phase1-integration-terminal-receipt.json",
+        "evidence/lens-next/20260812/phase1-readonly-acceptance-contract.json",
+        "evidence/lens-next/20260812/technical-assessment.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/.gitignore",
+        "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
+        "plugins/BIMLogLensNext/config/lens-next.config.schema.json",
+        "plugins/BIMLogLensNext/contracts/metadata.contract.json",
+        "plugins/BIMLogLensNext/contracts/plugin-registration.contract.json",
+        "plugins/BIMLogLensNext/install/Install-BIMLogLensNext.contract.json",
+        "plugins/BIMLogLensNext/install/Uninstall-BIMLogLensNext.contract.json",
+        "plugins/BIMLogLensNext/src/BridgeContracts.cs",
+        "plugins/BIMLogLensNext/src/BridgeRequestValidator.cs",
+        "plugins/BIMLogLensNext/src/ImmutableIdentity.cs",
+        "plugins/BIMLogLensNext/src/LensNextConstants.cs",
+        "plugins/BIMLogLensNext/src/LensNextFeatureFlags.cs",
+        "plugins/BIMLogLensNext/src/LensNextReadOnlyBridge.cs",
+        "plugins/BIMLogLensNext/src/LensNextStateContract.cs",
+        "plugins/BIMLogLensNext/src/NativeAbstractions.cs",
+        "plugins/BIMLogLensNext/src/PluginRegistrationContract.cs",
+        "plugins/BIMLogLensNext/tests/BIMLogLensNext.Tests.csproj",
+        "plugins/BIMLogLensNext/tests/Program.cs",
+        "plugins/BIMLogLensNext/tests/Run-IsolationContract.ps1",
+        "tests/lens-next-phase1/tsconfig.web.json",
+        "tests/lens-next-phase1/verify-phase1-source.mjs",
+        "tests/lens-next-phase1/verify-web-behavior.cjs"
+      ],
+      "reviewedChangeSha256": "e1ecec6d48fd213e0f278d82a2019dde45e8b1dbfd90d9c1acf24bb8fc0a3500"
     }
   ]
 }

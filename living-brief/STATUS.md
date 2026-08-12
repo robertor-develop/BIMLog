@@ -1,5 +1,33 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog Lens Next Phase 1 isolated local candidate - 2026-08-12
+
+- Lens Next is a new side-by-side, read-only candidate in the isolated F-root
+  worktree `F:\BIMLog\Worktrees\bimlog-lens-next-20260812`. It does not replace,
+  install, update, remove, or mutate BIMLog Lens Legacy.
+- The protected `/lens-next` workspace reads authorized BIMLog projects and live
+  Lens issue/history data, supports deterministic search and filters, and opens
+  details without workflow writes. Its narrow-panel view has executable server-
+  render coverage for loading, empty, error, populated, history, disconnected,
+  and exact-open states.
+- Exact open uses the immutable project/server/viewpoint/lifecycle/revision
+  identity plus available physical and model constraints. The web/native bridge
+  protocol now agrees on the short-lived injected session, project context,
+  request/idempotency identity, response envelope, and blocked missing or
+  ambiguous identity states. Label, folder, tree-position, active-view, and
+  best-guess fallbacks remain forbidden.
+- Frozen identities remain `BIMLogLensNext`,
+  `BIMLogLensNext.IgniteSmart`, `BIMLogLensNextButton.IgniteSmart`,
+  `%LOCALAPPDATA%\BIMLog\LensNext`, `127.0.0.1:8766`, and
+  `bimlog.lens_next.v1`. Phase 1 exposes only ping, capabilities,
+  project-context, and open-working-view; all production writes and
+  SavedViewpoint mutation remain disabled.
+- Local web behavior, strict TypeScript, SSR/view behavior, cross-lane identity,
+  native isolation, deterministic .NET build, native runtime, and mojibake checks
+  pass. This is local source evidence only: authoritative F-root Navisworks SDK
+  binding, plugin installation, live Navisworks acceptance, push, publication,
+  deployment, production access, and Phase 2 writes remain unperformed.
+
 ## BIMLog v1.60.31.04 Build 4 local release candidate - 2026-08-12
 
 - Build 4 completes active contract and budget activation on the canonical

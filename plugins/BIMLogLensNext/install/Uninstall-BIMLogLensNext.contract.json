@@ -1,0 +1,15 @@
+{
+  "definition": "Uninstall-BIMLogLensNext",
+  "status": "contract_only_no_uninstall_action",
+  "installationFolderLeaf": "BIMLogLensNext",
+  "allowedRemovalScope": [
+    "BIMLogLensNext.dll",
+    "BIMLogLensNext.dll.config"
+  ],
+  "preserveStateByDefault": true,
+  "forbiddenTargets": [
+    "BIMLogNavisPlugin",
+    "%APPDATA%\\BIMLog",
+    "BIMLog Viewpoints"
+  ]
+}

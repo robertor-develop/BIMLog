@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "useDefineForClassFields": true,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "allowImportingTsExtensions": true,
+    "allowArbitraryExtensions": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "esModuleInterop": true,
+    "jsx": "react-jsx",
+    "strict": true,
+    "skipLibCheck": true,
+    "noEmit": true
+  },
+  "files": [
+    "../../artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+    "../../artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
+    "../../artifacts/bimlog/src/features/lens-next/lens-next-types.ts",
+    "../../artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+    "../../artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+    "../../artifacts/bimlog/src/features/lens-next/LensNextWorkspace.tsx"
+  ]
+}

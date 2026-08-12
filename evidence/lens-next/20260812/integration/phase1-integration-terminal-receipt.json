@@ -1,0 +1,291 @@
+{
+  "schemaVersion": "bimlog-lens-next-phase1-integration-terminal-v2",
+  "generatedAtUtc": "2026-08-12T19:13:49.381Z",
+  "status": "PASS_PHASE1_INTEGRATION_READY_LOCAL_NO_RELEASE_ACTION",
+  "worktree": {
+    "root": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-20260812",
+    "branch": "codex/bimlog-lens-next-20260812",
+    "head": "2cea97f985f3167c601dfd3df4c78813676f5680",
+    "tree": "9cfd03aeb5e1fe78227a8c9e3eebad3202fb8a44"
+  },
+  "frozenContracts": {
+    "identityIsolation": {
+      "path": "evidence/lens-next/20260812/identity-isolation-contract.json",
+      "sha256": "E22E953EFF210FF189D635BF34A16D6E9954E5B51F234728179DDD8A2F45A317"
+    },
+    "phase1Acceptance": {
+      "path": "evidence/lens-next/20260812/phase1-readonly-acceptance-contract.json",
+      "sha256": "83154183F6E0E7B81BB897D2E687562C8116A047FC9F4DBB5BB8FF8BE40626E5"
+    }
+  },
+  "webSuccessor": {
+    "app": {
+      "path": "artifacts/bimlog/src/App.tsx",
+      "bytes": 8317,
+      "sha256": "85B6AAB418C74C6C1CA31D92ECD2CC69089E2CF4F10C7225CB227F8E71DFD8A1",
+      "protectedRoute": "/lens-next"
+    },
+    "featureFileCount": 9,
+    "featureFiles": [
+      { "path": "artifacts/bimlog/src/features/lens-next/index.ts", "bytes": 1193, "sha256": "16C72546A001AC3A4AF549397A939CA5912B84F4A6E2E3826D877A5E5D9EA6EE" },
+      { "path": "artifacts/bimlog/src/features/lens-next/lens-next-client.ts", "bytes": 8153, "sha256": "77F143FBC7F9DDFC142B2AE1CA6E4F76AA7A7F611B5A0D7339C4D0FF66FD773F" },
+      { "path": "artifacts/bimlog/src/features/lens-next/lens-next-model.ts", "bytes": 13692, "sha256": "C576B3CC28AA4FBA432F555DF906ED386E2CC15A35A964F6C1C2D9E473A98289" },
+      { "path": "artifacts/bimlog/src/features/lens-next/lens-next-panel.css", "bytes": 8738, "sha256": "F183B9E9CA134615106810AD7F193B2ACE616360F1242DDBFC1FEB2B0E4D077F" },
+      { "path": "artifacts/bimlog/src/features/lens-next/lens-next-session.ts", "bytes": 3773, "sha256": "3584DC14B046E81CF5AFC5D5AB1B32B43EC0AEC1B9107B586D8416E7438E76A3" },
+      { "path": "artifacts/bimlog/src/features/lens-next/lens-next-types.ts", "bytes": 3215, "sha256": "4046A94E361B4FB32CBEB0333C89F3216101E5148360D4D4FA0CBE7E5E952FA2" },
+      { "path": "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx", "bytes": 9774, "sha256": "9DD43F2921195C1FDE8E79770D09DC72E29C39A57B3CA4DB738A5F7F0E1274BD" },
+      { "path": "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx", "bytes": 13567, "sha256": "59EFEB66FB2B21163C19D533939B78974AFECB52A3136F10790C8CC15BD17598" },
+      { "path": "artifacts/bimlog/src/features/lens-next/LensNextWorkspace.tsx", "bytes": 2551, "sha256": "BB94078F5FA439978AC47D8EE8A04F4D41D305627BC97C0C1524919655A73A3B" }
+    ],
+    "behaviorScripts": [
+      { "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase1.behavior.ts", "bytes": 14194, "sha256": "4FBCC98DA2632419691050B57778D03AC994337E334E8428D6D48E81E9C26B81" },
+      { "path": "artifacts/bimlog/scripts/lens-next/lens-next-panel-render.behavior.tsx", "bytes": 7445, "sha256": "7BE5435E4B3EE6AEAEA724D2C83887455BC551AA76E5AA38BAE9850FA2E76E6E" }
+    ],
+    "acceptedProperties": {
+      "protectedAuthenticatedRoute": true,
+      "featureLocalWorkspaceAndSessionAdapter": true,
+      "executableServerRenderedProductionView": true,
+      "lucideIcons": ["ImageOff", "X"],
+      "bridgeTokenMemoryOnly": true,
+      "persistentTokenStores": 0,
+      "platformReadMethod": "GET",
+      "platformWriteEndpoints": 0
+    },
+    "independentQa": "PASS_FROZEN_SUCCESSOR_REPORTED_BY_COORDINATOR"
+  },
+  "nativeSuccessor": {
+    "root": "plugins/BIMLogLensNext",
+    "sourceFileCount": 19,
+    "ownerManifestSha256": "B0742339A9C98DC4E7C42CD1D3B032AA6BB53856EC8E2A8CC633F3F7CE4B8AA8",
+    "exactPerFileManifest": {
+      "path": "evidence/lens-next/20260812/integration/phase1-cross-lane-verification.json",
+      "bytes": 30508,
+      "sha256": "3D9BD94FE8D3380C18252787C46318DC13C448EEB9C4650B9A41B695CA8EEE72"
+    },
+    "binary": {
+      "path": "plugins/BIMLogLensNext/bin/Release/net48/BIMLogLensNext.dll",
+      "bytes": 27648,
+      "sha256": "11C37CA1BA535BB6A7B1A2FFB6FCB1CE8987972D1CC4FDCB30C276C451DA098C",
+      "targetFramework": "net48",
+      "platform": "AnyCPU"
+    },
+    "testBinary": {
+      "path": "plugins/BIMLogLensNext/tests/bin/Release/net48/BIMLogLensNext.Tests.exe",
+      "bytes": 19456,
+      "sha256": "80B4B19181FEFC968CF32B789FAA048BCF5129948E31E10100DE21BC6608CFE7"
+    },
+    "qaDefectRegression": {
+      "status": "PASS_3_OF_3",
+      "cases": [
+        {
+          "defect": "request idempotency could diverge from request identity",
+          "acceptedRule": "idempotencyKey must equal requestId",
+          "runtimeProof": "PASS idempotency_mismatch_blocks"
+        },
+        {
+          "defect": "wire session could diverge from the active native bridge session",
+          "acceptedRule": "sessionId must equal the active session before any native read",
+          "runtimeProof": "PASS session_context_mismatch_blocks_before_native_read"
+        },
+        {
+          "defect": "wire identity admitted invalid numeric or lifecycle values",
+          "acceptedRule": "projectId, serverId and revisionNumber are strict positive integers and lifecycle is active, superseded or voided",
+          "runtimeProof": "PASS invalid_wire_identity_blocks_before_native_read"
+        }
+      ]
+    },
+    "nativeBindingState": "abstract_until_authoritative_f_root_navisworks_references_are_bound"
+  },
+  "integrationArtifacts": {
+    "sourceVerifier": {
+      "path": "tests/lens-next-phase1/verify-phase1-source.mjs",
+      "bytes": 25889,
+      "sha256": "7F621CFF39745612B6D7A1797A16C7856FCEFDFAAEA9F0DB415B490AECCB3E00"
+    },
+    "webBehaviorVerifier": {
+      "path": "tests/lens-next-phase1/verify-web-behavior.cjs",
+      "bytes": 12234,
+      "sha256": "E3EE9386FB8DB29572C6C6273C777CD2EF506AB81DB5B08C737D0C7CE033766C"
+    },
+    "webStrictTypecheck": {
+      "path": "tests/lens-next-phase1/tsconfig.web.json",
+      "bytes": 908,
+      "sha256": "AE95F9356414052EEA0B6DA4EADF4343B50B91AB416591F5E3586A77A3DBA525"
+    },
+    "crossLaneReceipt": {
+      "path": "evidence/lens-next/20260812/integration/phase1-cross-lane-verification.json",
+      "bytes": 30508,
+      "sha256": "3D9BD94FE8D3380C18252787C46318DC13C448EEB9C4650B9A41B695CA8EEE72",
+      "assertions": 102,
+      "passed": 102,
+      "failed": 0
+    }
+  },
+  "proofs": [
+    {
+      "id": "cross-lane-source-contract",
+      "command": "node tests/lens-next-phase1/verify-phase1-source.mjs --receipt evidence/lens-next/20260812/integration/phase1-cross-lane-verification.json",
+      "result": "PASS_102_OF_102"
+    },
+    {
+      "id": "web-strict-typecheck",
+      "command": "node F:/BIMLog/Repositories/bimlog/node_modules/typescript/bin/tsc -p tests/lens-next-phase1/tsconfig.web.json --pretty false",
+      "result": "PASS_EXIT_0_NO_EMIT"
+    },
+    {
+      "id": "owned-web-runtime-contract",
+      "command": "node tests/lens-next-phase1/verify-web-behavior.cjs",
+      "result": "PASS_8_OF_8",
+      "explicitRegressions": [
+        "idempotencyKey_equals_requestId",
+        "active_session_project_and_model_context",
+        "strict_positive_project_server_revision",
+        "closed_lifecycle",
+        "forbidden_fallback_rejection"
+      ]
+    },
+    {
+      "id": "web-core-runtime",
+      "command": "tsx artifacts/bimlog/scripts/lens-next/lens-next-phase1.behavior.ts",
+      "result": "PASS",
+      "facts": {
+        "fixtureIssues": 500,
+        "refreshIdempotency": "PASS",
+        "authenticatedApiGets": 2,
+        "writeEndpoints": 0,
+        "writeCommands": 0,
+        "ephemeralSessionInjection": "PASS",
+        "persistentSessionStores": 0
+      }
+    },
+    {
+      "id": "web-executable-ssr",
+      "command": "tsx artifacts/bimlog/scripts/lens-next/lens-next-panel-render.behavior.tsx",
+      "result": "PASS",
+      "facts": {
+        "reactRenders": 6,
+        "accessibleLandmark": true,
+        "liveRegions": true,
+        "nativeButtonsAndSelects": true,
+        "lucideIcons": ["ImageOff", "X"],
+        "responsiveBreakpoints": [380, 720],
+        "protectedRouteCount": 1,
+        "sourceBoundWorkspace": true,
+        "persistentTokenStores": 0
+      }
+    },
+    {
+      "id": "native-release-build",
+      "command": "dotnet build plugins/BIMLogLensNext/BIMLogLensNext.csproj -c Release --no-restore",
+      "result": "PASS_0_WARNINGS_0_ERRORS"
+    },
+    {
+      "id": "native-test-build",
+      "command": "dotnet build plugins/BIMLogLensNext/tests/BIMLogLensNext.Tests.csproj -c Release --no-restore",
+      "result": "PASS_0_WARNINGS_0_ERRORS"
+    },
+    {
+      "id": "native-runtime",
+      "command": "plugins/BIMLogLensNext/tests/bin/Release/net48/BIMLogLensNext.Tests.exe",
+      "result": "PASS_17_OF_17"
+    },
+    {
+      "id": "native-static-isolation",
+      "command": "plugins/BIMLogLensNext/tests/Run-IsolationContract.ps1",
+      "result": "PASS",
+      "facts": {
+        "filesScanned": 64,
+        "targetFramework": "net48",
+        "platform": "AnyCPU",
+        "assembly": "BIMLogLensNext",
+        "installExecutable": false,
+        "legacyReferenceCount": 0,
+        "savedViewpointInstallMutation": false
+      }
+    },
+    {
+      "id": "mojibake",
+      "command": "node scripts/check-mojibake.mjs",
+      "result": "PASS"
+    },
+    {
+      "id": "diff-check",
+      "command": "git diff --check",
+      "result": "PASS_NO_ERRORS"
+    }
+  ],
+  "acceptedPhase1Properties": {
+    "exactIdentityNonCollision": true,
+    "bridgeProtocolAgreement": true,
+    "idempotencyEqualsRequestId": true,
+    "activeSessionBinding": true,
+    "strictPositiveIdentifiersAndRevision": true,
+    "closedLifecycle": true,
+    "secureInMemoryBridgeToken": true,
+    "persistentBridgeTokenStores": 0,
+    "nativeReadOnlyCommandAllowlistExact": true,
+    "webCommandsSubsetOfNativeReadOnlyAllowlist": true,
+    "platformWriteEndpointsAbsent": true,
+    "forbiddenFallbacksRejected": true,
+    "configurationCacheLogIsolation": true,
+    "legacyRuntimeIdentifiersPortsPathsAbsent": true,
+    "savedViewpointMutationApisAbsent": true,
+    "protectedRoute": true,
+    "executableSsr": true,
+    "lucideIcons": true,
+    "sourcePathAllowlistsPass": true,
+    "productionWritesEnabled": false,
+    "installOrMigrationAction": false
+  },
+  "pathDisposition": {
+    "verifiedImplementationAllowlist": {
+      "appFiles": 1,
+      "webFeatureFiles": 9,
+      "webBehaviorScripts": 2,
+      "nativeSourceFiles": 19
+    },
+    "ownedIntegrationPaths": [
+      "tests/lens-next-phase1/tsconfig.web.json",
+      "tests/lens-next-phase1/verify-phase1-source.mjs",
+      "tests/lens-next-phase1/verify-web-behavior.cjs",
+      "evidence/lens-next/20260812/integration/phase1-cross-lane-verification.json",
+      "evidence/lens-next/20260812/integration/phase1-integration-terminal-receipt.json"
+    ],
+    "supportingAssessmentEvidence": [
+      "evidence/lens-next/20260812/foundation-isolation-inventory.md",
+      "evidence/lens-next/20260812/identity-isolation-contract.json",
+      "evidence/lens-next/20260812/phase1-readonly-acceptance-contract.json",
+      "evidence/lens-next/20260812/technical-assessment.md"
+    ],
+    "quarantinedExcludedNotAccepted": [
+      "artifacts/bimlog/src/lib/help-content.ts",
+      "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
+      "living-brief/PLUGIN.md",
+      "living-brief/STATUS.md",
+      "living-brief/impact-declarations.json"
+    ],
+    "legacyPluginPathsModified": 0,
+    "unexpectedProductPaths": 0
+  },
+  "scopeBoundary": {
+    "phase": "Phase 1 read-only Lens Next",
+    "fullWorkspaceDependencyInstallPerformed": false,
+    "fullWorkspaceBuildClaimed": false,
+    "navisworksProductReferenceBound": false,
+    "localCommitCreated": false,
+    "releaseActionPerformed": false,
+    "reason": "The isolated Phase 1 source, executable UI behavior, native abstract bridge and cross-lane contracts pass locally. Authoritative F-root Navisworks references and later release phases remain outside this receipt."
+  },
+  "safety": {
+    "legacyModified": false,
+    "implementationFilesModifiedByIntegrationLane": false,
+    "quarantinedFilesModifiedByIntegrationLane": false,
+    "cRootReadOrWrite": false,
+    "install": false,
+    "gitMutation": false,
+    "databaseAction": false,
+    "networkOrExternalAction": false,
+    "pushPullPublishDeploy": false
+  }
+}

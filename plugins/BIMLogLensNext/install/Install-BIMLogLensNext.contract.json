@@ -1,0 +1,17 @@
+{
+  "definition": "Install-BIMLogLensNext",
+  "status": "contract_only_no_install_action",
+  "assembly": "BIMLogLensNext.dll",
+  "installationFolderLeaf": "BIMLogLensNext",
+  "allowedFiles": [
+    "BIMLogLensNext.dll",
+    "BIMLogLensNext.dll.config"
+  ],
+  "forbiddenTargets": [
+    "BIMLogNavisPlugin",
+    "%APPDATA%\\BIMLog",
+    "http://localhost:8765"
+  ],
+  "migrationOnInstall": false,
+  "savedViewpointProcessingOnInstall": false
+}

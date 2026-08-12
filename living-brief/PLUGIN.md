@@ -1,5 +1,19 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## BIMLog Lens Next isolated Phase 1 candidate - 2026-08-12
+
+Lens Next is separate from every Legacy path and identity documented below. Its
+frozen identities are assembly `BIMLogLensNext`, dock
+`BIMLogLensNext.IgniteSmart`, button `BIMLogLensNextButton.IgniteSmart`, state
+root `%LOCALAPPDATA%\BIMLog\LensNext`, loopback bridge `127.0.0.1:8766`, and
+metadata namespace `bimlog.lens_next.v1`. Phase 1 is read-only and permits only
+ping, capabilities, project-context, and exact immutable-identity
+open-working-view. It creates no SavedViewpoint, performs no Legacy discovery or
+mutation, and has not been installed. The current .NET candidate remains an
+abstract adapter until authoritative F-root references for the intended
+Navisworks version are explicitly available and bound; historical Legacy roots
+below are not valid Lens Next build roots.
+
 Owned/hand-edited in Git. The in-app Living Brief serves the verified deployed source bundle;
 the database is an exact status-bearing mirror and must never override this document.
 

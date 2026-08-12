@@ -1,0 +1,12 @@
+{
+  "schemaVersion": 1,
+  "assemblyName": "BIMLogLensNext",
+  "dllName": "BIMLogLensNext.dll",
+  "rootNamespace": "BIMLogLensNext",
+  "dockPluginId": "BIMLogLensNext.IgniteSmart",
+  "dockPanelId": "BIMLogLensNext.IgniteSmart",
+  "buttonPluginId": "BIMLogLensNextButton.IgniteSmart",
+  "commandPrefix": "BIMLogLensNext",
+  "nativeAdapter": "abstract_pending_authoritative_f_root_navisworks_references",
+  "phase1Mode": "read_only"
+}
