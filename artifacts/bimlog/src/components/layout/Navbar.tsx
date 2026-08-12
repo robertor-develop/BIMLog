@@ -5,9 +5,9 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/lib/i18n";
 import { logClientError } from "@/lib/client-log";
 import { useAuthStore } from "@/store/auth";
-import { Moon, Printer, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 
-export const BIMLOG_RELEASE_VERSION = "v1.60.28.03";
+export const BIMLOG_RELEASE_VERSION = "v1.60.31.04";
 
 export function Navbar() {
   const { t, tt } = useI18n();
@@ -64,7 +64,7 @@ export function Navbar() {
         <div className="sidebar-logo-mark" style={{ width: 28, height: 28, fontSize: 12 }}>B</div>
         <div style={{display:"grid",lineHeight:1.05}}>
           <div className="flex items-baseline gap-1.5"><span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: 14, color: "hsl(var(--foreground))" }}>BIMLog</span><span className="app-topbar-byline" style={{ fontSize: 10, color: "hsl(var(--muted-foreground))" }}>by IgniteSmart</span></div>
-          <span className="app-topbar-version" style={{fontSize:8,color:"hsl(var(--muted-foreground))",letterSpacing:'.04em'}}>{BIMLOG_RELEASE_VERSION}</span>
+          <span className="app-topbar-version" style={{fontSize:8,color:"hsl(var(--muted-foreground))",letterSpacing:'.04em',marginTop:4,lineHeight:1}}>{BIMLOG_RELEASE_VERSION}</span>
         </div>
       </Link>
 
@@ -117,7 +117,6 @@ export function Navbar() {
             <Button variant="ghost" size="sm" onClick={logout} style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>
               {t("nav.logout")}
             </Button>
-            <Button variant="ghost" size="icon" onClick={() => window.print()} aria-label={tt("Print or save page as PDF", "Imprimir o guardar página como PDF")} title={tt("Print / PDF", "Imprimir / PDF")} style={{width:32,height:32,color:"hsl(var(--muted-foreground))"}}><Printer size={16}/></Button>
             <Button
               variant="ghost"
               size="icon"

@@ -62,6 +62,10 @@ const currentViewTitles = {
   "clash-reports": { en: "Clash Reports — Current View", es: "Reportes de choques — Vista actual" },
   "submittal-register": { en: "Required Submittal Register — Current View", es: "Registro de entregables requeridos — Vista actual" },
   "naming-convention": { en: "Naming Convention — Current View", es: "Convención de nombres — Vista actual" },
+  "job-intake": { en: "Job Intake - Current View", es: "Ingreso del trabajo - Vista actual" },
+  "job-operations": { en: "Job Operations - Current View", es: "Operaciones del trabajo - Vista actual" },
+  "cost-value-planner": { en: "Cost & Value Planner - Current View", es: "Planificador de Costos y Valor - Vista actual" },
+  "team-performance": { en: "Team Performance & Skills - Current View", es: "Rendimiento y Habilidades del Equipo - Vista actual" },
 } as const;
 
 function pdfHeader(
@@ -258,6 +262,28 @@ router.post(
 );
 
 // ── PROJECT HEALTH ─────────────────────────────────────────────────────────────
+router.post("/help/manual/pdf", authMiddleware, async (req, res) => {
+  const lang = req.body?.lang === "es" ? "es" : "en";
+  const clean = (value: unknown, limit = 4000) => String(value ?? "").replace(/[\u0000-\u001F\u007F]/g, "").trim().slice(0, limit);
+  const sections = Array.isArray(req.body?.sections) ? req.body.sections.slice(0, 120).map((entry: unknown) => {
+    const item = entry && typeof entry === "object" ? entry as Record<string, unknown> : {};
+    return { title: clean(item.title, 180), body: clean(item.body) };
+  }).filter((entry: { title: string; body: string }) => entry.title || entry.body) : [];
+  if (!sections.length) { res.status(400).json({ error: "At least one bounded manual section is required" }); return; }
+  const title = clean(req.body?.title, 180) || (lang === "es" ? "Manual de usuario de BIMLog" : "BIMLog User Manual");
+  const doc = createPdfDocument({ size: "LETTER", layout: "portrait", margin: 50, bufferPages: true });
+  res.type("application/pdf"); res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`); doc.pipe(res);
+  const project = { name: "BIMLog", code: "HELP", companyName: "IgniteSmart" };
+  pdfHeader(doc, project, title, REPORT_THEMES.platform.standard);
+  for (const section of sections) {
+    if (doc.y > doc.page.height - 120) { doc.addPage(); pdfHeader(doc, project, title, REPORT_THEMES.platform.standard); }
+    doc.font("Helvetica-Bold").fontSize(12).fillColor("#17365D").text(section.title || (lang === "es" ? "Seccion" : "Section"), 50, doc.y, { width: doc.page.width - 100 });
+    doc.moveDown(0.35).font("Helvetica").fontSize(9).fillColor("#334155").text(section.body, 50, doc.y, { width: doc.page.width - 100, lineGap: 2 }).moveDown(0.8);
+  }
+  const snapshot = { surface: "help-center", lang, title, sections };
+  finishProfessionalReport(doc, project, `HELP-${computeContentHash(snapshot).slice(0, 10).toUpperCase()}`, snapshot);
+});
+
 router.get(
   "/projects/:projectId/reports/project-health/pdf",
   async (req, res) => {

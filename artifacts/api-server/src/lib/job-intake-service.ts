@@ -24,6 +24,7 @@ import {
   type JobIntakeData,
 } from "./job-intake-contract";
 import { waitForJobIntakeMigration } from "./job-intake-migration";
+import { buildActivatedCommercialBaseline, persistActivatedCommercialBaselineWithClient } from "./job-activation-commercial-baseline";
 
 const uuid = () => crypto.randomUUID();
 const categories = new Set([
@@ -1292,6 +1293,39 @@ export async function activateJobIntake(input: {
     }
     const draft = drafts[0] ?? null;
     const activationMode = draft ? "commercial" : "core";
+    const commercialBaseline = draft ? buildActivatedCommercialBaseline({
+      intakeId: intake.id,
+      projectId,
+      currency: data.identity.currency,
+      contracts: data.commercial.contracts.map((contract: any) => {
+        const activated = drafts.find((candidate) => candidate.profileId === contract.id);
+        if (!activated) throw new FinancialControlError(409, "ACTIVATION_CONTRACT_BASELINE_MISSING", "Every activated contract requires an immutable commercial baseline.");
+        return {
+          profileId: contract.id,
+          contractId: activated.contractId,
+          contractVersionId: activated.contractVersionId,
+          contractNumber: contract.contractNumber,
+          currency: data.identity.currency,
+          items: data.scopeItems.filter((item) => item.contractId === contract.id).map((item) => ({
+            stableLineId: item.id,
+            displayName: item.name,
+            projectCostNodeId: item.projectCostNodeId,
+            budgetSnapshotLineId: item.budgetSnapshotLineId,
+            quantity: item.plannedHours,
+            unit: item.unit,
+            unitRate: item.billingHourlyRate,
+            contractValue: item.contractValue,
+            apuPlanVersion: item.apuPlanVersion,
+            workflowTemplate: item.workflowTemplate || data.delivery.workflowTemplate,
+          })),
+        };
+      }),
+      workflowInstances: workflowBaseline.created,
+      workItems: data.scopeItems.length,
+      tasks: data.scopeItems.length,
+      resourceAssignments: data.team.assignments.length,
+    }) : null;
+    if (commercialBaseline) await persistActivatedCommercialBaselineWithClient(client, commercialBaseline, input.actorUserId);
     const activationSummary = {
       activationMode,
       capabilities,
@@ -1302,6 +1336,9 @@ export async function activateJobIntake(input: {
       contractId: draft?.contractId ?? null,
       contracts: drafts,
       commercialWorkflowInstances: workflowBaseline.created,
+      projectBudget: commercialBaseline?.projectBudget ?? null,
+      budgetAccounts: commercialBaseline?.budgetAccounts ?? [],
+      commercialBaselineFingerprint: commercialBaseline?.contentFingerprint ?? null,
     };
     const revision = Number(intake.revision) + 1;
     await client.query(

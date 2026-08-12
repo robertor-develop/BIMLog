@@ -20,9 +20,10 @@ type PrintPdfButtonProps = {
   currentViewSummary?: string[];
   options?: ReactNode;
   configurationInvalid?: boolean;
+  selectionMode?: boolean;
 };
 
-async function downloadPdfResponse(
+export async function downloadPdfResponse(
   response: Response,
   fallbackFileName: string,
 ) {
@@ -72,7 +73,16 @@ export async function downloadGovernedCurrentViewPdf(
   projectId: number,
   token: string,
   payload: {
-    surface: "reports-hub" | "integrations" | "clash-reports" | "submittal-register" | "naming-convention";
+    surface:
+      | "reports-hub"
+      | "integrations"
+      | "clash-reports"
+      | "submittal-register"
+      | "naming-convention"
+      | "job-intake"
+      | "job-operations"
+      | "cost-value-planner"
+      | "team-performance";
     lang: string;
     context: string[];
     columns: string[];
@@ -102,6 +112,7 @@ export function PrintPdfButton({
   currentViewSummary = [],
   options,
   configurationInvalid = false,
+  selectionMode = false,
 }: PrintPdfButtonProps) {
   const [open, setOpen] = useState(false);
   const statusId = useId();
@@ -181,12 +192,18 @@ export function PrintPdfButton({
       >
         <DialogHeader className="border-b border-slate-200 px-5 py-[18px] pr-12 text-left">
           <DialogTitle>
-            {isSpanish ? "Imprimir vista actual" : "Print current view"}
+            {selectionMode
+              ? isSpanish ? "Configurar PDF" : "Configure PDF"
+              : isSpanish ? "Imprimir vista actual" : "Print current view"}
           </DialogTitle>
           <DialogDescription className="leading-5">
-            {isSpanish
-              ? "Los filtros, búsqueda, orden, pestaña, fechas y vista visibles de la página se heredan automáticamente."
-              : "The page's visible filters, search, sort, tab, dates, and view are inherited automatically."}
+            {selectionMode
+              ? isSpanish
+                ? "Elija las secciones que debe incluir el PDF. BIMLog generará y descargará el archivo completado automáticamente."
+                : "Choose the sections to include. BIMLog will generate and download the completed PDF automatically."
+              : isSpanish
+                ? "Los filtros, búsqueda, orden, pestaña, fechas y vista visibles de la página se heredan automáticamente."
+                : "The page's visible filters, search, sort, tab, dates, and view are inherited automatically."}
           </DialogDescription>
         </DialogHeader>
         <div className="grid gap-4 p-5">
@@ -200,9 +217,13 @@ export function PrintPdfButton({
               </ul>
             ) : (
               <p className="m-0 text-xs leading-[1.55] text-slate-700">
-                {isSpanish
-                  ? "Se usará exactamente el estado visible actual. Los resultados vacíos se muestran como vacíos, sin filas inventadas."
-                  : "The exact current visible state will be used. Empty results remain empty; no rows are fabricated."}
+                {selectionMode
+                  ? isSpanish
+                    ? "Solo se incluirán las secciones seleccionadas. Los datos se toman del proyecto y borrador visibles; no se inventan filas."
+                    : "Only selected sections are included. Data comes from the visible project and draft; no rows are fabricated."
+                  : isSpanish
+                    ? "Se usará exactamente el estado visible actual. Los resultados vacíos se muestran como vacíos, sin filas inventadas."
+                    : "The exact current visible state will be used. Empty results remain empty; no rows are fabricated."}
               </p>
             )}
           </section>

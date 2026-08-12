@@ -365,6 +365,9 @@ app.use("/api/v1", router);
 
 (async () => {
   try {
+    await startFinancialBudgetMigration();
+    await startFinancialContractMigration();
+    await startContractItemWorkflowMigration();
     startJobIntakeMigration();
     await waitForJobIntakeMigration();
     console.log("[migration] Job Intake tables ensured");

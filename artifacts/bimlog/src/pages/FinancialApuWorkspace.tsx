@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRoute } from "wouter";
-import { ArrowLeft, Download, FileSpreadsheet, HelpCircle, Info, Plus, Printer, RotateCcw, Save, Sparkles, Trash2 } from "lucide-react";
+import { ArrowLeft, Download, FileSpreadsheet, HelpCircle, Info, Plus, RotateCcw, Save, Sparkles, Trash2 } from "lucide-react";
 import { FinancialProjectShell } from "@/components/layout/FinancialProjectShell";
+import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
@@ -117,7 +118,7 @@ const csvCell = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""'
 
 export function FinancialApuWorkspace() {
   const { token } = useAuthStore();
-  const { tt } = useI18n();
+  const { language, tt } = useI18n();
   const [, route] = useRoute("/projects/:id/financial/apu");
   const projectId = Number(route?.id);
   const [plan, setPlan] = useState<Plan>(emptyPlan);
@@ -135,6 +136,8 @@ export function FinancialApuWorkspace() {
   const [latestForecast, setLatestForecast] = useState<ForecastSnapshot | null>(null);
   const [forecastHistory, setForecastHistory] = useState<ForecastSnapshot[]>([]);
   const [forecastSaving, setForecastSaving] = useState(false);
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [pdfSections, setPdfSections] = useState({ plan: true, performance: true, forecast: true });
   useEffect(() => { window.localStorage.setItem("bimlog-cvp-help", helpVisible ? "shown" : "hidden"); }, [helpVisible]);
 
   const load = useCallback(async () => {
@@ -395,11 +398,55 @@ export function FinancialApuWorkspace() {
     const url = URL.createObjectURL(blob), anchor = document.createElement("a");
     anchor.href = url; anchor.download = `cost-value-plan-project-${projectId}-v${plan.version ?? "draft"}.csv`; anchor.click(); URL.revokeObjectURL(url);
   };
+  const selectedPdfSections = Object.values(pdfSections).filter(Boolean).length;
+  const pdfOptions = <div style={{ display: "grid", gap: 8 }}>
+    {([
+      ["plan", tt("Plan and allocations", "Plan y distribuciones")],
+      ["performance", tt("Latest performance snapshot", "Último registro de desempeño")],
+      ["forecast", tt("Latest forecast", "Último pronóstico")],
+    ] as const).map(([key, label]) => <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}><input type="checkbox" checked={pdfSections[key]} onChange={(event) => setPdfSections((current) => ({ ...current, [key]: event.target.checked }))}/><span>{label}</span></label>)}
+  </div>;
+  const exportPlanPdf = async () => {
+    if (!token || selectedPdfSections === 0) return;
+    setExportingPdf(true); setError("");
+    try {
+      const rows: string[][] = [];
+      if (pdfSections.plan) rows.push(
+        [tt("Plan", "Plan"), tt("Plan name", "Nombre del plan"), plan.name || tt("Draft", "Borrador")],
+        [tt("Plan", "Plan"), tt("Currency", "Moneda"), plan.currency],
+        [tt("Plan", "Plan"), tt("Selling price", "Precio de venta"), plan.sellingPrice],
+        [tt("Plan", "Plan"), tt("Fixed company cost", "Costo fijo de empresa"), plan.fixedCompanyCost],
+        [tt("Plan", "Plan"), tt("Net distributable value", "Valor neto distribuible"), format(values.net)],
+        [tt("Plan", "Plan"), tt("Labor operating pool", "Fondo operativo de mano de obra"), plan.allocations.labor],
+        [tt("Plan", "Plan"), tt("Project incentive reserve", "Reserva de incentivos"), plan.allocations.bonus],
+        [tt("Plan", "Plan"), tt("Project earnings", "Ganancias del proyecto"), plan.allocations.taskEarnings],
+        ...plan.productionPhases.map((line) => [tt("Production", "Producción"), line.name || tt("Unnamed phase", "Fase sin nombre"), `${line.amount} (${line.percentage}%)`]),
+        ...plan.administrativeLines.map((line) => [tt("Administration", "Administración"), line.name || tt("Unnamed line", "Línea sin nombre"), `${line.amount} (${line.percentage}%)`]),
+      );
+      if (pdfSections.performance) rows.push(
+        [tt("Performance", "Desempeño"), tt("Snapshot", "Registro"), latestPerformance ? `${latestPerformance.snapshotDate} · ${latestPerformance.label}` : tt("No saved snapshot", "Sin registro guardado")],
+        [tt("Performance", "Desempeño"), "PV / EV / AC", latestPerformance ? `${latestPerformance.plannedValue} / ${latestPerformance.earnedValue} / ${latestPerformance.actualCost}` : "—"],
+        [tt("Performance", "Desempeño"), "CPI / SPI", latestPerformance ? `${latestPerformance.evaluation.cpi ?? "—"} / ${latestPerformance.evaluation.spi ?? "—"}` : "—"],
+      );
+      if (pdfSections.forecast) rows.push(
+        [tt("Forecast", "Pronóstico"), tt("Snapshot", "Registro"), latestForecast ? `${latestForecast.forecastDate} · ${latestForecast.label}` : tt("No saved forecast", "Sin pronóstico guardado")],
+        [tt("Forecast", "Pronóstico"), "BAC / CV / SV", latestForecast ? `${latestForecast.evaluation.budgetAtCompletion} / ${latestForecast.evaluation.costVariance} / ${latestForecast.evaluation.scheduleVariance}` : "—"],
+        [tt("Forecast", "Pronóstico"), tt("Status", "Estado"), latestForecast?.evaluation.status ?? "—"],
+      );
+      await downloadGovernedCurrentViewPdf(projectId, token, {
+        surface: "cost-value-planner", lang: language,
+        context: [`${tt("Project", "Proyecto")}: ${projectName || projectId}`, `${tt("Plan version", "Versión del plan")}: ${plan.version ?? tt("Draft", "Borrador")}`, `${tt("Included sections", "Secciones incluidas")}: ${Object.entries(pdfSections).filter(([, value]) => value).map(([key]) => key).join(", ")}`],
+        columns: [tt("Section", "Sección"), tt("Field", "Campo"), tt("Value", "Valor")], rows,
+        emptyMessage: tt("No selected Cost & Value information is available.", "No hay información seleccionada de Costos y Valor."),
+      }, `cost-value-plan-project-${projectId}-v${plan.version ?? "draft"}.pdf`);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : tt("The Cost & Value PDF could not be generated.", "No se pudo generar el PDF de Costos y Valor.")); }
+    finally { setExportingPdf(false); }
+  };
 
   return <FinancialProjectShell projectId={projectId} activeTab="apu">
     <main className="cvp" data-testid="financial-apu-workspace">
       <style>{styles}</style><style>{allocationStyles}</style><style>{forecastStyles}</style>
-      <header><div><button className="text-action" onClick={() => window.history.back()}><ArrowLeft size={15}/>{tt("Back", "Volver")}</button><p className="eyebrow">{tt("Commercial", "Comercial")}</p><h1>{tt("Cost & Value Planner", "Planificador de Costos y Valor")}</h1><p>{tt("Turn a selling price into a controlled labor, incentive, earnings, performance, and forecast plan.", "Convierta un precio de venta en un plan controlado de mano de obra, incentivos, ganancias, rendimiento y pronóstico.")}</p></div><div className="header-actions"><button onClick={() => setHelpVisible((visible) => !visible)}><HelpCircle size={15}/>{helpVisible ? tt("Hide help", "Ocultar ayuda") : tt("Show help", "Mostrar ayuda")}</button><button onClick={exportPlanCsv}><FileSpreadsheet size={15}/>{tt("Draft CSV", "CSV borrador")}</button><button onClick={() => window.print()}><Printer size={15}/>{tt("Draft PDF", "PDF borrador")}</button>{plan.version && <span className="version">v{plan.version}</span>}</div></header>
+      <header><div><button className="text-action" onClick={() => window.history.back()}><ArrowLeft size={15}/>{tt("Back", "Volver")}</button><p className="eyebrow">{tt("Commercial", "Comercial")}</p><h1>{tt("Cost & Value Planner", "Planificador de Costos y Valor")}</h1><p>{tt("Turn a selling price into a controlled labor, incentive, earnings, performance, and forecast plan.", "Convierta un precio de venta en un plan controlado de mano de obra, incentivos, ganancias, rendimiento y pronóstico.")}</p></div><div className="header-actions"><button onClick={() => setHelpVisible((visible) => !visible)}><HelpCircle size={15}/>{helpVisible ? tt("Hide help", "Ocultar ayuda") : tt("Show help", "Mostrar ayuda")}</button><button onClick={exportPlanCsv}><FileSpreadsheet size={15}/>{tt("Export CSV", "Exportar CSV")}</button><PrintPdfButton lang={language} selectionMode loading={exportingPdf} disabled={!token} disabledReason={selectedPdfSections === 0 ? tt("Select at least one PDF section.", "Seleccione al menos una sección del PDF.") : undefined} configurationInvalid={selectedPdfSections === 0} options={pdfOptions} currentViewSummary={[`${tt("Project", "Proyecto")}: ${projectName || projectId}`, `${tt("Version", "Versión")}: ${plan.version ?? tt("Draft", "Borrador")}`]} onClick={() => void exportPlanPdf()}/>{plan.version && <span className="version">v{plan.version}</span>}</div></header>
       {loading ? <section className="panel">{tt("Loading planner…", "Cargando planificador…")}</section> : error && !projectName ? <section className="panel error" role="alert">{error}<button onClick={() => void load()}>{tt("Retry", "Reintentar")}</button></section> : <>
         {error && <div className="notice error" role="alert">{error}</div>}{message && <div className="notice success">{message}</div>}
         {helpVisible && <section className="panel guide" data-testid="cost-value-guide"><div className="section-title"><div><p className="eyebrow">{tt("How this plan works", "Cómo funciona este plan")}</p><h2>{tt("Five steps—no calculator required", "Cinco pasos—sin calculadora")}</h2></div><button onClick={() => setHelpVisible(false)}>{tt("Hide help", "Ocultar ayuda")}</button></div><div className="guide-grid"><article><strong>1. {tt("Establish value", "Establecer valor")}</strong><span>{tt("Selling Price − Fixed Company Cost = money available for labor, incentives, and project earnings.", "Precio de Venta − Costo Fijo de Empresa = dinero disponible para mano de obra, incentivos y ganancias.")}</span></article><article><strong>2. {tt("Allocate net value", "Distribuir valor neto")}</strong><span>{tt("Enter Labor % and Incentive %. Project Earnings receives the remainder automatically.", "Ingrese % de Mano de Obra y % de Incentivo. Ganancias recibe el remanente automáticamente.")}</span></article><article><strong>3. {tt("Split labor", "Dividir mano de obra")}</strong><span>{tt("Direct Production pays the people producing contracted deliverables. Project Administration covers coordination, management, meetings, and control.", "Producción Directa paga a quienes producen los entregables contratados. Administración cubre coordinación, gestión, reuniones y control.")}</span></article><article><strong>4. {tt("Distribute each pool", "Distribuir cada fondo")}</strong><span>{tt("Allocate Direct Production by delivery phase and Administration by activity. Use the automatic buttons instead of calculating the last percentage.", "Distribuya Producción Directa por fase y Administración por actividad. Use los botones automáticos en lugar de calcular el último porcentaje.")}</span></article><article><strong>5. {tt("Save and report", "Guardar y reportar")}</strong><span>{tt("Save when every section equals its required pool. CSV and PDF can also be exported while the plan is still a draft.", "Guarde cuando cada sección iguale su fondo requerido. CSV y PDF también pueden exportarse mientras el plan sea borrador.")}</span></article></div><div className="worked-example"><strong>{tt("Example", "Ejemplo")}: 10,000 − 2,000 = 8,000</strong><span>{tt("70% Labor = 5,600 · 20% Incentive = 1,600 · 10% Project Earnings = 800. If Direct Production is 85%, it receives 4,760 and Administration receives 840.", "70% Mano de Obra = 5,600 · 20% Incentivo = 1,600 · 10% Ganancias = 800. Si Producción Directa es 85%, recibe 4,760 y Administración recibe 840.")}</span></div></section>}
@@ -442,7 +489,7 @@ export function FinancialApuWorkspace() {
           <div className="performance-actions"><small>{tt("Expected uses current CPI; optimistic assumes remaining work meets budget; conservative combines CPI and SPI when available.", "El esperado usa el CPI actual; el optimista supone que el trabajo restante cumple el presupuesto; el conservador combina CPI y SPI cuando están disponibles.")}</small><button className="primary" disabled={!plan.version || !latestPerformance || forecastSaving || !forecast.label.trim()} onClick={() => void saveForecast()}><Save size={16}/>{forecastSaving ? tt("Calculating…", "Calculando…") : tt("Calculate & save forecast", "Calcular y guardar pronóstico")}</button></div>
         </section>
         <section className={`panel readiness ${balanceIssues.length === 0 ? "ready" : "needs-work"}`} data-testid="cost-value-save-readiness"><div className="section-title"><div><p className="eyebrow">{tt("Save readiness", "Preparación para guardar")}</p><h2>{balanceIssues.length === 0 ? tt("Everything balances—this plan can be saved", "Todo balancea—este plan puede guardarse") : tt(`${balanceIssues.length} corrections remain`, `Faltan ${balanceIssues.length} correcciones`)}</h2></div>{balanceIssues.length > 0 && <button onClick={autoBalanceDetailLines}><Sparkles size={15}/>{tt("Complete detail remainders", "Completar remanentes de detalle")}</button>}</div>{balanceIssues.length > 0 ? <ol>{balanceIssues.map((issue) => <li key={issue}>{issue}</li>)}</ol> : <p>{tt("Saving creates a new immutable version. Your previous saved version remains preserved.", "Guardar crea una nueva versión inmutable. La versión guardada anterior permanece preservada.")}</p>}</section>
-        <div className="savebar"><div><strong>{balanceIssues.length === 0 ? tt("Ready to save", "Listo para guardar") : balanceIssues[0]}</strong>{plan.savedAt && <small>{tt("Version", "Versión")} {plan.version} · {tt("saved", "guardada")} {new Date(plan.savedAt).toLocaleString()}</small>}</div><div className="save-actions"><button onClick={() => void load()} disabled={saving}><RotateCcw size={15}/>{tt("Reset draft", "Restablecer borrador")}</button><button onClick={exportPlanCsv}><FileSpreadsheet size={15}/>{tt("Export draft CSV", "Exportar CSV borrador")}</button><button onClick={() => window.print()}><Printer size={15}/>{tt("Print / Save draft PDF", "Imprimir / Guardar PDF borrador")}</button><button className="primary" disabled={balanceIssues.length > 0 || saving} onClick={() => void save()}><Save size={16}/>{saving ? tt("Saving…", "Guardando…") : tt("Save plan", "Guardar plan")}</button></div></div>
+        <div className="savebar"><div><strong>{balanceIssues.length === 0 ? tt("Ready to save", "Listo para guardar") : balanceIssues[0]}</strong>{plan.savedAt && <small>{tt("Version", "Versión")} {plan.version} · {tt("saved", "guardada")} {new Date(plan.savedAt).toLocaleString()}</small>}</div><div className="save-actions"><button onClick={() => void load()} disabled={saving}><RotateCcw size={15}/>{tt("Reset draft", "Restablecer borrador")}</button><button onClick={exportPlanCsv}><FileSpreadsheet size={15}/>{tt("Export CSV", "Exportar CSV")}</button><button className="primary" disabled={balanceIssues.length > 0 || saving} onClick={() => void save()}><Save size={16}/>{saving ? tt("Saving…", "Guardando…") : tt("Save plan", "Guardar plan")}</button></div></div>
       </>}
     </main>
   </FinancialProjectShell>;

@@ -1,0 +1,26 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+
+const root = path.resolve(import.meta.dirname, "..");
+const migration = fs.readFileSync(path.join(root, "lib/job-intake-migration.ts"), "utf8");
+const service = fs.readFileSync(path.join(root, "lib/job-intake-service.ts"), "utf8");
+const baseline = fs.readFileSync(path.join(root, "lib/job-activation-commercial-baseline.ts"), "utf8");
+const reports = fs.readFileSync(path.join(root, "routes/reports.ts"), "utf8");
+const app = fs.readFileSync(path.join(root, "app.ts"), "utf8");
+const schema = fs.readFileSync(path.resolve(root, "../../../lib/db/src/schema/job-intakes.ts"), "utf8");
+for (const table of ["job_activation_budget_accounts", "job_activation_contract_item_baselines", "job_activation_execution_baselines"]) assert.match(migration, new RegExp(`CREATE TABLE IF NOT EXISTS ${table}`));
+for (const table of ["job_activation_budget_accounts", "job_activation_contract_item_baselines", "job_activation_execution_baselines"]) assert.match(schema, new RegExp(`pgTable\\("${table}"`));
+assert.match(migration, /BEFORE UPDATE OR DELETE ON job_activation_budget_accounts/);
+assert.match(migration, /BEFORE UPDATE OR DELETE ON job_activation_contract_item_baselines/);
+assert.match(migration, /BEFORE UPDATE OR DELETE ON job_activation_execution_baselines/);
+assert.doesNotMatch(migration, /\b(?:DROP|TRUNCATE)\b|\bDELETE\s+FROM\b/i);
+assert.match(service, /persistActivatedCommercialBaselineWithClient\(client, commercialBaseline/);
+assert.match(service, /ACTIVATION_CONTRACT_BASELINE_MISSING/);
+assert.match(baseline, /ON CONFLICT\(intake_id,project_cost_node_id\) DO NOTHING/);
+assert.match(baseline, /ACTIVATION_BASELINE_CONFLICT/);
+for (const surface of ["job-intake", "job-operations", "cost-value-planner", "team-performance"]) assert.match(reports, new RegExp(`"${surface}"`));
+assert.match(reports, /router\.post\("\/help\/manual\/pdf", authMiddleware/);
+assert.match(reports, /sections\.slice\(0, 120\)/);
+assert.match(app, /await startFinancialBudgetMigration\(\);\s+await startFinancialContractMigration\(\);\s+await startContractItemWorkflowMigration\(\);\s+startJobIntakeMigration\(\)/);
+console.log("build4-backend.behavior: PASS (16/16)");

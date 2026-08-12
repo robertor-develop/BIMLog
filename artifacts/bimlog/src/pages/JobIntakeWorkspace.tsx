@@ -11,6 +11,7 @@ import {
   Zap,
 } from "lucide-react";
 import { FinancialProjectShell } from "@/components/layout/FinancialProjectShell";
+import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { ContractItemBulkEditor } from "@/components/job-intake/ContractItemBulkEditor";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
@@ -165,6 +166,8 @@ export function JobIntakeWorkspace() {
     [saveState, setSaveState] = useState<
       "saved" | "unsaved" | "saving" | "error"
     >("saved");
+  const [exportingPdf, setExportingPdf] = useState(false);
+  const [pdfSections, setPdfSections] = useState({ identity: true, scope: true, contracts: true, delivery: true, team: true, review: true });
   const revisionRef = useRef(0),
     dataRef = useRef<any>(blank),
     intakeRef = useRef<any>(null),
@@ -788,6 +791,48 @@ export function JobIntakeWorkspace() {
     }
     return `${label} · ${headerCells[index] || tt("Unnamed column", "Columna sin nombre")}`;
   };
+  const selectedPdfSections = Object.values(pdfSections).filter(Boolean).length;
+  const pdfOptions = <div style={{ display: "grid", gap: 8 }}>
+    {([
+      ["identity", tt("Job identity", "Identidad del trabajo")],
+      ["scope", tt("Contract Items", "Partidas de Contrato")],
+      ["contracts", tt("Contracts and pricing", "Contratos y precios")],
+      ["delivery", tt("Delivery workflow", "Flujo de entrega")],
+      ["team", tt("Team and resources", "Equipo y recursos")],
+      ["review", tt("Review and activation", "Revisión y activación")],
+    ] as const).map(([key, label]) => <label key={key} style={{ display: "flex", alignItems: "center", gap: 8, fontSize: 13 }}><input type="checkbox" checked={pdfSections[key]} onChange={(event) => setPdfSections((current) => ({ ...current, [key]: event.target.checked }))}/><span>{label}</span></label>)}
+  </div>;
+  const exportIntakePdf = async () => {
+    if (!token || selectedPdfSections === 0) return;
+    setExportingPdf(true); setError("");
+    try {
+      const rows: string[][] = [];
+      if (pdfSections.identity) {
+        for (const [field, value] of Object.entries(data.identity ?? {})) rows.push([tt("Identity", "Identidad"), field, String(value || "—"), "—"]);
+      }
+      if (pdfSections.scope) {
+        for (const item of data.scopeItems ?? []) rows.push([tt("Contract Item", "Partida de Contrato"), String(item.name || item.nameEn || item.id || "—"), String(item.quantity ?? "—"), String(item.contractId ?? item.contractProfileId ?? "—")]);
+      }
+      if (pdfSections.contracts) {
+        for (const contract of data.commercial?.contracts ?? []) rows.push([tt("Contract", "Contrato"), String(contract.title || contract.contractNumber || contract.id || "—"), String(contract.counterpartyName || "—"), String(contract.currency || data.identity?.currency || "—")]);
+      }
+      if (pdfSections.delivery) rows.push([tt("Delivery", "Entrega"), tt("Workflow template", "Plantilla de flujo"), String(data.delivery?.workflowTemplate || "—"), String(data.delivery?.milestoneSummary || "—")]);
+      if (pdfSections.team) {
+        for (const assignment of data.team?.assignments ?? []) rows.push([tt("Team", "Equipo"), String(assignment.name || assignment.role || assignment.userId || "—"), `${assignment.plannedHours ?? "—"}h`, String(assignment.scopeItemId || "—")]);
+      }
+      if (pdfSections.review) rows.push(
+        [tt("Review", "Revisión"), tt("Completion", "Avance"), `${completion.percent}%`, firstMissing || tt("Ready to activate", "Listo para activar")],
+        [tt("Review", "Revisión"), tt("Status", "Estado"), String(intake.status || "draft"), intake.activation ? tt("Activated", "Activado") : tt("Not activated", "No activado")],
+      );
+      await downloadGovernedCurrentViewPdf(projectId, token, {
+        surface: "job-intake", lang: language,
+        context: [`${tt("Project", "Proyecto")}: ${data.identity?.jobName || projectId}`, `${tt("Draft revision", "Revisión del borrador")}: ${intake.revision ?? revisionRef.current}`, `${tt("Included sections", "Secciones incluidas")}: ${Object.entries(pdfSections).filter(([, value]) => value).map(([key]) => key).join(", ")}`],
+        columns: [tt("Section", "Sección"), tt("Record", "Registro"), tt("Value", "Valor"), tt("Detail", "Detalle")], rows,
+        emptyMessage: tt("No selected Job Intake information is available.", "No hay información seleccionada de Ingreso."),
+      }, `${data.identity?.jobCode || `project-${projectId}`}-job-intake.pdf`);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : tt("The Job Intake PDF could not be generated.", "No se pudo generar el PDF de Ingreso.")); }
+    finally { setExportingPdf(false); }
+  };
   return (
     <FinancialProjectShell projectId={projectId} activeTab="intake">
       <style>{css}</style>
@@ -808,6 +853,7 @@ export function JobIntakeWorkspace() {
               )}
             </p>
             <div className="ji-actions">
+              <PrintPdfButton lang={language} selectionMode loading={exportingPdf} disabled={!token} disabledReason={selectedPdfSections === 0 ? tt("Select at least one PDF section.", "Seleccione al menos una sección del PDF.") : undefined} configurationInvalid={selectedPdfSections === 0} options={pdfOptions} currentViewSummary={[`${tt("Job", "Trabajo")}: ${data.identity?.jobName || projectId}`, `${tt("Completion", "Avance")}: ${completion.percent}%`]} onClick={() => void exportIntakePdf()}/>
               <span className="ji-paid">
                 {tt("Core included", "Funciones básicas incluidas")}
               </span>

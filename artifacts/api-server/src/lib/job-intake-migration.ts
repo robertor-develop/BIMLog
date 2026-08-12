@@ -223,6 +223,61 @@ CREATE TABLE IF NOT EXISTS job_activation_budget_variance_reviews(
   CONSTRAINT job_activation_budget_variance_positive_chk CHECK(variance_value>0),
   CONSTRAINT job_activation_budget_variance_version_chk CHECK(version>0)
 );
+CREATE TABLE IF NOT EXISTS job_activation_budget_accounts(
+  id text PRIMARY KEY,
+  intake_id text NOT NULL REFERENCES job_intakes(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  project_cost_node_id text NOT NULL REFERENCES project_cost_nodes(id),
+  currency text NOT NULL,
+  amount numeric(30,6) NOT NULL,
+  contract_ids jsonb NOT NULL,
+  contract_item_ids jsonb NOT NULL,
+  content_fingerprint text NOT NULL,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_budget_account_amount_chk CHECK(amount>=0),
+  CONSTRAINT job_activation_budget_account_currency_chk CHECK(currency~'^[A-Z]{3}$'),
+  CONSTRAINT job_activation_budget_account_uidx UNIQUE(intake_id,project_cost_node_id)
+);
+CREATE TABLE IF NOT EXISTS job_activation_contract_item_baselines(
+  id text PRIMARY KEY,
+  intake_id text NOT NULL REFERENCES job_intakes(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  contract_id text NOT NULL REFERENCES financial_contracts(id),
+  contract_version_id text NOT NULL REFERENCES financial_contract_versions(id),
+  stable_line_id text NOT NULL,
+  budget_account_id text NOT NULL REFERENCES job_activation_budget_accounts(id),
+  pricing_snapshot jsonb NOT NULL,
+  snapshot_fingerprint text NOT NULL,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_contract_item_baseline_uidx UNIQUE(contract_version_id,stable_line_id)
+);
+CREATE TABLE IF NOT EXISTS job_activation_execution_baselines(
+  id text PRIMARY KEY,
+  intake_id text NOT NULL UNIQUE REFERENCES job_intakes(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  content jsonb NOT NULL,
+  content_fingerprint text NOT NULL,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE OR REPLACE FUNCTION reject_job_activation_baseline_mutation() RETURNS trigger AS $$
+BEGIN
+  RAISE EXCEPTION 'activated commercial baselines are immutable';
+END;
+$$ LANGUAGE plpgsql;
+DO $$ BEGIN
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='job_activation_budget_accounts_immutable') THEN
+    CREATE TRIGGER job_activation_budget_accounts_immutable BEFORE UPDATE OR DELETE ON job_activation_budget_accounts FOR EACH ROW EXECUTE FUNCTION reject_job_activation_baseline_mutation();
+  END IF;
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='job_activation_contract_item_baselines_immutable') THEN
+    CREATE TRIGGER job_activation_contract_item_baselines_immutable BEFORE UPDATE OR DELETE ON job_activation_contract_item_baselines FOR EACH ROW EXECUTE FUNCTION reject_job_activation_baseline_mutation();
+  END IF;
+  IF NOT EXISTS(SELECT 1 FROM pg_trigger WHERE tgname='job_activation_execution_baselines_immutable') THEN
+    CREATE TRIGGER job_activation_execution_baselines_immutable BEFORE UPDATE OR DELETE ON job_activation_execution_baselines FOR EACH ROW EXECUTE FUNCTION reject_job_activation_baseline_mutation();
+  END IF;
+END $$;
 CREATE TABLE IF NOT EXISTS job_activation_operation_events(
   id text PRIMARY KEY,
   project_id integer NOT NULL REFERENCES projects(id),

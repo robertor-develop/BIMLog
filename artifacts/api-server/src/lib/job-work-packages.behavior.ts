@@ -15,7 +15,8 @@ for (const table of ["job_activation_work_packages", "job_activation_work_packag
   assert.match(migration, new RegExp(`CREATE TABLE IF NOT EXISTS ${table}`), `${table} must be created idempotently`);
   assert.match(schema, new RegExp(`pgTable\\("${table}"`), `${table} must exist in the canonical Drizzle schema`);
 }
-assert.doesNotMatch(migration, /\b(?:DROP|TRUNCATE|DELETE)\b/i, "work-package migration must remain additive");
+assert.doesNotMatch(migration, /\b(?:DROP|TRUNCATE)\b|\bDELETE\s+FROM\b/i, "work-package migration must remain additive; DELETE may only appear as an immutable-trigger event");
+assert.match(migration, /BEFORE UPDATE OR DELETE ON job_activation_budget_accounts/, "immutable baseline trigger must protect updates and deletes");
 assert.match(migration, /package_type IN\('shop_drawing','submittal','mixed','deliverable'\)/);
 assert.match(migration, /status IN\('draft','internal_review','submitted','returned','approved','cancelled'\)/);
 assert.match(migration, /UNIQUE\(project_id,package_code\)/);

@@ -1,7 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useRoute } from "wouter";
-import { AlertTriangle, BarChart3, BriefcaseBusiness, Download, ExternalLink, Info, Printer, RefreshCw, Search, UsersRound } from "lucide-react";
+import { AlertTriangle, BarChart3, BriefcaseBusiness, Download, ExternalLink, Info, RefreshCw, Search, UsersRound } from "lucide-react";
 import { FinancialProjectShell } from "@/components/layout/FinancialProjectShell";
+import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { ResourceSchedulingPanel } from "@/components/team-performance/ResourceSchedulingPanel";
@@ -42,6 +43,7 @@ export function TeamPerformanceWorkspace() {
   const [data, setData] = useState<Response | null>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(true);
+  const [exportingPdf, setExportingPdf] = useState(false);
   const [view, setView] = useState<View>("overview");
   const [from, setFrom] = useState(""); const [to, setTo] = useState("");
   const [member, setMember] = useState("all"); const [category, setCategory] = useState("all"); const [evidence, setEvidence] = useState("all");
@@ -90,11 +92,78 @@ export function TeamPerformanceWorkspace() {
     const link = document.createElement("a"); link.href = URL.createObjectURL(blob); link.download = `${data?.project.code ?? "project"}-team-capacity.csv`; link.click(); URL.revokeObjectURL(link.href);
   }
 
+  async function exportPdf() {
+    if (!data || !token) return;
+    setExportingPdf(true);
+    setError("");
+    try {
+      const rows = view === "planner"
+        ? candidates.map(({ person, match, remaining, available, support }) => [
+            person.name,
+            person.jobTitle || person.projectRole,
+            targetCategory || tr("No category", "Sin categoría"),
+            `${match?.evidenceCount ?? 0}`,
+            `${amount(remaining)}h / ${amount(available)}h`,
+            support,
+          ])
+        : view === "evidence"
+          ? evidenceItems.map((item) => [
+              selectedPerson?.name ?? tr("No member", "Sin miembro"),
+              item.type,
+              lang === "es" ? item.titleEs : item.titleEn,
+              item.category?.replaceAll("_", " ") || "—",
+              item.status,
+              item.date ?? "—",
+            ])
+          : view === "schedule"
+            ? [[
+                data.project.name,
+                tr("Resource scheduling", "Programación de recursos"),
+                tr("Current visible scheduling view", "Vista visible actual de programación"),
+                tr("Human review required", "Revisión humana requerida"),
+                "—",
+                "—",
+              ]]
+            : people.map((person) => [
+                person.name,
+                person.jobTitle || person.projectRole,
+                `${person.tasks.completed}/${person.tasks.assigned}`,
+                `${person.hours.planned}/${person.hours.actual}/${person.hours.earned}`,
+                factor(person.hours.efficiencyIndex),
+                person.evidenceLevel,
+              ]);
+      const columns = view === "planner"
+        ? [tr("Member", "Miembro"), tr("Role", "Rol"), tr("Target", "Objetivo"), tr("Evidence", "Evidencia"), tr("Committed / available", "Comprometidas / disponibles"), tr("Support", "Compatibilidad")]
+        : view === "evidence"
+          ? [tr("Member", "Miembro"), tr("Type", "Tipo"), tr("Source record", "Registro fuente"), tr("Category", "Categoría"), tr("Status", "Estado"), tr("Date", "Fecha")]
+          : [tr("Member", "Miembro"), tr("Role / view", "Rol / vista"), tr("Tasks C/A", "Tareas C/A"), tr("Hours P/A/E", "Horas P/R/G"), tr("Efficiency", "Eficiencia"), tr("Evidence", "Evidencia")];
+      await downloadGovernedCurrentViewPdf(projectId, token, {
+        surface: "team-performance",
+        lang,
+        context: [
+          `${tr("View", "Vista")}: ${view}`,
+          `${tr("Member", "Miembro")}: ${member}`,
+          `${tr("Category", "Categoría")}: ${category}`,
+          `${tr("Evidence", "Evidencia")}: ${evidence}`,
+          `${tr("Dates", "Fechas")}: ${from || "—"} / ${to || "—"}`,
+          ...(view === "planner" ? [`${tr("Scenario", "Escenario")}: ${targetCategory || "—"}, ${requiredHours}h, ${weeklyCapacity}h x ${horizonWeeks}`] : []),
+        ],
+        columns,
+        rows,
+        emptyMessage: tr("No team evidence matches the visible filters.", "Ninguna evidencia del equipo coincide con los filtros visibles."),
+      }, `${data.project.code || "project"}-team-performance.pdf`);
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : tr("The Team Performance PDF could not be generated.", "No se pudo generar el PDF de Rendimiento del Equipo."));
+    } finally {
+      setExportingPdf(false);
+    }
+  }
+
   const linkButton = (href: string, en: string, es: string) => <a className="tp-link" href={href}>{tr(en, es)}<ExternalLink size={13}/></a>;
   return <FinancialProjectShell projectId={projectId} activeTab="team-performance">
     <style>{`.tp{max-width:1280px;margin:0 auto}.tp-head{display:flex;justify-content:space-between;gap:18px;align-items:flex-start;flex-wrap:wrap}.tp-kicker{font-size:11px;font-weight:850;letter-spacing:.11em;text-transform:uppercase;color:#2563eb}.tp h1{font-size:30px;margin:4px 0 7px}.tp-sub{color:hsl(var(--muted-foreground));max-width:760px;line-height:1.55}.tp-actions,.tp-tabs,.tp-inline{display:flex;gap:8px;flex-wrap:wrap}.tp button,.tp-link{border:1px solid hsl(var(--border));background:hsl(var(--card));color:hsl(var(--foreground));border-radius:8px;padding:8px 11px;font-weight:700;font-size:12px;display:inline-flex;gap:6px;align-items:center;justify-content:center;cursor:pointer;text-decoration:none}.tp button.primary,.tp-tabs button.active{background:#1d4ed8;color:#fff;border-color:#1d4ed8}.tp-tabs{margin:18px 0}.tp-tabs button{padding:10px 14px}.tp-method{display:flex;gap:10px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:13px;margin:14px 0;color:#1e3a5f;font-size:12px;line-height:1.55}.tp-method svg{flex:none}.tp-filters,.tp-scenario{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:10px;background:hsl(var(--card));border:1px solid hsl(var(--border));padding:14px;border-radius:12px}.tp-scenario{grid-template-columns:repeat(4,minmax(0,1fr));margin-bottom:14px}.tp-field label{display:block;font-size:10px;font-weight:800;text-transform:uppercase;color:hsl(var(--muted-foreground));margin-bottom:5px}.tp-field select,.tp-field input{width:100%;height:36px;border:1px solid hsl(var(--border));background:hsl(var(--background));color:hsl(var(--foreground));border-radius:7px;padding:0 8px}.tp-kpis{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;margin:14px 0}.tp-kpi,.tp-person,.tp-candidate,.tp-panel{background:hsl(var(--card));border:1px solid hsl(var(--border));border-radius:13px;padding:16px}.tp-kpi span,.tp-metric span{font-size:10px;text-transform:uppercase;font-weight:800;color:hsl(var(--muted-foreground))}.tp-kpi strong{display:block;font-size:24px;margin-top:5px}.tp-grid,.tp-candidates{display:grid;gap:12px}.tp-person-head,.tp-candidate-head,.tp-panel-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;flex-wrap:wrap}.tp-person h2,.tp-candidate h2,.tp-panel h2{font-size:17px;margin:0 0 3px}.tp-muted{font-size:12px;color:hsl(var(--muted-foreground));line-height:1.5}.tp-level,.tp-support{font-size:10px;text-transform:uppercase;font-weight:850;border-radius:999px;padding:5px 8px;background:#eef2ff;color:#3730a3}.tp-support.supported{background:#dcfce7;color:#166534}.tp-support.conflict{background:#fef3c7;color:#92400e}.tp-support.insufficient{background:#f1f5f9;color:#475569}.tp-categories{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}.tp-chip{font-size:10px;background:hsl(var(--muted));border-radius:999px;padding:4px 7px}.tp-metrics{display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:8px}.tp-metric{border-top:1px solid hsl(var(--border));padding-top:9px}.tp-metric strong{display:block;font-size:15px;margin-top:3px}.tp-explain{font-size:10px;color:hsl(var(--muted-foreground));margin-top:10px}.tp-capbar{height:8px;background:hsl(var(--muted));border-radius:99px;overflow:hidden;margin:10px 0}.tp-capbar>span{display:block;height:100%;background:#2563eb;border-radius:99px}.tp-capbar>span.over{background:#dc2626}.tp-reasons{font-size:12px;line-height:1.65;margin:10px 0;padding-left:18px}.tp-two{display:grid;grid-template-columns:1fr 1.4fr;gap:14px}.tp-experience{display:grid;gap:7px;margin-top:12px}.tp-exp-row,.tp-evidence-row{display:grid;grid-template-columns:1.5fr repeat(4,.65fr);gap:8px;align-items:center;border-top:1px solid hsl(var(--border));padding:9px 0;font-size:11px}.tp-evidence-row{grid-template-columns:90px 1.5fr .8fr .7fr}.tp-trend{display:flex;align-items:flex-end;gap:8px;min-height:170px;padding-top:15px}.tp-month{flex:1;min-width:42px;text-align:center;font-size:9px;color:hsl(var(--muted-foreground))}.tp-bar{height:120px;display:flex;align-items:flex-end;justify-content:center;background:hsl(var(--muted));border-radius:7px 7px 0 0;overflow:hidden}.tp-bar span{display:block;width:100%;background:#2563eb;min-height:3px}.tp-empty,.tp-error{padding:28px;text-align:center;border:1px dashed hsl(var(--border));border-radius:12px}.tp-error{color:#b91c1c;background:#fef2f2}@media(max-width:980px){.tp-filters{grid-template-columns:repeat(3,minmax(0,1fr))}.tp-scenario{grid-template-columns:repeat(2,minmax(0,1fr))}.tp-kpis{grid-template-columns:repeat(2,minmax(0,1fr))}.tp-metrics{grid-template-columns:repeat(4,minmax(0,1fr))}.tp-two{grid-template-columns:1fr}}@media(max-width:560px){.tp-filters,.tp-scenario,.tp-kpis,.tp-metrics{grid-template-columns:1fr}.tp h1{font-size:24px}.tp-exp-row,.tp-evidence-row{grid-template-columns:1fr 1fr}.tp-actions{width:100%}.tp-actions>*{flex:1}}@media print{.sidebar,.project-context-bar,.tp-actions,.tp-tabs,.tp-filters,.tp-scenario,.feedback-widget{display:none!important}.main-area,.financial-page-content{margin:0!important;padding:0!important}.tp{max-width:none}.tp-person,.tp-panel{break-inside:avoid}}`}</style>
     <div className="tp">
-      <header className="tp-head"><div><div className="tp-kicker">{tr("Commercial intelligence", "Inteligencia comercial")}</div><h1>{tr("Team Performance & Skills", "Rendimiento y Habilidades del Equipo")}</h1><p className="tp-sub">{tr("Plan assignments from verified experience and remaining commitments. Every recommendation shows its evidence and assumptions; nothing is secretly scored or automatically assigned.", "Planifique asignaciones desde experiencia verificada y compromisos restantes. Cada recomendación muestra evidencia y supuestos; nada se califica en secreto ni se asigna automáticamente.")}</p></div><div className="tp-actions"><button onClick={exportCsv} disabled={!people.length}><Download size={14}/>{tr("Export CSV", "Exportar CSV")}</button><button onClick={() => window.print()}><Printer size={14}/>{tr("Print / PDF", "Imprimir / PDF")}</button></div></header>
+      <header className="tp-head"><div><div className="tp-kicker">{tr("Commercial intelligence", "Inteligencia comercial")}</div><h1>{tr("Team Performance & Skills", "Rendimiento y Habilidades del Equipo")}</h1><p className="tp-sub">{tr("Plan assignments from verified experience and remaining commitments. Every recommendation shows its evidence and assumptions; nothing is secretly scored or automatically assigned.", "Planifique asignaciones desde experiencia verificada y compromisos restantes. Cada recomendación muestra evidencia y supuestos; nada se califica en secreto ni se asigna automáticamente.")}</p></div><div className="tp-actions"><button onClick={exportCsv} disabled={!people.length}><Download size={14}/>{tr("Export CSV", "Exportar CSV")}</button><PrintPdfButton lang={lang} loading={exportingPdf} disabled={!data || !token} disabledReason={tr("Load the team evidence before generating the PDF.", "Cargue la evidencia del equipo antes de generar el PDF.")} currentViewSummary={[`${tr("View", "Vista")}: ${view}`, `${tr("Member", "Miembro")}: ${member}`, `${tr("Category", "Categoría")}: ${category}`, `${tr("Evidence", "Evidencia")}: ${evidence}`, `${tr("Dates", "Fechas")}: ${from || "—"} / ${to || "—"}`]} onClick={() => void exportPdf()}/></div></header>
       <div className="tp-tabs"><button className={view === "overview" ? "active" : ""} onClick={() => setView("overview")}><BarChart3 size={14}/>{tr("Team overview", "Resumen del equipo")}</button><button className={view === "planner" ? "active" : ""} onClick={() => setView("planner")}><BriefcaseBusiness size={14}/>{tr("Assignment planner", "Planificador de asignaciones")}</button><button className={view === "schedule" ? "active" : ""} onClick={() => setView("schedule")}><BriefcaseBusiness size={14}/>{tr("Resource scheduling", "Programación de recursos")}</button><button className={view === "evidence" ? "active" : ""} onClick={() => setView("evidence")}><Search size={14}/>{tr("Evidence explorer", "Explorador de evidencia")}</button></div>
       <div className="tp-method"><Info size={18}/><div><strong>{tr("Evidence, not guesswork. ", "Evidencia, no suposiciones. ")}</strong>{tr("Remaining commitment equals unfinished planned task hours after recorded progress. Capacity is a scenario you control below; it is not a claim about a person's real availability. Candidate support combines exact category evidence with that scenario and never assigns work automatically.", "El compromiso restante son las horas planificadas sin terminar después del avance registrado. La capacidad es un escenario controlado por usted; no afirma disponibilidad real. El apoyo de candidatos combina evidencia exacta de categoría con ese escenario y nunca asigna trabajo automáticamente.")}</div></div>
       {loading ? <div className="tp-empty">{tr("Loading verified operational evidence…", "Cargando evidencia operativa verificada…")}</div> : error ? <div className="tp-error">{error}</div> : !data ? null : <>

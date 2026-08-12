@@ -30,7 +30,9 @@ for (const field of ["purpose", "entryPoint", "beforeYouBegin", "keyConcepts", "
 for (const heading of ["Purpose and when to use it", "Where to find it", "Before you begin", "Access and permissions", "Controls and actions", "Statuses and lifecycle", "Validation rules", "Fields and what they mean", "Calculations and formulas", "What BIMLog saves", "Audit trail and history", "Important boundaries", "Related workspaces and handoffs", "Outputs and exports", "Worked example"]) assert.match(page, new RegExp(heading));
 for (const phrase of ["Full operational reference", "Referencia operativa completa", "optimistic concurrency", "Scenario capacity", "Controlled import", "Hourly-rate bridge", "Audit trail and history"]) assert.ok(content.includes(phrase) || page.includes(phrase), `${phrase} must be present in the professional operating manual`);
 for (const phrase of ["XLSM", "25 MB", "Source documents are optional", "Los documentos de origen son opcionales", "Inspect & map", "Inspeccionar y mapear", "Paste Excel range", "Pegar rango de Excel", "Advanced overrides", "Opciones avanzadas", "PDF and Word extraction is manual-review evidence only", "La extracción de PDF y Word es evidencia para revisión manual", "Save needs attention", "El guardado requiere atención", "registration with the invited email", "registro con el correo invitado"]) assert.ok(content.includes(phrase), `${phrase} must be covered by the bilingual release manual`);
-assert.match(page, /Print this manual section/);
+assert.match(page, /PrintPdfButton/);
+assert.match(page, /\/api\/v1\/help\/manual\/pdf/);
+assert.doesNotMatch(page, /window\.open|window\.print|Print complete manual|Print this manual section/);
 assert.match(page, /@media print/);
 assert.match(guide, /helpTopicForContext/, "quick guide must use the canonical documentation catalog");
 assert.match(guide, /Open complete instructions/);

@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { AlertTriangle, BarChart3, Download, Gauge, Printer, TrendingDown, TrendingUp } from "lucide-react";
+import { AlertTriangle, BarChart3, Download, Gauge, TrendingDown, TrendingUp } from "lucide-react";
 import { useI18n } from "@/lib/i18n";
+import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 
 const pcCss = `.pc-dashboard{background:#fff;border:1px solid #cbd5e1;border-radius:14px;padding:18px;margin-bottom:18px}.pc-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}.pc-head h2{margin:7px 0 3px}.pc-actions{display:flex;gap:8px;flex-wrap:wrap}.pc-actions button{display:flex;align-items:center;gap:6px}.pc-filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px;background:#f8fafc;border-radius:11px;padding:11px;margin:14px 0}.pc-kpis{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:9px}.pc-kpi{border:1px solid #dbe4f0;border-radius:11px;padding:11px;display:grid;gap:3px;min-height:92px}.pc-kpi strong{font-size:21px}.pc-kpi small{color:#64748b}.pc-kpi.good{background:#f0fdf4;color:#166534}.pc-kpi.warn{background:#fff7ed;color:#9a3412}.pc-kpi.bad{background:#fff1f2;color:#9f1239}.pc-alerts{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin:12px 0}.pc-alert{display:flex;align-items:center;gap:7px;padding:9px;border-radius:9px;background:#f8fafc;font-size:12px;font-weight:700}.pc-alert.bad{background:#fff1f2;color:#9f1239}.pc-alert.warn{background:#fff7ed;color:#9a3412}.pc-table-wrap{overflow:auto;margin-top:14px}.pc-table{width:100%;border-collapse:collapse;font-size:12px}.pc-table th,.pc-table td{text-align:right;padding:8px;border-bottom:1px solid #e2e8f0;white-space:nowrap}.pc-table th:first-child,.pc-table td:first-child{text-align:left;position:sticky;left:0;background:#fff}.pc-risk{display:inline-flex;border-radius:99px;padding:3px 7px;font-size:10px;font-weight:800}.pc-risk.healthy{background:#dcfce7;color:#166534}.pc-risk.warning{background:#ffedd5;color:#9a3412}.pc-risk.critical{background:#ffe4e6;color:#9f1239}.pc-risk.not_started{background:#e2e8f0;color:#475569}.pc-method{margin-top:12px;padding:10px;background:#eff6ff;border-radius:9px;font-size:12px;color:#1e3a8a}.pc-empty{padding:18px;text-align:center;background:#f8fafc;border-radius:11px}.pc-na{color:#64748b;font-size:12px}@media(max-width:1100px){.pc-kpis{grid-template-columns:repeat(3,1fr)}.pc-alerts{grid-template-columns:repeat(2,1fr)}}@media(max-width:800px){.pc-head{display:block}.pc-actions{margin-top:9px}.pc-filters{grid-template-columns:1fr 1fr}.pc-kpis{grid-template-columns:1fr 1fr}}@media(max-width:520px){.pc-filters,.pc-kpis,.pc-alerts{grid-template-columns:1fr}}@media print{body *{visibility:hidden!important}.pc-dashboard,.pc-dashboard *{visibility:visible!important}.pc-dashboard{position:absolute;inset:0;border:0}.pc-actions,.pc-filters{display:none!important}}`;
 const num = (value: unknown) => Number(value ?? 0);
@@ -19,12 +20,14 @@ function filteredTotals(rows: any[]) {
   return { ...totals, progressPercent: progress * 100, remainingHours: Math.max(0, totals.plannedHours - totals.actualHours), remainingBudget: Math.max(0, totals.plannedInternalCost - totals.actualInternalCost), cpi: totals.actualInternalCost > 0 ? totals.earnedInternalValue / totals.actualInternalCost : null, eacHours, eacCost, etcCost: eacCost == null ? null : Math.max(0, eacCost - totals.actualInternalCost), vacCost: eacCost == null ? null : totals.plannedInternalCost - eacCost };
 }
 
-export function ProjectControlsDashboard({ controls, members, packages }: { controls: any; members: any[]; packages: any[] }) {
+export function ProjectControlsDashboard({ controls, members, packages, projectId, token }: { controls: any; members: any[]; packages: any[]; projectId: number; token: string | null }) {
   const { tt, language } = useI18n();
   const [scopeId, setScopeId] = useState("");
   const [packageId, setPackageId] = useState("");
   const [memberId, setMemberId] = useState("");
   const [risk, setRisk] = useState("");
+  const [pdfBusy, setPdfBusy] = useState(false);
+  const [pdfError, setPdfError] = useState("");
   const rows = useMemo(() => (controls?.rows ?? []).filter((row: any) => (!scopeId || row.id === scopeId) && (!packageId || row.packageIds.includes(packageId)) && (!memberId || row.memberIds.includes(Number(memberId))) && (!risk || row.status === risk)), [controls, scopeId, packageId, memberId, risk]);
   const totals = useMemo(() => filteredTotals(rows), [rows]);
   if (!controls?.enabled) return null;
@@ -35,6 +38,30 @@ export function ProjectControlsDashboard({ controls, members, packages }: { cont
     const blob = new Blob([`\uFEFF${headers.map(csv).join(",")}\n${lines.join("\n")}\n`], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob), anchor = document.createElement("a"); anchor.href = url; anchor.download = `project-controls-${new Date().toISOString().slice(0,10)}-${language}.csv`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0);
   };
+  const exportPdf = async () => {
+    if (!token) return;
+    setPdfBusy(true); setPdfError("");
+    try {
+      await downloadGovernedCurrentViewPdf(projectId, token, {
+        surface: "job-operations",
+        lang: language,
+        context: [
+          `${tt("View", "Vista")}: ${tt("Project Controls Dashboard & Forecast", "Panel de Control y Pronóstico del Proyecto")}`,
+          `${tt("Phase / scope item", "Fase / partida")}: ${scopeId || tt("All scope", "Todo el alcance")}`,
+          `${tt("Work package", "Paquete de trabajo")}: ${packageId || tt("All packages", "Todos los paquetes")}`,
+          `${tt("Team member scope", "Alcance del miembro")}: ${memberId || tt("All members", "Todos los miembros")}`,
+          `${tt("Risk", "Riesgo")}: ${risk ? riskLabel(risk) : tt("All conditions", "Todas las condiciones")}`,
+        ],
+        columns: [tt("Scope", "Partida"), tt("Risk", "Riesgo"), tt("Progress", "Progreso"), tt("Plan / actual hours", "Horas plan / reales"), "CPI / EAC / VAC"],
+        rows: rows.map((row: any) => [row.name, riskLabel(row.status), `${amount(row.progressPercent)}%`, `${amount(row.plannedHours)} / ${amount(row.actualHours)}`, `${amount(row.cpi)} / ${amount(row.estimatedCostAtCompletion)} / ${amount(row.costVarianceAtCompletion)}`]),
+        emptyMessage: tt("No scope matches the selected filters.", "Ninguna partida coincide con los filtros seleccionados."),
+      }, `project-controls-${new Date().toISOString().slice(0, 10)}-${language}.pdf`);
+    } catch {
+      setPdfError(tt("The Project Controls PDF could not be generated.", "No se pudo generar el PDF de Control del Proyecto."));
+    } finally {
+      setPdfBusy(false);
+    }
+  };
   const filteredAlerts = useMemo(() => ({
     critical: rows.filter((row:any) => row.status === "critical").length,
     warning: rows.filter((row:any) => row.status === "warning").length,
@@ -42,7 +69,8 @@ export function ProjectControlsDashboard({ controls, members, packages }: { cont
     blockedPackages: rows.reduce((sum:number, row:any) => sum + num(row.blockedPackages), 0),
   }), [rows]);
   const cpiClass = totals.cpi == null ? "" : totals.cpi >= 1 ? "good" : totals.cpi < .8 ? "bad" : "warn";
-  return <section className="pc-dashboard"><style>{pcCss}</style><header className="pc-head"><div><span className="jo-chip"><BarChart3 size={12}/> {tt("PROJECT CONTROLS", "CONTROL DEL PROYECTO")}</span><h2>{tt("Project Controls Dashboard & Forecast", "Panel de Control y Pronóstico del Proyecto")}</h2><p>{tt("Live physical progress, cost performance, completion forecasts, and early warnings from approved operational data.", "Progreso físico, desempeño de costos, pronósticos y alertas desde datos operativos aprobados.")}</p></div><div className="pc-actions"><button type="button" onClick={exportCsv}><Download size={14}/>{tt("Export CSV", "Exportar CSV")}</button><button type="button" onClick={()=>window.print()}><Printer size={14}/>{tt("Print / PDF", "Imprimir / PDF")}</button></div></header>
+  return <section className="pc-dashboard"><style>{pcCss}</style><header className="pc-head"><div><span className="jo-chip"><BarChart3 size={12}/> {tt("PROJECT CONTROLS", "CONTROL DEL PROYECTO")}</span><h2>{tt("Project Controls Dashboard & Forecast", "Panel de Control y Pronóstico del Proyecto")}</h2><p>{tt("Live physical progress, cost performance, completion forecasts, and early warnings from approved operational data.", "Progreso físico, desempeño de costos, pronósticos y alertas desde datos operativos aprobados.")}</p></div><div className="pc-actions"><button type="button" onClick={exportCsv}><Download size={14}/>{tt("Export CSV", "Exportar CSV")}</button><PrintPdfButton lang={language} loading={pdfBusy} disabled={!token} currentViewSummary={[`${tt("Visible rows", "Filas visibles")}: ${rows.length}`, `${tt("Risk", "Riesgo")}: ${risk ? riskLabel(risk) : tt("All conditions", "Todas las condiciones")}`]} onClick={() => void exportPdf()}/></div></header>
+    {pdfError && <div className="pc-empty" role="alert">{pdfError}</div>}
     <div className="pc-filters"><label>{tt("Phase / scope item", "Fase / partida")}<select value={scopeId} onChange={e=>setScopeId(e.target.value)}><option value="">{tt("All scope", "Todo el alcance")}</option>{controls.rows.map((row:any)=><option key={row.id} value={row.id}>{row.name}</option>)}</select></label><label>{tt("Work package", "Paquete de trabajo")}<select value={packageId} onChange={e=>setPackageId(e.target.value)}><option value="">{tt("All packages", "Todos los paquetes")}</option>{packages.map((item:any)=><option key={item.id} value={item.id}>{item.packageCode} · {item.title}</option>)}</select></label><label>{tt("Team member scope", "Alcance del miembro")}<select value={memberId} onChange={e=>setMemberId(e.target.value)}><option value="">{tt("All members", "Todos los miembros")}</option>{members.map((item:any)=><option key={item.id} value={item.id}>{item.fullName||item.email}</option>)}</select></label><label>{tt("Risk", "Riesgo")}<select value={risk} onChange={e=>setRisk(e.target.value)}><option value="">{tt("All conditions", "Todas las condiciones")}</option>{["healthy","warning","critical","not_started"].map(value=><option key={value} value={value}>{riskLabel(value)}</option>)}</select></label></div>
     {rows.length===0?<div className="pc-empty">{tt("No scope matches the selected filters.", "Ninguna partida coincide con los filtros seleccionados.")}</div>:<><div className="pc-kpis"><article className="pc-kpi"><Gauge/><small>{tt("Physical progress", "Progreso físico")}</small><strong>{amount(totals.progressPercent)}%</strong></article><article className="pc-kpi"><small>{tt("Remaining hours", "Horas restantes")}</small><strong>{amount(totals.remainingHours)}h</strong><span>{tt("EAC", "EAC")}: {amount(totals.eacHours)}h</span></article>{controls.budgetVisible&&<><article className={`pc-kpi ${cpiClass}`}><small>CPI</small><strong>{amount(totals.cpi)}</strong><span>{totals.cpi==null?tt("Needs progress and actual cost", "Requiere progreso y costo real"):totals.cpi>=1?tt("At or above plan", "Igual o mejor que el plan"):tt("Below plan", "Por debajo del plan")}</span></article><article className="pc-kpi"><small>{tt("Remaining budget", "Presupuesto restante")}</small><strong>{amount(totals.remainingBudget)}</strong><span>{tt("Actual", "Real")}: {amount(totals.actualInternalCost)}</span></article><article className={`pc-kpi ${totals.vacCost!=null&&totals.vacCost<0?"bad":""}`}><small>{tt("Estimated at completion", "Estimado al completar")}</small><strong>{amount(totals.eacCost)}</strong><span>ETC {amount(totals.etcCost)} · VAC {amount(totals.vacCost)}</span></article></>}{controls.valueVisible&&<article className="pc-kpi"><small>{tt("Earned billable value", "Valor facturable ganado")}</small><strong>{amount(totals.earnedBillableValue)}</strong><span>{tt("Plan", "Plan")}: {amount(totals.plannedBillableValue)}</span></article>}<article className="pc-kpi"><small>SPI</small><strong>—</strong><span className="pc-na">{tt("Needs an approved schedule baseline", "Requiere una línea base de cronograma aprobada")}</span></article></div>
       <div className="pc-alerts"><div className={filteredAlerts.critical?"pc-alert bad":"pc-alert"}><AlertTriangle size={15}/>{filteredAlerts.critical} {tt("critical scope items", "partidas críticas")}</div><div className={filteredAlerts.warning?"pc-alert warn":"pc-alert"}><AlertTriangle size={15}/>{filteredAlerts.warning} {tt("warnings", "advertencias")}</div><div className={filteredAlerts.overduePackages?"pc-alert warn":"pc-alert"}>{filteredAlerts.overduePackages} {tt("overdue packages", "paquetes vencidos")}</div><div className={filteredAlerts.blockedPackages?"pc-alert bad":"pc-alert"}>{filteredAlerts.blockedPackages} {tt("blocked packages", "paquetes bloqueados")}</div></div>
