@@ -1,5 +1,29 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.60.31.04 Build 4 local release candidate - 2026-08-12
+
+- Build 4 completes active contract and budget activation on the canonical
+  multi-contract Job Intake path. Activation generates one project budget
+  aggregate across all activated contracts, immutable per-contract APU/pricing
+  and Contract Item financial baselines, Budget Accounts grouped by project
+  cost node, Project -> Contract -> Contract Item -> Budget Account drill-down,
+  and an immutable execution baseline. Persistence remains transactional,
+  fingerprinted, idempotent, tenant-scoped, and protected from update/delete.
+- Help, Job Intake, Job Operations, Cost & Value Planner, Team Performance, and
+  Project Controls now use the governed Print PDF flow. Existing visible
+  filters are inherited; pages without suitable filters present PDF-only
+  section choices; confirmation downloads a generated PDF. Blank tabs,
+  `window.print`, browser screenshots, draft-print wording, and duplicate nested
+  print controls are not accepted behavior.
+- The complete bilingual user manual and release information now identify
+  `v1.60.31.04`. The navigation brand separates the release number from the
+  BIMLog wordmark for legibility.
+- Generic APU, database safety, focused Build 4 backend and PDF behavior,
+  strict API/database/frontend TypeScript, and production UI build checks pass
+  locally. This is local source-candidate evidence only; push, Replit pull,
+  publication, deployment, production database verification, customer
+  acceptance, and live acceptance remain separately authorized.
+
 ## BIMLog v1.60.28.03 Smart Intake multi-contract activation local candidate - 2026-08-11
 
 - Build 3 extends the one canonical Job Intake draft with up to 50 independent

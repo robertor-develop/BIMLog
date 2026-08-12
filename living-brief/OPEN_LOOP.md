@@ -35,10 +35,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
    replace, preserve document/hash/cell provenance, inherit only currency-
    compatible saved APU/rate defaults, and activate through the existing shared
    operational and Commercial records without a duplicate Intake authority.
-4. Preserve the Build 3 local candidate's canonical multi-contract activation,
-   per-contract APU or pricing snapshots, workflow inheritance, and connected
-   budget relationships. Do not introduce a duplicate contract, item, APU,
-   workflow, or budget store.
+4. Preserve the Build 4 local candidate's generated project-budget aggregate,
+   immutable per-contract APU/financial baselines, Budget Accounts, workflow
+   inheritance, and execution baseline. Do not introduce a duplicate contract,
+   item, APU, workflow, budget, or PDF authority.
 5. Treat local source, test, typecheck, and build success as local evidence
    only. Push, publication, deployment, production/database verification, and
    customer acceptance require separate authorization and remain open.
@@ -56,10 +56,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 3. The flexible Smart Intake mapping and 100-plus Contract Item editor are now
    a separate local candidate described above; they are not part of pushed
    commit `1a45653691c750a5929ba6acd25ec415b66ef26b`.
-4. Preserve the Build 3 local candidate's canonical multi-contract activation,
-   per-contract APU or pricing snapshots, workflow inheritance, and connected
-   budget relationships. Do not introduce a duplicate contract, item, APU,
-   workflow, or budget store.
+4. Preserve the Build 4 local candidate's generated project-budget aggregate,
+   immutable per-contract APU/financial baselines, Budget Accounts, workflow
+   inheritance, and execution baseline. Do not introduce a duplicate contract,
+   item, APU, workflow, budget, or PDF authority.
 5. Treat local source, test, typecheck, and build success as local evidence
    only. Push, publication, deployment, production/database verification, and
    customer acceptance require separate authorization and remain open.

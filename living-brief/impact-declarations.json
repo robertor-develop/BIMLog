@@ -9198,6 +9198,88 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "20a7917c93580166a4f616417c865d4af687ef3e50d6e44ddba836cb821f7cee"
+    },
+    {
+      "taskId": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
+      "reviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "reviewedAt": "2026-08-12T09:03:24-04:00",
+      "status": "local_source_candidate_publication_pending",
+      "captureTiming": "same_product_task",
+      "summary": "Reconciles Build 4 active contract and budget activation plus governed PDF consistency corrections at v1.60.31.04; push, Replit, publication, production verification, customer acceptance, and live acceptance remain separate operator-controlled gates.",
+      "workstreams": [
+        "build4",
+        "smart-intake",
+        "project-budget",
+        "contract-items",
+        "pdf-consistency",
+        "user-manual",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical project, contract, item, APU, workflow, budget, and evidence ownership remain unchanged; Build 4 extends the existing authorities without duplication."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "F-root, user-operated Git/Replit publication, and no automatic production or customer action remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Affected newer pages now follow the established governed Print PDF interaction and automatic download standard, with focused behavior and build verification."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "Build 4 completes the approved active contract, project budget, Budget Account, and execution-baseline roadmap slice."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform topology now includes immutable activation budget accounts, Contract Item financial baselines, execution baselines, and governed PDF surfaces."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, installation, synchronization, or field-acceptance state changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Help, Intake, Operations, Cost and Value, Team Performance, and Project Controls now generate governed PDFs rather than blank tabs or browser print screens."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, regulatory interpretation, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records v1.60.31.04 as a locally verified Build 4 source candidate and preserves all external gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop preserves isolated database, Replit, publication, production, and customer acceptance gates without reopening completed local work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence remains append-only; no production or customer result is claimed by this local candidate."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3b6c1f30bb0a01007b1bf1b719a74c062070e9fef1ab6cdf2fd13a88c46db12a"
     }
   ]
 }

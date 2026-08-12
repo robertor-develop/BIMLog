@@ -1,18 +1,21 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
+  "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "ac932c0afeb1d6f6bb1d7066b324d164c2ac5fd30cbc79ad8693023f18e3ecf5",
+  "bundleSha256": "e8475afa9406a3e8424c05b38146abdca1b25a5397d5f4033e745ad460f08d6d",
   "impact": {
-    "baselineCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
+    "baselineCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
     "changedPaths": [
+      "artifacts/api-server/scripts/generate-platform-md.ts",
       "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -23,11 +26,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "claude",
@@ -35,11 +38,11 @@
       "sha256": "b8efc974142d81e72ec01cf72a1d180f5e3c5a346a5dbb390b2c3a7651f906e9",
       "sourceChangedAt": "2026-08-05T11:26:11-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "quality",
@@ -47,11 +50,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "vision",
@@ -59,23 +62,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "0b816cd1de974c6886db268bf505faac8afb602d8b84d7340e694cce2aba4294",
-      "sourceChangedAt": "2026-08-11T18:47:42-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "sha256": "1e5942f01fde575889cba1786f77834acc24ed1b8aa15c257d0783dc697e37ae",
+      "sourceChangedAt": "2026-08-12T13:03:24.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "plugin",
@@ -83,11 +86,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "report_design_system",
@@ -95,11 +98,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "standards_register",
@@ -107,35 +110,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "d45fb090840874d5c8df4c020aa223400b7a1fa2229ee60030161f38c7124014",
-      "sourceChangedAt": "2026-08-12T02:07:00.000Z",
+      "sha256": "484c42f390335995c0a0c31a9f1991bd076f131a143b29791bb2f2165fd76090",
+      "sourceChangedAt": "2026-08-12T13:03:24.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "50d362c015df2bab4dbdb4ab4b56be7f1e5b9cf9adeb5db9dbec6be3997b72ce",
-      "sourceChangedAt": "2026-08-12T02:07:00.000Z",
+      "sha256": "1100e0c47ff98073575b22398051beb473c01b7307d0d12ded9739827d06e508",
+      "sourceChangedAt": "2026-08-12T13:03:24.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     },
     {
       "key": "audit",
@@ -143,11 +146,11 @@
       "sha256": "c64878fb9aec6abbef080bb1da14f09dd92af10407b31ac6c4b4710eb42446cc",
       "sourceChangedAt": "2026-08-01T10:59:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
-      "semanticReviewTask": "bimlog-build3-release-version-living-brief-closure-20260811",
+      "reconciledThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewedThroughCommit": "023c271a435dcbd95a54958f47bd75b7b9adfa8e",
+      "semanticReviewTask": "bimlog-build4-v1.60.31.04-living-brief-closure-20260812",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-11T22:07:00-04:00"
+      "semanticReviewedAt": "2026-08-12T09:03:24-04:00"
     }
   ]
 }

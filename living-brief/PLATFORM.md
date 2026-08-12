@@ -155,6 +155,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-service.ts
+- artifacts/api-server/src/lib/build4-backend.behavior.ts
+- artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
 - artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
 - artifacts/api-server/src/lib/commercial-entitlement.ts
@@ -228,6 +230,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/help-center.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
+- artifacts/api-server/src/lib/job-activation-commercial-baseline.behavior.ts
+- artifacts/api-server/src/lib/job-activation-commercial-baseline.ts
 - artifacts/api-server/src/lib/job-budget-governance.behavior.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
 - artifacts/api-server/src/lib/job-intake-migration.ts
@@ -479,7 +483,7 @@ It changes only when the code structure or curated architectural facts change.
   the included BIM-services sample is configurable, not a platform-hardcoded policy.
   Optional section guidance, automatic detail-line remainder/equal splits, and exact save-readiness
   explanations make the complete allocation actionable. Draft and saved plans can be exported as CSV
-  or printed/saved as PDF; saved plan versions remain immutable.
+  or generated through the governed Print PDF flow; saved plan versions remain immutable.
 - Smart Intake uses the existing project-scoped `job_intakes.data` draft as its only pre-activation
   authority. Preserved XLS/XLSX/XLSM/CSV sources expose bounded multi-sheet previews; the user must
   explicitly choose the sheet, header row, Contract Item Name column, and Quantity column. A
@@ -496,6 +500,15 @@ It changes only when the code structure or curated architectural facts change.
   the connected Contract Item and budget relationships idempotently. Source documents remain
   optional, ordered draft persistence remains intact, and no duplicate Intake, contract, APU,
   workflow, or budget authority is created.
+- Build 4 extends that same activation transaction with generated project-budget aggregates,
+  immutable Contract Item financial/APU baselines, project cost-node Budget Accounts, and
+  Project to Contract to Contract Item to Budget Account drill-down. The generated execution
+  baseline and content fingerprints are immutable; replay is idempotent and conflicting
+  baselines fail closed rather than creating a parallel financial authority.
+- Help, Job Intake, Job Operations, Cost & Value Planner, Team Performance, and Project Controls
+  use the shared governed Print PDF confirmation and authenticated PDF response. Current-view
+  filters are preserved where present; otherwise PDF-only section choices are explicit. The
+  completed PDF downloads directly, without blank tabs, browser print screens, or window.print.
 - Commercial Contract Items turn an approved budget line and saved APU version into an operational
   contract scope. Quantity multiplied by the frozen APU selling price calculates the contractual value;
   the immutable item snapshot preserves the APU content, evaluation, fingerprint, BIM Submittal display,
