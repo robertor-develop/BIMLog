@@ -9121,6 +9121,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5b10e9504bb22f7a37d00d30d5ff7d7cbab6d52d0e13b57273eb0a23f2bb590f"
+    },
+    {
+      "taskId": "bimlog-build3-release-version-living-brief-closure-20260811",
+      "reviewedThroughCommit": "69f1791fe623faed546ae1da7a0d8498b00ffbac",
+      "reviewedAt": "2026-08-11T22:07:00-04:00",
+      "status": "source_reconciled_publication_pending",
+      "captureTiming": "same_product_task",
+      "summary": "Reconciles the final Build 3 release-version assertion at exact GitHub commit 69f1791 without changing application behavior and preserves Replit publication, deployment, production verification, and customer acceptance as separate operator-controlled gates.",
+      "workstreams": [
+        "smart-intake",
+        "multi-contract-activation",
+        "release-version",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The test-only release-version alignment changes no canonical identity, record ownership, or permanent ecosystem law."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation, evidence, Git, Replit, publication, and operator-control boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The assertion now checks the already accepted release version and introduces no new quality rule or waived acceptance gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction does not add, remove, or reinterpret any approved product capability or future direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated topology is unchanged because the corrected behavior assertion changes no route, service, schema, UI structure, or runtime dependency."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, packaging, installation, synchronization, or field-acceptance state changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, DOCX, spreadsheet, export renderer, or governed report presentation rule changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, citation, certification, regulatory interpretation, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status now records exact GitHub commit alignment while keeping Replit, deployment, production, customer, and live acceptance pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop now separates the completed source-version correction from the remaining operator-controlled Replit and production gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production evidence, accepted historical audit finding, database result, or customer verification was added or altered."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "20a7917c93580166a4f616417c865d4af687ef3e50d6e44ddba836cb821f7cee"
     }
   ]
 }

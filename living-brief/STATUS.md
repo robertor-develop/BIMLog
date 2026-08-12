@@ -15,9 +15,13 @@
 - The Smart Intake spreadsheet mapping, 100-plus-row bulk editor, optional
   source documents, original provenance, and ordered draft persistence remain
   in the same English/Spanish guided workflow.
-- This is local candidate truth for web release `v1.60.28.03`. It is not yet
-  committed, pushed, published, deployed, production verified, customer
-  accepted, or live accepted.
+- This source candidate is tracked at commit
+  `69f1791fe623faed546ae1da7a0d8498b00ffbac`, and GitHub `main` and `master`
+  resolve to that exact commit. The final source correction aligns the Team
+  Resource Planning release-version assertion with `v1.60.28.03`; it changes
+  no application behavior. Replit pull, publication, deployment, production
+  verification, customer acceptance, and live acceptance remain pending and
+  separately authorized.
 
 ## Smart Intake and bulk Contract Item local candidate - 2026-08-11
 

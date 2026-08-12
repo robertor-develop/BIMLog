@@ -15,9 +15,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 3. Verify desktop and narrow-width English/Spanish behavior with optional
    documents, imported and pasted rows, contract assignment controls, missing
    contract validation, autosave recovery, and the final activation summary.
-4. Treat local source, test, typecheck, and build success as local evidence
-   only. Commit, push, publication, deployment, production/database
-   verification, and customer acceptance remain separate actions.
+4. GitHub `main` and `master` currently resolve to exact Build 3 source commit
+   `69f1791fe623faed546ae1da7a0d8498b00ffbac`, including the corrected
+   `v1.60.28.03` Team Resource Planning release-version assertion. Treat local
+   test, typecheck, and build success as source evidence only. Replit pull,
+   publication, deployment, production/database verification, and customer
+   acceptance remain separate, operator-controlled actions.
 
 ## Smart Intake and Contract Item editor release gates - 2026-08-11
 
