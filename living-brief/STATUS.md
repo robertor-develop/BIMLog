@@ -20,8 +20,10 @@
   filters remain in force while the exact target is located and highlighted.
 - The Document Connections surface and manual guidance are English/Spanish.
   Focused backend and UI behavior, frontend typecheck/build, diff, and mojibake
-  checks pass locally. This is `v1.60.32.05` local source-candidate evidence only;
-  commit, push, publication, deployment, production database verification,
+  checks pass locally. The implementation is committed locally at
+  `3d22c6a64e311575f1de9c8478d4ecebda9d26a3`; this remains
+  `v1.60.32.05` local source-candidate evidence only. Push, publication,
+  deployment, production database verification,
   customer acceptance, and live acceptance remain separately authorized.
 
 ## BIMLog v1.60.31.04 Build 4 local release candidate - 2026-08-12

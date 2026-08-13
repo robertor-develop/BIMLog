@@ -9283,8 +9283,8 @@
     },
     {
       "taskId": "bimlog-build5-v1.60.32.05-document-connections-living-brief-reconciliation-20260813",
-      "reviewedThroughCommit": "2cea97f985f3167c601dfd3df4c78813676f5680",
-      "reviewedAt": "2026-08-13T00:25:31-04:00",
+      "reviewedThroughCommit": "3d22c6a64e311575f1de9c8478d4ecebda9d26a3",
+      "reviewedAt": "2026-08-13T01:00:00-04:00",
       "status": "local_source_candidate_publication_pending",
       "captureTiming": "same_product_task",
       "summary": "Reconciles the Roberto-authorized v1.60.32.05 Build 5 Document Connections local candidate: typed task and work-package junctions to canonical same-project RFIs, exact file revisions, and transmittals; bounded metadata, current authority, stale-safe unlink, exact navigation, and bilingual UI/manual behavior are implemented while all external gates remain pending.",
@@ -9355,24 +9355,11 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/help-center.behavior.ts",
-        "artifacts/api-server/src/lib/job-intake-migration.ts",
-        "artifacts/api-server/src/lib/job-operations-service.ts",
-        "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
-        "artifacts/api-server/src/routes/job-operations.ts",
-        "artifacts/bimlog/src/components/layout/Navbar.tsx",
-        "artifacts/bimlog/src/lib/help-content.ts",
-        "artifacts/bimlog/src/pages/HelpCenter.tsx",
-        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
-        "artifacts/bimlog/src/pages/project/FilesTab.tsx",
-        "artifacts/bimlog/src/pages/project/TransmittalsTab.tsx",
-        "lib/db/src/schema/job-intakes.ts",
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "9a0f698ff42c185f98366131f04077e2b0f06ede010d1ce7db96c90062901755"
+      "reviewedChangeSha256": "b6075e8a6133a945e1933635e54239703f9c9fe9306a8595ff52949c93679e25"
     }
   ]
 }

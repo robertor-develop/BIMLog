@@ -23,9 +23,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
    substitute selection.
 5. Preserve the Build 4 `v1.60.31.04` history and all existing canonical RFI,
    file, transmittal, task, and work-package authorities. This `v1.60.32.05` local
-   candidate is not committed, pushed, published, deployed, production/database
-   verified, customer accepted, or live accepted; each remains separately
-   authorized.
+   candidate is locally committed at
+   `3d22c6a64e311575f1de9c8478d4ecebda9d26a3`, but is not pushed,
+   published, deployed, production/database verified, customer accepted, or
+   live accepted; each remains separately authorized.
 
 ## BIMLog v1.60.28.03 Smart Intake multi-contract activation gates - 2026-08-11
 
