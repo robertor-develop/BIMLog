@@ -1,5 +1,5 @@
-import { useState, useRef, useCallback, useEffect } from "react";
-import { useLocation, Link } from "wouter";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
+import { useLocation, useSearch, Link } from "wouter";
 import { Button } from "@/components/ui/button";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { useListFiles, useDeleteFile, useGetConvention } from "@workspace/api-client-react";
@@ -40,7 +40,7 @@ function getExtLabel(fileName: string): string {
   return (fileName.split(".").pop() || "FILE").toUpperCase().slice(0, 3);
 }
 
-interface FileRow {
+export interface FileRow {
   id: number;
   projectId: number;
   fileName: string;
@@ -72,6 +72,19 @@ interface FileRow {
 interface DocumentFamily {
   root: FileRow;
   versions: FileRow[];
+}
+
+export type ExactFileDeepLink =
+  | { kind: "none" }
+  | { kind: "invalid" }
+  | { kind: "valid"; id: number };
+
+export function parseExactFileDeepLink(search: string): ExactFileDeepLink {
+  const values = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search).getAll("file");
+  if (values.length === 0) return { kind: "none" };
+  if (values.length !== 1 || !/^[1-9]\d*$/.test(values[0])) return { kind: "invalid" };
+  const id = Number(values[0]);
+  return Number.isSafeInteger(id) ? { kind: "valid", id } : { kind: "invalid" };
 }
 
 type FileExportColumn = "name" | "type" | "status" | "declaration" | "uploader" | "date" | "versions";
@@ -107,6 +120,7 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const { t, lang } = useI18n();
   const tr = (en: string, es: string) => lang === "es" ? es : en;
   const [, setLocation] = useLocation();
+  const search = useSearch();
   const { data: files, isLoading, isError } = useListFiles(projectId);
   const { data: convention } = useGetConvention(projectId);
   const [showUpload] = useState(true);
@@ -219,6 +233,27 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
   const rejectedCount = files?.filter(f => f.status === "rejected").length ?? 0;
 
   const families = files ? buildFamilies(files) : [];
+  const exactFileDeepLink = useMemo(() => parseExactFileDeepLink(search), [search]);
+  const exactFileTarget = exactFileDeepLink.kind === "valid"
+    ? families.flatMap(family => family.versions.map(revision => ({ family, revision })))
+      .find(({ revision }) => revision.id === exactFileDeepLink.id) ?? null
+    : null;
+  const exactFileNotFound = exactFileDeepLink.kind === "valid" && !isLoading && !isError && !!files && !exactFileTarget;
+
+  useEffect(() => {
+    if (!exactFileTarget) return;
+    setExpanded(current => {
+      if (current.has(exactFileTarget.family.root.id)) return current;
+      const next = new Set(current);
+      next.add(exactFileTarget.family.root.id);
+      return next;
+    });
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(`file-revision-${exactFileTarget.revision.id}`)?.scrollIntoView({ block: "center" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [exactFileTarget?.family.root.id, exactFileTarget?.revision.id]);
+
   const versionedCount = families.filter(f => f.versions.length > 1).length;
   const fileTypes = Array.from(new Set(families.map(({ versions }) => (versions[versions.length - 1].fileName.split(".").pop() || "file").toLowerCase()))).sort();
   const uploaders = Array.from(new Set(families.map(({ versions }) => versions[versions.length - 1].uploadedByName || "").filter(Boolean))).sort();
@@ -237,6 +272,9 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
       && (from === null || latestDate >= from)
       && (to === null || latestDate <= to);
   });
+  const visibleFamilies = exactFileTarget && !filteredFamilies.some(({ root }) => root.id === exactFileTarget.family.root.id)
+    ? [exactFileTarget.family, ...filteredFamilies]
+    : filteredFamilies;
 
   const toggleExportColumn = (column: FileExportColumn) => {
     setExportColumns((current) => {
@@ -427,9 +465,25 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
         </div>
       )}
 
+      {exactFileDeepLink.kind === "invalid" && (
+        <div role="alert" style={{ marginBottom: 12, padding: 12, border: "1px solid #FECACA", background: "#FEF2F2", borderRadius: 8, color: "#991B1B", fontSize: 13 }}>
+          {tr("The file link is invalid. No revision was selected.", "El enlace del archivo no es válido. No se seleccionó ninguna revisión.")}
+        </div>
+      )}
+      {exactFileNotFound && exactFileDeepLink.kind === "valid" && (
+        <div role="alert" style={{ marginBottom: 12, padding: 12, border: "1px solid #FECACA", background: "#FEF2F2", borderRadius: 8, color: "#991B1B", fontSize: 13 }}>
+          {tr(`File revision #${exactFileDeepLink.id} was not found in this project. No other revision was selected.`, `La revisión de archivo #${exactFileDeepLink.id} no se encontró en este proyecto. No se seleccionó ninguna otra revisión.`)}
+        </div>
+      )}
+      {exactFileTarget && (
+        <div role="status" style={{ marginBottom: 12, padding: 12, border: "1px solid #93C5FD", background: "#EFF6FF", borderRadius: 8, color: "#1E3A5F", fontSize: 13 }}>
+          {tr(`Opened exact file revision #${exactFileTarget.revision.id}: ${exactFileTarget.revision.fileName} (V${exactFileTarget.revision.version}).`, `Se abrió la revisión de archivo exacta #${exactFileTarget.revision.id}: ${exactFileTarget.revision.fileName} (V${exactFileTarget.revision.version}).`)}
+        </div>
+      )}
+
       {/* Document families table */}
       {!isLoading && !isError && (
-        filteredFamilies.length > 0 ? (
+        visibleFamilies.length > 0 ? (
           <div className="table-card">
             <table className="data-table">
               <thead>
@@ -444,21 +498,27 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                 </tr>
               </thead>
               <tbody>
-                {filteredFamilies.map(({ root, versions }) => {
+                {visibleFamilies.map(({ root, versions }) => {
                   const latest = versions[versions.length - 1];
                   const isMulti = versions.length > 1;
                   const isExp = expanded.has(root.id);
                   const isRejected = latest.status === "rejected";
                   const isRejExp = expandedRejected.has(root.id);
+                  const isExactSingleRevision = !isMulti && exactFileTarget?.revision.id === root.id;
 
                   return (
                     <>
                       {/* ── Primary document row ── */}
                       <tr
+                        id={isExactSingleRevision ? `file-revision-${root.id}` : undefined}
                         key={`root-${root.id}`}
+                        data-deep-link-target={isExactSingleRevision ? "true" : undefined}
+                        aria-current={isExactSingleRevision ? "true" : undefined}
                         style={{
                           cursor: (isMulti || isRejected) ? "pointer" : "default",
-                          background: isExp ? "hsl(var(--secondary) / 0.4)" : isRejExp ? "#FFF1F2" : undefined,
+                          background: isExactSingleRevision ? "#DBEAFE" : isExp ? "hsl(var(--secondary) / 0.4)" : isRejExp ? "#FFF1F2" : undefined,
+                          outline: isExactSingleRevision ? "2px solid #2563EB" : undefined,
+                          outlineOffset: isExactSingleRevision ? -2 : undefined,
                         }}
                         onClick={() => {
                           if (isRejected) toggleRejected(root.id);
@@ -871,7 +931,16 @@ export function FilesTab({ projectId, canWrite = true }: { projectId: number; ca
                         const isOriginal = idx === 0;
                         const isLatestVer = idx === versions.length - 1;
                         return (
-                          <tr key={`ver-${ver.id}`} style={{ background: "hsl(var(--secondary) / 0.25)" }}>
+                          <tr
+                            id={`file-revision-${ver.id}`}
+                            key={`ver-${ver.id}`}
+                            data-deep-link-target={exactFileTarget?.revision.id === ver.id ? "true" : undefined}
+                            style={{
+                              background: exactFileTarget?.revision.id === ver.id ? "#DBEAFE" : "hsl(var(--secondary) / 0.25)",
+                              outline: exactFileTarget?.revision.id === ver.id ? "2px solid #2563EB" : undefined,
+                              outlineOffset: exactFileTarget?.revision.id === ver.id ? -2 : undefined,
+                            }}
+                          >
                             <td></td>
                             <td colSpan={1}>
                               <div style={{ display: "flex", alignItems: "center", gap: 8, paddingLeft: 24 }}>

@@ -187,6 +187,25 @@ CREATE TABLE IF NOT EXISTS job_activation_work_package_tasks(
   linked_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT job_activation_work_package_task_uidx UNIQUE(package_id,task_id)
 );
+CREATE TABLE IF NOT EXISTS job_activation_document_connections(
+  id text PRIMARY KEY,
+  project_id integer NOT NULL,
+  target_type text NOT NULL,
+  target_id text NOT NULL,
+  entity_type text NOT NULL,
+  entity_id integer NOT NULL,
+  note text NOT NULL DEFAULT '',
+  linked_by_id integer NOT NULL,
+  linked_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_document_connections_project_id_fkey FOREIGN KEY(project_id) REFERENCES projects(id),
+  CONSTRAINT job_activation_document_connections_linked_by_id_fkey FOREIGN KEY(linked_by_id) REFERENCES users(id),
+  CONSTRAINT job_activation_document_connection_id_chk CHECK(id ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'),
+  CONSTRAINT job_activation_document_connection_target_type_chk CHECK(target_type IN('task','work_package')),
+  CONSTRAINT job_activation_document_connection_entity_type_chk CHECK(entity_type IN('rfi','file_revision','transmittal')),
+  CONSTRAINT job_activation_document_connection_target_id_chk CHECK(octet_length(target_id) BETWEEN 8 AND 64),
+  CONSTRAINT job_activation_document_connection_entity_id_chk CHECK(entity_id>0),
+  CONSTRAINT job_activation_document_connection_note_chk CHECK(octet_length(note)<=500)
+);
 CREATE TABLE IF NOT EXISTS job_activation_budget_baselines(
   id text PRIMARY KEY,
   intake_id text NOT NULL REFERENCES job_intakes(id),
@@ -302,6 +321,8 @@ CREATE INDEX IF NOT EXISTS job_activation_deliverable_task_idx ON job_activation
 CREATE INDEX IF NOT EXISTS job_activation_work_package_project_idx ON job_activation_work_packages(project_id,status,due_date,updated_at DESC);
 CREATE INDEX IF NOT EXISTS job_activation_work_package_item_idx ON job_activation_work_packages(work_item_id,created_at,id);
 CREATE INDEX IF NOT EXISTS job_activation_work_package_task_idx ON job_activation_work_package_tasks(task_id,package_id);
+CREATE UNIQUE INDEX IF NOT EXISTS job_activation_document_connection_target_entity_uidx ON job_activation_document_connections(project_id,target_type,target_id,entity_type,entity_id);
+CREATE INDEX IF NOT EXISTS job_activation_document_connection_project_target_idx ON job_activation_document_connections(project_id,target_type,target_id,linked_at);
 CREATE INDEX IF NOT EXISTS job_activation_budget_baseline_project_idx ON job_activation_budget_baselines(project_id,version DESC);
 CREATE INDEX IF NOT EXISTS job_activation_budget_baseline_fingerprint_idx ON job_activation_budget_baselines(project_id,content_fingerprint);
 CREATE INDEX IF NOT EXISTS job_activation_budget_variance_project_idx ON job_activation_budget_variance_reviews(project_id,status,created_at DESC);

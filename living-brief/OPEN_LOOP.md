@@ -2,6 +2,31 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## BIMLog v1.60.32.05 Build 5 Document Connections release gates - 2026-08-13
+
+1. Exercise typed task and work-package connections to same-project RFIs, exact
+   file revisions, and transmittals in an isolated database, including invalid
+   types and IDs, cross-project refusal, duplicate/idempotent requests,
+   concurrent changes, target reassignment, and canonical-source deletion.
+2. Verify current-authority recalculation and stale-safe unlink: a former
+   controller must not retain authority, a current authorized controller must
+   be able to remove the junction, and an unavailable canonical source must not
+   expose a dead anchor or mutate the source record or its history.
+3. Verify bounded option and connection-list behavior at, below, and above each
+   limit. Confirm truthful `total`, `limited`, and `max` disclosure, malformed
+   present-metadata failure, stable ordering, and no implication that a capped
+   result is complete.
+4. Exercise desktop and exact-390 English/Spanish populated, empty, loading,
+   failure, denied, capped, and unavailable states. Confirm exact RFI,
+   file-revision, and transmittal navigation after data load, preserved filters,
+   exact highlighting/opening, and visible invalid/not-found behavior with no
+   substitute selection.
+5. Preserve the Build 4 `v1.60.31.04` history and all existing canonical RFI,
+   file, transmittal, task, and work-package authorities. This `v1.60.32.05` local
+   candidate is not committed, pushed, published, deployed, production/database
+   verified, customer accepted, or live accepted; each remains separately
+   authorized.
+
 ## BIMLog v1.60.28.03 Smart Intake multi-contract activation gates - 2026-08-11
 
 1. Verify one through 50 contract profiles, independent APU or pricing

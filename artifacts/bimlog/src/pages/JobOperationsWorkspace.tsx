@@ -1,6 +1,6 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Link, useRoute } from "wouter";
-import { AlertTriangle, BriefcaseBusiness, CalendarClock, ClipboardCheck, Clock3, FileCheck2, PackagePlus, RefreshCw, Save, Trash2, UserRoundCheck } from "lucide-react";
+import { AlertTriangle, BriefcaseBusiness, CalendarClock, ClipboardCheck, Clock3, ExternalLink, FileCheck2, Link2, PackagePlus, RefreshCw, Save, Trash2, UserRoundCheck } from "lucide-react";
 import { FinancialProjectShell } from "@/components/layout/FinancialProjectShell";
 import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { useAuthStore } from "@/store/auth";
@@ -8,14 +8,188 @@ import { useI18n } from "@/lib/i18n";
 import { BudgetGovernancePanel } from "@/components/job-operations/BudgetGovernancePanel";
 import { ProjectControlsDashboard } from "@/components/job-operations/ProjectControlsDashboard";
 
-const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+const API_BASE = ((import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env?.VITE_API_URL) ?? "";
 const css = `
-.jo{max-width:1240px;margin:0 auto;padding:24px 0 80px}.jo *{box-sizing:border-box}.jo-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.jo-head-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.jo h1{font-size:30px;margin:4px 0}.jo h2{font-size:20px;margin:0}.jo h3{font-size:16px;margin:0}.jo p{color:#536174}.jo button,.jo select,.jo input,.jo textarea{border:1px solid #cbd5e1;border-radius:8px;padding:9px;background:#fff;color:#0f172a}.jo button{cursor:pointer}.jo button.primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff;font-weight:700}.jo button.danger{color:#b42318}.jo button:disabled{opacity:.5;cursor:not-allowed}.jo-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:18px}.jo-stat,.jo-card{background:#fff;border:1px solid #d9e1ec;border-radius:14px}.jo-stat{padding:14px}.jo-stat strong{display:block;font-size:22px}.jo-stat span{font-size:12px;color:#64748b}.jo-card{padding:18px;margin-bottom:16px}.jo-item-head{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:12px}.jo-chip{display:inline-flex;padding:3px 8px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:800;margin-right:5px}.jo-chip.warn{background:#fff7ed;color:#c2410c}.jo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.jo-task{border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-top:12px}.jo-task-head{display:flex;justify-content:space-between;gap:10px}.jo label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#475569}.jo-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.jo-progress{height:8px;background:#e8edf5;border-radius:99px;overflow:hidden;margin-top:8px}.jo-progress span{display:block;height:100%;background:#2563eb}.jo-sub{margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0}.jo-sub h4{margin:0 0 8px}.jo-table{width:100%;border-collapse:collapse;font-size:13px}.jo-table th,.jo-table td{text-align:left;padding:8px;border-bottom:1px solid #e2e8f0}.jo-empty,.jo-error,.jo-ok{padding:16px;border-radius:12px;margin-bottom:14px}.jo-empty{background:#eff6ff}.jo-error{background:#fff1f2;color:#9f1239}.jo-ok{background:#ecfdf5;color:#166534}.jo-muted{font-size:12px;color:#64748b}.jo-financial{background:#f0fdf4}.jo-forms{display:grid;grid-template-columns:1fr 1fr;gap:12px}.jo-form{border:1px solid #dbe4f0;border-radius:12px;padding:12px}.jo-form .jo-grid{grid-template-columns:2fr 1fr 1fr}.jo-file{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #e2e8f0}.jo textarea{min-height:40px;resize:vertical}.jo input[type=range]{padding:0}.jo-refresh{display:flex;align-items:center;gap:6px}.jo-package-create{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:12px;margin:10px 0}.jo-package-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:10px}.jo-package{border:1px solid #cbd5e1;border-radius:12px;padding:12px;background:#fff}.jo-package.overdue{border-color:#f97316;background:#fff7ed}.jo-package-head{display:flex;justify-content:space-between;gap:10px}.jo-package-meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;font-size:12px;color:#64748b}.jo-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px;margin:8px 0}.jo-check{display:flex!important;grid-template-columns:none!important;align-items:center;gap:7px!important;font-weight:500!important}.jo-check input{padding:0}.jo-package-edit{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:8px;align-items:end;margin-top:9px}@media(max-width:900px){.jo-grid,.jo-form .jo-grid{grid-template-columns:1fr 1fr}.jo-forms{grid-template-columns:1fr}.jo-head,.jo-item-head{display:block}.jo-table{display:block;overflow:auto}.jo-package-edit{grid-template-columns:1fr 1fr}}@media(max-width:560px){.jo-grid,.jo-form .jo-grid,.jo-package-edit{grid-template-columns:1fr}}
+.jo{max-width:1240px;margin:0 auto;padding:24px 0 80px}.jo *{box-sizing:border-box}.jo-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.jo-head-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.jo h1{font-size:30px;margin:4px 0}.jo h2{font-size:20px;margin:0}.jo h3{font-size:16px;margin:0}.jo p{color:#536174}.jo button,.jo select,.jo input,.jo textarea{border:1px solid #cbd5e1;border-radius:8px;padding:9px;background:#fff;color:#0f172a}.jo button{cursor:pointer}.jo button.primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff;font-weight:700}.jo button.danger{color:#b42318}.jo button:disabled{opacity:.5;cursor:not-allowed}.jo-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:18px}.jo-stat,.jo-card{background:#fff;border:1px solid #d9e1ec;border-radius:14px}.jo-stat{padding:14px}.jo-stat strong{display:block;font-size:22px}.jo-stat span{font-size:12px;color:#64748b}.jo-card{padding:18px;margin-bottom:16px}.jo-item-head{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:12px}.jo-chip{display:inline-flex;padding:3px 8px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:800;margin-right:5px}.jo-chip.warn{background:#fff7ed;color:#c2410c}.jo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.jo-task{border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-top:12px}.jo-task-head{display:flex;justify-content:space-between;gap:10px}.jo label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#475569}.jo-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.jo-progress{height:8px;background:#e8edf5;border-radius:99px;overflow:hidden;margin-top:8px}.jo-progress span{display:block;height:100%;background:#2563eb}.jo-sub{margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0}.jo-sub h4{margin:0 0 8px}.jo-table{width:100%;border-collapse:collapse;font-size:13px}.jo-table th,.jo-table td{text-align:left;padding:8px;border-bottom:1px solid #e2e8f0}.jo-empty,.jo-error,.jo-ok{padding:16px;border-radius:12px;margin-bottom:14px}.jo-empty{background:#eff6ff}.jo-error{background:#fff1f2;color:#9f1239}.jo-ok{background:#ecfdf5;color:#166534}.jo-muted{font-size:12px;color:#64748b}.jo-financial{background:#f0fdf4}.jo-forms{display:grid;grid-template-columns:1fr 1fr;gap:12px}.jo-form{border:1px solid #dbe4f0;border-radius:12px;padding:12px}.jo-form .jo-grid{grid-template-columns:2fr 1fr 1fr}.jo-file{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #e2e8f0}.jo textarea{min-height:40px;resize:vertical}.jo input[type=range]{padding:0}.jo-refresh{display:flex;align-items:center;gap:6px}.jo-package-create{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:12px;margin:10px 0}.jo-package-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:10px}.jo-package{border:1px solid #cbd5e1;border-radius:12px;padding:12px;background:#fff}.jo-package.overdue{border-color:#f97316;background:#fff7ed}.jo-package-head{display:flex;justify-content:space-between;gap:10px}.jo-package-meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;font-size:12px;color:#64748b}.jo-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px;margin:8px 0}.jo-check{display:flex!important;grid-template-columns:none!important;align-items:center;gap:7px!important;font-weight:500!important}.jo-check input{padding:0}.jo-package-edit{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:8px;align-items:end;margin-top:9px}.jo-connections{border-color:#bfdbfe;background:#f8fbff}.jo-connections-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.jo-connection-form{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px;align-items:end;padding:14px;border:1px solid #bfdbfe;border-radius:12px;background:#fff;margin:14px 0}.jo-connection-form .jo-note{grid-column:1/-1}.jo-connection-form .jo-actions{grid-column:1/-1;margin-top:0}.jo-connection-list{display:grid;gap:10px}.jo-connection{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:13px;border:1px solid #dbe4f0;border-radius:12px;background:#fff;min-width:0}.jo-connection-main{min-width:0}.jo-connection-title{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.jo-connection-title strong,.jo-connection p{overflow-wrap:anywhere}.jo-connection-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px;font-size:12px;color:#64748b}.jo-connection-actions{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}.jo-inline-confirm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;grid-column:1/-1;padding-top:10px;border-top:1px solid #e2e8f0}.jo-inline-confirm p{margin:0;flex:1 1 240px}.jo-permission{padding:12px;border:1px solid #fde68a;background:#fffbeb;border-radius:10px;color:#854d0e}.jo-loading{display:flex;align-items:center;gap:8px;color:#475569}@media(max-width:900px){.jo-grid,.jo-form .jo-grid{grid-template-columns:1fr 1fr}.jo-forms{grid-template-columns:1fr}.jo-head,.jo-item-head,.jo-connections-head{display:block}.jo-table{display:block;overflow:auto}.jo-package-edit{grid-template-columns:1fr 1fr}.jo-connection-form{grid-template-columns:1fr 1fr}.jo-connection-form .jo-note{grid-column:1/-1}}@media(max-width:560px){.jo-grid,.jo-form .jo-grid,.jo-package-edit,.jo-connection-form,.jo-connection{grid-template-columns:1fr}.jo-connection-form .jo-note,.jo-connection-form .jo-actions{grid-column:1}.jo-connection-actions{justify-content:flex-start}.jo-connections{padding:14px}.jo select,.jo input,.jo textarea,.jo button{max-width:100%}}
+.jo-limit{grid-column:1/-1;padding:10px;border:1px solid #fde68a;background:#fffbeb;border-radius:8px;color:#854d0e;font-size:12px}@media(max-width:390px){.jo-connections{padding:12px;border-radius:10px}.jo-connection-meta{display:grid;grid-template-columns:1fr}.jo-connection-actions{display:grid;grid-template-columns:1fr;align-items:stretch}.jo-connection-actions a,.jo-connection-actions button{width:100%}}
 `;
 
 const n = (value: unknown) => Number(value ?? 0);
 const money = (value: unknown) => n(value).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const today = () => new Date().toISOString().slice(0, 10);
+
+type Translate = (english: string, spanish: string) => string;
+type DocumentEntityType = "rfi" | "file_revision" | "transmittal";
+type DocumentTargetType = "task" | "work_package";
+type DocumentConnectionOption = { id: number; displayCode: string; title: string; status: string | null; version: number | null; deepLink: string; parentFileId?: number | null };
+type DocumentConnectionEntity = DocumentConnectionOption & { available: boolean; stale: boolean };
+type DocumentConnectionOptions = { rfis: DocumentConnectionOption[]; fileRevisions: DocumentConnectionOption[]; transmittals: DocumentConnectionOption[] };
+type DocumentConnectionOptionMetaItem = { total: number; limited: boolean; max: number };
+type DocumentConnectionOptionMeta = { rfis: DocumentConnectionOptionMetaItem; fileRevisions: DocumentConnectionOptionMetaItem; transmittals: DocumentConnectionOptionMetaItem };
+type DocumentConnectionMeta = { total: number; limited: boolean; max: number };
+type DocumentConnection = {
+  id: string; projectId: number; targetType: DocumentTargetType; targetId: string; entityType: DocumentEntityType; entityId: number; note: string;
+  linkedById: number; linkedAt: string; canRemove: boolean; entity: DocumentConnectionEntity;
+};
+type ApiCall = (path: string, init?: RequestInit) => Promise<any>;
+
+class RequestError extends Error {
+  constructor(message: string, readonly status: number, readonly code?: string) { super(message); }
+}
+
+const isOption = (value: unknown, needsParentFileId = false): value is DocumentConnectionOption => {
+  if (!value || typeof value !== "object") return false;
+  const option = value as Record<string, unknown>;
+  const base = Number.isInteger(option.id) && typeof option.displayCode === "string" && typeof option.title === "string" &&
+    (option.status === null || typeof option.status === "string") && (option.version === null || Number.isInteger(option.version)) && typeof option.deepLink === "string";
+  return base && (!needsParentFileId || option.parentFileId === null || Number.isInteger(option.parentFileId));
+};
+
+const parseDocumentConnectionOptions = (value: unknown): DocumentConnectionOptions | null => {
+  if (!value || typeof value !== "object") return null;
+  const options = value as Record<string, unknown>;
+  if (!Array.isArray(options.rfis) || !Array.isArray(options.fileRevisions) || !Array.isArray(options.transmittals)) return null;
+  if (!options.rfis.every((item) => isOption(item)) || !options.fileRevisions.every((item) => isOption(item, true)) || !options.transmittals.every((item) => isOption(item))) return null;
+  return { rfis: options.rfis, fileRevisions: options.fileRevisions, transmittals: options.transmittals };
+};
+
+const parseDocumentConnectionOptionMeta = (value: unknown): DocumentConnectionOptionMeta | null => {
+  if (!value || typeof value !== "object") return null;
+  const meta = value as Record<string, unknown>;
+  const valid = (item: unknown): item is DocumentConnectionOptionMetaItem => {
+    if (!item || typeof item !== "object") return false;
+    const entry = item as Record<string, unknown>;
+    return Number.isInteger(entry.total) && Number(entry.total) >= 0 && typeof entry.limited === "boolean" && Number.isInteger(entry.max) && Number(entry.max) > 0;
+  };
+  if (!valid(meta.rfis) || !valid(meta.fileRevisions) || !valid(meta.transmittals)) return null;
+  return { rfis: meta.rfis, fileRevisions: meta.fileRevisions, transmittals: meta.transmittals };
+};
+
+const parseDocumentConnectionMeta = (value: unknown): DocumentConnectionMeta | null => {
+  if (!value || typeof value !== "object") return null;
+  const meta = value as Record<string, unknown>;
+  return Number.isInteger(meta.total) && Number(meta.total) >= 0 && typeof meta.limited === "boolean" && Number.isInteger(meta.max) && Number(meta.max) > 0
+    ? { total: Number(meta.total), limited: meta.limited, max: Number(meta.max) }
+    : null;
+};
+
+const isConnectionEntity = (value: unknown): value is DocumentConnectionEntity => {
+  if (!isOption(value)) return false;
+  const entity = value as DocumentConnectionEntity;
+  return typeof entity.available === "boolean" && typeof entity.stale === "boolean";
+};
+
+const isConnection = (value: unknown): value is DocumentConnection => {
+  if (!value || typeof value !== "object") return false;
+  const item = value as Record<string, unknown>;
+  return typeof item.id === "string" && Number.isInteger(item.projectId) && (item.targetType === "task" || item.targetType === "work_package") &&
+    typeof item.targetId === "string" && (item.entityType === "rfi" || item.entityType === "file_revision" || item.entityType === "transmittal") &&
+    Number.isInteger(item.entityId) && typeof item.note === "string" && Number.isInteger(item.linkedById) &&
+    typeof item.linkedAt === "string" && typeof item.canRemove === "boolean" && isConnectionEntity(item.entity);
+};
+
+export function DocumentConnectionsPanel({ data, projectId, language, tt, api, reload, busy }: { data: any; projectId: number; language: string; tt: Translate; api: ApiCall; reload: () => Promise<void>; busy: boolean }) {
+  const [targetType, setTargetType] = useState<DocumentTargetType>("task");
+  const [targetId, setTargetId] = useState("");
+  const [targetQuery, setTargetQuery] = useState("");
+  const [entityType, setEntityType] = useState<DocumentEntityType>("rfi");
+  const [entityId, setEntityId] = useState("");
+  const [entityQuery, setEntityQuery] = useState("");
+  const [note, setNote] = useState("");
+  const [connectionBusy, setConnectionBusy] = useState(false);
+  const [connectionError, setConnectionError] = useState("");
+  const [connectionNotice, setConnectionNotice] = useState("");
+  const [confirmRemoveId, setConfirmRemoveId] = useState<string | null>(null);
+  const options = parseDocumentConnectionOptions(data?.documentConnectionOptions);
+  const metaPresent = data?.documentConnectionOptionMeta !== undefined;
+  const optionMeta = metaPresent ? parseDocumentConnectionOptionMeta(data.documentConnectionOptionMeta) : null;
+  const connectionMetaPresent = data?.documentConnectionMeta !== undefined;
+  const connectionMeta = connectionMetaPresent ? parseDocumentConnectionMeta(data.documentConnectionMeta) : null;
+  const rawConnections = data?.documentConnections;
+  const connectionsValid = Array.isArray(rawConnections) && rawConnections.every(isConnection);
+  const connections: DocumentConnection[] = connectionsValid ? rawConnections : [];
+  const tasks = Array.isArray(data?.tasks) ? data.tasks : [];
+  const packages = Array.isArray(data?.packages) ? data.packages : [];
+  const targetItems = targetType === "task" ? tasks : packages;
+  const canControl = (item: any) => item?.canControl === true || data?.canManage === true;
+  const controllableTargets = targetItems.filter(canControl);
+  const entityOptions = !options ? [] : entityType === "rfi" ? options.rfis : entityType === "file_revision" ? options.fileRevisions : options.transmittals;
+  const selectedMeta = !optionMeta ? null : entityType === "rfi" ? optionMeta.rfis : entityType === "file_revision" ? optionMeta.fileRevisions : optionMeta.transmittals;
+  const contains = (value: unknown, query: string) => String(value ?? "").toLocaleLowerCase(language === "es" ? "es" : "en").includes(query.trim().toLocaleLowerCase(language === "es" ? "es" : "en"));
+  const filteredTargets = controllableTargets.filter((item: any) => targetType === "task"
+    ? contains(language === "es" ? item.nameEs : item.nameEn, targetQuery)
+    : contains(`${item.packageCode} ${item.title}`, targetQuery));
+  const filteredEntityOptions = entityOptions.filter((item) => contains(`${item.displayCode} ${item.title} ${item.status ?? ""} ${item.version ?? ""}`, entityQuery));
+  const allOptionsEmpty = !!options && options.rfis.length === 0 && options.fileRevisions.length === 0 && options.transmittals.length === 0;
+  const anyControllableTarget = tasks.some(canControl) || packages.some(canControl);
+  const typeLabel = (value: DocumentEntityType) => ({ rfi: "RFI", file_revision: tt("File revision", "Revisión de archivo"), transmittal: tt("Transmittal", "Transmittal") })[value];
+  const canOpenCanonicalRecord = (entity: DocumentConnectionEntity) => entity.available && !entity.stale && entity.deepLink.trim().length > 0;
+  const targetTypeLabel = (value: DocumentTargetType) => value === "task" ? tt("Task", "Tarea") : tt("Work package", "Paquete de trabajo");
+  const targetLabel = (connection: DocumentConnection) => {
+    if (connection.targetType === "task") {
+      const task = tasks.find((item: any) => item.id === connection.targetId);
+      return task ? (language === "es" ? task.nameEs : task.nameEn) : `${tt("Unavailable task", "Tarea no disponible")} (${connection.targetId})`;
+    }
+    const item = packages.find((candidate: any) => candidate.id === connection.targetId);
+    return item ? `${item.packageCode} · ${item.title}` : `${tt("Unavailable package", "Paquete no disponible")} (${connection.targetId})`;
+  };
+  const selectedAlreadyLinked = connections.some((item) => item.targetType === targetType && item.targetId === targetId && item.entityType === entityType && item.entityId === Number(entityId));
+
+  useEffect(() => { setTargetId(""); setTargetQuery(""); }, [targetType]);
+  useEffect(() => { setEntityId(""); setEntityQuery(""); }, [entityType]);
+
+  if (!options || !connectionsValid || (metaPresent && !optionMeta) || (connectionMetaPresent && !connectionMeta)) return <section className="jo-card jo-connections" aria-labelledby="document-connections-title"><div className="jo-connections-head"><div><h2 id="document-connections-title"><Link2 size={18}/> {tt("Document connections", "Conexiones de documentos")}</h2><p>{tt("Connect operational work to canonical project records without copying them.", "Conecte el trabajo operativo con registros canónicos del proyecto sin copiarlos.")}</p></div></div><div className="jo-error" role="alert"><AlertTriangle size={16}/> {tt("Document connections could not load because the server response is incomplete. Refresh the workspace.", "Las conexiones de documentos no pudieron cargarse porque la respuesta del servidor está incompleta. Actualice el espacio.")}</div><button type="button" disabled={busy} onClick={() => void reload()}><RefreshCw size={14}/> {tt("Reload connections", "Recargar conexiones")}</button></section>;
+
+  const runAction = async (action: () => Promise<any>, success: string, idempotent?: string) => {
+    setConnectionBusy(true); setConnectionError(""); setConnectionNotice("");
+    try {
+      const result = await action();
+      setConnectionNotice(result?.idempotent === true && idempotent ? idempotent : success);
+      setConfirmRemoveId(null);
+      await reload();
+    } catch (cause) {
+      const request = cause instanceof RequestError ? cause : null;
+      if (request?.status === 404 || request?.status === 409 || request?.code?.includes("STALE")) setConnectionError(tt("This connection changed in another session. Reload before trying again.", "Esta conexión cambió en otra sesión. Recargue antes de volver a intentar."));
+      else if (request?.status === 401 || request?.status === 403) setConnectionError(tt("Your current permission does not allow this document connection change.", "Su permiso actual no permite cambiar esta conexión de documento."));
+      else setConnectionError(cause instanceof Error ? cause.message : String(cause));
+    } finally { setConnectionBusy(false); }
+  };
+
+  const submit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!targetId || !entityId) return;
+    void runAction(() => api(`/projects/${projectId}/operations/document-connections`, {
+      method: "POST", headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ connectionId: crypto.randomUUID(), targetType, targetId, entityType, entityId: Number(entityId), note: note.trim() }),
+    }), tt("Document linked to operational work.", "Documento vinculado al trabajo operativo."), tt("This document was already linked; the existing connection was kept.", "Este documento ya estaba vinculado; se conservó la conexión existente."));
+  };
+
+  return <section className="jo-card jo-connections" aria-labelledby="document-connections-title">
+    <div className="jo-connections-head"><div><h2 id="document-connections-title"><Link2 size={18}/> {tt("Document connections", "Conexiones de documentos")}</h2><p>{tt("Link a task or work package to a same-project RFI, file revision, or transmittal. The original document remains authoritative.", "Vincule una tarea o paquete con un RFI, revisión de archivo o transmittal del mismo proyecto. El documento original sigue siendo el registro autorizado.")}</p></div><span className="jo-chip">{connections.length} {tt("linked", "vinculadas")}</span></div>
+    {connectionError && <div className="jo-error" role="alert"><AlertTriangle size={16}/> {connectionError} <button type="button" disabled={connectionBusy || busy} onClick={() => void reload()}><RefreshCw size={14}/> {tt("Reload", "Recargar")}</button></div>}
+    {connectionNotice && <div className="jo-ok" role="status">{connectionNotice}</div>}
+    {(connectionBusy || busy) && <div className="jo-loading" role="status"><RefreshCw size={15}/> {tt("Updating document connections…", "Actualizando conexiones de documentos…")}</div>}
+    {connectionMeta?.limited && <div className="jo-limit" role="status"><AlertTriangle size={14}/> {tt(`Showing ${connections.length} of ${connectionMeta.total} document connections. The server limits this list to ${connectionMeta.max}.`, `Se muestran ${connections.length} de ${connectionMeta.total} conexiones de documentos. El servidor limita esta lista a ${connectionMeta.max}.`)}</div>}
+    {!anyControllableTarget && <div className="jo-permission"><strong>{tt("View-only access", "Acceso de solo lectura")}</strong><div>{tt("You can review connections, but your current permission cannot change the available tasks or work packages.", "Puede revisar las conexiones, pero su permiso actual no permite cambiar las tareas o paquetes disponibles.")}</div></div>}
+    {anyControllableTarget && allOptionsEmpty && <div className="jo-empty"><FileCheck2 size={19}/><strong>{tt("No canonical documents are available to link", "No hay documentos canónicos disponibles para vincular")}</strong><div>{tt("Create or receive an RFI, file revision, or transmittal in this project, then refresh Job Operations.", "Cree o reciba un RFI, revisión de archivo o transmittal en este proyecto y luego actualice Operaciones.")}</div></div>}
+    {anyControllableTarget && !allOptionsEmpty && <form className="jo-connection-form" onSubmit={submit}>
+      <label>{tt("Operational target", "Destino operativo")}<select value={targetType} onChange={(event) => setTargetType(event.target.value as DocumentTargetType)}><option value="task">{tt("Task", "Tarea")}</option><option value="work_package">{tt("Work package", "Paquete de trabajo")}</option></select></label>
+      <label>{tt("Search operational targets", "Buscar destinos operativos")}<input type="search" value={targetQuery} onChange={(event) => setTargetQuery(event.target.value)} placeholder={tt("Search task or package", "Buscar tarea o paquete")}/></label>
+      <label>{targetTypeLabel(targetType)}<select required value={targetId} onChange={(event) => setTargetId(event.target.value)}><option value="">{filteredTargets.length ? tt("Choose a target", "Seleccione un destino") : tt("No matching targets", "No hay destinos coincidentes")}</option>{filteredTargets.map((item: any) => <option key={item.id} value={item.id}>{targetType === "task" ? (language === "es" ? item.nameEs : item.nameEn) : `${item.packageCode} · ${item.title}`}</option>)}</select></label>
+      <label>{tt("Document type", "Tipo de documento")}<select value={entityType} onChange={(event) => setEntityType(event.target.value as DocumentEntityType)}><option value="rfi">RFI</option><option value="file_revision">{tt("File revision", "Revisión de archivo")}</option><option value="transmittal">{tt("Transmittal", "Transmittal")}</option></select></label>
+      <label>{tt("Search canonical documents", "Buscar documentos canónicos")}<input type="search" value={entityQuery} onChange={(event) => setEntityQuery(event.target.value)} placeholder={tt("Search code, title, status, or version", "Buscar código, título, estado o versión")}/></label>
+      <label>{typeLabel(entityType)}<select required value={entityId} onChange={(event) => setEntityId(event.target.value)}><option value="">{filteredEntityOptions.length ? tt("Choose a canonical record", "Seleccione un registro canónico") : tt("No matching records", "No hay registros coincidentes")}</option>{filteredEntityOptions.map((item) => <option key={item.id} value={item.id}>{item.displayCode} · {item.title}{item.status ? ` · ${item.status}` : ""}{item.version !== null ? ` · v${item.version}` : ""}</option>)}</select></label>
+      {selectedMeta?.limited && <div className="jo-limit" role="status"><AlertTriangle size={14}/> {tt(`Showing ${entityOptions.length} of ${selectedMeta.total} available records. The server limits this list to ${selectedMeta.max}; search applies only to the loaded records.`, `Se muestran ${entityOptions.length} de ${selectedMeta.total} registros disponibles. El servidor limita esta lista a ${selectedMeta.max}; la búsqueda se aplica solamente a los registros cargados.`)}</div>}
+      <label className="jo-note">{tt("Connection note", "Nota de la conexión")}<textarea value={note} onChange={(event) => setNote(event.target.value)} maxLength={500} placeholder={tt("Optional context for this relationship", "Contexto opcional para esta relación")}/></label>
+      <div className="jo-actions"><button className="primary" disabled={connectionBusy || busy || !targetId || !entityId}><Link2 size={15}/> {selectedAlreadyLinked ? tt("Keep existing link", "Conservar vínculo existente") : tt("Link document", "Vincular documento")}</button>{selectedAlreadyLinked && <span className="jo-muted">{tt("This exact relationship already exists; submitting keeps the same connection.", "Esta relación exacta ya existe; al enviar se conserva la misma conexión.")}</span>}</div>
+    </form>}
+    {connections.length === 0 ? <div className="jo-empty">{tt("No document connections yet.", "Todavía no hay conexiones de documentos.")}</div> : <div className="jo-connection-list">{connections.map((connection) => <article className="jo-connection" key={connection.id}>
+      <div className="jo-connection-main"><div className="jo-connection-title"><span className="jo-chip">{typeLabel(connection.entityType)}</span><strong>{connection.entity.displayCode} · {connection.entity.title}</strong></div><div className="jo-connection-meta"><span>{targetTypeLabel(connection.targetType)}: {targetLabel(connection)}</span><span>{tt("Status", "Estado")}: {connection.entity.status || tt("Not stated", "No indicado")}</span>{connection.entity.version !== null && <span>{tt("Version", "Versión")}: {connection.entity.version}</span>}<span>{tt("Linked", "Vinculado")}: {new Date(connection.linkedAt).toLocaleString(language === "es" ? "es" : "en")}</span></div>{connection.note && <p>{connection.note}</p>}</div>
+      <div className="jo-connection-actions">{canOpenCanonicalRecord(connection.entity) ? <a href={connection.entity.deepLink}><ExternalLink size={14}/> {tt("Open canonical record", "Abrir registro canónico")}</a> : <span className="jo-muted" role="status"><AlertTriangle size={14}/> {tt("Canonical record unavailable", "Registro canónico no disponible")}</span>}{connection.canRemove ? <button type="button" className="danger" aria-label={tt(`Remove ${connection.entity.displayCode} connection`, `Eliminar conexión ${connection.entity.displayCode}`)} disabled={connectionBusy || busy} onClick={() => setConfirmRemoveId(connection.id)}><Trash2 size={14}/> {tt("Remove link", "Eliminar vínculo")}</button> : <span className="jo-muted">{tt("View only", "Solo lectura")}</span>}</div>
+      {confirmRemoveId === connection.id && <div className="jo-inline-confirm" role="alert"><p><strong>{tt("Remove this connection?", "¿Eliminar esta conexión?")}</strong> {tt("The canonical document will not be deleted or changed.", "El documento canónico no se eliminará ni cambiará.")}</p><button type="button" onClick={() => setConfirmRemoveId(null)}>{tt("Cancel", "Cancelar")}</button><button type="button" className="danger" disabled={connectionBusy || busy} onClick={() => void runAction(() => api(`/projects/${projectId}/operations/document-connections/${connection.id}`, { method: "DELETE" }), tt("Document connection removed. The canonical record was not changed.", "Conexión eliminada. El registro canónico no cambió."))}>{tt("Remove connection", "Eliminar conexión")}</button></div>}
+    </article>)}</div>}
+  </section>;
+}
 
 export function JobOperationsWorkspace() {
   const { token } = useAuthStore();
@@ -34,7 +208,7 @@ export function JobOperationsWorkspace() {
   const api = useCallback(async (path: string, init?: RequestInit) => {
     const response = await fetch(`${API_BASE}/api/v1${path}`, { ...init, headers: { ...headers, ...(init?.headers ?? {}) } });
     const payload = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error((language === "es" ? payload?.error?.es : payload?.error?.en) || payload?.error?.en || tt("The request failed.", "La solicitud falló."));
+    if (!response.ok) throw new RequestError((language === "es" ? payload?.error?.es : payload?.error?.en) || payload?.error?.en || tt("The request failed.", "La solicitud falló."), response.status, payload?.code || payload?.error?.code);
     return payload;
   }, [headers, language, tt]);
   const load = useCallback(async () => {
@@ -115,7 +289,7 @@ export function JobOperationsWorkspace() {
     finally { setExportingPdf(false); }
   };
 
-  if (!data) return <FinancialProjectShell projectId={projectId} activeTab="operations"><style>{css}</style><main className="jo"><p>{busy ? tt("Loading job operations…", "Cargando operaciones del trabajo…") : error}</p></main></FinancialProjectShell>;
+  if (!data) return <FinancialProjectShell projectId={projectId} activeTab="operations"><style>{css}</style><main className="jo">{busy ? <p className="jo-loading" role="status"><RefreshCw size={15}/>{tt("Loading job operations…", "Cargando operaciones del trabajo…")}</p> : <div className="jo-error" role="alert"><AlertTriangle size={16}/>{error || tt("Job Operations is unavailable.", "Operaciones no está disponible.")}<div className="jo-actions"><button type="button" onClick={() => void load()}><RefreshCw size={14}/>{tt("Try again", "Intentar de nuevo")}</button></div></div>}</main></FinancialProjectShell>;
   const total = data.totals ?? {};
   const remaining = Math.max(0, n(total.plannedHours) - n(total.actualHours));
   const progress = data.tasks?.length ? Math.round(data.tasks.reduce((sum: number, task: any) => sum + n(task.progressPercent), 0) / data.tasks.length) : 0;
@@ -125,6 +299,7 @@ export function JobOperationsWorkspace() {
     {!data.available && <div className="jo-empty"><BriefcaseBusiness size={22}/><h2>{tt("Activate Job Intake first", "Primero active el Ingreso del Trabajo")}</h2><p>{tt("Job Operations begins with the work items, tasks, and assignments created by an activated Intake.", "Operaciones del Trabajo comienza con las partidas, tareas y asignaciones creadas por un Ingreso activado.")}</p><Link href={`/projects/${projectId}/intake`}>{tt("Open Job Intake & Setup", "Abrir Ingreso y Configuración del Trabajo")}</Link></div>}
     {data.available && <>
       <section className="jo-summary"><div className="jo-stat"><strong>{money(total.plannedHours)}h</strong><span>{tt("Planned hours", "Horas planificadas")}</span></div><div className="jo-stat"><strong>{money(total.actualHours)}h</strong><span>{tt("Actual hours", "Horas reales")}</span></div><div className="jo-stat"><strong>{money(remaining)}h</strong><span>{tt("Remaining", "Restantes")}</span></div><div className="jo-stat"><strong>{progress}%</strong><span>{tt("Task progress", "Progreso de tareas")}</span></div><div className="jo-stat"><strong>{data.packageSummary?.total ?? 0}</strong><span>{tt("Work packages", "Paquetes de trabajo")}</span></div><div className="jo-stat"><strong>{data.packageSummary?.overdue ?? 0}</strong><span>{tt("Overdue packages", "Paquetes vencidos")}</span></div><div className="jo-stat"><strong>{data.packageSummary?.blocked ?? 0}</strong><span>{tt("Packages with blockers", "Paquetes con bloqueos")}</span></div><div className="jo-stat"><strong>{data.packageSummary?.approved ?? 0}</strong><span>{tt("Approved packages", "Paquetes aprobados")}</span></div>{data.capabilities?.budget && <><div className="jo-stat jo-financial"><strong>{money(total.plannedInternalCost)}</strong><span>{tt("Planned internal cost", "Costo interno planificado")}</span></div><div className="jo-stat jo-financial"><strong>{money(total.actualInternalCost)}</strong><span>{tt("Actual internal cost", "Costo interno real")}</span></div></>}{data.capabilities?.cost_value_planner && <><div className="jo-stat jo-financial"><strong>{money(total.plannedBillableValue)}</strong><span>{tt("Planned billable value", "Valor facturable planificado")}</span></div><div className="jo-stat jo-financial"><strong>{money(total.earnedBillableValue)}</strong><span>{tt("Earned billable value", "Valor facturable ganado")}</span></div></>}</section>
+      <DocumentConnectionsPanel data={data} projectId={projectId} language={language} tt={tt} api={api} reload={load} busy={busy}/>
       <ProjectControlsDashboard controls={data.projectControls} members={data.members ?? []} packages={data.packages ?? []} projectId={projectId} token={token}/>
       <BudgetGovernancePanel projectId={projectId} governance={data.budgetGovernance} canManage={data.canManage} busy={busy} mutate={mutate}/>
       {data.workItems.map((item: any) => <section className="jo-card" key={item.id}><div className="jo-item-head"><div><h2>{item.name}</h2><p>{item.description || tt("Activated scope item", "Partida de alcance activada")}</p></div><div><span className="jo-chip">{money(item.plannedHours)}h</span>{data.capabilities?.cost_value_planner && <span className="jo-chip">{money(item.plannedBillableValue)}</span>}</div></div>

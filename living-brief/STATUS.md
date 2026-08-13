@@ -1,5 +1,29 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.60.32.05 Build 5 Document Connections local candidate - 2026-08-13
+
+- Job Operations now persists typed connections from canonical tasks or work
+  packages to canonical same-project RFIs, exact file revisions, and
+  transmittals. A connection is only a junction: it neither copies nor replaces
+  the source record and creates no competing document authority.
+- Selectors and the persisted connection list are bounded and expose separate
+  `total`, `limited`, and `max` metadata. The UI discloses capped results and
+  fails visibly if present metadata is malformed instead of presenting an
+  apparently complete list.
+- Link and unlink authority is evaluated against the current target controller.
+  If a canonical source later becomes unavailable, the stale connection remains
+  visible and removable to an authorized controller, but it exposes no dead
+  anchor or deep link.
+- Canonical RFI, file-revision, and transmittal links navigate to the exact
+  positive-integer record after destination data loads. Invalid or missing
+  targets fail visibly without selecting a substitute, and existing destination
+  filters remain in force while the exact target is located and highlighted.
+- The Document Connections surface and manual guidance are English/Spanish.
+  Focused backend and UI behavior, frontend typecheck/build, diff, and mojibake
+  checks pass locally. This is `v1.60.32.05` local source-candidate evidence only;
+  commit, push, publication, deployment, production database verification,
+  customer acceptance, and live acceptance remain separately authorized.
+
 ## BIMLog v1.60.31.04 Build 4 local release candidate - 2026-08-12
 
 - Build 4 completes active contract and budget activation on the canonical

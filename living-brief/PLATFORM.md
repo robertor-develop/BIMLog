@@ -233,6 +233,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.behavior.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.ts
 - artifacts/api-server/src/lib/job-budget-governance.behavior.ts
+- artifacts/api-server/src/lib/job-document-connections.behavior.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
 - artifacts/api-server/src/lib/job-intake-migration.ts
 - artifacts/api-server/src/lib/job-intake-service.ts
@@ -369,6 +370,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/FinancialControlsSettings.tsx
 - artifacts/bimlog/src/pages/HelpCenter.tsx
 - artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx
+- artifacts/bimlog/src/pages/JobOperationsDocumentConnections.behavior.tsx
 - artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx
 - artifacts/bimlog/src/pages/Landing.tsx
 - artifacts/bimlog/src/pages/LivingBrief.tsx
