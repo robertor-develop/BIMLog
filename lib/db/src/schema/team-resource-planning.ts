@@ -8,7 +8,6 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
@@ -80,7 +79,7 @@ export const teamStaffingApplicationEventsTable = pgTable(
     occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    unique("team_staffing_application_events_event_key_key").on(table.eventKey),
+    uniqueIndex("team_staffing_application_events_event_key_key").on(table.eventKey),
     index("team_staffing_application_project_time_idx").on(table.projectId, table.occurredAt.desc().nullsFirst()),
     foreignKey({ name: "team_staffing_application_events_scenario_version_id_fkey", columns: [table.scenarioVersionId], foreignColumns: [teamStaffingScenarioVersionsTable.id] }),
     foreignKey({ name: "team_staffing_application_events_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),

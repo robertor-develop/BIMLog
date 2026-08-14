@@ -9360,6 +9360,96 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b6075e8a6133a945e1933635e54239703f9c9fe9306a8595ff52949c93679e25"
+    },
+    {
+      "taskId": "bimlog-build6-v1.60.33.06-team-capacity-reconciliation-20260814",
+      "reviewedThroughCommit": "ac3d2b8b57f02080c6cbb7935312dd051ef12fed",
+      "reviewedAt": "2026-08-14T17:25:05-04:00",
+      "status": "local_source_candidate_external_acceptance_pending",
+      "captureTiming": "same_product_task",
+      "summary": "Reconciles the authorized Build 6 Team Capacity local candidate: explicit employee-owned availability and leave, authorized cross-project workload, verified operational experience, immutable staffing scenarios, and reviewed direct-task reassignment are implemented without inferred scoring, invented capacity, rate exposure, financial overwrite, or destructive schema behavior.",
+      "workstreams": [
+        "build6",
+        "team-performance",
+        "resource-planning",
+        "capacity",
+        "assignment",
+        "verified-experience",
+        "release-version",
+        "user-manual",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical employee, project, task, assignment, financial, and evidence authorities remain distinct; scenarios reference them and do not create competing records."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source, evidence, database, Git, Replit, publication, deployment, and human-approval boundaries fully govern this candidate."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-visible, bilingual, responsive, traceability, controlled-automation, and real-behavior acceptance rules cover this implementation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This candidate implements the already approved Team Performance capacity and assignment roadmap without expanding product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic platform generator was rerun and produced no canonical structural delta: Team Resource Planning service, migration, behavior, and schema sources were already inventoried, while the new co-located production-component harness does not change runtime topology."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, installation, synchronization, or field state changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing governed current-view PDF control is reused; no report renderer or presentation authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, regulatory interpretation, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records v1.60.33.06 as a locally tested Build 6 candidate and separates all external acceptance states."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop records isolated database, real browser/artifact, independent review, Git, Replit, publication, production, customer, and live gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical evidence remains unchanged because no production, database, customer, publication, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/team-resource-planning-migration.ts",
+        "artifacts/api-server/src/lib/team-resource-planning-service.ts",
+        "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.behavior.tsx",
+        "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.tsx",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "lib/db/src/schema/team-resource-planning.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "718e4fbf99adac42cfc2d87b2498b2dc624296aab0d479ca06438f7863e055ce"
     }
   ]
 }

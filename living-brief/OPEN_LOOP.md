@@ -2,6 +2,25 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## BIMLog v1.60.33.06 Build 6 Team Capacity release gates - 2026-08-14
+
+1. Complete the governed full production build and independently inspect the exact candidate diff,
+   including the generated platform inventory and Living Brief state.
+2. Exercise authenticated API persistence against an isolated authorized database: profile and
+   scenario version conflicts, project/company isolation, role and entitlement denial, rate
+   redaction, concurrent save/apply, stale basis refusal, divergent event replay, transaction
+   rollback, and zero partial reassignment. No database was accessed by this source task.
+3. Exercise the actual production UI on desktop and exact-390px English/Spanish for populated,
+   missing-profile, empty-task, priced-assignment, loading, denied, malformed-response, stale,
+   conflict, and successful apply states. Confirm save/reload persistence, CSV inspection, governed
+   Print PDF, no horizontal overflow, no failed requests or console exceptions, and no hidden rates.
+4. Preserve Build 5 `v1.60.32.05` and all canonical Job Intake, Job Operations, task, resource-rate,
+   package, deliverable, membership, entitlement, and company-binding authorities. Build 6 may
+   change only reviewed direct task assignees; scenario hours and financial values remain advisory.
+5. After local gates and independent acceptance, create one clean candidate commit. Push, Replit
+   alignment and complete non-destructive preview, authorized publish/deploy, deployed-commit and
+   production verification, customer acceptance, and live acceptance remain separate approvals.
+
 ## BIMLog v1.60.32.05 Build 5 Document Connections release gates - 2026-08-13
 
 1. Exercise typed task and work-package connections to same-project RFIs, exact

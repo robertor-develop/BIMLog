@@ -1,5 +1,24 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.60.33.06 Build 6 Team Capacity local candidate - 2026-08-14
+
+- Team Performance now uses employee-owned, append-only availability, working-day, and leave
+  profiles; missing profiles remain visibly unknown and no default capacity is invented.
+- Project leaders can compare authorized cross-project commitments and verified Job Operations
+  role, workflow, scope, package, and deliverable evidence without inferred skill scores or
+  automatic personnel ranking. Financial rates remain server-redacted unless the viewer has both
+  managerial and required Commercial financial authority, and this surface cannot edit rates.
+- Immutable what-if staffing scenarios bind current profile, workload, evidence, task, and direct
+  assignment versions. Applying a reviewed scenario is transactional, project-scoped, idempotent,
+  stale-safe, reasoned, and limited to eligible direct task assignees. Existing priced resource
+  assignments stay under Job Operations authority; advisory hours, costs, values, and rates are
+  never written to live work.
+- Focused backend and production-component SSR behavior, broader Team Performance regression,
+  API/frontend typechecks, diff, secret, database-source-safety, and mojibake gates pass locally.
+  The candidate version is `v1.60.33.06`. Full build completion, clean commit, independent review,
+  push, Replit availability/build, publication, deployment, production database verification,
+  customer acceptance, and live acceptance remain separate pending states.
+
 ## BIMLog v1.60.32.05 Build 5 Document Connections local candidate - 2026-08-13
 
 - Job Operations now persists typed connections from canonical tasks or work
