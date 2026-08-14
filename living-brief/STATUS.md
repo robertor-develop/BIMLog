@@ -15,9 +15,12 @@
   never written to live work.
 - Focused backend and production-component SSR behavior, broader Team Performance regression,
   API/frontend typechecks, diff, secret, database-source-safety, and mojibake gates pass locally.
-  The candidate version is `v1.60.33.06`. Full build completion, clean commit, independent review,
-  push, Replit availability/build, publication, deployment, production database verification,
-  customer acceptance, and live acceptance remain separate pending states.
+  Persisted scenario evaluations now redact nested person and aggregate financial values for
+  viewers without rate authority, all four mutation routes have bounded per-actor/project rate
+  limits, and Navbar and Help Center identify the same `v1.60.33.06` candidate. Full build and
+  clean-commit completion remain local gates; independent review, push, Replit availability/build,
+  publication, deployment, production database verification, customer acceptance, and live
+  acceptance remain separate pending states.
 
 ## BIMLog v1.60.32.05 Build 5 Document Connections local candidate - 2026-08-13
 

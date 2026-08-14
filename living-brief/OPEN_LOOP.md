@@ -4,11 +4,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity release gates - 2026-08-14
 
-1. Complete the governed full production build and independently inspect the exact candidate diff,
-   including the generated platform inventory and Living Brief state.
+1. Complete the governed full production build and independently inspect the corrected exact
+   candidate diff, including the generated platform inventory and Living Brief state.
 2. Exercise authenticated API persistence against an isolated authorized database: profile and
    scenario version conflicts, project/company isolation, role and entitlement denial, rate
-   redaction, concurrent save/apply, stale basis refusal, divergent event replay, transaction
+   redaction (including persisted scenario financials), mutation-rate-limit behavior across the
+   deployed process topology, concurrent save/apply, stale basis refusal, divergent event replay, transaction
    rollback, and zero partial reassignment. No database was accessed by this source task.
 3. Exercise the actual production UI on desktop and exact-390px English/Spanish for populated,
    missing-profile, empty-task, priced-assignment, loading, denied, malformed-response, stale,

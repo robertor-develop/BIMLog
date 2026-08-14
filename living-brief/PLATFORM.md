@@ -144,6 +144,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/middlewares/auth.ts
 - artifacts/api-server/src/middlewares/config-validator.ts
 - artifacts/api-server/src/middlewares/multipart.ts
+- artifacts/api-server/src/middlewares/team-resource-planning-rate-limit.ts
 
 ## Backend libs (artifacts/api-server/src/lib)
 - artifacts/api-server/src/lib/ai-control-plane-migration.ts

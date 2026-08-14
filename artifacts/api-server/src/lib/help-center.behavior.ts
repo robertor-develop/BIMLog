@@ -15,8 +15,8 @@ const styles = read("../../../../artifacts/bimlog/src/index.css");
 const app = read("../../../../artifacts/bimlog/src/App.tsx");
 const legacy = read("../../../../artifacts/bimlog/src/pages/SetupGuide.tsx");
 
-assert.match(navbar, /BIMLOG_RELEASE_VERSION = "v1\.60\.32\.05"/, "Navbar must expose the authorized Build 5 release");
-assert.match(page, /HELP_RELEASE_VERSION = "v1\.60\.32\.05"/, "Help Center must expose the authorized Build 5 release");
+assert.match(navbar, /BIMLOG_RELEASE_VERSION = "v1\.60\.33\.06"/, "Navbar must expose the authorized Build 6 release");
+assert.match(page, /HELP_RELEASE_VERSION = "v1\.60\.33\.06"/, "Help Center must expose the authorized Build 6 release");
 assert.match(content, /v1\.60\.32\.05: Build 5 Document Connections/);
 assert.match(content, /v1\.60\.32\.05: Build 5 Conexiones de documentos/);
 assert.match(content, /v1\.60\.31\.04: Build 4 Contract and Budget Activation/, "Build 4 release history must remain visible");
@@ -59,4 +59,4 @@ assert.match(app, /path="\/help"/);
 assert.match(app, /ProtectedRoute component=\{HelpCenter\}/);
 assert.match(legacy, /HelpCenter as SetupGuide/, "legacy setup-guide source must not retain a second documentation catalog");
 
-console.log(JSON.stringify({ status: "PASS", tests: ["authorized-build5-version", "preserved-build4-history", "canonical-source", "released-feature-coverage", "bilingual-manual", "entry-points", "prerequisites", "control-reference", "state-lifecycles", "validation-rules", "audit-history", "boundaries", "workspace-handoffs", "quick-guides", "troubleshooting", "release-information", "contextual-guide", "manual-not-duplicated-in-info", "collapsed-navigation-recovery", "persistent-day-night-mode", "accent-insensitive-search", "responsive-layout", "printable-operating-reference", "protected-route", "legacy-convergence"] }));
+console.log(JSON.stringify({ status: "PASS", tests: ["authorized-build6-version", "preserved-build4-history", "canonical-source", "released-feature-coverage", "bilingual-manual", "entry-points", "prerequisites", "control-reference", "state-lifecycles", "validation-rules", "audit-history", "boundaries", "workspace-handoffs", "quick-guides", "troubleshooting", "release-information", "contextual-guide", "manual-not-duplicated-in-info", "collapsed-navigation-recovery", "persistent-day-night-mode", "accent-insensitive-search", "responsive-layout", "printable-operating-reference", "protected-route", "legacy-convergence"] }));

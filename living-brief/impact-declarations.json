@@ -9450,6 +9450,93 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "718e4fbf99adac42cfc2d87b2498b2dc624296aab0d479ca06438f7863e055ce"
+    },
+    {
+      "taskId": "bimlog-build6-v1.60.33.06-security-correction-20260814",
+      "reviewedThroughCommit": "0beb1af24d51bb029c8b25460cdd03fd05a7fa0b",
+      "reviewedAt": "2026-08-14T18:43:06-04:00",
+      "status": "local_source_candidate_external_acceptance_pending",
+      "captureTiming": "same_product_task",
+      "summary": "Corrects the Build 6 local candidate by redacting persisted scenario financial values for unauthorized viewers, rate-limiting each mutation route, and aligning all visible and tested release-version markers.",
+      "workstreams": [
+        "build6",
+        "team-performance",
+        "resource-planning",
+        "security",
+        "rate-limiting",
+        "release-version",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves canonical employee, project, task, assignment, financial, and evidence authorities without creating competing records."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source, evidence, database, Git, Replit, publication, deployment, and approval boundaries continue to govern the corrected candidate."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Executable regression coverage now proves persisted financial redaction, bounded mutation attempts, and consistent release identification under existing quality rules."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction closes security and release-consistency defects without changing the approved Team Capacity product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The API runtime adds a co-located resource-planning mutation-rate-limit middleware and wires it into all four mutation routes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, package, installation, synchronization, or field state changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report renderer, export layout, PDF behavior, or presentation authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, regulatory interpretation, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records persisted financial redaction, bounded mutation routes, and consistent v1.60.33.06 release labeling."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop retains isolated database and deployed-topology verification for redaction and rate limiting alongside remaining release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical evidence remains unchanged because no database, production, customer, publication, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/api-server/src/lib/team-resource-planning-service.ts",
+        "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
+        "artifacts/api-server/src/middlewares/team-resource-planning-rate-limit.ts",
+        "artifacts/api-server/src/routes/team-performance.ts",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e8bff160165f54a32c0836a21375a84af911c16be206591506caf123ac53fa06"
     }
   ]
 }
