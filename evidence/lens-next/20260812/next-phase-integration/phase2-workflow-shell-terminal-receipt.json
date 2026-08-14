@@ -1,0 +1,316 @@
+{
+  "schemaVersion": "bimlog-lens-next-phase2-workflow-shell-terminal-v1",
+  "generatedAtUtc": "2026-08-14T21:20:39.922Z",
+  "status": "PASS_PHASE2_COHESIVE_WEB_SHELL_ZERO_IO_MUTATION",
+  "worktree": {
+    "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
+    "branch": "codex/bimlog-lens-next-20260812",
+    "head": "4e2d4da72493c9cb497e067c2e73e727e031ede4"
+  },
+  "scope": "final strict web-only cohesive shell acceptance under temporary adapter freeze",
+  "inputs": [
+    {
+      "role": "phase2-workflow-shell",
+      "path": "artifacts/bimlog/src/features/lens-next/LensNextPhase2WorkflowShell.tsx",
+      "bytes": 7778,
+      "sha256": "D5DDA7BDAD54B624BE721A8DDC338743D95538D3CB4E059698C3BCB356B076B3"
+    },
+    {
+      "role": "phase2-workflow-shell-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-workflow-shell.behavior.tsx",
+      "bytes": 9025,
+      "sha256": "41D7DC30761D1756EAB9364A33D7FA1E8BA0647526890C876CEB506C2C2F405A"
+    }
+  ],
+  "inputManifestSha256": "2D6C753CD3473D79F6853B9A4B43929548B64CC738359C8A37BB4EAB50C8EB81",
+  "acceptedPriorReceipts": [
+    {
+      "role": "workflow",
+      "path": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
+      "bytes": 11098,
+      "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+    },
+    {
+      "role": "timeline-queue-models",
+      "path": "evidence/lens-next/20260812/next-phase-integration/timeline-offline-queue-terminal-receipt.json",
+      "bytes": 7733,
+      "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554"
+    },
+    {
+      "role": "timeline-queue-views",
+      "path": "evidence/lens-next/20260812/next-phase-integration/presentational-views-terminal-receipt.json",
+      "bytes": 6712,
+      "sha256": "3F33DBE9F82D6944EB1E21F695F8AE80115D502FBE4D69C610216B92A0B82074"
+    },
+    {
+      "role": "action-draft-view",
+      "path": "evidence/lens-next/20260812/next-phase-integration/action-draft-view-terminal-receipt.json",
+      "bytes": 9878,
+      "sha256": "64178A994F16310CB8BAAF9E3592E2341499A10DD7D4EF38EDD22A7AFFCB7D20"
+    },
+    {
+      "role": "conflict-review-view",
+      "path": "evidence/lens-next/20260812/next-phase-integration/conflict-review-view-terminal-receipt.json",
+      "bytes": 6593,
+      "sha256": "BD3D1D1693A4916054DDCDD8388E1DA27B50D53FF714A5A22C3321C7766BE998"
+    },
+    {
+      "role": "connection-telemetry-view",
+      "path": "evidence/lens-next/20260812/next-phase-integration/connection-telemetry-view-terminal-receipt.json",
+      "bytes": 5659,
+      "sha256": "8977BB5243EE9041595823BBAC83F02795A6993167236C55EB045123D21CA805"
+    },
+    {
+      "role": "phase2-api-executor",
+      "path": "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
+      "bytes": 10641,
+      "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+    }
+  ],
+  "totals": {
+    "assertions": 19,
+    "passed": 19,
+    "failed": 0
+  },
+  "failedAssertionIds": [],
+  "checks": [
+    {
+      "id": "input.phase2-workflow-shell.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/src/features/lens-next/LensNextPhase2WorkflowShell.tsx",
+        "expected": {
+          "bytes": 7778,
+          "sha256": "D5DDA7BDAD54B624BE721A8DDC338743D95538D3CB4E059698C3BCB356B076B3"
+        },
+        "actual": {
+          "bytes": 7778,
+          "sha256": "D5DDA7BDAD54B624BE721A8DDC338743D95538D3CB4E059698C3BCB356B076B3"
+        }
+      }
+    },
+    {
+      "id": "input.phase2-workflow-shell-behavior.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-workflow-shell.behavior.tsx",
+        "expected": {
+          "bytes": 9025,
+          "sha256": "41D7DC30761D1756EAB9364A33D7FA1E8BA0647526890C876CEB506C2C2F405A"
+        },
+        "actual": {
+          "bytes": 9025,
+          "sha256": "41D7DC30761D1756EAB9364A33D7FA1E8BA0647526890C876CEB506C2C2F405A"
+        }
+      }
+    },
+    {
+      "id": "source.six-sections-two-locales",
+      "passed": true,
+      "detail": "The shell binds six sections and two locales through a presentation-only section callback."
+    },
+    {
+      "id": "source.bounds",
+      "passed": true,
+      "detail": "The cohesive shell advertises and freezes queue/activity limits of 100/500."
+    },
+    {
+      "id": "source.default-deny",
+      "passed": true,
+      "detail": "The shell denies tokens, network, storage, writes, conflict resolution, and visual mutation."
+    },
+    {
+      "id": "source.no-io-or-mutation-adapter",
+      "passed": true,
+      "detail": "No token, network, storage, persistence, or mutation adapter exists in the shell."
+    },
+    {
+      "id": "source.behavior-coverage",
+      "passed": true,
+      "detail": "The executable shell proof covers every bound view state family."
+    },
+    {
+      "id": "proof.phase2-workflow-shell-ssr",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "sections": 6,
+        "locales": 2,
+        "renders": 47,
+        "telemetryStates": 6,
+        "workflowStates": 6,
+        "draftStates": 6,
+        "activityStates": 6,
+        "queueStates": 6,
+        "conflictStates": 5,
+        "maximumQueuedDrafts": 100,
+        "maximumActivityEvents": 500,
+        "networkBehavior": false,
+        "storageBehavior": false,
+        "writeBehavior": false,
+        "visualMutationAllowed": false
+      }
+    },
+    {
+      "id": "proof.strict-typescript",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.prettier",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "stdout": "Checking formatting...\nAll matched files use Prettier code style!"
+      }
+    },
+    {
+      "id": "proof.diff",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "stdout": ""
+      }
+    },
+    {
+      "id": "prior.workflow.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
+        "expected": {
+          "bytes": 11098,
+          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+        },
+        "actual": {
+          "bytes": 11098,
+          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+        },
+        "status": "PASS_WEB_WORKFLOW_CONTRACTS_NO_MUTATION_AUTHORITY"
+      }
+    },
+    {
+      "id": "prior.timeline-queue-models.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/timeline-offline-queue-terminal-receipt.json",
+        "expected": {
+          "bytes": 7733,
+          "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554"
+        },
+        "actual": {
+          "bytes": 7733,
+          "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554"
+        },
+        "status": "PASS_PURE_TIMELINE_OFFLINE_QUEUE_NO_MUTATION_AUTHORITY"
+      }
+    },
+    {
+      "id": "prior.timeline-queue-views.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/presentational-views-terminal-receipt.json",
+        "expected": {
+          "bytes": 6712,
+          "sha256": "3F33DBE9F82D6944EB1E21F695F8AE80115D502FBE4D69C610216B92A0B82074"
+        },
+        "actual": {
+          "bytes": 6712,
+          "sha256": "3F33DBE9F82D6944EB1E21F695F8AE80115D502FBE4D69C610216B92A0B82074"
+        },
+        "status": "PASS_PRESENTATIONAL_VIEWS_ZERO_DISPATCH_IO"
+      }
+    },
+    {
+      "id": "prior.action-draft-view.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/action-draft-view-terminal-receipt.json",
+        "expected": {
+          "bytes": 9878,
+          "sha256": "64178A994F16310CB8BAAF9E3592E2341499A10DD7D4EF38EDD22A7AFFCB7D20"
+        },
+        "actual": {
+          "bytes": 9878,
+          "sha256": "64178A994F16310CB8BAAF9E3592E2341499A10DD7D4EF38EDD22A7AFFCB7D20"
+        },
+        "status": "PASS_ACTION_DRAFT_VIEW_DRAFT_ONLY_ZERO_AUTHORITY_IO"
+      }
+    },
+    {
+      "id": "prior.conflict-review-view.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/conflict-review-view-terminal-receipt.json",
+        "expected": {
+          "bytes": 6593,
+          "sha256": "BD3D1D1693A4916054DDCDD8388E1DA27B50D53FF714A5A22C3321C7766BE998"
+        },
+        "actual": {
+          "bytes": 6593,
+          "sha256": "BD3D1D1693A4916054DDCDD8388E1DA27B50D53FF714A5A22C3321C7766BE998"
+        },
+        "status": "PASS_CONFLICT_REVIEW_MANUAL_ONLY_ZERO_IO_MUTATION"
+      }
+    },
+    {
+      "id": "prior.connection-telemetry-view.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/connection-telemetry-view-terminal-receipt.json",
+        "expected": {
+          "bytes": 5659,
+          "sha256": "8977BB5243EE9041595823BBAC83F02795A6993167236C55EB045123D21CA805"
+        },
+        "actual": {
+          "bytes": 5659,
+          "sha256": "8977BB5243EE9041595823BBAC83F02795A6993167236C55EB045123D21CA805"
+        },
+        "status": "PASS_CONNECTION_TELEMETRY_PRESENTATIONAL_ZERO_IO_MUTATION"
+      }
+    },
+    {
+      "id": "prior.phase2-api-executor.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
+        "expected": {
+          "bytes": 10641,
+          "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+        },
+        "actual": {
+          "bytes": 10641,
+          "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+        },
+        "status": "PASS_SANDBOX_EXECUTOR_ACCEPTANCE_NO_PRODUCTION_AUTHORITY"
+      }
+    },
+    {
+      "id": "proof.mojibake",
+      "passed": true,
+      "detail": "No mojibake sentinel occurs in an assigned or owned source file."
+    }
+  ],
+  "disposition": {
+    "phase2CohesiveWebShellAccepted": true,
+    "sections": 6,
+    "locales": 2,
+    "renders": 47,
+    "maximumQueuedDrafts": 100,
+    "maximumActivityEvents": 500,
+    "networkAllowed": false,
+    "storageAllowed": false,
+    "writeAllowed": false,
+    "automaticConflictResolutionAllowed": false,
+    "visualMutationAllowed": false
+  },
+  "safety": {
+    "pluginNativeBridgeSavedViewpointPathsReadOrTested": false,
+    "implementationFilesWrittenByVerifier": false,
+    "databaseIo": false,
+    "networkIo": false,
+    "gitMutation": false,
+    "externalAction": false
+  }
+}

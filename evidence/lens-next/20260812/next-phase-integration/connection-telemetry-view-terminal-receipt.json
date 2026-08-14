@@ -1,0 +1,175 @@
+{
+  "schemaVersion": "bimlog-lens-next-connection-telemetry-view-terminal-v1",
+  "generatedAtUtc": "2026-08-14T21:20:09.614Z",
+  "status": "PASS_CONNECTION_TELEMETRY_PRESENTATIONAL_ZERO_IO_MUTATION",
+  "worktree": {
+    "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
+    "branch": "codex/bimlog-lens-next-20260812",
+    "head": "4e2d4da72493c9cb497e067c2e73e727e031ede4"
+  },
+  "scope": "strict web-only acceptance under temporary adapter freeze",
+  "inputs": [
+    {
+      "role": "connection-telemetry-view",
+      "path": "artifacts/bimlog/src/features/lens-next/LensNextConnectionTelemetryView.tsx",
+      "bytes": 9184,
+      "sha256": "B0B1893CECAB59942058B36FB07E6E9ABA66BE824EF8FD54A86F06EC30177A15"
+    },
+    {
+      "role": "connection-telemetry-view-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-connection-telemetry-view.behavior.tsx",
+      "bytes": 3747,
+      "sha256": "63F28A428C7A6B33EF50815AB51124ABE38D73D1CE4CF11D00B3B321DB30C97A"
+    }
+  ],
+  "inputManifestSha256": "DCE9BF442494273E5C327CD9E2B1CC32239B4557D29A3096FA468B7366793238",
+  "priorReceipt": {
+    "role": "auto-refresh-workflow",
+    "path": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
+    "bytes": 11098,
+    "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+  },
+  "totals": {
+    "assertions": 13,
+    "passed": 13,
+    "failed": 0
+  },
+  "failedAssertionIds": [],
+  "checks": [
+    {
+      "id": "input.connection-telemetry-view.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/src/features/lens-next/LensNextConnectionTelemetryView.tsx",
+        "expected": {
+          "bytes": 9184,
+          "sha256": "B0B1893CECAB59942058B36FB07E6E9ABA66BE824EF8FD54A86F06EC30177A15"
+        },
+        "actual": {
+          "bytes": 9184,
+          "sha256": "B0B1893CECAB59942058B36FB07E6E9ABA66BE824EF8FD54A86F06EC30177A15"
+        }
+      }
+    },
+    {
+      "id": "input.connection-telemetry-view-behavior.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/scripts/lens-next/lens-next-connection-telemetry-view.behavior.tsx",
+        "expected": {
+          "bytes": 3747,
+          "sha256": "63F28A428C7A6B33EF50815AB51124ABE38D73D1CE4CF11D00B3B321DB30C97A"
+        },
+        "actual": {
+          "bytes": 3747,
+          "sha256": "63F28A428C7A6B33EF50815AB51124ABE38D73D1CE4CF11D00B3B321DB30C97A"
+        }
+      }
+    },
+    {
+      "id": "source.states-locales-single-callback",
+      "passed": true,
+      "detail": "Six telemetry states, two locales, and one presentational refresh callback are exposed."
+    },
+    {
+      "id": "source.presentational-refresh-only",
+      "passed": true,
+      "detail": "The only control requests a read-only refresh and is disabled while refresh is in flight."
+    },
+    {
+      "id": "source.default-deny",
+      "passed": true,
+      "detail": "Token rendering, network dispatch, mutation, persistence, storage, and visual mutation are denied."
+    },
+    {
+      "id": "source.no-token-or-io-adapter",
+      "passed": true,
+      "detail": "No token value, network, persistence, or mutation adapter exists in the view source."
+    },
+    {
+      "id": "source.behavior-coverage",
+      "passed": true,
+      "detail": "The focused proof covers six states by two locales and one native refresh button."
+    },
+    {
+      "id": "proof.connection-telemetry-ssr",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "states": 6,
+        "locales": 2,
+        "renders": 12,
+        "nativeRefreshButtons": 1,
+        "maximumIssues": 500,
+        "sessionTokenRendered": false,
+        "callbackDispatchesNetwork": false,
+        "mutationAllowed": false,
+        "storageBehavior": false,
+        "visualMutationAllowed": false
+      }
+    },
+    {
+      "id": "proof.strict-typescript",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.prettier",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "stdout": "Checking formatting...\nAll matched files use Prettier code style!"
+      }
+    },
+    {
+      "id": "proof.diff",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "stdout": ""
+      }
+    },
+    {
+      "id": "prior.auto-refresh-workflow.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
+        "expected": {
+          "bytes": 11098,
+          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+        },
+        "actual": {
+          "bytes": 11098,
+          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+        },
+        "status": "PASS_WEB_WORKFLOW_CONTRACTS_NO_MUTATION_AUTHORITY"
+      }
+    },
+    {
+      "id": "proof.mojibake",
+      "passed": true,
+      "detail": "No mojibake sentinel occurs in an assigned or owned source file."
+    }
+  ],
+  "disposition": {
+    "connectionTelemetryViewAccepted": true,
+    "states": 6,
+    "locales": 2,
+    "presentationalRefreshCallbacks": 1,
+    "sessionTokenRendered": false,
+    "callbackDispatchesNetwork": false,
+    "mutationAllowed": false,
+    "storageOrPersistenceAllowed": false,
+    "visualMutationAllowed": false
+  },
+  "safety": {
+    "pluginNativeBridgeSavedViewpointPathsReadOrTested": false,
+    "implementationFilesWrittenByVerifier": false,
+    "databaseIo": false,
+    "networkIo": false,
+    "gitMutation": false,
+    "externalAction": false
+  }
+}

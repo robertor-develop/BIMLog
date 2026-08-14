@@ -1,0 +1,442 @@
+{
+  "schemaVersion": "bimlog-lens-next-phase2-cross-language-verification-v1",
+  "generatedAtUtc": "2026-08-14T21:17:34.992Z",
+  "status": "PASS",
+  "worktree": {
+    "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
+    "branch": "codex/bimlog-lens-next-20260812",
+    "head": "4e2d4da72493c9cb497e067c2e73e727e031ede4",
+    "tree": "f6a5b9733ba0163422e90c1302b27f49894b6cd0"
+  },
+  "inputs": [
+    {
+      "lane": "api",
+      "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-contract.ts",
+      "bytes": 11551,
+      "sha256": "EBADD7C022664174B63A9596DA0FAD9B536DFA59949080DBA00A88EC566463DA"
+    },
+    {
+      "lane": "api-test",
+      "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-contract.behavior.ts",
+      "bytes": 5339,
+      "sha256": "72DEDEF86936E0D4649FB575DEACBB409E9B9D08529D5200E718C792ABE9CFDA"
+    },
+    {
+      "lane": "native",
+      "path": "plugins/BIMLogLensNext/src/LensNextPhase2CommandPolicy.cs",
+      "bytes": 16668,
+      "sha256": "B3DC6F9021698434C7B58A8C5D0B66F918ABC2E2A3708979845234DB5E14BA6B"
+    },
+    {
+      "lane": "native-test",
+      "path": "plugins/BIMLogLensNext/tests/Phase2CommandPolicyTests.cs",
+      "bytes": 17392,
+      "sha256": "C8D37168390ECAFE191D3F4F9661F67B27567AF2DCC74F60DACA4CD2C5441247"
+    },
+    {
+      "lane": "web-capability",
+      "path": "artifacts/bimlog/src/features/lens-next/lens-next-phase2-capability.ts",
+      "bytes": 16192,
+      "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
+    },
+    {
+      "lane": "web-capability-test",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-capability.behavior.ts",
+      "bytes": 10607,
+      "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+    }
+  ],
+  "inputManifestSha256": "3BFD0970902034999E5B7000C4433C93902AC5FE9771387D9A9C42D9E5DEAE0F",
+  "totals": {
+    "assertions": 35,
+    "passed": 35,
+    "failed": 0
+  },
+  "failedAssertionIds": [],
+  "results": [
+    {
+      "id": "root.exact",
+      "passed": true,
+      "severity": "gate",
+      "detail": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-20260812"
+    },
+    {
+      "id": "git.branch",
+      "passed": true,
+      "severity": "gate",
+      "detail": "codex/bimlog-lens-next-20260812"
+    },
+    {
+      "id": "git.head",
+      "passed": true,
+      "severity": "gate",
+      "detail": "4e2d4da72493c9cb497e067c2e73e727e031ede4"
+    },
+    {
+      "id": "input.api.exact",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-contract.ts",
+        "expected": {
+          "bytes": 11551,
+          "sha256": "EBADD7C022664174B63A9596DA0FAD9B536DFA59949080DBA00A88EC566463DA"
+        },
+        "actual": {
+          "bytes": 11551,
+          "sha256": "EBADD7C022664174B63A9596DA0FAD9B536DFA59949080DBA00A88EC566463DA"
+        }
+      }
+    },
+    {
+      "id": "input.api-test.exact",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-contract.behavior.ts",
+        "expected": {
+          "bytes": 5339,
+          "sha256": "72DEDEF86936E0D4649FB575DEACBB409E9B9D08529D5200E718C792ABE9CFDA"
+        },
+        "actual": {
+          "bytes": 5339,
+          "sha256": "72DEDEF86936E0D4649FB575DEACBB409E9B9D08529D5200E718C792ABE9CFDA"
+        }
+      }
+    },
+    {
+      "id": "input.native.exact",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "path": "plugins/BIMLogLensNext/src/LensNextPhase2CommandPolicy.cs",
+        "expected": {
+          "bytes": 16668,
+          "sha256": "B3DC6F9021698434C7B58A8C5D0B66F918ABC2E2A3708979845234DB5E14BA6B"
+        },
+        "actual": {
+          "bytes": 16668,
+          "sha256": "B3DC6F9021698434C7B58A8C5D0B66F918ABC2E2A3708979845234DB5E14BA6B"
+        }
+      }
+    },
+    {
+      "id": "input.native-test.exact",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "path": "plugins/BIMLogLensNext/tests/Phase2CommandPolicyTests.cs",
+        "expected": {
+          "bytes": 17392,
+          "sha256": "C8D37168390ECAFE191D3F4F9661F67B27567AF2DCC74F60DACA4CD2C5441247"
+        },
+        "actual": {
+          "bytes": 17392,
+          "sha256": "C8D37168390ECAFE191D3F4F9661F67B27567AF2DCC74F60DACA4CD2C5441247"
+        }
+      }
+    },
+    {
+      "id": "input.web-capability.exact",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-phase2-capability.ts",
+        "expected": {
+          "bytes": 16192,
+          "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
+        },
+        "actual": {
+          "bytes": 16192,
+          "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
+        }
+      }
+    },
+    {
+      "id": "input.web-capability-test.exact",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-capability.behavior.ts",
+        "expected": {
+          "bytes": 10607,
+          "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+        },
+        "actual": {
+          "bytes": 10607,
+          "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+        }
+      }
+    },
+    {
+      "id": "api.contract-only-no-authority",
+      "passed": true,
+      "severity": "gate",
+      "detail": "API returns only a held plan"
+    },
+    {
+      "id": "native.pure-policy-no-io",
+      "passed": true,
+      "severity": "gate",
+      "detail": "Native policy has no Navisworks, file, database, or network surface"
+    },
+    {
+      "id": "api.pure-contract-no-io",
+      "passed": true,
+      "severity": "gate",
+      "detail": "API contract has no database, file, network, provider, or customer I/O"
+    },
+    {
+      "id": "web.pure-capability-no-io",
+      "passed": true,
+      "severity": "gate",
+      "detail": "Web capability contract has no database, file, network, provider, customer, or persistent-store I/O"
+    },
+    {
+      "id": "both.default-deny-unsupported",
+      "passed": true,
+      "severity": "gate",
+      "detail": "Unknown actions deny in both languages"
+    },
+    {
+      "id": "both.sandbox-or-pilot-only",
+      "passed": true,
+      "severity": "gate",
+      "detail": "Sandbox/pilot exact allowlist; production not accepted"
+    },
+    {
+      "id": "both.visual-state-invariant",
+      "passed": true,
+      "severity": "gate",
+      "detail": "Workflow mutation cannot alter visual payload"
+    },
+    {
+      "id": "both.no-fallback-or-auto-conflict",
+      "passed": true,
+      "severity": "gate",
+      "detail": "Fallbacks and silent conflict resolution deny"
+    },
+    {
+      "id": "both.positive-identity-revision-lifecycle",
+      "passed": true,
+      "severity": "gate",
+      "detail": "Both require positive immutable identity and a closed lifecycle"
+    },
+    {
+      "id": "cross.feature-flags-agree-with-frozen-eight-flag-contract",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "canonicalFlags": {
+          "status": "lens_next.status_updates",
+          "comment": "lens_next.comments",
+          "assignment": "lens_next.platform_metadata_writes"
+        },
+        "apiFlags": {
+          "status": "lens_next.status_updates",
+          "comment": "lens_next.comments",
+          "assignment": "lens_next.platform_metadata_writes"
+        },
+        "nativeFlags": {
+          "status": "lens_next.status_updates",
+          "comment": "lens_next.comments",
+          "assignment": "lens_next.platform_metadata_writes"
+        },
+        "webFlags": {
+          "status": "lens_next.status_updates",
+          "comment": "lens_next.comments",
+          "assignment": "lens_next.platform_metadata_writes"
+        }
+      }
+    },
+    {
+      "id": "cross.actions-have-explicit-closed-translation",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "apiActions": [
+          "status",
+          "comment",
+          "assignment"
+        ],
+        "nativeCommands": {
+          "status": "phase2-update-status",
+          "comment": "phase2-add-comment",
+          "assignment": "phase2-update-assignment"
+        },
+        "explicitTranslation": true
+      }
+    },
+    {
+      "id": "cross.immutable-identity-fields-agree",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "apiRequired": [
+          "projectId",
+          "serverId",
+          "viewpointId",
+          "issueFamilyId",
+          "lifecycleStatus",
+          "revisionNumber",
+          "expectedStatus",
+          "expectedVersion",
+          "expectedRevisionNumber"
+        ],
+        "nativeRequired": [
+          "ProjectId",
+          "ServerId",
+          "ViewpointId",
+          "IssueFamilyId",
+          "LifecycleStatus",
+          "RevisionNumber",
+          "ExpectedStatus",
+          "ExpectedVersion",
+          "ExpectedRevisionNumber"
+        ]
+      }
+    },
+    {
+      "id": "cross.permission-evidence-agrees",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "api": "receipt id/hash, subject, action, project, server, current, expiry",
+        "native": "receipt id/hash, actor, action, project, server, current, granted and expiry"
+      }
+    },
+    {
+      "id": "cross.idempotency-scope-agrees",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "api": "binds actor, action, project, server and revision",
+        "native": "binds actor, action, project, server and revision"
+      }
+    },
+    {
+      "id": "cross.pilot-policy-evidence-agrees",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "api": "evidence-bound policy receipt with productionWriteAllowed=false",
+        "native": "evidence-bound policy receipt with productionWriteAllowed=false"
+      }
+    },
+    {
+      "id": "web.identity-and-preconditions-match-server-contract",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "server": "issueFamilyId plus expected status/version/revision are required",
+        "web": "explicit stableIssueFamilyId-to-issueFamilyId mapping plus expected status/version/revision"
+      }
+    },
+    {
+      "id": "web.permission-evidence-matches-server-contract",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "server": "permission receipt id/hash, actor/action, project/server, current and expiry",
+        "web": "permission receipt id/hash, actor/action, project/server, current and expiry"
+      }
+    },
+    {
+      "id": "web.idempotency-scope-matches-server-contract",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "server": "actor, action, project, server and revision",
+        "web": "actor, action, project, server and revision"
+      }
+    },
+    {
+      "id": "web.pilot-policy-evidence-matches-server-contract",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "server": "receipt hash, environment, project/user/flag, production=false and expiry",
+        "web": "receipt hash, environment, project/user/flag, production=false and expiry"
+      }
+    },
+    {
+      "id": "web.executor-requires-server-transaction-audit-contract",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "server": "atomic precondition, zero-row 409 and audit/idempotency receipt in one transaction",
+        "web": "executor attestation binds atomic preconditions, zero-row 409, audit/idempotency transaction and exact result identity/version"
+      }
+    },
+    {
+      "id": "web.never-claims-mutation-authority-from-caller-envelope",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "server": "held contract only; mutationAllowed=false; authorityGranted=false",
+        "web": "mutationAllowed is invariant false; separately named dispatchAllowed requires exact server-runtime evidence"
+      }
+    },
+    {
+      "id": "cross.transaction-audit-receipt-requirements-agree",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "api": "held execution plan requires atomic predicate, 409 on zero rows, and audit/idempotency receipt in one transaction",
+        "native": "held execution plan requires atomic predicate, 409 on zero rows, and audit/idempotency receipt in one transaction"
+      }
+    },
+    {
+      "id": "cross.authority-outcome-is-explicitly-mapped",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "api": "always held; mutationAllowed=false; authorityGranted=false",
+        "native": "always held; MutationAllowed=false; AuthorityGranted=false"
+      }
+    },
+    {
+      "id": "tests.cover-own-contracts",
+      "passed": true,
+      "severity": "gate",
+      "detail": "API, native, and web adversarial deterministic behavior tests are present"
+    },
+    {
+      "id": "phase1.exact-frozen-inputs-non-regression",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "receipt": "evidence/lens-next/20260812/integration/phase1-cross-lane-verification.json",
+        "receiptStatus": "PASS",
+        "filesVerified": 31,
+        "mismatches": []
+      }
+    },
+    {
+      "id": "phase1.bridge-does-not-reference-phase2-policy",
+      "passed": true,
+      "severity": "gate",
+      "detail": {
+        "checked": [
+          "plugins/BIMLogLensNext/src/BridgeContracts.cs",
+          "plugins/BIMLogLensNext/src/BridgeRequestValidator.cs",
+          "plugins/BIMLogLensNext/src/LensNextReadOnlyBridge.cs",
+          "plugins/BIMLogLensNext/tests/Program.cs"
+        ],
+        "unexpectedReferences": []
+      }
+    }
+  ],
+  "disposition": {
+    "productMutationAllowed": false,
+    "reason": "Contract acceptance does not itself authorize I/O."
+  },
+  "safety": {
+    "implementationFilesWrittenByVerifier": false,
+    "legacyFilesWritten": false,
+    "databaseIo": false,
+    "networkIo": false,
+    "installAction": false,
+    "gitAction": false
+  }
+}

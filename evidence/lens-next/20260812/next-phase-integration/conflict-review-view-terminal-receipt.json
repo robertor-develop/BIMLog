@@ -1,0 +1,204 @@
+{
+  "schemaVersion": "bimlog-lens-next-conflict-review-view-terminal-v1",
+  "generatedAtUtc": "2026-08-14T21:20:05.871Z",
+  "status": "PASS_CONFLICT_REVIEW_MANUAL_ONLY_ZERO_IO_MUTATION",
+  "worktree": {
+    "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
+    "branch": "codex/bimlog-lens-next-20260812",
+    "head": "4e2d4da72493c9cb497e067c2e73e727e031ede4"
+  },
+  "scope": "strict web-only acceptance under temporary adapter freeze",
+  "inputs": [
+    {
+      "role": "conflict-review-view",
+      "path": "artifacts/bimlog/src/features/lens-next/LensNextConflictReviewView.tsx",
+      "bytes": 7660,
+      "sha256": "A9AEB9A225FD2D8C85CDFE0A39A481C75DF6A027D49341F2ADE582B71591E45D"
+    },
+    {
+      "role": "conflict-review-view-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-conflict-review-view.behavior.tsx",
+      "bytes": 3730,
+      "sha256": "6AA8CBE0C25F34A8AEC44F3E556CAFCAF1D8F4605BF2E12F95331143C75D30E1"
+    }
+  ],
+  "inputManifestSha256": "A890AC2233CC9B9F7EEE74C0C00837286CE66F556B9E47F9758F0D86B1B8EBA2",
+  "priorReceipts": [
+    {
+      "role": "auto-refresh-workflow",
+      "path": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
+      "bytes": 11098,
+      "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+    },
+    {
+      "role": "offline-queue",
+      "path": "evidence/lens-next/20260812/next-phase-integration/timeline-offline-queue-terminal-receipt.json",
+      "bytes": 7733,
+      "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554"
+    }
+  ],
+  "totals": {
+    "assertions": 14,
+    "passed": 14,
+    "failed": 0
+  },
+  "failedAssertionIds": [],
+  "checks": [
+    {
+      "id": "input.conflict-review-view.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/src/features/lens-next/LensNextConflictReviewView.tsx",
+        "expected": {
+          "bytes": 7660,
+          "sha256": "A9AEB9A225FD2D8C85CDFE0A39A481C75DF6A027D49341F2ADE582B71591E45D"
+        },
+        "actual": {
+          "bytes": 7660,
+          "sha256": "A9AEB9A225FD2D8C85CDFE0A39A481C75DF6A027D49341F2ADE582B71591E45D"
+        }
+      }
+    },
+    {
+      "id": "input.conflict-review-view-behavior.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/scripts/lens-next/lens-next-conflict-review-view.behavior.tsx",
+        "expected": {
+          "bytes": 3730,
+          "sha256": "6AA8CBE0C25F34A8AEC44F3E556CAFCAF1D8F4605BF2E12F95331143C75D30E1"
+        },
+        "actual": {
+          "bytes": 3730,
+          "sha256": "6AA8CBE0C25F34A8AEC44F3E556CAFCAF1D8F4605BF2E12F95331143C75D30E1"
+        }
+      }
+    },
+    {
+      "id": "source.states-locales-callbacks",
+      "passed": true,
+      "detail": "Five conflict states, two locales, and only refresh-request/discard-draft callbacks are exposed."
+    },
+    {
+      "id": "source.bound-values",
+      "passed": true,
+      "detail": "User/server values are bounded before presentation, with an invariant ceiling of 160 characters."
+    },
+    {
+      "id": "source.manual-review-default-deny",
+      "passed": true,
+      "detail": "The review is manual and fail closed: no resolution, send, I/O, write, or visual mutation."
+    },
+    {
+      "id": "source.no-direct-io-write-or-auto-resolution",
+      "passed": true,
+      "detail": "No direct adapter or automatic conflict-resolution primitive exists in the view."
+    },
+    {
+      "id": "source.behavior-coverage",
+      "passed": true,
+      "detail": "The focused proof covers all state/locale combinations, two native controls, and bounded values."
+    },
+    {
+      "id": "proof.conflict-review-ssr",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "kinds": 5,
+        "locales": 2,
+        "renders": 10,
+        "nativeButtons": 2,
+        "boundedValues": true,
+        "automaticResolutionAllowed": false,
+        "sendBehavior": false,
+        "networkBehavior": false,
+        "storageBehavior": false,
+        "writeBehavior": false,
+        "visualMutationAllowed": false
+      }
+    },
+    {
+      "id": "proof.strict-typescript",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.prettier",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "stdout": "Checking formatting...\nAll matched files use Prettier code style!"
+      }
+    },
+    {
+      "id": "proof.diff",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "stdout": ""
+      }
+    },
+    {
+      "id": "prior.auto-refresh-workflow.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
+        "expected": {
+          "bytes": 11098,
+          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+        },
+        "actual": {
+          "bytes": 11098,
+          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+        },
+        "status": "PASS_WEB_WORKFLOW_CONTRACTS_NO_MUTATION_AUTHORITY"
+      }
+    },
+    {
+      "id": "prior.offline-queue.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/timeline-offline-queue-terminal-receipt.json",
+        "expected": {
+          "bytes": 7733,
+          "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554"
+        },
+        "actual": {
+          "bytes": 7733,
+          "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554"
+        },
+        "status": "PASS_PURE_TIMELINE_OFFLINE_QUEUE_NO_MUTATION_AUTHORITY"
+      }
+    },
+    {
+      "id": "proof.mojibake",
+      "passed": true,
+      "detail": "No mojibake sentinel occurs in an assigned or owned source file."
+    }
+  ],
+  "disposition": {
+    "conflictReviewViewAccepted": true,
+    "conflictStates": 5,
+    "locales": 2,
+    "maximumBoundValueCharacters": 160,
+    "callbacks": [
+      "request-read-only-refresh",
+      "discard-local-draft"
+    ],
+    "automaticResolutionAllowed": false,
+    "sendAllowed": false,
+    "networkOrStorageAllowed": false,
+    "writeAllowed": false,
+    "visualMutationAllowed": false
+  },
+  "safety": {
+    "pluginNativeBridgeSavedViewpointPathsReadOrTested": false,
+    "implementationFilesWrittenByVerifier": false,
+    "databaseIo": false,
+    "networkIo": false,
+    "gitMutation": false,
+    "externalAction": false
+  }
+}

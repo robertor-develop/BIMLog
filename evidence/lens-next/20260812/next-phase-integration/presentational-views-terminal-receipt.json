@@ -1,0 +1,217 @@
+{
+  "schemaVersion": "bimlog-lens-next-presentational-views-terminal-v1",
+  "generatedAtUtc": "2026-08-14T21:19:56.876Z",
+  "status": "PASS_PRESENTATIONAL_VIEWS_ZERO_DISPATCH_IO",
+  "worktree": {
+    "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
+    "head": "4e2d4da72493c9cb497e067c2e73e727e031ede4"
+  },
+  "scope": "web-only under temporary adapter freeze",
+  "inputs": [
+    {
+      "role": "timeline-view",
+      "path": "artifacts/bimlog/src/features/lens-next/LensNextActivityTimelineView.tsx",
+      "bytes": 7349,
+      "sha256": "1E98210088426F8BA2C0034134FD2FD25EE59B5520793F6AF31F89427CC18989"
+    },
+    {
+      "role": "timeline-view-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline-view.behavior.tsx",
+      "bytes": 3705,
+      "sha256": "7CC260D29EF98535EA5D343282C7567769B38F2DA704C6B951BE0F9B8DF9B6B3"
+    },
+    {
+      "role": "queue-view",
+      "path": "artifacts/bimlog/src/features/lens-next/LensNextOfflineQueueView.tsx",
+      "bytes": 8821,
+      "sha256": "854056DE44A710DA24FF20B16D082EAF485E8C9B8DA23E8FCCCEE53A5E675CD8"
+    },
+    {
+      "role": "queue-view-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue-view.behavior.tsx",
+      "bytes": 5438,
+      "sha256": "05D848BF2B5CA87CE5229AFC41235734E869AAD4FF70922762EEDCA19F125175"
+    }
+  ],
+  "inputManifestSha256": "36BFAF67E1000FCA7A7D72F0A50D81D491428C4F20A40CA480AF02914BBF5625",
+  "totals": {
+    "assertions": 16,
+    "passed": 16,
+    "failed": 0
+  },
+  "failedAssertionIds": [],
+  "checks": [
+    {
+      "id": "input.timeline-view.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextActivityTimelineView.tsx",
+        "expected": {
+          "bytes": 7349,
+          "sha256": "1E98210088426F8BA2C0034134FD2FD25EE59B5520793F6AF31F89427CC18989"
+        },
+        "actual": {
+          "bytes": 7349,
+          "sha256": "1E98210088426F8BA2C0034134FD2FD25EE59B5520793F6AF31F89427CC18989"
+        }
+      }
+    },
+    {
+      "id": "input.timeline-view-behavior.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline-view.behavior.tsx",
+        "expected": {
+          "bytes": 3705,
+          "sha256": "7CC260D29EF98535EA5D343282C7567769B38F2DA704C6B951BE0F9B8DF9B6B3"
+        },
+        "actual": {
+          "bytes": 3705,
+          "sha256": "7CC260D29EF98535EA5D343282C7567769B38F2DA704C6B951BE0F9B8DF9B6B3"
+        }
+      }
+    },
+    {
+      "id": "input.queue-view.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextOfflineQueueView.tsx",
+        "expected": {
+          "bytes": 8821,
+          "sha256": "854056DE44A710DA24FF20B16D082EAF485E8C9B8DA23E8FCCCEE53A5E675CD8"
+        },
+        "actual": {
+          "bytes": 8821,
+          "sha256": "854056DE44A710DA24FF20B16D082EAF485E8C9B8DA23E8FCCCEE53A5E675CD8"
+        }
+      }
+    },
+    {
+      "id": "input.queue-view-behavior.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue-view.behavior.tsx",
+        "expected": {
+          "bytes": 5438,
+          "sha256": "05D848BF2B5CA87CE5229AFC41235734E869AAD4FF70922762EEDCA19F125175"
+        },
+        "actual": {
+          "bytes": 5438,
+          "sha256": "05D848BF2B5CA87CE5229AFC41235734E869AAD4FF70922762EEDCA19F125175"
+        }
+      }
+    },
+    {
+      "id": "timeline.accessible-bilingual-bounded",
+      "passed": true,
+      "detail": "Bilingual accessible status/alert view renders at most 100 of 500 model events."
+    },
+    {
+      "id": "timeline.lucide-zero-actions-io",
+      "passed": true,
+      "detail": "Lucide presentational view exposes no action, network, or storage behavior."
+    },
+    {
+      "id": "queue.accessible-bilingual-bounded",
+      "passed": true,
+      "detail": "Bilingual accessible status/alert queue renders at most 100 items."
+    },
+    {
+      "id": "queue.callbacks-not-dispatch",
+      "passed": true,
+      "detail": "Buttons are callback-only presentation; no dispatch, network, or storage adapter exists."
+    },
+    {
+      "id": "proof.timeline-ssr",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "stateViews": 6,
+        "locales": 2,
+        "modelEvents": 500,
+        "renderedEvents": 100,
+        "hiddenEvents": 400,
+        "cursorPresentationOnly": true,
+        "actionControls": 0,
+        "networkBehavior": false,
+        "persistenceBehavior": false,
+        "writeBehavior": false
+      }
+    },
+    {
+      "id": "proof.queue-ssr",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "modes": 6,
+        "locales": 2,
+        "renderedItems": 100,
+        "reconfirmButtons": 1,
+        "discardButtons": 100,
+        "dispatchBehavior": false,
+        "networkBehavior": false,
+        "storageBehavior": false,
+        "automaticConflictResolution": false,
+        "visualStateMutation": false
+      }
+    },
+    {
+      "id": "proof.strict-typescript",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.prettier",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.diff",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "prior.timeline-queue-model.rebind",
+      "passed": true,
+      "detail": {
+        "path": "evidence/lens-next/20260812/next-phase-integration/timeline-offline-queue-terminal-receipt.json",
+        "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554",
+        "status": "PASS_PURE_TIMELINE_OFFLINE_QUEUE_NO_MUTATION_AUTHORITY"
+      }
+    },
+    {
+      "id": "prior.workflow.rebind",
+      "passed": true,
+      "detail": {
+        "path": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
+        "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A",
+        "status": "PASS_WEB_WORKFLOW_CONTRACTS_NO_MUTATION_AUTHORITY"
+      }
+    },
+    {
+      "id": "proof.mojibake",
+      "passed": true,
+      "detail": "No sentinel matches."
+    }
+  ],
+  "disposition": {
+    "presentationalViewsAccepted": true,
+    "actionDispatchAllowed": false,
+    "networkOrStorageAllowed": false,
+    "mutationAllowed": false
+  },
+  "safety": {
+    "pluginNativeBridgeSavedViewpointPathsReadOrTested": false,
+    "implementationFilesWrittenByVerifier": false,
+    "databaseIo": false,
+    "networkIo": false,
+    "gitMutation": false,
+    "externalAction": false
+  }
+}

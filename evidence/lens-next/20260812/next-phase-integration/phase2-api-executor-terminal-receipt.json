@@ -1,0 +1,337 @@
+{
+  "schemaVersion": "bimlog-lens-next-phase2-api-executor-terminal-v1",
+  "generatedAtUtc": "2026-08-14T21:18:02.461Z",
+  "status": "PASS_SANDBOX_EXECUTOR_ACCEPTANCE_NO_PRODUCTION_AUTHORITY",
+  "worktree": {
+    "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
+    "head": "4e2d4da72493c9cb497e067c2e73e727e031ede4"
+  },
+  "scope": "API/web-only under temporary native/plugin adapter freeze",
+  "inputs": [
+    {
+      "role": "api-contract",
+      "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-contract.ts",
+      "bytes": 11551,
+      "sha256": "EBADD7C022664174B63A9596DA0FAD9B536DFA59949080DBA00A88EC566463DA"
+    },
+    {
+      "role": "api-contract-behavior",
+      "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-contract.behavior.ts",
+      "bytes": 5339,
+      "sha256": "72DEDEF86936E0D4649FB575DEACBB409E9B9D08529D5200E718C792ABE9CFDA"
+    },
+    {
+      "role": "api-executor",
+      "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-executor.ts",
+      "bytes": 7565,
+      "sha256": "6DAFB4126E0092BE0D0F7B789F7254AA246730F81A17399B71A804F5E20BACE0"
+    },
+    {
+      "role": "api-executor-behavior",
+      "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-executor.behavior.ts",
+      "bytes": 8519,
+      "sha256": "2CF4EC0AD025A3FE0866826368D576A709E63AF647043ACA60C332C322252DF1"
+    },
+    {
+      "role": "web-capability",
+      "path": "artifacts/bimlog/src/features/lens-next/lens-next-phase2-capability.ts",
+      "bytes": 16192,
+      "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
+    },
+    {
+      "role": "web-capability-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-capability.behavior.ts",
+      "bytes": 10607,
+      "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+    }
+  ],
+  "inputManifestSha256": "FC57ADBE5CCB000AD0900A6516DA4063E9051B2CF56F2022A999510128106771",
+  "totals": {
+    "assertions": 30,
+    "passed": 30,
+    "failed": 0
+  },
+  "failedAssertionIds": [],
+  "results": [
+    {
+      "id": "root.exact",
+      "passed": true,
+      "detail": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-20260812"
+    },
+    {
+      "id": "input.api-contract.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-contract.ts",
+        "expected": {
+          "bytes": 11551,
+          "sha256": "EBADD7C022664174B63A9596DA0FAD9B536DFA59949080DBA00A88EC566463DA"
+        },
+        "actual": {
+          "bytes": 11551,
+          "sha256": "EBADD7C022664174B63A9596DA0FAD9B536DFA59949080DBA00A88EC566463DA"
+        }
+      }
+    },
+    {
+      "id": "input.api-contract-behavior.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-contract.behavior.ts",
+        "expected": {
+          "bytes": 5339,
+          "sha256": "72DEDEF86936E0D4649FB575DEACBB409E9B9D08529D5200E718C792ABE9CFDA"
+        },
+        "actual": {
+          "bytes": 5339,
+          "sha256": "72DEDEF86936E0D4649FB575DEACBB409E9B9D08529D5200E718C792ABE9CFDA"
+        }
+      }
+    },
+    {
+      "id": "input.api-executor.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-executor.ts",
+        "expected": {
+          "bytes": 7565,
+          "sha256": "6DAFB4126E0092BE0D0F7B789F7254AA246730F81A17399B71A804F5E20BACE0"
+        },
+        "actual": {
+          "bytes": 7565,
+          "sha256": "6DAFB4126E0092BE0D0F7B789F7254AA246730F81A17399B71A804F5E20BACE0"
+        }
+      }
+    },
+    {
+      "id": "input.api-executor-behavior.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/api-server/src/lib/lens-next-phase2-mutation-executor.behavior.ts",
+        "expected": {
+          "bytes": 8519,
+          "sha256": "2CF4EC0AD025A3FE0866826368D576A709E63AF647043ACA60C332C322252DF1"
+        },
+        "actual": {
+          "bytes": 8519,
+          "sha256": "2CF4EC0AD025A3FE0866826368D576A709E63AF647043ACA60C332C322252DF1"
+        }
+      }
+    },
+    {
+      "id": "input.web-capability.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-phase2-capability.ts",
+        "expected": {
+          "bytes": 16192,
+          "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
+        },
+        "actual": {
+          "bytes": 16192,
+          "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
+        }
+      }
+    },
+    {
+      "id": "input.web-capability-behavior.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-capability.behavior.ts",
+        "expected": {
+          "bytes": 10607,
+          "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+        },
+        "actual": {
+          "bytes": 10607,
+          "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+        }
+      }
+    },
+    {
+      "id": "contract.three-actions-held-no-authority",
+      "passed": true,
+      "detail": "Three closed actions produce only a held, non-authorizing plan."
+    },
+    {
+      "id": "contract.immutable-identity-preconditions",
+      "passed": true,
+      "detail": "Exact immutable identity and status/version/revision preconditions are required."
+    },
+    {
+      "id": "contract.permission-pilot-idempotency",
+      "passed": true,
+      "detail": "Permission and pilot receipts plus actor/action/project/server/revision idempotency are bound."
+    },
+    {
+      "id": "contract.atomic-409-audit-visual",
+      "passed": true,
+      "detail": "Atomic predicate, zero-row 409, same-transaction audit/receipt, and visual invariance are explicit."
+    },
+    {
+      "id": "executor.sandbox-only-production-false",
+      "passed": true,
+      "detail": "Executor is explicitly sandbox-scoped and cannot report production enabled."
+    },
+    {
+      "id": "executor.injected-transaction-only",
+      "passed": true,
+      "detail": "All mutation behavior is behind an injected transaction; no real I/O adapter exists."
+    },
+    {
+      "id": "executor.exact-replay-and-mismatch",
+      "passed": true,
+      "detail": "Exact replay returns the prior result; mismatched replay fails 409."
+    },
+    {
+      "id": "executor.atomic-precondition-and-409",
+      "passed": true,
+      "detail": "The store must atomically match preconditions; no row or visual mismatch returns 409."
+    },
+    {
+      "id": "executor.audit-and-receipt-same-transaction",
+      "passed": true,
+      "detail": "Audit and idempotency receipt are appended within the same transaction callback."
+    },
+    {
+      "id": "executor.exact-result-visual-invariance",
+      "passed": true,
+      "detail": "Result identity/version/status/visual digest derive from the atomically updated row and preserve visual state."
+    },
+    {
+      "id": "executor.behavior-covers-replay-rollback-zero-duplicates",
+      "passed": true,
+      "detail": "In-memory adversarial behavior covers replay mismatch, rollback, and duplicate prevention."
+    },
+    {
+      "id": "web.unbound-executor-denies-dispatch",
+      "passed": true,
+      "detail": "A valid client envelope remains non-dispatchable until exact server-runtime executor evidence binds."
+    },
+    {
+      "id": "web.mutation-always-false",
+      "passed": true,
+      "detail": "UI capability never claims mutation authority, including when dispatch is accepted."
+    },
+    {
+      "id": "web.executor-attestation-exact",
+      "passed": true,
+      "detail": "UI dispatch binds the full server executor attestation without fallback or automatic conflict resolution."
+    },
+    {
+      "id": "web.production-false-zero-io",
+      "passed": true,
+      "detail": "Production write policy must be false and the evaluator performs no I/O or persistent-token access."
+    },
+    {
+      "id": "proof.api-contract-focused",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "output": {
+          "status": "PASS",
+          "acceptedShapes": 3,
+          "adversarialDenials": 15,
+          "contractOnly": true,
+          "mutationAllowed": false,
+          "authorityGranted": false,
+          "databaseIo": false,
+          "networkIo": false,
+          "providerOrCustomerIo": false
+        }
+      }
+    },
+    {
+      "id": "proof.api-executor-focused",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "output": {
+          "result": "PASS",
+          "actionPasses": 3,
+          "replayIdempotent": true,
+          "mismatchedReplayConflicts": true,
+          "preconditionConflict409": true,
+          "rollbackCases": 2,
+          "duplicateRecords": 0,
+          "productionEnabled": false,
+          "io": {
+            "database": false,
+            "network": false,
+            "customer": false,
+            "provider": false
+          }
+        }
+      }
+    },
+    {
+      "id": "proof.web-capability-focused",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "output": {
+          "result": "PASS",
+          "acceptedContracts": 3,
+          "enabledContracts": 3,
+          "adversarialDenials": 39,
+          "io": {
+            "database": false,
+            "network": false,
+            "provider": false,
+            "customer": false
+          }
+        }
+      }
+    },
+    {
+      "id": "proof.api-typescript",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.web-typescript",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.prettier",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.diff-check",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.mojibake",
+      "passed": true,
+      "detail": []
+    }
+  ],
+  "disposition": {
+    "contractAccepted": true,
+    "sandboxInjectedStoreExecutionAccepted": true,
+    "productionWriteAllowed": false,
+    "uiMutationAllowed": false,
+    "realDatabaseOrNetworkIoAllowed": false,
+    "nativePluginOrBridgeAcceptedByThisReceipt": false
+  },
+  "safety": {
+    "pluginNativeBridgeSavedViewpointPathsReadOrTested": false,
+    "implementationFilesWrittenByVerifier": false,
+    "realDatabaseIo": false,
+    "networkIo": false,
+    "customerProviderProductionAction": false,
+    "gitMutation": false,
+    "pushPublishDeploy": false
+  }
+}

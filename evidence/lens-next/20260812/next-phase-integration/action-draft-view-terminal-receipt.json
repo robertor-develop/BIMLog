@@ -1,0 +1,310 @@
+{
+  "schemaVersion": "bimlog-lens-next-action-draft-view-terminal-v1",
+  "generatedAtUtc": "2026-08-14T21:20:02.267Z",
+  "status": "PASS_ACTION_DRAFT_VIEW_DRAFT_ONLY_ZERO_AUTHORITY_IO",
+  "worktree": {
+    "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
+    "branch": "codex/bimlog-lens-next-20260812",
+    "head": "4e2d4da72493c9cb497e067c2e73e727e031ede4"
+  },
+  "scope": "strict web-only acceptance under temporary adapter freeze",
+  "inputs": [
+    {
+      "role": "action-draft-view",
+      "path": "artifacts/bimlog/src/features/lens-next/LensNextActionDraftView.tsx",
+      "bytes": 12788,
+      "sha256": "35ECBA0CAF0A6DE037947AD7EC4A3C53FCECC55395A51A40460ACCD1CB374797"
+    },
+    {
+      "role": "action-draft-view-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-action-draft-view.behavior.tsx",
+      "bytes": 5000,
+      "sha256": "879FFC0E80F4E1C019AF925D4FED8826084A50FA4D8F298C45E89DCD751A6438"
+    },
+    {
+      "role": "action-draft",
+      "path": "artifacts/bimlog/src/features/lens-next/lens-next-action-draft.ts",
+      "bytes": 10468,
+      "sha256": "E33B64F741EDCA50BCC9B8943F0D9FF594D0F7D4F01288408ECA49A751E7326B"
+    },
+    {
+      "role": "action-draft-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-action-draft.behavior.ts",
+      "bytes": 5669,
+      "sha256": "37CE589044D560EAD443030942D9F4A467B54CECCC86A35D21A47C04D2C21E2A"
+    },
+    {
+      "role": "phase2-capability",
+      "path": "artifacts/bimlog/src/features/lens-next/lens-next-phase2-capability.ts",
+      "bytes": 16192,
+      "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
+    },
+    {
+      "role": "phase2-capability-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-capability.behavior.ts",
+      "bytes": 10607,
+      "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+    }
+  ],
+  "inputManifestSha256": "04547281F91EF8628B903D75E2C10C378F245AAC4876EE387EE84E484BFF8F46",
+  "priorReceipt": {
+    "role": "phase2-api-executor",
+    "path": "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
+    "bytes": 10641,
+    "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+  },
+  "totals": {
+    "assertions": 21,
+    "passed": 21,
+    "failed": 0
+  },
+  "failedAssertionIds": [],
+  "checks": [
+    {
+      "id": "input.action-draft-view.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/src/features/lens-next/LensNextActionDraftView.tsx",
+        "expected": {
+          "bytes": 12788,
+          "sha256": "35ECBA0CAF0A6DE037947AD7EC4A3C53FCECC55395A51A40460ACCD1CB374797"
+        },
+        "actual": {
+          "bytes": 12788,
+          "sha256": "35ECBA0CAF0A6DE037947AD7EC4A3C53FCECC55395A51A40460ACCD1CB374797"
+        }
+      }
+    },
+    {
+      "id": "input.action-draft-view-behavior.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/scripts/lens-next/lens-next-action-draft-view.behavior.tsx",
+        "expected": {
+          "bytes": 5000,
+          "sha256": "879FFC0E80F4E1C019AF925D4FED8826084A50FA4D8F298C45E89DCD751A6438"
+        },
+        "actual": {
+          "bytes": 5000,
+          "sha256": "879FFC0E80F4E1C019AF925D4FED8826084A50FA4D8F298C45E89DCD751A6438"
+        }
+      }
+    },
+    {
+      "id": "input.action-draft.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/src/features/lens-next/lens-next-action-draft.ts",
+        "expected": {
+          "bytes": 10468,
+          "sha256": "E33B64F741EDCA50BCC9B8943F0D9FF594D0F7D4F01288408ECA49A751E7326B"
+        },
+        "actual": {
+          "bytes": 10468,
+          "sha256": "E33B64F741EDCA50BCC9B8943F0D9FF594D0F7D4F01288408ECA49A751E7326B"
+        }
+      }
+    },
+    {
+      "id": "input.action-draft-behavior.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/scripts/lens-next/lens-next-action-draft.behavior.ts",
+        "expected": {
+          "bytes": 5669,
+          "sha256": "37CE589044D560EAD443030942D9F4A467B54CECCC86A35D21A47C04D2C21E2A"
+        },
+        "actual": {
+          "bytes": 5669,
+          "sha256": "37CE589044D560EAD443030942D9F4A467B54CECCC86A35D21A47C04D2C21E2A"
+        }
+      }
+    },
+    {
+      "id": "input.phase2-capability.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/src/features/lens-next/lens-next-phase2-capability.ts",
+        "expected": {
+          "bytes": 16192,
+          "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
+        },
+        "actual": {
+          "bytes": 16192,
+          "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
+        }
+      }
+    },
+    {
+      "id": "input.phase2-capability-behavior.exact",
+      "passed": true,
+      "detail": {
+        "relativePath": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-capability.behavior.ts",
+        "expected": {
+          "bytes": 10607,
+          "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+        },
+        "actual": {
+          "bytes": 10607,
+          "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+        }
+      }
+    },
+    {
+      "id": "source.action-state-locale-contract",
+      "passed": true,
+      "detail": "The exact view/draft pair declares three actions, six states, and English/Spanish locales."
+    },
+    {
+      "id": "source.native-controls-bounds",
+      "passed": true,
+      "detail": "Native form controls are bounded to at most 100 assignment choices."
+    },
+    {
+      "id": "source.draft-only-callback-surface",
+      "passed": true,
+      "detail": "The view exposes local draft callbacks only and has no executor/dispatch/submit callback."
+    },
+    {
+      "id": "source.ui-default-deny",
+      "passed": true,
+      "detail": "The UI invariant set denies dispatch, authority, mutation, production writes, network, and storage."
+    },
+    {
+      "id": "source.no-direct-io-or-write-adapter",
+      "passed": true,
+      "detail": "No direct network, persistence, or mutation primitive exists in the view source."
+    },
+    {
+      "id": "source.draft-and-capability-default-deny",
+      "passed": true,
+      "detail": "The bound draft and capability contracts preserve UI/production default deny."
+    },
+    {
+      "id": "source.behavior-covers-view-surface",
+      "passed": true,
+      "detail": "The executable SSR proof covers all assigned actions, states, locales, native controls, and bound."
+    },
+    {
+      "id": "proof.action-draft-view",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "actions": 3,
+        "states": 6,
+        "locales": 2,
+        "nativeControls": true,
+        "maximumOptions": 100,
+        "dispatchBehavior": false,
+        "networkBehavior": false,
+        "storageBehavior": false,
+        "writeBehavior": false,
+        "authorityGranted": false,
+        "productionWriteAllowed": false,
+        "mutationAllowed": false
+      }
+    },
+    {
+      "id": "proof.action-draft-model",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "accepted": 3,
+        "draftBatch": 500,
+        "adversarialDenials": 20,
+        "deterministicNonceInjection": true,
+        "dispatchPerformed": false,
+        "productionWriteAllowed": false,
+        "mutationAllowed": false,
+        "io": {
+          "network": false,
+          "database": false,
+          "customer": false,
+          "provider": false
+        }
+      }
+    },
+    {
+      "id": "proof.phase2-capability",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "acceptedContracts": 3,
+        "enabledContracts": 3,
+        "adversarialDenials": 39,
+        "io": {
+          "database": false,
+          "network": false,
+          "provider": false,
+          "customer": false
+        }
+      }
+    },
+    {
+      "id": "proof.strict-typescript",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.prettier",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "stdout": "Checking formatting...\nAll matched files use Prettier code style!"
+      }
+    },
+    {
+      "id": "proof.diff",
+      "passed": true,
+      "detail": {
+        "exitCode": 0,
+        "stdout": ""
+      }
+    },
+    {
+      "id": "prior.api-executor.rebind",
+      "passed": true,
+      "detail": {
+        "relativePath": "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
+        "expected": {
+          "bytes": 10641,
+          "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+        },
+        "actual": {
+          "bytes": 10641,
+          "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+        },
+        "status": "PASS_SANDBOX_EXECUTOR_ACCEPTANCE_NO_PRODUCTION_AUTHORITY"
+      }
+    },
+    {
+      "id": "proof.mojibake",
+      "passed": true,
+      "detail": "No mojibake sentinel occurs in an assigned or owned source file."
+    }
+  ],
+  "disposition": {
+    "actionDraftViewAccepted": true,
+    "actions": 3,
+    "states": 6,
+    "locales": 2,
+    "maximumAssignmentOptions": 100,
+    "nativeFormControls": true,
+    "callbacksAreDraftOnly": true,
+    "dispatchAllowed": false,
+    "mutationAllowed": false,
+    "authorityGranted": false,
+    "productionWriteAllowed": false,
+    "networkOrStorageAllowed": false
+  },
+  "safety": {
+    "pluginNativeBridgeSavedViewpointPathsReadOrTested": false,
+    "implementationFilesWrittenByVerifier": false,
+    "databaseIo": false,
+    "networkIo": false,
+    "gitMutation": false,
+    "externalAction": false
+  }
+}

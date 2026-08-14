@@ -1,0 +1,256 @@
+{
+  "schemaVersion": "bimlog-lens-next-timeline-offline-queue-terminal-v1",
+  "generatedAtUtc": "2026-08-14T21:19:26.917Z",
+  "status": "PASS_PURE_TIMELINE_OFFLINE_QUEUE_NO_MUTATION_AUTHORITY",
+  "worktree": {
+    "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
+    "head": "4e2d4da72493c9cb497e067c2e73e727e031ede4"
+  },
+  "scope": "web/API-only under temporary adapter freeze",
+  "inputs": [
+    {
+      "role": "timeline",
+      "path": "artifacts/bimlog/src/features/lens-next/lens-next-activity-timeline.ts",
+      "bytes": 8209,
+      "sha256": "E455B6123D945A47EA4C254EF5F1E6992A852BFE0366B56D484B126F835BE8AC"
+    },
+    {
+      "role": "timeline-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline.behavior.ts",
+      "bytes": 6093,
+      "sha256": "2A72BAE5F880BF86D9C3174E2F75B756B21916D897F1B2A266CA73EDFEC779C7"
+    },
+    {
+      "role": "offline-queue",
+      "path": "artifacts/bimlog/src/features/lens-next/lens-next-offline-queue.ts",
+      "bytes": 9771,
+      "sha256": "F8C14CDC0B960A5C9F88CAA68538020FBB9A9D67238D153C6DA1CDFE4A7DF210"
+    },
+    {
+      "role": "offline-queue-behavior",
+      "path": "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue.behavior.ts",
+      "bytes": 7016,
+      "sha256": "35FD11FFFC72FB7C0C7A31DF257B6A1F1E7CFEE2889F44C5073F725275931395"
+    }
+  ],
+  "inputManifestSha256": "59DB1A92E88CA945D1B6B466CE68681B0200D065C8397A6A61CF945F5EB35283",
+  "totals": {
+    "assertions": 20,
+    "passed": 20,
+    "failed": 0
+  },
+  "failedAssertionIds": [],
+  "checks": [
+    {
+      "id": "input.timeline.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-activity-timeline.ts",
+        "expected": {
+          "bytes": 8209,
+          "sha256": "E455B6123D945A47EA4C254EF5F1E6992A852BFE0366B56D484B126F835BE8AC"
+        },
+        "actual": {
+          "bytes": 8209,
+          "sha256": "E455B6123D945A47EA4C254EF5F1E6992A852BFE0366B56D484B126F835BE8AC"
+        }
+      }
+    },
+    {
+      "id": "input.timeline-behavior.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline.behavior.ts",
+        "expected": {
+          "bytes": 6093,
+          "sha256": "2A72BAE5F880BF86D9C3174E2F75B756B21916D897F1B2A266CA73EDFEC779C7"
+        },
+        "actual": {
+          "bytes": 6093,
+          "sha256": "2A72BAE5F880BF86D9C3174E2F75B756B21916D897F1B2A266CA73EDFEC779C7"
+        }
+      }
+    },
+    {
+      "id": "input.offline-queue.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-offline-queue.ts",
+        "expected": {
+          "bytes": 9771,
+          "sha256": "F8C14CDC0B960A5C9F88CAA68538020FBB9A9D67238D153C6DA1CDFE4A7DF210"
+        },
+        "actual": {
+          "bytes": 9771,
+          "sha256": "F8C14CDC0B960A5C9F88CAA68538020FBB9A9D67238D153C6DA1CDFE4A7DF210"
+        }
+      }
+    },
+    {
+      "id": "input.offline-queue-behavior.exact",
+      "passed": true,
+      "detail": {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue.behavior.ts",
+        "expected": {
+          "bytes": 7016,
+          "sha256": "35FD11FFFC72FB7C0C7A31DF257B6A1F1E7CFEE2889F44C5073F725275931395"
+        },
+        "actual": {
+          "bytes": 7016,
+          "sha256": "35FD11FFFC72FB7C0C7A31DF257B6A1F1E7CFEE2889F44C5073F725275931395"
+        }
+      }
+    },
+    {
+      "id": "timeline.500-five-pages-dedupe-order",
+      "passed": true,
+      "detail": "500 events, five 100-event pages, dedupe and deterministic ordering."
+    },
+    {
+      "id": "timeline.cursor-identity-monotonic-conflict",
+      "passed": true,
+      "detail": "Cursor and immutable identity are bound; stale/divergent data blocks without auto-resolution."
+    },
+    {
+      "id": "timeline.get-only-bilingual-no-write",
+      "passed": true,
+      "detail": "GET-only pure state model, bilingual, no write or I/O adapter."
+    },
+    {
+      "id": "timeline.behavior-source-covers-matrix",
+      "passed": true,
+      "detail": "Behavior covers 500 events, dedupe, cursor denial and bilingual state."
+    },
+    {
+      "id": "queue.100-fifo-bytes-dedupe",
+      "passed": true,
+      "detail": "Queue is capped at 100 and bytes, FIFO, with idempotency dedupe."
+    },
+    {
+      "id": "queue.reconfirm-retry-offline",
+      "passed": true,
+      "detail": "Reconnect requires confirmation and retry is bounded while offline."
+    },
+    {
+      "id": "queue.stale-executor-precondition-conflict",
+      "passed": true,
+      "detail": "Stale executor or precondition mismatch blocks/conflicts fail-closed."
+    },
+    {
+      "id": "queue.no-persistence-network-write-auto-visual",
+      "passed": true,
+      "detail": "No persistence, network, write, auto-resolution, or visual mutation."
+    },
+    {
+      "id": "proof.timeline",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "events": 500,
+        "pages": 5,
+        "duplicatesAdded": 0,
+        "deterministicOrdering": true,
+        "staleBlocked": true,
+        "divergentBlocked": true,
+        "cursorBlocked": true,
+        "states": [
+          "empty",
+          "ready",
+          "offline",
+          "error",
+          "blocked"
+        ],
+        "locales": 2,
+        "writes": 0,
+        "io": {
+          "network": false,
+          "database": false,
+          "customer": false,
+          "provider": false
+        }
+      }
+    },
+    {
+      "id": "proof.queue",
+      "passed": true,
+      "detail": {
+        "result": "PASS",
+        "queued": 100,
+        "fifo": true,
+        "duplicatesAdded": 0,
+        "overflowBlocked": true,
+        "mismatchBlocked": true,
+        "staleBlocked": true,
+        "reconnectRequiresConfirmation": true,
+        "retryAttempts": 4,
+        "persistentStores": 0,
+        "dispatches": 0,
+        "io": {
+          "network": false,
+          "database": false,
+          "customer": false,
+          "provider": false
+        }
+      }
+    },
+    {
+      "id": "proof.strict-typescript",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.prettier",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "proof.diff",
+      "passed": true,
+      "detail": {
+        "exitCode": 0
+      }
+    },
+    {
+      "id": "prior.executor.rebind",
+      "passed": true,
+      "detail": {
+        "path": "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
+        "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8",
+        "status": "PASS_SANDBOX_EXECUTOR_ACCEPTANCE_NO_PRODUCTION_AUTHORITY"
+      }
+    },
+    {
+      "id": "prior.workflow.rebind",
+      "passed": true,
+      "detail": {
+        "path": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
+        "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A",
+        "status": "PASS_WEB_WORKFLOW_CONTRACTS_NO_MUTATION_AUTHORITY"
+      }
+    },
+    {
+      "id": "proof.mojibake",
+      "passed": true,
+      "detail": "No sentinel matches."
+    }
+  ],
+  "disposition": {
+    "pureContractsAccepted": true,
+    "mutationAllowed": false,
+    "authorityGranted": false,
+    "productionWriteAllowed": false,
+    "persistenceOrNetworkAllowed": false
+  },
+  "safety": {
+    "pluginNativeBridgeSavedViewpointPathsReadOrTested": false,
+    "implementationFilesWrittenByVerifier": false,
+    "databaseIo": false,
+    "networkIo": false,
+    "gitMutation": false,
+    "externalAction": false
+  }
+}
