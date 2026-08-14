@@ -1,5 +1,18 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog Lens Next dual-version native reference binding - 2026-08-14
+
+- Separate `net48` native shells now bind Navisworks 2021 and 2025 without
+  mixing assembly generations. The 2021 shell uses the installed references
+  selected by `H:\BIMLogPlugin2021`; the 2025 shell uses the approved
+  `H:\BIMLogPlugin2025\refs` set.
+- All six files are SHA-256 pinned and the build fails closed when a reference
+  is absent or mismatched. Both year-specific Release builds passed with zero
+  warnings/errors; Phase 1 isolation and Phase 2 policy tests each passed 17/17.
+- This is held source/build evidence only. No concrete Autodesk adapter,
+  installation, live Navisworks acceptance, Phase 2 enablement, integration,
+  push, publication, or deployment occurred.
+
 ## BIMLog Lens Next Phase 2 held local source candidate - 2026-08-14
 
 - Local commit `ea3f4992bab05f2ba99dbd8d2058053158734171` freezes the
@@ -16,7 +29,7 @@
 - The audit corrected stale full-receipt hash pins after upstream receipts were
   regenerated; the final downstream chain is bound to the newly verified
   receipt set. This is local source evidence, not runtime write acceptance.
-- No SDK binding, plugin installation, Legacy access, database or production
+- No concrete Autodesk adapter, plugin installation, Legacy access, database or production
   I/O, main integration, push, publication, deployment, provider action,
   customer action, or live Navisworks verification occurred.
 
@@ -44,8 +57,8 @@
   SavedViewpoint mutation remain disabled.
 - Local web behavior, strict TypeScript, SSR/view behavior, cross-lane identity,
   native isolation, deterministic .NET build, native runtime, and mojibake checks
-  pass. This is local source evidence only: authoritative F-root Navisworks SDK
-  binding, plugin installation, live Navisworks acceptance, push, publication,
+  pass. Authoritative dual-version SDK reference binding now passes separately
+  for 2021 and 2025. Plugin installation, live Navisworks acceptance, push, publication,
   deployment, production access, and Phase 2 writes remain unperformed.
 
 ## BIMLog v1.60.31.04 Build 4 local release candidate - 2026-08-12

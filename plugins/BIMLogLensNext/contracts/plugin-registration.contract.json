@@ -7,6 +7,6 @@
   "dockPanelId": "BIMLogLensNext.IgniteSmart",
   "buttonPluginId": "BIMLogLensNextButton.IgniteSmart",
   "commandPrefix": "BIMLogLensNext",
-  "nativeAdapter": "abstract_pending_authoritative_f_root_navisworks_references",
+  "nativeAdapter": "dual_2021_2025_hash_gated_reference_shells",
   "phase1Mode": "read_only"
 }

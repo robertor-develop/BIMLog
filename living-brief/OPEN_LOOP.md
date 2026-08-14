@@ -6,24 +6,23 @@
    default-deny until an independently approved sandbox/pilot write target,
    exact permission receipt, immutable issue-family identity, atomic
    precondition, audit/idempotency transaction, and rollback contract exist.
-2. Bind no native implementation until Roberto selects an authoritative F-root
-   Navisworks version/reference set. The current native policy is pure and has
-   no Navisworks or SavedViewpoint surface.
+2. Keep the hash-gated 2021/2025 reference shells separate. Implement and test
+   a concrete read-only Autodesk adapter only as its own accepted gate; the
+   current native policy still has no Navisworks or SavedViewpoint surface.
 3. Add and accept the real authenticated API/database transaction adapter in a
    separate isolated task. Contract and sandbox-executor proofs do not establish
    database behavior or production authority.
 4. After adapter acceptance, separately verify feature-flag rollout, offline
    reconfirmation, conflict handling, restart/idempotency, bilingual desktop and
    narrow UI behavior, Legacy non-interference, install, and live Navisworks.
-5. Preserve generated `tests/lens-next-next/bin` and `obj` artifacts locally;
-   they are excluded from the source candidate and require no cleanup action.
+5. Generated Lens Next `bin` and `obj` paths are now scoped ignores. Existing
+   artifacts remain untouched and excluded from the source candidate.
 
 ## BIMLog Lens Next Phase 1 remaining gates - 2026-08-12
 
-1. Bind the isolated native shell to authoritative F-root Navisworks references
-   for the explicitly selected Navisworks version. No qualifying SDK reference
-   is currently present in the authorized F-root candidate, so do not infer one
-   from Legacy or any C-root path.
+1. Independently accept the separate hash-gated Navisworks 2021 and 2025 native
+   reference shells, then implement the concrete read-only adapter without
+   mixing either assembly generation or importing Legacy source.
 2. Complete independent acceptance of the exact current candidate after the
    protected route, authenticated project adapter, ephemeral bridge-session
    adapter, web/native protocol correction, and executable narrow-panel render

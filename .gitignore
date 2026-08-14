@@ -47,3 +47,15 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Lens Next .NET build outputs (scoped; source/evidence remain visible)
+/plugins/BIMLogLensNext/bin/
+/plugins/BIMLogLensNext/obj/
+/plugins/BIMLogLensNext/tests/bin/
+/plugins/BIMLogLensNext/tests/obj/
+/plugins/BIMLogLensNext/native/2021/bin/
+/plugins/BIMLogLensNext/native/2021/obj/
+/plugins/BIMLogLensNext/native/2025/bin/
+/plugins/BIMLogLensNext/native/2025/obj/
+/tests/lens-next-next/bin/
+/tests/lens-next-next/obj/

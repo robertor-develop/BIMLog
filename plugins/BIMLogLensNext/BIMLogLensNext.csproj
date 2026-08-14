@@ -13,6 +13,8 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="tests\**\*.cs" />
+    <Compile Remove="native\**\*.cs" />
     <None Remove="tests\**\*" />
+    <None Remove="native\**\*" />
   </ItemGroup>
 </Project>

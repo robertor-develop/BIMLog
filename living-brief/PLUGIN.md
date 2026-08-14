@@ -1,5 +1,17 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## BIMLog Lens Next dual-version reference shells - 2026-08-14
+
+Lens Next has separate `BIMLogLensNext.Native2021` and
+`BIMLogLensNext.Native2025` projects. The 2021 project binds the installed
+Navisworks Manage 2021 assemblies selected by the approved
+`H:\BIMLogPlugin2021` project; the 2025 project binds
+`H:\BIMLogPlugin2025\refs`. A shared MSBuild gate pins all three Autodesk
+assemblies per year and stops on absence or hash mismatch. The core project
+excludes the native subtree, so neither product assembly generation leaks into
+the shared read-only contract. This proves source/build binding, not a concrete
+adapter, installation, live runtime behavior, or field acceptance.
+
 ## BIMLog Lens Next Phase 2 held workflow source candidate - 2026-08-14
 
 Commit `ea3f4992bab05f2ba99dbd8d2058053158734171` freezes a local,
@@ -12,9 +24,10 @@ forbidden, workflow status cannot change visual state, conflicts require human
 review, and the native Phase 1 bridge still exposes only its four read commands.
 
 This is not an enabled write implementation. It has no database, network,
-provider, customer, installation, SavedViewpoint, or Legacy I/O. No authoritative
-Navisworks SDK is bound. The generated test `bin`/`obj` files are local evidence
-byproducts and are not part of the frozen candidate. Native binding, a real
+provider, customer, installation, SavedViewpoint, or Legacy I/O. Authoritative
+Navisworks 2021/2025 references are now bound only through separate hash-gated
+shells. Generated test `bin`/`obj` files are ignored build byproducts and are
+not part of the frozen candidate. A concrete native adapter, a real
 sandbox transaction/audit adapter, feature enablement, installation, and live
 Navisworks acceptance remain separate future gates.
 
@@ -27,10 +40,9 @@ root `%LOCALAPPDATA%\BIMLog\LensNext`, loopback bridge `127.0.0.1:8766`, and
 metadata namespace `bimlog.lens_next.v1`. Phase 1 is read-only and permits only
 ping, capabilities, project-context, and exact immutable-identity
 open-working-view. It creates no SavedViewpoint, performs no Legacy discovery or
-mutation, and has not been installed. The current .NET candidate remains an
-abstract adapter until authoritative F-root references for the intended
-Navisworks version are explicitly available and bound; historical Legacy roots
-below are not valid Lens Next build roots.
+mutation, and has not been installed. Its concrete adapter remains unimplemented;
+the accepted reference boundary is two separate hash-gated 2021/2025 shells.
+Historical Legacy roots below are not valid Lens Next build roots.
 
 Owned/hand-edited in Git. The in-app Living Brief serves the verified deployed source bundle;
 the database is an exact status-bearing mirror and must never override this document.

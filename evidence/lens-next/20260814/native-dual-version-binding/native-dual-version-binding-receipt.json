@@ -1,0 +1,56 @@
+{
+  "schemaVersion": "bimlog-lens-next-native-dual-version-binding-v1",
+  "status": "SOURCE_BUILD_VERIFIED_HELD",
+  "date": "2026-08-14",
+  "authority": {
+    "operatorDecision": "Roberto designated H: as the approved BIMLog Lens development/reference root",
+    "constitutionVersion": "3.0.0",
+    "constitutionSha256": "733b944cfa80cc20436212f7a02344276bd913ec8688dd91146b186e3b5d7fcf"
+  },
+  "targets": [
+    {
+      "productYear": 2021,
+      "project": "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+      "provenanceProject": "H:\\BIMLogPlugin2021\\BIMLogNavisPlugin.csproj",
+      "referenceRoot": "C:\\Program Files\\Autodesk\\Navisworks Manage 2021",
+      "assemblies": {
+        "Autodesk.Navisworks.Api.dll": { "bytes": 3945576, "sha256": "C6DFF483062BAD5D6EA56067D2F6258C89D705177B1BBEDB68FC66735E6CE075", "assemblyVersion": "18.0.1347.51" },
+        "Autodesk.Navisworks.Automation.dll": { "bytes": 170296, "sha256": "7C02D8E760F1103B1CB9215C897D328052AFF4E036C688CF53F53B269896AAF5", "assemblyVersion": "18.0.1347.51" },
+        "Autodesk.Navisworks.Clash.dll": { "bytes": 427320, "sha256": "480F22A8AB07851E3751F9DDB3DC03975D829B464C7799AAE91E01F9F6388F9C", "assemblyVersion": "18.0.1347.51" }
+      },
+      "build": "PASS_0_WARNINGS_0_ERRORS"
+    },
+    {
+      "productYear": 2025,
+      "project": "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+      "provenanceProject": "H:\\BIMLogPlugin2025\\BIMLogNavisPlugin.csproj",
+      "referenceRoot": "H:\\BIMLogPlugin2025\\refs",
+      "assemblies": {
+        "Autodesk.Navisworks.Api.dll": { "bytes": 4243232, "sha256": "D6426063E03A97C34BA805F20C1D1ADD35BCC5C63EFEA87F8AF40F49E82BF155", "assemblyVersion": "22.0.0.0" },
+        "Autodesk.Navisworks.Automation.dll": { "bytes": 184096, "sha256": "476F7E78D5566A1071AB43E3C23B523585A6B8E1F85F3C9F1E8D4DF861DC8729", "assemblyVersion": "22.0.0.0" },
+        "Autodesk.Navisworks.Clash.dll": { "bytes": 502048, "sha256": "D272A4510C4FDA3E3E90A72E3C0C392CB687170C052C8698296E59BB0FFFC90A", "assemblyVersion": "22.0.0.0" }
+      },
+      "build": "PASS_0_WARNINGS_0_ERRORS"
+    }
+  ],
+  "separation": {
+    "assemblyGenerationsMixed": false,
+    "coreProjectExcludesNativeSubtree": true,
+    "copyOrInstallPerformed": false,
+    "legacySourceReadOrWritePerformed": false
+  },
+  "failClosedProof": {
+    "absentReferenceRejected": true,
+    "hashMismatchRejected": true,
+    "gate": "plugins/BIMLogLensNext/native/NavisworksReferenceGate.targets"
+  },
+  "focusedTests": {
+    "phase1ReadOnlyIsolation": "PASS_17_OF_17",
+    "phase2NativePolicy": "PASS_17_OF_17"
+  },
+  "limitations": [
+    "No plugin installation or live Navisworks runtime acceptance was performed.",
+    "The projects bind SDK references only; a concrete Autodesk adapter remains a separate implementation gate.",
+    "Phase 2 workflow execution remains held and default-deny."
+  ]
+}

@@ -1,0 +1,24 @@
+<Project>
+  <Target Name="VerifyAuthoritativeNavisworksReferences" BeforeTargets="ResolveAssemblyReferences">
+    <Error Condition="'$(NavisworksProductYear)' == ''" Text="NavisworksProductYear must be explicit." />
+    <Error Condition="'$(NavisworksReferenceRoot)' == ''" Text="NavisworksReferenceRoot must be explicit." />
+    <ItemGroup>
+      <_RequiredNavisworksReference Include="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Api.dll">
+        <ExpectedHash>$(NavisworksApiSha256)</ExpectedHash>
+      </_RequiredNavisworksReference>
+      <_RequiredNavisworksReference Include="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Automation.dll">
+        <ExpectedHash>$(NavisworksAutomationSha256)</ExpectedHash>
+      </_RequiredNavisworksReference>
+      <_RequiredNavisworksReference Include="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Clash.dll">
+        <ExpectedHash>$(NavisworksClashSha256)</ExpectedHash>
+      </_RequiredNavisworksReference>
+    </ItemGroup>
+    <Error Condition="!Exists('%(_RequiredNavisworksReference.Identity)')"
+           Text="Authoritative Navisworks $(NavisworksProductYear) reference is absent: %(_RequiredNavisworksReference.Identity)" />
+    <GetFileHash Files="@(_RequiredNavisworksReference)" Algorithm="SHA256" HashEncoding="hex">
+      <Output TaskParameter="Items" ItemName="_HashedNavisworksReference" />
+    </GetFileHash>
+    <Error Condition="'%(_HashedNavisworksReference.FileHash)' != '%(_HashedNavisworksReference.ExpectedHash)'"
+           Text="Authoritative Navisworks $(NavisworksProductYear) reference hash mismatch: %(_HashedNavisworksReference.Identity) expected %(_HashedNavisworksReference.ExpectedHash), received %(_HashedNavisworksReference.FileHash)." />
+  </Target>
+</Project>

@@ -9623,6 +9623,86 @@
         "tests/lens-next-next/verify-web-workflow-successor.mjs"
       ],
       "reviewedChangeSha256": "ae1f3d104bdd6e792e897d0a603e63d1300aabb9d22763d5f5b63128c98c1c5f"
+    },
+    {
+      "taskId": "bimlog-lens-next-dual-version-reference-binding-20260814",
+      "reviewedThroughCommit": "86935f48a25b17e70b4a3f37a6bfef874c72fb05",
+      "reviewedAt": "2026-08-14T18:48:00-04:00",
+      "status": "local_source_build_verified_held",
+      "captureTiming": "normal_acceptance_boundary",
+      "summary": "Binds separate hash-gated Navisworks 2021 and 2025 reference shells without mixing assembly generations, copying, installation, Legacy access, or external action.",
+      "workstreams": [
+        "bimlog-lens-next",
+        "dual-version-native-reference-binding",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No canonical product authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The isolated local and external-action boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed build and evidence gates cover the binding."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Dual-version Lens support was already required."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform route, API, schema, or topology changes."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records separate 2021/2025 reference projects, provenance, hashes, and limitations."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local source/build verification while preserving runtime and release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Replaces the reference-selection blocker with concrete adapter and runtime acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production, customer, or field evidence is claimed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        ".gitignore",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
+        "plugins/BIMLogLensNext/contracts/plugin-registration.contract.json"
+      ],
+      "reviewedChangeSha256": "03ec7a4531d8bf4cb50bba6ce1bc875f0984f19c6807d2456660e974bf34ba88"
     }
   ]
 }
