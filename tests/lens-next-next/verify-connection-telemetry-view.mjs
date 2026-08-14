@@ -43,7 +43,7 @@ const inputs = [
 const prior = [
   "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
   11098,
-  "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A",
+  "60EB976CED230800510BF10D5C49A72F13603A9A9B1F541C23D4DC0459F9E6E0",
 ];
 const checks = [];
 const abs = (relativePath) => path.join(ROOT, ...relativePath.split("/"));

@@ -1,6 +1,6 @@
 {
   "schemaVersion": "bimlog-lens-next-action-draft-view-terminal-v1",
-  "generatedAtUtc": "2026-08-14T21:20:02.267Z",
+  "generatedAtUtc": "2026-08-14T21:25:33.854Z",
   "status": "PASS_ACTION_DRAFT_VIEW_DRAFT_ONLY_ZERO_AUTHORITY_IO",
   "worktree": {
     "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
@@ -51,7 +51,7 @@
     "role": "phase2-api-executor",
     "path": "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
     "bytes": 10641,
-    "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+    "sha256": "10E287B7B36623012524E42E8EAB869C8CBFACD253A81807484FDBB2609C8240"
   },
   "totals": {
     "assertions": 21,
@@ -270,11 +270,11 @@
         "relativePath": "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
         "expected": {
           "bytes": 10641,
-          "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+          "sha256": "10E287B7B36623012524E42E8EAB869C8CBFACD253A81807484FDBB2609C8240"
         },
         "actual": {
           "bytes": 10641,
-          "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+          "sha256": "10E287B7B36623012524E42E8EAB869C8CBFACD253A81807484FDBB2609C8240"
         },
         "status": "PASS_SANDBOX_EXECUTOR_ACCEPTANCE_NO_PRODUCTION_AUTHORITY"
       }

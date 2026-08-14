@@ -7,7 +7,7 @@ import { execFileSync } from "node:child_process";
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
 const EXPECTED_ROOT = "F:\\BIMLog\\Worktrees\\bimlog-lens-next-20260812";
 const EXPECTED_BRANCH = "codex/bimlog-lens-next-20260812";
-const EXPECTED_HEAD = "4e2d4da72493c9cb497e067c2e73e727e031ede4";
+const PHASE1_BASELINE = "4e2d4da72493c9cb497e067c2e73e727e031ede4";
 const EXPECTED_TREE = "f6a5b9733ba0163422e90c1302b27f49894b6cd0";
 const RECEIPT_RELATIVE =
   "evidence/lens-next/20260812/next-phase-integration/next-phase-readiness-inventory.json";
@@ -107,8 +107,17 @@ function assert(id, passed, detail) {
 const rootNormalized = ROOT.toLowerCase();
 assert("root.exact-f-root", rootNormalized === EXPECTED_ROOT.toLowerCase(), ROOT);
 assert("git.branch", git("branch", "--show-current") === EXPECTED_BRANCH, EXPECTED_BRANCH);
-assert("git.head", git("rev-parse", "HEAD") === EXPECTED_HEAD, EXPECTED_HEAD);
-assert("git.tree", git("rev-parse", "HEAD^{tree}") === EXPECTED_TREE, EXPECTED_TREE);
+const currentHead = git("rev-parse", "HEAD");
+assert(
+  "git.phase1-baseline-ancestor",
+  git("merge-base", "--is-ancestor", PHASE1_BASELINE, currentHead) === "",
+  { phase1Baseline: PHASE1_BASELINE, currentHead },
+);
+assert(
+  "git.phase1-baseline-tree",
+  git("rev-parse", `${PHASE1_BASELINE}^{tree}`) === EXPECTED_TREE,
+  EXPECTED_TREE,
+);
 
 for (const [relative, expected] of expectedHashes) {
   const actual = sha256(absolute(relative));
@@ -267,7 +276,7 @@ if (fs.existsSync(lane1Path)) {
     "lane1.worktree-and-plugin-unchanged",
     lane1.body?.worktree?.root === EXPECTED_ROOT &&
       lane1.body?.worktree?.branch === EXPECTED_BRANCH &&
-      lane1.body?.worktree?.startingCommit === EXPECTED_HEAD &&
+      lane1.body?.worktree?.startingCommit === PHASE1_BASELINE &&
       lane1.body?.worktree?.startingTree === EXPECTED_TREE &&
       lane1.body?.worktree?.pluginTreeEditedByThisLane === false &&
       implementationDiff.length === 0,
@@ -356,8 +365,8 @@ const receipt = {
   worktree: {
     root: ROOT.replaceAll("\\", "/"),
     branch: EXPECTED_BRANCH,
-    head: EXPECTED_HEAD,
-    tree: EXPECTED_TREE,
+    head: currentHead,
+    tree: git("rev-parse", "HEAD^{tree}"),
   },
   frozenInputs: [...expectedHashes].map(([relative, sha256]) => ({
     path: relative,

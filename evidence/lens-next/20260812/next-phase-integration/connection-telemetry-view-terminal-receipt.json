@@ -1,6 +1,6 @@
 {
   "schemaVersion": "bimlog-lens-next-connection-telemetry-view-terminal-v1",
-  "generatedAtUtc": "2026-08-14T21:20:09.614Z",
+  "generatedAtUtc": "2026-08-14T21:25:40.778Z",
   "status": "PASS_CONNECTION_TELEMETRY_PRESENTATIONAL_ZERO_IO_MUTATION",
   "worktree": {
     "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
@@ -27,7 +27,7 @@
     "role": "auto-refresh-workflow",
     "path": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
     "bytes": 11098,
-    "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+    "sha256": "60EB976CED230800510BF10D5C49A72F13603A9A9B1F541C23D4DC0459F9E6E0"
   },
   "totals": {
     "assertions": 13,
@@ -138,11 +138,11 @@
         "relativePath": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
         "expected": {
           "bytes": 11098,
-          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+          "sha256": "60EB976CED230800510BF10D5C49A72F13603A9A9B1F541C23D4DC0459F9E6E0"
         },
         "actual": {
           "bytes": 11098,
-          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+          "sha256": "60EB976CED230800510BF10D5C49A72F13603A9A9B1F541C23D4DC0459F9E6E0"
         },
         "status": "PASS_WEB_WORKFLOW_CONTRACTS_NO_MUTATION_AUTHORITY"
       }

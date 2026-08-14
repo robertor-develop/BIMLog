@@ -1,12 +1,12 @@
 {
   "schemaVersion": "bimlog-lens-next-phase2-cross-language-verification-v1",
-  "generatedAtUtc": "2026-08-14T21:17:34.992Z",
+  "generatedAtUtc": "2026-08-14T21:23:56.646Z",
   "status": "PASS",
   "worktree": {
     "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
     "branch": "codex/bimlog-lens-next-20260812",
-    "head": "4e2d4da72493c9cb497e067c2e73e727e031ede4",
-    "tree": "f6a5b9733ba0163422e90c1302b27f49894b6cd0"
+    "head": "ea3f4992bab05f2ba99dbd8d2058053158734171",
+    "tree": "719c869faa8801bc17f23b418e88033a7eecb5a6"
   },
   "inputs": [
     {
@@ -67,10 +67,13 @@
       "detail": "codex/bimlog-lens-next-20260812"
     },
     {
-      "id": "git.head",
+      "id": "git.phase1-baseline-ancestor",
       "passed": true,
       "severity": "gate",
-      "detail": "4e2d4da72493c9cb497e067c2e73e727e031ede4"
+      "detail": {
+        "phase1Baseline": "4e2d4da72493c9cb497e067c2e73e727e031ede4",
+        "currentHead": "ea3f4992bab05f2ba99dbd8d2058053158734171"
+      }
     },
     {
       "id": "input.api.exact",

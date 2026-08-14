@@ -30,12 +30,12 @@ const priorReceipts = [
   [
     "executor",
     "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
-    "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8",
+    "10E287B7B36623012524E42E8EAB869C8CBFACD253A81807484FDBB2609C8240",
   ],
   [
     "workflow",
     "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
-    "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A",
+    "60EB976CED230800510BF10D5C49A72F13603A9A9B1F541C23D4DC0459F9E6E0",
   ],
 ];
 const inputs = [

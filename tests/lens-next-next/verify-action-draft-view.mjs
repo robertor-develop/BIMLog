@@ -68,7 +68,7 @@ const inputs = [
 const executorReceipt = [
   "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
   10641,
-  "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8",
+  "10E287B7B36623012524E42E8EAB869C8CBFACD253A81807484FDBB2609C8240",
 ];
 
 const checks = [];

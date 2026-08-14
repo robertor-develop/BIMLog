@@ -1,6 +1,6 @@
 {
   "schemaVersion": "bimlog-lens-next-phase2-workflow-shell-terminal-v1",
-  "generatedAtUtc": "2026-08-14T21:20:39.922Z",
+  "generatedAtUtc": "2026-08-14T21:26:02.929Z",
   "status": "PASS_PHASE2_COHESIVE_WEB_SHELL_ZERO_IO_MUTATION",
   "worktree": {
     "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
@@ -28,43 +28,43 @@
       "role": "workflow",
       "path": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
       "bytes": 11098,
-      "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+      "sha256": "60EB976CED230800510BF10D5C49A72F13603A9A9B1F541C23D4DC0459F9E6E0"
     },
     {
       "role": "timeline-queue-models",
       "path": "evidence/lens-next/20260812/next-phase-integration/timeline-offline-queue-terminal-receipt.json",
       "bytes": 7733,
-      "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554"
+      "sha256": "16FEE10E304E4290EA641E376458D43F155B6A28AFAFDC00A6DA10CA9DF54D1F"
     },
     {
       "role": "timeline-queue-views",
       "path": "evidence/lens-next/20260812/next-phase-integration/presentational-views-terminal-receipt.json",
       "bytes": 6712,
-      "sha256": "3F33DBE9F82D6944EB1E21F695F8AE80115D502FBE4D69C610216B92A0B82074"
+      "sha256": "E742B0F8133FA184CC500D6A79B5E78519B80ADD5BCAD7EEEB2BE2AB4D055E81"
     },
     {
       "role": "action-draft-view",
       "path": "evidence/lens-next/20260812/next-phase-integration/action-draft-view-terminal-receipt.json",
       "bytes": 9878,
-      "sha256": "64178A994F16310CB8BAAF9E3592E2341499A10DD7D4EF38EDD22A7AFFCB7D20"
+      "sha256": "A7414BD58FB0C14C03607ABB21B5DD267B599DD16BDE29A9C2F5C0290FEA3CBB"
     },
     {
       "role": "conflict-review-view",
       "path": "evidence/lens-next/20260812/next-phase-integration/conflict-review-view-terminal-receipt.json",
       "bytes": 6593,
-      "sha256": "BD3D1D1693A4916054DDCDD8388E1DA27B50D53FF714A5A22C3321C7766BE998"
+      "sha256": "E334251F246499281E4E6C68C1E5BA54EE1C33A944E6AD7A91F9FB333D3B0350"
     },
     {
       "role": "connection-telemetry-view",
       "path": "evidence/lens-next/20260812/next-phase-integration/connection-telemetry-view-terminal-receipt.json",
       "bytes": 5659,
-      "sha256": "8977BB5243EE9041595823BBAC83F02795A6993167236C55EB045123D21CA805"
+      "sha256": "98203829B43A0C05D388C00E735FEA873AAF4806BC69617AEC39034D7676AB65"
     },
     {
       "role": "phase2-api-executor",
       "path": "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
       "bytes": 10641,
-      "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+      "sha256": "10E287B7B36623012524E42E8EAB869C8CBFACD253A81807484FDBB2609C8240"
     }
   ],
   "totals": {
@@ -181,11 +181,11 @@
         "relativePath": "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
         "expected": {
           "bytes": 11098,
-          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+          "sha256": "60EB976CED230800510BF10D5C49A72F13603A9A9B1F541C23D4DC0459F9E6E0"
         },
         "actual": {
           "bytes": 11098,
-          "sha256": "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A"
+          "sha256": "60EB976CED230800510BF10D5C49A72F13603A9A9B1F541C23D4DC0459F9E6E0"
         },
         "status": "PASS_WEB_WORKFLOW_CONTRACTS_NO_MUTATION_AUTHORITY"
       }
@@ -197,11 +197,11 @@
         "relativePath": "evidence/lens-next/20260812/next-phase-integration/timeline-offline-queue-terminal-receipt.json",
         "expected": {
           "bytes": 7733,
-          "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554"
+          "sha256": "16FEE10E304E4290EA641E376458D43F155B6A28AFAFDC00A6DA10CA9DF54D1F"
         },
         "actual": {
           "bytes": 7733,
-          "sha256": "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554"
+          "sha256": "16FEE10E304E4290EA641E376458D43F155B6A28AFAFDC00A6DA10CA9DF54D1F"
         },
         "status": "PASS_PURE_TIMELINE_OFFLINE_QUEUE_NO_MUTATION_AUTHORITY"
       }
@@ -213,11 +213,11 @@
         "relativePath": "evidence/lens-next/20260812/next-phase-integration/presentational-views-terminal-receipt.json",
         "expected": {
           "bytes": 6712,
-          "sha256": "3F33DBE9F82D6944EB1E21F695F8AE80115D502FBE4D69C610216B92A0B82074"
+          "sha256": "E742B0F8133FA184CC500D6A79B5E78519B80ADD5BCAD7EEEB2BE2AB4D055E81"
         },
         "actual": {
           "bytes": 6712,
-          "sha256": "3F33DBE9F82D6944EB1E21F695F8AE80115D502FBE4D69C610216B92A0B82074"
+          "sha256": "E742B0F8133FA184CC500D6A79B5E78519B80ADD5BCAD7EEEB2BE2AB4D055E81"
         },
         "status": "PASS_PRESENTATIONAL_VIEWS_ZERO_DISPATCH_IO"
       }
@@ -229,11 +229,11 @@
         "relativePath": "evidence/lens-next/20260812/next-phase-integration/action-draft-view-terminal-receipt.json",
         "expected": {
           "bytes": 9878,
-          "sha256": "64178A994F16310CB8BAAF9E3592E2341499A10DD7D4EF38EDD22A7AFFCB7D20"
+          "sha256": "A7414BD58FB0C14C03607ABB21B5DD267B599DD16BDE29A9C2F5C0290FEA3CBB"
         },
         "actual": {
           "bytes": 9878,
-          "sha256": "64178A994F16310CB8BAAF9E3592E2341499A10DD7D4EF38EDD22A7AFFCB7D20"
+          "sha256": "A7414BD58FB0C14C03607ABB21B5DD267B599DD16BDE29A9C2F5C0290FEA3CBB"
         },
         "status": "PASS_ACTION_DRAFT_VIEW_DRAFT_ONLY_ZERO_AUTHORITY_IO"
       }
@@ -245,11 +245,11 @@
         "relativePath": "evidence/lens-next/20260812/next-phase-integration/conflict-review-view-terminal-receipt.json",
         "expected": {
           "bytes": 6593,
-          "sha256": "BD3D1D1693A4916054DDCDD8388E1DA27B50D53FF714A5A22C3321C7766BE998"
+          "sha256": "E334251F246499281E4E6C68C1E5BA54EE1C33A944E6AD7A91F9FB333D3B0350"
         },
         "actual": {
           "bytes": 6593,
-          "sha256": "BD3D1D1693A4916054DDCDD8388E1DA27B50D53FF714A5A22C3321C7766BE998"
+          "sha256": "E334251F246499281E4E6C68C1E5BA54EE1C33A944E6AD7A91F9FB333D3B0350"
         },
         "status": "PASS_CONFLICT_REVIEW_MANUAL_ONLY_ZERO_IO_MUTATION"
       }
@@ -261,11 +261,11 @@
         "relativePath": "evidence/lens-next/20260812/next-phase-integration/connection-telemetry-view-terminal-receipt.json",
         "expected": {
           "bytes": 5659,
-          "sha256": "8977BB5243EE9041595823BBAC83F02795A6993167236C55EB045123D21CA805"
+          "sha256": "98203829B43A0C05D388C00E735FEA873AAF4806BC69617AEC39034D7676AB65"
         },
         "actual": {
           "bytes": 5659,
-          "sha256": "8977BB5243EE9041595823BBAC83F02795A6993167236C55EB045123D21CA805"
+          "sha256": "98203829B43A0C05D388C00E735FEA873AAF4806BC69617AEC39034D7676AB65"
         },
         "status": "PASS_CONNECTION_TELEMETRY_PRESENTATIONAL_ZERO_IO_MUTATION"
       }
@@ -277,11 +277,11 @@
         "relativePath": "evidence/lens-next/20260812/next-phase-integration/phase2-api-executor-terminal-receipt.json",
         "expected": {
           "bytes": 10641,
-          "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+          "sha256": "10E287B7B36623012524E42E8EAB869C8CBFACD253A81807484FDBB2609C8240"
         },
         "actual": {
           "bytes": 10641,
-          "sha256": "898DEEACDF1284FA7CA68575F11644CC9E4C703AE0C57C351B99872202BF4FC8"
+          "sha256": "10E287B7B36623012524E42E8EAB869C8CBFACD253A81807484FDBB2609C8240"
         },
         "status": "PASS_SANDBOX_EXECUTOR_ACCEPTANCE_NO_PRODUCTION_AUTHORITY"
       }

@@ -56,12 +56,12 @@ const priors = [
   [
     "timeline-queue-model",
     "evidence/lens-next/20260812/next-phase-integration/timeline-offline-queue-terminal-receipt.json",
-    "EF29566E4D004A7D21591FDB78776FF3C1D0E56780405E17CAAB0CD2BA215554",
+    "16FEE10E304E4290EA641E376458D43F155B6A28AFAFDC00A6DA10CA9DF54D1F",
   ],
   [
     "workflow",
     "evidence/lens-next/20260812/next-phase-integration/web-workflow-successor-terminal-receipt.json",
-    "5E489D4F165865B16BE3FD116CF168F3B2650570B8CDDA42B140A8DDDCEAB57A",
+    "60EB976CED230800510BF10D5C49A72F13603A9A9B1F541C23D4DC0459F9E6E0",
   ],
 ];
 const checks = [];

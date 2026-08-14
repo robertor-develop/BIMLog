@@ -9,7 +9,7 @@ const OUTPUT_RELATIVE =
   "evidence/lens-next/20260812/next-phase-integration/phase2-cross-language-verification.json";
 const EXPECTED_ROOT = "F:\\BIMLog\\Worktrees\\bimlog-lens-next-20260812";
 const EXPECTED_BRANCH = "codex/bimlog-lens-next-20260812";
-const EXPECTED_HEAD = "4e2d4da72493c9cb497e067c2e73e727e031ede4";
+const PHASE1_BASELINE = "4e2d4da72493c9cb497e067c2e73e727e031ede4";
 
 const inputs = [
   {
@@ -87,7 +87,12 @@ check(
   git("branch", "--show-current") === EXPECTED_BRANCH,
   EXPECTED_BRANCH,
 );
-check("git.head", git("rev-parse", "HEAD") === EXPECTED_HEAD, EXPECTED_HEAD);
+const currentHead = git("rev-parse", "HEAD");
+check(
+  "git.phase1-baseline-ancestor",
+  git("merge-base", "--is-ancestor", PHASE1_BASELINE, currentHead) === "",
+  { phase1Baseline: PHASE1_BASELINE, currentHead },
+);
 for (const input of inputs) {
   const file = absolute(input.path);
   const actual = { bytes: fs.statSync(file).size, sha256: sha256(file) };
@@ -466,7 +471,7 @@ const receipt = {
   worktree: {
     root: ROOT.replaceAll("\\", "/"),
     branch: EXPECTED_BRANCH,
-    head: EXPECTED_HEAD,
+    head: currentHead,
     tree: git("rev-parse", "HEAD^{tree}"),
   },
   inputs,

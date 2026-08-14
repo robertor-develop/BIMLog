@@ -1,5 +1,23 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## BIMLog Lens Next Phase 2 held workflow source candidate - 2026-08-14
+
+Commit `ea3f4992bab05f2ba99dbd8d2058053158734171` freezes a local,
+hash-bound Phase 2 contract and presentation candidate. It adds status, comment,
+and assignment draft models; bounded read-only refresh, activity, offline-queue,
+conflict-review, and connection-state views; a pure API mutation-plan validator
+and sandbox executor contract; and a pure native command-policy contract. Every
+path remains default-deny: caller input cannot grant authority, production is
+forbidden, workflow status cannot change visual state, conflicts require human
+review, and the native Phase 1 bridge still exposes only its four read commands.
+
+This is not an enabled write implementation. It has no database, network,
+provider, customer, installation, SavedViewpoint, or Legacy I/O. No authoritative
+Navisworks SDK is bound. The generated test `bin`/`obj` files are local evidence
+byproducts and are not part of the frozen candidate. Native binding, a real
+sandbox transaction/audit adapter, feature enablement, installation, and live
+Navisworks acceptance remain separate future gates.
+
 ## BIMLog Lens Next isolated Phase 1 candidate - 2026-08-12
 
 Lens Next is separate from every Legacy path and identity documented below. Its

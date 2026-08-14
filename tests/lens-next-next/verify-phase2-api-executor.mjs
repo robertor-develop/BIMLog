@@ -6,7 +6,6 @@ import { execFileSync } from "node:child_process";
 
 const ROOT = path.resolve(import.meta.dirname, "..", "..");
 const EXPECTED_ROOT = "F:\\BIMLog\\Worktrees\\bimlog-lens-next-20260812";
-const EXPECTED_HEAD = "4e2d4da72493c9cb497e067c2e73e727e031ede4";
 const OUTPUT = path.join(
   ROOT,
   "evidence",
@@ -433,7 +432,10 @@ const receipt = {
       : "FAIL_CLOSED",
   worktree: {
     root: ROOT.replaceAll("\\", "/"),
-    head: EXPECTED_HEAD,
+    head: execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: ROOT,
+      encoding: "utf8",
+    }).trim(),
   },
   scope: "API/web-only under temporary native/plugin adapter freeze",
   inputs,

@@ -1,5 +1,23 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## BIMLog Lens Next Phase 2 held-candidate remaining gates - 2026-08-14
+
+1. Keep commit `ea3f4992bab05f2ba99dbd8d2058053158734171` held and
+   default-deny until an independently approved sandbox/pilot write target,
+   exact permission receipt, immutable issue-family identity, atomic
+   precondition, audit/idempotency transaction, and rollback contract exist.
+2. Bind no native implementation until Roberto selects an authoritative F-root
+   Navisworks version/reference set. The current native policy is pure and has
+   no Navisworks or SavedViewpoint surface.
+3. Add and accept the real authenticated API/database transaction adapter in a
+   separate isolated task. Contract and sandbox-executor proofs do not establish
+   database behavior or production authority.
+4. After adapter acceptance, separately verify feature-flag rollout, offline
+   reconfirmation, conflict handling, restart/idempotency, bilingual desktop and
+   narrow UI behavior, Legacy non-interference, install, and live Navisworks.
+5. Preserve generated `tests/lens-next-next/bin` and `obj` artifacts locally;
+   they are excluded from the source candidate and require no cleanup action.
+
 ## BIMLog Lens Next Phase 1 remaining gates - 2026-08-12
 
 1. Bind the isolated native shell to authoritative F-root Navisworks references
