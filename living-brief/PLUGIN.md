@@ -11,6 +11,11 @@ assemblies per year and stops on absence or hash mismatch. The core project
 excludes the native subtree, so neither product assembly generation leaks into
 the shared read-only contract. This proves source/build binding, not a concrete
 adapter, installation, live runtime behavior, or field acceptance.
+The Phase 1 inventory now explicitly recognizes the two core binding changes
+and all year-specific source paths while evaluating read-only behavior only
+against the frozen Phase 1 surfaces. Its comprehensive verifier passes 102/102;
+the held Phase 2 cross-language verifier passes 35/35 and permits no other
+frozen-input drift.
 
 ## BIMLog Lens Next Phase 2 held workflow source candidate - 2026-08-14
 

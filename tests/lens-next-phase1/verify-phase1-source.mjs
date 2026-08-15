@@ -80,7 +80,7 @@ const LEGACY = Object.freeze({
   configurationRoot: "%APPDATA%\\BIMLog",
 });
 
-const EXPECTED_WEB_PATHS = Object.freeze([
+const PHASE1_WEB_PATHS = Object.freeze([
   "artifacts/bimlog/src/features/lens-next/index.ts",
   "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
   "artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
@@ -92,12 +92,44 @@ const EXPECTED_WEB_PATHS = Object.freeze([
   "artifacts/bimlog/src/features/lens-next/LensNextWorkspace.tsx",
 ]);
 
-const EXPECTED_WEB_SCRIPT_PATHS = Object.freeze([
+const EXPECTED_WEB_PATHS = Object.freeze([
+  ...PHASE1_WEB_PATHS,
+  "artifacts/bimlog/src/features/lens-next/lens-next-action-draft.ts",
+  "artifacts/bimlog/src/features/lens-next/lens-next-activity-timeline.ts",
+  "artifacts/bimlog/src/features/lens-next/lens-next-auto-refresh.ts",
+  "artifacts/bimlog/src/features/lens-next/lens-next-offline-queue.ts",
+  "artifacts/bimlog/src/features/lens-next/lens-next-phase2-capability.ts",
+  "artifacts/bimlog/src/features/lens-next/LensNextActionDraftView.tsx",
+  "artifacts/bimlog/src/features/lens-next/LensNextActivityTimelineView.tsx",
+  "artifacts/bimlog/src/features/lens-next/LensNextConflictReviewView.tsx",
+  "artifacts/bimlog/src/features/lens-next/LensNextConnectionTelemetryView.tsx",
+  "artifacts/bimlog/src/features/lens-next/LensNextOfflineQueueView.tsx",
+  "artifacts/bimlog/src/features/lens-next/LensNextPhase2WorkflowShell.tsx",
+  "artifacts/bimlog/src/features/lens-next/LensNextWorkflowStateBanner.tsx",
+]);
+
+const PHASE1_WEB_SCRIPT_PATHS = Object.freeze([
   "artifacts/bimlog/scripts/lens-next/lens-next-panel-render.behavior.tsx",
   "artifacts/bimlog/scripts/lens-next/lens-next-phase1.behavior.ts",
 ]);
 
-const EXPECTED_NATIVE_PATHS = Object.freeze([
+const EXPECTED_WEB_SCRIPT_PATHS = Object.freeze([
+  ...PHASE1_WEB_SCRIPT_PATHS,
+  "artifacts/bimlog/scripts/lens-next/lens-next-action-draft-view.behavior.tsx",
+  "artifacts/bimlog/scripts/lens-next/lens-next-action-draft.behavior.ts",
+  "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline-view.behavior.tsx",
+  "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline.behavior.ts",
+  "artifacts/bimlog/scripts/lens-next/lens-next-auto-refresh.behavior.ts",
+  "artifacts/bimlog/scripts/lens-next/lens-next-conflict-review-view.behavior.tsx",
+  "artifacts/bimlog/scripts/lens-next/lens-next-connection-telemetry-view.behavior.tsx",
+  "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue-view.behavior.tsx",
+  "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue.behavior.ts",
+  "artifacts/bimlog/scripts/lens-next/lens-next-phase2-capability.behavior.ts",
+  "artifacts/bimlog/scripts/lens-next/lens-next-phase2-workflow-shell.behavior.tsx",
+  "artifacts/bimlog/scripts/lens-next/lens-next-workflow-state-banner.behavior.tsx",
+]);
+
+const PHASE1_NATIVE_PATHS = Object.freeze([
   "plugins/BIMLogLensNext/.gitignore",
   "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
   "plugins/BIMLogLensNext/config/lens-next.config.schema.json",
@@ -117,6 +149,18 @@ const EXPECTED_NATIVE_PATHS = Object.freeze([
   "plugins/BIMLogLensNext/tests/BIMLogLensNext.Tests.csproj",
   "plugins/BIMLogLensNext/tests/Program.cs",
   "plugins/BIMLogLensNext/tests/Run-IsolationContract.ps1",
+]);
+
+const EXPECTED_NATIVE_PATHS = Object.freeze([
+  ...PHASE1_NATIVE_PATHS,
+  "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+  "plugins/BIMLogLensNext/native/2021/ThisAssemblyProductYear.cs",
+  "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+  "plugins/BIMLogLensNext/native/2025/ThisAssemblyProductYear.cs",
+  "plugins/BIMLogLensNext/native/NativeReferenceBinding.cs",
+  "plugins/BIMLogLensNext/native/NavisworksReferenceGate.targets",
+  "plugins/BIMLogLensNext/src/LensNextPhase2CommandPolicy.cs",
+  "plugins/BIMLogLensNext/tests/Phase2CommandPolicyTests.cs",
 ]);
 
 function toPosix(value) {
@@ -336,9 +380,12 @@ record(
 );
 
 const appText = sourceText(appFiles, new Set([".tsx"]));
-const webText = sourceText(webFiles, new Set([".ts", ".tsx", ".css", ".json"]));
-const webScriptText = sourceText(webScriptFiles, new Set([".ts", ".tsx"]));
-const nativeText = sourceText(nativeFiles, new Set([".cs", ".csproj", ".json"]));
+const phase1WebFiles = webFiles.filter(({ relative }) => PHASE1_WEB_PATHS.includes(relative));
+const phase1WebScriptFiles = webScriptFiles.filter(({ relative }) => PHASE1_WEB_SCRIPT_PATHS.includes(relative));
+const phase1NativeFiles = nativeFiles.filter(({ relative }) => PHASE1_NATIVE_PATHS.includes(relative));
+const webText = sourceText(phase1WebFiles, new Set([".ts", ".tsx", ".css", ".json"]));
+const webScriptText = sourceText(phase1WebScriptFiles, new Set([".ts", ".tsx"]));
+const nativeText = sourceText(phase1NativeFiles, new Set([".cs", ".csproj", ".json"]));
 const nativeCsFiles = nativeFiles.filter(
   ({ relative }) =>
     relative.startsWith(`${NATIVE_RELATIVE_ROOT}/src/`) && relative.endsWith(".cs"),
@@ -601,7 +648,7 @@ record(
 );
 record(
   "web.executable-ssr-view-harness",
-  webScriptFiles.length === 2 &&
+  phase1WebScriptFiles.length === 2 &&
     /import\s*\{\s*renderToStaticMarkup\s*\}\s*from\s*[\"']react-dom\/server[\"']/.test(
       webScriptText,
     ) &&

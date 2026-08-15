@@ -1,11 +1,11 @@
 {
   "schemaVersion": "bimlog-lens-next-phase1-cross-lane-verification-v1",
-  "generatedAtUtc": "2026-08-12T19:10:40.090Z",
+  "generatedAtUtc": "2026-08-15T00:11:03.187Z",
   "status": "PASS",
   "worktree": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
   "harness": {
     "path": "tests/lens-next-phase1/verify-phase1-source.mjs",
-    "sha256": "7F621CFF39745612B6D7A1797A16C7856FCEFDFAAEA9F0DB415B490AECCB3E00"
+    "sha256": "2B3373A7A95C2FD44CA6398EDB0A06CE8AA7718C9CA6DE19BB6D4B705A5B0D4C"
   },
   "contracts": {
     "identity": {
@@ -35,6 +35,24 @@
         "sha256": "16C72546A001AC3A4AF549397A939CA5912B84F4A6E2E3826D877A5E5D9EA6EE"
       },
       {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-action-draft.ts",
+        "symbolicLink": false,
+        "bytes": 10468,
+        "sha256": "E33B64F741EDCA50BCC9B8943F0D9FF594D0F7D4F01288408ECA49A751E7326B"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-activity-timeline.ts",
+        "symbolicLink": false,
+        "bytes": 8209,
+        "sha256": "E455B6123D945A47EA4C254EF5F1E6992A852BFE0366B56D484B126F835BE8AC"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-auto-refresh.ts",
+        "symbolicLink": false,
+        "bytes": 8775,
+        "sha256": "B0354B8BA58D2274532D0213EB1D21FED7BDAA112177470CB2D3EBB615DE116A"
+      },
+      {
         "path": "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
         "symbolicLink": false,
         "bytes": 8153,
@@ -47,10 +65,22 @@
         "sha256": "C576B3CC28AA4FBA432F555DF906ED386E2CC15A35A964F6C1C2D9E473A98289"
       },
       {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-offline-queue.ts",
+        "symbolicLink": false,
+        "bytes": 9771,
+        "sha256": "F8C14CDC0B960A5C9F88CAA68538020FBB9A9D67238D153C6DA1CDFE4A7DF210"
+      },
+      {
         "path": "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
         "symbolicLink": false,
         "bytes": 8738,
         "sha256": "F183B9E9CA134615106810AD7F193B2ACE616360F1242DDBFC1FEB2B0E4D077F"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/lens-next-phase2-capability.ts",
+        "symbolicLink": false,
+        "bytes": 16192,
+        "sha256": "4C2A9CAB634837F0A9783693549D8E3C52ADC6FDACA2057272E456DEBA7985E8"
       },
       {
         "path": "artifacts/bimlog/src/features/lens-next/lens-next-session.ts",
@@ -65,6 +95,36 @@
         "sha256": "4046A94E361B4FB32CBEB0333C89F3216101E5148360D4D4FA0CBE7E5E952FA2"
       },
       {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextActionDraftView.tsx",
+        "symbolicLink": false,
+        "bytes": 12788,
+        "sha256": "35ECBA0CAF0A6DE037947AD7EC4A3C53FCECC55395A51A40460ACCD1CB374797"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextActivityTimelineView.tsx",
+        "symbolicLink": false,
+        "bytes": 7349,
+        "sha256": "1E98210088426F8BA2C0034134FD2FD25EE59B5520793F6AF31F89427CC18989"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextConflictReviewView.tsx",
+        "symbolicLink": false,
+        "bytes": 7660,
+        "sha256": "A9AEB9A225FD2D8C85CDFE0A39A481C75DF6A027D49341F2ADE582B71591E45D"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextConnectionTelemetryView.tsx",
+        "symbolicLink": false,
+        "bytes": 9184,
+        "sha256": "B0B1893CECAB59942058B36FB07E6E9ABA66BE824EF8FD54A86F06EC30177A15"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextOfflineQueueView.tsx",
+        "symbolicLink": false,
+        "bytes": 8821,
+        "sha256": "854056DE44A710DA24FF20B16D082EAF485E8C9B8DA23E8FCCCEE53A5E675CD8"
+      },
+      {
         "path": "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
         "symbolicLink": false,
         "bytes": 9774,
@@ -77,6 +137,18 @@
         "sha256": "59EFEB66FB2B21163C19D533939B78974AFECB52A3136F10790C8CC15BD17598"
       },
       {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextPhase2WorkflowShell.tsx",
+        "symbolicLink": false,
+        "bytes": 7778,
+        "sha256": "D5DDA7BDAD54B624BE721A8DDC338743D95538D3CB4E059698C3BCB356B076B3"
+      },
+      {
+        "path": "artifacts/bimlog/src/features/lens-next/LensNextWorkflowStateBanner.tsx",
+        "symbolicLink": false,
+        "bytes": 5095,
+        "sha256": "EBFFBCAE55125C761A474BEB72974A4995B1D2D4C0B04709133643325CF58F41"
+      },
+      {
         "path": "artifacts/bimlog/src/features/lens-next/LensNextWorkspace.tsx",
         "symbolicLink": false,
         "bytes": 2551,
@@ -84,6 +156,60 @@
       }
     ],
     "webScriptFiles": [
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-action-draft-view.behavior.tsx",
+        "symbolicLink": false,
+        "bytes": 5000,
+        "sha256": "879FFC0E80F4E1C019AF925D4FED8826084A50FA4D8F298C45E89DCD751A6438"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-action-draft.behavior.ts",
+        "symbolicLink": false,
+        "bytes": 5669,
+        "sha256": "37CE589044D560EAD443030942D9F4A467B54CECCC86A35D21A47C04D2C21E2A"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline-view.behavior.tsx",
+        "symbolicLink": false,
+        "bytes": 3705,
+        "sha256": "7CC260D29EF98535EA5D343282C7567769B38F2DA704C6B951BE0F9B8DF9B6B3"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline.behavior.ts",
+        "symbolicLink": false,
+        "bytes": 6093,
+        "sha256": "2A72BAE5F880BF86D9C3174E2F75B756B21916D897F1B2A266CA73EDFEC779C7"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-auto-refresh.behavior.ts",
+        "symbolicLink": false,
+        "bytes": 6143,
+        "sha256": "7986F9937C26C72BEEBAF6E1A48AD163323F353E7B79EFCE3DB5F970B65AA4F8"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-conflict-review-view.behavior.tsx",
+        "symbolicLink": false,
+        "bytes": 3730,
+        "sha256": "6AA8CBE0C25F34A8AEC44F3E556CAFCAF1D8F4605BF2E12F95331143C75D30E1"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-connection-telemetry-view.behavior.tsx",
+        "symbolicLink": false,
+        "bytes": 3747,
+        "sha256": "63F28A428C7A6B33EF50815AB51124ABE38D73D1CE4CF11D00B3B321DB30C97A"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue-view.behavior.tsx",
+        "symbolicLink": false,
+        "bytes": 5438,
+        "sha256": "05D848BF2B5CA87CE5229AFC41235734E869AAD4FF70922762EEDCA19F125175"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue.behavior.ts",
+        "symbolicLink": false,
+        "bytes": 7016,
+        "sha256": "35FD11FFFC72FB7C0C7A31DF257B6A1F1E7CFEE2889F44C5073F725275931395"
+      },
       {
         "path": "artifacts/bimlog/scripts/lens-next/lens-next-panel-render.behavior.tsx",
         "symbolicLink": false,
@@ -95,6 +221,24 @@
         "symbolicLink": false,
         "bytes": 14194,
         "sha256": "4FBCC98DA2632419691050B57778D03AC994337E334E8428D6D48E81E9C26B81"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-capability.behavior.ts",
+        "symbolicLink": false,
+        "bytes": 10607,
+        "sha256": "B1310F7306EFE3203103791B89E12A1E03B9F3C746C136A0A32B540388563D68"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-phase2-workflow-shell.behavior.tsx",
+        "symbolicLink": false,
+        "bytes": 9025,
+        "sha256": "41D7DC30761D1756EAB9364A33D7FA1E8BA0647526890C876CEB506C2C2F405A"
+      },
+      {
+        "path": "artifacts/bimlog/scripts/lens-next/lens-next-workflow-state-banner.behavior.tsx",
+        "symbolicLink": false,
+        "bytes": 3123,
+        "sha256": "A31CEC7E9B99D965E0130E9A57B7F4AF6B544BDE033ED0D6A797EE166C56C2AC"
       }
     ],
     "nativeFiles": [
@@ -107,8 +251,8 @@
       {
         "path": "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
         "symbolicLink": false,
-        "bytes": 632,
-        "sha256": "BD405124B1BC4DB35F3311C50660F153DC1AF026C5BDE395F7FB7295B9E54203"
+        "bytes": 706,
+        "sha256": "A35CF96FD19931AE68BD00E26E93C34D76C2AD8E0F36A4A79AA1C0D9C875C135"
       },
       {
         "path": "plugins/BIMLogLensNext/config/lens-next.config.schema.json",
@@ -125,8 +269,8 @@
       {
         "path": "plugins/BIMLogLensNext/contracts/plugin-registration.contract.json",
         "symbolicLink": false,
-        "bytes": 432,
-        "sha256": "0EF459EBC9F3FB818E3F2F13BD08CF23F9982C8D5E2BDFB207A9D6500E3CD62D"
+        "bytes": 415,
+        "sha256": "F294BA2044C630B0FAC6750C14AD60341D946A149100ED12493C0590BCEDFC7D"
       },
       {
         "path": "plugins/BIMLogLensNext/install/Install-BIMLogLensNext.contract.json",
@@ -139,6 +283,42 @@
         "symbolicLink": false,
         "bytes": 369,
         "sha256": "EBD6765396C14D97B8396B15A968C97EFE0E788E818F181418AAFA8D9B81DEA1"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+        "symbolicLink": false,
+        "bytes": 1427,
+        "sha256": "96BB66C2E03BBF051BC3ACAEB69F2C36DE3527DD74473A2BEB3AAADF9DD49C09"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/2021/ThisAssemblyProductYear.cs",
+        "symbolicLink": false,
+        "bytes": 265,
+        "sha256": "50BA638229FC42E9950132521DA2C804DB2D43E0879AA7E515FD4B43D07131FE"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+        "symbolicLink": false,
+        "bytes": 1403,
+        "sha256": "57FDF7F47F63F1527ECA00DB26A1BCE1601C7AE2C327E572C49C6BC8D2134697"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/2025/ThisAssemblyProductYear.cs",
+        "symbolicLink": false,
+        "bytes": 241,
+        "sha256": "333C4F6343B0157FF87972EF1D02E93215FEC932046E3DC5DF7CA1903DBAC602"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/NativeReferenceBinding.cs",
+        "symbolicLink": false,
+        "bytes": 352,
+        "sha256": "0B53DC6D22916FC37CF9764CDE5516FDFD5FACB29F55BBE029EA5275124626D4"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/NavisworksReferenceGate.targets",
+        "symbolicLink": false,
+        "bytes": 1749,
+        "sha256": "E6F1B5C78F3D761C990E0718356407C0DE78C63EBD2AAA87E75F358F0BAAF5E1"
       },
       {
         "path": "plugins/BIMLogLensNext/src/BridgeContracts.cs",
@@ -171,6 +351,12 @@
         "sha256": "5EF8B69AB7BD5B33A8B9579002FA29CC57BDDFDD7D23DD9ED22C990495047313"
       },
       {
+        "path": "plugins/BIMLogLensNext/src/LensNextPhase2CommandPolicy.cs",
+        "symbolicLink": false,
+        "bytes": 16668,
+        "sha256": "B3DC6F9021698434C7B58A8C5D0B66F918ABC2E2A3708979845234DB5E14BA6B"
+      },
+      {
         "path": "plugins/BIMLogLensNext/src/LensNextReadOnlyBridge.cs",
         "symbolicLink": false,
         "bytes": 6550,
@@ -199,6 +385,12 @@
         "symbolicLink": false,
         "bytes": 545,
         "sha256": "D42A4F7EA5A5632F9F70C847DC44F73B13866EA7F5925099A8C537B1FDF45F21"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/tests/Phase2CommandPolicyTests.cs",
+        "symbolicLink": false,
+        "bytes": 17392,
+        "sha256": "C8D37168390ECAFE191D3F4F9661F67B27567AF2DCC74F60DACA4CD2C5441247"
       },
       {
         "path": "plugins/BIMLogLensNext/tests/Program.cs",
@@ -502,19 +694,19 @@
       "id": "source.web.present",
       "kind": "readiness",
       "passed": true,
-      "detail": "9 file(s)"
+      "detail": "21 file(s)"
     },
     {
       "id": "source.web-scripts.present",
       "kind": "readiness",
       "passed": true,
-      "detail": "2 file(s)"
+      "detail": "14 file(s)"
     },
     {
       "id": "source.native.present",
       "kind": "readiness",
       "passed": true,
-      "detail": "19 file(s)"
+      "detail": "27 file(s)"
     },
     {
       "id": "source.app.path-allowlist",
@@ -530,13 +722,25 @@
       "passed": true,
       "detail": [
         "artifacts/bimlog/src/features/lens-next/index.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-action-draft.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-activity-timeline.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-auto-refresh.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-offline-queue.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/features/lens-next/lens-next-phase2-capability.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-session.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-types.ts",
+        "artifacts/bimlog/src/features/lens-next/LensNextActionDraftView.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextActivityTimelineView.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextConflictReviewView.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextConnectionTelemetryView.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextOfflineQueueView.tsx",
         "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
         "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPhase2WorkflowShell.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextWorkflowStateBanner.tsx",
         "artifacts/bimlog/src/features/lens-next/LensNextWorkspace.tsx"
       ]
     },
@@ -545,8 +749,20 @@
       "kind": "assertion",
       "passed": true,
       "detail": [
+        "artifacts/bimlog/scripts/lens-next/lens-next-action-draft-view.behavior.tsx",
+        "artifacts/bimlog/scripts/lens-next/lens-next-action-draft.behavior.ts",
+        "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline-view.behavior.tsx",
+        "artifacts/bimlog/scripts/lens-next/lens-next-activity-timeline.behavior.ts",
+        "artifacts/bimlog/scripts/lens-next/lens-next-auto-refresh.behavior.ts",
+        "artifacts/bimlog/scripts/lens-next/lens-next-conflict-review-view.behavior.tsx",
+        "artifacts/bimlog/scripts/lens-next/lens-next-connection-telemetry-view.behavior.tsx",
+        "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue-view.behavior.tsx",
+        "artifacts/bimlog/scripts/lens-next/lens-next-offline-queue.behavior.ts",
         "artifacts/bimlog/scripts/lens-next/lens-next-panel-render.behavior.tsx",
-        "artifacts/bimlog/scripts/lens-next/lens-next-phase1.behavior.ts"
+        "artifacts/bimlog/scripts/lens-next/lens-next-phase1.behavior.ts",
+        "artifacts/bimlog/scripts/lens-next/lens-next-phase2-capability.behavior.ts",
+        "artifacts/bimlog/scripts/lens-next/lens-next-phase2-workflow-shell.behavior.tsx",
+        "artifacts/bimlog/scripts/lens-next/lens-next-workflow-state-banner.behavior.tsx"
       ]
     },
     {
@@ -561,16 +777,24 @@
         "plugins/BIMLogLensNext/contracts/plugin-registration.contract.json",
         "plugins/BIMLogLensNext/install/Install-BIMLogLensNext.contract.json",
         "plugins/BIMLogLensNext/install/Uninstall-BIMLogLensNext.contract.json",
+        "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+        "plugins/BIMLogLensNext/native/2021/ThisAssemblyProductYear.cs",
+        "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+        "plugins/BIMLogLensNext/native/2025/ThisAssemblyProductYear.cs",
+        "plugins/BIMLogLensNext/native/NativeReferenceBinding.cs",
+        "plugins/BIMLogLensNext/native/NavisworksReferenceGate.targets",
         "plugins/BIMLogLensNext/src/BridgeContracts.cs",
         "plugins/BIMLogLensNext/src/BridgeRequestValidator.cs",
         "plugins/BIMLogLensNext/src/ImmutableIdentity.cs",
         "plugins/BIMLogLensNext/src/LensNextConstants.cs",
         "plugins/BIMLogLensNext/src/LensNextFeatureFlags.cs",
+        "plugins/BIMLogLensNext/src/LensNextPhase2CommandPolicy.cs",
         "plugins/BIMLogLensNext/src/LensNextReadOnlyBridge.cs",
         "plugins/BIMLogLensNext/src/LensNextStateContract.cs",
         "plugins/BIMLogLensNext/src/NativeAbstractions.cs",
         "plugins/BIMLogLensNext/src/PluginRegistrationContract.cs",
         "plugins/BIMLogLensNext/tests/BIMLogLensNext.Tests.csproj",
+        "plugins/BIMLogLensNext/tests/Phase2CommandPolicyTests.cs",
         "plugins/BIMLogLensNext/tests/Program.cs",
         "plugins/BIMLogLensNext/tests/Run-IsolationContract.ps1"
       ]

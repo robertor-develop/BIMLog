@@ -23,6 +23,9 @@
 1. Independently accept the separate hash-gated Navisworks 2021 and 2025 native
    reference shells, then implement the concrete read-only adapter without
    mixing either assembly generation or importing Legacy source.
+   The corrected current-tree inventory passes 102/102 and the Phase 2
+   cross-language non-regression gate passes 35/35; these are source proofs,
+   not installation or live Navisworks acceptance.
 2. Complete independent acceptance of the exact current candidate after the
    protected route, authenticated project adapter, ephemeral bridge-session
    adapter, web/native protocol correction, and executable narrow-panel render

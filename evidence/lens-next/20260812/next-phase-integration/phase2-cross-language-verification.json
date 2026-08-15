@@ -1,12 +1,12 @@
 {
   "schemaVersion": "bimlog-lens-next-phase2-cross-language-verification-v1",
-  "generatedAtUtc": "2026-08-14T21:23:56.646Z",
+  "generatedAtUtc": "2026-08-15T00:11:03.598Z",
   "status": "PASS",
   "worktree": {
     "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
     "branch": "codex/bimlog-lens-next-20260812",
-    "head": "ea3f4992bab05f2ba99dbd8d2058053158734171",
-    "tree": "719c869faa8801bc17f23b418e88033a7eecb5a6"
+    "head": "cfd6cf1a079d26e32ecc3a1fe8ff911a0b516658",
+    "tree": "e8c3b6c568370977a77fd2066c3b026062d18956"
   },
   "inputs": [
     {
@@ -72,7 +72,7 @@
       "severity": "gate",
       "detail": {
         "phase1Baseline": "4e2d4da72493c9cb497e067c2e73e727e031ede4",
-        "currentHead": "ea3f4992bab05f2ba99dbd8d2058053158734171"
+        "currentHead": "cfd6cf1a079d26e32ecc3a1fe8ff911a0b516658"
       }
     },
     {
@@ -411,7 +411,11 @@
       "detail": {
         "receipt": "evidence/lens-next/20260812/integration/phase1-cross-lane-verification.json",
         "receiptStatus": "PASS",
-        "filesVerified": 31,
+        "filesVerified": 63,
+        "acceptedBindingEvolution": [
+          "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
+          "plugins/BIMLogLensNext/contracts/plugin-registration.contract.json"
+        ],
         "mismatches": []
       }
     },

@@ -9,6 +9,12 @@
 - All six files are SHA-256 pinned and the build fails closed when a reference
   is absent or mismatched. Both year-specific Release builds passed with zero
   warnings/errors; Phase 1 isolation and Phase 2 policy tests each passed 17/17.
+- Independent QA initially rejected the binding because the frozen Phase 1
+  inventories did not yet acknowledge the legitimate core project and
+  registration evolution. The corrected harness inventories all 63 current
+  inputs, partitions the unchanged Phase 1 behavioral surface from held Phase 2,
+  and passes the comprehensive Phase 1 gate 102/102 and cross-language gate
+  35/35 without expanding the four-command read-only bridge.
 - This is held source/build evidence only. No concrete Autodesk adapter,
   installation, live Navisworks acceptance, Phase 2 enablement, integration,
   push, publication, or deployment occurred.
