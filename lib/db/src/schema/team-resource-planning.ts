@@ -87,3 +87,17 @@ export const teamStaffingApplicationEventsTable = pgTable(
     check("team_staffing_application_reason_chk", sql`length(${table.reason}) BETWEEN 10 AND 1000`),
   ],
 );
+
+export const teamResourceMutationRateLimitsTable = pgTable(
+  "team_resource_mutation_rate_limits",
+  {
+    bucketKey: text("bucket_key").primaryKey(),
+    windowStartedAt: timestamp("window_started_at", { withTimezone: true }).notNull(),
+    requestCount: integer("request_count").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index("team_resource_mutation_rate_limit_expiry_idx").on(table.expiresAt),
+    check("team_resource_mutation_rate_limit_count_chk", sql`${table.requestCount} > 0`),
+  ],
+);

@@ -42,6 +42,11 @@ CREATE TABLE IF NOT EXISTS team_staffing_application_events(
 );
 CREATE UNIQUE INDEX IF NOT EXISTS team_staffing_application_events_event_key_key ON team_staffing_application_events(event_key);
 CREATE INDEX IF NOT EXISTS team_staffing_application_project_time_idx ON team_staffing_application_events(project_id,occurred_at DESC);
+CREATE TABLE IF NOT EXISTS team_resource_mutation_rate_limits(
+ bucket_key text PRIMARY KEY, window_started_at timestamptz NOT NULL, request_count integer NOT NULL, expires_at timestamptz NOT NULL,
+ CONSTRAINT team_resource_mutation_rate_limit_count_chk CHECK(request_count>0)
+);
+CREATE INDEX IF NOT EXISTS team_resource_mutation_rate_limit_expiry_idx ON team_resource_mutation_rate_limits(expires_at);
 `);
     await client.query("COMMIT");
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }

@@ -9537,6 +9537,92 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e8bff160165f54a32c0836a21375a84af911c16be206591506caf123ac53fa06"
+    },
+    {
+      "taskId": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
+      "reviewedAt": "2026-08-15T00:05:00-04:00",
+      "status": "local_release_gate_correction_external_acceptance_pending",
+      "captureTiming": "same_product_task",
+      "summary": "Records isolated persistence, concurrency, redaction, rollback, and tenancy evidence and corrects mutation throttling from process-local maps to a database-shared authority.",
+      "workstreams": [
+        "build6",
+        "team-performance",
+        "resource-planning",
+        "security",
+        "database",
+        "rate-limiting",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical employee, company, project, task, assignment, and financial authorities remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release, database, evidence, Git, publication, and approval boundaries continue to govern."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction implements the existing tenancy, concurrency, rollback, additive migration, and multi-process control requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved Team Capacity product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The schema inventory adds the shared resource-planning mutation-rate-limit table and expiry index."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks source, package, installation, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report identity or layout authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the isolated database evidence and multi-process limiter correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop closes the proven database gates and retains browser, artifact, build, review, and commit gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production, publication, customer, provider, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/team-resource-planning-db.behavior.ts",
+        "artifacts/api-server/src/lib/team-resource-planning-migration.ts",
+        "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
+        "artifacts/api-server/src/middlewares/team-resource-planning-rate-limit.ts",
+        "lib/db/src/schema/team-resource-planning.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "377a19287a933372d4d391d6d513c56d34632543a0b24e13617cc2451f8576ea"
     }
   ]
 }

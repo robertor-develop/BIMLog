@@ -4,6 +4,17 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity release gates - 2026-08-14
 
+- Isolated PostgreSQL release evidence now passes profile persistence, membership/company/project
+  isolation, concurrent scenario conflict, persisted nested financial redaction, concurrent
+  idempotent application, divergent replay refusal, cross-tenant scenario refusal, stale-basis
+  refusal, injected mid-transaction rollback, and zero partial reassignment. No production database
+  was accessed.
+- A release review defect was corrected: the four mutation limiters had process-local maps that did
+  not enforce one bound across a multi-process topology. The candidate now uses one additive,
+  transactionally updated database bucket authority shared across processes and fails closed when
+  that authority is unavailable. Browser, CSV/PDF, final build, independent review, and clean-commit
+  evidence remain open until their terminal artifacts pass.
+
 1. Complete the governed full production build and independently inspect the corrected exact
    candidate diff, including the generated platform inventory and Living Brief state.
 2. Exercise authenticated API persistence against an isolated authorized database: profile and

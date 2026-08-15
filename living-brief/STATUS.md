@@ -2,6 +2,14 @@
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity local candidate - 2026-08-14
 
+- Release-gate verification on 2026-08-15 proved isolated PostgreSQL persistence, tenant and
+  membership refusal, concurrent version conflict, idempotent and divergent replay behavior,
+  persisted financial redaction, stale refusal, transaction rollback, and zero partial apply.
+  Review found that mutation limits were process-local and therefore bypassable across deployed
+  processes. The corrected candidate persists additive database-backed buckets shared by every
+  process and fails closed if the limiter authority is unavailable. Browser, artifact, final build,
+  independent review, and clean-commit gates remain separately recorded until evidenced.
+
 - Team Performance now uses employee-owned, append-only availability, working-day, and leave
   profiles; missing profiles remain visibly unknown and no default capacity is invented.
 - Project leaders can compare authorized cross-project commitments and verified Job Operations

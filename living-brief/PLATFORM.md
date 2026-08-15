@@ -281,6 +281,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/storage-adapter.ts
 - artifacts/api-server/src/lib/team-performance-service.ts
 - artifacts/api-server/src/lib/team-performance.behavior.ts
+- artifacts/api-server/src/lib/team-resource-planning-db.behavior.ts
 - artifacts/api-server/src/lib/team-resource-planning-migration.ts
 - artifacts/api-server/src/lib/team-resource-planning-service.ts
 - artifacts/api-server/src/lib/team-resource-planning.behavior.ts
