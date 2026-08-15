@@ -1,14 +1,27 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## BIMLog Lens Next read-only Autodesk adapter remaining gates - 2026-08-15
+
+1. Independently inspect the exact adapter candidate, both native assemblies, executable
+   contract evidence, and both local sandbox package manifests and hashes.
+2. With separate installation authority, run the exact accepted year-specific assembly in
+   synthetic/approved Navisworks 2021 and 2025 documents. Verify exact GUID navigation,
+   changed-document refusal, missing/non-viewpoint GUID refusal, owner-thread enforcement,
+   repeated read/navigation behavior, and zero SavedViewpoint collection or Legacy mutation.
+3. Keep Phase 2 status/comment/assignment commands default-deny. This read-only adapter does
+   not authorize the API/database transaction adapter, feature enablement, production writes,
+   migration, installation, deployment, provider/customer action, or field acceptance.
+
 ## BIMLog Lens Next Phase 2 held-candidate remaining gates - 2026-08-14
 
 1. Keep commit `ea3f4992bab05f2ba99dbd8d2058053158734171` held and
    default-deny until an independently approved sandbox/pilot write target,
    exact permission receipt, immutable issue-family identity, atomic
    precondition, audit/idempotency transaction, and rollback contract exist.
-2. Keep the hash-gated 2021/2025 reference shells separate. Implement and test
-   a concrete read-only Autodesk adapter only as its own accepted gate; the
-   current native policy still has no Navisworks or SavedViewpoint surface.
+2. Keep the hash-gated 2021/2025 reference shells separate. A concrete exact-GUID
+   read-only Autodesk adapter now exists as a separate local candidate; independent
+   source, package, installed-runtime, and field gates remain open. The Phase 2
+   policy still has no Navisworks or SavedViewpoint mutation surface.
 3. Add and accept the real authenticated API/database transaction adapter in a
    separate isolated task. Contract and sandbox-executor proofs do not establish
    database behavior or production authority.
@@ -21,8 +34,8 @@
 ## BIMLog Lens Next Phase 1 remaining gates - 2026-08-12
 
 1. Independently accept the separate hash-gated Navisworks 2021 and 2025 native
-   reference shells, then implement the concrete read-only adapter without
-   mixing either assembly generation or importing Legacy source.
+   reference shells and the new concrete read-only adapter without mixing either
+   assembly generation or importing Legacy source.
    The corrected current-tree inventory passes 102/102 and the Phase 2
    cross-language non-regression gate passes 35/35; these are source proofs,
    not installation or live Navisworks acceptance.

@@ -1,5 +1,22 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog Lens Next read-only Autodesk adapter local candidate - 2026-08-15
+
+- One shared adapter implementation compiles separately into the hash-gated Navisworks
+  2021 and 2025 projects. It requires exact project/model context, exact nonzero native
+  GUID resolution, an unchanged named document, and the owning UI thread.
+- Navigation is limited to re-resolving the same existing SavedViewpoint GUID and setting
+  `CurrentSavedViewpoint`. The adapter performs no collection enumeration, comment or
+  Legacy metadata read, fallback resolution, SavedViewpoint creation/mutation, file or
+  network I/O, or Phase 2 command execution.
+- Both Release builds pass with zero warnings/errors; year-specific executable contracts
+  pass 10/10 each, the adapter source contract passes 22/22, Phase 1 passes 102/102, and
+  the held Phase 2 cross-language contract passes 35/35.
+- Local held sandbox ZIP candidates exist for both years with DLL/PDB and hash manifests
+  only. No Autodesk SDK binaries or installer are packaged. Live Navisworks execution,
+  installation, independent acceptance, push, deployment, and field acceptance remain
+  separate pending states.
+
 ## BIMLog Lens Next dual-version native reference binding - 2026-08-14
 
 - Separate `net48` native shells now bind Navisworks 2021 and 2025 without
@@ -15,8 +32,9 @@
   inputs, partitions the unchanged Phase 1 behavioral surface from held Phase 2,
   and passes the comprehensive Phase 1 gate 102/102 and cross-language gate
   35/35 without expanding the four-command read-only bridge.
-- This is held source/build evidence only. No concrete Autodesk adapter,
-  installation, live Navisworks acceptance, Phase 2 enablement, integration,
+- The reference binding remains held source/build evidence. The concrete adapter is
+  the separate local candidate above; installation, live Navisworks acceptance,
+  Phase 2 enablement, integration,
   push, publication, or deployment occurred.
 
 ## BIMLog Lens Next Phase 2 held local source candidate - 2026-08-14
@@ -35,7 +53,7 @@
 - The audit corrected stale full-receipt hash pins after upstream receipts were
   regenerated; the final downstream chain is bound to the newly verified
   receipt set. This is local source evidence, not runtime write acceptance.
-- No concrete Autodesk adapter, plugin installation, Legacy access, database or production
+- No plugin installation, Legacy access, database or production
   I/O, main integration, push, publication, deployment, provider action,
   customer action, or live Navisworks verification occurred.
 

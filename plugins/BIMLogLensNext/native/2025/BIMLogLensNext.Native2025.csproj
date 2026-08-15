@@ -12,7 +12,9 @@
     <NavisworksClashSha256>D272A4510C4FDA3E3E90A72E3C0C392CB687170C052C8698296E59BB0FFFC90A</NavisworksClashSha256>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="..\AutodeskReadOnlyAdapter.cs" Link="AutodeskReadOnlyAdapter.cs" />
     <Compile Include="..\NativeReferenceBinding.cs" Link="NativeReferenceBinding.cs" />
+    <ProjectReference Include="..\..\BIMLogLensNext.csproj" />
     <Reference Include="Autodesk.Navisworks.Api" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Api.dll" Private="false" />
     <Reference Include="Autodesk.Navisworks.Automation" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Automation.dll" Private="false" />
     <Reference Include="Autodesk.Navisworks.Clash" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Clash.dll" Private="false" />

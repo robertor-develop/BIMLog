@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "bimlog-lens-next-readonly-adapter-sandbox-v1",
+  "status": "LOCAL_SANDBOX_PACKAGES_HELD_NO_INSTALL",
+  "sourceBaseline": "8782a301378cda88186f763848598fe163e0990f",
+  "adapter": {
+    "mode": "EXACT_NONZERO_GUID_RESOLUTION_AND_CURRENT_VIEW_NAVIGATION_ONLY",
+    "enumeratesSavedViewpoints": false,
+    "readsCommentsOrLegacyMetadata": false,
+    "createsOrMutatesSavedViewpointCollection": false,
+    "requiresOwningUiThread": true,
+    "requiresUnchangedNamedDocument": true,
+    "requiresExactProjectAndSha256Model": true
+  },
+  "sourceInputs": [
+    {"path":"plugins/BIMLogLensNext/native/AutodeskReadOnlyAdapter.cs","bytes":7126,"sha256":"DDD73B1F4B13FE36CC5530408E5E45AA12D1E33AD1DA6BC3F2B7C3B5F6EA974E"},
+    {"path":"plugins/BIMLogLensNext/native/Build-LensNextSandboxPackages.ps1","bytes":2781,"sha256":"98B257E0B1AFDB036E1BF2013C32C7EDEAFD160E318B30836F1ED746EFF77343"},
+    {"path":"plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj","bytes":1580,"sha256":"D39B55A89D36F807E506BA06CF9F379D32CB715E589AA007283CE5154EFDBD06"},
+    {"path":"plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj","bytes":1556,"sha256":"93D76098FCD0750165D00C24DC64E07791900CA64F4E56DF89E6091834425843"},
+    {"path":"plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs","bytes":5189,"sha256":"500E3EEEE1B90BCC6221A6EE79C72D7FC55446E6739C18A69B14033B0D9E8184"},
+    {"path":"tests/lens-next-adapter/verify-readonly-adapter.mjs","bytes":2324,"sha256":"87CA147E1F0393BF450DE9CD6C36A17DC7094076F0C26B1932A59E7531B18B2B"}
+  ],
+  "verification": {
+    "native2021Build": "PASS_0_WARNINGS_0_ERRORS",
+    "native2025Build": "PASS_0_WARNINGS_0_ERRORS",
+    "native2021Contract": "PASS_10_OF_10",
+    "native2025Contract": "PASS_10_OF_10",
+    "adapterSourceContract": "PASS_22_OF_22",
+    "phase1Comprehensive": "PASS_102_OF_102",
+    "phase2CrossLanguageHeld": "PASS_35_OF_35"
+  },
+  "packages": [
+    {
+      "productYear": 2021,
+      "path": "artifacts\\lens-next-sandbox-packages\\BIMLogLensNext-Navisworks2021-readonly-sandbox.zip",
+      "bytes": 31729,
+      "sha256": "8D65248B4AED57C1510ADE71E07672176B1494EAA1852EB94813767B0684D17D"
+    },
+    {
+      "productYear": 2025,
+      "path": "artifacts\\lens-next-sandbox-packages\\BIMLogLensNext-Navisworks2025-readonly-sandbox.zip",
+      "bytes": 31704,
+      "sha256": "CCE43CEDEC28CDC8EAA509038E8FB1E912745C5DA327EBD87CD8898E201CE37D"
+    }
+  ],
+  "boundaries": {
+    "install": false,
+    "deploy": false,
+    "legacyIo": false,
+    "customerData": false,
+    "phase2": false,
+    "autodeskRuntime": false
+  },
+  "limitations": {
+    "liveNavisworksDocumentHarness": "NOT_RUN_NO_SAFE_IN_PROCESS_DOCUMENT_FIXTURE_WITHOUT_PLUGIN_INSTALL",
+    "installation": "NOT_AUTHORIZED",
+    "fieldAcceptance": "NOT_PERFORMED"
+  }
+}

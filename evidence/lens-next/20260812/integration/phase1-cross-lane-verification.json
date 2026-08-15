@@ -1,11 +1,11 @@
 {
   "schemaVersion": "bimlog-lens-next-phase1-cross-lane-verification-v1",
-  "generatedAtUtc": "2026-08-15T00:11:03.187Z",
+  "generatedAtUtc": "2026-08-15T16:11:52.637Z",
   "status": "PASS",
   "worktree": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
   "harness": {
     "path": "tests/lens-next-phase1/verify-phase1-source.mjs",
-    "sha256": "2B3373A7A95C2FD44CA6398EDB0A06CE8AA7718C9CA6DE19BB6D4B705A5B0D4C"
+    "sha256": "12A931F7535679655332F0CBAF6936F5507F27EF5E7DF100220E7F0CA0C93E47"
   },
   "contracts": {
     "identity": {
@@ -287,8 +287,8 @@
       {
         "path": "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
         "symbolicLink": false,
-        "bytes": 1427,
-        "sha256": "96BB66C2E03BBF051BC3ACAEB69F2C36DE3527DD74473A2BEB3AAADF9DD49C09"
+        "bytes": 1580,
+        "sha256": "D39B55A89D36F807E506BA06CF9F379D32CB715E589AA007283CE5154EFDBD06"
       },
       {
         "path": "plugins/BIMLogLensNext/native/2021/ThisAssemblyProductYear.cs",
@@ -299,14 +299,26 @@
       {
         "path": "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
         "symbolicLink": false,
-        "bytes": 1403,
-        "sha256": "57FDF7F47F63F1527ECA00DB26A1BCE1601C7AE2C327E572C49C6BC8D2134697"
+        "bytes": 1556,
+        "sha256": "93D76098FCD0750165D00C24DC64E07791900CA64F4E56DF89E6091834425843"
       },
       {
         "path": "plugins/BIMLogLensNext/native/2025/ThisAssemblyProductYear.cs",
         "symbolicLink": false,
         "bytes": 241,
         "sha256": "333C4F6343B0157FF87972EF1D02E93215FEC932046E3DC5DF7CA1903DBAC602"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/AutodeskReadOnlyAdapter.cs",
+        "symbolicLink": false,
+        "bytes": 7126,
+        "sha256": "DDD73B1F4B13FE36CC5530408E5E45AA12D1E33AD1DA6BC3F2B7C3B5F6EA974E"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/Build-LensNextSandboxPackages.ps1",
+        "symbolicLink": false,
+        "bytes": 2781,
+        "sha256": "98B257E0B1AFDB036E1BF2013C32C7EDEAFD160E318B30836F1ED746EFF77343"
       },
       {
         "path": "plugins/BIMLogLensNext/native/NativeReferenceBinding.cs",
@@ -319,6 +331,36 @@
         "symbolicLink": false,
         "bytes": 1749,
         "sha256": "E6F1B5C78F3D761C990E0718356407C0DE78C63EBD2AAA87E75F358F0BAAF5E1"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/tests/2021/BIMLogLensNext.Native2021.Tests.csproj",
+        "symbolicLink": false,
+        "bytes": 430,
+        "sha256": "60E6C6CF780AC93BED867FD8ECF330131D0031EA6E6FFC85E2C2D2C0701BB931"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/tests/2021/ExpectedProductYear.cs",
+        "symbolicLink": false,
+        "bytes": 126,
+        "sha256": "5A4F2AAE9A7D77541C4233DBBEBEE71972DD0CE680F0AFF4F3BA581E0B7392E1"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/tests/2025/BIMLogLensNext.Native2025.Tests.csproj",
+        "symbolicLink": false,
+        "bytes": 430,
+        "sha256": "1003E2043DAA9138478F7DFDC44EFF8F9194687747C1B12BCA8F17E416BC31B4"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/tests/2025/ExpectedProductYear.cs",
+        "symbolicLink": false,
+        "bytes": 126,
+        "sha256": "D93563A88862E3CEFD792E97C6B769B99BCC0324EC93173C9604807FDFDF1252"
+      },
+      {
+        "path": "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
+        "symbolicLink": false,
+        "bytes": 5189,
+        "sha256": "500E3EEEE1B90BCC6221A6EE79C72D7FC55446E6739C18A69B14033B0D9E8184"
       },
       {
         "path": "plugins/BIMLogLensNext/src/BridgeContracts.cs",
@@ -706,7 +748,7 @@
       "id": "source.native.present",
       "kind": "readiness",
       "passed": true,
-      "detail": "27 file(s)"
+      "detail": "34 file(s)"
     },
     {
       "id": "source.app.path-allowlist",
@@ -781,8 +823,15 @@
         "plugins/BIMLogLensNext/native/2021/ThisAssemblyProductYear.cs",
         "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
         "plugins/BIMLogLensNext/native/2025/ThisAssemblyProductYear.cs",
+        "plugins/BIMLogLensNext/native/AutodeskReadOnlyAdapter.cs",
+        "plugins/BIMLogLensNext/native/Build-LensNextSandboxPackages.ps1",
         "plugins/BIMLogLensNext/native/NativeReferenceBinding.cs",
         "plugins/BIMLogLensNext/native/NavisworksReferenceGate.targets",
+        "plugins/BIMLogLensNext/native/tests/2021/BIMLogLensNext.Native2021.Tests.csproj",
+        "plugins/BIMLogLensNext/native/tests/2021/ExpectedProductYear.cs",
+        "plugins/BIMLogLensNext/native/tests/2025/BIMLogLensNext.Native2025.Tests.csproj",
+        "plugins/BIMLogLensNext/native/tests/2025/ExpectedProductYear.cs",
+        "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
         "plugins/BIMLogLensNext/src/BridgeContracts.cs",
         "plugins/BIMLogLensNext/src/BridgeRequestValidator.cs",
         "plugins/BIMLogLensNext/src/ImmutableIdentity.cs",

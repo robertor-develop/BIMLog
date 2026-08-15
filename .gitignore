@@ -57,5 +57,10 @@ Thumbs.db
 /plugins/BIMLogLensNext/native/2021/obj/
 /plugins/BIMLogLensNext/native/2025/bin/
 /plugins/BIMLogLensNext/native/2025/obj/
+/plugins/BIMLogLensNext/native/tests/2021/bin/
+/plugins/BIMLogLensNext/native/tests/2021/obj/
+/plugins/BIMLogLensNext/native/tests/2025/bin/
+/plugins/BIMLogLensNext/native/tests/2025/obj/
+/artifacts/lens-next-sandbox-packages/
 /tests/lens-next-next/bin/
 /tests/lens-next-next/obj/

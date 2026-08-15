@@ -9705,6 +9705,100 @@
         "tests/lens-next-phase1/verify-phase1-source.mjs"
       ],
       "reviewedChangeSha256": "e972d0b7599e2787c62fdda58f17fdc43c6f511c93e2410b345af6f308f937c1"
+    },
+    {
+      "taskId": "bimlog-lens-next-readonly-autodesk-adapter-20260815",
+      "reviewedThroughCommit": "8782a301378cda88186f763848598fe163e0990f",
+      "reviewedAt": "2026-08-15T12:25:00-04:00",
+      "status": "local_source_build_package_candidate_held",
+      "captureTiming": "normal_acceptance_boundary",
+      "summary": "Adds a bounded exact-GUID read-only Autodesk adapter compiled separately for hash-gated Navisworks 2021 and 2025, with executable contracts and held local sandbox packages.",
+      "workstreams": [
+        "bimlog-lens-next",
+        "readonly-autodesk-adapter",
+        "dual-version-native-binding",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No canonical product authority or ecosystem relationship changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing isolation, fail-closed, and external-action boundaries remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed build, test, and evidence requirements govern this candidate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Read-only dual-version Lens navigation is already within the accepted vision."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Regenerated structural inventory records the new adapter, test, and packaging source files."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the exact-GUID adapter behavior, separate year bindings, package boundary, and limitations."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, export, presentation, or design-system behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new external standard, certification, or compliance claim is introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records verified local build and contract evidence while preserving runtime gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Replaces implementation work with independent review and installed-runtime acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production, customer, provider, installation, or field evidence is claimed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        ".gitignore",
+        "evidence/lens-next/20260812/integration/phase1-cross-lane-verification.json",
+        "evidence/lens-next/20260812/next-phase-integration/phase2-cross-language-verification.json",
+        "evidence/lens-next/20260815/readonly-autodesk-adapter/adapter-sandbox-receipt.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+        "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+        "plugins/BIMLogLensNext/native/AutodeskReadOnlyAdapter.cs",
+        "plugins/BIMLogLensNext/native/Build-LensNextSandboxPackages.ps1",
+        "plugins/BIMLogLensNext/native/tests/2021/BIMLogLensNext.Native2021.Tests.csproj",
+        "plugins/BIMLogLensNext/native/tests/2021/ExpectedProductYear.cs",
+        "plugins/BIMLogLensNext/native/tests/2025/BIMLogLensNext.Native2025.Tests.csproj",
+        "plugins/BIMLogLensNext/native/tests/2025/ExpectedProductYear.cs",
+        "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
+        "tests/lens-next-adapter/verify-readonly-adapter.mjs",
+        "tests/lens-next-phase1/verify-phase1-source.mjs"
+      ],
+      "reviewedChangeSha256": "4f5d446de4d7ff9d9a6d6d6fc387f33be356f008bc9099281aa19eea2fd55c08"
     }
   ]
 }

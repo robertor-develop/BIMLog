@@ -1,5 +1,23 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## BIMLog Lens Next concrete read-only Autodesk adapter candidate - 2026-08-15
+
+Lens Next now has one shared adapter source compiled independently into the hash-gated
+Navisworks 2021 and 2025 native assemblies. It accepts only an open, named, unchanged
+document; an exact positive BIMLog project; an exact SHA-256 model fingerprint; and an
+explicit nonzero Navisworks SavedViewpoint GUID. It resolves that GUID directly through
+`Document.SavedViewpoints.ResolveGuid` and may set only `CurrentSavedViewpoint` to the
+same re-resolved object on the owning UI thread. It does not enumerate SavedViewpoint
+folders, read comments or Legacy metadata, use labels or paths as identity, reconstruct
+missing visual state, or create, copy, edit, move, replace, remove, or publish any item.
+
+Both year-specific builds and executable adapter contracts pass locally. Separate held
+sandbox ZIPs contain only the core and matching year-specific Lens Next DLL/PDB plus a
+hash manifest; Autodesk assemblies and installers are excluded. This is a local source,
+build, and package candidate only. No plugin installation, live Navisworks document
+execution, Legacy access, Phase 2 enablement, push, deployment, provider/customer action,
+or field acceptance occurred.
+
 ## BIMLog Lens Next dual-version reference shells - 2026-08-14
 
 Lens Next has separate `BIMLogLensNext.Native2021` and
@@ -9,8 +27,9 @@ Navisworks Manage 2021 assemblies selected by the approved
 `H:\BIMLogPlugin2025\refs`. A shared MSBuild gate pins all three Autodesk
 assemblies per year and stops on absence or hash mismatch. The core project
 excludes the native subtree, so neither product assembly generation leaks into
-the shared read-only contract. This proves source/build binding, not a concrete
-adapter, installation, live runtime behavior, or field acceptance.
+the shared read-only contract. This proves source/build binding; the separate
+adapter candidate above adds bounded exact-GUID navigation but does not prove
+installation, live runtime behavior, or field acceptance.
 The Phase 1 inventory now explicitly recognizes the two core binding changes
 and all year-specific source paths while evaluating read-only behavior only
 against the frozen Phase 1 surfaces. Its comprehensive verifier passes 102/102;
@@ -32,8 +51,8 @@ This is not an enabled write implementation. It has no database, network,
 provider, customer, installation, SavedViewpoint, or Legacy I/O. Authoritative
 Navisworks 2021/2025 references are now bound only through separate hash-gated
 shells. Generated test `bin`/`obj` files are ignored build byproducts and are
-not part of the frozen candidate. A concrete native adapter, a real
-sandbox transaction/audit adapter, feature enablement, installation, and live
+not part of the frozen candidate. The read-only adapter is now a separate local
+candidate; a real sandbox transaction/audit adapter, feature enablement, installation, and live
 Navisworks acceptance remain separate future gates.
 
 ## BIMLog Lens Next isolated Phase 1 candidate - 2026-08-12
@@ -45,8 +64,9 @@ root `%LOCALAPPDATA%\BIMLog\LensNext`, loopback bridge `127.0.0.1:8766`, and
 metadata namespace `bimlog.lens_next.v1`. Phase 1 is read-only and permits only
 ping, capabilities, project-context, and exact immutable-identity
 open-working-view. It creates no SavedViewpoint, performs no Legacy discovery or
-mutation, and has not been installed. Its concrete adapter remains unimplemented;
-the accepted reference boundary is two separate hash-gated 2021/2025 shells.
+mutation, and has not been installed. Its concrete adapter is now implemented only
+as the separate exact-GUID local candidate above; the accepted reference boundary
+remains two separate hash-gated 2021/2025 shells.
 Historical Legacy roots below are not valid Lens Next build roots.
 
 Owned/hand-edited in Git. The in-app Living Brief serves the verified deployed source bundle;
