@@ -9879,7 +9879,7 @@
     },
     {
       "taskId": "bimlog-lens-next-f-only-package-rehearsal-20260816",
-      "reviewedThroughCommit": "7c5fa2dbb284235e0f64a6658a66856f1c19f82d",
+      "reviewedThroughCommit": "b59e7e54e4a42aa562c6f2dc78cc624b49326cb5",
       "reviewedAt": "2026-08-16T01:32:06Z",
       "status": "local_f_only_install_uninstall_rollback_rehearsal_passed",
       "captureTiming": "normal_acceptance_boundary",
@@ -9949,11 +9949,10 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLUGIN.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "0691715453bedcaeca7bcf2d7b57a74ac18de2d57f9ac569bb590b2574ae88df"
+      "reviewedChangeSha256": "6c6b86ab417034e2b25135d37774ac4e68e07a726581718bba04377726b0fb06"
     }
   ]
 }

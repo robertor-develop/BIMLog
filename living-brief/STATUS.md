@@ -2,6 +2,7 @@
 
 ## BIMLog Lens Next F-only package lifecycle rehearsal - local evidence 2026-08-16
 
+- Local rehearsal commit: `b59e7e54e4a42aa562c6f2dc78cc624b49326cb5`.
 - A reusable PowerShell harness rehearses both deterministic year packages only under a unique
   `F:\BIMLog\Temp\lens-next-rehearsal-*` root and removes that root after verification.
 - Both 2021 and 2025 pass exact routing/inventory/hash checks, collision and cross-year refusal,

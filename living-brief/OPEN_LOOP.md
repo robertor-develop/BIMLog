@@ -2,6 +2,8 @@
 
 ## BIMLog Lens Next after F-only package lifecycle rehearsal - 2026-08-16
 
+Local rehearsal candidate: `b59e7e54e4a42aa562c6f2dc78cc624b49326cb5`.
+
 1. Independently inspect the F-only rehearsal harness/receipt and the previously frozen loadable
    package hashes before any external installation gate.
 2. Installation target selection, C-root authority, Navisworks launch, and separate live 2021/2025
