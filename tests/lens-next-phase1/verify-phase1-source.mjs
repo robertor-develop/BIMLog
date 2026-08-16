@@ -153,11 +153,16 @@ const PHASE1_NATIVE_PATHS = Object.freeze([
 
 const EXPECTED_NATIVE_PATHS = Object.freeze([
   ...PHASE1_NATIVE_PATHS,
+  "plugins/BIMLogLensNext/contracts/readonly-package.contract.json",
   "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+  "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
   "plugins/BIMLogLensNext/native/2021/ThisAssemblyProductYear.cs",
   "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+  "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
   "plugins/BIMLogLensNext/native/2025/ThisAssemblyProductYear.cs",
+  "plugins/BIMLogLensNext/native/AutodeskPluginEntryPoints.cs",
   "plugins/BIMLogLensNext/native/AutodeskReadOnlyAdapter.cs",
+  "plugins/BIMLogLensNext/native/Build-LensNextReadOnlyPackages.ps1",
   "plugins/BIMLogLensNext/native/Build-LensNextSandboxPackages.ps1",
   "plugins/BIMLogLensNext/native/NativeReferenceBinding.cs",
   "plugins/BIMLogLensNext/native/NavisworksReferenceGate.targets",

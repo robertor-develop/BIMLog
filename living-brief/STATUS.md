@@ -1,5 +1,16 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog Lens Next loadable read-only packages - local candidate 2026-08-16
+
+- Added distinct registered Lens Next dock/button entry points and matching 2021/2025 Autodesk
+  bundle manifests without reusing Legacy identity, state, bridge, metadata, or install paths.
+- Both AnyCPU/net48 Release assemblies build against separately hash-gated SDK references.
+  Deterministic year-specific ZIPs contain only Lens Next core/native DLL/PDB files, manifest,
+  and internal hash inventory; no install target is selected and no Autodesk assembly is bundled.
+- Read-only/default-deny source, adapter, Phase 1, Phase 2 non-regression, isolation, manifest,
+  package inventory, and deterministic-output gates pass locally. Installation, Navisworks launch,
+  live document behavior, push, publication, deployment, and field acceptance remain unperformed.
+
 ## BIMLog Lens Next read-only Autodesk adapter local candidate - 2026-08-15
 
 - One shared adapter implementation compiles separately into the hash-gated Navisworks

@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## BIMLog Lens Next loadable package remaining gates - 2026-08-16
+
+1. Independently inspect and accept the exact 2021/2025 registered assemblies, Autodesk manifests,
+   deterministic ZIP inventories/hashes, and retained read-only/default-deny boundaries.
+2. Do not choose or write an installation target until Roberto separately authorizes the exact
+   target and any required C-root constitutional boundary.
+3. After installation authority, run the existing year-separated synthetic/test-document field
+   checklist. Source/build/package evidence is not installed-runtime or field acceptance.
+
 ## BIMLog Lens Next read-only Autodesk adapter remaining gates - 2026-08-15
 
 1. Independently inspect the exact adapter candidate, both native assemblies, executable

@@ -420,6 +420,10 @@ const phase1Inputs = [
 const acceptedPhase1BindingEvolution = new Map([
   ["plugins/BIMLogLensNext/BIMLogLensNext.csproj", { bytes: 706, sha256: "A35CF96FD19931AE68BD00E26E93C34D76C2AD8E0F36A4A79AA1C0D9C875C135" }],
   ["plugins/BIMLogLensNext/contracts/plugin-registration.contract.json", { bytes: 415, sha256: "F294BA2044C630B0FAC6750C14AD60341D946A149100ED12493C0590BCEDFC7D" }],
+  ["plugins/BIMLogLensNext/install/Install-BIMLogLensNext.contract.json", { bytes: 660, sha256: "E38D2E2785B8DC4905D02D4C071B70E66D546829C5BC2C485C6440D80D18521F" }],
+  ["plugins/BIMLogLensNext/install/Uninstall-BIMLogLensNext.contract.json", { bytes: 588, sha256: "4C1A272F15BFB0525ECA3D1AF4317672E6261650ED3BAEDD79D31D22F6D08291" }],
+  ["plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj", { bytes: 1766, sha256: "7B0B77A5A7E511274950AF75804351B4452EEEF01D22494CFA72C040F3DFBCEA" }],
+  ["plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj", { bytes: 1742, sha256: "3D5051D22050A3D9D2D684E303E6710AA97D03098DC6C3AB1AC2E28B66295047" }],
 ]);
 const phase1Mismatches = phase1Inputs
   .map((input) => {

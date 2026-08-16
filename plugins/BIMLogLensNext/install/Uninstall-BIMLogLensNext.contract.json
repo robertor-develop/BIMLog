@@ -3,9 +3,16 @@
   "status": "contract_only_no_uninstall_action",
   "installationFolderLeaf": "BIMLogLensNext",
   "allowedRemovalScope": [
+    "PackageContents.xml",
     "BIMLogLensNext.dll",
-    "BIMLogLensNext.dll.config"
+    "BIMLogLensNext.pdb",
+    "BIMLogLensNext.Native2021.dll",
+    "BIMLogLensNext.Native2021.pdb",
+    "BIMLogLensNext.Native2025.dll",
+    "BIMLogLensNext.Native2025.pdb",
+    "manifest.json"
   ],
+  "exactTargetChosen": false,
   "preserveStateByDefault": true,
   "forbiddenTargets": [
     "BIMLogNavisPlugin",

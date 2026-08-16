@@ -1,12 +1,12 @@
 {
   "schemaVersion": "bimlog-lens-next-phase2-cross-language-verification-v1",
-  "generatedAtUtc": "2026-08-15T16:23:35.642Z",
+  "generatedAtUtc": "2026-08-16T01:26:06.333Z",
   "status": "PASS",
   "worktree": {
     "root": "F:/BIMLog/Worktrees/bimlog-lens-next-20260812",
     "branch": "codex/bimlog-lens-next-20260812",
-    "head": "8782a301378cda88186f763848598fe163e0990f",
-    "tree": "16840e3d170e6efd1ef3b434bce6d81f0de3a6ea"
+    "head": "ff12c1046ba90f6ebe0089e1fa6e7ce15a54ab37",
+    "tree": "c6029f89dff1c5fe01a62d33efb27746f9e3fa53"
   },
   "inputs": [
     {
@@ -72,7 +72,7 @@
       "severity": "gate",
       "detail": {
         "phase1Baseline": "4e2d4da72493c9cb497e067c2e73e727e031ede4",
-        "currentHead": "8782a301378cda88186f763848598fe163e0990f"
+        "currentHead": "ff12c1046ba90f6ebe0089e1fa6e7ce15a54ab37"
       }
     },
     {
@@ -414,7 +414,11 @@
         "filesVerified": 70,
         "acceptedBindingEvolution": [
           "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
-          "plugins/BIMLogLensNext/contracts/plugin-registration.contract.json"
+          "plugins/BIMLogLensNext/contracts/plugin-registration.contract.json",
+          "plugins/BIMLogLensNext/install/Install-BIMLogLensNext.contract.json",
+          "plugins/BIMLogLensNext/install/Uninstall-BIMLogLensNext.contract.json",
+          "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+          "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj"
         ],
         "mismatches": []
       }

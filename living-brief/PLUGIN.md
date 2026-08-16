@@ -1,5 +1,20 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## BIMLog Lens Next loadable read-only package candidate - 2026-08-16
+
+Lens Next now has year-separated registered Autodesk entry points: dock
+`BIMLogLensNext.IgniteSmart` and button `BIMLogLensNextButton.IgniteSmart`.
+The 2021 and 2025 native assemblies compile the same minimal read-only panel and exact-GUID
+adapter against their separately hash-gated SDK references. Their manifests bind only the
+matching Navisworks series and matching native DLL. Deterministic F-root ZIPs include the
+manifest, core DLL/PDB, matching year-native DLL/PDB, and hash manifest; they include no Autodesk
+or Legacy assembly and select no installation target.
+
+The panel exposes no workflow or SavedViewpoint mutation surface. All eight `lens_next.*` write
+flags remain false, Phase 2 remains held, and install/launch/live field acceptance remain separate
+gates. This is a local source/build/package candidate only; it was not installed or run in
+Navisworks.
+
 ## BIMLog Lens Next concrete read-only Autodesk adapter candidate - 2026-08-15
 
 Lens Next now has one shared adapter source compiled independently into the hash-gated

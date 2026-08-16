@@ -4,9 +4,16 @@
   "assembly": "BIMLogLensNext.dll",
   "installationFolderLeaf": "BIMLogLensNext",
   "allowedFiles": [
+    "PackageContents.xml",
     "BIMLogLensNext.dll",
-    "BIMLogLensNext.dll.config"
+    "BIMLogLensNext.pdb",
+    "BIMLogLensNext.Native2021.dll",
+    "BIMLogLensNext.Native2021.pdb",
+    "BIMLogLensNext.Native2025.dll",
+    "BIMLogLensNext.Native2025.pdb",
+    "manifest.json"
   ],
+  "exactTargetChosen": false,
   "forbiddenTargets": [
     "BIMLogNavisPlugin",
     "%APPDATA%\\BIMLog",

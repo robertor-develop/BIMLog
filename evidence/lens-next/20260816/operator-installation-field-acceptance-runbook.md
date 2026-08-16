@@ -1,6 +1,6 @@
 # BIMLog Lens Next installation and live field-acceptance runbook
 
-Status: `BLOCKED_BEFORE_INSTALLATION_PACKAGE`
+Status: `LOCAL_LOADABLE_PACKAGE_READY_EXTERNAL_INSTALL_AUTHORITY_PENDING`
 
 Prepared from clean candidate `bb016eb59baffa12b6b4d9c830ee8f4aaad94325` on branch
 `codex/bimlog-lens-next-20260812` in
@@ -12,20 +12,18 @@ publish, or deployment.
 
 ## Current package disposition
 
-The two held artifacts are source/build review packages, not operator-installable Navisworks
-plugins:
+The earlier sandbox artifacts remain source/build review packages. The new year-specific loadable
+package artifacts are:
 
 | Navisworks | Held artifact | SHA-256 |
 | --- | --- | --- |
-| 2021 | `artifacts\lens-next-sandbox-packages\BIMLogLensNext-Navisworks2021-readonly-sandbox.zip` | `8D65248B4AED57C1510ADE71E07672176B1494EAA1852EB94813767B0684D17D` |
-| 2025 | `artifacts\lens-next-sandbox-packages\BIMLogLensNext-Navisworks2025-readonly-sandbox.zip` | `CCE43CEDEC28CDC8EAA509038E8FB1E912745C5DA327EBD87CD8898E201CE37D` |
+| 2021 | `artifacts\lens-next-readonly-packages\BIMLogLensNext-Navisworks2021-readonly-loadable.zip` | `FAD1EAC5A5B5EB7AEF3C2C9A2E1ABCE323549036791A8A982BFCEA5689DAA593` |
+| 2025 | `artifacts\lens-next-readonly-packages\BIMLogLensNext-Navisworks2025-readonly-loadable.zip` | `C916D997EAEC84E0D39600ADB4146650AA8EF5B1645C5E02764E63EADA40C8DC` |
 
-Each ZIP contains only `BIMLogLensNext.dll`, its matching
-`BIMLogLensNext.Native{year}.dll`, PDBs, and a hash manifest. Neither ZIP contains an Autodesk
-plugin manifest or a registered `DockPanePlugin`/`AddInPlugin` entry point. The current install
-contract allows only `BIMLogLensNext.dll` and `BIMLogLensNext.dll.config`, so it does not authorize
-the native year DLL contained in either ZIP. No exact year-specific Lens Next installation target
-is frozen. Installation must stop until those three gaps are corrected and independently accepted.
+Each ZIP contains `PackageContents.xml`, `BIMLogLensNext.dll`, its matching
+`BIMLogLensNext.Native{year}.dll`, PDBs, and a hash manifest. The matching native assembly contains
+the distinct registered `DockPanePlugin` and `AddInPlugin` entry points. Install/uninstall contracts
+include the exact year-native payloads, while intentionally choosing no installation target.
 
 ## Side-by-side identity boundary
 
@@ -157,7 +155,6 @@ this authority from acceptance of the source or this runbook.
 
 ## Current blocker
 
-Installation and live acceptance remain blocked until an independently accepted, year-specific,
-loadable Lens Next plugin artifact exists with registered Autodesk entry points, manifest, exact
-installation targets, native DLLs included in the install/uninstall contract, and a valid C-root
-authority path. The present sandbox packages remain useful and verified build evidence only.
+Installation and live acceptance remain externally gated on independent candidate acceptance,
+an exact authorized installation target, and a valid C-root authority path where applicable. The
+loadable packages do not grant installation or Navisworks execution authority.

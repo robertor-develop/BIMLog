@@ -13,11 +13,14 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\AutodeskReadOnlyAdapter.cs" Link="AutodeskReadOnlyAdapter.cs" />
+    <Compile Include="..\AutodeskPluginEntryPoints.cs" Link="AutodeskPluginEntryPoints.cs" />
     <Compile Include="..\NativeReferenceBinding.cs" Link="NativeReferenceBinding.cs" />
     <ProjectReference Include="..\..\BIMLogLensNext.csproj" />
     <Reference Include="Autodesk.Navisworks.Api" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Api.dll" Private="false" />
     <Reference Include="Autodesk.Navisworks.Automation" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Automation.dll" Private="false" />
     <Reference Include="Autodesk.Navisworks.Clash" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Clash.dll" Private="false" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <Import Project="..\NavisworksReferenceGate.targets" />
 </Project>

@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 1,
+  "status": "local_package_only_no_install_authority",
+  "packageLeaf": "BIMLogLensNext.bundle",
+  "yearPackages": {
+    "2021": {
+      "nativeAssembly": "BIMLogLensNext.Native2021.dll",
+      "manifest": "native/2021/PackageContents.xml",
+      "navisworksSeries": "Nw18"
+    },
+    "2025": {
+      "nativeAssembly": "BIMLogLensNext.Native2025.dll",
+      "manifest": "native/2025/PackageContents.xml",
+      "navisworksSeries": "Nw22"
+    }
+  },
+  "requiredContents": [
+    "PackageContents.xml",
+    "Contents/BIMLogLensNext.dll",
+    "Contents/BIMLogLensNext.pdb",
+    "Contents/{year-native-assembly}",
+    "Contents/{year-native-pdb}",
+    "manifest.json"
+  ],
+  "writeFeatureFlagsEnabled": false,
+  "installTargetChosen": false,
+  "legacyFilesIncluded": false,
+  "autodeskAssembliesIncluded": false
+}

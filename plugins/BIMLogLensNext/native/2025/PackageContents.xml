@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage SchemaVersion="1.0" AutodeskProduct="Navisworks" Name="BIMLog Lens Next 2025" Description="Read-only BIMLog Lens Next for Navisworks Manage 2025" AppVersion="1.0.0" ProductCode="{D91F6111-A9B8-4B05-91BA-8F2DCAD32025}" UpgradeCode="{722C5931-DB3B-4C69-A7C0-6D1B73132025}">
+  <CompanyDetails Name="IgniteSmart" />
+  <Components>
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN" SeriesMin="Nw22" SeriesMax="Nw22" />
+    <ComponentEntry AppName="BIMLog Lens Next 2025" ModuleName="./Contents/BIMLogLensNext.Native2025.dll" />
+  </Components>
+</ApplicationPackage>

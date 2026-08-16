@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "bimlog-lens-next-readonly-loadable-packages-v1",
+  "status": "LOCAL_LOADABLE_PACKAGES_HELD_NO_INSTALL",
+  "sourceBaseline": "ff12c1046ba90f6ebe0089e1fa6e7ce15a54ab37",
+  "packages": [
+    {
+      "productYear": 2021,
+      "path": "artifacts\\lens-next-readonly-packages\\BIMLogLensNext-Navisworks2021-readonly-loadable.zip",
+      "bytes": 33663,
+      "sha256": "FAD1EAC5A5B5EB7AEF3C2C9A2E1ABCE323549036791A8A982BFCEA5689DAA593"
+    },
+    {
+      "productYear": 2025,
+      "path": "artifacts\\lens-next-readonly-packages\\BIMLogLensNext-Navisworks2025-readonly-loadable.zip",
+      "bytes": 33657,
+      "sha256": "C916D997EAEC84E0D39600ADB4146650AA8EF5B1645C5E02764E63EADA40C8DC"
+    }
+  ],
+  "verification": {
+    "native2021ReleaseBuild": "PASS_0_WARNINGS_0_ERRORS",
+    "native2025ReleaseBuild": "PASS_0_WARNINGS_0_ERRORS",
+    "native2021AdapterContract": "PASS_10_OF_10",
+    "native2025AdapterContract": "PASS_10_OF_10",
+    "loadablePackageSourceContract": "PASS_18_OF_18",
+    "readOnlyAdapterSourceContract": "PASS_22_OF_22",
+    "phase1Comprehensive": "PASS",
+    "phase2HeldCrossLanguageNonRegression": "PASS",
+    "deterministicSecondBuild": "PASS_IDENTICAL_ZIP_SHA256",
+    "zipInventoryInspected": true,
+    "registered2021AssemblyInspected": true,
+    "registered2025AssemblyInspection": "SOURCE_AND_COMPILE_INSPECTED_RUNTIME_METADATA_LOAD_UNAVAILABLE_OUTSIDE_NAVISWORKS"
+  },
+  "boundaries": {
+    "install": false,
+    "installTargetChosen": false,
+    "launch": false,
+    "legacyIo": false,
+    "productionIo": false,
+    "phase2": false
+  },
+  "limitations": {
+    "installation": "NOT_AUTHORIZED_NOT_PERFORMED",
+    "navisworksLaunch": "NOT_AUTHORIZED_NOT_PERFORMED",
+    "liveDocumentBehavior": "NOT_PERFORMED",
+    "fieldAcceptance": "NOT_PERFORMED"
+  }
+}
