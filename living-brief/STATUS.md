@@ -6,6 +6,8 @@
   loopback PostgreSQL port while retaining exact loopback-host, database-name, explicit-URL,
   and runtime identity checks. This removes a test-harness collision with an unrelated managed
   local PostgreSQL service without weakening production or remote-database refusal.
+  The same exact-runtime proof now expects the canonical `/api` health response to remain 200
+  instead of retaining its stale pre-health-route 404 assertion.
 
 - Exact-390 Spanish browser QA found and corrected the Resource Scheduling methodology remaining
   in English. The production component now presents the canonical methodology in Spanish while

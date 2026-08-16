@@ -9,6 +9,8 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   continuing to require an explicit URL, exact `bimlog_rfi_test` database name, loopback host,
   and verified server identity. The governed pre-push gate must still pass against a fresh
   disposable F-rooted cluster before the local candidate is closed.
+  The proof also tracks the accepted `/api` health endpoint as 200 rather than its obsolete
+  pre-health-route 404 expectation.
 
 - Exact-390 Spanish QA corrected the Resource Scheduling methodology that remained in English.
   Focused bilingual SSR, frontend typecheck, and live no-overflow browser evidence pass; the

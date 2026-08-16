@@ -321,7 +321,7 @@ try {
     (status) => status === 200,
   );
   const readyMs = performance.now() - startedAt;
-  assert.equal(apiStatus, 404);
+  assert.equal(apiStatus, 200);
   assert.equal(readyStatus, 200);
   assert(readyMs < 6_000);
   assert.match(stdout, /phase=bootstrap_bound/);
@@ -375,7 +375,7 @@ try {
       pdfGenerationAndParsing: true,
       imageAndCanvasNativeRuntime: true,
       emailArchiveDocxAuthImports: true,
-      apiHistoricalNon5xx: apiStatus,
+      apiRootStatus: apiStatus,
       readinessStatus: readyStatus,
       packagedLivingBriefDocuments: docs.length,
       passwordlessEligibleUnlock: true,

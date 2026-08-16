@@ -9782,6 +9782,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a8f96a0b31fa97c44a13def70d6df2d11e0cc61094d07043515005541426656b"
+    },
+    {
+      "taskId": "bimlog-build6-artifact-api-root-proof-20260816",
+      "reviewedThroughCommit": "fe2fb6593fc308247cfae40c6ebb62f359849f8a",
+      "reviewedAt": "2026-08-16T18:18:00-04:00",
+      "status": "local_artifact_api_root_assertion_correction_gate_pending",
+      "captureTiming": "same_release_gate_task",
+      "summary": "Aligns the exact production-artifact proof with the canonical /api health route introduced earlier in accepted source, expecting its 200 response instead of an obsolete 404.",
+      "workstreams": [
+        "build6",
+        "release-gate",
+        "production-artifact",
+        "health-check",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product or operating authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact built-runtime artifact requirement remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The test now asserts accepted production behavior rather than stale history."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Team Capacity direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing /api health route and runtime topology are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the stale artifact assertion correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop records the corrected proof while retaining the full gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external or production event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f731bef9be454b0135afc4c74c48737afe42f3b6be2faf8aaf6c22f3675e0511"
     }
   ]
 }
