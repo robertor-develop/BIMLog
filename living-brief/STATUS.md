@@ -773,3 +773,11 @@ database-safety, schema inventory, API TypeScript, and diff checks pass; publica
 The PLATFORM generator is now the sole authority for generated platform content. Commit
 `3a137aec83283e29c1a6661c3af2812b31ff1768` removes manual commit-specific PLATFORM prose and emits the
 schema-parity rule deterministically, preventing API builds from dirtying the tracked Living Brief.
+## BIMLog Lens Next install-target feasibility - read-only audit 2026-08-16
+
+- Autodesk documents no configurable arbitrary F/H bundle search root for Navisworks 2021/2025.
+  F-hosted assemblies can instead be loaded for a bounded run with `-AddPluginAssembly`; this is
+  runtime loading, not package installation or persistent auto-discovery.
+- Persistent `.bundle` discovery is C-rooted. No target was selected or changed. The local 2021
+  default executable was verified at version `18.0.1347.51`; a 2025 installation was not
+  established. See the [read-only feasibility audit](../evidence/lens-next/20260816/install-target-feasibility-audit.md).

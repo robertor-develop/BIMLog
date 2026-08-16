@@ -302,3 +302,13 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
   side offers suggestions).
 - v1.6.3 confirmed live in Navisworks 2021 by Roberto (recursion + 8-folder mirror + two-way
   status filing all verified) and packaged for Ruben (2025 zip).
+## BIMLog Lens Next install-target feasibility - 2026-08-16
+
+Official Autodesk documentation supports inert package storage on F and an explicit
+`-AddPluginAssembly` runtime load from another location, but does not document an arbitrary F/H
+bundle auto-discovery path for Navisworks 2021 or 2025. Persistent bundle discovery remains in
+C-root product/profile `Plugins` or `ApplicationPlugins` locations. The smallest documented
+persistent scope is one per-user Lens Next `.bundle` under `%APPDATA%\Autodesk\ApplicationPlugins`,
+which remains constitutionally unauthorized and unselected. Exact findings, version matrix, package
+hashes, ownership boundary, and recommended 2021 no-copy runtime gate are in
+[`install-target-feasibility-audit.md`](../evidence/lens-next/20260816/install-target-feasibility-audit.md).

@@ -9953,6 +9953,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6c6b86ab417034e2b25135d37774ac4e68e07a726581718bba04377726b0fb06"
+    },
+    {
+      "taskId": "bimlog-lens-next-install-target-feasibility-20260816",
+      "reviewedThroughCommit": "cad5866e066cfe03d46bf8ed4a9639574147ad72",
+      "reviewedAt": "2026-08-16T01:40:00Z",
+      "status": "read_only_install_target_feasibility_complete",
+      "captureTiming": "normal_acceptance_boundary",
+      "summary": "Records authoritative Autodesk and local readback separating F-hosted package storage, explicit non-C runtime assembly loading, and C-root persistent bundle discovery without selecting or modifying a target.",
+      "workstreams": [
+        "bimlog-lens-next",
+        "install-target-feasibility",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or product-direction change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The audit remains read-only and preserves all external-action gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Documentation evidence is not substituted for installed-runtime acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform structure or runtime behavior changed."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records supported package discovery and alternate runtime-load boundaries."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only official Autodesk product documentation is cited; no standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records verified feasibility facts and local installed-product readback."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the recommended separately authorized no-copy 2021 runtime gate and remaining 2025/C-root gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No installation, configuration, launch, Legacy, customer, provider, or production action occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "8bd4585a8dc6a1ad3e6aa3cdeabe6ac36d1adcba071eebea7899805928556a75"
     }
   ]
 }

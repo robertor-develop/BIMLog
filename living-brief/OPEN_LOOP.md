@@ -1845,3 +1845,13 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Preserve the exact schema object names and `DESC NULLS FIRST` semantics sealed at
   `08151f39e0db79c0196d50e64cd60b651c4f4992`; any provider preview containing DROP/recreate churn remains a hard no-go.
 - Keep `PLATFORM.md` generator-owned and require API build followed by `check:living-brief` to leave the release tree clean.
+## BIMLog Lens Next after install-target feasibility audit - 2026-08-16
+
+1. Obtain Roberto's separately bounded authorization before any Navisworks launch. Recommended
+   next gate is 2021-only, no-copy `-AddPluginAssembly` loading from the frozen F artifact with an
+   approved synthetic document and explicit before/after no-state-change evidence.
+2. Before a 2025 runtime gate, verify its exact installed executable, product version, and matching
+   assembly read-only; 2021 evidence cannot accept 2025.
+3. Any persistent C-root `.bundle` installation requires Roberto's exact constitutional authority,
+   literal target, hash/inventory, ownership rollback, and launch scope. No target is currently
+   selected or authorized.
