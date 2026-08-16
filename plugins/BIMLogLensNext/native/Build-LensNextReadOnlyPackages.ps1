@@ -12,7 +12,28 @@ $allowedRoot = [IO.Path]::GetFullPath((Join-Path $repoRoot 'artifacts'))
 if (-not $output.StartsWith($allowedRoot + [IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)) {
   throw 'Lens Next packages must remain under this repository artifacts directory.'
 }
+
+function Assert-NoReparseTraversal([string]$Path, [string]$Boundary) {
+  $cursor = [IO.Path]::GetFullPath($Path).TrimEnd('\')
+  $limit = [IO.Path]::GetFullPath($Boundary).TrimEnd('\')
+  while ($cursor.Length -ge $limit.Length) {
+    if (Test-Path -LiteralPath $cursor) {
+      $item = Get-Item -LiteralPath $cursor -Force
+      if (($item.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+        throw "Lens Next package output may not traverse a reparse point: $cursor"
+      }
+    }
+    if ($cursor.Equals($limit, [StringComparison]::OrdinalIgnoreCase)) { return }
+    $parent = Split-Path -Parent $cursor
+    if ($parent -eq $cursor) { break }
+    $cursor = $parent
+  }
+  throw "Lens Next package output escaped its repository boundary: $Path"
+}
+
+Assert-NoReparseTraversal $output $allowedRoot
 New-Item -ItemType Directory -Force -Path $output | Out-Null
+Assert-NoReparseTraversal $output $allowedRoot
 Add-Type -AssemblyName System.IO.Compression
 
 function Get-Bytes([string]$Path) { [IO.File]::ReadAllBytes($Path) }
