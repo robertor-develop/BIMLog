@@ -410,6 +410,83 @@ export const financialContractAmendmentLinesTable = pgTable(
   ],
 );
 
+export const financialContractPaymentApplicationsTable = pgTable(
+  "financial_contract_payment_applications",
+  {
+    id: text("id").primaryKey(),
+    contractId: text("contract_id").notNull(),
+    bimlogId: text("bimlog_id").notNull(),
+    applicationNumber: text("application_number").notNull(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    createdById: integer("created_by_id").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    unique("fin_contract_payment_apps_bimlog_id_key").on(t.bimlogId),
+    unique("fin_contract_payment_apps_contract_number_key").on(t.contractId, t.applicationNumber),
+    unique("fin_contract_payment_apps_contract_idem_key").on(t.contractId, t.idempotencyKey),
+    foreignKey({ columns: [t.contractId], foreignColumns: [financialContractsTable.id], name: "fin_contract_payment_apps_contract_id_fkey" }),
+    foreignKey({ columns: [t.createdById], foreignColumns: [usersTable.id], name: "fin_contract_payment_apps_created_by_id_fkey" }),
+  ],
+);
+
+export const financialContractPaymentVersionsTable = pgTable(
+  "financial_contract_payment_versions",
+  {
+    id: text("id").primaryKey(),
+    paymentApplicationId: text("payment_application_id").notNull(),
+    contractVersionId: text("contract_version_id").notNull(),
+    version: integer("version").notNull(),
+    revision: integer("revision").default(1).notNull(),
+    status: text("status").notNull(),
+    periodStart: date("period_start").notNull(),
+    periodEnd: date("period_end").notNull(),
+    currency: text("currency").notNull(),
+    grossAmount: numeric("gross_amount", { precision: 30, scale: 6 }).notNull(),
+    retainageAmount: numeric("retainage_amount", { precision: 30, scale: 6 }).notNull(),
+    netAmount: numeric("net_amount", { precision: 30, scale: 6 }).notNull(),
+    contentFingerprint: text("content_fingerprint").notNull(),
+    preparedById: integer("prepared_by_id").notNull(),
+    submittedById: integer("submitted_by_id"),
+    approvedById: integer("approved_by_id"),
+    submittedAt: timestamp("submitted_at", { withTimezone: true }),
+    approvedAt: timestamp("approved_at", { withTimezone: true }),
+    outcomeReason: text("outcome_reason"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (t) => [
+    unique("fin_contract_payment_versions_app_version_key").on(t.paymentApplicationId, t.version),
+    foreignKey({ columns: [t.paymentApplicationId], foreignColumns: [financialContractPaymentApplicationsTable.id], name: "fin_contract_payment_versions_app_id_fkey" }),
+    foreignKey({ columns: [t.contractVersionId], foreignColumns: [financialContractVersionsTable.id], name: "fin_contract_payment_versions_contract_ver_fkey" }),
+    foreignKey({ columns: [t.preparedById], foreignColumns: [usersTable.id], name: "fin_contract_payment_versions_prepared_by_fkey" }),
+    foreignKey({ columns: [t.submittedById], foreignColumns: [usersTable.id], name: "fin_contract_payment_versions_submitted_by_fkey" }),
+    foreignKey({ columns: [t.approvedById], foreignColumns: [usersTable.id], name: "fin_contract_payment_versions_approved_by_fkey" }),
+    check("fin_contract_payment_status_chk", sql`${t.status} IN ('draft','submitted','approved','returned','rejected','withdrawn','voided')`),
+    check("fin_contract_payment_currency_chk", sql`${t.currency} ~ '^[A-Z]{3}$'`),
+    check("fin_contract_payment_amounts_chk", sql`${t.grossAmount} >= 0 AND ${t.retainageAmount} >= 0 AND ${t.netAmount} >= 0 AND ${t.netAmount} = ${t.grossAmount} - ${t.retainageAmount}`),
+    check("fin_contract_payment_period_chk", sql`${t.periodEnd} >= ${t.periodStart}`),
+  ],
+);
+
+export const financialContractPaymentLinesTable = pgTable(
+  "financial_contract_payment_lines",
+  {
+    id: text("id").primaryKey(),
+    paymentVersionId: text("payment_version_id").notNull(),
+    contractSovLineId: text("contract_sov_line_id").notNull(),
+    currentAmount: numeric("current_amount", { precision: 30, scale: 6 }).notNull(),
+    evidence: jsonb("evidence").$type<Record<string, unknown>>().notNull().default({}),
+    sortOrder: integer("sort_order").notNull(),
+  },
+  (t) => [
+    unique("fin_contract_payment_lines_version_sov_key").on(t.paymentVersionId, t.contractSovLineId),
+    foreignKey({ columns: [t.paymentVersionId], foreignColumns: [financialContractPaymentVersionsTable.id], name: "fin_contract_payment_lines_version_id_fkey" }),
+    foreignKey({ columns: [t.contractSovLineId], foreignColumns: [financialContractSovLinesTable.id], name: "fin_contract_payment_lines_sov_line_id_fkey" }),
+    check("fin_contract_payment_line_amount_chk", sql`${t.currentAmount} >= 0`),
+  ],
+);
+
 export const financialContractImportSessionsTable = pgTable(
   "financial_contract_import_sessions",
   {
@@ -528,6 +605,8 @@ export const financialContractHistoryTable = pgTable(
     contractVersionId: text("contract_version_id"),
     amendmentId: text("amendment_id"),
     amendmentVersionId: text("amendment_version_id"),
+    paymentApplicationId: text("payment_application_id"),
+    paymentVersionId: text("payment_version_id"),
     actorUserId: integer("actor_user_id").notNull(),
     eventType: text("event_type").notNull(),
     beforeState: text("before_state"),
@@ -572,6 +651,8 @@ export const financialContractHistoryTable = pgTable(
       foreignColumns: [financialContractAmendmentVersionsTable.id],
       name: "financial_contract_history_amendment_version_id_fkey",
     }),
+    foreignKey({ columns: [t.paymentApplicationId], foreignColumns: [financialContractPaymentApplicationsTable.id], name: "fin_contract_history_payment_app_id_fkey" }),
+    foreignKey({ columns: [t.paymentVersionId], foreignColumns: [financialContractPaymentVersionsTable.id], name: "fin_contract_history_payment_version_id_fkey" }),
     foreignKey({
       columns: [t.actorUserId],
       foreignColumns: [usersTable.id],

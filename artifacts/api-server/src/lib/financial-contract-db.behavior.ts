@@ -31,7 +31,7 @@ const otherScheduleId = Number((await pool.query(`INSERT INTO schedule_item_plac
 await ensureFinancialControlSchema(); await ensureFinancialBudgetSchema(); await ensureFinancialContractSchema(); await ensureFinancialContractSchema();
 check("additive idempotent migration", "Build 3 schema ensured twice");
 const tables = (await pool.query(`SELECT table_name FROM information_schema.tables WHERE table_schema='public' AND table_name LIKE 'financial_contract%' ORDER BY table_name`)).rows;
-assert.equal(tables.length, 9); check("nine approved table families", "database inventory exact");
+assert.equal(tables.length, 12); check("twelve approved table families", "contract, amendment, import, grant, history, and governed payment inventory exact");
 const noDrops = (await pool.query(`SELECT count(*)::int n FROM information_schema.tables WHERE table_schema='public'`)).rows[0].n; assert.ok(noDrops >= 25); check("existing schema preserved", "additive prerequisite and Build 1/2 tables remain");
 
 await pool.query(`INSERT INTO company_cost_library_versions(id,library_id,company_id,version,effective_date,status,reason,content_fingerprint,created_by_id) VALUES('lv','lib',$1,1,current_date,'approved','Disposable library','lfp',$2)`, [companyId, userId]);
