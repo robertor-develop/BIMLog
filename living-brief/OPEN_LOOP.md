@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## BIMLog Lens Next after F-only package lifecycle rehearsal - 2026-08-16
+
+1. Independently inspect the F-only rehearsal harness/receipt and the previously frozen loadable
+   package hashes before any external installation gate.
+2. Installation target selection, C-root authority, Navisworks launch, and separate live 2021/2025
+   acceptance remain unperformed and require their own exact authorization.
+
 ## BIMLog Lens Next loadable package remaining gates - 2026-08-16
 
 Local implementation candidate: `57038697cbc8f5af3213ae6c3dd8e1a66a6210e4`.

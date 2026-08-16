@@ -9876,6 +9876,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "bedce10341fc46e5174256503bf8deb5e38846bd23eacb3e7859b6a731de7e18"
+    },
+    {
+      "taskId": "bimlog-lens-next-f-only-package-rehearsal-20260816",
+      "reviewedThroughCommit": "7c5fa2dbb284235e0f64a6658a66856f1c19f82d",
+      "reviewedAt": "2026-08-16T01:32:06Z",
+      "status": "local_f_only_install_uninstall_rollback_rehearsal_passed",
+      "captureTiming": "normal_acceptance_boundary",
+      "summary": "Adds and executes a disposable F-only dual-year package lifecycle rehearsal with strict boundary, routing, collision, idempotency, rollback, ownership, residual, path-escape, and reparse checks.",
+      "workstreams": [
+        "bimlog-lens-next",
+        "f-only-package-rehearsal",
+        "dual-version-native-binding",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product or ecosystem identity change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing isolation, evidence, and external-action boundaries remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The rehearsal adds artifact lifecycle evidence without substituting for installed-runtime acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Test/evidence-only tooling does not alter platform structure or runtime behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the F-only install, reinstall, rollback, uninstall, and traversal evidence boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export behavior change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records passed local rehearsal evidence without installation or field claims."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Leaves exact external installation and live acceptance gates open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No C/H/AppData/Autodesk/Legacy/production/customer/provider action occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0691715453bedcaeca7bcf2d7b57a74ac18de2d57f9ac569bb590b2574ae88df"
     }
   ]
 }

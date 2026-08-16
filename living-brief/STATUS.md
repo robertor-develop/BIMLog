@@ -1,5 +1,15 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog Lens Next F-only package lifecycle rehearsal - local evidence 2026-08-16
+
+- A reusable PowerShell harness rehearses both deterministic year packages only under a unique
+  `F:\BIMLog\Temp\lens-next-rehearsal-*` root and removes that root after verification.
+- Both 2021 and 2025 pass exact routing/inventory/hash checks, collision and cross-year refusal,
+  idempotent reinstall, rollback, exact-ownership uninstall, unrelated-file preservation, zero
+  owned residuals, and path-escape/reparse rejection.
+- No install target was selected; no Autodesk, Legacy, AppData, H-root, C-root, Navisworks,
+  production, customer, provider, push, publish, or deployment action occurred.
+
 ## BIMLog Lens Next loadable read-only packages - local candidate 2026-08-16
 
 - Local implementation commit: `57038697cbc8f5af3213ae6c3dd8e1a66a6210e4`.

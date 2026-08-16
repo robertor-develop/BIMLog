@@ -1,0 +1,103 @@
+{
+  "schemaVersion": "bimlog-lens-next-f-only-install-rehearsal-v1",
+  "status": "PASS",
+  "sourceBaseline": "7c5fa2dbb284235e0f64a6658a66856f1c19f82d",
+  "tempBoundary": "F:\\BIMLog\\Temp",
+  "runRootRemoved": true,
+  "checks": [
+    {
+      "id": "path_escape_refused",
+      "passed": true,
+      "detail": "Path escapes the rehearsal boundary: F:\\BIMLog\\escape"
+    },
+    {
+      "id": "reparse_traversal_refused",
+      "passed": true,
+      "detail": "Reparse traversal is forbidden: F:\\BIMLog\\Temp\\lens-next-rehearsal-b873834430b4439aa43f33c5b3e40d87\\reparse-link"
+    },
+    {
+      "id": "package_2021_routing_inventory_hashes",
+      "passed": true,
+      "detail": "FAD1EAC5A5B5EB7AEF3C2C9A2E1ABCE323549036791A8A982BFCEA5689DAA593"
+    },
+    {
+      "id": "package_2021_collision_refused",
+      "passed": true,
+      "detail": "Collision refused: Contents\\BIMLogLensNext.dll"
+    },
+    {
+      "id": "package_2021_install_reinstall_idempotent",
+      "passed": true,
+      "detail": [
+        "1B4A14D51FF7425DCC768225DAD1A9A589BCA348543163C3E6CEB38E3C71F2AF",
+        "69C7116A596A096F5D0E849785796BC847D690A125A0459610E64D31787008F7",
+        "BA05FE4B45EA0C50E19EE89CBD7EAA65B14E4E64B95DC1705F6BE1D5135FD24D",
+        "BA8639AF2051118DE70265C213172D0E063EABB44F1DBED1A0B98B8B400DF46C",
+        "EA7FDCAC179371EC3FCDCC0EFC8FDFF5C7992AF9A9E6CD8B51C9847DD926636E",
+        "C379473BCBEE7150F240B292798B7E966954A7743464134CEEC8AB77B19167BE"
+      ]
+    },
+    {
+      "id": "package_2021_cross_year_refused",
+      "passed": true,
+      "detail": "Cross-year collision refused."
+    },
+    {
+      "id": "package_2021_rollback_restored",
+      "passed": true,
+      "detail": "8769282534FBD1560FE77B45B6D27433A19C41BF4528267B35794A37F557B129"
+    },
+    {
+      "id": "package_2021_uninstall_exact_ownership_no_residuals",
+      "passed": true,
+      "detail": "unrelated.keep preserved"
+    },
+    {
+      "id": "package_2025_routing_inventory_hashes",
+      "passed": true,
+      "detail": "C916D997EAEC84E0D39600ADB4146650AA8EF5B1645C5E02764E63EADA40C8DC"
+    },
+    {
+      "id": "package_2025_collision_refused",
+      "passed": true,
+      "detail": "Collision refused: Contents\\BIMLogLensNext.dll"
+    },
+    {
+      "id": "package_2025_install_reinstall_idempotent",
+      "passed": true,
+      "detail": [
+        "1B4A14D51FF7425DCC768225DAD1A9A589BCA348543163C3E6CEB38E3C71F2AF",
+        "B3FD10F11FCCDD69797DCBF4A0BD1CB3DB184152B796348D820C4E33F08EEFBF",
+        "3C8DCAD5E6AAD3ED7E2040DE21894407565D46F371C8456F2B5E04C433131E98",
+        "BA8639AF2051118DE70265C213172D0E063EABB44F1DBED1A0B98B8B400DF46C",
+        "C87BA5D8AA9A5822AED486AD73D73BFDEDB22D40AC6502E09C1EA25729FFDEFA",
+        "34ADB97135C5DEBE72C0B138FF699FE72C758C83FBDE4D97BF917403771E6366"
+      ]
+    },
+    {
+      "id": "package_2025_cross_year_refused",
+      "passed": true,
+      "detail": "Cross-year collision refused."
+    },
+    {
+      "id": "package_2025_rollback_restored",
+      "passed": true,
+      "detail": "EE712ED7F21D4850BD61B7098B6ECEDC60927F1BDA0452EED0AEBB3D6474C954"
+    },
+    {
+      "id": "package_2025_uninstall_exact_ownership_no_residuals",
+      "passed": true,
+      "detail": "unrelated.keep preserved"
+    }
+  ],
+  "boundaries": {
+    "cRoot": false,
+    "hRoot": false,
+    "autodesk": false,
+    "appData": false,
+    "legacy": false,
+    "navisworksLaunch": false,
+    "installTargetChosen": false,
+    "production": false
+  }
+}

@@ -1,5 +1,18 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## BIMLog Lens Next F-only install/rollback rehearsal - 2026-08-16
+
+Both deterministic loadable packages now pass a fully disposable rehearsal under an exact
+collision-checked `F:\BIMLog\Temp` boundary. The reusable harness validates year routing,
+Autodesk manifest/plugin identities, exact ZIP inventory and internal hashes, collision refusal,
+same-package reinstall idempotence, cross-year refusal, rollback restoration, ownership-scoped
+uninstall, unrelated-file preservation, zero owned residuals, path-escape rejection, and reparse
+traversal rejection. Each unique rehearsal root is removed after verification.
+
+This is F-only synthetic evidence. It chooses no installation target and grants no C-root,
+Navisworks launch, live-document, production, customer, provider, push, publish, or deployment
+authority. Legacy Lens and all Lens Next write-disabled boundaries remain unchanged.
+
 ## BIMLog Lens Next loadable read-only package candidate - 2026-08-16
 
 Lens Next now has year-separated registered Autodesk entry points: dock
