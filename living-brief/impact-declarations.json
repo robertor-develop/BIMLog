@@ -10009,13 +10009,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "Records verified feasibility facts and local installed-product readback."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted baseline already records the verified feasibility facts and installed-product readback; sealing metadata adds no further status change."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "Records the recommended separately authorized no-copy 2021 runtime gate and remaining 2025/C-root gates."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted baseline already records the recommended 2021 runtime gate and remaining 2025/C-root gates; sealing metadata adds no further open-loop change."
         },
         {
           "key": "audit",

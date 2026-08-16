@@ -120,7 +120,7 @@
       "reconciledThroughCommit": "7a0be0ea46a2969e7fc6dc517947a98838932e65",
       "semanticReviewedThroughCommit": "7a0be0ea46a2969e7fc6dc517947a98838932e65",
       "semanticReviewTask": "bimlog-lens-next-install-target-feasibility-20260816",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-08-16T01:40:00Z"
     },
     {
@@ -132,7 +132,7 @@
       "reconciledThroughCommit": "7a0be0ea46a2969e7fc6dc517947a98838932e65",
       "semanticReviewedThroughCommit": "7a0be0ea46a2969e7fc6dc517947a98838932e65",
       "semanticReviewTask": "bimlog-lens-next-install-target-feasibility-20260816",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-08-16T01:40:00Z"
     },
     {
