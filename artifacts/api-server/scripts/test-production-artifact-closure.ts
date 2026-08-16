@@ -390,7 +390,5 @@ try {
     child.kill();
     await new Promise(resolve => child.once("exit", resolve));
   }
-  await proofPool.query(`DELETE FROM users WHERE email LIKE $1`, [`${proofMarker}%`]);
-  await proofPool.query(`DELETE FROM companies WHERE id=$1`, [companyId]);
   await proofPool.end();
 }

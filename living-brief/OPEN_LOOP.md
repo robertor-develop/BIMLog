@@ -11,6 +11,8 @@ This is the operating register for unfinished BIMLog work. It exists so customer
   disposable F-rooted cluster before the local candidate is closed.
   The proof also tracks the accepted `/api` health endpoint as 200 rather than its obsolete
   pre-health-route 404 expectation.
+  Proof users and their immutable entitlement initialization remain confined to the fresh
+  disposable cluster, which is stopped and removed as the cleanup boundary.
 
 - Exact-390 Spanish QA corrected the Resource Scheduling methodology that remained in English.
   Focused bilingual SSR, frontend typecheck, and live no-overflow browser evidence pass; the

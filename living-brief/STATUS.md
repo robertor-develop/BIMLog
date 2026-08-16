@@ -8,6 +8,8 @@
   local PostgreSQL service without weakening production or remote-database refusal.
   The same exact-runtime proof now expects the canonical `/api` health response to remain 200
   instead of retaining its stale pre-health-route 404 assertion.
+  Synthetic proof rows live only for the lifetime of the required fresh disposable database;
+  the harness no longer attempts to delete immutable entitlement history before disposal.
 
 - Exact-390 Spanish browser QA found and corrected the Resource Scheduling methodology remaining
   in English. The production component now presents the canonical methodology in Spanish while
