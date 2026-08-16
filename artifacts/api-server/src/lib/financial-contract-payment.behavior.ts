@@ -15,6 +15,8 @@ assert.throws(() => normalizePaymentApplication({ ...base, retainageAmount: "100
 assert.throws(() => normalizePaymentApplication({ ...base, grossAmount: "100" }), (error: any) => error.code === "CONTRACT_PAYMENT_LINES_UNRECONCILED");
 assert.throws(() => normalizePaymentApplication({ ...base, lines: [base.lines[0], base.lines[0]] }), (error: any) => error.code === "CONTRACT_PAYMENT_LINES_INVALID");
 assert.throws(() => normalizePaymentApplication({ ...base, periodStart: "2026-08-16" }), (error: any) => error.code === "CONTRACT_PAYMENT_PERIOD_INVALID");
+assert.throws(() => normalizePaymentApplication({ ...base, lines: [{ ...base.lines[0], evidence: { note: "x".repeat(1001) } }, base.lines[1]] }), (error: any) => error.code === "CONTRACT_PAYMENT_EVIDENCE_INVALID");
+assert.throws(() => normalizePaymentApplication({ ...base, lines: [{ ...base.lines[0], evidence: { measuredQuantity: Number.POSITIVE_INFINITY } }, base.lines[1]] }), (error: any) => error.code === "CONTRACT_PAYMENT_EVIDENCE_INVALID");
 const root = path.dirname(fileURLToPath(import.meta.url));
 const migration = fs.readFileSync(path.join(root, "financial-contract-migration.ts"), "utf8");
 const service = fs.readFileSync(path.join(root, "financial-contract-payment-service.ts"), "utf8");
@@ -22,11 +24,16 @@ for (const table of ["financial_contract_payment_applications", "financial_contr
 assert.doesNotMatch(migration, /\bDROP\b/i);
 assert.match(migration, /payment application version is immutable/);
 assert.match(migration, /payment line is outside the governed contract/);
+assert.match(migration, /IF s<>'draft' THEN RAISE EXCEPTION 'submitted payment application lines are immutable'/);
 assert.match(migration, /approved payment total exceeds the governed SOV line/);
+assert.match(migration, /returned payment application version is immutable; create a successor/);
+assert.match(migration, /financial_contract_amendment_lines[\s\S]*status='executed'[\s\S]*stable_line_id=sov\.stable_line_id/);
 assert.match(service, /pg_advisory_xact_lock/);
 assert.match(service, /CONTRACT_PAYMENT_IDEMPOTENCY_CONFLICT/);
 assert.match(service, /CONTRACT_PAYMENT_STALE/);
 assert.match(service, /payment_approval/);
+assert.match(service, /supersedes_id/);
+assert.match(service, /reviewed_by_id/);
 assert.match(service, /Approved plus requested payment cannot exceed/);
 assert.doesNotMatch(service, /bank_transfer|payment_provider|stripe|settlement/i);
-console.log(JSON.stringify({ suite: "advanced-contract-payments", status: "passed", checks: 19 }, null, 2));
+console.log(JSON.stringify({ suite: "advanced-contract-payments", status: "passed", checks: 27 }, null, 2));

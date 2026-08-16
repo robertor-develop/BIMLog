@@ -4,6 +4,14 @@ import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contr
 import { contractCurrency } from "./financial-contract-contract";
 
 export type PaymentLineInput = { contractSovLineId: string; currentAmount: string; evidence?: Record<string, unknown>; sortOrder: number };
+const safeEvidence = (value: unknown) => {
+  if (value == null) return {};
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new FinancialControlError(400, "CONTRACT_PAYMENT_EVIDENCE_INVALID", "Payment evidence must be a bounded object.");
+  const allowed = new Set(["fileId", "note", "measuredQuantity", "sourceReference"]);
+  const result = Object.fromEntries(Object.entries(value as Record<string, unknown>).filter(([key, entry]) => allowed.has(key) && ((typeof entry === "string" && entry.length <= 1000 && !/[\u0000-\u0008\u000B\u000C\u000E-\u001F]/.test(entry)) || (typeof entry === "number" && Number.isFinite(entry)))));
+  if (Object.keys(result).length !== Object.keys(value as object).length || JSON.stringify(result).length > 4096) throw new FinancialControlError(400, "CONTRACT_PAYMENT_EVIDENCE_INVALID", "Payment evidence contains unsupported or oversized content.");
+  return result;
+};
 const amount = (value: unknown, name: string) => {
   const scaled = scaledSignedDecimal(String(value));
   if (scaled < 0n) throw new FinancialControlError(400, "CONTRACT_PAYMENT_AMOUNT_INVALID", `${name} cannot be negative.`);
@@ -29,7 +37,7 @@ export function normalizePaymentApplication(input: any) {
   const lines = Array.isArray(input.lines) ? input.lines.map((line: any, index: number) => ({
     contractSovLineId: token(line.contractSovLineId, "contractSovLineId"),
     currentAmount: amount(line.currentAmount, "currentAmount"),
-    evidence: line.evidence && typeof line.evidence === "object" && !Array.isArray(line.evidence) ? line.evidence : {},
+    evidence: safeEvidence(line.evidence),
     sortOrder: Number.isSafeInteger(line.sortOrder) && line.sortOrder >= 0 ? line.sortOrder : index,
   })) : [];
   if (!lines.length || new Set(lines.map((line) => line.contractSovLineId)).size !== lines.length) throw new FinancialControlError(400, "CONTRACT_PAYMENT_LINES_INVALID", "Payment applications require unique governed SOV lines.");

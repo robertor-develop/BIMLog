@@ -20,7 +20,7 @@ import {
   transitionContract,
 } from "../lib/financial-contract-service";
 import { confirmContractImport, previewContractImport } from "../lib/financial-contract-import";
-import { approveContractPaymentApplication, createContractPaymentApplication, getContractPaymentApplications, transitionContractPaymentApplication } from "../lib/financial-contract-payment-service";
+import { approveContractPaymentApplication, createContractPaymentApplication, getContractPaymentApplications, reviseContractPaymentApplication, transitionContractPaymentApplication } from "../lib/financial-contract-payment-service";
 import { buildContractCurrentViewPdf, buildContractPdf, buildContractXlsx, type ContractExport, type ContractRegisterColumn, type ContractRegisterSection } from "../lib/financial-contract-export";
 
 const router = Router();
@@ -163,6 +163,7 @@ router.post("/projects/:projectId/financial/contracts/:contractId/grants", run(a
 router.get("/projects/:projectId/financial/contracts/:contractId/payments", run(async (req, res) => res.json(await getContractPaymentApplications({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId }))));
 router.get("/projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId", run(async (req, res) => res.json(await getContractPaymentApplications({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, paymentApplicationId: req.params.paymentApplicationId }))));
 router.post("/projects/:projectId/financial/contracts/:contractId/payments", run(async (req, res) => res.status(201).json(await createContractPaymentApplication({ ...req.body, actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId }))));
+router.post("/projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId/revisions", run(async (req, res) => res.status(201).json(await reviseContractPaymentApplication({ ...req.body, actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, paymentApplicationId: req.params.paymentApplicationId }))));
 router.post("/projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId/actions", run(async (req, res) => res.json(await transitionContractPaymentApplication({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, paymentApplicationId: req.params.paymentApplicationId, action: req.body.action, reason: req.body.reason, expectedRevision: req.body.expectedRevision }))));
 router.post("/projects/:projectId/financial/contracts/:contractId/payments/:paymentApplicationId/approve", run(async (req, res) => res.json(await approveContractPaymentApplication({ actorUserId: req.user.userId, projectId: project(req), contractId: req.params.contractId, paymentApplicationId: req.params.paymentApplicationId, expectedRevision: req.body.expectedRevision, confirmationFingerprint: req.body.confirmationFingerprint }))));
 
