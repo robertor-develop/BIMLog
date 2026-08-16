@@ -2,6 +2,7 @@
 
 ## BIMLog Lens Next loadable read-only packages - local candidate 2026-08-16
 
+- Local implementation commit: `57038697cbc8f5af3213ae6c3dd8e1a66a6210e4`.
 - Added distinct registered Lens Next dock/button entry points and matching 2021/2025 Autodesk
   bundle manifests without reusing Legacy identity, state, bridge, metadata, or install paths.
 - Both AnyCPU/net48 Release assemblies build against separately hash-gated SDK references.

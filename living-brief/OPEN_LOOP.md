@@ -2,6 +2,8 @@
 
 ## BIMLog Lens Next loadable package remaining gates - 2026-08-16
 
+Local implementation candidate: `57038697cbc8f5af3213ae6c3dd8e1a66a6210e4`.
+
 1. Independently inspect and accept the exact 2021/2025 registered assemblies, Autodesk manifests,
    deterministic ZIP inventories/hashes, and retained read-only/default-deny boundaries.
 2. Do not choose or write an installation target until Roberto separately authorizes the exact
