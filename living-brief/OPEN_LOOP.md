@@ -4,6 +4,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity release gates - 2026-08-14
 
+- The exact-artifact proof's fixed PostgreSQL port collided with an unrelated managed local
+  service. The proof now permits an explicit caller-selected non-privileged loopback port while
+  continuing to require an explicit URL, exact `bimlog_rfi_test` database name, loopback host,
+  and verified server identity. The governed pre-push gate must still pass against a fresh
+  disposable F-rooted cluster before the local candidate is closed.
+
 - Exact-390 Spanish QA corrected the Resource Scheduling methodology that remained in English.
   Focused bilingual SSR, frontend typecheck, and live no-overflow browser evidence pass; the
   governed post-change build still requires a clean successful run before local commit.

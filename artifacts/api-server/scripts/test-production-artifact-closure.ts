@@ -200,8 +200,10 @@ Module._resolveFilename = function(request, parent, isMain, options) {
 const proofDatabaseUrl = process.env.BIMLOG_ARTIFACT_PROOF_DATABASE_URL;
 assert(proofDatabaseUrl, "BIMLOG_ARTIFACT_PROOF_DATABASE_URL is required for the exact-artifact authorization proof.");
 const proofDatabaseIdentity = new URL(proofDatabaseUrl);
-assert(["127.0.0.1", "localhost", "::1"].includes(proofDatabaseIdentity.hostname));
-assert.equal(proofDatabaseIdentity.port, "55432");
+const proofDatabaseHostname = proofDatabaseIdentity.hostname.replace(/^\[|\]$/g, "");
+assert(["127.0.0.1", "localhost", "::1"].includes(proofDatabaseHostname));
+const proofDatabasePort = Number(proofDatabaseIdentity.port);
+assert(Number.isInteger(proofDatabasePort) && proofDatabasePort >= 1024 && proofDatabasePort <= 65535);
 assert.equal(proofDatabaseIdentity.pathname, "/bimlog_rfi_test");
 const { Pool } = requireFromArtifact("pg") as typeof import("pg");
 const proofPool = new Pool({ connectionString: proofDatabaseUrl, max: 2 });

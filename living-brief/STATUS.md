@@ -2,6 +2,11 @@
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity local candidate - 2026-08-14
 
+- The local production-artifact proof now accepts an explicit caller-selected non-privileged
+  loopback PostgreSQL port while retaining exact loopback-host, database-name, explicit-URL,
+  and runtime identity checks. This removes a test-harness collision with an unrelated managed
+  local PostgreSQL service without weakening production or remote-database refusal.
+
 - Exact-390 Spanish browser QA found and corrected the Resource Scheduling methodology remaining
   in English. The production component now presents the canonical methodology in Spanish while
   preserving the server-owned English contract; focused bilingual SSR and frontend typecheck pass.

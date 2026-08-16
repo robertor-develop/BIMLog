@@ -9703,6 +9703,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0a3d784e646265cc03a81c2001b1f37e6ccebb55013c18828bd7e6828c69b7cd"
+    },
+    {
+      "taskId": "bimlog-build6-artifact-proof-loopback-port-20260816",
+      "reviewedThroughCommit": "43d7df57e3d374d8121058451b8300c3db84139d",
+      "reviewedAt": "2026-08-16T18:10:00-04:00",
+      "status": "local_artifact_proof_harness_correction_gate_pending",
+      "captureTiming": "same_release_gate_task",
+      "summary": "Removes the fixed disposable PostgreSQL port from the production-artifact proof while retaining explicit URL, loopback-only host, non-privileged port, exact database name, and runtime identity requirements.",
+      "workstreams": [
+        "build6",
+        "release-gate",
+        "production-artifact",
+        "database-safety",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product, company, project, employee, or evidence authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing disposable-local-database and artifact-inspection requirements remain strict."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction restores executable artifact proof without substituting a weaker proxy."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Team Capacity product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production runtime, route, schema, package, or deployment topology changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks source, package, installation, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report renderer, identity, or layout changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the bounded local artifact-proof harness correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop records the corrected harness and retains the exact pre-push gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production, publication, customer, provider, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a8f96a0b31fa97c44a13def70d6df2d11e0cc61094d07043515005541426656b"
     }
   ]
 }
