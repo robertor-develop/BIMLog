@@ -2,6 +2,10 @@
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity local candidate - 2026-08-14
 
+- Exact-390 Spanish browser QA found and corrected the Resource Scheduling methodology remaining
+  in English. The production component now presents the canonical methodology in Spanish while
+  preserving the server-owned English contract; focused bilingual SSR and frontend typecheck pass.
+
 - Release-gate verification on 2026-08-15 proved isolated PostgreSQL persistence, tenant and
   membership refusal, concurrent version conflict, idempotent and divergent replay behavior,
   persisted financial redaction, stale refusal, transaction rollback, and zero partial apply.

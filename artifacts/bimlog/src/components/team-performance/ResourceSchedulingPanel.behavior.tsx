@@ -41,6 +41,8 @@ assert.match(english, /disabled=""[^>]*>.*Apply reviewed assignees/s);
 
 const spanish = render({ lang: "es" });
 for (const expected of ["Programación de Recursos", "nunca es una calificación inferida", "Evidencia verificada", "Escenarios inmutables guardados", "responsables directos elegibles", "Aplicar responsables revisados"]) assert.match(spanish, new RegExp(expected, "i"));
+assert.match(spanish, /La disponibilidad y las ausencias guardadas definen la capacidad/);
+assert.doesNotMatch(spanish, /Saved availability and leave define capacity/);
 
 const missingProfileData = { ...data, members: [{ ...data.members[0], profile: null }] };
 const missingProfile = render({ data: missingProfileData, profileDrafts: {} });

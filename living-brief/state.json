@@ -1,18 +1,14 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
+  "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "d48382f562663a24845f7158f33f1b8bb060f89cbb7c55b77e755a8ffbf9fc5f",
+  "bundleSha256": "6072c857355c7e27e3ebe5436a56bd7d8d875909b62c0fda3b980a39e06b5be6",
   "impact": {
-    "baselineCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
+    "baselineCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
     "changedPaths": [
-      "artifacts/api-server/src/lib/team-resource-planning-db.behavior.ts",
-      "artifacts/api-server/src/lib/team-resource-planning-migration.ts",
-      "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
-      "artifacts/api-server/src/middlewares/team-resource-planning-rate-limit.ts",
-      "lib/db/src/schema/team-resource-planning.ts",
+      "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.behavior.tsx",
+      "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.tsx",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -30,11 +26,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "claude",
@@ -42,11 +38,11 @@
       "sha256": "b8efc974142d81e72ec01cf72a1d180f5e3c5a346a5dbb390b2c3a7651f906e9",
       "sourceChangedAt": "2026-08-05T11:26:11-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "quality",
@@ -54,11 +50,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "vision",
@@ -66,23 +62,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "f59fab8f55df0a209ae1b6fff5748a05fded6a178fedf4f5a185181ee593d683",
-      "sourceChangedAt": "2026-08-15T04:05:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "sourceChangedAt": "2026-08-15T00:22:58-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "plugin",
@@ -90,11 +86,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "report_design_system",
@@ -102,11 +98,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "standards_register",
@@ -114,35 +110,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "5a07b17a73c7a03faf871650bba81be7d18ff69a7d5f25e70aeca073b8a1f280",
-      "sourceChangedAt": "2026-08-15T04:05:00.000Z",
+      "sha256": "ea4ec91c2e1476154cecc345c8297cb175e2584195fbb24c9698eebda3df7cdb",
+      "sourceChangedAt": "2026-08-16T00:13:29.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "47efefc724c2a896cee88dab3d2c2aacaace1af2fe3b4fc96bab1cae21e6ff5e",
-      "sourceChangedAt": "2026-08-15T04:05:00.000Z",
+      "sha256": "364d9d13d34ae95e303539ffd2158409721a8eda341de2787aabbbf6a067f1d2",
+      "sourceChangedAt": "2026-08-16T00:13:29.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     },
     {
       "key": "audit",
@@ -150,11 +146,11 @@
       "sha256": "c64878fb9aec6abbef080bb1da14f09dd92af10407b31ac6c4b4710eb42446cc",
       "sourceChangedAt": "2026-08-01T10:59:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewedThroughCommit": "ec8d7bbad34c2ffe763c68d922f0902d913dea9c",
-      "semanticReviewTask": "bimlog-build6-v1.60.33.06-release-gates-20260815",
+      "reconciledThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "semanticReviewTask": "bimlog-build6-v1.60.33.06-localization-20260815",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-15T00:05:00-04:00"
+      "semanticReviewedAt": "2026-08-15T20:13:29-04:00"
     }
   ]
 }

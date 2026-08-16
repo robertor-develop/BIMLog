@@ -9623,6 +9623,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "377a19287a933372d4d391d6d513c56d34632543a0b24e13617cc2451f8576ea"
+    },
+    {
+      "taskId": "bimlog-build6-v1.60.33.06-localization-20260815",
+      "reviewedThroughCommit": "966596fbb382edcf1f40a64ad796e2d9c4fa186d",
+      "reviewedAt": "2026-08-15T20:13:29-04:00",
+      "status": "local_browser_localization_correction_build_pending",
+      "captureTiming": "same_product_task",
+      "summary": "Records the exact-390 Spanish Resource Scheduling methodology localization correction and retains the remaining governed build and release gates.",
+      "workstreams": [
+        "build6",
+        "team-performance",
+        "resource-planning",
+        "localization",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical product, company, employee, project, task, and evidence authorities remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing bilingual UI, evidence, build, Git, and release boundaries continue to govern."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction implements the existing exact-390 bilingual UI acceptance requirement."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No approved Team Capacity product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, schema, package, runtime topology, or structural inventory changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks source, package, installation, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report identity, renderer, or layout authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the Spanish methodology localization correction and local evidence state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop retains the post-change governed build and external release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production, publication, customer, provider, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.behavior.tsx",
+        "artifacts/bimlog/src/components/team-performance/ResourceSchedulingPanel.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0a3d784e646265cc03a81c2001b1f37e6ccebb55013c18828bd7e6828c69b7cd"
     }
   ]
 }

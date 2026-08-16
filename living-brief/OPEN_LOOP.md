@@ -4,6 +4,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity release gates - 2026-08-14
 
+- Exact-390 Spanish QA corrected the Resource Scheduling methodology that remained in English.
+  Focused bilingual SSR, frontend typecheck, and live no-overflow browser evidence pass; the
+  governed post-change build still requires a clean successful run before local commit.
+
 - Isolated PostgreSQL release evidence now passes profile persistence, membership/company/project
   isolation, concurrent scenario conflict, persisted nested financial redaction, concurrent
   idempotent application, divergent replay refusal, cross-tenant scenario refusal, stale-basis
