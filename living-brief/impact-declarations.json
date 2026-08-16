@@ -9956,7 +9956,7 @@
     },
     {
       "taskId": "bimlog-lens-next-install-target-feasibility-20260816",
-      "reviewedThroughCommit": "cad5866e066cfe03d46bf8ed4a9639574147ad72",
+      "reviewedThroughCommit": "7a0be0ea46a2969e7fc6dc517947a98838932e65",
       "reviewedAt": "2026-08-16T01:40:00Z",
       "status": "read_only_install_target_feasibility_complete",
       "captureTiming": "normal_acceptance_boundary",
@@ -10024,12 +10024,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/PLUGIN.md",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "8bd4585a8dc6a1ad3e6aa3cdeabe6ac36d1adcba071eebea7899805928556a75"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
