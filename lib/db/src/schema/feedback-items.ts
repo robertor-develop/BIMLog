@@ -74,6 +74,17 @@ export const feedbackAuditEventsTable = pgTable("feedback_audit_events", {
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({ feedbackIdx: index("feedback_audit_feedback_idx").on(table.feedbackId, table.createdAt) }));
 
+export const feedbackCaptureConsentsTable = pgTable("feedback_capture_consents", {
+  id: text("id").primaryKey(),
+  actorUserId: integer("actor_user_id").references(() => usersTable.id).notNull(),
+  feedbackId: integer("feedback_id").references(() => feedbackItemsTable.id),
+  captureKind: text("capture_kind").notNull(),
+  purpose: text("purpose").notNull(),
+  noticeVersion: text("notice_version").notNull(),
+  grantedAt: timestamp("granted_at").defaultNow().notNull(),
+  revokedAt: timestamp("revoked_at"),
+}, (table) => ({ actorIdx: index("feedback_capture_consents_actor_idx").on(table.actorUserId, table.grantedAt) }));
+
 export const feedbackTranscriptionJobsTable = pgTable("feedback_transcription_jobs", {
   id: serial("id").primaryKey(),
   feedbackId: integer("feedback_id").references(() => feedbackItemsTable.id).notNull(),
@@ -84,8 +95,21 @@ export const feedbackTranscriptionJobsTable = pgTable("feedback_transcription_jo
   result: text("result"),
   errorCode: text("error_code"),
   attempts: integer("attempts").default(0).notNull(),
+  requestKey: text("request_key").notNull(),
+  requestHash: text("request_hash").notNull(),
+  consentId: text("consent_id").references(() => feedbackCaptureConsentsTable.id).notNull(),
+  provider: text("provider").notNull(),
+  model: text("model").notNull(),
+  adapterVersion: text("adapter_version").notNull(),
+  sourceSha256: text("source_sha256").notNull(),
+  outputSha256: text("output_sha256"),
+  completedAt: timestamp("completed_at"),
+  reviewState: text("review_state").default("pending").notNull(),
+  reviewedById: integer("reviewed_by_id").references(() => usersTable.id),
+  reviewedAt: timestamp("reviewed_at"),
+  reviewReason: text("review_reason"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-}, (table) => ({ feedbackIdx: index("feedback_transcription_feedback_idx").on(table.feedbackId, table.createdAt) }));
+}, (table) => ({ feedbackIdx: index("feedback_transcription_feedback_idx").on(table.feedbackId, table.createdAt), requestIdx: uniqueIndex("feedback_transcription_request_idx").on(table.requestedById, table.requestKey) }));
 
 export type FeedbackItem = typeof feedbackItemsTable.$inferSelect;

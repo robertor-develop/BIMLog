@@ -77,6 +77,8 @@ export function FeedbackWidget() {
   const [mine, setMine] = useState<Array<{ id: number; stableId: string; message: string; status: string; version: number; dispositionReason?: string; targetRelease?: string; transcript?: string }>>([]);
   const [history, setHistory] = useState<Array<{ id: number; eventType: string; reason?: string; createdAt: string }>>([]);
   const [reportedAssets, setReportedAssets] = useState<Array<{ id: number; name: string; scanState: string; downloadUrl?: string }>>([]);
+  const [captureConsents, setCaptureConsents] = useState<{ audio?: string; screenshot?: string }>({});
+  const [transformations, setTransformations] = useState<Record<string, Record<string, unknown>>>({});
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -110,6 +112,7 @@ export function FeedbackWidget() {
   function randomKey() { return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`; }
   function terminateMedia() { if (timerRef.current) window.clearInterval(timerRef.current); timerRef.current = null; const recorder = recorderRef.current; if (recorder && recorder.state !== "inactive") { recorder.onstop = null; try { recorder.stop(); } catch { /* already stopping */ } } recorderRef.current = null; streamRef.current?.getTracks().forEach(track => track.stop()); streamRef.current = null; }
   function closeFeedback() { if ((message.trim() || files.length) && !window.confirm(tt("Discard this unsent feedback and retained evidence?", "¿Descartar este comentario sin enviar y la evidencia conservada?"))) return; terminateMedia(); setRecordingState(audioUrl ? "ready" : "idle"); setOpen(false); window.setTimeout(() => openerRef.current?.focus(), 0); }
+  async function grantCaptureConsent(captureKind: "audio" | "screenshot") { const purpose = tt("Attach user-initiated evidence to this feedback for authorized review. You can revoke by discarding it before submission.", "Adjuntar evidencia iniciada por usted a este comentario para revisión autorizada. Puede revocarla descartándola antes de enviar."); if (!window.confirm(`${tt("Capture consent", "Consentimiento de captura")}\n\n${purpose}`)) return; const response = await fetch(`${API_BASE}/api/v1/feedback/capture-consents`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ captureKind, purpose, accepted: true }) }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Consent could not be recorded.", "No se pudo registrar el consentimiento.")); return; } setCaptureConsents(current => ({ ...current, [captureKind]: data.consent.id })); }
   async function loadMine() { setError(""); const response = await fetch(`${API_BASE}/api/v1/feedback/mine`, { headers: { Authorization: `Bearer ${token}` } }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Your feedback could not be loaded.", "No se pudieron cargar sus comentarios.")); return; } setMine(data.feedback || []); setReviewing(true); }
   async function loadHistory(id: number) { const headers = { Authorization: `Bearer ${token}` }; const [historyResponse, assetResponse] = await Promise.all([fetch(`${API_BASE}/api/v1/feedback/${id}/history`, { headers }), fetch(`${API_BASE}/api/v1/feedback/${id}/assets`, { headers })]); const data = await historyResponse.json().catch(() => ({})); const assetData = await assetResponse.json().catch(() => ({})); if (!historyResponse.ok || !assetResponse.ok) { setError(data.error || assetData.error || tt("History is unavailable.", "El historial no está disponible.")); return; } setHistory(data.history || []); setReportedAssets(assetData.assets || []); }
   async function reopen(item: { id: number; version: number }) { const reason = window.prompt(tt("Why should this feedback be reopened?", "¿Por qué se debe reabrir este comentario?")); if (!reason?.trim()) return; const response = await fetch(`${API_BASE}/api/v1/feedback/${item.id}/reopen`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ observedVersion: item.version, reason }) }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Feedback was not reopened.", "No se reabrió el comentario.")); return; } await loadMine(); }
@@ -149,7 +152,7 @@ export function FeedbackWidget() {
       const video = document.createElement("video"); video.srcObject = stream; await video.play();
       const canvas = document.createElement("canvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight;
       canvas.getContext("2d")?.drawImage(video, 0, 0); const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
-      if (!blob) throw new Error("capture"); addFiles([new File([blob], `feedback-capture-${Date.now()}.png`, { type: "image/png" })]);
+      if (!blob) throw new Error("capture"); const capture = new File([blob], `feedback-capture-${Date.now()}.png`, { type: "image/png" }); addFiles([capture]); setTransformations(current => ({ ...current, [capture.name]: { origin: "browser-display-capture", originalWidth: canvas.width, originalHeight: canvas.height, capturedAt: new Date().toISOString() } }));
     } catch (cause) { setError(cause instanceof DOMException && cause.name === "NotAllowedError" ? tt("Screen sharing was cancelled or denied. Nothing was captured.", "Se canceló o denegó compartir pantalla. No se capturó nada.") : tt("Screen capture failed. Retry or import an image.", "Falló la captura. Intente de nuevo o importe una imagen.")); }
     finally { stream?.getTracks().forEach(track => track.stop()); }
   }
@@ -158,6 +161,7 @@ export function FeedbackWidget() {
     const source = [...files].reverse().find(file => file.name.startsWith("feedback-capture-"));
     if (!source) { setError(tt("Capture or import a screenshot first.", "Capture o importe una imagen primero.")); return; }
     try {
+      const originalSha256 = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await source.arrayBuffer()))).map(value => value.toString(16).padStart(2, "0")).join("");
       const image = await createImageBitmap(source); const canvas = document.createElement("canvas");
       const sx = Math.round(image.width * crop.x / 100), sy = Math.round(image.height * crop.y / 100);
       const sw = Math.round(image.width * crop.width / 100), sh = Math.round(image.height * crop.height / 100);
@@ -166,6 +170,7 @@ export function FeedbackWidget() {
       const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png")); image.close(); if (!blob) throw new Error("crop");
       const cropped = new File([blob], `feedback-capture-${Date.now()}-cropped.png`, { type: "image/png" });
       setFiles(current => [...current.filter(file => file !== source), cropped]);
+      setTransformations(current => ({ ...current, [cropped.name]: { ...(current[source.name] || {}), sourceName: source.name, sourceSha256: originalSha256, cropPercent: crop, cropPixels: { x: sx, y: sy, width: sw, height: sh }, outputWidth: sw, outputHeight: sh, transformedAt: new Date().toISOString() } }));
     } catch { setError(tt("Crop bounds are invalid. Keep the rectangle inside the image.", "Los límites del recorte no son válidos. Mantenga el rectángulo dentro de la imagen.")); }
   }
 
@@ -208,7 +213,7 @@ export function FeedbackWidget() {
         setUploadState(tt("Uploading governed evidence…", "Cargando evidencia controlada…"));
         for (const group of ["audio", "screenshot", "attachment"] as const) {
           const selected = files.filter(file => group === "audio" ? file.name.startsWith("feedback-audio-") : group === "screenshot" ? file.name.startsWith("feedback-capture-") : !file.name.startsWith("feedback-audio-") && !file.name.startsWith("feedback-capture-"));
-          if (!selected.length) continue; const form = new FormData(); selected.forEach(file => form.append("files", file)); form.append("kind", group); if (group !== "attachment") form.append("consent", "true");
+          if (!selected.length) continue; const form = new FormData(); selected.forEach(file => form.append("files", file)); form.append("kind", group); if (group !== "attachment") { form.append("consentId", captureConsents[group]); form.append("transformation", JSON.stringify(transformations[selected[0].name] || { origin: group === "audio" ? "browser-microphone" : "browser-display-capture" })); }
           const uploaded = await fetch(`${API_BASE}/api/v1/feedback/${feedbackId}/assets`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
           const payload = await uploaded.json().catch(() => ({})); if (!uploaded.ok) throw new Error(payload.error || tt("Evidence upload failed safely; retry from your retained files.", "La carga de evidencia falló de forma segura; reintente desde sus archivos conservados."));
         }
@@ -355,8 +360,8 @@ export function FeedbackWidget() {
                     <FilePlus2 size={14} />{tt("Add files", "Agregar archivos")}
                     <input type="file" multiple hidden accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.png,.jpg,.jpeg,.txt,.log,.json" onChange={event => { addFiles(Array.from(event.target.files || [])); event.currentTarget.value = ""; }} />
                   </label>
-                  <button type="button" onClick={captureScreen} style={{ border: "1px solid hsl(var(--border))", background: "white", borderRadius: 6, padding: "7px 9px", fontSize: 11, display: "inline-flex", gap: 5, alignItems: "center" }}><Camera size={14}/>{tt("Capture screen", "Capturar pantalla")}</button>
-                  {recordingState === "idle" || recordingState === "ready" ? <button type="button" onClick={startRecording} style={{ border: "1px solid hsl(var(--border))", background: "white", borderRadius: 6, padding: "7px 9px", fontSize: 11, display: "inline-flex", gap: 5, alignItems: "center" }}><Mic size={14}/>{tt("Record voice", "Grabar voz")}</button> : <>
+                  <button type="button" onClick={captureConsents.screenshot ? captureScreen : () => grantCaptureConsent("screenshot")} style={{ border: "1px solid hsl(var(--border))", background: "white", borderRadius: 6, padding: "7px 9px", fontSize: 11, display: "inline-flex", gap: 5, alignItems: "center" }}><Camera size={14}/>{captureConsents.screenshot ? tt("Capture screen", "Capturar pantalla") : tt("Review screen consent", "Revisar consentimiento de pantalla")}</button>
+                  {recordingState === "idle" || recordingState === "ready" ? <button type="button" onClick={captureConsents.audio ? startRecording : () => grantCaptureConsent("audio")} style={{ border: "1px solid hsl(var(--border))", background: "white", borderRadius: 6, padding: "7px 9px", fontSize: 11, display: "inline-flex", gap: 5, alignItems: "center" }}><Mic size={14}/>{captureConsents.audio ? tt("Record voice", "Grabar voz") : tt("Review voice consent", "Revisar consentimiento de voz")}</button> : <>
                     <button type="button" onClick={pauseRecording} aria-label={recordingState === "paused" ? tt("Resume recording", "Reanudar grabación") : tt("Pause recording", "Pausar grabación")}><Pause size={14}/>{recordingState === "paused" ? tt("Resume", "Reanudar") : tt("Pause", "Pausar")}</button>
                     <button type="button" onClick={stopRecording}><Square size={14}/>{tt("Stop", "Detener")}</button>
                   </>}
@@ -369,6 +374,7 @@ export function FeedbackWidget() {
                 {audioUrl && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}><audio controls src={audioUrl} style={{ maxWidth: "260px" }}><Play/></audio><button type="button" onClick={discardRecording} aria-label={tt("Discard recording", "Descartar grabación")}><Trash2 size={14}/></button></div>}
                 {!!files.length && <ul style={{ margin: "8px 0 0", paddingLeft: 18, fontSize: 11 }}>{files.map((file, index) => <li key={`${file.name}-${index}`}>{file.name} · {(file.size / 1024).toFixed(1)} KB <button type="button" onClick={() => setFiles(current => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={tt(`Remove ${file.name}`, `Quitar ${file.name}`)}><X size={12}/></button></li>)}</ul>}
                 <p style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", margin: "8px 0 0" }}>{tt("Up to 10 supported files, 20 MB each. Files remain quarantined until the governed scanner approves them. Screen sharing starts only after your browser consent and stops immediately after capture.", "Hasta 10 archivos compatibles de 20 MB cada uno. Permanecen en cuarentena hasta la aprobación del escáner controlado. Compartir pantalla comienza solo con su consentimiento y termina inmediatamente después de capturar.")}</p>
+                <p style={{ fontSize: 10 }} aria-live="polite">{tt("Capture notice feedback-capture-v1", "Aviso de captura feedback-capture-v1")} · {captureConsents.audio ? tt("voice consent recorded", "consentimiento de voz registrado") : tt("voice not authorized", "voz no autorizada")} · {captureConsents.screenshot ? tt("screen consent recorded", "consentimiento de pantalla registrado") : tt("screen not authorized", "pantalla no autorizada")}</p>
               </section>
 
               <div style={{ marginTop: 10, padding: "8px 10px", border: "1px solid #dbeafe", background: "#eff6ff", borderRadius: 6, fontSize: 11, color: "#1d4ed8", display: "flex", gap: 8 }}>

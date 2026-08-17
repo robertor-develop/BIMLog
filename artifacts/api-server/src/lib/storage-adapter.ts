@@ -37,4 +37,4 @@ export class LocalDiskStorageAdapter implements StorageAdapter {
   }
 }
 
-export const storage: StorageAdapter = new LocalDiskStorageAdapter();
+export const storage: StorageAdapter = new LocalDiskStorageAdapter(process.env.BIMLOG_FEEDBACK_UPLOAD_ROOT ? path.resolve(process.env.BIMLOG_FEEDBACK_UPLOAD_ROOT) : undefined);

@@ -49,6 +49,7 @@ import { startCoordinatorSavedViewMigration } from "./lib/coordinator-saved-view
 import { startCoordinatorBulkActionMigration } from "./lib/coordinator-bulk-action-migration";
 import { PROCORE_RFI_IMPORT_MIGRATION_SQL } from "./lib/procore-rfi-import-migration";
 import { pool } from "@workspace/db";
+import { ensureFeedbackSchema } from "./lib/feedback-schema-migration";
 
 const PROCORE_RFI_IMPORT_TABLES = [
   "rfi_import_bindings",
@@ -1043,6 +1044,9 @@ void rfiMigrationReady.then((ready) => {
 
 (async () => {
   try {
+    await ensureFeedbackSchema(pool);
+    console.log("[migration] feedback_items table ensured transactionally");
+    return;
     await pool.query(`CREATE TABLE IF NOT EXISTS feedback_items (
       id serial PRIMARY KEY,
       user_id integer NOT NULL REFERENCES users(id),
@@ -1102,12 +1106,30 @@ void rfiMigrationReady.then((ready) => {
       before_state jsonb, after_state jsonb, reason text, created_at timestamp NOT NULL DEFAULT now()
     )`);
     await pool.query(`CREATE INDEX IF NOT EXISTS feedback_audit_feedback_idx ON feedback_audit_events(feedback_id, created_at)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS feedback_capture_consents (
+      id text PRIMARY KEY, actor_user_id integer NOT NULL REFERENCES users(id), feedback_id integer REFERENCES feedback_items(id),
+      capture_kind text NOT NULL, purpose text NOT NULL, notice_version text NOT NULL, granted_at timestamp NOT NULL DEFAULT now(), revoked_at timestamp
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_capture_consents_actor_idx ON feedback_capture_consents(actor_user_id, granted_at)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS feedback_transcription_jobs (
       id serial PRIMARY KEY, feedback_id integer NOT NULL REFERENCES feedback_items(id),
       asset_id integer NOT NULL REFERENCES feedback_assets(id), requested_by_id integer NOT NULL REFERENCES users(id),
       state text NOT NULL DEFAULT 'queued', adapter text NOT NULL, result text, error_code text,
-      attempts integer NOT NULL DEFAULT 0, created_at timestamp NOT NULL DEFAULT now(), updated_at timestamp NOT NULL DEFAULT now()
+      attempts integer NOT NULL DEFAULT 0, request_key text, request_hash text, consent_id text REFERENCES feedback_capture_consents(id),
+      provider text, model text, adapter_version text, source_sha256 text, output_sha256 text, completed_at timestamp,
+      review_state text NOT NULL DEFAULT 'pending', reviewed_by_id integer REFERENCES users(id), reviewed_at timestamp, review_reason text,
+      created_at timestamp NOT NULL DEFAULT now(), updated_at timestamp NOT NULL DEFAULT now()
     )`);
+    for (const statement of [
+      `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS request_key text`, `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS request_hash text`,
+      `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS consent_id text REFERENCES feedback_capture_consents(id)`, `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS provider text`,
+      `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS model text`, `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS adapter_version text`,
+      `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS source_sha256 text`, `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS output_sha256 text`,
+      `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS completed_at timestamp`, `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS review_state text NOT NULL DEFAULT 'pending'`,
+      `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS reviewed_by_id integer REFERENCES users(id)`, `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS reviewed_at timestamp`,
+      `ALTER TABLE feedback_transcription_jobs ADD COLUMN IF NOT EXISTS review_reason text`,
+    ]) await pool.query(statement);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS feedback_transcription_request_idx ON feedback_transcription_jobs(requested_by_id, request_key) WHERE request_key IS NOT NULL`);
     await pool.query(`CREATE INDEX IF NOT EXISTS feedback_transcription_feedback_idx ON feedback_transcription_jobs(feedback_id, created_at)`);
     await pool.query(
       `CREATE INDEX IF NOT EXISTS feedback_items_status_created_idx ON feedback_items (status, created_at DESC)`,

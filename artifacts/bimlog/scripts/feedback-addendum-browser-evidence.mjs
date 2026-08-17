@@ -25,6 +25,7 @@ async function scenario(language, width, fileName) {
     const fixture = { id: 801, stableId: "FB-EVIDENCE801", message: language === "es" ? "La captura conserva el contexto y la evidencia." : "Capture keeps context and evidence.", status: "verified", version: 3, dispositionReason: language === "es" ? "Verificado con evidencia local." : "Verified with local evidence.", targetRelease: "v F-1.60.35.8" };
     window.fetch = async (input, init = {}) => { const url = String(input); const method = String(init.method || "GET"); let body = {};
       if (url.endsWith("/api/v1/feedback") && method === "POST") body = { success: true, feedback: fixture };
+      else if (url.endsWith("/capture-consents") && method === "POST") { const request = JSON.parse(String(init.body || "{}")); body = { consent: { id: `consent-${request.captureKind}`, captureKind: request.captureKind, purpose: request.purpose, noticeVersion: "feedback-capture-v1", grantedAt: "2026-08-17T12:00:00.000Z" } }; }
       else if (url.includes("/assets") && method === "POST") body = { assets: [{ id: 901, scanState: "quarantined" }], scanner: "activation-required" };
       else if (url.endsWith("/api/v1/feedback/mine")) body = { feedback: [fixture] };
       else if (url.endsWith("/history")) body = { feedback: fixture, history: [{ id: 1, eventType: "created", createdAt: "2026-08-17T12:00:00.000Z" }, { id: 2, eventType: "triage_updated", reason: fixture.dispositionReason, createdAt: "2026-08-17T12:10:00.000Z" }] };
@@ -34,15 +35,18 @@ async function scenario(language, width, fileName) {
       return new Response(JSON.stringify(body), { status: method === "POST" ? 201 : 200, headers: { "Content-Type": "application/json" } }); };
   }, { language });
   const page = await context.newPage();
+  page.on("dialog", dialog => dialog.accept());
   const pageErrors = []; page.on("pageerror", error => pageErrors.push(error.message));
   await page.goto(`${baseUrl}/feedback-evidence`, { waitUntil: "networkidle" });
   const opener = page.getByRole("button", { name: language === "es" ? "Enviar comentarios a BIMLog" : "Send BIMLog feedback" });
   if (!await opener.count()) { await page.screenshot({ path: path.join(output, `diagnostic-${language}-${width}.png`), fullPage: true }); throw new Error(`${language}-${width}: feedback opener absent at ${page.url()} errors=${pageErrors.join(" | ")} body=${(await page.locator("body").innerText()).slice(0, 240)}`); }
   await opener.click();
   await page.getByRole("textbox").fill(language === "es" ? "La captura conserva el contexto y la evidencia." : "Capture keeps context and evidence.");
+  await page.getByText(language === "es" ? "Revisar consentimiento de voz" : "Review voice consent").click(); await page.getByText(language === "es" ? "consentimiento de voz registrado" : "voice consent recorded").waitFor();
   await page.getByText(language === "es" ? "Grabar voz" : "Record voice").click();
   const micError = language === "es" ? "Se denegó el permiso del micrófono." : "Microphone permission was denied.";
   await page.getByText(micError).waitFor(); assertions.push(`${language}-${width}: microphone denial visible`);
+  await page.getByText(language === "es" ? "Revisar consentimiento de pantalla" : "Review screen consent").click(); await page.getByText(language === "es" ? "consentimiento de pantalla registrado" : "screen consent recorded").waitFor();
   await page.getByText(language === "es" ? "Capturar pantalla" : "Capture screen").click();
   const captureError = language === "es" ? "Se canceló o denegó compartir pantalla. No se capturó nada." : "Screen sharing was cancelled or denied. Nothing was captured.";
   await page.getByText(captureError).waitFor(); assertions.push(`${language}-${width}: capture denial visible`);
