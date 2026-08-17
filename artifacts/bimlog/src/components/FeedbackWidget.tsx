@@ -79,6 +79,7 @@ export function FeedbackWidget() {
   const [reportedAssets, setReportedAssets] = useState<Array<{ id: number; name: string; scanState: string; downloadUrl?: string }>>([]);
   const [captureConsents, setCaptureConsents] = useState<{ audio?: string; screenshot?: string }>({});
   const fileIdsRef = useRef(new WeakMap<File,string>());
+  const [uploadResults,setUploadResults]=useState<Record<string,{state:"uploading"|"success"|"error";message:string}>>({});
   const [transformations, setTransformations] = useState<Record<string, Record<string, unknown>>>({});
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -113,6 +114,9 @@ export function FeedbackWidget() {
   if (!token || PUBLIC_PATHS.has(location)) return null;
 
   function randomKey() { return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`; }
+  function fileId(file:File){let id=fileIdsRef.current.get(file);if(!id){id=randomKey();fileIdsRef.current.set(file,id);}return id;}
+  const stateLabel=(value:string)=>({new:tt("New","Nuevo"),triaged:tt("Triaged","Clasificado"),accepted:tt("Accepted","Aceptado"),in_progress:tt("In progress","En curso"),blocked:tt("Blocked","Bloqueado"),fixed:tt("Fixed","Corregido"),verified:tt("Verified","Verificado"),rejected:tt("Rejected","Rechazado"),deferred:tt("Deferred","Aplazado"),clean:tt("Approved","Aprobado"),quarantined:tt("Quarantined","En cuarentena"),pending:tt("Pending","Pendiente"),recording:tt("Recording","Grabando"),paused:tt("Paused","Pausado"),ready:tt("Ready","Listo"),idle:tt("Idle","Inactivo")}[value]||tt("Unavailable","No disponible"));
+  const eventLabel=(value:string)=>({created:tt("Created","Creado"),assets_added:tt("Evidence added","Evidencia agregada"),transcription_requested:tt("Transcription requested","Transcripción solicitada"),transcription_reviewed:tt("Transcription reviewed","Transcripción revisada"),triage_updated:tt("Review updated","Revisión actualizada"),reopened:tt("Reopened","Reabierto")}[value]||tt("Update","Actualización"));
   function terminateMedia() { if (timerRef.current) window.clearInterval(timerRef.current); timerRef.current = null; const recorder = recorderRef.current; if (recorder && recorder.state !== "inactive") { recorder.onstop = null; try { recorder.stop(); } catch { /* already stopping */ } } recorderRef.current = null; streamRef.current?.getTracks().forEach(track => track.stop()); streamRef.current = null; }
   async function revokeCaptureConsents() { const ids=Object.values(captureConsents); setCaptureConsents({}); await Promise.allSettled(ids.map(id=>fetch(`${API_BASE}/api/v1/feedback/capture-consents/${id}/revoke`,{method:"POST",headers:{Authorization:`Bearer ${token}`}}))); }
   function clearReviewScope() { setMine([]); setHistory([]); setReportedAssets([]); setReviewing(false); }
@@ -125,7 +129,7 @@ export function FeedbackWidget() {
     const supported = /\.(pdf|docx?|xlsx?|csv|pptx?|png|jpe?g|txt|log|json|webm|ogg|wav|m4a)$/i;
     const accepted = incoming.filter(file => file.size > 0 && file.size <= 20 * 1024 * 1024 && supported.test(file.name));
     if (accepted.length !== incoming.length) setError(tt("Some files were refused. Use a supported type up to 20 MB.", "Se rechazaron algunos archivos. Use un tipo compatible de hasta 20 MB."));
-    for (const file of accepted) if (!fileIdsRef.current.has(file)) fileIdsRef.current.set(file, randomKey());
+    for (const file of accepted) fileId(file);
     setFiles(current => [...current, ...accepted].slice(0, 10));
   }
 
@@ -215,21 +219,24 @@ export function FeedbackWidget() {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || tt("Feedback was not submitted.", "No se envió el comentario."));
       const feedbackId = Number(data.feedback?.id);
+      let uploadFailed=false;
       if (files.length && feedbackId) {
         setUploadState(tt("Uploading governed evidence…", "Cargando evidencia controlada…"));
         for (const group of ["audio", "screenshot", "attachment"] as const) {
           const selected = files.filter(file => group === "audio" ? file.name.startsWith("feedback-audio-") : group === "screenshot" ? file.name.startsWith("feedback-capture-") : !file.name.startsWith("feedback-audio-") && !file.name.startsWith("feedback-capture-"));
           for (const file of selected) {
-            const uploadKey = `${idempotencyRef.current}:${fileIdsRef.current.get(file) || randomKey()}`; const form = new FormData(); form.append("files", file); form.append("kind", group);
+            const clientFileId=fileId(file);if(uploadResults[clientFileId]?.state==="success")continue;setUploadResults(current=>({...current,[clientFileId]:{state:"uploading",message:tt("Uploading","Cargando")}}));
+            const uploadKey = `${idempotencyRef.current}:${clientFileId}`; const form = new FormData(); form.append("files", file); form.append("kind", group);
             if (group !== "attachment") { const consentId = captureConsents[group]; if (!consentId) throw new Error(tt("Capture consent expired; grant consent again before uploading.", "El consentimiento de captura venció; concédalo nuevamente antes de cargar.")); form.append("consentId", consentId); }
             form.append("transformations", JSON.stringify({ [uploadKey]: transformations[file.name] || { origin: group === "audio" ? "browser-microphone" : group === "screenshot" ? "browser-display-capture" : "user-file-import" } }));
             const uploaded = await fetch(`${API_BASE}/api/v1/feedback/${feedbackId}/assets`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Idempotency-Key": uploadKey }, body: form });
-            const payload = await uploaded.json().catch(() => ({})); if (!uploaded.ok) throw new Error(payload.error || tt("Evidence upload failed safely; retry from your retained files.", "La carga de evidencia falló de forma segura; reintente desde sus archivos conservados."));
+            const payload = await uploaded.json().catch(() => ({})); if (!uploaded.ok){uploadFailed=true;setUploadResults(current=>({...current,[clientFileId]:{state:"error",message:payload.error||tt("Upload failed; retry this file.","La carga falló; reintente este archivo.")}}));continue;}setUploadResults(current=>({...current,[clientFileId]:{state:"success",message:tt("Uploaded","Cargado")}}));
           }
         }
       }
+      if(uploadFailed)throw new Error(tt("Some evidence failed. Retry failed files; completed files will not be duplicated.","Parte de la evidencia falló. Reintente los archivos fallidos; los completados no se duplicarán."));
       setMessage("");
-      setFiles([]); terminateMedia(); if(audioUrl)URL.revokeObjectURL(audioUrl); setAudioUrl("");setDuration(0);setRecordingState("idle");setCaptureConsents({}); idempotencyRef.current = randomKey(); setUploadState("");
+      setFiles([]);setUploadResults({}); terminateMedia(); if(audioUrl)URL.revokeObjectURL(audioUrl); setAudioUrl("");setDuration(0);setRecordingState("idle");setCaptureConsents({}); idempotencyRef.current = randomKey(); setUploadState("");
       setSuccess(tt(`Sent as ${data.feedback?.stableId || "feedback"}.`, `Enviado como ${data.feedback?.stableId || "comentario"}.`));
       setTimeout(() => { terminateMedia(); setOpen(false); window.setTimeout(() => openerRef.current?.focus(), 0); }, 900);
     } catch (err) {
@@ -324,9 +331,9 @@ export function FeedbackWidget() {
             <div style={{ padding: 16 }}>
               <div style={{ display: "flex", gap: 8, marginBottom: 12 }}><button type="button" onClick={() => setReviewing(false)} aria-pressed={!reviewing}>{tt("New feedback", "Nuevo comentario")}</button><button type="button" onClick={loadMine} aria-pressed={reviewing}>{tt("My feedback", "Mis comentarios")}</button></div>
               {reviewing ? <section aria-label={tt("My feedback backlog", "Mi lista de comentarios")}>
-                {!mine.length ? <p>{tt("No feedback has been reported.", "No se han reportado comentarios.")}</p> : mine.map(item => <article key={item.id} style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 10, marginBottom: 8 }}><strong>{item.stableId}</strong> · {item.status}<p style={{ margin: "5px 0" }}>{item.message}</p>{item.dispositionReason && <p>{tt("Decision", "Decisión")}: {item.dispositionReason}</p>}{item.targetRelease && <p>{tt("Target", "Objetivo")}: {item.targetRelease}</p>}{item.transcript && <details><summary>{tt("Transcript", "Transcripción")}</summary><p>{item.transcript}</p></details>}<button type="button" onClick={() => loadHistory(item.id)}>{tt("History", "Historial")}</button>{["verified", "rejected", "deferred"].includes(item.status) && <button type="button" onClick={() => reopen(item)}>{tt("Reopen", "Reabrir")}</button>}</article>)}
-                {!!history.length && <ol aria-label={tt("Feedback history", "Historial del comentario")}>{history.map(event => <li key={event.id}>{event.eventType} · {new Date(event.createdAt).toLocaleString(language)}{event.reason ? ` — ${event.reason}` : ""}</li>)}</ol>}
-                {!!reportedAssets.length && <ul aria-label={tt("Feedback attachments", "Archivos del comentario")}>{reportedAssets.map(asset => <li key={asset.id}>{asset.downloadUrl ? <a href={`${API_BASE}${asset.downloadUrl}`}>{asset.name}</a> : asset.name} · {asset.scanState}</li>)}</ul>}
+                {!mine.length ? <p>{tt("No feedback has been reported.", "No se han reportado comentarios.")}</p> : mine.map(item => <article key={item.id} style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 10, marginBottom: 8 }}><strong>{item.stableId}</strong> · {stateLabel(item.status)}<p style={{ margin: "5px 0" }}>{item.message}</p>{item.dispositionReason && <p>{tt("Decision", "Decisión")}: {item.dispositionReason}</p>}{item.targetRelease && <p>{tt("Target", "Objetivo")}: {item.targetRelease}</p>}{item.transcript && <details><summary>{tt("Transcript", "Transcripción")}</summary><p>{item.transcript}</p></details>}<button type="button" onClick={() => loadHistory(item.id)}>{tt("History", "Historial")}</button>{["verified", "rejected", "deferred"].includes(item.status) && <button type="button" onClick={() => reopen(item)}>{tt("Reopen", "Reabrir")}</button>}</article>)}
+                {!!history.length && <ol aria-label={tt("Feedback history", "Historial del comentario")}>{history.map(event => <li key={event.id}>{eventLabel(event.eventType)} · {new Date(event.createdAt).toLocaleString(language)}{event.reason ? ` — ${event.reason}` : ""}</li>)}</ol>}
+                {!!reportedAssets.length && <ul aria-label={tt("Feedback attachments", "Archivos del comentario")}>{reportedAssets.map(asset => <li key={asset.id}>{asset.downloadUrl ? <a href={`${API_BASE}${asset.downloadUrl}`}>{asset.name}</a> : asset.name} · {stateLabel(asset.scanState)}</li>)}</ul>}
               </section> : <>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
                 <label style={{ fontSize: 12, fontWeight: 700 }}>
@@ -381,9 +388,9 @@ export function FeedbackWidget() {
                   {(["x", "y", "width", "height"] as const).map(key => <label key={key} style={{ fontSize: 9 }}>{key.toUpperCase()} %<input aria-label={`${key} percent`} type="number" min="0" max="100" value={crop[key]} onChange={event => setCrop(current => ({ ...current, [key]: Number(event.target.value) }))} style={{ width: "100%", boxSizing: "border-box" }}/></label>)}
                   <button type="button" onClick={cropScreenshot} style={{ height: 28, whiteSpace: "nowrap" }}><RotateCcw size={12}/>{tt("Apply crop", "Aplicar recorte")}</button>
                 </div>}
-                {recordingState !== "idle" && <div aria-live="polite" style={{ fontSize: 11, marginTop: 8 }}>{tt("Recording", "Grabación")}: {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, "0")} · {recordingState}</div>}
+                {recordingState !== "idle" && <div aria-live="polite" style={{ fontSize: 11, marginTop: 8 }}>{tt("Recording", "Grabación")}: {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, "0")} · {stateLabel(recordingState)}</div>}
                 {audioUrl && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}><audio controls src={audioUrl} style={{ maxWidth: "260px" }}><Play/></audio><button type="button" onClick={discardRecording} aria-label={tt("Discard recording", "Descartar grabación")}><Trash2 size={14}/></button></div>}
-                {!!files.length && <ul style={{ margin: "8px 0 0", paddingLeft: 18, fontSize: 11 }}>{files.map((file, index) => <li key={`${file.name}-${index}`}>{file.name} · {(file.size / 1024).toFixed(1)} KB <button type="button" onClick={() => setFiles(current => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={tt(`Remove ${file.name}`, `Quitar ${file.name}`)}><X size={12}/></button></li>)}</ul>}
+                {!!files.length && <ul style={{ margin: "8px 0 0", paddingLeft: 18, fontSize: 11 }}>{files.map((file, index) => <li key={fileId(file)}>{file.name} · {(file.size / 1024).toFixed(1)} KB <button type="button" onClick={() => setFiles(current => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={tt(`Remove ${file.name}`, `Quitar ${file.name}`)}><X size={12}/></button> {uploadResults[fileId(file)]&&<span role="status">{uploadResults[fileId(file)].message}</span>} {uploadResults[fileId(file)]?.state==="error"&&<button type="button" onClick={submitFeedback}>{tt("Retry this file","Reintentar este archivo")}</button>}</li>)}</ul>}
                 <p style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", margin: "8px 0 0" }}>{tt("Up to 10 supported files, 20 MB each. Files remain quarantined until the governed scanner approves them. Screen sharing starts only after your browser consent and stops immediately after capture.", "Hasta 10 archivos compatibles de 20 MB cada uno. Permanecen en cuarentena hasta la aprobación del escáner controlado. Compartir pantalla comienza solo con su consentimiento y termina inmediatamente después de capturar.")}</p>
                 <p style={{ fontSize: 10 }} aria-live="polite">{tt("Capture notice feedback-capture-v1", "Aviso de captura feedback-capture-v1")} · {captureConsents.audio ? tt("voice consent recorded", "consentimiento de voz registrado") : tt("voice not authorized", "voz no autorizada")} · {captureConsents.screenshot ? tt("screen consent recorded", "consentimiento de pantalla registrado") : tt("screen not authorized", "pantalla no autorizada")}</p>
               </section>
