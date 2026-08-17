@@ -245,12 +245,10 @@ function sourceText(files, allowedExtensions) {
 }
 
 function fileHashes(files) {
-  return files.map(({ relative, absolute, symbolicLink }) => ({
-    path: relative,
-    symbolicLink,
-    bytes: fs.statSync(absolute).size,
-    sha256: sha256(fs.readFileSync(absolute)),
-  }));
+  return files.map(({ relative, absolute, symbolicLink }) => {
+    const bytes = canonicalTextBytes(fs.readFileSync(absolute));
+    return { path: relative, symbolicLink, bytes: bytes.length, sha256: sha256(bytes) };
+  });
 }
 
 const root = findWorktreeRoot();

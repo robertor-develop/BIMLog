@@ -61,10 +61,15 @@ function absolute(relative) {
   return path.join(ROOT, ...relative.split("/"));
 }
 
+function canonicalBytes(file) {
+  return Buffer.from(fs.readFileSync(file, "utf8").replace(/\r\n/g, "\n"), "utf8");
+}
+
 function sha256(file) {
+  const bytes = canonicalBytes(file);
   return crypto
     .createHash("sha256")
-    .update(fs.readFileSync(file))
+    .update(bytes)
     .digest("hex")
     .toUpperCase();
 }
@@ -95,7 +100,7 @@ check(
 );
 for (const input of inputs) {
   const file = absolute(input.path);
-  const actual = { bytes: fs.statSync(file).size, sha256: sha256(file) };
+  const actual = { bytes: canonicalBytes(file).length, sha256: sha256(file) };
   check(
     `input.${input.lane}.exact`,
     actual.bytes === input.bytes && actual.sha256 === input.sha256,
@@ -424,12 +429,13 @@ const acceptedPhase1BindingEvolution = new Map([
   ["plugins/BIMLogLensNext/install/Uninstall-BIMLogLensNext.contract.json", { bytes: 588, sha256: "4C1A272F15BFB0525ECA3D1AF4317672E6261650ED3BAEDD79D31D22F6D08291" }],
   ["plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj", { bytes: 1766, sha256: "7B0B77A5A7E511274950AF75804351B4452EEEF01D22494CFA72C040F3DFBCEA" }],
   ["plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj", { bytes: 1742, sha256: "3D5051D22050A3D9D2D684E303E6710AA97D03098DC6C3AB1AC2E28B66295047" }],
+  ["plugins/BIMLogLensNext/tests/Program.cs", { bytes: 20433, sha256: "5105DAA69BFFCC81EF6126981C40573BB9CA530D3A0751A767F437350586AC9E" }],
 ]);
 const phase1Mismatches = phase1Inputs
   .map((input) => {
     const file = absolute(input.path);
     if (!fs.existsSync(file)) return { path: input.path, reason: "missing" };
-    const actual = { bytes: fs.statSync(file).size, sha256: sha256(file) };
+    const actual = { bytes: canonicalBytes(file).length, sha256: sha256(file) };
     const accepted = acceptedPhase1BindingEvolution.get(input.path);
     const expected = accepted ?? input;
     return actual.bytes === expected.bytes && actual.sha256 === expected.sha256
