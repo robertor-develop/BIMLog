@@ -10021,8 +10021,8 @@
     },
     {
       "taskId": "bimlog-feedback-addendum-20260817",
-      "reviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
-      "reviewedAt": "2026-08-17T14:30:00Z",
+      "reviewedThroughCommit": "e1e4c0633ec8fdd6837b95fe57ec38f1c6976a8c",
+      "reviewedAt": "2026-08-17T17:05:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task",
       "summary": "Reconciles Feedback addendum v F-1.60.35.8 with governed evidence quarantine, default-deny transcription, accountable triage, and explicit external gates.",
@@ -10090,19 +10090,11 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/package.json",
-        "artifacts/api-server/src/app.ts",
-        "artifacts/api-server/src/routes/feedback.ts",
-        "artifacts/bimlog/src/components/FeedbackWidget.tsx",
-        "artifacts/bimlog/src/lib/help-content.ts",
-        "artifacts/bimlog/src/pages/AdminPanel.tsx",
-        "lib/db/src/schema/feedback-items.ts",
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "08f33898f61f781932fa5f41326e7f813b96117d0350cc7327e93f35a030fe85"
+      "reviewedChangeSha256": "9f4a52232334d6bf895364d06db9cdbda646a4939fe6b90ea9a8c6092d21e2bd"
     }
   ]
 }

@@ -1871,3 +1871,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - A governed malware-scanning implementation and retention/deletion operator policy must be explicitly activated before quarantined evidence can be downloaded outside local fixtures.
 - A transcription provider, credentials, processing terms, retention policy, and cost authority remain unapproved. Production stays default-deny; no transcript may silently replace reporter text.
 - Replit alignment, development migration preview, production migration, push, publish, deployment, provider calls, and customer validation remain separate explicit gates.
+- Independent QA must re-audit the remediated exact-current candidate and its retained 12/12 EN desktop/ES 390 actual-component evidence before push readiness is asserted.
+- Production scanner and transcription activation remain intentionally default-deny; the local fixture and disposable database receipts do not authorize provider traffic or customer evidence processing.
