@@ -27,7 +27,8 @@ const disposable = path.join(proofRoot, randomUUID()),
 fs.mkdirSync(custody, { recursive: true });
 const keyPath = path.join(disposable, "localhost.key"),
   certPath = path.join(disposable, "localhost.crt"),
-  openssl = process.env.BIMLOG_TEST_OPENSSL || "openssl";
+  openssl = process.env.BIMLOG_TEST_OPENSSL ||
+    ["C:\\Program Files\\Git\\usr\\bin\\openssl.exe","C:\\Program Files\\Git\\mingw64\\bin\\openssl.exe"].find(candidate=>fs.existsSync(candidate)) || "openssl";
 if (
   spawnSync(
     openssl,
