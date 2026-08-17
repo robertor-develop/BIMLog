@@ -10094,6 +10094,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c1a795bf5b916b9408e3c863ea108d48ba8585873d22a1b6e24f52815363616a"
+    },
+    {
+      "taskId": "bimlog-feedback-durable-storage-20260817",
+      "reviewedThroughCommit": "0f2d4f099bf6f03b53b7b290775297b7be462a7c",
+      "reviewedAt": "2026-08-17T18:51:00Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task",
+      "summary": "Binds Feedback evidence to explicit durable storage custody and serializes canonical migration startup.",
+      "workstreams": [
+        "feedback-addendum",
+        "durable-storage",
+        "migration",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing evidence custody and default-deny doctrine governs the change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing provider and production gates remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Executable restart, exact-byte, concurrency, and denial evidence is added."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Feedback storage now requires explicit production durable custody and migration startup uses a PostgreSQL advisory lock."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens or plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard claim."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records durable storage implementation and local proof."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains environment provisioning, DB rerun, backup/restore, provider, and publication gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No provider, production, publication, or customer action occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6d514dcae7723e2696d9473790dabf1ab385534b835b47c9e4f8f33c0b1d01cc"
     }
   ]
 }
