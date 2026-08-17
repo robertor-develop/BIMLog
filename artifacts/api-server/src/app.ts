@@ -50,6 +50,7 @@ import { startCoordinatorBulkActionMigration } from "./lib/coordinator-bulk-acti
 import { PROCORE_RFI_IMPORT_MIGRATION_SQL } from "./lib/procore-rfi-import-migration";
 import { pool } from "@workspace/db";
 import { ensureFeedbackSchema } from "./lib/feedback-schema-migration";
+import { storage as feedbackStorage } from "./lib/storage-adapter";
 
 const PROCORE_RFI_IMPORT_TABLES = [
   "rfi_import_bindings",
@@ -1044,6 +1045,8 @@ void rfiMigrationReady.then((ready) => {
 
 (async () => {
   try {
+    const storageHealth = await feedbackStorage.health();
+    console.log(`[feedback-storage] ${storageHealth.backendId} ${storageHealth.backendType} healthy`);
     await ensureFeedbackSchema(pool);
     console.log("[migration] feedback_items table ensured transactionally");
   } catch (e) {

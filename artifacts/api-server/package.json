@@ -12,7 +12,7 @@
     "build": "tsx ./build.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:multipart-security": "tsx ./scripts/test-multipart-security.ts",
-    "test:feedback-addendum": "tsx ./src/lib/feedback-evidence-contract.behavior.ts",
+    "test:feedback-addendum": "tsx ./src/lib/feedback-evidence-contract.behavior.ts && tsx ./src/lib/storage-adapter.behavior.ts",
     "test:feedback-addendum-db": "tsx ./src/lib/feedback-http-db.behavior.ts",
     "test:sendgrid-transport": "tsx ./scripts/test-sendgrid-transport.ts",
     "test:startup-bootstrap": "tsx ./scripts/test-startup-bootstrap.ts",

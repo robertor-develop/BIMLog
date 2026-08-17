@@ -14,10 +14,11 @@ process.env.PROD_DATABASE_URL = urlText;
 process.env.JWT_SECRET = "feedback-local-fixture-secret-at-least-32-bytes";
 delete process.env.BIMLOG_FEEDBACK_SCANNER;
 const uploadRoot = path.resolve(".tmp", "feedback-http-uploads"); if (fs.existsSync(uploadRoot)) throw new Error("Feedback upload proof root must not exist"); process.env.BIMLOG_FEEDBACK_UPLOAD_ROOT = uploadRoot;
+process.env.BIMLOG_FEEDBACK_STORAGE_BACKEND = "local-test";
 
 const { default: router } = await import("../routes/feedback");
 const { signToken } = await import("../middlewares/auth");
-const { ensureFeedbackSchema } = await import("./feedback-schema-migration");
+const { ensureFeedbackSchema, FEEDBACK_SCHEMA_ADVISORY_LOCK } = await import("./feedback-schema-migration");
 const { pool: appPool } = await import("@workspace/db");
 const testPool = new pg.Pool({ connectionString: urlText });
 await testPool.query(`DROP TABLE IF EXISTS feedback_transcription_jobs, feedback_capture_consents, feedback_audit_events, feedback_assets, feedback_items, project_members, projects, users, companies, fixture_failures; DROP FUNCTION IF EXISTS fixture_reject_audit()`);
@@ -29,7 +30,9 @@ await testPool.query(`
   CREATE TABLE project_members(id serial PRIMARY KEY, project_id integer NOT NULL REFERENCES projects(id), user_id integer NOT NULL REFERENCES users(id), role text NOT NULL, joined_at timestamp NOT NULL DEFAULT now(), permissions_override jsonb, status text DEFAULT 'active');
   INSERT INTO companies VALUES (1,'A'),(2,'B'); INSERT INTO users VALUES (11,'a@test.invalid','A',1,false),(22,'b@test.invalid','B',2,false),(33,'admin@test.invalid','Admin',1,true); INSERT INTO projects VALUES (101,'A project','A-1','active',11,now(),now()); INSERT INTO project_members(project_id,user_id,role,status) VALUES(101,11,'member','active');
 `);
-await ensureFeedbackSchema(testPool); await ensureFeedbackSchema(testPool);
+const lockOwner = await testPool.connect(); await lockOwner.query("BEGIN"); await lockOwner.query(`select pg_advisory_xact_lock(${FEEDBACK_SCHEMA_ADVISORY_LOCK})`);
+let migrationSettled = false; const serializedMigration = ensureFeedbackSchema(testPool).finally(() => { migrationSettled = true; });
+await new Promise(resolve => setTimeout(resolve, 100)); assert.equal(migrationSettled, false); await lockOwner.query("COMMIT"); lockOwner.release(); await serializedMigration; await ensureFeedbackSchema(testPool);
 await testPool.query(`CREATE TABLE fixture_failures(event_type text PRIMARY KEY); CREATE FUNCTION fixture_reject_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF EXISTS(SELECT 1 FROM fixture_failures WHERE event_type=NEW.event_type) THEN RAISE EXCEPTION 'fixture audit refusal'; END IF; RETURN NEW; END $$; CREATE TRIGGER fixture_reject_audit_trigger BEFORE INSERT ON feedback_audit_events FOR EACH ROW EXECUTE FUNCTION fixture_reject_audit()`);
 
 const app = express(); app.use(express.json()); app.use("/api/v1", router); const server = createServer(app); await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
@@ -50,7 +53,7 @@ try {
   await testPool.query("update project_members set status='active' where user_id=11"); const file = new FormData(); file.append("kind", "attachment"); file.append("files", new Blob(["bounded fixture"], { type: "text/plain" }), "field-note.txt"); const uploaded = await fetch(`${base}/feedback/${id}/assets`, { method: "POST", headers: { Authorization: `Bearer ${tokenA}` }, body: file }); assert.equal(uploaded.status, 201);
   const assetPayload = await uploaded.json() as { assets: Array<{ id: number; scanState: string }> }; assert.equal(assetPayload.assets[0].scanState, "quarantined"); const download = await fetch(`${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`, { headers: { Authorization: `Bearer ${tokenA}` } }); assert.equal(download.status, 423);
   const duplicate = new FormData(); duplicate.append("kind", "attachment"); duplicate.append("files", new Blob(["bounded fixture"], { type: "text/plain" }), "field-note.txt"); const duplicateResponse = await fetch(`${base}/feedback/${id}/assets`, { method: "POST", headers: { Authorization: `Bearer ${tokenA}` }, body: duplicate }); assert.equal(duplicateResponse.status, 500); const assets = await testPool.query("select count(*)::int n from feedback_assets"); assert.equal(assets.rows[0].n, 1);
-  const storedFiles = fs.existsSync(uploadRoot) ? fs.readdirSync(path.join(uploadRoot, "projects", "101", "files")) : []; assert.equal(storedFiles.length, 1);
+  const storedFiles = fs.existsSync(uploadRoot) ? fs.readdirSync(uploadRoot, { recursive: true }).filter(value => /^[a-f0-9]{64}$/.test(path.basename(String(value)))) : []; assert.equal(storedFiles.length, 1);
   await testPool.query("update feedback_assets set scan_state='clean', scanner_adapter='local-fixture', scanned_at=now() where id=$1", [assetPayload.assets[0].id]); const cleanDownload = await fetch(`${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`, { headers: { Authorization: `Bearer ${tokenA}` } }); assert.equal(cleanDownload.status, 200); assert.equal(await cleanDownload.text(), "bounded fixture");
   const triage = await Promise.all(["one", "two"].map(() => fetch(`${base}/feedback/admin/${id}`, { method: "PATCH", headers: headers(tokenAdmin), body: JSON.stringify({ observedVersion: 1, status: "triaged" }) }))); assert.deepEqual(triage.map(value => value.status).sort(), [200, 409]);
   await testPool.query("insert into fixture_failures values ('triage_updated')"); const auditRollback = await fetch(`${base}/feedback/admin/${id}`, { method: "PATCH", headers: headers(tokenAdmin), body: JSON.stringify({ observedVersion: 2, status: "accepted" }) }); assert.equal(auditRollback.status, 500); assert.equal((await testPool.query("select status from feedback_items where id=$1", [id])).rows[0].status, "triaged"); await testPool.query("delete from fixture_failures");

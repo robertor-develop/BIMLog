@@ -1,9 +1,11 @@
 type MigrationPool = { connect(): Promise<{ query(sql: string): Promise<unknown>; release(): void }> };
+export const FEEDBACK_SCHEMA_ADVISORY_LOCK = 1603508;
 
 export async function ensureFeedbackSchema(pool: MigrationPool) {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await client.query(`SELECT pg_advisory_xact_lock(${FEEDBACK_SCHEMA_ADVISORY_LOCK})`);
     const statements = [
       `CREATE TABLE IF NOT EXISTS feedback_items (id serial PRIMARY KEY,user_id integer NOT NULL REFERENCES users(id),project_id integer REFERENCES projects(id),feedback_type text NOT NULL,priority text NOT NULL DEFAULT 'normal',module text,page_url text NOT NULL,message text NOT NULL,status text NOT NULL DEFAULT 'new',stable_id text,company_id integer,owner_user_id integer REFERENCES users(id),target_release text,disposition_reason text,customer_visible boolean NOT NULL DEFAULT true,version integer NOT NULL DEFAULT 1,idempotency_key text,request_hash text,transcript text,transcript_provenance text,metadata jsonb,created_at timestamp NOT NULL DEFAULT now(),updated_at timestamp NOT NULL DEFAULT now(),resolved_at timestamp)`,
       `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS stable_id text`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS company_id integer`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS owner_user_id integer REFERENCES users(id)`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS target_release text`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS disposition_reason text`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS customer_visible boolean NOT NULL DEFAULT true`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS idempotency_key text`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS request_hash text`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS transcript text`, `ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS transcript_provenance text`,

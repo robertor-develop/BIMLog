@@ -16,6 +16,7 @@ const PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
 const STATUSES = new Set(["new", "triaged", "accepted", "in_progress", "blocked", "fixed", "verified", "rejected", "deferred"]);
 const TERMINAL = new Set(["verified", "rejected", "deferred"]);
 const CAPTURE_NOTICE_VERSION = "feedback-capture-v1";
+const localFixture = (value: string | undefined, expected: string) => process.env.NODE_ENV !== "production" && process.env.BIMLOG_FEEDBACK_ALLOW_LOCAL_FIXTURES === "true" && value === expected;
 const TRANSITIONS: Record<string, Set<string>> = {
   new: new Set(["triaged", "rejected"]), triaged: new Set(["accepted", "deferred", "rejected"]),
   accepted: new Set(["in_progress", "blocked", "deferred"]), in_progress: new Set(["blocked", "fixed"]),
@@ -110,7 +111,7 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
     for (const file of files) {
       const checked = inspectFeedbackEvidence(file), storagePath = await storage.upload(file.buffer, feedback.projectId ?? `feedback-${id}`, checked.name); stored.push(storagePath); pending.push({ storagePath, checked, file });
     }
-    const scannerAdapter = process.env.BIMLOG_FEEDBACK_SCANNER === "fixture-clean" ? "local-fixture" : "default-deny";
+    const scannerAdapter = localFixture(process.env.BIMLOG_FEEDBACK_SCANNER, "fixture-clean") ? "local-fixture" : "default-deny";
     const scanState = scannerAdapter === "local-fixture" ? "clean" : "quarantined";
     const results = await db.transaction(async tx => {
       const rows = [];
@@ -125,7 +126,7 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
       if (captureConsent && !captureConsent.feedbackId) await tx.update(feedbackCaptureConsentsTable).set({ feedbackId: id }).where(eq(feedbackCaptureConsentsTable.id, captureConsent.id));
       return rows;
     });
-    return res.status(201).json({ assets: results, scanner: process.env.BIMLOG_FEEDBACK_SCANNER === "fixture-clean" ? "local-fixture" : "activation-required" });
+    return res.status(201).json({ assets: results, scanner: scannerAdapter === "local-fixture" ? "local-fixture" : "activation-required" });
   } catch (error) {
     const cleanupFailures = [];
     for (const item of stored) { try { await storage.delete(item); } catch { cleanupFailures.push(item); } }
@@ -146,7 +147,7 @@ router.post("/feedback/:id/transcription", authMiddleware, async (req, res) => {
   if (!consentId || !requestKey) return res.status(400).json({ code: "TRANSCRIPTION_CONSENT_REQUIRED", error: "Capture consent and idempotency key are required" });
   const [consent] = await db.select().from(feedbackCaptureConsentsTable).where(and(eq(feedbackCaptureConsentsTable.id, consentId), eq(feedbackCaptureConsentsTable.actorUserId, user.userId), eq(feedbackCaptureConsentsTable.captureKind, "audio"), eq(feedbackCaptureConsentsTable.feedbackId, id))).limit(1);
   if (!consent || consent.revokedAt) return res.status(403).json({ code: "TRANSCRIPTION_CONSENT_INVALID", error: "Active linked audio consent is required" });
-  const fixture = process.env.BIMLOG_FEEDBACK_TRANSCRIPTION_ADAPTER === "local-fixture";
+  const fixture = localFixture(process.env.BIMLOG_FEEDBACK_TRANSCRIPTION_ADAPTER, "local-fixture");
   const provider = fixture ? "local-fixture" : "none", model = fixture ? "deterministic-fixture" : "none", adapterVersion = "feedback-transcription-v1";
   const requestHash = createHash("sha256").update(JSON.stringify({ feedbackId: id, assetId, consentId, sourceSha256: asset.sha256, provider, model, adapterVersion })).digest("hex");
   const [prior] = await db.select().from(feedbackTranscriptionJobsTable).where(and(eq(feedbackTranscriptionJobsTable.requestedById, user.userId), eq(feedbackTranscriptionJobsTable.requestKey, requestKey))).limit(1);
