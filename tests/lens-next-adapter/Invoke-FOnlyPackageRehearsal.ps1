@@ -1,11 +1,28 @@
 [CmdletBinding()]
 param(
   [string]$TempBoundary = 'F:\BIMLog\Temp',
+  [string]$PackageRoot = (Join-Path $PSScriptRoot '..\..\artifacts\lens-next-readonly-packages'),
   [string]$ReceiptPath
 )
 
 $ErrorActionPreference = 'Stop'
 $repoRoot = [IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
+$packageBoundary = [IO.Path]::GetFullPath((Join-Path $repoRoot 'artifacts')).TrimEnd('\')
+$packageRootFull = [IO.Path]::GetFullPath($PackageRoot).TrimEnd('\')
+if (-not $packageRootFull.StartsWith($packageBoundary + '\', [StringComparison]::OrdinalIgnoreCase)) {
+  throw 'Rehearsal packages must remain below this repository artifacts boundary.'
+}
+$packageCursor = $packageRootFull
+while ($packageCursor.Length -ge $packageBoundary.Length) {
+  if (Test-Path -LiteralPath $packageCursor) {
+    $packageItem = Get-Item -LiteralPath $packageCursor -Force
+    if (($packageItem.Attributes -band [IO.FileAttributes]::ReparsePoint) -ne 0) {
+      throw "Rehearsal package path may not traverse a reparse point: $packageCursor"
+    }
+  }
+  if ($packageCursor.Equals($packageBoundary, [StringComparison]::OrdinalIgnoreCase)) { break }
+  $packageCursor = Split-Path -Parent $packageCursor
+}
 $boundary = [IO.Path]::GetFullPath($TempBoundary).TrimEnd('\')
 if (-not $boundary.Equals('F:\BIMLog\Temp', [StringComparison]::OrdinalIgnoreCase)) {
   throw 'Rehearsal boundary must be exactly F:\BIMLog\Temp.'
@@ -127,7 +144,7 @@ try {
   Remove-Item -LiteralPath $reparse -Force
 
   foreach ($year in @(2021, 2025)) {
-    $zip = Join-Path $repoRoot "artifacts\lens-next-readonly-packages\BIMLogLensNext-Navisworks$year-readonly-loadable.zip"
+    $zip = Join-Path $packageRootFull "BIMLogLensNext-Navisworks$year-readonly-loadable.zip"
     $package = Read-Package $zip $year
     Pass "package_${year}_routing_inventory_hashes" $package.ZipHash
     $target = Join-Path $runRoot "year-$year\BIMLogLensNext.bundle"
@@ -143,7 +160,7 @@ try {
     if (($firstHashes -join '|') -ne ($secondHashes -join '|')) { throw "Non-idempotent reinstall for $year." }
     Pass "package_${year}_install_reinstall_idempotent" $firstHashes
     $foreignYear = if ($year -eq 2021) { 2025 } else { 2021 }
-    $foreignZip = Join-Path $repoRoot "artifacts\lens-next-readonly-packages\BIMLogLensNext-Navisworks$foreignYear-readonly-loadable.zip"
+    $foreignZip = Join-Path $packageRootFull "BIMLogLensNext-Navisworks$foreignYear-readonly-loadable.zip"
     $foreign = Read-Package $foreignZip $foreignYear
     try { Install-Package $foreign $target $false | Out-Null; throw 'cross-year accepted' } catch { if ($_.Exception.Message -eq 'cross-year accepted') { throw }; Pass "package_${year}_cross_year_refused" $_.Exception.Message }
     [IO.File]::WriteAllBytes($prior, $priorBytes)
