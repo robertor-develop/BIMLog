@@ -76,7 +76,7 @@
       "reconciledThroughCommit": "2657c7372f8445f450a711e5d7ff8cf324ac4238",
       "semanticReviewedThroughCommit": "2657c7372f8445f450a711e5d7ff8cf324ac4238",
       "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-08-17T03:30:00Z"
     },
     {

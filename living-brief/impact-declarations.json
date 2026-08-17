@@ -9978,8 +9978,8 @@
         },
         {
           "key": "platform",
-          "result": "updated",
-          "reason": "The governed generator reconciled the integrated financial-contract schema and production component inventory."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated financial-contract inventory was already reconciled at the tested implementation commit; the later sanitized receipt changes evidence metadata only and adds no platform structure."
         },
         {
           "key": "plugin",
