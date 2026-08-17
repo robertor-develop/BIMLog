@@ -1,0 +1,31 @@
+{
+  "schemaVersion": 1,
+  "product": "BIMLog Platform Build 7 Advanced Contracts",
+  "releaseIdentity": "v1.60.35.07",
+  "testedImplementationHead": "70980135339a4b7cd3f0d886718896cffc77e83d",
+  "testedAtUtc": "2026-08-17T02:16:19Z",
+  "database": {
+    "classification": "disposable-loopback-only",
+    "host": "127.0.0.1",
+    "port": 55441,
+    "name": "bimlog_build7_evidence_9734",
+    "production": false
+  },
+  "gates": [
+    { "name": "migration-twice-and-database-safety", "status": "passed", "checks": 16 },
+    { "name": "authenticated-http-lifecycle-permission-rollback-history", "status": "passed", "checks": 19 },
+    { "name": "two-request-revision-race", "status": "passed", "evidence": "both responses converged on one successor version" },
+    { "name": "revision-replay-zero-residue", "status": "passed", "evidence": "8 versions, 8 lines, exactly 1 payment_application_revised history event" },
+    { "name": "two-session-approval-ceiling", "status": "passed", "evidence": "exactly 1 approved payment version" },
+    { "name": "advanced-contract-payment-behavior", "status": "passed", "checks": 27 },
+    { "name": "financial-contract-focused-behavior", "status": "passed", "checks": 45 },
+    { "name": "api-strict-typecheck", "status": "passed" },
+    { "name": "diff-check", "status": "passed" }
+  ],
+  "secretsIncluded": false,
+  "externalSystemsAccessed": false,
+  "productionAccessed": false,
+  "limitations": [
+    "Local implementation evidence only; independent acceptance, integration, push, publication, deployment, and field verification remain separate gates."
+  ]
+}
