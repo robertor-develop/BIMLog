@@ -1,0 +1,35 @@
+{
+  "schemaVersion": 1,
+  "product": "BIMLog Platform Build 7 Advanced Contracts",
+  "releaseIdentity": "v1.60.35.07",
+  "testedImplementationHead": "2657c7372f8445f450a711e5d7ff8cf324ac4238",
+  "testedTreeSha1": "239c1baf3cd6b4ceadcdad2ae971533ea1683e49",
+  "baseline": "601bf94aa5505d0137f8ae1858b40356d9f3aaf6",
+  "ownerHeads": {
+    "backend": "88d745d340d6c57390c77eef1542f6b283025f7d",
+    "ui": "1c66fdc4fada201fb73293301d7b8a70b99ad8bc"
+  },
+  "database": {
+    "classification": "new-disposable-loopback-only",
+    "host": "127.0.0.1",
+    "port": 55442,
+    "name": "bimlog_build7_access_c644",
+    "production": false
+  },
+  "gates": [
+    { "name": "migration-twice-and-database-safety", "status": "passed", "checks": 16 },
+    { "name": "authenticated-http-lifecycle-permission-concurrency-rollback-history", "status": "passed", "checks": 20 },
+    { "name": "advanced-contract-payment-behavior", "status": "passed", "checks": 27 },
+    { "name": "routed-browser-en-desktop-es-390-reload-history-denial", "status": "passed", "checks": 96 },
+    { "name": "monorepo-typecheck", "status": "passed" },
+    { "name": "full-production-build-and-runtime-closure", "status": "passed", "runtimeFiles": 10806 },
+    { "name": "living-brief-integrity", "status": "passed", "documents": 11 },
+    { "name": "tracked-secret-and-database-source-safety", "status": "passed" }
+  ],
+  "browserResultsSha256": "4f3aea46146017c447560f4f1f2cf94aaf430eb0f9f6c125a5f9318566f18bb1",
+  "browserEvidenceLocation": "F:/BIMLog/Evidence/build7-integration-20260817/browser-evidence-root/build7-advanced-contracts-browser",
+  "secretsIncluded": false,
+  "externalSystemsAccessed": false,
+  "productionAccessed": false,
+  "limitations": ["Local integration evidence only; push, provider publication, deployment, production migration, and customer field verification remain separate external gates."]
+}
