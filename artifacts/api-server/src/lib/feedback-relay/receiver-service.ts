@@ -51,6 +51,7 @@ export type StoredDelivery = {
   receipt: Signed<ReceiptContract>;
   directoryDurability: "fsync" | "rename-recovery";
   nonceRecovery?:{key:string;proofSha256:string};
+  generation:number;
   authentication:{keyId:string;canonicalSha256:string;hmacSha256:string};
 };
 export type PurgeAuthority = {
@@ -83,6 +84,7 @@ type DeletionJournal =
       requestId: string;
       objectRelativePath: string;
       receipt: PreparedDeletion;
+      generation:number;
       authentication:{keyId:string;canonicalSha256:string;hmacSha256:string};
     }
   | {
@@ -91,6 +93,7 @@ type DeletionJournal =
       requestId: string;
       objectRelativePath: string;
       receipt: DeletionReceipt;
+      generation:number;
       authentication:{keyId:string;canonicalSha256:string;hmacSha256:string};
     };
 export type BackupInventory = {
@@ -128,10 +131,10 @@ export class FilesystemReceiverNonceAuthority implements ReceiverNonceAuthority{
   constructor(root:string){this.root=canonicalRoot(root);if(!fs.existsSync(this.root)||!fs.statSync(this.root).isDirectory())fail("FEEDBACK_RECEIVER_NONCE_ROOT_REQUIRED","Nonce authority root must already exist");assertNoLinks(this.root,this.root);if(fs.lstatSync(this.root).isSymbolicLink())fail("FEEDBACK_RECEIVER_REPARSE_DENIED","Nonce authority root cannot be a link");}
   private key(input:DurableNonceRecord["binding"]){return sha256(JSON.stringify([input.audience,input.keyId,input.nonce,input.companyId,input.projectId]));}
   private async locked<T>(key:string,work:(lease:{assertCurrent():void;fence:string})=>T|Promise<T>){return fencedDirectoryLock(this.root,path.join(this.root,`${key}.lock`),`nonce:${key}`,work);}
-  async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`);assertNoLinks(this.root,file);return this.locked(key,lease=>{lease.assertCurrent();const token=`${key}.${randomUUID()}`;if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.version!==2||!HEX64.test(known.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_SCHEMA_INVALID","Nonce record schema is invalid");if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId||known.state==="reserved")return null;lease.assertCurrent();atomicJson(this.root,file,{...known,tokenSha256:sha256(token)});return{token,status:"identical-retry" as const};}const record:DurableNonceRecord={version:2,binding:input,state:"reserved",tokenSha256:sha256(token)};lease.assertCurrent();atomicJson(this.root,file,record);return{token,status:"new" as const};});}
-  async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||!HEX64.test(record.tokenSha256)||!timingSafeEqual(Buffer.from(record.tokenSha256,"hex"),Buffer.from(sha256(token),"hex")))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});});}
+  async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`);assertNoLinks(this.root,file);return this.locked(key,lease=>{lease.assertCurrent();const token=`${key}.${randomUUID()}`;if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.version!==2||!HEX64.test(known.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_SCHEMA_INVALID","Nonce record schema is invalid");if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId||known.state==="reserved")return null;return{token,status:"identical-retry" as const};}const record:DurableNonceRecord={version:2,binding:input,state:"reserved",tokenSha256:sha256(token)};lease.assertCurrent();atomicJson(this.root,file,record);return{token,status:"new" as const};});}
+  async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||!HEX64.test(record.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");if(record.state==="committed")return;if(!timingSafeEqual(Buffer.from(record.tokenSha256,"hex"),Buffer.from(sha256(token),"hex")))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});});}
   async rollback(token:string){const key=token.split(".")[0];if(!HEX64.test(key))return;await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`);if(!fs.existsSync(file))return;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version===2&&record.tokenSha256===sha256(token)&&record.state==="reserved"){lease.assertCurrent();fs.unlinkSync(file);syncDirectory(this.root);}});}
-  async recover(input:{key:string;proofSha256:string}){if(!HEX64.test(input.key)||!HEX64.test(input.proofSha256))return false;return this.locked(input.key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${input.key}.json`);if(!fs.existsSync(file))return false;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||record.tokenSha256!==input.proofSha256)return false;if(record.state==="reserved"){lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});}return true;});}
+  async recover(input:{key:string;proofSha256:string}){if(!HEX64.test(input.key)||!HEX64.test(input.proofSha256))return false;return this.locked(input.key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${input.key}.json`);if(!fs.existsSync(file))return false;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2)return false;if(record.state==="committed")return true;if(record.tokenSha256!==input.proofSha256)return false;lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});return true;});}
 }
 export type ReceiverFaultHooks = {
   afterNonceReserved?: () => void;
@@ -423,6 +426,7 @@ export class FeedbackReceiverCustodyService {
       path.join(this.system, "requests"),
       path.join(this.system, "locks"),
       path.join(this.system, "deletions"),
+      path.join(this.system, "quarantine"),
       path.join(this.system, "staging"),
     ])
       mkdirSafe(this.root, dir);
@@ -464,7 +468,7 @@ export class FeedbackReceiverCustodyService {
     const request=input.signedRequest.payload,now=input.now??new Date(),requestHash=sha256(canonicalRequest(request)),inspection=verifiedInspection(input.inspection,request,input.clientDeclared),identity=fileIdentity(input.stagedPath);
     if(identity.byteCount!==request.byteCount||identity.sha256!==request.sha256||request.bodySha256!==request.sha256)fail("FEEDBACK_RECEIVER_OBJECT_MISMATCH","Staged bytes do not match the signed request");
     try{return await this.lock(request.requestId,async lease=>{lease.assertCurrent();const index=this.indexPath(request.requestId);if(fs.existsSync(index)){await this.authorizeHeader(input.signedRequest,now);lease.assertCurrent();const stored=this.readStored(index),object=path.join(this.root,stored.objectRelativePath),current=fileIdentity(object);if(stored.requestHash!==requestHash||!sameSignature(stored.requestSignature,input.signedRequest.signature)||current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_REPLAY_READBACK_MISMATCH","Replay bytes do not match current custody");return stored.receipt;}
-      if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");let reservation:NonceReservation|undefined;const nonceAdapter:NonceAuthority={consume:async details=>{lease.assertCurrent();reservation=(await this.nonces.reserve(details))??undefined;return Boolean(reservation);}};await verifyRequest(input.signedRequest,this.senderKeys,nonceAdapter,{now,maxSkewMs:this.maxSkewMs});lease.assertCurrent();if(!reservation)fail("FEEDBACK_RECEIVER_NONCE_DENIED","Nonce authority denied request");const accepted=reservation as NonceReservation;let committed=false,indexed=false,moved=false;const object=this.objectPath(request);try{this.faults.afterNonceReserved?.();lease.assertCurrent();assertNoLinks(this.root,object);if(fs.existsSync(object)){const current=fileIdentity(object);if(current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_OBJECT_CONFLICT","Existing custody object differs from request");}else{if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");lease.assertCurrent();mkdirSafe(this.root,path.dirname(object));const stagedFd=fs.openSync(input.stagedPath,"r+");try{fs.fsyncSync(stagedFd);}finally{fs.closeSync(stagedFd);}lease.assertCurrent();fs.renameSync(input.stagedPath,object);syncDirectory(path.dirname(input.stagedPath));syncDirectory(path.dirname(object));moved=true;}this.faults.afterObjectWritten?.();lease.assertCurrent();const receipt=signReceipt({version:"1",requestId:request.requestId,companyId:request.companyId,projectId:request.projectId,feedbackId:request.feedbackId,objectId:request.objectId,byteCount:request.byteCount,sha256:request.sha256,destinationId:this.authority.destinationId,receivedAt:now.toISOString(),requestNonce:request.nonce,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);lease.assertCurrent();const record=this.authenticateRecord("bimlog-feedback-receiver-request-index-v3",{requestHash,requestSignature:input.signedRequest.signature,objectRelativePath:path.relative(this.root,object),authorityVersion:3 as const,inspection,receipt,nonceRecovery:{key:accepted.token.split(".")[0],proofSha256:sha256(accepted.token)},directoryDurability:syncDirectory(path.dirname(index))});atomicJson(this.root,index,record);indexed=true;lease.assertCurrent();await this.nonces.commit(accepted.token);lease.assertCurrent();committed=true;return receipt;}catch(error){if(!committed&&!indexed)await this.nonces.rollback(accepted.token);if(moved&&!fs.existsSync(index)&&fs.existsSync(object)){lease.assertCurrent();fs.unlinkSync(object);}throw error;}});}finally{if(fs.existsSync(input.stagedPath))await this.discardUploadStage(input.stagedPath);}
+      if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");let reservation:NonceReservation|undefined;const nonceAdapter:NonceAuthority={consume:async details=>{lease.assertCurrent();reservation=(await this.nonces.reserve(details))??undefined;return Boolean(reservation);}};await verifyRequest(input.signedRequest,this.senderKeys,nonceAdapter,{now,maxSkewMs:this.maxSkewMs});lease.assertCurrent();if(!reservation)fail("FEEDBACK_RECEIVER_NONCE_DENIED","Nonce authority denied request");const accepted=reservation as NonceReservation;let committed=false,indexed=false,moved=false;const object=this.objectPath(request);try{this.faults.afterNonceReserved?.();lease.assertCurrent();assertNoLinks(this.root,object);if(fs.existsSync(object)){const current=fileIdentity(object);if(current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_OBJECT_CONFLICT","Existing custody object differs from request");}else{if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");lease.assertCurrent();mkdirSafe(this.root,path.dirname(object));const stagedFd=fs.openSync(input.stagedPath,"r+");try{fs.fsyncSync(stagedFd);}finally{fs.closeSync(stagedFd);}lease.assertCurrent();fs.renameSync(input.stagedPath,object);syncDirectory(path.dirname(input.stagedPath));syncDirectory(path.dirname(object));moved=true;}this.faults.afterObjectWritten?.();lease.assertCurrent();const receipt=signReceipt({version:"1",requestId:request.requestId,companyId:request.companyId,projectId:request.projectId,feedbackId:request.feedbackId,objectId:request.objectId,byteCount:request.byteCount,sha256:request.sha256,destinationId:this.authority.destinationId,receivedAt:now.toISOString(),requestNonce:request.nonce,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);lease.assertCurrent();const generation=this.bumpGeneration();lease.assertCurrent();const record=this.authenticateRecord("bimlog-feedback-receiver-request-index-v3",{requestHash,requestSignature:input.signedRequest.signature,objectRelativePath:path.relative(this.root,object),authorityVersion:3 as const,inspection,receipt,nonceRecovery:{key:accepted.token.split(".")[0],proofSha256:sha256(accepted.token)},generation,directoryDurability:syncDirectory(path.dirname(index))});atomicJson(this.root,index,record);indexed=true;lease.assertCurrent();await this.nonces.commit(accepted.token);lease.assertCurrent();committed=true;return receipt;}catch(error){if(!committed&&!indexed)await this.nonces.rollback(accepted.token);if(moved&&!fs.existsSync(index)&&fs.existsSync(object)){lease.assertCurrent();fs.unlinkSync(object);}throw error;}});}finally{if(fs.existsSync(input.stagedPath))await this.discardUploadStage(input.stagedPath);}
   }
   private indexPath(requestId: string) {
     return path.join(this.system, "requests", `${sha256(requestId)}.json`);
@@ -499,7 +503,8 @@ export class FeedbackReceiverCustodyService {
     if(!HEX64.test(String(record.requestHash))||!HEX64.test(String(record.requestSignature))||typeof record.objectRelativePath!=="string"||path.isAbsolute(record.objectRelativePath)||!record.receipt||!record.inspection)fail("FEEDBACK_RECEIVER_REQUEST_INDEX_SCHEMA_INVALID","Request index schema is invalid");
     return record as unknown as StoredDelivery;
   }
-  private readStored(file:string){return this.verifyStoredRecord(readJson<unknown>(this.root,file));}
+  private quarantineLegacy(file:string,kind:string){assertNoLinks(this.root,file);const quarantine=path.join(this.system,"quarantine",`${kind}-${path.basename(file)}-${randomUUID()}`);assertNoLinks(this.root,quarantine);fs.renameSync(file,quarantine);syncDirectory(path.dirname(file));syncDirectory(path.dirname(quarantine));}
+  private readStored(file:string){const value=readJson<unknown>(this.root,file);try{return this.verifyStoredRecord(value);}catch(error){if(error instanceof RelayProtocolError&&error.code==="FEEDBACK_RECEIVER_REQUEST_INDEX_MIGRATION_REQUIRED")this.quarantineLegacy(file,"request-index");throw error;}}
   private verifyJournalRecord(value:unknown):DeletionJournal{
     if(!value||typeof value!=="object")fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal schema is invalid");
     const record=value as Record<string,unknown>;if(record.authorityVersion!==3)fail("FEEDBACK_RECEIVER_DELETION_MIGRATION_REQUIRED","Legacy deletion journal requires authenticated migration");
@@ -509,7 +514,14 @@ export class FeedbackReceiverCustodyService {
     if(!sameSignature(digest,String(authentication!.canonicalSha256))||!sameSignature(mac,String(authentication!.hmacSha256))||(record.state!=="prepared"&&record.state!=="finalized")||typeof record.objectRelativePath!=="string"||path.isAbsolute(record.objectRelativePath)||!record.receipt)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal authentication is invalid");
     return record as unknown as DeletionJournal;
   }
-  private readJournal(file:string){return this.verifyJournalRecord(readJson<unknown>(this.root,file));}
+  private readJournal(file:string){const value=readJson<unknown>(this.root,file);try{return this.verifyJournalRecord(value);}catch(error){if(error instanceof RelayProtocolError&&error.code==="FEEDBACK_RECEIVER_DELETION_MIGRATION_REQUIRED")this.quarantineLegacy(file,"deletion-journal");throw error;}}
+  private generationPath(){return path.join(this.system,"generation.json");}
+  private readGeneration(){const file=this.generationPath();if(!fs.existsSync(file))return 0;const value=readJson<Record<string,unknown>>(this.root,file),authentication=value.authentication as Record<string,unknown>|undefined,key=this.receiverKeys.keys.find(candidate=>candidate.id===authentication?.keyId);
+    if(value.version!==1||!Number.isSafeInteger(value.generation)||Number(value.generation)<0||!authentication||!key){return fail("FEEDBACK_RECEIVER_GENERATION_INVALID","Receiver generation authority is invalid");}
+    const {authentication:ignored,...payload}=value,canonical=canonicalJson({domain:"bimlog-feedback-receiver-generation-v1",...payload}),digest=sha256(canonical),mac=createHmac("sha256",key.secret).update(canonical,"utf8").digest("hex");
+    if(!sameSignature(digest,String(authentication.canonicalSha256))||!sameSignature(mac,String(authentication.hmacSha256)))return fail("FEEDBACK_RECEIVER_GENERATION_INVALID","Receiver generation authority is invalid");return Number(value.generation);}
+  private bumpGeneration(){return this.lockSync("__generation__",lease=>{lease.assertCurrent();const generation=this.readGeneration()+1;if(!Number.isSafeInteger(generation))return fail("FEEDBACK_RECEIVER_GENERATION_EXHAUSTED","Receiver generation is exhausted");lease.assertCurrent();atomicJson(this.root,this.generationPath(),this.authenticateRecord("bimlog-feedback-receiver-generation-v1",{version:1 as const,generation}));return generation;});}
+  snapshotGeneration(){return this.readGeneration();}
   private async lock<T>(identity: string, work: (lease:{assertCurrent():void;fence:string}) => Promise<T>): Promise<T> {
     const lock = path.join(this.system, "locks", sha256(identity));
     const ownerPath = path.join(lock, "owner.json"), leaseMs = 5_000;
@@ -688,12 +700,14 @@ export class FeedbackReceiverCustodyService {
           now,
         );
         lease.assertCurrent();
+        const generation=this.bumpGeneration();lease.assertCurrent();
         const record=this.authenticateRecord("bimlog-feedback-receiver-request-index-v3",{
           requestHash,
           requestSignature: input.signedRequest.signature,
           objectRelativePath: path.relative(this.root, object),
           inspection,
           receipt,
+          generation,
           directoryDurability: "rename-recovery",
           authorityVersion:3 as const,nonceRecovery:{key:acceptedReservation.token.split(".")[0],proofSha256:sha256(acceptedReservation.token)},
         });
@@ -795,18 +809,12 @@ export class FeedbackReceiverCustodyService {
       const target = path.join(deletions, entry),
         journal = this.readJournal(target);
       if (journal.state === "prepared") {
-        const {journalSha256,...preparedBase}=journal.receipt;if(journal.authorityVersion!==3||sha256(JSON.stringify(preparedBase))!==journalSha256)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Prepared deletion journal failed authentication");
-        const object = path.join(this.root, journal.objectRelativePath);
-        assertNoLinks(this.root, object);
-        if (!fs.existsSync(object)) {
-          const deletedAt=new Date().toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,new Date(absenceVerifiedAt));
-          const {authentication:ignored,...journalPayload}=journal;atomicJson(this.root, target, this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{
-            ...journalPayload,
-            state: "finalized",
-            receipt: { ...journal.receipt, absenceVerified: true,deletedAt,absenceVerifiedAt,signed },
-          }));
-          finalizedDeletions++;
-        }
+        this.lockSync(journal.requestId,lease=>{lease.assertCurrent();const current=this.readJournal(target);if(current.state!=="prepared")return;
+          const {journalSha256,...preparedBase}=current.receipt;if(current.authorityVersion!==3||sha256(JSON.stringify(preparedBase))!==journalSha256||!HEX64.test(current.receipt.policySha256)||!current.receipt.approvedBy.trim()||new Date(current.receipt.approvedAt).toISOString()!==current.receipt.approvedAt)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Prepared deletion journal failed authority revalidation");
+          const object=path.join(this.root,current.objectRelativePath);assertNoLinks(this.root,object);lease.assertCurrent();if(!fs.existsSync(object)){
+            const deletedAt=new Date().toISOString(),absenceVerifiedAt=deletedAt,signed=signDeletionReceipt({version:"1",requestId:current.receipt.requestId,companyId:current.receipt.companyId,projectId:current.receipt.projectId,feedbackId:current.receipt.feedbackId,objectId:current.receipt.objectId,byteCount:current.receipt.byteCount,objectSha256:current.receipt.objectSha256,destinationId:current.receipt.destinationId,policySha256:current.receipt.policySha256,approvedBy:current.receipt.approvedBy,approvedAt:current.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:current.receipt.journalSha256,deliveryReceiptSha256:current.receipt.deliveryReceiptSha256,readbackSha256:current.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,new Date(absenceVerifiedAt));
+            const generation=this.bumpGeneration();lease.assertCurrent();const {authentication:ignored,...journalPayload}=current;atomicJson(this.root,target,this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{...journalPayload,generation,state:"finalized",receipt:{...current.receipt,absenceVerified:true,deletedAt,absenceVerifiedAt,signed}}));finalizedDeletions++;
+          }});
       }
     }
     return { removedStages, removedStaleLocks, finalizedDeletions };
@@ -884,12 +892,13 @@ export class FeedbackReceiverCustodyService {
           deliveryReceiptSha256:sha256(canonicalReceipt(stored.receipt.payload)),readbackSha256:sha256(canonicalReadback(readback.payload)),
         } as const,
         receipt: PreparedDeletion = {...preparedBase,journalSha256:sha256(JSON.stringify(preparedBase))};
-      const journalDraft = {
+      const generation=this.bumpGeneration();lease.assertCurrent();const journalDraft = {
         state: "prepared",
         authorityVersion:3 as const,
         requestId,
         objectRelativePath: stored.objectRelativePath,
         receipt,
+        generation,
       };
       lease.assertCurrent();
       journal=this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",journalDraft) as DeletionJournal;atomicJson(this.root, journalPath, journal);
@@ -908,10 +917,11 @@ export class FeedbackReceiverCustodyService {
     const deletedAt=now.toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);
     const receipt: DeletionReceipt = {...journal.receipt,absenceVerified:true,deletedAt,absenceVerifiedAt,signed};
     lease.assertCurrent();
-    const {authentication:ignored,...journalPayload}=journal;atomicJson(this.root, journalPath, this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{
+    const generation=this.bumpGeneration();lease.assertCurrent();const {authentication:ignored,...journalPayload}=journal;atomicJson(this.root, journalPath, this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{
       ...journalPayload,
       state: "finalized",
       receipt,
+      generation,
     }));
     return receipt;
     });

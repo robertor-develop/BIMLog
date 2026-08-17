@@ -10,7 +10,8 @@ type Binding=Parameters<ReceiverNonceAuthority["reserve"]>[0];
 const script=fileURLToPath(import.meta.url);
 if(process.argv[2]==="--nonce-child"){
   const root=process.argv[3],binding=JSON.parse(Buffer.from(process.argv[4],"base64url").toString("utf8")) as Binding;
-  const authority=new FilesystemReceiverNonceAuthority(root),reservation=await authority.reserve(binding);
+  const authority=new FilesystemReceiverNonceAuthority(root);let reservation;
+  for(let attempt=0;attempt<1_000&&!reservation;attempt++){reservation=await authority.reserve(binding);if(!reservation)await new Promise(resolve=>setTimeout(resolve,2));}
   if(!reservation)throw new Error("nonce reservation denied");
   await authority.commit(reservation.token);
   process.stdout.write(JSON.stringify({status:reservation.status}));
