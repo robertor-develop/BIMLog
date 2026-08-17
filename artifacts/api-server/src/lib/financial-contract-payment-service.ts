@@ -4,7 +4,7 @@ import { FinancialControlError } from "./financial-control-contract";
 import { authorizeFinancialOperation } from "./financial-control-service";
 import { waitForFinancialContractMigration } from "./financial-contract-migration";
 import { positiveId, scaledSignedDecimal } from "./financial-budget-contract";
-import { normalizePaymentApplication } from "./financial-contract-payment";
+import { normalizePaymentApplication, normalizePaymentRevision } from "./financial-contract-payment";
 
 type Client = { query: (sql: string, values?: unknown[]) => Promise<{ rows: any[] }> };
 const uuid = () => crypto.randomUUID();
@@ -41,13 +41,20 @@ export async function createContractPaymentApplication(input: any) {
 }
 
 export async function reviseContractPaymentApplication(input: any) {
-  const projectId = positiveId(input.projectId, "projectId"), contractId = text(input.contractId, "contractId"), paymentApplicationId = text(input.paymentApplicationId, "paymentApplicationId"), expectedRevision = positiveId(input.expectedRevision, "expectedRevision"), normalized = normalizePaymentApplication(input);
+  const projectId = positiveId(input.projectId, "projectId"), contractId = text(input.contractId, "contractId"), paymentApplicationId = text(input.paymentApplicationId, "paymentApplicationId"), expectedRevision = positiveId(input.expectedRevision, "expectedRevision"), normalized = normalizePaymentRevision(input);
   return tx(async (client) => {
     const auth = await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.prepare", operation: "prepare", client });
     await recordPermission(client, contractId, auth.actor.userId, "prepare");
     await client.query(`SELECT pg_advisory_xact_lock(hashtext($1))`, [`contract-payment:${contractId}`]);
     const current = (await client.query(`SELECT a.application_number,v.* FROM financial_contract_payment_applications a JOIN financial_contracts c ON c.id=a.contract_id JOIN LATERAL(SELECT * FROM financial_contract_payment_versions WHERE payment_application_id=a.id ORDER BY version DESC LIMIT 1)v ON true WHERE a.id=$1 AND a.contract_id=$2 AND c.project_id=$3 FOR UPDATE OF a`, [paymentApplicationId, contractId, projectId])).rows[0];
     if (!current) throw new FinancialControlError(404, "CONTRACT_PAYMENT_NOT_FOUND", "Payment application not found.");
+    if (current.supersedes_id) {
+      const superseded = (await client.query(`SELECT revision FROM financial_contract_payment_versions WHERE id=$1 AND payment_application_id=$2`, [current.supersedes_id, paymentApplicationId])).rows[0];
+      if (Number(superseded?.revision) === expectedRevision) {
+        if (current.content_fingerprint !== normalized.contentFingerprint) throw new FinancialControlError(409, "CONTRACT_PAYMENT_REVISION_REPLAY_CONFLICT", "This returned payment revision was already replaced with different immutable content.");
+        return getContractPaymentApplications({ actorUserId: input.actorUserId, projectId, contractId, paymentApplicationId }, client);
+      }
+    }
     if (current.status !== "returned" || Number(current.revision) !== expectedRevision) throw new FinancialControlError(409, "CONTRACT_PAYMENT_STALE", "Only the current returned payment version can be revised.");
     if (current.application_number !== normalized.applicationNumber) throw new FinancialControlError(409, "CONTRACT_PAYMENT_ROOT_IMMUTABLE", "A payment revision cannot change its application number.");
     const contract = (await client.query(`SELECT v.id version_id,v.currency FROM financial_contract_versions v WHERE v.contract_id=$1 AND v.status='executed' ORDER BY v.version DESC LIMIT 1`, [contractId])).rows[0];

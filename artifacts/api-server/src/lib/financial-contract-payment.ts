@@ -4,7 +4,9 @@ import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contr
 import { contractCurrency } from "./financial-contract-contract";
 
 export type PaymentLineInput = { contractSovLineId: string; currentAmount: string; evidence?: Record<string, unknown>; sortOrder: number };
-export type NormalizedPaymentApplication = { applicationNumber: string; idempotencyKey: string; periodStart: string; periodEnd: string; currency: string; grossAmount: string; retainageAmount: string; netAmount: string; lines: PaymentLineInput[]; contentFingerprint: string };
+type NormalizedPaymentContent = { applicationNumber: string; periodStart: string; periodEnd: string; currency: string; grossAmount: string; retainageAmount: string; netAmount: string; lines: PaymentLineInput[] };
+export type NormalizedPaymentApplication = NormalizedPaymentContent & { idempotencyKey: string; contentFingerprint: string };
+export type NormalizedPaymentRevision = NormalizedPaymentContent & { contentFingerprint: string };
 const safeEvidence = (value: unknown) => {
   if (value == null) return {};
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new FinancialControlError(400, "CONTRACT_PAYMENT_EVIDENCE_INVALID", "Payment evidence must be a bounded object.");
@@ -29,7 +31,7 @@ const token = (value: unknown, name: string, max = 120) => {
   return text;
 };
 
-export function normalizePaymentApplication(input: any): NormalizedPaymentApplication {
+const normalizePaymentContent = (input: any): NormalizedPaymentContent => {
   const periodStart = date(input.periodStart, "periodStart"), periodEnd = date(input.periodEnd, "periodEnd");
   if (periodEnd < periodStart) throw new FinancialControlError(400, "CONTRACT_PAYMENT_PERIOD_INVALID", "Payment period end cannot precede its start.");
   const currency = contractCurrency(input.currency), grossAmount = amount(input.grossAmount, "grossAmount"), retainageAmount = amount(input.retainageAmount ?? "0", "retainageAmount");
@@ -44,7 +46,18 @@ export function normalizePaymentApplication(input: any): NormalizedPaymentApplic
   if (!lines.length || new Set(lines.map((line) => line.contractSovLineId)).size !== lines.length) throw new FinancialControlError(400, "CONTRACT_PAYMENT_LINES_INVALID", "Payment applications require unique governed SOV lines.");
   const lineTotal = lines.reduce((sum, line) => sum + scaledSignedDecimal(line.currentAmount), 0n);
   if (lineTotal !== scaledSignedDecimal(grossAmount)) throw new FinancialControlError(400, "CONTRACT_PAYMENT_LINES_UNRECONCILED", "Payment line total must equal the gross amount exactly.");
-  const normalized = { applicationNumber: token(input.applicationNumber, "applicationNumber"), idempotencyKey: token(input.idempotencyKey, "idempotencyKey", 200), periodStart, periodEnd, currency, grossAmount, retainageAmount, netAmount: decimalFromScaled(netScaled), lines };
+  return { applicationNumber: token(input.applicationNumber, "applicationNumber"), periodStart, periodEnd, currency, grossAmount, retainageAmount, netAmount: decimalFromScaled(netScaled), lines };
+};
+
+export function normalizePaymentApplication(input: any): NormalizedPaymentApplication {
+  const content = normalizePaymentContent(input);
+  const normalized = { ...content, idempotencyKey: token(input.idempotencyKey, "idempotencyKey", 200) };
+  const contentFingerprint = crypto.createHash("sha256").update(JSON.stringify(normalized)).digest("hex");
+  return { ...normalized, contentFingerprint };
+}
+
+export function normalizePaymentRevision(input: any): NormalizedPaymentRevision {
+  const normalized = normalizePaymentContent(input);
   const contentFingerprint = crypto.createHash("sha256").update(JSON.stringify(normalized)).digest("hex");
   return { ...normalized, contentFingerprint };
 }
