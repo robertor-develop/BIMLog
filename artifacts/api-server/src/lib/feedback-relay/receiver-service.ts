@@ -79,17 +79,19 @@ type PreparedDeletion = Omit<DeletionReceipt, "absenceVerified"|"absenceVerified
 type DeletionJournal =
   | {
       state: "prepared";
-      authorityVersion:2;
+      authorityVersion:3;
       requestId: string;
       objectRelativePath: string;
       receipt: PreparedDeletion;
+      authentication:{keyId:string;canonicalSha256:string;hmacSha256:string};
     }
   | {
       state: "finalized";
-      authorityVersion:2;
+      authorityVersion:3;
       requestId: string;
       objectRelativePath: string;
       receipt: DeletionReceipt;
+      authentication:{keyId:string;canonicalSha256:string;hmacSha256:string};
     };
 export type BackupInventory = {
   createdAt: string;
@@ -498,6 +500,16 @@ export class FeedbackReceiverCustodyService {
     return record as unknown as StoredDelivery;
   }
   private readStored(file:string){return this.verifyStoredRecord(readJson<unknown>(this.root,file));}
+  private verifyJournalRecord(value:unknown):DeletionJournal{
+    if(!value||typeof value!=="object")fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal schema is invalid");
+    const record=value as Record<string,unknown>;if(record.authorityVersion!==3)fail("FEEDBACK_RECEIVER_DELETION_MIGRATION_REQUIRED","Legacy deletion journal requires authenticated migration");
+    const authentication=record.authentication as Record<string,unknown>|undefined,key=this.receiverKeys.keys.find(candidate=>candidate.id===authentication?.keyId);
+    if(!authentication||!key||!HEX64.test(String(authentication.canonicalSha256))||!HEX64.test(String(authentication.hmacSha256)))fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal authentication is invalid");
+    const {authentication:ignored,...payload}=record,canonical=canonicalJson({domain:"bimlog-feedback-receiver-deletion-journal-v3",...payload}),digest=sha256(canonical),mac=createHmac("sha256",key!.secret).update(canonical,"utf8").digest("hex");
+    if(!sameSignature(digest,String(authentication!.canonicalSha256))||!sameSignature(mac,String(authentication!.hmacSha256))||(record.state!=="prepared"&&record.state!=="finalized")||typeof record.objectRelativePath!=="string"||path.isAbsolute(record.objectRelativePath)||!record.receipt)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal authentication is invalid");
+    return record as unknown as DeletionJournal;
+  }
+  private readJournal(file:string){return this.verifyJournalRecord(readJson<unknown>(this.root,file));}
   private async lock<T>(identity: string, work: (lease:{assertCurrent():void;fence:string}) => Promise<T>): Promise<T> {
     const lock = path.join(this.system, "locks", sha256(identity));
     const ownerPath = path.join(lock, "owner.json"), leaseMs = 5_000;
@@ -781,18 +793,18 @@ export class FeedbackReceiverCustodyService {
     const deletions = path.join(this.system, "deletions");
     for (const entry of fs.readdirSync(deletions)) {
       const target = path.join(deletions, entry),
-        journal = readJson<DeletionJournal>(this.root, target);
+        journal = this.readJournal(target);
       if (journal.state === "prepared") {
-        const {journalSha256,...preparedBase}=journal.receipt;if(journal.authorityVersion!==2||sha256(JSON.stringify(preparedBase))!==journalSha256)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Prepared deletion journal failed authentication");
+        const {journalSha256,...preparedBase}=journal.receipt;if(journal.authorityVersion!==3||sha256(JSON.stringify(preparedBase))!==journalSha256)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Prepared deletion journal failed authentication");
         const object = path.join(this.root, journal.objectRelativePath);
         assertNoLinks(this.root, object);
         if (!fs.existsSync(object)) {
           const deletedAt=new Date().toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,new Date(absenceVerifiedAt));
-          atomicJson(this.root, target, {
-            ...journal,
+          const {authentication:ignored,...journalPayload}=journal;atomicJson(this.root, target, this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{
+            ...journalPayload,
             state: "finalized",
             receipt: { ...journal.receipt, absenceVerified: true,deletedAt,absenceVerifiedAt,signed },
-          });
+          }));
           finalizedDeletions++;
         }
       }
@@ -839,7 +851,7 @@ export class FeedbackReceiverCustodyService {
     const journalPath = this.deletionPath(requestId);
     let journal: DeletionJournal;
     if (fs.existsSync(journalPath)) {
-      journal = readJson<DeletionJournal>(this.root, journalPath);
+      journal = this.readJournal(journalPath);
       lease.assertCurrent();
       if (
         journal.receipt.policySha256 !== authority.policySha256 ||
@@ -872,18 +884,19 @@ export class FeedbackReceiverCustodyService {
           deliveryReceiptSha256:sha256(canonicalReceipt(stored.receipt.payload)),readbackSha256:sha256(canonicalReadback(readback.payload)),
         } as const,
         receipt: PreparedDeletion = {...preparedBase,journalSha256:sha256(JSON.stringify(preparedBase))};
-      journal = {
+      const journalDraft = {
         state: "prepared",
-        authorityVersion:2,
+        authorityVersion:3 as const,
         requestId,
         objectRelativePath: stored.objectRelativePath,
         receipt,
       };
       lease.assertCurrent();
-      atomicJson(this.root, journalPath, journal);
+      journal=this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",journalDraft) as DeletionJournal;atomicJson(this.root, journalPath, journal);
       this.faults.afterDeletionPrepared?.();
       lease.assertCurrent();
     }
+    if(journal.state!=="prepared")return fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal state is invalid");
     const object = path.join(this.root, journal.objectRelativePath);
     assertNoLinks(this.root, object);
     if (fs.existsSync(object)){lease.assertCurrent();fs.unlinkSync(object);syncDirectory(path.dirname(object));}
@@ -895,11 +908,11 @@ export class FeedbackReceiverCustodyService {
     const deletedAt=now.toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);
     const receipt: DeletionReceipt = {...journal.receipt,absenceVerified:true,deletedAt,absenceVerifiedAt,signed};
     lease.assertCurrent();
-    atomicJson(this.root, journalPath, {
-      ...journal,
+    const {authentication:ignored,...journalPayload}=journal;atomicJson(this.root, journalPath, this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{
+      ...journalPayload,
       state: "finalized",
       receipt,
-    });
+    }));
     return receipt;
     });
   }
