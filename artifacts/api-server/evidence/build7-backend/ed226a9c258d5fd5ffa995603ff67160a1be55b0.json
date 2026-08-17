@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "product": "BIMLog Platform Build 7 Advanced Contracts",
+  "releaseIdentity": "v1.60.35.07",
+  "testedImplementationHead": "ed226a9c258d5fd5ffa995603ff67160a1be55b0",
+  "testedTreeSha1": "7c3d9bf426a5430f07d4768bfe4fa37d0fe83768",
+  "testedAtUtc": "2026-08-17T02:43:53Z",
+  "testSourceSha256": {
+    "financial-contract-http.behavior.ts": "efdd97b2f085ad51c17a589c62f43e91c39778b2c2df7d25d2838439e160f4e8",
+    "financial-contract-db.behavior.ts": "bf821430271cb1ee3ec896e2968f1b0d926a9833927e8d78f42f6dd875369522"
+  },
+  "database": {
+    "classification": "disposable-loopback-only",
+    "host": "127.0.0.1",
+    "port": 55442,
+    "name": "bimlog_build7_access_c644",
+    "production": false,
+    "finalManifest": { "contracts": 3, "paymentApplications": 7, "historyRows": 34 }
+  },
+  "gates": [
+    { "name": "migration-twice-and-database-safety", "status": "passed", "checks": 16 },
+    { "name": "authenticated-http", "status": "passed", "checks": 20 },
+    { "name": "different-contract-record-isolation", "status": "passed", "evidence": "viewer retrieved only the explicitly granted different contract and no target payment history" },
+    { "name": "exact-contract-authorized-history", "status": "passed", "evidence": "authorized exact-contract viewer retrieved attributable payment lifecycle history" },
+    { "name": "read-zero-mutation", "status": "passed", "evidence": "contract, payment application/version/line, and history counts unchanged across authorized and denied reads" },
+    { "name": "revision-race-replay-rollback", "status": "passed" },
+    { "name": "approval-ceiling-concurrency", "status": "passed" },
+    { "name": "advanced-contract-payment-behavior", "status": "passed", "checks": 27 },
+    { "name": "api-strict-typecheck", "status": "passed" },
+    { "name": "diff-check", "status": "passed" }
+  ],
+  "secretsIncluded": false,
+  "externalSystemsAccessed": false,
+  "productionAccessed": false,
+  "limitations": ["Local implementation evidence only; independent acceptance and serialized integration remain separate gates."]
+}
