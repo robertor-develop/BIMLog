@@ -10021,7 +10021,7 @@
     },
     {
       "taskId": "bimlog-feedback-addendum-20260817",
-      "reviewedThroughCommit": "e1e4c0633ec8fdd6837b95fe57ec38f1c6976a8c",
+      "reviewedThroughCommit": "0dbbe8ca350a9e3ddc3fda0f1592e0170d985939",
       "reviewedAt": "2026-08-17T17:05:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task",
@@ -10094,7 +10094,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "9f4a52232334d6bf895364d06db9cdbda646a4939fe6b90ea9a8c6092d21e2bd"
+      "reviewedChangeSha256": "e89fe98f2e86e6911e4f52168f352e7d730db572f661e9274d8cf139621541e0"
     }
   ]
 }
