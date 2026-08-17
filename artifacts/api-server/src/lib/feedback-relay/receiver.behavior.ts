@@ -76,7 +76,7 @@ class MemoryNonces implements ReceiverNonceAuthority {
   async commit(token: string) {
     if (token.startsWith("retry:")) return;
     const value = this.pending.get(token);
-    if (!value) throw new Error("reservation missing");
+    if (!value) return;
     this.bound.set(value.key, value.hash);
     this.pending.delete(token);
   }

@@ -112,8 +112,9 @@ export function createReceiverHttpsHandler(input: {
           flags: "r+",
           mode: 0o600,
         });
+        let idleTimer:NodeJS.Timeout|undefined;
         try {
-          let idleTimer:NodeJS.Timeout|undefined;const resetIdle=()=>{if(idleTimer)clearTimeout(idleTimer);idleTimer=setTimeout(()=>req.destroy(new RelayProtocolError("FEEDBACK_RECEIVER_BODY_IDLE_TIMEOUT","Receiver body became idle")),input.deadlines.bodyIdleMs);};resetIdle();for await (const chunk of req) {resetIdle();if(totalController.signal.aborted)throw new RelayProtocolError("FEEDBACK_RECEIVER_TOTAL_TIMEOUT","Receiver total deadline exceeded");
+          const resetIdle=()=>{if(idleTimer)clearTimeout(idleTimer);idleTimer=setTimeout(()=>req.destroy(new RelayProtocolError("FEEDBACK_RECEIVER_BODY_IDLE_TIMEOUT","Receiver body became idle")),input.deadlines.bodyIdleMs);};resetIdle();for await (const chunk of req) {resetIdle();if(totalController.signal.aborted)throw new RelayProtocolError("FEEDBACK_RECEIVER_TOTAL_TIMEOUT","Receiver total deadline exceeded");
             const bytes = Buffer.from(chunk);
             total += bytes.length;
             if (total > length)
@@ -129,7 +130,7 @@ export function createReceiverHttpsHandler(input: {
         } catch (error) {
           output.destroy();
           throw error;
-        }
+        } finally {if(idleTimer)clearTimeout(idleTimer);}
         if (total !== length)
           throw new RelayProtocolError(
             "FEEDBACK_RECEIVER_CONTENT_LENGTH_MISMATCH",

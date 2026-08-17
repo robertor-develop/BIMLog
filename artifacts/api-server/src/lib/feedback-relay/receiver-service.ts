@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { randomUUID, timingSafeEqual } from "node:crypto";
+import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import {
   RelayProtocolError,
   canonicalRequest,
@@ -47,6 +47,7 @@ export type StoredDelivery = {
   inspection: ScannerInspection;
   receipt: Signed<ReceiptContract>;
   directoryDurability: "fsync" | "rename-recovery";
+  nonceToken?:string;
 };
 export type PurgeAuthority = {
   policySha256: string;
@@ -196,6 +197,7 @@ function syncDirectory(dir: string) {
     return "rename-recovery" as const;
   }
 }
+function fileIdentity(file:string){const fd=fs.openSync(file,"r"),hash=createHash("sha256"),chunk=Buffer.allocUnsafe(64*1024);let byteCount=0;try{for(;;){const read=fs.readSync(fd,chunk,0,chunk.length,null);if(!read)break;byteCount+=read;hash.update(chunk.subarray(0,read));}}finally{fs.closeSync(fd);}return{byteCount,sha256:hash.digest("hex")};}
 function atomicWrite(root: string, target: string, bytes: Buffer) {
   assertNoLinks(root, target);
   mkdirSafe(root, path.dirname(target));
@@ -363,20 +365,10 @@ export class FeedbackReceiverCustodyService {
         "FEEDBACK_RECEIVER_STAGING_AUTHORITY_DENIED",
         "Upload staging path escaped receiver authority",
       );
-    try {
-      // The network path is streamed to a bounded private stage first. Async I/O
-      // prevents synchronous whole-file work from blocking the receiver loop.
-      const bytes = await fs.promises.readFile(input.stagedPath);
-      return await this.deliver({
-        signedRequest: input.signedRequest,
-        bytes,
-        inspection: input.inspection,
-        clientDeclared: input.clientDeclared,
-        now: input.now,
-      });
-    } finally {
-      await this.discardUploadStage(input.stagedPath);
-    }
+    const request=input.signedRequest.payload,now=input.now??new Date(),requestHash=sha256(canonicalRequest(request)),inspection=verifiedInspection(input.inspection,request,input.clientDeclared),identity=fileIdentity(input.stagedPath);
+    if(identity.byteCount!==request.byteCount||identity.sha256!==request.sha256||request.bodySha256!==request.sha256)fail("FEEDBACK_RECEIVER_OBJECT_MISMATCH","Staged bytes do not match the signed request");
+    try{return await this.lock(request.requestId,async()=>{const index=this.indexPath(request.requestId);if(fs.existsSync(index)){await this.authorizeHeader(input.signedRequest,now);const stored=readJson<StoredDelivery>(this.root,index),object=path.join(this.root,stored.objectRelativePath),current=fileIdentity(object);if(stored.requestHash!==requestHash||!sameSignature(stored.requestSignature,input.signedRequest.signature)||current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_REPLAY_READBACK_MISMATCH","Replay bytes do not match current custody");return stored.receipt;}
+      let reservation:NonceReservation|undefined;const nonceAdapter:NonceAuthority={consume:async details=>{reservation=(await this.nonces.reserve(details))??undefined;return Boolean(reservation);}};await verifyRequest(input.signedRequest,this.senderKeys,nonceAdapter,{now,maxSkewMs:this.maxSkewMs});if(!reservation)fail("FEEDBACK_RECEIVER_NONCE_DENIED","Nonce authority denied request");const accepted=reservation as NonceReservation;let committed=false,indexed=false,moved=false;const object=this.objectPath(request);try{this.faults.afterNonceReserved?.();assertNoLinks(this.root,object);if(fs.existsSync(object)){const current=fileIdentity(object);if(current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_OBJECT_CONFLICT","Existing custody object differs from request");}else{mkdirSafe(this.root,path.dirname(object));fs.renameSync(input.stagedPath,object);syncDirectory(path.dirname(object));moved=true;}this.faults.afterObjectWritten?.();const receipt=signReceipt({version:"1",requestId:request.requestId,companyId:request.companyId,projectId:request.projectId,feedbackId:request.feedbackId,objectId:request.objectId,byteCount:request.byteCount,sha256:request.sha256,destinationId:this.authority.destinationId,receivedAt:now.toISOString(),requestNonce:request.nonce,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);atomicJson(this.root,index,{requestHash,requestSignature:input.signedRequest.signature,objectRelativePath:path.relative(this.root,object),inspection,receipt,nonceToken:accepted.token,directoryDurability:syncDirectory(path.dirname(index))} satisfies StoredDelivery);indexed=true;await this.nonces.commit(accepted.token);committed=true;return receipt;}catch(error){if(!committed&&!indexed)await this.nonces.rollback(accepted.token);if(moved&&!fs.existsSync(index)&&fs.existsSync(object))fs.unlinkSync(object);throw error;}});}finally{if(fs.existsSync(input.stagedPath))await this.discardUploadStage(input.stagedPath);}
   }
   private indexPath(requestId: string) {
     return path.join(this.system, "requests", `${sha256(requestId)}.json`);
@@ -444,6 +436,7 @@ export class FeedbackReceiverCustodyService {
           "FEEDBACK_RECEIVER_REQUEST_CONFLICT",
           "Request identity was reused with divergent authority",
         );
+      if(stored.nonceToken)await this.nonces.commit(stored.nonceToken);
       return signed.payload;
     }
     return this.authenticateRequest(signed, now);
@@ -516,7 +509,7 @@ export class FeedbackReceiverCustodyService {
           "Nonce authority denied request",
         );
       const acceptedReservation = reservation as NonceReservation;
-      let committed = false,
+      let committed = false,indexed=false,
         wroteObject = false;
       try {
         this.faults.afterNonceReserved?.();
@@ -559,7 +552,9 @@ export class FeedbackReceiverCustodyService {
           inspection,
           receipt,
           directoryDurability: "rename-recovery",
+          nonceToken:acceptedReservation.token,
         } satisfies StoredDelivery);
+        indexed=true;
         if (directoryDurability === "fsync") {
           const stored = readJson<StoredDelivery>(this.root, index);
           stored.directoryDurability = "fsync";
@@ -569,7 +564,7 @@ export class FeedbackReceiverCustodyService {
         committed = true;
         return receipt;
       } catch (error) {
-        if (!committed) await this.nonces.rollback(acceptedReservation.token);
+        if (!committed&&!indexed) await this.nonces.rollback(acceptedReservation.token);
         if (wroteObject && !fs.existsSync(index)) {
           const object = this.objectPath(request);
           try {
@@ -588,10 +583,10 @@ export class FeedbackReceiverCustodyService {
       ),
       object = path.join(this.root, stored.objectRelativePath);
     assertNoLinks(this.root, object);
-    const bytes = fs.readFileSync(object);
+    const identity=fileIdentity(object);
     if (
-      bytes.length !== stored.receipt.payload.byteCount ||
-      sha256(bytes) !== stored.receipt.payload.sha256
+      identity.byteCount !== stored.receipt.payload.byteCount ||
+      identity.sha256 !== stored.receipt.payload.sha256
     )
       fail(
         "FEEDBACK_RECEIVER_READBACK_MISMATCH",
@@ -605,8 +600,8 @@ export class FeedbackReceiverCustodyService {
         projectId: stored.receipt.payload.projectId,
         feedbackId: stored.receipt.payload.feedbackId,
         objectId: stored.receipt.payload.objectId,
-        byteCount: bytes.length,
-        sha256: sha256(bytes),
+        byteCount: identity.byteCount,
+        sha256: identity.sha256,
         destinationId: this.authority.destinationId,
         verifiedAt: now.toISOString(),
         receiptSha256: sha256(canonicalReceipt(stored.receipt.payload)),
@@ -707,15 +702,15 @@ export class FeedbackReceiverCustodyService {
         ),
         object = path.join(this.root, stored.objectRelativePath);
       assertNoLinks(this.root, object);
-      const bytes = fs.readFileSync(object);
-      if (sha256(bytes) !== stored.receipt.payload.sha256)
+      const identity=fileIdentity(object);
+      if (identity.byteCount!==stored.receipt.payload.byteCount||identity.sha256 !== stored.receipt.payload.sha256)
         fail(
           "FEEDBACK_RECEIVER_READBACK_MISMATCH",
           "Custody bytes changed before purge",
         );
       const readback=this.readback(requestId,now),preparedBase = {
-          objectSha256: sha256(bytes),
-          byteCount: bytes.length,
+          objectSha256: identity.sha256,
+          byteCount: identity.byteCount,
           policySha256: authority.policySha256,
           approvedBy: authority.approvedBy,
           approvedAt:authority.approvedAt,
@@ -778,11 +773,11 @@ function inventoryAuthority(root: string) {
       if (entry.isDirectory()) {
         if (entry.name !== "staging" && entry.name !== "locks") walk(target);
       } else if (entry.isFile()) {
-        const bytes = fs.readFileSync(target);
+        const identity=fileIdentity(target);
         result.push({
           relativePath: path.relative(root, target).replaceAll("\\", "/"),
-          byteCount: bytes.length,
-          sha256: sha256(bytes),
+          byteCount: identity.byteCount,
+          sha256: identity.sha256,
         });
       }
     }
@@ -817,7 +812,7 @@ export function createReceiverBackup(
     assertNoLinks(source, from);
     mkdirSafe(backup, path.dirname(to));
     fs.copyFileSync(from, to, fs.constants.COPYFILE_EXCL);
-    if (sha256(fs.readFileSync(to)) !== item.sha256)
+    if (fileIdentity(to).sha256 !== item.sha256)
       fail(
         "FEEDBACK_RECEIVER_BACKUP_MISMATCH",
         "Backup object verification failed",
@@ -864,8 +859,8 @@ export function restoreReceiverBackup(
     assertNoLinks(backup, from);
     mkdirSafe(restore, path.dirname(to));
     fs.copyFileSync(from, to, fs.constants.COPYFILE_EXCL);
-    const bytes = fs.readFileSync(to);
-    if (bytes.length !== item.byteCount || sha256(bytes) !== item.sha256)
+    const identity=fileIdentity(to);
+    if (identity.byteCount !== item.byteCount || identity.sha256 !== item.sha256)
       fail(
         "FEEDBACK_RECEIVER_RESTORE_MISMATCH",
         "Restored object verification failed",
