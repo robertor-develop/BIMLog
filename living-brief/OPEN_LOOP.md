@@ -1874,4 +1874,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Independent QA must re-audit the remediated exact-current candidate and its retained 12/12 EN desktop/ES 390 actual-component evidence before push readiness is asserted.
 - Production scanner and transcription activation remain intentionally default-deny; the local fixture and disposable database receipts do not authorize provider traffic or customer evidence processing.
 - Retention hold is the only active local state. Release, expiry, destructive deletion, and storage compensation for a deletion lifecycle remain unimplemented and must not be claimed or activated before a governed retention policy and separate implementation acceptance.
+- Final independent acceptance must bind the exact clean commit after the consent-aware 16/16 browser receipt and canonical 30/30 migration/HTTP receipt are sealed.
 - The 16/16 disposable database/HTTP proof is local evidence only; independent QA acceptance and authorized migration preview remain required before push readiness.
