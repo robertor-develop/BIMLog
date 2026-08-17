@@ -16,7 +16,7 @@ assert.doesNotMatch(source,/\.toFixed\(|Number\(line\.currentAmount/);
 assert.match(source,/contractSovLineId:String\(line\.contractSovLineId\?\?line\.id\?\?line\.stableLineId\)/);
 assert.match(source,/CONTRACT_PAYMENT_SOV_EXCEEDED/);
 assert.match(source,/Reload authoritative state/);
-for(const proof of ["/revisions","Record independent review","Create corrected successor","confirmationFingerprint","CONTRACT_PAYMENT_DUTIES_CONFLICT","Suspended authority always denies","No settlement, accounting, or money movement","Immutable evidence and history","max-width:390px"]){
+for(const proof of ["/revisions","Record independent review","Create corrected successor","confirmationFingerprint","CONTRACT_PAYMENT_DUTIES_CONFLICT","Your financial authority is suspended","Suspended authority always denies","No settlement, accounting, or money movement","Immutable evidence and history","max-width:390px"]){
   const corpus=source+fs.readFileSync(path.join(path.dirname(fileURLToPath(import.meta.url)),"../../pages/FinancialContractWorkspace.tsx"),"utf8");
   assert.match(corpus,new RegExp(proof.replace(/[.*+?^${}()|[\]\\]/g,"\\$&"),"i"));
 }

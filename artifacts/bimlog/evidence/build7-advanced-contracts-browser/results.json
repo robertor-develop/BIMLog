@@ -1,0 +1,33 @@
+{
+  "suite": "build7-advanced-contracts-production-component",
+  "checks": 44,
+  "status": "passed",
+  "viewports": [
+    1440,
+    390
+  ],
+  "languages": [
+    "en",
+    "es"
+  ],
+  "states": [
+    "create",
+    "submit",
+    "return",
+    "revise",
+    "resubmit",
+    "approve",
+    "reject",
+    "withdraw",
+    "void",
+    "stale",
+    "conflict",
+    "denied",
+    "suspended",
+    "cumulative",
+    "reload",
+    "empty",
+    "error",
+    "loading"
+  ]
+}
