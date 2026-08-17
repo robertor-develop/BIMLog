@@ -159,7 +159,7 @@ export function FeedbackWidget() {
   async function submitFeedback() {
     const trimmed = message.trim();
     if (!trimmed) {
-      setError("Describe what happened or what should improve.");
+      setError(tt("Describe what happened or what should improve.", "Describa lo ocurrido o lo que debe mejorar."));
       return;
     }
     setSubmitting(true);
