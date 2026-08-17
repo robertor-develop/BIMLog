@@ -10246,6 +10246,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a426efce100aa0b88ed868a51cdac715090924d52137a3aded9c8111b508eb59"
+    },
+    {
+      "taskId": "bimlog-feedback-storage-security-remediation-20260817",
+      "reviewedThroughCommit": "c8218d58db0daa2f737862f22324a495f5f1e5cc",
+      "reviewedAt": "2026-08-17T19:08:00Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task",
+      "summary": "Replaces self-declared storage-root trust with an independent operator binding and closes link traversal and failure-residue gaps.",
+      "workstreams": [
+        "feedback-addendum",
+        "durable-storage",
+        "security",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed evidence custody doctrine remains controlling."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Provider and production activation remain separate explicit gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Adds executable cross-process, reparse, failure-residue, backup, and restore proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accountable durable feedback evidence remains the existing product outcome."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Production filesystem custody now derives trust from an external operator manifest rather than data-root content."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Navisworks, installer, or plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document design behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new external standard, certification, or compliance claim is introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the corrected durable storage trust and executable proof boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps operator provisioning, environment durability, database, and publication gates explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No provider, production, publication, deployment, or customer action occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "795fd5367bbfd2ce3abf7ca0e24a2e60cb4fe669d4ac155a056fb770b426416d"
     }
   ]
 }

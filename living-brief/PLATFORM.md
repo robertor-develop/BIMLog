@@ -193,6 +193,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feature-policy.behavior.ts
 - artifacts/api-server/src/lib/feedback-evidence-contract.behavior.ts
 - artifacts/api-server/src/lib/feedback-evidence-contract.ts
+- artifacts/api-server/src/lib/feedback-http-db.behavior.ts
+- artifacts/api-server/src/lib/feedback-schema-migration.ts
 - artifacts/api-server/src/lib/ffmpeg-capability.ts
 - artifacts/api-server/src/lib/financial-budget-browser.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-contract.ts
@@ -283,6 +285,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/rfi-standard-exports.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts
+- artifacts/api-server/src/lib/storage-adapter.behavior.ts
 - artifacts/api-server/src/lib/storage-adapter.ts
 - artifacts/api-server/src/lib/team-performance-service.ts
 - artifacts/api-server/src/lib/team-performance.behavior.ts
