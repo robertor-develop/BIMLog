@@ -96,6 +96,8 @@ export const feedbackAssetsTable = pgTable(
     byteSize: bigint("byte_size", { mode: "number" }).notNull(),
     sha256: text("sha256").notNull(),
     storagePath: text("storage_path").notNull(),
+    uploadRequestKey: text("upload_request_key"),
+    uploadRequestHash: text("upload_request_hash"),
     scanState: text("scan_state").default("quarantined").notNull(),
     scannerAdapter: text("scanner_adapter").default("default-deny").notNull(),
     scannedAt: timestamp("scanned_at"),
@@ -116,6 +118,7 @@ export const feedbackAssetsTable = pgTable(
       table.feedbackId,
       table.sha256,
     ),
+    uploadRequestIdx: uniqueIndex("feedback_assets_upload_request_idx").on(table.feedbackId,table.uploadedById,table.uploadRequestKey).where(sql`${table.uploadRequestKey} IS NOT NULL`),
     scanStateCheck: check(
       "feedback_assets_scan_state_chk",
       sql`${table.scanState} IN ('quarantined','clean','rejected')`,
@@ -545,6 +548,7 @@ export const feedbackRelayTemporaryObjectsTable = pgTable(
     deletedAt: timestamp("deleted_at"),
     absenceVerifiedAt: timestamp("absence_verified_at"),
     deleteFencingToken: bigint("delete_fencing_token", { mode: "bigint" }),
+    deleteFailedAt: timestamp("delete_failed_at"),
   },
   (table) => ({
     jobIdx: uniqueIndex("feedback_relay_temp_job_idx").on(table.jobId),

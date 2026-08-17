@@ -18,6 +18,7 @@ for (const upgrade of ["ADD COLUMN IF NOT EXISTS", "606-catalog-preserved", "aut
 assert.doesNotMatch(ddl, /j\.state='transferring' AND p_to_state IN \('delivered'/);
 assert.doesNotMatch(ddl, /j\.state='delivered' AND p_to_state IN \('receipt-verified'/);
 for (const recovery of ["j.state='transferring' AND p_to_state IN ('queued','receipt-verified','held','manual-review')", "j.state='delivered' AND p_to_state IN ('held','manual-review')", "j.state='held' AND p_to_state IN ('queued','manual-review')", "delete_started_at IS NOT NULL AND deleted_at IS NULL", "deleted_at IS NOT NULL"]) assert.ok(ddl.includes(recovery), recovery);
+for(const additive of ["feedback_assets_upload_request_idx","upload_request_hash","delete_failed_at"])assert.ok(ddl.includes(additive),additive);
 
 const failed: string[] = []; let failureReleased = false;
 await assert.rejects(() => ensureFeedbackSchema({ connect: async () => ({ query: async (sql: string) => { failed.push(sql); if (sql.includes("CREATE TABLE IF NOT EXISTS feedback_relay_nonces")) throw new Error("forced migration failure"); }, release: () => { failureReleased = true; } }) }));
