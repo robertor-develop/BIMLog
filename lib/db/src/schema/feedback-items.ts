@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import { pgTable, serial, text, timestamp, integer, jsonb, index, bigint, boolean, uniqueIndex, check } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 import { projectsTable } from "./projects";
+import { companiesTable } from "./companies";
 
 export const feedbackItemsTable = pgTable("feedback_items", {
   id: serial("id").primaryKey(),
@@ -14,7 +15,7 @@ export const feedbackItemsTable = pgTable("feedback_items", {
   message: text("message").notNull(),
   status: text("status").default("open").notNull(),
   stableId: text("stable_id").notNull(),
-  companyId: integer("company_id"),
+  companyId: integer("company_id").references(() => companiesTable.id).notNull(),
   ownerUserId: integer("owner_user_id").references(() => usersTable.id),
   targetRelease: text("target_release"),
   dispositionReason: text("disposition_reason"),

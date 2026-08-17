@@ -1071,7 +1071,12 @@ void rfiMigrationReady.then((ready) => {
     await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS transcript_provenance text`);
     await pool.query(`UPDATE feedback_items SET status = CASE status WHEN 'open' THEN 'new' WHEN 'in_review' THEN 'triaged' WHEN 'planned' THEN 'accepted' WHEN 'done' THEN 'verified' ELSE status END WHERE status IN ('open','in_review','planned','done')`);
     await pool.query(`UPDATE feedback_items SET stable_id = 'FB-' || lpad(id::text, 8, '0') WHERE stable_id IS NULL`);
+    await pool.query(`UPDATE feedback_items f SET company_id = u.company_id FROM users u WHERE f.user_id = u.id AND f.company_id IS NULL`);
     await pool.query(`ALTER TABLE feedback_items ALTER COLUMN stable_id SET NOT NULL`);
+    await pool.query(`ALTER TABLE feedback_items ALTER COLUMN company_id SET NOT NULL`);
+    await pool.query(`DO $$ BEGIN ALTER TABLE feedback_items ADD CONSTRAINT feedback_items_company_id_fkey FOREIGN KEY (company_id) REFERENCES companies(id); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+    await pool.query(`DO $$ BEGIN ALTER TABLE feedback_items ADD CONSTRAINT feedback_items_status_chk CHECK (status IN ('new','triaged','accepted','in_progress','blocked','fixed','verified','rejected','deferred')); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
+    await pool.query(`DO $$ BEGIN ALTER TABLE feedback_items ADD CONSTRAINT feedback_items_version_chk CHECK (version > 0); EXCEPTION WHEN duplicate_object THEN NULL; END $$`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS feedback_items_stable_id_idx ON feedback_items(stable_id)`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS feedback_items_user_idempotency_idx ON feedback_items(user_id, idempotency_key) WHERE idempotency_key IS NOT NULL`);
     await pool.query(`CREATE TABLE IF NOT EXISTS feedback_assets (
@@ -1116,6 +1121,8 @@ void rfiMigrationReady.then((ready) => {
     console.log("[migration] feedback_items table ensured");
   } catch (e) {
     console.error("[migration] feedback_items migration failed:", e);
+    process.exitCode = 1;
+    throw e;
   }
 })();
 

@@ -163,6 +163,15 @@ router.get("/feedback/:id/history", authMiddleware, async (req, res) => {
   return res.json({ feedback: { id: feedback.id, stableId: feedback.stableId, version: feedback.version }, history });
 });
 
+router.get("/feedback/:id/assets", authMiddleware, async (req, res) => {
+  const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
+  const id = asId(req.params.id); if (!id) return res.status(400).json({ code: "FEEDBACK_ID_INVALID", error: "Invalid feedback id" });
+  const feedback = await accessible(id, user); if (!feedback) return res.status(403).json({ code: "FEEDBACK_ASSET_LIST_DENIED", error: "Evidence access is denied" });
+  const assets = await db.select({ id: feedbackAssetsTable.id, kind: feedbackAssetsTable.kind, name: feedbackAssetsTable.safeName, mediaType: feedbackAssetsTable.mediaType, byteSize: feedbackAssetsTable.byteSize, sha256: feedbackAssetsTable.sha256, scanState: feedbackAssetsTable.scanState, createdAt: feedbackAssetsTable.createdAt })
+    .from(feedbackAssetsTable).where(eq(feedbackAssetsTable.feedbackId, id)).orderBy(feedbackAssetsTable.createdAt);
+  return res.json({ assets: assets.map(asset => ({ ...asset, downloadUrl: asset.scanState === "clean" ? `/api/v1/feedback/${id}/assets/${asset.id}/download` : null })) });
+});
+
 router.post("/feedback/:id/comments", authMiddleware, async (req, res) => {
   const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
   const id = asId(req.params.id), comment = bounded(req.body.comment, 4000); if (!id || !comment) return res.status(400).json({ code: "FEEDBACK_COMMENT_INVALID", error: "A bounded comment is required" });

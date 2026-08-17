@@ -28,6 +28,7 @@ async function scenario(language, width, fileName) {
       else if (url.includes("/assets") && method === "POST") body = { assets: [{ id: 901, scanState: "quarantined" }], scanner: "activation-required" };
       else if (url.endsWith("/api/v1/feedback/mine")) body = { feedback: [fixture] };
       else if (url.endsWith("/history")) body = { feedback: fixture, history: [{ id: 1, eventType: "created", createdAt: "2026-08-17T12:00:00.000Z" }, { id: 2, eventType: "triage_updated", reason: fixture.dispositionReason, createdAt: "2026-08-17T12:10:00.000Z" }] };
+      else if (url.endsWith("/assets")) body = { assets: [{ id: 901, name: "field-note.txt", scanState: "quarantined", downloadUrl: null }] };
       else if (url.endsWith("/reopen") && method === "POST") body = { success: true, feedback: { ...fixture, status: "triaged", version: 4 } };
       else return new Response(JSON.stringify({ code: "FIXTURE_ROUTE_DENIED" }), { status: 403, headers: { "Content-Type": "application/json" } });
       return new Response(JSON.stringify(body), { status: method === "POST" ? 201 : 200, headers: { "Content-Type": "application/json" } }); };
@@ -56,7 +57,7 @@ async function scenario(language, width, fileName) {
   await page.getByText(/FB-EVIDENCE801/).waitFor(); assertions.push(`${language}-${width}: successful governed submission visible`);
   await page.waitForTimeout(1000); await opener.click(); await page.getByRole("button", { name: language === "es" ? "Mis comentarios" : "My feedback" }).click();
   await page.getByText("FB-EVIDENCE801").waitFor(); await page.getByRole("button", { name: language === "es" ? "Historial" : "History" }).click();
-  await page.getByText("triage_updated").waitFor(); assertions.push(`${language}-${width}: customer backlog and history visible`);
+  await page.getByText("triage_updated").waitFor(); await page.getByText(/field-note\.txt/).waitFor(); assertions.push(`${language}-${width}: customer backlog, history, decision, and quarantined attachment visible`);
   await page.screenshot({ path: path.join(output, fileName.replace(".png", "-backlog.png")), fullPage: true });
   await context.close();
 }
