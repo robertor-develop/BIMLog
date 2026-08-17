@@ -6,6 +6,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+const fileSha256 = async (file: File) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await file.arrayBuffer()))).map(value => value.toString(16).padStart(2, "0")).join("");
 
 const PUBLIC_PATHS = new Set([
   "/",
@@ -213,9 +214,13 @@ export function FeedbackWidget() {
         setUploadState(tt("Uploading governed evidence…", "Cargando evidencia controlada…"));
         for (const group of ["audio", "screenshot", "attachment"] as const) {
           const selected = files.filter(file => group === "audio" ? file.name.startsWith("feedback-audio-") : group === "screenshot" ? file.name.startsWith("feedback-capture-") : !file.name.startsWith("feedback-audio-") && !file.name.startsWith("feedback-capture-"));
-          if (!selected.length) continue; const form = new FormData(); selected.forEach(file => form.append("files", file)); form.append("kind", group); if (group !== "attachment") { const consentId = captureConsents[group]; if (!consentId) throw new Error(tt("Capture consent expired; grant consent again before uploading.", "El consentimiento de captura venció; concédalo nuevamente antes de cargar.")); form.append("consentId", consentId); form.append("transformation", JSON.stringify(transformations[selected[0].name] || { origin: group === "audio" ? "browser-microphone" : "browser-display-capture" })); }
-          const uploaded = await fetch(`${API_BASE}/api/v1/feedback/${feedbackId}/assets`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
-          const payload = await uploaded.json().catch(() => ({})); if (!uploaded.ok) throw new Error(payload.error || tt("Evidence upload failed safely; retry from your retained files.", "La carga de evidencia falló de forma segura; reintente desde sus archivos conservados."));
+          for (const file of selected) {
+            const uploadKey = `${idempotencyRef.current}:${await fileSha256(file)}`; const form = new FormData(); form.append("files", file); form.append("kind", group);
+            if (group !== "attachment") { const consentId = captureConsents[group]; if (!consentId) throw new Error(tt("Capture consent expired; grant consent again before uploading.", "El consentimiento de captura venció; concédalo nuevamente antes de cargar.")); form.append("consentId", consentId); }
+            form.append("transformations", JSON.stringify({ [uploadKey]: transformations[file.name] || { origin: group === "audio" ? "browser-microphone" : group === "screenshot" ? "browser-display-capture" : "user-file-import" } }));
+            const uploaded = await fetch(`${API_BASE}/api/v1/feedback/${feedbackId}/assets`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Idempotency-Key": uploadKey }, body: form });
+            const payload = await uploaded.json().catch(() => ({})); if (!uploaded.ok) throw new Error(payload.error || tt("Evidence upload failed safely; retry from your retained files.", "La carga de evidencia falló de forma segura; reintente desde sus archivos conservados."));
+          }
         }
       }
       setMessage("");
