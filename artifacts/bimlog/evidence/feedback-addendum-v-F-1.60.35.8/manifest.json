@@ -1,19 +1,23 @@
 {
   "label": "BIMLog — Feedback Addendum Remediation Writer",
   "release": "v F-1.60.35.8",
-  "sourceCommit": "1eb3b73ec78479ece9332378856d23af4df0ee2d",
+  "sourceCommit": "956b83af22a98efb71d2f7065398868b8629f3c4",
   "runtime": {
     "playwrightCore": "1.55.0",
     "chromium": "151.0.7922.34"
   },
   "assertions": [
+    "en-1440: versioned voice consent recorded before capture",
     "en-1440: microphone denial visible",
+    "en-1440: versioned screen consent recorded before capture",
     "en-1440: capture denial visible",
     "en-1440: supported file visible",
     "en-1440: dialog contained",
     "en-1440: successful governed submission visible",
     "en-1440: customer backlog, history, decision, and quarantined attachment visible",
+    "es-390: versioned voice consent recorded before capture",
     "es-390: microphone denial visible",
+    "es-390: versioned screen consent recorded before capture",
     "es-390: capture denial visible",
     "es-390: supported file visible",
     "es-390: dialog contained",
@@ -23,7 +27,7 @@
   "files": [
     {
       "name": "feedback-en-desktop.png",
-      "sha256": "056f1dc27e5dc88454aa8b1e4f86f728d5222782e25d98a1fa53c8db7d55836e"
+      "sha256": "5d23a1e8d9dce45cd873d5f3a3ef2e0875ab2033e3a88f9effa05a28159e079e"
     },
     {
       "name": "feedback-en-desktop-backlog.png",
@@ -31,7 +35,7 @@
     },
     {
       "name": "feedback-es-390.png",
-      "sha256": "b94d1965db2472af3b6b498067be9324f1ac0f8a9c8c3bcf947d8a8a3bdc490c"
+      "sha256": "c8b62e5c342e9632cfc756ad2cbddf62e820873da092549931f832808539a0be"
     },
     {
       "name": "feedback-es-390-backlog.png",
