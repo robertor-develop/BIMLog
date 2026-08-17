@@ -215,7 +215,7 @@ export function FeedbackWidget() {
       setMessage("");
       setFiles([]); discardRecording(); idempotencyRef.current = randomKey(); setUploadState("");
       setSuccess(tt(`Sent as ${data.feedback?.stableId || "feedback"}.`, `Enviado como ${data.feedback?.stableId || "comentario"}.`));
-      setTimeout(closeFeedback, 900);
+      setTimeout(() => { terminateMedia(); setOpen(false); window.setTimeout(() => openerRef.current?.focus(), 0); }, 900);
     } catch (err) {
       setError(err instanceof Error ? err.message : tt("Feedback was not submitted.", "No se envió el comentario."));
     } finally {
