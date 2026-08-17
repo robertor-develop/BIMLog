@@ -1,0 +1,34 @@
+{
+  "schema": "bimlog.ui-browser-evidence.v1",
+  "boundary": "Deterministic isolated production-component fixtures only; this is not backend or database integration evidence.",
+  "uiImplementationCommit": "e911030350d562d399ddc3a167be09221e6bea4f",
+  "baseCommit": "2fd1571a24e50e7932f784022176ffa7837cd824",
+  "runtime": {
+    "node": "24.11.1",
+    "pnpm": "11.17.0",
+    "playwrightCore": "1.55.0",
+    "chromium": "151.0.7922.34",
+    "chromiumExecutableSha256": "409805a16d6416087e6b2f778df1cf8f7bbb267d6b99f6b5bb0a618eace234f2"
+  },
+  "command": "$env:BIMLOG_PLAYWRIGHT_CORE='F:\\IgniteSmart\\Customers\\LuxManifest\\Repositories\\manifest-me-ai\\node_modules\\playwright-core\\index.js'; $env:BIMLOG_CHROMIUM_EXECUTABLE='C:\\Users\\soporte\\AppData\\Local\\ms-playwright\\chromium-1234\\chrome-win64\\chrome.exe'; node scripts/advanced-contracts-browser-evidence.mjs",
+  "outcome": {
+    "status": "passed",
+    "assertions": 96,
+    "focusedPaymentChecks": 13,
+    "focusedHistoryChecks": 16,
+    "typecheck": "passed",
+    "productionBuild": "passed"
+  },
+  "resultsJsonSha256": "4f3aea46146017c447560f4f1f2cf94aaf430eb0f9f6c125a5f9318566f18bb1",
+  "screenshots": {
+    "count": 38,
+    "inventoryAlgorithm": "SHA256 of UTF-8 lines sorted ordinal by filename: <filename> <lowercase-file-sha256> <byte-length>\\n",
+    "inventorySha256": "1e9397abb1af2bd0f3280cfcc367da6773f10c02b1cb33cc198bc95884541793",
+    "routedOrderedHistorySha256": "dc6cd57cc8027e3d7254a405dbce1435b9a2ad83384e23c31e717ca50c661cf8",
+    "routedReload390Sha256": "3687633aa6f711681f23692fb9a5ee459700cce182e0b1faff43f3c280e84a0d",
+    "routedDeniedEn390Sha256": "7924dc8987008eeb5a0c7317e9c62057cc28f6a365b3594c344573ee05344a21",
+    "routedDeniedEs390Sha256": "2fcca92ff8fcea2c85f7c320f0bf010a3d767c1a35696bf888c22726424817c8",
+    "routedSuspendedEn390Sha256": "f360f76e96cf7edaf64a8974a7e2330a7d51e0937b6096d46b32526bf1f172bc",
+    "routedSuspendedEs390Sha256": "db4e0124b074c87365de4ad143cf15ec103dd99bab4881ee16731cd4cffefed3"
+  }
+}
