@@ -63,5 +63,6 @@ Thumbs.db
 /plugins/BIMLogLensNext/native/tests/2025/obj/
 /artifacts/lens-next-sandbox-packages/
 /artifacts/lens-next-readonly-packages/
+/artifacts/lens-next-field-readiness-*/
 /tests/lens-next-next/bin/
 /tests/lens-next-next/obj/
