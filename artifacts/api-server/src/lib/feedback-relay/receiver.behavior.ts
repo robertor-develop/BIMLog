@@ -4,10 +4,12 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import {
   FeedbackReceiverCustodyService,
+  FilesystemReceiverNonceAuthority,
   createReceiverBackup,
   restoreReceiverBackup,
   type ReceiverNonceAuthority,
 } from "./receiver-service.js";
+import {verifyDeletionReceiptDurably} from "./protocol.js";
 import {
   assertReadbackMatchesReceipt,
   canonicalRequest,
@@ -128,6 +130,7 @@ const inspection = {
   sha256: sha256(bytes),
 };
 try {
+  await check("filesystem nonce authority survives instance restart",async()=>{const nonceRoot=path.join(disposable,"nonce-authority");fs.mkdirSync(nonceRoot);const binding={audience:"receiver",keyId:"key-active",nonce:"restart-nonce",timestamp:now.toISOString(),requestId:"restart-request",companyId:"company",projectId:"project",requestSha256:"d".repeat(64)};const first=new FilesystemReceiverNonceAuthority(nonceRoot),reserved=await first.reserve(binding);assert.ok(reserved);await first.commit(reserved.token);const restarted=new FilesystemReceiverNonceAuthority(nonceRoot);assert.equal((await restarted.reserve(binding))?.status,"identical-retry");assert.equal(await restarted.reserve({...binding,requestSha256:"e".repeat(64)}),null);});
   await check("external root authority and sanitized health are bound", () =>
     assert.deepEqual(service.health(), {
       status: "ok",
@@ -505,12 +508,7 @@ try {
       };
       const deleted = service.purge("request-one", purgeAuthority, now);
       assert.equal(deleted.absenceVerified, true);
-      await verifyRequest(
-        deleted.signed,
-        receiverKeys,
-        { consume: async () => true },
-        { now, maxSkewMs: 0 },
-      );
+      const durable=verifyDeletionReceiptDurably(deleted.signed,receiverKeys,now);assert.equal(durable.canonicalSha256.length,64);assert.equal(deleted.signed.payload.approvedBy,"operator");assert.equal(deleted.signed.payload.journalSha256,deleted.journalSha256);
       assert.deepEqual(
         service.purge("request-one", purgeAuthority, now),
         deleted,
