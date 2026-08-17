@@ -7,7 +7,7 @@ import { ensureFinancialContractSchema } from "./financial-contract-migration";
 const url = process.env.PROD_DATABASE_URL;
 if (!url) throw new Error("Disposable PROD_DATABASE_URL required.");
 const target = new URL(url);
-const exactDisposableIdentity = (target.port === "55435" && target.pathname === "/bimlog_financial_build3") || (target.port === "55441" && target.pathname === "/bimlog_build7_evidence_9734");
+const exactDisposableIdentity = (target.port === "55435" && target.pathname === "/bimlog_financial_build3") || (target.port === "55441" && target.pathname === "/bimlog_build7_evidence_9734") || (target.port === "55442" && target.pathname === "/bimlog_build7_access_c644");
 if (!["127.0.0.1", "localhost"].includes(target.hostname) || !exactDisposableIdentity) throw new Error("Refusing to run outside an exact disposable Build 7 evidence database.");
 const checks: Array<{ number: number; name: string; evidence: string }> = [], check = (name: string, evidence: string) => checks.push({ number: checks.length + 1, name, evidence });
 
