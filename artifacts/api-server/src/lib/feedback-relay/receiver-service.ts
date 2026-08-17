@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
+import { execFileSync } from "node:child_process";
 import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
 import {
   RelayProtocolError,
@@ -142,7 +143,24 @@ const fail = (code: string, message: string): never => {
 const canonicalRoot = (value: string) => path.resolve(value);
 const PROCESS_INSTANCE_ID = randomUUID();
 const PROCESS_STARTED_AT = new Date(Date.now() - process.uptime() * 1000).toISOString();
-const OS_BOOT_ID = sha256(`${os.hostname()}\n${Math.floor((Date.now() - os.uptime() * 1000) / 1000)}`);
+function operatingSystemBootId(){
+  const configured=process.env.BIMLOG_FEEDBACK_OS_BOOT_ID;
+  if(configured){if(!HEX64.test(configured))fail("FEEDBACK_RECEIVER_BOOT_ID_INVALID","Configured OS boot identity is invalid");return configured;}
+  if(process.platform==="linux"){
+    const value=fs.readFileSync("/proc/sys/kernel/random/boot_id","utf8").trim();
+    if(!/^[a-f0-9-]{36}$/i.test(value))fail("FEEDBACK_RECEIVER_BOOT_ID_UNAVAILABLE","Linux boot identity is unavailable");
+    return sha256(`linux\n${value.toLowerCase()}`);
+  }
+  if(process.platform==="win32"){
+    try{
+      const value=execFileSync("powershell.exe",["-NoProfile","-NonInteractive","-Command","(Get-CimInstance Win32_OperatingSystem).LastBootUpTime.ToUniversalTime().ToString('o')"],{encoding:"utf8",windowsHide:true,timeout:10_000}).trim();
+      const parsed=new Date(value);if(Number.isNaN(parsed.getTime()))throw new Error("invalid boot time");
+      return sha256(`windows\n${os.hostname().toLowerCase()}\n${parsed.toISOString()}`);
+    }catch{return fail("FEEDBACK_RECEIVER_BOOT_ID_UNAVAILABLE","Stable Windows boot identity is unavailable");}
+  }
+  return fail("FEEDBACK_RECEIVER_BOOT_ID_UNAVAILABLE","Stable OS boot identity is unavailable");
+}
+const OS_BOOT_ID = operatingSystemBootId();
 type LockOwnerV2 = {
   version: 2;
   instanceId: string;
@@ -416,8 +434,8 @@ export class FeedbackReceiverCustodyService {
       );
     const request=input.signedRequest.payload,now=input.now??new Date(),requestHash=sha256(canonicalRequest(request)),inspection=verifiedInspection(input.inspection,request,input.clientDeclared),identity=fileIdentity(input.stagedPath);
     if(identity.byteCount!==request.byteCount||identity.sha256!==request.sha256||request.bodySha256!==request.sha256)fail("FEEDBACK_RECEIVER_OBJECT_MISMATCH","Staged bytes do not match the signed request");
-    try{return await this.lock(request.requestId,async()=>{const index=this.indexPath(request.requestId);if(fs.existsSync(index)){await this.authorizeHeader(input.signedRequest,now);const stored=readJson<StoredDelivery>(this.root,index),object=path.join(this.root,stored.objectRelativePath),current=fileIdentity(object);if(stored.requestHash!==requestHash||!sameSignature(stored.requestSignature,input.signedRequest.signature)||current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_REPLAY_READBACK_MISMATCH","Replay bytes do not match current custody");return stored.receipt;}
-      if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");let reservation:NonceReservation|undefined;const nonceAdapter:NonceAuthority={consume:async details=>{reservation=(await this.nonces.reserve(details))??undefined;return Boolean(reservation);}};await verifyRequest(input.signedRequest,this.senderKeys,nonceAdapter,{now,maxSkewMs:this.maxSkewMs});if(!reservation)fail("FEEDBACK_RECEIVER_NONCE_DENIED","Nonce authority denied request");const accepted=reservation as NonceReservation;let committed=false,indexed=false,moved=false;const object=this.objectPath(request);try{this.faults.afterNonceReserved?.();assertNoLinks(this.root,object);if(fs.existsSync(object)){const current=fileIdentity(object);if(current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_OBJECT_CONFLICT","Existing custody object differs from request");}else{if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");mkdirSafe(this.root,path.dirname(object));const stagedFd=fs.openSync(input.stagedPath,"r+");try{fs.fsyncSync(stagedFd);}finally{fs.closeSync(stagedFd);}fs.renameSync(input.stagedPath,object);syncDirectory(path.dirname(input.stagedPath));syncDirectory(path.dirname(object));moved=true;}this.faults.afterObjectWritten?.();const receipt=signReceipt({version:"1",requestId:request.requestId,companyId:request.companyId,projectId:request.projectId,feedbackId:request.feedbackId,objectId:request.objectId,byteCount:request.byteCount,sha256:request.sha256,destinationId:this.authority.destinationId,receivedAt:now.toISOString(),requestNonce:request.nonce,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);atomicJson(this.root,index,{requestHash,requestSignature:input.signedRequest.signature,objectRelativePath:path.relative(this.root,object),authorityVersion:2,inspection,receipt,nonceRecovery:{key:accepted.token.split(".")[0],proofSha256:sha256(accepted.token)},directoryDurability:syncDirectory(path.dirname(index))} satisfies StoredDelivery);indexed=true;await this.nonces.commit(accepted.token);committed=true;return receipt;}catch(error){if(!committed&&!indexed)await this.nonces.rollback(accepted.token);if(moved&&!fs.existsSync(index)&&fs.existsSync(object))fs.unlinkSync(object);throw error;}});}finally{if(fs.existsSync(input.stagedPath))await this.discardUploadStage(input.stagedPath);}
+    try{return await this.lock(request.requestId,async lease=>{lease.assertCurrent();const index=this.indexPath(request.requestId);if(fs.existsSync(index)){await this.authorizeHeader(input.signedRequest,now);lease.assertCurrent();const stored=readJson<StoredDelivery>(this.root,index),object=path.join(this.root,stored.objectRelativePath),current=fileIdentity(object);if(stored.requestHash!==requestHash||!sameSignature(stored.requestSignature,input.signedRequest.signature)||current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_REPLAY_READBACK_MISMATCH","Replay bytes do not match current custody");return stored.receipt;}
+      if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");let reservation:NonceReservation|undefined;const nonceAdapter:NonceAuthority={consume:async details=>{lease.assertCurrent();reservation=(await this.nonces.reserve(details))??undefined;return Boolean(reservation);}};await verifyRequest(input.signedRequest,this.senderKeys,nonceAdapter,{now,maxSkewMs:this.maxSkewMs});lease.assertCurrent();if(!reservation)fail("FEEDBACK_RECEIVER_NONCE_DENIED","Nonce authority denied request");const accepted=reservation as NonceReservation;let committed=false,indexed=false,moved=false;const object=this.objectPath(request);try{this.faults.afterNonceReserved?.();lease.assertCurrent();assertNoLinks(this.root,object);if(fs.existsSync(object)){const current=fileIdentity(object);if(current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_OBJECT_CONFLICT","Existing custody object differs from request");}else{if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");lease.assertCurrent();mkdirSafe(this.root,path.dirname(object));const stagedFd=fs.openSync(input.stagedPath,"r+");try{fs.fsyncSync(stagedFd);}finally{fs.closeSync(stagedFd);}lease.assertCurrent();fs.renameSync(input.stagedPath,object);syncDirectory(path.dirname(input.stagedPath));syncDirectory(path.dirname(object));moved=true;}this.faults.afterObjectWritten?.();lease.assertCurrent();const receipt=signReceipt({version:"1",requestId:request.requestId,companyId:request.companyId,projectId:request.projectId,feedbackId:request.feedbackId,objectId:request.objectId,byteCount:request.byteCount,sha256:request.sha256,destinationId:this.authority.destinationId,receivedAt:now.toISOString(),requestNonce:request.nonce,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);lease.assertCurrent();atomicJson(this.root,index,{requestHash,requestSignature:input.signedRequest.signature,objectRelativePath:path.relative(this.root,object),authorityVersion:2,inspection,receipt,nonceRecovery:{key:accepted.token.split(".")[0],proofSha256:sha256(accepted.token)},directoryDurability:syncDirectory(path.dirname(index))} satisfies StoredDelivery);indexed=true;lease.assertCurrent();await this.nonces.commit(accepted.token);lease.assertCurrent();committed=true;return receipt;}catch(error){if(!committed&&!indexed)await this.nonces.rollback(accepted.token);if(moved&&!fs.existsSync(index)&&fs.existsSync(object)){lease.assertCurrent();fs.unlinkSync(object);}throw error;}});}finally{if(fs.existsSync(input.stagedPath))await this.discardUploadStage(input.stagedPath);}
   }
   private indexPath(requestId: string) {
     return path.join(this.system, "requests", `${sha256(requestId)}.json`);
@@ -435,7 +453,7 @@ export class FeedbackReceiverCustodyService {
       request.sha256,
     );
   }
-  private async lock<T>(identity: string, work: () => Promise<T>): Promise<T> {
+  private async lock<T>(identity: string, work: (lease:{assertCurrent():void;fence:string}) => Promise<T>): Promise<T> {
     const lock = path.join(this.system, "locks", sha256(identity));
     const ownerPath = path.join(lock, "owner.json"), leaseMs = 5_000;
     for (let attempt = 0; attempt < 1_000; attempt++) {
@@ -446,11 +464,14 @@ export class FeedbackReceiverCustodyService {
           processStartedAt:PROCESS_STARTED_AT,osBootId:OS_BOOT_ID,fence,acquiredAt:acquiredAt.toISOString(),
           heartbeatAt:new Date().toISOString(),leaseUntil:new Date(Date.now()+leaseMs).toISOString()});
         atomicWrite(lock, ownerPath, Buffer.from(JSON.stringify(makeOwner()), "utf8"));
-        const heartbeat=setInterval(()=>{try{const current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));
-          if(!current||current.fence!==fence)return;atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));}catch{}},Math.floor(leaseMs/3));
+        let lost=false;
+        const assertCurrent=()=>{if(lost)fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");let current:LockOwnerV2|null=null;
+          try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+          if(!current||current.fence!==fence||new Date(current.leaseUntil).getTime()<Date.now()){lost=true;fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");}};
+        const heartbeat=setInterval(()=>{try{assertCurrent();atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));}catch{lost=true;}},Math.floor(leaseMs/3));
         heartbeat.unref();
         try {
-          return await work();
+          assertCurrent();return await work({assertCurrent,fence});
         } finally {
           clearInterval(heartbeat);
           const current=fs.existsSync(ownerPath)?parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8"))):null;
@@ -522,10 +543,12 @@ export class FeedbackReceiverCustodyService {
         "FEEDBACK_RECEIVER_OBJECT_MISMATCH",
         "Delivered bytes do not match the signed request",
       );
-    return this.lock(request.requestId, async () => {
+    return this.lock(request.requestId, async (lease) => {
+      lease.assertCurrent();
       const index = this.indexPath(request.requestId);
       if (fs.existsSync(index)) {
         await this.authorizeHeader(input.signedRequest, now);
+        lease.assertCurrent();
         const stored = readJson<StoredDelivery>(this.root, index);
         if (
           stored.requestHash !== requestHash ||
@@ -552,6 +575,7 @@ export class FeedbackReceiverCustodyService {
       let reservation: NonceReservation | undefined;
       const nonceAdapter: NonceAuthority = {
         consume: async (details) => {
+          lease.assertCurrent();
           reservation = (await this.nonces.reserve(details)) ?? undefined;
           return Boolean(reservation);
         },
@@ -560,6 +584,7 @@ export class FeedbackReceiverCustodyService {
         now,
         maxSkewMs: this.maxSkewMs,
       });
+      lease.assertCurrent();
       if (!reservation)
         fail(
           "FEEDBACK_RECEIVER_NONCE_DENIED",
@@ -570,6 +595,7 @@ export class FeedbackReceiverCustodyService {
         wroteObject = false;
       try {
         this.faults.afterNonceReserved?.();
+        lease.assertCurrent();
         const object = this.objectPath(request);
         assertNoLinks(this.root, object);
         if (fs.existsSync(object)) {
@@ -580,10 +606,12 @@ export class FeedbackReceiverCustodyService {
               "Existing custody object differs from request",
             );
         } else {
+          lease.assertCurrent();
           atomicWrite(this.root, object, input.bytes);
           wroteObject = true;
         }
         this.faults.afterObjectWritten?.();
+        lease.assertCurrent();
         const receipt = signReceipt(
           {
             version: "1",
@@ -602,6 +630,7 @@ export class FeedbackReceiverCustodyService {
           this.receiverKeys,
           now,
         );
+        lease.assertCurrent();
         const directoryDurability = atomicJson(this.root, index, {
           requestHash,
           requestSignature: input.signedRequest.signature,
@@ -613,11 +642,14 @@ export class FeedbackReceiverCustodyService {
         } satisfies StoredDelivery);
         indexed=true;
         if (directoryDurability === "fsync") {
+          lease.assertCurrent();
           const stored = readJson<StoredDelivery>(this.root, index);
           stored.directoryDurability = "fsync";
           atomicJson(this.root, index, stored);
         }
+        lease.assertCurrent();
         await this.nonces.commit(acceptedReservation.token);
+        lease.assertCurrent();
         committed = true;
         return receipt;
       } catch (error) {
@@ -625,6 +657,7 @@ export class FeedbackReceiverCustodyService {
         if (wroteObject && !fs.existsSync(index)) {
           const object = this.objectPath(request);
           try {
+            lease.assertCurrent();
             assertNoLinks(this.root, object);
             fs.unlinkSync(object);
           } catch {}
@@ -720,11 +753,30 @@ export class FeedbackReceiverCustodyService {
     }
     return { removedStages, removedStaleLocks, finalizedDeletions };
   }
+  private lockSync<T>(identity:string,work:(lease:{assertCurrent():void;fence:string})=>T):T{
+    const lock=path.join(this.system,"locks",sha256(identity)),ownerPath=path.join(lock,"owner.json"),leaseMs=5_000;
+    for(let attempt=0;attempt<1_000;attempt++){
+      try{
+        fs.mkdirSync(lock);const acquiredAt=new Date(),fence=sha256(`${identity}\n${randomUUID()}\n${acquiredAt.toISOString()}`);
+        const owner:LockOwnerV2={version:2,instanceId:PROCESS_INSTANCE_ID,pid:process.pid,processStartedAt:PROCESS_STARTED_AT,osBootId:OS_BOOT_ID,fence,acquiredAt:acquiredAt.toISOString(),heartbeatAt:acquiredAt.toISOString(),leaseUntil:new Date(acquiredAt.getTime()+leaseMs).toISOString()};
+        atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(owner),"utf8"));
+        const assertCurrent=()=>{let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+          if(!current||current.fence!==fence||new Date(current.leaseUntil).getTime()<Date.now())fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");};
+        try{assertCurrent();return work({assertCurrent,fence});}finally{let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}if(current?.fence===fence)fs.rmSync(lock,{recursive:true,force:false});}
+      }catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;let owner:LockOwnerV2|null=null;try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+        if(!owner||ownerIsProvablyDead(owner)){const quarantine=`${lock}.stale-${randomUUID()}`;try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch{}}
+        Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,2);
+      }
+    }
+    return fail("FEEDBACK_RECEIVER_LOCK_TIMEOUT","Receiver request is already being processed");
+  }
   purge(
     requestId: string,
     authority: PurgeAuthority,
     now = new Date(),
   ): DeletionReceipt {
+    return this.lockSync(`purge:${requestId}`,lease=>{
+    lease.assertCurrent();
     if (authority.hold)
       fail("FEEDBACK_RECEIVER_HOLD_ACTIVE", "Held custody cannot be purged");
     const approvedAt = new Date(authority.approvedAt);
@@ -742,6 +794,7 @@ export class FeedbackReceiverCustodyService {
     let journal: DeletionJournal;
     if (fs.existsSync(journalPath)) {
       journal = readJson<DeletionJournal>(this.root, journalPath);
+      lease.assertCurrent();
       if (
         journal.receipt.policySha256 !== authority.policySha256 ||
         journal.receipt.approvedBy !== authority.approvedBy
@@ -757,6 +810,7 @@ export class FeedbackReceiverCustodyService {
           this.indexPath(requestId),
         ),
         object = path.join(this.root, stored.objectRelativePath);
+      lease.assertCurrent();
       assertNoLinks(this.root, object);
       const identity=fileIdentity(object);
       if (identity.byteCount!==stored.receipt.payload.byteCount||identity.sha256 !== stored.receipt.payload.sha256)
@@ -782,12 +836,14 @@ export class FeedbackReceiverCustodyService {
         objectRelativePath: stored.objectRelativePath,
         receipt,
       };
+      lease.assertCurrent();
       atomicJson(this.root, journalPath, journal);
       this.faults.afterDeletionPrepared?.();
+      lease.assertCurrent();
     }
     const object = path.join(this.root, journal.objectRelativePath);
     assertNoLinks(this.root, object);
-    if (fs.existsSync(object)){fs.unlinkSync(object);syncDirectory(path.dirname(object));}
+    if (fs.existsSync(object)){lease.assertCurrent();fs.unlinkSync(object);syncDirectory(path.dirname(object));}
     if (fs.existsSync(object))
       fail(
         "FEEDBACK_RECEIVER_ABSENCE_UNPROVEN",
@@ -795,12 +851,14 @@ export class FeedbackReceiverCustodyService {
       );
     const deletedAt=now.toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);
     const receipt: DeletionReceipt = {...journal.receipt,absenceVerified:true,deletedAt,absenceVerifiedAt,signed};
+    lease.assertCurrent();
     atomicJson(this.root, journalPath, {
       ...journal,
       state: "finalized",
       receipt,
     });
     return receipt;
+    });
   }
   health() {
     try {
