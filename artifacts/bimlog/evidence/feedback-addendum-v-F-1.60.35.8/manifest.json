@@ -1,0 +1,30 @@
+{
+  "label": "BIMLog — Feedback Addendum Writer",
+  "release": "v F-1.60.35.8",
+  "sourceCommit": "1a15a34686a0274f938457b186779271370a7ecd",
+  "runtime": {
+    "playwrightCore": "1.55.0",
+    "chromiumExecutableSha256": "409805a16d6416087e6b2f778df1cf8f7bbb267d6b99f6b5bb0a618eace234f2"
+  },
+  "assertions": [
+    "en-1440: microphone denial visible",
+    "en-1440: capture denial visible",
+    "en-1440: supported file visible",
+    "en-1440: dialog contained",
+    "es-390: microphone denial visible",
+    "es-390: capture denial visible",
+    "es-390: supported file visible",
+    "es-390: dialog contained"
+  ],
+  "files": [
+    {
+      "name": "feedback-en-desktop.png",
+      "sha256": "3b661adf47c6fc2ccadf60d39848231a6dd2b38de2580f52427feeaf3a9f2829"
+    },
+    {
+      "name": "feedback-es-390.png",
+      "sha256": "47a23f89b245c82db8432a5bfce1127814cd2c65161bd16b7f8b777b09db1fc2"
+    }
+  ],
+  "limits": "Actual production App and FeedbackWidget on an intentionally nonexistent isolated route, with local browser permission-denial and file fixtures; no API, DB, scanner, transcription provider, or customer integration claim."
+}
