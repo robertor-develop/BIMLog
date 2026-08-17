@@ -4,6 +4,7 @@ import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contr
 import { contractCurrency } from "./financial-contract-contract";
 
 export type PaymentLineInput = { contractSovLineId: string; currentAmount: string; evidence?: Record<string, unknown>; sortOrder: number };
+export type NormalizedPaymentApplication = { applicationNumber: string; idempotencyKey: string; periodStart: string; periodEnd: string; currency: string; grossAmount: string; retainageAmount: string; netAmount: string; lines: PaymentLineInput[]; contentFingerprint: string };
 const safeEvidence = (value: unknown) => {
   if (value == null) return {};
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new FinancialControlError(400, "CONTRACT_PAYMENT_EVIDENCE_INVALID", "Payment evidence must be a bounded object.");
@@ -28,13 +29,13 @@ const token = (value: unknown, name: string, max = 120) => {
   return text;
 };
 
-export function normalizePaymentApplication(input: any) {
+export function normalizePaymentApplication(input: any): NormalizedPaymentApplication {
   const periodStart = date(input.periodStart, "periodStart"), periodEnd = date(input.periodEnd, "periodEnd");
   if (periodEnd < periodStart) throw new FinancialControlError(400, "CONTRACT_PAYMENT_PERIOD_INVALID", "Payment period end cannot precede its start.");
   const currency = contractCurrency(input.currency), grossAmount = amount(input.grossAmount, "grossAmount"), retainageAmount = amount(input.retainageAmount ?? "0", "retainageAmount");
   const netScaled = scaledSignedDecimal(grossAmount) - scaledSignedDecimal(retainageAmount);
   if (netScaled < 0n) throw new FinancialControlError(400, "CONTRACT_PAYMENT_RETAINAGE_INVALID", "Retainage cannot exceed the gross amount.");
-  const lines = Array.isArray(input.lines) ? input.lines.map((line: any, index: number) => ({
+  const lines: PaymentLineInput[] = Array.isArray(input.lines) ? input.lines.map((line: any, index: number): PaymentLineInput => ({
     contractSovLineId: token(line.contractSovLineId, "contractSovLineId"),
     currentAmount: amount(line.currentAmount, "currentAmount"),
     evidence: safeEvidence(line.evidence),
