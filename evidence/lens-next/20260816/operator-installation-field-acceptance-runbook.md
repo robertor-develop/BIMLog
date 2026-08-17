@@ -2,7 +2,7 @@
 
 Status: `LOCAL_LOADABLE_PACKAGE_READY_EXTERNAL_INSTALL_AUTHORITY_PENDING`
 
-Prepared from clean candidate `bb016eb59baffa12b6b4d9c830ee8f4aaad94325` on branch
+Reconciled for local field-readiness source candidate `ad77d5e221b6e94a7575dda37ffd900c662fa518` on branch
 `codex/bimlog-lens-next-20260812` in
 `F:\BIMLog\Worktrees\bimlog-lens-next-20260812`.
 
@@ -17,8 +17,8 @@ package artifacts are:
 
 | Navisworks | Held artifact | SHA-256 |
 | --- | --- | --- |
-| 2021 | `artifacts\lens-next-readonly-packages\BIMLogLensNext-Navisworks2021-readonly-loadable.zip` | `FAD1EAC5A5B5EB7AEF3C2C9A2E1ABCE323549036791A8A982BFCEA5689DAA593` |
-| 2025 | `artifacts\lens-next-readonly-packages\BIMLogLensNext-Navisworks2025-readonly-loadable.zip` | `C916D997EAEC84E0D39600ADB4146650AA8EF5B1645C5E02764E63EADA40C8DC` |
+| 2021 | `artifacts\lens-next-field-readiness-20260817\ad77d5e-run3\packages\BIMLogLensNext-Navisworks2021-readonly-loadable.zip` | `221535A7B9BC2BCF6AA9D736FECBBE1F22668C47DA085282F9A8DD83192CD9EA` |
+| 2025 | `artifacts\lens-next-field-readiness-20260817\ad77d5e-run3\packages\BIMLogLensNext-Navisworks2025-readonly-loadable.zip` | `E68DB4CAE85ACF18BC8B5E0AD4047C501AAB7E835993C163B0645C1828392D4A` |
 
 Each ZIP contains `PackageContents.xml`, `BIMLogLensNext.dll`, its matching
 `BIMLogLensNext.Native{year}.dll`, PDBs, and a hash manifest. The matching native assembly contains

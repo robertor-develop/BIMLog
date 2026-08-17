@@ -1,0 +1,59 @@
+{
+  "schemaVersion": "bimlog-lens-next-local-field-readiness-v1",
+  "status": "LOCAL_CANDIDATE_READY_EXTERNAL_RUNTIME_AND_INSTALL_AUTHORITY_PENDING",
+  "sourceCommit": "ad77d5e221b6e94a7575dda37ffd900c662fa518",
+  "build6Ancestor": "601bf94aa5505d0137f8ae1858b40356d9f3aaf6",
+  "excludedLineages": ["Build 7", "Legacy Lens v1.60.35", "Lens correlation/API"],
+  "packages": [
+    {
+      "productYear": 2021,
+      "path": "artifacts/lens-next-field-readiness-20260817/ad77d5e-run3/packages/BIMLogLensNext-Navisworks2021-readonly-loadable.zip",
+      "bytes": 33671,
+      "sha256": "221535A7B9BC2BCF6AA9D736FECBBE1F22668C47DA085282F9A8DD83192CD9EA"
+    },
+    {
+      "productYear": 2025,
+      "path": "artifacts/lens-next-field-readiness-20260817/ad77d5e-run3/packages/BIMLogLensNext-Navisworks2025-readonly-loadable.zip",
+      "bytes": 33663,
+      "sha256": "E68DB4CAE85ACF18BC8B5E0AD4047C501AAB7E835993C163B0645C1828392D4A"
+    }
+  ],
+  "determinism": {
+    "secondRunRoot": "artifacts/lens-next-field-readiness-20260817/ad77d5e-run4",
+    "packagesByteIdentical": true,
+    "zipEntryTimestamp": "2000-01-01T00:00:00-05:00"
+  },
+  "checks": {
+    "phase1Source": "102/102 PASS",
+    "webBehavior": "8/8 PASS",
+    "coreIsolationAndSyntheticReopen": "20/20 PASS",
+    "native2021": "10/10 PASS",
+    "native2025": "10/10 PASS",
+    "phase2DefaultDeny": "17/17 PASS",
+    "loadablePackageSource": "21/21 PASS",
+    "adapterSource": "22/22 PASS",
+    "fOnlyInstallRollbackRehearsal": "16/16 PASS",
+    "dualReleaseBuilds": "PASS, zero warnings and zero errors",
+    "writeFeatureFlags": "8/8 false",
+    "bridge": "127.0.0.1:8766 only; Legacy 8765 and alternate endpoints refused",
+    "navigation": "exact nonzero GUID only; no enumeration or label/path fallback",
+    "legacyIo": false
+  },
+  "operatorEvidence": {
+    "englishRunbook": "evidence/lens-next/20260816/operator-installation-field-acceptance-runbook.md",
+    "spanishRunbook": "evidence/lens-next/20260817/operator-installation-field-acceptance-runbook.es.md",
+    "resultTemplate": "evidence/lens-next/20260817/field-acceptance-result-template.json"
+  },
+  "boundaries": {
+    "installed": false,
+    "navisworksLaunched": false,
+    "liveDocumentTested": false,
+    "customerDataAccessed": false,
+    "legacyAccessed": false,
+    "productionAccessed": false,
+    "pushed": false,
+    "published": false,
+    "deployed": false,
+    "phase2Enabled": false
+  }
+}
