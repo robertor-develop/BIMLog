@@ -12,6 +12,7 @@ import {
   boolean,
   uniqueIndex,
   check,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import { companiesTable, usersTable } from "./users";
 import { projectsTable } from "./projects";
@@ -221,7 +222,7 @@ export type FeedbackItem = typeof feedbackItemsTable.$inferSelect;
 export const feedbackRelayJobsTable = pgTable(
   "feedback_relay_jobs",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
     feedbackId: integer("feedback_id")
       .references(() => feedbackItemsTable.id)
       .notNull(),
@@ -234,18 +235,36 @@ export const feedbackRelayJobsTable = pgTable(
     projectId: integer("project_id").references(() => projectsTable.id),
     state: text("state").default("queued").notNull(),
     version: integer("version").default(1).notNull(),
+    relayMode: text("relay_mode").notNull(),
+    direction: text("direction").default("outbound").notNull(),
     destinationId: text("destination_id").notNull(),
     objectId: text("object_id").notNull(),
+    idempotencyKey: text("idempotency_key").notNull(),
+    requestHash: text("request_hash").notNull(),
+    sourceByteCount: bigint("source_byte_count", { mode: "bigint" }).notNull(),
+    sourceSha256: text("source_sha256").notNull(),
     policyId: text("policy_id").notNull(),
     policyVersion: text("policy_version").notNull(),
     policySha256: text("policy_sha256").notNull(),
+    lineageId: text("lineage_id").notNull(),
+    parentJobId: bigint("parent_job_id", { mode: "bigint" }).references(
+      (): AnyPgColumn => feedbackRelayJobsTable.id,
+    ),
+    receiptId: bigint("receipt_id", { mode: "bigint" }).references(
+      (): AnyPgColumn => feedbackRelayReceiptsTable.id,
+    ),
+    deletionProofId: bigint("deletion_proof_id", { mode: "bigint" }).references(
+      (): AnyPgColumn => feedbackRelayDeletionProofsTable.id,
+    ),
+    expiresAt: timestamp("expires_at"),
+    expiryOutcome: text("expiry_outcome"),
     attempts: integer("attempts").default(0).notNull(),
     nextAttemptAt: timestamp("next_attempt_at"),
     leaseOwner: text("lease_owner"),
     leaseToken: text("lease_token"),
     leaseExpiresAt: timestamp("lease_expires_at"),
-    fencingToken: bigint("fencing_token", { mode: "number" })
-      .default(0)
+    fencingToken: bigint("fencing_token", { mode: "bigint" })
+      .default(0n)
       .notNull(),
     lastErrorCode: text("last_error_code"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -258,6 +277,11 @@ export const feedbackRelayJobsTable = pgTable(
     objectDestinationIdx: uniqueIndex(
       "feedback_relay_jobs_object_destination_idx",
     ).on(table.destinationId, table.objectId),
+    idempotencyIdx: uniqueIndex("feedback_relay_jobs_idempotency_idx").on(
+      table.companyId,
+      table.destinationId,
+      table.idempotencyKey,
+    ),
     claimIdx: index("feedback_relay_jobs_claim_idx").on(
       table.state,
       table.nextAttemptAt,
@@ -271,8 +295,10 @@ export const feedbackRelayJobsTable = pgTable(
     ),
     stateCheck: check(
       "feedback_relay_jobs_state_chk",
-      sql`${table.state} IN ('queued','transferring','delivered','cleanup-pending','manual-review','held','expired')`,
+      sql`${table.state} IN ('queued','transferring','delivered','receipt-verified','cleanup-pending','manual-review','held','expired')`,
     ),
+    modeCheck: check("feedback_relay_jobs_mode_chk", sql`${table.relayMode} IN ('direct','queue')`),
+    directionCheck: check("feedback_relay_jobs_direction_chk", sql`${table.direction}='outbound'`),
     versionCheck: check(
       "feedback_relay_jobs_version_chk",
       sql`${table.version} > 0`,
@@ -285,10 +311,13 @@ export const feedbackRelayJobsTable = pgTable(
       "feedback_relay_jobs_fencing_chk",
       sql`${table.fencingToken} >= 0`,
     ),
+    sourceCheck: check("feedback_relay_jobs_source_chk", sql`${table.sourceByteCount}>=0 AND ${table.sourceSha256} ~ '^[a-f0-9]{64}$'`),
+    requestHashCheck: check("feedback_relay_jobs_request_hash_chk", sql`${table.requestHash} ~ '^[a-f0-9]{64}$'`),
     policyHashCheck: check(
       "feedback_relay_jobs_policy_hash_chk",
       sql`${table.policySha256} ~ '^[a-f0-9]{64}$'`,
     ),
+    expiryCheck: check("feedback_relay_jobs_expiry_chk", sql`(${table.state}='expired' AND ${table.expiresAt} IS NOT NULL AND ${table.expiryOutcome} IS NOT NULL) OR (${table.state}<>'expired' AND ${table.expiryOutcome} IS NULL)`),
     leaseCheck: check(
       "feedback_relay_jobs_lease_chk",
       sql`(${table.leaseOwner} IS NULL AND ${table.leaseToken} IS NULL AND ${table.leaseExpiresAt} IS NULL) OR (${table.leaseOwner} IS NOT NULL AND ${table.leaseToken} IS NOT NULL AND ${table.leaseExpiresAt} IS NOT NULL)`,
@@ -299,8 +328,8 @@ export const feedbackRelayJobsTable = pgTable(
 export const feedbackRelayCustodyEventsTable = pgTable(
   "feedback_relay_custody_events",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    jobId: bigint("job_id", { mode: "number" })
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    jobId: bigint("job_id", { mode: "bigint" })
       .references(() => feedbackRelayJobsTable.id)
       .notNull(),
     sequence: integer("sequence").notNull(),
@@ -309,7 +338,7 @@ export const feedbackRelayCustodyEventsTable = pgTable(
     fromState: text("from_state"),
     toState: text("to_state").notNull(),
     jobVersion: integer("job_version").notNull(),
-    fencingToken: bigint("fencing_token", { mode: "number" }).notNull(),
+    fencingToken: bigint("fencing_token", { mode: "bigint" }).notNull(),
     actorType: text("actor_type").notNull(),
     actorId: text("actor_id"),
     reasonCode: text("reason_code"),
@@ -343,11 +372,11 @@ export const feedbackRelayCustodyEventsTable = pgTable(
     ),
     toStateCheck: check(
       "feedback_relay_custody_to_state_chk",
-      sql`${table.toState} IN ('queued','transferring','delivered','cleanup-pending','manual-review','held','expired')`,
+      sql`${table.toState} IN ('queued','transferring','delivered','receipt-verified','cleanup-pending','manual-review','held','expired')`,
     ),
     fromStateCheck: check(
       "feedback_relay_custody_from_state_chk",
-      sql`${table.fromState} IS NULL OR ${table.fromState} IN ('queued','transferring','delivered','cleanup-pending','manual-review','held','expired')`,
+      sql`${table.fromState} IS NULL OR ${table.fromState} IN ('queued','transferring','delivered','receipt-verified','cleanup-pending','manual-review','held','expired')`,
     ),
   }),
 );
@@ -355,7 +384,17 @@ export const feedbackRelayCustodyEventsTable = pgTable(
 export const feedbackRelayNoncesTable = pgTable(
   "feedback_relay_nonces",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    jobId: bigint("job_id", { mode: "bigint" }).references(() => feedbackRelayJobsTable.id).notNull(),
+    receiverId: text("receiver_id").notNull(),
+    direction: text("direction").notNull(),
+    scopeId: text("scope_id").notNull(),
+    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
+    projectId: integer("project_id").references(() => projectsTable.id),
+    feedbackId: integer("feedback_id").references(() => feedbackItemsTable.id).notNull(),
+    assetId: integer("asset_id").references(() => feedbackAssetsTable.id).notNull(),
+    objectId: text("object_id").notNull(),
+    requestHash: text("request_hash").notNull(),
     audience: text("audience").notNull(),
     keyId: text("key_id").notNull(),
     nonce: text("nonce").notNull(),
@@ -366,11 +405,16 @@ export const feedbackRelayNoncesTable = pgTable(
   },
   (table) => ({
     authorityIdx: uniqueIndex("feedback_relay_nonces_authority_idx").on(
-      table.audience,
-      table.keyId,
+      table.receiverId,
+      table.direction,
+      table.scopeId,
+      table.objectId,
+      table.requestHash,
       table.nonce,
     ),
     requestIdx: uniqueIndex("feedback_relay_nonces_request_idx").on(
+      table.receiverId,
+      table.direction,
       table.requestId,
     ),
     expiryIdx: index("feedback_relay_nonces_expiry_idx").on(table.expiresAt),
@@ -378,35 +422,50 @@ export const feedbackRelayNoncesTable = pgTable(
       "feedback_relay_nonces_expiry_chk",
       sql`${table.expiresAt}>${table.requestTimestamp}`,
     ),
+    directionCheck: check("feedback_relay_nonces_direction_chk", sql`${table.direction} IN ('inbound','outbound')`),
+    hashCheck: check("feedback_relay_nonces_hash_chk", sql`${table.requestHash} ~ '^[a-f0-9]{64}$'`),
   }),
 );
 
 export const feedbackRelayReceiptsTable = pgTable(
   "feedback_relay_receipts",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    jobId: bigint("job_id", { mode: "number" })
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    jobId: bigint("job_id", { mode: "bigint" })
       .references(() => feedbackRelayJobsTable.id)
       .notNull(),
+    jobVersion: integer("job_version").notNull(),
+    fencingToken: bigint("fencing_token", { mode: "bigint" }).notNull(),
+    relayMode: text("relay_mode").notNull(),
+    direction: text("direction").notNull(),
+    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
+    projectId: integer("project_id").references(() => projectsTable.id),
+    feedbackId: integer("feedback_id").references(() => feedbackItemsTable.id).notNull(),
+    assetId: integer("asset_id").references(() => feedbackAssetsTable.id).notNull(),
+    policyId: text("policy_id").notNull(),
+    policyVersion: text("policy_version").notNull(),
+    policySha256: text("policy_sha256").notNull(),
+    requestHash: text("request_hash").notNull(),
     protocolVersion: text("protocol_version").notNull(),
     requestId: text("request_id").notNull(),
     requestNonce: text("request_nonce").notNull(),
     destinationId: text("destination_id").notNull(),
     objectId: text("object_id").notNull(),
-    byteCount: bigint("byte_count", { mode: "number" }).notNull(),
+    byteCount: bigint("byte_count", { mode: "bigint" }).notNull(),
     sha256: text("sha256").notNull(),
     receivedAt: timestamp("received_at").notNull(),
     receiverKeyId: text("receiver_key_id").notNull(),
     canonicalSha256: text("canonical_sha256").notNull(),
     signature: text("signature").notNull(),
     verifiedAt: timestamp("verified_at").notNull(),
-    readbackVerifiedAt: timestamp("readback_verified_at"),
-    readbackSha256: text("readback_sha256"),
+    readbackVerifiedAt: timestamp("readback_verified_at").notNull(),
+    readbackSha256: text("readback_sha256").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
   (table) => ({
     jobIdx: uniqueIndex("feedback_relay_receipts_job_idx").on(table.jobId),
     requestIdx: uniqueIndex("feedback_relay_receipts_request_idx").on(
+      table.destinationId,
       table.requestId,
     ),
     objectIdx: uniqueIndex("feedback_relay_receipts_destination_object_idx").on(
@@ -419,11 +478,11 @@ export const feedbackRelayReceiptsTable = pgTable(
     ),
     hashCheck: check(
       "feedback_relay_receipts_hash_chk",
-      sql`${table.sha256} ~ '^[a-f0-9]{64}$' AND ${table.canonicalSha256} ~ '^[a-f0-9]{64}$'`,
+      sql`${table.sha256} ~ '^[a-f0-9]{64}$' AND ${table.canonicalSha256} ~ '^[a-f0-9]{64}$' AND ${table.requestHash} ~ '^[a-f0-9]{64}$' AND ${table.policySha256} ~ '^[a-f0-9]{64}$'`,
     ),
     readbackCheck: check(
       "feedback_relay_receipts_readback_chk",
-      sql`(${table.readbackVerifiedAt} IS NULL AND ${table.readbackSha256} IS NULL) OR (${table.readbackVerifiedAt} IS NOT NULL AND ${table.readbackSha256}=${table.sha256} AND ${table.readbackVerifiedAt}>=${table.verifiedAt})`,
+      sql`${table.readbackSha256}=${table.sha256} AND ${table.verifiedAt}>=${table.receivedAt} AND ${table.readbackVerifiedAt}>=${table.verifiedAt} AND ${table.createdAt}>=${table.readbackVerifiedAt}`,
     ),
   }),
 );
@@ -431,8 +490,8 @@ export const feedbackRelayReceiptsTable = pgTable(
 export const feedbackRelayHoldsTable = pgTable(
   "feedback_relay_holds",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    jobId: bigint("job_id", { mode: "number" })
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    jobId: bigint("job_id", { mode: "bigint" })
       .references(() => feedbackRelayJobsTable.id)
       .notNull(),
     holdKey: text("hold_key").notNull(),
@@ -465,13 +524,13 @@ export const feedbackRelayHoldsTable = pgTable(
 export const feedbackRelayTemporaryObjectsTable = pgTable(
   "feedback_relay_temporary_objects",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    jobId: bigint("job_id", { mode: "number" })
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    jobId: bigint("job_id", { mode: "bigint" })
       .references(() => feedbackRelayJobsTable.id)
       .notNull(),
     storageBackend: text("storage_backend").notNull(),
     storageKey: text("storage_key").notNull(),
-    byteCount: bigint("byte_count", { mode: "number" }).notNull(),
+    byteCount: bigint("byte_count", { mode: "bigint" }).notNull(),
     sha256: text("sha256").notNull(),
     encrypted: boolean("encrypted").notNull(),
     createdAt: timestamp("created_at").defaultNow().notNull(),
@@ -479,7 +538,7 @@ export const feedbackRelayTemporaryObjectsTable = pgTable(
     deleteStartedAt: timestamp("delete_started_at"),
     deletedAt: timestamp("deleted_at"),
     absenceVerifiedAt: timestamp("absence_verified_at"),
-    deleteFencingToken: bigint("delete_fencing_token", { mode: "number" }),
+    deleteFencingToken: bigint("delete_fencing_token", { mode: "bigint" }),
   },
   (table) => ({
     jobIdx: uniqueIndex("feedback_relay_temp_job_idx").on(table.jobId),
@@ -512,14 +571,14 @@ export const feedbackRelayTemporaryObjectsTable = pgTable(
 export const feedbackRelayDeletionProofsTable = pgTable(
   "feedback_relay_deletion_proofs",
   {
-    id: bigserial("id", { mode: "number" }).primaryKey(),
-    jobId: bigint("job_id", { mode: "number" })
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    jobId: bigint("job_id", { mode: "bigint" })
       .references(() => feedbackRelayJobsTable.id)
       .notNull(),
-    temporaryObjectId: bigint("temporary_object_id", { mode: "number" })
+    temporaryObjectId: bigint("temporary_object_id", { mode: "bigint" })
       .references(() => feedbackRelayTemporaryObjectsTable.id)
       .notNull(),
-    receiptId: bigint("receipt_id", { mode: "number" })
+    receiptId: bigint("receipt_id", { mode: "bigint" })
       .references(() => feedbackRelayReceiptsTable.id)
       .notNull(),
     approvalId: text("approval_id").notNull(),
