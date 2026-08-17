@@ -1,7 +1,7 @@
 {
   "label": "BIMLog — Feedback Addendum Remediation Writer",
   "release": "v F-1.60.35.8",
-  "sourceCommit": "999e0772f68e0cc5837443a1ea8c239c40a5baaa",
+  "sourceCommit": "f3cc2479d802777347bdc4840f6c3933f0450fdc",
   "runtime": {
     "playwrightCore": "1.55.0",
     "chromium": "151.0.7922.34"
@@ -12,13 +12,13 @@
     "en-1440: supported file visible",
     "en-1440: dialog contained",
     "en-1440: successful governed submission visible",
-    "en-1440: customer backlog and history visible",
+    "en-1440: customer backlog, history, decision, and quarantined attachment visible",
     "es-390: microphone denial visible",
     "es-390: capture denial visible",
     "es-390: supported file visible",
     "es-390: dialog contained",
     "es-390: successful governed submission visible",
-    "es-390: customer backlog and history visible"
+    "es-390: customer backlog, history, decision, and quarantined attachment visible"
   ],
   "files": [
     {
@@ -27,7 +27,7 @@
     },
     {
       "name": "feedback-en-desktop-backlog.png",
-      "sha256": "ddc58a15fdee40e2c18689a01932ea7b988bf39a6e44c6c0b9edd3059098070f"
+      "sha256": "a14510c38e33b0390516981cc8cf04321a83525a1ff2642cbcc2731e87033d72"
     },
     {
       "name": "feedback-es-390.png",
@@ -35,7 +35,7 @@
     },
     {
       "name": "feedback-es-390-backlog.png",
-      "sha256": "73b1bf1f75df548b405dbfee6cba96a6a52a72c11ef48e8d3b07174ae0c7dda4"
+      "sha256": "a06bab7f6e9b1e20f13de56db2ce49bfaff31964242ddf1d6bcd4eb6e657a048"
     }
   ],
   "limits": "Actual production App and FeedbackWidget on an intentionally nonexistent isolated route, with local browser permission-denial and file fixtures; no API, DB, scanner, transcription provider, or customer integration claim."
