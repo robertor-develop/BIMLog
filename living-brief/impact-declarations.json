@@ -10021,8 +10021,8 @@
     },
     {
       "taskId": "bimlog-feedback-addendum-20260817",
-      "reviewedThroughCommit": "3b442c421ee1d97d90a7cec214da6bbc73494458",
-      "reviewedAt": "2026-08-17T18:32:00Z",
+      "reviewedThroughCommit": "4a232e10ee52386dfb719f98601ea2872861b990",
+      "reviewedAt": "2026-08-17T18:39:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task",
       "summary": "Reconciles Feedback addendum v F-1.60.35.8 with governed evidence quarantine, default-deny transcription, accountable triage, and explicit external gates.",
@@ -10075,8 +10075,8 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "Records the local Feedback candidate, security boundaries, and exact release identity."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The two count-only acceptance corrections affect OPEN_LOOP.md; STATUS.md remains semantically current."
         },
         {
           "key": "open_loop",
@@ -10091,10 +10091,9 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "495ea9e15fc76f4b881e340d5c6ad1b23b9588b0a7f5138e63ac06ebac7b6f4c"
+      "reviewedChangeSha256": "c1a795bf5b916b9408e3c863ea108d48ba8585873d22a1b6e24f52815363616a"
     }
   ]
 }
