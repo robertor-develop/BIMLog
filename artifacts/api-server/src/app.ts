@@ -1066,6 +1066,7 @@ void rfiMigrationReady.then((ready) => {
     await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS customer_visible boolean NOT NULL DEFAULT true`);
     await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1`);
     await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS idempotency_key text`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS request_hash text`);
     await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS transcript text`);
     await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS transcript_provenance text`);
     await pool.query(`UPDATE feedback_items SET status = CASE status WHEN 'open' THEN 'new' WHEN 'in_review' THEN 'triaged' WHEN 'planned' THEN 'accepted' WHEN 'done' THEN 'verified' ELSE status END WHERE status IN ('open','in_review','planned','done')`);
@@ -1078,8 +1079,14 @@ void rfiMigrationReady.then((ready) => {
       project_id integer REFERENCES projects(id), uploaded_by_id integer NOT NULL REFERENCES users(id),
       kind text NOT NULL, original_name text NOT NULL, safe_name text NOT NULL, media_type text NOT NULL,
       byte_size bigint NOT NULL, sha256 text NOT NULL, storage_path text NOT NULL,
-      scan_state text NOT NULL DEFAULT 'quarantined', created_at timestamp NOT NULL DEFAULT now()
+      scan_state text NOT NULL DEFAULT 'quarantined', scanner_adapter text NOT NULL DEFAULT 'default-deny',
+      scanned_at timestamp, retention_hold boolean NOT NULL DEFAULT true, expires_at timestamp,
+      created_at timestamp NOT NULL DEFAULT now()
     )`);
+    await pool.query(`ALTER TABLE feedback_assets ADD COLUMN IF NOT EXISTS scanner_adapter text NOT NULL DEFAULT 'default-deny'`);
+    await pool.query(`ALTER TABLE feedback_assets ADD COLUMN IF NOT EXISTS scanned_at timestamp`);
+    await pool.query(`ALTER TABLE feedback_assets ADD COLUMN IF NOT EXISTS retention_hold boolean NOT NULL DEFAULT true`);
+    await pool.query(`ALTER TABLE feedback_assets ADD COLUMN IF NOT EXISTS expires_at timestamp`);
     await pool.query(`CREATE INDEX IF NOT EXISTS feedback_assets_feedback_idx ON feedback_assets(feedback_id, created_at)`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS feedback_assets_feedback_hash_idx ON feedback_assets(feedback_id, sha256)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS feedback_audit_events (

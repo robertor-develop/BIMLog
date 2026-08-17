@@ -73,6 +73,9 @@ export function FeedbackWidget() {
   const [duration, setDuration] = useState(0);
   const [uploadState, setUploadState] = useState("");
   const [crop, setCrop] = useState({ x: 10, y: 10, width: 80, height: 80 });
+  const [reviewing, setReviewing] = useState(false);
+  const [mine, setMine] = useState<Array<{ id: number; stableId: string; message: string; status: string; version: number; dispositionReason?: string; targetRelease?: string; transcript?: string }>>([]);
+  const [history, setHistory] = useState<Array<{ id: number; eventType: string; reason?: string; createdAt: string }>>([]);
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -87,10 +90,12 @@ export function FeedbackWidget() {
     streamRef.current?.getTracks().forEach(track => track.stop());
     if (audioUrl) URL.revokeObjectURL(audioUrl);
   }, [audioUrl]);
+  useEffect(() => { if (!token) terminateMedia(); }, [token]);
+  useEffect(() => () => terminateMedia(), [location]);
   useEffect(() => {
     if (!open) return;
     dialogRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") closeFeedback(); };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [open]);
@@ -101,6 +106,11 @@ export function FeedbackWidget() {
   if (!token || PUBLIC_PATHS.has(location)) return null;
 
   function randomKey() { return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`; }
+  function terminateMedia() { if (timerRef.current) window.clearInterval(timerRef.current); timerRef.current = null; const recorder = recorderRef.current; if (recorder && recorder.state !== "inactive") { recorder.onstop = null; try { recorder.stop(); } catch { /* already stopping */ } } recorderRef.current = null; streamRef.current?.getTracks().forEach(track => track.stop()); streamRef.current = null; }
+  function closeFeedback() { terminateMedia(); setRecordingState(audioUrl ? "ready" : "idle"); setOpen(false); }
+  async function loadMine() { setError(""); const response = await fetch(`${API_BASE}/api/v1/feedback/mine`, { headers: { Authorization: `Bearer ${token}` } }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Your feedback could not be loaded.", "No se pudieron cargar sus comentarios.")); return; } setMine(data.feedback || []); setReviewing(true); }
+  async function loadHistory(id: number) { const response = await fetch(`${API_BASE}/api/v1/feedback/${id}/history`, { headers: { Authorization: `Bearer ${token}` } }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("History is unavailable.", "El historial no está disponible.")); return; } setHistory(data.history || []); }
+  async function reopen(item: { id: number; version: number }) { const reason = window.prompt(tt("Why should this feedback be reopened?", "¿Por qué se debe reabrir este comentario?")); if (!reason?.trim()) return; const response = await fetch(`${API_BASE}/api/v1/feedback/${item.id}/reopen`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ observedVersion: item.version, reason }) }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Feedback was not reopened.", "No se reabrió el comentario.")); return; } await loadMine(); }
   function addFiles(incoming: File[]) {
     const supported = /\.(pdf|docx?|xlsx?|csv|pptx?|png|jpe?g|txt|log|json|webm|ogg|wav|m4a)$/i;
     const accepted = incoming.filter(file => file.size > 0 && file.size <= 20 * 1024 * 1024 && supported.test(file.name));
@@ -118,10 +128,11 @@ export function FeedbackWidget() {
       recorder.onstop = () => {
         const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
         if (blob.size > 20 * 1024 * 1024 || durationRef.current > 300) { setError(tt("Recording exceeds the 5 minute or 20 MB limit.", "La grabación supera el límite de 5 minutos o 20 MB.")); discardRecording(); return; }
-        const file = new File([blob], `feedback-audio-${Date.now()}.webm`, { type: blob.type }); addFiles([file]); setAudioUrl(URL.createObjectURL(blob)); setRecordingState("ready");
+        const extension = blob.type.includes("ogg") ? "ogg" : blob.type.includes("mp4") ? "m4a" : blob.type.includes("wav") ? "wav" : "webm";
+        const file = new File([blob], `feedback-audio-${Date.now()}.${extension}`, { type: blob.type }); addFiles([file]); setAudioUrl(URL.createObjectURL(blob)); setRecordingState("ready");
       };
       recorder.start(500); setRecordingState("recording"); timerRef.current = window.setInterval(() => setDuration(value => { durationRef.current = value + 1; if (durationRef.current >= 300) stopRecording(); return durationRef.current; }), 1000);
-    } catch (cause) { setError(cause instanceof DOMException && cause.name === "NotAllowedError" ? tt("Microphone permission was denied.", "Se denegó el permiso del micrófono.") : tt("No microphone is available. Check the device and retry.", "No hay micrófono disponible. Revise el dispositivo e intente de nuevo.")); }
+    } catch (cause) { terminateMedia(); setRecordingState("idle"); setError(cause instanceof DOMException && cause.name === "NotAllowedError" ? tt("Microphone permission was denied.", "Se denegó el permiso del micrófono.") : tt("No microphone is available. Check the device and retry.", "No hay micrófono disponible. Revise el dispositivo e intente de nuevo.")); }
   }
   function pauseRecording() { const recorder = recorderRef.current; if (!recorder) return; if (recorder.state === "recording") { recorder.pause(); setRecordingState("paused"); } else if (recorder.state === "paused") { recorder.resume(); setRecordingState("recording"); } }
   function stopRecording() { if (timerRef.current) window.clearInterval(timerRef.current); timerRef.current = null; recorderRef.current?.stop(); streamRef.current?.getTracks().forEach(track => track.stop()); }
@@ -203,7 +214,7 @@ export function FeedbackWidget() {
       setMessage("");
       setFiles([]); discardRecording(); idempotencyRef.current = randomKey(); setUploadState("");
       setSuccess(tt(`Sent as ${data.feedback?.stableId || "feedback"}.`, `Enviado como ${data.feedback?.stableId || "comentario"}.`));
-      setTimeout(() => setOpen(false), 900);
+      setTimeout(closeFeedback, 900);
     } catch (err) {
       setError(err instanceof Error ? err.message : tt("Feedback was not submitted.", "No se envió el comentario."));
     } finally {
@@ -279,11 +290,11 @@ export function FeedbackWidget() {
             <div style={{ background: "#1e3a5f", color: "white", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
                 <div style={{ fontWeight: 800, fontSize: 15 }}>{tt("BIMLog Feedback", "Comentarios de BIMLog")}</div>
-                <div style={{ fontSize: 11, opacity: 0.82 }}>{moduleName} - {location}</div>
+              <div style={{ fontSize: 11, opacity: 0.82 }}>{moduleName} - {location}</div>
               </div>
               <button
                 type="button"
-                onClick={() => setOpen(false)}
+                onClick={closeFeedback}
                 aria-label={tt("Close feedback", "Cerrar comentarios")}
                 style={{ background: "transparent", border: "none", color: "white", cursor: "pointer", padding: 4 }}
               >
@@ -292,6 +303,11 @@ export function FeedbackWidget() {
             </div>
 
             <div style={{ padding: 16 }}>
+              <div style={{ display: "flex", gap: 8, marginBottom: 12 }}><button type="button" onClick={() => setReviewing(false)} aria-pressed={!reviewing}>{tt("New feedback", "Nuevo comentario")}</button><button type="button" onClick={loadMine} aria-pressed={reviewing}>{tt("My feedback", "Mis comentarios")}</button></div>
+              {reviewing ? <section aria-label={tt("My feedback backlog", "Mi lista de comentarios")}>
+                {!mine.length ? <p>{tt("No feedback has been reported.", "No se han reportado comentarios.")}</p> : mine.map(item => <article key={item.id} style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: 10, marginBottom: 8 }}><strong>{item.stableId}</strong> · {item.status}<p style={{ margin: "5px 0" }}>{item.message}</p>{item.dispositionReason && <p>{tt("Decision", "Decisión")}: {item.dispositionReason}</p>}{item.targetRelease && <p>{tt("Target", "Objetivo")}: {item.targetRelease}</p>}{item.transcript && <details><summary>{tt("Transcript", "Transcripción")}</summary><p>{item.transcript}</p></details>}<button type="button" onClick={() => loadHistory(item.id)}>{tt("History", "Historial")}</button>{["verified", "rejected", "deferred"].includes(item.status) && <button type="button" onClick={() => reopen(item)}>{tt("Reopen", "Reabrir")}</button>}</article>)}
+                {!!history.length && <ol aria-label={tt("Feedback history", "Historial del comentario")}>{history.map(event => <li key={event.id}>{event.eventType} · {new Date(event.createdAt).toLocaleString(language)}{event.reason ? ` — ${event.reason}` : ""}</li>)}</ol>}
+              </section> : <>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
                 <label style={{ fontSize: 12, fontWeight: 700 }}>
                   {tt("Type", "Tipo")}
@@ -361,7 +377,7 @@ export function FeedbackWidget() {
               {uploadState && <div role="status" style={{ fontSize: 12, marginTop: 10 }}>{uploadState}</div>}
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
-                <button type="button" onClick={() => setOpen(false)} style={{ border: "1px solid hsl(var(--border))", background: "white", borderRadius: 6, padding: "8px 12px", cursor: "pointer" }}>
+                <button type="button" onClick={closeFeedback} style={{ border: "1px solid hsl(var(--border))", background: "white", borderRadius: 6, padding: "8px 12px", cursor: "pointer" }}>
                   {tt("Cancel", "Cancelar")}
                 </button>
                 <button
@@ -374,6 +390,7 @@ export function FeedbackWidget() {
                   {submitting ? tt("Sending…", "Enviando…") : tt("Send", "Enviar")}
                 </button>
               </div>
+              </>}
             </div>
           </div>
         </div>

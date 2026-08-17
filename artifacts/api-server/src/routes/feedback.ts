@@ -15,12 +15,25 @@ const TYPES = new Set(["bug", "workflow", "idea", "question", "other"]);
 const PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
 const STATUSES = new Set(["new", "triaged", "accepted", "in_progress", "blocked", "fixed", "verified", "rejected", "deferred"]);
 const TERMINAL = new Set(["verified", "rejected", "deferred"]);
+const TRANSITIONS: Record<string, Set<string>> = {
+  new: new Set(["triaged", "rejected"]), triaged: new Set(["accepted", "deferred", "rejected"]),
+  accepted: new Set(["in_progress", "blocked", "deferred"]), in_progress: new Set(["blocked", "fixed"]),
+  blocked: new Set(["in_progress", "deferred"]), fixed: new Set(["verified", "in_progress"]),
+  verified: new Set(["triaged"]), rejected: new Set(["triaged"]), deferred: new Set(["triaged"]),
+};
 
 const asId = (value: unknown) => { const n = Number(value); return Number.isInteger(n) && n > 0 ? n : null; };
 const bounded = (value: unknown, max: number) => String(value ?? "").trim().slice(0, max);
 async function accessible(id: number, user: NonNullable<Express.Request["user"]>) {
   const [row] = await db.select().from(feedbackItemsTable).where(eq(feedbackItemsTable.id, id)).limit(1);
-  if (!row || (!user.isSuperAdmin && row.userId !== user.userId)) return null;
+  if (!row) return null;
+  if (user.isSuperAdmin) return row;
+  const [actor] = await db.select({ companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, user.userId)).limit(1);
+  if (!actor || !row.companyId || actor.companyId !== row.companyId || row.userId !== user.userId || !row.customerVisible) return null;
+  if (row.projectId) {
+    const [member] = await db.select({ id: projectMembersTable.id }).from(projectMembersTable).where(and(eq(projectMembersTable.projectId, row.projectId), eq(projectMembersTable.userId, user.userId), eq(projectMembersTable.status, "active"))).limit(1);
+    if (!member) return null;
+  }
   return row;
 }
 
@@ -32,19 +45,33 @@ router.post("/feedback", authMiddleware, async (req, res) => {
     const projectId = asId(req.body.projectId), idempotencyKey = bounded(req.get("Idempotency-Key"), 120) || null;
     if (!TYPES.has(feedbackType) || !PRIORITIES.has(priority)) return res.status(400).json({ code: "FEEDBACK_CLASSIFICATION_INVALID", error: "Invalid feedback classification" });
     if (!message || !pageUrl) return res.status(400).json({ code: "FEEDBACK_REQUIRED_FIELDS", error: "Description and page are required" });
+    const [actor] = await db.select({ companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, user.userId)).limit(1);
+    if (!actor?.companyId) return res.status(403).json({ code: "COMPANY_ACCESS_DENIED", error: "Current company authority is required" });
     if (projectId && !user.isSuperAdmin) {
-      const member = await db.select({ id: projectMembersTable.id }).from(projectMembersTable).where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, user.userId))).limit(1);
+      const member = await db.select({ id: projectMembersTable.id }).from(projectMembersTable).where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, user.userId), eq(projectMembersTable.status, "active"))).limit(1);
       if (!member.length) return res.status(403).json({ code: "PROJECT_ACCESS_DENIED", error: "You do not have access to this project" });
     }
+    const requestHash = createHash("sha256").update(JSON.stringify({ feedbackType, priority, message, moduleName, pageUrl, projectId, companyId: actor.companyId })).digest("hex");
     if (idempotencyKey) {
       const [prior] = await db.select().from(feedbackItemsTable).where(and(eq(feedbackItemsTable.userId, user.userId), eq(feedbackItemsTable.idempotencyKey, idempotencyKey))).limit(1);
-      if (prior) return res.json({ success: true, replayed: true, feedback: prior });
+      if (prior) return prior.requestHash === requestHash ? res.json({ success: true, replayed: true, feedback: prior }) : res.status(409).json({ code: "FEEDBACK_IDEMPOTENCY_CONFLICT", error: "This idempotency key belongs to different feedback" });
     }
-    const metadata = req.body.metadata && typeof req.body.metadata === "object" && !Array.isArray(req.body.metadata) ? req.body.metadata : {};
-    const [created] = await db.insert(feedbackItemsTable).values({ userId: user.userId, projectId, feedbackType, priority, module: moduleName || null, pageUrl, message,
-      status: "new", stableId: `FB-${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`, idempotencyKey,
-      metadata: { ...metadata, build: "v F-1.60.35.8", userAgent: req.get("user-agent") || null } }).returning();
-    await db.insert(feedbackAuditEventsTable).values({ feedbackId: created.id, actorUserId: user.userId, eventType: "created", afterState: { status: "new", version: 1 } });
+    let created;
+    try {
+      created = await db.transaction(async tx => {
+        const [row] = await tx.insert(feedbackItemsTable).values({ userId: user.userId, companyId: actor.companyId, projectId, feedbackType, priority, module: moduleName || null, pageUrl, message,
+          status: "new", stableId: `FB-${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`, idempotencyKey, requestHash,
+          metadata: { build: "v F-1.60.35.8", userAgent: bounded(req.get("user-agent"), 512), viewport: bounded(req.body.metadata?.viewport, 32), language: bounded(req.body.metadata?.language, 24) } }).returning();
+        await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "created", afterState: { status: "new", version: 1 } });
+        return row;
+      });
+    } catch (cause) {
+      if (idempotencyKey) {
+        const [winner] = await db.select().from(feedbackItemsTable).where(and(eq(feedbackItemsTable.userId, user.userId), eq(feedbackItemsTable.idempotencyKey, idempotencyKey))).limit(1);
+        if (winner) return winner.requestHash === requestHash ? res.json({ success: true, replayed: true, feedback: winner }) : res.status(409).json({ code: "FEEDBACK_IDEMPOTENCY_CONFLICT", error: "This idempotency key belongs to different feedback" });
+      }
+      throw cause;
+    }
     return res.status(201).json({ success: true, replayed: false, feedback: created });
   } catch (error) { console.error("[feedback] create failed", error instanceof Error ? error.name : "unknown"); return res.status(500).json({ code: "FEEDBACK_CREATE_FAILED", error: "Failed to submit feedback" }); }
 });
@@ -57,20 +84,29 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
     const feedback = await accessible(id, user); if (!feedback) return res.status(403).json({ code: "FEEDBACK_WRITE_DENIED", error: "You cannot add files to this feedback" });
     const files = Array.isArray(req.files) ? req.files : [], kind = bounded(req.body.kind || "attachment", 20);
     if (!files.length || !["attachment", "screenshot", "audio"].includes(kind)) return res.status(400).json({ code: "FEEDBACK_ASSET_INVALID", error: "Supported files and a valid asset kind are required" });
-    const results = [];
+    const pending: Array<{ storagePath: string; checked: ReturnType<typeof inspectFeedbackEvidence>; file: Express.Multer.File }> = [];
     for (const file of files) {
-      const checked = inspectFeedbackEvidence(file), storagePath = await storage.upload(file.buffer, feedback.projectId ?? `feedback-${id}`, checked.name); stored.push(storagePath);
-      const scanState = process.env.BIMLOG_FEEDBACK_SCANNER === "fixture-clean" ? "clean" : "quarantined";
-      const [asset] = await db.insert(feedbackAssetsTable).values({ feedbackId: id, projectId: feedback.projectId, uploadedById: user.userId, kind,
-        originalName: bounded(file.originalname, 255), safeName: checked.name, mediaType: bounded(file.mimetype || "application/octet-stream", 120), byteSize: file.size,
-        sha256: checked.sha256, storagePath, scanState }).returning();
-      results.push({ id: asset.id, kind, name: asset.safeName, mediaType: asset.mediaType, byteSize: asset.byteSize, sha256: asset.sha256, scanState });
+      const checked = inspectFeedbackEvidence(file), storagePath = await storage.upload(file.buffer, feedback.projectId ?? `feedback-${id}`, checked.name); stored.push(storagePath); pending.push({ storagePath, checked, file });
     }
-    await db.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "assets_added", afterState: { count: results.length } });
+    const scannerAdapter = process.env.BIMLOG_FEEDBACK_SCANNER === "fixture-clean" ? "local-fixture" : "default-deny";
+    const scanState = scannerAdapter === "local-fixture" ? "clean" : "quarantined";
+    const results = await db.transaction(async tx => {
+      const rows = [];
+      for (const item of pending) {
+        const [asset] = await tx.insert(feedbackAssetsTable).values({ feedbackId: id, projectId: feedback.projectId, uploadedById: user.userId, kind,
+          originalName: bounded(item.file.originalname, 255), safeName: item.checked.name, mediaType: item.checked.mediaType, byteSize: item.file.size,
+          sha256: item.checked.sha256, storagePath: item.storagePath, scanState, scannerAdapter, scannedAt: scanState === "clean" ? new Date() : null }).returning();
+        rows.push({ id: asset.id, kind, name: asset.safeName, mediaType: asset.mediaType, byteSize: asset.byteSize, sha256: asset.sha256, scanState });
+      }
+      await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "assets_added", afterState: { count: rows.length, scannerAdapter, scanState } });
+      return rows;
+    });
     return res.status(201).json({ assets: results, scanner: process.env.BIMLOG_FEEDBACK_SCANNER === "fixture-clean" ? "local-fixture" : "activation-required" });
   } catch (error) {
-    for (const item of stored) await storage.delete(item).catch(() => undefined);
+    const cleanupFailures = [];
+    for (const item of stored) { try { await storage.delete(item); } catch { cleanupFailures.push(item); } }
     const known = error as Error & { status?: number; code?: string };
+    if (cleanupFailures.length) return res.status(500).json({ code: "FEEDBACK_STORAGE_COMPENSATION_FAILED", error: "Upload failed and quarantined storage cleanup requires operator review" });
     return res.status(known.status || 500).json({ code: known.code || "FEEDBACK_UPLOAD_FAILED", error: known.status ? known.message : "Upload failed safely" });
   }
 });
@@ -81,6 +117,8 @@ router.post("/feedback/:id/transcription", authMiddleware, async (req, res) => {
   const feedback = await accessible(id, user); if (!feedback) return res.status(403).json({ code: "TRANSCRIPTION_DENIED", error: "Transcription is not authorized" });
   const [asset] = await db.select().from(feedbackAssetsTable).where(and(eq(feedbackAssetsTable.id, assetId), eq(feedbackAssetsTable.feedbackId, id))).limit(1);
   if (!asset || asset.kind !== "audio") return res.status(404).json({ code: "AUDIO_ASSET_NOT_FOUND", error: "Audio asset not found" });
+  if (asset.scanState !== "clean") return res.status(423).json({ code: "AUDIO_ASSET_QUARANTINED", error: "Audio must pass governed scanning before transcription" });
+  if (req.body.consent !== true) return res.status(400).json({ code: "TRANSCRIPTION_CONSENT_REQUIRED", error: "Explicit transcription consent is required" });
   const fixture = process.env.BIMLOG_FEEDBACK_TRANSCRIPTION_ADAPTER === "local-fixture";
   const [job] = await db.insert(feedbackTranscriptionJobsTable).values({ feedbackId: id, assetId, requestedById: user.userId, adapter: fixture ? "local-fixture" : "default-deny",
     state: fixture ? "completed" : "blocked", result: fixture ? bounded(req.body.fixtureTranscript || "Local transcription fixture result.", 12000) : null,
@@ -90,8 +128,25 @@ router.post("/feedback/:id/transcription", authMiddleware, async (req, res) => {
 
 router.get("/feedback/mine", authMiddleware, async (req, res) => {
   const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
-  const rows = await db.select().from(feedbackItemsTable).where(eq(feedbackItemsTable.userId, user.userId)).orderBy(desc(feedbackItemsTable.createdAt)).limit(200);
+  const rows = await db.select().from(feedbackItemsTable).where(and(eq(feedbackItemsTable.userId, user.userId), eq(feedbackItemsTable.customerVisible, true))).orderBy(desc(feedbackItemsTable.createdAt)).limit(200);
   return res.json({ feedback: rows });
+});
+
+router.post("/feedback/:id/reopen", authMiddleware, async (req, res) => {
+  const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
+  const id = asId(req.params.id), observedVersion = asId(req.body.observedVersion), reason = bounded(req.body.reason, 2000);
+  if (!id || !observedVersion || !reason) return res.status(400).json({ code: "FEEDBACK_REOPEN_INVALID", error: "Current version and a reopen reason are required" });
+  const before = await accessible(id, user); if (!before) return res.status(403).json({ code: "FEEDBACK_REOPEN_DENIED", error: "Reopen access is denied" });
+  if (!TERMINAL.has(before.status)) return res.status(409).json({ code: "FEEDBACK_REOPEN_STATE_INVALID", error: "Only closed feedback can be reopened" });
+  const updated = await db.transaction(async tx => {
+    const [row] = await tx.update(feedbackItemsTable).set({ status: "triaged", dispositionReason: reason, version: before.version + 1, updatedAt: new Date(), resolvedAt: null })
+      .where(and(eq(feedbackItemsTable.id, id), eq(feedbackItemsTable.version, observedVersion))).returning();
+    if (!row) return null;
+    await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "reopened", beforeState: { status: before.status, version: before.version }, afterState: { status: row.status, version: row.version }, reason });
+    return row;
+  });
+  if (!updated) return res.status(409).json({ code: "FEEDBACK_STALE", error: "Feedback changed; reload before reopening" });
+  return res.json({ success: true, feedback: updated });
 });
 
 router.get("/feedback/:id/history", authMiddleware, async (req, res) => {
@@ -154,13 +209,18 @@ router.patch("/feedback/admin/:id", authMiddleware, isSuperAdminMiddleware, asyn
   if (observedVersion !== before.version) return res.status(409).json({ code: "FEEDBACK_STALE", error: "Feedback changed; reload before updating", currentVersion: before.version });
   const status = bounded(req.body.status || before.status, 32), reason = bounded(req.body.reason, 2000);
   if (!STATUSES.has(status)) return res.status(400).json({ code: "FEEDBACK_STATUS_INVALID", error: "Invalid feedback status" });
+  if (status !== before.status && !TRANSITIONS[before.status]?.has(status)) return res.status(409).json({ code: "FEEDBACK_TRANSITION_INVALID", error: "This state transition is not allowed" });
   if ((TERMINAL.has(status) || status === "blocked") && !reason) return res.status(400).json({ code: "FEEDBACK_REASON_REQUIRED", error: "A reason is required for this state" });
-  const [updated] = await db.update(feedbackItemsTable).set({ status, dispositionReason: reason || before.dispositionReason,
-    targetRelease: bounded(req.body.targetRelease, 80) || before.targetRelease, customerVisible: req.body.customerVisible === undefined ? before.customerVisible : req.body.customerVisible === true,
-    version: before.version + 1, updatedAt: new Date(), resolvedAt: TERMINAL.has(status) ? new Date() : null })
-    .where(and(eq(feedbackItemsTable.id, id), eq(feedbackItemsTable.version, observedVersion))).returning();
+  const updated = await db.transaction(async tx => {
+    const [row] = await tx.update(feedbackItemsTable).set({ status, dispositionReason: reason || before.dispositionReason,
+      targetRelease: bounded(req.body.targetRelease, 80) || before.targetRelease, customerVisible: req.body.customerVisible === undefined ? before.customerVisible : req.body.customerVisible === true,
+      version: before.version + 1, updatedAt: new Date(), resolvedAt: TERMINAL.has(status) ? new Date() : null })
+      .where(and(eq(feedbackItemsTable.id, id), eq(feedbackItemsTable.version, observedVersion))).returning();
+    if (!row) return null;
+    await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: TERMINAL.has(before.status) && status === "triaged" ? "reopened" : "triage_updated", beforeState: { status: before.status, version: before.version }, afterState: { status: row.status, version: row.version }, reason: reason || null });
+    return row;
+  });
   if (!updated) return res.status(409).json({ code: "FEEDBACK_STALE", error: "Feedback changed; reload before updating" });
-  await db.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "triage_updated", beforeState: { status: before.status, version: before.version }, afterState: { status: updated.status, version: updated.version }, reason: reason || null });
   return res.json({ success: true, feedback: updated });
 });
 

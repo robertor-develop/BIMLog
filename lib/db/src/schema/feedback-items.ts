@@ -1,4 +1,5 @@
-import { pgTable, serial, text, timestamp, integer, jsonb, index, bigint, boolean, uniqueIndex } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import { pgTable, serial, text, timestamp, integer, jsonb, index, bigint, boolean, uniqueIndex, check } from "drizzle-orm/pg-core";
 import { usersTable } from "./users";
 import { projectsTable } from "./projects";
 
@@ -20,6 +21,7 @@ export const feedbackItemsTable = pgTable("feedback_items", {
   customerVisible: boolean("customer_visible").default(true).notNull(),
   version: integer("version").default(1).notNull(),
   idempotencyKey: text("idempotency_key"),
+  requestHash: text("request_hash"),
   transcript: text("transcript"),
   transcriptProvenance: text("transcript_provenance"),
   metadata: jsonb("metadata").$type<Record<string, unknown>>(),
@@ -32,6 +34,8 @@ export const feedbackItemsTable = pgTable("feedback_items", {
   projectCreatedIdx: index("feedback_items_project_created_idx").on(table.projectId, table.createdAt.desc()),
   stableIdIdx: uniqueIndex("feedback_items_stable_id_idx").on(table.stableId),
   idempotencyIdx: uniqueIndex("feedback_items_user_idempotency_idx").on(table.userId, table.idempotencyKey),
+  statusCheck: check("feedback_items_status_chk", sql`${table.status} IN ('new','triaged','accepted','in_progress','blocked','fixed','verified','rejected','deferred')`),
+  versionCheck: check("feedback_items_version_chk", sql`${table.version} > 0`),
 }));
 
 export const feedbackAssetsTable = pgTable("feedback_assets", {
@@ -47,10 +51,15 @@ export const feedbackAssetsTable = pgTable("feedback_assets", {
   sha256: text("sha256").notNull(),
   storagePath: text("storage_path").notNull(),
   scanState: text("scan_state").default("quarantined").notNull(),
+  scannerAdapter: text("scanner_adapter").default("default-deny").notNull(),
+  scannedAt: timestamp("scanned_at"),
+  retentionHold: boolean("retention_hold").default(true).notNull(),
+  expiresAt: timestamp("expires_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   feedbackIdx: index("feedback_assets_feedback_idx").on(table.feedbackId, table.createdAt),
   dedupIdx: uniqueIndex("feedback_assets_feedback_hash_idx").on(table.feedbackId, table.sha256),
+  scanStateCheck: check("feedback_assets_scan_state_chk", sql`${table.scanState} IN ('quarantined','clean','rejected')`),
 }));
 
 export const feedbackAuditEventsTable = pgTable("feedback_audit_events", {
