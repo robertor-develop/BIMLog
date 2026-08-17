@@ -1809,6 +1809,9 @@ Future behavior:
 - Authenticated negative coverage now explicitly proves cross-tenant record hiding and cross-project
   `FIN_SCOPE_MEMBERSHIP_DENIED`, with zero payment/history disclosure and zero mutation. This closes the
   remaining local history-access evidence gap; external source/release gates remain unchanged.
+- Pre-push rehearsal found a local runtime-closure evidence-directory race after successful assembly.
+  The bounded build correction recreates the directory before writing the terminal receipt; the exact
+  authoritative pre-push command must pass at the final clean HEAD before operator handoff.
 
 ### RFI List and Log Governed PDFs
 

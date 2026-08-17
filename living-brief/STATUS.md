@@ -662,6 +662,9 @@ is reserved for genuine completion.
   The final authenticated history-read proof also covers a different-company project member and a
   same-company viewer assigned only to another project. Both receive fail-closed record isolation,
   disclose no payment/history identity, and leave contract, payment-version, line, and history counts unchanged.
+  The exact repository pre-push rehearsal also exposed a runtime-closure receipt-directory race after
+  successful assembly. The build now recreates that evidence directory immediately before its terminal
+  receipt write, preserving the same runtime contents and fail-closed validation contract.
 
 - Replit publication-preview alignment: local source commit
   `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b` preserves the accepted constraint-collision correction and aligns all
