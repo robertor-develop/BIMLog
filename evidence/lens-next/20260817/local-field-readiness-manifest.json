@@ -2,6 +2,7 @@
   "schemaVersion": "bimlog-lens-next-local-field-readiness-v1",
   "status": "LOCAL_CANDIDATE_READY_EXTERNAL_RUNTIME_AND_INSTALL_AUTHORITY_PENDING",
   "sourceCommit": "ad77d5e221b6e94a7575dda37ffd900c662fa518",
+  "verificationCommit": "7d31c07c73ebc444390dc2a10e507dceb6f60c88",
   "build6Ancestor": "601bf94aa5505d0137f8ae1858b40356d9f3aaf6",
   "excludedLineages": ["Build 7", "Legacy Lens v1.60.35", "Lens correlation/API"],
   "packages": [
@@ -30,6 +31,7 @@
     "native2021": "10/10 PASS",
     "native2025": "10/10 PASS",
     "phase2DefaultDeny": "17/17 PASS",
+    "phase2CrossLanguageContract": "35/35 PASS",
     "loadablePackageSource": "21/21 PASS",
     "adapterSource": "22/22 PASS",
     "fOnlyInstallRollbackRehearsal": "16/16 PASS",
