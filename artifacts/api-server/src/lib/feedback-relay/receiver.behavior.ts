@@ -450,11 +450,19 @@ try {
     const requestDir=path.join(root,"99-System","requests"),indexPath=path.join(requestDir,`${sha256("request-one")}.json`),original=fs.readFileSync(indexPath);const tampered=JSON.parse(original.toString("utf8"));tampered.objectRelativePath="01-Active/substitution";fs.writeFileSync(indexPath,JSON.stringify(tampered));
     assert.throws(()=>service.readback("request-one",now),(error:any)=>error?.code==="FEEDBACK_RECEIVER_REQUEST_INDEX_AUTH_INVALID");fs.writeFileSync(indexPath,original);
   });
+  await check("legacy request index is refused and atomically quarantined",()=>{
+    const indexPath=path.join(root,"99-System","requests",`${sha256("request-one")}.json`),original=fs.readFileSync(indexPath),legacy=JSON.parse(original.toString("utf8"));legacy.authorityVersion=1;delete legacy.authentication;fs.writeFileSync(indexPath,JSON.stringify(legacy));
+    assert.throws(()=>service.readback("request-one",now),(error:any)=>error?.code==="FEEDBACK_RECEIVER_REQUEST_INDEX_MIGRATION_REQUIRED");assert.equal(fs.existsSync(indexPath),false);assert.equal(fs.readdirSync(path.join(root,"99-System","quarantine")).some(name=>name.startsWith(`request-index-${sha256("request-one")}.json-`)),true);fs.writeFileSync(indexPath,original);
+  });
+  await check("recovery preserves a live owned upload stage",async()=>{
+    const live=service.createUploadStage();fs.writeFileSync(live,"live-partial",{flag:"r+"});const recovered=service.recover();assert.equal(recovered.removedStages,0);assert.equal(fs.existsSync(live),true);await service.discardUploadStage(live);assert.equal(fs.existsSync(`${live}.owner.json`),false);
+  });
   await check(
     "crash recovery removes staging residue and proven-dead process locks",
     () => {
       const stage = path.join(root, "99-System", "staging", "orphan");
       fs.writeFileSync(stage, "partial");
+      fs.utimesSync(stage,new Date(Date.now()-2_000),new Date(Date.now()-2_000));
       const stale = path.join(root, "99-System", "locks", "stale");
       fs.mkdirSync(stale);
       fs.writeFileSync(
@@ -530,6 +538,10 @@ try {
       );
     },
   );
+  await check("final deletion journal nested tamper is refused",()=>{
+    const deletionPath=path.join(root,"99-System","deletions",`${sha256("request-one")}.json`),original=fs.readFileSync(deletionPath),tampered=JSON.parse(original.toString("utf8"));tampered.receipt.signed.payload.approvedBy="substitution";fs.writeFileSync(deletionPath,JSON.stringify(tampered));
+    assert.throws(()=>service.purge("request-one",{policySha256:"a".repeat(64),approvedBy:"operator",approvedAt:now.toISOString(),hold:false},now),(error:any)=>error?.code==="FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID");fs.writeFileSync(deletionPath,original);
+  });
   await check(
     "prepared purge survives crash without false absence and restart finalizes",
     async () => {

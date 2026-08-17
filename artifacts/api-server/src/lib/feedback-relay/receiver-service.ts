@@ -12,6 +12,8 @@ import {
   signReadback,
   signDeletionReceipt,
   signReceipt,
+  verifyReceiptDurably,
+  verifyDeletionReceiptDurably,
   verifyRequest,
   type NonceAuthority,
   type ReadbackContract,
@@ -440,6 +442,8 @@ export class FeedbackReceiverCustodyService {
     assertNoLinks(this.root, target);
     const descriptor = fs.openSync(target, "wx", 0o600);
     fs.closeSync(descriptor);
+    const acquiredAt=new Date(),owner:LockOwnerV2={version:2,instanceId:PROCESS_INSTANCE_ID,pid:process.pid,processStartedAt:PROCESS_STARTED_AT,osBootId:OS_BOOT_ID,fence:sha256(`${target}\n${randomUUID()}`),acquiredAt:acquiredAt.toISOString(),heartbeatAt:acquiredAt.toISOString(),leaseUntil:new Date(acquiredAt.getTime()+300_000).toISOString()};
+    atomicJson(this.root,`${target}.owner.json`,owner);
     return target;
   }
   async discardUploadStage(target: string) {
@@ -450,6 +454,7 @@ export class FeedbackReceiverCustodyService {
         "Upload staging path escaped receiver authority",
       );
     await fs.promises.rm(target, { force: true });
+    await fs.promises.rm(`${target}.owner.json`,{force:true});
   }
   async deliverStaged(input: {
     signedRequest: Signed<RequestContract>;
@@ -502,7 +507,9 @@ export class FeedbackReceiverCustodyService {
     const verifiedAuthentication=authentication!,verificationKey=key!,{authentication:ignored,...payload}=record,canonical=canonicalJson({domain:"bimlog-feedback-receiver-request-index-v3",...payload}),digest=sha256(canonical),mac=createHmac("sha256",verificationKey.secret).update(canonical,"utf8").digest("hex");
     if(!sameSignature(digest,String(verifiedAuthentication.canonicalSha256))||!sameSignature(mac,String(verifiedAuthentication.hmacSha256)))fail("FEEDBACK_RECEIVER_REQUEST_INDEX_AUTH_INVALID","Request index authentication is invalid");
     if(!HEX64.test(String(record.requestHash))||!HEX64.test(String(record.requestSignature))||typeof record.objectRelativePath!=="string"||path.isAbsolute(record.objectRelativePath)||!record.receipt||!record.inspection)fail("FEEDBACK_RECEIVER_REQUEST_INDEX_SCHEMA_INVALID","Request index schema is invalid");
-    return record as unknown as StoredDelivery;
+    const stored=record as unknown as StoredDelivery;if(!Number.isSafeInteger(stored.generation)||stored.generation<1||!stored.receipt?.payload||typeof stored.receipt.signature!=="string"||!stored.inspection||stored.inspection.verdict!=="clean"||!HEX64.test(stored.inspection.sha256)||!Number.isSafeInteger(stored.inspection.byteCount)||stored.inspection.byteCount<0||(stored.nonceRecovery&&(!/^[A-Za-z0-9:_-]{1,256}$/.test(stored.nonceRecovery.key)||!HEX64.test(stored.nonceRecovery.proofSha256))))fail("FEEDBACK_RECEIVER_REQUEST_INDEX_SCHEMA_INVALID","Request index nested schema is invalid");
+    verifyReceiptDurably(stored.receipt,this.receiverKeys,new Date(Math.max(Date.now(),new Date(stored.receipt.payload.receivedAt).getTime())));
+    return stored;
   }
   private quarantineLegacy(file:string,kind:string){assertNoLinks(this.root,file);const quarantine=path.join(this.system,"quarantine",`${kind}-${path.basename(file)}-${randomUUID()}`);assertNoLinks(this.root,quarantine);fs.renameSync(file,quarantine);syncDirectory(path.dirname(file));syncDirectory(path.dirname(quarantine));}
   private readStored(file:string){const value=readJson<unknown>(this.root,file);try{return this.verifyStoredRecord(value);}catch(error){if(error instanceof RelayProtocolError&&error.code==="FEEDBACK_RECEIVER_REQUEST_INDEX_MIGRATION_REQUIRED")this.quarantineLegacy(file,"request-index");throw error;}}
@@ -513,7 +520,8 @@ export class FeedbackReceiverCustodyService {
     if(!authentication||!key||!HEX64.test(String(authentication.canonicalSha256))||!HEX64.test(String(authentication.hmacSha256)))fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal authentication is invalid");
     const {authentication:ignored,...payload}=record,canonical=canonicalJson({domain:"bimlog-feedback-receiver-deletion-journal-v3",...payload}),digest=sha256(canonical),mac=createHmac("sha256",key!.secret).update(canonical,"utf8").digest("hex");
     if(!sameSignature(digest,String(authentication!.canonicalSha256))||!sameSignature(mac,String(authentication!.hmacSha256))||(record.state!=="prepared"&&record.state!=="finalized")||typeof record.objectRelativePath!=="string"||path.isAbsolute(record.objectRelativePath)||!record.receipt)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal authentication is invalid");
-    return record as unknown as DeletionJournal;
+    const journal=record as unknown as DeletionJournal;if(!Number.isSafeInteger(journal.generation)||journal.generation<1||!HEX64.test(journal.receipt.objectSha256)||!HEX64.test(journal.receipt.policySha256)||!HEX64.test(journal.receipt.journalSha256)||!HEX64.test(journal.receipt.deliveryReceiptSha256)||!HEX64.test(journal.receipt.readbackSha256)||!Number.isSafeInteger(journal.receipt.byteCount)||journal.receipt.byteCount<0)return fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal nested schema is invalid");
+    if(journal.state==="finalized")verifyDeletionReceiptDurably(journal.receipt.signed,this.receiverKeys,new Date(Math.max(Date.now(),new Date(journal.receipt.signed.payload.absenceVerifiedAt).getTime())));return journal;
   }
   private readJournal(file:string){const value=readJson<unknown>(this.root,file);try{return this.verifyJournalRecord(value);}catch(error){if(error instanceof RelayProtocolError&&error.code==="FEEDBACK_RECEIVER_DELETION_MIGRATION_REQUIRED")this.quarantineLegacy(file,"deletion-journal");throw error;}}
   private generationPath(){return path.join(this.system,"generation.json");}
@@ -775,6 +783,7 @@ export class FeedbackReceiverCustodyService {
   }
   readback(requestId:string,now=new Date()):Signed<ReadbackContract>{return this.lockSync(requestId,lease=>this.readbackUnderFence(requestId,now,lease.assertCurrent));}
   recover() {
+    return this.lockSync("__recovery__",recoveryLease=>{recoveryLease.assertCurrent();
     const staging = path.join(this.system, "staging");
     let removedStages = 0,
       removedStaleLocks = 0,
@@ -783,10 +792,9 @@ export class FeedbackReceiverCustodyService {
     for (const entry of fs.readdirSync(staging)) {
       const target = path.join(staging, entry);
       assertNoLinks(this.root, target);
-      if (fs.lstatSync(target).isFile()) {
-        fs.unlinkSync(target);
-        removedStages++;
-      }
+      if(!fs.lstatSync(target).isFile()||entry.endsWith(".owner.json"))continue;
+      const ownerPath=`${target}.owner.json`;let owner:LockOwnerV2|null=null;try{if(fs.existsSync(ownerPath))owner=parseLockOwner(readJson<unknown>(this.root,ownerPath));}catch{}
+      if((!owner&&ownerlessLockExpired(target))||(owner&&ownerIsProvablyDead(owner))){fs.unlinkSync(target);if(fs.existsSync(ownerPath))fs.unlinkSync(ownerPath);syncDirectory(staging);removedStages++;}
     }
     const locks = path.join(this.system, "locks");
     for (const entry of fs.readdirSync(locks)) {
@@ -818,7 +826,8 @@ export class FeedbackReceiverCustodyService {
           }});
       }
     }
-    return { removedStages, removedStaleLocks, finalizedDeletions };
+    recoveryLease.assertCurrent();return { removedStages, removedStaleLocks, finalizedDeletions };
+    });
   }
   private lockSync<T>(identity:string,work:(lease:{assertCurrent():void;fence:string})=>T):T{
     const lock=path.join(this.system,"locks",sha256(identity)),ownerPath=path.join(lock,"owner.json"),leaseMs=30_000;
