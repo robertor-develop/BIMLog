@@ -650,6 +650,14 @@ is reserved for genuine completion.
 
 ## Current candidates and next work
 
+- BIMLog Platform Build 7 Advanced Contracts v1.60.35.07 is integrated locally from the verified
+  backend and UI owner lineages. It adds governed contract payment applications against exact executed
+  SOV identities, immutable revisions and attributable lifecycle history, maker/checker separation,
+  cumulative-ceiling serialization, stable denial/conflict mappings, and bilingual responsive controls.
+  Disposable PostgreSQL migration/restart safety, authenticated HTTP permissions, revision/approval
+  concurrency, rollback, focused UI behavior, routed browser evidence, and TypeScript checks are local
+  evidence only. Nothing was pushed, published, deployed, or run against production/customer data.
+
 - Replit publication-preview alignment: local source commit
   `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b` preserves the accepted constraint-collision correction and aligns all
   105 rejected preview constraint/index names to the existing database authorities. Focused fixtures, source

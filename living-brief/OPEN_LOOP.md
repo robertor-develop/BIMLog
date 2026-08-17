@@ -1791,6 +1791,20 @@ Future behavior:
 
 ## Closed / Shipped
 
+### Platform Build 7 Advanced Contracts v1.60.35.07 - Local Integration Candidate
+
+- The complete verified backend owner series was serialized before the complete UI owner series from
+  Build 6 baseline `601bf94aa5505d0137f8ae1858b40356d9f3aaf6`; owner history was preserved without conflicts.
+- The integrated scope governs payment creation, submission/review/return/reject, immutable successor
+  revision and resubmission, approval, withdrawal/void, exact SOV foreign-key identity, cumulative
+  executed-contract/amendment ceilings, stable replay/conflict behavior, and attributable append-only history.
+- Local isolated evidence covers additive migration twice, database defenses, authenticated lifecycle and
+  record/tenant/project permission denials, two-request revision concurrency, two-session approval concurrency,
+  rollback/zero residue, focused production-component UI states, and routed English desktop plus Spanish
+  exact-390 behavior including reload, history, denial, and suspended states.
+- Release boundary: local clean-integration candidate only. Normal push, provider publication/deployment,
+  production migration, and customer/field verification remain separately authorized external gates.
+
 ### RFI List and Log Governed PDFs
 
 Accepted source on 2026-07-23 after replaying reviewed candidate `5e2806c3a36391a32d384bf3913cee54e68b6e07` onto authoritative master without importing old candidate ancestry.
