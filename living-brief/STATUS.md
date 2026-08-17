@@ -750,3 +750,10 @@ database-safety, schema inventory, API TypeScript, and diff checks pass; publica
 The PLATFORM generator is now the sole authority for generated platform content. Commit
 `3a137aec83283e29c1a6661c3af2812b31ff1768` removes manual commit-specific PLATFORM prose and emits the
 schema-parity rule deterministically, preventing API builds from dirtying the tracked Living Brief.
+# Feedback addendum v F-1.60.35.8 - Local Candidate
+
+- The existing authenticated Feedback control is being extended in its canonical widget and route, not duplicated.
+- Feedback records now carry stable IDs, optimistic versions, reporter/project/page/module/browser/build context, accountable triage states, decision reasons, target release, customer visibility, and immutable audit events.
+- Optional voice recording and explicit browser-consented screen capture/crop remain user-driven. Original audio and imported evidence use the existing storage abstraction with bounded count/size and signature validation.
+- Files are fail-closed in quarantine unless the governed scanner abstraction approves them. External transcription is default-deny; only the explicitly labeled local fixture adapter can complete local evidence without a provider call.
+- This state is source implementation only. It is not pushed, published, deployed, production-migrated, provider-activated, independently accepted, or customer-verified.

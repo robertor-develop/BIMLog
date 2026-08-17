@@ -1865,3 +1865,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Preserve the exact schema object names and `DESC NULLS FIRST` semantics sealed at
   `08151f39e0db79c0196d50e64cd60b651c4f4992`; any provider preview containing DROP/recreate churn remains a hard no-go.
 - Keep `PLATFORM.md` generator-owned and require API build followed by `check:living-brief` to leave the release tree clean.
+# Feedback addendum v F-1.60.35.8 - External and Acceptance Gates
+
+- Independent review must inspect the final routed production-component browser evidence at desktop and exact 390px in English and Spanish.
+- A governed malware-scanning implementation and retention/deletion operator policy must be explicitly activated before quarantined evidence can be downloaded outside local fixtures.
+- A transcription provider, credentials, processing terms, retention policy, and cost authority remain unapproved. Production stays default-deny; no transcript may silently replace reporter text.
+- Replit alignment, development migration preview, production migration, push, publish, deployment, provider calls, and customer validation remain separate explicit gates.

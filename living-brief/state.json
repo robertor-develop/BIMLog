@@ -1,18 +1,27 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
+  "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "8014ea2f33c13254d914c64dc959637a6313febe6e0d3b0269a39abd323b6fa9",
+  "bundleSha256": "4d69daeb8cb980956ebde103dd795eafd94dd36d00de6ac92ef9a58c03428fc5",
   "impact": {
-    "baselineCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
+    "baselineCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
     "changedPaths": [
+      "artifacts/api-server/package.json",
+      "artifacts/api-server/src/app.ts",
+      "artifacts/api-server/src/routes/feedback.ts",
+      "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+      "artifacts/bimlog/src/lib/help-content.ts",
+      "artifacts/bimlog/src/pages/AdminPanel.tsx",
+      "lib/db/src/schema/feedback-items.ts",
       "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -23,11 +32,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "claude",
@@ -35,11 +44,11 @@
       "sha256": "b8efc974142d81e72ec01cf72a1d180f5e3c5a346a5dbb390b2c3a7651f906e9",
       "sourceChangedAt": "2026-08-05T11:26:11-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "quality",
@@ -47,11 +56,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "vision",
@@ -59,23 +68,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "ce05514e37271029178447bf7ecf5c41fe2570dd8384072e540425b696d15aa9",
-      "sourceChangedAt": "2026-08-16T23:47:51-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "sha256": "8289d797a958e9fdecd7728f517c65f34c6384d42158f938110240edda7db8a3",
+      "sourceChangedAt": "2026-08-17T14:30:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "plugin",
@@ -83,11 +92,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "report_design_system",
@@ -95,11 +104,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "standards_register",
@@ -107,35 +116,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "0062615b0db98b44f466f2508a8635f2f55bb79d702d1285d5d2b3109d9438b1",
-      "sourceChangedAt": "2026-08-17T12:40:00.000Z",
+      "sha256": "c4dc91263f50ad92da0e717d8622b2cfcbc7d532b1b95eee82f90f249b6b7020",
+      "sourceChangedAt": "2026-08-17T14:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "979f77eb36be83df3a29a78a58f972859fff68f11d34b1e24249d71a5703f357",
-      "sourceChangedAt": "2026-08-17T12:40:00.000Z",
+      "sha256": "0cd410868773208794fc8b1540e6549f7fe5b956a82239b23902614f910ccc10",
+      "sourceChangedAt": "2026-08-17T14:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     },
     {
       "key": "audit",
@@ -143,11 +152,11 @@
       "sha256": "c64878fb9aec6abbef080bb1da14f09dd92af10407b31ac6c4b4710eb42446cc",
       "sourceChangedAt": "2026-08-01T10:59:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewedThroughCommit": "de6d5fd563535b2c87e388ca613948d86b330806",
-      "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reconciledThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "semanticReviewTask": "bimlog-feedback-addendum-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-17T03:30:00Z"
+      "semanticReviewedAt": "2026-08-17T14:30:00Z"
     }
   ]
 }

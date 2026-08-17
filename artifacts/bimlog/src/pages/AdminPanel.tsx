@@ -953,11 +953,15 @@ function AiUsageTab({ token }: { token: string }) {
 }
 
 const FEEDBACK_STATUS_OPTIONS = [
-  { value: "open", label: "Open" },
-  { value: "in_review", label: "In Review" },
-  { value: "planned", label: "Planned" },
-  { value: "done", label: "Done" },
+  { value: "new", label: "New" },
+  { value: "triaged", label: "Triaged" },
+  { value: "accepted", label: "Accepted" },
+  { value: "in_progress", label: "In progress" },
+  { value: "blocked", label: "Blocked" },
+  { value: "fixed", label: "Fixed" },
+  { value: "verified", label: "Verified" },
   { value: "rejected", label: "Rejected" },
+  { value: "deferred", label: "Deferred" },
 ];
 
 function FeedbackTab({ token }: { token: string }) {
@@ -990,23 +994,27 @@ function FeedbackTab({ token }: { token: string }) {
     if (!Number.isInteger(numericId)) return;
     setError("");
     try {
+      const item = items.find(candidate => Number(candidate.id) === numericId);
+      const needsReason = ["blocked", "verified", "rejected", "deferred"].includes(status);
+      const reason = needsReason ? window.prompt("Decision reason (required)", String(item?.dispositionReason || "")) : "";
+      if (needsReason && !reason?.trim()) return;
       const response = await apiFetch(`/feedback/admin/${numericId}`, token, {
         method: "PATCH",
-        body: JSON.stringify({ status }),
+        body: JSON.stringify({ status, reason, observedVersion: Number(item?.version) }),
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Failed to update feedback");
-      setItems((current) => current.map((item) => Number(item.id) === numericId ? { ...item, status } : item));
+      setItems((current) => current.map((candidate) => Number(candidate.id) === numericId ? { ...candidate, ...data.feedback } : candidate));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update feedback");
     }
   }
 
   const visibleItems = statusFilter === "all" ? items : items.filter((item) => String(item.status || "open") === statusFilter);
-  const openCount = items.filter((item) => String(item.status || "open") === "open").length;
-  const reviewCount = items.filter((item) => String(item.status || "open") === "in_review").length;
-  const plannedCount = items.filter((item) => String(item.status || "open") === "planned").length;
-  const closedCount = items.filter((item) => ["done", "rejected"].includes(String(item.status || "open"))).length;
+  const openCount = items.filter((item) => String(item.status || "new") === "new").length;
+  const reviewCount = items.filter((item) => ["triaged", "accepted"].includes(String(item.status || "new"))).length;
+  const plannedCount = items.filter((item) => ["in_progress", "blocked", "fixed"].includes(String(item.status || "new"))).length;
+  const closedCount = items.filter((item) => ["verified", "rejected", "deferred"].includes(String(item.status || "new"))).length;
 
   return (
     <div>
@@ -1021,9 +1029,9 @@ function FeedbackTab({ token }: { token: string }) {
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
-        <StatCard label="Open" value={openCount} />
-        <StatCard label="In Review" value={reviewCount} />
-        <StatCard label="Planned" value={plannedCount} />
+        <StatCard label="New" value={openCount} />
+        <StatCard label="Triaged / accepted" value={reviewCount} />
+        <StatCard label="Active work" value={plannedCount} />
         <StatCard label="Closed" value={closedCount} />
       </div>
 
@@ -1067,7 +1075,7 @@ function FeedbackTab({ token }: { token: string }) {
             <tbody>
               {visibleItems.map((item) => (
                 <tr key={String(item.id)}>
-                  <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}>{item.createdAt ? new Date(String(item.createdAt)).toLocaleString() : "-"}</Td>
+                  <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}><strong>{String(item.stableId || "-")}</strong><br/>{item.createdAt ? new Date(String(item.createdAt)).toLocaleString() : "-"}</Td>
                   <Td>
                     <div style={{ fontSize: 12, fontWeight: 700 }}>{String(item.userFullName || "Unnamed")}</div>
                     <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(item.userEmail || "")}</div>
@@ -1082,7 +1090,7 @@ function FeedbackTab({ token }: { token: string }) {
                   <Td style={{ minWidth: 280, maxWidth: 460, whiteSpace: "normal", overflowWrap: "anywhere" }}>{String(item.message || "")}</Td>
                   <Td>
                     <select
-                      value={String(item.status || "open")}
+                      value={String(item.status || "new")}
                       onChange={(event) => updateStatus(item.id, event.target.value)}
                       style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "6px 8px", fontSize: 12, background: "hsl(var(--background))" }}
                     >

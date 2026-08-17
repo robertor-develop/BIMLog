@@ -10018,6 +10018,91 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6510228390b5da2628d313a38a3553f2f1ce60cd6e9a456d3d8ad60a2dd5127b"
+    },
+    {
+      "taskId": "bimlog-feedback-addendum-20260817",
+      "reviewedThroughCommit": "972fd7cfca7c4310ac0ca158f8566c320e73d7f6",
+      "reviewedAt": "2026-08-17T14:30:00Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task",
+      "summary": "Reconciles Feedback addendum v F-1.60.35.8 with governed evidence quarantine, default-deny transcription, accountable triage, and explicit external gates.",
+      "workstreams": [
+        "feedback-addendum",
+        "feedback",
+        "evidence",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing human authority, privacy, evidence, and customer-isolation doctrine governs the addendum."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing preserve-first, source/UI/artifact/deployment gates and default-deny external-action rules remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing actual-component, bilingual responsive, accessibility, audit, and artifact inspection requirements apply."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Feedback improves traceable field-to-backlog review without changing product identity."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic generator records the additive Feedback evidence, audit, and transcription-job tables within the existing React, Express, PostgreSQL, and storage-adapter architecture."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Legacy, Navisworks, installer, or plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded CSV review export introduces no PDF/DOCX design-system change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new external standard or compliance claim is made."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local Feedback candidate, security boundaries, and exact release identity."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps scanner, transcription, independent review, migration, release, and customer gates explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No provider, production, publish, deploy, customer, or field action occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/routes/feedback.ts",
+        "artifacts/bimlog/src/components/FeedbackWidget.tsx",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "artifacts/bimlog/src/pages/AdminPanel.tsx",
+        "lib/db/src/schema/feedback-items.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "08f33898f61f781932fa5f41326e7f813b96117d0350cc7327e93f35a030fe85"
     }
   ]
 }

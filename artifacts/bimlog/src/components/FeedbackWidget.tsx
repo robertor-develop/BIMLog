@@ -1,8 +1,9 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
-import { AlertCircle, MessageSquare, Send, X } from "lucide-react";
+import { AlertCircle, Camera, FilePlus2, MessageSquare, Mic, Pause, Play, RotateCcw, Send, Square, Trash2, X } from "lucide-react";
 import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
+import { useI18n } from "@/lib/i18n";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -57,6 +58,8 @@ function getModule(path: string) {
 export function FeedbackWidget() {
   const [location] = useLocation();
   const { token, user } = useAuthStore();
+  const { language } = useI18n();
+  const es = language === "es";
   const [open, setOpen] = useState(false);
   const [feedbackType, setFeedbackType] = useState("bug");
   const [priority, setPriority] = useState("normal");
@@ -64,11 +67,94 @@ export function FeedbackWidget() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
   const [success, setSuccess] = useState("");
+  const [files, setFiles] = useState<File[]>([]);
+  const [recordingState, setRecordingState] = useState<"idle" | "recording" | "paused" | "ready">("idle");
+  const [audioUrl, setAudioUrl] = useState("");
+  const [duration, setDuration] = useState(0);
+  const [uploadState, setUploadState] = useState("");
+  const [crop, setCrop] = useState({ x: 10, y: 10, width: 80, height: 80 });
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const streamRef = useRef<MediaStream | null>(null);
+  const chunksRef = useRef<Blob[]>([]);
+  const timerRef = useRef<number | null>(null);
+  const durationRef = useRef(0);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const idempotencyRef = useRef(randomKey());
+
+  const tt = (en: string, spanish: string) => es ? spanish : en;
+  useEffect(() => () => {
+    if (timerRef.current) window.clearInterval(timerRef.current);
+    streamRef.current?.getTracks().forEach(track => track.stop());
+    if (audioUrl) URL.revokeObjectURL(audioUrl);
+  }, [audioUrl]);
+  useEffect(() => {
+    if (!open) return;
+    dialogRef.current?.focus();
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [open]);
 
   const projectId = useMemo(() => getProjectId(location), [location]);
   const moduleName = useMemo(() => getModule(location), [location]);
 
   if (!token || PUBLIC_PATHS.has(location)) return null;
+
+  function randomKey() { return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`; }
+  function addFiles(incoming: File[]) {
+    const supported = /\.(pdf|docx?|xlsx?|csv|pptx?|png|jpe?g|txt|log|json|webm|ogg|wav|m4a)$/i;
+    const accepted = incoming.filter(file => file.size > 0 && file.size <= 20 * 1024 * 1024 && supported.test(file.name));
+    if (accepted.length !== incoming.length) setError(tt("Some files were refused. Use a supported type up to 20 MB.", "Se rechazaron algunos archivos. Use un tipo compatible de hasta 20 MB."));
+    setFiles(current => [...current, ...accepted].slice(0, 10));
+  }
+
+  async function startRecording() {
+    setError("");
+    if (!navigator.mediaDevices?.getUserMedia || typeof MediaRecorder === "undefined") { setError(tt("Audio recording is not supported in this browser.", "La grabación de audio no es compatible con este navegador.")); return; }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true }); streamRef.current = stream; chunksRef.current = []; durationRef.current = 0; setDuration(0);
+      const recorder = new MediaRecorder(stream); recorderRef.current = recorder;
+      recorder.ondataavailable = event => { if (event.data.size) chunksRef.current.push(event.data); };
+      recorder.onstop = () => {
+        const blob = new Blob(chunksRef.current, { type: recorder.mimeType || "audio/webm" });
+        if (blob.size > 20 * 1024 * 1024 || durationRef.current > 300) { setError(tt("Recording exceeds the 5 minute or 20 MB limit.", "La grabación supera el límite de 5 minutos o 20 MB.")); discardRecording(); return; }
+        const file = new File([blob], `feedback-audio-${Date.now()}.webm`, { type: blob.type }); addFiles([file]); setAudioUrl(URL.createObjectURL(blob)); setRecordingState("ready");
+      };
+      recorder.start(500); setRecordingState("recording"); timerRef.current = window.setInterval(() => setDuration(value => { durationRef.current = value + 1; if (durationRef.current >= 300) stopRecording(); return durationRef.current; }), 1000);
+    } catch (cause) { setError(cause instanceof DOMException && cause.name === "NotAllowedError" ? tt("Microphone permission was denied.", "Se denegó el permiso del micrófono.") : tt("No microphone is available. Check the device and retry.", "No hay micrófono disponible. Revise el dispositivo e intente de nuevo.")); }
+  }
+  function pauseRecording() { const recorder = recorderRef.current; if (!recorder) return; if (recorder.state === "recording") { recorder.pause(); setRecordingState("paused"); } else if (recorder.state === "paused") { recorder.resume(); setRecordingState("recording"); } }
+  function stopRecording() { if (timerRef.current) window.clearInterval(timerRef.current); timerRef.current = null; recorderRef.current?.stop(); streamRef.current?.getTracks().forEach(track => track.stop()); }
+  function discardRecording() { if (timerRef.current) window.clearInterval(timerRef.current); const recorder = recorderRef.current; if (recorder && recorder.state !== "inactive") { recorder.onstop = null; recorder.stop(); } streamRef.current?.getTracks().forEach(track => track.stop()); setFiles(current => current.filter(file => !file.name.startsWith("feedback-audio-"))); if (audioUrl) URL.revokeObjectURL(audioUrl); setAudioUrl(""); setDuration(0); setRecordingState("idle"); }
+
+  async function captureScreen() {
+    setError("");
+    if (!navigator.mediaDevices?.getDisplayMedia) { setError(tt("Screen capture is not supported in this browser.", "La captura de pantalla no es compatible con este navegador.")); return; }
+    let stream: MediaStream | null = null;
+    try {
+      stream = await navigator.mediaDevices.getDisplayMedia({ video: true, audio: false });
+      const video = document.createElement("video"); video.srcObject = stream; await video.play();
+      const canvas = document.createElement("canvas"); canvas.width = video.videoWidth; canvas.height = video.videoHeight;
+      canvas.getContext("2d")?.drawImage(video, 0, 0); const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png"));
+      if (!blob) throw new Error("capture"); addFiles([new File([blob], `feedback-capture-${Date.now()}.png`, { type: "image/png" })]);
+    } catch (cause) { setError(cause instanceof DOMException && cause.name === "NotAllowedError" ? tt("Screen sharing was cancelled or denied. Nothing was captured.", "Se canceló o denegó compartir pantalla. No se capturó nada.") : tt("Screen capture failed. Retry or import an image.", "Falló la captura. Intente de nuevo o importe una imagen.")); }
+    finally { stream?.getTracks().forEach(track => track.stop()); }
+  }
+
+  async function cropScreenshot() {
+    const source = [...files].reverse().find(file => file.name.startsWith("feedback-capture-"));
+    if (!source) { setError(tt("Capture or import a screenshot first.", "Capture o importe una imagen primero.")); return; }
+    try {
+      const image = await createImageBitmap(source); const canvas = document.createElement("canvas");
+      const sx = Math.round(image.width * crop.x / 100), sy = Math.round(image.height * crop.y / 100);
+      const sw = Math.round(image.width * crop.width / 100), sh = Math.round(image.height * crop.height / 100);
+      if (sw < 32 || sh < 32 || sx + sw > image.width || sy + sh > image.height) throw new Error("bounds");
+      canvas.width = sw; canvas.height = sh; canvas.getContext("2d")?.drawImage(image, sx, sy, sw, sh, 0, 0, sw, sh);
+      const blob = await new Promise<Blob | null>(resolve => canvas.toBlob(resolve, "image/png")); image.close(); if (!blob) throw new Error("crop");
+      const cropped = new File([blob], `feedback-capture-${Date.now()}-cropped.png`, { type: "image/png" });
+      setFiles(current => [...current.filter(file => file !== source), cropped]);
+    } catch { setError(tt("Crop bounds are invalid. Keep the rectangle inside the image.", "Los límites del recorte no son válidos. Mantenga el rectángulo dentro de la imagen.")); }
+  }
 
   async function submitFeedback() {
     const trimmed = message.trim();
@@ -85,6 +171,7 @@ export function FeedbackWidget() {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
+          "Idempotency-Key": idempotencyRef.current,
         },
         body: JSON.stringify({
           feedbackType,
@@ -102,12 +189,23 @@ export function FeedbackWidget() {
         }),
       });
       const data = await response.json().catch(() => ({}));
-      if (!response.ok) throw new Error(data.error || "Feedback was not submitted.");
+      if (!response.ok) throw new Error(data.error || tt("Feedback was not submitted.", "No se envió el comentario."));
+      const feedbackId = Number(data.feedback?.id);
+      if (files.length && feedbackId) {
+        setUploadState(tt("Uploading governed evidence…", "Cargando evidencia controlada…"));
+        for (const group of ["audio", "screenshot", "attachment"] as const) {
+          const selected = files.filter(file => group === "audio" ? file.name.startsWith("feedback-audio-") : group === "screenshot" ? file.name.startsWith("feedback-capture-") : !file.name.startsWith("feedback-audio-") && !file.name.startsWith("feedback-capture-"));
+          if (!selected.length) continue; const form = new FormData(); selected.forEach(file => form.append("files", file)); form.append("kind", group);
+          const uploaded = await fetch(`${API_BASE}/api/v1/feedback/${feedbackId}/assets`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
+          const payload = await uploaded.json().catch(() => ({})); if (!uploaded.ok) throw new Error(payload.error || tt("Evidence upload failed safely; retry from your retained files.", "La carga de evidencia falló de forma segura; reintente desde sus archivos conservados."));
+        }
+      }
       setMessage("");
-      setSuccess("Sent to BIMLog support.");
+      setFiles([]); discardRecording(); idempotencyRef.current = randomKey(); setUploadState("");
+      setSuccess(tt(`Sent as ${data.feedback?.stableId || "feedback"}.`, `Enviado como ${data.feedback?.stableId || "comentario"}.`));
       setTimeout(() => setOpen(false), 900);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Feedback was not submitted.");
+      setError(err instanceof Error ? err.message : tt("Feedback was not submitted.", "No se envió el comentario."));
     } finally {
       setSubmitting(false);
     }
@@ -127,8 +225,8 @@ export function FeedbackWidget() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        aria-label="Send BIMLog feedback"
-        title="Send BIMLog feedback"
+        aria-label={tt("Send BIMLog feedback", "Enviar comentarios a BIMLog")}
+        title={tt("Send BIMLog feedback", "Enviar comentarios a BIMLog")}
         style={{
           position: "fixed",
           right: 20,
@@ -164,9 +262,11 @@ export function FeedbackWidget() {
           }}
         >
           <div
+            ref={dialogRef}
+            tabIndex={-1}
             role="dialog"
             aria-modal="true"
-            aria-label="BIMLog feedback"
+            aria-label={tt("BIMLog feedback", "Comentarios de BIMLog")}
             style={{
               width: "min(420px, calc(100vw - 40px))",
               background: "hsl(var(--background))",
@@ -178,13 +278,13 @@ export function FeedbackWidget() {
           >
             <div style={{ background: "#1e3a5f", color: "white", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
               <div>
-                <div style={{ fontWeight: 800, fontSize: 15 }}>BIMLog Feedback</div>
+                <div style={{ fontWeight: 800, fontSize: 15 }}>{tt("BIMLog Feedback", "Comentarios de BIMLog")}</div>
                 <div style={{ fontSize: 11, opacity: 0.82 }}>{moduleName} - {location}</div>
               </div>
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                aria-label="Close feedback"
+                aria-label={tt("Close feedback", "Cerrar comentarios")}
                 style={{ background: "transparent", border: "none", color: "white", cursor: "pointer", padding: 4 }}
               >
                 <X size={18} />
@@ -194,27 +294,27 @@ export function FeedbackWidget() {
             <div style={{ padding: 16 }}>
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 12, marginBottom: 12 }}>
                 <label style={{ fontSize: 12, fontWeight: 700 }}>
-                  Type
+                  {tt("Type", "Tipo")}
                   <select value={feedbackType} onChange={(e) => setFeedbackType(e.target.value)} style={{ ...selectStyle, marginTop: 5 }}>
-                    {TYPE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    {TYPE_OPTIONS.map((option) => <option key={option.value} value={option.value}>{es ? ({ bug: "Error", workflow: "Problema de flujo", idea: "Idea", question: "Pregunta", other: "Otro" } as Record<string,string>)[option.value] : option.label}</option>)}
                   </select>
                 </label>
                 <label style={{ fontSize: 12, fontWeight: 700 }}>
-                  Priority
+                  {tt("Priority", "Prioridad")}
                   <select value={priority} onChange={(e) => setPriority(e.target.value)} style={{ ...selectStyle, marginTop: 5 }}>
-                    {PRIORITY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                    {PRIORITY_OPTIONS.map((option) => <option key={option.value} value={option.value}>{es ? ({ normal: "Normal", high: "Alta", urgent: "Urgente", low: "Baja" } as Record<string,string>)[option.value] : option.label}</option>)}
                   </select>
                 </label>
               </div>
 
               <label style={{ fontSize: 12, fontWeight: 700 }}>
-                What should we know?
+                {tt("What should we know?", "¿Qué debemos saber?")}
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   spellCheck
                   rows={6}
-                  placeholder="Describe the bug, workflow issue, or improvement."
+                  placeholder={tt("Describe the bug, workflow issue, or improvement.", "Describa el error, problema de flujo o mejora.")}
                   style={{
                     width: "100%",
                     marginTop: 5,
@@ -228,17 +328,41 @@ export function FeedbackWidget() {
                 />
               </label>
 
+              <section aria-label={tt("Evidence", "Evidencia")} style={{ marginTop: 12, border: "1px solid hsl(var(--border))", borderRadius: 8, padding: 10 }}>
+                <div style={{ fontSize: 12, fontWeight: 800, marginBottom: 8 }}>{tt("Evidence (optional)", "Evidencia (opcional)")}</div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: 8 }}>
+                  <label style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "7px 9px", fontSize: 11, cursor: "pointer", display: "inline-flex", gap: 5, alignItems: "center" }}>
+                    <FilePlus2 size={14} />{tt("Add files", "Agregar archivos")}
+                    <input type="file" multiple hidden accept=".pdf,.doc,.docx,.xls,.xlsx,.csv,.ppt,.pptx,.png,.jpg,.jpeg,.txt,.log,.json" onChange={event => { addFiles(Array.from(event.target.files || [])); event.currentTarget.value = ""; }} />
+                  </label>
+                  <button type="button" onClick={captureScreen} style={{ border: "1px solid hsl(var(--border))", background: "white", borderRadius: 6, padding: "7px 9px", fontSize: 11, display: "inline-flex", gap: 5, alignItems: "center" }}><Camera size={14}/>{tt("Capture screen", "Capturar pantalla")}</button>
+                  {recordingState === "idle" || recordingState === "ready" ? <button type="button" onClick={startRecording} style={{ border: "1px solid hsl(var(--border))", background: "white", borderRadius: 6, padding: "7px 9px", fontSize: 11, display: "inline-flex", gap: 5, alignItems: "center" }}><Mic size={14}/>{tt("Record voice", "Grabar voz")}</button> : <>
+                    <button type="button" onClick={pauseRecording} aria-label={recordingState === "paused" ? tt("Resume recording", "Reanudar grabación") : tt("Pause recording", "Pausar grabación")}><Pause size={14}/>{recordingState === "paused" ? tt("Resume", "Reanudar") : tt("Pause", "Pausar")}</button>
+                    <button type="button" onClick={stopRecording}><Square size={14}/>{tt("Stop", "Detener")}</button>
+                  </>}
+                </div>
+                {files.some(file => file.name.startsWith("feedback-capture-")) && <div style={{ display: "grid", gridTemplateColumns: "repeat(4, minmax(48px, 1fr)) auto", gap: 5, marginTop: 8, alignItems: "end" }}>
+                  {(["x", "y", "width", "height"] as const).map(key => <label key={key} style={{ fontSize: 9 }}>{key.toUpperCase()} %<input aria-label={`${key} percent`} type="number" min="0" max="100" value={crop[key]} onChange={event => setCrop(current => ({ ...current, [key]: Number(event.target.value) }))} style={{ width: "100%", boxSizing: "border-box" }}/></label>)}
+                  <button type="button" onClick={cropScreenshot} style={{ height: 28, whiteSpace: "nowrap" }}><RotateCcw size={12}/>{tt("Apply crop", "Aplicar recorte")}</button>
+                </div>}
+                {recordingState !== "idle" && <div aria-live="polite" style={{ fontSize: 11, marginTop: 8 }}>{tt("Recording", "Grabación")}: {Math.floor(duration / 60)}:{String(duration % 60).padStart(2, "0")} · {recordingState}</div>}
+                {audioUrl && <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 8 }}><audio controls src={audioUrl} style={{ maxWidth: "260px" }}><Play/></audio><button type="button" onClick={discardRecording} aria-label={tt("Discard recording", "Descartar grabación")}><Trash2 size={14}/></button></div>}
+                {!!files.length && <ul style={{ margin: "8px 0 0", paddingLeft: 18, fontSize: 11 }}>{files.map((file, index) => <li key={`${file.name}-${index}`}>{file.name} · {(file.size / 1024).toFixed(1)} KB <button type="button" onClick={() => setFiles(current => current.filter((_, itemIndex) => itemIndex !== index))} aria-label={tt(`Remove ${file.name}`, `Quitar ${file.name}`)}><X size={12}/></button></li>)}</ul>}
+                <p style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", margin: "8px 0 0" }}>{tt("Up to 10 supported files, 20 MB each. Files remain quarantined until the governed scanner approves them. Screen sharing starts only after your browser consent and stops immediately after capture.", "Hasta 10 archivos compatibles de 20 MB cada uno. Permanecen en cuarentena hasta la aprobación del escáner controlado. Compartir pantalla comienza solo con su consentimiento y termina inmediatamente después de capturar.")}</p>
+              </section>
+
               <div style={{ marginTop: 10, padding: "8px 10px", border: "1px solid #dbeafe", background: "#eff6ff", borderRadius: 6, fontSize: 11, color: "#1d4ed8", display: "flex", gap: 8 }}>
                 <AlertCircle size={14} style={{ flexShrink: 0, marginTop: 1 }} />
-                <span>BIMLog will include this page, module, and browser context so support can reproduce the issue.</span>
+                <span>{tt("BIMLog will include this page, module, browser, and build context so authorized reviewers can reproduce the issue.", "BIMLog incluirá el contexto de página, módulo, navegador y versión para que revisores autorizados reproduzcan el problema.")}</span>
               </div>
 
               {error && <div style={{ color: "#b91c1c", fontSize: 12, marginTop: 10 }}>{error}</div>}
               {success && <div style={{ color: "#15803d", fontSize: 12, marginTop: 10 }}>{success}</div>}
+              {uploadState && <div role="status" style={{ fontSize: 12, marginTop: 10 }}>{uploadState}</div>}
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
                 <button type="button" onClick={() => setOpen(false)} style={{ border: "1px solid hsl(var(--border))", background: "white", borderRadius: 6, padding: "8px 12px", cursor: "pointer" }}>
-                  Cancel
+                  {tt("Cancel", "Cancelar")}
                 </button>
                 <button
                   type="button"
@@ -247,7 +371,7 @@ export function FeedbackWidget() {
                   style={{ border: "1px solid #1d4ed8", background: "#1d4ed8", color: "white", borderRadius: 6, padding: "8px 12px", cursor: submitting ? "not-allowed" : "pointer", display: "inline-flex", alignItems: "center", gap: 7, fontWeight: 700 }}
                 >
                   <Send size={14} />
-                  {submitting ? "Sending..." : "Send"}
+                  {submitting ? tt("Sending…", "Enviando…") : tt("Send", "Enviar")}
                 </button>
               </div>
             </div>

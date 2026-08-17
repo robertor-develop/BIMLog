@@ -12,6 +12,7 @@
     "build": "tsx ./build.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test:multipart-security": "tsx ./scripts/test-multipart-security.ts",
+    "test:feedback-addendum": "tsx ./src/lib/feedback-evidence-contract.behavior.ts",
     "test:sendgrid-transport": "tsx ./scripts/test-sendgrid-transport.ts",
     "test:startup-bootstrap": "tsx ./scripts/test-startup-bootstrap.ts",
     "test:startup-bundle": "tsx ./scripts/test-startup-bundle.ts",

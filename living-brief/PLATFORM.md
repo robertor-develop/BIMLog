@@ -191,6 +191,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feature-policy-service.ts
 - artifacts/api-server/src/lib/feature-policy-support-matrix.ts
 - artifacts/api-server/src/lib/feature-policy.behavior.ts
+- artifacts/api-server/src/lib/feedback-evidence-contract.behavior.ts
+- artifacts/api-server/src/lib/feedback-evidence-contract.ts
 - artifacts/api-server/src/lib/ffmpeg-capability.ts
 - artifacts/api-server/src/lib/financial-budget-browser.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-contract.ts

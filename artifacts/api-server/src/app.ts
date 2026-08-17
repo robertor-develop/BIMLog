@@ -1058,6 +1058,43 @@ void rfiMigrationReady.then((ready) => {
       updated_at timestamp NOT NULL DEFAULT now(),
       resolved_at timestamp
     )`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS stable_id text`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS company_id integer`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS owner_user_id integer REFERENCES users(id)`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS target_release text`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS disposition_reason text`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS customer_visible boolean NOT NULL DEFAULT true`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS idempotency_key text`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS transcript text`);
+    await pool.query(`ALTER TABLE feedback_items ADD COLUMN IF NOT EXISTS transcript_provenance text`);
+    await pool.query(`UPDATE feedback_items SET status = CASE status WHEN 'open' THEN 'new' WHEN 'in_review' THEN 'triaged' WHEN 'planned' THEN 'accepted' WHEN 'done' THEN 'verified' ELSE status END WHERE status IN ('open','in_review','planned','done')`);
+    await pool.query(`UPDATE feedback_items SET stable_id = 'FB-' || lpad(id::text, 8, '0') WHERE stable_id IS NULL`);
+    await pool.query(`ALTER TABLE feedback_items ALTER COLUMN stable_id SET NOT NULL`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS feedback_items_stable_id_idx ON feedback_items(stable_id)`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS feedback_items_user_idempotency_idx ON feedback_items(user_id, idempotency_key) WHERE idempotency_key IS NOT NULL`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS feedback_assets (
+      id serial PRIMARY KEY, feedback_id integer NOT NULL REFERENCES feedback_items(id),
+      project_id integer REFERENCES projects(id), uploaded_by_id integer NOT NULL REFERENCES users(id),
+      kind text NOT NULL, original_name text NOT NULL, safe_name text NOT NULL, media_type text NOT NULL,
+      byte_size bigint NOT NULL, sha256 text NOT NULL, storage_path text NOT NULL,
+      scan_state text NOT NULL DEFAULT 'quarantined', created_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_assets_feedback_idx ON feedback_assets(feedback_id, created_at)`);
+    await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS feedback_assets_feedback_hash_idx ON feedback_assets(feedback_id, sha256)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS feedback_audit_events (
+      id serial PRIMARY KEY, feedback_id integer NOT NULL REFERENCES feedback_items(id),
+      actor_user_id integer NOT NULL REFERENCES users(id), event_type text NOT NULL,
+      before_state jsonb, after_state jsonb, reason text, created_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_audit_feedback_idx ON feedback_audit_events(feedback_id, created_at)`);
+    await pool.query(`CREATE TABLE IF NOT EXISTS feedback_transcription_jobs (
+      id serial PRIMARY KEY, feedback_id integer NOT NULL REFERENCES feedback_items(id),
+      asset_id integer NOT NULL REFERENCES feedback_assets(id), requested_by_id integer NOT NULL REFERENCES users(id),
+      state text NOT NULL DEFAULT 'queued', adapter text NOT NULL, result text, error_code text,
+      attempts integer NOT NULL DEFAULT 0, created_at timestamp NOT NULL DEFAULT now(), updated_at timestamp NOT NULL DEFAULT now()
+    )`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS feedback_transcription_feedback_idx ON feedback_transcription_jobs(feedback_id, created_at)`);
     await pool.query(
       `CREATE INDEX IF NOT EXISTS feedback_items_status_created_idx ON feedback_items (status, created_at DESC)`,
     );
