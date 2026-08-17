@@ -1,8 +1,7 @@
 import { sql } from "drizzle-orm";
 import { pgTable, serial, text, timestamp, integer, jsonb, index, bigint, boolean, uniqueIndex, check } from "drizzle-orm/pg-core";
-import { usersTable } from "./users";
+import { companiesTable, usersTable } from "./users";
 import { projectsTable } from "./projects";
-import { companiesTable } from "./companies";
 
 export const feedbackItemsTable = pgTable("feedback_items", {
   id: serial("id").primaryKey(),
