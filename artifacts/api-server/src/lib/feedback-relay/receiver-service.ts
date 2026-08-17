@@ -122,13 +122,13 @@ export interface ReceiverNonceAuthority {
 type DurableNonceRecord={version:2;binding:{audience:string;keyId:string;nonce:string;timestamp:string;requestId:string;companyId:string;projectId:string;requestSha256:string};state:"reserved"|"committed";tokenSha256:string};
 export class FilesystemReceiverNonceAuthority implements ReceiverNonceAuthority{
   private readonly root:string;
-  constructor(root:string){this.root=canonicalRoot(root);if(!fs.existsSync(this.root)||!fs.statSync(this.root).isDirectory())fail("FEEDBACK_RECEIVER_NONCE_ROOT_REQUIRED","Nonce authority root must already exist");assertTreeNoLinks(this.root);}
+  constructor(root:string){this.root=canonicalRoot(root);if(!fs.existsSync(this.root)||!fs.statSync(this.root).isDirectory())fail("FEEDBACK_RECEIVER_NONCE_ROOT_REQUIRED","Nonce authority root must already exist");assertNoLinks(this.root,this.root);if(fs.lstatSync(this.root).isSymbolicLink())fail("FEEDBACK_RECEIVER_REPARSE_DENIED","Nonce authority root cannot be a link");}
   private key(input:DurableNonceRecord["binding"]){return sha256(JSON.stringify([input.audience,input.keyId,input.nonce,input.companyId,input.projectId]));}
-  private async locked<T>(key:string,work:()=>T|Promise<T>){const lock=path.join(this.root,`${key}.lock`);for(let attempt=0;attempt<200;attempt++){try{fs.mkdirSync(lock);try{return await work();}finally{fs.rmdirSync(lock);}}catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;await new Promise(resolve=>setTimeout(resolve,2));}}return fail("FEEDBACK_RECEIVER_NONCE_BUSY","Nonce authority is busy");}
-  async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`);assertNoLinks(this.root,file);return this.locked(key,()=>{const token=`${key}.${randomUUID()}`;if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.version!==2||!HEX64.test(known.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_SCHEMA_INVALID","Nonce record schema is invalid");if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId||known.state==="reserved")return null;atomicJson(this.root,file,{...known,tokenSha256:sha256(token)});return{token,status:"identical-retry" as const};}const record:DurableNonceRecord={version:2,binding:input,state:"reserved",tokenSha256:sha256(token)};atomicJson(this.root,file,record);return{token,status:"new" as const};});}
-  async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");await this.locked(key,()=>{const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||!HEX64.test(record.tokenSha256)||!timingSafeEqual(Buffer.from(record.tokenSha256,"hex"),Buffer.from(sha256(token),"hex")))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");atomicJson(this.root,file,{...record,state:"committed"});});}
-  async rollback(token:string){const key=token.split(".")[0];if(!HEX64.test(key))return;await this.locked(key,()=>{const file=path.join(this.root,`${key}.json`);if(!fs.existsSync(file))return;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version===2&&record.tokenSha256===sha256(token)&&record.state==="reserved"){fs.unlinkSync(file);syncDirectory(this.root);}});}
-  async recover(input:{key:string;proofSha256:string}){if(!HEX64.test(input.key)||!HEX64.test(input.proofSha256))return false;return this.locked(input.key,()=>{const file=path.join(this.root,`${input.key}.json`);if(!fs.existsSync(file))return false;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||record.tokenSha256!==input.proofSha256)return false;if(record.state==="reserved")atomicJson(this.root,file,{...record,state:"committed"});return true;});}
+  private async locked<T>(key:string,work:(lease:{assertCurrent():void;fence:string})=>T|Promise<T>){return fencedDirectoryLock(this.root,path.join(this.root,`${key}.lock`),`nonce:${key}`,work);}
+  async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`);assertNoLinks(this.root,file);return this.locked(key,lease=>{lease.assertCurrent();const token=`${key}.${randomUUID()}`;if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.version!==2||!HEX64.test(known.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_SCHEMA_INVALID","Nonce record schema is invalid");if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId||known.state==="reserved")return null;lease.assertCurrent();atomicJson(this.root,file,{...known,tokenSha256:sha256(token)});return{token,status:"identical-retry" as const};}const record:DurableNonceRecord={version:2,binding:input,state:"reserved",tokenSha256:sha256(token)};lease.assertCurrent();atomicJson(this.root,file,record);return{token,status:"new" as const};});}
+  async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||!HEX64.test(record.tokenSha256)||!timingSafeEqual(Buffer.from(record.tokenSha256,"hex"),Buffer.from(sha256(token),"hex")))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});});}
+  async rollback(token:string){const key=token.split(".")[0];if(!HEX64.test(key))return;await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`);if(!fs.existsSync(file))return;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version===2&&record.tokenSha256===sha256(token)&&record.state==="reserved"){lease.assertCurrent();fs.unlinkSync(file);syncDirectory(this.root);}});}
+  async recover(input:{key:string;proofSha256:string}){if(!HEX64.test(input.key)||!HEX64.test(input.proofSha256))return false;return this.locked(input.key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${input.key}.json`);if(!fs.existsSync(file))return false;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||record.tokenSha256!==input.proofSha256)return false;if(record.state==="reserved"){lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});}return true;});}
 }
 export type ReceiverFaultHooks = {
   afterNonceReserved?: () => void;
@@ -198,6 +198,25 @@ function ownerIsProvablyDead(owner: LockOwnerV2, now = new Date()) {
   // A live PID cannot prove the original process is alive after PID reuse unless it is this instance.
   return owner.pid === process.pid &&
     (owner.instanceId !== PROCESS_INSTANCE_ID || owner.processStartedAt !== PROCESS_STARTED_AT);
+}
+function ownerlessLockExpired(lock:string,now=Date.now()){try{return now-fs.statSync(lock).mtimeMs>=1_000;}catch{return false;}}
+async function fencedDirectoryLock<T>(root:string,lock:string,identity:string,work:(lease:{assertCurrent():void;fence:string})=>T|Promise<T>):Promise<T>{
+  const ownerPath=path.join(lock,"owner.json"),leaseMs=5_000;
+  for(let attempt=0;attempt<1_000;attempt++){
+    try{
+      fs.mkdirSync(lock);const acquiredAt=new Date(),fence=sha256(`${identity}\n${randomUUID()}\n${acquiredAt.toISOString()}`);
+      const makeOwner=():LockOwnerV2=>({version:2,instanceId:PROCESS_INSTANCE_ID,pid:process.pid,processStartedAt:PROCESS_STARTED_AT,osBootId:OS_BOOT_ID,fence,acquiredAt:acquiredAt.toISOString(),heartbeatAt:new Date().toISOString(),leaseUntil:new Date(Date.now()+leaseMs).toISOString()});
+      atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));let lost=false;
+      const assertCurrent=()=>{if(lost)fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+        if(!current||current.fence!==fence||new Date(current.leaseUntil).getTime()<Date.now()){lost=true;fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");}};
+      const heartbeat=setInterval(()=>{try{assertCurrent();atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));}catch{lost=true;}},Math.floor(leaseMs/3));heartbeat.unref();
+      try{assertCurrent();return await work({assertCurrent,fence});}finally{clearInterval(heartbeat);let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}if(current?.fence===fence)fs.rmSync(lock,{recursive:true,force:false});}
+    }catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;let owner:LockOwnerV2|null=null;try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
+      if((!owner&&ownerlessLockExpired(lock))||(owner&&ownerIsProvablyDead(owner))){const quarantine=`${lock}.stale-${randomUUID()}`;try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch(renameError){if((renameError as NodeJS.ErrnoException).code!=="ENOENT")await new Promise(resolve=>setTimeout(resolve,2));}}
+      else await new Promise(resolve=>setTimeout(resolve,2));
+    }
+  }
+  return fail("FEEDBACK_RECEIVER_LOCK_TIMEOUT","Receiver authority is already being processed");
 }
 const rootFingerprint = (root: string) =>
   sha256(
@@ -481,7 +500,7 @@ export class FeedbackReceiverCustodyService {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
         let owner:LockOwnerV2|null=null;
         try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
-        if(!owner || ownerIsProvablyDead(owner)){
+        if((!owner&&ownerlessLockExpired(lock))||(owner&&ownerIsProvablyDead(owner))){
           const quarantine=`${lock}.stale-${randomUUID()}`;
           try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch(renameError){if((renameError as NodeJS.ErrnoException).code!=="ENOENT")await new Promise(resolve=>setTimeout(resolve,2));}
         } else await new Promise((resolve) => setTimeout(resolve, 2));
@@ -764,7 +783,7 @@ export class FeedbackReceiverCustodyService {
           if(!current||current.fence!==fence||new Date(current.leaseUntil).getTime()<Date.now())fail("FEEDBACK_RECEIVER_FENCE_LOST","Receiver mutation fence was lost");};
         try{assertCurrent();return work({assertCurrent,fence});}finally{let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}if(current?.fence===fence)fs.rmSync(lock,{recursive:true,force:false});}
       }catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;let owner:LockOwnerV2|null=null;try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
-        if(!owner||ownerIsProvablyDead(owner)){const quarantine=`${lock}.stale-${randomUUID()}`;try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch{}}
+        if((!owner&&ownerlessLockExpired(lock))||(owner&&ownerIsProvablyDead(owner))){const quarantine=`${lock}.stale-${randomUUID()}`;try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch{}}
         Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,2);
       }
     }
