@@ -1081,12 +1081,14 @@ void rfiMigrationReady.then((ready) => {
       byte_size bigint NOT NULL, sha256 text NOT NULL, storage_path text NOT NULL,
       scan_state text NOT NULL DEFAULT 'quarantined', scanner_adapter text NOT NULL DEFAULT 'default-deny',
       scanned_at timestamp, retention_hold boolean NOT NULL DEFAULT true, expires_at timestamp,
+      provenance jsonb NOT NULL DEFAULT '{}'::jsonb,
       created_at timestamp NOT NULL DEFAULT now()
     )`);
     await pool.query(`ALTER TABLE feedback_assets ADD COLUMN IF NOT EXISTS scanner_adapter text NOT NULL DEFAULT 'default-deny'`);
     await pool.query(`ALTER TABLE feedback_assets ADD COLUMN IF NOT EXISTS scanned_at timestamp`);
     await pool.query(`ALTER TABLE feedback_assets ADD COLUMN IF NOT EXISTS retention_hold boolean NOT NULL DEFAULT true`);
     await pool.query(`ALTER TABLE feedback_assets ADD COLUMN IF NOT EXISTS expires_at timestamp`);
+    await pool.query(`ALTER TABLE feedback_assets ADD COLUMN IF NOT EXISTS provenance jsonb NOT NULL DEFAULT '{}'::jsonb`);
     await pool.query(`CREATE INDEX IF NOT EXISTS feedback_assets_feedback_idx ON feedback_assets(feedback_id, created_at)`);
     await pool.query(`CREATE UNIQUE INDEX IF NOT EXISTS feedback_assets_feedback_hash_idx ON feedback_assets(feedback_id, sha256)`);
     await pool.query(`CREATE TABLE IF NOT EXISTS feedback_audit_events (

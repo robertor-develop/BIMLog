@@ -82,6 +82,7 @@ export function FeedbackWidget() {
   const timerRef = useRef<number | null>(null);
   const durationRef = useRef(0);
   const dialogRef = useRef<HTMLDivElement | null>(null);
+  const openerRef = useRef<HTMLButtonElement | null>(null);
   const idempotencyRef = useRef(randomKey());
 
   const tt = (en: string, spanish: string) => es ? spanish : en;
@@ -95,7 +96,7 @@ export function FeedbackWidget() {
   useEffect(() => {
     if (!open) return;
     dialogRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") closeFeedback(); };
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") closeFeedback(); if (event.key === "Tab" && dialogRef.current) { const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]),select:not([disabled]),textarea:not([disabled]),input:not([disabled]),audio[controls]')).filter(node => node.offsetParent !== null); if (!focusable.length) return; const first = focusable[0], last = focusable[focusable.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } } };
     window.addEventListener("keydown", closeOnEscape);
     return () => window.removeEventListener("keydown", closeOnEscape);
   }, [open]);
@@ -107,7 +108,7 @@ export function FeedbackWidget() {
 
   function randomKey() { return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`; }
   function terminateMedia() { if (timerRef.current) window.clearInterval(timerRef.current); timerRef.current = null; const recorder = recorderRef.current; if (recorder && recorder.state !== "inactive") { recorder.onstop = null; try { recorder.stop(); } catch { /* already stopping */ } } recorderRef.current = null; streamRef.current?.getTracks().forEach(track => track.stop()); streamRef.current = null; }
-  function closeFeedback() { terminateMedia(); setRecordingState(audioUrl ? "ready" : "idle"); setOpen(false); }
+  function closeFeedback() { if ((message.trim() || files.length) && !window.confirm(tt("Discard this unsent feedback and retained evidence?", "¿Descartar este comentario sin enviar y la evidencia conservada?"))) return; terminateMedia(); setRecordingState(audioUrl ? "ready" : "idle"); setOpen(false); window.setTimeout(() => openerRef.current?.focus(), 0); }
   async function loadMine() { setError(""); const response = await fetch(`${API_BASE}/api/v1/feedback/mine`, { headers: { Authorization: `Bearer ${token}` } }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Your feedback could not be loaded.", "No se pudieron cargar sus comentarios.")); return; } setMine(data.feedback || []); setReviewing(true); }
   async function loadHistory(id: number) { const response = await fetch(`${API_BASE}/api/v1/feedback/${id}/history`, { headers: { Authorization: `Bearer ${token}` } }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("History is unavailable.", "El historial no está disponible.")); return; } setHistory(data.history || []); }
   async function reopen(item: { id: number; version: number }) { const reason = window.prompt(tt("Why should this feedback be reopened?", "¿Por qué se debe reabrir este comentario?")); if (!reason?.trim()) return; const response = await fetch(`${API_BASE}/api/v1/feedback/${item.id}/reopen`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ observedVersion: item.version, reason }) }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Feedback was not reopened.", "No se reabrió el comentario.")); return; } await loadMine(); }
@@ -206,7 +207,7 @@ export function FeedbackWidget() {
         setUploadState(tt("Uploading governed evidence…", "Cargando evidencia controlada…"));
         for (const group of ["audio", "screenshot", "attachment"] as const) {
           const selected = files.filter(file => group === "audio" ? file.name.startsWith("feedback-audio-") : group === "screenshot" ? file.name.startsWith("feedback-capture-") : !file.name.startsWith("feedback-audio-") && !file.name.startsWith("feedback-capture-"));
-          if (!selected.length) continue; const form = new FormData(); selected.forEach(file => form.append("files", file)); form.append("kind", group);
+          if (!selected.length) continue; const form = new FormData(); selected.forEach(file => form.append("files", file)); form.append("kind", group); if (group !== "attachment") form.append("consent", "true");
           const uploaded = await fetch(`${API_BASE}/api/v1/feedback/${feedbackId}/assets`, { method: "POST", headers: { Authorization: `Bearer ${token}` }, body: form });
           const payload = await uploaded.json().catch(() => ({})); if (!uploaded.ok) throw new Error(payload.error || tt("Evidence upload failed safely; retry from your retained files.", "La carga de evidencia falló de forma segura; reintente desde sus archivos conservados."));
         }
@@ -234,6 +235,7 @@ export function FeedbackWidget() {
   return (
     <>
       <button
+        ref={openerRef}
         type="button"
         onClick={() => setOpen(true)}
         aria-label={tt("Send BIMLog feedback", "Enviar comentarios a BIMLog")}

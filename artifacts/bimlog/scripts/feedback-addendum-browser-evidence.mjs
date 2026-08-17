@@ -22,6 +22,15 @@ async function scenario(language, width, fileName) {
       getUserMedia: async () => { throw new DOMException("fixture denied", "NotAllowedError"); },
       getDisplayMedia: async () => { throw new DOMException("fixture denied", "NotAllowedError"); },
     }});
+    const fixture = { id: 801, stableId: "FB-EVIDENCE801", message: language === "es" ? "La captura conserva el contexto y la evidencia." : "Capture keeps context and evidence.", status: "verified", version: 3, dispositionReason: language === "es" ? "Verificado con evidencia local." : "Verified with local evidence.", targetRelease: "v F-1.60.35.8" };
+    window.fetch = async (input, init = {}) => { const url = String(input); const method = String(init.method || "GET"); let body = {};
+      if (url.endsWith("/api/v1/feedback") && method === "POST") body = { success: true, feedback: fixture };
+      else if (url.includes("/assets") && method === "POST") body = { assets: [{ id: 901, scanState: "quarantined" }], scanner: "activation-required" };
+      else if (url.endsWith("/api/v1/feedback/mine")) body = { feedback: [fixture] };
+      else if (url.endsWith("/history")) body = { feedback: fixture, history: [{ id: 1, eventType: "created", createdAt: "2026-08-17T12:00:00.000Z" }, { id: 2, eventType: "triage_updated", reason: fixture.dispositionReason, createdAt: "2026-08-17T12:10:00.000Z" }] };
+      else if (url.endsWith("/reopen") && method === "POST") body = { success: true, feedback: { ...fixture, status: "triaged", version: 4 } };
+      else return new Response(JSON.stringify({ code: "FIXTURE_ROUTE_DENIED" }), { status: 403, headers: { "Content-Type": "application/json" } });
+      return new Response(JSON.stringify(body), { status: method === "POST" ? 201 : 200, headers: { "Content-Type": "application/json" } }); };
   }, { language });
   const page = await context.newPage();
   const pageErrors = []; page.on("pageerror", error => pageErrors.push(error.message));
@@ -43,12 +52,18 @@ async function scenario(language, width, fileName) {
   const dialog = page.getByRole("dialog");
   const box = await dialog.boundingBox(); if (!box || box.x < 0 || box.x + box.width > width) throw new Error(`${language}-${width}: dialog overflow`);
   assertions.push(`${language}-${width}: dialog contained`);
+  await page.getByRole("button", { name: language === "es" ? "Enviar" : "Send", exact: true }).click();
+  await page.getByText(/FB-EVIDENCE801/).waitFor(); assertions.push(`${language}-${width}: successful governed submission visible`);
+  await page.waitForTimeout(1000); await opener.click(); await page.getByRole("button", { name: language === "es" ? "Mis comentarios" : "My feedback" }).click();
+  await page.getByText("FB-EVIDENCE801").waitFor(); await page.getByRole("button", { name: language === "es" ? "Historial" : "History" }).click();
+  await page.getByText("triage_updated").waitFor(); assertions.push(`${language}-${width}: customer backlog and history visible`);
+  await page.screenshot({ path: path.join(output, fileName.replace(".png", "-backlog.png")), fullPage: true });
   await context.close();
 }
 
 await scenario("en", 1440, "feedback-en-desktop.png");
 await scenario("es", 390, "feedback-es-390.png");
 await browser.close();
-const files = ["feedback-en-desktop.png", "feedback-es-390.png"].map(name => ({ name, sha256: createHash("sha256").update(readFileSync(path.join(output, name))).digest("hex") }));
+const files = ["feedback-en-desktop.png", "feedback-en-desktop-backlog.png", "feedback-es-390.png", "feedback-es-390-backlog.png"].map(name => ({ name, sha256: createHash("sha256").update(readFileSync(path.join(output, name))).digest("hex") }));
 writeFileSync(path.join(output, "manifest.json"), `${JSON.stringify({ label: "BIMLog — Feedback Addendum Writer", release: "v F-1.60.35.8", sourceCommit: process.env.BIMLOG_FEEDBACK_SOURCE_COMMIT || "uncommitted-follow-up", runtime: { playwrightCore: "1.55.0", chromium: chromiumVersion }, assertions, files, limits: "Actual production App and FeedbackWidget on an intentionally nonexistent isolated route, with local browser permission-denial and file fixtures; no API, DB, scanner, transcription provider, or customer integration claim." }, null, 2)}\n`);
 console.log(`feedback browser evidence: ${assertions.length}/${assertions.length} passed`);

@@ -55,6 +55,7 @@ export const feedbackAssetsTable = pgTable("feedback_assets", {
   scannedAt: timestamp("scanned_at"),
   retentionHold: boolean("retention_hold").default(true).notNull(),
   expiresAt: timestamp("expires_at"),
+  provenance: jsonb("provenance").$type<Record<string, unknown>>().default({}).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 }, (table) => ({
   feedbackIdx: index("feedback_assets_feedback_idx").on(table.feedbackId, table.createdAt),

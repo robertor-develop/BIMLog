@@ -10,7 +10,7 @@ import { storage } from "../lib/storage-adapter";
 import { FEEDBACK_MAX_FILE_BYTES, inspectFeedbackEvidence } from "../lib/feedback-evidence-contract";
 
 const router = Router();
-const upload = boundedMultipart(createMemoryUpload({ fileSize: FEEDBACK_MAX_FILE_BYTES, files: 10, fields: 1, parts: 11 }).array("files", 10));
+const upload = boundedMultipart(createMemoryUpload({ fileSize: FEEDBACK_MAX_FILE_BYTES, files: 10, fields: 3, parts: 13 }).array("files", 10));
 const TYPES = new Set(["bug", "workflow", "idea", "question", "other"]);
 const PRIORITIES = new Set(["low", "normal", "high", "urgent"]);
 const STATUSES = new Set(["new", "triaged", "accepted", "in_progress", "blocked", "fixed", "verified", "rejected", "deferred"]);
@@ -84,6 +84,8 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
     const feedback = await accessible(id, user); if (!feedback) return res.status(403).json({ code: "FEEDBACK_WRITE_DENIED", error: "You cannot add files to this feedback" });
     const files = Array.isArray(req.files) ? req.files : [], kind = bounded(req.body.kind || "attachment", 20);
     if (!files.length || !["attachment", "screenshot", "audio"].includes(kind)) return res.status(400).json({ code: "FEEDBACK_ASSET_INVALID", error: "Supported files and a valid asset kind are required" });
+    const consent = req.body.consent === "true";
+    if (["audio", "screenshot"].includes(kind) && !consent) return res.status(400).json({ code: "FEEDBACK_CAPTURE_CONSENT_REQUIRED", error: "Explicit evidence capture consent is required" });
     const pending: Array<{ storagePath: string; checked: ReturnType<typeof inspectFeedbackEvidence>; file: Express.Multer.File }> = [];
     for (const file of files) {
       const checked = inspectFeedbackEvidence(file), storagePath = await storage.upload(file.buffer, feedback.projectId ?? `feedback-${id}`, checked.name); stored.push(storagePath); pending.push({ storagePath, checked, file });
@@ -95,7 +97,8 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
       for (const item of pending) {
         const [asset] = await tx.insert(feedbackAssetsTable).values({ feedbackId: id, projectId: feedback.projectId, uploadedById: user.userId, kind,
           originalName: bounded(item.file.originalname, 255), safeName: item.checked.name, mediaType: item.checked.mediaType, byteSize: item.file.size,
-          sha256: item.checked.sha256, storagePath: item.storagePath, scanState, scannerAdapter, scannedAt: scanState === "clean" ? new Date() : null }).returning();
+          sha256: item.checked.sha256, storagePath: item.storagePath, scanState, scannerAdapter, scannedAt: scanState === "clean" ? new Date() : null,
+          provenance: { source: kind === "screenshot" ? "browser-display-capture-or-user-import" : kind === "audio" ? "browser-microphone" : "user-file-import", consentRecorded: consent, receivedAt: new Date().toISOString() } }).returning();
         rows.push({ id: asset.id, kind, name: asset.safeName, mediaType: asset.mediaType, byteSize: asset.byteSize, sha256: asset.sha256, scanState });
       }
       await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "assets_added", afterState: { count: rows.length, scannerAdapter, scanState } });
@@ -194,7 +197,7 @@ router.get("/feedback/admin", authMiddleware, isSuperAdminMiddleware, async (_re
 
 router.get("/feedback/admin/export.csv", authMiddleware, isSuperAdminMiddleware, async (_req, res) => {
   const rows = await db.select().from(feedbackItemsTable).orderBy(desc(feedbackItemsTable.createdAt)).limit(5000);
-  const cell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""').replace(/[\r\n]+/g, " ")}"`;
+  const cell = (value: unknown) => { const normalized = String(value ?? "").replace(/[\r\n]+/g, " "); const neutral = /^[\s]*[=+\-@]/.test(normalized) ? `'${normalized}` : normalized; return `"${neutral.replace(/"/g, '""')}"`; };
   const header = ["Feedback ID", "Created", "Type", "Priority", "State", "Module", "Description", "Target release", "Decision reason", "Customer visible"];
   const lines = [header.map(cell).join(","), ...rows.map(row => [row.stableId, row.createdAt.toISOString(), row.feedbackType, row.priority, row.status, row.module, row.message, row.targetRelease, row.dispositionReason, row.customerVisible].map(cell).join(","))];
   res.setHeader("Content-Type", "text/csv; charset=utf-8"); res.setHeader("Content-Disposition", "attachment; filename=feedback-review-v-F-1.60.35.8.csv");
