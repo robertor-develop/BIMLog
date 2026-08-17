@@ -13,6 +13,7 @@ const relayCatalog=async()=> (await pool.query(`SELECT jsonb_agg(x ORDER BY x.ki
 
 try {
   await pool.query(`DROP TABLE IF EXISTS feedback_relay_deletion_proofs,feedback_relay_temporary_objects,feedback_relay_holds,feedback_relay_receipts,feedback_relay_nonces,feedback_relay_custody_events,feedback_relay_jobs,feedback_transcription_jobs,feedback_capture_consents,feedback_audit_events,feedback_assets,feedback_items,project_members,projects,users,companies CASCADE`);
+  await pool.query(`DROP VIEW IF EXISTS feedback_relay_nonces_legacy_authority_idx,feedback_relay_nonces_authority_idx`);
   await pool.query(`CREATE TABLE companies(id integer PRIMARY KEY,name text NOT NULL); CREATE TABLE users(id integer PRIMARY KEY,email text NOT NULL,full_name text NOT NULL,company_id integer NOT NULL REFERENCES companies(id)); CREATE TABLE projects(id integer PRIMARY KEY,name text NOT NULL,code text NOT NULL,status text NOT NULL,created_by_id integer NOT NULL REFERENCES users(id),created_at timestamp NOT NULL DEFAULT now(),updated_at timestamp NOT NULL DEFAULT now()); INSERT INTO companies VALUES(1,'A'),(2,'B'); INSERT INTO users VALUES(11,'a@test.invalid','A',1),(22,'b@test.invalid','B',2); INSERT INTO projects VALUES(101,'A project','A-1','active',11,now(),now()),(202,'B project','B-1','active',22,now(),now()); CREATE VIEW feedback_relay_nonces AS SELECT 1::bigint id`);
   await assert.rejects(() => ensureFeedbackSchema(pool));
   assert.equal((await pool.query(`SELECT to_regclass('feedback_relay_jobs') value`)).rows[0].value, null, "failed migration must leave no created relay tables");
@@ -20,19 +21,36 @@ try {
 
   const owner = await pool.connect(); await owner.query("BEGIN"); await owner.query(`SELECT pg_advisory_xact_lock(${FEEDBACK_SCHEMA_ADVISORY_LOCK})`);
   let settled = false; const blocked = ensureFeedbackSchema(pool).finally(() => { settled = true; }); await new Promise(resolve => setTimeout(resolve, 100)); assert.equal(settled, false); await owner.query("COMMIT"); owner.release(); await blocked;
-  await pool.query(`INSERT INTO feedback_items(user_id,project_id,feedback_type,page_url,message,stable_id,company_id) VALUES(11,101,'bug','/fixture','preserve me','FB-TEST',1); INSERT INTO feedback_assets(feedback_id,project_id,uploaded_by_id,kind,original_name,safe_name,media_type,byte_size,sha256,storage_path,scan_state,scanned_at) VALUES(1,101,11,'attachment','a.txt','a.txt','text/plain',5,$1,'opaque','clean',now())`, [digest]);
+  const canonicalFixture = await pool.connect();
+  try {
+    await canonicalFixture.query("BEGIN");
+    await canonicalFixture.query(`INSERT INTO feedback_items(user_id,project_id,feedback_type,page_url,message,stable_id,company_id) VALUES(11,101,'bug','/fixture','preserve me','FB-TEST',1)`);
+    await canonicalFixture.query(`INSERT INTO feedback_assets(feedback_id,project_id,uploaded_by_id,kind,original_name,safe_name,media_type,byte_size,sha256,storage_path,scan_state,scanned_at) VALUES(1,101,11,'attachment','a.txt','a.txt','text/plain',5,$1,'opaque','clean',now())`, [digest]);
+    await canonicalFixture.query("COMMIT");
+  } catch (error) {
+    await canonicalFixture.query("ROLLBACK");
+    throw error;
+  } finally { canonicalFixture.release(); }
   await ensureFeedbackSchema(pool); assert.equal((await pool.query(`SELECT message FROM feedback_items WHERE stable_id='FB-TEST'`)).rows[0].message, "preserve me");
-  await pool.query(`DROP TABLE feedback_relay_deletion_proofs,feedback_relay_temporary_objects,feedback_relay_holds,feedback_relay_receipts,feedback_relay_nonces,feedback_relay_custody_events,feedback_relay_jobs CASCADE;
+  const predecessor = await pool.connect();
+  try {
+    await predecessor.query("BEGIN");
+    await predecessor.query(`DROP TABLE feedback_relay_deletion_proofs,feedback_relay_temporary_objects,feedback_relay_holds,feedback_relay_receipts,feedback_relay_nonces,feedback_relay_custody_events,feedback_relay_jobs CASCADE;
     CREATE TABLE feedback_relay_jobs(id bigserial PRIMARY KEY,feedback_id integer NOT NULL REFERENCES feedback_items(id),asset_id integer NOT NULL REFERENCES feedback_assets(id),company_id integer NOT NULL REFERENCES companies(id),project_id integer REFERENCES projects(id),state text NOT NULL DEFAULT 'queued',version integer NOT NULL DEFAULT 1,destination_id text NOT NULL,object_id text NOT NULL,policy_id text NOT NULL,policy_version text NOT NULL,policy_sha256 text NOT NULL,attempts integer NOT NULL DEFAULT 0,next_attempt_at timestamp,lease_owner text,lease_token text,lease_expires_at timestamp,fencing_token bigint NOT NULL DEFAULT 0,last_error_code text,created_at timestamp NOT NULL DEFAULT now(),updated_at timestamp NOT NULL DEFAULT now());
     CREATE TABLE feedback_relay_custody_events(id bigserial PRIMARY KEY,job_id bigint NOT NULL REFERENCES feedback_relay_jobs(id),sequence integer NOT NULL,event_id text NOT NULL,event_type text NOT NULL,from_state text,to_state text NOT NULL,job_version integer NOT NULL,fencing_token bigint NOT NULL,actor_type text NOT NULL,actor_id text,reason_code text,metadata jsonb NOT NULL DEFAULT '{}',occurred_at timestamp NOT NULL DEFAULT now());
     CREATE TABLE feedback_relay_nonces(id bigserial PRIMARY KEY,audience text NOT NULL,key_id text NOT NULL,nonce text NOT NULL,request_id text NOT NULL,request_timestamp timestamp NOT NULL,consumed_at timestamp NOT NULL DEFAULT now(),expires_at timestamp NOT NULL);
     CREATE TABLE feedback_relay_receipts(id bigserial PRIMARY KEY,job_id bigint NOT NULL REFERENCES feedback_relay_jobs(id),protocol_version text NOT NULL,request_id text NOT NULL,request_nonce text NOT NULL,destination_id text NOT NULL,object_id text NOT NULL,byte_count bigint NOT NULL,sha256 text NOT NULL,received_at timestamp NOT NULL,receiver_key_id text NOT NULL,canonical_sha256 text NOT NULL,signature text NOT NULL,verified_at timestamp NOT NULL,readback_verified_at timestamp,readback_sha256 text,created_at timestamp NOT NULL DEFAULT now());
     CREATE TABLE feedback_relay_holds(id bigserial PRIMARY KEY,job_id bigint NOT NULL REFERENCES feedback_relay_jobs(id),hold_key text NOT NULL,reason text NOT NULL,placed_by_user_id integer REFERENCES users(id),placed_at timestamp NOT NULL DEFAULT now(),released_by_user_id integer REFERENCES users(id),released_at timestamp,release_reason text);
     CREATE TABLE feedback_relay_temporary_objects(id bigserial PRIMARY KEY,job_id bigint NOT NULL REFERENCES feedback_relay_jobs(id),storage_backend text NOT NULL,storage_key text NOT NULL,byte_count bigint NOT NULL,sha256 text NOT NULL,encrypted boolean NOT NULL,created_at timestamp NOT NULL DEFAULT now(),expires_at timestamp NOT NULL,delete_started_at timestamp,deleted_at timestamp,absence_verified_at timestamp,delete_fencing_token bigint);
-    CREATE TABLE feedback_relay_deletion_proofs(id bigserial PRIMARY KEY,job_id bigint NOT NULL REFERENCES feedback_relay_jobs(id),temporary_object_id bigint NOT NULL REFERENCES feedback_relay_temporary_objects(id),receipt_id bigint NOT NULL REFERENCES feedback_relay_receipts(id),approval_id text NOT NULL,approved_by_user_id integer NOT NULL REFERENCES users(id),inventory jsonb NOT NULL,inventory_sha256 text NOT NULL,deleted_at timestamp NOT NULL,absence_verified_at timestamp NOT NULL,proof_sha256 text NOT NULL,created_at timestamp NOT NULL DEFAULT now());
-    INSERT INTO feedback_relay_jobs(feedback_id,asset_id,company_id,project_id,state,destination_id,object_id,policy_id,policy_version,policy_sha256) VALUES(1,1,1,101,'delivered','legacy-receiver','legacy-object','legacy-policy','1',$1);
-    INSERT INTO feedback_relay_nonces(audience,key_id,nonce,request_id,request_timestamp,expires_at) VALUES('legacy','legacy-key','legacy-nonce','legacy-request',now(),now()+interval '1 hour')`,[digest]);
-  await pool.query(`CREATE VIEW feedback_relay_nonces_legacy_authority_idx AS SELECT 1 marker`); await assert.rejects(() => ensureFeedbackSchema(pool)); assert.equal((await pool.query(`SELECT count(*)::int n FROM information_schema.columns WHERE table_name='feedback_relay_jobs' AND column_name='relay_mode'`)).rows[0].n,0,"forced mid-upgrade rollback must restore exact predecessor catalog"); await pool.query(`DROP VIEW feedback_relay_nonces_legacy_authority_idx`);
+    CREATE TABLE feedback_relay_deletion_proofs(id bigserial PRIMARY KEY,job_id bigint NOT NULL REFERENCES feedback_relay_jobs(id),temporary_object_id bigint NOT NULL REFERENCES feedback_relay_temporary_objects(id),receipt_id bigint NOT NULL REFERENCES feedback_relay_receipts(id),approval_id text NOT NULL,approved_by_user_id integer NOT NULL REFERENCES users(id),inventory jsonb NOT NULL,inventory_sha256 text NOT NULL,deleted_at timestamp NOT NULL,absence_verified_at timestamp NOT NULL,proof_sha256 text NOT NULL,created_at timestamp NOT NULL DEFAULT now())`);
+    await predecessor.query(`INSERT INTO feedback_relay_jobs(feedback_id,asset_id,company_id,project_id,state,destination_id,object_id,policy_id,policy_version,policy_sha256) VALUES(1,1,1,101,'delivered','legacy-receiver','legacy-object','legacy-policy','1',$1)`, [digest]);
+    await predecessor.query(`INSERT INTO feedback_relay_nonces(audience,key_id,nonce,request_id,request_timestamp,expires_at) VALUES('legacy','legacy-key','legacy-nonce','legacy-request',now(),now()+interval '1 hour')`);
+    await predecessor.query("COMMIT");
+  } catch (error) {
+    await predecessor.query("ROLLBACK");
+    throw error;
+  } finally { predecessor.release(); }
+  await pool.query(`CREATE VIEW feedback_relay_nonces_authority_idx AS SELECT 1 marker`); await assert.rejects(() => ensureFeedbackSchema(pool)); assert.equal((await pool.query(`SELECT count(*)::int n FROM information_schema.columns WHERE table_name='feedback_relay_jobs' AND column_name='relay_mode'`)).rows[0].n,0,"forced mid-upgrade rollback must restore exact predecessor catalog"); await pool.query(`DROP VIEW feedback_relay_nonces_authority_idx`);
   await ensureFeedbackSchema(pool); const upgradedCatalog=await relayCatalog(); await ensureFeedbackSchema(pool); const repeatedCatalog=await relayCatalog(); assert.deepEqual(repeatedCatalog,upgradedCatalog,"repeated upgrade must preserve exact relay catalog");
   const upgraded=await pool.query(`SELECT relay_mode,state,source_byte_count,source_sha256 FROM feedback_relay_jobs WHERE object_id='legacy-object'`); assert.equal(upgraded.rows[0].relay_mode,'queue'); assert.equal(upgraded.rows[0].state,'manual-review'); assert.equal(upgraded.rows[0].source_byte_count,'5'); assert.equal(upgraded.rows[0].source_sha256,digest); assert.equal((await pool.query(`SELECT authority_version FROM feedback_relay_nonces WHERE request_id='legacy-request'`)).rows[0].authority_version,'legacy');
   await pool.query(`DROP TABLE feedback_relay_deletion_proofs,feedback_relay_temporary_objects,feedback_relay_holds,feedback_relay_receipts,feedback_relay_nonces,feedback_relay_custody_events,feedback_relay_jobs CASCADE`); await ensureFeedbackSchema(pool); assert.deepEqual(await relayCatalog(),upgradedCatalog,"upgraded and fresh relay catalogs must be identical");
@@ -71,4 +89,8 @@ try {
   await pool.query(`SELECT feedback_relay_transition_job($1,5,'lease-a',1,'delivered','event-6','delivered','worker','worker-a','temporary-custody-deleted')`,[jobId]);
   assert.equal((await pool.query(`SELECT count(*)::int n FROM feedback_relay_custody_events WHERE job_id=$1`,[jobId])).rows[0].n,6);
   console.log("feedback relay schema DB behavior: 27/27 passed");
-} finally { await pool.end(); }
+} finally {
+  await pool.query(`DROP TABLE IF EXISTS feedback_relay_deletion_proofs,feedback_relay_temporary_objects,feedback_relay_holds,feedback_relay_receipts,feedback_relay_nonces,feedback_relay_custody_events,feedback_relay_jobs CASCADE`);
+  await pool.query(`DROP VIEW IF EXISTS feedback_relay_nonces_legacy_authority_idx,feedback_relay_nonces_authority_idx`);
+  await pool.end();
+}
