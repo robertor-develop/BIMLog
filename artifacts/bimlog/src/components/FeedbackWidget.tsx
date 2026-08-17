@@ -6,7 +6,6 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
-const fileSha256 = async (file: File) => Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", await file.arrayBuffer()))).map(value => value.toString(16).padStart(2, "0")).join("");
 
 const PUBLIC_PATHS = new Set([
   "/",
@@ -79,6 +78,7 @@ export function FeedbackWidget() {
   const [history, setHistory] = useState<Array<{ id: number; eventType: string; reason?: string; createdAt: string }>>([]);
   const [reportedAssets, setReportedAssets] = useState<Array<{ id: number; name: string; scanState: string; downloadUrl?: string }>>([]);
   const [captureConsents, setCaptureConsents] = useState<{ audio?: string; screenshot?: string }>({});
+  const fileIdsRef = useRef(new WeakMap<File,string>());
   const [transformations, setTransformations] = useState<Record<string, Record<string, unknown>>>({});
   const recorderRef = useRef<MediaRecorder | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -100,9 +100,11 @@ export function FeedbackWidget() {
   useEffect(() => {
     if (!open) return;
     dialogRef.current?.focus();
-    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") closeFeedback(); if (event.key === "Tab" && dialogRef.current) { const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]),select:not([disabled]),textarea:not([disabled]),input:not([disabled]),audio[controls]')).filter(node => node.offsetParent !== null); if (!focusable.length) return; const first = focusable[0], last = focusable[focusable.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } } };
+    const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape") closeFeedback(); if (event.key === "Tab" && dialogRef.current) { const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]),select:not([disabled]),textarea:not([disabled]),input:not([disabled]),audio[controls],a[href],summary,[tabindex]:not([tabindex="-1"])')).filter(node => node.offsetParent !== null); if (!focusable.length) return; const first = focusable[0], last = focusable[focusable.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } } };
     window.addEventListener("keydown", closeOnEscape);
-    return () => window.removeEventListener("keydown", closeOnEscape);
+    const restored: Array<[HTMLElement, boolean, string | null]> = []; let child: HTMLElement | null = dialogRef.current;
+    while (child?.parentElement && child.parentElement !== document.body) { for (const sibling of Array.from(child.parentElement.children)) if (sibling !== child && sibling instanceof HTMLElement) { restored.push([sibling, sibling.inert, sibling.getAttribute("aria-hidden")]); sibling.inert = true; sibling.setAttribute("aria-hidden", "true"); } child = child.parentElement; }
+    return () => { window.removeEventListener("keydown", closeOnEscape); for (const [node, inert, hidden] of restored) { node.inert = inert; if (hidden === null) node.removeAttribute("aria-hidden"); else node.setAttribute("aria-hidden", hidden); } };
   }, [open]);
 
   const projectId = useMemo(() => getProjectId(location), [location]);
@@ -112,15 +114,18 @@ export function FeedbackWidget() {
 
   function randomKey() { return globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random()}`; }
   function terminateMedia() { if (timerRef.current) window.clearInterval(timerRef.current); timerRef.current = null; const recorder = recorderRef.current; if (recorder && recorder.state !== "inactive") { recorder.onstop = null; try { recorder.stop(); } catch { /* already stopping */ } } recorderRef.current = null; streamRef.current?.getTracks().forEach(track => track.stop()); streamRef.current = null; }
-  function closeFeedback() { if ((message.trim() || files.length) && !window.confirm(tt("Discard this unsent feedback and retained evidence?", "¿Descartar este comentario sin enviar y la evidencia conservada?"))) return; terminateMedia(); setRecordingState(audioUrl ? "ready" : "idle"); setOpen(false); window.setTimeout(() => openerRef.current?.focus(), 0); }
+  async function revokeCaptureConsents() { const ids=Object.values(captureConsents); setCaptureConsents({}); await Promise.allSettled(ids.map(id=>fetch(`${API_BASE}/api/v1/feedback/capture-consents/${id}/revoke`,{method:"POST",headers:{Authorization:`Bearer ${token}`}}))); }
+  function clearReviewScope() { setMine([]); setHistory([]); setReportedAssets([]); setReviewing(false); }
+  function closeFeedback() { if ((message.trim() || files.length) && !window.confirm(tt("Discard this unsent feedback and retained evidence?", "¿Descartar este comentario sin enviar y la evidencia conservada?"))) return; terminateMedia(); setRecordingState(audioUrl ? "ready" : "idle"); void revokeCaptureConsents(); setOpen(false); window.setTimeout(() => openerRef.current?.focus(), 0); }
   async function grantCaptureConsent(captureKind: "audio" | "screenshot") { const purpose = tt("Attach user-initiated evidence to this feedback for authorized review. You can revoke by discarding it before submission.", "Adjuntar evidencia iniciada por usted a este comentario para revisión autorizada. Puede revocarla descartándola antes de enviar."); if (!window.confirm(`${tt("Capture consent", "Consentimiento de captura")}\n\n${purpose}`)) return; const response = await fetch(`${API_BASE}/api/v1/feedback/capture-consents`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ captureKind, purpose, accepted: true }) }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Consent could not be recorded.", "No se pudo registrar el consentimiento.")); return; } setCaptureConsents(current => ({ ...current, [captureKind]: data.consent.id })); }
-  async function loadMine() { setError(""); const response = await fetch(`${API_BASE}/api/v1/feedback/mine`, { headers: { Authorization: `Bearer ${token}` } }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Your feedback could not be loaded.", "No se pudieron cargar sus comentarios.")); return; } setMine(data.feedback || []); setReviewing(true); }
-  async function loadHistory(id: number) { const headers = { Authorization: `Bearer ${token}` }; const [historyResponse, assetResponse] = await Promise.all([fetch(`${API_BASE}/api/v1/feedback/${id}/history`, { headers }), fetch(`${API_BASE}/api/v1/feedback/${id}/assets`, { headers })]); const data = await historyResponse.json().catch(() => ({})); const assetData = await assetResponse.json().catch(() => ({})); if (!historyResponse.ok || !assetResponse.ok) { setError(data.error || assetData.error || tt("History is unavailable.", "El historial no está disponible.")); return; } setHistory(data.history || []); setReportedAssets(assetData.assets || []); }
+  async function loadMine() { setError(""); const response = await fetch(`${API_BASE}/api/v1/feedback/mine`, { headers: { Authorization: `Bearer ${token}` } }); const data = await response.json().catch(() => ({})); if (!response.ok) { if([401,403].includes(response.status))clearReviewScope(); setError(data.error || tt("Your feedback could not be loaded.", "No se pudieron cargar sus comentarios.")); return; } setMine(data.feedback || []); setHistory([]); setReportedAssets([]); setReviewing(true); }
+  async function loadHistory(id: number) { const headers = { Authorization: `Bearer ${token}` }; const [historyResponse, assetResponse] = await Promise.all([fetch(`${API_BASE}/api/v1/feedback/${id}/history`, { headers }), fetch(`${API_BASE}/api/v1/feedback/${id}/assets`, { headers })]); const data = await historyResponse.json().catch(() => ({})); const assetData = await assetResponse.json().catch(() => ({})); if (!historyResponse.ok || !assetResponse.ok) { if([historyResponse.status,assetResponse.status].some(status=>[401,403].includes(status)))clearReviewScope(); setError(data.error || assetData.error || tt("History is unavailable.", "El historial no está disponible.")); return; } setHistory(data.history || []); setReportedAssets(assetData.assets || []); }
   async function reopen(item: { id: number; version: number }) { const reason = window.prompt(tt("Why should this feedback be reopened?", "¿Por qué se debe reabrir este comentario?")); if (!reason?.trim()) return; const response = await fetch(`${API_BASE}/api/v1/feedback/${item.id}/reopen`, { method: "POST", headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` }, body: JSON.stringify({ observedVersion: item.version, reason }) }); const data = await response.json().catch(() => ({})); if (!response.ok) { setError(data.error || tt("Feedback was not reopened.", "No se reabrió el comentario.")); return; } await loadMine(); }
   function addFiles(incoming: File[]) {
     const supported = /\.(pdf|docx?|xlsx?|csv|pptx?|png|jpe?g|txt|log|json|webm|ogg|wav|m4a)$/i;
     const accepted = incoming.filter(file => file.size > 0 && file.size <= 20 * 1024 * 1024 && supported.test(file.name));
     if (accepted.length !== incoming.length) setError(tt("Some files were refused. Use a supported type up to 20 MB.", "Se rechazaron algunos archivos. Use un tipo compatible de hasta 20 MB."));
+    for (const file of accepted) if (!fileIdsRef.current.has(file)) fileIdsRef.current.set(file, randomKey());
     setFiles(current => [...current, ...accepted].slice(0, 10));
   }
 
@@ -142,7 +147,7 @@ export function FeedbackWidget() {
   }
   function pauseRecording() { const recorder = recorderRef.current; if (!recorder) return; if (recorder.state === "recording") { recorder.pause(); setRecordingState("paused"); } else if (recorder.state === "paused") { recorder.resume(); setRecordingState("recording"); } }
   function stopRecording() { if (timerRef.current) window.clearInterval(timerRef.current); timerRef.current = null; recorderRef.current?.stop(); streamRef.current?.getTracks().forEach(track => track.stop()); }
-  function discardRecording() { if (timerRef.current) window.clearInterval(timerRef.current); const recorder = recorderRef.current; if (recorder && recorder.state !== "inactive") { recorder.onstop = null; recorder.stop(); } streamRef.current?.getTracks().forEach(track => track.stop()); setFiles(current => current.filter(file => !file.name.startsWith("feedback-audio-"))); if (audioUrl) URL.revokeObjectURL(audioUrl); setAudioUrl(""); setDuration(0); setRecordingState("idle"); }
+  function discardRecording() { if (timerRef.current) window.clearInterval(timerRef.current); const recorder = recorderRef.current; if (recorder && recorder.state !== "inactive") { recorder.onstop = null; recorder.stop(); } streamRef.current?.getTracks().forEach(track => track.stop()); setFiles(current => current.filter(file => !file.name.startsWith("feedback-audio-"))); if (audioUrl) URL.revokeObjectURL(audioUrl); setAudioUrl(""); setDuration(0); setRecordingState("idle"); const consent=captureConsents.audio;if(consent){setCaptureConsents(current=>({...current,audio:undefined}));void fetch(`${API_BASE}/api/v1/feedback/capture-consents/${consent}/revoke`,{method:"POST",headers:{Authorization:`Bearer ${token}`}});} }
 
   async function captureScreen() {
     setError("");
@@ -214,9 +219,8 @@ export function FeedbackWidget() {
         setUploadState(tt("Uploading governed evidence…", "Cargando evidencia controlada…"));
         for (const group of ["audio", "screenshot", "attachment"] as const) {
           const selected = files.filter(file => group === "audio" ? file.name.startsWith("feedback-audio-") : group === "screenshot" ? file.name.startsWith("feedback-capture-") : !file.name.startsWith("feedback-audio-") && !file.name.startsWith("feedback-capture-"));
-          for (const [fileIndex, file] of selected.entries()) {
-            const identity = new File([JSON.stringify({ group, fileIndex, name: file.name, size: file.size, lastModified: file.lastModified })], "identity.json");
-            const uploadKey = `${idempotencyRef.current}:${await fileSha256(identity)}`; const form = new FormData(); form.append("files", file); form.append("kind", group);
+          for (const file of selected) {
+            const uploadKey = `${idempotencyRef.current}:${fileIdsRef.current.get(file) || randomKey()}`; const form = new FormData(); form.append("files", file); form.append("kind", group);
             if (group !== "attachment") { const consentId = captureConsents[group]; if (!consentId) throw new Error(tt("Capture consent expired; grant consent again before uploading.", "El consentimiento de captura venció; concédalo nuevamente antes de cargar.")); form.append("consentId", consentId); }
             form.append("transformations", JSON.stringify({ [uploadKey]: transformations[file.name] || { origin: group === "audio" ? "browser-microphone" : group === "screenshot" ? "browser-display-capture" : "user-file-import" } }));
             const uploaded = await fetch(`${API_BASE}/api/v1/feedback/${feedbackId}/assets`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Idempotency-Key": uploadKey }, body: form });
@@ -225,7 +229,7 @@ export function FeedbackWidget() {
         }
       }
       setMessage("");
-      setFiles([]); discardRecording(); idempotencyRef.current = randomKey(); setUploadState("");
+      setFiles([]); terminateMedia(); if(audioUrl)URL.revokeObjectURL(audioUrl); setAudioUrl("");setDuration(0);setRecordingState("idle");setCaptureConsents({}); idempotencyRef.current = randomKey(); setUploadState("");
       setSuccess(tt(`Sent as ${data.feedback?.stableId || "feedback"}.`, `Enviado como ${data.feedback?.stableId || "comentario"}.`));
       setTimeout(() => { terminateMedia(); setOpen(false); window.setTimeout(() => openerRef.current?.focus(), 0); }, 900);
     } catch (err) {
@@ -298,7 +302,8 @@ export function FeedbackWidget() {
               border: "1px solid hsl(var(--border))",
               borderRadius: 8,
               boxShadow: "0 18px 48px rgba(15, 23, 42, 0.28)",
-              overflow: "hidden",
+              maxHeight: "calc(100dvh - 24px)",
+              overflowY: "auto",
             }}
           >
             <div style={{ background: "#1e3a5f", color: "white", padding: "14px 16px", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
@@ -388,8 +393,8 @@ export function FeedbackWidget() {
                 <span>{tt("BIMLog will include this page, module, browser, and build context so authorized reviewers can reproduce the issue.", "BIMLog incluirá el contexto de página, módulo, navegador y versión para que revisores autorizados reproduzcan el problema.")}</span>
               </div>
 
-              {error && <div style={{ color: "#b91c1c", fontSize: 12, marginTop: 10 }}>{error}</div>}
-              {success && <div style={{ color: "#15803d", fontSize: 12, marginTop: 10 }}>{success}</div>}
+              {error && <div role="alert" aria-live="assertive" style={{ color: "#b91c1c", fontSize: 12, marginTop: 10 }}>{error}</div>}
+              {success && <div role="status" aria-live="polite" style={{ color: "#15803d", fontSize: 12, marginTop: 10 }}>{success}</div>}
               {uploadState && <div role="status" style={{ fontSize: 12, marginTop: 10 }}>{uploadState}</div>}
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: 10, marginTop: 14 }}>
