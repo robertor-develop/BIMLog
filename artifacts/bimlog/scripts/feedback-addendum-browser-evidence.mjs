@@ -42,11 +42,11 @@ async function scenario(language, width, fileName) {
   if (!await opener.count()) { await page.screenshot({ path: path.join(output, `diagnostic-${language}-${width}.png`), fullPage: true }); throw new Error(`${language}-${width}: feedback opener absent at ${page.url()} errors=${pageErrors.join(" | ")} body=${(await page.locator("body").innerText()).slice(0, 240)}`); }
   await opener.click();
   await page.getByRole("textbox").fill(language === "es" ? "La captura conserva el contexto y la evidencia." : "Capture keeps context and evidence.");
-  await page.getByText(language === "es" ? "Revisar consentimiento de voz" : "Review voice consent").click(); await page.getByText(language === "es" ? "consentimiento de voz registrado" : "voice consent recorded").waitFor();
+  await page.getByText(language === "es" ? "Revisar consentimiento de voz" : "Review voice consent").click(); await page.getByText(language === "es" ? "consentimiento de voz registrado" : "voice consent recorded").waitFor(); assertions.push(`${language}-${width}: versioned voice consent recorded before capture`);
   await page.getByText(language === "es" ? "Grabar voz" : "Record voice").click();
   const micError = language === "es" ? "Se denegó el permiso del micrófono." : "Microphone permission was denied.";
   await page.getByText(micError).waitFor(); assertions.push(`${language}-${width}: microphone denial visible`);
-  await page.getByText(language === "es" ? "Revisar consentimiento de pantalla" : "Review screen consent").click(); await page.getByText(language === "es" ? "consentimiento de pantalla registrado" : "screen consent recorded").waitFor();
+  await page.getByText(language === "es" ? "Revisar consentimiento de pantalla" : "Review screen consent").click(); await page.getByText(language === "es" ? "consentimiento de pantalla registrado" : "screen consent recorded").waitFor(); assertions.push(`${language}-${width}: versioned screen consent recorded before capture`);
   await page.getByText(language === "es" ? "Capturar pantalla" : "Capture screen").click();
   const captureError = language === "es" ? "Se canceló o denegó compartir pantalla. No se capturó nada." : "Screen sharing was cancelled or denied. Nothing was captured.";
   await page.getByText(captureError).waitFor(); assertions.push(`${language}-${width}: capture denial visible`);
