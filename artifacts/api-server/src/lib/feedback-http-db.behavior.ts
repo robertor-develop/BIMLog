@@ -13,7 +13,13 @@ if (!(["127.0.0.1", "localhost", "::1"].includes(parsed.hostname)) || parsed.pat
 process.env.PROD_DATABASE_URL = urlText;
 process.env.JWT_SECRET = "feedback-local-fixture-secret-at-least-32-bytes";
 delete process.env.BIMLOG_FEEDBACK_SCANNER;
-const uploadRoot = path.resolve(".tmp", "feedback-http-uploads"); if (fs.existsSync(uploadRoot)) throw new Error("Feedback upload proof root must not exist"); process.env.BIMLOG_FEEDBACK_UPLOAD_ROOT = uploadRoot;
+const uploadRoot = path.resolve(".tmp", "feedback-http-uploads");
+if (fs.existsSync(uploadRoot)) {
+  const stat = fs.lstatSync(uploadRoot);
+  if (!stat.isDirectory() || stat.isSymbolicLink() || path.basename(uploadRoot) !== "feedback-http-uploads") throw new Error("Feedback upload proof root identity mismatch");
+  fs.rmSync(uploadRoot, { recursive: true });
+}
+process.env.BIMLOG_FEEDBACK_UPLOAD_ROOT = uploadRoot;
 process.env.BIMLOG_FEEDBACK_STORAGE_BACKEND = "local-test";
 
 const { default: router } = await import("../routes/feedback");
@@ -21,7 +27,13 @@ const { signToken } = await import("../middlewares/auth");
 const { ensureFeedbackSchema, FEEDBACK_SCHEMA_ADVISORY_LOCK } = await import("./feedback-schema-migration");
 const { pool: appPool } = await import("@workspace/db");
 const testPool = new pg.Pool({ connectionString: urlText });
+// Relay tables form deliberate evidence-preservation cycles (jobs reference receipts/proofs,
+// while those rows reference jobs). Remove only that exact disposable subsystem first; the
+// narrowly scoped CASCADE can therefore remove its own triggers/functions without reaching
+// unrelated schema. Parent fixture tables are then dropped without CASCADE.
+await testPool.query(`DROP TABLE IF EXISTS feedback_relay_deletion_proofs, feedback_relay_temporary_objects, feedback_relay_holds, feedback_relay_receipts, feedback_relay_nonces, feedback_relay_custody_events, feedback_relay_jobs CASCADE`);
 await testPool.query(`DROP TABLE IF EXISTS feedback_transcription_jobs, feedback_capture_consents, feedback_audit_events, feedback_assets, feedback_items, project_members, projects, users, companies, fixture_failures; DROP FUNCTION IF EXISTS fixture_reject_audit()`);
+assert.equal((await testPool.query("select count(*)::int n from pg_catalog.pg_class where relnamespace='public'::regnamespace and relname like 'feedback_relay_%' and relkind in ('r','p','v','m')")).rows[0].n, 0, "repeat cleanup must remove the exact relay relations before parents");
 await assert.rejects(() => ensureFeedbackSchema(testPool)); assert.equal((await testPool.query("select to_regclass('feedback_items') value")).rows[0].value, null);
 await testPool.query(`
   CREATE TABLE companies(id integer PRIMARY KEY, name text NOT NULL);
