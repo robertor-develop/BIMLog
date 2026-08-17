@@ -1,6 +1,7 @@
 {
-  "suite": "build7-advanced-contracts-production-component",
-  "checks": 71,
+  "suite": "build7-advanced-contracts-isolated-production-components",
+  "boundary": "Deterministic isolated browser fixtures; not backend or database integration.",
+  "checks": 96,
   "status": "passed",
   "viewports": [
     1440,
@@ -34,6 +35,11 @@
     "denied-history",
     "suspended-history",
     "revision-linkage",
-    "attributable-reasons"
+    "attributable-reasons",
+    "routed-workspace",
+    "persisted-order-fixture",
+    "authenticated-denial",
+    "authenticated-suspension",
+    "reload-replaces-state"
   ]
 }
