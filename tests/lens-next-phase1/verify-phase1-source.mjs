@@ -201,6 +201,10 @@ function sha256(bytes) {
   return crypto.createHash("sha256").update(bytes).digest("hex").toUpperCase();
 }
 
+function canonicalTextBytes(bytes) {
+  return Buffer.from(bytes.toString("utf8").replace(/\r\n/g, "\n"), "utf8");
+}
+
 function readBytes(root, relativePath) {
   return fs.readFileSync(path.join(root, relativePath));
 }
@@ -265,10 +269,10 @@ const acceptanceBytes = readBytes(root, ACCEPTANCE_RELATIVE_PATH);
 const identity = JSON.parse(identityBytes.toString("utf8"));
 const acceptance = JSON.parse(acceptanceBytes.toString("utf8"));
 
-recordEqual("contract.identity.sha256", sha256(identityBytes), EXPECTED_IDENTITY_SHA256);
+recordEqual("contract.identity.sha256", sha256(canonicalTextBytes(identityBytes)), EXPECTED_IDENTITY_SHA256);
 recordEqual(
   "contract.acceptance.sha256",
-  sha256(acceptanceBytes),
+  sha256(canonicalTextBytes(acceptanceBytes)),
   EXPECTED_ACCEPTANCE_SHA256,
 );
 recordEqual(

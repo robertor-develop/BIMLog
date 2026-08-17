@@ -17,11 +17,14 @@ namespace BIMLogLensNext.Tests
                 Run("write_flags_default_off", WriteFlagsDefaultOff);
                 Run("only_read_commands_are_exposed", OnlyReadCommandsAreExposed);
                 Run("invalid_origin_or_token_blocks", InvalidOriginOrTokenBlocks);
+                Run("bridge_collision_never_falls_back_to_legacy_or_alternate_port", BridgeCollisionNeverFallsBack);
                 Run("idempotency_mismatch_blocks", IdempotencyMismatchBlocks);
                 Run("fallback_fields_block", FallbackFieldsBlock);
                 Run("session_context_mismatch_blocks_before_native_read", SessionContextMismatchBlocksBeforeNativeRead);
                 Run("invalid_wire_identity_blocks_before_native_read", InvalidWireIdentityBlocksBeforeNativeRead);
                 Run("unique_identity_opens_once", UniqueIdentityOpensOnce);
+                Run("repeated_exact_open_remains_read_only", RepeatedExactOpenRemainsReadOnly);
+                Run("synthetic_document_reopen_requires_new_session", SyntheticDocumentReopenRequiresNewSession);
                 Run("success_response_matches_web_contract", SuccessResponseMatchesWebContract);
                 Run("project_context_matches_web_contract", ProjectContextMatchesWebContract);
                 Run("missing_identity_blocks", MissingIdentityBlocks);
@@ -31,7 +34,7 @@ namespace BIMLogLensNext.Tests
                 Run("legacy_and_saved_viewpoints_never_touched", LegacyAndSavedViewpointsNeverTouched);
                 Run("state_roots_are_isolated", StateRootsAreIsolated);
 
-                Console.WriteLine("PASS " + _passed + "/17");
+                Console.WriteLine("PASS " + _passed + "/20");
                 return 0;
             }
             catch (Exception exception)
@@ -156,6 +159,55 @@ namespace BIMLogLensNext.Tests
             True(response.Success);
             Equal("working_view_opened", response.Code);
             Equal(1, adapter.OpenCalls);
+        }
+
+        private static void BridgeCollisionNeverFallsBack()
+        {
+            var bridge = Bridge(new FakeAdapter(), new RecordingDispatcher());
+            foreach (var origin in new[] { "http://localhost:8765", "http://127.0.0.1:8765", "http://127.0.0.1:8767", "http://0.0.0.0:8766" })
+            {
+                var request = Request(LensNextBridgeCommands.Ping);
+                request.Origin = origin;
+                var response = bridge.Execute(request);
+                False(response.Success);
+                Equal("origin_not_approved", response.Code);
+            }
+            Equal(8766, LensNextConstants.BridgePort);
+            Equal("127.0.0.1", LensNextConstants.BridgeHost);
+        }
+
+        private static void RepeatedExactOpenRemainsReadOnly()
+        {
+            var adapter = new FakeAdapter();
+            adapter.Candidates.Add(Candidate("physical-1", "nav-guid-1"));
+            var bridge = Bridge(adapter, new RecordingDispatcher());
+            True(bridge.Execute(OpenRequest()).Success);
+            True(bridge.Execute(OpenRequest()).Success);
+            Equal(2, adapter.FindCalls);
+            Equal(2, adapter.OpenCalls);
+            Equal(0, adapter.LegacyReads);
+            Equal(0, adapter.SavedViewpointWrites);
+            Equal(0, adapter.PlatformWrites);
+        }
+
+        private static void SyntheticDocumentReopenRequiresNewSession()
+        {
+            var closedAdapter = new FakeAdapter();
+            closedAdapter.Candidates.Add(Candidate("physical-1", "nav-guid-1"));
+            var stale = OpenRequest();
+            stale.Fields = CopyWith(stale.Fields, "sessionId", "closed-session");
+            var denied = Bridge(closedAdapter, new RecordingDispatcher()).Execute(stale);
+            False(denied.Success);
+            Equal("session_context_mismatch", denied.Code);
+            Equal(0, closedAdapter.FindCalls);
+            Equal(0, closedAdapter.OpenCalls);
+
+            var reopenedAdapter = new FakeAdapter();
+            reopenedAdapter.Candidates.Add(Candidate("physical-1", "nav-guid-1"));
+            True(Bridge(reopenedAdapter, new RecordingDispatcher()).Execute(OpenRequest()).Success);
+            Equal(1, reopenedAdapter.FindCalls);
+            Equal(1, reopenedAdapter.OpenCalls);
+            Equal(0, reopenedAdapter.SavedViewpointWrites);
         }
 
         private static void SuccessResponseMatchesWebContract()

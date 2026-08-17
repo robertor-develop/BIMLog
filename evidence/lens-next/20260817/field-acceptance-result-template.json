@@ -1,0 +1,52 @@
+{
+  "schemaVersion": "bimlog-lens-next-field-acceptance-v1",
+  "boundary": "Operator-completed external runtime evidence; the committed template itself proves no installation or Navisworks execution.",
+  "candidateCommit": null,
+  "authorizationReference": null,
+  "results": [
+    {
+      "productYear": 2021,
+      "status": "NOT_RUN",
+      "packageSha256": null,
+      "navisworksVersion": null,
+      "syntheticDocumentSha256": null,
+      "projectId": null,
+      "modelFingerprint": null,
+      "exactSavedViewpointGuid": null,
+      "checks": {
+        "packageInventory": "NOT_RUN",
+        "legacyInventoryUnchanged": "NOT_RUN",
+        "bridge8766AvailableWithoutTouching8765": "NOT_RUN",
+        "exactGuidOpenTwice": "NOT_RUN",
+        "zeroEnumerationFallback": "NOT_RUN",
+        "allRefusalsExplicit": "NOT_RUN",
+        "closeReopenUsesNewSession": "NOT_RUN",
+        "savedViewpointsUnchanged": "NOT_RUN",
+        "rollbackExact": "NOT_RUN",
+        "zeroLegacyIo": "NOT_RUN"
+      }
+    },
+    {
+      "productYear": 2025,
+      "status": "NOT_RUN",
+      "packageSha256": null,
+      "navisworksVersion": null,
+      "syntheticDocumentSha256": null,
+      "projectId": null,
+      "modelFingerprint": null,
+      "exactSavedViewpointGuid": null,
+      "checks": {
+        "packageInventory": "NOT_RUN",
+        "legacyInventoryUnchanged": "NOT_RUN",
+        "bridge8766AvailableWithoutTouching8765": "NOT_RUN",
+        "exactGuidOpenTwice": "NOT_RUN",
+        "zeroEnumerationFallback": "NOT_RUN",
+        "allRefusalsExplicit": "NOT_RUN",
+        "closeReopenUsesNewSession": "NOT_RUN",
+        "savedViewpointsUnchanged": "NOT_RUN",
+        "rollbackExact": "NOT_RUN",
+        "zeroLegacyIo": "NOT_RUN"
+      }
+    }
+  ]
+}
