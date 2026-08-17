@@ -9941,6 +9941,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3a2a8ddb84a366f71dc8e4d0cdc5be31529690dd25ae7b1f6abc4f0f3ea9ed78"
+    },
+    {
+      "taskId": "bimlog-build7-advanced-contracts-integration-20260817",
+      "reviewedThroughCommit": "d8bb09dab55d53a7f9eeb4055a620e2f3e998115",
+      "reviewedAt": "2026-08-17T03:30:00Z",
+      "status": "local_integration_candidate",
+      "captureTiming": "same_release_integration",
+      "summary": "Reconciles the serialized backend and UI Advanced Contracts v1.60.35.07 integration and preserves external release gates.",
+      "workstreams": [
+        "build7",
+        "advanced-contracts",
+        "payments",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing canonical financial record, human authority, and evidence doctrine governs the implementation."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing integration, database, evidence, and external-action boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The candidate implements existing financial exactness, authorization, concurrency, rollback, and responsive bilingual gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or future product claim changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "PLATFORM remains generator-owned; structural inventory is reconciled by the governed build."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks source, package, installation, or behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, DOCX, spreadsheet, or governed report design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact local Build 7 integration scope and evidence boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the integrated candidate and retains push, deployment, production, and field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production, provider, customer, publication, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
