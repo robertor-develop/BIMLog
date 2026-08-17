@@ -10021,8 +10021,8 @@
     },
     {
       "taskId": "bimlog-feedback-addendum-20260817",
-      "reviewedThroughCommit": "66f319dd3b9288a9ee6221344d7900d2101a8cd6",
-      "reviewedAt": "2026-08-17T18:25:00Z",
+      "reviewedThroughCommit": "d9e3f23d6156b9795ca993be0c174f441aad28e0",
+      "reviewedAt": "2026-08-17T18:30:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task",
       "summary": "Reconciles Feedback addendum v F-1.60.35.8 with governed evidence quarantine, default-deny transcription, accountable triage, and explicit external gates.",
@@ -10094,7 +10094,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "3d8d04368cad7de545a8cba540c40bda1f98e53fc5fac6ad0eaf69fe89f74d01"
+      "reviewedChangeSha256": "120c4d460d9581a2221fa209de57c3c8d40e65ede92f5b619322d089089761a4"
     }
   ]
 }
