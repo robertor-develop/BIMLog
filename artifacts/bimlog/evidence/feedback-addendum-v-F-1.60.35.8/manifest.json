@@ -1,7 +1,7 @@
 {
   "label": "BIMLog — Feedback Addendum Remediation Writer",
   "release": "v F-1.60.35.8",
-  "sourceCommit": "f3cc2479d802777347bdc4840f6c3933f0450fdc",
+  "sourceCommit": "1eb3b73ec78479ece9332378856d23af4df0ee2d",
   "runtime": {
     "playwrightCore": "1.55.0",
     "chromium": "151.0.7922.34"
