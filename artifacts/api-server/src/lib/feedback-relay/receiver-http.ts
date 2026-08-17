@@ -140,6 +140,7 @@ export function createReceiverHttpsHandler(input: {
           request: signed.payload,
           signal:scannerController.signal,
         }),input.deadlines.scannerMs,"FEEDBACK_RECEIVER_SCANNER_TIMEOUT",scannerController);
+        if(scannerController.signal.aborted||totalController.signal.aborted)throw new RelayProtocolError("FEEDBACK_RECEIVER_ABORTED","Receiver operation was aborted before custody");
         const declaredType = String(req.headers["content-type"] || "").split(
             ";",
             1,
@@ -156,6 +157,7 @@ export function createReceiverHttpsHandler(input: {
               ? { mediaType: declaredType, mediaKind: declaredKind }
               : undefined,
           now: input.now?.(),
+          signal:scannerController.signal,
         });
         json(res, 201, receipt);
       } catch (error) {

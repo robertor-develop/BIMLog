@@ -41,13 +41,14 @@ export type ScannerInspection = {
   sha256: string;
 };
 export type StoredDelivery = {
+  authorityVersion:2;
   requestHash: string;
   requestSignature: string;
   objectRelativePath: string;
   inspection: ScannerInspection;
   receipt: Signed<ReceiptContract>;
   directoryDurability: "fsync" | "rename-recovery";
-  nonceToken?:string;
+  nonceRecovery?:{key:string;proofSha256:string};
 };
 export type PurgeAuthority = {
   policySha256: string;
@@ -75,12 +76,14 @@ type PreparedDeletion = Omit<DeletionReceipt, "absenceVerified"|"absenceVerified
 type DeletionJournal =
   | {
       state: "prepared";
+      authorityVersion:2;
       requestId: string;
       objectRelativePath: string;
       receipt: PreparedDeletion;
     }
   | {
       state: "finalized";
+      authorityVersion:2;
       requestId: string;
       objectRelativePath: string;
       receipt: DeletionReceipt;
@@ -112,6 +115,7 @@ export interface ReceiverNonceAuthority {
   }): Promise<NonceReservation | null>;
   commit(token: string): Promise<void>;
   rollback(token: string): Promise<void>;
+  recover?(input:{key:string;proofSha256:string}):Promise<boolean>;
 }
 type DurableNonceRecord={binding:{audience:string;keyId:string;nonce:string;timestamp:string;requestId:string;companyId:string;projectId:string;requestSha256:string};state:"reserved"|"committed";token:string};
 export class FilesystemReceiverNonceAuthority implements ReceiverNonceAuthority{
@@ -122,6 +126,7 @@ export class FilesystemReceiverNonceAuthority implements ReceiverNonceAuthority{
   async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`);assertNoLinks(this.root,file);return this.locked(key,()=>{if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId||known.state==="reserved")return null;return{token:known.token,status:"identical-retry" as const};}const record:DurableNonceRecord={binding:input,state:"reserved",token:`${key}.${randomUUID()}`};atomicJson(this.root,file,record);return{token:record.token,status:"new" as const};});}
   async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");await this.locked(key,()=>{const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.token!==token)fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");atomicJson(this.root,file,{...record,state:"committed"});});}
   async rollback(token:string){const key=token.split(".")[0];if(!HEX64.test(key))return;await this.locked(key,()=>{const file=path.join(this.root,`${key}.json`);if(!fs.existsSync(file))return;const record=readJson<DurableNonceRecord>(this.root,file);if(record.token===token&&record.state==="reserved")fs.unlinkSync(file);});}
+  async recover(input:{key:string;proofSha256:string}){if(!HEX64.test(input.key)||!HEX64.test(input.proofSha256))return false;return this.locked(input.key,()=>{const file=path.join(this.root,`${input.key}.json`);if(!fs.existsSync(file))return false;const record=readJson<DurableNonceRecord>(this.root,file);if(sha256(record.token)!==input.proofSha256)return false;if(record.state==="reserved")atomicJson(this.root,file,{...record,state:"committed"});return true;});}
 }
 export type ReceiverFaultHooks = {
   afterNonceReserved?: () => void;
@@ -358,7 +363,9 @@ export class FeedbackReceiverCustodyService {
     inspection: ScannerInspection;
     clientDeclared?: { mediaType: string; mediaKind: ReceiverMediaKind };
     now?: Date;
+    signal?:AbortSignal;
   }) {
+    if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");
     assertNoLinks(this.root, input.stagedPath);
     if (!contained(path.join(this.system, "staging"), input.stagedPath))
       fail(
@@ -368,7 +375,7 @@ export class FeedbackReceiverCustodyService {
     const request=input.signedRequest.payload,now=input.now??new Date(),requestHash=sha256(canonicalRequest(request)),inspection=verifiedInspection(input.inspection,request,input.clientDeclared),identity=fileIdentity(input.stagedPath);
     if(identity.byteCount!==request.byteCount||identity.sha256!==request.sha256||request.bodySha256!==request.sha256)fail("FEEDBACK_RECEIVER_OBJECT_MISMATCH","Staged bytes do not match the signed request");
     try{return await this.lock(request.requestId,async()=>{const index=this.indexPath(request.requestId);if(fs.existsSync(index)){await this.authorizeHeader(input.signedRequest,now);const stored=readJson<StoredDelivery>(this.root,index),object=path.join(this.root,stored.objectRelativePath),current=fileIdentity(object);if(stored.requestHash!==requestHash||!sameSignature(stored.requestSignature,input.signedRequest.signature)||current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_REPLAY_READBACK_MISMATCH","Replay bytes do not match current custody");return stored.receipt;}
-      let reservation:NonceReservation|undefined;const nonceAdapter:NonceAuthority={consume:async details=>{reservation=(await this.nonces.reserve(details))??undefined;return Boolean(reservation);}};await verifyRequest(input.signedRequest,this.senderKeys,nonceAdapter,{now,maxSkewMs:this.maxSkewMs});if(!reservation)fail("FEEDBACK_RECEIVER_NONCE_DENIED","Nonce authority denied request");const accepted=reservation as NonceReservation;let committed=false,indexed=false,moved=false;const object=this.objectPath(request);try{this.faults.afterNonceReserved?.();assertNoLinks(this.root,object);if(fs.existsSync(object)){const current=fileIdentity(object);if(current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_OBJECT_CONFLICT","Existing custody object differs from request");}else{mkdirSafe(this.root,path.dirname(object));const stagedFd=fs.openSync(input.stagedPath,"r+");try{fs.fsyncSync(stagedFd);}finally{fs.closeSync(stagedFd);}fs.renameSync(input.stagedPath,object);syncDirectory(path.dirname(object));moved=true;}this.faults.afterObjectWritten?.();const receipt=signReceipt({version:"1",requestId:request.requestId,companyId:request.companyId,projectId:request.projectId,feedbackId:request.feedbackId,objectId:request.objectId,byteCount:request.byteCount,sha256:request.sha256,destinationId:this.authority.destinationId,receivedAt:now.toISOString(),requestNonce:request.nonce,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);atomicJson(this.root,index,{requestHash,requestSignature:input.signedRequest.signature,objectRelativePath:path.relative(this.root,object),inspection,receipt,nonceToken:accepted.token,directoryDurability:syncDirectory(path.dirname(index))} satisfies StoredDelivery);indexed=true;await this.nonces.commit(accepted.token);committed=true;return receipt;}catch(error){if(!committed&&!indexed)await this.nonces.rollback(accepted.token);if(moved&&!fs.existsSync(index)&&fs.existsSync(object))fs.unlinkSync(object);throw error;}});}finally{if(fs.existsSync(input.stagedPath))await this.discardUploadStage(input.stagedPath);}
+      if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");let reservation:NonceReservation|undefined;const nonceAdapter:NonceAuthority={consume:async details=>{reservation=(await this.nonces.reserve(details))??undefined;return Boolean(reservation);}};await verifyRequest(input.signedRequest,this.senderKeys,nonceAdapter,{now,maxSkewMs:this.maxSkewMs});if(!reservation)fail("FEEDBACK_RECEIVER_NONCE_DENIED","Nonce authority denied request");const accepted=reservation as NonceReservation;let committed=false,indexed=false,moved=false;const object=this.objectPath(request);try{this.faults.afterNonceReserved?.();assertNoLinks(this.root,object);if(fs.existsSync(object)){const current=fileIdentity(object);if(current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_OBJECT_CONFLICT","Existing custody object differs from request");}else{if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");mkdirSafe(this.root,path.dirname(object));const stagedFd=fs.openSync(input.stagedPath,"r+");try{fs.fsyncSync(stagedFd);}finally{fs.closeSync(stagedFd);}fs.renameSync(input.stagedPath,object);syncDirectory(path.dirname(input.stagedPath));syncDirectory(path.dirname(object));moved=true;}this.faults.afterObjectWritten?.();const receipt=signReceipt({version:"1",requestId:request.requestId,companyId:request.companyId,projectId:request.projectId,feedbackId:request.feedbackId,objectId:request.objectId,byteCount:request.byteCount,sha256:request.sha256,destinationId:this.authority.destinationId,receivedAt:now.toISOString(),requestNonce:request.nonce,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);atomicJson(this.root,index,{requestHash,requestSignature:input.signedRequest.signature,objectRelativePath:path.relative(this.root,object),authorityVersion:2,inspection,receipt,nonceRecovery:{key:accepted.token.split(".")[0],proofSha256:sha256(accepted.token)},directoryDurability:syncDirectory(path.dirname(index))} satisfies StoredDelivery);indexed=true;await this.nonces.commit(accepted.token);committed=true;return receipt;}catch(error){if(!committed&&!indexed)await this.nonces.rollback(accepted.token);if(moved&&!fs.existsSync(index)&&fs.existsSync(object))fs.unlinkSync(object);throw error;}});}finally{if(fs.existsSync(input.stagedPath))await this.discardUploadStage(input.stagedPath);}
   }
   private indexPath(requestId: string) {
     return path.join(this.system, "requests", `${sha256(requestId)}.json`);
@@ -436,7 +443,7 @@ export class FeedbackReceiverCustodyService {
           "FEEDBACK_RECEIVER_REQUEST_CONFLICT",
           "Request identity was reused with divergent authority",
         );
-      if(stored.nonceToken)await this.nonces.commit(stored.nonceToken);
+      if(stored.nonceRecovery&&this.nonces.recover&&!await this.nonces.recover(stored.nonceRecovery))fail("FEEDBACK_RECEIVER_NONCE_RECOVERY_DENIED","Durable nonce recovery proof was denied");
       return signed.payload;
     }
     return this.authenticateRequest(signed, now);
@@ -552,7 +559,7 @@ export class FeedbackReceiverCustodyService {
           inspection,
           receipt,
           directoryDurability: "rename-recovery",
-          nonceToken:acceptedReservation.token,
+          authorityVersion:2,nonceRecovery:{key:acceptedReservation.token.split(".")[0],proofSha256:sha256(acceptedReservation.token)},
         } satisfies StoredDelivery);
         indexed=true;
         if (directoryDurability === "fsync") {
@@ -649,6 +656,7 @@ export class FeedbackReceiverCustodyService {
       const target = path.join(deletions, entry),
         journal = readJson<DeletionJournal>(this.root, target);
       if (journal.state === "prepared") {
+        const {journalSha256,...preparedBase}=journal.receipt;if(journal.authorityVersion!==2||sha256(JSON.stringify(preparedBase))!==journalSha256)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Prepared deletion journal failed authentication");
         const object = path.join(this.root, journal.objectRelativePath);
         assertNoLinks(this.root, object);
         if (!fs.existsSync(object)) {
@@ -721,6 +729,7 @@ export class FeedbackReceiverCustodyService {
         receipt: PreparedDeletion = {...preparedBase,journalSha256:sha256(JSON.stringify(preparedBase))};
       journal = {
         state: "prepared",
+        authorityVersion:2,
         requestId,
         objectRelativePath: stored.objectRelativePath,
         receipt,
