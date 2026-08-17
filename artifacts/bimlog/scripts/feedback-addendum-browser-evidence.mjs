@@ -8,7 +8,7 @@ const chromiumExecutable = process.env.BIMLOG_CHROMIUM_EXECUTABLE;
 const baseUrl = process.env.BIMLOG_FEEDBACK_EVIDENCE_URL;
 if (!playwrightCore || !chromiumExecutable || !baseUrl) throw new Error("Explicit Playwright, Chromium, and isolated URL bindings are required.");
 const { chromium } = (await import(pathToFileURL(playwrightCore).href)).default;
-const output = path.resolve("evidence/feedback-addendum-v-F-1.60.35.8"); mkdirSync(output, { recursive: true });
+const output = path.resolve("artifacts/bimlog/evidence/feedback-addendum-v-F-1.60.35.8"); mkdirSync(output, { recursive: true });
 const browser = await chromium.launch({ headless: true, executablePath: chromiumExecutable });
 const chromiumVersion = await browser.version();
 const assertions = [];
