@@ -2,11 +2,12 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "40ad692236ba7ee53db495d61648ac1481b162e8",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "9db84496a9dad2921072b9cc70397a45d1ba171cab4455e4197207661b06c7d0",
+  "bundleSha256": "8ca5d7f85c21c1d72ba1859fdbc16bb983513231628d0b440981df233eaa1b44",
   "impact": {
     "baselineCommit": "40ad692236ba7ee53db495d61648ac1481b162e8",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -68,13 +69,13 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "f59fab8f55df0a209ae1b6fff5748a05fded6a178fedf4f5a185181ee593d683",
-      "sourceChangedAt": "2026-08-15T00:22:58-04:00",
-      "changeState": "accepted",
+      "sha256": "ce05514e37271029178447bf7ecf5c41fe2570dd8384072e540425b696d15aa9",
+      "sourceChangedAt": "2026-08-17T03:30:00.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "40ad692236ba7ee53db495d61648ac1481b162e8",
       "semanticReviewedThroughCommit": "40ad692236ba7ee53db495d61648ac1481b162e8",
       "semanticReviewTask": "bimlog-build7-advanced-contracts-integration-20260817",
-      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewResult": "updated",
       "semanticReviewedAt": "2026-08-17T03:30:00Z"
     },
     {

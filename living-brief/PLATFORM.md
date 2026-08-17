@@ -210,6 +210,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-contract-import.behavior.ts
 - artifacts/api-server/src/lib/financial-contract-import.ts
 - artifacts/api-server/src/lib/financial-contract-migration.ts
+- artifacts/api-server/src/lib/financial-contract-payment-service.ts
+- artifacts/api-server/src/lib/financial-contract-payment.behavior.ts
+- artifacts/api-server/src/lib/financial-contract-payment.ts
 - artifacts/api-server/src/lib/financial-contract-service.ts
 - artifacts/api-server/src/lib/financial-contract.behavior.ts
 - artifacts/api-server/src/lib/financial-control-browser.behavior.ts

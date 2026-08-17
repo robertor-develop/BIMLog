@@ -9978,8 +9978,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "PLATFORM remains generator-owned; structural inventory is reconciled by the governed build."
+          "result": "updated",
+          "reason": "The governed generator reconciled the integrated financial-contract schema and production component inventory."
         },
         {
           "key": "plugin",
@@ -10014,10 +10014,11 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b35893cf8071bd54ba4e160e989c77bbb23e8c2c40aa72922485bac4ad2d691b"
+      "reviewedChangeSha256": "724fdabbf298426ee798f7ea9c954114f588690eadd11182fd338369de3eddc7"
     }
   ]
 }
