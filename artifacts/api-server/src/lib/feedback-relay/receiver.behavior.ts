@@ -6,7 +6,9 @@ import {
   FeedbackReceiverCustodyService,
   FilesystemReceiverNonceAuthority,
   createReceiverBackup,
+  createReceiverBackupV2,
   restoreReceiverBackup,
+  restoreReceiverBackupV2,
   type ReceiverNonceAuthority,
 } from "./receiver-service.js";
 import {verifyDeletionReceiptDurably} from "./protocol.js";
@@ -618,6 +620,11 @@ try {
       () => restoreReceiverBackup(backup, target),
       /must exist and be empty/,
     );
+  });
+  await check("signed generation-fenced async backup restores exact bytes",async()=>{
+    const backupV2=path.join(disposable,"backup-v2"),restoreV2=path.join(disposable,"restore-v2");fs.mkdirSync(backupV2);fs.mkdirSync(restoreV2);
+    const manifest=await createReceiverBackupV2(service,backupV2,receiverKeys,{createdAt:now,concurrency:3});assert.equal(manifest.generation,service.snapshotGeneration());assert.match(manifest.authentication.hmacSha256,/^[a-f0-9]{64}$/);
+    const restored=await restoreReceiverBackupV2(backupV2,restoreV2,receiverKeys,{concurrency:2});assert.equal(restored.manifestSha256,manifest.manifestSha256);for(const item of manifest.objects)assert.equal(sha256(fs.readFileSync(path.join(restoreV2,item.relativePath))),item.sha256);
   });
   await check("no raw identifiers or key material enter custody files", () => {
     const all: string[] = [];

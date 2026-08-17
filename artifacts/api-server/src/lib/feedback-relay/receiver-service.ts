@@ -106,6 +106,7 @@ export type BackupInventory = {
   }[];
   inventorySha256: string;
 };
+export type SignedBackupManifestV2={version:2;createdAt:string;sourceRootFingerprintSha256:string;generation:number;objects:BackupInventory["objects"];manifestSha256:string;authentication:{keyId:string;hmacSha256:string}};
 export type NonceReservation = {
   token: string;
   status: "new" | "identical-retry";
@@ -1048,4 +1049,19 @@ export function restoreReceiverBackup(
       );
   }
   return inventory;
+}
+
+function backupKey(ring:RelayKeyRing,keyId=ring.activeKeyId){const key=ring.keys.find(candidate=>candidate.id===keyId);if(!key||key.secret.length<32||key.status==="revoked")return fail("FEEDBACK_RECEIVER_BACKUP_KEY_INVALID","Backup authentication key is unavailable");return key;}
+export async function createReceiverBackupV2(service:FeedbackReceiverCustodyService,backupRoot:string,ring:RelayKeyRing,options:{createdAt?:Date;concurrency?:number;signal?:AbortSignal}={}):Promise<SignedBackupManifestV2>{
+  const backup=canonicalRoot(backupRoot),concurrency=options.concurrency??2;if(!Number.isSafeInteger(concurrency)||concurrency<1||concurrency>16)fail("FEEDBACK_RECEIVER_BACKUP_CONCURRENCY_INVALID","Backup concurrency is invalid");
+  if(!fs.existsSync(backup)||fs.readdirSync(backup).length)fail("FEEDBACK_RECEIVER_BACKUP_ROOT_NOT_EMPTY","Backup root must exist and be empty");assertTreeNoLinks(service.root);const generation=service.snapshotGeneration(),objects=inventoryAuthority(service.root),queue=[...objects];let failure:unknown;
+  const worker=async()=>{while(queue.length&&!failure){if(options.signal?.aborted)return fail("FEEDBACK_RECEIVER_BACKUP_ABORTED","Backup was aborted");const item=queue.shift()!,from=path.join(service.root,item.relativePath),to=path.join(backup,item.relativePath);try{assertNoLinks(service.root,from);mkdirSafe(backup,path.dirname(to));await fs.promises.copyFile(from,to,fs.constants.COPYFILE_EXCL);const identity=fileIdentity(to);if(identity.byteCount!==item.byteCount||identity.sha256!==item.sha256)fail("FEEDBACK_RECEIVER_BACKUP_MISMATCH","Backup object verification failed");}catch(error){failure=error;}}};
+  await Promise.all(Array.from({length:concurrency},worker));if(failure)throw failure;if(service.snapshotGeneration()!==generation)fail("FEEDBACK_RECEIVER_BACKUP_GENERATION_CHANGED","Receiver generation changed during backup");
+  const key=backupKey(ring),base={version:2 as const,createdAt:(options.createdAt??new Date()).toISOString(),sourceRootFingerprintSha256:FeedbackReceiverCustodyService.fingerprintRoot(service.root),generation,objects},canonical=canonicalJson({domain:"bimlog-feedback-receiver-backup-v2",...base}),manifestSha256=sha256(canonical),manifest={...base,manifestSha256,authentication:{keyId:key.id,hmacSha256:createHmac("sha256",key.secret).update(canonical,"utf8").digest("hex")}};
+  atomicJson(backup,path.join(backup,"backup-manifest-v2.json"),manifest);return manifest;
+}
+export async function restoreReceiverBackupV2(backupRoot:string,restoreRoot:string,ring:RelayKeyRing,options:{concurrency?:number;signal?:AbortSignal}={}):Promise<SignedBackupManifestV2>{
+  const backup=canonicalRoot(backupRoot),restore=canonicalRoot(restoreRoot),concurrency=options.concurrency??2;if(!Number.isSafeInteger(concurrency)||concurrency<1||concurrency>16)fail("FEEDBACK_RECEIVER_BACKUP_CONCURRENCY_INVALID","Restore concurrency is invalid");if(!fs.existsSync(restore)||fs.readdirSync(restore).length)fail("FEEDBACK_RECEIVER_RESTORE_ROOT_NOT_EMPTY","Restore root must exist and be empty");assertTreeNoLinks(backup);
+  const manifest=readJson<SignedBackupManifestV2>(backup,path.join(backup,"backup-manifest-v2.json"));if(manifest.version!==2||!Number.isSafeInteger(manifest.generation)||!Array.isArray(manifest.objects)||!HEX64.test(manifest.manifestSha256))fail("FEEDBACK_RECEIVER_BACKUP_MANIFEST_INVALID","Backup manifest schema is invalid");const key=backupKey(ring,manifest.authentication?.keyId),base={version:manifest.version,createdAt:manifest.createdAt,sourceRootFingerprintSha256:manifest.sourceRootFingerprintSha256,generation:manifest.generation,objects:manifest.objects},canonical=canonicalJson({domain:"bimlog-feedback-receiver-backup-v2",...base});if(sha256(canonical)!==manifest.manifestSha256||!sameSignature(createHmac("sha256",key.secret).update(canonical,"utf8").digest("hex"),manifest.authentication?.hmacSha256||""))fail("FEEDBACK_RECEIVER_BACKUP_MANIFEST_INVALID","Backup manifest authentication is invalid");
+  const queue=[...manifest.objects];let failure:unknown;const worker=async()=>{while(queue.length&&!failure){if(options.signal?.aborted)return fail("FEEDBACK_RECEIVER_BACKUP_ABORTED","Restore was aborted");const item=queue.shift()!,from=path.join(backup,item.relativePath),to=path.join(restore,item.relativePath);try{assertNoLinks(backup,from);mkdirSafe(restore,path.dirname(to));await fs.promises.copyFile(from,to,fs.constants.COPYFILE_EXCL);const identity=fileIdentity(to);if(identity.byteCount!==item.byteCount||identity.sha256!==item.sha256)fail("FEEDBACK_RECEIVER_RESTORE_MISMATCH","Restored object verification failed");}catch(error){failure=error;}}};await Promise.all(Array.from({length:concurrency},worker));if(failure)throw failure;return manifest;
 }
