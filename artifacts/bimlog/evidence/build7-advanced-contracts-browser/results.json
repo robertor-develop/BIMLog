@@ -1,6 +1,6 @@
 {
   "suite": "build7-advanced-contracts-production-component",
-  "checks": 44,
+  "checks": 71,
   "status": "passed",
   "viewports": [
     1440,
@@ -28,6 +28,12 @@
     "reload",
     "empty",
     "error",
-    "loading"
+    "loading",
+    "complete-history",
+    "empty-history",
+    "denied-history",
+    "suspended-history",
+    "revision-linkage",
+    "attributable-reasons"
   ]
 }
