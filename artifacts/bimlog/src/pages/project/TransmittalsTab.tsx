@@ -1,4 +1,5 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
+import { useSearch } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import { FileText, Trash2, Sparkles, Send } from "lucide-react";
@@ -11,11 +12,25 @@ interface Transmittal {
   sentTo?: Array<{ name?: string; email?: string; userId?: number }> | null;
 }
 
+export type ExactTransmittalDeepLink =
+  | { kind: "none" }
+  | { kind: "invalid" }
+  | { kind: "valid"; id: number };
+
+export function parseExactTransmittalDeepLink(search: string): ExactTransmittalDeepLink {
+  const values = new URLSearchParams(search.startsWith("?") ? search.slice(1) : search).getAll("transmittal");
+  if (values.length === 0) return { kind: "none" };
+  if (values.length !== 1 || !/^[1-9]\d*$/.test(values[0])) return { kind: "invalid" };
+  const id = Number(values[0]);
+  return Number.isSafeInteger(id) ? { kind: "valid", id } : { kind: "invalid" };
+}
+
 const API = "/api/v1";
 
 export function TransmittalsTab({ projectId, canWrite }: { projectId: number; canWrite: boolean }) {
   const { lang } = useI18n();
   const { token } = useAuthStore();
+  const searchParams = useSearch();
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
   const [items, setItems] = useState<Transmittal[]>([]);
@@ -35,6 +50,7 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
   const [search, setSearch] = useState("");
   const [sortBy, setSortBy] = useState("created_desc");
   const [exportingViewPdf, setExportingViewPdf] = useState(false);
+  const [loadError, setLoadError] = useState(false);
 
   const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,9 +86,13 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
 
   const load = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const r = await fetch(`${API}/projects/${projectId}/transmittals`, { headers: { Authorization: `Bearer ${token}` } });
-      if (r.ok) setItems(await r.json());
+      if (!r.ok) throw new Error(`load ${r.status}`);
+      setItems(await r.json());
+    } catch {
+      setLoadError(true);
     } finally { setLoading(false); setLoaded(true); }
   };
 
@@ -198,6 +218,29 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
         return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
       });
   }, [filter, items, search, sortBy]);
+  const exactTransmittalDeepLink = useMemo(() => parseExactTransmittalDeepLink(searchParams), [searchParams]);
+  const exactTransmittalTarget = exactTransmittalDeepLink.kind === "valid"
+    ? items.find(item => item.id === exactTransmittalDeepLink.id) ?? null
+    : null;
+  const exactTransmittalNotFound = exactTransmittalDeepLink.kind === "valid" && loaded && !loading && !loadError && !exactTransmittalTarget;
+  const resolvedTransmittalTarget = loaded && !loading && !loadError ? exactTransmittalTarget : null;
+  const openedTransmittal = resolvedTransmittalTarget && selected?.id === resolvedTransmittalTarget.id ? selected : null;
+  const visibleTransmittals = resolvedTransmittalTarget && !filtered.some(item => item.id === resolvedTransmittalTarget.id)
+    ? [resolvedTransmittalTarget, ...filtered]
+    : filtered;
+
+  useEffect(() => {
+    if (!loaded) return;
+    setSelected(resolvedTransmittalTarget);
+  }, [loaded, resolvedTransmittalTarget]);
+
+  useEffect(() => {
+    if (!openedTransmittal) return;
+    const frame = window.requestAnimationFrame(() => {
+      document.getElementById(`transmittal-${openedTransmittal.id}`)?.scrollIntoView({ block: "center" });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [openedTransmittal?.id]);
 
   const currentViewSummary = [
     `${t("Status", "Estado")}: ${filter === "all" ? t("All", "Todos") : t(filter.charAt(0).toUpperCase() + filter.slice(1), filter === "draft" ? "Borrador" : filter === "sent" ? "Enviado" : "Acusado")}`,
@@ -377,7 +420,35 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
 
       {loading && <div className="text-muted">{t("Loading…", "Cargando…")}</div>}
 
-      {!loading && filtered.length === 0 && (
+      {loadError && !loading && (
+        <div role="alert" className="alert alert-danger">
+          {t("Transmittals could not be loaded. No record was selected.", "No se pudieron cargar las transmisiones. No se seleccionó ningún registro.")}
+        </div>
+      )}
+      {exactTransmittalDeepLink.kind === "invalid" && (
+        <div role="alert" className="alert alert-danger">
+          {t("The transmittal link is invalid. No transmittal was selected.", "El enlace de la transmisión no es válido. No se seleccionó ninguna transmisión.")}
+        </div>
+      )}
+      {exactTransmittalNotFound && exactTransmittalDeepLink.kind === "valid" && (
+        <div role="alert" className="alert alert-danger">
+          {t(`Transmittal #${exactTransmittalDeepLink.id} was not found in this project. No other transmittal was selected.`, `La transmisión #${exactTransmittalDeepLink.id} no se encontró en este proyecto. No se seleccionó ninguna otra transmisión.`)}
+        </div>
+      )}
+      {openedTransmittal && (
+        <section aria-label={t("Opened transmittal detail", "Detalle de transmisión abierto")} data-deep-link-detail="true" className="card" style={{ marginBottom: 16, padding: 16, border: "2px solid #2563EB", background: "#EFF6FF" }}>
+          <div style={{ color: "#1E3A5F", fontSize: 11, fontWeight: 800, textTransform: "uppercase", marginBottom: 6 }}>{t("Opened exact transmittal", "Transmisión exacta abierta")}</div>
+          <div style={{ display: "flex", gap: 8, alignItems: "center", flexWrap: "wrap" }}>
+            <strong>{openedTransmittal.number}</strong>
+            {statusBadge(openedTransmittal.status)}
+          </div>
+          <div style={{ fontWeight: 700, marginTop: 6 }}>{openedTransmittal.title}</div>
+          {openedTransmittal.purpose && <div style={{ color: "#4B5563", fontSize: 12, marginTop: 4 }}>{openedTransmittal.purpose}</div>}
+          <div style={{ color: "#6B7280", fontSize: 11, marginTop: 6 }}>{t("Record ID", "ID del registro")}: {openedTransmittal.id}</div>
+        </section>
+      )}
+
+      {!loading && !loadError && visibleTransmittals.length === 0 && (
         <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
           <div style={{ marginBottom: 12, display: "flex", justifyContent: "center" }}><Send size={40} color="#D1D5DB" /></div>
           <div style={{ fontWeight: 600 }}>
@@ -393,10 +464,17 @@ export function TransmittalsTab({ projectId, canWrite }: { projectId: number; ca
         </div>
       )}
 
-      {!loading && filtered.length > 0 && (
+      {!loading && !loadError && visibleTransmittals.length > 0 && (
         <div style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-          {filtered.map(tx => (
-            <div key={tx.id} className="card" style={{ padding: 16 }}>
+          {visibleTransmittals.map(tx => (
+            <div
+              id={`transmittal-${tx.id}`}
+              key={tx.id}
+              data-deep-link-target={openedTransmittal?.id === tx.id ? "true" : undefined}
+              aria-current={openedTransmittal?.id === tx.id ? "true" : undefined}
+              className="card"
+              style={{ padding: 16, border: openedTransmittal?.id === tx.id ? "2px solid #2563EB" : undefined, background: openedTransmittal?.id === tx.id ? "#EFF6FF" : undefined }}
+            >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
                 <div>
                   <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 4 }}>

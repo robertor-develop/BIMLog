@@ -75,6 +75,77 @@ Local implementation candidate: `57038697cbc8f5af3213ae6c3dd8e1a66a6210e4`.
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## BIMLog v1.60.33.06 Build 6 Team Capacity release gates - 2026-08-14
+
+- The exact-artifact proof's fixed PostgreSQL port collided with an unrelated managed local
+  service. The proof now permits an explicit caller-selected non-privileged loopback port while
+  continuing to require an explicit URL, exact `bimlog_rfi_test` database name, loopback host,
+  and verified server identity. The governed pre-push gate must still pass against a fresh
+  disposable F-rooted cluster before the local candidate is closed.
+  The proof also tracks the accepted `/api` health endpoint as 200 rather than its obsolete
+  pre-health-route 404 expectation.
+  Proof users and their immutable entitlement initialization remain confined to the fresh
+  disposable cluster, which is stopped and removed as the cleanup boundary.
+
+- Exact-390 Spanish QA corrected the Resource Scheduling methodology that remained in English.
+  Focused bilingual SSR, frontend typecheck, and live no-overflow browser evidence pass; the
+  governed post-change build still requires a clean successful run before local commit.
+
+- Isolated PostgreSQL release evidence now passes profile persistence, membership/company/project
+  isolation, concurrent scenario conflict, persisted nested financial redaction, concurrent
+  idempotent application, divergent replay refusal, cross-tenant scenario refusal, stale-basis
+  refusal, injected mid-transaction rollback, and zero partial reassignment. No production database
+  was accessed.
+- A release review defect was corrected: the four mutation limiters had process-local maps that did
+  not enforce one bound across a multi-process topology. The candidate now uses one additive,
+  transactionally updated database bucket authority shared across processes and fails closed when
+  that authority is unavailable. Browser, CSV/PDF, final build, independent review, and clean-commit
+  evidence remain open until their terminal artifacts pass.
+
+1. Complete the governed full production build and independently inspect the corrected exact
+   candidate diff, including the generated platform inventory and Living Brief state.
+2. Exercise authenticated API persistence against an isolated authorized database: profile and
+   scenario version conflicts, project/company isolation, role and entitlement denial, rate
+   redaction (including persisted scenario financials), mutation-rate-limit behavior across the
+   deployed process topology, concurrent save/apply, stale basis refusal, divergent event replay, transaction
+   rollback, and zero partial reassignment. No database was accessed by this source task.
+3. Exercise the actual production UI on desktop and exact-390px English/Spanish for populated,
+   missing-profile, empty-task, priced-assignment, loading, denied, malformed-response, stale,
+   conflict, and successful apply states. Confirm save/reload persistence, CSV inspection, governed
+   Print PDF, no horizontal overflow, no failed requests or console exceptions, and no hidden rates.
+4. Preserve Build 5 `v1.60.32.05` and all canonical Job Intake, Job Operations, task, resource-rate,
+   package, deliverable, membership, entitlement, and company-binding authorities. Build 6 may
+   change only reviewed direct task assignees; scenario hours and financial values remain advisory.
+5. After local gates and independent acceptance, create one clean candidate commit. Push, Replit
+   alignment and complete non-destructive preview, authorized publish/deploy, deployed-commit and
+   production verification, customer acceptance, and live acceptance remain separate approvals.
+
+## BIMLog v1.60.32.05 Build 5 Document Connections release gates - 2026-08-13
+
+1. Exercise typed task and work-package connections to same-project RFIs, exact
+   file revisions, and transmittals in an isolated database, including invalid
+   types and IDs, cross-project refusal, duplicate/idempotent requests,
+   concurrent changes, target reassignment, and canonical-source deletion.
+2. Verify current-authority recalculation and stale-safe unlink: a former
+   controller must not retain authority, a current authorized controller must
+   be able to remove the junction, and an unavailable canonical source must not
+   expose a dead anchor or mutate the source record or its history.
+3. Verify bounded option and connection-list behavior at, below, and above each
+   limit. Confirm truthful `total`, `limited`, and `max` disclosure, malformed
+   present-metadata failure, stable ordering, and no implication that a capped
+   result is complete.
+4. Exercise desktop and exact-390 English/Spanish populated, empty, loading,
+   failure, denied, capped, and unavailable states. Confirm exact RFI,
+   file-revision, and transmittal navigation after data load, preserved filters,
+   exact highlighting/opening, and visible invalid/not-found behavior with no
+   substitute selection.
+5. Preserve the Build 4 `v1.60.31.04` history and all existing canonical RFI,
+   file, transmittal, task, and work-package authorities. This `v1.60.32.05` local
+   candidate is locally committed at
+   `3d22c6a64e311575f1de9c8478d4ecebda9d26a3`, but is not pushed,
+   published, deployed, production/database verified, customer accepted, or
+   live accepted; each remains separately authorized.
+
 ## BIMLog v1.60.28.03 Smart Intake multi-contract activation gates - 2026-08-11
 
 1. Verify one through 50 contract profiles, independent APU or pricing

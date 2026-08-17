@@ -1,4 +1,4 @@
-import { check, date, index, integer, jsonb, numeric, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { check, date, foreignKey, index, integer, jsonb, numeric, pgTable, text, timestamp, uniqueIndex, type AnyPgColumn } from "drizzle-orm/pg-core";
 import { sql } from "drizzle-orm";
 import { companiesTable, usersTable } from "./users";
 import { projectsTable } from "./projects";
@@ -60,6 +60,29 @@ export const jobActivationWorkPackagesTable = pgTable("job_activation_work_packa
 export const jobActivationWorkPackageTasksTable = pgTable("job_activation_work_package_tasks", {
   packageId: text("package_id").notNull().references(() => jobActivationWorkPackagesTable.id), taskId: text("task_id").notNull().references(() => jobActivationTasksTable.id), linkedById: integer("linked_by_id").notNull().references(() => usersTable.id), linkedAt: timestamp("linked_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [uniqueIndex("job_activation_work_package_task_uidx").on(table.packageId, table.taskId), index("job_activation_work_package_task_idx").on(table.taskId, table.packageId)]);
+
+export const jobActivationDocumentConnectionsTable = pgTable("job_activation_document_connections", {
+  id: text("id").primaryKey(),
+  projectId: integer("project_id").notNull(),
+  targetType: text("target_type").notNull(),
+  targetId: text("target_id").notNull(),
+  entityType: text("entity_type").notNull(),
+  entityId: integer("entity_id").notNull(),
+  note: text("note").notNull().default(""),
+  linkedById: integer("linked_by_id").notNull(),
+  linkedAt: timestamp("linked_at", { withTimezone: true }).notNull().defaultNow(),
+}, (table) => [
+  foreignKey({ name: "job_activation_document_connections_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),
+  foreignKey({ name: "job_activation_document_connections_linked_by_id_fkey", columns: [table.linkedById], foreignColumns: [usersTable.id] }),
+  uniqueIndex("job_activation_document_connection_target_entity_uidx").on(table.projectId, table.targetType, table.targetId, table.entityType, table.entityId),
+  index("job_activation_document_connection_project_target_idx").on(table.projectId, table.targetType, table.targetId, table.linkedAt),
+  check("job_activation_document_connection_id_chk", sql`${table.id} ~ '^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$'`),
+  check("job_activation_document_connection_target_type_chk", sql`${table.targetType} IN ('task','work_package')`),
+  check("job_activation_document_connection_entity_type_chk", sql`${table.entityType} IN ('rfi','file_revision','transmittal')`),
+  check("job_activation_document_connection_target_id_chk", sql`octet_length(${table.targetId}) BETWEEN 8 AND 64`),
+  check("job_activation_document_connection_entity_id_chk", sql`${table.entityId} > 0`),
+  check("job_activation_document_connection_note_chk", sql`octet_length(${table.note}) <= 500`),
+]);
 
 export const jobActivationBudgetBaselinesTable = pgTable("job_activation_budget_baselines", {
   id: text("id").primaryKey(), intakeId: text("intake_id").notNull().references(() => jobIntakesTable.id), projectId: integer("project_id").notNull().references(() => projectsTable.id), version: integer("version").notNull(), supersedesId: text("supersedes_id").references((): AnyPgColumn => jobActivationBudgetBaselinesTable.id), content: jsonb("content").$type<Record<string, unknown>>().notNull(), contentFingerprint: text("content_fingerprint").notNull(), revisionReason: text("revision_reason").notNull().default(""), createdById: integer("created_by_id").notNull().references(() => usersTable.id), createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

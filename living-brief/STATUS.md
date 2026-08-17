@@ -1,5 +1,36 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.60.33.06 Build 6 Team Capacity local candidate - 2026-08-14
+
+- The local production-artifact proof accepts an explicit caller-selected non-privileged loopback
+  PostgreSQL port while retaining exact loopback-host, database-name, explicit-URL, and runtime
+  identity checks. The canonical `/api` health response remains 200, and synthetic proof rows
+  live only for the lifetime of the disposable database.
+- Exact-390 Spanish browser QA corrected the Resource Scheduling methodology localization while
+  preserving the server-owned English contract.
+- Release verification proved isolated persistence, tenant and membership refusal, concurrent
+  version conflict, idempotent and divergent replay, financial redaction, stale refusal,
+  transaction rollback, and zero partial apply. Mutation limits use additive database-backed
+  buckets shared across processes and fail closed if limiter authority is unavailable.
+- Team Performance uses employee-owned append-only availability, working-day, and leave profiles;
+  missing profiles remain visibly unknown. Cross-project comparisons use verified Job Operations
+  evidence without inferred skill scores or automatic ranking. Financial values remain redacted
+  without both managerial and Commercial financial authority.
+- Immutable what-if scenarios are version-bound, transactional, project-scoped, idempotent,
+  stale-safe, reasoned, and limited to eligible direct task assignees. The candidate remains local;
+  independent review, push, publication, deployment, production, and field gates remain separate.
+
+## BIMLog v1.60.32.05 Build 5 Document Connections local candidate - 2026-08-13
+
+- Job Operations persists typed junctions from canonical tasks or work packages to canonical
+  same-project RFIs, exact file revisions, and transmittals without duplicating source authority.
+- Selectors disclose bounded result metadata and fail visibly on malformed completeness metadata.
+  Link/unlink authority follows the current target controller; unavailable canonical sources
+  remain visible and removable without exposing dead navigation.
+- Exact record navigation fails visibly rather than selecting a substitute. The bilingual local
+  source candidate is committed at `3d22c6a64e311575f1de9c8478d4ecebda9d26a3`; publication,
+  deployment, production verification, customer acceptance, and live acceptance remain separate.
+
 ## BIMLog Lens Next F-only package lifecycle rehearsal - local evidence 2026-08-16
 
 - Local rehearsal commit: `b59e7e54e4a42aa562c6f2dc78cc624b49326cb5`.

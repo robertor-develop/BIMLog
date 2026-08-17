@@ -200,8 +200,10 @@ Module._resolveFilename = function(request, parent, isMain, options) {
 const proofDatabaseUrl = process.env.BIMLOG_ARTIFACT_PROOF_DATABASE_URL;
 assert(proofDatabaseUrl, "BIMLOG_ARTIFACT_PROOF_DATABASE_URL is required for the exact-artifact authorization proof.");
 const proofDatabaseIdentity = new URL(proofDatabaseUrl);
-assert(["127.0.0.1", "localhost", "::1"].includes(proofDatabaseIdentity.hostname));
-assert.equal(proofDatabaseIdentity.port, "55432");
+const proofDatabaseHostname = proofDatabaseIdentity.hostname.replace(/^\[|\]$/g, "");
+assert(["127.0.0.1", "localhost", "::1"].includes(proofDatabaseHostname));
+const proofDatabasePort = Number(proofDatabaseIdentity.port);
+assert(Number.isInteger(proofDatabasePort) && proofDatabasePort >= 1024 && proofDatabasePort <= 65535);
 assert.equal(proofDatabaseIdentity.pathname, "/bimlog_rfi_test");
 const { Pool } = requireFromArtifact("pg") as typeof import("pg");
 const proofPool = new Pool({ connectionString: proofDatabaseUrl, max: 2 });
@@ -319,7 +321,7 @@ try {
     (status) => status === 200,
   );
   const readyMs = performance.now() - startedAt;
-  assert.equal(apiStatus, 404);
+  assert.equal(apiStatus, 200);
   assert.equal(readyStatus, 200);
   assert(readyMs < 6_000);
   assert.match(stdout, /phase=bootstrap_bound/);
@@ -373,7 +375,7 @@ try {
       pdfGenerationAndParsing: true,
       imageAndCanvasNativeRuntime: true,
       emailArchiveDocxAuthImports: true,
-      apiHistoricalNon5xx: apiStatus,
+      apiRootStatus: apiStatus,
       readinessStatus: readyStatus,
       packagedLivingBriefDocuments: docs.length,
       passwordlessEligibleUnlock: true,
@@ -388,7 +390,5 @@ try {
     child.kill();
     await new Promise(resolve => child.once("exit", resolve));
   }
-  await proofPool.query(`DELETE FROM users WHERE email LIKE $1`, [`${proofMarker}%`]);
-  await proofPool.query(`DELETE FROM companies WHERE id=$1`, [companyId]);
   await proofPool.end();
 }

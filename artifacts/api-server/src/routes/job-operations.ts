@@ -7,8 +7,10 @@ import {
   createJobBudgetVarianceReview,
   createJobOperationPackage,
   getJobOperations,
+  linkJobOperationDocumentConnection,
   linkJobOperationDeliverable,
   reassignJobOperationResource,
+  unlinkJobOperationDocumentConnection,
   unlinkJobOperationDeliverable,
   updateJobOperationPackage,
   updateJobOperationTask,
@@ -19,6 +21,16 @@ const router = Router();
 router.use("/projects/:projectId/operations", authMiddleware);
 
 const errorEs: Record<string, string> = {
+  JOB_OPERATIONS_COMPANY_MISMATCH: "El proyecto pertenece a otra empresa.",
+  JOB_OPERATIONS_DOCUMENT_TARGET_TYPE_INVALID: "El tipo de destino de la conexión no es válido.",
+  JOB_OPERATIONS_DOCUMENT_ENTITY_TYPE_INVALID: "El tipo de documento de la conexión no es válido.",
+  JOB_OPERATIONS_DOCUMENT_ENTITY_NOT_FOUND: "No se encontró el documento canónico en este proyecto.",
+  JOB_OPERATIONS_DOCUMENT_CONNECTION_NOT_FOUND: "No se encontró la conexión del documento.",
+  JOB_OPERATIONS_DOCUMENT_CONNECTION_DENIED: "No tiene permiso para administrar esta conexión.",
+  JOB_OPERATIONS_DOCUMENT_TARGET_STALE: "La tarea o el paquete seleccionado ya no está activo.",
+  JOB_OPERATIONS_DOCUMENT_CONNECTION_STALE: "El documento canónico conectado ya no está disponible.",
+  JOB_OPERATIONS_DOCUMENT_CONNECTION_ID_CONFLICT: "El identificador de la conexión ya pertenece a otra solicitud.",
+  JOB_OPERATIONS_DOCUMENT_CONNECTION_CONFLICT: "La conexión cambió en otra sesión. Recargue antes de guardar.",
   JOB_OPERATIONS_PROJECT_NOT_FOUND: "No se encontró el proyecto.",
   JOB_OPERATIONS_MEMBERSHIP_REQUIRED: "Debe ser miembro activo del proyecto.",
   JOB_OPERATIONS_TASK_NOT_FOUND: "No se encontró la tarea.",
@@ -86,6 +98,12 @@ router.post("/projects/:projectId/operations/deliverables", run(async (req, res)
 }));
 router.delete("/projects/:projectId/operations/deliverables/:deliverableId", run(async (req, res) => {
   res.json(await unlinkJobOperationDeliverable({ actorUserId: req.user.userId, projectId: req.params.projectId, deliverableId: req.params.deliverableId }));
+}));
+router.post("/projects/:projectId/operations/document-connections", run(async (req, res) => {
+  res.status(201).json(await linkJobOperationDocumentConnection({ actorUserId: req.user.userId, projectId: req.params.projectId, connectionId: req.body?.connectionId, targetType: req.body?.targetType, targetId: req.body?.targetId, entityType: req.body?.entityType, entityId: req.body?.entityId, note: req.body?.note }));
+}));
+router.delete("/projects/:projectId/operations/document-connections/:connectionId", run(async (req, res) => {
+  res.json(await unlinkJobOperationDocumentConnection({ actorUserId: req.user.userId, projectId: req.params.projectId, connectionId: req.params.connectionId }));
 }));
 router.post("/projects/:projectId/operations/packages", run(async (req, res) => {
   res.status(201).json(await createJobOperationPackage({ actorUserId: req.user.userId, projectId: req.params.projectId, packageId: req.body?.packageId, workItemId: req.body?.workItemId, packageCode: req.body?.packageCode, title: req.body?.title, description: req.body?.description, packageType: req.body?.packageType, responsibleUserId: req.body?.responsibleUserId, dueDate: req.body?.dueDate, taskIds: req.body?.taskIds }));

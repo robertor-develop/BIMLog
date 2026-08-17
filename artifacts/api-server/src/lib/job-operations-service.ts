@@ -9,6 +9,10 @@ const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complet
 const DELIVERABLE_TYPES = new Set(["shop_drawing", "submittal", "deliverable", "supporting"]);
 const PACKAGE_TYPES = new Set(["shop_drawing", "submittal", "mixed", "deliverable"]);
 const PACKAGE_STATUSES = new Set(["draft", "internal_review", "submitted", "returned", "approved", "cancelled"]);
+const DOCUMENT_TARGET_TYPES = new Set(["task", "work_package"]);
+const DOCUMENT_ENTITY_TYPES = new Set(["rfi", "file_revision", "transmittal"]);
+const DOCUMENT_CONNECTION_OPTION_LIMIT = 200;
+const DOCUMENT_CONNECTION_LIST_LIMIT = 200;
 const BUDGET_METRICS = new Set(["hours", "internal_cost", "billable_value"]);
 const BUDGET_REVIEW_STATUSES = new Set(["acknowledged", "resolved", "rejected"]);
 const PACKAGE_TRANSITIONS: Record<string, Set<string>> = {
@@ -25,6 +29,12 @@ function id(value: unknown, field: string) {
   const parsed = String(value ?? "").trim();
   if (!/^[0-9a-f-]{8,64}$/i.test(parsed)) throw new FinancialControlError(400, "JOB_OPERATIONS_ID_INVALID", `${field} is invalid.`);
   return parsed;
+}
+const RFC4122_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+export function canonicalDocumentConnectionId(value: unknown) {
+  const parsed = String(value ?? "");
+  if (!RFC4122_UUID.test(parsed)) throw new FinancialControlError(400, "JOB_OPERATIONS_ID_INVALID", "connectionId must be an RFC 4122 UUID.");
+  return parsed.toLowerCase();
 }
 function positiveInt(value: unknown, field: string) {
   const parsed = Number(value);
@@ -60,34 +70,196 @@ function workHours(value: unknown) {
 }
 
 async function scope(actorUserId: number, projectId: number, client: Queryable = pool) {
-  const row = (await client.query(`SELECT p.id,p.name,p.code,u.is_super_admin,pm.role,ji.id intake_id,ji.data
-    FROM projects p JOIN users u ON u.id=$2
+  const row = (await client.query(`SELECT p.id,p.name,p.code,u.is_super_admin,u.company_id actor_company,pm.role,ji.id intake_id,ji.data,
+    COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id) project_company
+    FROM projects p JOIN users u ON u.id=$2 JOIN users creator ON creator.id=p.created_by_id
     LEFT JOIN project_members pm ON pm.project_id=p.id AND pm.user_id=u.id AND pm.status='active'
     LEFT JOIN job_intakes ji ON ji.project_id=p.id
     WHERE p.id=$1 AND p.status<>'archived'`, [projectId, actorUserId])).rows[0];
   if (!row) throw new FinancialControlError(404, "JOB_OPERATIONS_PROJECT_NOT_FOUND", "Project not found.");
   if (!row.is_super_admin && !row.role) throw new FinancialControlError(403, "JOB_OPERATIONS_MEMBERSHIP_REQUIRED", "Active project membership is required.");
+  if (!row.is_super_admin && Number(row.actor_company) !== Number(row.project_company)) throw new FinancialControlError(403, "JOB_OPERATIONS_COMPANY_MISMATCH", "The project belongs to another company.");
   const leaderId = Number(row.data?.team?.projectLeaderUserId ?? 0) || null;
-  return { projectId, projectName: row.name, projectCode: row.code, intakeId: row.intake_id ?? null, leaderId, canManage: row.is_super_admin === true || leaderId === actorUserId || MANAGER_ROLES.has(String(row.role ?? "").toLowerCase()) };
+  return { projectId, projectName: row.name, projectCode: row.code, companyId: Number(row.project_company), intakeId: row.intake_id ?? null, leaderId, canManage: row.is_super_admin === true || leaderId === actorUserId || MANAGER_ROLES.has(String(row.role ?? "").toLowerCase()) };
 }
 
 async function event(client: Queryable, input: { projectId: number; actorUserId: number; eventType: string; workItemId?: string | null; taskId?: string | null; assignmentId?: string | null; packageId?: string | null; evidence?: Record<string, unknown> }) {
   await client.query(`INSERT INTO job_activation_operation_events(id,project_id,work_item_id,task_id,assignment_id,package_id,actor_user_id,event_type,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)`, [crypto.randomUUID(), input.projectId, input.workItemId ?? null, input.taskId ?? null, input.assignmentId ?? null, input.packageId ?? null, input.actorUserId, input.eventType, JSON.stringify(input.evidence ?? {})]);
 }
 
-async function taskAccess(client: Queryable, actorUserId: number, projectId: number, taskId: string) {
-  const access = await scope(actorUserId, projectId, client);
-  const task = (await client.query(`SELECT t.*,w.project_id,w.intake_id FROM job_activation_tasks t JOIN job_activation_work_items w ON w.id=t.work_item_id WHERE t.id=$1 AND w.project_id=$2`, [taskId, projectId])).rows[0];
+async function taskAccess(client: Queryable, actorUserId: number, projectId: number, taskId: string, knownAccess?: Awaited<ReturnType<typeof scope>>) {
+  const access = knownAccess ?? await scope(actorUserId, projectId, client);
+  const task = (await client.query(`SELECT t.*,w.project_id,w.intake_id,w.status work_item_status FROM job_activation_tasks t JOIN job_activation_work_items w ON w.id=t.work_item_id WHERE t.id=$1 AND w.project_id=$2`, [taskId, projectId])).rows[0];
   if (!task) throw new FinancialControlError(404, "JOB_OPERATIONS_TASK_NOT_FOUND", "Task not found.");
   const assigned = Number(task.assignee_user_id) === actorUserId || Boolean((await client.query(`SELECT 1 FROM job_activation_resource_assignments WHERE task_id=$1 AND user_id=$2 LIMIT 1`, [taskId, actorUserId])).rows[0]);
   return { access, task, canControl: access.canManage || assigned };
 }
 
-async function packageAccess(client: Queryable, actorUserId: number, projectId: number, packageId: string) {
-  const access = await scope(actorUserId, projectId, client);
-  const workPackage = (await client.query(`SELECT p.* FROM job_activation_work_packages p WHERE p.id=$1 AND p.project_id=$2`, [packageId, projectId])).rows[0];
+async function packageAccess(client: Queryable, actorUserId: number, projectId: number, packageId: string, knownAccess?: Awaited<ReturnType<typeof scope>>) {
+  const access = knownAccess ?? await scope(actorUserId, projectId, client);
+  const workPackage = (await client.query(`SELECT p.*,w.status work_item_status FROM job_activation_work_packages p JOIN job_activation_work_items w ON w.id=p.work_item_id WHERE p.id=$1 AND p.project_id=$2`, [packageId, projectId])).rows[0];
   if (!workPackage) throw new FinancialControlError(404, "JOB_OPERATIONS_PACKAGE_NOT_FOUND", "Work package not found.");
   return { access, workPackage, canControl: access.canManage || Number(workPackage.responsible_user_id) === actorUserId };
+}
+
+type DocumentTargetType = "task" | "work_package";
+type DocumentEntityType = "rfi" | "file_revision" | "transmittal";
+
+function documentTargetType(value: unknown): DocumentTargetType {
+  const parsed = String(value ?? "");
+  if (!DOCUMENT_TARGET_TYPES.has(parsed)) throw new FinancialControlError(400, "JOB_OPERATIONS_DOCUMENT_TARGET_TYPE_INVALID", "Document connection target type is invalid.");
+  return parsed as DocumentTargetType;
+}
+
+function documentEntityType(value: unknown): DocumentEntityType {
+  const parsed = String(value ?? "");
+  if (!DOCUMENT_ENTITY_TYPES.has(parsed)) throw new FinancialControlError(400, "JOB_OPERATIONS_DOCUMENT_ENTITY_TYPE_INVALID", "Document connection entity type is invalid.");
+  return parsed as DocumentEntityType;
+}
+
+async function documentTargetAccess(client: Queryable, actorUserId: number, projectId: number, targetType: DocumentTargetType, targetId: string, options: { allowStale?: boolean; access?: Awaited<ReturnType<typeof scope>> } = {}) {
+  if (targetType === "task") {
+    const control = await taskAccess(client, actorUserId, projectId, targetId, options.access);
+    if (!options.allowStale && (control.task.status === "cancelled" || control.task.work_item_status === "cancelled")) throw new FinancialControlError(409, "JOB_OPERATIONS_DOCUMENT_TARGET_STALE", "The selected task is no longer active.");
+    return { access: control.access, canControl: control.canControl, workItemId: String(control.task.work_item_id), taskId: targetId, packageId: null as string | null };
+  }
+  const control = await packageAccess(client, actorUserId, projectId, targetId, options.access);
+  if (!options.allowStale && (control.workPackage.status === "cancelled" || control.workPackage.work_item_status === "cancelled")) throw new FinancialControlError(409, "JOB_OPERATIONS_DOCUMENT_TARGET_STALE", "The selected work package is no longer active.");
+  return { access: control.access, canControl: control.canControl, workItemId: String(control.workPackage.work_item_id), taskId: null as string | null, packageId: targetId };
+}
+
+function documentEntityDeepLink(entityType: DocumentEntityType, projectId: number, entityId: number) {
+  if (entityType === "rfi") return `/projects/${projectId}/rfis?rfi=${entityId}`;
+  if (entityType === "file_revision") return `/projects/${projectId}/files?file=${entityId}`;
+  return `/projects/${projectId}/transmittals?transmittal=${entityId}`;
+}
+
+function documentEntity(input: { entityType: DocumentEntityType; entityId: number; displayCode: unknown; title: unknown; status: unknown; version: unknown; available?: boolean }, projectId: number) {
+  const available = input.available !== false;
+  return {
+    id: Number(input.entityId),
+    entityType: input.entityType,
+    entityId: Number(input.entityId),
+    entityIdentity: `${input.entityType}:${input.entityId}`,
+    available,
+    stale: !available,
+    displayCode: available ? String(input.displayCode ?? "") : "",
+    title: available ? String(input.title ?? input.displayCode ?? "") : "",
+    status: available && input.status != null ? String(input.status) : null,
+    version: available && input.version != null ? Number(input.version) : null,
+    deepLink: available ? documentEntityDeepLink(input.entityType, projectId, Number(input.entityId)) : "",
+  };
+}
+
+async function canonicalDocumentEntity(client: Queryable, projectId: number, entityType: DocumentEntityType, entityId: number) {
+  let row: any;
+  if (entityType === "rfi") row = (await client.query(`SELECT id,number display_code,subject title,status,COALESCE(revision_number,0) version FROM rfis WHERE id=$1 AND project_id=$2 AND deleted_at IS NULL FOR SHARE`, [entityId, projectId])).rows[0];
+  else if (entityType === "file_revision") row = (await client.query(`SELECT id,file_name display_code,file_name title,status,version FROM files WHERE id=$1 AND project_id=$2 AND COALESCE(status,'')<>'deleted' FOR SHARE`, [entityId, projectId])).rows[0];
+  else row = (await client.query(`SELECT id,number display_code,title,status,NULL::integer version FROM transmittals WHERE id=$1 AND project_id=$2 AND deleted_at IS NULL FOR SHARE`, [entityId, projectId])).rows[0];
+  if (!row) throw new FinancialControlError(404, "JOB_OPERATIONS_DOCUMENT_ENTITY_NOT_FOUND", "Canonical document record not found in this project.");
+  return documentEntity({ entityType, entityId: Number(row.id), displayCode: row.display_code, title: row.title, status: row.status, version: row.version }, projectId);
+}
+
+export function presentDocumentConnectionOptionView(projectId: number, rows: { rfis: any[]; fileRevisions: any[]; transmittals: any[] }, totals: { rfis: number; fileRevisions: number; transmittals: number }) {
+  const option = (row: any, deepLink: string) => ({ id: Number(row.id), displayCode: String(row.display_code), title: String(row.title ?? row.display_code), status: row.status == null ? null : String(row.status), version: row.version == null ? null : Number(row.version), deepLink });
+  const options = {
+    rfis: rows.rfis.map((row) => option(row, documentEntityDeepLink("rfi", projectId, Number(row.id)))),
+    fileRevisions: rows.fileRevisions.map((row) => ({ ...option(row, documentEntityDeepLink("file_revision", projectId, Number(row.id))), parentFileId: row.parent_file_id == null ? null : Number(row.parent_file_id) })),
+    transmittals: rows.transmittals.map((row) => option(row, documentEntityDeepLink("transmittal", projectId, Number(row.id)))),
+  };
+  return { options, meta: {
+    rfis: { total: totals.rfis, limited: totals.rfis > options.rfis.length, max: DOCUMENT_CONNECTION_OPTION_LIMIT },
+    fileRevisions: { total: totals.fileRevisions, limited: totals.fileRevisions > options.fileRevisions.length, max: DOCUMENT_CONNECTION_OPTION_LIMIT },
+    transmittals: { total: totals.transmittals, limited: totals.transmittals > options.transmittals.length, max: DOCUMENT_CONNECTION_OPTION_LIMIT },
+  } };
+}
+
+async function documentConnectionOptions(client: Queryable, projectId: number) {
+  const [rfis, fileRevisions, transmittals, rfiCount, fileRevisionCount, transmittalCount] = await Promise.all([
+    client.query(`SELECT id,number display_code,subject title,status,COALESCE(revision_number,0) version FROM rfis WHERE project_id=$1 AND deleted_at IS NULL ORDER BY lower(number),id LIMIT $2`, [projectId, DOCUMENT_CONNECTION_OPTION_LIMIT]),
+    client.query(`SELECT id,file_name display_code,file_name title,status,version,parent_file_id FROM files WHERE project_id=$1 AND COALESCE(status,'')<>'deleted' ORDER BY lower(file_name),version DESC,id LIMIT $2`, [projectId, DOCUMENT_CONNECTION_OPTION_LIMIT]),
+    client.query(`SELECT id,number display_code,title,status,NULL::integer version FROM transmittals WHERE project_id=$1 AND deleted_at IS NULL ORDER BY lower(number),id LIMIT $2`, [projectId, DOCUMENT_CONNECTION_OPTION_LIMIT]),
+    client.query(`SELECT COUNT(*)::integer total FROM rfis WHERE project_id=$1 AND deleted_at IS NULL`, [projectId]),
+    client.query(`SELECT COUNT(*)::integer total FROM files WHERE project_id=$1 AND COALESCE(status,'')<>'deleted'`, [projectId]),
+    client.query(`SELECT COUNT(*)::integer total FROM transmittals WHERE project_id=$1 AND deleted_at IS NULL`, [projectId]),
+  ]);
+  const total = { rfis: Number(rfiCount.rows[0]?.total ?? 0), fileRevisions: Number(fileRevisionCount.rows[0]?.total ?? 0), transmittals: Number(transmittalCount.rows[0]?.total ?? 0) };
+  return presentDocumentConnectionOptionView(projectId, { rfis: rfis.rows, fileRevisions: fileRevisions.rows, transmittals: transmittals.rows }, total);
+}
+
+async function documentConnectionRows(client: Queryable, projectId: number, connectionId: string) {
+  return (await client.query(`SELECT c.id,c.project_id "projectId",c.target_type "targetType",c.target_id "targetId",c.entity_type "entityType",c.entity_id "entityId",c.note,c.linked_by_id "linkedById",c.linked_at "linkedAt",
+    CASE c.entity_type WHEN 'rfi' THEN r.id WHEN 'file_revision' THEN f.id WHEN 'transmittal' THEN tx.id END "canonicalId",
+    CASE c.entity_type WHEN 'rfi' THEN r.number WHEN 'file_revision' THEN f.file_name WHEN 'transmittal' THEN tx.number END "displayCode",
+    CASE c.entity_type WHEN 'rfi' THEN r.subject WHEN 'file_revision' THEN f.file_name WHEN 'transmittal' THEN tx.title END title,
+    CASE c.entity_type WHEN 'rfi' THEN CASE WHEN r.deleted_at IS NULL THEN r.status ELSE 'deleted' END WHEN 'file_revision' THEN f.status WHEN 'transmittal' THEN CASE WHEN tx.deleted_at IS NULL THEN tx.status ELSE 'deleted' END END status,
+    CASE c.entity_type WHEN 'rfi' THEN COALESCE(r.revision_number,0) WHEN 'file_revision' THEN f.version ELSE NULL END version
+    FROM job_activation_document_connections c
+    LEFT JOIN rfis r ON c.entity_type='rfi' AND r.id=c.entity_id AND r.project_id=c.project_id
+    LEFT JOIN files f ON c.entity_type='file_revision' AND f.id=c.entity_id AND f.project_id=c.project_id
+    LEFT JOIN transmittals tx ON c.entity_type='transmittal' AND tx.id=c.entity_id AND tx.project_id=c.project_id
+    WHERE c.project_id=$1 AND c.id=$2
+    ORDER BY c.linked_at DESC,c.id LIMIT 1`, [projectId, connectionId])).rows;
+}
+
+export function presentDocumentConnection(row: any, canRemove: boolean) {
+  const entityType = row.entityType as DocumentEntityType, entityId = Number(row.entityId);
+  const entityAvailable = row.canonicalId != null
+    && !(entityType === "rfi" && row.status === "deleted")
+    && !(entityType === "file_revision" && row.status === "deleted")
+    && !(entityType === "transmittal" && row.status === "deleted");
+  return {
+    id: String(row.id), projectId: Number(row.projectId), targetType: row.targetType as DocumentTargetType, targetId: String(row.targetId), entityType, entityId,
+    note: String(row.note ?? ""), linkedById: Number(row.linkedById), linkedAt: row.linkedAt,
+    canRemove,
+    entity: documentEntity({ entityType, entityId, displayCode: row.displayCode, title: row.title, status: row.status, version: row.version, available: entityAvailable }, Number(row.projectId)),
+  };
+}
+
+export function presentDocumentConnectionListView(rows: any[], canManage: boolean) {
+  const total = Number(rows[0]?.connectionTotal ?? 0);
+  const connections = rows.map((row) => presentDocumentConnection(row, canManage || row.currentCanControl === true));
+  return { connections, meta: { total, limited: total > connections.length, max: DOCUMENT_CONNECTION_LIST_LIMIT } };
+}
+
+async function documentConnectionList(client: Queryable, projectId: number, actorUserId: number, canManage: boolean) {
+  const rows = (await client.query(`WITH current_task_control AS (
+      SELECT t.id FROM job_activation_tasks t
+      JOIN job_activation_work_items w ON w.id=t.work_item_id
+      LEFT JOIN job_activation_resource_assignments ra ON ra.task_id=t.id AND ra.user_id=$2
+      WHERE w.project_id=$1 AND (t.assignee_user_id=$2 OR ra.id IS NOT NULL)
+      GROUP BY t.id
+    ), current_package_control AS (
+      SELECT p.id FROM job_activation_work_packages p WHERE p.project_id=$1 AND p.responsible_user_id=$2
+    )
+    SELECT c.id,c.project_id "projectId",c.target_type "targetType",c.target_id "targetId",c.entity_type "entityType",c.entity_id "entityId",c.note,c.linked_by_id "linkedById",c.linked_at "linkedAt",
+    COUNT(*) OVER()::integer "connectionTotal",
+    ((c.target_type='task' AND tc.id IS NOT NULL) OR (c.target_type='work_package' AND pc.id IS NOT NULL)) "currentCanControl",
+    CASE c.entity_type WHEN 'rfi' THEN r.id WHEN 'file_revision' THEN f.id WHEN 'transmittal' THEN tx.id END "canonicalId",
+    CASE c.entity_type WHEN 'rfi' THEN r.number WHEN 'file_revision' THEN f.file_name WHEN 'transmittal' THEN tx.number END "displayCode",
+    CASE c.entity_type WHEN 'rfi' THEN r.subject WHEN 'file_revision' THEN f.file_name WHEN 'transmittal' THEN tx.title END title,
+    CASE c.entity_type WHEN 'rfi' THEN CASE WHEN r.deleted_at IS NULL THEN r.status ELSE 'deleted' END WHEN 'file_revision' THEN f.status WHEN 'transmittal' THEN CASE WHEN tx.deleted_at IS NULL THEN tx.status ELSE 'deleted' END END status,
+    CASE c.entity_type WHEN 'rfi' THEN COALESCE(r.revision_number,0) WHEN 'file_revision' THEN f.version ELSE NULL END version
+    FROM job_activation_document_connections c
+    LEFT JOIN current_task_control tc ON c.target_type='task' AND tc.id=c.target_id
+    LEFT JOIN current_package_control pc ON c.target_type='work_package' AND pc.id=c.target_id
+    LEFT JOIN rfis r ON c.entity_type='rfi' AND r.id=c.entity_id AND r.project_id=c.project_id
+    LEFT JOIN files f ON c.entity_type='file_revision' AND f.id=c.entity_id AND f.project_id=c.project_id
+    LEFT JOIN transmittals tx ON c.entity_type='transmittal' AND tx.id=c.entity_id AND tx.project_id=c.project_id
+    WHERE c.project_id=$1
+    ORDER BY c.linked_at DESC,c.id
+    LIMIT $3`, [projectId, actorUserId, DOCUMENT_CONNECTION_LIST_LIMIT])).rows;
+  return presentDocumentConnectionListView(rows, canManage);
+}
+
+export async function currentDocumentConnectionCanRemove(client: Queryable, actorUserId: number, projectId: number, row: any, access: Awaited<ReturnType<typeof scope>>) {
+  try {
+    const target = await documentTargetAccess(client, actorUserId, projectId, documentTargetType(row.targetType ?? row.target_type), id(row.targetId ?? row.target_id, "targetId"), { allowStale: true, access });
+    return target.canControl;
+  } catch (error) {
+    if (error instanceof FinancialControlError && (error.code === "JOB_OPERATIONS_TASK_NOT_FOUND" || error.code === "JOB_OPERATIONS_PACKAGE_NOT_FOUND")) return access.canManage;
+    throw error;
+  }
 }
 
 async function validatePackageTasks(client: Queryable, workItemId: string, taskIds: string[]) {
@@ -194,8 +366,13 @@ async function projectControlsView(client: Queryable, access: Awaited<ReturnType
 export async function getJobOperations(input: { actorUserId: number; projectId: unknown }) {
   await waitForJobIntakeMigration();
   const projectId = positiveInt(input.projectId, "projectId"), access = await scope(input.actorUserId, projectId);
-  const capabilities = await effectiveCommercialAccessForUser(input.actorUserId);
-  if (!access.intakeId) return { available: false, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, capabilities };
+  const [capabilities, connectionOptionView, connectionView] = await Promise.all([
+    effectiveCommercialAccessForUser(input.actorUserId),
+    documentConnectionOptions(pool, projectId),
+    documentConnectionList(pool, projectId, input.actorUserId, access.canManage),
+  ]);
+  const documentConnections = connectionView.connections;
+  if (!access.intakeId) return { available: false, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, capabilities, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta };
   const [workItems, tasks, assignments, timeEntries, deliverables, packages, packageTasks, members, files, totals] = await Promise.all([
     pool.query(`SELECT id,stable_scope_item_id "stableScopeItemId",name,description,unit,planned_hours "plannedHours",workflow_template "workflowTemplate",status,billing_hourly_rate "billingHourlyRate",planned_billable_value "plannedBillableValue",contract_id "contractId" FROM job_activation_work_items WHERE intake_id=$1 ORDER BY created_at,id`, [access.intakeId]),
     pool.query(`SELECT t.id,t.work_item_id "workItemId",t.task_key "taskKey",t.name_en "nameEn",t.name_es "nameEs",t.status,t.version,t.progress_percent "progressPercent",t.planned_hours "plannedHours",t.assignee_user_id "assigneeUserId",COALESCE(e.actual_hours,0)::text "actualHours",COALESCE(d.deliverable_count,0)::int "deliverableCount"
@@ -262,7 +439,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     approved: safePackages.filter((row) => row.status === "approved").length,
   };
   const [budgetGovernance, projectControls] = await Promise.all([budgetGovernanceView(pool, access, capabilities), projectControlsView(pool, access, capabilities)]);
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, budgetGovernance, projectControls, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, totals: safeTotals };
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, budgetGovernance, projectControls, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
 }
 
 export async function createJobBudgetBaseline(input: { actorUserId: number; projectId: unknown; baselineId: unknown; revisionReason?: unknown }) {
@@ -477,5 +654,53 @@ export async function unlinkJobOperationDeliverable(input: { actorUserId: number
     await client.query(`DELETE FROM job_activation_task_deliverables WHERE id=$1`, [deliverableId]);
     await event(client, { projectId, actorUserId: input.actorUserId, eventType: "deliverable_unlinked", workItemId: row.work_item_id, taskId: row.task_id, evidence: { deliverableId, fileId: row.file_id } });
     await client.query("COMMIT"); return { id: deliverableId, removed: true };
+  } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
+}
+
+export async function linkJobOperationDocumentConnection(input: { actorUserId: number; projectId: unknown; connectionId: unknown; targetType: unknown; targetId: unknown; entityType: unknown; entityId: unknown; note?: unknown }) {
+  await waitForJobIntakeMigration();
+  const projectId = positiveInt(input.projectId, "projectId"), connectionId = canonicalDocumentConnectionId(input.connectionId), targetType = documentTargetType(input.targetType), targetId = id(input.targetId, "targetId"), entityType = documentEntityType(input.entityType), entityId = positiveInt(input.entityId, "entityId"), note = text(input.note, 500, "note");
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const target = await documentTargetAccess(client, input.actorUserId, projectId, targetType, targetId);
+    if (!target.canControl) throw new FinancialControlError(403, "JOB_OPERATIONS_DOCUMENT_CONNECTION_DENIED", "Only the project leader or the responsible task/package member may connect documents.");
+    const entity = await canonicalDocumentEntity(client, projectId, entityType, entityId);
+    const existingId = (await client.query(`SELECT id,target_type,target_id,entity_type,entity_id,note FROM job_activation_document_connections WHERE id=$1 AND project_id=$2 FOR UPDATE`, [connectionId, projectId])).rows[0];
+    if (existingId) {
+      const sameRequest = Number(existingId.entity_id) === entityId && existingId.target_type === targetType && existingId.target_id === targetId && existingId.entity_type === entityType && String(existingId.note) === note;
+      if (!sameRequest) throw new FinancialControlError(409, "JOB_OPERATIONS_DOCUMENT_CONNECTION_ID_CONFLICT", "Connection ID is already bound to another request.");
+      const rows = await documentConnectionRows(client, projectId, connectionId);
+      const result = presentDocumentConnection(rows[0], target.canControl);
+      await client.query("COMMIT");
+      return { ...result, idempotent: true };
+    }
+    if ((await client.query(`SELECT 1 FROM job_activation_document_connections WHERE id=$1`, [connectionId])).rows[0]) throw new FinancialControlError(409, "JOB_OPERATIONS_DOCUMENT_CONNECTION_ID_CONFLICT", "Connection ID is unavailable.");
+    const inserted = (await client.query(`INSERT INTO job_activation_document_connections(id,project_id,target_type,target_id,entity_type,entity_id,note,linked_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8) ON CONFLICT DO NOTHING RETURNING id`, [connectionId, projectId, targetType, targetId, entityType, entityId, note, input.actorUserId])).rows[0];
+    let persistedId = inserted?.id as string | undefined;
+    if (!persistedId) persistedId = (await client.query(`SELECT id FROM job_activation_document_connections WHERE project_id=$1 AND target_type=$2 AND target_id=$3 AND entity_type=$4 AND entity_id=$5`, [projectId, targetType, targetId, entityType, entityId])).rows[0]?.id;
+    if (!persistedId) throw new FinancialControlError(409, "JOB_OPERATIONS_DOCUMENT_CONNECTION_CONFLICT", "The document connection changed concurrently. Reload and retry.");
+    if (inserted) await event(client, { projectId, actorUserId: input.actorUserId, eventType: "document_connection_linked", workItemId: target.workItemId, taskId: target.taskId, packageId: target.packageId, evidence: { connectionId: persistedId, targetType, targetId, entityType, entityId, entityIdentity: entity.entityIdentity, displayCode: entity.displayCode, note } });
+    const rows = await documentConnectionRows(client, projectId, persistedId);
+    const result = presentDocumentConnection(rows[0], target.canControl);
+    await client.query("COMMIT");
+    return { ...result, idempotent: !inserted };
+  } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
+}
+
+export async function unlinkJobOperationDocumentConnection(input: { actorUserId: number; projectId: unknown; connectionId: unknown }) {
+  await waitForJobIntakeMigration();
+  const projectId = positiveInt(input.projectId, "projectId"), connectionId = canonicalDocumentConnectionId(input.connectionId), client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const access = await scope(input.actorUserId, projectId, client);
+    const row = (await client.query(`SELECT * FROM job_activation_document_connections WHERE id=$1 AND project_id=$2 FOR UPDATE`, [connectionId, projectId])).rows[0];
+    if (!row) throw new FinancialControlError(404, "JOB_OPERATIONS_DOCUMENT_CONNECTION_NOT_FOUND", "Document connection not found.");
+    const canRemove = await currentDocumentConnectionCanRemove(client, input.actorUserId, projectId, row, access);
+    if (!canRemove) throw new FinancialControlError(403, "JOB_OPERATIONS_DOCUMENT_CONNECTION_DENIED", "Only the current project leader or current responsible task/package member may remove this connection.");
+    await client.query(`DELETE FROM job_activation_document_connections WHERE id=$1 AND project_id=$2`, [connectionId, projectId]);
+    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "document_connection_unlinked", taskId: row.target_type === "task" ? row.target_id : null, packageId: row.target_type === "work_package" ? row.target_id : null, evidence: { connectionId, targetType: row.target_type, targetId: row.target_id, entityType: row.entity_type, entityId: Number(row.entity_id), note: String(row.note), linkedById: Number(row.linked_by_id), linkedAt: row.linked_at } });
+    await client.query("COMMIT");
+    return { id: connectionId, removed: true };
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }

@@ -8,7 +8,6 @@ import {
   pgTable,
   text,
   timestamp,
-  unique,
   uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
@@ -80,11 +79,25 @@ export const teamStaffingApplicationEventsTable = pgTable(
     occurredAt: timestamp("occurred_at", { withTimezone: true }).defaultNow().notNull(),
   },
   (table) => [
-    unique("team_staffing_application_events_event_key_key").on(table.eventKey),
+    uniqueIndex("team_staffing_application_events_event_key_key").on(table.eventKey),
     index("team_staffing_application_project_time_idx").on(table.projectId, table.occurredAt.desc().nullsFirst()),
     foreignKey({ name: "team_staffing_application_events_scenario_version_id_fkey", columns: [table.scenarioVersionId], foreignColumns: [teamStaffingScenarioVersionsTable.id] }),
     foreignKey({ name: "team_staffing_application_events_project_id_fkey", columns: [table.projectId], foreignColumns: [projectsTable.id] }),
     foreignKey({ name: "team_staffing_application_events_actor_user_id_fkey", columns: [table.actorUserId], foreignColumns: [usersTable.id] }),
     check("team_staffing_application_reason_chk", sql`length(${table.reason}) BETWEEN 10 AND 1000`),
+  ],
+);
+
+export const teamResourceMutationRateLimitsTable = pgTable(
+  "team_resource_mutation_rate_limits",
+  {
+    bucketKey: text("bucket_key").primaryKey(),
+    windowStartedAt: timestamp("window_started_at", { withTimezone: true }).notNull(),
+    requestCount: integer("request_count").notNull(),
+    expiresAt: timestamp("expires_at", { withTimezone: true }).notNull(),
+  },
+  (table) => [
+    index("team_resource_mutation_rate_limit_expiry_idx").on(table.expiresAt),
+    check("team_resource_mutation_rate_limit_count_chk", sql`${table.requestCount} > 0`),
   ],
 );
