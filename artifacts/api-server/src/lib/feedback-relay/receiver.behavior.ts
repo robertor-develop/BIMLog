@@ -446,6 +446,10 @@ try {
       ),
     ),
   );
+  await check("request index tamper fails keyed runtime authentication",()=>{
+    const requestDir=path.join(root,"99-System","requests"),indexPath=path.join(requestDir,`${sha256("request-one")}.json`),original=fs.readFileSync(indexPath);const tampered=JSON.parse(original.toString("utf8"));tampered.objectRelativePath="01-Active/substitution";fs.writeFileSync(indexPath,JSON.stringify(tampered));
+    assert.throws(()=>service.readback("request-one",now),(error:any)=>error?.code==="FEEDBACK_RECEIVER_REQUEST_INDEX_AUTH_INVALID");fs.writeFileSync(indexPath,original);
+  });
   await check(
     "crash recovery removes staging residue and proven-dead process locks",
     () => {
