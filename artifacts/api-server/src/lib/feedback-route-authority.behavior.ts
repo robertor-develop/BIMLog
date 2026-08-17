@@ -7,7 +7,7 @@ const assertions: Array<[string, RegExp]> = [
   ["current company is reloaded", /select\(\{ companyId: usersTable\.companyId \}\)/],
   ["project company is server-derived", /innerJoin\(usersTable, eq\(projectsTable\.createdById, usersTable\.id\)\)/],
   ["active membership is required", /eq\(projectMembersTable\.status, "active"\)/],
-  ["page URL drops query and fragment", /url\.origin.*url\.pathname/],
+  ["page URL is application-relative", /return url\.pathname\.slice/],
   ["customer feedback is allowlisted", /const customerFeedbackDto/],
   ["customer history is visibility classified", /visibility: "customer"/],
   ["customer history event types are allowlisted", /CUSTOMER_EVENT_TYPES\.has/],
@@ -22,6 +22,7 @@ const assertions: Array<[string, RegExp]> = [
   ["CSV action is audited", /eventType: "admin_exported"/],
 ];
 for (const [name, pattern] of assertions) assert.match(source, pattern, name);
+assert.ok(source.indexOf("pg_advisory_xact_lock") < source.indexOf("storage.upload"), "upload idempotency must be reserved before object creation");
 for (const forbidden of ["feedback: prior }", "feedback: winner }", "return res.json({ job });", "actorUserId: event.actorUserId", "metadata: feedbackItemsTable.metadata"])
   assert.equal(source.includes(forbidden), false, `response must not expose ${forbidden}`);
-console.log(`feedback route authority source assertions: ${assertions.length + 5}/${assertions.length + 5} passed (runtime PostgreSQL not exercised)`);
+console.log(`feedback route authority source assertions: ${assertions.length + 6}/${assertions.length + 6} passed (runtime PostgreSQL not exercised)`);

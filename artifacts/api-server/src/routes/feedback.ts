@@ -27,7 +27,7 @@ const TRANSITIONS: Record<string, Set<string>> = {
 const asId = (value: unknown) => { const n = Number(value); return Number.isInteger(n) && n > 0 ? n : null; };
 const bounded = (value: unknown, max: number) => String(value ?? "").trim().slice(0, max);
 const sanitizedPageUrl = (value: unknown) => {
-  try { const url = new URL(bounded(value, 2048), "http://bimlog.local"); return `${url.origin === "http://bimlog.local" ? "" : url.origin}${url.pathname}`.slice(0, 2048) || "/"; }
+  try { const url = new URL(bounded(value, 2048), "http://bimlog.local"); return url.pathname.slice(0, 2048) || "/"; }
   catch { return ""; }
 };
 type CustomerFeedbackRow = Pick<typeof feedbackItemsTable.$inferSelect, "id" | "stableId" | "projectId" | "feedbackType" | "priority" | "module" | "pageUrl" | "message" | "status" | "version" | "targetRelease" | "dispositionReason" | "createdAt" | "updatedAt" | "resolvedAt">;
@@ -122,42 +122,34 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
   try {
     const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
     const id = asId(req.params.id); if (!id) return res.status(400).json({ code: "FEEDBACK_ID_INVALID", error: "Invalid feedback id" });
-    const feedback = await accessible(id, user); if (!feedback) return res.status(403).json({ code: "FEEDBACK_WRITE_DENIED", error: "You cannot add files to this feedback" });
     const files = Array.isArray(req.files) ? req.files : [], requestedKind = bounded(req.body.kind || "attachment", 20), uploadKey = bounded(req.get("Idempotency-Key"), 120);
     if (!files.length || files.length !== 1 || !uploadKey || !["attachment", "screenshot", "audio"].includes(requestedKind)) return res.status(400).json({ code: "FEEDBACK_ASSET_INVALID", error: "One supported file and a per-file idempotency key are required" });
     const inspected = inspectFeedbackEvidence(files[0]); const mediaClass = inspected.mediaType.startsWith("audio/") ? "audio" : inspected.mediaType.startsWith("image/") ? "image" : "document";
     if ((requestedKind === "audio" && mediaClass !== "audio") || (requestedKind === "screenshot" && mediaClass !== "image") || (requestedKind === "attachment" && mediaClass === "audio")) return res.status(415).json({ code: "FEEDBACK_ASSET_KIND_MISMATCH", error: "Asset kind does not match inspected media" });
     const kind = requestedKind;
-    const consentId = bounded(req.body.consentId, 80); let captureConsent: typeof feedbackCaptureConsentsTable.$inferSelect | undefined;
-    if (["audio", "screenshot"].includes(kind)) {
-      [captureConsent] = await db.select().from(feedbackCaptureConsentsTable).where(and(eq(feedbackCaptureConsentsTable.id, consentId), eq(feedbackCaptureConsentsTable.actorUserId, user.userId), eq(feedbackCaptureConsentsTable.captureKind, kind))).limit(1);
-      if (!captureConsent || captureConsent.revokedAt || (captureConsent.feedbackId && captureConsent.feedbackId !== id)) return res.status(403).json({ code: "FEEDBACK_CAPTURE_CONSENT_REQUIRED", error: "Active matching capture consent is required" });
-    }
+    const consentId = bounded(req.body.consentId, 80);
     const transformations = (() => { try { const parsed = JSON.parse(bounded(req.body.transformations, 12000)); return parsed && typeof parsed === "object" && !Array.isArray(parsed) ? parsed as Record<string, unknown> : {}; } catch { return {}; } })();
     const requestHash = createHash("sha256").update(JSON.stringify({ feedbackId: id, actorId: user.userId, kind, sha256: inspected.sha256, transformation: transformations[uploadKey] ?? null })).digest("hex");
-    const [prior] = await db.select().from(feedbackAssetsTable).where(and(eq(feedbackAssetsTable.feedbackId, id), sql`${feedbackAssetsTable.provenance}->>'uploadRequestKey' = ${uploadKey}`)).limit(1);
-    if (prior) return (prior.provenance?.uploadRequestHash === requestHash) ? res.json({ replayed: true, assets: [{ id: prior.id, kind: prior.kind, name: prior.safeName, mediaType: prior.mediaType, byteSize: prior.byteSize, sha256: prior.sha256, scanState: prior.scanState }] }) : res.status(409).json({ code: "FEEDBACK_ASSET_IDEMPOTENCY_CONFLICT", error: "This upload key belongs to different evidence" });
-    const pending: Array<{ storagePath: string; checked: ReturnType<typeof inspectFeedbackEvidence>; file: Express.Multer.File }> = [];
-    for (const file of files) {
-      const checked = inspectFeedbackEvidence(file), storagePath = await storage.upload(file.buffer, feedback.projectId ?? `feedback-${id}`, checked.name); stored.push(storagePath); pending.push({ storagePath, checked, file });
-    }
     const scannerAdapter = localFixture(process.env.BIMLOG_FEEDBACK_SCANNER, "fixture-clean") ? "local-fixture" : "default-deny";
     const scanState = scannerAdapter === "local-fixture" ? "clean" : "quarantined";
     const results = await db.transaction(async tx => {
       await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`${user.userId}:${uploadKey}`}, 0))`);
+      const [actor] = await tx.select({ companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, user.userId)).limit(1);
+      const [feedback] = await tx.select().from(feedbackItemsTable).where(eq(feedbackItemsTable.id, id)).limit(1);
+      if (!actor || !feedback || (!user.isSuperAdmin && (feedback.userId !== user.userId || feedback.companyId !== actor.companyId || !feedback.customerVisible))) throw Object.assign(new Error("You cannot add files to this feedback"), { status: 403, code: "FEEDBACK_WRITE_DENIED" });
+      if (feedback.projectId) { const [project] = await tx.select({ companyId: usersTable.companyId }).from(projectsTable).innerJoin(usersTable, eq(projectsTable.createdById, usersTable.id)).where(eq(projectsTable.id, feedback.projectId)).limit(1); const [member] = user.isSuperAdmin ? [{ id: 1 }] : await tx.select({ id: projectMembersTable.id }).from(projectMembersTable).where(and(eq(projectMembersTable.projectId, feedback.projectId), eq(projectMembersTable.userId, user.userId), eq(projectMembersTable.status, "active"))).limit(1); if (!project || project.companyId !== feedback.companyId || !member) throw Object.assign(new Error("You cannot add files to this feedback"), { status: 403, code: "FEEDBACK_WRITE_DENIED" }); }
+      let captureConsent: typeof feedbackCaptureConsentsTable.$inferSelect | undefined;
+      if (["audio", "screenshot"].includes(kind)) { [captureConsent] = await tx.select().from(feedbackCaptureConsentsTable).where(and(eq(feedbackCaptureConsentsTable.id, consentId), eq(feedbackCaptureConsentsTable.actorUserId, user.userId), eq(feedbackCaptureConsentsTable.captureKind, kind), sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).limit(1); if (!captureConsent || (captureConsent.feedbackId && captureConsent.feedbackId !== id)) throw Object.assign(new Error("Active matching capture consent is required"), { status: 403, code: "FEEDBACK_CAPTURE_CONSENT_REQUIRED" }); }
       const [winner] = await tx.select().from(feedbackAssetsTable).where(and(eq(feedbackAssetsTable.feedbackId, id), sql`${feedbackAssetsTable.provenance}->>'uploadRequestKey' = ${uploadKey}`)).limit(1);
       if (winner) { if (winner.provenance?.uploadRequestHash !== requestHash) throw Object.assign(new Error("This upload key belongs to different evidence"), { status: 409, code: "FEEDBACK_ASSET_IDEMPOTENCY_CONFLICT" }); return [{ id: winner.id, kind: winner.kind, name: winner.safeName, mediaType: winner.mediaType, byteSize: winner.byteSize, sha256: winner.sha256, scanState: winner.scanState, replayed: true }]; }
-      const rows = [];
-      for (const item of pending) {
-        const [asset] = await tx.insert(feedbackAssetsTable).values({ feedbackId: id, projectId: feedback.projectId, uploadedById: user.userId, kind,
-          originalName: bounded(item.file.originalname, 255), safeName: item.checked.name, mediaType: item.checked.mediaType, byteSize: item.file.size,
-          sha256: item.checked.sha256, storagePath: item.storagePath, scanState, scannerAdapter, scannedAt: scanState === "clean" ? new Date() : null,
+      const file = files[0], storagePath = await storage.upload(file.buffer, feedback.projectId ?? `feedback-${id}`, inspected.name); stored.push(storagePath);
+      const [asset] = await tx.insert(feedbackAssetsTable).values({ feedbackId: id, projectId: feedback.projectId, uploadedById: user.userId, kind,
+          originalName: bounded(file.originalname, 255), safeName: inspected.name, mediaType: inspected.mediaType, byteSize: file.size,
+          sha256: inspected.sha256, storagePath, scanState, scannerAdapter, scannedAt: scanState === "clean" ? new Date() : null,
           provenance: { source: kind === "screenshot" ? "browser-display-capture" : kind === "audio" ? "browser-microphone" : "user-file-import", uploadRequestKey: uploadKey, uploadRequestHash: requestHash, consentId: captureConsent?.id || null, consentNoticeVersion: captureConsent?.noticeVersion || null, purpose: captureConsent?.purpose || null, actorUserId: user.userId, grantedAt: captureConsent?.grantedAt?.toISOString() || null, receivedAt: new Date().toISOString(), transformation: boundedTransformation(JSON.stringify(transformations[uploadKey] ?? null)) } }).returning();
-        rows.push({ id: asset.id, kind, name: asset.safeName, mediaType: asset.mediaType, byteSize: asset.byteSize, sha256: asset.sha256, scanState });
-      }
-      await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "assets_added", afterState: { count: rows.length, scannerAdapter, scanState } });
-      if (captureConsent && !captureConsent.feedbackId) await tx.update(feedbackCaptureConsentsTable).set({ feedbackId: id }).where(eq(feedbackCaptureConsentsTable.id, captureConsent.id));
-      return rows;
+      await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "assets_added", afterState: { count: 1, scannerAdapter, scanState } });
+      if (captureConsent && !captureConsent.feedbackId) { const linked = await tx.update(feedbackCaptureConsentsTable).set({ feedbackId: id }).where(and(eq(feedbackCaptureConsentsTable.id, captureConsent.id), sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).returning({ id: feedbackCaptureConsentsTable.id }); if (!linked.length) throw Object.assign(new Error("Capture consent was revoked"), { status: 403, code: "FEEDBACK_CAPTURE_CONSENT_REQUIRED" }); }
+      return [{ id: asset.id, kind, name: asset.safeName, mediaType: asset.mediaType, byteSize: asset.byteSize, sha256: asset.sha256, scanState }];
     });
     const replayed = results.some(row => "replayed" in row && row.replayed === true);
     return res.status(replayed ? 200 : 201).json({ replayed, assets: results.map(row => ({ id: row.id, kind: row.kind, name: row.name, mediaType: row.mediaType, byteSize: row.byteSize, sha256: row.sha256, scanState: row.scanState })), scanner: scannerAdapter === "local-fixture" ? "local-fixture" : "activation-required" });

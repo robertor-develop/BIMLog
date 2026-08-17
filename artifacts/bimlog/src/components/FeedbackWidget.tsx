@@ -214,8 +214,9 @@ export function FeedbackWidget() {
         setUploadState(tt("Uploading governed evidence…", "Cargando evidencia controlada…"));
         for (const group of ["audio", "screenshot", "attachment"] as const) {
           const selected = files.filter(file => group === "audio" ? file.name.startsWith("feedback-audio-") : group === "screenshot" ? file.name.startsWith("feedback-capture-") : !file.name.startsWith("feedback-audio-") && !file.name.startsWith("feedback-capture-"));
-          for (const file of selected) {
-            const uploadKey = `${idempotencyRef.current}:${await fileSha256(file)}`; const form = new FormData(); form.append("files", file); form.append("kind", group);
+          for (const [fileIndex, file] of selected.entries()) {
+            const identity = new File([JSON.stringify({ group, fileIndex, name: file.name, size: file.size, lastModified: file.lastModified })], "identity.json");
+            const uploadKey = `${idempotencyRef.current}:${await fileSha256(identity)}`; const form = new FormData(); form.append("files", file); form.append("kind", group);
             if (group !== "attachment") { const consentId = captureConsents[group]; if (!consentId) throw new Error(tt("Capture consent expired; grant consent again before uploading.", "El consentimiento de captura venció; concédalo nuevamente antes de cargar.")); form.append("consentId", consentId); }
             form.append("transformations", JSON.stringify({ [uploadKey]: transformations[file.name] || { origin: group === "audio" ? "browser-microphone" : group === "screenshot" ? "browser-display-capture" : "user-file-import" } }));
             const uploaded = await fetch(`${API_BASE}/api/v1/feedback/${feedbackId}/assets`, { method: "POST", headers: { Authorization: `Bearer ${token}`, "Idempotency-Key": uploadKey }, body: form });
