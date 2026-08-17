@@ -1804,6 +1804,8 @@ Future behavior:
   exact-390 behavior including reload, history, denial, and suspended states.
 - Release boundary: local clean-integration candidate only. Normal push, provider publication/deployment,
   production migration, and customer/field verification remain separately authorized external gates.
+- Sanitized commit-bound integration evidence is retained in
+  `artifacts/api-server/evidence/build7-integration/2657c7372f8445f450a711e5d7ff8cf324ac4238.json`.
 
 ### RFI List and Log Governed PDFs
 

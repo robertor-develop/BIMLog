@@ -657,6 +657,8 @@ is reserved for genuine completion.
   Disposable PostgreSQL migration/restart safety, authenticated HTTP permissions, revision/approval
   concurrency, rollback, focused UI behavior, routed browser evidence, and TypeScript checks are local
   evidence only. Nothing was pushed, published, deployed, or run against production/customer data.
+  The sanitized integration receipt is retained under `artifacts/api-server/evidence/build7-integration/`
+  and binds the tested implementation tree, owner heads, local gates, and external-release limitations.
 
 - Replit publication-preview alignment: local source commit
   `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b` preserves the accepted constraint-collision correction and aligns all
