@@ -15,13 +15,13 @@ import {
 } from "./receiver-service.js";
 export type ReceiverScanner = (
   stagedPath: string,
-  context: { request: RequestContract },
+  context: { request: RequestContract;signal:AbortSignal },
 ) => Promise<ScannerInspection>;
 export type ReceiverAdmissionLease={release():void|Promise<void>};
 export type ReceiverAdmissionAuthority={admit(input:{companyId:string;projectId:string;byteCount:number;freeSpaceReserveBytes:number}):Promise<ReceiverAdmissionLease|null>};
 export type ReceiverDeadlines={bodyIdleMs:number;scannerMs:number;totalMs:number};
 const boundedDeadline=(value:number)=>Number.isSafeInteger(value)&&value>=10&&value<=300_000;
-async function deadline<T>(promise:Promise<T>,ms:number,code:string){let timer:NodeJS.Timeout|undefined;try{return await Promise.race([promise,new Promise<T>((_,reject)=>{timer=setTimeout(()=>reject(new RelayProtocolError(code,"Receiver operation deadline exceeded")),ms);})]);}finally{if(timer)clearTimeout(timer);}}
+async function deadline<T>(promise:Promise<T>,ms:number,code:string,controller?:AbortController){let timer:NodeJS.Timeout|undefined;try{return await Promise.race([promise,new Promise<T>((_,reject)=>{timer=setTimeout(()=>{controller?.abort();reject(new RelayProtocolError(code,"Receiver operation deadline exceeded"));},ms);})]);}finally{if(timer)clearTimeout(timer);}}
 const json = (res: ServerResponse, status: number, value: unknown) => {
   const body = Buffer.from(JSON.stringify(value));
   res.writeHead(status, {
@@ -57,7 +57,7 @@ export function createReceiverHttpsHandler(input: {
     );
   if(!input.admission||!Number.isSafeInteger(input.freeSpaceReserveBytes)||input.freeSpaceReserveBytes<0||!boundedDeadline(input.deadlines.bodyIdleMs)||!boundedDeadline(input.deadlines.scannerMs)||!boundedDeadline(input.deadlines.totalMs))throw new RelayProtocolError("FEEDBACK_RECEIVER_RESOURCE_AUTHORITY_REQUIRED","External admission and bounded deadlines are required");
   return async (req: IncomingMessage, res: ServerResponse) => {
-    const totalController=new AbortController(),totalTimer=setTimeout(()=>{totalController.abort();req.destroy(new RelayProtocolError("FEEDBACK_RECEIVER_TOTAL_TIMEOUT","Receiver total deadline exceeded"));},input.deadlines.totalMs);let lease:ReceiverAdmissionLease|undefined;
+    const totalController=new AbortController(),scannerController=new AbortController(),abortScanner=()=>scannerController.abort(),totalTimer=setTimeout(()=>{totalController.abort();scannerController.abort();req.destroy(new RelayProtocolError("FEEDBACK_RECEIVER_TOTAL_TIMEOUT","Receiver total deadline exceeded"));},input.deadlines.totalMs);req.once("aborted",abortScanner);let lease:ReceiverAdmissionLease|undefined;
     try {
       if (req.method !== "PUT")
         throw new RelayProtocolError(
@@ -138,7 +138,8 @@ export function createReceiverHttpsHandler(input: {
           );
         const inspection = await deadline(input.scanner(stagedPath, {
           request: signed.payload,
-        }),input.deadlines.scannerMs,"FEEDBACK_RECEIVER_SCANNER_TIMEOUT");
+          signal:scannerController.signal,
+        }),input.deadlines.scannerMs,"FEEDBACK_RECEIVER_SCANNER_TIMEOUT",scannerController);
         const declaredType = String(req.headers["content-type"] || "").split(
             ";",
             1,
@@ -165,6 +166,6 @@ export function createReceiverHttpsHandler(input: {
       const safe = safeRelayError(error),
         code = String(safe.code);
       json(res, status(code), safe);
-    } finally {clearTimeout(totalTimer);await lease?.release();}
+    } finally {clearTimeout(totalTimer);req.off("aborted",abortScanner);scannerController.abort();await lease?.release();}
   };
 }
