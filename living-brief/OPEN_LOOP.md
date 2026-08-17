@@ -1806,6 +1806,9 @@ Future behavior:
   production migration, and customer/field verification remain separately authorized external gates.
 - Sanitized commit-bound integration evidence is retained in
   `artifacts/api-server/evidence/build7-integration/2657c7372f8445f450a711e5d7ff8cf324ac4238.json`.
+- Authenticated negative coverage now explicitly proves cross-tenant record hiding and cross-project
+  `FIN_SCOPE_MEMBERSHIP_DENIED`, with zero payment/history disclosure and zero mutation. This closes the
+  remaining local history-access evidence gap; external source/release gates remain unchanged.
 
 ### RFI List and Log Governed PDFs
 

@@ -659,6 +659,9 @@ is reserved for genuine completion.
   evidence only. Nothing was pushed, published, deployed, or run against production/customer data.
   The sanitized integration receipt is retained under `artifacts/api-server/evidence/build7-integration/`
   and binds the tested implementation tree, owner heads, local gates, and external-release limitations.
+  The final authenticated history-read proof also covers a different-company project member and a
+  same-company viewer assigned only to another project. Both receive fail-closed record isolation,
+  disclose no payment/history identity, and leave contract, payment-version, line, and history counts unchanged.
 
 - Replit publication-preview alignment: local source commit
   `a761ff82b65226ac9c7fd782b6f69a60a3e1da1b` preserves the accepted constraint-collision correction and aligns all

@@ -9944,11 +9944,11 @@
     },
     {
       "taskId": "bimlog-build7-advanced-contracts-integration-20260817",
-      "reviewedThroughCommit": "2657c7372f8445f450a711e5d7ff8cf324ac4238",
+      "reviewedThroughCommit": "013ff12991c49d5e80efbb5b431b713de685034d",
       "reviewedAt": "2026-08-17T03:30:00Z",
       "status": "local_integration_candidate",
       "captureTiming": "same_release_integration",
-      "summary": "Reconciles the serialized backend and UI Advanced Contracts v1.60.35.07 integration and preserves external release gates.",
+      "summary": "Reconciles the serialized Advanced Contracts v1.60.35.07 integration and explicit authenticated cross-tenant/cross-project history isolation while preserving external release gates.",
       "workstreams": [
         "build7",
         "advanced-contracts",
@@ -10013,12 +10013,11 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/evidence/build7-integration/2657c7372f8445f450a711e5d7ff8cf324ac4238.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "2a9e276f1b99e46e83e17f7e03e8f72552c951361fa8b476231e1c693b5d60ba"
+      "reviewedChangeSha256": "2115fb77d4afc789a81006584b8a6d79e653aa7d7cf5f6244c2a88a0cb239be2"
     }
   ]
 }
