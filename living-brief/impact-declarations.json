@@ -9944,7 +9944,7 @@
     },
     {
       "taskId": "bimlog-build7-advanced-contracts-integration-20260817",
-      "reviewedThroughCommit": "d8bb09dab55d53a7f9eeb4055a620e2f3e998115",
+      "reviewedThroughCommit": "40ad692236ba7ee53db495d61648ac1481b162e8",
       "reviewedAt": "2026-08-17T03:30:00Z",
       "status": "local_integration_candidate",
       "captureTiming": "same_release_integration",
@@ -10013,9 +10013,11 @@
         }
       ],
       "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "reviewedChangeSha256": "b35893cf8071bd54ba4e160e989c77bbb23e8c2c40aa72922485bac4ad2d691b"
     }
   ]
 }
