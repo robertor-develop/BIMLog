@@ -14,6 +14,7 @@ const assertions: Array<[string, RegExp]> = [
   ["asset upload is one file and bounded", /files: 1, fields: 4, parts: 5/],
   ["asset kind follows inspected media", /FEEDBACK_ASSET_KIND_MISMATCH/],
   ["per-file upload idempotency is mandatory", /per-file idempotency key are required/],
+  ["upload identity uses canonical DB columns", /feedbackAssetsTable\.uploadRequestKey/],
   ["upload races serialize", /pg_advisory_xact_lock/],
   ["transcription races recover the winner", /if \(!winner\) throw cause/],
   ["transcription authority uses transaction reader", /accessible\(id,user,tx\); const \[activeConsent\]/],
