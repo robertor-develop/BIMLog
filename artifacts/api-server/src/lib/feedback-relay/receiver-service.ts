@@ -5,6 +5,7 @@ import {
   RelayProtocolError,
   canonicalRequest,
   canonicalReceipt,
+  canonicalReadback,
   sha256,
   signReadback,
   signDeletionReceipt,
@@ -62,9 +63,11 @@ export type DeletionReceipt = {
   absenceVerified: true;
   absenceVerifiedAt:string;
   journalSha256:string;
+  deliveryReceiptSha256:string;
+  readbackSha256:string;
   signed: Signed<DeletionReceiptContract>;
 };
-type PreparedDeletion = Omit<DeletionReceipt, "absenceVerified"|"absenceVerifiedAt"|"signed"> & {
+type PreparedDeletion = Omit<DeletionReceipt, "absenceVerified"|"absenceVerifiedAt"|"deletedAt"|"signed"> & {
   absenceVerified: false;
   requestId:string;companyId:string;projectId:string;feedbackId:string;objectId:string;destinationId:string;approvedAt:string;
 };
@@ -114,9 +117,10 @@ export class FilesystemReceiverNonceAuthority implements ReceiverNonceAuthority{
   private readonly root:string;
   constructor(root:string){this.root=canonicalRoot(root);if(!fs.existsSync(this.root)||!fs.statSync(this.root).isDirectory())fail("FEEDBACK_RECEIVER_NONCE_ROOT_REQUIRED","Nonce authority root must already exist");assertTreeNoLinks(this.root);}
   private key(input:DurableNonceRecord["binding"]){return sha256(JSON.stringify([input.audience,input.keyId,input.nonce,input.companyId,input.projectId]));}
-  async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`),lock=path.join(this.root,`${key}.lock`);assertNoLinks(this.root,file);try{fs.mkdirSync(lock);}catch(error){if((error as NodeJS.ErrnoException).code==="EEXIST")return null;throw error;}try{if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId)return null;if(known.state==="committed")return{token:known.token,status:"identical-retry" as const};return{token:known.token,status:"new" as const};}const record:DurableNonceRecord={binding:input,state:"reserved",token:`${key}.${randomUUID()}`};atomicJson(this.root,file,record);return{token:record.token,status:"new" as const};}finally{fs.rmdirSync(lock);}}
-  async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.token!==token)fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");atomicJson(this.root,file,{...record,state:"committed"});}
-  async rollback(token:string){const key=token.split(".")[0];if(!HEX64.test(key))return;const file=path.join(this.root,`${key}.json`);if(!fs.existsSync(file))return;const record=readJson<DurableNonceRecord>(this.root,file);if(record.token===token&&record.state==="reserved")fs.unlinkSync(file);}
+  private async locked<T>(key:string,work:()=>T|Promise<T>){const lock=path.join(this.root,`${key}.lock`);for(let attempt=0;attempt<200;attempt++){try{fs.mkdirSync(lock);try{return await work();}finally{fs.rmdirSync(lock);}}catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;await new Promise(resolve=>setTimeout(resolve,2));}}return fail("FEEDBACK_RECEIVER_NONCE_BUSY","Nonce authority is busy");}
+  async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`);assertNoLinks(this.root,file);return this.locked(key,()=>{if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId||known.state==="reserved")return null;return{token:known.token,status:"identical-retry" as const};}const record:DurableNonceRecord={binding:input,state:"reserved",token:`${key}.${randomUUID()}`};atomicJson(this.root,file,record);return{token:record.token,status:"new" as const};});}
+  async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");await this.locked(key,()=>{const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.token!==token)fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");atomicJson(this.root,file,{...record,state:"committed"});});}
+  async rollback(token:string){const key=token.split(".")[0];if(!HEX64.test(key))return;await this.locked(key,()=>{const file=path.join(this.root,`${key}.json`);if(!fs.existsSync(file))return;const record=readJson<DurableNonceRecord>(this.root,file);if(record.token===token&&record.state==="reserved")fs.unlinkSync(file);});}
 }
 export type ReceiverFaultHooks = {
   afterNonceReserved?: () => void;
@@ -516,8 +520,6 @@ export class FeedbackReceiverCustodyService {
         wroteObject = false;
       try {
         this.faults.afterNonceReserved?.();
-        await this.nonces.commit(acceptedReservation.token);
-        committed = true;
         const object = this.objectPath(request);
         assertNoLinks(this.root, object);
         if (fs.existsSync(object)) {
@@ -563,6 +565,8 @@ export class FeedbackReceiverCustodyService {
           stored.directoryDurability = "fsync";
           atomicJson(this.root, index, stored);
         }
+        await this.nonces.commit(acceptedReservation.token);
+        committed = true;
         return receipt;
       } catch (error) {
         if (!committed) await this.nonces.rollback(acceptedReservation.token);
@@ -653,11 +657,11 @@ export class FeedbackReceiverCustodyService {
         const object = path.join(this.root, journal.objectRelativePath);
         assertNoLinks(this.root, object);
         if (!fs.existsSync(object)) {
-          const absenceVerifiedAt=new Date().toISOString(), signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt:journal.receipt.deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,new Date(absenceVerifiedAt));
+          const deletedAt=new Date().toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,new Date(absenceVerifiedAt));
           atomicJson(this.root, target, {
             ...journal,
             state: "finalized",
-            receipt: { ...journal.receipt, absenceVerified: true,absenceVerifiedAt,signed },
+            receipt: { ...journal.receipt, absenceVerified: true,deletedAt,absenceVerifiedAt,signed },
           });
           finalizedDeletions++;
         }
@@ -709,8 +713,7 @@ export class FeedbackReceiverCustodyService {
           "FEEDBACK_RECEIVER_READBACK_MISMATCH",
           "Custody bytes changed before purge",
         );
-      const preparedBase = {
-          deletedAt: now.toISOString(),
+      const readback=this.readback(requestId,now),preparedBase = {
           objectSha256: sha256(bytes),
           byteCount: bytes.length,
           policySha256: authority.policySha256,
@@ -718,6 +721,7 @@ export class FeedbackReceiverCustodyService {
           approvedAt:authority.approvedAt,
           absenceVerified: false,
           requestId,companyId:stored.receipt.payload.companyId,projectId:stored.receipt.payload.projectId,feedbackId:stored.receipt.payload.feedbackId,objectId:stored.receipt.payload.objectId,destinationId:this.authority.destinationId,
+          deliveryReceiptSha256:sha256(canonicalReceipt(stored.receipt.payload)),readbackSha256:sha256(canonicalReadback(readback.payload)),
         } as const,
         receipt: PreparedDeletion = {...preparedBase,journalSha256:sha256(JSON.stringify(preparedBase))};
       journal = {
@@ -731,14 +735,14 @@ export class FeedbackReceiverCustodyService {
     }
     const object = path.join(this.root, journal.objectRelativePath);
     assertNoLinks(this.root, object);
-    if (fs.existsSync(object)) fs.unlinkSync(object);
+    if (fs.existsSync(object)){fs.unlinkSync(object);syncDirectory(path.dirname(object));}
     if (fs.existsSync(object))
       fail(
         "FEEDBACK_RECEIVER_ABSENCE_UNPROVEN",
         "Purged object absence could not be verified",
       );
-    const absenceVerifiedAt=now.toISOString(), signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt:journal.receipt.deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);
-    const receipt: DeletionReceipt = {...journal.receipt,absenceVerified:true,absenceVerifiedAt,signed};
+    const deletedAt=now.toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);
+    const receipt: DeletionReceipt = {...journal.receipt,absenceVerified:true,deletedAt,absenceVerifiedAt,signed};
     atomicJson(this.root, journalPath, {
       ...journal,
       state: "finalized",

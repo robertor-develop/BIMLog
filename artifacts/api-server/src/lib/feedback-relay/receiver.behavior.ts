@@ -130,7 +130,7 @@ const inspection = {
   sha256: sha256(bytes),
 };
 try {
-  await check("filesystem nonce authority survives instance restart",async()=>{const nonceRoot=path.join(disposable,"nonce-authority");fs.mkdirSync(nonceRoot);const binding={audience:"receiver",keyId:"key-active",nonce:"restart-nonce",timestamp:now.toISOString(),requestId:"restart-request",companyId:"company",projectId:"project",requestSha256:"d".repeat(64)};const first=new FilesystemReceiverNonceAuthority(nonceRoot),reserved=await first.reserve(binding);assert.ok(reserved);await first.commit(reserved.token);const restarted=new FilesystemReceiverNonceAuthority(nonceRoot);assert.equal((await restarted.reserve(binding))?.status,"identical-retry");assert.equal(await restarted.reserve({...binding,requestSha256:"e".repeat(64)}),null);});
+  await check("filesystem nonce authority survives instance restart",async()=>{const nonceRoot=path.join(disposable,"nonce-authority");fs.mkdirSync(nonceRoot);const binding={audience:"receiver",keyId:"key-active",nonce:"restart-nonce",timestamp:now.toISOString(),requestId:"restart-request",companyId:"company",projectId:"project",requestSha256:"d".repeat(64)};const first=new FilesystemReceiverNonceAuthority(nonceRoot),reserved=await first.reserve(binding);assert.ok(reserved);assert.equal(await new FilesystemReceiverNonceAuthority(nonceRoot).reserve(binding),null);await first.commit(reserved.token);const restarted=new FilesystemReceiverNonceAuthority(nonceRoot);assert.equal((await restarted.reserve(binding))?.status,"identical-retry");assert.equal(await restarted.reserve({...binding,requestSha256:"e".repeat(64)}),null);});
   await check("external root authority and sanitized health are bound", () =>
     assert.deepEqual(service.health(), {
       status: "ok",

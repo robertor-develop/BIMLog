@@ -17,6 +17,11 @@ export type ReceiverScanner = (
   stagedPath: string,
   context: { request: RequestContract },
 ) => Promise<ScannerInspection>;
+export type ReceiverAdmissionLease={release():void|Promise<void>};
+export type ReceiverAdmissionAuthority={admit(input:{companyId:string;projectId:string;byteCount:number;freeSpaceReserveBytes:number}):Promise<ReceiverAdmissionLease|null>};
+export type ReceiverDeadlines={bodyIdleMs:number;scannerMs:number;totalMs:number};
+const boundedDeadline=(value:number)=>Number.isSafeInteger(value)&&value>=10&&value<=300_000;
+async function deadline<T>(promise:Promise<T>,ms:number,code:string){let timer:NodeJS.Timeout|undefined;try{return await Promise.race([promise,new Promise<T>((_,reject)=>{timer=setTimeout(()=>reject(new RelayProtocolError(code,"Receiver operation deadline exceeded")),ms);})]);}finally{if(timer)clearTimeout(timer);}}
 const json = (res: ServerResponse, status: number, value: unknown) => {
   const body = Buffer.from(JSON.stringify(value));
   res.writeHead(status, {
@@ -39,6 +44,9 @@ const status = (code: string) =>
 export function createReceiverHttpsHandler(input: {
   service: FeedbackReceiverCustodyService;
   scanner: ReceiverScanner;
+  admission:ReceiverAdmissionAuthority;
+  freeSpaceReserveBytes:number;
+  deadlines:ReceiverDeadlines;
   maxRequestBytes: number;
   now?: () => Date;
 }) {
@@ -47,7 +55,9 @@ export function createReceiverHttpsHandler(input: {
       "FEEDBACK_RECEIVER_REQUEST_LIMIT_INVALID",
       "Receiver request limit is invalid",
     );
+  if(!input.admission||!Number.isSafeInteger(input.freeSpaceReserveBytes)||input.freeSpaceReserveBytes<0||!boundedDeadline(input.deadlines.bodyIdleMs)||!boundedDeadline(input.deadlines.scannerMs)||!boundedDeadline(input.deadlines.totalMs))throw new RelayProtocolError("FEEDBACK_RECEIVER_RESOURCE_AUTHORITY_REQUIRED","External admission and bounded deadlines are required");
   return async (req: IncomingMessage, res: ServerResponse) => {
+    const totalController=new AbortController(),totalTimer=setTimeout(()=>{totalController.abort();req.destroy(new RelayProtocolError("FEEDBACK_RECEIVER_TOTAL_TIMEOUT","Receiver total deadline exceeded"));},input.deadlines.totalMs);let lease:ReceiverAdmissionLease|undefined;
     try {
       if (req.method !== "PUT")
         throw new RelayProtocolError(
@@ -94,6 +104,7 @@ export function createReceiverHttpsHandler(input: {
           "FEEDBACK_RECEIVER_CONTENT_LENGTH_MISMATCH",
           "HTTP content length differs from signed bytes",
         );
+      lease=(await input.admission.admit({companyId:signed.payload.companyId,projectId:signed.payload.projectId,byteCount:length,freeSpaceReserveBytes:input.freeSpaceReserveBytes}))??undefined;if(!lease)throw new RelayProtocolError("FEEDBACK_RECEIVER_ADMISSION_DENIED","Receiver resource authority denied admission");
       const stagedPath = input.service.createUploadStage();
       let total = 0;
       try {
@@ -102,7 +113,7 @@ export function createReceiverHttpsHandler(input: {
           mode: 0o600,
         });
         try {
-          for await (const chunk of req) {
+          let idleTimer:NodeJS.Timeout|undefined;const resetIdle=()=>{if(idleTimer)clearTimeout(idleTimer);idleTimer=setTimeout(()=>req.destroy(new RelayProtocolError("FEEDBACK_RECEIVER_BODY_IDLE_TIMEOUT","Receiver body became idle")),input.deadlines.bodyIdleMs);};resetIdle();for await (const chunk of req) {resetIdle();if(totalController.signal.aborted)throw new RelayProtocolError("FEEDBACK_RECEIVER_TOTAL_TIMEOUT","Receiver total deadline exceeded");
             const bytes = Buffer.from(chunk);
             total += bytes.length;
             if (total > length)
@@ -112,6 +123,7 @@ export function createReceiverHttpsHandler(input: {
               );
             if (!output.write(bytes)) await once(output, "drain");
           }
+          if(idleTimer)clearTimeout(idleTimer);
           output.end();
           await once(output, "close");
         } catch (error) {
@@ -123,9 +135,9 @@ export function createReceiverHttpsHandler(input: {
             "FEEDBACK_RECEIVER_CONTENT_LENGTH_MISMATCH",
             "HTTP body was truncated",
           );
-        const inspection = await input.scanner(stagedPath, {
+        const inspection = await deadline(input.scanner(stagedPath, {
           request: signed.payload,
-        });
+        }),input.deadlines.scannerMs,"FEEDBACK_RECEIVER_SCANNER_TIMEOUT");
         const declaredType = String(req.headers["content-type"] || "").split(
             ";",
             1,
@@ -152,6 +164,6 @@ export function createReceiverHttpsHandler(input: {
       const safe = safeRelayError(error),
         code = String(safe.code);
       json(res, status(code), safe);
-    }
+    } finally {clearTimeout(totalTimer);await lease?.release();}
   };
 }

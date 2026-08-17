@@ -111,6 +111,7 @@ const service = new FeedbackReceiverCustodyService(
     30_000,
   ),
   handler = createReceiverHttpsHandler({
+    admission:{admit:async()=>({release:()=>undefined})},freeSpaceReserveBytes:1024,deadlines:{bodyIdleMs:1000,scannerMs:1000,totalMs:5000},
     service,
     maxRequestBytes: 1024,
     now: () => now,
