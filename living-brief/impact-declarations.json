@@ -10171,6 +10171,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6d514dcae7723e2696d9473790dabf1ab385534b835b47c9e4f8f33c0b1d01cc"
+    },
+    {
+      "taskId": "bimlog-feedback-final-db-acceptance-20260817",
+      "reviewedThroughCommit": "ab9370e5d162d6430c7f84a88e052f44c63eb60b",
+      "reviewedAt": "2026-08-17T18:58:00Z",
+      "status": "local_candidate",
+      "captureTiming": "same_task",
+      "summary": "Records the fail-closed capture-consent upload correction discovered by final scoped typecheck.",
+      "workstreams": [
+        "feedback-addendum",
+        "capture-consent",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing explicit-consent doctrine governs."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating authority change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Type safety now matches runtime fail-closed behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing accountable and consent-first feedback vision remains unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No architecture change beyond the accepted Feedback component."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Navisworks, installer, or plugin behavior is changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document presentation behavior is changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new external standard, compliance statement, or certification is claimed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the final consent-boundary correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing DB and external gates remain accurate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external action occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a426efce100aa0b88ed868a51cdac715090924d52137a3aded9c8111b508eb59"
     }
   ]
 }
