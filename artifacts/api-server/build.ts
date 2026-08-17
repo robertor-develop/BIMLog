@@ -943,6 +943,7 @@ export async function deployRuntimeClosure(
     closure: closure ?? null,
     failure: failure instanceof Error ? failure.message : failure ? String(failure) : null,
   };
+  await mkdir(evidenceDir, { recursive: true });
   await writeFile(receiptPath, JSON.stringify(receipt, null, 2));
   if (failure) throw failure;
   console.log(
