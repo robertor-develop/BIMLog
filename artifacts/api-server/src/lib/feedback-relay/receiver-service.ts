@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import os from "node:os";
 import { execFileSync } from "node:child_process";
-import { createHash, randomUUID, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, randomUUID, timingSafeEqual } from "node:crypto";
 import {
   RelayProtocolError,
   canonicalRequest,
@@ -43,7 +43,7 @@ export type ScannerInspection = {
   sha256: string;
 };
 export type StoredDelivery = {
-  authorityVersion:2;
+  authorityVersion:3;
   requestHash: string;
   requestSignature: string;
   objectRelativePath: string;
@@ -51,6 +51,7 @@ export type StoredDelivery = {
   receipt: Signed<ReceiptContract>;
   directoryDurability: "fsync" | "rename-recovery";
   nonceRecovery?:{key:string;proofSha256:string};
+  authentication:{keyId:string;canonicalSha256:string;hmacSha256:string};
 };
 export type PurgeAuthority = {
   policySha256: string;
@@ -314,6 +315,13 @@ function readJson<T>(root: string, file: string): T {
   assertNoLinks(root, file);
   return JSON.parse(fs.readFileSync(file, "utf8")) as T;
 }
+function canonicalJson(value:unknown):string{
+  if(value===null||typeof value==="string"||typeof value==="boolean")return JSON.stringify(value);
+  if(typeof value==="number"){if(!Number.isSafeInteger(value))fail("FEEDBACK_RECEIVER_SCHEMA_INVALID","Authority record contains an unsafe number");return JSON.stringify(value);}
+  if(Array.isArray(value))return `[${value.map(canonicalJson).join(",")}]`;
+  if(typeof value==="object"){const record=value as Record<string,unknown>;return `{${Object.keys(record).sort().map(key=>`${JSON.stringify(key)}:${canonicalJson(record[key])}`).join(",")}}`;}
+  return fail("FEEDBACK_RECEIVER_SCHEMA_INVALID","Authority record contains an unsupported value");
+}
 const MEDIA_KIND: Readonly<Record<string, ReceiverMediaKind>> = {
   "image/png": "screenshot",
   "image/jpeg": "screenshot",
@@ -453,8 +461,8 @@ export class FeedbackReceiverCustodyService {
       );
     const request=input.signedRequest.payload,now=input.now??new Date(),requestHash=sha256(canonicalRequest(request)),inspection=verifiedInspection(input.inspection,request,input.clientDeclared),identity=fileIdentity(input.stagedPath);
     if(identity.byteCount!==request.byteCount||identity.sha256!==request.sha256||request.bodySha256!==request.sha256)fail("FEEDBACK_RECEIVER_OBJECT_MISMATCH","Staged bytes do not match the signed request");
-    try{return await this.lock(request.requestId,async lease=>{lease.assertCurrent();const index=this.indexPath(request.requestId);if(fs.existsSync(index)){await this.authorizeHeader(input.signedRequest,now);lease.assertCurrent();const stored=readJson<StoredDelivery>(this.root,index),object=path.join(this.root,stored.objectRelativePath),current=fileIdentity(object);if(stored.requestHash!==requestHash||!sameSignature(stored.requestSignature,input.signedRequest.signature)||current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_REPLAY_READBACK_MISMATCH","Replay bytes do not match current custody");return stored.receipt;}
-      if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");let reservation:NonceReservation|undefined;const nonceAdapter:NonceAuthority={consume:async details=>{lease.assertCurrent();reservation=(await this.nonces.reserve(details))??undefined;return Boolean(reservation);}};await verifyRequest(input.signedRequest,this.senderKeys,nonceAdapter,{now,maxSkewMs:this.maxSkewMs});lease.assertCurrent();if(!reservation)fail("FEEDBACK_RECEIVER_NONCE_DENIED","Nonce authority denied request");const accepted=reservation as NonceReservation;let committed=false,indexed=false,moved=false;const object=this.objectPath(request);try{this.faults.afterNonceReserved?.();lease.assertCurrent();assertNoLinks(this.root,object);if(fs.existsSync(object)){const current=fileIdentity(object);if(current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_OBJECT_CONFLICT","Existing custody object differs from request");}else{if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");lease.assertCurrent();mkdirSafe(this.root,path.dirname(object));const stagedFd=fs.openSync(input.stagedPath,"r+");try{fs.fsyncSync(stagedFd);}finally{fs.closeSync(stagedFd);}lease.assertCurrent();fs.renameSync(input.stagedPath,object);syncDirectory(path.dirname(input.stagedPath));syncDirectory(path.dirname(object));moved=true;}this.faults.afterObjectWritten?.();lease.assertCurrent();const receipt=signReceipt({version:"1",requestId:request.requestId,companyId:request.companyId,projectId:request.projectId,feedbackId:request.feedbackId,objectId:request.objectId,byteCount:request.byteCount,sha256:request.sha256,destinationId:this.authority.destinationId,receivedAt:now.toISOString(),requestNonce:request.nonce,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);lease.assertCurrent();atomicJson(this.root,index,{requestHash,requestSignature:input.signedRequest.signature,objectRelativePath:path.relative(this.root,object),authorityVersion:2,inspection,receipt,nonceRecovery:{key:accepted.token.split(".")[0],proofSha256:sha256(accepted.token)},directoryDurability:syncDirectory(path.dirname(index))} satisfies StoredDelivery);indexed=true;lease.assertCurrent();await this.nonces.commit(accepted.token);lease.assertCurrent();committed=true;return receipt;}catch(error){if(!committed&&!indexed)await this.nonces.rollback(accepted.token);if(moved&&!fs.existsSync(index)&&fs.existsSync(object)){lease.assertCurrent();fs.unlinkSync(object);}throw error;}});}finally{if(fs.existsSync(input.stagedPath))await this.discardUploadStage(input.stagedPath);}
+    try{return await this.lock(request.requestId,async lease=>{lease.assertCurrent();const index=this.indexPath(request.requestId);if(fs.existsSync(index)){await this.authorizeHeader(input.signedRequest,now);lease.assertCurrent();const stored=this.readStored(index),object=path.join(this.root,stored.objectRelativePath),current=fileIdentity(object);if(stored.requestHash!==requestHash||!sameSignature(stored.requestSignature,input.signedRequest.signature)||current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_REPLAY_READBACK_MISMATCH","Replay bytes do not match current custody");return stored.receipt;}
+      if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");let reservation:NonceReservation|undefined;const nonceAdapter:NonceAuthority={consume:async details=>{lease.assertCurrent();reservation=(await this.nonces.reserve(details))??undefined;return Boolean(reservation);}};await verifyRequest(input.signedRequest,this.senderKeys,nonceAdapter,{now,maxSkewMs:this.maxSkewMs});lease.assertCurrent();if(!reservation)fail("FEEDBACK_RECEIVER_NONCE_DENIED","Nonce authority denied request");const accepted=reservation as NonceReservation;let committed=false,indexed=false,moved=false;const object=this.objectPath(request);try{this.faults.afterNonceReserved?.();lease.assertCurrent();assertNoLinks(this.root,object);if(fs.existsSync(object)){const current=fileIdentity(object);if(current.byteCount!==identity.byteCount||current.sha256!==identity.sha256)fail("FEEDBACK_RECEIVER_OBJECT_CONFLICT","Existing custody object differs from request");}else{if(input.signal?.aborted)fail("FEEDBACK_RECEIVER_ABORTED","Receiver delivery was aborted");lease.assertCurrent();mkdirSafe(this.root,path.dirname(object));const stagedFd=fs.openSync(input.stagedPath,"r+");try{fs.fsyncSync(stagedFd);}finally{fs.closeSync(stagedFd);}lease.assertCurrent();fs.renameSync(input.stagedPath,object);syncDirectory(path.dirname(input.stagedPath));syncDirectory(path.dirname(object));moved=true;}this.faults.afterObjectWritten?.();lease.assertCurrent();const receipt=signReceipt({version:"1",requestId:request.requestId,companyId:request.companyId,projectId:request.projectId,feedbackId:request.feedbackId,objectId:request.objectId,byteCount:request.byteCount,sha256:request.sha256,destinationId:this.authority.destinationId,receivedAt:now.toISOString(),requestNonce:request.nonce,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);lease.assertCurrent();const record=this.authenticateRecord("bimlog-feedback-receiver-request-index-v3",{requestHash,requestSignature:input.signedRequest.signature,objectRelativePath:path.relative(this.root,object),authorityVersion:3 as const,inspection,receipt,nonceRecovery:{key:accepted.token.split(".")[0],proofSha256:sha256(accepted.token)},directoryDurability:syncDirectory(path.dirname(index))});atomicJson(this.root,index,record);indexed=true;lease.assertCurrent();await this.nonces.commit(accepted.token);lease.assertCurrent();committed=true;return receipt;}catch(error){if(!committed&&!indexed)await this.nonces.rollback(accepted.token);if(moved&&!fs.existsSync(index)&&fs.existsSync(object)){lease.assertCurrent();fs.unlinkSync(object);}throw error;}});}finally{if(fs.existsSync(input.stagedPath))await this.discardUploadStage(input.stagedPath);}
   }
   private indexPath(requestId: string) {
     return path.join(this.system, "requests", `${sha256(requestId)}.json`);
@@ -472,6 +480,24 @@ export class FeedbackReceiverCustodyService {
       request.sha256,
     );
   }
+  private authenticateRecord<T extends Record<string,unknown>>(domain:string,value:T){
+    const key=this.receiverKeys.keys.find(candidate=>candidate.id===this.receiverKeys.activeKeyId&&candidate.status==="active");
+    if(!key||key.secret.length<32)fail("FEEDBACK_RECEIVER_RECORD_KEY_INVALID","Receiver record authentication key is unavailable");
+    const signingKey=key!,canonical=canonicalJson({domain,...value}),canonicalSha256=sha256(canonical),hmacSha256=createHmac("sha256",signingKey.secret).update(canonical,"utf8").digest("hex");
+    return {...value,authentication:{keyId:signingKey.id,canonicalSha256,hmacSha256}};
+  }
+  private verifyStoredRecord(value:unknown):StoredDelivery{
+    if(!value||typeof value!=="object")fail("FEEDBACK_RECEIVER_REQUEST_INDEX_SCHEMA_INVALID","Request index schema is invalid");
+    const record=value as Record<string,unknown>;
+    if(record.authorityVersion!==3)fail("FEEDBACK_RECEIVER_REQUEST_INDEX_MIGRATION_REQUIRED","Legacy request index requires authenticated migration");
+    const authentication=record.authentication as Record<string,unknown>|undefined,key=this.receiverKeys.keys.find(candidate=>candidate.id===authentication?.keyId);
+    if(!authentication||!key||!HEX64.test(String(authentication.canonicalSha256))||!HEX64.test(String(authentication.hmacSha256)))fail("FEEDBACK_RECEIVER_REQUEST_INDEX_AUTH_INVALID","Request index authentication is invalid");
+    const verifiedAuthentication=authentication!,verificationKey=key!,{authentication:ignored,...payload}=record,canonical=canonicalJson({domain:"bimlog-feedback-receiver-request-index-v3",...payload}),digest=sha256(canonical),mac=createHmac("sha256",verificationKey.secret).update(canonical,"utf8").digest("hex");
+    if(!sameSignature(digest,String(verifiedAuthentication.canonicalSha256))||!sameSignature(mac,String(verifiedAuthentication.hmacSha256)))fail("FEEDBACK_RECEIVER_REQUEST_INDEX_AUTH_INVALID","Request index authentication is invalid");
+    if(!HEX64.test(String(record.requestHash))||!HEX64.test(String(record.requestSignature))||typeof record.objectRelativePath!=="string"||path.isAbsolute(record.objectRelativePath)||!record.receipt||!record.inspection)fail("FEEDBACK_RECEIVER_REQUEST_INDEX_SCHEMA_INVALID","Request index schema is invalid");
+    return record as unknown as StoredDelivery;
+  }
+  private readStored(file:string){return this.verifyStoredRecord(readJson<unknown>(this.root,file));}
   private async lock<T>(identity: string, work: (lease:{assertCurrent():void;fence:string}) => Promise<T>): Promise<T> {
     const lock = path.join(this.system, "locks", sha256(identity));
     const ownerPath = path.join(lock, "owner.json"), leaseMs = 5_000;
@@ -524,7 +550,7 @@ export class FeedbackReceiverCustodyService {
     const requestHash = sha256(canonicalRequest(signed.payload));
     const index = this.indexPath(signed.payload.requestId);
     if (fs.existsSync(index)) {
-      const stored = readJson<StoredDelivery>(this.root, index);
+      const stored = this.readStored(index);
       if (
         stored.requestHash !== requestHash ||
         !sameSignature(stored.requestSignature, signed.signature)
@@ -568,7 +594,7 @@ export class FeedbackReceiverCustodyService {
       if (fs.existsSync(index)) {
         await this.authorizeHeader(input.signedRequest, now);
         lease.assertCurrent();
-        const stored = readJson<StoredDelivery>(this.root, index);
+        const stored = this.readStored(index);
         if (
           stored.requestHash !== requestHash ||
           !sameSignature(stored.requestSignature, input.signedRequest.signature)
@@ -650,21 +676,22 @@ export class FeedbackReceiverCustodyService {
           now,
         );
         lease.assertCurrent();
-        const directoryDurability = atomicJson(this.root, index, {
+        const record=this.authenticateRecord("bimlog-feedback-receiver-request-index-v3",{
           requestHash,
           requestSignature: input.signedRequest.signature,
           objectRelativePath: path.relative(this.root, object),
           inspection,
           receipt,
           directoryDurability: "rename-recovery",
-          authorityVersion:2,nonceRecovery:{key:acceptedReservation.token.split(".")[0],proofSha256:sha256(acceptedReservation.token)},
-        } satisfies StoredDelivery);
+          authorityVersion:3 as const,nonceRecovery:{key:acceptedReservation.token.split(".")[0],proofSha256:sha256(acceptedReservation.token)},
+        });
+        const directoryDurability = atomicJson(this.root, index, record);
         indexed=true;
         if (directoryDurability === "fsync") {
           lease.assertCurrent();
-          const stored = readJson<StoredDelivery>(this.root, index);
+          const stored = this.readStored(index);
           stored.directoryDurability = "fsync";
-          atomicJson(this.root, index, stored);
+          const {authentication:ignored,...payload}=stored;atomicJson(this.root,index,this.authenticateRecord("bimlog-feedback-receiver-request-index-v3",payload));
         }
         lease.assertCurrent();
         await this.nonces.commit(acceptedReservation.token);
@@ -685,13 +712,12 @@ export class FeedbackReceiverCustodyService {
       }
     });
   }
-  readback(requestId: string, now = new Date()): Signed<ReadbackContract> {
-    const stored = readJson<StoredDelivery>(
-        this.root,
-        this.indexPath(requestId),
-      ),
+  private readbackUnderFence(requestId: string, now:Date,assertCurrent:()=>void): Signed<ReadbackContract> {
+    assertCurrent();
+    const stored = this.readStored(this.indexPath(requestId)),
       object = path.join(this.root, stored.objectRelativePath);
     assertNoLinks(this.root, object);
+    assertCurrent();
     const identity=fileIdentity(object);
     if (
       identity.byteCount !== stored.receipt.payload.byteCount ||
@@ -701,7 +727,7 @@ export class FeedbackReceiverCustodyService {
         "FEEDBACK_RECEIVER_READBACK_MISMATCH",
         "Custody bytes no longer match their receipt",
       );
-    return signReadback(
+    assertCurrent();return signReadback(
       {
         version: "1",
         requestId: stored.receipt.payload.requestId,
@@ -720,6 +746,7 @@ export class FeedbackReceiverCustodyService {
       now,
     );
   }
+  readback(requestId:string,now=new Date()):Signed<ReadbackContract>{return this.lockSync(requestId,lease=>this.readbackUnderFence(requestId,now,lease.assertCurrent));}
   recover() {
     const staging = path.join(this.system, "staging");
     let removedStages = 0,
@@ -773,7 +800,7 @@ export class FeedbackReceiverCustodyService {
     return { removedStages, removedStaleLocks, finalizedDeletions };
   }
   private lockSync<T>(identity:string,work:(lease:{assertCurrent():void;fence:string})=>T):T{
-    const lock=path.join(this.system,"locks",sha256(identity)),ownerPath=path.join(lock,"owner.json"),leaseMs=5_000;
+    const lock=path.join(this.system,"locks",sha256(identity)),ownerPath=path.join(lock,"owner.json"),leaseMs=30_000;
     for(let attempt=0;attempt<1_000;attempt++){
       try{
         fs.mkdirSync(lock);const acquiredAt=new Date(),fence=sha256(`${identity}\n${randomUUID()}\n${acquiredAt.toISOString()}`);
@@ -794,7 +821,7 @@ export class FeedbackReceiverCustodyService {
     authority: PurgeAuthority,
     now = new Date(),
   ): DeletionReceipt {
-    return this.lockSync(`purge:${requestId}`,lease=>{
+    return this.lockSync(requestId,lease=>{
     lease.assertCurrent();
     if (authority.hold)
       fail("FEEDBACK_RECEIVER_HOLD_ACTIVE", "Held custody cannot be purged");
@@ -824,10 +851,7 @@ export class FeedbackReceiverCustodyService {
         );
       if (journal.state === "finalized") return journal.receipt;
     } else {
-      const stored = readJson<StoredDelivery>(
-          this.root,
-          this.indexPath(requestId),
-        ),
+      const stored = this.readStored(this.indexPath(requestId)),
         object = path.join(this.root, stored.objectRelativePath);
       lease.assertCurrent();
       assertNoLinks(this.root, object);
@@ -837,7 +861,7 @@ export class FeedbackReceiverCustodyService {
           "FEEDBACK_RECEIVER_READBACK_MISMATCH",
           "Custody bytes changed before purge",
         );
-      const readback=this.readback(requestId,now),preparedBase = {
+      const readback=this.readbackUnderFence(requestId,now,lease.assertCurrent),preparedBase = {
           objectSha256: identity.sha256,
           byteCount: identity.byteCount,
           policySha256: authority.policySha256,
