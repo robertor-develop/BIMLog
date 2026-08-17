@@ -18,7 +18,9 @@ Direct mode streams to a healthy configured receiver and retains no permanent BI
 
 The configured root must be independently approved and must not be a workspace, application, build, cache, or temporary directory. Every existing component is checked for links/reparse points and physical containment.
 
-`<Root>/BIMLog-Feedback/{01-Active,02-Resolved-Retention,03-Legal-Hold,90-Quarantine,91-Transfer-Failures,99-System}/<CompanySlug>/<ProjectCode-or-General>/<YYYY>/<FB-StableId>/`
+The exact operator-approved root on Roberto's current machine is `F:/BIMLog/Feedback`. Other servers configure `<BIMLogDataRoot>/Feedback`; the receiver never creates or selects a root implicitly. The root must remain outside repositories, worktrees, evidence, application, build, cache, and temporary custody.
+
+`<BIMLogDataRoot>/Feedback/{01-Active,02-Resolved-Retention,03-Legal-Hold,90-Quarantine,91-Transfer-Failures,99-System}/<CompanySlug>/<ProjectCode-or-General>/<YYYY>/<FB-StableId>/`
 
 Each ticket has `README.txt`, `manifest.json`, and `originals/`, `screenshots/`, `audio/`, `documents/`, `transcripts/`, `receipts/`. Byte filenames are opaque: UTC timestamp plus short content hash. Sanitized display names exist only in `manifest.json`. Manifests are restore-safe, versioned, hash-bound, and contain no credentials or host paths. Atomic projection moves preserve ticket/object IDs and receipts.
 

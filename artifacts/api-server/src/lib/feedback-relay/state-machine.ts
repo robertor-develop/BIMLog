@@ -1,10 +1,11 @@
-export const relayStates = ["queued", "transferring", "delivered", "cleanup-pending", "manual-review", "held", "expired"] as const;
+export const relayStates = ["queued", "transferring", "receipt-verified", "cleanup-pending", "delivered", "manual-review", "held", "expired"] as const;
 export type RelayState = typeof relayStates[number];
 const transitions: Record<RelayState, ReadonlySet<RelayState>> = {
   queued: new Set(["transferring", "held", "expired", "manual-review"]),
-  transferring: new Set(["queued", "delivered", "held", "manual-review"]),
-  delivered: new Set(["cleanup-pending", "held", "manual-review"]),
-  "cleanup-pending": new Set(["held", "manual-review"]),
+  transferring: new Set(["queued", "receipt-verified", "held", "manual-review"]),
+  "receipt-verified": new Set(["cleanup-pending", "delivered", "held", "manual-review"]),
+  "cleanup-pending": new Set(["delivered", "held", "manual-review"]),
+  delivered: new Set(["held", "manual-review"]),
   "manual-review": new Set(["queued", "held", "expired"]),
   held: new Set(["queued", "manual-review"]),
   expired: new Set([]),
