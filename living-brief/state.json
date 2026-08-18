@@ -1,12 +1,13 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
+  "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "346a39d02c4dcf48c1819cd9eb924a8c2597e47443305ccd427d13bdc2efe0aa",
+  "bundleSha256": "301423addf98a0b7dd4734ce07b1336d28d426a2217133b4a607982590756e79",
   "impact": {
-    "baselineCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
+    "baselineCommit": "faf4f732e901278451984385616ff878f3164d38",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -23,11 +24,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "claude",
@@ -35,11 +36,11 @@
       "sha256": "b8efc974142d81e72ec01cf72a1d180f5e3c5a346a5dbb390b2c3a7651f906e9",
       "sourceChangedAt": "2026-08-05T11:26:11-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "quality",
@@ -47,11 +48,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "vision",
@@ -59,23 +60,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "107f6cf09e8f835635959e81cd806bb7f437742a0215025ee98caf78089959ea",
-      "sourceChangedAt": "2026-08-17T21:50:25-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "sha256": "be7176da5fe1c2c4a22c984ade4135403c5c3dc41cfc7f25c8e11c29d4246859",
+      "sourceChangedAt": "2026-08-18T03:28:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "plugin",
@@ -83,11 +84,11 @@
       "sha256": "7ebbbfbbccd7ce313f20db8eb07f48f020ef834138692d062a58767f4eeb1a37",
       "sourceChangedAt": "2026-07-21T13:36:32-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "report_design_system",
@@ -95,11 +96,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "standards_register",
@@ -107,35 +108,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "24fb3b9535a86b9a3c812faddc58e77ce71ae37758276a850ce41572e7c22cab",
-      "sourceChangedAt": "2026-08-18T03:00:00.000Z",
+      "sha256": "4bef495a92c6cd32152f36ac9e8e261c3e1fd40aa8fbfa96570db7cc2e72727d",
+      "sourceChangedAt": "2026-08-18T03:28:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "a64b5814ff251576c135022205f7a361f042d4e5d053ae25b1425e21363e6ff5",
-      "sourceChangedAt": "2026-08-18T03:00:00.000Z",
+      "sha256": "23bf62ae8f8e5d4f8fc7bfd8dd50aeed5dea21ce91fdc44a22229ec5121c1203",
+      "sourceChangedAt": "2026-08-18T03:28:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     },
     {
       "key": "audit",
@@ -143,11 +144,11 @@
       "sha256": "c64878fb9aec6abbef080bb1da14f09dd92af10407b31ac6c4b4710eb42446cc",
       "sourceChangedAt": "2026-08-01T10:59:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewedThroughCommit": "7ef033426b0d34f6617138de95493381f033ceeb",
-      "semanticReviewTask": "bimlog-feedback-build8-startup-build-closure-20260817",
+      "reconciledThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "semanticReviewTask": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-18T03:00:00Z"
+      "semanticReviewedAt": "2026-08-18T03:28:00Z"
     }
   ]
 }

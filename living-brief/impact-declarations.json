@@ -10714,6 +10714,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5306d46303ce72068e69612cec0843244f8bbcc0dfb0c903e0e98e3b6c6d50c3"
+    },
+    {
+      "taskId": "bimlog-feedback-build8-procore-pg18-final-reseal-20260817",
+      "reviewedThroughCommit": "faf4f732e901278451984385616ff878f3164d38",
+      "reviewedAt": "2026-08-18T03:28:00Z",
+      "status": "procore_pg18_source_accepted_final_build_and_browser_acceptance_pending",
+      "captureTiming": "post_source_qa_pre_final_build",
+      "summary": "Reconciles the independently accepted four-path Procore RFI PostgreSQL 18 metadata correction while preserving prior Feedback evidence classifications and keeping exact-final build and browser acceptance open.",
+      "workstreams": [
+        "feedback-addendum",
+        "procore-rfi",
+        "postgresql-18",
+        "production-startup",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No human authority, privacy, custody, or customer-isolation rule changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release, database, provider, publication, and field gates remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Records source QA and accurately classifies unretained writer execution results as supporting evidence, not a sealed receipt."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or identity change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The new Procore migration behavior path must be included in the deterministic generated source inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Navisworks, installer, package distribution, or plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report layout or document design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Binds the candidate to faf4f732, records source QA, and retains the final build and browser gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains exact-current build closure, controlled-mock reseal, and authenticated full-stack browser acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No push, Replit, provider, production, disposal, customer, or external event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f70d229e603759bb8d4c1236494e45aeb688bf46387f3ec6b81167c29c211139"
     }
   ]
 }

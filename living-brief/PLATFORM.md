@@ -282,6 +282,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.ts
 - artifacts/api-server/src/lib/procore-rfi-import-commit.ts
+- artifacts/api-server/src/lib/procore-rfi-import-migration.behavior.ts
 - artifacts/api-server/src/lib/procore-rfi-import-migration.ts
 - artifacts/api-server/src/lib/procore-rfi-import.behavior.ts
 - artifacts/api-server/src/lib/procore-rfi-import.ts
