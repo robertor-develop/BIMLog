@@ -32,9 +32,18 @@ import { startFinancialControlMigration } from "./lib/financial-control-migratio
 import { startCommercialEntitlementMigration } from "./lib/commercial-entitlement";
 import { startFinancialBudgetMigration } from "./lib/financial-budget-migration";
 import { startFinancialContractMigration } from "./lib/financial-contract-migration";
-import { startJobIntakeMigration, waitForJobIntakeMigration } from "./lib/job-intake-migration";
-import { startProjectInvitationMigration, waitForProjectInvitationMigration } from "./lib/project-invitation-migration";
-import { startTeamResourcePlanningMigration, waitForTeamResourcePlanningMigration } from "./lib/team-resource-planning-migration";
+import {
+  startJobIntakeMigration,
+  waitForJobIntakeMigration,
+} from "./lib/job-intake-migration";
+import {
+  startProjectInvitationMigration,
+  waitForProjectInvitationMigration,
+} from "./lib/project-invitation-migration";
+import {
+  startTeamResourcePlanningMigration,
+  waitForTeamResourcePlanningMigration,
+} from "./lib/team-resource-planning-migration";
 import { startContractItemWorkflowMigration } from "./lib/contract-item-workflow-migration";
 import {
   startGenericApuPersistenceMigration,
@@ -72,41 +81,71 @@ const PROCORE_RFI_IMPORT_CONSTRAINTS = [
   ["rfi_import_rows", "rfi_import_source_identity_uq"],
 ] as const;
 const PROCORE_RFI_IMPORT_INDEXES = [
-  ["rfi_import_bindings", "rfi_import_single_current_binding_uq", ["project_id", "company_id", "provider", "source_project_code", "capability"]],
-  ["rfi_import_authorizations", "rfi_import_single_current_authorization_uq", ["binding_id", "binding_version", "user_id", "capability"]],
+  [
+    "rfi_import_bindings",
+    "rfi_import_single_current_binding_uq",
+    [
+      "project_id",
+      "company_id",
+      "provider",
+      "source_project_code",
+      "capability",
+    ],
+  ],
+  [
+    "rfi_import_authorizations",
+    "rfi_import_single_current_authorization_uq",
+    ["binding_id", "binding_version", "user_id", "capability"],
+  ],
 ] as const;
 
 async function ensureProcoreRfiImportSchema(): Promise<void> {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await client.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:procore-rfi-import-schema'))");
-    const existing = await client.query<{ table_name: string }>(`
+    await client.query(
+      "SELECT pg_advisory_xact_lock(hashtext('bimlog:procore-rfi-import-schema'))",
+    );
+    const existing = await client.query<{ table_name: string }>(
+      `
       SELECT table_name
         FROM unnest($1::text[]) AS requested(table_name)
        WHERE to_regclass('public.' || table_name) IS NOT NULL
-    `, [PROCORE_RFI_IMPORT_TABLES]);
+    `,
+      [PROCORE_RFI_IMPORT_TABLES],
+    );
     if (existing.rowCount === 0) {
       await client.query(PROCORE_RFI_IMPORT_MIGRATION_SQL);
     } else if (existing.rowCount !== PROCORE_RFI_IMPORT_TABLES.length) {
       throw new Error("PROCORE_RFI_IMPORT_SCHEMA_PARTIAL");
     }
-    const constraints = await client.query<{ table_name: string; constraint_name: string }>(`
+    const constraints = await client.query<{
+      table_name: string;
+      constraint_name: string;
+    }>(
+      `
       SELECT target.relname AS table_name, constraint_record.conname AS constraint_name
         FROM pg_constraint constraint_record
         JOIN pg_class target ON target.oid = constraint_record.conrelid
         JOIN pg_namespace namespace ON namespace.oid = target.relnamespace
        WHERE namespace.nspname = 'public' AND constraint_record.conname = ANY($1::text[])
-    `, [PROCORE_RFI_IMPORT_CONSTRAINTS.map(([, name]) => name)]);
-    const actualConstraints = new Set(constraints.rows.map(row => `${row.table_name}:${row.constraint_name}`));
-    const constraintsValid = PROCORE_RFI_IMPORT_CONSTRAINTS.every(([table, name]) => actualConstraints.has(`${table}:${name}`));
+    `,
+      [PROCORE_RFI_IMPORT_CONSTRAINTS.map(([, name]) => name)],
+    );
+    const actualConstraints = new Set(
+      constraints.rows.map((row) => `${row.table_name}:${row.constraint_name}`),
+    );
+    const constraintsValid = PROCORE_RFI_IMPORT_CONSTRAINTS.every(
+      ([table, name]) => actualConstraints.has(`${table}:${name}`),
+    );
     const indexes = await client.query<{
       table_name: string;
       index_name: string;
       key_columns: string[];
       predicate: string | null;
       is_unique: boolean;
-    }>(`
+    }>(
+      `
       SELECT target.relname AS table_name,
              index_class.relname AS index_name,
              index_record.indisunique AS is_unique,
@@ -122,16 +161,25 @@ async function ensureProcoreRfiImportSchema(): Promise<void> {
        WHERE namespace.nspname = 'public' AND index_class.relname = ANY($1::text[])
        GROUP BY target.relname, index_class.relname, index_record.indisunique,
                 index_record.indpred, index_record.indrelid
-    `, [PROCORE_RFI_IMPORT_INDEXES.map(([, name]) => name)]);
-    const normalizePredicate = (value: string | null) => (value ?? "")
-      .toLowerCase()
-      .replace(/[()\s]/g, "");
-    const indexesValid = PROCORE_RFI_IMPORT_INDEXES.every(([table, name, expectedColumns]) => indexes.rows.some(row => (
-      row.table_name === table && row.index_name === name
-      && row.is_unique
-      && row.key_columns.join(",") === expectedColumns.join(",")
-      && ["current=trueandrevoked_atisnull", "currentandrevoked_atisnull"].includes(normalizePredicate(row.predicate))
-    )));
+    `,
+      [PROCORE_RFI_IMPORT_INDEXES.map(([, name]) => name)],
+    );
+    const normalizePredicate = (value: string | null) =>
+      (value ?? "").toLowerCase().replace(/[()\s]/g, "");
+    const indexesValid = PROCORE_RFI_IMPORT_INDEXES.every(
+      ([table, name, expectedColumns]) =>
+        indexes.rows.some(
+          (row) =>
+            row.table_name === table &&
+            row.index_name === name &&
+            row.is_unique &&
+            row.key_columns.join(",") === expectedColumns.join(",") &&
+            [
+              "current=trueandrevoked_atisnull",
+              "currentandrevoked_atisnull",
+            ].includes(normalizePredicate(row.predicate)),
+        ),
+    );
     if (!constraintsValid || !indexesValid) {
       throw new Error("PROCORE_RFI_IMPORT_SCHEMA_INTEGRITY_FAILED");
     }
@@ -182,23 +230,30 @@ void ensureProcoreRfiImportSchema()
     console.error("[migration] Procore RFI import migration failed:", error);
   });
 
-(async () => {
+const coordinatorStartupBarrier = (async () => {
   try {
     await startCoordinatorSavedViewMigration();
     await startCoordinatorBulkActionMigration();
     console.log("[migration] coordinator saved views ensured");
-  } catch {
+  } catch (error) {
     console.error("[migration] coordinator data migration failed");
+    throw error;
   }
 })();
 
 app.disable("etag");
 app.set("trust proxy", 1);
 app.use(cors());
-app.use("/api/v1/projects/:projectId/rfis/import/procore", (_req: Request, res: Response, next: NextFunction) => {
-  if (procoreRfiImportSchemaState === "ready") { next(); return; }
-  res.status(503).json({ error: "PROCORE_RFI_IMPORT_SCHEMA_UNAVAILABLE" });
-});
+app.use(
+  "/api/v1/projects/:projectId/rfis/import/procore",
+  (_req: Request, res: Response, next: NextFunction) => {
+    if (procoreRfiImportSchemaState === "ready") {
+      next();
+      return;
+    }
+    res.status(503).json({ error: "PROCORE_RFI_IMPORT_SCHEMA_UNAVAILABLE" });
+  },
+);
 const captureRawBody = (req: Request, _res: Response, buf: Buffer) => {
   if (buf && buf.length) (req as unknown as { rawBody?: Buffer }).rawBody = buf;
 };
@@ -238,12 +293,10 @@ app.use((req: Request, res: Response, next: NextFunction) => {
     if (total > RAW_BODY_BYPASS_MAX_BYTES) {
       finish(() => {
         chunks.length = 0; // free what we buffered; further chunks are ignored via the done guard
-        res
-          .status(413)
-          .json({
-            error: "payload_too_large",
-            message: "Request body exceeds 500mb limit",
-          });
+        res.status(413).json({
+          error: "payload_too_large",
+          message: "Request body exceeds 500mb limit",
+        });
       });
       return;
     }
@@ -349,7 +402,10 @@ app.use("/api/v1", router);
     await waitForTeamResourcePlanningMigration();
     console.log("[migration] Team resource planning tables ensured");
   } catch (error) {
-    console.error("[migration] Team resource planning migration failed:", error);
+    console.error(
+      "[migration] Team resource planning migration failed:",
+      error,
+    );
     throw error;
   }
 })();
@@ -459,12 +515,13 @@ app.use("/api/v1", router);
     await startFinancialBudgetMigration();
     await startFinancialContractMigration();
     await startContractItemWorkflowMigration();
-    console.log("[migration] financial cost structure, budget, and contract tables ensured");
+    console.log(
+      "[migration] financial cost structure, budget, and contract tables ensured",
+    );
   } catch {
     console.error("[migration] financial budget migration failed");
   }
 })();
-
 
 (async () => {
   try {
@@ -676,13 +733,7 @@ const rfiMigrationReady = (async () => {
   }
 })();
 
-void rfiMigrationReady.then((ready) => {
-  if (ready) startOverdueNotifier();
-  else
-    console.error(
-      "[overdue-notifier] Not started because the RFI schema migration failed.",
-    );
-});
+let telegramWorkersReady = false;
 
 (async () => {
   try {
@@ -762,7 +813,7 @@ void rfiMigrationReady.then((ready) => {
   }
 })();
 
-(async () => {
+const telegramStartupBarrier = (async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS notification_channels (
       id serial PRIMARY KEY,
@@ -881,18 +932,17 @@ void rfiMigrationReady.then((ready) => {
         `[telegram-notifications] recovered ${recoveredUnknownNotifications} stale attempt(s) as unknown/manual review`,
       );
     console.log("[migration] telegram product notification tables ensured");
-    startTelegramProductWorker();
-    startNotificationOutboxWorker();
-    startRfiNotificationWorker();
+    telegramWorkersReady = true;
   } catch (e) {
     console.error(
       "[migration] telegram product notification migration failed:",
       e,
     );
+    throw e;
   }
 })();
 
-(async () => {
+const scheduleStartupBarrier = (async () => {
   try {
     await pool.query(
       `ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS building_level TEXT`,
@@ -971,6 +1021,7 @@ void rfiMigrationReady.then((ready) => {
     );
   } catch (e) {
     console.error("[migration] schedule planner migration failed:", e);
+    throw e;
   }
 })();
 
@@ -1043,10 +1094,13 @@ void rfiMigrationReady.then((ready) => {
   }
 })();
 
-(async () => {
+const feedbackStartupBarrier = (async () => {
   try {
+    await pool.query("SELECT 1");
     const storageHealth = await feedbackStorage.health();
-    console.log(`[feedback-storage] ${storageHealth.backendId} ${storageHealth.backendType} healthy`);
+    console.log(
+      `[feedback-storage] ${storageHealth.backendId} ${storageHealth.backendType} healthy`,
+    );
     await ensureFeedbackSchema(pool);
     console.log("[migration] feedback_items table ensured transactionally");
   } catch (e) {
@@ -1056,7 +1110,7 @@ void rfiMigrationReady.then((ready) => {
   }
 })();
 
-(async () => {
+const livingBriefAndLensStartupBarrier = (async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoints (
       id SERIAL PRIMARY KEY,
@@ -1261,6 +1315,7 @@ void rfiMigrationReady.then((ready) => {
     );
   } catch (e) {
     console.error("[migration] lens_viewpoints migration failed:", e);
+    throw e;
   }
 
   try {
@@ -1292,6 +1347,7 @@ void rfiMigrationReady.then((ready) => {
     console.log("[migration] living_brief settings ensured");
   } catch (e) {
     console.error("[migration] living_brief migration failed:", e);
+    throw e;
   }
 
   try {
@@ -1343,10 +1399,11 @@ void rfiMigrationReady.then((ready) => {
       "[migration] lens_viewpoint reports/events migration failed:",
       e,
     );
+    throw e;
   }
 })();
 
-(async () => {
+const meetingLensStartupBarrier = (async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_lens_viewpoint_links (
       id SERIAL PRIMARY KEY,
@@ -1383,7 +1440,32 @@ void rfiMigrationReady.then((ready) => {
       "[migration] meeting_lens_viewpoint_links migration failed:",
       e,
     );
+    throw e;
   }
 })();
+
+export const startupBarrier = Promise.all([
+  feedbackStartupBarrier,
+  coordinatorStartupBarrier,
+  telegramStartupBarrier,
+  scheduleStartupBarrier,
+  livingBriefAndLensStartupBarrier,
+  meetingLensStartupBarrier,
+  rfiMigrationReady.then((ready) => {
+    if (!ready) throw new Error("RFI_SCHEMA_MIGRATION_FAILED");
+  }),
+]).then(() => undefined);
+
+let workersStarted = false;
+export function startWorkers(): void {
+  if (workersStarted) return;
+  workersStarted = true;
+  startOverdueNotifier();
+  if (telegramWorkersReady) {
+    startTelegramProductWorker();
+    startNotificationOutboxWorker();
+    startRfiNotificationWorker();
+  }
+}
 
 export default app;

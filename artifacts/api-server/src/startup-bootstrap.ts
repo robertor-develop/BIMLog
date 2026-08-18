@@ -5,11 +5,13 @@ export type StartupState = "starting" | "ready" | "failed";
 
 interface StartupLogger {
   info(message: string): void;
-  error(message: string, error: unknown): void;
+  error(message: string): void;
 }
 
 interface ApplicationModule {
   default: RequestListener;
+  startupBarrier?: Promise<void>;
+  startWorkers?: () => void;
 }
 
 interface BootstrapOptions {
@@ -24,6 +26,17 @@ const NOT_READY_BODY = {
   failed: JSON.stringify({ status: "failed" }),
 } as const;
 
+function sanitizedStartupError(error: unknown): string {
+  const message = error instanceof Error ? error.message : String(error);
+  if (message.includes("FEEDBACK_STORAGE_AUTHORITY_INVALID")) {
+    return "FEEDBACK_STORAGE_AUTHORITY_INVALID";
+  }
+  if (message.includes("FEEDBACK_STORAGE_AUTHORITY_REQUIRED")) {
+    return "FEEDBACK_STORAGE_AUTHORITY_REQUIRED";
+  }
+  return "APPLICATION_INITIALIZATION_FAILED";
+}
+
 export function createApplicationBootstrap(
   loadApplication: () => Promise<ApplicationModule>,
   options: BootstrapOptions = {},
@@ -31,14 +44,21 @@ export function createApplicationBootstrap(
   const logger = options.logger ?? console;
   const initializationTimeoutMs =
     options.initializationTimeoutMs ?? DEFAULT_INITIALIZATION_TIMEOUT_MS;
-  if (!Number.isFinite(initializationTimeoutMs) || initializationTimeoutMs <= 0) {
-    throw new RangeError("Application initialization timeout must be positive.");
+  if (
+    !Number.isFinite(initializationTimeoutMs) ||
+    initializationTimeoutMs <= 0
+  ) {
+    throw new RangeError(
+      "Application initialization timeout must be positive.",
+    );
   }
 
   const createdAt = performance.now();
   const elapsed = () => Math.round(performance.now() - createdAt);
   let state: StartupState = "starting";
   let application: RequestListener | undefined;
+  let applicationModule: ApplicationModule | undefined;
+  let workersStarted = false;
   let initialization: Promise<void> | undefined;
 
   const server = createServer((request, response) => {
@@ -65,13 +85,19 @@ export function createApplicationBootstrap(
   const initialize = (): Promise<void> => {
     initialization ??= Promise.resolve()
       .then(async () => {
-        logger.info(
-          `[startup] phase=app_import_begin elapsed_ms=${elapsed()}`,
-        );
+        logger.info(`[startup] phase=app_import_begin elapsed_ms=${elapsed()}`);
         let timeout: NodeJS.Timeout | undefined;
         try {
           return await Promise.race([
-            loadApplication(),
+            loadApplication().then(async (module) => {
+              if (typeof module.default !== "function") {
+                throw new TypeError(
+                  "Application module did not provide a request handler.",
+                );
+              }
+              await module.startupBarrier;
+              return module;
+            }),
             new Promise<never>((_resolve, reject) => {
               timeout = setTimeout(
                 () =>
@@ -82,7 +108,6 @@ export function createApplicationBootstrap(
                   ),
                 initializationTimeoutMs,
               );
-              timeout.unref?.();
             }),
           ]);
         } finally {
@@ -90,27 +115,20 @@ export function createApplicationBootstrap(
         }
       })
       .then((module) => {
-        if (typeof module.default !== "function") {
-          throw new TypeError(
-            "Application module did not provide a request handler.",
-          );
-        }
-
         logger.info(
           `[startup] phase=app_import_complete elapsed_ms=${elapsed()}`,
         );
         application = module.default;
+        applicationModule = module;
         state = "ready";
-        logger.info(
-          `[startup] phase=ready_transition elapsed_ms=${elapsed()}`,
-        );
+        logger.info(`[startup] phase=ready_transition elapsed_ms=${elapsed()}`);
       })
       .catch((error: unknown) => {
         state = "failed";
         logger.error(
-          `[startup] phase=app_import_failure elapsed_ms=${elapsed()}`,
-          error,
+          `[startup] phase=app_import_failure elapsed_ms=${elapsed()} error=${sanitizedStartupError(error)}`,
         );
+        throw error;
       });
 
     return initialization;
@@ -119,6 +137,11 @@ export function createApplicationBootstrap(
   return {
     server,
     initialize,
+    startWorkers: () => {
+      if (state !== "ready" || workersStarted) return;
+      workersStarted = true;
+      applicationModule?.startWorkers?.();
+    },
     getState: (): StartupState => state,
   };
 }

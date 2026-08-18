@@ -15,7 +15,9 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
-async function listen(server: Server): Promise<{ url: string; elapsedMs: number }> {
+async function listen(
+  server: Server,
+): Promise<{ url: string; elapsedMs: number }> {
   const startedAt = performance.now();
   await new Promise<void>((resolve, reject) => {
     server.once("error", reject);
@@ -62,37 +64,24 @@ const application: RequestListener = (request, result) => {
 
 const delayedImport = deferred<{ default: RequestListener }>();
 const delayedLogs: Array<{ message: string; error?: unknown }> = [];
-const delayed = createApplicationBootstrap(
-  () => delayedImport.promise,
-  {
-    initializationTimeoutMs: 1_000,
-    logger: {
-      info: (message) => delayedLogs.push({ message }),
-      error: (message, error) => delayedLogs.push({ message, error }),
-    },
+const delayed = createApplicationBootstrap(() => delayedImport.promise, {
+  initializationTimeoutMs: 1_000,
+  logger: {
+    info: (message) => delayedLogs.push({ message }),
+    error: (message, error) => delayedLogs.push({ message, error }),
   },
-);
+});
+const delayedInitialization = delayed.initialize();
+assert.equal(delayed.server.listening, false);
+delayedImport.resolve({ default: application });
+await delayedInitialization;
+assert.equal(delayed.getState(), "ready" satisfies StartupState);
+assert.equal(delayed.server.listening, false);
 const delayedListener = await listen(delayed.server);
 assert(
   delayedListener.elapsedMs < 1_000,
   `listener took ${delayedListener.elapsedMs.toFixed(1)}ms to bind`,
 );
-const delayedInitialization = delayed.initialize();
-assert.deepEqual(await response(delayedListener.url, "/api"), {
-  status: 404,
-  body: "Cannot GET /api\n",
-});
-assert.deepEqual(await response(delayedListener.url, "/api/v1/healthz"), {
-  status: 503,
-  body: JSON.stringify({ status: "starting" }),
-});
-assert.deepEqual(await response(delayedListener.url, "/other"), {
-  status: 503,
-  body: JSON.stringify({ status: "starting" }),
-});
-delayedImport.resolve({ default: application });
-await delayedInitialization;
-assert.equal(delayed.getState(), "ready" satisfies StartupState);
 assert.deepEqual(await response(delayedListener.url, "/api/v1/healthz"), {
   status: 200,
   body: JSON.stringify({ status: "ok" }),
@@ -114,48 +103,68 @@ assert(
 );
 await close(delayed.server);
 
-const failedLogs: Array<{ message: string; error?: unknown }> = [];
+const providerSecret = "provider-secret-must-not-appear";
+const failedLogs: Array<{ message: string }> = [];
 const failed = createApplicationBootstrap(
-  async () => {
-    throw new Error("synthetic import failure");
-  },
+  async () => ({
+    default: application,
+    startupBarrier: Promise.reject(
+      new Error(`FEEDBACK_STORAGE_AUTHORITY_INVALID ${providerSecret}`),
+    ),
+  }),
   {
     initializationTimeoutMs: 1_000,
     logger: {
       info: (message) => failedLogs.push({ message }),
-      error: (message, error) => failedLogs.push({ message, error }),
+      error: (message) => failedLogs.push({ message }),
     },
   },
 );
-const failedListener = await listen(failed.server);
-await failed.initialize();
+await assert.rejects(failed.initialize(), /FEEDBACK_STORAGE_AUTHORITY_INVALID/);
 assert.equal(failed.getState(), "failed" satisfies StartupState);
-assert.deepEqual(await response(failedListener.url, "/api"), {
-  status: 503,
-  body: JSON.stringify({ status: "failed" }),
-});
-assert.deepEqual(await response(failedListener.url, "/api/v1/healthz"), {
-  status: 503,
-  body: JSON.stringify({ status: "failed" }),
-});
+assert.equal(failed.server.listening, false);
+assert.equal(failed.server.address(), null);
 const failureLog = failedLogs.find((entry) =>
   entry.message.includes("phase=app_import_failure"),
 );
-assert(failureLog?.error instanceof Error);
-await close(failed.server);
+assert.match(failureLog?.message ?? "", /FEEDBACK_STORAGE_AUTHORITY_INVALID/);
+assert.doesNotMatch(failureLog?.message ?? "", new RegExp(providerSecret));
+assert.equal(
+  failedLogs.filter((entry) =>
+    entry.message.includes("phase=app_import_failure"),
+  ).length,
+  1,
+);
 
 const timedOut = createApplicationBootstrap(
   () => new Promise<{ default: RequestListener }>(() => undefined),
   { initializationTimeoutMs: 25 },
 );
-const timedOutListener = await listen(timedOut.server);
-await timedOut.initialize();
+await assert.rejects(timedOut.initialize(), /exceeded 25ms/);
 assert.equal(timedOut.getState(), "failed" satisfies StartupState);
-assert.equal(
-  (await response(timedOutListener.url, "/api")).status,
-  503,
-);
-await close(timedOut.server);
+assert.equal(timedOut.server.listening, false);
+assert.equal(timedOut.server.address(), null);
+
+const barrier = deferred<void>();
+let workerStarts = 0;
+const barrierBootstrap = createApplicationBootstrap(async () => ({
+  default: application,
+  startupBarrier: barrier.promise,
+  startWorkers: () => {
+    workerStarts += 1;
+  },
+}));
+const barrierInitialization = barrierBootstrap.initialize();
+await new Promise((resolve) => setTimeout(resolve, 10));
+assert.equal(barrierBootstrap.server.listening, false);
+assert.equal(barrierBootstrap.getState(), "starting");
+barrier.resolve();
+await barrierInitialization;
+assert.equal(barrierBootstrap.getState(), "ready");
+assert.equal(workerStarts, 0);
+barrierBootstrap.startWorkers();
+barrierBootstrap.startWorkers();
+assert.equal(workerStarts, 1);
 
 let discoveryCalls = 0;
 const resolveDelayedFfmpeg = createFfmpegPathResolver({
@@ -174,11 +183,13 @@ assert.equal(discoveryCalls, 1);
 console.log(
   JSON.stringify({
     listenerBoundWithinMs: Number(delayedListener.elapsedMs.toFixed(1)),
-    apiProbeStayedNonSuccessUntilReady: true,
-    healthzProbeStayedNonSuccessUntilReady: true,
+    socketStayedClosedUntilInitialization: true,
     apiAndHealthzSucceededAfterReady: true,
     readyAfterImport: true,
-    failedAndTimedOutImportsStayedNonReady: true,
+    failedAndTimedOutImportsNeverListened: true,
+    providerSecretsSanitizedFromStartupFailure: true,
+    startupBarrierPrecedesReadyAndWorkers: true,
+    doubleWorkerStartSuppressed: true,
     phaseTelemetryComplete: true,
     delayedFfmpegDiscoveryBoundedAndCached: true,
   }),

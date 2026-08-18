@@ -16,7 +16,14 @@ if (Number.isNaN(port) || port <= 0) {
 
 const bootstrap = createApplicationBootstrap(() => import("./app"));
 
-bootstrap.server.listen(port, () => {
-  console.log(`[startup] phase=bootstrap_bound port=${port} elapsed_ms=0`);
-  void bootstrap.initialize();
-});
+try {
+  await bootstrap.initialize();
+  await new Promise<void>((resolve, reject) => {
+    bootstrap.server.once("error", reject);
+    bootstrap.server.listen(port, () => resolve());
+  });
+  console.log(`[startup] phase=bootstrap_bound port=${port}`);
+  bootstrap.startWorkers();
+} catch {
+  process.exitCode = 1;
+}

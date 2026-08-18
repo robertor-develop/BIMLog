@@ -268,35 +268,6 @@ Module._resolveFilename = function(request, parent, isMain, options) {
 };
 `,
 );
-const negativeNoListenGuardPath = path.join(
-  resolvedProofRoot,
-  "artifact-negative-no-listen-guard.cjs",
-);
-fs.writeFileSync(
-  negativeNoListenGuardPath,
-  `"use strict";
-const http = require("node:http");
-const originalListen = http.Server.prototype.listen;
-const originalError = console.error;
-console.error = function(...args) {
-  originalError.apply(this, args);
-  if (args.some((argument) => String(argument?.stack ?? argument).includes("FEEDBACK_STORAGE_AUTHORITY_INVALID"))) {
-    process.exitCode = 1;
-  }
-};
-http.Server.prototype.listen = function(...args) {
-  if (this.listening) throw new Error("Negative artifact server was already listening.");
-  const callback = args.find((argument) => typeof argument === "function");
-  process.stderr.write("[artifact-negative] listen_intercepted=true socket_opened=false\\n");
-  process.nextTick(() => callback?.call(this));
-  return this;
-};
-process.once("exit", () => {
-  http.Server.prototype.listen = originalListen;
-});
-`,
-  { flag: "wx", mode: 0o600 },
-);
 
 const proofDatabaseUrl = process.env.BIMLOG_ARTIFACT_PROOF_DATABASE_URL;
 assert(
@@ -419,7 +390,7 @@ const invalidStorageChild = spawn(process.execPath, [bundle], {
     ...feedbackStorageEnvironment,
     BIMLOG_FEEDBACK_STORAGE_AUTHORITY_SHA256: "0".repeat(64),
     NODE_OPTIONS:
-      `${process.env.NODE_OPTIONS ?? ""} --require ${guardPath} --require ${negativeNoListenGuardPath}`.trim(),
+      `${process.env.NODE_OPTIONS ?? ""} --require ${guardPath}`.trim(),
   },
   stdio: ["ignore", "pipe", "pipe"],
   windowsHide: true,
@@ -488,10 +459,7 @@ assert.equal(
 assert.notEqual(invalidStorageExitResult.code, 0);
 assert.equal(invalidStorageExitResult.signal, null);
 assert.match(invalidStorageOutput, /FEEDBACK_STORAGE_AUTHORITY_INVALID/);
-assert.match(
-  invalidStorageStderr,
-  /listen_intercepted=true socket_opened=false/,
-);
+assert.doesNotMatch(invalidStorageOutput, /phase=bootstrap_bound/);
 assert.doesNotMatch(invalidStorageOutput, /phase=ready_transition/);
 assert.equal(invalidStorageTcpReached, false);
 assert.equal(invalidStorageReadinessReached, false);
