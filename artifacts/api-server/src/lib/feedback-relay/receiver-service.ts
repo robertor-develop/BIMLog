@@ -128,13 +128,13 @@ export interface ReceiverNonceAuthority {
   rollback(token: string): Promise<void>;
   recover?(input:{key:string;proofSha256:string}):Promise<boolean>;
 }
-type DurableNonceRecord={version:2;binding:{audience:string;keyId:string;nonce:string;timestamp:string;requestId:string;companyId:string;projectId:string;requestSha256:string};state:"reserved"|"committed";tokenSha256:string};
+type DurableNonceRecord={version:2;binding:{audience:string;keyId:string;nonce:string;timestamp:string;requestId:string;companyId:string;projectId:string;requestSha256:string};state:"reserved"|"committed";tokenSha256:string;owner?:LockOwnerV2};
 export class FilesystemReceiverNonceAuthority implements ReceiverNonceAuthority{
   private readonly root:string;
   constructor(root:string){this.root=canonicalRoot(root);if(!fs.existsSync(this.root)||!fs.statSync(this.root).isDirectory())fail("FEEDBACK_RECEIVER_NONCE_ROOT_REQUIRED","Nonce authority root must already exist");assertNoLinks(this.root,this.root);if(fs.lstatSync(this.root).isSymbolicLink())fail("FEEDBACK_RECEIVER_REPARSE_DENIED","Nonce authority root cannot be a link");}
   private key(input:DurableNonceRecord["binding"]){return sha256(JSON.stringify([input.audience,input.keyId,input.nonce,input.companyId,input.projectId]));}
   private async locked<T>(key:string,work:(lease:{assertCurrent():void;fence:string})=>T|Promise<T>){return fencedDirectoryLock(this.root,path.join(this.root,`${key}.lock`),`nonce:${key}`,work);}
-  async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`);assertNoLinks(this.root,file);return this.locked(key,lease=>{lease.assertCurrent();const token=`${key}.${randomUUID()}`;if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.version!==2||!HEX64.test(known.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_SCHEMA_INVALID","Nonce record schema is invalid");if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId||known.state==="reserved")return null;return{token,status:"identical-retry" as const};}const record:DurableNonceRecord={version:2,binding:input,state:"reserved",tokenSha256:sha256(token)};lease.assertCurrent();atomicJson(this.root,file,record);return{token,status:"new" as const};});}
+  async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`);assertNoLinks(this.root,file);return this.locked(key,lease=>{lease.assertCurrent();const token=`${key}.${randomUUID()}`;if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.version!==2||!HEX64.test(known.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_SCHEMA_INVALID","Nonce record schema is invalid");if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId)return null;if(known.state==="reserved"){if(!known.owner||!ownerIsProvablyDead(known.owner))return null;const recovered={...known,tokenSha256:sha256(token),owner:currentOwner(`nonce:${key}`,300_000)};lease.assertCurrent();atomicJson(this.root,file,recovered);return{token,status:"new" as const};}return{token,status:"identical-retry" as const};}const record:DurableNonceRecord={version:2,binding:input,state:"reserved",tokenSha256:sha256(token),owner:currentOwner(`nonce:${key}`,300_000)};lease.assertCurrent();atomicJson(this.root,file,record);return{token,status:"new" as const};});}
   async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||!HEX64.test(record.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");if(record.state==="committed")return;if(!timingSafeEqual(Buffer.from(record.tokenSha256,"hex"),Buffer.from(sha256(token),"hex")))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});});}
   async rollback(token:string){const key=token.split(".")[0];if(!HEX64.test(key))return;await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`);if(!fs.existsSync(file))return;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version===2&&record.tokenSha256===sha256(token)&&record.state==="reserved"){lease.assertCurrent();fs.unlinkSync(file);syncDirectory(this.root);}});}
   async recover(input:{key:string;proofSha256:string}){if(!HEX64.test(input.key)||!HEX64.test(input.proofSha256))return false;return this.locked(input.key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${input.key}.json`);if(!fs.existsSync(file))return false;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2)return false;if(record.state==="committed")return true;if(record.tokenSha256!==input.proofSha256)return false;lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});return true;});}
@@ -183,6 +183,7 @@ type LockOwnerV2 = {
   heartbeatAt: string;
   leaseUntil: string;
 };
+function currentOwner(identity:string,leaseMs:number):LockOwnerV2{const now=new Date();return{version:2,instanceId:PROCESS_INSTANCE_ID,pid:process.pid,processStartedAt:PROCESS_STARTED_AT,osBootId:OS_BOOT_ID,fence:sha256(`${identity}\n${randomUUID()}\n${now.toISOString()}`),acquiredAt:now.toISOString(),heartbeatAt:now.toISOString(),leaseUntil:new Date(now.getTime()+leaseMs).toISOString()};}
 function parseLockOwner(value: unknown): LockOwnerV2 | null {
   if (!value || typeof value !== "object") return null;
   const owner = value as Record<string, unknown>;
@@ -198,17 +199,20 @@ function parseLockOwner(value: unknown): LockOwnerV2 | null {
   return owner as LockOwnerV2;
 }
 function processIsAlive(pid: number) {
+  if(process.platform==="win32"){try{const output=execFileSync("tasklist.exe",["/FI",`PID eq ${pid}`,"/FO","CSV","/NH"],{encoding:"utf8",windowsHide:true,timeout:5_000});return new RegExp(`"${pid}"`).test(output);}catch{return true;}}
   try { process.kill(pid, 0); return true; } catch (error) {
-    return (error as NodeJS.ErrnoException).code === "EPERM";
+    if((error as NodeJS.ErrnoException).code!=="EPERM")return false;
+    return true;
   }
 }
+function processMatchesOwner(owner:LockOwnerV2){if(process.platform!=="win32")return processIsAlive(owner.pid);try{const value=execFileSync("powershell.exe",["-NoProfile","-NonInteractive","-Command",`$p=Get-CimInstance Win32_Process -Filter 'ProcessId=${owner.pid}' -ErrorAction SilentlyContinue;if($p){$p.CreationDate.ToUniversalTime().ToString('o')}`],{encoding:"utf8",windowsHide:true,timeout:10_000}).trim();if(!value)return false;const actual=new Date(value).getTime(),expected=new Date(owner.processStartedAt).getTime();return Number.isFinite(actual)&&Math.abs(actual-expected)<2_000;}catch{return true;}}
 function ownerIsProvablyDead(owner: LockOwnerV2, now = new Date()) {
   if (owner.osBootId !== OS_BOOT_ID) return true;
+  if(owner.pid===process.pid)return owner.instanceId!==PROCESS_INSTANCE_ID||owner.processStartedAt!==PROCESS_STARTED_AT;
+  if (!processMatchesOwner(owner)) return true;
   if (new Date(owner.leaseUntil).getTime() >= now.getTime()) return false;
-  if (!processIsAlive(owner.pid)) return true;
-  // A live PID cannot prove the original process is alive after PID reuse unless it is this instance.
-  return owner.pid === process.pid &&
-    (owner.instanceId !== PROCESS_INSTANCE_ID || owner.processStartedAt !== PROCESS_STARTED_AT);
+  // A foreign live PID cannot be taken over without an external process-start proof.
+  return false;
 }
 function ownerlessLockExpired(lock:string,now=Date.now()){try{return now-fs.statSync(lock).mtimeMs>=1_000;}catch{return false;}}
 async function fencedDirectoryLock<T>(root:string,lock:string,identity:string,work:(lease:{assertCurrent():void;fence:string})=>T|Promise<T>):Promise<T>{

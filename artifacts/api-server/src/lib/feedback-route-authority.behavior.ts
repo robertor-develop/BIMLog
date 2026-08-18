@@ -27,6 +27,7 @@ const assertions: Array<[string, RegExp]> = [
   ["customer routes do not bypass reporter authority", /if \(!actor \|\| !row\.companyId \|\| actor\.companyId !== row\.companyId \|\| row\.userId !== user\.userId/],
   ["audio origin is explicit and validated", /audio: new Set\(\["browser-microphone", "user-file-import"\]\)/],
   ["imported audio does not require capture consent", /const captureKind = origin === "browser-microphone".*else if \(consentId\)/s],
+  ["imported-audio transcription uses processing consent", /audioOrigin==="user-file-import"\?"transcription":"audio"/],
   ["download enforces stored and actual byte bounds", /asset\.byteSize > FEEDBACK_MAX_FILE_BYTES.*bytes\.byteLength > FEEDBACK_MAX_FILE_BYTES/s],
   ["create authority uses transaction reader", /projectAuthorized\(projectId, user, actor\.companyId, tx\)/],
   ["admin mutation reads inside transaction", /feedback-admin:\$\{id\}.*tx\.select\(\)\.from\(feedbackItemsTable\)/s],

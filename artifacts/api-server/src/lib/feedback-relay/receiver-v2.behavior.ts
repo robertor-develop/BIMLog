@@ -4,7 +4,8 @@ import path from "node:path";
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { FilesystemReceiverNonceAuthority, type ReceiverNonceAuthority } from "./receiver-service.js";
+import { FeedbackReceiverCustodyService,FilesystemReceiverNonceAuthority, type ReceiverNonceAuthority,type ReceiverFaultHooks } from "./receiver-service.js";
+import {sha256,signRequest,type RelayKeyRing,type RequestContract} from "./protocol.js";
 
 type Binding=Parameters<ReceiverNonceAuthority["reserve"]>[0];
 const script=fileURLToPath(import.meta.url);
@@ -16,6 +17,13 @@ if(process.argv[2]==="--nonce-child"){
   await authority.commit(reservation.token);
   process.stdout.write(JSON.stringify({status:reservation.status}));
   process.exit(0);
+}
+const now=new Date("2026-08-17T15:00:00.000Z"),ring=(id:string,secret:string):RelayKeyRing=>({activeKeyId:id,keys:[{id,secret:Buffer.from(secret),status:"active",notBefore:new Date("2026-01-01T00:00:00.000Z"),notAfter:new Date("2027-01-01T00:00:00.000Z")}]}),sender=ring("sender-key","sender-0123456789abcdef0123456789"),receiver=ring("receiver-key","receiver-0123456789abcdef01234567"),deliveryBytes=Buffer.from("multiprocess crash custody bytes");
+const deliveryRequest:RequestContract={version:"1",method:"PUT",path:"/v1/objects/crash",query:"",audience:"receiver",keyId:"sender-key",timestamp:now.toISOString(),nonce:"crash-nonce",requestId:"crash-request",companyId:"crash-company",projectId:"crash-project",feedbackId:"FB-CRASH",objectId:"crash-object",byteCount:deliveryBytes.length,sha256:sha256(deliveryBytes),bodySha256:sha256(deliveryBytes)};
+const inspection={verdict:"clean" as const,scannerAdapter:"crash-malware-scanner",inspectedAt:now.toISOString(),inspectedMediaType:"application/pdf",mediaKind:"document" as const,byteCount:deliveryBytes.length,sha256:sha256(deliveryBytes)};
+if(process.argv[2]==="--delivery-crash-child"){
+  const receiverRoot=process.argv[3],nonceRoot=process.argv[4],boundary=process.argv[5] as keyof ReceiverFaultHooks,authority={canonicalRoot:receiverRoot,rootFingerprintSha256:FeedbackReceiverCustodyService.fingerprintRoot(receiverRoot),destinationId:"receiver-crash"},faults:{[key:string]:()=>never}={[boundary]:()=>process.exit(70)};
+  const service=new FeedbackReceiverCustodyService(authority,sender,receiver,new FilesystemReceiverNonceAuthority(nonceRoot),30_000,faults);await service.deliver({signedRequest:signRequest(deliveryRequest,sender,now),bytes:deliveryBytes,inspection,now});process.exit(0);
 }
 
 const disposable=path.join("F:\\BIMLog\\.disposable\\feedback-receiver-v2-tests",randomUUID()),root=path.join(disposable,"nonces");
@@ -54,6 +62,13 @@ await check("expired same-PID owner with mismatched process identity is treated 
 await check("expired owner with matching live process identity remains fail closed",async()=>{
   const authority=new FilesystemReceiverNonceAuthority(root) as any,probe="2".repeat(64);let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve});const active=authority.locked(probe,async()=>{await held;});const probeOwner=path.join(root,`${probe}.lock`,`owner.json`);while(!fs.existsSync(probeOwner))await new Promise(resolve=>setTimeout(resolve,2));const owner=JSON.parse(fs.readFileSync(probeOwner,"utf8"));release();await active;
   const identity="3".repeat(64),lock=path.join(root,`${identity}.lock`);fs.mkdirSync(lock);fs.writeFileSync(path.join(lock,"owner.json"),JSON.stringify({...owner,acquiredAt:"2020-01-01T00:00:00.000Z",heartbeatAt:"2020-01-01T00:00:00.000Z",leaseUntil:"2020-01-01T00:00:01.000Z"}));await assert.rejects(authority.locked(identity,async()=>undefined),(error:any)=>error?.code==="FEEDBACK_RECEIVER_LOCK_TIMEOUT");fs.rmSync(lock,{recursive:true,force:false});
+});
+
+await check("kill and restart reconciles nonce object generation and index boundaries",async()=>{
+  for(const boundary of ["afterNonceReserved","afterObjectWritten","afterGenerationWritten","afterIndexWritten"] as const){const caseRoot=path.join(disposable,`crash-${boundary}`),receiverRoot=path.join(caseRoot,"receiver"),nonceRoot=path.join(caseRoot,"nonces");fs.mkdirSync(receiverRoot,{recursive:true});fs.mkdirSync(nonceRoot,{recursive:true});
+    const exitCode=await new Promise<number|null>((resolve,reject)=>{const child=spawn(process.execPath,["--import","tsx",script,"--delivery-crash-child",receiverRoot,nonceRoot,boundary],{stdio:["ignore","ignore","pipe"]});const errors:Buffer[]=[];child.stderr.on("data",value=>errors.push(value));child.once("error",reject);child.once("exit",code=>{if(code!==70)reject(new Error(Buffer.concat(errors).toString("utf8")||`unexpected crash exit ${code}`));else resolve(code);});});assert.equal(exitCode,70);
+    const authority={canonicalRoot:receiverRoot,rootFingerprintSha256:FeedbackReceiverCustodyService.fingerprintRoot(receiverRoot),destinationId:"receiver-crash"},service=new FeedbackReceiverCustodyService(authority,sender,receiver,new FilesystemReceiverNonceAuthority(nonceRoot),30_000);const receipt=await service.deliver({signedRequest:signRequest(deliveryRequest,sender,now),bytes:deliveryBytes,inspection,now});assert.equal(receipt.payload.requestId,deliveryRequest.requestId);assert.equal((await service.readbackAsync(deliveryRequest.requestId,now)).payload.sha256,deliveryRequest.sha256);service.recover();assert.equal(fs.readdirSync(path.join(receiverRoot,"99-System","staging")).length,0);
+  }
 });
 
 fs.rmSync(disposable,{recursive:true,force:false});

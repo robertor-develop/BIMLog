@@ -25,6 +25,7 @@ const assertions:Array<[string,RegExp]>=[
   ["relay lifecycle is localized",/receipt-verified.*cleanup-pending.*manual-review/s],
   ["relay history is visible",/Relay status history.*Historial del estado de retransmisión/s],
   ["customer can request transcription",/Request transcription.*Solicitar transcripción/s],
+  ["imported transcription obtains processing consent",/captureKind:"transcription"/],
   ["customer can review transcription",/reviewTranscription\(item\.id,item\.transcription!\.id/],
   ["attachment download is authenticated",/fetch\(`\$\{API_BASE\}\$\{asset\.downloadUrl\}`.*Authorization: `Bearer \$\{token\}`/s],
   ["download object URLs are released",/URL\.revokeObjectURL\(url\)/],
