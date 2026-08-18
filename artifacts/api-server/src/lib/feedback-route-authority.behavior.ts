@@ -20,10 +20,14 @@ const assertions: Array<[string, RegExp]> = [
   ["transcription authority uses transaction reader", /const fresh=await accessible\(id,user,tx\)/],
   ["transcription rechecks owned clean scanned asset", /eq\(feedbackAssetsTable\.uploadedById,user\.userId\).*eq\(feedbackAssetsTable\.scanState,"clean"\).*scannedAt/s],
   ["consent operations serialize", /capture-consent:\$\{consentId\}/],
-  ["identical bytes deduplicate within feedback", /eq\(feedbackAssetsTable\.sha256,inspected\.sha256\).*deduplicated: true/s],
+  ["semantic identity guards identical-byte dedup", /identityMatches.*FEEDBACK_ASSET_PROVENANCE_CONFLICT.*asset_upload_receipt/s],
   ["dedup contract is explicit", /json\(\{ replayed, deduplicated,/],
   ["mine exposes safe transcription projection", /transcription:transcriptionByFeedback\.has\(row\.id\)\?transcriptionDto/],
-  ["mine exposes relay lifecycle projection", /relayState:relayByFeedback\.get\(row\.id\)\|\|null/],
+  ["mine exposes safe relay lifecycle projection", /relay:\s*relay\?\{state:relay\.state,version:relay\.version,createdAt:relay\.createdAt,updatedAt:relay\.updatedAt,reason:.*history:/s],
+  ["customer routes do not bypass reporter authority", /if \(!actor \|\| !row\.companyId \|\| actor\.companyId !== row\.companyId \|\| row\.userId !== user\.userId/],
+  ["audio origin is explicit and validated", /audio: new Set\(\["browser-microphone", "user-file-import"\]\)/],
+  ["imported audio does not require capture consent", /const captureKind = origin === "browser-microphone".*else if \(consentId\)/s],
+  ["download enforces stored and actual byte bounds", /asset\.byteSize > FEEDBACK_MAX_FILE_BYTES.*bytes\.byteLength > FEEDBACK_MAX_FILE_BYTES/s],
   ["create authority uses transaction reader", /projectAuthorized\(projectId, user, actor\.companyId, tx\)/],
   ["admin mutation reads inside transaction", /feedback-admin:\$\{id\}.*tx\.select\(\)\.from\(feedbackItemsTable\)/s],
   ["review authority uses transaction reader", /accessible\(id,user,tx\)\)return undefined/],
@@ -36,6 +40,6 @@ const assertions: Array<[string, RegExp]> = [
 ];
 for (const [name, pattern] of assertions) assert.match(source, pattern, name);
 assert.ok(source.indexOf("pg_advisory_xact_lock") < source.indexOf("storage.upload"), "upload idempotency must be reserved before object creation");
-for (const forbidden of ["feedback: prior }", "feedback: winner }", "return res.json({ job });", "actorUserId: event.actorUserId", "metadata: feedbackItemsTable.metadata"])
+for (const forbidden of ["if (user.isSuperAdmin) return true", "if (user.isSuperAdmin) return row", "feedback: prior }", "feedback: winner }", "return res.json({ job });", "actorUserId: event.actorUserId", "metadata: feedbackItemsTable.metadata", "storagePath:feedbackRelayJobsTable"])
   assert.equal(source.includes(forbidden), false, `response must not expose ${forbidden}`);
 console.log(`feedback route authority source assertions: ${assertions.length + 6}/${assertions.length + 6} passed (runtime PostgreSQL not exercised)`);
