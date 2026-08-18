@@ -10403,6 +10403,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9713df10be7456a8bd11b68f013b3d02fea230fc81dc80a49fecb499c8dff0c1"
+    },
+    {
+      "taskId": "bimlog-feedback-build8-final-living-brief-reseal-20260817",
+      "reviewedThroughCommit": "bc3818b10fa383eb5e1a7d5982c0cd690d9cdf1a",
+      "reviewedAt": "2026-08-18T01:59:00Z",
+      "status": "local_schema_safety_candidate_exact_head_dynamic_and_browser_reseals_pending",
+      "captureTiming": "same_release_reconciliation",
+      "summary": "Rebinds Feedback Build 8 to the database-safety and Drizzle closure while preserving the accepted predecessor dynamic receipt and keeping exact-head database and integrated-browser reruns open.",
+      "workstreams": [
+        "feedback-addendum",
+        "database-safety",
+        "drizzle-parity",
+        "browser-provenance",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing human authority, privacy, evidence custody, and customer-isolation doctrine remains controlling."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source, database, browser, release, production, and field gates remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The reseal preserves exact candidate binding and does not substitute predecessor runtime proof for an exact-head rerun."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product identity or roadmap change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Drizzle additions extend an existing schema file and introduce no new generated structural path."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Navisworks, installer, or plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new external standard, certification, or compliance claim is introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact schema-safety source identity, accepted predecessor dynamic evidence, and current rerun boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps exact-head dynamic database and final integrated browser reseals pending with obsolete evidence classified historically."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No push, Replit publication, deployment, provider activation, production mutation, customer action, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "75339ccdd76b0904dea95f25cd91b7e420315bd591f02fdde697445a961137b5"
     }
   ]
 }
