@@ -11,7 +11,7 @@ const outputRoot = path.resolve(need("BIMLOG_FEEDBACK_INTEGRATED_OUTPUT"));
 if (existsSync(outputRoot)) throw new Error(`Collision guard: ${outputRoot} exists`);
 
 const productionRoots = ["artifacts/bimlog/src", "artifacts/bimlog/public", "artifacts/bimlog/index.html", "artifacts/bimlog/package.json", "artifacts/bimlog/vite.config.ts", "artifacts/bimlog/tsconfig.json", "lib/api-client-react", "lib/api-zod", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "tsconfig.base.json"];
-const textExtensions = new Set([".cjs", ".css", ".csv", ".html", ".js", ".json", ".jsx", ".md", ".mjs", ".toml", ".ts", ".tsx", ".txt", ".yaml", ".yml"]);
+const textExtensions = new Set([".cjs", ".css", ".csv", ".html", ".js", ".json", ".jsx", ".md", ".mjs", ".svg", ".toml", ".ts", ".tsx", ".txt", ".yaml", ".yml"]);
 const normalizeText = bytes => Buffer.from(bytes.toString("utf8").replace(/\r\n/g, "\n"));
 
 function snapshot(label) {
