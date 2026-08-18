@@ -5,9 +5,7 @@ import { randomUUID } from "node:crypto";
 import {
   FeedbackReceiverCustodyService,
   FilesystemReceiverNonceAuthority,
-  createReceiverBackup,
   createReceiverBackupV2,
-  restoreReceiverBackup,
   restoreReceiverBackupV2,
   type ReceiverNonceAuthority,
 } from "./receiver-service.js";
@@ -28,10 +26,8 @@ const disposable = path.join(
     "F:\\BIMLog\\.disposable\\feedback-receiver-tests",
     randomUUID(),
   ),
-  root = path.join(disposable, "receiver"),
-  backup = path.join(disposable, "backup"),
-  restore = path.join(disposable, "restore");
-for (const p of [root, backup, restore]) fs.mkdirSync(p, { recursive: true });
+  root = path.join(disposable, "receiver");
+fs.mkdirSync(root, { recursive: true });
 let passed = 0;
 const check = async (name: string, fn: () => unknown | Promise<unknown>) => {
   await fn();
@@ -612,31 +608,6 @@ try {
       );
     },
   );
-  await check(
-    "backup inventory and isolated restore preserve exact remaining bytes",
-    () => {
-      const inventory = createReceiverBackup(root, backup, now);
-      assert.ok(inventory.objects.length >= 1);
-      assert.deepEqual(
-        restoreReceiverBackup(backup, restore).objects,
-        inventory.objects,
-      );
-      for (const item of inventory.objects)
-        assert.equal(
-          sha256(fs.readFileSync(path.join(restore, item.relativePath))),
-          item.sha256,
-        );
-    },
-  );
-  await check("non-empty restore destination fails closed", () => {
-    const target = path.join(disposable, "nonempty");
-    fs.mkdirSync(target);
-    fs.writeFileSync(path.join(target, "owned"), "x");
-    assert.throws(
-      () => restoreReceiverBackup(backup, target),
-      /must exist and be empty/,
-    );
-  });
   await check("signed generation-fenced async backup restores exact bytes",async()=>{
     const backupV2=path.join(disposable,"backup-v2"),restoreV2=path.join(disposable,"restore-v2");fs.mkdirSync(backupV2);fs.mkdirSync(restoreV2);
     const manifest=await createReceiverBackupV2(service,backupV2,receiverKeys,{createdAt:now,concurrency:3});assert.equal(manifest.generation,service.snapshotGeneration());assert.match(manifest.authentication.hmacSha256,/^[a-f0-9]{64}$/);
