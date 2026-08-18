@@ -57,6 +57,32 @@ export type FeedbackPurgeCommand = {
   deliveryReceiptSha256: string; readbackSha256: string; issuedAt: string; expiresAt: string; revokedAt: string | null;
   signingKeyId: string; signatureReference: string; canonicalSha256: string;
 };
+
+const PURGE_COMMAND_DOMAIN = "bimlog-feedback-purge-command-v1";
+const purgeText = (value: string, field: string) => text(value, field);
+const purgeHash = (value: string, field: string) => {
+  const normalized = purgeText(value, field);
+  if (!/^[a-f0-9]{64}$/.test(normalized)) throw new FeedbackRelayAuthorityError("FEEDBACK_PURGE_COMMAND_INVALID", `Invalid ${field}`);
+  return normalized;
+};
+export function canonicalizeFeedbackPurgeCommand(command: Omit<FeedbackPurgeCommand, "canonicalSha256" | "signatureReference" | "revokedAt">): string {
+  const issuedAt = new Date(command.issuedAt), expiresAt = new Date(command.expiresAt), approvedAt = new Date(command.approvedAt);
+  if ([issuedAt, expiresAt, approvedAt].some(value => Number.isNaN(value.getTime())) || approvedAt > issuedAt || issuedAt >= expiresAt)
+    throw new FeedbackRelayAuthorityError("FEEDBACK_PURGE_COMMAND_INVALID", "Invalid purge command time authority");
+  if (!Number.isSafeInteger(command.companyId) || command.companyId < 1 || (command.projectId !== null && (!Number.isSafeInteger(command.projectId) || command.projectId < 1)) || !Number.isSafeInteger(command.feedbackId) || command.feedbackId < 1 || !Number.isSafeInteger(command.jobVersion) || command.jobVersion < 1 || !Number.isSafeInteger(command.holdSnapshotVersion) || command.holdSnapshotVersion < 0)
+    throw new FeedbackRelayAuthorityError("FEEDBACK_PURGE_COMMAND_INVALID", "Invalid purge command numeric authority");
+  return [PURGE_COMMAND_DOMAIN,`commandVersion:${command.commandVersion}`,`commandId:${purgeText(command.commandId,"commandId")}`,`jobId:${purgeText(command.jobId,"jobId")}`,`objectId:${purgeText(command.objectId,"objectId")}`,`companyId:${command.companyId}`,`projectId:${command.projectId ?? ""}`,`feedbackId:${command.feedbackId}`,`jobVersion:${command.jobVersion}`,`fencingToken:${purgeText(command.fencingToken,"fencingToken")}`,`holdSnapshotVersion:${command.holdSnapshotVersion}`,`noActiveHoldProofSha256:${purgeHash(command.noActiveHoldProofSha256,"noActiveHoldProofSha256")}`,`resolvedEvidenceSha256:${purgeHash(command.resolvedEvidenceSha256,"resolvedEvidenceSha256")}`,`customerClosureEvidenceSha256:${purgeHash(command.customerClosureEvidenceSha256,"customerClosureEvidenceSha256")}`,`internalClosureEvidenceSha256:${purgeHash(command.internalClosureEvidenceSha256,"internalClosureEvidenceSha256")}`,`policyId:${purgeText(command.policyId,"policyId")}`,`policyVersion:${purgeText(command.policyVersion,"policyVersion")}`,`policySha256:${purgeHash(command.policySha256,"policySha256")}`,`approvalId:${purgeText(command.approvalId,"approvalId")}`,`approvalAuthority:${purgeText(command.approvalAuthority,"approvalAuthority")}`,`approvedAt:${approvedAt.toISOString()}`,`deliveryReceiptSha256:${purgeHash(command.deliveryReceiptSha256,"deliveryReceiptSha256")}`,`readbackSha256:${purgeHash(command.readbackSha256,"readbackSha256")}`,`issuedAt:${issuedAt.toISOString()}`,`expiresAt:${expiresAt.toISOString()}`,`signingKeyId:${purgeText(command.signingKeyId,"signingKeyId")}`].join("\n");
+}
+export function feedbackPurgeCommandSha256(command: Omit<FeedbackPurgeCommand, "canonicalSha256" | "signatureReference" | "revokedAt">): string { return createHash("sha256").update(canonicalizeFeedbackPurgeCommand(command),"utf8").digest("hex"); }
+export interface FeedbackPurgeSignatureVerifier { verify(input: { keyId: string; canonicalSha256: string; signatureReference: string }): Promise<boolean>; }
+export const defaultDenyFeedbackPurgeSignatureVerifier: FeedbackPurgeSignatureVerifier = { async verify() { return false; } };
+export async function assertFeedbackPurgeCommandSignature(command: FeedbackPurgeCommand, verifier: FeedbackPurgeSignatureVerifier = defaultDenyFeedbackPurgeSignatureVerifier) {
+  const { canonicalSha256, signatureReference, revokedAt: _revokedAt, ...unsigned } = command;
+  const computed = feedbackPurgeCommandSha256(unsigned);
+  if (!/^[a-f0-9]{64}$/.test(canonicalSha256) || !timingSafeEqual(Buffer.from(computed,"hex"),Buffer.from(canonicalSha256,"hex"))) throw new FeedbackRelayAuthorityError("FEEDBACK_PURGE_COMMAND_HASH_MISMATCH","Purge command canonical digest mismatch");
+  if (!await verifier.verify({keyId:command.signingKeyId,canonicalSha256,signatureReference})) throw new FeedbackRelayAuthorityError("FEEDBACK_PURGE_COMMAND_SIGNATURE_DENIED","Purge command signature authority denied");
+  return command;
+}
 export function assertGovernedExpiry(input: ExpiryCandidate, policy: RetentionPolicy, now = new Date()): "expired" {
   assertRetentionPolicy(policy);
   if(!expiryEligible(input,now)) throw new FeedbackRelayAuthorityError("FEEDBACK_RELAY_EXPIRY_DENIED","Relay item does not satisfy governed expiry preconditions");
