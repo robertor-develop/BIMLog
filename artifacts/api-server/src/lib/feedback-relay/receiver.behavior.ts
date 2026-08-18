@@ -456,6 +456,9 @@ try {
   await check("recovery preserves a live owned upload stage",async()=>{
     const live=service.createUploadStage();fs.writeFileSync(live,"live-partial",{flag:"r+"});const recovered=service.recover();assert.equal(recovered.removedStages,0);assert.equal(fs.existsSync(live),true);await service.discardUploadStage(live);assert.equal(fs.existsSync(`${live}.owner.json`),false);
   });
+  await check("recovery honors mkdir-to-owner grace before ownerless takeover",()=>{
+    const lock=path.join(root,"99-System","locks","owner-publication-window");fs.mkdirSync(lock);assert.equal(service.recover().removedStaleLocks,0);assert.equal(fs.existsSync(lock),true);fs.utimesSync(lock,new Date(Date.now()-2_000),new Date(Date.now()-2_000));assert.equal(service.recover().removedStaleLocks,1);assert.equal(fs.existsSync(lock),false);
+  });
   await check(
     "crash recovery removes staging residue and proven-dead process locks",
     () => {
@@ -468,6 +471,7 @@ try {
         path.join(stale, "owner.json"),
         JSON.stringify({ pid: 2147483647 }),
       );
+      fs.utimesSync(stale,new Date(Date.now()-2_000),new Date(Date.now()-2_000));
       assert.deepEqual(service.recover(), {
         removedStages: 1,
         removedStaleLocks: 1,

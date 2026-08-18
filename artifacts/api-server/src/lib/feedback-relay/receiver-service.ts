@@ -806,7 +806,7 @@ export class FeedbackReceiverCustodyService {
         fail("FEEDBACK_RECEIVER_LOCK_INVALID", "Receiver lock authority is not a directory");
       let owner:LockOwnerV2|null=null;
       try { if(fs.existsSync(ownerPath))owner=parseLockOwner(readJson<unknown>(this.root,ownerPath)); } catch {}
-      if (!owner || ownerIsProvablyDead(owner)) {
+      if ((!owner&&ownerlessLockExpired(target))||(owner&&ownerIsProvablyDead(owner))) {
         const quarantine=`${target}.stale-${randomUUID()}`;
         fs.renameSync(target,quarantine);
         syncDirectory(locks);

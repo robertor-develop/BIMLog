@@ -46,5 +46,15 @@ await check("stale fence substitution aborts the prior nonce owner",async()=>{
   await assert.rejects(operation,(error:any)=>error?.code==="FEEDBACK_RECEIVER_FENCE_LOST");
 });
 
+await check("expired same-PID owner with mismatched process identity is treated as PID reuse",async()=>{
+  const authority=new FilesystemReceiverNonceAuthority(root) as any,probe="e".repeat(64);let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve});const active=authority.locked(probe,async()=>{await held;});const probeOwner=path.join(root,`${probe}.lock`,`owner.json`);while(!fs.existsSync(probeOwner))await new Promise(resolve=>setTimeout(resolve,2));const owner=JSON.parse(fs.readFileSync(probeOwner,"utf8"));release();await active;
+  const reused="f".repeat(64),lock=path.join(root,`${reused}.lock`);fs.mkdirSync(lock);fs.writeFileSync(path.join(lock,"owner.json"),JSON.stringify({...owner,instanceId:randomUUID(),processStartedAt:"2020-01-01T00:00:00.000Z",acquiredAt:"2020-01-01T00:00:00.000Z",heartbeatAt:"2020-01-01T00:00:00.000Z",leaseUntil:"2020-01-01T00:00:01.000Z",fence:"1".repeat(64)}));let acquired=false;await authority.locked(reused,async()=>{acquired=true;});assert.equal(acquired,true);
+});
+
+await check("expired owner with matching live process identity remains fail closed",async()=>{
+  const authority=new FilesystemReceiverNonceAuthority(root) as any,probe="2".repeat(64);let release!:()=>void;const held=new Promise<void>(resolve=>{release=resolve});const active=authority.locked(probe,async()=>{await held;});const probeOwner=path.join(root,`${probe}.lock`,`owner.json`);while(!fs.existsSync(probeOwner))await new Promise(resolve=>setTimeout(resolve,2));const owner=JSON.parse(fs.readFileSync(probeOwner,"utf8"));release();await active;
+  const identity="3".repeat(64),lock=path.join(root,`${identity}.lock`);fs.mkdirSync(lock);fs.writeFileSync(path.join(lock,"owner.json"),JSON.stringify({...owner,acquiredAt:"2020-01-01T00:00:00.000Z",heartbeatAt:"2020-01-01T00:00:00.000Z",leaseUntil:"2020-01-01T00:00:01.000Z"}));await assert.rejects(authority.locked(identity,async()=>undefined),(error:any)=>error?.code==="FEEDBACK_RECEIVER_LOCK_TIMEOUT");fs.rmSync(lock,{recursive:true,force:false});
+});
+
 fs.rmSync(disposable,{recursive:true,force:false});
 console.log(`feedback receiver v2 process behavior: ${passed}/${passed}`);
