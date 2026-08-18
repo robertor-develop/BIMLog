@@ -3,6 +3,7 @@ import AdmZip from "adm-zip";
 import PDFDocument from "pdfkit";
 import sharp from "sharp";
 import { FEEDBACK_MAX_FILE_BYTES, FEEDBACK_RELEASE } from "./feedback-evidence-contract";
+import { FEEDBACK_CUSTOMER_EVENT_TYPES } from "./feedback-follow-up";
 
 export const FEEDBACK_PACKAGE_MAX_BYTES = 100 * 1024 * 1024;
 export const FEEDBACK_PACKAGE_MAX_ASSETS = 10;
@@ -31,7 +32,7 @@ const canonical = (value: unknown): string => {
   return `{${Object.entries(value as Record<string, unknown>).sort(([a], [b]) => a.localeCompare(b)).map(([key, item]) => `${JSON.stringify(key)}:${canonical(item)}`).join(",")}}`;
 };
 const packageName = (value: string) => value.replace(/[^A-Za-z0-9._-]+/g, "_").slice(0, 120) || "evidence.bin";
-const customerEvents = new Set(["created", "assets_added", "transcription_requested", "transcription_reviewed", "triage_updated", "reopened"]);
+const customerEvents = new Set(["created", "assets_added", "transcription_requested", "transcription_reviewed", "triage_updated", "reopened", ...FEEDBACK_CUSTOMER_EVENT_TYPES]);
 const customerState = (value: unknown) => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const record = value as Record<string, unknown>, allowed = ["status", "version", "count", "scanState", "reviewState"];
@@ -59,7 +60,7 @@ export async function buildFeedbackPackage(args: {
     id: event.id, type: event.eventType, at: event.createdAt.toISOString(),
     before: args.visibility === "customer" ? customerState(event.beforeState) : event.beforeState,
     after: args.visibility === "customer" ? customerState(event.afterState) : event.afterState,
-    reason: args.visibility === "internal" ? event.reason : null,
+    reason: args.visibility === "internal" || FEEDBACK_CUSTOMER_EVENT_TYPES.has(event.eventType) ? event.reason : null,
   }));
   const manifestObject = {
     schema: "bimlog.feedback-package.v1", release: FEEDBACK_RELEASE, visibility: args.visibility,
