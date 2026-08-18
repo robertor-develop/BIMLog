@@ -1,9 +1,9 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Router } from "express";
-import { and, desc, eq, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { projectMembersTable, projectsTable, usersTable } from "@workspace/db/schema";
-import { feedbackAssetsTable, feedbackAuditEventsTable, feedbackCaptureConsentsTable, feedbackItemsTable, feedbackTranscriptionJobsTable } from "../../../../lib/db/src/schema/feedback-items";
+import { feedbackAssetsTable, feedbackAuditEventsTable, feedbackCaptureConsentsTable, feedbackItemsTable, feedbackRelayJobsTable, feedbackTranscriptionJobsTable } from "../../../../lib/db/src/schema/feedback-items";
 import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
 import { boundedMultipart, createMemoryUpload } from "../middlewares/multipart";
 import { storage } from "../lib/storage-adapter";
@@ -74,31 +74,23 @@ router.post("/feedback", authMiddleware, async (req, res) => {
     const projectId = asId(req.body.projectId), idempotencyKey = bounded(req.get("Idempotency-Key"), 120) || null;
     if (!TYPES.has(feedbackType) || !PRIORITIES.has(priority)) return res.status(400).json({ code: "FEEDBACK_CLASSIFICATION_INVALID", error: "Invalid feedback classification" });
     if (!message || !pageUrl) return res.status(400).json({ code: "FEEDBACK_REQUIRED_FIELDS", error: "Description and page are required" });
-    const [actor] = await db.select({ companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, user.userId)).limit(1);
-    if (!actor?.companyId) return res.status(403).json({ code: "COMPANY_ACCESS_DENIED", error: "Current company authority is required" });
-    if (!await projectAuthorized(projectId, user, actor.companyId)) return res.status(403).json({ code: "PROJECT_ACCESS_DENIED", error: "You do not have access to this project" });
-    const requestHash = createHash("sha256").update(JSON.stringify({ feedbackType, priority, message, moduleName, pageUrl, projectId, companyId: actor.companyId })).digest("hex");
-    if (idempotencyKey) {
-      const [prior] = await db.select().from(feedbackItemsTable).where(and(eq(feedbackItemsTable.userId, user.userId), eq(feedbackItemsTable.idempotencyKey, idempotencyKey))).limit(1);
-      if (prior) return prior.requestHash === requestHash ? res.json({ success: true, replayed: true, feedback: customerFeedbackDto(prior) }) : res.status(409).json({ code: "FEEDBACK_IDEMPOTENCY_CONFLICT", error: "This idempotency key belongs to different feedback" });
-    }
-    let created;
-    try {
-      created = await db.transaction(async tx => {
+    const outcome = await db.transaction(async tx => {
+        await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`feedback:${user.userId}:${idempotencyKey || randomUUID()}`},0))`);
+        const [actor] = await tx.select({ companyId: usersTable.companyId }).from(usersTable).where(eq(usersTable.id, user.userId)).limit(1);
+        if (!actor?.companyId) return { status: 403, code: "COMPANY_ACCESS_DENIED", error: "Current company authority is required" } as const;
+        if (!await projectAuthorized(projectId, user, actor.companyId, tx)) return { status: 403, code: "PROJECT_ACCESS_DENIED", error: "You do not have access to this project" } as const;
+        const requestHash = createHash("sha256").update(JSON.stringify({ feedbackType, priority, message, moduleName, pageUrl, projectId, companyId: actor.companyId })).digest("hex");
+        if (idempotencyKey) { const [prior] = await tx.select().from(feedbackItemsTable).where(and(eq(feedbackItemsTable.userId, user.userId), eq(feedbackItemsTable.idempotencyKey, idempotencyKey))).limit(1); if (prior) return prior.requestHash === requestHash ? { status: 200, row: prior, replayed: true } as const : { status: 409, code: "FEEDBACK_IDEMPOTENCY_CONFLICT", error: "This idempotency key belongs to different feedback" } as const; }
         const [row] = await tx.insert(feedbackItemsTable).values({ userId: user.userId, companyId: actor.companyId, projectId, feedbackType, priority, module: moduleName || null, pageUrl, message,
           status: "new", stableId: `FB-${randomUUID().replace(/-/g, "").slice(0, 12).toUpperCase()}`, idempotencyKey, requestHash,
           metadata: { build: "v F-1.60.35.8", userAgent: bounded(req.get("user-agent"), 512), viewport: bounded(req.body.metadata?.viewport, 32), language: bounded(req.body.metadata?.language, 24) } }).returning();
+        if (!row) throw new Error("Feedback insert did not return a row");
         await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "created", afterState: { status: "new", version: 1 } });
-        return row;
+        return { status: 201, row, replayed: false } as const;
       });
-    } catch (cause) {
-      if (idempotencyKey) {
-        const [winner] = await db.select().from(feedbackItemsTable).where(and(eq(feedbackItemsTable.userId, user.userId), eq(feedbackItemsTable.idempotencyKey, idempotencyKey))).limit(1);
-        if (winner) return winner.requestHash === requestHash ? res.json({ success: true, replayed: true, feedback: customerFeedbackDto(winner) }) : res.status(409).json({ code: "FEEDBACK_IDEMPOTENCY_CONFLICT", error: "This idempotency key belongs to different feedback" });
-      }
-      throw cause;
-    }
-    return res.status(201).json({ success: true, replayed: false, feedback: customerFeedbackDto(created) });
+    if (!("row" in outcome)) return res.status(outcome.status).json({ code: outcome.code, error: outcome.error });
+    if (!outcome.row) throw new Error("Feedback transaction returned no row");
+    return res.status(outcome.status).json({ success: true, replayed: outcome.replayed, feedback: customerFeedbackDto(outcome.row) });
   } catch (error) { console.error("[feedback] create failed", error instanceof Error ? error.name : "unknown"); return res.status(500).json({ code: "FEEDBACK_CREATE_FAILED", error: "Failed to submit feedback" }); }
 });
 
@@ -112,7 +104,7 @@ router.post("/feedback/capture-consents", authMiddleware, async (req, res) => {
 
 router.post("/feedback/capture-consents/:id/revoke", authMiddleware, async (req, res) => {
   const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
-  const id = bounded(req.params.id, 80); const consent = await db.transaction(async tx => { const [row] = await tx.update(feedbackCaptureConsentsTable).set({ revokedAt: new Date() }).where(and(eq(feedbackCaptureConsentsTable.id, id), eq(feedbackCaptureConsentsTable.actorUserId, user.userId), sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).returning(); if (row?.feedbackId) await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.feedbackId, actorUserId: user.userId, eventType: "capture_consent_revoked", afterState: { captureKind: row.captureKind, noticeVersion: row.noticeVersion } }); return row; });
+  const id = bounded(req.params.id, 80); const consent = await db.transaction(async tx => { await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`capture-consent:${id}`},0))`); const [row] = await tx.update(feedbackCaptureConsentsTable).set({ revokedAt: new Date() }).where(and(eq(feedbackCaptureConsentsTable.id, id), eq(feedbackCaptureConsentsTable.actorUserId, user.userId), sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).returning(); if (row?.feedbackId) await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.feedbackId, actorUserId: user.userId, eventType: "capture_consent_revoked", afterState: { captureKind: row.captureKind, noticeVersion: row.noticeVersion } }); return row; });
   if (!consent) return res.status(404).json({ code: "CAPTURE_CONSENT_NOT_FOUND", error: "Capture consent not found" });
   return res.json({ revoked: true });
 });
@@ -139,20 +131,23 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
       if (!actor || !feedback || (!user.isSuperAdmin && (feedback.userId !== user.userId || feedback.companyId !== actor.companyId || !feedback.customerVisible))) throw Object.assign(new Error("You cannot add files to this feedback"), { status: 403, code: "FEEDBACK_WRITE_DENIED" });
       if (feedback.projectId) { const [project] = await tx.select({ companyId: usersTable.companyId }).from(projectsTable).innerJoin(usersTable, eq(projectsTable.createdById, usersTable.id)).where(eq(projectsTable.id, feedback.projectId)).limit(1); const [member] = user.isSuperAdmin ? [{ id: 1 }] : await tx.select({ id: projectMembersTable.id }).from(projectMembersTable).where(and(eq(projectMembersTable.projectId, feedback.projectId), eq(projectMembersTable.userId, user.userId), eq(projectMembersTable.status, "active"))).limit(1); if (!project || project.companyId !== feedback.companyId || !member) throw Object.assign(new Error("You cannot add files to this feedback"), { status: 403, code: "FEEDBACK_WRITE_DENIED" }); }
       let captureConsent: typeof feedbackCaptureConsentsTable.$inferSelect | undefined;
-      if (["audio", "screenshot"].includes(kind)) { [captureConsent] = await tx.select().from(feedbackCaptureConsentsTable).where(and(eq(feedbackCaptureConsentsTable.id, consentId), eq(feedbackCaptureConsentsTable.actorUserId, user.userId), eq(feedbackCaptureConsentsTable.captureKind, kind), sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).limit(1); if (!captureConsent || (captureConsent.feedbackId && captureConsent.feedbackId !== id)) throw Object.assign(new Error("Active matching capture consent is required"), { status: 403, code: "FEEDBACK_CAPTURE_CONSENT_REQUIRED" }); }
+      if (["audio", "screenshot"].includes(kind)) { await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`capture-consent:${consentId}`},0))`); [captureConsent] = await tx.select().from(feedbackCaptureConsentsTable).where(and(eq(feedbackCaptureConsentsTable.id, consentId), eq(feedbackCaptureConsentsTable.actorUserId, user.userId), eq(feedbackCaptureConsentsTable.captureKind, kind), sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).limit(1); if (!captureConsent || (captureConsent.feedbackId && captureConsent.feedbackId !== id)) throw Object.assign(new Error("Active matching capture consent is required"), { status: 403, code: "FEEDBACK_CAPTURE_CONSENT_REQUIRED" }); }
       const [winner] = await tx.select().from(feedbackAssetsTable).where(and(eq(feedbackAssetsTable.feedbackId, id),eq(feedbackAssetsTable.uploadedById,user.userId),eq(feedbackAssetsTable.uploadRequestKey,uploadKey))).limit(1);
       if (winner) { if (winner.uploadRequestHash !== requestHash) throw Object.assign(new Error("This upload key belongs to different evidence"), { status: 409, code: "FEEDBACK_ASSET_IDEMPOTENCY_CONFLICT" }); return [{ id: winner.id, kind: winner.kind, name: winner.safeName, mediaType: winner.mediaType, byteSize: winner.byteSize, sha256: winner.sha256, scanState: winner.scanState, replayed: true }]; }
+      if (captureConsent && !captureConsent.feedbackId) { const linked = await tx.update(feedbackCaptureConsentsTable).set({ feedbackId: id }).where(and(eq(feedbackCaptureConsentsTable.id, captureConsent.id), sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).returning({ id: feedbackCaptureConsentsTable.id }); if (!linked.length) throw Object.assign(new Error("Capture consent was revoked"), { status: 403, code: "FEEDBACK_CAPTURE_CONSENT_REQUIRED" }); }
+      const [identical] = await tx.select().from(feedbackAssetsTable).where(and(eq(feedbackAssetsTable.feedbackId,id),eq(feedbackAssetsTable.sha256,inspected.sha256))).limit(1);
+      if (identical) return [{ id: identical.id, kind: identical.kind, name: identical.safeName, mediaType: identical.mediaType, byteSize: identical.byteSize, sha256: identical.sha256, scanState: identical.scanState, replayed: true, deduplicated: true }];
       const file = files[0], storagePath = await storage.upload(file.buffer, feedback.projectId ?? `feedback-${id}`, inspected.name); stored.push(storagePath);
       const [asset] = await tx.insert(feedbackAssetsTable).values({ feedbackId: id, projectId: feedback.projectId, uploadedById: user.userId, kind,
           originalName: bounded(file.originalname, 255), safeName: inspected.name, mediaType: inspected.mediaType, byteSize: file.size,
           sha256: inspected.sha256, storagePath, uploadRequestKey:uploadKey,uploadRequestHash:requestHash,scanState, scannerAdapter, scannedAt: scanState === "clean" ? new Date() : null,
           provenance: { source: kind === "screenshot" ? "browser-display-capture" : kind === "audio" ? "browser-microphone" : "user-file-import", uploadRequestKey: uploadKey, uploadRequestHash: requestHash, consentId: captureConsent?.id || null, consentNoticeVersion: captureConsent?.noticeVersion || null, purpose: captureConsent?.purpose || null, actorUserId: user.userId, grantedAt: captureConsent?.grantedAt?.toISOString() || null, receivedAt: new Date().toISOString(), transformation: boundedTransformation(JSON.stringify(transformations[uploadKey] ?? null)) } }).returning();
       await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "assets_added", afterState: { count: 1, scannerAdapter, scanState } });
-      if (captureConsent && !captureConsent.feedbackId) { const linked = await tx.update(feedbackCaptureConsentsTable).set({ feedbackId: id }).where(and(eq(feedbackCaptureConsentsTable.id, captureConsent.id), sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).returning({ id: feedbackCaptureConsentsTable.id }); if (!linked.length) throw Object.assign(new Error("Capture consent was revoked"), { status: 403, code: "FEEDBACK_CAPTURE_CONSENT_REQUIRED" }); }
       return [{ id: asset.id, kind, name: asset.safeName, mediaType: asset.mediaType, byteSize: asset.byteSize, sha256: asset.sha256, scanState }];
     });
     const replayed = results.some(row => "replayed" in row && row.replayed === true);
-    return res.status(replayed ? 200 : 201).json({ replayed, assets: results.map(row => ({ id: row.id, kind: row.kind, name: row.name, mediaType: row.mediaType, byteSize: row.byteSize, sha256: row.sha256, scanState: row.scanState })), scanner: scannerAdapter === "local-fixture" ? "local-fixture" : "activation-required" });
+    const deduplicated = results.some(row => "deduplicated" in row && row.deduplicated === true);
+    return res.status(replayed ? 200 : 201).json({ replayed, deduplicated, assets: results.map(row => ({ id: row.id, kind: row.kind, name: row.name, mediaType: row.mediaType, byteSize: row.byteSize, sha256: row.sha256, scanState: row.scanState })), scanner: scannerAdapter === "local-fixture" ? "local-fixture" : "activation-required" });
   } catch (error) {
     const cleanupFailures = [];
     const userId = req.user?.userId, uploadKey = bounded(req.get("Idempotency-Key"), 120);
@@ -166,31 +161,28 @@ router.post("/feedback/:id/assets", authMiddleware, upload, async (req, res) => 
 router.post("/feedback/:id/transcription", authMiddleware, async (req, res) => {
   const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
   const id = asId(req.params.id), assetId = asId(req.body.assetId); if (!id || !assetId) return res.status(400).json({ code: "TRANSCRIPTION_INPUT_INVALID", error: "Feedback and audio asset are required" });
-  const feedback = await accessible(id, user); if (!feedback) return res.status(403).json({ code: "TRANSCRIPTION_DENIED", error: "Transcription is not authorized" });
-  const [asset] = await db.select().from(feedbackAssetsTable).where(and(eq(feedbackAssetsTable.id, assetId), eq(feedbackAssetsTable.feedbackId, id))).limit(1);
-  if (!asset || asset.kind !== "audio") return res.status(404).json({ code: "AUDIO_ASSET_NOT_FOUND", error: "Audio asset not found" });
-  if (asset.scanState !== "clean") return res.status(423).json({ code: "AUDIO_ASSET_QUARANTINED", error: "Audio must pass governed scanning before transcription" });
   const consentId = bounded(req.body.consentId, 80), requestKey = bounded(req.get("Idempotency-Key"), 120);
   if (!consentId || !requestKey) return res.status(400).json({ code: "TRANSCRIPTION_CONSENT_REQUIRED", error: "Capture consent and idempotency key are required" });
-  const [consent] = await db.select().from(feedbackCaptureConsentsTable).where(and(eq(feedbackCaptureConsentsTable.id, consentId), eq(feedbackCaptureConsentsTable.actorUserId, user.userId), eq(feedbackCaptureConsentsTable.captureKind, "audio"), eq(feedbackCaptureConsentsTable.feedbackId, id))).limit(1);
-  if (!consent || consent.revokedAt) return res.status(403).json({ code: "TRANSCRIPTION_CONSENT_INVALID", error: "Active linked audio consent is required" });
   const fixture = localFixture(process.env.BIMLOG_FEEDBACK_TRANSCRIPTION_ADAPTER, "local-fixture");
   const provider = fixture ? "local-fixture" : "none", model = fixture ? "deterministic-fixture" : "none", adapterVersion = "feedback-transcription-v1";
-  const requestHash = createHash("sha256").update(JSON.stringify({ feedbackId: id, assetId, consentId, sourceSha256: asset.sha256, provider, model, adapterVersion })).digest("hex");
-  const [prior] = await db.select().from(feedbackTranscriptionJobsTable).where(and(eq(feedbackTranscriptionJobsTable.requestedById, user.userId), eq(feedbackTranscriptionJobsTable.requestKey, requestKey))).limit(1);
-  if (prior) return prior.requestHash === requestHash ? res.status(prior.state === "blocked" ? 424 : 200).json({ replayed: true, job: transcriptionDto(prior), originalAudioRetained: true }) : res.status(409).json({ code: "TRANSCRIPTION_IDEMPOTENCY_CONFLICT", error: "This idempotency key belongs to a different request" });
   const result = fixture ? "Local transcription fixture result." : null, outputSha256 = result ? createHash("sha256").update(result).digest("hex") : null;
-  let job; try { job = await db.transaction(async tx => { await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`transcription:${user.userId}:${requestKey}`},0))`); const fresh=await accessible(id,user,tx); const [activeConsent]=await tx.select({id:feedbackCaptureConsentsTable.id}).from(feedbackCaptureConsentsTable).where(and(eq(feedbackCaptureConsentsTable.id,consentId),eq(feedbackCaptureConsentsTable.actorUserId,user.userId),eq(feedbackCaptureConsentsTable.feedbackId,id),sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).limit(1); if(!fresh||!activeConsent)throw Object.assign(new Error("Transcription authority changed"),{status:403,code:"TRANSCRIPTION_DENIED"}); const [winner]=await tx.select().from(feedbackTranscriptionJobsTable).where(and(eq(feedbackTranscriptionJobsTable.requestedById,user.userId),eq(feedbackTranscriptionJobsTable.requestKey,requestKey))).limit(1);if(winner){if(winner.requestHash!==requestHash)throw Object.assign(new Error("This idempotency key belongs to a different request"),{status:409,code:"TRANSCRIPTION_IDEMPOTENCY_CONFLICT"});return winner;} const [row] = await tx.insert(feedbackTranscriptionJobsTable).values({ feedbackId: id, assetId, requestedById: user.userId, adapter: fixture ? "local-fixture" : "default-deny",
-    state: fixture ? "completed" : "blocked", result, errorCode: fixture ? null : "EXTERNAL_TRANSCRIPTION_NOT_ACTIVATED", attempts: 1, requestKey, requestHash, consentId, provider, model, adapterVersion, sourceSha256: asset.sha256, outputSha256, completedAt: fixture ? new Date() : null }).returning();
-    await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "transcription_requested", afterState: { state: row.state } }); return row; }); } catch (cause) { const [winner] = await db.select().from(feedbackTranscriptionJobsTable).where(and(eq(feedbackTranscriptionJobsTable.requestedById, user.userId), eq(feedbackTranscriptionJobsTable.requestKey, requestKey))).limit(1); if (!winner) throw cause; if (winner.requestHash !== requestHash) return res.status(409).json({ code: "TRANSCRIPTION_IDEMPOTENCY_CONFLICT", error: "This idempotency key belongs to a different request" }); return res.status(winner.state === "blocked" ? 424 : 200).json({ replayed: true, job: transcriptionDto(winner), originalAudioRetained: true }); }
-  return res.status(fixture ? 201 : 424).json({ replayed: false, job: transcriptionDto(job), originalAudioRetained: true });
+  try { const outcome = await db.transaction(async tx => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`capture-consent:${consentId}`},0))`); await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`transcription:${user.userId}:${requestKey}`},0))`);
+    const fresh=await accessible(id,user,tx); const [asset]=await tx.select().from(feedbackAssetsTable).where(and(eq(feedbackAssetsTable.id,assetId),eq(feedbackAssetsTable.feedbackId,id),eq(feedbackAssetsTable.uploadedById,user.userId),eq(feedbackAssetsTable.kind,"audio"),eq(feedbackAssetsTable.scanState,"clean"),sql`${feedbackAssetsTable.scannedAt} is not null`)).limit(1);
+    const [activeConsent]=await tx.select({id:feedbackCaptureConsentsTable.id}).from(feedbackCaptureConsentsTable).where(and(eq(feedbackCaptureConsentsTable.id,consentId),eq(feedbackCaptureConsentsTable.actorUserId,user.userId),eq(feedbackCaptureConsentsTable.captureKind,"audio"),eq(feedbackCaptureConsentsTable.feedbackId,id),sql`${feedbackCaptureConsentsTable.revokedAt} is null`)).limit(1);
+    if(!fresh||!asset||!activeConsent)throw Object.assign(new Error("Active linked consent and a currently clean owned audio asset are required"),{status:403,code:"TRANSCRIPTION_DENIED"});
+    const requestHash=createHash("sha256").update(JSON.stringify({feedbackId:id,assetId,consentId,sourceSha256:asset.sha256,provider,model,adapterVersion})).digest("hex"); const [winner]=await tx.select().from(feedbackTranscriptionJobsTable).where(and(eq(feedbackTranscriptionJobsTable.requestedById,user.userId),eq(feedbackTranscriptionJobsTable.requestKey,requestKey))).limit(1);
+    if(winner){if(winner.requestHash!==requestHash)throw Object.assign(new Error("This idempotency key belongs to a different request"),{status:409,code:"TRANSCRIPTION_IDEMPOTENCY_CONFLICT"});return {row:winner,replayed:true};}
+    const [row] = await tx.insert(feedbackTranscriptionJobsTable).values({ feedbackId:id,assetId,requestedById:user.userId,adapter:fixture?"local-fixture":"default-deny",state:fixture?"completed":"blocked",result,errorCode:fixture?null:"EXTERNAL_TRANSCRIPTION_NOT_ACTIVATED",attempts:1,requestKey,requestHash,consentId,provider,model,adapterVersion,sourceSha256:asset.sha256,outputSha256,completedAt:fixture?new Date():null }).returning();
+    await tx.insert(feedbackAuditEventsTable).values({feedbackId:id,actorUserId:user.userId,eventType:"transcription_requested",afterState:{state:row.state}});return {row,replayed:false}; });
+    return res.status(outcome.replayed?(outcome.row.state==="blocked"?424:200):(fixture?201:424)).json({replayed:outcome.replayed,job:transcriptionDto(outcome.row),originalAudioRetained:true});
+  } catch(cause){const known=cause as Error&{status?:number;code?:string};return res.status(known.status||500).json({code:known.code||"TRANSCRIPTION_FAILED",error:known.status?known.message:"Transcription failed safely"});}
 });
 
 router.post("/feedback/:id/transcription/:jobId/review", authMiddleware, async (req, res) => {
   const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
   const id = asId(req.params.id), jobId = asId(req.params.jobId), reviewState = bounded(req.body.reviewState, 20), reason = bounded(req.body.reason, 2000);
   if (!id || !jobId || !["accepted", "rejected"].includes(reviewState) || (reviewState === "rejected" && !reason)) return res.status(400).json({ code: "TRANSCRIPTION_REVIEW_INVALID", error: "A valid review decision and rejection reason are required" });
-  const feedback = await accessible(id, user); if (!feedback) return res.status(403).json({ code: "TRANSCRIPTION_REVIEW_DENIED", error: "Review access is denied" });
   const job = await db.transaction(async tx => { await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`review:${id}:${jobId}`},0))`); if(!await accessible(id,user,tx))return undefined; const [row] = await tx.update(feedbackTranscriptionJobsTable).set({ reviewState, reviewedById: user.userId, reviewedAt: new Date(), reviewReason: reason || null }).where(and(eq(feedbackTranscriptionJobsTable.id, jobId), eq(feedbackTranscriptionJobsTable.feedbackId, id), eq(feedbackTranscriptionJobsTable.state, "completed"), eq(feedbackTranscriptionJobsTable.reviewState, "pending"))).returning(); if (!row) return null; await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "transcription_reviewed", afterState: { jobId, reviewState, outputSha256: row.outputSha256 }, reason: reason || null }); return row; });
   if(job===undefined)return res.status(403).json({code:"TRANSCRIPTION_REVIEW_DENIED",error:"Review authority changed"});
   if (!job) return res.status(409).json({ code: "TRANSCRIPTION_REVIEW_CONFLICT", error: "Transcription is unavailable or already reviewed" }); return res.json({ job: transcriptionDto(job) });
@@ -212,24 +204,27 @@ router.get("/feedback/mine", authMiddleware, async (req, res) => {
   const projectIds = [...new Set(rows.flatMap(row => row.projectId ? [row.projectId] : []))];
   const active = new Set<number>();
   for (const projectId of projectIds) if (await projectAuthorized(projectId, { ...user, isSuperAdmin: false }, actor.companyId)) active.add(projectId);
-  return res.json({ feedback: rows.filter(row => !row.projectId || active.has(row.projectId)).map(customerFeedbackDto) });
+  const visible=rows.filter(row=>!row.projectId||active.has(row.projectId)),ids=visible.map(row=>row.id);
+  const transcriptions=ids.length?await db.select().from(feedbackTranscriptionJobsTable).where(and(inArray(feedbackTranscriptionJobsTable.feedbackId,ids),eq(feedbackTranscriptionJobsTable.requestedById,user.userId))).orderBy(desc(feedbackTranscriptionJobsTable.createdAt)):[];
+  const relays=ids.length?await db.select({feedbackId:feedbackRelayJobsTable.feedbackId,state:feedbackRelayJobsTable.state}).from(feedbackRelayJobsTable).where(and(inArray(feedbackRelayJobsTable.feedbackId,ids),eq(feedbackRelayJobsTable.companyId,actor.companyId))).orderBy(desc(feedbackRelayJobsTable.createdAt)):[];
+  const transcriptionByFeedback=new Map<number,typeof feedbackTranscriptionJobsTable.$inferSelect>();for(const job of transcriptions)if(!transcriptionByFeedback.has(job.feedbackId))transcriptionByFeedback.set(job.feedbackId,job);const relayByFeedback=new Map<number,string>();for(const relay of relays)if(!relayByFeedback.has(relay.feedbackId))relayByFeedback.set(relay.feedbackId,relay.state);
+  return res.json({feedback:visible.map(row=>({...customerFeedbackDto(row),transcription:transcriptionByFeedback.has(row.id)?transcriptionDto(transcriptionByFeedback.get(row.id)!):null,relayState:relayByFeedback.get(row.id)||null}))});
 });
 
 router.post("/feedback/:id/reopen", authMiddleware, async (req, res) => {
   const user = req.user; if (!user) return res.status(401).json({ code: "AUTH_REQUIRED", error: "Unauthorized" });
   const id = asId(req.params.id), observedVersion = asId(req.body.observedVersion), reason = bounded(req.body.reason, 2000);
   if (!id || !observedVersion || !reason) return res.status(400).json({ code: "FEEDBACK_REOPEN_INVALID", error: "Current version and a reopen reason are required" });
-  const before = await accessible(id, user); if (!before) return res.status(403).json({ code: "FEEDBACK_REOPEN_DENIED", error: "Reopen access is denied" });
-  if (!TERMINAL.has(before.status)) return res.status(409).json({ code: "FEEDBACK_REOPEN_STATE_INVALID", error: "Only closed feedback can be reopened" });
   const updated = await db.transaction(async tx => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`reopen:${id}`},0))`); const fresh=await accessible(id,user,tx);if(!fresh)return undefined;
-    const [row] = await tx.update(feedbackItemsTable).set({ status: "triaged", dispositionReason: reason, version: before.version + 1, updatedAt: new Date(), resolvedAt: null })
+    if(!TERMINAL.has(fresh.status))return "invalid" as const;
+    const [row] = await tx.update(feedbackItemsTable).set({ status: "triaged", dispositionReason: reason, version: fresh.version + 1, updatedAt: new Date(), resolvedAt: null })
       .where(and(eq(feedbackItemsTable.id, id), eq(feedbackItemsTable.version, observedVersion))).returning();
     if (!row) return null;
-    await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "reopened", beforeState: { status: before.status, version: before.version }, afterState: { status: row.status, version: row.version }, reason });
+    await tx.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: user.userId, eventType: "reopened", beforeState: { status: fresh.status, version: fresh.version }, afterState: { status: row.status, version: row.version }, reason });
     return row;
   });
-  if(updated===undefined)return res.status(403).json({code:"FEEDBACK_REOPEN_DENIED",error:"Reopen authority changed"}); if (!updated) return res.status(409).json({ code: "FEEDBACK_STALE", error: "Feedback changed; reload before reopening" });
+  if(updated===undefined)return res.status(403).json({code:"FEEDBACK_REOPEN_DENIED",error:"Reopen authority changed"}); if(updated==="invalid")return res.status(409).json({code:"FEEDBACK_REOPEN_STATE_INVALID",error:"Only closed feedback can be reopened"}); if (!updated) return res.status(409).json({ code: "FEEDBACK_STALE", error: "Feedback changed; reload before reopening" });
   return res.json({ success: true, feedback: customerFeedbackDto(updated) });
 });
 
@@ -301,14 +296,9 @@ router.get("/feedback/admin/export.csv", authMiddleware, isSuperAdminMiddleware,
 router.patch("/feedback/admin/:id", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
   const user = req.user!; const id = asId(req.params.id), observedVersion = asId(req.body.observedVersion);
   if (!id) return res.status(400).json({ code: "FEEDBACK_ID_INVALID", error: "Invalid feedback id" });
-  const [before] = await db.select().from(feedbackItemsTable).where(eq(feedbackItemsTable.id, id)).limit(1);
-  if (!before) return res.status(404).json({ code: "FEEDBACK_NOT_FOUND", error: "Feedback not found" });
-  if (observedVersion !== before.version) return res.status(409).json({ code: "FEEDBACK_STALE", error: "Feedback changed; reload before updating", currentVersion: before.version });
-  const status = bounded(req.body.status || before.status, 32), reason = bounded(req.body.reason, 2000);
-  if (!STATUSES.has(status)) return res.status(400).json({ code: "FEEDBACK_STATUS_INVALID", error: "Invalid feedback status" });
-  if (status !== before.status && !TRANSITIONS[before.status]?.has(status)) return res.status(409).json({ code: "FEEDBACK_TRANSITION_INVALID", error: "This state transition is not allowed" });
-  if ((TERMINAL.has(status) || status === "blocked") && !reason) return res.status(400).json({ code: "FEEDBACK_REASON_REQUIRED", error: "A reason is required for this state" });
   const updated = await db.transaction(async tx => {
+    await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`feedback-admin:${id}`},0))`);const [before]=await tx.select().from(feedbackItemsTable).where(eq(feedbackItemsTable.id,id)).limit(1);if(!before)return {error:"FEEDBACK_NOT_FOUND",status:404,message:"Feedback not found"} as const;if(observedVersion!==before.version)return {error:"FEEDBACK_STALE",status:409,message:"Feedback changed; reload before updating"} as const;
+    const status=bounded(req.body.status||before.status,32),reason=bounded(req.body.reason,2000);if(!STATUSES.has(status))return {error:"FEEDBACK_STATUS_INVALID",status:400,message:"Invalid feedback status"} as const;if(status!==before.status&&!TRANSITIONS[before.status]?.has(status))return {error:"FEEDBACK_TRANSITION_INVALID",status:409,message:"This state transition is not allowed"} as const;if((TERMINAL.has(status)||status==="blocked")&&!reason)return {error:"FEEDBACK_REASON_REQUIRED",status:400,message:"A reason is required for this state"} as const;
     const [row] = await tx.update(feedbackItemsTable).set({ status, dispositionReason: reason || before.dispositionReason,
       targetRelease: bounded(req.body.targetRelease, 80) || before.targetRelease, customerVisible: req.body.customerVisible === undefined ? before.customerVisible : req.body.customerVisible === true,
       version: before.version + 1, updatedAt: new Date(), resolvedAt: TERMINAL.has(status) ? new Date() : null })
@@ -318,6 +308,7 @@ router.patch("/feedback/admin/:id", authMiddleware, isSuperAdminMiddleware, asyn
     return row;
   });
   if (!updated) return res.status(409).json({ code: "FEEDBACK_STALE", error: "Feedback changed; reload before updating" });
+  if("error" in updated)return res.status(updated.status).json({code:updated.error,error:updated.message});
   return res.json({ success: true, feedback: customerFeedbackDto(updated) });
 });
 
