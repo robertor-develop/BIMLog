@@ -268,6 +268,28 @@ Module._resolveFilename = function(request, parent, isMain, options) {
 };
 `,
 );
+const negativeNoListenGuardPath = path.join(
+  resolvedProofRoot,
+  "artifact-negative-no-listen-guard.cjs",
+);
+fs.writeFileSync(
+  negativeNoListenGuardPath,
+  `"use strict";
+const http = require("node:http");
+const originalListen = http.Server.prototype.listen;
+http.Server.prototype.listen = function(...args) {
+  if (this.listening) throw new Error("Negative artifact server was already listening.");
+  const callback = args.find((argument) => typeof argument === "function");
+  process.stderr.write("[artifact-negative] listen_intercepted=true socket_opened=false\\n");
+  process.nextTick(() => callback?.call(this));
+  return this;
+};
+process.once("exit", () => {
+  http.Server.prototype.listen = originalListen;
+});
+`,
+  { flag: "wx", mode: 0o600 },
+);
 
 const proofDatabaseUrl = process.env.BIMLOG_ARTIFACT_PROOF_DATABASE_URL;
 assert(
@@ -390,27 +412,90 @@ const invalidStorageChild = spawn(process.execPath, [bundle], {
     ...feedbackStorageEnvironment,
     BIMLOG_FEEDBACK_STORAGE_AUTHORITY_SHA256: "0".repeat(64),
     NODE_OPTIONS:
-      `${process.env.NODE_OPTIONS ?? ""} --require ${guardPath}`.trim(),
+      `${process.env.NODE_OPTIONS ?? ""} --require ${guardPath} --require ${negativeNoListenGuardPath}`.trim(),
   },
   stdio: ["ignore", "pipe", "pipe"],
   windowsHide: true,
 });
-let invalidStorageOutput = "";
+const invalidStorageStartedAt = performance.now();
+let invalidStorageStdout = "";
+let invalidStorageStderr = "";
 invalidStorageChild.stdout.on("data", (chunk) => {
-  invalidStorageOutput += String(chunk);
+  invalidStorageStdout += String(chunk);
 });
 invalidStorageChild.stderr.on("data", (chunk) => {
-  invalidStorageOutput += String(chunk);
+  invalidStorageStderr += String(chunk);
 });
-for (let attempt = 0; attempt < 240; attempt += 1) {
-  if (/FEEDBACK_STORAGE_AUTHORITY_INVALID/.test(invalidStorageOutput)) break;
-  await new Promise((resolve) => setTimeout(resolve, 25));
+let invalidStorageReadinessReached = false;
+let invalidStorageTcpReached = false;
+let invalidStorageTimedOut = false;
+let invalidStorageCleanupRequired = false;
+const invalidStorageProbeTimingsMs: number[] = [];
+const invalidStorageExit = new Promise<{
+  code: number | null;
+  signal: NodeJS.Signals | null;
+}>((resolve) => {
+  invalidStorageChild.once("exit", (code, signal) => resolve({ code, signal }));
+});
+try {
+  const deadline = performance.now() + 6_000;
+  while (
+    invalidStorageChild.exitCode === null &&
+    performance.now() < deadline
+  ) {
+    const probeStartedAt = performance.now();
+    const response = await fetch(
+      `http://127.0.0.1:${negativePort}/api/v1/healthz`,
+    ).catch(() => null);
+    invalidStorageProbeTimingsMs.push(
+      Number((performance.now() - probeStartedAt).toFixed(1)),
+    );
+    if (response) {
+      invalidStorageTcpReached = true;
+      if (response.status === 200) invalidStorageReadinessReached = true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  invalidStorageTimedOut = invalidStorageChild.exitCode === null;
+} finally {
+  if (invalidStorageChild.exitCode === null) {
+    invalidStorageCleanupRequired = true;
+    invalidStorageChild.kill();
+  }
 }
+const invalidStorageExitResult = await invalidStorageExit;
+const invalidStorageElapsedMs = Number(
+  (performance.now() - invalidStorageStartedAt).toFixed(1),
+);
+const invalidStorageOutput = `${invalidStorageStdout}\n${invalidStorageStderr}`;
+assert.equal(
+  invalidStorageTimedOut,
+  false,
+  "Invalid authority child did not exit naturally.",
+);
+assert.equal(
+  invalidStorageCleanupRequired,
+  false,
+  "Invalid authority denial required forced process cleanup.",
+);
+assert.notEqual(invalidStorageExitResult.code, 0);
+assert.equal(invalidStorageExitResult.signal, null);
 assert.match(invalidStorageOutput, /FEEDBACK_STORAGE_AUTHORITY_INVALID/);
-if (invalidStorageChild.exitCode === null) {
-  invalidStorageChild.kill();
-  await new Promise((resolve) => invalidStorageChild.once("exit", resolve));
-}
+assert.match(
+  invalidStorageStderr,
+  /listen_intercepted=true socket_opened=false/,
+);
+assert.doesNotMatch(invalidStorageOutput, /phase=ready_transition/);
+assert.equal(invalidStorageTcpReached, false);
+assert.equal(invalidStorageReadinessReached, false);
+assert(!invalidStorageOutput.includes(proofDatabaseUrl));
+await new Promise<void>((resolve, reject) => {
+  const reuse = net.createServer();
+  reuse.once("error", reject);
+  reuse.listen(negativePort, "127.0.0.1", () =>
+    reuse.close((error) => (error ? reject(error) : resolve())),
+  );
+});
 const child = spawn(process.execPath, [bundle], {
   cwd: runtimeRoot,
   env: {
@@ -553,6 +638,19 @@ try {
       feedbackStorageBoundedRead: true,
       feedbackStorageMaxReadBytes: storageMaxReadBytes,
       invalidStorageAuthorityDenied: true,
+      invalidStorageProof: {
+        naturalExit: !invalidStorageCleanupRequired,
+        exitCode: invalidStorageExitResult.code,
+        signal: invalidStorageExitResult.signal,
+        elapsedMs: invalidStorageElapsedMs,
+        tcpReached: invalidStorageTcpReached,
+        readinessReached: invalidStorageReadinessReached,
+        negativePortReusable: true,
+        probeCount: invalidStorageProbeTimingsMs.length,
+        probeTimingsMs: invalidStorageProbeTimingsMs,
+        stdout: invalidStorageStdout,
+        stderr: invalidStorageStderr,
+      },
       readyMs: Number(readyMs.toFixed(1)),
       platform: `${os.platform()}-${os.arch()}`,
     }),
