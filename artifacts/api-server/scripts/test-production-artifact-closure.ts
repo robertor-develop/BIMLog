@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { spawn } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import crypto from "node:crypto";
 import { createRequire } from "node:module";
 import fs from "node:fs";
@@ -36,9 +36,13 @@ const packagedState = JSON.parse(
 assert.equal(packagedCatalog.documents.length, 11);
 assert.equal(packagedState.documents.length, 11);
 for (const document of packagedCatalog.documents) {
-  const metadata = packagedState.documents.find(entry => entry.key === document.key);
+  const metadata = packagedState.documents.find(
+    (entry) => entry.key === document.key,
+  );
   assert(metadata && metadata.file === document.file);
-  const content = fs.readFileSync(path.join(packagedLivingBriefRoot, document.file));
+  const content = fs.readFileSync(
+    path.join(packagedLivingBriefRoot, document.file),
+  );
   const contentSha256 = crypto
     .createHash("sha256")
     .update(content.toString("utf8").replace(/\r\n?/g, "\n"))
@@ -176,6 +180,74 @@ if (process.platform === "win32") {
   );
 }
 fs.mkdirSync(resolvedProofRoot, { recursive: true });
+const storageRoot = path.join(
+  resolvedProofRoot,
+  `feedback-durable-storage-${crypto.randomUUID()}`,
+);
+assert.equal(
+  fs.existsSync(storageRoot),
+  false,
+  "Durable fixture must be collision-new.",
+);
+const storageRelative = path.relative(resolvedProofRoot, storageRoot);
+assert(
+  storageRelative &&
+    !storageRelative.startsWith("..") &&
+    !path.isAbsolute(storageRelative),
+);
+fs.mkdirSync(storageRoot, { recursive: false });
+assert.equal(fs.realpathSync.native(storageRoot), path.resolve(storageRoot));
+for (const candidate of [resolvedProofRoot, storageRoot]) {
+  const stat = fs.lstatSync(candidate);
+  assert(
+    !stat.isSymbolicLink(),
+    `Artifact proof custody cannot contain links: ${candidate}`,
+  );
+}
+if (process.platform === "win32") {
+  const acl = spawnSync("icacls.exe", [storageRoot], {
+    encoding: "utf8",
+    windowsHide: true,
+  });
+  assert.equal(acl.status, 0, "Durable fixture ACL must be readable.");
+  assert.doesNotMatch(
+    `${acl.stdout}\n${acl.stderr}`,
+    /(?:Everyone|Todos|Authenticated Users|Usuarios autentificados|BUILTIN\\Users|BUILTIN\\Usuarios)/i,
+    "Durable fixture ACL must not grant broad principals.",
+  );
+}
+const storageBackendId = "artifact-proof-durable";
+const storageMaxReadBytes = 20 * 1024 * 1024;
+const storageAuthority = {
+  schemaVersion: 1,
+  backendId: storageBackendId,
+  dataRoot: storageRoot,
+  backupRequired: true,
+  capabilities: ["exact-bytes", "bounded-read"],
+  maxReadBytes: storageMaxReadBytes,
+};
+assert.deepEqual(Object.keys(storageAuthority).sort(), [
+  "backendId",
+  "backupRequired",
+  "capabilities",
+  "dataRoot",
+  "maxReadBytes",
+  "schemaVersion",
+]);
+const storageAuthorityPath = path.join(
+  resolvedProofRoot,
+  "feedback-storage-authority.json",
+);
+const storageAuthorityBytes = Buffer.from(JSON.stringify(storageAuthority));
+fs.writeFileSync(storageAuthorityPath, storageAuthorityBytes, {
+  flag: "wx",
+  mode: 0o600,
+});
+const storageAuthoritySha256 = crypto
+  .createHash("sha256")
+  .update(storageAuthorityBytes)
+  .digest("hex");
+assert.match(storageAuthoritySha256, /^[a-f0-9]{64}$/);
 const guardPath = path.join(resolvedProofRoot, "artifact-resolution-guard.cjs");
 fs.writeFileSync(
   guardPath,
@@ -198,12 +270,22 @@ Module._resolveFilename = function(request, parent, isMain, options) {
 );
 
 const proofDatabaseUrl = process.env.BIMLOG_ARTIFACT_PROOF_DATABASE_URL;
-assert(proofDatabaseUrl, "BIMLOG_ARTIFACT_PROOF_DATABASE_URL is required for the exact-artifact authorization proof.");
+assert(
+  proofDatabaseUrl,
+  "BIMLOG_ARTIFACT_PROOF_DATABASE_URL is required for the exact-artifact authorization proof.",
+);
 const proofDatabaseIdentity = new URL(proofDatabaseUrl);
-const proofDatabaseHostname = proofDatabaseIdentity.hostname.replace(/^\[|\]$/g, "");
+const proofDatabaseHostname = proofDatabaseIdentity.hostname.replace(
+  /^\[|\]$/g,
+  "",
+);
 assert(["127.0.0.1", "localhost", "::1"].includes(proofDatabaseHostname));
 const proofDatabasePort = Number(proofDatabaseIdentity.port);
-assert(Number.isInteger(proofDatabasePort) && proofDatabasePort >= 1024 && proofDatabasePort <= 65535);
+assert(
+  Number.isInteger(proofDatabasePort) &&
+    proofDatabasePort >= 1024 &&
+    proofDatabasePort <= 65535,
+);
 assert.equal(proofDatabaseIdentity.pathname, "/bimlog_rfi_test");
 const { Pool } = requireFromArtifact("pg") as typeof import("pg");
 const proofPool = new Pool({ connectionString: proofDatabaseUrl, max: 2 });
@@ -217,19 +299,30 @@ const users = await Promise.all([
   proofPool.query<{ id: number; email: string }>(
     `INSERT INTO users (email,password_hash,full_name,company_id,is_super_admin,can_access_living_brief)
      VALUES ($1,$2,$3,$4,false,true) RETURNING id,email`,
-    [`${proofMarker}-eligible@example.test`, "artifact-proof-not-used", "Artifact Eligible", companyId],
+    [
+      `${proofMarker}-eligible@example.test`,
+      "artifact-proof-not-used",
+      "Artifact Eligible",
+      companyId,
+    ],
   ),
   proofPool.query<{ id: number; email: string }>(
     `INSERT INTO users (email,password_hash,full_name,company_id,is_super_admin,can_access_living_brief)
      VALUES ($1,$2,$3,$4,false,false) RETURNING id,email`,
-    [`${proofMarker}-ineligible@example.test`, "artifact-proof-not-used", "Artifact Ineligible", companyId],
+    [
+      `${proofMarker}-ineligible@example.test`,
+      "artifact-proof-not-used",
+      "Artifact Ineligible",
+      companyId,
+    ],
   ),
 ]);
 const eligibleUser = users[0].rows[0]!;
 const ineligibleUser = users[1].rows[0]!;
 const jwtSecret = "synthetic-local-artifact-proof-only-0000000000000000";
 function signProofJwt(payload: Record<string, unknown>): string {
-  const encode = (value: unknown) => Buffer.from(JSON.stringify(value)).toString("base64url");
+  const encode = (value: unknown) =>
+    Buffer.from(JSON.stringify(value)).toString("base64url");
   const now = Math.floor(Date.now() / 1000);
   const unsigned = `${encode({ alg: "HS256", typ: "JWT" })}.${encode({ ...payload, iat: now, exp: now + 600 })}`;
   return `${unsigned}.${crypto.createHmac("sha256", jwtSecret).update(unsigned).digest("base64url")}`;
@@ -266,6 +359,65 @@ const inheritedRuntimeEnvironment = Object.fromEntries(
     .map((key) => [key, process.env[key]])
     .filter((entry): entry is [string, string] => typeof entry[1] === "string"),
 );
+const feedbackStorageEnvironment = {
+  BIMLOG_FEEDBACK_STORAGE_BACKEND: "durable-filesystem",
+  BIMLOG_FEEDBACK_STORAGE_BACKEND_ID: storageBackendId,
+  BIMLOG_FEEDBACK_UPLOAD_ROOT: storageRoot,
+  BIMLOG_FEEDBACK_STORAGE_AUTHORITY_MANIFEST: storageAuthorityPath,
+  BIMLOG_FEEDBACK_STORAGE_AUTHORITY_SHA256: storageAuthoritySha256,
+};
+const negativePort = await new Promise<number>((resolve, reject) => {
+  const server = net.createServer();
+  server.once("error", reject);
+  server.listen(0, "127.0.0.1", () => {
+    const address = server.address();
+    assert(address && typeof address === "object");
+    server.close((error) => (error ? reject(error) : resolve(address.port)));
+  });
+});
+const invalidStorageChild = spawn(process.execPath, [bundle], {
+  cwd: runtimeRoot,
+  env: {
+    ...inheritedRuntimeEnvironment,
+    PORT: String(negativePort),
+    NODE_ENV: "production",
+    REPLIT_DEPLOYMENT: "1",
+    DATABASE_URL: proofDatabaseUrl,
+    PROD_DATABASE_URL: proofDatabaseUrl,
+    JWT_SECRET: jwtSecret,
+    BIMLOG_SOURCE_COMMIT: deploymentSource.sourceCommit,
+    BIMLOG_ARTIFACT_RUNTIME_ROOT: runtimeRoot,
+    ...feedbackStorageEnvironment,
+    BIMLOG_FEEDBACK_STORAGE_AUTHORITY_SHA256: "0".repeat(64),
+    NODE_OPTIONS:
+      `${process.env.NODE_OPTIONS ?? ""} --require ${guardPath}`.trim(),
+  },
+  stdio: ["ignore", "pipe", "pipe"],
+  windowsHide: true,
+});
+let invalidStorageOutput = "";
+invalidStorageChild.stdout.on("data", (chunk) => {
+  invalidStorageOutput += String(chunk);
+});
+invalidStorageChild.stderr.on("data", (chunk) => {
+  invalidStorageOutput += String(chunk);
+});
+const invalidStorageExit = await Promise.race([
+  new Promise<number | null>((resolve) =>
+    invalidStorageChild.once("exit", resolve),
+  ),
+  new Promise<never>((_, reject) =>
+    setTimeout(
+      () =>
+        reject(
+          new Error("Invalid storage authority child did not fail closed."),
+        ),
+      6_000,
+    ),
+  ),
+]);
+assert.notEqual(invalidStorageExit, 0);
+assert.match(invalidStorageOutput, /FEEDBACK_STORAGE_AUTHORITY_INVALID/);
 const child = spawn(process.execPath, [bundle], {
   cwd: runtimeRoot,
   env: {
@@ -278,6 +430,7 @@ const child = spawn(process.execPath, [bundle], {
     JWT_SECRET: jwtSecret,
     BIMLOG_SOURCE_COMMIT: deploymentSource.sourceCommit,
     BIMLOG_ARTIFACT_RUNTIME_ROOT: runtimeRoot,
+    ...feedbackStorageEnvironment,
     NODE_OPTIONS:
       `${process.env.NODE_OPTIONS ?? ""} --require ${guardPath}`.trim(),
   },
@@ -328,8 +481,18 @@ try {
   assert.match(stdout, /phase=app_import_begin/);
   assert.match(stdout, /phase=app_import_complete/);
   assert.match(stdout, /phase=ready_transition/);
+  assert.match(
+    stdout,
+    /\[feedback-storage\] artifact-proof-durable durable-filesystem healthy/,
+  );
+  assert(storageAuthority.capabilities.includes("bounded-read"));
+  assert.equal(storageAuthority.maxReadBytes, storageMaxReadBytes);
   assert.doesNotMatch(stderr, /outside its runtime closure/);
-  const api = async (pathname: string, token: string, init: RequestInit = {}) => {
+  const api = async (
+    pathname: string,
+    token: string,
+    init: RequestInit = {},
+  ) => {
     const response = await fetch(`http://127.0.0.1:${port}/api/v1${pathname}`, {
       ...init,
       headers: {
@@ -339,7 +502,10 @@ try {
       },
     });
     const text = await response.text();
-    return { status: response.status, body: text ? JSON.parse(text) as Record<string, unknown> : {} };
+    return {
+      status: response.status,
+      body: text ? (JSON.parse(text) as Record<string, unknown>) : {},
+    };
   };
   const eligible = await api("/living-brief/eligibility", eligibleToken);
   assert.equal(eligible.status, 200);
@@ -347,9 +513,15 @@ try {
   const ineligible = await api("/living-brief/eligibility", ineligibleToken);
   assert.equal(ineligible.status, 200);
   assert.equal(ineligible.body.eligible, false);
-  const deniedUnlock = await api("/living-brief/unlock", ineligibleToken, { method: "POST", body: "{}" });
+  const deniedUnlock = await api("/living-brief/unlock", ineligibleToken, {
+    method: "POST",
+    body: "{}",
+  });
   assert.equal(deniedUnlock.status, 403);
-  const unlock = await api("/living-brief/unlock", eligibleToken, { method: "POST", body: "{}" });
+  const unlock = await api("/living-brief/unlock", eligibleToken, {
+    method: "POST",
+    body: "{}",
+  });
   assert.equal(unlock.status, 200);
   assert.equal(typeof unlock.body.briefToken, "string");
   const documents = await api("/living-brief/docs", eligibleToken, {
@@ -360,7 +532,10 @@ try {
   const catalog = documents.body.catalog as Array<Record<string, unknown>>;
   assert.equal(docs.length, 11);
   assert.equal(catalog.length, 11);
-  assert.deepEqual(docs.map(document => document.name), packagedCatalog.documents.map(document => document.file));
+  assert.deepEqual(
+    docs.map((document) => document.name),
+    packagedCatalog.documents.map((document) => document.file),
+  );
   for (const document of docs) {
     assert.equal(document.sourceCommit, deploymentSource.sourceCommit);
     assert.equal(document.deployedSourceCommit, deploymentSource.sourceCommit);
@@ -381,6 +556,10 @@ try {
       passwordlessEligibleUnlock: true,
       ineligibleUnlockDenied: deniedUnlock.status,
       deployedSourceCommit: deploymentSource.sourceCommit,
+      feedbackStorageBackend: "durable-filesystem",
+      feedbackStorageBoundedRead: true,
+      feedbackStorageMaxReadBytes: storageMaxReadBytes,
+      invalidStorageAuthorityDenied: true,
       readyMs: Number(readyMs.toFixed(1)),
       platform: `${os.platform()}-${os.arch()}`,
     }),
@@ -388,7 +567,7 @@ try {
 } finally {
   if (child.exitCode === null) {
     child.kill();
-    await new Promise(resolve => child.once("exit", resolve));
+    await new Promise((resolve) => child.once("exit", resolve));
   }
   await proofPool.end();
 }
