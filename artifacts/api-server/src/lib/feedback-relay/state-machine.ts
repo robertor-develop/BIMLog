@@ -39,10 +39,24 @@ export function parseRetentionPolicy(environment: NodeJS.ProcessEnv): RetentionP
   const read = (key: string) => days(Number(required(key)),key);
   return assertRetentionPolicy({ version:required("BIMLOG_FEEDBACK_RETENTION_POLICY_VERSION"),approvedBy:required("BIMLOG_FEEDBACK_RETENTION_APPROVED_BY"),approvedAt:required("BIMLOG_FEEDBACK_RETENTION_APPROVED_AT"),scope:required("BIMLOG_FEEDBACK_RETENTION_SCOPE"),policySha256:required("BIMLOG_FEEDBACK_RETENTION_POLICY_SHA256"),temporaryDays:read("BIMLOG_FEEDBACK_TEMPORARY_DAYS"),failureDays:read("BIMLOG_FEEDBACK_FAILURE_DAYS"),quarantineDays:read("BIMLOG_FEEDBACK_QUARANTINE_DAYS"),resolvedDays:read("BIMLOG_FEEDBACK_RESOLVED_DAYS") });
 }
-export type ExpiryCandidate = { state: RelayState; outcomeKnown: boolean; receiptVerified: boolean; temporaryDeleted: boolean; deleteFailed: boolean; hold: boolean; expiresAt: Date };
+export const feedbackRetentionOutcomes = ["temporary-absent", "no-temporary-object"] as const;
+export type FeedbackRetentionOutcome = typeof feedbackRetentionOutcomes[number];
+export type ExpiryCandidate = { state: RelayState; outcome: FeedbackRetentionOutcome | null; receiptVerified: boolean; temporaryObjectExists: boolean; temporaryDeleted: boolean; absenceVerified: boolean; deleteFailed: boolean; hold: boolean; expiresAt: Date };
 export function expiryEligible(input: ExpiryCandidate, now = new Date()) {
-  return input.state === "queued" && input.outcomeKnown && !input.receiptVerified && !input.temporaryDeleted && !input.deleteFailed && !input.hold && !Number.isNaN(input.expiresAt.getTime()) && input.expiresAt.getTime() <= now.getTime();
+  const custodyClosed = input.outcome === "no-temporary-object"
+    ? !input.temporaryObjectExists
+    : input.outcome === "temporary-absent" && input.temporaryObjectExists && input.temporaryDeleted && input.absenceVerified;
+  return input.state === "queued" && custodyClosed && !input.receiptVerified && !input.deleteFailed && !input.hold && !Number.isNaN(input.expiresAt.getTime()) && input.expiresAt.getTime() <= now.getTime();
 }
+
+export type FeedbackPurgeCommand = {
+  commandVersion: "1"; commandId: string; jobId: string; objectId: string; companyId: number; projectId: number | null; feedbackId: number;
+  jobVersion: number; fencingToken: string; holdSnapshotVersion: number; noActiveHoldProofSha256: string;
+  resolvedEvidenceSha256: string; customerClosureEvidenceSha256: string; internalClosureEvidenceSha256: string;
+  policyId: string; policyVersion: string; policySha256: string; approvalId: string; approvalAuthority: string; approvedAt: string;
+  deliveryReceiptSha256: string; readbackSha256: string; issuedAt: string; expiresAt: string; revokedAt: string | null;
+  signingKeyId: string; signatureReference: string; canonicalSha256: string;
+};
 export function assertGovernedExpiry(input: ExpiryCandidate, policy: RetentionPolicy, now = new Date()): "expired" {
   assertRetentionPolicy(policy);
   if(!expiryEligible(input,now)) throw new FeedbackRelayAuthorityError("FEEDBACK_RELAY_EXPIRY_DENIED","Relay item does not satisfy governed expiry preconditions");
