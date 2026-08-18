@@ -18,7 +18,7 @@ if (!sourcePaths.length) throw new Error("No immutable production inputs resolve
 const normalizeEol = bytes => Buffer.from(bytes.toString("utf8").replace(/\r\n/g, "\n"));
 const sourceProvenance = Object.fromEntries(sourcePaths.map(relativePath => {
   const blobId = git(["rev-parse", `${head}:${relativePath}`]).trim();
-  const gitBytes = execFileSync("git", ["cat-file", "blob", blobId], { encoding: "buffer" });
+  const gitBytes = execFileSync("git", ["cat-file", "blob", blobId], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 });
   const checkoutBytes = readFileSync(path.resolve(relativePath));
   const gitNormalized = normalizeEol(gitBytes), checkoutNormalized = normalizeEol(checkoutBytes);
   if (!gitNormalized.equals(checkoutNormalized)) throw new Error(`Checkout differs from immutable Git object after EOL normalization: ${relativePath}`);
@@ -27,7 +27,7 @@ const sourceProvenance = Object.fromEntries(sourcePaths.map(relativePath => {
 }));
 const harnessPath = "artifacts/bimlog/scripts/feedback-addendum-browser-evidence.mjs";
 const harnessBlobId = git(["rev-parse", `${head}:${harnessPath}`]).trim();
-const harnessGitBytes = execFileSync("git", ["cat-file", "blob", harnessBlobId], { encoding: "buffer" }), harnessCheckoutBytes = readFileSync(new URL(import.meta.url));
+const harnessGitBytes = execFileSync("git", ["cat-file", "blob", harnessBlobId], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 }), harnessCheckoutBytes = readFileSync(new URL(import.meta.url));
 if (!normalizeEol(harnessGitBytes).equals(normalizeEol(harnessCheckoutBytes))) throw new Error("Harness checkout does not match immutable harness Git object");
 const harnessProvenance = { gitBlobId: harnessBlobId, gitBlobSha256: sha(harnessGitBytes), checkoutSha256: sha(harnessCheckoutBytes), checkoutNormalizedSha256: sha(normalizeEol(harnessCheckoutBytes)) };
 if (verifySourceOnly) {
