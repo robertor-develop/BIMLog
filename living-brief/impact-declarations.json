@@ -10481,6 +10481,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "75339ccdd76b0904dea95f25cd91b7e420315bd591f02fdde697445a961137b5"
+    },
+    {
+      "taskId": "bimlog-feedback-build8-terminal-living-brief-reseal-20260817",
+      "reviewedThroughCommit": "962561c3e1ed028260355b5e76409c60dde55cee",
+      "reviewedAt": "2026-08-18T02:30:00Z",
+      "status": "local_exact_head_acceptance_sealed_final_browser_reseal_pending",
+      "captureTiming": "same_release_reconciliation",
+      "summary": "Rebinds Feedback Build 8 to the exact artifact-harness head and accepted API/database, source/receiver, build/runtime, artifact, and zero-residue receipt while retaining the final exact-head browser reseal as pending.",
+      "workstreams": [
+        "feedback-addendum",
+        "exact-head-acceptance",
+        "artifact-proof",
+        "browser-reseal",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing human authority, privacy, evidence custody, and customer-isolation doctrine remains controlling."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source, database, artifact, browser, release, production, and field gates remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact-head receipt proves the required local dynamic, source, build/runtime, artifact, privacy, and residue gates without claiming external acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product identity or roadmap change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Artifact-harness changes add no new generated structural path."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Navisworks, installer, or plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new external standard, certification, or compliance claim is introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact artifact-harness identity, accepted terminal local receipt, value-blind artifact evidence boundary, and predecessor browser evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes exact-head API/database and artifact acceptance while retaining final exact-head browser and every external gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No push, Replit publication, deployment, provider activation, production mutation, customer action, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1dbb3dc558ecb4f4070605aec6277972df55bf4b7b0a1e91a9e20f83bca1a27b"
     }
   ]
 }
