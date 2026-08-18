@@ -89,12 +89,15 @@ const authority = {
   rootFingerprintSha256: FeedbackReceiverCustodyService.fingerprintRoot(root),
   destinationId: "receiver-test",
 };
+let clockNow=now,clockTick=false;
 const service = new FeedbackReceiverCustodyService(
   authority,
   senderKeys,
   receiverKeys,
   nonces,
   30000,
+  {},
+  ()=>{const value=clockNow;if(clockTick)clockNow=new Date(clockNow.getTime()+1);return value;},
 );
 const bytes = Buffer.from("opaque receiver evidence bytes"),
   request = (
@@ -521,17 +524,20 @@ try {
       purgeAuthority.set({...command,jobVersion:2});await code("FEEDBACK_PURGE_COMMAND_HASH_MISMATCH",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));
       purgeAuthority.set({...command,fencingToken:"stale-fence"});await code("FEEDBACK_PURGE_COMMAND_HASH_MISMATCH",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));
       purgeAuthority.set({...command,holdSnapshotVersion:2});await code("FEEDBACK_PURGE_COMMAND_HASH_MISMATCH",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));
-      purgeAuthority.set(command);await code("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,new Date(now.getTime()+120_000)));
+      purgeAuthority.set(command);clockNow=new Date(now.getTime()+120_000);await code("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));clockNow=now;
       await assert.rejects(service.consumePurgeCommand("request-one",command,{...purgeAuthority,async current(){throw new Error("authority outage");}},now),/authority outage/);
       await code("FEEDBACK_PURGE_COMMAND_SIGNATURE_DENIED",()=>service.consumePurgeCommand("request-one",command,{...purgeAuthority,async verify(){return false;}},now));
-      const deleted = await service.consumePurgeCommand("request-one",command,purgeAuthority,now);
+      clockTick=true;const deleted = await service.consumePurgeCommand("request-one",command,purgeAuthority,now);clockTick=false;
       assert.equal(deleted.absenceVerified, true);
-      const durable=verifyDeletionReceiptDurably(deleted.signed,receiverKeys,now);assert.equal(durable.canonicalSha256.length,64);assert.equal(deleted.signed.payload.approvedBy,"operator");assert.equal(deleted.signed.payload.journalSha256,deleted.journalSha256);
+      const durable=verifyDeletionReceiptDurably(deleted.signed,receiverKeys,new Date(deleted.absenceVerifiedAt));assert.equal(durable.canonicalSha256.length,64);assert.equal(deleted.signed.payload.approvedBy,"operator");assert.equal(deleted.signed.payload.journalSha256,deleted.journalSha256);
       assert.deepEqual(
         await service.consumePurgeCommand("request-one",command,purgeAuthority,now),
         deleted,
       );
       assert.equal(deleted.commandId,command.commandId);assert.equal(deleted.commandSha256,command.canonicalSha256);assert.equal(deleted.jobVersion,command.jobVersion);assert.equal(deleted.fencingToken,command.fencingToken);assert.equal(deleted.holdSnapshotVersion,command.holdSnapshotVersion);
+      assert.ok(new Date(deleted.deletedAt)>now);assert.ok(new Date(deleted.absenceVerifiedAt)>=new Date(deleted.deletedAt));
+      purgeAuthority.set({...command,revokedAt:now.toISOString()});await code("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));assert.deepEqual(await service.readDeletionReceipt(signedFirst),deleted);
+      purgeAuthority.set(command);clockNow=new Date(now.getTime()+120_000);await code("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));assert.deepEqual(await service.readDeletionReceipt(signedFirst),deleted);clockNow=now;
     },
   );
   await check("final deletion journal nested tamper is refused",async()=>{
@@ -567,6 +573,7 @@ try {
             throw new Error("forced purge crash");
           },
         },
+        ()=>now,
       );
       await failing.deliver({ signedRequest: signed, bytes, inspection, now });
       const governed=await commandFor(failing,r.requestId);
@@ -588,6 +595,8 @@ try {
         receiverKeys,
         purgeNonces,
         30000,
+        {},
+        ()=>now,
       );
       assert.equal(
         (await restarted.consumePurgeCommand(r.requestId,governed.command,governed.authority,now)).absenceVerified,

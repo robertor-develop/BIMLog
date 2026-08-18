@@ -7,7 +7,6 @@ import {
   RelayProtocolError,
   canonicalRequest,
   canonicalReceipt,
-  canonicalReadback,
   sha256,
   signReadback,
   signDeletionReceipt,
@@ -145,7 +144,7 @@ export class FilesystemReceiverNonceAuthority implements ReceiverNonceAuthority{
   private key(input:DurableNonceRecord["binding"]){return sha256(JSON.stringify([input.audience,input.keyId,input.nonce,input.companyId,input.projectId]));}
   private async locked<T>(key:string,work:(lease:{assertCurrent():void;fence:string})=>T|Promise<T>){return fencedDirectoryLock(this.root,path.join(this.root,`${key}.lock`),`nonce:${key}`,work);}
   async reserve(input:DurableNonceRecord["binding"]){const key=this.key(input),file=path.join(this.root,`${key}.json`);assertNoLinks(this.root,file);return this.locked(key,lease=>{lease.assertCurrent();const token=`${key}.${randomUUID()}`;if(fs.existsSync(file)){const known=readJson<DurableNonceRecord>(this.root,file);if(known.version!==2||!HEX64.test(known.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_SCHEMA_INVALID","Nonce record schema is invalid");if(known.binding.requestSha256!==input.requestSha256||known.binding.requestId!==input.requestId)return null;if(known.state==="reserved"){if(!known.owner||!ownerIsProvablyDead(known.owner))return null;const recovered={...known,tokenSha256:sha256(token),owner:currentOwner(`nonce:${key}`,300_000)};lease.assertCurrent();atomicJson(this.root,file,recovered);return{token,status:"new" as const};}return{token,status:"identical-retry" as const};}const record:DurableNonceRecord={version:2,binding:input,state:"reserved",tokenSha256:sha256(token),owner:currentOwner(`nonce:${key}`,300_000)};lease.assertCurrent();atomicJson(this.root,file,record);return{token,status:"new" as const};});}
-  async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||!HEX64.test(record.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");if(record.state==="committed")return;if(!timingSafeEqual(Buffer.from(record.tokenSha256,"hex"),Buffer.from(sha256(token),"hex")))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});});}
+  async commit(token:string){const key=token.split(".")[0];if(!HEX64.test(key))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");for(let attempt=0;;attempt++){try{await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`),record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2||!HEX64.test(record.tokenSha256))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");if(record.state==="committed")return;if(!timingSafeEqual(Buffer.from(record.tokenSha256,"hex"),Buffer.from(sha256(token),"hex")))fail("FEEDBACK_RECEIVER_NONCE_TOKEN_INVALID","Nonce token is invalid");lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});});return;}catch(error){if(!(error instanceof RelayProtocolError)||error.code!=="FEEDBACK_RECEIVER_FENCE_LOST"||attempt>=3)throw error;await new Promise(resolve=>setTimeout(resolve,2**attempt));}}}
   async rollback(token:string){const key=token.split(".")[0];if(!HEX64.test(key))return;await this.locked(key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${key}.json`);if(!fs.existsSync(file))return;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version===2&&record.tokenSha256===sha256(token)&&record.state==="reserved"){lease.assertCurrent();fs.unlinkSync(file);syncDirectory(this.root);}});}
   async recover(input:{key:string;proofSha256:string}){if(!HEX64.test(input.key)||!HEX64.test(input.proofSha256))return false;return this.locked(input.key,lease=>{lease.assertCurrent();const file=path.join(this.root,`${input.key}.json`);if(!fs.existsSync(file))return false;const record=readJson<DurableNonceRecord>(this.root,file);if(record.version!==2)return false;if(record.state==="committed")return true;if(record.tokenSha256!==input.proofSha256)return false;lease.assertCurrent();atomicJson(this.root,file,{...record,state:"committed"});return true;});}
 }
@@ -154,8 +153,13 @@ export type ReceiverFaultHooks = {
   afterObjectWritten?: () => void;
   afterGenerationWritten?: () => void;
   afterIndexWritten?: () => void;
-  afterDeletionPrepared?: () => void;
+  afterDeletionPrepared?: () => void | Promise<void>;
+  beforeDeletionUnlink?: () => void | Promise<void>;
+  afterDeletionAbsenceVerified?: () => void | Promise<void>;
+  beforeDeletionFinalized?: () => void | Promise<void>;
+  beforeDeletionReturn?: () => void | Promise<void>;
 };
+export type ReceiverClock = () => Date;
 
 const HEX64 = /^[a-f0-9]{64}$/;
 const fail = (code: string, message: string): never => {
@@ -224,7 +228,7 @@ function ownerIsProvablyDead(owner: LockOwnerV2, now = new Date()) {
   // A foreign live PID cannot be taken over without an external process-start proof.
   return false;
 }
-function ownerlessLockExpired(lock:string,now=Date.now()){try{return now-fs.statSync(lock).mtimeMs>=1_000;}catch{return false;}}
+function ownerlessLockExpired(lock:string,now=Date.now(),graceMs=1_000){try{return now-fs.statSync(lock).mtimeMs>=graceMs;}catch{return false;}}
 async function fencedDirectoryLock<T>(root:string,lock:string,identity:string,work:(lease:{assertCurrent():void;fence:string})=>T|Promise<T>):Promise<T>{
   const ownerPath=path.join(lock,"owner.json"),leaseMs=5_000;
   for(let attempt=0;attempt<1_000;attempt++){
@@ -237,7 +241,7 @@ async function fencedDirectoryLock<T>(root:string,lock:string,identity:string,wo
       const heartbeat=setInterval(()=>{try{assertCurrent();atomicWrite(lock,ownerPath,Buffer.from(JSON.stringify(makeOwner()),"utf8"));}catch{lost=true;}},Math.floor(leaseMs/3));heartbeat.unref();
       try{assertCurrent();return await work({assertCurrent,fence});}finally{clearInterval(heartbeat);let current:LockOwnerV2|null=null;try{current=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}if(current?.fence===fence)fs.rmSync(lock,{recursive:true,force:false});}
     }catch(error){if((error as NodeJS.ErrnoException).code!=="EEXIST")throw error;let owner:LockOwnerV2|null=null;try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
-      if((!owner&&ownerlessLockExpired(lock))||(owner&&ownerIsProvablyDead(owner))){const quarantine=`${lock}.stale-${randomUUID()}`;try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch(renameError){if((renameError as NodeJS.ErrnoException).code!=="ENOENT")await new Promise(resolve=>setTimeout(resolve,2));}}
+      if((!owner&&ownerlessLockExpired(lock,Date.now(),10_000))||(owner&&ownerIsProvablyDead(owner))){const quarantine=`${lock}.stale-${randomUUID()}`;try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch(renameError){if((renameError as NodeJS.ErrnoException).code!=="ENOENT")await new Promise(resolve=>setTimeout(resolve,2));}}
       else await new Promise(resolve=>setTimeout(resolve,2));
     }
   }
@@ -309,6 +313,7 @@ function syncDirectory(dir: string) {
   }
 }
 function fileIdentity(file:string){const fd=fs.openSync(file,"r"),hash=createHash("sha256"),chunk=Buffer.allocUnsafe(64*1024);let byteCount=0;try{for(;;){const read=fs.readSync(fd,chunk,0,chunk.length,null);if(!read)break;byteCount+=read;hash.update(chunk.subarray(0,read));}}finally{fs.closeSync(fd);}return{byteCount,sha256:hash.digest("hex")};}
+function renameAtomic(source:string,target:string){for(let attempt=0;;attempt++){try{return fs.renameSync(source,target);}catch(error){const code=(error as NodeJS.ErrnoException).code;if(process.platform!=="win32"||!(code==="EBUSY"||code==="EPERM"||code==="EACCES")||attempt>=7)throw error;Atomics.wait(new Int32Array(new SharedArrayBuffer(4)),0,0,2**attempt);}}}
 function atomicWrite(root: string, target: string, bytes: Buffer) {
   assertNoLinks(root, target);
   mkdirSafe(root, path.dirname(target));
@@ -323,7 +328,7 @@ function atomicWrite(root: string, target: string, bytes: Buffer) {
     fs.fsyncSync(fd);
     fs.closeSync(fd);
     fd = undefined;
-    fs.renameSync(temporary, target);
+    renameAtomic(temporary, target);
     return syncDirectory(path.dirname(target));
   } catch (error) {
     if (fd !== undefined) {
@@ -424,6 +429,7 @@ export class FeedbackReceiverCustodyService {
     private readonly nonces: ReceiverNonceAuthority,
     private readonly maxSkewMs: number,
     private readonly faults: ReceiverFaultHooks = {},
+    private readonly clock: ReceiverClock = () => new Date(),
   ) {
     this.root = canonicalRoot(authority.canonicalRoot);
     if (!fs.existsSync(this.root) || !fs.statSync(this.root).isDirectory())
@@ -580,7 +586,7 @@ export class FeedbackReceiverCustodyService {
         if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
         let owner:LockOwnerV2|null=null;
         try{owner=parseLockOwner(JSON.parse(fs.readFileSync(ownerPath,"utf8")));}catch{}
-        if((!owner&&ownerlessLockExpired(lock))||(owner&&ownerIsProvablyDead(owner))){
+        if((!owner&&ownerlessLockExpired(lock,Date.now(),10_000))||(owner&&ownerIsProvablyDead(owner))){
           const quarantine=`${lock}.stale-${randomUUID()}`;
           try{fs.renameSync(lock,quarantine);syncDirectory(path.dirname(lock));fs.rmSync(quarantine,{recursive:true,force:false});continue;}catch(renameError){if((renameError as NodeJS.ErrnoException).code!=="ENOENT")await new Promise(resolve=>setTimeout(resolve,2));}
         } else await new Promise((resolve) => setTimeout(resolve, 2));
@@ -867,9 +873,9 @@ export class FeedbackReceiverCustodyService {
   private async purgeUnderLease(
     requestId: string,
     authority: VerifiedPurgeAuthority,
-    now: Date,
+    _operationStart: Date,
     lease:{assertCurrent():void;fence:string},
-    revalidate?:()=>Promise<void>,
+    revalidate?:()=>Promise<Date>,
   ): Promise<DeletionReceipt> {
     lease.assertCurrent();
     if (authority.hold)
@@ -890,16 +896,20 @@ export class FeedbackReceiverCustodyService {
     if (fs.existsSync(journalPath)) {
       journal = this.readJournal(journalPath);
       lease.assertCurrent();
-      if (
+      const authorityDiffers =
         journal.receipt.policySha256 !== authority.policySha256 ||
         journal.receipt.approvedBy !== authority.approvedBy ||
         journal.receipt.commandId !== authority.command.commandId ||
-        journal.receipt.commandSha256 !== authority.command.canonicalSha256
-      )
-        fail(
+        journal.receipt.commandSha256 !== authority.command.canonicalSha256;
+      if(authorityDiffers&&journal.state==="finalized") fail(
           "FEEDBACK_RECEIVER_PURGE_CONFLICT",
           "Purge receipt authority differs from immutable history",
         );
+      if(authorityDiffers&&journal.state==="prepared"){
+        if(String(authority.command.companyId)!==journal.receipt.companyId||String(authority.command.projectId??"")!==journal.receipt.projectId||String(authority.command.feedbackId)!==journal.receipt.feedbackId||authority.command.objectId!==journal.receipt.objectId||authority.command.deliveryReceiptSha256!==journal.receipt.deliveryReceiptSha256||authority.command.readbackSha256!==journal.receipt.readbackSha256)fail("FEEDBACK_RECEIVER_PURGE_COMMAND_BINDING_INVALID","Replacement purge command does not bind the prepared obligation");
+        const {journalSha256:oldJournalSha256,...oldPrepared}=journal.receipt,newPreparedBase={...oldPrepared,policySha256:authority.command.policySha256,approvedBy:authority.command.approvalAuthority,approvedAt:authority.command.approvedAt,commandId:authority.command.commandId,commandSha256:authority.command.canonicalSha256,jobId:authority.command.jobId,jobVersion:authority.command.jobVersion,fencingToken:authority.command.fencingToken,holdSnapshotVersion:authority.command.holdSnapshotVersion,noActiveHoldProofSha256:authority.command.noActiveHoldProofSha256},receipt={...newPreparedBase,journalSha256:sha256(JSON.stringify(newPreparedBase))};
+        await revalidate?.();lease.assertCurrent();const generation=this.bumpGeneration();lease.assertCurrent();journal=this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{state:"prepared" as const,authorityVersion:3 as const,requestId,objectRelativePath:journal.objectRelativePath,receipt,generation}) as DeletionJournal;atomicJson(this.root,journalPath,journal);
+      }
       if (journal.state === "finalized") return journal.receipt;
     } else {
       const stored = this.readStored(this.indexPath(requestId)),
@@ -912,8 +922,8 @@ export class FeedbackReceiverCustodyService {
           "FEEDBACK_RECEIVER_READBACK_MISMATCH",
           "Custody bytes changed before purge",
         );
-      const readback=this.readbackUnderFence(requestId,now,lease.assertCurrent),deliveryReceiptSha256=sha256(canonicalReceipt(stored.receipt.payload)),readbackSha256=sha256(canonicalReadback(readback.payload));
-      if(String(authority.command.companyId)!==stored.receipt.payload.companyId||String(authority.command.projectId??"")!==stored.receipt.payload.projectId||String(authority.command.feedbackId)!==stored.receipt.payload.feedbackId||authority.command.objectId!==stored.receipt.payload.objectId||authority.command.deliveryReceiptSha256!==deliveryReceiptSha256||authority.command.readbackSha256!==readbackSha256)fail("FEEDBACK_RECEIVER_PURGE_COMMAND_BINDING_INVALID","Purge command does not bind the current custody record");
+      const deliveryReceiptSha256=sha256(canonicalReceipt(stored.receipt.payload)),readbackSha256=authority.command.readbackSha256;
+      if(String(authority.command.companyId)!==stored.receipt.payload.companyId||String(authority.command.projectId??"")!==stored.receipt.payload.projectId||String(authority.command.feedbackId)!==stored.receipt.payload.feedbackId||authority.command.objectId!==stored.receipt.payload.objectId||authority.command.deliveryReceiptSha256!==deliveryReceiptSha256||!HEX64.test(readbackSha256))fail("FEEDBACK_RECEIVER_PURGE_COMMAND_BINDING_INVALID","Purge command does not bind the current custody record");
       const preparedBase = {
           objectSha256: identity.sha256,
           byteCount: identity.byteCount,
@@ -936,31 +946,34 @@ export class FeedbackReceiverCustodyService {
       };
       lease.assertCurrent();
       await revalidate?.();lease.assertCurrent();journal=this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",journalDraft) as DeletionJournal;atomicJson(this.root, journalPath, journal);
-      this.faults.afterDeletionPrepared?.();
+      await this.faults.afterDeletionPrepared?.();
       lease.assertCurrent();
     }
     if(journal.state!=="prepared")return fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal state is invalid");
     const object = path.join(this.root, journal.objectRelativePath);
     assertNoLinks(this.root, object);
-    if (fs.existsSync(object)){await revalidate?.();lease.assertCurrent();fs.unlinkSync(object);syncDirectory(path.dirname(object));}
+    if (fs.existsSync(object)){await this.faults.beforeDeletionUnlink?.();await revalidate?.();lease.assertCurrent();fs.unlinkSync(object);syncDirectory(path.dirname(object));}
+    await revalidate?.();lease.assertCurrent();
     if (fs.existsSync(object))
       fail(
         "FEEDBACK_RECEIVER_ABSENCE_UNPROVEN",
         "Purged object absence could not be verified",
       );
-    await revalidate?.();lease.assertCurrent();const deletedAt=now.toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,commandId:journal.receipt.commandId,commandSha256:journal.receipt.commandSha256,jobId:journal.receipt.jobId,jobVersion:journal.receipt.jobVersion,fencingToken:journal.receipt.fencingToken,holdSnapshotVersion:journal.receipt.holdSnapshotVersion,noActiveHoldProofSha256:journal.receipt.noActiveHoldProofSha256,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);
+    await this.faults.afterDeletionAbsenceVerified?.();
+    const deletedAtDate=await revalidate?.()??this.clock(),absenceVerifiedAtDate=this.clock();if(absenceVerifiedAtDate.getTime()<deletedAtDate.getTime())fail("FEEDBACK_RECEIVER_CLOCK_REGRESSED","Receiver trusted clock regressed");lease.assertCurrent();const deletedAt=deletedAtDate.toISOString(),absenceVerifiedAt=absenceVerifiedAtDate.toISOString(), signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,commandId:journal.receipt.commandId,commandSha256:journal.receipt.commandSha256,jobId:journal.receipt.jobId,jobVersion:journal.receipt.jobVersion,fencingToken:journal.receipt.fencingToken,holdSnapshotVersion:journal.receipt.holdSnapshotVersion,noActiveHoldProofSha256:journal.receipt.noActiveHoldProofSha256,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,absenceVerifiedAtDate);
     const receipt: DeletionReceipt = {...journal.receipt,absenceVerified:true,deletedAt,absenceVerifiedAt,signed};
     lease.assertCurrent();
-    await revalidate?.();lease.assertCurrent();const generation=this.bumpGeneration();lease.assertCurrent();const {authentication:ignored,...journalPayload}=journal;await revalidate?.();lease.assertCurrent();atomicJson(this.root, journalPath, this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{
+    await this.faults.beforeDeletionFinalized?.();await revalidate?.();lease.assertCurrent();const generation=this.bumpGeneration();lease.assertCurrent();const {authentication:ignored,...journalPayload}=journal;await revalidate?.();lease.assertCurrent();atomicJson(this.root, journalPath, this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{
       ...journalPayload,
       state: "finalized",
       receipt,
       generation,
     }));
-    await revalidate?.();lease.assertCurrent();
+    await this.faults.beforeDeletionReturn?.();await revalidate?.();lease.assertCurrent();
     return receipt;
   }
-  async consumePurgeCommand(requestId:string,command:FeedbackPurgeCommand,authority:ReceiverPurgeCommandAuthority,now=new Date()):Promise<DeletionReceipt>{return this.lock(requestId,async lease=>{const requestIndex=this.readStored(this.indexPath(requestId));const revalidate=async()=>{lease.assertCurrent();await assertFeedbackPurgeCommandSignature(command,authority);if(command.revokedAt!==null||new Date(command.issuedAt)>now||new Date(command.expiresAt)<=now)fail("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE","Purge command is not currently effective");const current=await authority.current({requestId,commandId:command.commandId,jobId:command.jobId,canonicalSha256:command.canonicalSha256,requestIndex,now});await assertFeedbackPurgeCommandSignature(current,authority);if(current.canonicalSha256!==command.canonicalSha256||current.commandId!==command.commandId||current.jobId!==command.jobId||current.signatureReference!==command.signatureReference||current.revokedAt!==null||new Date(current.issuedAt)>now||new Date(current.expiresAt)<=now)fail("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE","Purge command is no longer current");};await revalidate();return this.purgeUnderLease(requestId,{policySha256:command.policySha256,approvedBy:command.approvalAuthority,approvedAt:command.approvedAt,hold:false,command},now,lease,revalidate);});}
+  async consumePurgeCommand(requestId:string,command:FeedbackPurgeCommand,authority:ReceiverPurgeCommandAuthority,operationStart=new Date()):Promise<DeletionReceipt>{return this.lock(requestId,async lease=>{const requestIndex=this.readStored(this.indexPath(requestId));let lastChecked=-Infinity;const revalidate=async()=>{lease.assertCurrent();const checkedAt=this.clock();if(checkedAt.getTime()<lastChecked)fail("FEEDBACK_RECEIVER_CLOCK_REGRESSED","Receiver trusted clock regressed");lastChecked=checkedAt.getTime();await assertFeedbackPurgeCommandSignature(command,authority);if(command.revokedAt!==null||new Date(command.issuedAt)>checkedAt||new Date(command.expiresAt)<=checkedAt)fail("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE","Purge command is not currently effective");const current=await authority.current({requestId,commandId:command.commandId,jobId:command.jobId,canonicalSha256:command.canonicalSha256,requestIndex,now:checkedAt});await assertFeedbackPurgeCommandSignature(current,authority);if(current.canonicalSha256!==command.canonicalSha256||current.commandId!==command.commandId||current.jobId!==command.jobId||current.signatureReference!==command.signatureReference||current.revokedAt!==null||new Date(current.issuedAt)>checkedAt||new Date(current.expiresAt)<=checkedAt)fail("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE","Purge command is no longer current");return checkedAt;};await revalidate();return this.purgeUnderLease(requestId,{policySha256:command.policySha256,approvedBy:command.approvalAuthority,approvedAt:command.approvedAt,hold:false,command},operationStart,lease,revalidate);});}
+  async readDeletionReceipt(signedRequest:Signed<RequestContract>):Promise<DeletionReceipt>{const request=await this.authorizeHeader(signedRequest,this.clock());return this.lock(request.requestId,async lease=>{lease.assertCurrent();const journal=this.readJournal(this.deletionPath(request.requestId));if(journal.state!=="finalized")return fail("FEEDBACK_RECEIVER_DELETION_RECEIPT_NOT_FINAL","Deletion receipt is not final");const payload=journal.receipt.signed.payload;if(payload.requestId!==request.requestId||payload.companyId!==request.companyId||payload.projectId!==request.projectId||payload.feedbackId!==request.feedbackId||payload.objectId!==request.objectId)return fail("FEEDBACK_RECEIVER_DELETION_RECEIPT_IDENTITY_MISMATCH","Deletion receipt identity differs from caller authority");verifyDeletionReceiptDurably(journal.receipt.signed,this.receiverKeys,this.clock());lease.assertCurrent();return journal.receipt;});}
   /** @deprecated Release callers must use consumePurgeCommand. */
   purge(_requestId:string,_authority:PurgeAuthority,_now=new Date()):DeletionReceipt{return fail("FEEDBACK_RECEIVER_PURGE_COMMAND_REQUIRED","A current signed purge command is required");}
   /** @deprecated Release callers must use consumePurgeCommand. */
