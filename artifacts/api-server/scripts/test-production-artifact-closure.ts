@@ -277,6 +277,13 @@ fs.writeFileSync(
   `"use strict";
 const http = require("node:http");
 const originalListen = http.Server.prototype.listen;
+const originalError = console.error;
+console.error = function(...args) {
+  originalError.apply(this, args);
+  if (args.some((argument) => String(argument?.stack ?? argument).includes("FEEDBACK_STORAGE_AUTHORITY_INVALID"))) {
+    process.exitCode = 1;
+  }
+};
 http.Server.prototype.listen = function(...args) {
   if (this.listening) throw new Error("Negative artifact server was already listening.");
   const callback = args.find((argument) => typeof argument === "function");
