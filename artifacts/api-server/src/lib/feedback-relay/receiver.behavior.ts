@@ -630,6 +630,9 @@ try {
     const aborted=path.join(disposable,"backup-aborted");fs.mkdirSync(aborted);const controller=new AbortController();controller.abort();await assert.rejects(createReceiverBackupV2(service,aborted,receiverKeys,{signal:controller.signal}),(error:any)=>error?.code==="FEEDBACK_RECEIVER_BACKUP_ABORTED");assert.equal(fs.readdirSync(aborted).length,0);
     const retry=path.join(disposable,"backup-retry");fs.mkdirSync(retry);assert.equal((await createReceiverBackupV2(service,retry,receiverKeys,{concurrency:2})).generation,service.snapshotGeneration());
   });
+  await check("partial restore failure removes residue before exact retry",async()=>{
+    const backupRoot=path.join(disposable,"restore-failure-backup"),failedRoot=path.join(disposable,"restore-failure-target");fs.mkdirSync(backupRoot);fs.mkdirSync(failedRoot);const manifest=await createReceiverBackupV2(service,backupRoot,receiverKeys,{concurrency:2}),victim=manifest.objects[manifest.objects.length-1],victimPath=path.join(backupRoot,victim.relativePath),original=fs.readFileSync(victimPath);fs.writeFileSync(victimPath,Buffer.concat([original,Buffer.from("tamper")]));await assert.rejects(restoreReceiverBackupV2(backupRoot,failedRoot,receiverKeys,{concurrency:1}),(error:any)=>error?.code==="FEEDBACK_RECEIVER_RESTORE_MISMATCH");assert.equal(fs.readdirSync(failedRoot).length,0);fs.writeFileSync(victimPath,original);assert.equal((await restoreReceiverBackupV2(backupRoot,failedRoot,receiverKeys,{concurrency:2})).manifestSha256,manifest.manifestSha256);
+  });
   await check("no raw identifiers or key material enter custody files", () => {
     const all: string[] = [];
     const walk = (d: string) => {
