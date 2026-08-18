@@ -10324,6 +10324,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "795fd5367bbfd2ce3abf7ca0e24a2e60cb4fe669d4ac155a056fb770b426416d"
+    },
+    {
+      "taskId": "bimlog-feedback-addendum-living-brief-reconciliation-20260817",
+      "reviewedThroughCommit": "17353d45274f36130cadc47c0515a4dbf5ada71b",
+      "reviewedAt": "2026-08-18T01:40:00Z",
+      "status": "local_source_and_controlled_browser_evidence_api_db_final_receipt_pending",
+      "captureTiming": "same_release_reconciliation",
+      "summary": "Reconciles Feedback addendum v F-1.60.35.8 through the exact source/browser harness candidate, records accepted migration, purge, privacy, storage, and receiver tranches, and preserves the final API/database, receiver activation, release, and customer gates.",
+      "workstreams": [
+        "feedback-addendum",
+        "receiver",
+        "privacy",
+        "browser-evidence",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing human authority, privacy, evidence custody, and customer-isolation doctrine governs the reconciled implementation."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source, actual-component, external-action, production, and field gates remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The reconciliation distinguishes controlled mocked browser evidence from live backend and production acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Direct accountable feedback custody advances the existing product direction without changing product identity."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic generator records the accepted relay, receiver, storage, route-authority, and behavior source inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Navisworks, installer, or plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed PDF, DOCX, spreadsheet, or report design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new external standard, certification, or compliance claim is introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact source tranches, controlled browser manifest, direct receiver architecture, and truthful implementation boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps the exact-current API/database receipt, receiver activation, retention, push, Replit publication, deployment, and customer gates open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No push, Replit publication, deployment, provider activation, production mutation, customer action, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9713df10be7456a8bd11b68f013b3d02fea230fc81dc80a49fecb499c8dff0c1"
     }
   ]
 }
