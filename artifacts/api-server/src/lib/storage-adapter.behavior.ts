@@ -5,6 +5,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "bimlog-feedback-storage-"));
+const mutableFs: { lstatSync: typeof fs.lstatSync } = fs;
 const checks = new Set<string>();
 function passed(name: string) { assert.ok(!checks.has(name), `duplicate check: ${name}`); checks.add(name); }
 try {
@@ -68,7 +69,7 @@ try {
   const linkRoot = path.join(root, "link-root"), outside = path.join(root, "outside"); fs.mkdirSync(linkRoot); fs.mkdirSync(outside); try { fs.symlinkSync(outside, path.join(linkRoot, "aa"), "junction"); const linked = new LocalDiskStorageAdapter(linkRoot); await assert.rejects(() => linked.download(`aa/bb/${"a".repeat(64)}`), /REPARSE/); passed("static nested reparse denial"); } catch (error) { if ((error as NodeJS.ErrnoException).code !== "EPERM") throw error; }
   const raceRoot = path.join(root, "reparse-race"); const raceAdapter = new LocalDiskStorageAdapter(raceRoot); const raceKey = await raceAdapter.upload(mutableBytes, 1, "race.bin"); const raceFirstPath = path.join(raceRoot, raceKey.split("/")[0]); changed = false;
   fs.readSync = ((...args: Parameters<typeof fs.readSync>) => { const count = originalRead(...args); changed = true; return count; }) as typeof fs.readSync;
-  fs.lstatSync = ((target: fs.PathLike, options?: fs.StatSyncOptions) => { const stat = originalLstat(target, options as never); if (changed && path.resolve(String(target)) === raceFirstPath) return new Proxy(stat, { get(value, property, receiver) { return property === "isSymbolicLink" ? () => true : Reflect.get(value, property, receiver); } }); return stat; }) as typeof fs.lstatSync;
-  try { await assert.rejects(() => raceAdapter.downloadBounded(raceKey, mutableBytes.length), /STORAGE_REPARSE_COMPONENT_DENIED/); passed("nested reparse replacement race"); } finally { fs.readSync = originalRead; fs.lstatSync = originalLstat; }
+  mutableFs.lstatSync = ((target: fs.PathLike, options?: fs.StatSyncOptions) => { const stat = originalLstat(target, options as never); if (changed && path.resolve(String(target)) === raceFirstPath) return new Proxy(stat, { get(value, property, receiver) { return property === "isSymbolicLink" ? () => true : Reflect.get(value, property, receiver); } }); return stat; }) as typeof fs.lstatSync;
+  try { await assert.rejects(() => raceAdapter.downloadBounded(raceKey, mutableBytes.length), /STORAGE_REPARSE_COMPONENT_DENIED/); passed("nested reparse replacement race"); } finally { fs.readSync = originalRead; mutableFs.lstatSync = originalLstat; }
   console.log(`feedback durable storage contract: ${checks.size}/${checks.size} dynamic checks passed`);
 } finally { fs.rmSync(root, { recursive: true, force: true }); }
