@@ -9,14 +9,27 @@ import pg from "pg";
 const urlText = process.env.BIMLOG_FEEDBACK_TEST_DATABASE_URL;
 if (!urlText) throw new Error("BIMLOG_FEEDBACK_TEST_DATABASE_URL is required");
 const parsed = new URL(urlText);
-if (!(["127.0.0.1", "localhost", "::1"].includes(parsed.hostname)) || parsed.pathname !== "/bimlog_feedback_test" || parsed.search || parsed.hash) throw new Error("Feedback test DB must be an exact loopback-only bimlog_feedback_test database");
+if (
+  !["127.0.0.1", "localhost", "::1"].includes(parsed.hostname) ||
+  parsed.pathname !== "/bimlog_feedback_test" ||
+  parsed.search ||
+  parsed.hash
+)
+  throw new Error(
+    "Feedback test DB must be an exact loopback-only bimlog_feedback_test database",
+  );
 process.env.PROD_DATABASE_URL = urlText;
 process.env.JWT_SECRET = "feedback-local-fixture-secret-at-least-32-bytes";
 delete process.env.BIMLOG_FEEDBACK_SCANNER;
 const uploadRoot = path.resolve(".tmp", "feedback-http-uploads");
 if (fs.existsSync(uploadRoot)) {
   const stat = fs.lstatSync(uploadRoot);
-  if (!stat.isDirectory() || stat.isSymbolicLink() || path.basename(uploadRoot) !== "feedback-http-uploads") throw new Error("Feedback upload proof root identity mismatch");
+  if (
+    !stat.isDirectory() ||
+    stat.isSymbolicLink() ||
+    path.basename(uploadRoot) !== "feedback-http-uploads"
+  )
+    throw new Error("Feedback upload proof root identity mismatch");
   fs.rmSync(uploadRoot, { recursive: true });
 }
 process.env.BIMLOG_FEEDBACK_UPLOAD_ROOT = uploadRoot;
@@ -25,17 +38,35 @@ process.env.BIMLOG_FEEDBACK_STORAGE_BACKEND = "local-test";
 const { default: router } = await import("../routes/feedback");
 const { storage: testStorage } = await import("./storage-adapter");
 const { signToken } = await import("../middlewares/auth");
-const { ensureFeedbackSchema, FEEDBACK_SCHEMA_ADVISORY_LOCK } = await import("./feedback-schema-migration");
+const { ensureFeedbackSchema, FEEDBACK_SCHEMA_ADVISORY_LOCK } =
+  await import("./feedback-schema-migration");
 const { pool: appPool } = await import("@workspace/db");
 const testPool = new pg.Pool({ connectionString: urlText });
 // Relay tables form deliberate evidence-preservation cycles (jobs reference receipts/proofs,
 // while those rows reference jobs). Remove only that exact disposable subsystem first; the
 // narrowly scoped CASCADE can therefore remove its own triggers/functions without reaching
 // unrelated schema. Parent fixture tables are then dropped without CASCADE.
-await testPool.query(`DROP TABLE IF EXISTS feedback_relay_purge_key_authorities, feedback_relay_purge_commands, feedback_relay_deletion_proofs, feedback_relay_temporary_objects, feedback_relay_holds, feedback_relay_receipts, feedback_relay_nonces, feedback_relay_custody_events, feedback_relay_jobs CASCADE`);
-await testPool.query(`DROP TABLE IF EXISTS feedback_transcription_jobs, feedback_capture_consents, feedback_audit_events, feedback_assets, feedback_items, project_members, projects, users, companies, fixture_failures; DROP FUNCTION IF EXISTS fixture_reject_audit()`);
-assert.equal((await testPool.query("select count(*)::int n from pg_catalog.pg_class where relnamespace='public'::regnamespace and relname like 'feedback_relay_%' and relkind in ('r','p','v','m')")).rows[0].n, 0, "repeat cleanup must remove the exact relay relations before parents");
-await assert.rejects(() => ensureFeedbackSchema(testPool)); assert.equal((await testPool.query("select to_regclass('feedback_items') value")).rows[0].value, null);
+await testPool.query(
+  `DROP TABLE IF EXISTS feedback_relay_purge_key_authorities, feedback_relay_purge_commands, feedback_relay_deletion_proofs, feedback_relay_temporary_objects, feedback_relay_holds, feedback_relay_receipts, feedback_relay_nonces, feedback_relay_custody_events, feedback_relay_jobs CASCADE`,
+);
+await testPool.query(
+  `DROP TABLE IF EXISTS feedback_transcription_jobs, feedback_capture_consents, feedback_audit_events, feedback_assets, feedback_items, project_members, projects, users, companies, fixture_failures; DROP FUNCTION IF EXISTS fixture_reject_audit()`,
+);
+assert.equal(
+  (
+    await testPool.query(
+      "select count(*)::int n from pg_catalog.pg_class where relnamespace='public'::regnamespace and relname like 'feedback_relay_%' and relkind in ('r','p','v','m')",
+    )
+  ).rows[0].n,
+  0,
+  "repeat cleanup must remove the exact relay relations before parents",
+);
+await assert.rejects(() => ensureFeedbackSchema(testPool));
+assert.equal(
+  (await testPool.query("select to_regclass('feedback_items') value")).rows[0]
+    .value,
+  null,
+);
 await testPool.query(`
   CREATE TABLE companies(id integer PRIMARY KEY, name text NOT NULL);
   CREATE TABLE users(id integer PRIMARY KEY, email text NOT NULL, full_name text NOT NULL, company_id integer NOT NULL REFERENCES companies(id), is_super_admin boolean NOT NULL DEFAULT false);
@@ -43,41 +74,645 @@ await testPool.query(`
   CREATE TABLE project_members(id serial PRIMARY KEY, project_id integer NOT NULL REFERENCES projects(id), user_id integer NOT NULL REFERENCES users(id), role text NOT NULL, joined_at timestamp NOT NULL DEFAULT now(), permissions_override jsonb, status text DEFAULT 'active');
   INSERT INTO companies VALUES (1,'A'),(2,'B'); INSERT INTO users VALUES (11,'a@test.invalid','A',1,false),(22,'b@test.invalid','B',2,false),(33,'admin@test.invalid','Admin',1,true); INSERT INTO projects VALUES (101,'A project','A-1','active',11,now(),now()); INSERT INTO project_members(project_id,user_id,role,status) VALUES(101,11,'member','active');
 `);
-const lockOwner = await testPool.connect(); await lockOwner.query("BEGIN"); await lockOwner.query(`select pg_advisory_xact_lock(${FEEDBACK_SCHEMA_ADVISORY_LOCK})`);
-let migrationSettled = false; const serializedMigration = ensureFeedbackSchema(testPool).finally(() => { migrationSettled = true; });
-await new Promise(resolve => setTimeout(resolve, 100)); assert.equal(migrationSettled, false); await lockOwner.query("COMMIT"); lockOwner.release(); await serializedMigration; await ensureFeedbackSchema(testPool);
-await testPool.query(`CREATE TABLE fixture_failures(event_type text PRIMARY KEY); CREATE FUNCTION fixture_reject_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF EXISTS(SELECT 1 FROM fixture_failures WHERE event_type=NEW.event_type) THEN RAISE EXCEPTION 'fixture audit refusal'; END IF; RETURN NEW; END $$; CREATE TRIGGER fixture_reject_audit_trigger BEFORE INSERT ON feedback_audit_events FOR EACH ROW EXECUTE FUNCTION fixture_reject_audit()`);
+const lockOwner = await testPool.connect();
+await lockOwner.query("BEGIN");
+await lockOwner.query(
+  `select pg_advisory_xact_lock(${FEEDBACK_SCHEMA_ADVISORY_LOCK})`,
+);
+let migrationSettled = false;
+const serializedMigration = ensureFeedbackSchema(testPool).finally(() => {
+  migrationSettled = true;
+});
+await new Promise((resolve) => setTimeout(resolve, 100));
+assert.equal(migrationSettled, false);
+await lockOwner.query("COMMIT");
+lockOwner.release();
+await serializedMigration;
+await ensureFeedbackSchema(testPool);
+await testPool.query(
+  `CREATE TABLE fixture_failures(event_type text PRIMARY KEY); CREATE FUNCTION fixture_reject_audit() RETURNS trigger LANGUAGE plpgsql AS $$ BEGIN IF EXISTS(SELECT 1 FROM fixture_failures WHERE event_type=NEW.event_type) THEN RAISE EXCEPTION 'fixture audit refusal'; END IF; RETURN NEW; END $$; CREATE TRIGGER fixture_reject_audit_trigger BEFORE INSERT ON feedback_audit_events FOR EACH ROW EXECUTE FUNCTION fixture_reject_audit()`,
+);
 
-const app = express(); app.use(express.json()); app.use("/api/v1", router); const server = createServer(app); await new Promise<void>(resolve => server.listen(0, "127.0.0.1", resolve));
-const address = server.address(); if (!address || typeof address === "string") throw new Error("test server failed"); const base = `http://127.0.0.1:${address.port}/api/v1`;
-const tokenA = signToken({ userId: 11, email: "a@test.invalid", companyId: 1, fullName: "A", companyName: "A" });
-const tokenB = signToken({ userId: 22, email: "b@test.invalid", companyId: 2, fullName: "B", companyName: "B" });
-const tokenAdmin = signToken({ userId: 33, email: "admin@test.invalid", companyId: 1, fullName: "Admin", companyName: "A", isSuperAdmin: true });
-const headers = (token: string, key?: string) => ({ "Content-Type": "application/json", Authorization: `Bearer ${token}`, ...(key ? { "Idempotency-Key": key } : {}) });
-const body = { feedbackType: "bug", priority: "high", message: "Concurrent governed fixture", module: "Fixture", projectId: 101, pageUrl: "http://localhost/fixture", metadata: { userEmail: "must-not-persist@example.invalid", arbitrary: "must-not-persist", viewport: "390x844", language: "es" } };
+const app = express();
+app.use(express.json());
+app.use("/api/v1", router);
+const server = createServer(app);
+await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+const address = server.address();
+if (!address || typeof address === "string")
+  throw new Error("test server failed");
+const base = `http://127.0.0.1:${address.port}/api/v1`;
+const tokenA = signToken({
+  userId: 11,
+  email: "a@test.invalid",
+  companyId: 1,
+  fullName: "A",
+  companyName: "A",
+});
+const tokenB = signToken({
+  userId: 22,
+  email: "b@test.invalid",
+  companyId: 2,
+  fullName: "B",
+  companyName: "B",
+});
+const tokenAdmin = signToken({
+  userId: 33,
+  email: "admin@test.invalid",
+  companyId: 1,
+  fullName: "Admin",
+  companyName: "A",
+  isSuperAdmin: true,
+});
+const headers = (token: string, key?: string) => ({
+  "Content-Type": "application/json",
+  Authorization: `Bearer ${token}`,
+  ...(key ? { "Idempotency-Key": key } : {}),
+});
+const body = {
+  feedbackType: "bug",
+  priority: "high",
+  message: "Concurrent governed fixture",
+  module: "Fixture",
+  projectId: 101,
+  pageUrl: "http://localhost/fixture",
+  metadata: {
+    userEmail: "must-not-persist@example.invalid",
+    arbitrary: "must-not-persist",
+    viewport: "390x844",
+    language: "es",
+  },
+};
 try {
-  await testPool.query("insert into fixture_failures values ('created')"); const rolledBack = await fetch(`${base}/feedback`, { method: "POST", headers: headers(tokenA, "rollback-key"), body: JSON.stringify(body) }); assert.equal(rolledBack.status, 500); assert.equal((await testPool.query("select count(*)::int n from feedback_items")).rows[0].n, 0); await testPool.query("delete from fixture_failures");
-  const concurrent = await Promise.all(Array.from({ length: 4 }, () => fetch(`${base}/feedback`, { method: "POST", headers: headers(tokenA, "same-key"), body: JSON.stringify(body) })));
-  assert.ok(concurrent.every(response => [200, 201].includes(response.status))); const payloads = await Promise.all(concurrent.map(response => response.json())) as Array<{ feedback: { id: number } }>; assert.equal(new Set(payloads.map(value => value.feedback.id)).size, 1);
-  const count = await testPool.query("select count(*)::int n from feedback_items"); assert.equal(count.rows[0].n, 1); const audits = await testPool.query("select count(*)::int n from feedback_audit_events where event_type='created'"); assert.equal(audits.rows[0].n, 1);
-  const divergent = await fetch(`${base}/feedback`, { method: "POST", headers: headers(tokenA, "same-key"), body: JSON.stringify({ ...body, message: "different" }) }); assert.equal(divergent.status, 409);
-  const denied = await fetch(`${base}/feedback`, { method: "POST", headers: headers(tokenB, "cross-company"), body: JSON.stringify(body) }); assert.equal(denied.status, 403);
-  const id = payloads[0].feedback.id; await testPool.query("update project_members set status='suspended' where user_id=11"); const suspended = await fetch(`${base}/feedback/${id}/history`, { headers: { Authorization: `Bearer ${tokenA}` } }); assert.equal(suspended.status, 403);
-  await testPool.query("update project_members set status='active' where user_id=11"); assert.equal((await fetch(`${base}/feedback/${id}/history`, { headers: { Authorization: `Bearer ${tokenAdmin}` } })).status,403,"superadmin must not bypass reporter authority on customer routes"); const uploadFile = () => { const file = new FormData(); file.append("kind", "attachment"); file.append("origin","user-file-import"); file.append("files", new Blob(["bounded fixture"], { type: "text/plain" }), "field-note.txt"); file.append("transformations", JSON.stringify({ "asset-key": null })); return fetch(`${base}/feedback/${id}/assets`, { method: "POST", headers: { Authorization: `Bearer ${tokenA}`, "Idempotency-Key": "asset-key" }, body: file }); }; const uploadRace = await Promise.all(Array.from({ length: 4 }, uploadFile)); assert.deepEqual(uploadRace.map(response => response.status).sort(), [200,200,200,201]);
-  const assetPayloads = await Promise.all(uploadRace.map(response => response.json())) as Array<{ assets: Array<{ id: number; scanState: string }> }>; assert.equal(new Set(assetPayloads.map(payload => payload.assets[0].id)).size,1); const assetPayload=assetPayloads[0]; assert.equal(assetPayload.assets[0].scanState, "quarantined"); const download = await fetch(`${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`, { headers: { Authorization: `Bearer ${tokenA}` } }); assert.equal(download.status, 423);
-  const duplicate = new FormData(); duplicate.append("kind", "attachment"); duplicate.append("origin","user-file-import"); duplicate.append("files", new Blob(["bounded fixture"], { type: "text/plain" }), "field-note.txt"); duplicate.append("transformations", JSON.stringify({ "asset-key": null })); const duplicateResponse = await fetch(`${base}/feedback/${id}/assets`, { method: "POST", headers: { Authorization: `Bearer ${tokenA}`, "Idempotency-Key": "asset-key" }, body: duplicate }); assert.equal(duplicateResponse.status, 200); const assets = await testPool.query("select count(*)::int n from feedback_assets"); assert.equal(assets.rows[0].n, 1);
-  const importedAudio = new FormData(); importedAudio.append("kind","audio"); importedAudio.append("origin","user-file-import"); importedAudio.append("files",new Blob([new Uint8Array([0x1a,0x45,0xdf,0xa3,0x01])],{type:"audio/webm"}),"field-audio.webm"); importedAudio.append("transformations",JSON.stringify({"imported-audio-key":null})); const importedAudioResponse=await fetch(`${base}/feedback/${id}/assets`,{method:"POST",headers:{Authorization:`Bearer ${tokenA}`,"Idempotency-Key":"imported-audio-key"},body:importedAudio});assert.equal(importedAudioResponse.status,201,"imported audio must not require browser capture consent");
-  const storedFiles = fs.existsSync(uploadRoot) ? fs.readdirSync(uploadRoot, { recursive: true }).filter(value => /^[a-f0-9]{64}$/.test(path.basename(String(value)))) : []; assert.equal(storedFiles.length, 2);
-  const captureConsentResponse=await fetch(`${base}/feedback/capture-consents`,{method:"POST",headers:headers(tokenA),body:JSON.stringify({captureKind:"audio",purpose:"single evidence fixture",accepted:true})});const captureConsent=((await captureConsentResponse.json()) as {consent:{id:string}}).consent.id;const captured=(key:string,tail:number)=>{const form=new FormData();form.append("kind","audio");form.append("origin","browser-microphone");form.append("consentId",captureConsent);form.append("files",new Blob([new Uint8Array([0x1a,0x45,0xdf,0xa3,tail])],{type:"audio/webm"}),`${key}.webm`);form.append("transformations",JSON.stringify({[key]:null}));return fetch(`${base}/feedback/${id}/assets`,{method:"POST",headers:{Authorization:`Bearer ${tokenA}`,"Idempotency-Key":key},body:form});};const consentRace=await Promise.all([captured("captured-one",1),captured("captured-two",2)]);assert.deepEqual(consentRace.map(response=>response.status).sort(),[201,409],"only one racing evidence upload may consume capture consent");
-  let simulatePhysicalOversize=false;(testStorage as typeof testStorage&{downloadBounded:(key:string,maxBytes:number)=>Promise<Buffer>}).downloadBounded=async(key,maxBytes)=>{if(simulatePhysicalOversize)throw Object.assign(new Error("bounded fixture physical cap"),{code:"STORAGE_OBJECT_TOO_LARGE"});const bytes=await testStorage.download(key);assert.ok(bytes.byteLength<=maxBytes);return bytes;};await testPool.query("update feedback_assets set scan_state='clean', scanner_adapter='local-fixture', scanned_at=now() where id=$1", [assetPayload.assets[0].id]);await testPool.query("update feedback_assets set byte_size=$2 where id=$1",[assetPayload.assets[0].id,20*1024*1024+1]);assert.equal((await fetch(`${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`,{headers:{Authorization:`Bearer ${tokenA}`}})).status,413,"oversized metadata must deny before storage download");await testPool.query("update feedback_assets set byte_size=$2 where id=$1",[assetPayload.assets[0].id,"bounded fixture".length]);simulatePhysicalOversize=true;assert.equal((await fetch(`${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`,{headers:{Authorization:`Bearer ${tokenA}`}})).status,413,"bounded adapter physical-object abort must map to denial");simulatePhysicalOversize=false; const cleanDownload = await fetch(`${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`, { headers: { Authorization: `Bearer ${tokenA}` } }); assert.equal(cleanDownload.status, 200); assert.equal(await cleanDownload.text(), "bounded fixture");
-  const triage = await Promise.all(["one", "two"].map(() => fetch(`${base}/feedback/admin/${id}`, { method: "PATCH", headers: headers(tokenAdmin), body: JSON.stringify({ observedVersion: 1, status: "triaged" }) }))); assert.deepEqual(triage.map(value => value.status).sort(), [200, 409]);
-  await testPool.query("insert into fixture_failures values ('triage_updated')"); const auditRollback = await fetch(`${base}/feedback/admin/${id}`, { method: "PATCH", headers: headers(tokenAdmin), body: JSON.stringify({ observedVersion: 2, status: "accepted" }) }); assert.equal(auditRollback.status, 500); assert.equal((await testPool.query("select status from feedback_items where id=$1", [id])).rows[0].status, "triaged"); await testPool.query("delete from fixture_failures");
-  await testPool.query("update feedback_items set status='verified', version=3 where id=$1", [id]); const staleReopen = await fetch(`${base}/feedback/${id}/reopen`, { method: "POST", headers: headers(tokenA), body: JSON.stringify({ observedVersion: 2, reason: "stale" }) }); assert.equal(staleReopen.status, 409);
-  await testPool.query("update feedback_items set customer_visible=false where id=$1", [id]); assert.equal((await fetch(`${base}/feedback/${id}/history`, { headers: { Authorization: `Bearer ${tokenA}` } })).status, 403); await testPool.query("update feedback_items set customer_visible=true where id=$1", [id]);
-  await testPool.query("insert into feedback_capture_consents(id,actor_user_id,feedback_id,capture_kind,purpose,notice_version) values('audio-consent',11,$1,'audio','fixture','feedback-capture-v1')", [id]); const audio = await testPool.query("insert into feedback_assets(feedback_id,project_id,uploaded_by_id,kind,original_name,safe_name,media_type,byte_size,sha256,storage_path,scan_state,scanner_adapter,scanned_at,provenance) values($1,101,11,'audio','voice.webm','voice.webm','audio/webm',4,'sourcehash','fixture','clean','local-fixture',now(),'{}') returning id", [id]);
-  const transcriptionHeaders = { ...headers(tokenA, "transcription-key") }; const transcriptionBody = JSON.stringify({ assetId: audio.rows[0].id, consentId: "audio-consent" }); const blocked = await fetch(`${base}/feedback/${id}/transcription`, { method: "POST", headers: transcriptionHeaders, body: transcriptionBody }); assert.equal(blocked.status, 424);const blockedJob=((await blocked.json()) as {job:{id:number}}).job;assert.doesNotMatch(JSON.stringify((await (await fetch(`${base}/feedback/mine`,{headers:{Authorization:`Bearer ${tokenA}`}})).json())),/EXTERNAL_TRANSCRIPTION_NOT_ACTIVATED/); const replay = await fetch(`${base}/feedback/${id}/transcription`, { method: "POST", headers: transcriptionHeaders, body: transcriptionBody }); assert.equal(replay.status, 424); assert.equal((await testPool.query("select count(*)::int n from feedback_transcription_jobs")).rows[0].n, 1);process.env.BIMLOG_FEEDBACK_ALLOW_LOCAL_FIXTURES="true";process.env.BIMLOG_FEEDBACK_TRANSCRIPTION_ADAPTER="local-fixture";const successorRequest=()=>fetch(`${base}/feedback/${id}/transcription`,{method:"POST",headers:headers(tokenA,"transcription-successor-key"),body:JSON.stringify({assetId:audio.rows[0].id,consentId:"audio-consent",retryOfJobId:blockedJob.id})});const successors=await Promise.all([successorRequest(),successorRequest()]);assert.deepEqual(successors.map(response=>response.status).sort(),[200,201],"racing successor requests must converge on one activated job");delete process.env.BIMLOG_FEEDBACK_ALLOW_LOCAL_FIXTURES;delete process.env.BIMLOG_FEEDBACK_TRANSCRIPTION_ADAPTER;assert.equal((await testPool.query("select count(*)::int n from feedback_transcription_jobs")).rows[0].n,2);
-  const relayAssets=await testPool.query("select id,sha256,byte_size from feedback_assets where feedback_id=$1 order by id limit 2",[id]);const relayHash="a".repeat(64),policyHash="b".repeat(64);const relayOne=await testPool.query("insert into feedback_relay_jobs(feedback_id,asset_id,company_id,project_id,state,version,relay_mode,destination_id,object_id,idempotency_key,request_hash,source_byte_count,source_sha256,policy_id,policy_version,policy_sha256,lineage_id,last_error_code) values($1,$2,1,101,'queued',1,'queue','fixture-destination','fixture-object-1','relay-key-1',$3,$4,$5,'fixture-policy','1',$6,'fixture-lineage','RAW_INTERNAL_FIRST') returning id",[id,relayAssets.rows[0].id,relayHash,relayAssets.rows[0].byte_size,relayAssets.rows[0].sha256,policyHash]);const relayTwo=await testPool.query("insert into feedback_relay_jobs(feedback_id,asset_id,company_id,project_id,state,version,relay_mode,destination_id,object_id,idempotency_key,request_hash,source_byte_count,source_sha256,policy_id,policy_version,policy_sha256,lineage_id,last_error_code,lease_token,lease_owner,lease_expires_at) values($1,$2,1,101,'queued',1,'queue','fixture-destination','fixture-object-2','relay-key-2',$3,$4,$5,'fixture-policy','1',$6,'fixture-lineage','RAW_INTERNAL_SECOND','fixture-lease','fixture-worker',now()+interval '5 minutes') returning id",[id,relayAssets.rows[1].id,relayHash,relayAssets.rows[1].byte_size,relayAssets.rows[1].sha256,policyHash]);await testPool.query("select feedback_relay_transition_job($1,1,'fixture-lease',0,'manual-review','fixture-event','state-transitioned','system',null,'RAW_CUSTODY_SECRET')",[relayTwo.rows[0].id]);const mineDto=(await (await fetch(`${base}/feedback/mine`,{headers:{Authorization:`Bearer ${tokenA}`}})).json()) as {feedback:Array<{id:number;relays:Array<{assetId:number;version:number;reason:string}>}>};const customerRelays=mineDto.feedback.find(row=>row.id===id)?.relays;assert.equal(customerRelays?.length,2,"every evidence lineage must remain visible");assert.deepEqual(customerRelays?.map(relay=>relay.version).sort(),[1,2]);assert.equal(customerRelays?.find(relay=>relay.version===2)?.reason,"support-review");assert.doesNotMatch(JSON.stringify(customerRelays),/RAW_INTERNAL|RAW_CUSTODY|fixture-lineage|fixture-destination/);assert.ok(relayOne.rows[0].id);
-  const formula = await fetch(`${base}/feedback`, { method: "POST", headers: headers(tokenA, "formula-key"), body: JSON.stringify({ ...body, message: "=HYPERLINK(\"bad\")" }) }); assert.equal(formula.status, 201); const csv = await fetch(`${base}/feedback/admin/export.csv`, { headers: { Authorization: `Bearer ${tokenAdmin}`, "X-Export-Reason": "fixture review" } }); assert.equal(csv.status, 200); assert.match(await csv.text(), /'=HYPERLINK/);
-  assert.equal((await testPool.query("select retention_hold,expires_at from feedback_assets where id=$1", [assetPayload.assets[0].id])).rows[0].retention_hold, true);
+  await testPool.query("insert into fixture_failures values ('created')");
+  const rolledBack = await fetch(`${base}/feedback`, {
+    method: "POST",
+    headers: headers(tokenA, "rollback-key"),
+    body: JSON.stringify(body),
+  });
+  assert.equal(rolledBack.status, 500);
+  assert.equal(
+    (await testPool.query("select count(*)::int n from feedback_items")).rows[0]
+      .n,
+    0,
+  );
+  await testPool.query("delete from fixture_failures");
+  const concurrent = await Promise.all(
+    Array.from({ length: 4 }, () =>
+      fetch(`${base}/feedback`, {
+        method: "POST",
+        headers: headers(tokenA, "same-key"),
+        body: JSON.stringify(body),
+      }),
+    ),
+  );
+  assert.ok(
+    concurrent.every((response) => [200, 201].includes(response.status)),
+  );
+  const payloads = (await Promise.all(
+    concurrent.map((response) => response.json()),
+  )) as Array<{ feedback: { id: number } }>;
+  assert.equal(new Set(payloads.map((value) => value.feedback.id)).size, 1);
+  const count = await testPool.query(
+    "select count(*)::int n from feedback_items",
+  );
+  assert.equal(count.rows[0].n, 1);
+  const audits = await testPool.query(
+    "select count(*)::int n from feedback_audit_events where event_type='created'",
+  );
+  assert.equal(audits.rows[0].n, 1);
+  const divergent = await fetch(`${base}/feedback`, {
+    method: "POST",
+    headers: headers(tokenA, "same-key"),
+    body: JSON.stringify({ ...body, message: "different" }),
+  });
+  assert.equal(divergent.status, 409);
+  const denied = await fetch(`${base}/feedback`, {
+    method: "POST",
+    headers: headers(tokenB, "cross-company"),
+    body: JSON.stringify(body),
+  });
+  assert.equal(denied.status, 403);
+  const id = payloads[0].feedback.id;
+  await testPool.query(
+    "update project_members set status='suspended' where user_id=11",
+  );
+  const suspended = await fetch(`${base}/feedback/${id}/history`, {
+    headers: { Authorization: `Bearer ${tokenA}` },
+  });
+  assert.equal(suspended.status, 403);
+  await testPool.query(
+    "update project_members set status='active' where user_id=11",
+  );
+  assert.equal(
+    (
+      await fetch(`${base}/feedback/${id}/history`, {
+        headers: { Authorization: `Bearer ${tokenAdmin}` },
+      })
+    ).status,
+    403,
+    "superadmin must not bypass reporter authority on customer routes",
+  );
+  const uploadFile = () => {
+    const file = new FormData();
+    file.append("kind", "attachment");
+    file.append("origin", "user-file-import");
+    file.append(
+      "files",
+      new Blob(["bounded fixture"], { type: "text/plain" }),
+      "field-note.txt",
+    );
+    file.append("transformations", JSON.stringify({ "asset-key": null }));
+    return fetch(`${base}/feedback/${id}/assets`, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${tokenA}`,
+        "Idempotency-Key": "asset-key",
+      },
+      body: file,
+    });
+  };
+  const uploadRace = await Promise.all(Array.from({ length: 4 }, uploadFile));
+  assert.deepEqual(
+    uploadRace.map((response) => response.status).sort(),
+    [200, 200, 200, 201],
+  );
+  const assetPayloads = (await Promise.all(
+    uploadRace.map((response) => response.json()),
+  )) as Array<{ assets: Array<{ id: number; scanState: string }> }>;
+  assert.equal(
+    new Set(assetPayloads.map((payload) => payload.assets[0].id)).size,
+    1,
+  );
+  const assetPayload = assetPayloads[0];
+  assert.equal(assetPayload.assets[0].scanState, "quarantined");
+  const download = await fetch(
+    `${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`,
+    { headers: { Authorization: `Bearer ${tokenA}` } },
+  );
+  assert.equal(download.status, 423);
+  const duplicate = new FormData();
+  duplicate.append("kind", "attachment");
+  duplicate.append("origin", "user-file-import");
+  duplicate.append(
+    "files",
+    new Blob(["bounded fixture"], { type: "text/plain" }),
+    "field-note.txt",
+  );
+  duplicate.append("transformations", JSON.stringify({ "asset-key": null }));
+  const duplicateResponse = await fetch(`${base}/feedback/${id}/assets`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${tokenA}`,
+      "Idempotency-Key": "asset-key",
+    },
+    body: duplicate,
+  });
+  assert.equal(duplicateResponse.status, 200);
+  const assets = await testPool.query(
+    "select count(*)::int n from feedback_assets",
+  );
+  assert.equal(assets.rows[0].n, 1);
+  const importedAudio = new FormData();
+  importedAudio.append("kind", "audio");
+  importedAudio.append("origin", "user-file-import");
+  importedAudio.append(
+    "files",
+    new Blob([new Uint8Array([0x1a, 0x45, 0xdf, 0xa3, 0x01])], {
+      type: "audio/webm",
+    }),
+    "field-audio.webm",
+  );
+  importedAudio.append(
+    "transformations",
+    JSON.stringify({ "imported-audio-key": null }),
+  );
+  const importedAudioResponse = await fetch(`${base}/feedback/${id}/assets`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${tokenA}`,
+      "Idempotency-Key": "imported-audio-key",
+    },
+    body: importedAudio,
+  });
+  assert.equal(
+    importedAudioResponse.status,
+    201,
+    "imported audio must not require browser capture consent",
+  );
+  const storedFiles = fs.existsSync(uploadRoot)
+    ? fs
+        .readdirSync(uploadRoot, { recursive: true })
+        .filter((value) => /^[a-f0-9]{64}$/.test(path.basename(String(value))))
+    : [];
+  assert.equal(storedFiles.length, 2);
+  const captureConsentResponse = await fetch(
+    `${base}/feedback/capture-consents`,
+    {
+      method: "POST",
+      headers: headers(tokenA),
+      body: JSON.stringify({
+        captureKind: "audio",
+        purpose: "single evidence fixture",
+        accepted: true,
+      }),
+    },
+  );
+  const captureConsent = (
+    (await captureConsentResponse.json()) as { consent: { id: string } }
+  ).consent.id;
+  const captured = (key: string, tail: number) => {
+    const form = new FormData();
+    form.append("kind", "audio");
+    form.append("origin", "browser-microphone");
+    form.append("consentId", captureConsent);
+    form.append(
+      "files",
+      new Blob([new Uint8Array([0x1a, 0x45, 0xdf, 0xa3, tail])], {
+        type: "audio/webm",
+      }),
+      `${key}.webm`,
+    );
+    form.append("transformations", JSON.stringify({ [key]: null }));
+    return fetch(`${base}/feedback/${id}/assets`, {
+      method: "POST",
+      headers: { Authorization: `Bearer ${tokenA}`, "Idempotency-Key": key },
+      body: form,
+    });
+  };
+  const consentRace = await Promise.all([
+    captured("captured-one", 1),
+    captured("captured-two", 2),
+  ]);
+  assert.deepEqual(
+    consentRace.map((response) => response.status).sort(),
+    [201, 409],
+    "only one racing evidence upload may consume capture consent",
+  );
+  let simulatePhysicalOversize = false;
+  (
+    testStorage as typeof testStorage & {
+      downloadBounded: (key: string, maxBytes: number) => Promise<Buffer>;
+    }
+  ).downloadBounded = async (key, maxBytes) => {
+    if (simulatePhysicalOversize)
+      throw Object.assign(new Error("bounded fixture physical cap"), {
+        code: "STORAGE_OBJECT_TOO_LARGE",
+      });
+    const bytes = await testStorage.download(key);
+    assert.ok(bytes.byteLength <= maxBytes);
+    return bytes;
+  };
+  await testPool.query(
+    "update feedback_assets set scan_state='clean', scanner_adapter='local-fixture', scanned_at=now() where id=$1",
+    [assetPayload.assets[0].id],
+  );
+  await testPool.query("update feedback_assets set byte_size=$2 where id=$1", [
+    assetPayload.assets[0].id,
+    20 * 1024 * 1024 + 1,
+  ]);
+  assert.equal(
+    (
+      await fetch(
+        `${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`,
+        { headers: { Authorization: `Bearer ${tokenA}` } },
+      )
+    ).status,
+    413,
+    "oversized metadata must deny before storage download",
+  );
+  await testPool.query("update feedback_assets set byte_size=$2 where id=$1", [
+    assetPayload.assets[0].id,
+    "bounded fixture".length,
+  ]);
+  simulatePhysicalOversize = true;
+  assert.equal(
+    (
+      await fetch(
+        `${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`,
+        { headers: { Authorization: `Bearer ${tokenA}` } },
+      )
+    ).status,
+    413,
+    "bounded adapter physical-object abort must map to denial",
+  );
+  simulatePhysicalOversize = false;
+  const cleanDownload = await fetch(
+    `${base}/feedback/${id}/assets/${assetPayload.assets[0].id}/download`,
+    { headers: { Authorization: `Bearer ${tokenA}` } },
+  );
+  assert.equal(cleanDownload.status, 200);
+  assert.equal(await cleanDownload.text(), "bounded fixture");
+  const triage = await Promise.all(
+    ["one", "two"].map(() =>
+      fetch(`${base}/feedback/admin/${id}`, {
+        method: "PATCH",
+        headers: headers(tokenAdmin),
+        body: JSON.stringify({ observedVersion: 1, status: "triaged" }),
+      }),
+    ),
+  );
+  assert.deepEqual(triage.map((value) => value.status).sort(), [200, 409]);
+  await testPool.query(
+    "insert into fixture_failures values ('triage_updated')",
+  );
+  const auditRollback = await fetch(`${base}/feedback/admin/${id}`, {
+    method: "PATCH",
+    headers: headers(tokenAdmin),
+    body: JSON.stringify({ observedVersion: 2, status: "accepted" }),
+  });
+  assert.equal(auditRollback.status, 500);
+  assert.equal(
+    (
+      await testPool.query("select status from feedback_items where id=$1", [
+        id,
+      ])
+    ).rows[0].status,
+    "triaged",
+  );
+  await testPool.query("delete from fixture_failures");
+  await testPool.query(
+    "update feedback_items set status='verified', version=3 where id=$1",
+    [id],
+  );
+  const staleReopen = await fetch(`${base}/feedback/${id}/reopen`, {
+    method: "POST",
+    headers: headers(tokenA),
+    body: JSON.stringify({ observedVersion: 2, reason: "stale" }),
+  });
+  assert.equal(staleReopen.status, 409);
+  await testPool.query(
+    "update feedback_items set customer_visible=false where id=$1",
+    [id],
+  );
+  assert.equal(
+    (
+      await fetch(`${base}/feedback/${id}/history`, {
+        headers: { Authorization: `Bearer ${tokenA}` },
+      })
+    ).status,
+    403,
+  );
+  await testPool.query(
+    "update feedback_items set customer_visible=true where id=$1",
+    [id],
+  );
+  await testPool.query(
+    "insert into feedback_capture_consents(id,actor_user_id,feedback_id,capture_kind,purpose,notice_version) values('audio-consent',11,$1,'audio','fixture','feedback-capture-v1')",
+    [id],
+  );
+  const audio = await testPool.query(
+    "insert into feedback_assets(feedback_id,project_id,uploaded_by_id,kind,original_name,safe_name,media_type,byte_size,sha256,storage_path,scan_state,scanner_adapter,scanned_at,provenance) values($1,101,11,'audio','voice.webm','voice.webm','audio/webm',4,'sourcehash','fixture','clean','local-fixture',now(),'{}') returning id",
+    [id],
+  );
+  const transcriptionHeaders = { ...headers(tokenA, "transcription-key") };
+  const transcriptionBody = JSON.stringify({
+    assetId: audio.rows[0].id,
+    consentId: "audio-consent",
+  });
+  const blocked = await fetch(`${base}/feedback/${id}/transcription`, {
+    method: "POST",
+    headers: transcriptionHeaders,
+    body: transcriptionBody,
+  });
+  assert.equal(blocked.status, 424);
+  const blockedJob = ((await blocked.json()) as { job: { id: number } }).job;
+  assert.doesNotMatch(
+    JSON.stringify(
+      await (
+        await fetch(`${base}/feedback/mine`, {
+          headers: { Authorization: `Bearer ${tokenA}` },
+        })
+      ).json(),
+    ),
+    /EXTERNAL_TRANSCRIPTION_NOT_ACTIVATED/,
+  );
+  const replay = await fetch(`${base}/feedback/${id}/transcription`, {
+    method: "POST",
+    headers: transcriptionHeaders,
+    body: transcriptionBody,
+  });
+  assert.equal(replay.status, 424);
+  assert.equal(
+    (
+      await testPool.query(
+        "select count(*)::int n from feedback_transcription_jobs",
+      )
+    ).rows[0].n,
+    1,
+  );
+  process.env.BIMLOG_FEEDBACK_ALLOW_LOCAL_FIXTURES = "true";
+  process.env.BIMLOG_FEEDBACK_TRANSCRIPTION_ADAPTER = "local-fixture";
+  const successorRequest = () =>
+    fetch(`${base}/feedback/${id}/transcription`, {
+      method: "POST",
+      headers: headers(tokenA, "transcription-successor-key"),
+      body: JSON.stringify({
+        assetId: audio.rows[0].id,
+        consentId: "audio-consent",
+        retryOfJobId: blockedJob.id,
+      }),
+    });
+  const successors = await Promise.all([
+    successorRequest(),
+    successorRequest(),
+  ]);
+  assert.deepEqual(
+    successors.map((response) => response.status).sort(),
+    [200, 201],
+    "racing successor requests must converge on one activated job",
+  );
+  delete process.env.BIMLOG_FEEDBACK_ALLOW_LOCAL_FIXTURES;
+  delete process.env.BIMLOG_FEEDBACK_TRANSCRIPTION_ADAPTER;
+  assert.equal(
+    (
+      await testPool.query(
+        "select count(*)::int n from feedback_transcription_jobs",
+      )
+    ).rows[0].n,
+    2,
+  );
+  const relayAssets = await testPool.query(
+    `select a.id,a.sha256,a.byte_size,a.scan_state,a.scanned_at,a.feedback_id,a.project_id,
+            f.company_id,f.customer_visible,u.company_id uploader_company,
+            pu.company_id project_company,pm.status member_status
+       from feedback_assets a
+       join feedback_items f on f.id=a.feedback_id
+       join users u on u.id=a.uploaded_by_id
+       join projects p on p.id=a.project_id
+       join users pu on pu.id=p.created_by_id
+       join project_members pm on pm.project_id=p.id and pm.user_id=f.user_id
+      where a.feedback_id=$1 and a.scan_state='clean' and a.scanned_at is not null
+      order by a.id limit 2`,
+    [id],
+  );
+  assert.equal(
+    relayAssets.rowCount,
+    2,
+    "two clean scanned relay assets required",
+  );
+  for (const asset of relayAssets.rows) {
+    assert.equal(asset.feedback_id, id);
+    assert.equal(asset.project_id, 101);
+    assert.equal(asset.company_id, 1);
+    assert.equal(asset.uploader_company, 1);
+    assert.equal(asset.project_company, 1);
+    assert.equal(asset.member_status, "active");
+    assert.equal(asset.customer_visible, true);
+    assert.equal(asset.scan_state, "clean");
+    assert.ok(asset.scanned_at);
+    assert.ok(Number(asset.byte_size) > 0);
+    assert.ok(String(asset.sha256).length > 0);
+  }
+  assert.equal(
+    (
+      await testPool.query(
+        "select count(*)::int n from feedback_capture_consents where id='audio-consent' and actor_user_id=11 and feedback_id=$1 and capture_kind='audio' and revoked_at is null",
+        [id],
+      )
+    ).rows[0].n,
+    1,
+    "transcription consent fixture must remain active",
+  );
+  const relayHash = "a".repeat(64),
+    policyHash = "b".repeat(64);
+  assert.match(relayHash, /^[a-f0-9]{64}$/);
+  assert.match(policyHash, /^[a-f0-9]{64}$/);
+  const relayOne = await testPool.query(
+    "insert into feedback_relay_jobs(feedback_id,asset_id,company_id,project_id,state,version,relay_mode,destination_id,object_id,idempotency_key,request_hash,source_byte_count,source_sha256,policy_id,policy_version,policy_sha256,lineage_id,last_error_code) values($1,$2,1,101,'queued',1,'queue','fixture-destination','fixture-object-1','relay-key-1',$3,$4,$5,'fixture-policy','1',$6,'fixture-lineage','RAW_INTERNAL_FIRST') returning id",
+    [
+      id,
+      relayAssets.rows[0].id,
+      relayHash,
+      relayAssets.rows[0].byte_size,
+      relayAssets.rows[0].sha256,
+      policyHash,
+    ],
+  );
+  const relayTwo = await testPool.query(
+    "insert into feedback_relay_jobs(feedback_id,asset_id,company_id,project_id,state,version,relay_mode,destination_id,object_id,idempotency_key,request_hash,source_byte_count,source_sha256,policy_id,policy_version,policy_sha256,lineage_id,last_error_code,lease_token,lease_owner,lease_expires_at) values($1,$2,1,101,'queued',1,'queue','fixture-destination','fixture-object-2','relay-key-2',$3,$4,$5,'fixture-policy','1',$6,'fixture-lineage','RAW_INTERNAL_SECOND','fixture-lease','fixture-worker',now()+interval '5 minutes') returning id",
+    [
+      id,
+      relayAssets.rows[1].id,
+      relayHash,
+      relayAssets.rows[1].byte_size,
+      relayAssets.rows[1].sha256,
+      policyHash,
+    ],
+  );
+  const relayFixtureAuthority = await testPool.query(
+    `select j.id,j.feedback_id,j.company_id,j.project_id,j.state,j.version,
+            j.policy_id,j.policy_version,j.policy_sha256,
+            count(e.id)::int custody_count,min(e.sequence)::int first_sequence,
+            bool_and(e.to_state='queued') custody_queued,
+            count(h.id)::int active_holds
+       from feedback_relay_jobs j
+       join feedback_relay_custody_events e on e.job_id=j.id
+       left join feedback_relay_holds h on h.job_id=j.id and h.released_at is null
+      where j.id=any($1::bigint[])
+      group by j.id order by j.id`,
+    [[relayOne.rows[0].id, relayTwo.rows[0].id]],
+  );
+  assert.equal(relayFixtureAuthority.rowCount, 2);
+  for (const job of relayFixtureAuthority.rows) {
+    assert.equal(job.feedback_id, id);
+    assert.equal(job.company_id, 1);
+    assert.equal(job.project_id, 101);
+    assert.equal(job.state, "queued");
+    assert.equal(job.version, 1);
+    assert.equal(job.policy_id, "fixture-policy");
+    assert.equal(job.policy_version, "1");
+    assert.equal(job.policy_sha256, policyHash);
+    assert.equal(job.custody_count, 1);
+    assert.equal(job.first_sequence, 1);
+    assert.equal(job.custody_queued, true);
+    assert.equal(job.active_holds, 0);
+  }
+  const relayTwoAuthority = (
+    await testPool.query(
+      `select j.state,j.version,j.fencing_token,j.lease_token,j.lease_expires_at,
+              count(e.id)::int custody_count,min(e.sequence)::int first_sequence,
+              bool_and(e.to_state='queued') custody_queued,
+              count(h.id)::int active_holds
+         from feedback_relay_jobs j
+         join feedback_relay_custody_events e on e.job_id=j.id
+         left join feedback_relay_holds h on h.job_id=j.id and h.released_at is null
+        where j.id=$1
+        group by j.id`,
+      [relayTwo.rows[0].id],
+    )
+  ).rows[0];
+  assert.equal(relayTwoAuthority.state, "queued");
+  assert.equal(relayTwoAuthority.version, 1);
+  assert.equal(Number(relayTwoAuthority.fencing_token), 0);
+  assert.equal(relayTwoAuthority.lease_token, "fixture-lease");
+  assert.ok(
+    new Date(relayTwoAuthority.lease_expires_at).getTime() > Date.now(),
+  );
+  assert.equal(relayTwoAuthority.custody_count, 1);
+  assert.equal(relayTwoAuthority.first_sequence, 1);
+  assert.equal(relayTwoAuthority.custody_queued, true);
+  assert.equal(relayTwoAuthority.active_holds, 0);
+  await testPool.query(
+    "select feedback_relay_transition_job($1,1,'fixture-lease',0,'manual-review','fixture-event','state-transitioned','system',null,'RAW_CUSTODY_SECRET')",
+    [relayTwo.rows[0].id],
+  );
+  const mineDto = (await (
+    await fetch(`${base}/feedback/mine`, {
+      headers: { Authorization: `Bearer ${tokenA}` },
+    })
+  ).json()) as {
+    feedback: Array<{
+      id: number;
+      relays: Array<{ assetId: number; version: number; reason: string }>;
+    }>;
+  };
+  const customerRelays = mineDto.feedback.find((row) => row.id === id)?.relays;
+  assert.equal(
+    customerRelays?.length,
+    2,
+    "every evidence lineage must remain visible",
+  );
+  assert.deepEqual(
+    customerRelays?.map((relay) => relay.version).sort(),
+    [1, 2],
+  );
+  assert.equal(
+    customerRelays?.find((relay) => relay.version === 2)?.reason,
+    "support-review",
+  );
+  assert.doesNotMatch(
+    JSON.stringify(customerRelays),
+    /RAW_INTERNAL|RAW_CUSTODY|fixture-lineage|fixture-destination/,
+  );
+  assert.ok(relayOne.rows[0].id);
+  const formula = await fetch(`${base}/feedback`, {
+    method: "POST",
+    headers: headers(tokenA, "formula-key"),
+    body: JSON.stringify({ ...body, message: '=HYPERLINK("bad")' }),
+  });
+  assert.equal(formula.status, 201);
+  const csv = await fetch(`${base}/feedback/admin/export.csv`, {
+    headers: {
+      Authorization: `Bearer ${tokenAdmin}`,
+      "X-Export-Reason": "fixture review",
+    },
+  });
+  assert.equal(csv.status, 200);
+  assert.match(await csv.text(), /'=HYPERLINK/);
+  assert.equal(
+    (
+      await testPool.query(
+        "select retention_hold,expires_at from feedback_assets where id=$1",
+        [assetPayload.assets[0].id],
+      )
+    ).rows[0].retention_hold,
+    true,
+  );
   console.log("feedback DB/HTTP contract: 38/38 passed");
-} finally { await new Promise<void>(resolve => server.close(() => resolve())); await appPool.end(); await testPool.end(); if (fs.existsSync(uploadRoot)) fs.rmSync(uploadRoot, { recursive: true }); }
+} finally {
+  await new Promise<void>((resolve) => server.close(() => resolve()));
+  await appPool.end();
+  await testPool.end();
+  if (fs.existsSync(uploadRoot)) fs.rmSync(uploadRoot, { recursive: true });
+}
