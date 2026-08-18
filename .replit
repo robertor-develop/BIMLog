@@ -50,7 +50,14 @@ timeoutMs = 20000
 [userenv.shared]
 BIMLOG_URL = "https://bimlog.app"
 APP_URL = "https://bimlog.app"
+BIMLOG_FEEDBACK_STORAGE_BACKEND = "replit-app-storage"
+BIMLOG_FEEDBACK_APP_STORAGE_BUCKET_ID = "replit-objstore-8239dcf7-d5e0-4821-b81a-15ba62a1ffd7"
+BIMLOG_FEEDBACK_STORAGE_BACKEND_ID = "bimlog-feedback-replit"
+BIMLOG_FEEDBACK_STORAGE_MAX_READ_BYTES = "20971520"
 
 [nix]
 channel = "stable-25_05"
 packages = ["libreoffice"]
+
+[objectStorage]
+defaultBucketID = "replit-objstore-8239dcf7-d5e0-4821-b81a-15ba62a1ffd7"
