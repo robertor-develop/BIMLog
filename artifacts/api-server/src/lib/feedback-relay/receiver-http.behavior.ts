@@ -27,8 +27,8 @@ const disposable = path.join(proofRoot, randomUUID()),
 fs.mkdirSync(custody, { recursive: true });
 const keyPath = path.join(disposable, "localhost.key"),
   certPath = path.join(disposable, "localhost.crt"),
-  openssl = process.env.BIMLOG_TEST_OPENSSL ||
-    ["C:\\Program Files\\Git\\usr\\bin\\openssl.exe","C:\\Program Files\\Git\\mingw64\\bin\\openssl.exe"].find(candidate=>fs.existsSync(candidate)) || "openssl";
+  governedOpenSsl={path:"C:\\Program Files\\Git\\usr\\bin\\openssl.exe",sha256:"063e62dcc027fc5dbb1343de631f02a9291f8b1df0b4e37012e49a03d525aad4",version:"OpenSSL 3.5.6 7 Apr 2026 (Library: OpenSSL 3.5.6 7 Apr 2026)"},openssl = process.env.BIMLOG_TEST_OPENSSL || (process.platform==="win32"&&fs.existsSync(governedOpenSsl.path)?governedOpenSsl.path:"");
+if(!openssl||!path.isAbsolute(openssl)||!fs.existsSync(openssl))throw new Error("Governed absolute OpenSSL fixture executable is required");const expectedOpenSslSha256=process.env.BIMLOG_TEST_OPENSSL_SHA256||(openssl===governedOpenSsl.path?governedOpenSsl.sha256:""),expectedOpenSslVersion=process.env.BIMLOG_TEST_OPENSSL_VERSION||(openssl===governedOpenSsl.path?governedOpenSsl.version:"");if(!expectedOpenSslSha256||!expectedOpenSslVersion||createHash("sha256").update(fs.readFileSync(openssl)).digest("hex")!==expectedOpenSslSha256||String(spawnSync(openssl,["version"],{encoding:"utf8",windowsHide:true}).stdout).trim()!==expectedOpenSslVersion)throw new Error("OpenSSL fixture executable identity differs from governed authority");
 if (
   spawnSync(
     openssl,
