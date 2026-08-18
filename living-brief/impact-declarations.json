@@ -10871,6 +10871,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "bdf05b3a624787249eb68b1dff2d57c7efd4c35df260c406b43562e73457d955"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-source-convergence-20260818",
+      "reviewedThroughCommit": "5fa2033e03161ecfdca17304c580c58b6efaf5c7",
+      "reviewedAt": "2026-08-18T11:52:00Z",
+      "status": "replit_configuration_source_converged_post_failure_republish_pending",
+      "captureTiming": "post_failed_publish_pre_corrected_build",
+      "summary": "Binds Replit's exact non-secret App Storage configuration into tracked source after the provider UI modified .replit and caused the clean-source deployment gate to fail before promotion.",
+      "workstreams": [
+        "feedback-addendum",
+        "replit-app-storage",
+        "publication",
+        "deployment-source-integrity"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Temporary App Storage custody and permanent receiver authority remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing provider, post-failure authorization, database, and customer gates remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Records the clean-source failure mechanism and requires exact build plus clean Replit status before another publish."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or identity changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing App Storage backend is unchanged; only its Replit deployment binding is source-controlled."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or document design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records pushed App Storage source, the failed deployment, exact cause, and convergence correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires exact build, push, clean Replit synchronization, explicit post-failure authorization, and one controlled republish."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records failed deployment a34f876f without claiming publication or production replacement."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3f4ee5f4f7b5c44f06d89392e0db2c50292800653350f341cc6bad377af59c08"
     }
   ]
 }
