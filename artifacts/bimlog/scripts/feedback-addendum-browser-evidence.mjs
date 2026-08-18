@@ -39,7 +39,7 @@ const baseUrl = need("BIMLOG_FEEDBACK_EVIDENCE_URL").replace(/\/$/, ""), output 
 if (existsSync(output)) throw new Error(`Collision guard: ${output} exists`);
 mkdirSync(output, { recursive: false });
 const { chromium } = (await import(pathToFileURL(playwrightCore).href)).default;
-const bundleRoot = path.resolve("artifacts/bimlog/dist/public/assets");
+const bundleRoot = path.resolve(process.env.BIMLOG_FEEDBACK_BUNDLE_ROOT || "artifacts/bimlog/dist/public", "assets");
 const bundleHashes = Object.fromEntries(readdirSync(bundleRoot).filter(n => /\.js$/.test(n)).sort().map(n => [n, fileSha(path.join(bundleRoot, n))]));
 const assertions = [], failures = [], scenarios = [];
 const pass = (s, n, detail = true) => assertions.push({ scenario: s, name: n, pass: true, detail });
