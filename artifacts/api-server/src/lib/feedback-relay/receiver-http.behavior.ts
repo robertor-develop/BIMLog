@@ -8,7 +8,7 @@ import {
   FeedbackReceiverCustodyService,
   type ReceiverNonceAuthority,
 } from "./receiver-service.js";
-import { createReceiverHttpsHandler } from "./receiver-http.js";
+import { createReceiverHttpsHandler,FilesystemReceiverAdmissionAuthority } from "./receiver-http.js";
 import { NativeHttpsRelayTransport } from "./transport.js";
 import {
   sha256,
@@ -171,6 +171,9 @@ const check = async (name: string, fn: () => unknown | Promise<unknown>) => {
   console.log(`PASS ${passed}: ${name}`);
 };
 try {
+  await check("admission authority fences concurrency quota bytes and free space",async()=>{
+    const admission=new FilesystemReceiverAdmissionAuthority(custody,{maxConcurrent:2,maxPerCompany:1,maxPerProject:1,maxBytesInFlight:10});const first=await admission.admit({companyId:"c1",projectId:"p1",byteCount:6,freeSpaceReserveBytes:0});assert.ok(first);assert.equal(await admission.admit({companyId:"c1",projectId:"p2",byteCount:1,freeSpaceReserveBytes:0}),null);assert.equal(await admission.admit({companyId:"c2",projectId:"p2",byteCount:5,freeSpaceReserveBytes:0}),null);assert.equal(await admission.admit({companyId:"c2",projectId:"p2",byteCount:1,freeSpaceReserveBytes:Number.MAX_SAFE_INTEGER}),null);first.release();first.release();const second=await admission.admit({companyId:"c1",projectId:"p1",byteCount:10,freeSpaceReserveBytes:0});assert.ok(second);second.release();
+  });
   await check(
     "native HTTPS receiver binds protocol scanner custody and signed receipt",
     async () => {
