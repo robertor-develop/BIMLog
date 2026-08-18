@@ -10796,11 +10796,11 @@
     },
     {
       "taskId": "bimlog-feedback-replit-app-storage-publication-hotfix-20260818",
-      "reviewedThroughCommit": "f527fc3d556d4aa4c69d908503ed283684361ffd",
+      "reviewedThroughCommit": "828cf7416f5f8ea1536554e7a5e66aec71eac32a",
       "reviewedAt": "2026-08-18T10:30:00Z",
       "status": "replit_app_storage_source_implemented_exact_build_and_live_bucket_smoke_pending",
       "captureTiming": "post_source_tests_pre_publication",
-      "summary": "Keeps Feedback enabled for publication by adding persistent Replit App Storage with exact-byte verification, bounded reads, retention holds, and fail-closed bucket binding.",
+      "summary": "Keeps Feedback enabled for publication by adding persistent Replit App Storage with exact-byte verification, bounded reads, retention holds, and fail-closed bucket binding, plus narrow wildcard dependency support in deterministic runtime closure.",
       "workstreams": [
         "feedback-addendum",
         "replit-app-storage",
@@ -10870,7 +10870,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "14ecb6bdd0e08f0a678724d419ba08ccdf4a40b89ac50a9cd6b82ac0ac9cf24a"
+      "reviewedChangeSha256": "bdf05b3a624787249eb68b1dff2d57c7efd4c35df260c406b43562e73457d955"
     }
   ]
 }

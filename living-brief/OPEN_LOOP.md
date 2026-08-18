@@ -1867,7 +1867,7 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Keep `PLATFORM.md` generator-owned and require API build followed by `check:living-brief` to leave the release tree clean.
 # Feedback addendum v F-1.60.35.8 - External and Acceptance Gates
 
-- Complete exact-head build and independent acceptance for Replit App Storage successor `f527fc3d`, then atomically push `main` and `master` under a new exact-SHA authorization.
+- Complete exact-head build and independent acceptance for Replit App Storage lineage `f527fc3d` plus runtime-closure correction `828cf7416f5f8ea1536554e7a5e66aec71eac32a`, then atomically push `main` and `master` under a new exact-SHA authorization.
 - In Replit, create/attach a private App Storage bucket and bind `BIMLOG_FEEDBACK_STORAGE_BACKEND=replit-app-storage`, `BIMLOG_FEEDBACK_APP_STORAGE_BUCKET_ID`, `BIMLOG_FEEDBACK_STORAGE_BACKEND_ID=bimlog-feedback-replit`, and `BIMLOG_FEEDBACK_STORAGE_MAX_READ_BYTES=20971520`. Run a real upload/readback/delete health smoke before Publish.
 - Keep scanner and transcription fixtures disabled in production. Evidence remains quarantined until a governed scanner is activated; App Storage persistence does not imply malware-clean or receiver-delivered status.
 - App Storage is temporary persistent custody for publication, not the final Roberto-controlled receiver. Preserve objects until verified transfer/readback, then use governed deletion; do not rely on the published app filesystem.
