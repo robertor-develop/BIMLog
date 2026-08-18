@@ -462,8 +462,8 @@ try {
     [id],
   );
   const audio = await testPool.query(
-    "insert into feedback_assets(feedback_id,project_id,uploaded_by_id,kind,original_name,safe_name,media_type,byte_size,sha256,storage_path,scan_state,scanner_adapter,scanned_at,provenance) values($1,101,11,'audio','voice.webm','voice.webm','audio/webm',4,'sourcehash','fixture','clean','local-fixture',now(),'{}') returning id",
-    [id],
+    "insert into feedback_assets(feedback_id,project_id,uploaded_by_id,kind,original_name,safe_name,media_type,byte_size,sha256,storage_path,scan_state,scanner_adapter,scanned_at,provenance) values($1,101,11,'audio','voice.webm','voice.webm','audio/webm',4,$2,'fixture','clean','local-fixture',now(),'{}') returning id",
+    [id, "c".repeat(64)],
   );
   const transcriptionHeaders = { ...headers(tokenA, "transcription-key") };
   const transcriptionBody = JSON.stringify({
@@ -562,7 +562,7 @@ try {
     assert.equal(asset.scan_state, "clean");
     assert.ok(asset.scanned_at);
     assert.ok(Number(asset.byte_size) > 0);
-    assert.ok(String(asset.sha256).length > 0);
+    assert.match(String(asset.sha256), /^[a-f0-9]{64}$/);
   }
   assert.equal(
     (
@@ -602,7 +602,10 @@ try {
   );
   const relayFixtureAuthority = await testPool.query(
     `select j.id,j.feedback_id,j.company_id,j.project_id,j.state,j.version,
-            j.policy_id,j.policy_version,j.policy_sha256,
+            j.relay_mode,j.direction,j.attempts,j.fencing_token,
+            j.request_hash,j.source_byte_count,j.source_sha256,
+            j.policy_id,j.policy_version,j.policy_sha256,j.expiry_outcome,
+            j.lease_owner,j.lease_token,j.lease_expires_at,
             count(e.id)::int custody_count,min(e.sequence)::int first_sequence,
             bool_and(e.to_state='queued') custody_queued,
             count(h.id)::int active_holds
@@ -620,9 +623,26 @@ try {
     assert.equal(job.project_id, 101);
     assert.equal(job.state, "queued");
     assert.equal(job.version, 1);
+    assert.equal(job.relay_mode, "queue");
+    assert.equal(job.direction, "outbound");
+    assert.equal(job.attempts, 0);
+    assert.equal(Number(job.fencing_token), 0);
+    assert.match(job.request_hash, /^[a-f0-9]{64}$/);
+    assert.ok(Number(job.source_byte_count) >= 0);
+    assert.match(job.source_sha256, /^[a-f0-9]{64}$/);
     assert.equal(job.policy_id, "fixture-policy");
     assert.equal(job.policy_version, "1");
     assert.equal(job.policy_sha256, policyHash);
+    assert.equal(job.expiry_outcome, null);
+    if (job.id === relayOne.rows[0].id) {
+      assert.equal(job.lease_owner, null);
+      assert.equal(job.lease_token, null);
+      assert.equal(job.lease_expires_at, null);
+    } else {
+      assert.equal(job.lease_owner, "fixture-worker");
+      assert.equal(job.lease_token, "fixture-lease");
+      assert.ok(new Date(job.lease_expires_at).getTime() > Date.now());
+    }
     assert.equal(job.custody_count, 1);
     assert.equal(job.first_sequence, 1);
     assert.equal(job.custody_queued, true);
