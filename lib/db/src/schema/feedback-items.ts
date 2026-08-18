@@ -617,3 +617,74 @@ export const feedbackRelayDeletionProofsTable = pgTable(
     ),
   }),
 );
+
+export const feedbackRelayPurgeCommandsTable = pgTable(
+  "feedback_relay_purge_commands",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    commandVersion: text("command_version").notNull(),
+    commandId: text("command_id").unique().notNull(),
+    jobId: bigint("job_id", { mode: "bigint" })
+      .references(() => feedbackRelayJobsTable.id)
+      .notNull(),
+    objectId: text("object_id").notNull(),
+    companyId: integer("company_id").notNull(),
+    projectId: integer("project_id"),
+    feedbackId: integer("feedback_id").notNull(),
+    jobVersion: integer("job_version").notNull(),
+    fencingToken: bigint("fencing_token", { mode: "bigint" }).notNull(),
+    holdSnapshotVersion: integer("hold_snapshot_version").notNull(),
+    noActiveHoldProofSha256: text("no_active_hold_proof_sha256").notNull(),
+    resolvedEvidenceSha256: text("resolved_evidence_sha256").notNull(),
+    customerClosureEvidenceSha256: text("customer_closure_evidence_sha256").notNull(),
+    internalClosureEvidenceSha256: text("internal_closure_evidence_sha256").notNull(),
+    policyId: text("policy_id").notNull(),
+    policyVersion: text("policy_version").notNull(),
+    policySha256: text("policy_sha256").notNull(),
+    approvalId: text("approval_id").notNull(),
+    approvalAuthority: text("approval_authority").notNull(),
+    approvedAt: timestamp("approved_at").notNull(),
+    deliveryReceiptSha256: text("delivery_receipt_sha256").notNull(),
+    readbackSha256: text("readback_sha256").notNull(),
+    issuedAt: timestamp("issued_at").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    revokedAt: timestamp("revoked_at"),
+    revokedByUserId: integer("revoked_by_user_id").references(() => usersTable.id),
+    revocationReason: text("revocation_reason"),
+    signingKeyId: text("signing_key_id").notNull(),
+    signatureReference: text("signature_reference").notNull(),
+    canonicalSha256: text("canonical_sha256").notNull(),
+  },
+  (table) => ({
+    currentIdx: uniqueIndex("feedback_relay_purge_current_idx")
+      .on(table.jobId)
+      .where(sql`${table.revokedAt} IS NULL`),
+    hashesCheck: check(
+      "feedback_relay_purge_hashes_chk",
+      sql`${table.noActiveHoldProofSha256} ~ '^[a-f0-9]{64}$' AND ${table.resolvedEvidenceSha256} ~ '^[a-f0-9]{64}$' AND ${table.customerClosureEvidenceSha256} ~ '^[a-f0-9]{64}$' AND ${table.internalClosureEvidenceSha256} ~ '^[a-f0-9]{64}$' AND ${table.policySha256} ~ '^[a-f0-9]{64}$' AND ${table.deliveryReceiptSha256} ~ '^[a-f0-9]{64}$' AND ${table.readbackSha256} ~ '^[a-f0-9]{64}$' AND ${table.canonicalSha256} ~ '^[a-f0-9]{64}$'`,
+    ),
+    timeCheck: check(
+      "feedback_relay_purge_time_chk",
+      sql`${table.approvedAt}<=${table.issuedAt} AND ${table.issuedAt}<${table.expiresAt} AND (${table.revokedAt} IS NULL OR ${table.revokedAt}>=${table.issuedAt})`,
+    ),
+  }),
+);
+
+export const feedbackRelayPurgeKeyAuthoritiesTable = pgTable(
+  "feedback_relay_purge_key_authorities",
+  {
+    keyId: text("key_id").primaryKey(),
+    verifierReference: text("verifier_reference").notNull(),
+    active: boolean("active").default(false).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    validFrom: timestamp("valid_from").defaultNow().notNull(),
+    expiresAt: timestamp("expires_at"),
+    revokedAt: timestamp("revoked_at"),
+  },
+  (table) => ({
+    nonemptyCheck: check(
+      "feedback_relay_purge_key_nonempty_chk",
+      sql`length(trim(${table.keyId}))>0 AND length(trim(${table.verifierReference}))>0`,
+    ),
+  }),
+);

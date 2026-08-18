@@ -59,6 +59,28 @@ const exactSourceAllowlist = new Map([
     ]),
   ],
   [
+    "artifacts/api-server/src/lib/feedback-schema-migration.ts",
+    [
+      ["ALTER TABLE feedback_relay_custody_events DROP CONSTRAINT IF EXISTS feedback_relay_custody_from_state_chk", "feedback_relay_custody_from_state_chk", "ALTER TABLE feedback_relay_custody_events ADD CONSTRAINT feedback_relay_custody_from_state_chk", "replace the predecessor state-domain constraint idempotently without changing rows"],
+      ["ALTER TABLE feedback_relay_custody_events DROP CONSTRAINT IF EXISTS feedback_relay_custody_to_state_chk", "feedback_relay_custody_to_state_chk", "ALTER TABLE feedback_relay_custody_events ADD CONSTRAINT feedback_relay_custody_to_state_chk", "replace the predecessor state-domain constraint idempotently without changing rows"],
+      ["ALTER TABLE feedback_relay_jobs DROP CONSTRAINT IF EXISTS feedback_relay_jobs_expiry_outcome_chk", "feedback_relay_jobs_expiry_outcome_chk", "ALTER TABLE feedback_relay_jobs ADD CONSTRAINT feedback_relay_jobs_expiry_outcome_chk", "replace the predecessor expiry-domain constraint idempotently without changing rows"],
+      ["ALTER TABLE feedback_relay_jobs DROP CONSTRAINT IF EXISTS feedback_relay_jobs_state_chk", "feedback_relay_jobs_state_chk", "ALTER TABLE feedback_relay_jobs ADD CONSTRAINT feedback_relay_jobs_state_chk", "replace the predecessor state-domain constraint idempotently without changing rows"],
+      ["ALTER TABLE feedback_relay_receipts DROP CONSTRAINT IF EXISTS feedback_relay_receipts_readback_chk", "feedback_relay_receipts_readback_chk", "ALTER TABLE feedback_relay_receipts ADD CONSTRAINT feedback_relay_receipts_verification_chk", "replace the predecessor readback constraint with the named verification invariant without changing rows"],
+      ["DROP INDEX IF EXISTS feedback_relay_nonces_authority_idx", "feedback_relay_nonces_authority_idx", "CREATE UNIQUE INDEX IF NOT EXISTS feedback_relay_nonces_authority_idx", "replace the predecessor nonce authority index with the current partial uniqueness definition"],
+      ["DROP INDEX IF EXISTS feedback_relay_nonces_request_idx", "feedback_relay_nonces_request_idx", "CREATE UNIQUE INDEX IF NOT EXISTS feedback_relay_nonces_request_idx", "replace the predecessor nonce request index with the current partial uniqueness definition"],
+      ["DROP INDEX IF EXISTS feedback_relay_receipts_request_idx", "feedback_relay_receipts_request_idx", "CREATE UNIQUE INDEX IF NOT EXISTS feedback_relay_receipts_request_idx", "replace the predecessor receipt request index with the current compound uniqueness definition"],
+      ["DROP TRIGGER IF EXISTS feedback_relay_holds_guarded ON feedback_relay_holds", "feedback_relay_holds_guarded", "CREATE TRIGGER feedback_relay_holds_guarded", "replace the same named guard trigger idempotently after its function definition"],
+      ["DROP TRIGGER IF EXISTS feedback_relay_jobs_guard_fence ON feedback_relay_jobs", "feedback_relay_jobs_guard_fence", "CREATE TRIGGER feedback_relay_jobs_guard_fence", "replace the same named guard trigger idempotently after its function definition"],
+      ["DROP TRIGGER IF EXISTS feedback_relay_jobs_terminal_expiry ON feedback_relay_jobs", "feedback_relay_jobs_terminal_expiry", "CREATE TRIGGER feedback_relay_jobs_terminal_expiry", "replace the same named expiry trigger idempotently after its function definition"],
+      ["DROP TRIGGER IF EXISTS feedback_relay_nonces_immutable ON feedback_relay_nonces", "feedback_relay_nonces_immutable", "CREATE TRIGGER feedback_relay_nonces_validate", "replace the predecessor immutability trigger with the current scoped validation trigger after preserving rows"],
+      ["DROP TRIGGER IF EXISTS feedback_relay_purge_commands_immutable ON feedback_relay_purge_commands", "feedback_relay_purge_commands_immutable", "CREATE TRIGGER feedback_relay_purge_commands_immutable", "replace the same named immutability trigger idempotently after its function definition"],
+      ["DROP TRIGGER IF EXISTS feedback_relay_purge_insert_guard ON feedback_relay_purge_commands", "feedback_relay_purge_insert_guard", "CREATE TRIGGER feedback_relay_purge_insert_guard", "replace the same named insertion guard idempotently after its function definition"],
+      ["DROP TRIGGER IF EXISTS feedback_relay_purge_issue_audit ON feedback_relay_purge_commands", "feedback_relay_purge_issue_audit", "CREATE TRIGGER feedback_relay_purge_issue_audit", "replace the same named audit trigger idempotently after its function definition"],
+      ["DROP TRIGGER IF EXISTS feedback_relay_receipts_immutable ON feedback_relay_receipts", "feedback_relay_receipts_immutable", "CREATE TRIGGER feedback_relay_receipts_validate", "replace the predecessor immutability trigger with the current scoped validation trigger after preserving rows"],
+      ["DROP TRIGGER IF EXISTS feedback_relay_temporary_delete_failure_audit ON feedback_relay_temporary_objects", "feedback_relay_temporary_delete_failure_audit", "CREATE TRIGGER feedback_relay_temporary_delete_failure_audit", "replace the same named audit trigger idempotently after its function definition"],
+    ].map(([statement, objectName, replacement, rationale]) => ({ statement, objectName, replacement, rationale })),
+  ],
+  [
     "artifacts/api-server/src/lib/telegram-product.ts",
     new Set([
       "ALTER TABLE telegram_support_cases DROP CONSTRAINT IF EXISTS telegram_support_cases_status_chk",
@@ -94,7 +116,15 @@ function stripAllowedSourceStatements(relativePath, sql) {
   const allowed = exactSourceAllowlist.get(relativePath);
   if (!allowed) return sql;
   let result = sql;
-  for (const statement of allowed) result = result.replaceAll(statement, "");
+  for (const entry of allowed) {
+    const statement = typeof entry === "string" ? entry : entry.statement;
+    if (typeof entry !== "string") {
+      if (!entry.objectName || !entry.rationale || !sql.includes(entry.replacement)) {
+        throw new Error(`Invalid governed database-safety replacement contract for ${relativePath}: ${statement}`);
+      }
+    }
+    result = result.replaceAll(statement, "");
+  }
   return result;
 }
 
