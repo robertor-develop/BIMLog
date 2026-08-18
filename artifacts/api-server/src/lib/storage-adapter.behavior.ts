@@ -14,6 +14,30 @@ try {
   assert.ok(!key.includes("secret") && !key.includes("101"));
   const reopened = new LocalDiskStorageAdapter(root, { backendId: "fixture-shared", backendType: "durable-filesystem" });
   assert.deepEqual(await reopened.download(key), bytes);
+  assert.deepEqual(await reopened.downloadBounded(key, bytes.length), bytes, "exact limit must succeed");
+  await assert.rejects(() => reopened.downloadBounded(key, bytes.length - 1), (error: NodeJS.ErrnoException) => error.code === "STORAGE_OBJECT_TOO_LARGE" && !error.message.includes(root), "one byte over must be denied without leaking paths");
+  for (const invalid of [0, -1, 1.5, Number.NaN, Number.POSITIVE_INFINITY, Number.MAX_SAFE_INTEGER]) await assert.rejects(() => reopened.downloadBounded(key, invalid), (error: NodeJS.ErrnoException) => error.code === "STORAGE_MAX_BYTES_INVALID");
+  const mutableBytes = Buffer.alloc(128 * 1024, 7); const mutableKey = await first.upload(mutableBytes, 101, "mutable.bin"); const mutablePath = path.join(root, ...mutableKey.split("/"));
+  const originalRead = fs.readSync, originalOpen = fs.openSync, originalFstat = fs.fstatSync, originalClose = fs.closeSync;
+  let changed = false; fs.readSync = ((...args: Parameters<typeof fs.readSync>) => { const count = originalRead(...args); if (!changed) { changed = true; fs.appendFileSync(mutablePath, Buffer.from([8])); } return count; }) as typeof fs.readSync;
+  await assert.rejects(() => reopened.downloadBounded(mutableKey, mutableBytes.length + 1), (error: NodeJS.ErrnoException) => error.code === "STORAGE_OBJECT_CHANGED"); fs.readSync = originalRead;
+  fs.writeFileSync(mutablePath, mutableBytes); changed = false; fs.readSync = ((...args: Parameters<typeof fs.readSync>) => { const count = originalRead(...args); if (!changed) { changed = true; fs.truncateSync(mutablePath, 1); } return count; }) as typeof fs.readSync;
+  await assert.rejects(() => reopened.downloadBounded(mutableKey, mutableBytes.length), (error: NodeJS.ErrnoException) => error.code === "STORAGE_OBJECT_CHANGED"); fs.readSync = originalRead;
+  fs.writeFileSync(mutablePath, mutableBytes); changed = false; fs.readSync = ((...args: Parameters<typeof fs.readSync>) => { const count = originalRead(...args); if (!changed) { changed = true; fs.renameSync(mutablePath, `${mutablePath}.old`); fs.writeFileSync(mutablePath, mutableBytes); } return count; }) as typeof fs.readSync;
+  await assert.rejects(() => reopened.downloadBounded(mutableKey, mutableBytes.length), (error: NodeJS.ErrnoException) => error.code === "STORAGE_OBJECT_CHANGED"); fs.readSync = originalRead; fs.rmSync(`${mutablePath}.old`); fs.writeFileSync(mutablePath, mutableBytes);
+  for (const fault of ["open", "fstat", "read", "close"] as const) {
+    let openedDescriptor: number | undefined;
+    if (fault === "open") fs.openSync = (() => { throw new Error(`private ${root}`); }) as typeof fs.openSync;
+    if (fault === "fstat") fs.fstatSync = (() => { throw new Error(`private ${root}`); }) as typeof fs.fstatSync;
+    if (fault === "read") fs.readSync = (() => { throw new Error(`private ${root}`); }) as typeof fs.readSync;
+    if (fault === "close") fs.closeSync = ((fd: number) => { originalClose(fd); throw new Error(`private ${root}`); }) as typeof fs.closeSync;
+    fs.openSync = fault === "open" ? fs.openSync : ((...args: Parameters<typeof fs.openSync>) => { openedDescriptor = originalOpen(...args); return openedDescriptor; }) as typeof fs.openSync;
+    await assert.rejects(() => reopened.downloadBounded(mutableKey, mutableBytes.length), (error: NodeJS.ErrnoException) => error.code === "STORAGE_OBJECT_READ_FAILED" && !error.message.includes(root), `${fault} failure must be sanitized`);
+    fs.openSync = originalOpen; fs.fstatSync = originalFstat; fs.readSync = originalRead; fs.closeSync = originalClose;
+    if (openedDescriptor !== undefined) assert.throws(() => originalFstat(openedDescriptor!), "failed reads must close their descriptor");
+  }
+  for (let attempt = 0; attempt < 5; attempt++) { fs.readSync = ((...args: Parameters<typeof fs.readSync>) => { const count = originalRead(...args); fs.unlinkSync(mutablePath); return count; }) as typeof fs.readSync; await assert.rejects(() => reopened.downloadBounded(mutableKey, mutableBytes.length)); fs.readSync = originalRead; fs.writeFileSync(mutablePath, mutableBytes); }
+  await assert.rejects(() => reopened.downloadBounded(`../${mutableKey}`, mutableBytes.length), /STORAGE_KEY_INVALID/, "Windows traversal must stay contained");
   const moduleUrl = new URL("./storage-adapter.ts", import.meta.url).href;
   const child = spawnSync(process.execPath, ["--import", "tsx", "--input-type=module", "--eval", `const {LocalDiskStorageAdapter}=await import(${JSON.stringify(moduleUrl)});const bytes=await new LocalDiskStorageAdapter(process.env.PROOF_ROOT).download(process.env.PROOF_KEY);process.stdout.write(bytes.toString("hex"));`], { cwd: path.resolve(import.meta.dirname, "../.."), env: { ...process.env, PROOF_ROOT: root, PROOF_KEY: key }, encoding: "utf8" });
   assert.equal(child.status, 0, child.error?.message || child.stderr); assert.equal(child.stdout, bytes.toString("hex"));

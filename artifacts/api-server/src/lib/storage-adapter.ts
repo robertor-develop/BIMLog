@@ -1,4 +1,5 @@
 import fs from "node:fs";
+import { constants as bufferConstants } from "node:buffer";
 import os from "node:os";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
@@ -6,8 +7,9 @@ import { createHash, randomUUID } from "node:crypto";
 const PROVEN = ["exact-bytes", "atomic-create", "shared-root", "restart-persistence", "sha256-verification"] as const;
 type Capability = typeof PROVEN[number];
 export type StorageHealth = { backendId: string; backendType: "durable-filesystem" | "local-test"; healthy: true; capabilities: readonly Capability[]; backupContract: { required: true; format: "opaque-key-v1"; integrity: "sha256"; restoreVerification: "exact-bytes-and-sha256" } };
-export interface StorageAdapter { upload(bytes: Buffer, projectId: number | string, filename: string): Promise<string>; download(key: string): Promise<Buffer>; delete(key: string, options?: { retentionHold?: boolean }): Promise<void>; health(): Promise<StorageHealth>; }
+export interface StorageAdapter { upload(bytes: Buffer, projectId: number | string, filename: string): Promise<string>; download(key: string): Promise<Buffer>; downloadBounded(key: string, maxBytes: number): Promise<Buffer>; delete(key: string, options?: { retentionHold?: boolean }): Promise<void>; health(): Promise<StorageHealth>; }
 const KEY = /^[a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9]{64}$/;
+const MAX_BOUNDED_DOWNLOAD_BYTES = Math.min(bufferConstants.MAX_LENGTH, 0x7fffffff);
 type Options = { backendId?: string; backendType?: StorageHealth["backendType"]; capabilities?: readonly Capability[]; faultAt?: "write" | "fsync" };
 
 function assertNoLinks(target: string) {
@@ -19,6 +21,8 @@ function assertNoLinks(target: string) {
 }
 function strictChild(parent: string, child: string) { const prefix = `${path.resolve(parent)}${path.sep}`; const resolved = path.resolve(child); if (!resolved.startsWith(prefix)) throw new Error("STORAGE_PATH_ESCAPE"); return resolved; }
 function ensureDirectory(target: string) { try { fs.mkdirSync(target); } catch (error) { if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error; } const stat = fs.lstatSync(target); if (!stat.isDirectory() || stat.isSymbolicLink()) throw new Error("STORAGE_REPARSE_COMPONENT_DENIED"); }
+function storageError(code: string) { return Object.assign(new Error(code), { code }); }
+function sameObject(left: fs.BigIntStats, right: fs.BigIntStats) { return left.dev === right.dev && left.ino === right.ino; }
 
 export class LocalDiskStorageAdapter implements StorageAdapter {
   private readonly root: string; private readonly backendId: string; private readonly backendType: StorageHealth["backendType"]; private readonly capabilities: readonly Capability[]; private readonly faultAt?: Options["faultAt"];
@@ -41,6 +45,49 @@ export class LocalDiskStorageAdapter implements StorageAdapter {
     return key;
   }
   async download(key: string) { const target = this.resolveKey(key); this.assertSafe(target); return fs.readFileSync(target); }
+  async downloadBounded(key: string, maxBytes: number) {
+    if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0 || maxBytes > MAX_BOUNDED_DOWNLOAD_BYTES) throw storageError("STORAGE_MAX_BYTES_INVALID");
+    const target = this.resolveKey(key); let descriptor: number | undefined; let result: Buffer | undefined; let failure: unknown;
+    try {
+      this.assertSafe(target);
+      const noFollow = (fs.constants as typeof fs.constants & { O_NOFOLLOW?: number }).O_NOFOLLOW ?? 0;
+      descriptor = fs.openSync(target, fs.constants.O_RDONLY | noFollow);
+      const opened = fs.fstatSync(descriptor, { bigint: true });
+      if (!opened.isFile()) throw storageError("STORAGE_OBJECT_UNSAFE");
+      if (opened.size < 0n || opened.size > BigInt(maxBytes)) throw storageError("STORAGE_OBJECT_TOO_LARGE");
+      this.assertSafe(target);
+      const pathAfterOpen = fs.lstatSync(target, { bigint: true });
+      if (pathAfterOpen.isSymbolicLink() || !sameObject(opened, pathAfterOpen)) throw storageError("STORAGE_OBJECT_CHANGED");
+      const expected = Number(opened.size); result = Buffer.allocUnsafe(expected); let offset = 0;
+      while (offset < expected) {
+        const count = fs.readSync(descriptor, result, offset, Math.min(64 * 1024, expected - offset), offset);
+        if (count <= 0) throw storageError("STORAGE_OBJECT_CHANGED");
+        offset += count;
+      }
+      if (expected === 0) {
+        const probe = Buffer.allocUnsafe(1);
+        if (fs.readSync(descriptor, probe, 0, 1, 0) !== 0) throw storageError("STORAGE_OBJECT_CHANGED");
+      } else {
+        const firstByte = result[0];
+        const grew = fs.readSync(descriptor, result, 0, 1, expected) !== 0;
+        result[0] = firstByte;
+        if (grew) throw storageError(expected === maxBytes ? "STORAGE_OBJECT_TOO_LARGE" : "STORAGE_OBJECT_CHANGED");
+      }
+      const completed = fs.fstatSync(descriptor, { bigint: true });
+      this.assertSafe(target);
+      const pathAfterRead = fs.lstatSync(target, { bigint: true });
+      if (!sameObject(opened, completed) || !sameObject(opened, pathAfterRead) || completed.size !== opened.size || completed.mtimeNs !== opened.mtimeNs || completed.ctimeNs !== opened.ctimeNs) throw storageError("STORAGE_OBJECT_CHANGED");
+    } catch (error) { failure = error; }
+    finally {
+      if (descriptor !== undefined) try { fs.closeSync(descriptor); } catch (error) { if (failure === undefined) failure = error; }
+    }
+    if (failure !== undefined) {
+      const code = (failure as NodeJS.ErrnoException).code;
+      if (typeof code === "string" && code.startsWith("STORAGE_")) throw storageError(code);
+      throw storageError("STORAGE_OBJECT_READ_FAILED");
+    }
+    return result!;
+  }
   async delete(key: string, options: { retentionHold?: boolean } = {}) { if (options.retentionHold) throw new Error("STORAGE_RETENTION_HOLD_ACTIVE"); const target = this.resolveKey(key); this.assertSafe(target); try { fs.unlinkSync(target); } catch (error) { if ((error as NodeJS.ErrnoException).code !== "ENOENT") throw error; } }
   async health(): Promise<StorageHealth> { this.assertSafe(this.root); const probe = strictChild(this.root, path.join(this.root, `.health-${randomUUID()}`)); let handle: number | undefined; try { handle = fs.openSync(probe, "wx", 0o600); fs.writeFileSync(handle, "bimlog-storage-health-v1"); fs.fsyncSync(handle); fs.closeSync(handle); handle = undefined; } finally { if (handle !== undefined) try { fs.closeSync(handle); } catch {} try { fs.unlinkSync(probe); } catch {} } return { backendId: this.backendId, backendType: this.backendType, healthy: true, capabilities: this.capabilities, backupContract: { required: true, format: "opaque-key-v1", integrity: "sha256", restoreVerification: "exact-bytes-and-sha256" } }; }
 }
