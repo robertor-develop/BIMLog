@@ -782,6 +782,7 @@ export class FeedbackReceiverCustodyService {
     );
   }
   readback(requestId:string,now=new Date()):Signed<ReadbackContract>{return this.lockSync(requestId,lease=>this.readbackUnderFence(requestId,now,lease.assertCurrent));}
+  async readbackAsync(requestId:string,now=new Date()):Promise<Signed<ReadbackContract>>{return this.lock(requestId,async lease=>this.readbackUnderFence(requestId,now,lease.assertCurrent));}
   recover() {
     return this.lockSync("__recovery__",recoveryLease=>{recoveryLease.assertCurrent();
     const staging = path.join(this.system, "staging");

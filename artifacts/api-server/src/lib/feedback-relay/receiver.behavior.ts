@@ -442,6 +442,9 @@ try {
       ),
     ),
   );
+  await check("renewable async readback shares request fence and lineage",async()=>{
+    const readback=await service.readbackAsync("request-one",now);assertReadbackMatchesReceipt(readback.payload,firstReceipt);
+  });
   await check("request index tamper fails keyed runtime authentication",()=>{
     const requestDir=path.join(root,"99-System","requests"),indexPath=path.join(requestDir,`${sha256("request-one")}.json`),original=fs.readFileSync(indexPath);const tampered=JSON.parse(original.toString("utf8"));tampered.objectRelativePath="01-Active/substitution";fs.writeFileSync(indexPath,JSON.stringify(tampered));
     assert.throws(()=>service.readback("request-one",now),(error:any)=>error?.code==="FEEDBACK_RECEIVER_REQUEST_INDEX_AUTH_INVALID");fs.writeFileSync(indexPath,original);
@@ -612,6 +615,15 @@ try {
     const backupV2=path.join(disposable,"backup-v2"),restoreV2=path.join(disposable,"restore-v2");fs.mkdirSync(backupV2);fs.mkdirSync(restoreV2);
     const manifest=await createReceiverBackupV2(service,backupV2,receiverKeys,{createdAt:now,concurrency:3});assert.equal(manifest.generation,service.snapshotGeneration());assert.match(manifest.authentication.hmacSha256,/^[a-f0-9]{64}$/);
     const restored=await restoreReceiverBackupV2(backupV2,restoreV2,receiverKeys,{concurrency:2});assert.equal(restored.manifestSha256,manifest.manifestSha256);for(const item of manifest.objects)assert.equal(sha256(fs.readFileSync(path.join(restoreV2,item.relativePath))),item.sha256);
+  });
+  await check("concurrent custody generation invalidates backup snapshot",async()=>{
+    const target=path.join(disposable,"backup-race");fs.mkdirSync(target);const originalCopy=fs.promises.copyFile.bind(fs.promises);let entered!:()=>void,release!:()=>void;const enteredPromise=new Promise<void>(resolve=>{entered=resolve}),releasePromise=new Promise<void>(resolve=>{release=resolve});let first=true;
+    (fs.promises as any).copyFile=async(...args:any[])=>{if(first){first=false;entered();await releasePromise;}return originalCopy(args[0],args[1],args[2]);};
+    try{const backupPromise=createReceiverBackupV2(service,target,receiverKeys,{createdAt:now,concurrency:1});await enteredPromise;(service as any).bumpGeneration();release();await assert.rejects(backupPromise,(error:any)=>error?.code==="FEEDBACK_RECEIVER_BACKUP_GENERATION_CHANGED");}finally{(fs.promises as any).copyFile=originalCopy;}
+  });
+  await check("aborted backup fails closed and clean retry succeeds",async()=>{
+    const aborted=path.join(disposable,"backup-aborted");fs.mkdirSync(aborted);const controller=new AbortController();controller.abort();await assert.rejects(createReceiverBackupV2(service,aborted,receiverKeys,{signal:controller.signal}),(error:any)=>error?.code==="FEEDBACK_RECEIVER_BACKUP_ABORTED");assert.equal(fs.readdirSync(aborted).length,0);
+    const retry=path.join(disposable,"backup-retry");fs.mkdirSync(retry);assert.equal((await createReceiverBackupV2(service,retry,receiverKeys,{concurrency:2})).generation,service.snapshotGeneration());
   });
   await check("no raw identifiers or key material enter custody files", () => {
     const all: string[] = [];
