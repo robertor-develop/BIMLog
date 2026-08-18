@@ -23,6 +23,7 @@ import {
   type RequestContract,
   type Signed,
 } from "./protocol.js";
+import { assertFeedbackPurgeCommandSignature, type FeedbackPurgeCommand, type FeedbackPurgeSignatureVerifier } from "./state-machine.js";
 
 export type ReceiverRootAuthority = {
   canonicalRoot: string;
@@ -62,13 +63,21 @@ export type PurgeAuthority = {
   approvedAt: string;
   hold: boolean;
 };
-export interface ReceiverPurgeCommandAuthority<TCommand>{verifyAndRevalidate(input:{requestId:string;command:TCommand;requestIndex:StoredDelivery;now:Date}):Promise<PurgeAuthority>;}
+type VerifiedPurgeAuthority = PurgeAuthority & { command: FeedbackPurgeCommand };
+export interface ReceiverPurgeCommandAuthority extends FeedbackPurgeSignatureVerifier { current(input:{requestId:string;commandId:string;jobId:string;canonicalSha256:string;requestIndex:StoredDelivery;now:Date}):Promise<FeedbackPurgeCommand>; }
 export type DeletionReceipt = {
   deletedAt: string;
   objectSha256: string;
   byteCount: number;
   policySha256: string;
   approvedBy: string;
+  commandId:string;
+  commandSha256:string;
+  jobId:string;
+  jobVersion:number;
+  fencingToken:string;
+  holdSnapshotVersion:number;
+  noActiveHoldProofSha256:string;
   absenceVerified: true;
   absenceVerifiedAt:string;
   journalSha256:string;
@@ -78,7 +87,7 @@ export type DeletionReceipt = {
 };
 type PreparedDeletion = Omit<DeletionReceipt, "absenceVerified"|"absenceVerifiedAt"|"deletedAt"|"signed"> & {
   absenceVerified: false;
-  requestId:string;companyId:string;projectId:string;feedbackId:string;objectId:string;destinationId:string;approvedAt:string;
+  requestId:string;companyId:string;projectId:string;feedbackId:string;objectId:string;destinationId:string;approvedAt:string;commandId:string;commandSha256:string;jobId:string;jobVersion:number;fencingToken:string;holdSnapshotVersion:number;noActiveHoldProofSha256:string;
 };
 type DeletionJournal =
   | {
@@ -293,8 +302,10 @@ function syncDirectory(dir: string) {
       fs.closeSync(fd);
     }
     return "fsync" as const;
-  } catch {
-    return "rename-recovery" as const;
+  } catch (error) {
+    const code=(error as NodeJS.ErrnoException).code;
+    if(process.platform==="win32"&&(code==="EPERM"||code==="EINVAL"||code==="EISDIR"))return "rename-recovery" as const;
+    throw error;
   }
 }
 function fileIdentity(file:string){const fd=fs.openSync(file,"r"),hash=createHash("sha256"),chunk=Buffer.allocUnsafe(64*1024);let byteCount=0;try{for(;;){const read=fs.readSync(fd,chunk,0,chunk.length,null);if(!read)break;byteCount+=read;hash.update(chunk.subarray(0,read));}}finally{fs.closeSync(fd);}return{byteCount,sha256:hash.digest("hex")};}
@@ -530,7 +541,7 @@ export class FeedbackReceiverCustodyService {
     if(!authentication||!key||!HEX64.test(String(authentication.canonicalSha256))||!HEX64.test(String(authentication.hmacSha256)))fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal authentication is invalid");
     const {authentication:ignored,...payload}=record,canonical=canonicalJson({domain:"bimlog-feedback-receiver-deletion-journal-v3",...payload}),digest=sha256(canonical),mac=createHmac("sha256",key!.secret).update(canonical,"utf8").digest("hex");
     if(!sameSignature(digest,String(authentication!.canonicalSha256))||!sameSignature(mac,String(authentication!.hmacSha256))||(record.state!=="prepared"&&record.state!=="finalized")||typeof record.objectRelativePath!=="string"||path.isAbsolute(record.objectRelativePath)||!record.receipt)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal authentication is invalid");
-    const journal=record as unknown as DeletionJournal;if(!Number.isSafeInteger(journal.generation)||journal.generation<1||!HEX64.test(journal.receipt.objectSha256)||!HEX64.test(journal.receipt.policySha256)||!HEX64.test(journal.receipt.journalSha256)||!HEX64.test(journal.receipt.deliveryReceiptSha256)||!HEX64.test(journal.receipt.readbackSha256)||!Number.isSafeInteger(journal.receipt.byteCount)||journal.receipt.byteCount<0)return fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal nested schema is invalid");
+    const journal=record as unknown as DeletionJournal;if(!Number.isSafeInteger(journal.generation)||journal.generation<1||!HEX64.test(journal.receipt.objectSha256)||!HEX64.test(journal.receipt.policySha256)||!HEX64.test(journal.receipt.journalSha256)||!HEX64.test(journal.receipt.deliveryReceiptSha256)||!HEX64.test(journal.receipt.readbackSha256)||!HEX64.test(journal.receipt.commandSha256)||!HEX64.test(journal.receipt.noActiveHoldProofSha256)||!journal.receipt.commandId?.trim()||!journal.receipt.jobId?.trim()||!journal.receipt.fencingToken?.trim()||!Number.isSafeInteger(journal.receipt.jobVersion)||journal.receipt.jobVersion<1||!Number.isSafeInteger(journal.receipt.holdSnapshotVersion)||journal.receipt.holdSnapshotVersion<0||!Number.isSafeInteger(journal.receipt.byteCount)||journal.receipt.byteCount<0)return fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal nested schema is invalid");
     if(journal.state==="finalized")verifyDeletionReceiptDurably(journal.receipt.signed,this.receiverKeys,new Date(Math.max(Date.now(),new Date(journal.receipt.signed.payload.absenceVerifiedAt).getTime())));return journal;
   }
   private readJournal(file:string){const value=readJson<unknown>(this.root,file);try{return this.verifyJournalRecord(value);}catch(error){if(error instanceof RelayProtocolError&&error.code==="FEEDBACK_RECEIVER_DELETION_MIGRATION_REQUIRED")this.quarantineLegacy(file,"deletion-journal");throw error;}}
@@ -829,14 +840,9 @@ export class FeedbackReceiverCustodyService {
     for (const entry of fs.readdirSync(deletions)) {
       const target = path.join(deletions, entry),
         journal = this.readJournal(target);
-      if (journal.state === "prepared") {
-        this.lockSync(journal.requestId,lease=>{lease.assertCurrent();const current=this.readJournal(target);if(current.state!=="prepared")return;
-          const {journalSha256,...preparedBase}=current.receipt;if(current.authorityVersion!==3||sha256(JSON.stringify(preparedBase))!==journalSha256||!HEX64.test(current.receipt.policySha256)||!current.receipt.approvedBy.trim()||new Date(current.receipt.approvedAt).toISOString()!==current.receipt.approvedAt)fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Prepared deletion journal failed authority revalidation");
-          const object=path.join(this.root,current.objectRelativePath);assertNoLinks(this.root,object);lease.assertCurrent();if(!fs.existsSync(object)){
-            const deletedAt=new Date().toISOString(),absenceVerifiedAt=deletedAt,signed=signDeletionReceipt({version:"1",requestId:current.receipt.requestId,companyId:current.receipt.companyId,projectId:current.receipt.projectId,feedbackId:current.receipt.feedbackId,objectId:current.receipt.objectId,byteCount:current.receipt.byteCount,objectSha256:current.receipt.objectSha256,destinationId:current.receipt.destinationId,policySha256:current.receipt.policySha256,approvedBy:current.receipt.approvedBy,approvedAt:current.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:current.receipt.journalSha256,deliveryReceiptSha256:current.receipt.deliveryReceiptSha256,readbackSha256:current.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,new Date(absenceVerifiedAt));
-            const generation=this.bumpGeneration();lease.assertCurrent();const {authentication:ignored,...journalPayload}=current;atomicJson(this.root,target,this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{...journalPayload,generation,state:"finalized",receipt:{...current.receipt,absenceVerified:true,deletedAt,absenceVerifiedAt,signed}}));finalizedDeletions++;
-          }});
-      }
+      // Prepared deletions are durable recovery obligations. Recovery has no
+      // current database authority port, so it must never mint a receipt.
+      if (journal.state === "prepared") continue;
     }
     recoveryLease.assertCurrent();return { removedStages, removedStaleLocks, finalizedDeletions };
     });
@@ -858,12 +864,13 @@ export class FeedbackReceiverCustodyService {
     }
     return fail("FEEDBACK_RECEIVER_LOCK_TIMEOUT","Receiver request is already being processed");
   }
-  private purgeUnderLease(
+  private async purgeUnderLease(
     requestId: string,
-    authority: PurgeAuthority,
+    authority: VerifiedPurgeAuthority,
     now: Date,
     lease:{assertCurrent():void;fence:string},
-  ): DeletionReceipt {
+    revalidate?:()=>Promise<void>,
+  ): Promise<DeletionReceipt> {
     lease.assertCurrent();
     if (authority.hold)
       fail("FEEDBACK_RECEIVER_HOLD_ACTIVE", "Held custody cannot be purged");
@@ -885,7 +892,9 @@ export class FeedbackReceiverCustodyService {
       lease.assertCurrent();
       if (
         journal.receipt.policySha256 !== authority.policySha256 ||
-        journal.receipt.approvedBy !== authority.approvedBy
+        journal.receipt.approvedBy !== authority.approvedBy ||
+        journal.receipt.commandId !== authority.command.commandId ||
+        journal.receipt.commandSha256 !== authority.command.canonicalSha256
       )
         fail(
           "FEEDBACK_RECEIVER_PURGE_CONFLICT",
@@ -903,18 +912,21 @@ export class FeedbackReceiverCustodyService {
           "FEEDBACK_RECEIVER_READBACK_MISMATCH",
           "Custody bytes changed before purge",
         );
-      const readback=this.readbackUnderFence(requestId,now,lease.assertCurrent),preparedBase = {
+      const readback=this.readbackUnderFence(requestId,now,lease.assertCurrent),deliveryReceiptSha256=sha256(canonicalReceipt(stored.receipt.payload)),readbackSha256=sha256(canonicalReadback(readback.payload));
+      if(String(authority.command.companyId)!==stored.receipt.payload.companyId||String(authority.command.projectId??"")!==stored.receipt.payload.projectId||String(authority.command.feedbackId)!==stored.receipt.payload.feedbackId||authority.command.objectId!==stored.receipt.payload.objectId||authority.command.deliveryReceiptSha256!==deliveryReceiptSha256||authority.command.readbackSha256!==readbackSha256)fail("FEEDBACK_RECEIVER_PURGE_COMMAND_BINDING_INVALID","Purge command does not bind the current custody record");
+      const preparedBase = {
           objectSha256: identity.sha256,
           byteCount: identity.byteCount,
           policySha256: authority.policySha256,
           approvedBy: authority.approvedBy,
           approvedAt:authority.approvedAt,
+          commandId:authority.command.commandId,commandSha256:authority.command.canonicalSha256,jobId:authority.command.jobId,jobVersion:authority.command.jobVersion,fencingToken:authority.command.fencingToken,holdSnapshotVersion:authority.command.holdSnapshotVersion,noActiveHoldProofSha256:authority.command.noActiveHoldProofSha256,
           absenceVerified: false,
           requestId,companyId:stored.receipt.payload.companyId,projectId:stored.receipt.payload.projectId,feedbackId:stored.receipt.payload.feedbackId,objectId:stored.receipt.payload.objectId,destinationId:this.authority.destinationId,
-          deliveryReceiptSha256:sha256(canonicalReceipt(stored.receipt.payload)),readbackSha256:sha256(canonicalReadback(readback.payload)),
+          deliveryReceiptSha256,readbackSha256,
         } as const,
         receipt: PreparedDeletion = {...preparedBase,journalSha256:sha256(JSON.stringify(preparedBase))};
-      const generation=this.bumpGeneration();lease.assertCurrent();const journalDraft = {
+      await revalidate?.();lease.assertCurrent();const generation=this.bumpGeneration();lease.assertCurrent();const journalDraft = {
         state: "prepared",
         authorityVersion:3 as const,
         requestId,
@@ -923,33 +935,36 @@ export class FeedbackReceiverCustodyService {
         generation,
       };
       lease.assertCurrent();
-      journal=this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",journalDraft) as DeletionJournal;atomicJson(this.root, journalPath, journal);
+      await revalidate?.();lease.assertCurrent();journal=this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",journalDraft) as DeletionJournal;atomicJson(this.root, journalPath, journal);
       this.faults.afterDeletionPrepared?.();
       lease.assertCurrent();
     }
     if(journal.state!=="prepared")return fail("FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID","Deletion journal state is invalid");
     const object = path.join(this.root, journal.objectRelativePath);
     assertNoLinks(this.root, object);
-    if (fs.existsSync(object)){lease.assertCurrent();fs.unlinkSync(object);syncDirectory(path.dirname(object));}
+    if (fs.existsSync(object)){await revalidate?.();lease.assertCurrent();fs.unlinkSync(object);syncDirectory(path.dirname(object));}
     if (fs.existsSync(object))
       fail(
         "FEEDBACK_RECEIVER_ABSENCE_UNPROVEN",
         "Purged object absence could not be verified",
       );
-    const deletedAt=now.toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);
+    await revalidate?.();lease.assertCurrent();const deletedAt=now.toISOString(),absenceVerifiedAt=deletedAt, signed=signDeletionReceipt({version:"1",requestId:journal.receipt.requestId,companyId:journal.receipt.companyId,projectId:journal.receipt.projectId,feedbackId:journal.receipt.feedbackId,objectId:journal.receipt.objectId,byteCount:journal.receipt.byteCount,objectSha256:journal.receipt.objectSha256,destinationId:journal.receipt.destinationId,policySha256:journal.receipt.policySha256,approvedBy:journal.receipt.approvedBy,approvedAt:journal.receipt.approvedAt,commandId:journal.receipt.commandId,commandSha256:journal.receipt.commandSha256,jobId:journal.receipt.jobId,jobVersion:journal.receipt.jobVersion,fencingToken:journal.receipt.fencingToken,holdSnapshotVersion:journal.receipt.holdSnapshotVersion,noActiveHoldProofSha256:journal.receipt.noActiveHoldProofSha256,deletedAt,absenceVerifiedAt,journalSha256:journal.receipt.journalSha256,deliveryReceiptSha256:journal.receipt.deliveryReceiptSha256,readbackSha256:journal.receipt.readbackSha256,receiverKeyId:this.receiverKeys.activeKeyId},this.receiverKeys,now);
     const receipt: DeletionReceipt = {...journal.receipt,absenceVerified:true,deletedAt,absenceVerifiedAt,signed};
     lease.assertCurrent();
-    const generation=this.bumpGeneration();lease.assertCurrent();const {authentication:ignored,...journalPayload}=journal;atomicJson(this.root, journalPath, this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{
+    await revalidate?.();lease.assertCurrent();const generation=this.bumpGeneration();lease.assertCurrent();const {authentication:ignored,...journalPayload}=journal;await revalidate?.();lease.assertCurrent();atomicJson(this.root, journalPath, this.authenticateRecord("bimlog-feedback-receiver-deletion-journal-v3",{
       ...journalPayload,
       state: "finalized",
       receipt,
       generation,
     }));
+    await revalidate?.();lease.assertCurrent();
     return receipt;
   }
-  purge(requestId:string,authority:PurgeAuthority,now=new Date()):DeletionReceipt{return this.lockSync(requestId,lease=>this.purgeUnderLease(requestId,authority,now,lease));}
-  async purgeAsync(requestId:string,authority:PurgeAuthority,now=new Date()):Promise<DeletionReceipt>{return this.lock(requestId,async lease=>this.purgeUnderLease(requestId,authority,now,lease));}
-  async consumePurgeCommand<TCommand>(requestId:string,command:TCommand,authority:ReceiverPurgeCommandAuthority<TCommand>,now=new Date()):Promise<DeletionReceipt>{return this.lock(requestId,async lease=>{lease.assertCurrent();const requestIndex=this.readStored(this.indexPath(requestId)),verified=await authority.verifyAndRevalidate({requestId,command,requestIndex,now});lease.assertCurrent();return this.purgeUnderLease(requestId,verified,now,lease);});}
+  async consumePurgeCommand(requestId:string,command:FeedbackPurgeCommand,authority:ReceiverPurgeCommandAuthority,now=new Date()):Promise<DeletionReceipt>{return this.lock(requestId,async lease=>{const requestIndex=this.readStored(this.indexPath(requestId));const revalidate=async()=>{lease.assertCurrent();await assertFeedbackPurgeCommandSignature(command,authority);if(command.revokedAt!==null||new Date(command.issuedAt)>now||new Date(command.expiresAt)<=now)fail("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE","Purge command is not currently effective");const current=await authority.current({requestId,commandId:command.commandId,jobId:command.jobId,canonicalSha256:command.canonicalSha256,requestIndex,now});await assertFeedbackPurgeCommandSignature(current,authority);if(current.canonicalSha256!==command.canonicalSha256||current.commandId!==command.commandId||current.jobId!==command.jobId||current.signatureReference!==command.signatureReference||current.revokedAt!==null||new Date(current.issuedAt)>now||new Date(current.expiresAt)<=now)fail("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE","Purge command is no longer current");};await revalidate();return this.purgeUnderLease(requestId,{policySha256:command.policySha256,approvedBy:command.approvalAuthority,approvedAt:command.approvedAt,hold:false,command},now,lease,revalidate);});}
+  /** @deprecated Release callers must use consumePurgeCommand. */
+  purge(_requestId:string,_authority:PurgeAuthority,_now=new Date()):DeletionReceipt{return fail("FEEDBACK_RECEIVER_PURGE_COMMAND_REQUIRED","A current signed purge command is required");}
+  /** @deprecated Release callers must use consumePurgeCommand. */
+  async purgeAsync(_requestId:string,_authority:PurgeAuthority,_now=new Date()):Promise<DeletionReceipt>{return fail("FEEDBACK_RECEIVER_PURGE_COMMAND_REQUIRED","A current signed purge command is required");}
   health() {
     try {
       assertTreeNoLinks(this.root);

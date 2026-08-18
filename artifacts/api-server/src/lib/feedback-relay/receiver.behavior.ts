@@ -10,6 +10,7 @@ import {
   type ReceiverNonceAuthority,
 } from "./receiver-service.js";
 import {verifyDeletionReceiptDurably} from "./protocol.js";
+import {feedbackPurgeCommandSha256,type FeedbackPurgeCommand} from "./state-machine.js";
 import {
   assertReadbackMatchesReceipt,
   canonicalRequest,
@@ -110,9 +111,9 @@ const bytes = Buffer.from("opaque receiver evidence bytes"),
     timestamp: now.toISOString(),
     nonce,
     requestId,
-    companyId: "company-test",
-    projectId: "project-test",
-    feedbackId: "FB-TEST",
+    companyId: "1",
+    projectId: "2",
+    feedbackId: "3",
     objectId: id,
     byteCount: bytes.length,
     sha256: sha256(bytes),
@@ -126,6 +127,13 @@ const inspection = {
   mediaKind: "document" as const,
   byteCount: bytes.length,
   sha256: sha256(bytes),
+};
+const commandFor=async(target:FeedbackReceiverCustodyService,requestId:string,overrides:Partial<FeedbackPurgeCommand>={})=>{
+  const readback=(await target.readbackAsync(requestId,now)).payload;
+  const unsigned={commandVersion:"1" as const,commandId:`command-${requestId}`,jobId:`job-${requestId}`,objectId:readback.objectId,companyId:Number(readback.companyId),projectId:readback.projectId?Number(readback.projectId):null,feedbackId:Number(readback.feedbackId),jobVersion:1,fencingToken:"fence-1",holdSnapshotVersion:1,noActiveHoldProofSha256:"1".repeat(64),resolvedEvidenceSha256:"2".repeat(64),customerClosureEvidenceSha256:"3".repeat(64),internalClosureEvidenceSha256:"4".repeat(64),policyId:"feedback-retention",policyVersion:"1",policySha256:"a".repeat(64),approvalId:"approval-1",approvalAuthority:"operator",approvedAt:now.toISOString(),deliveryReceiptSha256:readback.receiptSha256,readbackSha256:sha256((await import("./protocol.js")).canonicalReadback(readback)),issuedAt:now.toISOString(),expiresAt:new Date(now.getTime()+60_000).toISOString(),signingKeyId:"purge-key"};
+  const base={...unsigned,...overrides} as typeof unsigned,command={...base,revokedAt:overrides.revokedAt??null,signatureReference:overrides.signatureReference??"valid-signature",canonicalSha256:feedbackPurgeCommandSha256(base)} as FeedbackPurgeCommand;
+  let current=command;const authority={async verify(input:{keyId:string;canonicalSha256:string;signatureReference:string}){return input.keyId==="purge-key"&&input.signatureReference==="valid-signature";},async current(){return current;},set(value:FeedbackPurgeCommand){current=value;}};
+  return {command,authority};
 };
 try {
   await check("filesystem nonce authority survives instance restart",async()=>{const nonceRoot=path.join(disposable,"nonce-authority");fs.mkdirSync(nonceRoot);const binding={audience:"receiver",keyId:"key-active",nonce:"restart-nonce",timestamp:now.toISOString(),requestId:"restart-request",companyId:"company",projectId:"project",requestSha256:"d".repeat(64)};const first=new FilesystemReceiverNonceAuthority(nonceRoot),reserved=await first.reserve(binding);assert.ok(reserved);assert.equal(await new FilesystemReceiverNonceAuthority(nonceRoot).reserve(binding),null);await first.commit(reserved.token);const restarted=new FilesystemReceiverNonceAuthority(nonceRoot);assert.equal((await restarted.reserve(binding))?.status,"identical-retry");assert.equal(await restarted.reserve({...binding,requestSha256:"e".repeat(64)}),null);});
@@ -152,6 +160,7 @@ try {
   const firstRequest = request("object-one", "nonce-one", "request-one"),
     signedFirst = signRequest(firstRequest, senderKeys, now);
   let firstReceipt: any;
+  let completedPurge:Awaited<ReturnType<typeof commandFor>>;
   await check(
     "delivery atomically projects scanner-clean opaque bytes and returns signed scoped receipt",
     async () => {
@@ -500,51 +509,34 @@ try {
     );
     fs.unlinkSync(link);
   });
-  await check("hold defeats governed purge", () =>
-    code("FEEDBACK_RECEIVER_HOLD_ACTIVE", () =>
-      service.purge(
-        "request-one",
-        {
-          policySha256: "a".repeat(64),
-          approvedBy: "operator",
-          approvedAt: now.toISOString(),
-          hold: true,
-        },
-        now,
-      ),
-    ),
-  );
+  await check("legacy forgeable purge entry points are unreachable", async () => {
+    await code("FEEDBACK_RECEIVER_PURGE_COMMAND_REQUIRED",()=>service.purge("request-one",{policySha256:"a".repeat(64),approvedBy:"operator",approvedAt:now.toISOString(),hold:false},now));
+    await code("FEEDBACK_RECEIVER_PURGE_COMMAND_REQUIRED",()=>service.purgeAsync("request-one",{policySha256:"a".repeat(64),approvedBy:"operator",approvedAt:now.toISOString(),hold:false},now));
+  });
   await check(
     "governed purge verifies absence and emits signed deletion receipt",
     async () => {
-      const purgeAuthority = {
-        policySha256: "a".repeat(64),
-        approvedBy: "operator",
-        approvedAt: now.toISOString(),
-        hold: false,
-      };
-      const deleted = service.purge("request-one", purgeAuthority, now);
+      const {command,authority:purgeAuthority}=completedPurge=await commandFor(service,"request-one");
+      purgeAuthority.set({...command,revokedAt:now.toISOString()});await code("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));
+      purgeAuthority.set({...command,jobVersion:2});await code("FEEDBACK_PURGE_COMMAND_HASH_MISMATCH",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));
+      purgeAuthority.set({...command,fencingToken:"stale-fence"});await code("FEEDBACK_PURGE_COMMAND_HASH_MISMATCH",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));
+      purgeAuthority.set({...command,holdSnapshotVersion:2});await code("FEEDBACK_PURGE_COMMAND_HASH_MISMATCH",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,now));
+      purgeAuthority.set(command);await code("FEEDBACK_RECEIVER_PURGE_COMMAND_STALE",()=>service.consumePurgeCommand("request-one",command,purgeAuthority,new Date(now.getTime()+120_000)));
+      await assert.rejects(service.consumePurgeCommand("request-one",command,{...purgeAuthority,async current(){throw new Error("authority outage");}},now),/authority outage/);
+      await code("FEEDBACK_PURGE_COMMAND_SIGNATURE_DENIED",()=>service.consumePurgeCommand("request-one",command,{...purgeAuthority,async verify(){return false;}},now));
+      const deleted = await service.consumePurgeCommand("request-one",command,purgeAuthority,now);
       assert.equal(deleted.absenceVerified, true);
       const durable=verifyDeletionReceiptDurably(deleted.signed,receiverKeys,now);assert.equal(durable.canonicalSha256.length,64);assert.equal(deleted.signed.payload.approvedBy,"operator");assert.equal(deleted.signed.payload.journalSha256,deleted.journalSha256);
       assert.deepEqual(
-        service.purge("request-one", purgeAuthority, now),
+        await service.consumePurgeCommand("request-one",command,purgeAuthority,now),
         deleted,
       );
-      assert.deepEqual(await service.purgeAsync("request-one",purgeAuthority,now),deleted);
-      assert.throws(
-        () =>
-          service.purge(
-            "request-one",
-            { ...purgeAuthority, approvedBy: "other" },
-            now,
-          ),
-        /authority differs/,
-      );
+      assert.equal(deleted.commandId,command.commandId);assert.equal(deleted.commandSha256,command.canonicalSha256);assert.equal(deleted.jobVersion,command.jobVersion);assert.equal(deleted.fencingToken,command.fencingToken);assert.equal(deleted.holdSnapshotVersion,command.holdSnapshotVersion);
     },
   );
-  await check("final deletion journal nested tamper is refused",()=>{
+  await check("final deletion journal nested tamper is refused",async()=>{
     const deletionPath=path.join(root,"99-System","deletions",`${sha256("request-one")}.json`),original=fs.readFileSync(deletionPath),tampered=JSON.parse(original.toString("utf8"));tampered.receipt.signed.payload.approvedBy="substitution";fs.writeFileSync(deletionPath,JSON.stringify(tampered));
-    assert.throws(()=>service.purge("request-one",{policySha256:"a".repeat(64),approvedBy:"operator",approvedAt:now.toISOString(),hold:false},now),(error:any)=>error?.code==="FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID");fs.writeFileSync(deletionPath,original);
+    const {command,authority}=completedPurge;await assert.rejects(service.consumePurgeCommand("request-one",command,authority,now),(error:any)=>error?.code==="FEEDBACK_RECEIVER_DELETION_JOURNAL_INVALID");fs.writeFileSync(deletionPath,original);
   });
   await check(
     "prepared purge survives crash without false absence and restart finalizes",
@@ -577,16 +569,8 @@ try {
         },
       );
       await failing.deliver({ signedRequest: signed, bytes, inspection, now });
-      const governed = {
-        policySha256: "b".repeat(64),
-        approvedBy: "operator",
-        approvedAt: now.toISOString(),
-        hold: false,
-      };
-      assert.throws(
-        () => failing.purge(r.requestId, governed, now),
-        /forced purge crash/,
-      );
+      const governed=await commandFor(failing,r.requestId);
+      await assert.rejects(failing.consumePurgeCommand(r.requestId,governed.command,governed.authority,now),/forced purge crash/);
       const deletionPath = path.join(
         purgeRoot,
         "99-System",
@@ -606,7 +590,7 @@ try {
         30000,
       );
       assert.equal(
-        restarted.purge(r.requestId, governed, now).absenceVerified,
+        (await restarted.consumePurgeCommand(r.requestId,governed.command,governed.authority,now)).absenceVerified,
         true,
       );
       assert.equal(
