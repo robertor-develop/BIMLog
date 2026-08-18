@@ -10559,6 +10559,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1dbb3dc558ecb4f4070605aec6277972df55bf4b7b0a1e91a9e20f83bca1a27b"
+    },
+    {
+      "taskId": "bimlog-feedback-build8-startup-terminal-living-brief-reseal-20260817",
+      "reviewedThroughCommit": "9e428f3cb249d5b80041ee5f19ded9cfe962d141",
+      "reviewedAt": "2026-08-18T02:54:00Z",
+      "status": "local_startup_fail_closed_accepted_full_workspace_build_and_final_browser_reseal_pending",
+      "captureTiming": "same_release_reconciliation",
+      "summary": "Rebinds Feedback Build 8 to the production startup fail-closed implementation and natural-process acceptance while preserving predecessor dynamic/API, receiver, artifact, and browser evidence and retaining the exact-head build and browser reruns.",
+      "workstreams": [
+        "feedback-addendum",
+        "production-startup",
+        "fail-closed-authority",
+        "artifact-proof",
+        "living-brief"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed evidence custody and external-action doctrine remains controlling."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing startup, source, artifact, browser, release, production, and field gates remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Natural child exit/no-listener and positive readiness behavior replace synthetic startup proxy evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product identity or roadmap change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Startup implementation changes existing files and adds no generated structural path."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Navisworks, installer, or plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new external standard, certification, or compliance claim is introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact startup identity, natural fail-closed and positive readiness proof, predecessor evidence, and remaining build/browser gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Supersedes synthetic invalid-authority proof and retains exact full workspace build and final-head browser reseal."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No push, Replit publication, deployment, provider activation, production mutation, customer action, or field event occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ea783cea368da465d047e774f09078710d23cb5a92699ebde0db084fbcdb1830"
     }
   ]
 }
