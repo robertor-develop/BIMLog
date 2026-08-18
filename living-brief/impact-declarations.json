@@ -10793,6 +10793,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f70d229e603759bb8d4c1236494e45aeb688bf46387f3ec6b81167c29c211139"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-app-storage-publication-hotfix-20260818",
+      "reviewedThroughCommit": "f527fc3d556d4aa4c69d908503ed283684361ffd",
+      "reviewedAt": "2026-08-18T10:30:00Z",
+      "status": "replit_app_storage_source_implemented_exact_build_and_live_bucket_smoke_pending",
+      "captureTiming": "post_source_tests_pre_publication",
+      "summary": "Keeps Feedback enabled for publication by adding persistent Replit App Storage with exact-byte verification, bounded reads, retention holds, and fail-closed bucket binding.",
+      "workstreams": [
+        "feedback-addendum",
+        "replit-app-storage",
+        "publication",
+        "evidence-custody"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "updated",
+          "reason": "Records temporary persistent Replit custody without replacing Roberto-controlled permanent receiver authority."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Adds the explicit App Storage provider boundary, required startup binding, and live bucket smoke gate before publication."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Requires exact upload, readback, hash, bounded download, hold, deletion, and health cleanup evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Feedback remains enabled and the product objective is unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Adds the official Replit App Storage runtime dependency and storage backend."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens, Navisworks, installer, or plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout or document design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external certification or standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the source hotfix, passed focused gates, and pending exact build and live bucket smoke."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Defines exact Replit bucket binding, preview, push, and publication gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records that Build 8 was pushed and synchronized while this successor remains local and unpublished."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "14ecb6bdd0e08f0a678724d419ba08ccdf4a40b89ac50a9cd6b82ac0ac9cf24a"
     }
   ]
 }

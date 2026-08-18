@@ -10,6 +10,10 @@ not redefine ecosystem identity, permanent product laws, standards metadata, or 
 Preferred future filename: AI_DEV.md. Keep CLAUDE.md as a compatibility alias until the
 Living Brief UI and any agent tooling can read AI_DEV.md directly.
 
+## Feedback Replit App Storage boundary
+
+Production Feedback may use the official Replit App Storage SDK only when an explicit private bucket ID and governed maximum read size are bound at startup. The adapter must preserve opaque object names, exact-byte SHA-256 readback, bounded streaming downloads, retention holds, health-probe cleanup, and sanitized default-deny failures. Replit App Storage is temporary persistent custody and does not replace the Roberto-controlled receiver, malware-scanner authority, transcription authority, verified transfer receipt, or governed post-transfer deletion.
+
 ## Who / What
 - Product: BIMLog, a construction coordination platform.
 - Owner: Roberto Rodriguez, CEO of BIMCapital Partners INC / IgniteSmart.
