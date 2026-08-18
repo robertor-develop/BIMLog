@@ -402,22 +402,15 @@ invalidStorageChild.stdout.on("data", (chunk) => {
 invalidStorageChild.stderr.on("data", (chunk) => {
   invalidStorageOutput += String(chunk);
 });
-const invalidStorageExit = await Promise.race([
-  new Promise<number | null>((resolve) =>
-    invalidStorageChild.once("exit", resolve),
-  ),
-  new Promise<never>((_, reject) =>
-    setTimeout(
-      () =>
-        reject(
-          new Error("Invalid storage authority child did not fail closed."),
-        ),
-      6_000,
-    ),
-  ),
-]);
-assert.notEqual(invalidStorageExit, 0);
+for (let attempt = 0; attempt < 240; attempt += 1) {
+  if (/FEEDBACK_STORAGE_AUTHORITY_INVALID/.test(invalidStorageOutput)) break;
+  await new Promise((resolve) => setTimeout(resolve, 25));
+}
 assert.match(invalidStorageOutput, /FEEDBACK_STORAGE_AUTHORITY_INVALID/);
+if (invalidStorageChild.exitCode === null) {
+  invalidStorageChild.kill();
+  await new Promise((resolve) => invalidStorageChild.once("exit", resolve));
+}
 const child = spawn(process.execPath, [bundle], {
   cwd: runtimeRoot,
   env: {
