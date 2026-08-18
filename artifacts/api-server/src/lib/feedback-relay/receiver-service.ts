@@ -847,12 +847,12 @@ export class FeedbackReceiverCustodyService {
     }
     return fail("FEEDBACK_RECEIVER_LOCK_TIMEOUT","Receiver request is already being processed");
   }
-  purge(
+  private purgeUnderLease(
     requestId: string,
     authority: PurgeAuthority,
-    now = new Date(),
+    now: Date,
+    lease:{assertCurrent():void;fence:string},
   ): DeletionReceipt {
-    return this.lockSync(requestId,lease=>{
     lease.assertCurrent();
     if (authority.hold)
       fail("FEEDBACK_RECEIVER_HOLD_ACTIVE", "Held custody cannot be purged");
@@ -935,8 +935,9 @@ export class FeedbackReceiverCustodyService {
       generation,
     }));
     return receipt;
-    });
   }
+  purge(requestId:string,authority:PurgeAuthority,now=new Date()):DeletionReceipt{return this.lockSync(requestId,lease=>this.purgeUnderLease(requestId,authority,now,lease));}
+  async purgeAsync(requestId:string,authority:PurgeAuthority,now=new Date()):Promise<DeletionReceipt>{return this.lock(requestId,async lease=>this.purgeUnderLease(requestId,authority,now,lease));}
   health() {
     try {
       assertTreeNoLinks(this.root);

@@ -530,6 +530,7 @@ try {
         service.purge("request-one", purgeAuthority, now),
         deleted,
       );
+      assert.deepEqual(await service.purgeAsync("request-one",purgeAuthority,now),deleted);
       assert.throws(
         () =>
           service.purge(
