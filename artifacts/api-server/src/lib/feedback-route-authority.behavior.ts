@@ -24,9 +24,10 @@ const assertions: Array<[string, RegExp]> = [
   ["semantic identity guards identical-byte dedup", /identityMatches.*FEEDBACK_ASSET_PROVENANCE_CONFLICT.*asset_upload_receipt/s],
   ["dedup contract is explicit", /json\(\{ replayed, deduplicated,/],
   ["mine exposes safe transcription projection", /transcription:transcriptionByFeedback\.has\(row\.id\)\?transcriptionDto/],
-  ["mine exposes safe relay lifecycle projection", /relay:\s*relay\?\{state:relay\.state,version:relay\.version,createdAt:relay\.createdAt,updatedAt:relay\.updatedAt,reason:customerRelayReason\(relay\.state\),history:/s],
+  ["transcription reason is customer allowlisted", /customerTranscriptionReason.*provider-unavailable/s],
+  ["mine exposes per-evidence relay lifecycle projection", /relays:\(relaysByFeedback\.get\(row\.id\)\|\|\[\]\)\.map\(relay=>\(\{assetId:relay\.assetId,state:relay\.state/s],
   ["relay reason projection is a customer enum", /const customerRelayReason = \(state: string\) => \(\{ queued: "awaiting-delivery".*expired: "retention-ended"/s],
-  ["relay selection is lineage and version aware", /currentByLineage.*relay\.version>current\.version.*relay\.lineageId<current\.lineageId/s],
+  ["relay selection preserves every asset lineage", /\$\{relay\.feedbackId\}:\$\{relay\.assetId\}:\$\{relay\.lineageId\}.*relaysByFeedback/s],
   ["relay history has deterministic job sequence time order", /orderBy\(feedbackRelayCustodyEventsTable\.jobId,feedbackRelayCustodyEventsTable\.sequence,feedbackRelayCustodyEventsTable\.occurredAt\)/],
   ["customer routes do not bypass reporter authority", /if \(!actor \|\| !row\.companyId \|\| actor\.companyId !== row\.companyId \|\| row\.userId !== user\.userId/],
   ["audio origin is explicit and validated", /audio: new Set\(\["browser-microphone", "user-file-import"\]\)/],
@@ -34,6 +35,8 @@ const assertions: Array<[string, RegExp]> = [
   ["imported-audio transcription uses processing consent", /audioOrigin==="user-file-import"\?"transcription":"audio"/],
   ["blocked transcription requires explicit successor", /TRANSCRIPTION_SUCCESSOR_REQUIRED.*TRANSCRIPTION_ADAPTER_UNCHANGED/s],
   ["download enforces stored and actual byte bounds", /asset\.byteSize > FEEDBACK_MAX_FILE_BYTES.*bytes\.byteLength > FEEDBACK_MAX_FILE_BYTES/s],
+  ["download requires bounded adapter read", /downloadBounded\?\:.*maxBytes.*FEEDBACK_BOUNDED_DOWNLOAD_UNAVAILABLE/s],
+  ["physical oversize abort is mapped", /STORAGE_OBJECT_TOO_LARGE.*FEEDBACK_DOWNLOAD_TOO_LARGE/s],
   ["create authority uses transaction reader", /projectAuthorized\(projectId, user, actor\.companyId, tx\)/],
   ["admin mutation reads inside transaction", /feedback-admin:\$\{id\}.*tx\.select\(\)\.from\(feedbackItemsTable\)/s],
   ["review authority uses transaction reader", /accessible\(id,user,tx\)\)return undefined/],
@@ -46,6 +49,6 @@ const assertions: Array<[string, RegExp]> = [
 ];
 for (const [name, pattern] of assertions) assert.match(source, pattern, name);
 assert.ok(source.indexOf("pg_advisory_xact_lock") < source.indexOf("storage.upload"), "upload idempotency must be reserved before object creation");
-for (const forbidden of ["feedbackRelayJobsTable.lastErrorCode", "feedbackRelayJobsTable.expiryOutcome", "feedbackRelayCustodyEventsTable.reasonCode", "if (user.isSuperAdmin) return true", "if (user.isSuperAdmin) return row", "feedback: prior }", "feedback: winner }", "return res.json({ job });", "actorUserId: event.actorUserId", "metadata: feedbackItemsTable.metadata", "storagePath:feedbackRelayJobsTable"])
+for (const forbidden of ["errorCode: row.errorCode", "storage.download(asset.storagePath)", "feedbackRelayJobsTable.lastErrorCode", "feedbackRelayJobsTable.expiryOutcome", "feedbackRelayCustodyEventsTable.reasonCode", "if (user.isSuperAdmin) return true", "if (user.isSuperAdmin) return row", "feedback: prior }", "feedback: winner }", "return res.json({ job });", "actorUserId: event.actorUserId", "metadata: feedbackItemsTable.metadata", "storagePath:feedbackRelayJobsTable"])
   assert.equal(source.includes(forbidden), false, `response must not expose ${forbidden}`);
 console.log(`feedback route authority source assertions: ${assertions.length + 6}/${assertions.length + 6} passed (runtime PostgreSQL not exercised)`);
