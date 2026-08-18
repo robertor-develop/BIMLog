@@ -45,6 +45,7 @@
   "dependencies": {
     "@anthropic-ai/sdk": "^0.79.0",
     "@napi-rs/canvas": "0.1.80",
+    "@replit/object-storage": "^1.0.0",
     "@sendgrid/mail": "^8.1.6",
     "@types/archiver": "^7.0.0",
     "@types/express-session": "^1.19.0",

@@ -4,13 +4,28 @@ import os from "node:os";
 import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { createHash, randomUUID } from "node:crypto";
+import { Readable } from "node:stream";
 const root = fs.mkdtempSync(path.join(os.tmpdir(), "bimlog-feedback-storage-"));
 const mutableFs: { lstatSync: typeof fs.lstatSync } = fs;
 const checks = new Set<string>();
 function passed(name: string) { assert.ok(!checks.has(name), `duplicate check: ${name}`); checks.add(name); }
 try {
   process.env.NODE_ENV = "test"; process.env.BIMLOG_FEEDBACK_STORAGE_BACKEND = "local-test"; process.env.BIMLOG_FEEDBACK_UPLOAD_ROOT = root;
-  const { LocalDiskStorageAdapter, createStorageFromEnvironment } = await import("./storage-adapter");
+  const { LocalDiskStorageAdapter, ReplitAppStorageAdapter, createStorageFromEnvironment } = await import("./storage-adapter");
+  const appObjects = new Map<string, Buffer>();
+  const appClient = {
+    async uploadFromBytes(name: string, value: Buffer) { appObjects.set(name, Buffer.from(value)); return { ok: true as const, value: null }; },
+    downloadAsStream(name: string) { const value = appObjects.get(name); return value === undefined ? Readable.from((async function*(){ throw new Error("not found"); })()) : Readable.from([value]); },
+    async delete(name: string) { appObjects.delete(name); return { ok: true as const, value: null }; },
+  };
+  const appStorage = new ReplitAppStorageAdapter(appClient, "bimlog-replit-fixture", 20 * 1024 * 1024);
+  const appBytes = Buffer.from([0, 1, 2, 255, 13, 10]); const appKey = await appStorage.upload(appBytes, 101, "customer-name.pdf");
+  assert.match(appKey, /^[a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9]{64}$/); assert.equal(appObjects.size, 1); assert.deepEqual(await appStorage.downloadBounded(appKey, appBytes.length), appBytes);
+  await assert.rejects(() => appStorage.downloadBounded(appKey, appBytes.length - 1), (error: NodeJS.ErrnoException) => error.code === "STORAGE_OBJECT_TOO_LARGE");
+  const appHealth = await appStorage.health(); assert.equal(appHealth.backendType, "replit-app-storage"); assert.equal(appHealth.maxReadBytes, 20 * 1024 * 1024); assert.equal(appObjects.size, 1, "health probe must clean itself");
+  await assert.rejects(() => appStorage.delete(appKey, { retentionHold: true }), /STORAGE_RETENTION_HOLD_ACTIVE/); await appStorage.delete(appKey); assert.equal(appObjects.size, 0); passed("Replit App Storage exact lifecycle");
+  assert.throws(() => createStorageFromEnvironment({ NODE_ENV: "production", BIMLOG_FEEDBACK_STORAGE_BACKEND: "replit-app-storage" }), /FEEDBACK_APP_STORAGE_BUCKET_REQUIRED/); passed("Replit App Storage missing bucket refusal");
+  const configuredAppStorage = createStorageFromEnvironment({ NODE_ENV: "production", BIMLOG_FEEDBACK_STORAGE_BACKEND: "replit-app-storage", BIMLOG_FEEDBACK_APP_STORAGE_BUCKET_ID: "bimlog-feedback-temporary", BIMLOG_FEEDBACK_STORAGE_BACKEND_ID: "bimlog-feedback-replit", BIMLOG_FEEDBACK_STORAGE_MAX_READ_BYTES: String(20 * 1024 * 1024) }); assert.ok(configuredAppStorage instanceof ReplitAppStorageAdapter); passed("Replit App Storage production binding");
   const first = new LocalDiskStorageAdapter(root, { backendId: "fixture-shared", backendType: "durable-filesystem" });
   const bytes = Buffer.from([0, 255, 1, 2, 10, 13, 128]);
   const key = await first.upload(bytes, 101, "secret customer name.pdf");

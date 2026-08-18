@@ -3,14 +3,16 @@ import { constants as bufferConstants } from "node:buffer";
 import os from "node:os";
 import path from "node:path";
 import { createHash, randomUUID } from "node:crypto";
+import { Client as ReplitObjectStorageClient } from "@replit/object-storage";
 
 const PROVEN = ["exact-bytes", "atomic-create", "shared-root", "restart-persistence", "sha256-verification", "bounded-read"] as const;
 type Capability = typeof PROVEN[number];
-export type StorageHealth = { backendId: string; backendType: "durable-filesystem" | "local-test"; healthy: true; capabilities: readonly Capability[]; maxReadBytes: number; backupContract: { required: true; format: "opaque-key-v1"; integrity: "sha256"; restoreVerification: "exact-bytes-and-sha256" } };
+export type StorageHealth = { backendId: string; backendType: "durable-filesystem" | "replit-app-storage" | "local-test"; healthy: true; capabilities: readonly Capability[]; maxReadBytes: number; backupContract: { required: true; format: "opaque-key-v1"; integrity: "sha256"; restoreVerification: "exact-bytes-and-sha256" } };
 export interface StorageAdapter { upload(bytes: Buffer, projectId: number | string, filename: string): Promise<string>; download(key: string): Promise<Buffer>; downloadBounded(key: string, maxBytes: number): Promise<Buffer>; delete(key: string, options?: { retentionHold?: boolean }): Promise<void>; health(): Promise<StorageHealth>; }
 const KEY = /^[a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9]{64}$/;
 const MAX_BOUNDED_DOWNLOAD_BYTES = Math.min(bufferConstants.MAX_LENGTH, 0x7fffffff);
 type Options = { backendId?: string; backendType?: StorageHealth["backendType"]; capabilities?: readonly Capability[]; maxReadBytes?: number; faultAt?: "write" | "fsync" };
+type ReplitStorageClient = Pick<ReplitObjectStorageClient, "uploadFromBytes" | "downloadAsStream" | "delete">;
 
 function assertNoLinks(target: string) {
   const absolute = path.resolve(target), parsed = path.parse(absolute); let cursor = parsed.root;
@@ -93,10 +95,62 @@ export class LocalDiskStorageAdapter implements StorageAdapter {
   async health(): Promise<StorageHealth> { this.assertSafe(this.root); const probe = strictChild(this.root, path.join(this.root, `.health-${randomUUID()}`)); let handle: number | undefined; try { handle = fs.openSync(probe, "wx", 0o600); fs.writeFileSync(handle, "bimlog-storage-health-v1"); fs.fsyncSync(handle); fs.closeSync(handle); handle = undefined; } finally { if (handle !== undefined) try { fs.closeSync(handle); } catch {} try { fs.unlinkSync(probe); } catch {} } return { backendId: this.backendId, backendType: this.backendType, healthy: true, capabilities: this.capabilities, maxReadBytes: this.maxReadBytes, backupContract: { required: true, format: "opaque-key-v1", integrity: "sha256", restoreVerification: "exact-bytes-and-sha256" } }; }
 }
 
+export class ReplitAppStorageAdapter implements StorageAdapter {
+  private readonly prefix = "bimlog-feedback/v1";
+  constructor(private readonly client: ReplitStorageClient, private readonly backendId: string, private readonly maxReadBytes: number) {
+    if (!/^[a-z0-9][a-z0-9._-]{2,63}$/i.test(backendId) || !Number.isSafeInteger(maxReadBytes) || maxReadBytes <= 0 || maxReadBytes > MAX_BOUNDED_DOWNLOAD_BYTES) throw new Error("STORAGE_BINDING_INVALID");
+  }
+  private objectName(key: string) { if (!KEY.test(key)) throw storageError("STORAGE_KEY_INVALID"); return `${this.prefix}/${key}`; }
+  private async readBounded(key: string, maxBytes: number) {
+    if (!Number.isSafeInteger(maxBytes) || maxBytes <= 0) throw storageError("STORAGE_MAX_BYTES_INVALID");
+    if (maxBytes > this.maxReadBytes) throw storageError("STORAGE_MAX_BYTES_EXCEEDS_BACKEND_LIMIT");
+    const stream = this.client.downloadAsStream(this.objectName(key), { decompress: false });
+    const chunks: Buffer[] = []; let total = 0;
+    try {
+      for await (const value of stream) {
+        const chunk = Buffer.isBuffer(value) ? value : Buffer.from(value);
+        total += chunk.length;
+        if (total > maxBytes) { stream.destroy(); throw storageError("STORAGE_OBJECT_TOO_LARGE"); }
+        chunks.push(chunk);
+      }
+      return Buffer.concat(chunks, total);
+    } catch (error) {
+      if ((error as NodeJS.ErrnoException).code?.startsWith("STORAGE_")) throw error;
+      throw storageError("STORAGE_OBJECT_READ_FAILED");
+    }
+  }
+  async upload(bytes: Buffer, _projectId: number | string, _filename: string) {
+    if (bytes.length > this.maxReadBytes) throw storageError("STORAGE_OBJECT_TOO_LARGE");
+    const digest = createHash("sha256").update(bytes).digest("hex"), id = createHash("sha256").update(`${randomUUID()}\n${digest}`).digest("hex"), key = `${id.slice(0, 2)}/${id.slice(2, 4)}/${id}`;
+    const result = await this.client.uploadFromBytes(this.objectName(key), bytes, { compress: false });
+    if (!result.ok) throw storageError("STORAGE_OBJECT_WRITE_FAILED");
+    try {
+      const stored = await this.readBounded(key, Math.max(1, bytes.length));
+      if (stored.length !== bytes.length || createHash("sha256").update(stored).digest("hex") !== digest) throw storageError("STORAGE_OBJECT_CHANGED");
+    } catch (error) { await this.client.delete(this.objectName(key), { ignoreNotFound: true }); throw error; }
+    return key;
+  }
+  async download(key: string) { return this.readBounded(key, this.maxReadBytes); }
+  async downloadBounded(key: string, maxBytes: number) { return this.readBounded(key, maxBytes); }
+  async delete(key: string, options: { retentionHold?: boolean } = {}) { if (options.retentionHold) throw storageError("STORAGE_RETENTION_HOLD_ACTIVE"); const result = await this.client.delete(this.objectName(key), { ignoreNotFound: true }); if (!result.ok) throw storageError("STORAGE_OBJECT_DELETE_FAILED"); }
+  async health(): Promise<StorageHealth> {
+    const bytes = Buffer.from("bimlog-replit-app-storage-health-v1"), key = await this.upload(bytes, "health", "health");
+    try { const stored = await this.downloadBounded(key, bytes.length); if (!stored.equals(bytes)) throw storageError("STORAGE_HEALTH_FAILED"); }
+    finally { await this.delete(key); }
+    return { backendId: this.backendId, backendType: "replit-app-storage", healthy: true, capabilities: PROVEN, maxReadBytes: this.maxReadBytes, backupContract: { required: true, format: "opaque-key-v1", integrity: "sha256", restoreVerification: "exact-bytes-and-sha256" } };
+  }
+}
+
 function forbiddenProductionRoot(root: string) { const value = path.resolve(root).toLowerCase(), cwd = path.resolve(process.cwd()).toLowerCase(), tmp = path.resolve(os.tmpdir()).toLowerCase(); return value === cwd || value.startsWith(`${cwd}${path.sep}`) || value === tmp || value.startsWith(`${tmp}${path.sep}`) || /[\\/](worktrees?|repositories?|artifacts?|build|dist|cache|tmp|temp)([\\/]|$)/i.test(value); }
 export function createStorageFromEnvironment(environment: NodeJS.ProcessEnv = process.env): StorageAdapter {
   const production = environment.NODE_ENV === "production", backend = environment.BIMLOG_FEEDBACK_STORAGE_BACKEND ?? (production ? undefined : "local-test"), root = environment.BIMLOG_FEEDBACK_UPLOAD_ROOT ?? (production ? undefined : path.resolve(".tmp", "uploads"));
-  if (production && backend !== "durable-filesystem") throw new Error("FEEDBACK_DURABLE_STORAGE_REQUIRED"); if (!root) throw new Error("FEEDBACK_STORAGE_ROOT_REQUIRED");
+  if (production && backend !== "durable-filesystem" && backend !== "replit-app-storage") throw new Error("FEEDBACK_DURABLE_STORAGE_REQUIRED");
+  if (backend === "replit-app-storage") {
+    const bucketId = environment.BIMLOG_FEEDBACK_APP_STORAGE_BUCKET_ID, backendId = environment.BIMLOG_FEEDBACK_STORAGE_BACKEND_ID ?? "bimlog-feedback-replit", maxReadBytes = Number(environment.BIMLOG_FEEDBACK_STORAGE_MAX_READ_BYTES ?? 20 * 1024 * 1024);
+    if (!bucketId || !/^[a-z0-9][a-z0-9._-]{2,127}$/i.test(bucketId)) throw new Error("FEEDBACK_APP_STORAGE_BUCKET_REQUIRED");
+    return new ReplitAppStorageAdapter(new ReplitObjectStorageClient({ bucketId }), backendId, maxReadBytes);
+  }
+  if (!root) throw new Error("FEEDBACK_STORAGE_ROOT_REQUIRED");
   if (backend === "durable-filesystem") {
     const backendId = environment.BIMLOG_FEEDBACK_STORAGE_BACKEND_ID, authorityPath = environment.BIMLOG_FEEDBACK_STORAGE_AUTHORITY_MANIFEST, authoritySha256 = environment.BIMLOG_FEEDBACK_STORAGE_AUTHORITY_SHA256; if (!backendId) throw new Error("FEEDBACK_STORAGE_BACKEND_ID_REQUIRED");
     if (production && (forbiddenProductionRoot(root) || !authorityPath || path.resolve(authorityPath) === path.resolve(root) || path.resolve(authorityPath).startsWith(`${path.resolve(root)}${path.sep}`))) throw new Error("FEEDBACK_STORAGE_AUTHORITY_REQUIRED");
