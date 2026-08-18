@@ -350,6 +350,7 @@ async function assembleRuntimeFromInstalledGraph(
             : comparison === 0;
   };
   const satisfiesDeclaredSpec = (version: string, spec: string) => {
+    if (/^(?:\*|x)$/i.test(spec.trim())) return parseSemver(version) !== null;
     if (!/^[v0-9xX*~^<>=|.\s-]+$/.test(spec)) return true;
     const parsed = parseSemver(version);
     if (!parsed) return false;
