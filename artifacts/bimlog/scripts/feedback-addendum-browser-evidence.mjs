@@ -5,17 +5,40 @@ import { pathToFileURL } from "node:url";
 import { execFileSync } from "node:child_process";
 
 const need = n => { const v = process.env[n]; if (!v) throw new Error(`${n} is required`); return v; };
+const verifySourceOnly = process.argv.includes("--verify-source-only");
+const sha = v => createHash("sha256").update(v).digest("hex"), fileSha = f => sha(readFileSync(f));
+const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
+const tree = execFileSync("git", ["rev-parse", "HEAD^{tree}"], { encoding: "utf8" }).trim();
+const git = (args, options = {}) => execFileSync("git", args, { encoding: "utf8", ...options });
+const productionInputs = ["artifacts/bimlog/src", "artifacts/bimlog/public", "artifacts/bimlog/index.html", "artifacts/bimlog/package.json", "artifacts/bimlog/vite.config.ts", "artifacts/bimlog/tsconfig.json", "lib/api-client-react", "lib/api-zod", "package.json", "pnpm-lock.yaml", "pnpm-workspace.yaml", "tsconfig.base.json"];
+const relevantStatus = git(["status", "--porcelain=v1", "--untracked-files=all", "--", ...productionInputs]).trim();
+if (relevantStatus) throw new Error(`Relevant production inputs are not clean at ${head}:\n${relevantStatus}`);
+const sourcePaths = git(["ls-tree", "-r", "--name-only", head, "--", ...productionInputs]).split(/\r?\n/).filter(Boolean).sort();
+if (!sourcePaths.length) throw new Error("No immutable production inputs resolved from Git");
+const normalizeEol = bytes => Buffer.from(bytes.toString("utf8").replace(/\r\n/g, "\n"));
+const sourceProvenance = Object.fromEntries(sourcePaths.map(relativePath => {
+  const blobId = git(["rev-parse", `${head}:${relativePath}`]).trim();
+  const gitBytes = execFileSync("git", ["cat-file", "blob", blobId], { encoding: "buffer" });
+  const checkoutBytes = readFileSync(path.resolve(relativePath));
+  const gitNormalized = normalizeEol(gitBytes), checkoutNormalized = normalizeEol(checkoutBytes);
+  if (!gitNormalized.equals(checkoutNormalized)) throw new Error(`Checkout differs from immutable Git object after EOL normalization: ${relativePath}`);
+  const text = checkoutBytes.toString("utf8"), crlf = (text.match(/\r\n/g) || []).length, bareLf = (text.match(/(?<!\r)\n/g) || []).length;
+  return [relativePath, { gitBlobId: blobId, gitBlobSha256: sha(gitBytes), checkoutSha256: sha(checkoutBytes), checkoutNormalizedSha256: sha(checkoutNormalized), bytes: checkoutBytes.length, eol: crlf && bareLf ? "mixed" : crlf ? "crlf" : bareLf ? "lf" : "binary-or-no-newline", eolPolicy: "checkout bytes must equal immutable Git blob bytes after CRLF-to-LF normalization" }];
+}));
+const harnessPath = "artifacts/bimlog/scripts/feedback-addendum-browser-evidence.mjs";
+const harnessBlobId = git(["rev-parse", `${head}:${harnessPath}`]).trim();
+const harnessGitBytes = execFileSync("git", ["cat-file", "blob", harnessBlobId], { encoding: "buffer" }), harnessCheckoutBytes = readFileSync(new URL(import.meta.url));
+if (!normalizeEol(harnessGitBytes).equals(normalizeEol(harnessCheckoutBytes))) throw new Error("Harness checkout does not match immutable harness Git object");
+const harnessProvenance = { gitBlobId: harnessBlobId, gitBlobSha256: sha(harnessGitBytes), checkoutSha256: sha(harnessCheckoutBytes), checkoutNormalizedSha256: sha(normalizeEol(harnessCheckoutBytes)) };
+if (verifySourceOnly) {
+  console.log(JSON.stringify({ status: "PASS", head, tree, productionInputCount: sourcePaths.length, harness: harnessProvenance }));
+  process.exit(0);
+}
 const playwrightCore = need("BIMLOG_PLAYWRIGHT_CORE"), chromiumExecutable = need("BIMLOG_CHROMIUM_EXECUTABLE");
 const baseUrl = need("BIMLOG_FEEDBACK_EVIDENCE_URL").replace(/\/$/, ""), output = path.resolve(need("BIMLOG_FEEDBACK_EVIDENCE_OUTPUT"));
 if (existsSync(output)) throw new Error(`Collision guard: ${output} exists`);
 mkdirSync(output, { recursive: false });
 const { chromium } = (await import(pathToFileURL(playwrightCore).href)).default;
-const sha = v => createHash("sha256").update(v).digest("hex"), fileSha = f => sha(readFileSync(f));
-const sourceFiles = ["src/App.tsx", "src/components/FeedbackWidget.tsx", "src/main.tsx", "vite.config.ts"];
-const sourceHashes = Object.fromEntries(sourceFiles.map(n => [n, fileSha(path.resolve("artifacts/bimlog", n))]));
-const head = execFileSync("git", ["rev-parse", "HEAD"], { encoding: "utf8" }).trim();
-const tree = execFileSync("git", ["rev-parse", "HEAD^{tree}"], { encoding: "utf8" }).trim();
-const harnessHash = fileSha(new URL(import.meta.url));
 const bundleRoot = path.resolve("artifacts/bimlog/dist/public/assets");
 const bundleHashes = Object.fromEntries(readdirSync(bundleRoot).filter(n => /\.js$/.test(n)).sort().map(n => [n, fileSha(path.join(bundleRoot, n))]));
 const assertions = [], failures = [], scenarios = [];
@@ -104,7 +127,7 @@ try { await run("en",{width:1440,height:900});await run("es",{width:390,height:8
 const screenshots=scenarios.flatMap(s=>s.screenshots.map(name=>{const f=path.join(output,name);return{name,scenario:s.id,width:s.viewport.width,height:s.viewport.height,bytes:statSync(f).size,sha256:fileSha(f)};}));
 const forbidden=["storageKey","providerPayload","internalNote","relayToken","purgeToken"], serialized=JSON.stringify({assertions,scenarios});
 const leakScan=forbidden.map(pattern=>({pattern,matches:(serialized.match(new RegExp(pattern,"gi"))||[]).length}));
-const manifest={label:"BIMLog — Feedback Final Browser Evidence Writer",generatedAt:new Date().toISOString(),source:{head,tree,expectedLineage:["88b0692f","dc3ff093"],sourceHashes,harnessHash,bundleHashes},runtime:{node:process.version,platform:process.platform,arch:process.arch,playwrightCore,chromiumExecutable,chromiumVersion,baseUrl},mockedBoundary:"Actual production App and FeedbackWidget in real Chromium with controlled in-browser API/media mocks. No real DB, provider, scanner, transcription provider, Replit, customer, or production system.",assertions:{passed:assertions.length,failed:failures.length,results:assertions,failures},scenarios,screenshots,leakScan};
+const manifest={label:"BIMLog — Feedback Final Browser Evidence Writer",generatedAt:new Date().toISOString(),source:{head,tree,expectedLineage:["88b0692f","dc3ff093","a1efa4f"],cleanRelevantPaths:true,productionInputCount:sourcePaths.length,productionInputs:sourceProvenance,harness:harnessProvenance,bundleHashes},runtime:{node:process.version,platform:process.platform,arch:process.arch,playwrightCore,chromiumExecutable,chromiumVersion,baseUrl},mockedBoundary:"Actual production App and FeedbackWidget in real Chromium with controlled in-browser API/media mocks. No real DB, provider, scanner, transcription provider, Replit, customer, or production system.",assertions:{passed:assertions.length,failed:failures.length,results:assertions,failures},scenarios,screenshots,leakScan};
 writeFileSync(path.join(output,"results.json"),`${JSON.stringify({assertions,failures,scenarios},null,2)}\n`);writeFileSync(path.join(output,"manifest.json"),`${JSON.stringify(manifest,null,2)}\n`);
 if(failures.length||leakScan.some(x=>x.matches))throw new Error(`Evidence failed: ${failures.length} assertions, leak=${JSON.stringify(leakScan)}`);
 console.log(`feedback final browser evidence: ${assertions.length}/${assertions.length} passed; ${output}`);
