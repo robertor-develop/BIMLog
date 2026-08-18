@@ -306,17 +306,20 @@ function atomicWrite(root: string, target: string, bytes: Buffer) {
       fs.existsSync(staging) && !contained(staging, target)
         ? path.join(staging, `.stage-${randomUUID()}`)
         : path.join(path.dirname(target), `.stage-${randomUUID()}`);
-  const fd = fs.openSync(temporary, "wx", 0o600);
+  let fd: number | undefined = fs.openSync(temporary, "wx", 0o600);
   try {
     fs.writeFileSync(fd, bytes);
     fs.fsyncSync(fd);
-  } finally {
     fs.closeSync(fd);
-  }
-  try {
+    fd = undefined;
     fs.renameSync(temporary, target);
     return syncDirectory(path.dirname(target));
   } catch (error) {
+    if (fd !== undefined) {
+      try {
+        fs.closeSync(fd);
+      } catch {}
+    }
     try {
       fs.unlinkSync(temporary);
     } catch {}

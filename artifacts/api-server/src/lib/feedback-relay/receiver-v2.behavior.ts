@@ -71,5 +71,21 @@ await check("kill and restart reconciles nonce object generation and index bound
   }
 });
 
+await check("write fsync and rename faults leave no atomic residue and permit exact retry",async()=>{
+  for(const operation of ["writeFileSync","fsyncSync","renameSync"] as const){
+    const caseRoot=path.join(disposable,`io-${operation}`),receiverRoot=path.join(caseRoot,"receiver"),nonceRoot=path.join(caseRoot,"nonces");fs.mkdirSync(receiverRoot,{recursive:true});fs.mkdirSync(nonceRoot,{recursive:true});
+    const request={...deliveryRequest,nonce:`${operation}-nonce`,requestId:`${operation}-request`,objectId:`${operation}-object`,path:`/v1/objects/${operation}`},signedRequest=signRequest(request,sender,now),authority={canonicalRoot:receiverRoot,rootFingerprintSha256:FeedbackReceiverCustodyService.fingerprintRoot(receiverRoot),destinationId:"receiver-io"};let armed=false,failed=false;
+    const original=fs[operation] as (...args:any[])=>any;(fs as any)[operation]=(...args:any[])=>{if(armed&&!failed){failed=true;throw Object.assign(new Error(`injected ${operation}`),{code:"EIO"});}return original(...args);};
+    try{const service=new FeedbackReceiverCustodyService(authority,sender,receiver,new FilesystemReceiverNonceAuthority(nonceRoot),30_000,{afterObjectWritten:()=>{armed=true;}});await assert.rejects(service.deliver({signedRequest,bytes:deliveryBytes,inspection,now}),/injected/);}finally{(fs as any)[operation]=original;}
+    assert.equal(failed,true);const residues:string[]=[];const inspect=(dir:string)=>{if(!fs.existsSync(dir))return;for(const entry of fs.readdirSync(dir,{withFileTypes:true})){const target=path.join(dir,entry.name);if(entry.isDirectory())inspect(target);else if(entry.name.startsWith(".stage-"))residues.push(target);}};inspect(receiverRoot);inspect(nonceRoot);assert.deepEqual(residues,[]);
+    const retry=new FeedbackReceiverCustodyService(authority,sender,receiver,new FilesystemReceiverNonceAuthority(nonceRoot),30_000),receipt=await retry.deliver({signedRequest,bytes:deliveryBytes,inspection,now});assert.equal(receipt.payload.requestId,request.requestId);assert.equal((await retry.readbackAsync(request.requestId,now)).payload.sha256,request.sha256);
+  }
+});
+
+await check("unlink failure preserves prepared proof and exact purge retry finalizes cleanly",async()=>{
+  const caseRoot=path.join(disposable,"io-unlinkSync"),receiverRoot=path.join(caseRoot,"receiver"),nonceRoot=path.join(caseRoot,"nonces");fs.mkdirSync(receiverRoot,{recursive:true});fs.mkdirSync(nonceRoot,{recursive:true});const request={...deliveryRequest,nonce:"unlink-nonce",requestId:"unlink-request",objectId:"unlink-object",path:"/v1/objects/unlink"},authority={canonicalRoot:receiverRoot,rootFingerprintSha256:FeedbackReceiverCustodyService.fingerprintRoot(receiverRoot),destinationId:"receiver-io"},service=new FeedbackReceiverCustodyService(authority,sender,receiver,new FilesystemReceiverNonceAuthority(nonceRoot),30_000);await service.deliver({signedRequest:signRequest(request,sender,now),bytes:deliveryBytes,inspection,now});
+  const original=fs.unlinkSync,objectPath=path.join(receiverRoot,"01-Active",sha256(request.companyId).slice(0,16),sha256(request.projectId).slice(0,16),sha256(request.feedbackId).slice(0,16),sha256(request.objectId).slice(0,16),request.sha256);let failed=false;(fs as any).unlinkSync=(target:string,...args:any[])=>{if(!failed&&path.resolve(target)===path.resolve(objectPath)){failed=true;throw Object.assign(new Error("injected unlinkSync"),{code:"EIO"});}return (original as any)(target,...args);};try{await assert.rejects(service.purgeAsync(request.requestId,{policySha256:"9".repeat(64),approvedBy:"crash-operator",approvedAt:now.toISOString(),hold:false},now),/injected unlinkSync/);}finally{(fs as any).unlinkSync=original;}assert.equal(fs.existsSync(objectPath),true);assert.equal((await service.purgeAsync(request.requestId,{policySha256:"9".repeat(64),approvedBy:"crash-operator",approvedAt:now.toISOString(),hold:false},now)).absenceVerified,true);assert.equal(fs.existsSync(objectPath),false);
+});
+
 fs.rmSync(disposable,{recursive:true,force:false});
 console.log(`feedback receiver v2 process behavior: ${passed}/${passed}`);
