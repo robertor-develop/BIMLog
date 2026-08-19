@@ -22,12 +22,20 @@ import {
   type LensNextProjectOption,
   type LensNextRefreshState,
 } from "./lens-next-types";
+import {
+  buildLensNextIssueGroups,
+  LENS_NEXT_VIEW_PRESETS,
+  type LensNextViewDimension,
+  type LensNextViewPresetId,
+  type LensNextViewSettings,
+} from "./lens-next-view-settings";
 import "./lens-next-panel.css";
 
 export interface LensNextPanelProps {
   projects: readonly LensNextProjectOption[];
   selectedProjectId: number | null;
   onProjectChange(projectId: number): void;
+  projectLocked?: boolean;
   authToken: string;
   bridgeSessionToken: string;
   apiBaseUrl?: string;
@@ -39,10 +47,11 @@ export function LensNextPanel({
   projects,
   selectedProjectId,
   onProjectChange,
+  projectLocked = false,
   authToken,
   bridgeSessionToken,
   apiBaseUrl = "/api/v1",
-  autoRefreshMs = 60_000,
+  autoRefreshMs = 10_000,
   fetchImpl,
 }: LensNextPanelProps) {
   const authorizedProjects = useMemo(
@@ -66,6 +75,12 @@ export function LensNextPanel({
   const [filters, setFilters] = useState<LensNextFilters>({
     ...LENS_NEXT_DEFAULT_FILTERS,
   });
+  const [viewPreset, setViewPreset] = useState<LensNextViewPresetId>("status_only");
+  const [customGroupBy, setCustomGroupBy] = useState<readonly LensNextViewDimension[]>([
+    "status",
+    "floor",
+    "trade",
+  ]);
   const [apiState, setApiState] = useState<LensNextConnectionState>("idle");
   const [bridgeState, setBridgeState] =
     useState<LensNextConnectionState>("idle");
@@ -103,6 +118,55 @@ export function LensNextPanel({
   const filteredIssues = useMemo(
     () => filterLensNextIssues(issues, filters),
     [filters, issues],
+  );
+
+  useEffect(() => {
+    if (authorizedProjectId === null) return;
+    try {
+      const raw = window.localStorage.getItem(`bimlog.lens_next.view.${authorizedProjectId}`);
+      if (!raw) return;
+      const saved = JSON.parse(raw) as { preset?: LensNextViewPresetId; groupBy?: LensNextViewDimension[] };
+      if (saved.preset && (saved.preset === "custom" || Object.prototype.hasOwnProperty.call(LENS_NEXT_VIEW_PRESETS, saved.preset))) {
+        setViewPreset(saved.preset);
+      }
+      if (Array.isArray(saved.groupBy) && saved.groupBy.length > 0) setCustomGroupBy(saved.groupBy.slice(0, 4));
+    } catch {
+      // Personal presentation settings are non-authoritative; invalid local state is ignored.
+    }
+  }, [authorizedProjectId]);
+
+  useEffect(() => {
+    if (authorizedProjectId === null) return;
+    try {
+      window.localStorage.setItem(
+        `bimlog.lens_next.view.${authorizedProjectId}`,
+        JSON.stringify({ preset: viewPreset, groupBy: customGroupBy }),
+      );
+    } catch {
+      // View settings remain usable in-memory when browser persistence is unavailable.
+    }
+  }, [authorizedProjectId, customGroupBy, viewPreset]);
+
+  const viewSettings = useMemo<LensNextViewSettings | null>(() => {
+    if (authorizedProjectId === null) return null;
+    return {
+      id: `panel-view:${authorizedProjectId}`,
+      name: "My coordination view",
+      scope: "personal",
+      preset: viewPreset,
+      groupBy: viewPreset === "custom" ? customGroupBy : LENS_NEXT_VIEW_PRESETS[viewPreset],
+      hideResolved: false,
+      statuses: [],
+      priorityMaximum: null,
+      ownerUserId: "current-user",
+      projectId: authorizedProjectId,
+      updatedAt: new Date().toISOString(),
+    };
+  }, [authorizedProjectId, customGroupBy, viewPreset]);
+
+  const issueGroups = useMemo(
+    () => (viewSettings ? buildLensNextIssueGroups(filteredIssues, viewSettings) : []),
+    [filteredIssues, viewSettings],
   );
   const trades = useMemo(
     () =>
@@ -281,7 +345,15 @@ export function LensNextPanel({
       authorizedProjects={authorizedProjects}
       selectedProjectId={selectedProjectId}
       onProjectChange={onProjectChange}
+      projectLocked={projectLocked}
+      bridgeDisplayName={bridgeContext?.displayName ?? null}
+      bridgeModelFingerprint={bridgeContext?.modelFingerprint ?? null}
       filteredIssues={filteredIssues}
+      issueGroups={issueGroups}
+      viewPreset={viewPreset}
+      customGroupBy={customGroupBy}
+      onViewPresetChange={setViewPreset}
+      onCustomGroupByChange={(next) => { setCustomGroupBy(next); setViewPreset("custom"); }}
       selectedServerId={selectedServerId}
       selectedIssue={selectedIssue}
       filters={filters}

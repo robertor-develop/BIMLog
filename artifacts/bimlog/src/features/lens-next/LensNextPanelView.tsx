@@ -1,6 +1,12 @@
 import React from "react";
 import { ImageOff, X } from "lucide-react";
 import { LENS_NEXT_STATUSES } from "./lens-next-types";
+import {
+  LENS_NEXT_VIEW_DIMENSIONS,
+  type LensNextIssueGroupNode,
+  type LensNextViewDimension,
+  type LensNextViewPresetId,
+} from "./lens-next-view-settings";
 import type {
   LensNextConnectionState,
   LensNextFilters,
@@ -107,6 +113,47 @@ function IssueCard({
   );
 }
 
+function IssueGroups({
+  groups,
+  selectedServerId,
+  onSelectIssue,
+  depth = 0,
+}: {
+  groups: readonly LensNextIssueGroupNode[];
+  selectedServerId: number | null;
+  onSelectIssue(serverId: number): void;
+  depth?: number;
+}) {
+  return (
+    <>
+      {groups.map((group) => (
+        <section className="lens-next__group" key={`${depth}:${group.key}`}>
+          <h4 className="lens-next__group-title" style={{ paddingLeft: `${depth * 10}px` }}>
+            {group.label}
+          </h4>
+          {group.children.length > 0 ? (
+            <IssueGroups
+              groups={group.children}
+              selectedServerId={selectedServerId}
+              onSelectIssue={onSelectIssue}
+              depth={depth + 1}
+            />
+          ) : (
+            group.issues.map((issue) => (
+              <IssueCard
+                key={issue.identity.serverId}
+                issue={issue}
+                selected={issue.identity.serverId === selectedServerId}
+                onSelect={() => onSelectIssue(issue.identity.serverId)}
+              />
+            ))
+          )}
+        </section>
+      ))}
+    </>
+  );
+}
+
 function HistoryView({ history }: { history: LensNextHistory }) {
   return (
     <section
@@ -155,7 +202,15 @@ export interface LensNextPanelViewProps {
   authorizedProjects: readonly LensNextProjectOption[];
   selectedProjectId: number | null;
   onProjectChange(projectId: number): void;
+  projectLocked: boolean;
+  bridgeDisplayName: string | null;
+  bridgeModelFingerprint: string | null;
   filteredIssues: readonly LensNextIssue[];
+  issueGroups: readonly LensNextIssueGroupNode[];
+  viewPreset: LensNextViewPresetId;
+  customGroupBy: readonly LensNextViewDimension[];
+  onViewPresetChange(next: LensNextViewPresetId): void;
+  onCustomGroupByChange(next: readonly LensNextViewDimension[]): void;
   selectedServerId: number | null;
   selectedIssue: LensNextIssue | null;
   filters: LensNextFilters;
@@ -182,7 +237,15 @@ export function LensNextPanelView({
   authorizedProjects,
   selectedProjectId,
   onProjectChange,
+  projectLocked,
+  bridgeDisplayName,
+  bridgeModelFingerprint,
   filteredIssues,
+  issueGroups,
+  viewPreset,
+  customGroupBy,
+  onViewPresetChange,
+  onCustomGroupByChange,
   selectedServerId,
   selectedIssue,
   filters,
@@ -234,6 +297,7 @@ export function LensNextPanelView({
         <span>Project</span>
         <select
           value={selectedProjectId ?? ""}
+          disabled={projectLocked}
           onChange={(event) => {
             const projectId = Number(event.target.value);
             if (
@@ -254,7 +318,53 @@ export function LensNextPanelView({
             </option>
           ))}
         </select>
+        {projectLocked && <small>Bound to the active Navisworks project.</small>}
       </label>
+
+      {(bridgeDisplayName || bridgeModelFingerprint) && (
+        <section className="lens-next__active-model" aria-label="Active Navisworks model">
+          <strong>{bridgeDisplayName ?? "Active Navisworks model"}</strong>
+          {bridgeModelFingerprint && <small>Model {bridgeModelFingerprint.slice(0, 12)}…</small>}
+        </section>
+      )}
+
+      <section className="lens-next__view-settings" aria-label="Personal issue view">
+        <label className="lens-next__field lens-next__field--wide">
+          <span>My view</span>
+          <select
+            value={viewPreset}
+            onChange={(event) => onViewPresetChange(event.target.value as LensNextViewPresetId)}
+          >
+            <option value="status_only">Status only</option>
+            <option value="floor_trade_company">Floor → Trade → Company</option>
+            <option value="floor_company_trade">Floor → Company → Trade</option>
+            <option value="company_floor_trade">Company → Floor → Trade</option>
+            <option value="company_trade_floor">Company → Trade → Floor</option>
+            <option value="trade_floor_company">Trade → Floor → Company</option>
+            <option value="trade_company_floor">Trade → Company → Floor</option>
+            <option value="custom">Custom</option>
+          </select>
+        </label>
+        {viewPreset === "custom" && [0, 1, 2].map((slot) => (
+          <label className="lens-next__field" key={slot}>
+            <span>Group {slot + 1}</span>
+            <select
+              value={customGroupBy[slot] ?? ""}
+              onChange={(event) => {
+                const next = [...customGroupBy];
+                const value = event.target.value as LensNextViewDimension;
+                if (value) next[slot] = value;
+                onCustomGroupByChange(next.filter(Boolean).slice(0, 4));
+              }}
+            >
+              {LENS_NEXT_VIEW_DIMENSIONS.map((dimension) => (
+                <option key={dimension} value={dimension}>{dimension}</option>
+              ))}
+            </select>
+          </label>
+        ))}
+        <small className="lens-next__view-note">Personal grouping changes presentation only. It never changes issue identity, status, or another user’s view.</small>
+      </section>
 
       <section className="lens-next__filters" aria-label="Issue filters">
         <label className="lens-next__field lens-next__field--wide">
@@ -370,14 +480,11 @@ export function LensNextPanelView({
               : "No issues match these filters."}
           </div>
         ) : (
-          filteredIssues.map((issue) => (
-            <IssueCard
-              key={issue.identity.serverId}
-              issue={issue}
-              selected={issue.identity.serverId === selectedServerId}
-              onSelect={() => onSelectIssue(issue.identity.serverId)}
-            />
-          ))
+          <IssueGroups
+            groups={issueGroups}
+            selectedServerId={selectedServerId}
+            onSelectIssue={onSelectIssue}
+          />
         )}
       </section>
 

@@ -5,11 +5,13 @@ export {
   type LensNextPanelViewProps,
 } from "./LensNextPanelView";
 export {
+  bootstrapLensNextBridgeSession,
   createLensNextApiClient,
   createLensNextBridgeClient,
   LENS_NEXT_BRIDGE_ORIGIN,
   type LensNextApiClient,
   type LensNextApiClientOptions,
+  type LensNextBridgeBootstrapSession,
   type LensNextBridgeClient,
   type LensNextBridgeClientOptions,
 } from "./lens-next-client";
@@ -37,3 +39,12 @@ export {
   type LensNextBridgeSessionReceipt,
   type LensNextBridgeSessionSnapshot,
 } from "./lens-next-session";
+export * from "./lens-next-view-settings";
+export * from "./lens-next-collaboration";
+
+export {
+  lensNextLaunchModeFromSearch,
+  resolveLensNextLaunchProject,
+  type LensNextLaunchMode,
+  type LensNextLaunchProjectResolution,
+} from "./lens-next-launch-binding";

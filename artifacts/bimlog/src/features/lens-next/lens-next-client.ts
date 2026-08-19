@@ -98,6 +98,55 @@ export function createLensNextApiClient(
   });
 }
 
+
+export interface LensNextBridgeBootstrapSession {
+  protocolVersion: 1;
+  source: "lens-next-native-host";
+  token: string;
+  sessionId: string;
+  issuedAt: string;
+  expiresAt: string;
+}
+
+export async function bootstrapLensNextBridgeSession(
+  fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
+  signal?: AbortSignal,
+): Promise<LensNextBridgeBootstrapSession> {
+  const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/session`, {
+    method: "GET",
+    mode: "cors",
+    cache: "no-store",
+    headers: { Accept: "application/json" },
+    signal,
+  });
+  const raw = await jsonBody(response, "Lens Next bridge session");
+  const payload = bridgePayload(raw, "session");
+  const protocolVersion = Number(payload.protocolVersion);
+  const source = String(payload.source ?? "");
+  const token = String(payload.token ?? "").trim();
+  const sessionId = String(payload.sessionId ?? "").trim();
+  const issuedAt = String(payload.issuedAt ?? "").trim();
+  const expiresAt = String(payload.expiresAt ?? "").trim();
+  if (
+    protocolVersion !== 1 ||
+    source !== "lens-next-native-host" ||
+    !/^[A-Za-z0-9._~-]{32,512}$/.test(token) ||
+    !sessionId ||
+    !Number.isFinite(Date.parse(issuedAt)) ||
+    !Number.isFinite(Date.parse(expiresAt))
+  ) {
+    throw new Error("Lens Next bridge session response is invalid");
+  }
+  return Object.freeze({
+    protocolVersion: 1,
+    source: "lens-next-native-host" as const,
+    token,
+    sessionId,
+    issuedAt,
+    expiresAt,
+  });
+}
+
 export interface LensNextBridgeClientOptions {
   sessionToken: string;
   fetchImpl?: FetchLike;
