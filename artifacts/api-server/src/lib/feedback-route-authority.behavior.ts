@@ -46,9 +46,17 @@ const assertions: Array<[string, RegExp]> = [
   ["consent revocation is audited", /capture_consent_revoked/],
   ["CSV requires reason", /FEEDBACK_EXPORT_REASON_REQUIRED/],
   ["CSV action is audited", /eventType: "admin_exported"/],
+  ["intake persists a notification outbox before delivery", /submission_notification_outbox_created.*return \{ status: 201, row/s],
+  ["notification failure cannot roll back canonical intake", /notificationState = "retry-required".*canonical intake remains durable/s],
+  ["reviewer notification opens the real feedback tab", /actionUrl: `\/admin\?tab=feedback&feedback=/],
+  ["admin queue projects evidence disposition", /packageState: counts\.total === 0.*awaiting-scan/s],
+  ["admin package detail exposes sanitized evidence state", /\/feedback\/admin\/:id\/detail.*scannerAdapter.*scanState/s],
+  ["staff can claim feedback without forging owner identity", /ownerUserId: req\.body\.claimToMe === true \? user\.userId/],
 ];
 for (const [name, pattern] of assertions) assert.match(source, pattern, name);
 assert.ok(source.indexOf("pg_advisory_xact_lock") < source.indexOf("storage.upload"), "upload idempotency must be reserved before object creation");
 for (const forbidden of ["errorCode: row.errorCode", "storage.download(asset.storagePath)", "feedbackRelayJobsTable.lastErrorCode", "feedbackRelayJobsTable.expiryOutcome", "feedbackRelayCustodyEventsTable.reasonCode", "if (user.isSuperAdmin) return true", "if (user.isSuperAdmin) return row", "feedback: prior }", "feedback: winner }", "return res.json({ job });", "actorUserId: event.actorUserId", "metadata: feedbackItemsTable.metadata", "storagePath:feedbackRelayJobsTable"])
   assert.equal(source.includes(forbidden), false, `response must not expose ${forbidden}`);
+const customerDtoSource = source.slice(source.indexOf("const customerFeedbackDto"), source.indexOf("const customerEventState"));
+assert.equal(customerDtoSource.includes("dispositionReason"), false, "customer DTO must not expose internal disposition reason");
 console.log(`feedback route authority source assertions: ${assertions.length + 6}/${assertions.length + 6} passed (runtime PostgreSQL not exercised)`);

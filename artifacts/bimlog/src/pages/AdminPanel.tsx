@@ -969,6 +969,9 @@ function FeedbackTab({ token }: { token: string }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [detail, setDetail] = useState<Record<string, unknown> | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
 
   const loadFeedback = useCallback(() => {
     setLoading(true);
@@ -988,6 +991,13 @@ function FeedbackTab({ token }: { token: string }) {
   useEffect(() => {
     loadFeedback();
   }, [loadFeedback]);
+
+  useEffect(() => {
+    if (!items.length || selectedId !== null || typeof window === "undefined") return;
+    const requested = new URLSearchParams(window.location.search).get("feedback");
+    const match = requested ? items.find(item => String(item.stableId) === requested) : undefined;
+    if (match) void openDetail(match.id);
+  }, [items, selectedId]);
 
   async function updateStatus(id: unknown, status: string) {
     const numericId = Number(id);
@@ -1010,6 +1020,39 @@ function FeedbackTab({ token }: { token: string }) {
     }
   }
 
+  async function openDetail(id: unknown) {
+    const numericId = Number(id); if (!Number.isInteger(numericId)) return;
+    setSelectedId(numericId); setDetail(null); setDetailLoading(true); setError("");
+    try { const response = await apiFetch(`/feedback/admin/${numericId}/detail`, token); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Failed to load feedback package"); setDetail(data); }
+    catch (err) { setError(err instanceof Error ? err.message : "Failed to load feedback package"); }
+    finally { setDetailLoading(false); }
+  }
+
+  async function claimFeedback(item: Record<string, unknown>) {
+    const numericId = Number(item.id); if (!Number.isInteger(numericId)) return;
+    try { const response = await apiFetch(`/feedback/admin/${numericId}`, token, { method: "PATCH", body: JSON.stringify({ observedVersion: Number(item.version), claimToMe: true }) }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Failed to claim feedback"); setItems(current => current.map(candidate => Number(candidate.id) === numericId ? { ...candidate, ...data.feedback } : candidate)); await openDetail(numericId); }
+    catch (err) { setError(err instanceof Error ? err.message : "Failed to claim feedback"); }
+  }
+
+  async function sendCustomerUpdate(item: Record<string, unknown>) {
+    const message = window.prompt("Customer-visible update"); if (!message?.trim()) return;
+    const responseType = String(item.status) === "fixed" || String(item.status) === "verified" ? "fix" : "response";
+    try { const response = await apiFetch(`/feedback/admin/${Number(item.id)}/events`, token, { method: "POST", headers: { "Idempotency-Key": `admin-ui:${Number(item.id)}:${Date.now()}` }, body: JSON.stringify({ responseType, visibility: "customer", message: message.trim() }) }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Failed to send customer update"); await openDetail(item.id); }
+    catch (err) { setError(err instanceof Error ? err.message : "Failed to send customer update"); }
+  }
+
+  async function downloadPackage(item: Record<string, unknown>) {
+    const reason = window.prompt("Export reason (required)", "Internal feedback review"); if (!reason?.trim()) return;
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${Number(item.id)}/package.zip`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Package is not ready"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${String(item.stableId || "feedback")}.zip`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
+    catch (err) { setError(err instanceof Error ? err.message : "Failed to download package"); }
+  }
+
+  async function downloadFollowUpRegister() {
+    const reason = window.prompt("Export reason (required)", "Customer feedback follow-up review"); if (!reason?.trim()) return;
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/follow-up.csv`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Follow-up register is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = "bimlog-feedback-follow-up.csv"; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
+    catch (err) { setError(err instanceof Error ? err.message : "Follow-up register is unavailable"); }
+  }
+
   const visibleItems = statusFilter === "all" ? items : items.filter((item) => String(item.status || "open") === statusFilter);
   const openCount = items.filter((item) => String(item.status || "new") === "new").length;
   const reviewCount = items.filter((item) => ["triaged", "accepted"].includes(String(item.status || "new"))).length;
@@ -1025,7 +1068,7 @@ function FeedbackTab({ token }: { token: string }) {
             BIMLog user feedback, bug reports, workflow requests, and improvement ideas.
           </p>
         </div>
-        <Button variant="outline" size="sm" onClick={loadFeedback}>Refresh</Button>
+        <div style={{ display: "flex", gap: 8 }}><Button variant="outline" size="sm" onClick={() => void downloadFollowUpRegister()}>Follow-up register</Button><Button variant="outline" size="sm" onClick={loadFeedback}>Refresh</Button></div>
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
@@ -1068,7 +1111,9 @@ function FeedbackTab({ token }: { token: string }) {
                 <Th>Priority</Th>
                 <Th>Module</Th>
                 <Th>Message</Th>
-                <Th>Status</Th>
+                <Th>Evidence package</Th>
+                <Th>Status / owner</Th>
+                <Th>Follow-up</Th>
                 <Th>Page</Th>
               </tr>
             </thead>
@@ -1088,7 +1133,10 @@ function FeedbackTab({ token }: { token: string }) {
                   <Td><Badge label={String(item.priority || "normal")} color={String(item.priority) === "urgent" ? "#ef4444" : "#f59e0b"} /></Td>
                   <Td style={{ fontSize: 12 }}>{String(item.module || "-")}</Td>
                   <Td style={{ minWidth: 280, maxWidth: 460, whiteSpace: "normal", overflowWrap: "anywhere" }}>{String(item.message || "")}</Td>
-                  <Td>
+                  <Td style={{ minWidth: 170 }}>
+                    {(() => { const evidence = (item.evidence || {}) as Record<string, unknown>; const total = Number(evidence.total || 0), quarantined = Number(evidence.quarantined || 0), clean = Number(evidence.clean || 0), rejected = Number(evidence.rejected || 0); return <><div style={{ fontSize: 12, fontWeight: 800 }}>{total} file{total === 1 ? "" : "s"}</div><div style={{ fontSize: 11, color: quarantined ? "#b45309" : rejected ? "#b91c1c" : "#15803d" }}>{clean} clean · {quarantined} awaiting scan · {rejected} rejected</div><div style={{ fontSize: 11 }}>{String(item.packageState || "metadata-only")}</div></>; })()}
+                  </Td>
+                  <Td style={{ minWidth: 150 }}>
                     <select
                       value={String(item.status || "new")}
                       onChange={(event) => updateStatus(item.id, event.target.value)}
@@ -1096,7 +1144,9 @@ function FeedbackTab({ token }: { token: string }) {
                     >
                       {FEEDBACK_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                     </select>
+                    <div style={{ marginTop: 6, fontSize: 11 }}>{item.ownerUserId ? `Owner #${String(item.ownerUserId)}` : "Unassigned"}</div>
                   </Td>
+                  <Td style={{ minWidth: 155 }}><div style={{ display: "grid", gap: 6 }}><Button variant="outline" size="sm" onClick={() => void openDetail(item.id)}>Review package</Button>{!item.ownerUserId && <Button variant="outline" size="sm" onClick={() => void claimFeedback(item)}>Claim</Button>}<Button variant="outline" size="sm" disabled={item.packageState !== "ready"} onClick={() => void downloadPackage(item)}>Download ZIP</Button><Button variant="outline" size="sm" onClick={() => void sendCustomerUpdate(item)}>Send update</Button></div></Td>
                   <Td style={{ maxWidth: 260, overflowWrap: "anywhere" }}>
                     <a href={String(item.pageUrl || "#")} target="_blank" rel="noreferrer" style={{ color: "#1d4ed8", fontSize: 11 }}>
                       {String(item.pageUrl || "-")}
@@ -1108,6 +1158,16 @@ function FeedbackTab({ token }: { token: string }) {
           </table>
         </div>
       )}
+      {selectedId !== null && <section aria-label="Selected feedback package" style={{ marginTop: 18, padding: 18, border: "2px solid #2563eb", borderRadius: 12, background: "hsl(var(--card))" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}><h3 style={{ margin: 0 }}>Feedback package review</h3><Button variant="outline" size="sm" onClick={() => { setSelectedId(null); setDetail(null); }}>Close</Button></div>
+        {detailLoading ? <p role="status">Loading complete package…</p> : detail ? <>
+          <p><strong>{String(((detail.feedback || {}) as Record<string, unknown>).stableId || selectedId)}</strong> · Package: {String(detail.packageState || "unknown")}</p>
+          <h4>Evidence</h4>
+          {Array.isArray(detail.assets) && detail.assets.length ? <ul>{(detail.assets as Record<string, unknown>[]).map(asset => <li key={String(asset.id)}><strong>{String(asset.name)}</strong> — {String(asset.kind)} — {String(asset.scanState)} via {String(asset.scannerAdapter)} — {Number(asset.byteSize || 0).toLocaleString()} bytes</li>)}</ul> : <p>No files attached.</p>}
+          <h4>Activity</h4>
+          {Array.isArray(detail.history) && detail.history.length ? <ol>{(detail.history as Record<string, unknown>[]).map(event => <li key={String(event.id)}><strong>{String(event.eventType)}</strong> · {event.createdAt ? new Date(String(event.createdAt)).toLocaleString() : ""}{event.reason ? ` — ${String(event.reason)}` : ""}</li>)}</ol> : <p>No activity recorded.</p>}
+        </> : <p role="alert">Package details could not be loaded.</p>}
+      </section>}
     </div>
   );
 }
@@ -1115,7 +1175,7 @@ function FeedbackTab({ token }: { token: string }) {
 export function AdminPanel() {
   const [, setLocation] = useLocation();
   const { token } = useAuthStore();
-  const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(() => { if (typeof window === "undefined") return 0; const requested = new URLSearchParams(window.location.search).get("tab"); return requested === "feedback" || window.location.pathname.endsWith("/admin/feedback") ? 9 : 0; });
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
@@ -1200,7 +1260,7 @@ export function AdminPanel() {
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
           {TABS.map((tab, i) => (
-            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => setActiveTab(i)}>
+            <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
           ))}

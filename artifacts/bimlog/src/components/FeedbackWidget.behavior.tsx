@@ -44,6 +44,7 @@ const assertions:Array<[string,RegExp]>=[
   ["capture bundle has stable linkage",/captureBundleId.*evidenceRole: "original".*evidenceRole: "marked"/s],
   ["capture bundle identity reaches server",/form\.append\("captureBundleId".*form\.append\("captureRole"/s],
   ["visual markup editor replaces numeric crop",/FeedbackMarkupEditor/],
+  ["feedback notification route opens customer history",/location === "\/feedback".*setOpen\(true\).*loadMine\(\)/s],
 ];
 for(const [name,pattern] of assertions)assert.match(source,pattern,name);
 for(const [name,pattern] of [

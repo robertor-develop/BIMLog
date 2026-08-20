@@ -59,6 +59,8 @@ import { startCoordinatorBulkActionMigration } from "./lib/coordinator-bulk-acti
 import { ensureProcoreRfiImportSchema } from "./lib/procore-rfi-import-migration";
 import { pool } from "@workspace/db";
 import { ensureFeedbackSchema } from "./lib/feedback-schema-migration";
+import { startFeedbackNotificationWorker } from "./lib/feedback-notification-worker";
+import { startFeedbackScanWorker, verifyFeedbackScannerStartup } from "./lib/feedback-scan-worker";
 import { storage as feedbackStorage } from "./lib/storage-adapter";
 
 const ENV_MODE =
@@ -1337,6 +1339,7 @@ const meetingLensStartupBarrier = (async () => {
 
 export const startupBarrier = Promise.all([
   feedbackStartupBarrier,
+  verifyFeedbackScannerStartup(),
   coordinatorStartupBarrier,
   telegramStartupBarrier,
   scheduleStartupBarrier,
@@ -1352,6 +1355,8 @@ export function startWorkers(): void {
   if (workersStarted) return;
   workersStarted = true;
   startOverdueNotifier();
+  startFeedbackNotificationWorker();
+  startFeedbackScanWorker();
   if (telegramWorkersReady) {
     startTelegramProductWorker();
     startNotificationOutboxWorker();

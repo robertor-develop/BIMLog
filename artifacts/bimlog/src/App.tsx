@@ -164,8 +164,14 @@ function Router() {
       <Route path="/settings/financial-controls">
         {() => <ProtectedRoute component={FinancialControlsSettings} />}
       </Route>
+      <Route path="/admin/feedback">
+        {() => <ProtectedRoute component={AdminPanel} />}
+      </Route>
       <Route path="/admin">
         {() => <ProtectedRoute component={AdminPanel} />}
+      </Route>
+      <Route path="/feedback">
+        {() => <ProtectedRoute component={Dashboard} />}
       </Route>
       <Route path="/total-control">
         {() => <ProtectedRoute component={TotalControl} />}

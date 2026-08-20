@@ -40,11 +40,11 @@ const sanitizedPageUrl = (value: unknown) => {
   try { const url = new URL(bounded(value, 2048), "http://bimlog.local"); return url.pathname.slice(0, 2048) || "/"; }
   catch { return ""; }
 };
-type CustomerFeedbackRow = Pick<typeof feedbackItemsTable.$inferSelect, "id" | "stableId" | "projectId" | "feedbackType" | "priority" | "module" | "pageUrl" | "message" | "status" | "version" | "targetRelease" | "dispositionReason" | "createdAt" | "updatedAt" | "resolvedAt">;
+type CustomerFeedbackRow = Pick<typeof feedbackItemsTable.$inferSelect, "id" | "stableId" | "projectId" | "feedbackType" | "priority" | "module" | "pageUrl" | "message" | "status" | "version" | "targetRelease" | "createdAt" | "updatedAt" | "resolvedAt">;
 const customerFeedbackDto = (row: CustomerFeedbackRow) => ({
   id: row.id, stableId: row.stableId, projectId: row.projectId, feedbackType: row.feedbackType, priority: row.priority,
   module: row.module, pageUrl: sanitizedPageUrl(row.pageUrl), message: row.message, status: row.status, version: row.version,
-  targetRelease: row.targetRelease, dispositionReason: row.dispositionReason, createdAt: row.createdAt,
+  targetRelease: row.targetRelease, createdAt: row.createdAt,
   updatedAt: row.updatedAt, resolvedAt: row.resolvedAt,
 });
 const customerEventState = (value: unknown) => {
@@ -97,15 +97,30 @@ router.post("/feedback", authMiddleware, async (req, res) => {
         if (!row) throw new Error("Feedback insert did not return a row");
         await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "created", afterState: { status: "new", version: 1 } });
         const [acknowledgment] = await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "submission_acknowledged", reason: "Your feedback was received and is ready for review.", afterState: { status: "new", version: 1, receiptId: row.stableId, release: FEEDBACK_RELEASE } }).returning({ id: feedbackAuditEventsTable.id });
-        const [customerNotification] = await tx.insert(notificationsTable).values({ userId: user.userId, projectId: row.projectId, type: "feedback_acknowledgment", title: `Feedback ${row.stableId} received`, message: "Your feedback was received and is ready for review.", actionUrl: "/feedback" }).returning({ id: notificationsTable.id });
-        await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "customer_notification_delivery", afterState: { sourceEventId: acknowledgment.id, notificationId: customerNotification.id, channel: "in_app", state: "created", idempotencyKey: `ack:${row.id}` } });
         const reviewers = await tx.select({ id: usersTable.id }).from(usersTable).where(eq(usersTable.isSuperAdmin, true));
-        if (reviewers.length) { const reviewerNotifications = await tx.insert(notificationsTable).values(reviewers.map(reviewer => ({ userId: reviewer.id, projectId: row.projectId, type: "feedback_review_requested", title: `New feedback ${row.stableId}`, message: `${row.feedbackType} feedback requires review.`, actionUrl: "/admin/feedback" }))).returning({ id: notificationsTable.id }); await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "internal_reviewer_notifications_created", afterState: { notificationIds: reviewerNotifications.map(item => item.id), reviewerCount: reviewerNotifications.length } }); }
-        return { status: 201, row, replayed: false } as const;
+        await tx.insert(feedbackAuditEventsTable).values({ feedbackId: row.id, actorUserId: user.userId, eventType: "submission_notification_outbox_created", afterState: { sourceEventId: acknowledgment.id, reviewerUserIds: reviewers.map(reviewer => reviewer.id), customerUserId: user.userId, state: "pending", release: FEEDBACK_RELEASE } });
+        return { status: 201, row, replayed: false, acknowledgmentId: acknowledgment.id, reviewerIds: reviewers.map(reviewer => reviewer.id) } as const;
       });
     if (!("row" in outcome)) return res.status(outcome.status).json({ code: outcome.code, error: outcome.error });
     if (!outcome.row) throw new Error("Feedback transaction returned no row");
-    return res.status(outcome.status).json({ success: true, replayed: outcome.replayed, receipt: { id: outcome.row.stableId, acknowledgedAt: outcome.row.createdAt, status: outcome.row.status, release: FEEDBACK_RELEASE }, feedback: customerFeedbackDto(outcome.row) });
+    let notificationState = outcome.replayed ? "previously-attempted" : "pending";
+    if (!outcome.replayed && "acknowledgmentId" in outcome) {
+      try {
+        await db.transaction(async tx => {
+          const [customerNotification] = await tx.insert(notificationsTable).values({ userId: user.userId, projectId: outcome.row.projectId, type: "feedback_acknowledgment", title: `Feedback ${outcome.row.stableId} received`, message: "Your feedback was received and is ready for review.", actionUrl: "/feedback" }).returning({ id: notificationsTable.id });
+          await tx.insert(feedbackAuditEventsTable).values({ feedbackId: outcome.row.id, actorUserId: user.userId, eventType: "customer_notification_delivery", afterState: { sourceEventId: outcome.acknowledgmentId, notificationId: customerNotification.id, channel: "in_app", state: "created", idempotencyKey: `ack:${outcome.row.id}` } });
+          const reviewerIds = outcome.reviewerIds || [];
+          if (reviewerIds.length) { const reviewerNotifications = await tx.insert(notificationsTable).values(reviewerIds.map(reviewerId => ({ userId: reviewerId, projectId: outcome.row.projectId, type: "feedback_review_requested", title: `New feedback ${outcome.row.stableId}`, message: `${outcome.row.feedbackType} feedback requires review.`, actionUrl: `/admin?tab=feedback&feedback=${encodeURIComponent(outcome.row.stableId)}` }))).returning({ id: notificationsTable.id }); await tx.insert(feedbackAuditEventsTable).values({ feedbackId: outcome.row.id, actorUserId: user.userId, eventType: "internal_reviewer_notifications_created", afterState: { notificationIds: reviewerNotifications.map(item => item.id), reviewerCount: reviewerNotifications.length, state: "created" } }); }
+          await tx.insert(feedbackAuditEventsTable).values({ feedbackId: outcome.row.id, actorUserId: user.userId, eventType: "submission_notification_outbox_settled", afterState: { sourceEventId: outcome.acknowledgmentId, state: "delivered" } });
+        });
+        notificationState = "delivered";
+      } catch (notificationError) {
+        notificationState = "retry-required";
+        console.error("[feedback] submission notification delivery deferred", notificationError instanceof Error ? notificationError.name : "unknown");
+        try { await db.insert(feedbackAuditEventsTable).values({ feedbackId: outcome.row.id, actorUserId: user.userId, eventType: "submission_notification_delivery_failed", afterState: { sourceEventId: outcome.acknowledgmentId, state: "retry-required" } }); } catch { /* canonical intake remains durable even if delivery logging is unavailable */ }
+      }
+    }
+    return res.status(outcome.status).json({ success: true, replayed: outcome.replayed, notificationState, receipt: { id: outcome.row.stableId, acknowledgedAt: outcome.row.createdAt, status: outcome.row.status, release: FEEDBACK_RELEASE }, feedback: customerFeedbackDto(outcome.row) });
   } catch (error) { console.error("[feedback] create failed", error instanceof Error ? error.name : "unknown"); return res.status(500).json({ code: "FEEDBACK_CREATE_FAILED", error: "Failed to submit feedback" }); }
 });
 
@@ -390,11 +405,25 @@ router.get("/feedback/admin", authMiddleware, isSuperAdminMiddleware, async (_re
     userEmail: usersTable.email, userFullName: usersTable.fullName, projectId: feedbackItemsTable.projectId, projectName: projectsTable.name, projectCode: projectsTable.code,
     feedbackType: feedbackItemsTable.feedbackType, priority: feedbackItemsTable.priority, module: feedbackItemsTable.module, pageUrl: feedbackItemsTable.pageUrl,
     message: feedbackItemsTable.message, status: feedbackItemsTable.status, targetRelease: feedbackItemsTable.targetRelease,
-    dispositionReason: feedbackItemsTable.dispositionReason, customerVisible: feedbackItemsTable.customerVisible,
+    dispositionReason: feedbackItemsTable.dispositionReason, customerVisible: feedbackItemsTable.customerVisible, ownerUserId: feedbackItemsTable.ownerUserId,
     createdAt: feedbackItemsTable.createdAt, updatedAt: feedbackItemsTable.updatedAt, resolvedAt: feedbackItemsTable.resolvedAt })
     .from(feedbackItemsTable).leftJoin(usersTable, eq(feedbackItemsTable.userId, usersTable.id)).leftJoin(projectsTable, eq(feedbackItemsTable.projectId, projectsTable.id))
     .orderBy(desc(feedbackItemsTable.createdAt)).limit(500);
-  return res.json({ feedback: rows });
+  const feedbackIds = rows.map(row => row.id);
+  const assets = feedbackIds.length ? await db.select({ feedbackId: feedbackAssetsTable.feedbackId, scanState: feedbackAssetsTable.scanState })
+    .from(feedbackAssetsTable).where(inArray(feedbackAssetsTable.feedbackId, feedbackIds)) : [];
+  const evidence = new Map<number, { total: number; clean: number; quarantined: number; rejected: number }>();
+  for (const asset of assets) { const current = evidence.get(asset.feedbackId) || { total: 0, clean: 0, quarantined: 0, rejected: 0 }; current.total += 1; if (asset.scanState === "clean") current.clean += 1; else if (asset.scanState === "rejected") current.rejected += 1; else current.quarantined += 1; evidence.set(asset.feedbackId, current); }
+  return res.json({ feedback: rows.map(row => { const counts = evidence.get(row.id) || { total: 0, clean: 0, quarantined: 0, rejected: 0 }; return { ...row, evidence: counts, packageState: counts.total === 0 ? "metadata-only" : counts.clean === counts.total ? "ready" : counts.rejected > 0 ? "rejected-evidence" : "awaiting-scan" }; }) });
+});
+
+router.get("/feedback/admin/:id/detail", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
+  const id = asId(req.params.id); if (!id) return res.status(400).json({ code: "FEEDBACK_ID_INVALID", error: "Invalid feedback id" });
+  const [feedback] = await db.select({ id: feedbackItemsTable.id, stableId: feedbackItemsTable.stableId, status: feedbackItemsTable.status, version: feedbackItemsTable.version, ownerUserId: feedbackItemsTable.ownerUserId, targetRelease: feedbackItemsTable.targetRelease, dispositionReason: feedbackItemsTable.dispositionReason, createdAt: feedbackItemsTable.createdAt, updatedAt: feedbackItemsTable.updatedAt }).from(feedbackItemsTable).where(eq(feedbackItemsTable.id, id)).limit(1);
+  if (!feedback) return res.status(404).json({ code: "FEEDBACK_NOT_FOUND", error: "Feedback not found" });
+  const assets = await db.select({ id: feedbackAssetsTable.id, kind: feedbackAssetsTable.kind, name: feedbackAssetsTable.safeName, mediaType: feedbackAssetsTable.mediaType, byteSize: feedbackAssetsTable.byteSize, sha256: feedbackAssetsTable.sha256, scanState: feedbackAssetsTable.scanState, scannerAdapter: feedbackAssetsTable.scannerAdapter, scannedAt: feedbackAssetsTable.scannedAt, createdAt: feedbackAssetsTable.createdAt }).from(feedbackAssetsTable).where(eq(feedbackAssetsTable.feedbackId, id)).orderBy(feedbackAssetsTable.createdAt, feedbackAssetsTable.id);
+  const history = await db.select({ id: feedbackAuditEventsTable.id, eventType: feedbackAuditEventsTable.eventType, reason: feedbackAuditEventsTable.reason, createdAt: feedbackAuditEventsTable.createdAt }).from(feedbackAuditEventsTable).where(eq(feedbackAuditEventsTable.feedbackId, id)).orderBy(feedbackAuditEventsTable.createdAt, feedbackAuditEventsTable.id).limit(FEEDBACK_PACKAGE_MAX_EVENTS);
+  return res.json({ feedback, assets, history, packageState: assets.length === 0 ? "metadata-only" : assets.every(asset => asset.scanState === "clean" && asset.scannedAt) ? "ready" : assets.some(asset => asset.scanState === "rejected") ? "rejected-evidence" : "awaiting-scan" });
 });
 
 router.get("/feedback/admin/export.csv", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
@@ -433,7 +462,7 @@ router.patch("/feedback/admin/:id", authMiddleware, isSuperAdminMiddleware, asyn
   const updated = await db.transaction(async tx => {
     await tx.execute(sql`select pg_advisory_xact_lock(hashtextextended(${`feedback-admin:${id}`},0))`);const [before]=await tx.select().from(feedbackItemsTable).where(eq(feedbackItemsTable.id,id)).limit(1);if(!before)return {error:"FEEDBACK_NOT_FOUND",status:404,message:"Feedback not found"} as const;if(observedVersion!==before.version)return {error:"FEEDBACK_STALE",status:409,message:"Feedback changed; reload before updating"} as const;
     const status=bounded(req.body.status||before.status,32),reason=bounded(req.body.reason,2000);if(!STATUSES.has(status))return {error:"FEEDBACK_STATUS_INVALID",status:400,message:"Invalid feedback status"} as const;if(status!==before.status&&!TRANSITIONS[before.status]?.has(status))return {error:"FEEDBACK_TRANSITION_INVALID",status:409,message:"This state transition is not allowed"} as const;if((TERMINAL.has(status)||status==="blocked")&&!reason)return {error:"FEEDBACK_REASON_REQUIRED",status:400,message:"A reason is required for this state"} as const;
-    const [row] = await tx.update(feedbackItemsTable).set({ status, dispositionReason: reason || before.dispositionReason,
+    const [row] = await tx.update(feedbackItemsTable).set({ status, dispositionReason: reason || before.dispositionReason, ownerUserId: req.body.claimToMe === true ? user.userId : before.ownerUserId,
       targetRelease: bounded(req.body.targetRelease, 80) || before.targetRelease, customerVisible: req.body.customerVisible === undefined ? before.customerVisible : req.body.customerVisible === true,
       version: before.version + 1, updatedAt: new Date(), resolvedAt: TERMINAL.has(status) ? new Date() : null })
       .where(and(eq(feedbackItemsTable.id, id), eq(feedbackItemsTable.version, observedVersion))).returning();
