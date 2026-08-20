@@ -1045,9 +1045,6 @@ const livingBriefAndLensStartupBarrier = (async () => {
     await pool.query(
       `CREATE INDEX IF NOT EXISTS meeting_drafts_expiry_idx ON meeting_drafts (expires_at)`,
     );
-    await pool.query(
-      `CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_guid_unique ON lens_viewpoints (project_id, navisworks_guid)`,
-    );
     console.log("[migration] lens_viewpoints table ensured");
 
     // ── Trade+Floor sequence authority + viewpoint lifecycle ──────────────────
@@ -1121,6 +1118,31 @@ const livingBriefAndLensStartupBarrier = (async () => {
     await pool.query(
       `DROP INDEX IF EXISTS lens_viewpoints_project_guid_unique`,
     );
+    // Historical syncs could create more than one live row for the same
+    // viewpoint identity before lifecycle-aware uniqueness existed. Preserve
+    // every row, but deterministically classify older duplicates as superseded
+    // before installing the active-row indexes. The newest row remains active.
+    for (const identityColumn of [
+      "viewpoint_id",
+      "navisworks_guid",
+      "display_id",
+    ] as const) {
+      await pool.query(`WITH ranked AS (
+        SELECT id,
+               row_number() OVER (
+                 PARTITION BY project_id, ${identityColumn}
+                 ORDER BY id DESC
+               ) AS duplicate_rank
+          FROM lens_viewpoints
+         WHERE lifecycle_status = 'active'
+           AND ${identityColumn} IS NOT NULL
+      )
+      UPDATE lens_viewpoints AS candidate
+         SET lifecycle_status = 'superseded'
+        FROM ranked
+       WHERE candidate.id = ranked.id
+         AND ranked.duplicate_rank > 1`);
+    }
     await pool.query(
       `CREATE UNIQUE INDEX IF NOT EXISTS lens_viewpoints_project_viewpoint_active_unique ON lens_viewpoints (project_id, viewpoint_id) WHERE lifecycle_status = 'active'`,
     );
