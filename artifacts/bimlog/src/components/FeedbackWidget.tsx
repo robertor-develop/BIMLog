@@ -105,7 +105,7 @@ export function FeedbackWidget() {
   useEffect(() => { if(error) errorRef.current?.focus(); }, [error]);
   useEffect(() => () => terminateMedia(), [location]);
   useEffect(() => {
-    if (!open) return;
+    if (!open || editingCapture) return;
     dialogRef.current?.focus();
     const closeOnEscape = (event: KeyboardEvent) => { if (event.key === "Escape" && !editingCapture) closeFeedback(); if (event.key === "Tab" && !editingCapture && dialogRef.current) { const focusable = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]),select:not([disabled]),textarea:not([disabled]),input:not([disabled]),audio[controls],a[href],summary,[tabindex]:not([tabindex="-1"])')).filter(node => node.offsetParent !== null); if (!focusable.length) return; const first = focusable[0], last = focusable[focusable.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } } };
     window.addEventListener("keydown", closeOnEscape);

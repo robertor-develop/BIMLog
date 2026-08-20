@@ -60,6 +60,11 @@ export function FeedbackMarkupEditor({ file, language, onCancel, onSave }: Props
     return () => { active = false; imageRef.current?.close(); imageRef.current = null; };
   }, [file]);
   useEffect(() => { onCancelRef.current = onCancel; }, [onCancel]);
+  useEffect(() => {
+    const restored: Array<[HTMLElement, boolean, string | null]> = []; let child: HTMLElement | null = dialogRef.current;
+    while (child?.parentElement && child.parentElement !== document.body) { for (const sibling of Array.from(child.parentElement.children)) if (sibling !== child && sibling instanceof HTMLElement) { restored.push([sibling, sibling.inert, sibling.getAttribute("aria-hidden")]); sibling.inert = true; sibling.setAttribute("aria-hidden", "true"); } child = child.parentElement; }
+    return () => { for (const [node, inert, hidden] of restored) { node.inert = inert; if (hidden === null) node.removeAttribute("aria-hidden"); else node.setAttribute("aria-hidden", hidden); } };
+  }, []);
   useEffect(() => { const restore = document.activeElement instanceof HTMLElement ? document.activeElement : null; const key = (event: KeyboardEvent) => { if (event.key === "Escape") { event.preventDefault(); event.stopImmediatePropagation(); onCancelRef.current(); return; } if (event.key !== "Tab" || !dialogRef.current) return; const nodes = Array.from(dialogRef.current.querySelectorAll<HTMLElement>('button:not([disabled]),input:not([disabled]),canvas[tabindex]')).filter(node => node.offsetParent !== null); if (!nodes.length) return; const first = nodes[0], last = nodes[nodes.length - 1]; if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); } else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); } }; document.addEventListener("keydown", key, true); return () => { document.removeEventListener("keydown", key, true); window.setTimeout(() => restore?.focus(), 0); }; }, []);
 
   useEffect(() => {
