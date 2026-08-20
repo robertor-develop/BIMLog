@@ -139,6 +139,8 @@ async function runAdmin() {
     ];
     window.fetch=async(input,init={})=>{const url=new URL(String(input),location.href),pathname=url.pathname,method=String(init.method||"GET").toUpperCase(),headers=Object.fromEntries(new Headers(init.headers||{}).entries());let body; if(typeof init.body==="string")try{body=JSON.parse(init.body);}catch{body=init.body;}S.requests.push({pathname,method,headers,body});
       if(pathname==="/api/v1/admin/overview"&&method==="GET")return json({scope:"mine"});
+      if(pathname==="/api/v1/auth/me"&&method==="GET")return json({user:{id:501,email:"reviewer@example.invalid",fullName:"Governed Reviewer",isSuperAdmin:true}});
+      if(pathname==="/api/v1/users/me/company-profile"&&method==="GET")return json({profile:null});
       if(pathname==="/api/v1/feedback/admin"&&method==="GET")return json({feedback});
       if(pathname==="/api/v1/feedback/admin/801/detail"&&method==="GET")return json({feedback:{id:801,stableId:"FB-OPS801",status:"new",version:1,ownerUserId:null},packageState:"awaiting-scan",assets:[{id:901,name:"marked.png",kind:"screenshot",scanState:"clean",scannerAdapter:"clamav-cli",byteSize:1024},{id:902,name:"voice.webm",kind:"audio",scanState:"quarantined",scannerAdapter:"default-deny",byteSize:2048}],history:[{id:1,eventType:"created",createdAt:"2026-08-20T12:00:00Z"},{id:2,eventType:"submission_acknowledged",createdAt:"2026-08-20T12:00:01Z"}]});
       if(pathname==="/api/v1/feedback/admin/801"&&method==="PATCH")return json({feedback:{...feedback[0],ownerUserId:501,version:2}});
