@@ -10951,11 +10951,11 @@
     },
     {
       "taskId": "bimlog-feedback-packages-v1.60.35.09-f-reconciliation-20260820",
-      "reviewedThroughCommit": "3736433a7a040461a979e92e5621a3728c658d7f",
+      "reviewedThroughCommit": "d575b81cc5190affff33afcb5e52b6196a2d8880",
       "reviewedAt": "2026-08-20T18:02:16Z",
       "status": "local_implemented_and_behavior_tested_external_gates_pending",
       "captureTiming": "post_code_freeze_same_release_reconciliation",
-      "summary": "Reconciles Feedback packages v1.60.35.09-F through the frozen local source-and-harness head, including PDF/JSON/ZIP packages and deterministic PDF proof output, the PostgreSQL follow-up register, governed customer notifications, six-field linked original/marked screenshot uploads and browser evidence, durable email delivery outcomes and retry, and canonical H-only plugin enforcement without claiming push, publication, receiver/provider activation, production migration, or customer acceptance.",
+      "summary": "Reconciles Feedback packages v1.60.35.09-F through the frozen local source-and-harness head, including governed PDF/JSON/ZIP packages, deterministic PDF proof output, retained four-page visual acceptance evidence, the PostgreSQL follow-up register, governed customer notifications, six-field linked original/marked screenshot uploads and browser evidence, durable email delivery outcomes and retry, and canonical H-only plugin enforcement without claiming push, publication, receiver/provider activation, production migration, or customer acceptance.",
       "workstreams": [
         "feedback-packages",
         "feedback-follow-up",
@@ -11025,7 +11025,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "21f92b2caee997ca1288cf9193fcf1dfd8bdffc203de4d60aacdca79b327a26d"
+      "reviewedChangeSha256": "f0b2c3f74edf059e0a372e17b50cf62629a989ac7f4d89a9a7c7f726f7bd0d8d"
     }
   ]
 }
