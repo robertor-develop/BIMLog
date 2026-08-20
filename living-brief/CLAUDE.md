@@ -170,10 +170,12 @@ does not prove that an artifact is useful or complete.
   numbering, images, and content.
 - Spreadsheet: open or render every sheet; verify relevant formulas/values, printable sheets,
   page setup, and orientation.
-- Plugin: when shared code changes, build both documented physical versions at
-  `C:\Dev\BIMLogPlugin\BIMLogNavisPlugin` and `H:\BIMLogPlugin2025`; preserve intentional
-  project/reference differences; verify framework, AnyCPU target, version, DLL, PDB, and package
-  ZIP. Compilation is not live Navisworks verification.
+- Plugin: when shared code changes, build both documented physical versions only under
+  `H:\BIMLogPlugin2021` and `H:\BIMLogPlugin2025`; preserve intentional project/reference
+  differences; verify framework, AnyCPU target, version, DLL, PDB, and package ZIP. Source,
+  intermediate output, validation artifacts, packages, and ZIPs fail closed outside the matching
+  H: root. Compilation is not live Navisworks verification. Separately authorized installation
+  copies into Autodesk's required plugin load paths are the sole permitted non-H writes.
 
 ### 4. Deployment/Field Gate
 Report these states separately: committed, pushed, available in the Replit workspace, built in
@@ -614,8 +616,8 @@ inline badge. If one side's design changes, the other side must be reviewed too.
 - Jump to Viewpoint uses `/jump?code=displayId`, not `/jump/guid`.
 - GUIDs are often null/zero in DB. Always jump by displayId.
 - Build: AnyCPU, .NET Framework 4.8.
-- Navisworks 2021 production path: `C:\Dev\BIMLogPlugin\BIMLogNavisPlugin`.
-- Navisworks 2025 Ruben path: `H:\BIMLogPlugin2025`.
+- Navisworks 2021 canonical source/build/package root: `H:\BIMLogPlugin2021`.
+- Navisworks 2025 canonical source/build/package root: `H:\BIMLogPlugin2025`.
 - Use version naming `v1.60.6`, `v1.60.7`, `v1.60.8`, etc. for plugin releases.
 
 ## Navisworks API lessons - never repeat these
