@@ -269,6 +269,8 @@ export const feedbackRelayJobsTable = pgTable(
     fencingToken: bigint("fencing_token", { mode: "bigint" })
       .default(0n)
       .notNull(),
+    holdVersion: integer("hold_version").default(0).notNull(),
+    heldFromState: text("held_from_state"),
     lastErrorCode: text("last_error_code"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -549,6 +551,10 @@ export const feedbackRelayTemporaryObjectsTable = pgTable(
     absenceVerifiedAt: timestamp("absence_verified_at"),
     deleteFencingToken: bigint("delete_fencing_token", { mode: "bigint" }),
     deleteFailedAt: timestamp("delete_failed_at"),
+    deleteFailureCode: text("delete_failure_code"),
+    deleteFailureFencingToken: bigint("delete_failure_fencing_token", {
+      mode: "bigint",
+    }),
   },
   (table) => ({
     jobIdx: uniqueIndex("feedback_relay_temp_job_idx").on(table.jobId),
