@@ -15,20 +15,36 @@ claims, use [STANDARDS_REGISTER.md](./STANDARDS_REGISTER.md); do not infer compl
 behavior.
 
 ## Build + versioning + packaging
+- **Canonical H-only boundary (mandatory and mechanically enforced).** All BIMLog Navisworks
+  plugin source, builds, intermediate outputs, validation artifacts, packages, and ZIP files
+  must be created only under `H:\BIMLogPlugin2021` or `H:\BIMLogPlugin2025`, as applicable.
+  Every build and packaging mechanism must fail closed before writing when its source or output
+  is outside the matching canonical H: root. Downloads, Desktop, Temp, C:, D:, F:,
+  repositories, and worktrees are prohibited plugin build or packaging destinations. The sole
+  permitted non-H writes are separately and explicitly authorized installation copies into
+  Autodesk's required plugin load paths; build or package authority never implies installation
+  authority.
 - Two physical builds must be reviewed and synchronized together. Preserve the documented,
   intentional `BIMLogLensPanel.cs` differences and the different `.csproj` DLL references while
   keeping shared behavior aligned:
-  - Navisworks 2021: `C:\Dev\BIMLogPlugin\BIMLogNavisPlugin` (Roberto's machine). Deploy:
-    close all `*Navis*`/`*Roamer*` processes, then copy `bin\Debug\net48\*.dll/.pdb` into
-    `C:\Program Files\Autodesk\Navisworks Manage 2021\Plugins\BIMLogNavisPlugin\`.
-  - Navisworks 2025: `H:\BIMLogPlugin2025` (Ruben's machine). Refs in `H:\...\refs\`.
-- Build: AnyCPU, .NET Framework 4.8, `dotnet build -c Debug`.
-- Semantic versioning v1.6.x. Package with `H:\BIMLogPlugin2025\Build-Package-2025.ps1
+  - Navisworks 2021 source/build root: `H:\BIMLogPlugin2021`.
+  - Navisworks 2025 source/build root: `H:\BIMLogPlugin2025`. References remain in
+    `H:\BIMLogPlugin2025\refs\`.
+- Build AnyCPU / .NET Framework 4.8 from the matching canonical root only:
+  `dotnet build H:\BIMLogPlugin2021\BIMLogNavisPlugin.csproj -c Debug` or
+  `dotnet build H:\BIMLogPlugin2025\BIMLogNavisPlugin.csproj -c Debug`. The project guards pin
+  output, intermediate, and project-extension paths beneath the matching H: root and reject
+  overrides outside it before build.
+- Semantic versioning v1.6.x. Package 2025 with `H:\BIMLogPlugin2025\Build-Package-2025.ps1
   -Version vX.Y.Z` — it builds the 2025 DLL and zips DLL+PDB+install.ps1+Install_BIMLog_2025.bat
   +README_BIMLog_Lens.txt+BIMLog_Lens_Revision_Update_vX.Y.Z.txt. Every release: update the
   README revision + write a per-revision update .txt covering the delta. Current frozen review candidate: v1.60.18.
   Shared logic in `BIMLogLensPanel.cs` + `BIMLogApiClient.cs` must be reviewed in both physical
   copies for every shared change; preserve intentional version-specific differences.
+- Installation is a separate gated action. Only after Roberto explicitly authorizes that exact
+  installation may accepted DLL/PDB/manifest files be copied from the canonical H: package into
+  Autodesk's required plugin load path for the matching Navisworks year. Never build, validate,
+  stage, or package in an Autodesk C: load path.
 
 ## The shared display contract (DONE — was the big open item)
 Plugin viewpoint DisplayName and the platform table use the SAME clean field set. Plugin name:

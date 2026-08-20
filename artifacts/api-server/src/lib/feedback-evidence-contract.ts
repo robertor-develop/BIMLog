@@ -3,7 +3,7 @@ import path from "node:path";
 
 export const FEEDBACK_MAX_FILES = 10;
 export const FEEDBACK_MAX_FILE_BYTES = 20 * 1024 * 1024;
-export const FEEDBACK_RELEASE = "v F-1.60.35.8";
+export const FEEDBACK_RELEASE = "v1.60.35.09-F";
 const EXTENSIONS = new Set([".pdf", ".doc", ".docx", ".xls", ".xlsx", ".csv", ".ppt", ".pptx", ".png", ".jpg", ".jpeg", ".txt", ".log", ".json", ".webm", ".ogg", ".wav", ".m4a"]);
 const MEDIA_TYPES: Record<string, string> = { ".pdf": "application/pdf", ".doc": "application/msword", ".docx": "application/vnd.openxmlformats-officedocument.wordprocessingml.document", ".xls": "application/vnd.ms-excel", ".xlsx": "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", ".csv": "text/csv", ".ppt": "application/vnd.ms-powerpoint", ".pptx": "application/vnd.openxmlformats-officedocument.presentationml.presentation", ".png": "image/png", ".jpg": "image/jpeg", ".jpeg": "image/jpeg", ".txt": "text/plain", ".log": "text/plain", ".json": "application/json", ".webm": "audio/webm", ".ogg": "audio/ogg", ".wav": "audio/wav", ".m4a": "audio/mp4" };
 

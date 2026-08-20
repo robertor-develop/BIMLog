@@ -193,7 +193,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feature-policy.behavior.ts
 - artifacts/api-server/src/lib/feedback-evidence-contract.behavior.ts
 - artifacts/api-server/src/lib/feedback-evidence-contract.ts
+- artifacts/api-server/src/lib/feedback-follow-up.behavior.ts
+- artifacts/api-server/src/lib/feedback-follow-up.ts
 - artifacts/api-server/src/lib/feedback-http-db.behavior.ts
+- artifacts/api-server/src/lib/feedback-package.behavior.ts
+- artifacts/api-server/src/lib/feedback-package.ts
 - artifacts/api-server/src/lib/feedback-relay-schema-db.behavior.ts
 - artifacts/api-server/src/lib/feedback-relay-schema-migration.behavior.ts
 - artifacts/api-server/src/lib/feedback-relay/delivery.ts

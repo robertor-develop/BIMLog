@@ -1,6 +1,10 @@
 # BIMLog Feedback pass-through relay and Roberto receiver
 
-Release identity: `v F-1.60.35.8`. Google Drive is excluded. PostgreSQL is the lifecycle/backlog authority; the receiver filesystem is a verified custody projection.
+Release identity: `v1.60.35.09-F`. Google Drive is excluded. PostgreSQL is the lifecycle/backlog authority; the receiver filesystem is a verified custody projection.
+
+## One feedback, one package
+
+Each authorized feedback export is assembled from a fresh PostgreSQL snapshot. The ZIP contains a canonical JSON manifest, a human-readable PDF, and only evidence with a completed clean scanner receipt. The PDF carries submission metadata, submitter, timestamps, message, status history, evidence inventory, authenticated download links, and bounded embedded PNG/JPEG evidence. Customer packages redact internal history, reasons, and submitter email; internal packages and the PostgreSQL-derived follow-up CSV require super-admin authority plus an export reason. Package reads are bounded, hash-verified, and fail closed on missing storage, scanner, or integrity proof.
 
 ## Single protocol
 

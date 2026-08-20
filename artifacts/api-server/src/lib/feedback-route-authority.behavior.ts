@@ -11,7 +11,7 @@ const assertions: Array<[string, RegExp]> = [
   ["customer feedback is allowlisted", /const customerFeedbackDto/],
   ["customer history is visibility classified", /visibility: "customer"/],
   ["customer history event types are allowlisted", /CUSTOMER_EVENT_TYPES\.has/],
-  ["asset upload is one file and bounded", /files: 1, fields: 4, parts: 5/],
+  ["asset upload is one file plus the six governed metadata fields and bounded", /files: 1, fields: 6, parts: 7/],
   ["asset kind follows inspected media", /FEEDBACK_ASSET_KIND_MISMATCH/],
   ["per-file upload idempotency is mandatory", /per-file idempotency key are required/],
   ["upload identity uses canonical DB columns", /feedbackAssetsTable\.uploadRequestKey/],

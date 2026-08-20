@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 
 const source=fs.readFileSync(new URL("./FeedbackWidget.tsx",import.meta.url),"utf8");
+const editor=fs.readFileSync(new URL("./FeedbackMarkupEditor.tsx",import.meta.url),"utf8");
 const assertions:Array<[string,RegExp]>=[
   ["dialog is viewport bounded",/maxHeight: "calc\(100dvh - 24px\)"/],
   ["dialog scrolls",/overflowY: "auto"/],
@@ -38,6 +39,17 @@ const assertions:Array<[string,RegExp]>=[
   ["history events are translated",/eventLabel\(event\.eventType\)/],
   ["scan states are translated",/stateLabel\(asset\.scanState\)/],
   ["recording states are translated",/stateLabel\(recordingState\)/],
+  ["capture reserves two atomic evidence slots",/files\.length > 8.*two linked slots/s],
+  ["capture keeps original and marked evidence",/\[\.\.\.current, original, rendered\]/],
+  ["capture bundle has stable linkage",/captureBundleId.*evidenceRole: "original".*evidenceRole: "marked"/s],
+  ["capture bundle identity reaches server",/form\.append\("captureBundleId".*form\.append\("captureRole"/s],
+  ["visual markup editor replaces numeric crop",/FeedbackMarkupEditor/],
 ];
 for(const [name,pattern] of assertions)assert.match(source,pattern,name);
+for(const [name,pattern] of [
+  ["editor exposes required drawing tools",/"crop".*"pen".*"pencil".*"highlight".*"line".*"arrow".*"rectangle".*"square".*"circle".*"text"/s],
+  ["editor supports undo and redo",/const undo =.*const redoOne =/s],
+  ["editor persists operation provenance",/toolVersion: "bimlog-cutting-markup-v1".*operationCount: operations\.length.*operations/s],
+  ["editor preserves original statement",/untouched capture.*marked version remain linked/s],
+] as Array<[string,RegExp]>) assert.match(editor,pattern,name);
 console.log(`FeedbackWidget source assertions: ${assertions.length}/${assertions.length} passed`);

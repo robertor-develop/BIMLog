@@ -25,7 +25,7 @@ export async function sendEmail(params: {
   html: string;
   replyTo?: string;
   triggerType?: string;
-}): Promise<void> {
+}): Promise<"sent" | "skipped" | "failed"> {
   if (!process.env.SENDGRID_API_KEY) {
     console.warn(`[email] Skipping send to ${params.to} — SENDGRID_API_KEY not set.`);
     setImmediate(async () => {
@@ -35,7 +35,7 @@ export async function sendEmail(params: {
         console.error("[email] Failed to log skipped email:", logError instanceof Error ? logError.message : logError);
       }
     });
-    return;
+    return "skipped";
   }
   try {
     await sgMail.send({
@@ -53,6 +53,7 @@ export async function sendEmail(params: {
         console.error("[email] Failed to log sent email:", logError instanceof Error ? logError.message : logError);
       }
     });
+    return "sent";
   } catch (err) {
     const errMsg = err instanceof Error ? err.message : String(err);
     console.error(`[email] Failed to send to ${params.to}:`, errMsg);
@@ -63,6 +64,7 @@ export async function sendEmail(params: {
         console.error("[email] Failed to log failed email:", logError instanceof Error ? logError.message : logError);
       }
     });
+    return "failed";
   }
 }
 
