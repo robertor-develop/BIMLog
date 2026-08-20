@@ -11101,6 +11101,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "dd139961e48de40f3b202e6295d010686c947521f52c9ca69d181b141c4cf659"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-schema-preservation-20260820",
+      "reviewedThroughCommit": "0e1758b3a082bbb241aece44e32f8c68d3378e5b",
+      "reviewedAt": "2026-08-20T20:08:00.000Z",
+      "status": "accepted_candidate",
+      "captureTiming": "post_fix_pre_publish_reconciliation",
+      "summary": "Declares four already-governed Feedback retention and deletion-failure columns in Drizzle so Replit publish previews preserve them instead of proposing destructive column drops.",
+      "workstreams": [
+        "feedback-v1.60.35.09-F",
+        "replit-development-schema-parity",
+        "production-data-preservation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The schema declaration repair preserves existing governed behavior."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating instruction changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair removes destructive preview drift and preserves the existing quality gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform inventory path changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin source or build path changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards authority changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted Feedback release status remains accurate; this is schema parity only."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The external publication gate remains explicit until deployment succeeds."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The audit model is unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
