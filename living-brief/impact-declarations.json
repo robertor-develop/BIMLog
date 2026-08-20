@@ -10025,7 +10025,7 @@
       "reviewedAt": "2026-08-17T18:39:00Z",
       "status": "local_candidate",
       "captureTiming": "same_task",
-      "summary": "Reconciles Feedback addendum v F-1.60.35.8 with governed evidence quarantine, default-deny transcription, accountable triage, and explicit external gates.",
+      "summary": "Reconciles Feedback packages v1.60.35.09-F with governed evidence quarantine, default-deny transcription, accountable triage, and explicit external gates.",
       "workstreams": [
         "feedback-addendum",
         "feedback",
@@ -10331,7 +10331,7 @@
       "reviewedAt": "2026-08-18T01:40:00Z",
       "status": "local_source_and_controlled_browser_evidence_api_db_final_receipt_pending",
       "captureTiming": "same_release_reconciliation",
-      "summary": "Reconciles Feedback addendum v F-1.60.35.8 through the exact source/browser harness candidate, records accepted migration, purge, privacy, storage, and receiver tranches, and preserves the final API/database, receiver activation, release, and customer gates.",
+      "summary": "Reconciles Feedback packages v1.60.35.09-F through the exact source/browser harness candidate, records accepted migration, purge, privacy, storage, and receiver tranches, and preserves the final API/database, receiver activation, release, and customer gates.",
       "workstreams": [
         "feedback-addendum",
         "receiver",
@@ -10948,6 +10948,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3f4ee5f4f7b5c44f06d89392e0db2c50292800653350f341cc6bad377af59c08"
+    },
+    {
+      "taskId": "bimlog-feedback-packages-v1.60.35.09-f-reconciliation-20260820",
+      "reviewedThroughCommit": "c7a945acb3bb26b263be36cd8107a8d78ed0cfcf",
+      "reviewedAt": "2026-08-20T18:02:16Z",
+      "status": "local_implemented_and_behavior_tested_external_gates_pending",
+      "captureTiming": "post_code_freeze_same_release_reconciliation",
+      "summary": "Reconciles Feedback packages v1.60.35.09-F through the frozen local source-and-harness head, including PDF/JSON/ZIP packages, the PostgreSQL follow-up register, governed customer notifications, linked original/marked screenshot roles and browser evidence, and canonical H-only plugin enforcement without claiming push, publication, receiver/provider activation, production migration, or customer acceptance.",
+      "workstreams": [
+        "feedback-packages",
+        "feedback-follow-up",
+        "feedback-notifications",
+        "feedback-markup",
+        "plugin-h-only-enforcement"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The canonical record, human authority, truthful evidence, and receiver custody boundaries are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing package artifact, external-action, notification, and release gates remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing artifact inspection and customer-feedback closeout requirements already govern this implementation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or ecosystem identity changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The canonical generator records the Feedback package and follow-up modules discovered from the frozen source; no hand-authored platform claim was added."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "The frozen ancestry establishes canonical H-only plugin source, build, validation, package, and ZIP enforcement without claiming a build or installation."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Feedback package PDF is governed by the implementation contract; no shared report-design authority changed in this tranche."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact frozen head, implemented and behavior-tested package/register/notification scope, H-only enforcement, and truthful external limitations."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Preserves artifact inspection, authenticated API/browser, provider receipt, receiver activation, push, publication, and customer gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No append-only historical event was added; this is current-state reconciliation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "fe824182ae10a32a0b63e1b2bd5ada2de91e7b0a82930d633ebcc90b67a4f3b8"
     }
   ]
 }
