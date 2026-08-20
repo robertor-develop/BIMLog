@@ -10951,7 +10951,7 @@
     },
     {
       "taskId": "bimlog-feedback-packages-v1.60.35.09-f-reconciliation-20260820",
-      "reviewedThroughCommit": "d575b81cc5190affff33afcb5e52b6196a2d8880",
+      "reviewedThroughCommit": "344a0ba7c6dabc0d38c7c8dabf7cbf7646b47458",
       "reviewedAt": "2026-08-20T18:02:16Z",
       "status": "local_implemented_and_behavior_tested_external_gates_pending",
       "captureTiming": "post_code_freeze_same_release_reconciliation",
@@ -11025,7 +11025,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "f0b2c3f74edf059e0a372e17b50cf62629a989ac7f4d89a9a7c7f726f7bd0d8d"
+      "reviewedChangeSha256": "e6732115af355ec49281202c7232448c83ae5665efa6e3831461769a17301343"
     }
   ]
 }
