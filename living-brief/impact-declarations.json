@@ -11326,6 +11326,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "856aebe18b5deb1f616459e8fb855c52a19bdfd9597ba5f44f13706ad51eee35"
+    },
+    {
+      "taskId": "bimlog-feedback-reviewer-authorization-reseal-20260820",
+      "reviewedThroughCommit": "a42b23e2db920ddb9cd417464ef7ff9a1bb6de83",
+      "reviewedAt": "2026-08-20T22:20:00.000Z",
+      "status": "local_authorization_source_and_browser_harness_implemented_exact_execution_pending",
+      "captureTiming": "post_fix_pre_publish_reconciliation",
+      "summary": "Reseals Feedback operational intake after gating the reviewer tab and panel to the authenticated store super-admin and expanding the controlled browser writer across the full reviewer workflow and non-super-admin denial, without claiming a new executed browser receipt or any scanner, receiver, provider, publication, deployment, or customer activation.",
+      "workstreams": [
+        "feedback-reviewer-authorization",
+        "feedback-controlled-browser-harness",
+        "feedback-operational-intake"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction reinforces truthful authorization and preserves separate source, executed-evidence, deployment, and customer-acceptance states."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing authorization, privacy, fail-closed external-action, and evidence rules fully govern this bounded UI and harness correction."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The QA mismatch is corrected and exact-head controlled browser execution remains explicitly required before acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product identity, customer outcome, or long-term direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The modified AdminPanel and browser harness paths are already present in the deterministic platform inventory, so regeneration is mechanically unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, build, package, installation, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact or report design-system behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact authorization-corrected product head and distinguishes expanded harness source from executed browser evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Advances the exact acceptance target while preserving browser execution, scanner activation, receiver mounting, publication, provider, and customer gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The immutable Feedback audit-event model and acceptance audit boundary remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6fe8678ef52617f68de29e8c1d8a50fd0613366f9231da12b04266c679d11992"
     }
   ]
 }
