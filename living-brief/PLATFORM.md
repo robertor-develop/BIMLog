@@ -453,6 +453,7 @@ It changes only when the code structure or curated architectural facts change.
 - /data-retention
 - /dashboard
 - /pending
+- /lens-next
 - /projects/:id/financial/cost-structure
 - /projects/:id/financial/budget
 - /projects/:id/financial/history
