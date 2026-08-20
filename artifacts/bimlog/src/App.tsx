@@ -41,6 +41,7 @@ import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 import { DebugBanner } from "@/components/DebugBanner";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
+import { LensNextWorkspace } from "@/features/lens-next/LensNextWorkspace";
 
 const queryClient = new QueryClient();
 
@@ -111,6 +112,9 @@ function Router() {
       </Route>
       <Route path="/pending">
         {() => <ProtectedRoute component={PendingItems} />}
+      </Route>
+      <Route path="/lens-next">
+        {() => <ProtectedRoute component={LensNextWorkspace} />}
       </Route>
       <Route path="/projects/:id/financial/cost-structure">
         {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="structure" />} />}
