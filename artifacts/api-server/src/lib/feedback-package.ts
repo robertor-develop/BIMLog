@@ -71,17 +71,18 @@ export async function buildFeedbackPackage(args: {
     evidence: evidence.map(asset => ({ id: asset.id, kind: asset.kind, name: asset.safeName, mediaType: asset.mediaType, byteSize: asset.byteSize, sha256: asset.sha256, scanState: asset.scanState, scannedAt: asset.scannedAt?.toISOString() ?? null, createdAt: asset.createdAt.toISOString(), included: asset.scanState === "clean" && !!asset.scannedAt, zipPath: asset.scanState === "clean" && asset.scannedAt ? asset.zipName : null, secureDownloadUrl: asset.downloadUrl })),
   };
   const manifest = Buffer.from(`${canonical(manifestObject)}\n`, "utf8");
-  const pdf = await createHumanPdf(manifestObject, evidence);
+  const manifestSha256 = sha256(manifest);
+  const pdf = await createHumanPdf(manifestObject, evidence, manifestSha256);
   const zip = new AdmZip(); zip.addFile("manifest.json", manifest); zip.addFile(`${packageName(args.feedback.stableId)}-feedback.pdf`, pdf);
   for (const asset of evidence) if (asset.scanState === "clean" && asset.scannedAt && asset.bytes) zip.addFile(asset.zipName, asset.bytes);
   const archive = zip.toBuffer();
   if (archive.byteLength > FEEDBACK_PACKAGE_MAX_BYTES + 10 * 1024 * 1024) throw new FeedbackPackageError("Generated feedback package exceeds the archive bound", "PACKAGE_LIMIT");
-  return { archive, manifest, pdf, manifestSha256: sha256(manifest), archiveSha256: sha256(archive) };
+  return { archive, manifest, pdf, manifestSha256, archiveSha256: sha256(archive) };
 }
 
-async function createHumanPdf(manifest: Record<string, any>, evidence: Array<FeedbackPackageAsset & { downloadUrl: string | null }>): Promise<Buffer> {
+async function createHumanPdf(manifest: Record<string, any>, evidence: Array<FeedbackPackageAsset & { downloadUrl: string | null }>, manifestSha256: string): Promise<Buffer> {
   return await new Promise((resolve, reject) => {
-    const chunks: Buffer[] = []; const doc = new PDFDocument({ size: "LETTER", margin: 50, info: { Title: `${manifest.feedback.stableId} Feedback Package`, Author: "BIMLog" } });
+    const chunks: Buffer[] = []; const doc = new PDFDocument({ size: "LETTER", margin: 50, bufferPages: true, info: { Title: `${manifest.feedback.stableId} Feedback Package`, Author: "BIMLog by IgniteSmart", Subject: `Feedback package ${manifest.feedback.stableId} - ${manifest.release}` } });
     doc.on("data", chunk => chunks.push(Buffer.from(chunk))); doc.on("error", reject); doc.on("end", () => resolve(Buffer.concat(chunks)));
     const field = (label: string, value: unknown) => { doc.font("Helvetica-Bold").text(`${label}: `, { continued: true }).font("Helvetica").text(String(value ?? "—")); };
     doc.fontSize(18).font("Helvetica-Bold").text("BIMLog Feedback Package"); doc.moveDown(0.5).fontSize(10);
@@ -98,6 +99,19 @@ async function createHumanPdf(manifest: Record<string, any>, evidence: Array<Fee
           if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_EMBEDDED_IMAGE_PIXELS) throw new FeedbackPackageError(`Image evidence ${asset.id} exceeds the render bound`, "PACKAGE_LIMIT");
           const rendered = await sharp(asset.bytes, { limitInputPixels: MAX_EMBEDDED_IMAGE_PIXELS }).rotate().resize({ width: 1500, height: 1900, fit: "inside", withoutEnlargement: true }).png().toBuffer();
           doc.addPage().font("Helvetica-Bold").text(`Image evidence ${asset.id}: ${asset.safeName}`); doc.moveDown().image(rendered, { fit: [510, 650], align: "center", valign: "center" });
+        }
+        doc.addPage().fontSize(14).font("Helvetica-Bold").text("Package snapshot fingerprint");
+        doc.moveDown(0.6).fontSize(10).font("Helvetica").text("This fingerprint binds the canonical JSON snapshot used to generate this human-readable report.");
+        doc.moveDown(0.6); field("Feedback", manifest.feedback.stableId); field("Release", manifest.release); field("Snapshot date/time", manifest.feedback.updatedAt); field("Canonical manifest SHA-256", manifestSha256);
+        const range = doc.bufferedPageRange();
+        for (let index = range.start; index < range.start + range.count; index++) {
+          doc.switchToPage(index);
+          const footerY = doc.page.height - 36;
+          doc.page.margins.bottom = 0;
+          doc.fontSize(8).font("Helvetica").fillColor("#4b5563").text(
+            `BIMLog by IgniteSmart · ${manifest.feedback.stableId} · ${manifest.release} · Snapshot ${manifest.feedback.updatedAt} · Page ${index - range.start + 1} of ${range.count}`,
+            50, footerY, { width: doc.page.width - 100, align: "center", lineBreak: false },
+          ).fillColor("black");
         }
         doc.end();
       } catch (error) { doc.removeAllListeners("data"); doc.removeAllListeners("end"); doc.end(); reject(error); }
