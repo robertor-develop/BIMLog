@@ -1174,8 +1174,9 @@ function FeedbackTab({ token }: { token: string }) {
 
 export function AdminPanel() {
   const [, setLocation] = useLocation();
-  const { token } = useAuthStore();
-  const [activeTab, setActiveTab] = useState(() => { if (typeof window === "undefined") return 0; const requested = new URLSearchParams(window.location.search).get("tab"); return requested === "feedback" || window.location.pathname.endsWith("/admin/feedback") ? 9 : 0; });
+  const { token, user } = useAuthStore();
+  const isSuperAdmin = Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin);
+  const [activeTab, setActiveTab] = useState(0);
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
@@ -1185,6 +1186,13 @@ export function AdminPanel() {
       .catch(() => setLocation("/dashboard"))
       .finally(() => setChecking(false));
   }, [token, setLocation]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const requested = new URLSearchParams(window.location.search).get("tab") === "feedback" || window.location.pathname.endsWith("/admin/feedback");
+    if (requested && isSuperAdmin) setActiveTab(9);
+    else if (requested && !isSuperAdmin) setActiveTab(0);
+  }, [isSuperAdmin]);
 
   if (checking || !token) return <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh", color: "hsl(var(--muted-foreground))" }}>Checking access...</div>;
   const isSpanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
@@ -1259,7 +1267,7 @@ export function AdminPanel() {
         </section>
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
-          {TABS.map((tab, i) => (
+          {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => tab !== "Feedback" || isSuperAdmin).map(({ tab, i }) => (
             <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
@@ -1276,7 +1284,7 @@ export function AdminPanel() {
           {activeTab === 6 && <FeatureFlagsTab token={token} />}
           {activeTab === 7 && <AdminActionsLogTab token={token} />}
           {activeTab === 8 && <AiUsageTab token={token} />}
-          {activeTab === 9 && <FeedbackTab token={token} />}
+          {activeTab === 9 && isSuperAdmin && <FeedbackTab token={token} />}
         </main>
       </div>
     </div>
