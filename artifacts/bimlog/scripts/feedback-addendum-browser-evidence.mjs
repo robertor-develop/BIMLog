@@ -43,7 +43,7 @@ const bundleRoot = path.resolve(process.env.BIMLOG_FEEDBACK_BUNDLE_ROOT || "arti
 const bundleHashes = Object.fromEntries(readdirSync(bundleRoot).filter(n => /\.js$/.test(n)).sort().map(n => [n, fileSha(path.join(bundleRoot, n))]));
 const assertions = [], failures = [], scenarios = [];
 const pass = (s, n, detail = true) => assertions.push({ scenario: s, name: n, pass: true, detail });
-const check = (s, n, ok, detail = ok) => { if (!ok) { failures.push({ scenario: s, name: n, detail }); throw new Error(`${s}: ${n}`); } pass(s, n, detail); };
+const check = (s, n, ok, detail = ok) => { if (!ok) { failures.push({ scenario: s, name: n, detail }); throw new Error(`${s}: ${n}: ${JSON.stringify(detail)}`); } pass(s, n, detail); };
 const browser = await chromium.launch({ headless: true, executablePath: chromiumExecutable });
 const chromiumVersion = await browser.version();
 
