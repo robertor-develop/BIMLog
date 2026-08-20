@@ -11249,6 +11249,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-feedback-operational-intake-reconciliation-20260820",
+      "reviewedThroughCommit": "f13c38f4e7090ed0e57e708f86a4f104fb42e1fc",
+      "reviewedAt": "2026-08-20T21:55:00.000Z",
+      "status": "local_source_implemented_external_activation_and_acceptance_pending",
+      "captureTiming": "post_fix_pre_publish_reconciliation",
+      "summary": "Reconciles the Feedback operational-intake source delta: valid customer and reviewer deep links, an immediate super-admin review queue, post-commit notification reconciliation, customer DTO privacy, and governed ClamAV scanner/worker source without claiming external scanner, receiver, provider, publication, deployment, or customer activation.",
+      "workstreams": [
+        "feedback-operational-intake",
+        "feedback-notification-reconciliation",
+        "feedback-scanner-activation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The delta preserves canonical PostgreSQL authority, human review, truthful evidence, and separate implementation, activation, and customer-acceptance states."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed provider, privacy, external-action, and evidence-custody rules already govern the bounded operational-intake source."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation closes identified intake visibility, notification durability, and privacy gaps without changing the established customer-feedback quality contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accountable customer-feedback objective and product direction are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform inventory records the new Feedback notification worker, scan worker, scanner implementation, and route/UI source paths."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, build, package, installation, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report design or artifact layout behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact operational-intake product head, implemented controls, and truthful inactive scanner and receiver boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Preserves exact-head browser, PostgreSQL, scanner activation, receiver mounting, publication, provider, and customer acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing immutable Feedback audit-event model remains authoritative."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "856aebe18b5deb1f616459e8fb855c52a19bdfd9597ba5f44f13706ad51eee35"
     }
   ]
 }

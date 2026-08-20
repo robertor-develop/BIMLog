@@ -196,6 +196,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feedback-follow-up.behavior.ts
 - artifacts/api-server/src/lib/feedback-follow-up.ts
 - artifacts/api-server/src/lib/feedback-http-db.behavior.ts
+- artifacts/api-server/src/lib/feedback-notification-worker.ts
 - artifacts/api-server/src/lib/feedback-package.behavior.ts
 - artifacts/api-server/src/lib/feedback-package.ts
 - artifacts/api-server/src/lib/feedback-relay-schema-db.behavior.ts
@@ -213,6 +214,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feedback-relay/state-machine.ts
 - artifacts/api-server/src/lib/feedback-relay/transport.ts
 - artifacts/api-server/src/lib/feedback-route-authority.behavior.ts
+- artifacts/api-server/src/lib/feedback-scan-worker.behavior.ts
+- artifacts/api-server/src/lib/feedback-scan-worker.ts
+- artifacts/api-server/src/lib/feedback-scanner.behavior.ts
+- artifacts/api-server/src/lib/feedback-scanner.ts
 - artifacts/api-server/src/lib/feedback-schema-migration.ts
 - artifacts/api-server/src/lib/ffmpeg-capability.ts
 - artifacts/api-server/src/lib/financial-budget-browser.behavior.ts
@@ -394,6 +399,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/DataRetention.tsx
 - artifacts/bimlog/src/pages/Disclaimer.tsx
 - artifacts/bimlog/src/pages/Features.tsx
+- artifacts/bimlog/src/pages/FeedbackAdmin.behavior.tsx
 - artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx
 - artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx
@@ -470,7 +476,9 @@ It changes only when the code structure or curated architectural facts change.
 - /settings/company-profile
 - /settings/notifications
 - /settings/financial-controls
+- /admin/feedback
 - /admin
+- /feedback
 - /total-control
 - /living-brief
 - /pricing
