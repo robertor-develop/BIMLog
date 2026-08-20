@@ -11402,6 +11402,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6fe8678ef52617f68de29e8c1d8a50fd0613366f9231da12b04266c679d11992"
+    },
+    {
+      "taskId": "bimlog-feedback-terminal-browser-reseal-20260820",
+      "reviewedThroughCommit": "78374d8bfeb4b41c722a55bd7a3d01cc00fcebdd",
+      "reviewedAt": "2026-08-20T22:34:00.000Z",
+      "status": "exact_head_controlled_browser_68_of_68_pass_external_gates_pending",
+      "captureTiming": "post_acceptance_terminal_reconciliation",
+      "summary": "Records the exact-head 68/68 controlled Chromium receipt for the bilingual customer widget, super-admin reviewer queue and workflow, and non-super-admin denial after harness-only selector, settlement, and authorization-fixture corrections, without claiming full-stack, scanner, receiver, provider, publication, deployment, or customer activation.",
+      "workstreams": [
+        "feedback-controlled-browser-acceptance",
+        "feedback-reviewer-authorization",
+        "feedback-operational-intake"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The retained receipt truthfully separates controlled browser evidence from full-stack, deployment, provider, and customer acceptance."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing evidence, authorization, privacy, and external-action rules govern this retained controlled-browser receipt."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact-head controlled browser gate is now satisfied while remaining full-stack and external acceptance stays explicit."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product identity, customer outcome, or long-term direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Harness-only corrections modify no structural platform inventory path or route."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, build, package, installation, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact or report design-system behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact head, tree, retained evidence path, independently computed manifest hash, 68 passed assertions, and controlled-boundary limitations."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the exact-head controlled browser gate while retaining full-stack, scanner activation, receiver mounting, publication, provider, and customer gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The immutable Feedback audit-event model and acceptance audit boundary remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "84963a111a4671db4f6784c99221d9955a04961358915abb067389c8d614bb85"
     }
   ]
 }
