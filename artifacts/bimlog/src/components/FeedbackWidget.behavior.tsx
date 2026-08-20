@@ -42,6 +42,7 @@ const assertions:Array<[string,RegExp]>=[
   ["capture reserves two atomic evidence slots",/files\.length > 8.*two linked slots/s],
   ["capture keeps original and marked evidence",/\[\.\.\.current, original, rendered\]/],
   ["capture bundle has stable linkage",/captureBundleId.*evidenceRole: "original".*evidenceRole: "marked"/s],
+  ["capture bundle identity reaches server",/form\.append\("captureBundleId".*form\.append\("captureRole"/s],
   ["visual markup editor replaces numeric crop",/FeedbackMarkupEditor/],
 ];
 for(const [name,pattern] of assertions)assert.match(source,pattern,name);
