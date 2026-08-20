@@ -10951,11 +10951,11 @@
     },
     {
       "taskId": "bimlog-feedback-packages-v1.60.35.09-f-reconciliation-20260820",
-      "reviewedThroughCommit": "c7a945acb3bb26b263be36cd8107a8d78ed0cfcf",
+      "reviewedThroughCommit": "3736433a7a040461a979e92e5621a3728c658d7f",
       "reviewedAt": "2026-08-20T18:02:16Z",
       "status": "local_implemented_and_behavior_tested_external_gates_pending",
       "captureTiming": "post_code_freeze_same_release_reconciliation",
-      "summary": "Reconciles Feedback packages v1.60.35.09-F through the frozen local source-and-harness head, including PDF/JSON/ZIP packages, the PostgreSQL follow-up register, governed customer notifications, linked original/marked screenshot roles and browser evidence, and canonical H-only plugin enforcement without claiming push, publication, receiver/provider activation, production migration, or customer acceptance.",
+      "summary": "Reconciles Feedback packages v1.60.35.09-F through the frozen local source-and-harness head, including PDF/JSON/ZIP packages and deterministic PDF proof output, the PostgreSQL follow-up register, governed customer notifications, six-field linked original/marked screenshot uploads and browser evidence, durable email delivery outcomes and retry, and canonical H-only plugin enforcement without claiming push, publication, receiver/provider activation, production migration, or customer acceptance.",
       "workstreams": [
         "feedback-packages",
         "feedback-follow-up",
@@ -10972,7 +10972,7 @@
         {
           "key": "claude",
           "result": "reviewed_no_semantic_change",
-          "reason": "Existing package artifact, external-action, notification, and release gates remain controlling."
+          "reason": "The frozen source head already removes the remaining C-root plugin build contradiction and binds both plugin source/build/package roots to canonical H-only locations; this docs-only reseal requires no further CLAUDE edit."
         },
         {
           "key": "quality",
@@ -11007,12 +11007,12 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records exact frozen head, implemented and behavior-tested package/register/notification scope, H-only enforcement, and truthful external limitations."
+          "reason": "Records exact frozen head, six-field multipart correction, durable email sent/failed/skipped receipts and retry, package/register/notification scope, H-only enforcement, and truthful external limitations."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Preserves artifact inspection, authenticated API/browser, provider receipt, receiver activation, push, publication, and customer gates."
+          "reason": "Preserves artifact inspection, authenticated API/browser, real provider delivery receipt, receiver activation, push, publication, and customer gates."
         },
         {
           "key": "audit",
@@ -11022,11 +11022,10 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "fe824182ae10a32a0b63e1b2bd5ada2de91e7b0a82930d633ebcc90b67a4f3b8"
+      "reviewedChangeSha256": "21f92b2caee997ca1288cf9193fcf1dfd8bdffc203de4d60aacdca79b327a26d"
     }
   ]
 }
