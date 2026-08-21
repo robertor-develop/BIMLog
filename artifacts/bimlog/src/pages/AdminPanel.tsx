@@ -1063,6 +1063,11 @@ function FeedbackTab({ token }: { token: string }) {
     finally { setDetailLoading(false); }
   }
 
+  function closeDetail() {
+    setSelectedId(null); setDetail(null);
+    if (typeof window !== "undefined") { const url = new URL(window.location.href); url.searchParams.delete("feedback"); window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`); }
+  }
+
   async function claimFeedback(item: Record<string, unknown>) {
     const numericId = Number(item.id); if (!Number.isInteger(numericId)) return;
     setError(""); setSuccess(""); setPendingAction(`claim:${numericId}`);
@@ -1228,8 +1233,8 @@ function FeedbackTab({ token }: { token: string }) {
           </div>
         </div>
       )}
-      {selectedId !== null && <><button type="button" aria-label="Close feedback details" onClick={() => { setSelectedId(null); setDetail(null); }} style={{ position: "fixed", inset: 0, zIndex: 1499, border: 0, background: "rgba(15,23,42,.42)" }} /><section role="dialog" aria-modal="true" aria-label="Feedback details" style={{ position: "fixed", top: 16, right: 16, bottom: 16, zIndex: 1500, width: "min(720px, calc(100vw - 32px))", overflowY: "auto", padding: 22, border: "1px solid hsl(var(--border))", borderRadius: 14, background: "hsl(var(--card))", boxShadow: "0 28px 80px rgba(15,23,42,.38)" }}>
-        <div style={{ position: "sticky", top: -22, zIndex: 2, margin: "-22px -22px 16px", padding: "18px 22px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, background: "hsl(var(--card))", borderBottom: "1px solid hsl(var(--border))" }}><div><h3 style={{ margin: 0 }}>Feedback details</h3><div style={{ fontSize: 12, marginTop: 4, color: "hsl(var(--muted-foreground))" }}>What was submitted, what is safe to open, and what your team has done</div></div><Button variant="outline" size="sm" onClick={() => { setSelectedId(null); setDetail(null); }}>Close</Button></div>
+      {selectedId !== null && <><button type="button" aria-label="Close feedback details" onClick={closeDetail} style={{ position: "fixed", inset: 0, zIndex: 1499, border: 0, background: "rgba(15,23,42,.42)" }} /><section role="dialog" aria-modal="true" aria-label="Feedback details" style={{ position: "fixed", top: 16, right: 16, bottom: 16, zIndex: 1500, width: "min(720px, calc(100vw - 32px))", overflowY: "auto", padding: 22, border: "1px solid hsl(var(--border))", borderRadius: 14, background: "hsl(var(--card))", boxShadow: "0 28px 80px rgba(15,23,42,.38)" }}>
+        <div style={{ position: "sticky", top: -22, zIndex: 2, margin: "-22px -22px 16px", padding: "18px 22px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, background: "hsl(var(--card))", borderBottom: "1px solid hsl(var(--border))" }}><div><h3 style={{ margin: 0 }}>Feedback details</h3><div style={{ fontSize: 12, marginTop: 4, color: "hsl(var(--muted-foreground))" }}>What was submitted, what is safe to open, and what your team has done</div></div><Button variant="outline" size="sm" onClick={closeDetail}>Close</Button></div>
         {detailLoading ? <p role="status">Loading complete package…</p> : detail ? <>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 10, marginBottom: 20 }}><div style={{ padding: 12, borderRadius: 10, background: "hsl(var(--muted) / .55)" }}><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Feedback ID</div><strong>{String(((detail.feedback || {}) as Record<string, unknown>).stableId || selectedId)}</strong></div><div style={{ padding: 12, borderRadius: 10, background: "hsl(var(--muted) / .55)" }}><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Evidence package</div><strong>{String(detail.packageState || "unknown").replace(/-/g, " ")}</strong></div><div style={{ padding: 12, borderRadius: 10, background: "hsl(var(--muted) / .55)" }}><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Current report</div><strong>Generated when downloaded</strong></div></div>
           <h4 style={{ marginBottom: 8 }}>Evidence</h4>
