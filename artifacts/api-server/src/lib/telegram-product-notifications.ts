@@ -14,6 +14,7 @@ export const MODULE_CATALOG = [
   { key: "lens", en: "Lens / Coordination", es: "Lens / Coordinación", available: false },
   { key: "files", en: "Files / Reviews", es: "Archivos / Revisiones", available: false },
   { key: "support", en: "Support", es: "Soporte", available: true },
+  { key: "feedback", en: "Feedback review packages", es: "Paquetes de revisión de comentarios", available: true },
   { key: "delivery", en: "Delivery Concierge", es: "Conserje de Entrega", available: true },
   { key: "account_security", en: "Account / Security", es: "Cuenta / Seguridad", available: true },
 ] as const;
@@ -166,7 +167,7 @@ export async function getNotificationPreferenceCenter(userId: number) {
     settings: { ...row, enabled: row?.enabled === true, paused: row?.paused === true, telegramEnabled: row?.telegram_enabled === true, emailEnabled: row?.email_enabled === true,
       emailAvailable: false, emailUnavailableReason: "Encrypted notification email provider credentials are not yet available.", nextScheduledDigest: nextDigest.rows[0]?.scheduled_for || null },
     projects: projects.rows.map((p: any) => ({ id: p.id, name: p.name, code: p.code, role: p.role, enabled: projectMap.has(Number(p.id)) ? projectMap.get(Number(p.id)) : true, inherited: !projectMap.has(Number(p.id)) })),
-    modules: MODULE_CATALOG.map(m => { const override:any=moduleMap.get(m.key); return ({ ...m, enabled: m.available && (override?.enabled ?? true), frequency: override?.frequency || "inherit", inherited: !override || override.frequency === "inherit" }); }),
+    modules: MODULE_CATALOG.map(m => { const override:any=moduleMap.get(m.key),defaultEnabled=m.key==="feedback"?false:true; return ({ ...m, enabled: m.available && (override?.enabled ?? defaultEnabled), frequency: override?.frequency || "inherit", inherited: !override || override.frequency === "inherit" }); }),
     events: EVENT_CATALOG.map(([key,en,es]) => ({ key,en,es,enabled: eventMap.get(key) ?? true,inherited: !eventMap.has(key) })),
     history: status.rows,
   };

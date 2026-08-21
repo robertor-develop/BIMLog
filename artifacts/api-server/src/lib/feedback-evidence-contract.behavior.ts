@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { FEEDBACK_MAX_FILE_BYTES, FEEDBACK_RELEASE, FeedbackEvidenceError, inspectFeedbackEvidence, sanitizeFeedbackFilename } from "./feedback-evidence-contract";
 
-assert.equal(FEEDBACK_RELEASE, "v1.60.35.10-F");
+assert.equal(FEEDBACK_RELEASE, "v1.60.35.11-F");
 assert.equal(sanitizeFeedbackFilename("../../evil<script>.pdf"), "evil_script_.pdf");
 const pdf = Buffer.from("%PDF-1.7\n1 0 obj\n<<>>\nendobj\n%%EOF");
 assert.equal(inspectFeedbackEvidence({ originalname: "proof.pdf", size: pdf.length, buffer: pdf }).name, "proof.pdf");

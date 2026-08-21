@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import fs from "node:fs";
-import { aggregateFeedbackTelegramDelivery, feedbackTelegramConfigurationDecision } from "./feedback-telegram-policy";
+import { aggregateFeedbackTelegramDelivery, feedbackTelegramAttemptDecision, feedbackTelegramConfigurationDecision, feedbackTelegramNextAttemptAt } from "./feedback-telegram-policy";
 
 assert.equal(feedbackTelegramConfigurationDecision(false,0),"provider-not-configured"); assert.equal(feedbackTelegramConfigurationDecision(true,0),"no-opted-in-reviewer"); assert.equal(feedbackTelegramConfigurationDecision(true,1),"ready");
 const event=(id:number,snapshotEventId:number,recipientUserId:number|null,artifactKind:string,state:string)=>({id,snapshotEventId,recipientUserId,artifactKind,state});
@@ -11,7 +11,15 @@ assert.equal(aggregateFeedbackTelegramDelivery(10,[7,8],[event(1,10,7,"docx","se
 assert.equal(aggregateFeedbackTelegramDelivery(11,[7],[event(9,10,7,"docx","sent"),event(10,10,7,"xlsx","sent")]).overallState,"not-requested");
 assert.equal(aggregateFeedbackTelegramDelivery(10,[7],[event(1,10,7,"docx","failed"),event(9,10,7,"docx","sent"),event(2,10,7,"xlsx","sent")]).overallState,"sent");
 assert.equal(aggregateFeedbackTelegramDelivery(10,[],[event(1,10,null,"docx","skipped"),event(2,10,null,"xlsx","skipped")]).overallState,"skipped");
+assert.equal(aggregateFeedbackTelegramDelivery(10,[7],[event(1,10,7,"docx","unknown"),event(2,10,7,"xlsx","sent")]).overallState,"manual-review");
+const now=new Date("2026-08-21T12:00:00Z");
+assert.deepEqual(feedbackTelegramAttemptDecision(null,now),{action:"send",attemptNumber:1});
+assert.deepEqual(feedbackTelegramAttemptDecision({state:"failed",attemptNumber:1,createdAt:now,nextAttemptAt:new Date(now.getTime()-1)},now),{action:"send",attemptNumber:2});
+assert.deepEqual(feedbackTelegramAttemptDecision({state:"failed",attemptNumber:1,createdAt:now,nextAttemptAt:new Date(now.getTime()+1)},now),{action:"wait"});
+assert.deepEqual(feedbackTelegramAttemptDecision({state:"sending",attemptNumber:1,createdAt:new Date(now.getTime()-600001)},now),{action:"mark-unknown",attemptNumber:1});
+assert.deepEqual(feedbackTelegramAttemptDecision({state:"unknown",attemptNumber:1,createdAt:now},now),{action:"manual-review"});
+assert.equal(feedbackTelegramNextAttemptAt(3,now),null);
 const worker = fs.readFileSync(new URL("./feedback-telegram-worker.ts", import.meta.url), "utf8"), telegram = fs.readFileSync(new URL("./telegram-product.ts", import.meta.url), "utf8"), app = fs.readFileSync(new URL("../app.ts", import.meta.url), "utf8"),route=fs.readFileSync(new URL("../routes/feedback.ts",import.meta.url),"utf8");
-assert.match(worker,/state: "skipped"/); assert.match(worker,/provider-not-configured/); assert.match(worker,/no-opted-in-reviewer/); assert.match(worker,/notification_channels.*provider='telegram'.*status='connected'.*u\.is_super_admin=true/s); assert.match(worker,/state: "sending"[\s\S]*sendVerifiedTelegramDocument/); assert.match(worker,/"sent" \| "failed"/); assert.match(worker,/downloadBounded.*byteLength !== byteCount.*createHash\("sha256"\)/s); assert.match(worker,/providerAcknowledgementId.*Telegram acknowledged feedback document/s); assert.match(telegram,/sendVerifiedTelegramDocument[\s\S]*encrypted_telegram_chat_id[\s\S]*decryptEvidence/); assert.match(telegram,/new FormData\(\)[\s\S]*new Blob[\s\S]*sendDocument/); assert.match(telegram,/BIMLOG_FEEDBACK_TELEGRAM_MAX_BYTES[\s\S]*BIMLOG_FEEDBACK_TELEGRAM_TIMEOUT_MS/); assert.match(app,/if \(telegramWorkersReady\)[\s\S]*startFeedbackTelegramDeliveryWorker\(\)/);
+assert.match(worker,/state: "skipped"/); assert.match(worker,/provider-not-configured/); assert.match(worker,/no-opted-in-reviewer/); assert.match(worker,/notification_preferences np[\s\S]*np\.enabled='true'[\s\S]*np\.telegram_enabled=true[\s\S]*module_key='feedback'[\s\S]*consent\.status='granted'/); assert.match(worker,/state: "sending"[\s\S]*sendVerifiedTelegramDocument/); assert.match(worker,/ambiguous-provider-outcome[\s\S]*blind resend is prohibited/); assert.match(worker,/nextAttemptAt[\s\S]*manualReview/); assert.match(worker,/"sent" \| "failed"/); assert.match(worker,/downloadBounded.*byteLength !== byteCount.*createHash\("sha256"\)/s); assert.match(worker,/providerAcknowledgementId.*Telegram acknowledged feedback document/s); assert.match(telegram,/sendVerifiedTelegramDocument[\s\S]*encrypted_telegram_chat_id[\s\S]*decryptEvidence/); assert.match(telegram,/new FormData\(\)[\s\S]*new Blob[\s\S]*sendDocument/); assert.match(telegram,/BIMLOG_FEEDBACK_TELEGRAM_MAX_BYTES[\s\S]*BIMLOG_FEEDBACK_TELEGRAM_TIMEOUT_MS/); assert.match(app,/if \(telegramWorkersReady\)[\s\S]*startFeedbackTelegramDeliveryWorker\(\)/);
 assert.match(route,/pkg\.id package_snapshot_event_id/);assert.match(route,/jsonb_agg\(jsonb_build_object/);assert.match(route,/telegramDelivery:telegram/);assert.match(route,/aggregateFeedbackTelegramDelivery/);
-console.log("feedback Telegram governed delivery and aggregation: 26/26 passed");
+console.log("feedback Telegram governed delivery and aggregation: 34/34 passed");
