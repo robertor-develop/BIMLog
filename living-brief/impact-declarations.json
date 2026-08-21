@@ -12312,11 +12312,11 @@
     },
     {
       "taskId": "bimlog-feedback-replit-signature-bootstrap-reconciliation-20260821",
-      "reviewedThroughCommit": "5de30cc8e36098f2929754836abdfcbf89ee73b9",
+      "reviewedThroughCommit": "30d87b46271732e5b718ba1f3863ec91ffce7875",
       "reviewedAt": "2026-08-21T08:00:00-04:00",
       "status": "scanner_signature_bootstrap_implemented_replit_proof_pending",
       "captureTiming": "post_source_pre_replit_execution",
-      "summary": "Adds a fail-closed FreshClam signature bootstrap and refresh authority to the exact Replit scanner launcher after operational scanning proved the Nix ClamAV package contained no signature database.",
+      "summary": "Adds a fail-closed FreshClam signature bootstrap and refresh authority to the exact Replit scanner launcher after operational scanning proved the Nix ClamAV package contained no signature database, including revalidation before any stale-database fallback.",
       "workstreams": [
         "feedback-scanner-activation",
         "feedback-replit-publication"
@@ -12383,7 +12383,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "86b19a4a03deaeefe3ebbccf892096dff24d817df7bdbb881452e1bd2bcd7966"
+      "reviewedChangeSha256": "aa114811a0290db63c9e5d6e9902cf20828ecf2532ba947ec7e8bdaeb2ce60fa"
     }
   ]
 }
