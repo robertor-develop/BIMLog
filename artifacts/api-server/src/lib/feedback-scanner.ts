@@ -123,7 +123,10 @@ async function executableSha256(executable: string): Promise<string> {
 }
 
 function scannerEnvironment(): NodeJS.ProcessEnv {
-  const keys = ["SystemRoot", "WINDIR", "LANG", "LC_ALL", "TZ"];
+  // Replit exposes declared Nix packages through its governed runtime PATH.
+  // The committed launcher still pins the exact content-addressed store path
+  // and version before forwarding a fixed scanner operation.
+  const keys = ["SystemRoot", "WINDIR", "LANG", "LC_ALL", "TZ", "PATH"];
   return Object.fromEntries(keys.flatMap(key => process.env[key] ? [[key, process.env[key]]] : []));
 }
 
