@@ -41,7 +41,7 @@ test "$(command -v freshclam)" = "$FRESHCLAM_PATH"
 test -f "$FRESHCLAM_CONFIG"
 test ! -L "$FRESHCLAM_CONFIG"
 test "$(sha256sum "$FRESHCLAM_CONFIG" | awk '{print $1}')" = "$FRESHCLAM_CONFIG_SHA256"
-test "$(freshclam --config-file="$FRESHCLAM_CONFIG" --version)" = "$CLAMAV_VERSION"
+test "$(freshclam --config-file="$FRESHCLAM_CONFIG" --version | cut -d/ -f1)" = "$CLAMAV_VERSION"
 
 mkdir -p "$DATABASE_ROOT"
 chmod 700 "$DATABASE_ROOT"
