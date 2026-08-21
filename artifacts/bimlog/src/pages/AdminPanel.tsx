@@ -119,6 +119,17 @@ const ADMIN_PANEL_SHELL_CSS = `
     overflow-x: auto !important;
   }
   .hq-admin-content table { min-width: 760px; }
+  .feedback-command-bar {
+    position: sticky;
+    top: 0;
+    z-index: 12;
+    margin: -8px -8px 16px;
+    padding: 12px 8px;
+    background: hsl(var(--card) / 0.96);
+    border-bottom: 1px solid hsl(var(--border));
+    backdrop-filter: blur(10px);
+  }
+  .feedback-review-cards { display: none; }
   @media (max-width: 720px) {
     .hq-admin-shell { width: min(100% - 24px, 390px); padding: 14px 0 24px; }
     .hq-admin-hero { grid-template-columns: 1fr; padding: 18px; border-radius: 18px; }
@@ -128,6 +139,9 @@ const ADMIN_PANEL_SHELL_CSS = `
     .hq-admin-tabs { margin: 14px 0; border-radius: 16px; }
     .hq-admin-tab { padding: 9px 12px; font-size: 12px; }
     .hq-admin-content { padding: 14px; border-radius: 18px; }
+    .feedback-command-bar { top: 0; margin: -4px -4px 14px; padding: 10px 4px; }
+    .feedback-review-table { display: none; }
+    .feedback-review-cards { display: grid; gap: 12px; }
   }
 `;
 
@@ -953,15 +967,15 @@ function AiUsageTab({ token }: { token: string }) {
 }
 
 const FEEDBACK_STATUS_OPTIONS = [
-  { value: "new", label: "New" },
-  { value: "triaged", label: "Triaged" },
-  { value: "accepted", label: "Accepted" },
-  { value: "in_progress", label: "In progress" },
-  { value: "blocked", label: "Blocked" },
-  { value: "fixed", label: "Fixed" },
-  { value: "verified", label: "Verified" },
-  { value: "rejected", label: "Rejected" },
-  { value: "deferred", label: "Deferred" },
+  { value: "new", label: "New", labelEs: "Nuevo" },
+  { value: "triaged", label: "Triaged", labelEs: "Clasificado" },
+  { value: "accepted", label: "Accepted", labelEs: "Aceptado" },
+  { value: "in_progress", label: "In progress", labelEs: "En progreso" },
+  { value: "blocked", label: "Blocked", labelEs: "Bloqueado" },
+  { value: "fixed", label: "Fixed", labelEs: "Corregido" },
+  { value: "verified", label: "Verified", labelEs: "Verificado" },
+  { value: "rejected", label: "Rejected", labelEs: "Rechazado" },
+  { value: "deferred", label: "Deferred", labelEs: "Aplazado" },
 ];
 
 const FEEDBACK_STATUS_TRANSITIONS: Record<string, string[]> = {
@@ -992,6 +1006,8 @@ const feedbackActivityLabel = (value: unknown) => ({
 }[String(value)] || String(value).replace(/_/g, " "));
 
 function FeedbackTab({ token }: { token: string }) {
+  const isSpanish = typeof window !== "undefined" && localStorage.getItem("bimlog-lang") === "es";
+  const t = (english: string, spanish: string) => isSpanish ? spanish : english;
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -1000,32 +1016,43 @@ function FeedbackTab({ token }: { token: string }) {
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [operations, setOperations] = useState<Record<string, any> | null>(null);
+  const [operationsLoading, setOperationsLoading] = useState(true);
+  const [operationsError, setOperationsError] = useState(false);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [success, setSuccess] = useState("");
   const reportDownloadRef = useRef<string | null>(null);
   const topScrollRef = useRef<HTMLDivElement>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
 
-  const loadFeedback = useCallback(() => {
+  const loadFeedback = useCallback((announce = false) => {
     setLoading(true);
     setError("");
+    if (announce) setSuccess("");
     apiFetch("/feedback/admin", token)
       .then(async (response) => {
         const data = await response.json().catch(() => ({}));
         if (!response.ok) throw new Error(data.error || "Failed to load feedback");
         setItems(Array.isArray(data.feedback) ? data.feedback : []);
+        if (announce) setSuccess(isSpanish ? "La cola de comentarios está actualizada." : "Feedback queue is up to date.");
       })
       .catch((err) => {
         setError(err instanceof Error ? err.message : "Failed to load feedback");
       })
       .finally(() => setLoading(false));
-  }, [token]);
+  }, [isSpanish, token]);
 
   useEffect(() => {
     loadFeedback();
   }, [loadFeedback]);
 
-  useEffect(() => { apiFetch("/feedback/admin/operations-status", token).then(response => response.ok ? response.json() : null).then(value => setOperations(value)).catch(() => setOperations(null)); }, [token]);
+  useEffect(() => {
+    setOperationsLoading(true); setOperationsError(false);
+    apiFetch("/feedback/admin/operations-status", token)
+      .then(async response => { if (!response.ok) throw new Error("operations unavailable"); return response.json(); })
+      .then(value => setOperations(value))
+      .catch(() => { setOperations(null); setOperationsError(true); })
+      .finally(() => setOperationsLoading(false));
+  }, [token]);
 
   useEffect(() => {
     if (!items.length || selectedId !== null || typeof window === "undefined") return;
@@ -1058,7 +1085,7 @@ function FeedbackTab({ token }: { token: string }) {
     try {
       const item = items.find(candidate => Number(candidate.id) === numericId);
       const needsReason = ["blocked", "verified", "rejected", "deferred"].includes(status);
-      const reason = needsReason ? window.prompt("Decision reason (required)", String(item?.dispositionReason || "")) : "";
+      const reason = needsReason ? window.prompt(t("Decision reason (required)", "Motivo de la decisión (obligatorio)"), String(item?.dispositionReason || "")) : "";
       if (needsReason && !reason?.trim()) return;
       const response = await apiFetch(`/feedback/admin/${numericId}`, token, {
         method: "PATCH",
@@ -1067,7 +1094,7 @@ function FeedbackTab({ token }: { token: string }) {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Failed to update feedback");
       setItems((current) => current.map((candidate) => Number(candidate.id) === numericId ? { ...candidate, ...data.feedback } : candidate));
-      setSuccess(`Feedback ${String(item?.stableId || numericId)} is now ${status.replace(/_/g, " ")}.`);
+      setSuccess(t(`Feedback ${String(item?.stableId || numericId)} is now ${status.replace(/_/g, " ")}.`, `El comentario ${String(item?.stableId || numericId)} ahora está ${status.replace(/_/g, " ")}.`));
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update feedback");
     } finally { setPendingAction(null); }
@@ -1089,40 +1116,50 @@ function FeedbackTab({ token }: { token: string }) {
   async function claimFeedback(item: Record<string, unknown>) {
     const numericId = Number(item.id); if (!Number.isInteger(numericId)) return;
     setError(""); setSuccess(""); setPendingAction(`claim:${numericId}`);
-    try { const response = await apiFetch(`/feedback/admin/${numericId}`, token, { method: "PATCH", body: JSON.stringify({ observedVersion: Number(item.version), claimToMe: true }) }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Failed to claim feedback"); setItems(current => current.map(candidate => Number(candidate.id) === numericId ? { ...candidate, ...data.feedback } : candidate)); setSuccess(`You now own ${String(item.stableId || numericId)}. Status and customer follow-up remain visible here.`); await openDetail(numericId); }
+    try { const response = await apiFetch(`/feedback/admin/${numericId}`, token, { method: "PATCH", body: JSON.stringify({ observedVersion: Number(item.version), claimToMe: true }) }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Failed to claim feedback"); setItems(current => current.map(candidate => Number(candidate.id) === numericId ? { ...candidate, ...data.feedback } : candidate)); setSuccess(t(`You now own ${String(item.stableId || numericId)}. Status and customer follow-up remain visible here.`, `Ahora eres responsable de ${String(item.stableId || numericId)}. El estado y seguimiento siguen visibles aquí.`)); await openDetail(numericId); }
     catch (err) { setError(err instanceof Error ? err.message : "Failed to claim feedback"); }
     finally { setPendingAction(null); }
   }
 
   async function sendCustomerUpdate(item: Record<string, unknown>) {
-    const message = window.prompt("Customer-visible update"); if (!message?.trim()) return;
+    const message = window.prompt(t("Customer-visible update", "Actualización visible para el cliente")); if (!message?.trim()) return;
     const responseType = String(item.status) === "fixed" || String(item.status) === "verified" ? "fix" : "response";
-    try { const response = await apiFetch(`/feedback/admin/${Number(item.id)}/events`, token, { method: "POST", headers: { "Idempotency-Key": `admin-ui:${Number(item.id)}:${Date.now()}` }, body: JSON.stringify({ responseType, visibility: "customer", message: message.trim() }) }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Failed to send customer update"); await openDetail(item.id); }
+    const action = `message:${Number(item.id)}`; setError(""); setSuccess(""); setPendingAction(action);
+    try { const response = await apiFetch(`/feedback/admin/${Number(item.id)}/events`, token, { method: "POST", headers: { "Idempotency-Key": `admin-ui:${Number(item.id)}:${Date.now()}` }, body: JSON.stringify({ responseType, visibility: "customer", message: message.trim() }) }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Failed to send customer update"); setSuccess(t(`Customer update sent for ${String(item.stableId || item.id)}.`, `Actualización enviada al cliente para ${String(item.stableId || item.id)}.`)); await openDetail(item.id); }
     catch (err) { setError(err instanceof Error ? err.message : "Failed to send customer update"); }
+    finally { setPendingAction(null); }
   }
 
   async function downloadPackage(item: Record<string, unknown>) {
-    const reason = window.prompt("Export reason (required)", "Internal feedback review"); if (!reason?.trim()) return;
-    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${Number(item.id)}/package.zip`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Package is not ready"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${String(item.stableId || "feedback")}.zip`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
+    const reason = window.prompt(t("Export reason (required)", "Motivo de exportación (obligatorio)"), t("Internal feedback review", "Revisión interna de comentarios")); if (!reason?.trim()) return;
+    const action = `package:${Number(item.id)}`; setError(""); setSuccess(""); setPendingAction(action);
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${Number(item.id)}/package.zip`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Package is not ready"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${String(item.stableId || "feedback")}.zip`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); setSuccess(t(`Complete package downloaded for ${String(item.stableId || item.id)}.`, `Paquete completo descargado para ${String(item.stableId || item.id)}.`)); }
     catch (err) { setError(err instanceof Error ? err.message : "Failed to download package"); }
+    finally { setPendingAction(null); }
   }
 
   async function downloadEvidence(asset: Record<string, unknown>, reasonOverride?: string) {
-    if (!selectedId) return; const reason = reasonOverride || window.prompt("Export reason (required)", "Review verified customer evidence"); if (!reason?.trim()) return;
-    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${selectedId}/assets/${Number(asset.id)}/download`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Evidence is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = String(asset.name || "feedback-evidence"); anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); setSuccess(`Downloaded verified file ${String(asset.name || asset.id)} from private BIMLog custody.`); }
+    if (!selectedId) return; const reason = reasonOverride || window.prompt(t("Export reason (required)", "Motivo de exportación (obligatorio)"), t("Review verified customer evidence", "Revisar evidencia verificada del cliente")); if (!reason?.trim()) return;
+    const action = `evidence:${Number(asset.id)}`; setError(""); setSuccess(""); setPendingAction(action);
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${selectedId}/assets/${Number(asset.id)}/download`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Evidence is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = String(asset.name || "feedback-evidence"); anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); setSuccess(t(`Downloaded verified file ${String(asset.name || asset.id)} from private BIMLog custody.`, `Archivo verificado ${String(asset.name || asset.id)} descargado de la custodia privada de BIMLog.`)); }
     catch (err) { setError(err instanceof Error ? err.message : "Evidence is unavailable"); }
+    finally { setPendingAction(null); }
   }
 
   async function downloadPackageSnapshot(item: Record<string, unknown>, format: "pdf" | "json" | "docx" | "xlsx") {
-    const reason = window.prompt("Export reason (required)", "Internal feedback follow-up"); if (!reason?.trim()) return;
-    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${Number(item.id)}/package-snapshot.${format}`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Automatic snapshot is not ready"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${String(item.stableId || "feedback")}-snapshot.${format}`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
+    const reason = window.prompt(t("Export reason (required)", "Motivo de exportación (obligatorio)"), t("Internal feedback follow-up", "Seguimiento interno de comentarios")); if (!reason?.trim()) return;
+    const action = `snapshot:${format}:${Number(item.id)}`; setError(""); setSuccess(""); setPendingAction(action);
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${Number(item.id)}/package-snapshot.${format}`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Automatic snapshot is not ready"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${String(item.stableId || "feedback")}-snapshot.${format}`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); setSuccess(t(`${format.toUpperCase()} report downloaded for ${String(item.stableId || item.id)}.`, `Informe ${format.toUpperCase()} descargado para ${String(item.stableId || item.id)}.`)); }
     catch (err) { setError(err instanceof Error ? err.message : "Automatic snapshot is not ready"); }
+    finally { setPendingAction(null); }
   }
 
   async function downloadFollowUpRegister(format: "csv" | "xlsx" = "xlsx") {
-    const reason = window.prompt("Export reason (required)", "Customer feedback follow-up review"); if (!reason?.trim()) return;
-    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/follow-up.${format}`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Follow-up register is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `bimlog-feedback-follow-up.${format}`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
+    const reason = window.prompt(t("Export reason (required)", "Motivo de exportación (obligatorio)"), t("Customer feedback follow-up review", "Revisión de seguimiento de comentarios")); if (!reason?.trim()) return;
+    const action = `register:${format}`; setError(""); setSuccess(""); setPendingAction(action);
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/follow-up.${format}`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Follow-up register is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `bimlog-feedback-follow-up.${format}`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); setSuccess(t(`${format.toUpperCase()} follow-up register downloaded.`, `Registro de seguimiento ${format.toUpperCase()} descargado.`)); }
     catch (err) { setError(err instanceof Error ? err.message : "Follow-up register is unavailable"); }
+    finally { setPendingAction(null); }
   }
 
   const visibleItems = statusFilter === "all" ? items : items.filter((item) => String(item.status || "open") === statusFilter);
@@ -1130,57 +1167,72 @@ function FeedbackTab({ token }: { token: string }) {
   const reviewCount = items.filter((item) => ["triaged", "accepted"].includes(String(item.status || "new"))).length;
   const plannedCount = items.filter((item) => ["in_progress", "blocked", "fixed"].includes(String(item.status || "new"))).length;
   const closedCount = items.filter((item) => ["verified", "rejected", "deferred"].includes(String(item.status || "new"))).length;
+  const statusLabel = (value: unknown) => {
+    const option = FEEDBACK_STATUS_OPTIONS.find(candidate => candidate.value === String(value));
+    return option ? (isSpanish ? option.labelEs : option.label) : String(value || "new").replace(/_/g, " ");
+  };
+  const packageExplanation = (item: Record<string, unknown>) => {
+    const state = String(item.packageState || "metadata-only");
+    if (state === "ready") return t("Ready: the governed ZIP includes current reports and verified-safe evidence.", "Listo: el ZIP gobernado incluye informes actuales y evidencia verificada.");
+    if (state === "quarantined") return t("Locked: evidence is quarantined until controlled scanning completes.", "Bloqueado: la evidencia está en cuarentena hasta completar el escaneo controlado.");
+    return t("Metadata only: reports are available, but no verified evidence bytes are packaged.", "Solo metadatos: los informes están disponibles, pero no se empaqueta evidencia verificada.");
+  };
 
   return (
-    <div>
-      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, marginBottom: 16 }}>
+    <div aria-busy={loading || Boolean(pendingAction)}>
+      <div className="feedback-command-bar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>Feedback</h2>
+          <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>{t("Feedback reviewer", "Revisión de comentarios")} <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>v1.60.35.10-F</span></h2>
           <p style={{ margin: "4px 0 0", color: "hsl(var(--muted-foreground))", fontSize: 12 }}>
-            BIMLog user feedback, bug reports, workflow requests, and improvement ideas.
+            {t("Claim an owner, move only to a valid next status, review safe evidence, and close the customer loop.", "Asigna un responsable, avanza solo al siguiente estado válido, revisa evidencia segura y responde al cliente.")}
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}><Button variant="outline" size="sm" onClick={() => void downloadFollowUpRegister("xlsx")}>Download master Excel follow-up</Button><Button variant="outline" size="sm" onClick={() => void downloadFollowUpRegister("csv")}>Download CSV</Button><Button variant="outline" size="sm" onClick={loadFeedback}>Refresh</Button></div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} title={t("Exports the governed follow-up register for all feedback", "Exporta el registro gobernado de seguimiento")} onClick={() => void downloadFollowUpRegister("xlsx")}>{pendingAction === "register:xlsx" ? t("Preparing Excel…", "Preparando Excel…") : t("Download master Excel follow-up", "Descargar seguimiento maestro en Excel")}</Button><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={() => void downloadFollowUpRegister("csv")}>{pendingAction === "register:csv" ? t("Preparing CSV…", "Preparando CSV…") : t("Download CSV", "Descargar CSV")}</Button><Button variant="outline" size="sm" disabled={loading} onClick={() => loadFeedback(true)}>{loading ? t("Refreshing…", "Actualizando…") : t("Refresh", "Actualizar")}</Button></div>
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
-        <StatCard label="New" value={openCount} />
-        <StatCard label="Triaged / accepted" value={reviewCount} />
-        <StatCard label="Active work" value={plannedCount} />
-        <StatCard label="Closed" value={closedCount} />
+        <StatCard label={t("New", "Nuevos")} value={openCount} />
+        <StatCard label={t("Triaged / accepted", "Clasificados / aceptados")} value={reviewCount} />
+        <StatCard label={t("Active work", "Trabajo activo")} value={plannedCount} />
+        <StatCard label={t("Closed", "Cerrados")} value={closedCount} />
       </div>
 
+      {operationsLoading && <div role="status" style={{ marginBottom: 12, fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{t("Checking evidence custody, scanner, alerts, and receiver…", "Comprobando custodia, escáner, alertas y receptor…")}</div>}
+      {operationsError && <div role="alert" style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 8, background: "#fffbeb", border: "1px solid #fde68a", color: "#92400e", fontSize: 12 }}>{t("Operational health is unavailable. The review queue still works, but verify custody and delivery before exporting.", "La salud operativa no está disponible. La cola funciona, pero verifica custodia y entrega antes de exportar.")}</div>}
       {operations && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 10, marginBottom: 16 }}>
-        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Temporary evidence custody</strong><div style={{ fontSize: 11, marginTop: 4 }}>{String(operations.storage?.location || operations.storage?.backend || "unknown")} · {operations.storage?.healthy ? "healthy" : "unavailable"}</div><div style={{ fontSize: 10, marginTop: 4, color: "hsl(var(--muted-foreground))" }}>Metadata: PostgreSQL · Access: private through BIMLog</div></div>
-        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Controlled scanner</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.scanner?.configured ? "Active; quarantined files will be processed" : "Not active; files remain safely quarantined"}</div></div>
-        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Telegram Word / Excel</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.telegramDocuments?.configured ? "Active for linked super-admin chats" : "Not configured"}</div></div>
-        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Permanent computer receiver</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.permanentComputerReceiver?.connected ? "Connected" : `Not connected · target ${String(operations.permanentComputerReceiver?.root || "F:\\BIMLog\\Feedback")}`}</div></div>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>{t("Evidence custody", "Custodia de evidencia")}</strong><div style={{ fontSize: 11, marginTop: 4 }}>{String(operations.storage?.location || operations.storage?.backend || t("unknown", "desconocida"))} · {operations.storage?.healthy ? t("healthy", "disponible") : t("unavailable", "no disponible")}</div><div style={{ fontSize: 10, marginTop: 4, color: "hsl(var(--muted-foreground))" }}>Metadata: PostgreSQL · Access: private through BIMLog</div></div>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>{t("Controlled scanner", "Escáner controlado")}</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.scanner?.configured ? t("Active; quarantined files will be processed", "Activo; procesará archivos en cuarentena") : t("Not active; files remain safely quarantined and cannot be opened", "Inactivo; los archivos permanecen en cuarentena y no pueden abrirse")}</div></div>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>{t("Internal document alert", "Alerta interna de documentos")}</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.telegramDocuments?.configured ? t("Active for linked super-admin chats", "Activa para chats de superadministradores vinculados") : t("Not configured; intake remains available in this queue", "No configurada; la entrada permanece visible en esta cola")}</div></div>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>{t("Permanent computer receiver", "Receptor permanente")}</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.permanentComputerReceiver?.connected ? t("Connected", "Conectado") : `${t("Not connected", "No conectado")} · target ${String(operations.permanentComputerReceiver?.root || "F:\\BIMLog\\Feedback")}`}</div></div>
       </div>}
 
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 14 }}>
         <label style={{ fontSize: 12, fontWeight: 700 }}>
-          Status
+          {t("Status", "Estado")}
           <select
+            aria-label={t("Filter feedback by status", "Filtrar comentarios por estado")}
             value={statusFilter}
             onChange={(event) => setStatusFilter(event.target.value)}
             style={{ marginLeft: 8, border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "7px 10px", background: "hsl(var(--background))" }}
           >
-            <option value="all">All statuses</option>
-            {FEEDBACK_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+            <option value="all">{t("All statuses", "Todos los estados")}</option>
+            {FEEDBACK_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{isSpanish ? option.labelEs : option.label}</option>)}
           </select>
         </label>
       </div>
 
-      {error && <div style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 8, background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", fontSize: 12 }}>{error}</div>}
-      {success && <div role="status" style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 8, background: "#ecfdf5", border: "1px solid #86efac", color: "#166534", fontSize: 12 }}>{success}</div>}
+      <div aria-live="polite" aria-atomic="true">
+        {error && <div role="alert" style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 8, background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", fontSize: 12 }}>{error}</div>}
+        {success && <div role="status" style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 8, background: "#ecfdf5", border: "1px solid #86efac", color: "#166534", fontSize: 12 }}>{success}</div>}
+      </div>
       {loading ? (
         <div style={{ padding: 32, color: "hsl(var(--muted-foreground))", textAlign: "center" }}>Loading feedback...</div>
       ) : visibleItems.length === 0 ? (
         <div style={{ padding: 32, color: "hsl(var(--muted-foreground))", textAlign: "center", border: "1px solid hsl(var(--border))", borderRadius: 10 }}>
-          No feedback matches this view.
+          {t("No feedback matches this view.", "Ningún comentario coincide con esta vista.")}
         </div>
       ) : (
-        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, overflow: "hidden" }}>
+        <><div className="feedback-review-table" style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, overflow: "hidden" }}>
           <div
             ref={topScrollRef}
             aria-label="Feedback table horizontal scroll"
@@ -1195,17 +1247,17 @@ function FeedbackTab({ token }: { token: string }) {
           <table style={{ width: 1830, minWidth: "100%", borderCollapse: "separate", borderSpacing: 0, background: "hsl(var(--card))" }}>
             <thead style={{ position: "sticky", top: 0, zIndex: 8, background: "hsl(var(--card))", boxShadow: "0 1px 0 hsl(var(--border))" }}>
               <tr>
-                <Th>Created</Th>
-                <Th>User</Th>
-                <Th>Project</Th>
-                <Th>Type</Th>
-                <Th>Priority</Th>
-                <Th>Module</Th>
-                <Th>Message</Th>
-                <Th>Evidence package</Th>
-                <Th>Status / owner</Th>
-                <Th>Follow-up</Th>
-                <Th>Page</Th>
+                <Th>{t("Created", "Creado")}</Th>
+                <Th>{t("User", "Usuario")}</Th>
+                <Th>{t("Project", "Proyecto")}</Th>
+                <Th>{t("Type", "Tipo")}</Th>
+                <Th>{t("Priority", "Prioridad")}</Th>
+                <Th>{t("Module", "Módulo")}</Th>
+                <Th>{t("Message", "Mensaje")}</Th>
+                <Th>{t("Evidence package", "Paquete de evidencia")}</Th>
+                <Th>{t("Status / owner", "Estado / responsable")}</Th>
+                <Th>{t("Follow-up", "Seguimiento")}</Th>
+                <Th>{t("Page", "Página")}</Th>
               </tr>
             </thead>
             <tbody>
@@ -1225,23 +1277,24 @@ function FeedbackTab({ token }: { token: string }) {
                   <Td style={{ fontSize: 12 }}>{String(item.module || "-")}</Td>
                   <Td style={{ minWidth: 280, maxWidth: 460, whiteSpace: "normal", overflowWrap: "anywhere" }}>{String(item.message || "")}</Td>
                   <Td style={{ minWidth: 170 }}>
-                    {(() => { const evidence = (item.evidence || {}) as Record<string, unknown>; const total = Number(evidence.total || 0), quarantined = Number(evidence.quarantined || 0), clean = Number(evidence.clean || 0), rejected = Number(evidence.rejected || 0); return <><div style={{ fontSize: 12, fontWeight: 800 }}>{total} file{total === 1 ? "" : "s"}</div><div style={{ fontSize: 11, color: quarantined ? "#b45309" : rejected ? "#b91c1c" : "#15803d" }}>{clean} clean · {quarantined} awaiting scan · {rejected} rejected</div><div style={{ fontSize: 11 }}>Package: {String(item.packageState || "metadata-only")}</div><div style={{ fontSize: 11 }}>Telegram docs: {String(item.telegramDeliveryState || "not-sent").replace(/_/g, " ")}</div></>; })()}
+                    {(() => { const evidence = (item.evidence || {}) as Record<string, unknown>; const total = Number(evidence.total || 0), quarantined = Number(evidence.quarantined || 0), clean = Number(evidence.clean || 0), rejected = Number(evidence.rejected || 0); return <><div style={{ fontSize: 12, fontWeight: 800 }}>{total} {t(total === 1 ? "file" : "files", total === 1 ? "archivo" : "archivos")}</div><div style={{ fontSize: 11, color: quarantined ? "#b45309" : rejected ? "#b91c1c" : "#15803d" }}>{clean} {t("clean", "seguros")} · {quarantined} {t("awaiting scan", "esperando escaneo")} · {rejected} {t("rejected", "rechazados")}</div><div style={{ fontSize: 11 }}>{t("Package", "Paquete")}: {String(item.packageState || "metadata-only").replace(/-/g, " ")}</div><div style={{ marginTop: 4, fontSize: 10, color: "hsl(var(--muted-foreground))" }}>{packageExplanation(item)}</div><div style={{ fontSize: 11 }}>{t("Internal document alert", "Alerta interna")}: {String(item.telegramDeliveryState || "not-sent").replace(/_/g, " ")}</div></>; })()}
                   </Td>
                   <Td style={{ minWidth: 170, position: "sticky", right: 170, zIndex: 4, background: "hsl(var(--card))", boxShadow: "-1px 0 0 hsl(var(--border))" }}>
                     <select
+                      aria-label={`${t("Next status for", "Siguiente estado para")} ${String(item.stableId || item.id)}`}
                       value={String(item.status || "new")}
                       onChange={(event) => updateStatus(item.id, event.target.value)}
                       disabled={pendingAction === `status:${Number(item.id)}`}
                       style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "6px 8px", fontSize: 12, background: "hsl(var(--background))" }}
                     >
-                      {FEEDBACK_STATUS_OPTIONS.filter((option) => option.value === String(item.status || "new") || (FEEDBACK_STATUS_TRANSITIONS[String(item.status || "new")] || []).includes(option.value)).map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                      {FEEDBACK_STATUS_OPTIONS.filter((option) => option.value === String(item.status || "new") || (FEEDBACK_STATUS_TRANSITIONS[String(item.status || "new")] || []).includes(option.value)).map((option) => <option key={option.value} value={option.value}>{isSpanish ? option.labelEs : option.label}</option>)}
                     </select>
-                    <div style={{ marginTop: 6, fontSize: 11 }}>{pendingAction === `status:${Number(item.id)}` ? "Saving…" : item.ownerUserId ? `Owned by reviewer #${String(item.ownerUserId)}` : "Unassigned"}</div>
+                    <div style={{ marginTop: 6, fontSize: 11 }}>{pendingAction === `status:${Number(item.id)}` ? t("Saving…", "Guardando…") : item.ownerUserId ? `${t("Owned by reviewer", "Responsable") } #${String(item.ownerUserId)}` : t("Unassigned — claim before acting", "Sin asignar — asume responsabilidad antes de actuar")}</div>
                   </Td>
-                  <Td style={{ minWidth: 170, position: "sticky", right: 0, zIndex: 4, background: "hsl(var(--card))" }}><div style={{ display: "grid", gap: 6 }}><Button variant="outline" size="sm" onClick={() => void openDetail(item.id)}>Review details</Button>{!item.ownerUserId && <Button variant="outline" size="sm" disabled={pendingAction === `claim:${Number(item.id)}`} onClick={() => void claimFeedback(item)}>{pendingAction === `claim:${Number(item.id)}` ? "Claiming…" : "Assign to me"}</Button>}<Button variant="outline" size="sm" disabled={item.packageState !== "ready"} title={item.packageState !== "ready" ? "Evidence remains locked until controlled scanning is complete" : "Download PDF, Word, Excel, JSON, and verified evidence together"} onClick={() => void downloadPackage(item)}>Download complete ZIP</Button><Button variant="outline" size="sm" onClick={() => void downloadPackageSnapshot(item,"pdf")}>Current PDF report</Button><Button variant="outline" size="sm" onClick={() => void downloadPackageSnapshot(item,"docx")}>Current Word report</Button><Button variant="outline" size="sm" onClick={() => void downloadPackageSnapshot(item,"xlsx")}>Current item Excel</Button><Button variant="outline" size="sm" onClick={() => void downloadPackageSnapshot(item,"json")}>Current JSON record</Button><Button variant="outline" size="sm" onClick={() => void sendCustomerUpdate(item)}>Message customer</Button></div></Td>
+                  <Td style={{ minWidth: 170, position: "sticky", right: 0, zIndex: 4, background: "hsl(var(--card))" }}><div style={{ display: "grid", gap: 6 }}><Button variant="outline" size="sm" onClick={() => void openDetail(item.id)}>{t("Review details", "Revisar detalles")}</Button>{!item.ownerUserId && <Button variant="outline" size="sm" title={t("Assigns you as accountable reviewer; it does not change status", "Te asigna como responsable; no cambia el estado")} disabled={Boolean(pendingAction)} onClick={() => void claimFeedback(item)}>{pendingAction === `claim:${Number(item.id)}` ? t("Claiming…", "Asignando…") : t("Assign to me", "Asignarme")}</Button>}<Button variant="outline" size="sm" disabled={item.packageState !== "ready" || Boolean(pendingAction)} title={packageExplanation(item)} onClick={() => void downloadPackage(item)}>{pendingAction === `package:${Number(item.id)}` ? t("Preparing ZIP…", "Preparando ZIP…") : t("Download complete ZIP", "Descargar ZIP completo")}</Button><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} title={t("Generated now from current authority", "Generado ahora desde la autoridad actual")} onClick={() => void downloadPackageSnapshot(item,"pdf")}>{pendingAction === `snapshot:pdf:${Number(item.id)}` ? t("Preparing PDF…", "Preparando PDF…") : t("Current PDF report", "Informe PDF actual")}</Button><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={() => void downloadPackageSnapshot(item,"docx")}>{pendingAction === `snapshot:docx:${Number(item.id)}` ? t("Preparing Word…", "Preparando Word…") : t("Current Word report", "Informe Word actual")}</Button><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={() => void downloadPackageSnapshot(item,"xlsx")}>{pendingAction === `snapshot:xlsx:${Number(item.id)}` ? t("Preparing Excel…", "Preparando Excel…") : t("Current item Excel", "Excel actual del elemento")}</Button><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={() => void downloadPackageSnapshot(item,"json")}>{pendingAction === `snapshot:json:${Number(item.id)}` ? t("Preparing JSON…", "Preparando JSON…") : t("Current JSON record", "Registro JSON actual")}</Button><Button variant="outline" size="sm" title={t("Adds a customer-visible timeline response; internal notes remain private", "Agrega una respuesta visible para el cliente; las notas internas siguen privadas")} disabled={Boolean(pendingAction)} onClick={() => void sendCustomerUpdate(item)}>{pendingAction === `message:${Number(item.id)}` ? t("Sending…", "Enviando…") : t("Message customer", "Responder al cliente")}</Button></div></Td>
                   <Td style={{ width: 130 }}>
                     <a href={String(item.pageUrl || "#")} target="_blank" rel="noreferrer" style={{ color: "#1d4ed8", fontSize: 11 }}>
-                      Open reported page ↗
+                      {t("Open reported page ↗", "Abrir página reportada ↗")}
                     </a>
                   </Td>
                 </tr>
@@ -1250,14 +1303,27 @@ function FeedbackTab({ token }: { token: string }) {
           </table>
           </div>
         </div>
+        <div className="feedback-review-cards" aria-label={t("Feedback review cards", "Tarjetas de revisión de comentarios")}>
+          {visibleItems.map(item => {
+            const evidence = (item.evidence || {}) as Record<string, unknown>;
+            const total = Number(evidence.total || 0), quarantined = Number(evidence.quarantined || 0), clean = Number(evidence.clean || 0), rejected = Number(evidence.rejected || 0);
+            return <article key={String(item.id)} style={{ padding: 14, border: "1px solid hsl(var(--border))", borderRadius: 12, background: "hsl(var(--card))" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", gap: 8, alignItems: "start" }}><div><strong>{String(item.stableId || "-")}</strong><div style={{ marginTop: 3, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{item.createdAt ? new Date(String(item.createdAt)).toLocaleString() : "-"}</div></div><Badge label={statusLabel(item.status)} color="#3b82f6" /></div>
+              <p style={{ fontSize: 13, lineHeight: 1.5, overflowWrap: "anywhere" }}>{String(item.message || "")}</p>
+              <div style={{ display: "grid", gap: 5, padding: 10, borderRadius: 8, background: "hsl(var(--muted) / .5)", fontSize: 11 }}><strong>{total} {t(total === 1 ? "file" : "files", total === 1 ? "archivo" : "archivos")}: {clean} {t("clean", "seguros")} · {quarantined} {t("awaiting scan", "esperando escaneo")} · {rejected} {t("rejected", "rechazados")}</strong><span>{packageExplanation(item)}</span><span>{item.ownerUserId ? `${t("Owned by reviewer", "Responsable")} #${String(item.ownerUserId)}` : t("Unassigned — claim before acting", "Sin asignar — asume responsabilidad antes de actuar")}</span></div>
+              <label style={{ display: "grid", gap: 4, marginTop: 10, fontSize: 11, fontWeight: 700 }}>{t("Status — only valid next steps are shown", "Estado — solo se muestran pasos siguientes válidos")}<select aria-label={`${t("Next status for", "Siguiente estado para")} ${String(item.stableId || item.id)}`} value={String(item.status || "new")} disabled={pendingAction === `status:${Number(item.id)}`} onChange={event => updateStatus(item.id, event.target.value)} style={{ width: "100%", padding: "8px 9px", border: "1px solid hsl(var(--border))", borderRadius: 7, background: "hsl(var(--background))" }}>{FEEDBACK_STATUS_OPTIONS.filter(option => option.value === String(item.status || "new") || (FEEDBACK_STATUS_TRANSITIONS[String(item.status || "new")] || []).includes(option.value)).map(option => <option key={option.value} value={option.value}>{isSpanish ? option.labelEs : option.label}</option>)}</select></label>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(2,minmax(0,1fr))", gap: 7, marginTop: 10 }}><Button variant="outline" size="sm" onClick={() => void openDetail(item.id)}>{t("Review details", "Ver detalles")}</Button>{!item.ownerUserId && <Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={() => void claimFeedback(item)}>{pendingAction === `claim:${Number(item.id)}` ? t("Claiming…", "Asignando…") : t("Assign to me", "Asignarme")}</Button>}<Button variant="outline" size="sm" disabled={item.packageState !== "ready" || Boolean(pendingAction)} title={packageExplanation(item)} onClick={() => void downloadPackage(item)}>{t("Complete ZIP", "ZIP completo")}</Button><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={() => void sendCustomerUpdate(item)}>{pendingAction === `message:${Number(item.id)}` ? t("Sending…", "Enviando…") : t("Message customer", "Responder al cliente")}</Button></div>
+            </article>;
+          })}
+        </div></>
       )}
       {selectedId !== null && <><button type="button" aria-label="Close feedback details" onClick={closeDetail} style={{ position: "fixed", inset: 0, zIndex: 1499, border: 0, background: "rgba(15,23,42,.42)" }} /><section role="dialog" aria-modal="true" aria-label="Feedback details" style={{ position: "fixed", top: 16, right: 16, bottom: 16, zIndex: 1500, width: "min(720px, calc(100vw - 32px))", overflowY: "auto", padding: 22, border: "1px solid hsl(var(--border))", borderRadius: 14, background: "hsl(var(--card))", boxShadow: "0 28px 80px rgba(15,23,42,.38)" }}>
-        <div style={{ position: "sticky", top: -22, zIndex: 2, margin: "-22px -22px 16px", padding: "18px 22px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, background: "hsl(var(--card))", borderBottom: "1px solid hsl(var(--border))" }}><div><h3 style={{ margin: 0 }}>Feedback details</h3><div style={{ fontSize: 12, marginTop: 4, color: "hsl(var(--muted-foreground))" }}>What was submitted, what is safe to open, and what your team has done</div></div><Button variant="outline" size="sm" onClick={closeDetail}>Close</Button></div>
-        {detailLoading ? <p role="status">Loading complete package…</p> : detail ? <>
+        <div style={{ position: "sticky", top: -22, zIndex: 2, margin: "-22px -22px 16px", padding: "18px 22px", display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, background: "hsl(var(--card))", borderBottom: "1px solid hsl(var(--border))" }}><div><h3 style={{ margin: 0 }}>{t("Feedback details", "Detalles del comentario")}</h3><div style={{ fontSize: 12, marginTop: 4, color: "hsl(var(--muted-foreground))" }}>{t("What was submitted, what is safe to open, and what your team has done", "Qué se envió, qué es seguro abrir y qué hizo tu equipo")}</div></div><Button variant="outline" size="sm" onClick={closeDetail}>{t("Close", "Cerrar")}</Button></div>
+        {detailLoading ? <p role="status">{t("Loading complete package…", "Cargando paquete completo…")}</p> : detail ? <>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(180px,1fr))", gap: 10, marginBottom: 20 }}><div style={{ padding: 12, borderRadius: 10, background: "hsl(var(--muted) / .55)" }}><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Feedback ID</div><strong>{String(((detail.feedback || {}) as Record<string, unknown>).stableId || selectedId)}</strong></div><div style={{ padding: 12, borderRadius: 10, background: "hsl(var(--muted) / .55)" }}><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Evidence package</div><strong>{String(detail.packageState || "unknown").replace(/-/g, " ")}</strong></div><div style={{ padding: 12, borderRadius: 10, background: "hsl(var(--muted) / .55)" }}><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Current report</div><strong>Generated when downloaded</strong></div></div>
-          <h4 style={{ marginBottom: 8 }}>Evidence</h4>
-          {Array.isArray(detail.assets) && detail.assets.length ? <div style={{ display: "grid", gap: 10 }}>{(detail.assets as Record<string, unknown>[]).map(asset => <div key={String(asset.id)} style={{ padding: 12, border: "1px solid hsl(var(--border))", borderRadius: 10 }}><div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}><strong style={{ overflowWrap: "anywhere" }}>{String(asset.name)}</strong><span style={{ fontSize: 11, fontWeight: 700, color: String(asset.scanState) === "clean" ? "#166534" : "#92400e" }}>{String(asset.scanState) === "clean" ? "Verified safe" : String(asset.scanState) === "rejected" ? "Rejected" : "Awaiting controlled scan"}</span></div><div style={{ marginTop: 4, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(asset.kind)} · {String(asset.mediaType)} · {Number(asset.byteSize || 0).toLocaleString()} bytes</div><div style={{ marginTop: 6, fontSize: 11 }}>{String(asset.scanState) === "clean" ? "Included in the current PDF, Word, Excel preview sheet, ZIP, and secure download." : "The record is visible, but its bytes remain locked until controlled scanning completes."}</div>{String(asset.scanState) === "clean" && <div style={{ marginTop: 8 }}><Button variant="outline" size="sm" onClick={() => void downloadEvidence(asset)}>Download verified file</Button></div>}</div>)}</div> : <p>No files attached.</p>}
-          <h4>Activity</h4>
+          <h4 style={{ marginBottom: 8 }}>{t("Evidence", "Evidencia")}</h4>
+          {Array.isArray(detail.assets) && detail.assets.length ? <div style={{ display: "grid", gap: 10 }}>{(detail.assets as Record<string, unknown>[]).map(asset => <div key={String(asset.id)} style={{ padding: 12, border: "1px solid hsl(var(--border))", borderRadius: 10 }}><div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 10, flexWrap: "wrap" }}><strong style={{ overflowWrap: "anywhere" }}>{String(asset.name)}</strong><span style={{ fontSize: 11, fontWeight: 700, color: String(asset.scanState) === "clean" ? "#166534" : "#92400e" }}>{String(asset.scanState) === "clean" ? t("Verified safe", "Seguro y verificado") : String(asset.scanState) === "rejected" ? t("Rejected", "Rechazado") : t("Awaiting controlled scan", "Esperando escaneo controlado")}</span></div><div style={{ marginTop: 4, fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(asset.kind)} · {String(asset.mediaType)} · {Number(asset.byteSize || 0).toLocaleString()} bytes</div><div style={{ marginTop: 6, fontSize: 11 }}>{String(asset.scanState) === "clean" ? t("Included in the current PDF, Word, Excel preview sheet, ZIP, and secure download.", "Incluido en los informes actuales, el ZIP y la descarga segura.") : t("The record is visible, but its bytes remain locked until controlled scanning completes.", "El registro es visible, pero sus bytes permanecen bloqueados hasta completar el escaneo controlado.")}</div>{String(asset.scanState) === "clean" && <div style={{ marginTop: 8 }}><Button variant="outline" size="sm" disabled={Boolean(pendingAction)} onClick={() => void downloadEvidence(asset)}>{pendingAction === `evidence:${Number(asset.id)}` ? t("Downloading…", "Descargando…") : t("Download verified file", "Descargar archivo verificado")}</Button></div>}</div>)}</div> : <p>{t("No files attached.", "No hay archivos adjuntos.")}</p>}
+          <h4>{t("Activity", "Actividad")}</h4>
           {Array.isArray(detail.history) && detail.history.length ? <ol style={{ display: "grid", gap: 8, paddingLeft: 22 }}>{(detail.history as Record<string, unknown>[]).map(event => <li key={String(event.id)}><strong>{feedbackActivityLabel(event.eventType)}</strong><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{event.createdAt ? new Date(String(event.createdAt)).toLocaleString() : ""}{event.reason ? ` · ${String(event.reason)}` : ""}{String(event.eventType) === "feedback_telegram_delivery" ? ` · ${String(((event.afterState || {}) as Record<string,unknown>).artifactKind || "document")}: ${String(((event.afterState || {}) as Record<string,unknown>).state || "unknown")}` : ""}</div></li>)}</ol> : <p>No activity recorded.</p>}
         </> : <p role="alert">Package details could not be loaded.</p>}
       </section></>}
