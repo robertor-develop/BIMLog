@@ -3,7 +3,7 @@ import AdmZip from "adm-zip";
 import PDFDocument from "pdfkit";
 import sharp from "sharp";
 import { AlignmentType, Document, ExternalHyperlink, Footer, HeadingLevel, ImageRun, PageNumber, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType } from "docx";
-import * as XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { FEEDBACK_MAX_FILE_BYTES, FEEDBACK_RELEASE } from "./feedback-evidence-contract";
 import { FEEDBACK_CUSTOMER_EVENT_TYPES } from "./feedback-follow-up";
 
@@ -35,7 +35,23 @@ const canonical = (value: unknown): string => {
 };
 const packageName = (value: string) => value.replace(/[^A-Za-z0-9._-]+/g, "_").slice(0, 120) || "evidence.bin";
 const customerEvents = new Set(["created", "assets_added", "transcription_requested", "transcription_reviewed", "triage_updated", "reopened", ...FEEDBACK_CUSTOMER_EVENT_TYPES]);
-const packageExcludedEvents = new Set(["package_snapshot_created", "feedback_telegram_delivery", "admin_package_exported", "admin_package_snapshot_exported", "admin_exported", "admin_follow_up_exported", "admin_asset_exported"]);
+export const FEEDBACK_PACKAGE_EXCLUDED_EVENTS = ["package_snapshot_created", "feedback_telegram_delivery", "admin_package_exported", "admin_package_snapshot_exported", "admin_exported", "admin_follow_up_exported", "admin_asset_exported", "evidence_scan_started", "evidence_scan_failed"] as const;
+const packageExcludedEvents = new Set<string>(FEEDBACK_PACKAGE_EXCLUDED_EVENTS);
+const eventLabels: Record<string, string> = {
+  created: "Feedback submitted",
+  submission_acknowledged: "Submission acknowledged",
+  internal_reviewer_notifications_created: "Review team notified",
+  assets_added: "Evidence attached",
+  evidence_scan_clean: "Evidence verified safe",
+  evidence_scan_rejected: "Evidence rejected by controlled scanning",
+  triage_updated: "Review status updated",
+  customer_response: "Customer response sent",
+  customer_decision: "Decision shared with customer",
+  customer_fix: "Resolution shared with customer",
+  customer_answer: "Answer shared with customer",
+  reopened: "Feedback reopened",
+};
+const eventLabel = (type: string) => eventLabels[type] || type.replace(/_/g, " ").replace(/^./, value => value.toUpperCase());
 const customerState = (value: unknown) => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const record = value as Record<string, unknown>, allowed = ["status", "version", "count", "scanState", "reviewState"];
@@ -78,7 +94,7 @@ export async function buildFeedbackPackage(args: {
   const manifestSha256 = sha256(manifest);
   const pdf = await createHumanPdf(manifestObject, evidence, manifestSha256);
   const docx = await createHumanDocx(manifestObject, evidence, manifestSha256);
-  const workbook = createFeedbackWorkbook(manifestObject, evidence, manifestSha256);
+  const workbook = await createFeedbackWorkbook(manifestObject, evidence, manifestSha256);
   const zip = new AdmZip(); zip.addFile("manifest.json", manifest); zip.addFile(`${packageName(args.feedback.stableId)}-feedback.pdf`, pdf); zip.addFile(`${packageName(args.feedback.stableId)}-feedback.docx`, docx); zip.addFile(`${packageName(args.feedback.stableId)}-follow-up.xlsx`, workbook);
   for (const asset of evidence) if (asset.scanState === "clean" && asset.scannedAt && asset.bytes) zip.addFile(asset.zipName, asset.bytes);
   const archive = zip.toBuffer();
@@ -90,21 +106,22 @@ async function createHumanPdf(manifest: Record<string, any>, evidence: Array<Fee
   return await new Promise((resolve, reject) => {
     const chunks: Buffer[] = []; const doc = new PDFDocument({ size: "LETTER", margin: 50, bufferPages: true, info: { Title: `${manifest.feedback.stableId} Feedback Package`, Author: "BIMLog by IgniteSmart", Subject: `Feedback package ${manifest.feedback.stableId} - ${manifest.release}` } });
     doc.on("data", chunk => chunks.push(Buffer.from(chunk))); doc.on("error", reject); doc.on("end", () => resolve(Buffer.concat(chunks)));
-    const field = (label: string, value: unknown) => { doc.font("Helvetica-Bold").text(`${label}: `, { continued: true }).font("Helvetica").text(String(value ?? "—")); };
-    doc.fontSize(18).font("Helvetica-Bold").text("BIMLog Feedback Package"); doc.moveDown(0.5).fontSize(10);
-    field("Release", manifest.release); field("Feedback", manifest.feedback.stableId); field("Submitted by", `${manifest.feedback.submitter.name ?? "Unknown"}${manifest.feedback.submitter.email ? ` <${manifest.feedback.submitter.email}>` : ""}`);
-    field("Submitted date/time", manifest.feedback.createdAt); field("Last updated", manifest.feedback.updatedAt); field("Status", manifest.feedback.status); field("Type / priority", `${manifest.feedback.feedbackType} / ${manifest.feedback.priority}`); field("Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : "None"); field("Module / page", `${manifest.feedback.module ?? "—"} / ${manifest.feedback.pageUrl}`);
-    doc.moveDown().font("Helvetica-Bold").text("Message"); doc.font("Helvetica").text(manifest.feedback.message); doc.moveDown().font("Helvetica-Bold").text("Status history");
-    for (const event of manifest.history) doc.font("Helvetica").text(`${event.at} — ${event.type}${event.reason ? ` — ${event.reason}` : ""}`);
-    doc.addPage().font("Helvetica-Bold").text("Evidence inventory");
-    for (const asset of manifest.evidence) { doc.moveDown(0.4).font("Helvetica-Bold").text(`${asset.id} · ${asset.name}`); doc.font("Helvetica").text(`${asset.kind} · ${asset.mediaType} · ${asset.byteSize} bytes · scan ${asset.scanState}`); doc.text(`SHA-256 ${asset.sha256}`); doc.fillColor("blue").text("Open evidence record (sign-in required)", { link: asset.reviewUrl, underline: true }).fillColor("black"); if (asset.secureDownloadUrl) doc.fillColor("blue").text("Secure authenticated download", { link: asset.secureDownloadUrl, underline: true }).fillColor("black"); else doc.fillColor("#92400e").text("Preview and download remain locked until controlled scanning completes.").fillColor("black"); }
+    const field = (label: string, value: unknown) => { doc.font("Helvetica-Bold").fillColor("#173b63").text(`${label}: `, { continued: true }).font("Helvetica").fillColor("#111827").text(String(value ?? "—")); };
+    doc.rect(0, 0, doc.page.width, 112).fill("#173b63"); doc.fillColor("#ffffff").fontSize(9).font("Helvetica-Bold").text("BIMLOG BY IGNITESMART", 50, 34); doc.fontSize(22).text("Feedback review package", 50, 53); doc.fontSize(10).font("Helvetica").text(`${manifest.feedback.stableId}  ·  ${manifest.release}`, 50, 84); doc.fillColor("#111827").y = 134;
+    doc.fontSize(10); field("Submitted by", `${manifest.feedback.submitter.name ?? "Unknown"}${manifest.feedback.submitter.email ? ` <${manifest.feedback.submitter.email}>` : ""}`);
+    field("Submitted", manifest.feedback.createdAt); field("Last updated", manifest.feedback.updatedAt); field("Status", manifest.feedback.status); field("Type / priority", `${manifest.feedback.feedbackType} / ${manifest.feedback.priority}`); field("Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : "None");
+    doc.moveDown(0.7).roundedRect(50, doc.y, doc.page.width - 100, 66, 6).fillAndStroke("#eef5fb", "#b8cadd"); doc.fillColor("#173b63").font("Helvetica-Bold").text("CUSTOMER MESSAGE", 64, doc.y + 13); doc.fillColor("#111827").font("Helvetica").text(manifest.feedback.message, 64, doc.y + 30, { width: doc.page.width - 128, height: 32, ellipsis: true }); doc.y += 74;
+    doc.moveDown(0.5).font("Helvetica-Bold").fillColor("#173b63").text("Meaningful activity"); doc.moveDown(0.25);
+    for (const event of manifest.history) doc.font("Helvetica").fillColor("#111827").text(`${event.at}  ·  ${eventLabel(event.type)}${event.reason ? `  ·  ${event.reason}` : ""}`, { paragraphGap: 3 });
+    doc.addPage().font("Helvetica-Bold").fillColor("#173b63").fontSize(16).text("Evidence inventory"); doc.moveDown(0.3).font("Helvetica").fillColor("#475569").fontSize(9).text("Every link opens the governed BIMLog record. Verified files also provide an authenticated original download.");
+    for (const asset of manifest.evidence) { doc.moveDown(0.7).font("Helvetica-Bold").fillColor("#173b63").text(`${asset.id} · ${asset.name}`); doc.font("Helvetica").fillColor("#111827").text(`${asset.kind} · ${asset.mediaType} · ${asset.byteSize.toLocaleString()} bytes · ${asset.scanState === "clean" ? "verified safe" : asset.scanState}`); doc.fontSize(8).fillColor("#64748b").text(`SHA-256 ${asset.sha256}`).fontSize(10); doc.fillColor("#0563c1").text("Open evidence record (sign-in required)", { link: asset.reviewUrl, underline: true }).fillColor("#111827"); if (asset.secureDownloadUrl) doc.fillColor("#0563c1").text("Secure authenticated download", { link: asset.secureDownloadUrl, underline: true }).fillColor("#111827"); else doc.fillColor("#92400e").text("Preview and download remain locked until controlled scanning completes.").fillColor("#111827"); }
     void (async () => {
       try {
         for (const asset of evidence) if (asset.scanState === "clean" && asset.scannedAt && asset.bytes && /^image\/(png|jpe?g)$/.test(asset.mediaType)) {
           const metadata = await sharp(asset.bytes, { limitInputPixels: MAX_EMBEDDED_IMAGE_PIXELS }).metadata();
           if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_EMBEDDED_IMAGE_PIXELS) throw new FeedbackPackageError(`Image evidence ${asset.id} exceeds the render bound`, "PACKAGE_LIMIT");
           const rendered = await sharp(asset.bytes, { limitInputPixels: MAX_EMBEDDED_IMAGE_PIXELS }).rotate().resize({ width: 1500, height: 1900, fit: "inside", withoutEnlargement: true }).png().toBuffer();
-          doc.addPage().font("Helvetica-Bold").text(`Image evidence ${asset.id}: ${asset.safeName}`); doc.moveDown().image(rendered, { fit: [510, 650], align: "center", valign: "center" });
+          doc.addPage().font("Helvetica-Bold").fillColor("#173b63").fontSize(15).text(`Image evidence ${asset.id}`); doc.font("Helvetica").fillColor("#475569").fontSize(9).text(`${asset.safeName} · ${asset.byteSize.toLocaleString()} bytes · verified safe`); doc.moveDown().image(rendered, { fit: [510, 635], align: "center", valign: "center" }); doc.moveDown(0.4).fillColor("#0563c1").text("Open secure original in BIMLog", { link: asset.downloadUrl!, underline: true }).fillColor("#111827");
         }
         doc.addPage().fontSize(14).font("Helvetica-Bold").text("Package snapshot fingerprint");
         doc.moveDown(0.6).fontSize(10).font("Helvetica").text("This fingerprint binds the canonical JSON snapshot used to generate this human-readable report.");
@@ -127,16 +144,17 @@ async function createHumanPdf(manifest: Record<string, any>, evidence: Array<Fee
 
 async function createHumanDocx(manifest: Record<string, any>, evidence: Array<FeedbackPackageAsset & { downloadUrl: string | null; reviewUrl: string }>, manifestSha256: string): Promise<Buffer> {
   const field = (label: string, value: unknown) => new Paragraph({ children: [new TextRun({ text: `${label}: `, bold: true }), new TextRun(String(value ?? "—"))] });
-  const evidenceRows = [new TableRow({ children: ["File", "Type", "Scan", "Size", "Links"].map(text => new TableCell({ children: [new Paragraph({ children: [new TextRun({ text, bold: true })] })] })) })];
+  const columnWidths = [2500, 1500, 1200, 900, 3260];
+  const evidenceRows = [new TableRow({ children: ["File", "Type", "Scan", "Size", "Links"].map((text, index) => new TableCell({ width: { size: columnWidths[index], type: WidthType.DXA }, shading: { fill: "DDEBF7" }, children: [new Paragraph({ children: [new TextRun({ text, bold: true, color: "173B63" })] })] })) })];
   for (const asset of evidence) {
     const links = [new ExternalHyperlink({ link: asset.reviewUrl, children: [new TextRun({ text: "Open evidence record", style: "Hyperlink" })] })];
     if (asset.downloadUrl) links.push(new ExternalHyperlink({ link: asset.downloadUrl, children: [new TextRun({ text: " · Secure download", style: "Hyperlink" })] }));
     evidenceRows.push(new TableRow({ children: [
-      new TableCell({ children: [new Paragraph(asset.safeName), new Paragraph({ children: [new TextRun({ text: `SHA-256 ${asset.sha256}`, size: 16, color: "64748B" })] })] }),
-      new TableCell({ children: [new Paragraph(`${asset.kind} / ${asset.mediaType}`)] }),
-      new TableCell({ children: [new Paragraph(asset.scanState), ...(!asset.downloadUrl ? [new Paragraph({ children: [new TextRun({ text: "Bytes locked pending controlled scan", color: "92400E" })] })] : [])] }),
-      new TableCell({ children: [new Paragraph(asset.byteSize.toLocaleString())] }),
-      new TableCell({ children: [new Paragraph({ children: links })] }),
+      new TableCell({ width: { size: columnWidths[0], type: WidthType.DXA }, children: [new Paragraph(asset.safeName), new Paragraph({ children: [new TextRun({ text: `SHA-256 ${asset.sha256}`, size: 16, color: "64748B" })] })] }),
+      new TableCell({ width: { size: columnWidths[1], type: WidthType.DXA }, children: [new Paragraph(`${asset.kind} / ${asset.mediaType}`)] }),
+      new TableCell({ width: { size: columnWidths[2], type: WidthType.DXA }, children: [new Paragraph(asset.scanState === "clean" ? "Verified safe" : asset.scanState), ...(!asset.downloadUrl ? [new Paragraph({ children: [new TextRun({ text: "Bytes locked pending controlled scan", color: "92400E" })] })] : [])] }),
+      new TableCell({ width: { size: columnWidths[3], type: WidthType.DXA }, children: [new Paragraph(asset.byteSize.toLocaleString())] }),
+      new TableCell({ width: { size: columnWidths[4], type: WidthType.DXA }, children: [new Paragraph({ children: links })] }),
     ] }));
   }
   const imageSections: Paragraph[] = [];
@@ -147,35 +165,58 @@ async function createHumanDocx(manifest: Record<string, any>, evidence: Array<Fe
     imageSections.push(new Paragraph({ heading: HeadingLevel.HEADING_2, children: [new TextRun(`Image evidence ${asset.id}: ${asset.safeName}`)] }));
     imageSections.push(new Paragraph({ alignment: AlignmentType.CENTER, children: [new ImageRun({ data: asset.bytes, transformation: { width, height }, type: asset.mediaType.includes("png") ? "png" : "jpg" })] }));
   }
-  const document = new Document({ sections: [{
+  const document = new Document({ styles: { default: { document: { run: { font: "Aptos", size: 20 }, paragraph: { spacing: { after: 120 } } } }, paragraphStyles: [{ id: "Title", name: "Title", basedOn: "Normal", next: "Normal", run: { size: 38, bold: true, color: "173B63" }, paragraph: { spacing: { after: 240 } } }, { id: "Heading1", name: "Heading 1", basedOn: "Normal", next: "Normal", run: { size: 26, bold: true, color: "173B63" }, paragraph: { spacing: { before: 260, after: 120 } } }, { id: "Heading2", name: "Heading 2", basedOn: "Normal", next: "Normal", run: { size: 22, bold: true, color: "1F4E78" }, paragraph: { spacing: { before: 200, after: 100 } } }] }, sections: [{
+    properties: { page: { margin: { top: 1080, right: 1080, bottom: 1080, left: 1080 } } },
     footers: { default: new Footer({ children: [new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun(`BIMLog by IgniteSmart · ${manifest.feedback.stableId} · ${manifest.release} · `), new TextRun({ children: ["Page ", PageNumber.CURRENT, " of ", PageNumber.TOTAL_PAGES] })] })] }) },
     children: [
       new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun("BIMLog Feedback Package")] }),
       field("Release", manifest.release), field("Feedback", manifest.feedback.stableId), field("Submitted by", `${manifest.feedback.submitter.name ?? "Unknown"}${manifest.feedback.submitter.email ? ` <${manifest.feedback.submitter.email}>` : ""}`), field("Submitted", manifest.feedback.createdAt), field("Updated", manifest.feedback.updatedAt), field("Status", manifest.feedback.status), field("Type / priority", `${manifest.feedback.feedbackType} / ${manifest.feedback.priority}`), field("Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : "None"), field("Reported page", manifest.feedback.pageUrl),
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("Customer message")] }), new Paragraph(manifest.feedback.message),
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("Evidence inventory")] }),
-      new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, rows: evidenceRows }),
+      new Table({ width: { size: 9360, type: WidthType.DXA }, columnWidths, rows: evidenceRows }),
       ...imageSections,
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("Status history")] }),
-      ...manifest.history.map((event: any) => new Paragraph(`${event.at} — ${event.type}${event.reason ? ` — ${event.reason}` : ""}`)),
+      ...manifest.history.map((event: any) => new Paragraph(`${event.at} — ${eventLabel(event.type)}${event.reason ? ` — ${event.reason}` : ""}`)),
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("Snapshot fingerprint")] }), field("Canonical manifest SHA-256", manifestSha256),
     ],
   }] });
   return Buffer.from(await Packer.toBuffer(document));
 }
 
-function createFeedbackWorkbook(manifest: Record<string, any>, evidence: Array<FeedbackPackageAsset & { downloadUrl: string | null; reviewUrl: string }>, manifestSha256: string): Buffer {
-  const workbook = XLSX.utils.book_new();
-  const summary = XLSX.utils.aoa_to_sheet([
-    ["BIMLog Feedback Follow-up"], ["Feedback ID", manifest.feedback.stableId], ["Release", manifest.release], ["Status", manifest.feedback.status], ["Priority", manifest.feedback.priority], ["Type", manifest.feedback.feedbackType], ["Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : ""], ["Submitter", manifest.feedback.submitter.name ?? ""], ["Submitted", manifest.feedback.createdAt], ["Updated", manifest.feedback.updatedAt], ["Target release", manifest.feedback.targetRelease ?? ""], ["Decision / resolution", manifest.feedback.dispositionReason ?? ""], ["Message", manifest.feedback.message], ["Reported page", manifest.feedback.pageUrl], ["Snapshot SHA-256", manifestSha256],
-  ]);
-  summary["!cols"] = [{ wch: 24 }, { wch: 90 }];
-  XLSX.utils.book_append_sheet(workbook, summary, "Follow-up");
-  const evidenceSheet = XLSX.utils.aoa_to_sheet([["ID", "File", "Kind", "Media type", "Bytes", "Scan state", "SHA-256", "Review link", "Secure download"], ...evidence.map(asset => [asset.id, asset.safeName, asset.kind, asset.mediaType, asset.byteSize, asset.scanState, asset.sha256, asset.reviewUrl, asset.downloadUrl ?? "Locked pending scan"])]);
-  evidenceSheet["!cols"] = [{ wch: 8 }, { wch: 40 }, { wch: 20 }, { wch: 24 }, { wch: 14 }, { wch: 18 }, { wch: 66 }, { wch: 72 }, { wch: 72 }];
-  evidenceSheet["!autofilter"] = { ref: `A1:I${evidence.length + 1}` }; evidenceSheet["!freeze"] = { xSplit: 0, ySplit: 1 } as any;
-  for (let row = 2; row <= evidence.length + 1; row++) { const review = evidenceSheet[`H${row}`]; if (review?.v) review.l = { Target: String(review.v), Tooltip: "Open evidence record" }; const download = evidenceSheet[`I${row}`]; if (download?.v && String(download.v).startsWith("http")) download.l = { Target: String(download.v), Tooltip: "Secure authenticated download" }; }
-  XLSX.utils.book_append_sheet(workbook, evidenceSheet, "Evidence");
-  const history = XLSX.utils.aoa_to_sheet([["Date/time", "Event", "Reason"], ...manifest.history.map((event: any) => [event.at, event.type, event.reason ?? ""])]); history["!cols"] = [{ wch: 28 }, { wch: 34 }, { wch: 90 }]; history["!autofilter"] = { ref: `A1:C${manifest.history.length + 1}` }; history["!freeze"] = { xSplit: 0, ySplit: 1 } as any; XLSX.utils.book_append_sheet(workbook, history, "Activity");
-  return Buffer.from(XLSX.write(workbook, { type: "buffer", bookType: "xlsx", compression: true, bookSST: true }));
+async function createFeedbackWorkbook(manifest: Record<string, any>, evidence: Array<FeedbackPackageAsset & { downloadUrl: string | null; reviewUrl: string }>, manifestSha256: string): Promise<Buffer> {
+  const workbook = new ExcelJS.Workbook();
+  workbook.creator = "BIMLog by IgniteSmart"; workbook.title = `${manifest.feedback.stableId} Feedback Follow-up`; workbook.subject = `Feedback ${manifest.feedback.stableId} · ${manifest.release}`;
+  const brand = "1F4E78", accent = "DDEBF7", grid = "B8C4D2";
+  const titleRow = (sheet: ExcelJS.Worksheet, title: string, width: number) => {
+    sheet.mergeCells(1, 1, 1, width); const cell = sheet.getCell(1, 1); cell.value = title; cell.font = { bold: true, size: 18, color: { argb: "FFFFFFFF" } }; cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: `FF${brand}` } }; cell.alignment = { vertical: "middle" }; sheet.getRow(1).height = 34;
+  };
+  const headerRow = (row: ExcelJS.Row) => { row.font = { bold: true, color: { argb: "FFFFFFFF" } }; row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: `FF${brand}` } }; row.alignment = { vertical: "middle", wrapText: true }; row.height = 26; };
+
+  const summary = workbook.addWorksheet("Follow-up", { views: [{ state: "frozen", ySplit: 1 }] }); titleRow(summary, "BIMLog Feedback Follow-up", 2);
+  summary.columns = [{ width: 24 }, { width: 92 }];
+  const fields: Array<[string, unknown]> = [["Feedback ID", manifest.feedback.stableId], ["Release", manifest.release], ["Status", manifest.feedback.status], ["Priority", manifest.feedback.priority], ["Type", manifest.feedback.feedbackType], ["Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : "None"], ["Submitter", manifest.feedback.submitter.name ?? "Unknown"], ["Submitted", manifest.feedback.createdAt], ["Updated", manifest.feedback.updatedAt], ["Target release", manifest.feedback.targetRelease ?? "Not assigned"], ["Decision / resolution", manifest.feedback.dispositionReason ?? "Pending review"], ["Message", manifest.feedback.message], ["Reported page", manifest.feedback.pageUrl], ["Snapshot SHA-256", manifestSha256]];
+  for (const [label, value] of fields) { const row = summary.addRow([label, String(value ?? "")]); row.getCell(1).font = { bold: true, color: { argb: `FF${brand}` } }; row.getCell(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: `FF${accent}` } }; row.eachCell(cell => { cell.border = { bottom: { style: "thin", color: { argb: `FF${grid}` } } }; cell.alignment = { vertical: "top", wrapText: true }; }); if (label === "Reported page") row.getCell(2).value = { text: String(value), hyperlink: String(value), tooltip: "Open reported page" }; }
+  summary.getRow(13).height = 72;
+
+  const evidenceSheet = workbook.addWorksheet("Evidence", { views: [{ state: "frozen", ySplit: 2 }] }); titleRow(evidenceSheet, "Evidence inventory and secure links", 9);
+  evidenceSheet.columns = [{ width: 8 }, { width: 38 }, { width: 16 }, { width: 22 }, { width: 14 }, { width: 16 }, { width: 66 }, { width: 24 }, { width: 24 }];
+  const evidenceHeader = evidenceSheet.addRow(["ID", "File", "Kind", "Media type", "Bytes", "Scan state", "SHA-256", "Review record", "Verified file"]); headerRow(evidenceHeader);
+  for (const asset of evidence) { const row = evidenceSheet.addRow([asset.id, asset.safeName, asset.kind, asset.mediaType, asset.byteSize, asset.scanState, asset.sha256, { text: "Open review", hyperlink: asset.reviewUrl, tooltip: "Open evidence record in BIMLog" }, asset.downloadUrl ? { text: "Secure download", hyperlink: asset.downloadUrl, tooltip: "Authenticated BIMLog download" } : "Locked pending scan"]); row.eachCell(cell => { cell.alignment = { vertical: "top", wrapText: true }; cell.border = { bottom: { style: "thin", color: { argb: `FF${grid}` } } }; }); }
+  evidenceSheet.autoFilter = { from: "A2", to: `I${evidence.length + 2}` };
+
+  const previews = workbook.addWorksheet("Evidence previews", { views: [{ state: "frozen", ySplit: 1 }] }); titleRow(previews, "Verified screenshot and image previews", 8); previews.columns = [{ width: 4 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 4 }];
+  let previewRow = 3; let imageCount = 0;
+  for (const asset of evidence) if (asset.downloadUrl && asset.bytes && /^image\/(png|jpe?g)$/.test(asset.mediaType)) {
+    const metadata = await sharp(asset.bytes, { limitInputPixels: MAX_EMBEDDED_IMAGE_PIXELS }).metadata(); if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_EMBEDDED_IMAGE_PIXELS) continue;
+    const preview = await sharp(asset.bytes, { limitInputPixels: MAX_EMBEDDED_IMAGE_PIXELS }).rotate().resize({ width: 1100, height: 760, fit: "inside", withoutEnlargement: true }).png().toBuffer();
+    previews.mergeCells(previewRow, 2, previewRow, 7); const caption = previews.getCell(previewRow, 2); caption.value = `${asset.safeName} · ${asset.mediaType} · ${asset.byteSize.toLocaleString()} bytes`; caption.font = { bold: true, color: { argb: `FF${brand}` } }; caption.alignment = { wrapText: true }; previewRow += 1;
+    const imageId = workbook.addImage({ buffer: preview as unknown as ExcelJS.Buffer, extension: "png" }); previews.addImage(imageId, { tl: { col: 1.2, row: previewRow - 1 }, ext: { width: 700, height: Math.min(500, Math.max(180, Math.round(700 * metadata.height / metadata.width))) } });
+    const rowsHigh = 27; for (let offset = 0; offset < rowsHigh; offset++) previews.getRow(previewRow + offset).height = 15; previewRow += rowsHigh;
+    previews.mergeCells(previewRow, 2, previewRow, 7); const links = previews.getCell(previewRow, 2); links.value = { text: "Open secure original in BIMLog", hyperlink: asset.downloadUrl, tooltip: "Authenticated download" }; links.font = { color: { argb: "FF0563C1" }, underline: true }; previewRow += 2; imageCount += 1;
+  }
+  if (!imageCount) { previews.mergeCells(3, 2, 5, 7); const note = previews.getCell(3, 2); note.value = "No verified image bytes are available yet. The evidence inventory retains secure review links and will include previews after controlled scanning completes."; note.alignment = { vertical: "middle", horizontal: "center", wrapText: true }; note.font = { italic: true, color: { argb: "FF92400E" } }; }
+
+  const history = workbook.addWorksheet("Activity", { views: [{ state: "frozen", ySplit: 2 }] }); titleRow(history, "Meaningful feedback activity", 3); history.columns = [{ width: 28 }, { width: 42 }, { width: 90 }]; const activityHeader = history.addRow(["Date/time", "Activity", "Customer-visible note"]); headerRow(activityHeader);
+  for (const event of manifest.history) { const row = history.addRow([event.at, eventLabel(event.type), event.reason || "—"]); row.eachCell(cell => { cell.alignment = { vertical: "top", wrapText: true }; cell.border = { bottom: { style: "thin", color: { argb: `FF${grid}` } } }; }); }
+  const output = await workbook.xlsx.writeBuffer(); return Buffer.from(output);
 }

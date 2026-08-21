@@ -63,6 +63,7 @@
     "drizzle-orm": "catalog:",
     "express": "^5",
     "express-session": "^1.19.0",
+    "exceljs": "^4.4.0",
     "jsonwebtoken": "^9.0.3",
     "multer": "2.2.0",
     "openai": "^6.38.0",

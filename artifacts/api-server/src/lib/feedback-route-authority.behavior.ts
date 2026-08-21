@@ -52,7 +52,7 @@ const assertions: Array<[string, RegExp]> = [
   ["admin queue projects evidence disposition", /packageState: counts\.total === 0.*awaiting-scan/s],
   ["admin package detail exposes sanitized evidence state", /\/feedback\/admin\/:id\/detail.*scannerAdapter.*scanState/s],
   ["customer snapshot downloads recheck reporter authority", /package-snapshot\.pdf.*accessible\(id,user\).*sendPackageSnapshot/s],
-  ["snapshot bytes are bounded and hash verified", /downloadBounded\(key, byteCount\).*FEEDBACK_PACKAGE_SNAPSHOT_INTEGRITY_FAILED/s],
+  ["snapshot downloads regenerate against current database and storage authority", /sendPackageSnapshot.*packageSource\(id, visibility, customerUser\).*X-Feedback-Snapshot-Source.*current-authority/s],
   ["admin snapshot exports require a reason", /package-snapshot\.pdf.*X-Export-Reason.*admin_package_snapshot_exported/s],
   ["staff can claim feedback without forging owner identity", /ownerUserId: req\.body\.claimToMe === true \? user\.userId/],
 ];

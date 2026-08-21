@@ -42,7 +42,7 @@ export function SidebarUtilities({
   }, []);
 
   return (
-    <div className="sidebar-utilities" aria-label={`Sidebar utilities: ${activeTab}`}>
+    <div className={`sidebar-utilities${collapsed ? " is-collapsed" : ""}`} aria-label={`Sidebar utilities: ${activeTab}`}>
       <div className="sidebar-utility-grid">
         <div ref={infoRef} style={{ position: "relative" }}>
           <button
@@ -52,15 +52,15 @@ export function SidebarUtilities({
             onClick={() => setInfoOpen((open) => !open)}
           >
             <Info style={{ width: 13, height: 13 }} />
-            {label("Info", "Info")}
-            <ChevronDown
+            {!collapsed && label("Info", "Info")}
+            {!collapsed && <ChevronDown
               style={{
                 width: 11,
                 height: 11,
                 transform: infoOpen ? "rotate(180deg)" : "none",
                 transition: "transform 0.15s",
               }}
-            />
+            />}
           </button>
           {infoOpen && (
             <div className="sidebar-info-menu">
@@ -81,14 +81,14 @@ export function SidebarUtilities({
             </div>
           )}
         </div>
-        {onToggleCollapse && <button type="button" className="sidebar-utility-button" aria-pressed={collapsed} title={collapsed ? label("Expand navigation", "Expandir navegación") : label("Collapse navigation", "Contraer navegación")} onClick={onToggleCollapse}>
-          {collapsed ? <PanelLeftOpen style={{ width: 13, height: 13 }}/> : <PanelLeftClose style={{ width: 13, height: 13 }}/>} {collapsed ? label("Expand", "Expandir") : label("Collapse", "Contraer")}
+        {onToggleCollapse && <button type="button" className="sidebar-utility-button" aria-pressed={collapsed} aria-label={collapsed ? label("Expand navigation", "Expandir navegación") : label("Collapse navigation", "Contraer navegación")} title={collapsed ? label("Expand navigation", "Expandir navegación") : label("Collapse navigation", "Contraer navegación")} onClick={onToggleCollapse}>
+          {collapsed ? <PanelLeftOpen style={{ width: 13, height: 13 }}/> : <PanelLeftClose style={{ width: 13, height: 13 }}/>} {!collapsed && label("Collapse", "Contraer")}
         </button>}
         <Link href={helpHref} className="sidebar-utility-button" title={label("Help Center", "Centro de ayuda")}>
           <HelpCircle style={{ width: 13, height: 13 }} />
-          {label("Help", "Ayuda")}
+          {!collapsed && label("Help", "Ayuda")}
         </Link>
-        <LangToggle />
+        <LangToggle compact={collapsed} />
       </div>
     </div>
   );

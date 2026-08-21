@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n";
  * Small EN/ES language toggle. In the sidebar it uses the same footprint
  * as the Guide button; the floating style remains available for standalone pages.
  */
-export function LangToggle({ floating = false }: { floating?: boolean }) {
+export function LangToggle({ floating = false, compact = false }: { floating?: boolean; compact?: boolean }) {
   const { language, setLanguage } = useI18n();
 
   const baseStyle: React.CSSProperties = {
@@ -39,7 +39,7 @@ export function LangToggle({ floating = false }: { floating?: boolean }) {
       style={floating ? { ...baseStyle, ...floatStyle } : undefined}
     >
       <Globe style={{ width: 13, height: 13 }} />
-      {language.toUpperCase()}
+      {!compact && language.toUpperCase()}
     </button>
   );
 }

@@ -14,8 +14,8 @@ let running = false;
 
 type Candidate = { id: number; user_id: number; project_id: number | null; source_event_id: number };
 const publicBaseUrl = () => {
-  try { const url = new URL(process.env.BIMLOG_PUBLIC_URL || "https://app.bimlog.com"); if (process.env.NODE_ENV === "production" && url.protocol !== "https:") throw new Error("HTTPS required"); return url.origin; }
-  catch { return "https://app.bimlog.com"; }
+  try { const url = new URL(process.env.BIMLOG_PUBLIC_URL || process.env.BIMLOG_URL || process.env.APP_URL || "https://bimlog.app"); if (process.env.NODE_ENV === "production" && url.protocol !== "https:") throw new Error("HTTPS required"); return url.origin; }
+  catch { return "https://bimlog.app"; }
 };
 
 function packageState(manifest: Buffer) {
@@ -45,7 +45,7 @@ async function snapshotOne(candidate: Candidate, visibility: "customer" | "inter
     docxPath = await storage.upload(generated.docx, candidate.project_id ?? `feedback-${candidate.id}`, `feedback-${candidate.id}-${visibility}.docx`);
     workbookPath = await storage.upload(generated.workbook, candidate.project_id ?? `feedback-${candidate.id}`, `feedback-${candidate.id}-${visibility}.xlsx`);
     const inserted = await db.transaction(async tx => {
-      const latest = await tx.execute(sql`SELECT max(id)::integer source_event_id FROM feedback_audit_events WHERE feedback_id=${candidate.id} AND event_type NOT IN ('package_snapshot_created','feedback_telegram_delivery','admin_package_exported','admin_package_snapshot_exported','admin_exported','admin_follow_up_exported','admin_asset_exported')`);
+      const latest = await tx.execute(sql`SELECT max(id)::integer source_event_id FROM feedback_audit_events WHERE feedback_id=${candidate.id} AND event_type NOT IN ('package_snapshot_created','feedback_telegram_delivery','admin_package_exported','admin_package_snapshot_exported','admin_exported','admin_follow_up_exported','admin_asset_exported','evidence_scan_started','evidence_scan_failed')`);
       if (Number(latest.rows[0]?.source_event_id) !== candidate.source_event_id) return false;
       const [winner] = await tx.select({ id: feedbackAuditEventsTable.id }).from(feedbackAuditEventsTable)
         .where(and(eq(feedbackAuditEventsTable.feedbackId, candidate.id), eq(feedbackAuditEventsTable.eventType, SNAPSHOT_EVENT), sql`${feedbackAuditEventsTable.afterState}->>'visibility'=${visibility}`, sql`${feedbackAuditEventsTable.afterState}->>'sourceEventId'=${String(candidate.source_event_id)}`, sql`${feedbackAuditEventsTable.afterState}->>'docxStoragePath' IS NOT NULL`, sql`${feedbackAuditEventsTable.afterState}->>'workbookStoragePath' IS NOT NULL`)).limit(1);
@@ -74,7 +74,7 @@ async function snapshotOne(candidate: Candidate, visibility: "customer" | "inter
 export async function reconcileFeedbackPackageSnapshotsOnce(limit = DEFAULT_BATCH_SIZE) {
   const result = await db.execute(sql`SELECT f.id,f.user_id,f.project_id,source.source_event_id
     FROM feedback_items f
-    JOIN LATERAL (SELECT max(e.id)::integer source_event_id FROM feedback_audit_events e WHERE e.feedback_id=f.id AND e.event_type NOT IN ('package_snapshot_created','feedback_telegram_delivery','admin_package_exported','admin_package_snapshot_exported','admin_exported','admin_follow_up_exported','admin_asset_exported')) source ON source.source_event_id IS NOT NULL
+    JOIN LATERAL (SELECT max(e.id)::integer source_event_id FROM feedback_audit_events e WHERE e.feedback_id=f.id AND e.event_type NOT IN ('package_snapshot_created','feedback_telegram_delivery','admin_package_exported','admin_package_snapshot_exported','admin_exported','admin_follow_up_exported','admin_asset_exported','evidence_scan_started','evidence_scan_failed')) source ON source.source_event_id IS NOT NULL
     WHERE NOT EXISTS (SELECT 1 FROM feedback_audit_events s WHERE s.feedback_id=f.id AND s.event_type='package_snapshot_created' AND (s.after_state->>'sourceEventId')::integer=source.source_event_id AND s.after_state->>'visibility'='customer' AND s.after_state->>'docxStoragePath' IS NOT NULL AND s.after_state->>'workbookStoragePath' IS NOT NULL)
        OR NOT EXISTS (SELECT 1 FROM feedback_audit_events s WHERE s.feedback_id=f.id AND s.event_type='package_snapshot_created' AND (s.after_state->>'sourceEventId')::integer=source.source_event_id AND s.after_state->>'visibility'='internal' AND s.after_state->>'docxStoragePath' IS NOT NULL AND s.after_state->>'workbookStoragePath' IS NOT NULL)
     ORDER BY f.updated_at,f.id LIMIT ${limit}`);

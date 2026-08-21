@@ -50,6 +50,13 @@ export function MasterSidebar() {
   });
   const [notificationPanelCollapsed, setNotificationPanelCollapsed] = useState(() => typeof window !== "undefined" && window.localStorage.getItem("bimlog-notification-panel-collapsed") === "true");
   const [notificationPanelResizing, setNotificationPanelResizing] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    if (typeof window === "undefined") return 220;
+    const saved = Number(window.localStorage.getItem("bimlog-master-sidebar-width"));
+    return Number.isFinite(saved) ? Math.min(420, Math.max(196, saved)) : 220;
+  });
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(() => typeof window !== "undefined" && window.localStorage.getItem("bimlog-master-sidebar-collapsed") === "true");
+  const [sidebarResizing, setSidebarResizing] = useState(false);
 
   const [showSearch, setShowSearch] = useState(false);
   const [searchQ, setSearchQ] = useState("");
@@ -119,6 +126,22 @@ export function MasterSidebar() {
   }, [notificationPanelResizing]);
 
   useEffect(() => {
+    if (!sidebarResizing) return;
+    const resize = (event: PointerEvent) => setSidebarWidth(Math.min(420, Math.max(196, event.clientX)));
+    const finish = () => setSidebarResizing(false);
+    window.addEventListener("pointermove", resize);
+    window.addEventListener("pointerup", finish, { once: true });
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    return () => {
+      window.removeEventListener("pointermove", resize);
+      window.removeEventListener("pointerup", finish);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [sidebarResizing]);
+
+  useEffect(() => {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("bimlog-notification-panel-width", String(Math.round(notificationPanelWidth)));
   }, [notificationPanelWidth]);
@@ -127,6 +150,16 @@ export function MasterSidebar() {
     if (typeof window === "undefined") return;
     window.localStorage.setItem("bimlog-notification-panel-collapsed", String(notificationPanelCollapsed));
   }, [notificationPanelCollapsed]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("bimlog-master-sidebar-width", String(Math.round(sidebarWidth)));
+  }, [sidebarWidth]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("bimlog-master-sidebar-collapsed", String(sidebarCollapsed));
+  }, [sidebarCollapsed]);
 
   const loadNotifications = async () => {
     if (!token) return;
@@ -253,11 +286,12 @@ export function MasterSidebar() {
         type="button"
         className={`sidebar-nav-item${isActive ? " active" : ""}`}
         aria-current={isActive ? "page" : undefined}
-        style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", gap: 8 }}
+        title={label}
+        style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", justifyContent: sidebarCollapsed ? "center" : "flex-start", gap: sidebarCollapsed ? 0 : 8 }}
         onClick={() => { setLocation(route); setMobileOpen(false); }}
       >
         <Icon style={{ width: 14, height: 14, flexShrink: 0 }} />
-        <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>
+        {!sidebarCollapsed && <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>}
       </button>
     );
   };
@@ -285,9 +319,10 @@ export function MasterSidebar() {
     )}
     <div
       id="headquarters-global-sidebar"
-      className="sidebar"
-      style={isMobile ? { position: "fixed", top: 0, bottom: 0, left: 0, zIndex: 1310, width: "min(340px, 88vw)", transform: mobileOpen ? "translateX(0)" : "translateX(-105%)", transition: "transform 0.18s ease", boxShadow: mobileOpen ? "20px 0 60px rgba(15,23,42,0.28)" : undefined } : undefined}
+      className={`sidebar${!isMobile && sidebarCollapsed ? " master-sidebar-collapsed" : ""}`}
+      style={isMobile ? { position: "fixed", top: 0, bottom: 0, left: 0, zIndex: 1310, width: "min(340px, 88vw)", transform: mobileOpen ? "translateX(0)" : "translateX(-105%)", transition: "transform 0.18s ease", boxShadow: mobileOpen ? "20px 0 60px rgba(15,23,42,0.28)" : undefined } : { position: "relative", width: sidebarCollapsed ? 58 : sidebarWidth, transition: sidebarResizing ? undefined : "width .16s ease" }}
     >
+      {!isMobile && !sidebarCollapsed && <button type="button" aria-label={t("Resize main navigation", "Cambiar ancho de la navegación principal")} title={t("Drag to resize the whole navigation", "Arrastre para cambiar el ancho de toda la navegación")} onPointerDown={(event) => { event.preventDefault(); setSidebarResizing(true); }} style={{ position: "absolute", top: 0, right: 0, bottom: 0, zIndex: 20, width: 10, border: 0, borderLeft: "1px solid rgba(255,255,255,.12)", background: "transparent", color: "rgba(255,255,255,.55)", cursor: "col-resize", display: "grid", alignItems: "center" }}><GripVertical style={{ width: 10, height: 20 }} /></button>}
       {isMobile && (
         <button
           type="button"
@@ -298,12 +333,12 @@ export function MasterSidebar() {
           {t("Close", "Cerrar")}
         </button>
       )}
-      <SidebarUtilities activeTab="dashboard" />
+      <SidebarUtilities activeTab="dashboard" collapsed={!isMobile && sidebarCollapsed} onToggleCollapse={!isMobile ? () => setSidebarCollapsed(value => !value) : undefined} />
 
-      <div ref={searchRef} style={{ position: "relative", padding: "0 10px 10px" }}>
-        <button type="button" onClick={() => { setShowSearch(!showSearch); setSearchQ(""); setSearchResults(null); setSearchLoadFailed(false); }} style={{ display: "flex", alignItems: "center", gap: 6, width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, padding: "6px 10px", color: "rgba(255,255,255,0.75)", cursor: "pointer", fontSize: 11 }}>
+      <div ref={searchRef} style={{ position: "relative", padding: sidebarCollapsed && !isMobile ? "0 8px 10px" : "0 10px 10px" }}>
+        <button type="button" aria-label={t("Search everything", "Buscar todo")} title={t("Search everything", "Buscar todo")} onClick={() => { setShowSearch(!showSearch); setSearchQ(""); setSearchResults(null); setSearchLoadFailed(false); }} style={{ display: "flex", alignItems: "center", justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start", gap: 6, width: "100%", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.1)", borderRadius: 7, padding: sidebarCollapsed && !isMobile ? "6px 0" : "6px 10px", color: "rgba(255,255,255,0.75)", cursor: "pointer", fontSize: 11 }}>
           <Search style={{ width: 13, height: 13 }} />
-          {t("Search everything…", "Buscar todo…")}
+          {(!sidebarCollapsed || isMobile) && t("Search everything…", "Buscar todo…")}
         </button>
 
         {showSearch && (
@@ -348,18 +383,18 @@ export function MasterSidebar() {
       </div>
 
       <nav className="sidebar-nav" style={{ flex: 1 }} aria-label={t("Headquarters navigation", "Navegación de sede")}>
-        <span className="sidebar-section-label">{t("Headquarters", "Sede")}</span>
+        {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Headquarters", "Sede")}</span>}
         {navButton(t("BIMLog Headquarters", "Sede BIMLog"), "/dashboard", LayoutDashboard)}
 
         {(showAdminPanel || showTotalControl) && (
           <>
-            <span className="sidebar-section-label">{t("Administration", "Administración")}</span>
+            {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Administration", "Administración")}</span>}
             {showAdminPanel && navButton(t("Project Administration", "Administración de Proyectos"), "/admin", ShieldCheck)}
             {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
           </>
         )}
 
-        <span className="sidebar-section-label">{t("Settings", "Configuración")}</span>
+        {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Settings", "Configuración")}</span>}
         {navButton(t("Feature Visibility", "Visibilidad de funciones"), "/profile", Settings2)}
         {navButton(t("Notification Settings", "Configuración de Notificaciones"), "/settings/notifications", Bell)}
         {navButton(t("Company Profile", "Perfil de Empresa"), "/settings/company-profile", Building2)}
@@ -369,10 +404,10 @@ export function MasterSidebar() {
       {user && (
         <div style={{ padding: "0 0 8px" }}>
 
-          <div ref={bellRef} style={{ position: "relative", padding: "0 14px 10px" }}>
-            <button type="button" aria-expanded={showBell} onClick={() => { setShowBell(!showBell); if (!showBell) void loadNotifications(); }} style={{ display: "flex", alignItems: "center", gap: 8, width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 7, padding: "7px 10px", cursor: "pointer", color: "rgba(255,255,255,0.95)", fontSize: 12 }}>
+          <div ref={bellRef} style={{ position: "relative", padding: sidebarCollapsed && !isMobile ? "0 8px 10px" : "0 14px 10px" }}>
+            <button type="button" aria-expanded={showBell} aria-label={t("Notification Inbox", "Bandeja de Notificaciones")} title={t("Notification Inbox", "Bandeja de Notificaciones")} onClick={() => { setShowBell(!showBell); if (!showBell) void loadNotifications(); }} style={{ display: "flex", alignItems: "center", justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start", gap: 8, width: "100%", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", borderRadius: 7, padding: sidebarCollapsed && !isMobile ? "7px 0" : "7px 10px", cursor: "pointer", color: "rgba(255,255,255,0.95)", fontSize: 12 }}>
               <Bell style={{ width: 14, height: 14 }} />
-              <span style={{ flex: 1, textAlign: "left" }}>{t("Notification Inbox", "Bandeja de Notificaciones")}</span>
+              {(!sidebarCollapsed || isMobile) && <span style={{ flex: 1, textAlign: "left" }}>{t("Notification Inbox", "Bandeja de Notificaciones")}</span>}
               {unreadCount > 0 && (
                 <span style={{ background: "#DC2626", color: "white", borderRadius: "50%", width: 18, height: 18, display: "flex", alignItems: "center", justifyContent: "center", fontSize: 10, fontWeight: 700 }}>{unreadCount > 9 ? "9+" : unreadCount}</span>
               )}
@@ -444,11 +479,11 @@ export function MasterSidebar() {
 
           <div style={{ height: 1, background: "var(--sidebar-border)", margin: "0 14px 10px" }} />
 
-          <a href="#" className="sidebar-footer" style={{ textDecoration: "none", cursor: "pointer" }} title="My Profile" onClick={e => { e.preventDefault(); setLocation("/profile"); }}>
+          <a href="#" className="sidebar-footer" style={{ textDecoration: "none", cursor: "pointer", justifyContent: sidebarCollapsed && !isMobile ? "center" : undefined, paddingLeft: sidebarCollapsed && !isMobile ? 0 : undefined, paddingRight: sidebarCollapsed && !isMobile ? 0 : undefined }} title="My Profile" onClick={e => { e.preventDefault(); setLocation("/profile"); }}>
             <div className="avatar avatar-sm av-blue" style={avatarUrl ? { backgroundImage: `url(${avatarUrl})`, backgroundSize: "cover", backgroundPosition: "center" } : {}}>
               {!avatarUrl && (user.fullName?.charAt(0).toUpperCase() ?? "?")}
             </div>
-            <div style={{ flex: 1, minWidth: 0 }}>
+            {(!sidebarCollapsed || isMobile) && <div style={{ flex: 1, minWidth: 0 }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: "#fff", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{user.fullName}</div>
               <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", display: "flex", alignItems: "center", gap: 4, overflow: "hidden" }}>
                 {companyLogoUrl && (
@@ -456,16 +491,16 @@ export function MasterSidebar() {
                 )}
                 <span style={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{companyName || user.companyName || ""}</span>
               </div>
-            </div>
-            <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", flexShrink: 0 }}>{t("Profile →", "Perfil →")}</div>
+            </div>}
+            {(!sidebarCollapsed || isMobile) && <div style={{ fontSize: 9, color: "rgba(255,255,255,0.7)", flexShrink: 0 }}>{t("Profile →", "Perfil →")}</div>}
           </a>
 
-          <button onClick={logout} style={{ display: "block", width: "calc(100% - 28px)", margin: "6px 14px 0", padding: "5px 0", borderRadius: 5, cursor: "pointer", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 500 }}>
+          {(!sidebarCollapsed || isMobile) && <button onClick={logout} style={{ display: "block", width: "calc(100% - 28px)", margin: "6px 14px 0", padding: "5px 0", borderRadius: 5, cursor: "pointer", background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.07)", color: "rgba(255,255,255,0.75)", fontSize: 11, fontWeight: 500 }}>
             {t("Sign Out", "Cerrar Sesión")}
-          </button>
-          <button onClick={() => { localStorage.removeItem("bimlog-auth"); logout(); window.location.href = "/"; }} style={{ display: "block", width: "calc(100% - 28px)", margin: "4px 14px 0", padding: "3px 0", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 10, textAlign: "center", textDecoration: "underline", textUnderlineOffset: 2 }}>
+          </button>}
+          {(!sidebarCollapsed || isMobile) && <button onClick={() => { localStorage.removeItem("bimlog-auth"); logout(); window.location.href = "/"; }} style={{ display: "block", width: "calc(100% - 28px)", margin: "4px 14px 0", padding: "3px 0", background: "none", border: "none", cursor: "pointer", color: "rgba(255,255,255,0.7)", fontSize: 10, textAlign: "center", textDecoration: "underline", textUnderlineOffset: 2 }}>
             {t("Clear session & sign in again", "Limpiar sesión e iniciar sesión")}
-          </button>
+          </button>}
         </div>
       )}
     </div>
