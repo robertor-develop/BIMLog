@@ -1286,7 +1286,7 @@ function FeedbackTab({ token }: { token: string }) {
     <div aria-busy={loading || Boolean(pendingAction)}>
       <div className="feedback-command-bar" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 16, flexWrap: "wrap" }}>
         <div>
-          <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>{t("Feedback reviewer", "Revisión de comentarios")} <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>v1.60.35.10-F</span></h2>
+          <h2 style={{ fontSize: 20, fontWeight: 800, margin: 0 }}>{t("Feedback reviewer", "Revisión de comentarios")} <span style={{ fontSize: 10, color: "hsl(var(--muted-foreground))", whiteSpace: "nowrap" }}>v1.60.35.11-F</span></h2>
           <p style={{ margin: "4px 0 0", color: "hsl(var(--muted-foreground))", fontSize: 12 }}>
             {t("Claim an owner, move only to a valid next status, review safe evidence, and close the customer loop.", "Asigna un responsable, avanza solo al siguiente estado válido, revisa evidencia segura y responde al cliente.")}
           </p>

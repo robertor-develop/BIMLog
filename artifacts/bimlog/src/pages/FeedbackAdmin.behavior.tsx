@@ -44,7 +44,7 @@ const checks: Array<[string, RegExp]> = [
   ["detail renders projected scan failures against matching asset identity", /detail\.scanFailures.*find\(candidate => Number\(candidate\.id\) === assetId\).*Evidence asset/s],
   ["scan failure reason is control-stripped and bounded", /safeScanFailureReason.*replace\(\/\[\\u0000-\\u001f\\u007f\]\/g.*slice\(0, 320\)/s],
   ["scan failure shows retry state timestamp and governed next action", /(?=[\s\S]*failure\.retryable === true)(?=[\s\S]*failure\.createdAt)(?=[\s\S]*Keep quarantined and correct scanner or source authority)/],
-  ["owned reviewer surface shows the requested release label", /v1\.60\.35\.10-F/],
+  ["owned reviewer surface shows the requested release label", /v1\.60\.35\.11-F/],
   ["main sidebar already persists full-width resize and collapse", /bimlog-master-sidebar-width.*bimlog-master-sidebar-collapsed.*setSidebarResizing\(true\)/s],
   ["reported page uses a readable link label", /Open reported page ↗/],
   ["detail explains that reports are generated from current authority", /Current report.*Generated when downloaded/s],
