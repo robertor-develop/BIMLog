@@ -55,6 +55,7 @@ const assertions: Array<[string, RegExp]> = [
   ["snapshot downloads regenerate against current database and storage authority", /sendPackageSnapshot.*packageSource\(id, visibility, customerUser\).*X-Feedback-Snapshot-Source.*current-authority/s],
   ["admin snapshot exports require a reason", /package-snapshot\.pdf.*X-Export-Reason.*admin_package_snapshot_exported/s],
   ["staff can claim feedback without forging owner identity", /ownerUserId: req\.body\.claimToMe === true \? user\.userId/],
+  ["operations expose independent backup progress without claiming receiver activation", /feedbackBackupProgress\(\).*backup: \{ \.\.\.backup, independentFromPrimary: backup\.configured.*permanentComputerReceiver: \{ connected: false/s],
 ];
 for (const [name, pattern] of assertions) assert.match(source, pattern, name);
 assert.ok(source.indexOf("pg_advisory_xact_lock") < source.indexOf("storage.upload"), "upload idempotency must be reserved before object creation");

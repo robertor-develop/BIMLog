@@ -50,7 +50,7 @@ await testPool.query(
   `DROP TABLE IF EXISTS feedback_relay_purge_key_authorities, feedback_relay_purge_commands, feedback_relay_deletion_proofs, feedback_relay_temporary_objects, feedback_relay_holds, feedback_relay_receipts, feedback_relay_nonces, feedback_relay_custody_events, feedback_relay_jobs CASCADE`,
 );
 await testPool.query(
-  `DROP TABLE IF EXISTS feedback_transcription_jobs, feedback_capture_consents, feedback_audit_events, feedback_assets, feedback_items, project_members, projects, users, companies, fixture_failures; DROP FUNCTION IF EXISTS fixture_reject_audit()`,
+  `DROP TABLE IF EXISTS feedback_backup_jobs, feedback_transcription_jobs, feedback_capture_consents, feedback_audit_events, feedback_assets, feedback_items, project_members, projects, users, companies, fixture_failures; DROP FUNCTION IF EXISTS fixture_reject_audit()`,
 );
 assert.equal(
   (

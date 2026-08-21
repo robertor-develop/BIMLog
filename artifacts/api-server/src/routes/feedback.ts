@@ -18,6 +18,7 @@ import { sendEmail } from "../lib/email";
 import { getTelegramProductConfig, telegramProductHealth } from "../lib/telegram-product";
 import { eligibleFeedbackTelegramRecipientIds } from "../lib/feedback-telegram-worker";
 import { feedbackScanBackfillProgress } from "../lib/feedback-scan-worker";
+import { feedbackBackupProgress } from "../lib/feedback-backup-worker";
 
 const router = Router();
 const upload = boundedMultipart(createMemoryUpload({ fileSize: FEEDBACK_MAX_FILE_BYTES, files: 1, fields: 6, parts: 7 }).array("files", 1));
@@ -478,7 +479,7 @@ router.get("/feedback/admin/export.csv", authMiddleware, isSuperAdminMiddleware,
   const header = ["Feedback ID", "Created", "Type", "Priority", "State", "Module", "Description", "Target release", "Decision reason", "Customer visible"];
   const lines = [header.map(csvCell).join(","), ...rows.map(row => [row.stableId, row.createdAt.toISOString(), row.feedbackType, row.priority, row.status, row.module, row.message, row.targetRelease, row.dispositionReason, row.customerVisible].map(csvCell).join(","))];
   if (rows.length) await db.insert(feedbackAuditEventsTable).values(rows.map(row => ({ feedbackId: row.id, actorUserId: req.user!.userId, eventType: "admin_exported", afterState: { scope: "all", release: FEEDBACK_RELEASE }, reason })));
-  res.setHeader("Content-Type", "text/csv; charset=utf-8"); res.setHeader("Content-Disposition", "attachment; filename=feedback-review-v1.60.35.11-F.csv");
+  res.setHeader("Content-Type", "text/csv; charset=utf-8"); res.setHeader("Content-Disposition", "attachment; filename=feedback-review-v1.60.35.12-F.csv");
   return res.send(`\uFEFF${lines.join("\r\n")}\r\n`);
 });
 
@@ -486,17 +487,19 @@ router.get("/feedback/admin/follow-up.csv", authMiddleware, isSuperAdminMiddlewa
   const reason = bounded(req.get("X-Export-Reason"), 500); if (!reason) return res.status(400).json({ code: "FEEDBACK_EXPORT_REASON_REQUIRED", error: "An export reason is required" });
   const rows = await loadFeedbackFollowUpRows();
   const feedbackIds = rows.map(row => Number(row.id)).filter(Number.isInteger); if (feedbackIds.length) await db.insert(feedbackAuditEventsTable).values(feedbackIds.map(feedbackId => ({ feedbackId, actorUserId: req.user!.userId, eventType: "admin_follow_up_exported", afterState: { scope: "postgresql-register", release: FEEDBACK_RELEASE }, reason })));
-  res.setHeader("Content-Type", "text/csv; charset=utf-8"); res.setHeader("Content-Disposition", "attachment; filename=feedback-follow-up-v1.60.35.11-F.csv"); return res.send(buildFeedbackFollowUpCsv(rows,publicBaseUrl()));
+  res.setHeader("Content-Type", "text/csv; charset=utf-8"); res.setHeader("Content-Disposition", "attachment; filename=feedback-follow-up-v1.60.35.12-F.csv"); return res.send(buildFeedbackFollowUpCsv(rows,publicBaseUrl()));
 });
 
 router.get("/feedback/admin/operations-status", authMiddleware, isSuperAdminMiddleware, async (_req, res) => {
-  const storageHealth = await storage.health(),telegram=telegramProductHealth(),scanBackfill=await feedbackScanBackfillProgress(),eligibleTelegramRecipients=await eligibleFeedbackTelegramRecipientIds();
+  const storageHealth = await storage.health(),telegram=telegramProductHealth(),scanBackfill=await feedbackScanBackfillProgress(),backup=await feedbackBackupProgress(),eligibleTelegramRecipients=await eligibleFeedbackTelegramRecipientIds();
   const scanEvents=await db.execute(sql`SELECT max(created_at) FILTER(WHERE event_type IN ('evidence_scan_clean','evidence_scan_rejected')) last_success_at,max(created_at) FILTER(WHERE event_type='evidence_scan_failed') last_failure_at,count(*) FILTER(WHERE event_type='evidence_scan_failed' AND created_at>=now()-interval '1 hour')::integer recent_failures FROM feedback_audit_events`);
   const notifications=await db.execute(sql`SELECT count(*) FILTER(WHERE NOT EXISTS(SELECT 1 FROM feedback_audit_events e WHERE e.feedback_id=f.id AND e.event_type='internal_reviewer_notifications_created'))::integer pending,count(*) FILTER(WHERE EXISTS(SELECT 1 FROM feedback_audit_events e WHERE e.feedback_id=f.id AND e.event_type='submission_notification_outbox_settled' AND e.after_state->>'state'='blocked'))::integer blocked,extract(epoch FROM now()-min(f.created_at) FILTER(WHERE NOT EXISTS(SELECT 1 FROM feedback_audit_events e WHERE e.feedback_id=f.id AND e.event_type='internal_reviewer_notifications_created')))::integer oldest_pending_age_seconds FROM feedback_items f`);
   const telegramAttempts=await db.execute(sql`WITH latest AS(SELECT DISTINCT ON (after_state->>'snapshotEventId',after_state->>'recipientUserId',after_state->>'artifactKind') after_state,created_at FROM feedback_audit_events WHERE event_type='feedback_telegram_delivery' ORDER BY after_state->>'snapshotEventId',after_state->>'recipientUserId',after_state->>'artifactKind',id DESC) SELECT count(*) FILTER(WHERE after_state->>'state'='failed')::integer failed,count(*) FILTER(WHERE after_state->>'state'='unknown')::integer manual_review,count(*) FILTER(WHERE after_state->>'state'='sending')::integer sending,count(*) FILTER(WHERE after_state->>'state'='sent')::integer sent,min(created_at) FILTER(WHERE after_state->>'state' IN ('failed','unknown')) oldest_actionable_at FROM latest`);
   const scanRow=scanEvents.rows[0] as Record<string,unknown>|undefined,notificationRow=notifications.rows[0] as Record<string,unknown>|undefined,telegramRow=telegramAttempts.rows[0] as Record<string,unknown>|undefined;
   return res.json({
+    readiness: { state: backup.configured && backup.manualReview === 0 ? "ready" : backup.configured ? "manual-review" : "backup-not-configured", explanation: backup.configured ? "Primary custody and independent encrypted exact-restore backup telemetry are available." : "Primary custody is available; independent encrypted backup is not configured.", checkedAt: new Date().toISOString() },
     storage: { backend: storageHealth.backendId, location: storageHealth.backendType === "replit-app-storage" && storageHealth.backendId === "bimlog-feedback-replit" ? "Private Replit App Storage bucket bimlog-feedback-temporary" : `Private ${storageHealth.backendType} backend ${storageHealth.backendId}`, metadataAuthority: "PostgreSQL", healthy: storageHealth.healthy, capabilities: storageHealth.capabilities, maxReadBytes: storageHealth.maxReadBytes },
+    backup: { ...backup, independentFromPrimary: backup.configured, encryption: backup.configured ? "AES-256-GCM" : null },
     scanner: { configured: process.env.BIMLOG_FEEDBACK_SCANNER === "clamav-cli", mode: process.env.BIMLOG_FEEDBACK_SCANNER === "clamav-cli" ? "governed-clamav" : "quarantine-only",state:process.env.BIMLOG_FEEDBACK_SCANNER!=="clamav-cli"?"not-configured":scanBackfill.manualReview>0?"manual-review":scanBackfill.eligible>0||scanBackfill.deferred>0?"processing-backlog":"ready",backfill:scanBackfill,lastSuccessfulScanAt:scanRow?.last_success_at||null,lastFailureAt:scanRow?.last_failure_at||null,recentFailures:Number(scanRow?.recent_failures||0) },
     reviewerNotifications:{state:Number(notificationRow?.pending||0)>0?"reconciling":"settled",pending:Number(notificationRow?.pending||0),blocked:Number(notificationRow?.blocked||0),oldestPendingAgeSeconds:notificationRow?.oldest_pending_age_seconds==null?null:Number(notificationRow.oldest_pending_age_seconds)},
     telegramDocuments: { configured: telegram.configured, mode: telegram.configured ? "explicit-opt-in-feedback-package-delivery" : "not-configured",eligibleRecipients:eligibleTelegramRecipients.length,sent:Number(telegramRow?.sent||0),sending:Number(telegramRow?.sending||0),failed:Number(telegramRow?.failed||0),manualReview:Number(telegramRow?.manual_review||0),oldestActionableAt:telegramRow?.oldest_actionable_at||null },

@@ -148,6 +148,49 @@ export const feedbackAssetsTable = pgTable(
   }),
 );
 
+export const feedbackBackupJobsTable = pgTable(
+  "feedback_backup_jobs",
+  {
+    id: bigserial("id", { mode: "bigint" }).primaryKey(),
+    assetId: integer("asset_id")
+      .references(() => feedbackAssetsTable.id)
+      .notNull(),
+    feedbackId: integer("feedback_id")
+      .references(() => feedbackItemsTable.id)
+      .notNull(),
+    state: text("state").default("queued").notNull(),
+    attempts: integer("attempts").default(0).notNull(),
+    nextAttemptAt: timestamp("next_attempt_at").defaultNow(),
+    leaseOwner: text("lease_owner"),
+    leaseToken: text("lease_token"),
+    leaseExpiresAt: timestamp("lease_expires_at"),
+    fencingToken: bigint("fencing_token", { mode: "number" }).default(0).notNull(),
+    sourceByteCount: bigint("source_byte_count", { mode: "number" }).notNull(),
+    sourceSha256: text("source_sha256").notNull(),
+    backupBackendId: text("backup_backend_id"),
+    backupObjectId: text("backup_object_id"),
+    encryptionKeyId: text("encryption_key_id"),
+    ciphertextByteCount: bigint("ciphertext_byte_count", { mode: "number" }),
+    ciphertextSha256: text("ciphertext_sha256"),
+    verifiedAt: timestamp("verified_at"),
+    lastErrorCode: text("last_error_code"),
+    manualReviewAt: timestamp("manual_review_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => ({
+    assetIdx: uniqueIndex("feedback_backup_jobs_asset_idx").on(table.assetId),
+    claimIdx: index("feedback_backup_jobs_claim_idx").on(table.state, table.manualReviewAt, table.nextAttemptAt, table.leaseExpiresAt, table.createdAt, table.id),
+    stateCheck: check("feedback_backup_jobs_state_chk", sql`${table.state} IN ('queued','backing-up','retry-required','verified','manual-review')`),
+    attemptsCheck: check("feedback_backup_jobs_attempts_chk", sql`${table.attempts} >= 0`),
+    fencingCheck: check("feedback_backup_jobs_fencing_chk", sql`${table.fencingToken} >= 0`),
+    sourceCheck: check("feedback_backup_jobs_source_chk", sql`${table.sourceByteCount} >= 0 AND ${table.sourceSha256} ~ '^[a-f0-9]{64}$'`),
+    leaseCheck: check("feedback_backup_jobs_lease_chk", sql`(${table.leaseOwner} IS NULL AND ${table.leaseToken} IS NULL AND ${table.leaseExpiresAt} IS NULL) OR (${table.leaseOwner} IS NOT NULL AND ${table.leaseToken} IS NOT NULL AND ${table.leaseExpiresAt} IS NOT NULL)`),
+    verifiedCheck: check("feedback_backup_jobs_verified_chk", sql`${table.state} <> 'verified' OR (${table.backupBackendId} IS NOT NULL AND ${table.backupObjectId} IS NOT NULL AND ${table.encryptionKeyId} IS NOT NULL AND ${table.ciphertextByteCount} IS NOT NULL AND ${table.ciphertextByteCount} > 0 AND ${table.ciphertextSha256} ~ '^[a-f0-9]{64}$' AND ${table.verifiedAt} IS NOT NULL)`),
+    manualReviewCheck: check("feedback_backup_jobs_manual_review_chk", sql`${table.state} <> 'manual-review' OR (${table.manualReviewAt} IS NOT NULL AND ${table.nextAttemptAt} IS NULL AND ${table.leaseOwner} IS NULL)`),
+  }),
+);
+
 export const feedbackAuditEventsTable = pgTable(
   "feedback_audit_events",
   {

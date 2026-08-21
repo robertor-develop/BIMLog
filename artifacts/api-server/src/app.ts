@@ -61,6 +61,7 @@ import { pool } from "@workspace/db";
 import { ensureFeedbackSchema } from "./lib/feedback-schema-migration";
 import { startFeedbackNotificationWorker } from "./lib/feedback-notification-worker";
 import { startFeedbackScanWorker, verifyFeedbackScannerStartup } from "./lib/feedback-scan-worker";
+import { startFeedbackBackupWorker, verifyFeedbackBackupStartup } from "./lib/feedback-backup-worker";
 import { startFeedbackPackageSnapshotWorker } from "./lib/feedback-package-worker";
 import { startFeedbackTelegramDeliveryWorker } from "./lib/feedback-telegram-worker";
 import { storage as feedbackStorage } from "./lib/storage-adapter";
@@ -1342,6 +1343,7 @@ const meetingLensStartupBarrier = (async () => {
 export const startupBarrier = Promise.all([
   feedbackStartupBarrier,
   verifyFeedbackScannerStartup(),
+  verifyFeedbackBackupStartup(),
   coordinatorStartupBarrier,
   telegramStartupBarrier,
   scheduleStartupBarrier,
@@ -1359,6 +1361,7 @@ export function startWorkers(): void {
   startOverdueNotifier();
   startFeedbackNotificationWorker();
   startFeedbackScanWorker();
+  startFeedbackBackupWorker();
   startFeedbackPackageSnapshotWorker();
   if (telegramWorkersReady) {
     startTelegramProductWorker();

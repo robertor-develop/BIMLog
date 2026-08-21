@@ -1,10 +1,14 @@
 # BIMLog Feedback pass-through relay and Roberto receiver
 
-Release identity: `v1.60.35.11-F`. Google Drive is excluded. PostgreSQL is the lifecycle/backlog authority; the receiver filesystem is a verified custody projection.
+Release identity: `v1.60.35.12-F`. Google Drive is excluded. PostgreSQL is the lifecycle/backlog authority; the receiver filesystem is a verified custody projection.
 
 ## One feedback, one package
 
 Each authorized feedback export is assembled from a fresh PostgreSQL snapshot. The ZIP contains a canonical JSON manifest, a human-readable PDF, and only evidence with a completed clean scanner receipt. The PDF carries submission metadata, submitter, timestamps, message, status history, evidence inventory, authenticated download links, and bounded embedded PNG/JPEG evidence. Customer packages redact internal history, reasons, and submitter email; internal packages and the PostgreSQL-derived follow-up CSV require super-admin authority plus an export reason. Package reads are bounded, hash-verified, and fail closed on missing storage, scanner, or integrity proof.
+
+## Independent encrypted backup
+
+Primary App Storage custody and backup custody are separate authorities and must use different bucket IDs. Every evidence insert atomically enrolls one durable PostgreSQL backup job; migration also backfills existing evidence idempotently. A fair `SKIP LOCKED` worker uses leases and monotonic fencing, bounded exponential retry, crash reclaim, and terminal manual review. It rereads the primary object through the bounded storage port and verifies the exact recorded byte count and SHA-256 before encryption. Backup envelopes use AES-256-GCM with a protected 256-bit key, opaque deterministic object identity, authenticated asset/source metadata, and no customer filename or message. The worker downloads the stored ciphertext, authenticates and decrypts it, and re-verifies the exact source bytes and SHA-256 before marking the job verified. Failed or ambiguous attempts remain actionable; they never claim a valid backup. Configuration is sealed, rejects partial or unknown authority fields, and refuses reuse of the primary bucket. The super-admin operations surface reports queue, deferment, leases, verified count, manual review, and oldest eligible age without exposing bucket credentials or evidence content. Production bucket creation, secret binding, key custody/rotation, and a retained live restore drill remain external activation gates until separately completed.
 
 ## Single protocol
 
