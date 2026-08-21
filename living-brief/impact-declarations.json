@@ -12996,6 +12996,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3f001ab019bb878056e772adc3486ab75a29efe60184608831aff31e328c08bb"
+    },
+    {
+      "taskId": "bimlog-feedback-v1.60.35.11-f-final-integrated-evidence-reseal-20260821",
+      "reviewedThroughCommit": "2376b3cc5fb561235e61a009237a487820e14354",
+      "reviewedAt": "2026-08-21T16:45:00-04:00",
+      "status": "local_integrated_browser_package_and_disposable_database_evidence_accepted_external_release_pending",
+      "captureTiming": "post_integrated_local_acceptance_pre_push_pre_publication",
+      "summary": "Reconciles v1.60.35.11-F through exact integrated source, durable and fair scanner scheduling, consent-bound recoverable Telegram delivery, operational UI hardening, 100/100 controlled Chromium evidence, visually accepted package artifacts, and repeated disposable PostgreSQL 18 acceptance while retaining every external activation and release boundary.",
+      "workstreams": [
+        "feedback-durable-scan-scheduling",
+        "feedback-telegram-consent-and-recovery",
+        "feedback-operational-ui-states",
+        "feedback-controlled-browser-acceptance",
+        "feedback-package-acceptance",
+        "feedback-disposable-postgresql-acceptance",
+        "feedback-external-release-boundary"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accountable intake, evidence, review, response, and fail-closed custody lifecycle is preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, credential, provider, production, push, publication, or customer authority boundary changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing exact-source browser, rendered-document, disposable-database, privacy, security, and zero-leak acceptance rules produced the cited evidence without changing their thresholds."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer Feedback promise and accountable reviewer workflow remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The official deterministic generator was rerun and its canonical output matches the tracked structural inventory after line-ending normalization."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin, H-drive build, package, installation, or field state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted Build 11 PDF, DOCX, and XLSX apply existing report, link, preview, pagination, custody, and inspection doctrine."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No certification, external standard, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact Build 11 source capability and accepted local browser, package, source-gate, and disposable-database evidence without claiming external release state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the cited local Build 11 gates and retains production scanner, Telegram, receiver, backup, push, publication, deployment, live, and customer gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This task verified retained evidence read-only and reconciled documentation only; it did not execute browser, database, provider, receiver, remote, production, push, or publication actions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5470eb0d76f2bc6e4933fa3bd9e35ba7411e4848d5c9230734b37e342a95dbfd"
     }
   ]
 }
