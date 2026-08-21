@@ -11553,6 +11553,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "84446544cdddc56848528c478ab78b25f113fe204d300ef0bcafaefc7a46ed3d"
+    },
+    {
+      "taskId": "bimlog-feedback-history-query-hotfix-20260821",
+      "reviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
+      "reviewedAt": "2026-08-21T00:46:00.000Z",
+      "status": "reactive_history_query_corrected_release_pending",
+      "captureTiming": "post_implementation_pre_release",
+      "summary": "Uses Wouter's reactive search authority so explicit feedback notification links open customer history while the plain feedback route and floating button continue to open a new submission.",
+      "workstreams": [
+        "feedback-customer-entry",
+        "feedback-notification-routing"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The query-routing correction does not change platform doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing privacy, authorization, evidence, and external-action controls remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Acceptance now verifies both the plain route and the reactive direct-history query."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves the approved feedback workflow."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route inventory or structural platform component changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin artifact or behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report artifact changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the published predecessor and the exact reactive-query successor."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records final build, push, republish, and live query-link verification gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Feedback and notification audit behavior remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "448ea4852f301150c6685e641b09190fb1a09f2f992a781ec1253df95cfc2ff3"
     }
   ]
 }
