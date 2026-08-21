@@ -44,8 +44,8 @@ const assertions:Array<[string,RegExp]>=[
   ["capture bundle has stable linkage",/captureBundleId.*evidenceRole: "original".*evidenceRole: "marked"/s],
   ["capture bundle identity reaches server",/form\.append\("captureBundleId".*form\.append\("captureRole"/s],
   ["visual markup editor replaces numeric crop",/FeedbackMarkupEditor/],
-  ["plain feedback route opens a new submission",/path !== "\/feedback".*setOpen\(true\).*else setReviewing\(false\)/s],
-  ["feedback notification route opens customer history",/new URLSearchParams\(query\).*view.*mine.*loadMine\(\)/s],
+  ["plain feedback route opens a new submission",/location !== "\/feedback".*setOpen\(true\).*else setReviewing\(false\)/s],
+  ["feedback notification route reads the reactive query and opens customer history",/useSearch\(\).*new URLSearchParams\(search\).*view.*mine.*loadMine\(\)/s],
   ["floating feedback button always opens a new submission",/onClick=\{\(\) => \{ setReviewing\(false\); setOpen\(true\); \}\}/],
 ];
 for(const [name,pattern] of assertions)assert.match(source,pattern,name);

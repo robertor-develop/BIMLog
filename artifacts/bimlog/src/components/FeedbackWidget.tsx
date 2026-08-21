@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { AlertCircle, Camera, FilePlus2, MessageSquare, Mic, Pause, Play, Send, Square, Trash2, X } from "lucide-react";
-import { useLocation } from "wouter";
+import { useLocation, useSearch } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { FeedbackMarkupEditor } from "@/components/FeedbackMarkupEditor";
@@ -58,6 +58,7 @@ function getModule(path: string) {
 
 export function FeedbackWidget() {
   const [location] = useLocation();
+  const search = useSearch();
   const { token, user } = useAuthStore();
   const { language } = useI18n();
   const es = language === "es";
@@ -105,12 +106,11 @@ export function FeedbackWidget() {
   useEffect(() => { if(error) errorRef.current?.focus(); }, [error]);
   useEffect(() => () => terminateMedia(), [location]);
   useEffect(() => {
-    const [path, query = ""] = location.split("?", 2);
-    if (!token || path !== "/feedback") return;
+    if (!token || location !== "/feedback") return;
     setOpen(true);
-    if (new URLSearchParams(query).get("view") === "mine") void loadMine();
+    if (new URLSearchParams(search).get("view") === "mine") void loadMine();
     else setReviewing(false);
-  }, [location, token]);
+  }, [location, search, token]);
   useEffect(() => {
     if (!open || editingCapture) return;
     dialogRef.current?.focus();
