@@ -1476,6 +1476,33 @@ export async function sendVerifiedTelegramNotification(userId: number, text: str
   return acknowledgement;
 }
 
+export async function sendVerifiedTelegramDocument(
+  userId: number,
+  document: { bytes: Buffer; fileName: string; contentType: string; caption: string },
+  transport: typeof fetch = fetch,
+): Promise<string> {
+  const config = requireTelegramProductConfig();
+  const maximum = Math.min(50 * 1024 * 1024, Math.max(1, Number(process.env.BIMLOG_FEEDBACK_TELEGRAM_MAX_BYTES || 20 * 1024 * 1024)));
+  if (!document.bytes.length || document.bytes.length > maximum) throw new TelegramProductError(413, "TELEGRAM_DOCUMENT_SIZE_INVALID", "Telegram document exceeds the governed byte bound.");
+  const fileName = document.fileName.replace(/[^A-Za-z0-9._-]+/g, "_").slice(0, 120);
+  if (!fileName || !/^[a-z0-9][a-z0-9._-]*$/i.test(fileName)) throw new TelegramProductError(400, "TELEGRAM_DOCUMENT_NAME_INVALID", "Telegram document name is invalid.");
+  const result = await pool.query<{ encrypted_telegram_chat_id: string }>(
+    `SELECT encrypted_telegram_chat_id FROM notification_channels WHERE user_id=$1 AND adapter_id=$2 AND provider='telegram' AND status='connected' ORDER BY linked_at DESC LIMIT 1`,
+    [userId, config.adapterId],
+  );
+  const encrypted = result.rows[0]?.encrypted_telegram_chat_id;
+  if (!encrypted) throw new TelegramProductError(409, "TELEGRAM_CHANNEL_UNAVAILABLE", "A verified linked private Telegram chat is required.");
+  const chat = decryptEvidence<{ telegramChatId: string }>(config, encrypted);
+  const form = new FormData(); const bytes = new Uint8Array(document.bytes.length); bytes.set(document.bytes);
+  form.set("chat_id", chat.telegramChatId); form.set("caption", String(document.caption || "BIMLog feedback document").replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 900)); form.set("document", new Blob([bytes], { type: document.contentType }), fileName);
+  const endpoint = (process.env.TELEGRAM_PRODUCT_TELEGRAM_API_BASE_URL || BOT_API_BASE).replace(/\/$/, "");
+  const response = await transport(`${endpoint}/bot${config.botToken}/sendDocument`, { method: "POST", body: form, signal: AbortSignal.timeout(Math.max(1000, Number(process.env.BIMLOG_FEEDBACK_TELEGRAM_TIMEOUT_MS || 15000))) });
+  const payload = await response.json().catch(() => null) as { ok?: boolean; result?: { message_id?: string | number } } | null;
+  const messageId = payload?.ok === true && payload.result?.message_id != null ? String(payload.result.message_id) : "";
+  if (!response.ok || !messageId) throw new TelegramProductError(502, "TELEGRAM_DOCUMENT_SEND_FAILED", "Telegram did not acknowledge the feedback document.");
+  return `telegram:${messageId}`;
+}
+
 export function telegramProductHealth() {
   const config = getTelegramProductConfig();
   return {

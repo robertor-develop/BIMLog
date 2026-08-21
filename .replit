@@ -57,7 +57,7 @@ BIMLOG_FEEDBACK_STORAGE_MAX_READ_BYTES = "20971520"
 
 [nix]
 channel = "stable-25_05"
-packages = ["libreoffice"]
+packages = ["libreoffice", "clamav"]
 
 [objectStorage]
 defaultBucketID = "replit-objstore-8239dcf7-d5e0-4821-b81a-15ba62a1ffd7"

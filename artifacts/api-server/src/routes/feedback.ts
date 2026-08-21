@@ -1,4 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
+import * as XLSX from "xlsx";
 import { Router, type Response } from "express";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
@@ -12,6 +13,7 @@ import { FeedbackPackageError, FEEDBACK_PACKAGE_MAX_EVENTS } from "../lib/feedba
 import { buildFeedbackPackageFromAuthority } from "../lib/feedback-package-source";
 import { feedbackEmailCopyEnabled, feedbackEmailCopyHtml, FEEDBACK_CUSTOMER_EVENT_TYPES, FEEDBACK_STAFF_RESPONSE_TYPES } from "../lib/feedback-follow-up";
 import { sendEmail } from "../lib/email";
+import { telegramProductHealth } from "../lib/telegram-product";
 
 const router = Router();
 const upload = boundedMultipart(createMemoryUpload({ fileSize: FEEDBACK_MAX_FILE_BYTES, files: 1, fields: 6, parts: 7 }).array("files", 1));
@@ -41,6 +43,8 @@ const packageSnapshotDto = (state: Record<string, unknown> | undefined) => state
   state: String(state.state || "unavailable"), sourceEventId: Number(state.sourceEventId) || null, release: String(state.release || FEEDBACK_RELEASE),
   generatedAt: typeof state.generatedAt === "string" ? state.generatedAt : null,
   pdfSha256: typeof state.pdfSha256 === "string" ? state.pdfSha256 : null,
+  docxSha256: typeof state.docxSha256 === "string" ? state.docxSha256 : null,
+  workbookSha256: typeof state.workbookSha256 === "string" ? state.workbookSha256 : null,
   manifestSha256: typeof state.manifestSha256 === "string" ? state.manifestSha256 : null,
 }) : null;
 async function latestPackageSnapshot(id: number, visibility: "customer" | "internal") {
@@ -386,21 +390,25 @@ router.get("/feedback/admin/:id/package.zip", authMiddleware, isSuperAdminMiddle
   catch (error) { const known = error instanceof FeedbackPackageError; return res.status(known && error.code === "PACKAGE_LIMIT" ? 413 : 409).json({ code: known ? `FEEDBACK_${error.code}` : "FEEDBACK_PACKAGE_FAILED", error: "Feedback package could not be generated safely" }); }
 });
 
-async function sendPackageSnapshot(res: Response, id: number, visibility: "customer" | "internal", format: "pdf" | "json") {
+async function sendPackageSnapshot(res: Response, id: number, visibility: "customer" | "internal", format: "pdf" | "json" | "docx" | "xlsx") {
   const state = await latestPackageSnapshot(id, visibility);
   if (!state) return res.status(409).json({ code: "FEEDBACK_PACKAGE_SNAPSHOT_PENDING", error: "The automatic package snapshot is still being prepared" });
-  const pathField = format === "pdf" ? "pdfStoragePath" : "manifestStoragePath", bytesField = format === "pdf" ? "pdfByteCount" : "manifestByteCount", hashField = format === "pdf" ? "pdfSha256" : "manifestSha256";
+  const fields = format === "pdf" ? ["pdfStoragePath", "pdfByteCount", "pdfSha256"] : format === "docx" ? ["docxStoragePath", "docxByteCount", "docxSha256"] : format === "xlsx" ? ["workbookStoragePath", "workbookByteCount", "workbookSha256"] : ["manifestStoragePath", "manifestByteCount", "manifestSha256"];
+  const [pathField, bytesField, hashField] = fields;
   const key = String(state[pathField] || ""), byteCount = Number(state[bytesField]), expectedSha256 = String(state[hashField] || "");
   if (!key || !Number.isSafeInteger(byteCount) || byteCount <= 0 || !/^[a-f0-9]{64}$/.test(expectedSha256)) return res.status(409).json({ code: "FEEDBACK_PACKAGE_SNAPSHOT_INVALID", error: "The automatic package snapshot is incomplete" });
   let bytes: Buffer; try { bytes = await storage.downloadBounded(key, byteCount); } catch { return res.status(502).json({ code: "FEEDBACK_PACKAGE_SNAPSHOT_READ_FAILED", error: "The automatic package snapshot could not be read safely" }); }
   if (bytes.byteLength !== byteCount || createHash("sha256").update(bytes).digest("hex") !== expectedSha256) return res.status(409).json({ code: "FEEDBACK_PACKAGE_SNAPSHOT_INTEGRITY_FAILED", error: "The automatic package snapshot failed integrity verification" });
-  res.setHeader("Content-Type", format === "pdf" ? "application/pdf" : "application/json; charset=utf-8"); res.setHeader("Content-Disposition", `attachment; filename="feedback-${id}-snapshot.${format}"`); res.setHeader("X-Content-Type-Options", "nosniff"); res.setHeader("X-Feedback-Snapshot-SHA256", expectedSha256); return res.send(bytes);
+  const mediaType = format === "pdf" ? "application/pdf" : format === "docx" ? "application/vnd.openxmlformats-officedocument.wordprocessingml.document" : format === "xlsx" ? "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" : "application/json; charset=utf-8";
+  res.setHeader("Content-Type", mediaType); res.setHeader("Content-Disposition", `attachment; filename="feedback-${id}-snapshot.${format}"`); res.setHeader("X-Content-Type-Options", "nosniff"); res.setHeader("X-Feedback-Snapshot-SHA256", expectedSha256); return res.send(bytes);
 }
 
 router.get("/feedback/:id/package-snapshot.pdf", authMiddleware, async (req, res) => { const user=req.user,id=asId(req.params.id);if(!user)return res.status(401).json({code:"AUTH_REQUIRED",error:"Unauthorized"});if(!id||!await accessible(id,user))return res.status(403).json({code:"FEEDBACK_PACKAGE_DENIED",error:"Package access is denied"});return sendPackageSnapshot(res,id,"customer","pdf"); });
 router.get("/feedback/:id/package-snapshot.json", authMiddleware, async (req, res) => { const user=req.user,id=asId(req.params.id);if(!user)return res.status(401).json({code:"AUTH_REQUIRED",error:"Unauthorized"});if(!id||!await accessible(id,user))return res.status(403).json({code:"FEEDBACK_PACKAGE_DENIED",error:"Package access is denied"});return sendPackageSnapshot(res,id,"customer","json"); });
 router.get("/feedback/admin/:id/package-snapshot.pdf", authMiddleware, isSuperAdminMiddleware, async (req,res)=>{const id=asId(req.params.id),reason=bounded(req.get("X-Export-Reason"),500);if(!id||!reason)return res.status(400).json({code:"FEEDBACK_EXPORT_REASON_REQUIRED",error:"Feedback and an export reason are required"});await db.insert(feedbackAuditEventsTable).values({feedbackId:id,actorUserId:req.user!.userId,eventType:"admin_package_snapshot_exported",afterState:{format:"pdf",release:FEEDBACK_RELEASE},reason});return sendPackageSnapshot(res,id,"internal","pdf");});
 router.get("/feedback/admin/:id/package-snapshot.json", authMiddleware, isSuperAdminMiddleware, async (req,res)=>{const id=asId(req.params.id),reason=bounded(req.get("X-Export-Reason"),500);if(!id||!reason)return res.status(400).json({code:"FEEDBACK_EXPORT_REASON_REQUIRED",error:"Feedback and an export reason are required"});await db.insert(feedbackAuditEventsTable).values({feedbackId:id,actorUserId:req.user!.userId,eventType:"admin_package_snapshot_exported",afterState:{format:"json",release:FEEDBACK_RELEASE},reason});return sendPackageSnapshot(res,id,"internal","json");});
+router.get("/feedback/admin/:id/package-snapshot.docx", authMiddleware, isSuperAdminMiddleware, async (req,res)=>{const id=asId(req.params.id),reason=bounded(req.get("X-Export-Reason"),500);if(!id||!reason)return res.status(400).json({code:"FEEDBACK_EXPORT_REASON_REQUIRED",error:"Feedback and an export reason are required"});await db.insert(feedbackAuditEventsTable).values({feedbackId:id,actorUserId:req.user!.userId,eventType:"admin_package_snapshot_exported",afterState:{format:"docx",release:FEEDBACK_RELEASE},reason});return sendPackageSnapshot(res,id,"internal","docx");});
+router.get("/feedback/admin/:id/package-snapshot.xlsx", authMiddleware, isSuperAdminMiddleware, async (req,res)=>{const id=asId(req.params.id),reason=bounded(req.get("X-Export-Reason"),500);if(!id||!reason)return res.status(400).json({code:"FEEDBACK_EXPORT_REASON_REQUIRED",error:"Feedback and an export reason are required"});await db.insert(feedbackAuditEventsTable).values({feedbackId:id,actorUserId:req.user!.userId,eventType:"admin_package_snapshot_exported",afterState:{format:"xlsx",release:FEEDBACK_RELEASE},reason});return sendPackageSnapshot(res,id,"internal","xlsx");});
 
 router.get("/feedback/admin/:id/assets/:assetId/download", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
   const id = asId(req.params.id), assetId = asId(req.params.assetId), reason = bounded(req.get("X-Export-Reason"), 500); if (!id || !assetId) return res.status(400).json({ code: "FEEDBACK_ASSET_INVALID", error: "Invalid asset" }); if (!reason) return res.status(400).json({ code: "FEEDBACK_EXPORT_REASON_REQUIRED", error: "An export reason is required" });
@@ -423,9 +431,11 @@ router.get("/feedback/admin", authMiddleware, isSuperAdminMiddleware, async (_re
     .from(feedbackAssetsTable).where(inArray(feedbackAssetsTable.feedbackId, feedbackIds)) : [];
   const snapshots=feedbackIds.length?await db.select({feedbackId:feedbackAuditEventsTable.feedbackId,afterState:feedbackAuditEventsTable.afterState,createdAt:feedbackAuditEventsTable.createdAt}).from(feedbackAuditEventsTable).where(and(inArray(feedbackAuditEventsTable.feedbackId,feedbackIds),eq(feedbackAuditEventsTable.eventType,"package_snapshot_created"),sql`${feedbackAuditEventsTable.afterState}->>'visibility'='internal'`)).orderBy(desc(feedbackAuditEventsTable.id)):[];
   const snapshotByFeedback=new Map<number,Record<string,unknown>>();for(const event of snapshots)if(!snapshotByFeedback.has(event.feedbackId))snapshotByFeedback.set(event.feedbackId,{...(event.afterState as Record<string,unknown>),generatedAt:event.createdAt.toISOString()});
+  const telegramEvents=feedbackIds.length?await db.select({feedbackId:feedbackAuditEventsTable.feedbackId,afterState:feedbackAuditEventsTable.afterState}).from(feedbackAuditEventsTable).where(and(inArray(feedbackAuditEventsTable.feedbackId,feedbackIds),eq(feedbackAuditEventsTable.eventType,"feedback_telegram_delivery"))).orderBy(desc(feedbackAuditEventsTable.id)):[];
+  const telegramByFeedback=new Map<number,string>();for(const event of telegramEvents)if(!telegramByFeedback.has(event.feedbackId))telegramByFeedback.set(event.feedbackId,String((event.afterState as Record<string,unknown>)?.state||"unknown"));
   const evidence = new Map<number, { total: number; clean: number; quarantined: number; rejected: number }>();
   for (const asset of assets) { const current = evidence.get(asset.feedbackId) || { total: 0, clean: 0, quarantined: 0, rejected: 0 }; current.total += 1; if (asset.scanState === "clean") current.clean += 1; else if (asset.scanState === "rejected") current.rejected += 1; else current.quarantined += 1; evidence.set(asset.feedbackId, current); }
-  return res.json({ feedback: rows.map(row => { const counts = evidence.get(row.id) || { total: 0, clean: 0, quarantined: 0, rejected: 0 }; return { ...row, evidence: counts, packageState: counts.total === 0 ? "metadata-only" : counts.clean === counts.total ? "ready" : counts.rejected > 0 ? "rejected-evidence" : "awaiting-scan",packageSnapshot:packageSnapshotDto(snapshotByFeedback.get(row.id)) }; }) });
+  return res.json({ feedback: rows.map(row => { const counts = evidence.get(row.id) || { total: 0, clean: 0, quarantined: 0, rejected: 0 }; return { ...row, evidence: counts, packageState: counts.total === 0 ? "metadata-only" : counts.clean === counts.total ? "ready" : counts.rejected > 0 ? "rejected-evidence" : "awaiting-scan",packageSnapshot:packageSnapshotDto(snapshotByFeedback.get(row.id)),telegramDeliveryState:telegramByFeedback.get(row.id)||"not-sent" }; }) });
 });
 
 router.get("/feedback/admin/:id/detail", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
@@ -433,7 +443,7 @@ router.get("/feedback/admin/:id/detail", authMiddleware, isSuperAdminMiddleware,
   const [feedback] = await db.select({ id: feedbackItemsTable.id, stableId: feedbackItemsTable.stableId, status: feedbackItemsTable.status, version: feedbackItemsTable.version, ownerUserId: feedbackItemsTable.ownerUserId, targetRelease: feedbackItemsTable.targetRelease, dispositionReason: feedbackItemsTable.dispositionReason, createdAt: feedbackItemsTable.createdAt, updatedAt: feedbackItemsTable.updatedAt }).from(feedbackItemsTable).where(eq(feedbackItemsTable.id, id)).limit(1);
   if (!feedback) return res.status(404).json({ code: "FEEDBACK_NOT_FOUND", error: "Feedback not found" });
   const assets = await db.select({ id: feedbackAssetsTable.id, kind: feedbackAssetsTable.kind, name: feedbackAssetsTable.safeName, mediaType: feedbackAssetsTable.mediaType, byteSize: feedbackAssetsTable.byteSize, sha256: feedbackAssetsTable.sha256, scanState: feedbackAssetsTable.scanState, scannerAdapter: feedbackAssetsTable.scannerAdapter, scannedAt: feedbackAssetsTable.scannedAt, createdAt: feedbackAssetsTable.createdAt }).from(feedbackAssetsTable).where(eq(feedbackAssetsTable.feedbackId, id)).orderBy(feedbackAssetsTable.createdAt, feedbackAssetsTable.id);
-  const history = await db.select({ id: feedbackAuditEventsTable.id, eventType: feedbackAuditEventsTable.eventType, reason: feedbackAuditEventsTable.reason, createdAt: feedbackAuditEventsTable.createdAt }).from(feedbackAuditEventsTable).where(eq(feedbackAuditEventsTable.feedbackId, id)).orderBy(feedbackAuditEventsTable.createdAt, feedbackAuditEventsTable.id).limit(FEEDBACK_PACKAGE_MAX_EVENTS);
+  const history = await db.select({ id: feedbackAuditEventsTable.id, eventType: feedbackAuditEventsTable.eventType, afterState: feedbackAuditEventsTable.afterState, reason: feedbackAuditEventsTable.reason, createdAt: feedbackAuditEventsTable.createdAt }).from(feedbackAuditEventsTable).where(eq(feedbackAuditEventsTable.feedbackId, id)).orderBy(feedbackAuditEventsTable.createdAt, feedbackAuditEventsTable.id).limit(FEEDBACK_PACKAGE_MAX_EVENTS);
   const packageSnapshot=packageSnapshotDto(await latestPackageSnapshot(id,"internal"));
   return res.json({ feedback, assets, history, packageState: assets.length === 0 ? "metadata-only" : assets.every(asset => asset.scanState === "clean" && asset.scannedAt) ? "ready" : assets.some(asset => asset.scanState === "rejected") ? "rejected-evidence" : "awaiting-scan",packageSnapshot });
 });
@@ -455,6 +465,30 @@ router.get("/feedback/admin/follow-up.csv", authMiddleware, isSuperAdminMiddlewa
   const lines = [headers.map(csvCell).join(","), ...result.rows.map((row: any) => [row.stable_id, row.status, row.priority, row.feedback_type, row.module, [row.project_code, row.project_name].filter(Boolean).join(" "), row.submitter_name, row.submitter_email, row.owner_user_id, row.target_release, row.disposition_reason, row.customer_visible, row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at, row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at, row.resolved_at instanceof Date ? row.resolved_at.toISOString() : row.resolved_at, row.last_event_type, row.last_event_at instanceof Date ? row.last_event_at.toISOString() : row.last_event_at].map(csvCell).join(","))];
   const feedbackIds = result.rows.map((row: any) => Number(row.id)).filter(Number.isInteger); if (feedbackIds.length) await db.insert(feedbackAuditEventsTable).values(feedbackIds.map(feedbackId => ({ feedbackId, actorUserId: req.user!.userId, eventType: "admin_follow_up_exported", afterState: { scope: "postgresql-register", release: FEEDBACK_RELEASE }, reason })));
   res.setHeader("Content-Type", "text/csv; charset=utf-8"); res.setHeader("Content-Disposition", "attachment; filename=feedback-follow-up-v1.60.35.09-F.csv"); return res.send(`\uFEFF${lines.join("\r\n")}\r\n`);
+});
+
+router.get("/feedback/admin/operations-status", authMiddleware, isSuperAdminMiddleware, async (_req, res) => {
+  const storageHealth = await storage.health(); const telegram = telegramProductHealth();
+  return res.json({
+    storage: { backend: storageHealth.backendId, healthy: storageHealth.healthy, capabilities: storageHealth.capabilities, maxReadBytes: storageHealth.maxReadBytes },
+    scanner: { configured: process.env.BIMLOG_FEEDBACK_SCANNER === "clamav-cli", mode: process.env.BIMLOG_FEEDBACK_SCANNER === "clamav-cli" ? "governed-clamav" : "quarantine-only" },
+    telegramDocuments: { configured: telegram.configured, mode: telegram.configured ? "linked-superadmin-delivery" : "not-configured" },
+    permanentComputerReceiver: { connected: false, root: "F:\\BIMLog\\Feedback", state: "not-mounted", explanation: "Replit cannot write to a private Windows drive until the governed receiver has a reachable TLS endpoint." },
+    release: FEEDBACK_RELEASE,
+  });
+});
+
+router.get("/feedback/admin/follow-up.xlsx", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
+  const reason = bounded(req.get("X-Export-Reason"), 500); if (!reason) return res.status(400).json({ code: "FEEDBACK_EXPORT_REASON_REQUIRED", error: "An export reason is required" });
+  const result = await db.execute(sql`SELECT f.id, f.stable_id, f.status, f.priority, f.feedback_type, f.module, f.target_release, f.disposition_reason, f.owner_user_id, f.customer_visible, f.created_at, f.updated_at, f.resolved_at, u.full_name submitter_name, u.email submitter_email, p.code project_code, p.name project_name, e.event_type last_event_type, e.created_at last_event_at FROM feedback_items f JOIN users u ON u.id=f.user_id LEFT JOIN projects p ON p.id=f.project_id LEFT JOIN LATERAL (SELECT event_type,created_at FROM feedback_audit_events WHERE feedback_id=f.id ORDER BY created_at DESC,id DESC LIMIT 1) e ON true ORDER BY CASE f.priority WHEN 'urgent' THEN 0 WHEN 'high' THEN 1 WHEN 'normal' THEN 2 ELSE 3 END,f.updated_at ASC LIMIT 5000`);
+  const headers = ["Feedback ID", "Status", "Priority", "Type", "Module", "Project", "Submitter", "Submitter email", "Owner user ID", "Target release", "Decision reason", "Customer visible", "Created", "Updated", "Resolved", "Last event", "Last event at", "Review link"];
+  const safeCell = (value: unknown) => { const text = String(value ?? "").replace(/[\u0000-\u001f\u007f]/g, " "); return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text; };
+  const rows = result.rows.map((row: any) => [row.stable_id, row.status, row.priority, row.feedback_type, row.module, [row.project_code, row.project_name].filter(Boolean).join(" "), row.submitter_name, row.submitter_email, row.owner_user_id, row.target_release, row.disposition_reason, row.customer_visible, row.created_at instanceof Date ? row.created_at.toISOString() : row.created_at, row.updated_at instanceof Date ? row.updated_at.toISOString() : row.updated_at, row.resolved_at instanceof Date ? row.resolved_at.toISOString() : row.resolved_at, row.last_event_type, row.last_event_at instanceof Date ? row.last_event_at.toISOString() : row.last_event_at, `${publicBaseUrl()}/admin/feedback?feedback=${encodeURIComponent(String(row.stable_id))}`].map(safeCell));
+  const workbook = XLSX.utils.book_new(), sheet = XLSX.utils.aoa_to_sheet([headers, ...rows]); sheet["!cols"] = headers.map((header, index) => ({ wch: index === 10 ? 60 : index === 17 ? 72 : Math.max(14, Math.min(34, header.length + 5)) })); sheet["!autofilter"] = { ref: `A1:R${rows.length + 1}` }; sheet["!freeze"] = { xSplit: 1, ySplit: 1 } as any;
+  for (let row = 2; row <= rows.length + 1; row++) { const link = sheet[`R${row}`]; if (link?.v) link.l = { Target: String(link.v), Tooltip: "Open feedback in BIMLog" }; }
+  XLSX.utils.book_append_sheet(workbook, sheet, "Feedback follow-up"); const bytes = Buffer.from(XLSX.write(workbook, { type: "buffer", bookType: "xlsx", compression: true, bookSST: true }));
+  const feedbackIds = result.rows.map((row: any) => Number(row.id)).filter(Number.isInteger); if (feedbackIds.length) await db.insert(feedbackAuditEventsTable).values(feedbackIds.map(feedbackId => ({ feedbackId, actorUserId: req.user!.userId, eventType: "admin_follow_up_exported", afterState: { scope: "postgresql-register-xlsx", release: FEEDBACK_RELEASE }, reason })));
+  res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"); res.setHeader("Content-Disposition", "attachment; filename=bimlog-feedback-follow-up.xlsx"); res.setHeader("X-Content-Type-Options", "nosniff"); return res.send(bytes);
 });
 
 router.post("/feedback/admin/:id/events",authMiddleware,isSuperAdminMiddleware,async(req,res)=>{
@@ -484,7 +518,7 @@ router.patch("/feedback/admin/:id", authMiddleware, isSuperAdminMiddleware, asyn
   });
   if (!updated) return res.status(409).json({ code: "FEEDBACK_STALE", error: "Feedback changed; reload before updating" });
   if("error" in updated)return res.status(updated.status).json({code:updated.error,error:updated.message});
-  return res.json({ success: true, feedback: customerFeedbackDto(updated) });
+  return res.json({ success: true, feedback: { ...customerFeedbackDto(updated), ownerUserId: updated.ownerUserId, dispositionReason: updated.dispositionReason, customerVisible: updated.customerVisible } });
 });
 
 export default router;

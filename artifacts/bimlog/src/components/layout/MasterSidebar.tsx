@@ -5,7 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { SidebarUtilities } from "@/components/layout/SidebarUtilities";
 import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
-import { Bell, Search, X, Building2, CircleDollarSign, LayoutDashboard, ShieldCheck, Menu, Settings2 } from "lucide-react";
+import { Bell, Search, X, Building2, CircleDollarSign, LayoutDashboard, ShieldCheck, Menu, Settings2, ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -43,6 +43,13 @@ export function MasterSidebar() {
   const [notificationLoadFailed, setNotificationLoadFailed] = useState(false);
   const notificationRequestId = useRef(0);
   const bellRef = useRef<HTMLDivElement>(null);
+  const [notificationPanelWidth, setNotificationPanelWidth] = useState(() => {
+    if (typeof window === "undefined") return 360;
+    const saved = Number(window.localStorage.getItem("bimlog-notification-panel-width"));
+    return Number.isFinite(saved) ? Math.min(720, Math.max(300, saved)) : 360;
+  });
+  const [notificationPanelCollapsed, setNotificationPanelCollapsed] = useState(() => typeof window !== "undefined" && window.localStorage.getItem("bimlog-notification-panel-collapsed") === "true");
+  const [notificationPanelResizing, setNotificationPanelResizing] = useState(false);
 
   const [showSearch, setShowSearch] = useState(false);
   const [searchQ, setSearchQ] = useState("");
@@ -91,6 +98,35 @@ export function MasterSidebar() {
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
+
+  useEffect(() => {
+    if (!notificationPanelResizing) return;
+    const resize = (event: PointerEvent) => {
+      const next = Math.min(Math.min(720, window.innerWidth - 24), Math.max(300, event.clientX));
+      setNotificationPanelWidth(next);
+    };
+    const finish = () => setNotificationPanelResizing(false);
+    window.addEventListener("pointermove", resize);
+    window.addEventListener("pointerup", finish, { once: true });
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    return () => {
+      window.removeEventListener("pointermove", resize);
+      window.removeEventListener("pointerup", finish);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [notificationPanelResizing]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("bimlog-notification-panel-width", String(Math.round(notificationPanelWidth)));
+  }, [notificationPanelWidth]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("bimlog-notification-panel-collapsed", String(notificationPanelCollapsed));
+  }, [notificationPanelCollapsed]);
 
   const loadNotifications = async () => {
     if (!token) return;
@@ -343,15 +379,33 @@ export function MasterSidebar() {
             </button>
 
             {showBell && (
-              <div aria-busy={loadingNotifs} style={{ position: "absolute", bottom: "calc(100% + 4px)", left: 14, width: 300, zIndex: 9999, background: "white", borderRadius: 10, boxShadow: "0 8px 32px rgba(0,0,0,0.2)", border: "1px solid #E5E7EB", overflow: "hidden" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "10px 14px", borderBottom: "1px solid #F3F4F6" }}>
-                  <span style={{ fontWeight: 700, fontSize: 13, color: "#111" }}>{t("Notification Inbox", "Bandeja de Notificaciones")}</span>
-                  {unreadCount > 0 && (
+              <aside
+                aria-busy={loadingNotifs}
+                aria-label={t("Notification inbox", "Bandeja de notificaciones")}
+                style={{ position: "fixed", top: 72, bottom: 16, left: 12, width: isMobile ? "calc(100vw - 24px)" : notificationPanelCollapsed ? 56 : notificationPanelWidth, zIndex: 9999, background: "white", borderRadius: 12, boxShadow: "0 18px 60px rgba(0,0,0,0.28)", border: "1px solid #D1D5DB", overflow: "hidden", transition: notificationPanelResizing ? undefined : "width .16s ease" }}
+              >
+                {!isMobile && !notificationPanelCollapsed && <button
+                  type="button"
+                  aria-label={t("Resize notification inbox", "Cambiar ancho de la bandeja")}
+                  title={t("Drag to resize", "Arrastre para cambiar el ancho")}
+                  onPointerDown={(event) => { event.preventDefault(); setNotificationPanelResizing(true); }}
+                  style={{ position: "absolute", top: 0, right: 0, bottom: 0, zIndex: 4, width: 12, display: "grid", placeItems: "center", border: 0, borderLeft: "1px solid #E5E7EB", background: "rgba(248,250,252,.82)", color: "#64748B", cursor: "col-resize" }}
+                ><GripVertical style={{ width: 12, height: 18 }} /></button>}
+                <div style={{ display: "flex", justifyContent: notificationPanelCollapsed ? "center" : "space-between", alignItems: "center", gap: 8, padding: notificationPanelCollapsed ? "10px 8px" : "10px 22px 10px 14px", borderBottom: "1px solid #F3F4F6" }}>
+                  {notificationPanelCollapsed ? <Bell aria-hidden style={{ width: 18, height: 18, color: "#1D4ED8" }} /> : <span style={{ fontWeight: 700, fontSize: 13, color: "#111" }}>{t("Notification Inbox", "Bandeja de Notificaciones")}</span>}
+                  {!notificationPanelCollapsed && unreadCount > 0 && (
                     <button onClick={markAllRead} style={{ background: "none", border: "none", fontSize: 11, color: "#2563EB", cursor: "pointer", fontWeight: 600 }}>
                       {t("Mark all read", "Marcar todo leído")}
                     </button>
                   )}
+                  <button type="button" onClick={() => setNotificationPanelCollapsed(value => !value)} aria-label={notificationPanelCollapsed ? t("Expand notification inbox", "Expandir bandeja") : t("Collapse notification inbox", "Contraer bandeja")} title={notificationPanelCollapsed ? t("Expand", "Expandir") : t("Collapse to icons", "Contraer a iconos")} style={{ border: 0, background: "transparent", color: "#475569", cursor: "pointer", padding: 3, display: "grid", placeItems: "center" }}>
+                    {notificationPanelCollapsed ? <ChevronRight style={{ width: 18, height: 18 }} /> : <ChevronLeft style={{ width: 18, height: 18 }} />}
+                  </button>
                 </div>
+                {notificationPanelCollapsed ? <div style={{ display: "grid", justifyItems: "center", gap: 12, padding: "14px 8px" }}>
+                  <button type="button" aria-label={t("Expand notifications", "Expandir notificaciones")} onClick={() => setNotificationPanelCollapsed(false)} style={{ position: "relative", width: 38, height: 38, borderRadius: 9, border: "1px solid #DBEAFE", background: "#EFF6FF", color: "#1D4ED8", cursor: "pointer", display: "grid", placeItems: "center" }}><Bell style={{ width: 18, height: 18 }} />{unreadCount > 0 && <span style={{ position: "absolute", top: -5, right: -5, minWidth: 18, height: 18, padding: "0 4px", borderRadius: 10, background: "#DC2626", color: "#fff", fontSize: 10, fontWeight: 800, display: "grid", placeItems: "center" }}>{unreadCount > 9 ? "9+" : unreadCount}</span>}</button>
+                  <button type="button" aria-label={t("Close notifications", "Cerrar notificaciones")} onClick={() => setShowBell(false)} style={{ width: 34, height: 34, borderRadius: 8, border: "1px solid #E5E7EB", background: "white", color: "#64748B", cursor: "pointer", display: "grid", placeItems: "center" }}><X style={{ width: 15, height: 15 }} /></button>
+                </div> : <>
                 {loadingNotifs && (
                   <div role="status" aria-live="polite" style={{ padding: 20, textAlign: "center", fontSize: 12, color: "#6B7280" }}>{t("Loading…", "Cargando…")}</div>
                 )}
@@ -369,7 +423,7 @@ export function MasterSidebar() {
                     {t("No notifications", "Sin notificaciones")}
                   </div>
                 )}
-                <div style={{ maxHeight: 320, overflowY: "auto" }}>
+                <div style={{ height: "calc(100% - 44px)", overflowY: "auto" }}>
                   {notifications.map(n => (
                     <div key={n.id} style={{ padding: "10px 14px", borderBottom: "1px solid #F9FAFB", background: n.isRead ? "white" : "#EFF6FF", display: "flex", gap: 8, alignItems: "flex-start" }}>
                       <div style={{ flex: 1, cursor: "pointer" }} onClick={() => { markRead(n.id); if (n.actionUrl) setLocation(n.actionUrl); setShowBell(false); }}>
@@ -383,7 +437,8 @@ export function MasterSidebar() {
                     </div>
                   ))}
                 </div>
-              </div>
+                </>}
+              </aside>
             )}
           </div>
 

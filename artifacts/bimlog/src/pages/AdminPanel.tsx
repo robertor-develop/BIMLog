@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useLocation } from "wouter";
 import { Eye, EyeOff } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
@@ -964,6 +964,18 @@ const FEEDBACK_STATUS_OPTIONS = [
   { value: "deferred", label: "Deferred" },
 ];
 
+const FEEDBACK_STATUS_TRANSITIONS: Record<string, string[]> = {
+  new: ["triaged", "rejected"],
+  triaged: ["accepted", "deferred", "rejected"],
+  accepted: ["in_progress", "blocked", "deferred"],
+  in_progress: ["blocked", "fixed"],
+  blocked: ["in_progress", "deferred"],
+  fixed: ["verified", "in_progress"],
+  verified: ["triaged"],
+  rejected: ["triaged"],
+  deferred: ["triaged"],
+};
+
 function FeedbackTab({ token }: { token: string }) {
   const [items, setItems] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
@@ -972,6 +984,11 @@ function FeedbackTab({ token }: { token: string }) {
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [detail, setDetail] = useState<Record<string, unknown> | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
+  const [operations, setOperations] = useState<Record<string, any> | null>(null);
+  const [pendingAction, setPendingAction] = useState<string | null>(null);
+  const [success, setSuccess] = useState("");
+  const topScrollRef = useRef<HTMLDivElement>(null);
+  const tableScrollRef = useRef<HTMLDivElement>(null);
 
   const loadFeedback = useCallback(() => {
     setLoading(true);
@@ -992,6 +1009,8 @@ function FeedbackTab({ token }: { token: string }) {
     loadFeedback();
   }, [loadFeedback]);
 
+  useEffect(() => { apiFetch("/feedback/admin/operations-status", token).then(response => response.ok ? response.json() : null).then(value => setOperations(value)).catch(() => setOperations(null)); }, [token]);
+
   useEffect(() => {
     if (!items.length || selectedId !== null || typeof window === "undefined") return;
     const requested = new URLSearchParams(window.location.search).get("feedback");
@@ -1002,7 +1021,7 @@ function FeedbackTab({ token }: { token: string }) {
   async function updateStatus(id: unknown, status: string) {
     const numericId = Number(id);
     if (!Number.isInteger(numericId)) return;
-    setError("");
+    setError(""); setSuccess(""); setPendingAction(`status:${numericId}`);
     try {
       const item = items.find(candidate => Number(candidate.id) === numericId);
       const needsReason = ["blocked", "verified", "rejected", "deferred"].includes(status);
@@ -1015,9 +1034,10 @@ function FeedbackTab({ token }: { token: string }) {
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error || "Failed to update feedback");
       setItems((current) => current.map((candidate) => Number(candidate.id) === numericId ? { ...candidate, ...data.feedback } : candidate));
+      setSuccess(`Feedback ${String(item?.stableId || numericId)} is now ${status.replace(/_/g, " ")}.`);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Failed to update feedback");
-    }
+    } finally { setPendingAction(null); }
   }
 
   async function openDetail(id: unknown) {
@@ -1030,8 +1050,10 @@ function FeedbackTab({ token }: { token: string }) {
 
   async function claimFeedback(item: Record<string, unknown>) {
     const numericId = Number(item.id); if (!Number.isInteger(numericId)) return;
-    try { const response = await apiFetch(`/feedback/admin/${numericId}`, token, { method: "PATCH", body: JSON.stringify({ observedVersion: Number(item.version), claimToMe: true }) }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Failed to claim feedback"); setItems(current => current.map(candidate => Number(candidate.id) === numericId ? { ...candidate, ...data.feedback } : candidate)); await openDetail(numericId); }
+    setError(""); setSuccess(""); setPendingAction(`claim:${numericId}`);
+    try { const response = await apiFetch(`/feedback/admin/${numericId}`, token, { method: "PATCH", body: JSON.stringify({ observedVersion: Number(item.version), claimToMe: true }) }); const data = await response.json().catch(() => ({})); if (!response.ok) throw new Error(data.error || "Failed to claim feedback"); setItems(current => current.map(candidate => Number(candidate.id) === numericId ? { ...candidate, ...data.feedback } : candidate)); setSuccess(`You now own ${String(item.stableId || numericId)}. Status and customer follow-up remain visible here.`); await openDetail(numericId); }
     catch (err) { setError(err instanceof Error ? err.message : "Failed to claim feedback"); }
+    finally { setPendingAction(null); }
   }
 
   async function sendCustomerUpdate(item: Record<string, unknown>) {
@@ -1047,15 +1069,21 @@ function FeedbackTab({ token }: { token: string }) {
     catch (err) { setError(err instanceof Error ? err.message : "Failed to download package"); }
   }
 
-  async function downloadPackageSnapshot(item: Record<string, unknown>, format: "pdf" | "json") {
+  async function downloadEvidence(asset: Record<string, unknown>) {
+    if (!selectedId) return; const reason = window.prompt("Export reason (required)", "Review verified customer evidence"); if (!reason?.trim()) return;
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${selectedId}/assets/${Number(asset.id)}/download`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Evidence is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = String(asset.name || "feedback-evidence"); anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
+    catch (err) { setError(err instanceof Error ? err.message : "Evidence is unavailable"); }
+  }
+
+  async function downloadPackageSnapshot(item: Record<string, unknown>, format: "pdf" | "json" | "docx" | "xlsx") {
     const reason = window.prompt("Export reason (required)", "Internal feedback follow-up"); if (!reason?.trim()) return;
     try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${Number(item.id)}/package-snapshot.${format}`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Automatic snapshot is not ready"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${String(item.stableId || "feedback")}-snapshot.${format}`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
     catch (err) { setError(err instanceof Error ? err.message : "Automatic snapshot is not ready"); }
   }
 
-  async function downloadFollowUpRegister() {
+  async function downloadFollowUpRegister(format: "csv" | "xlsx" = "xlsx") {
     const reason = window.prompt("Export reason (required)", "Customer feedback follow-up review"); if (!reason?.trim()) return;
-    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/follow-up.csv`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Follow-up register is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = "bimlog-feedback-follow-up.csv"; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/follow-up.${format}`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Follow-up register is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `bimlog-feedback-follow-up.${format}`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
     catch (err) { setError(err instanceof Error ? err.message : "Follow-up register is unavailable"); }
   }
 
@@ -1074,7 +1102,7 @@ function FeedbackTab({ token }: { token: string }) {
             BIMLog user feedback, bug reports, workflow requests, and improvement ideas.
           </p>
         </div>
-        <div style={{ display: "flex", gap: 8 }}><Button variant="outline" size="sm" onClick={() => void downloadFollowUpRegister()}>Follow-up register</Button><Button variant="outline" size="sm" onClick={loadFeedback}>Refresh</Button></div>
+        <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}><Button variant="outline" size="sm" onClick={() => void downloadFollowUpRegister("xlsx")}>Download master Excel follow-up</Button><Button variant="outline" size="sm" onClick={() => void downloadFollowUpRegister("csv")}>Download CSV</Button><Button variant="outline" size="sm" onClick={loadFeedback}>Refresh</Button></div>
       </div>
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: 12, marginBottom: 16 }}>
@@ -1083,6 +1111,13 @@ function FeedbackTab({ token }: { token: string }) {
         <StatCard label="Active work" value={plannedCount} />
         <StatCard label="Closed" value={closedCount} />
       </div>
+
+      {operations && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 10, marginBottom: 16 }}>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Temporary evidence custody</strong><div style={{ fontSize: 11, marginTop: 4 }}>{String(operations.storage?.backend || "unknown")} · {operations.storage?.healthy ? "healthy" : "unavailable"}</div></div>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Controlled scanner</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.scanner?.configured ? "Active; quarantined files will be processed" : "Not active; files remain safely quarantined"}</div></div>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Telegram Word / Excel</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.telegramDocuments?.configured ? "Active for linked super-admin chats" : "Not configured"}</div></div>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Permanent computer receiver</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.permanentComputerReceiver?.connected ? "Connected" : `Not connected · target ${String(operations.permanentComputerReceiver?.root || "F:\\BIMLog\\Feedback")}`}</div></div>
+      </div>}
 
       <div style={{ display: "flex", gap: 12, alignItems: "center", marginBottom: 14 }}>
         <label style={{ fontSize: 12, fontWeight: 700 }}>
@@ -1099,6 +1134,7 @@ function FeedbackTab({ token }: { token: string }) {
       </div>
 
       {error && <div style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 8, background: "#fef2f2", border: "1px solid #fecaca", color: "#b91c1c", fontSize: 12 }}>{error}</div>}
+      {success && <div role="status" style={{ marginBottom: 12, padding: "10px 12px", borderRadius: 8, background: "#ecfdf5", border: "1px solid #86efac", color: "#166534", fontSize: 12 }}>{success}</div>}
       {loading ? (
         <div style={{ padding: 32, color: "hsl(var(--muted-foreground))", textAlign: "center" }}>Loading feedback...</div>
       ) : visibleItems.length === 0 ? (
@@ -1106,9 +1142,20 @@ function FeedbackTab({ token }: { token: string }) {
           No feedback matches this view.
         </div>
       ) : (
-        <div style={{ overflowX: "auto", border: "1px solid hsl(var(--border))", borderRadius: 10 }}>
-          <table style={{ width: "100%", borderCollapse: "collapse", background: "hsl(var(--card))" }}>
-            <thead>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 10, overflow: "hidden" }}>
+          <div
+            ref={topScrollRef}
+            aria-label="Feedback table horizontal scroll"
+            onScroll={(event) => { if (tableScrollRef.current) tableScrollRef.current.scrollLeft = event.currentTarget.scrollLeft; }}
+            style={{ overflowX: "auto", overflowY: "hidden", height: 16, borderBottom: "1px solid hsl(var(--border))", background: "hsl(var(--muted) / 0.4)" }}
+          ><div style={{ width: 1830, height: 1 }} /></div>
+          <div
+            ref={tableScrollRef}
+            onScroll={(event) => { if (topScrollRef.current) topScrollRef.current.scrollLeft = event.currentTarget.scrollLeft; }}
+            style={{ overflow: "auto", maxHeight: "min(68vh, 760px)" }}
+          >
+          <table style={{ width: 1830, minWidth: "100%", borderCollapse: "separate", borderSpacing: 0, background: "hsl(var(--card))" }}>
+            <thead style={{ position: "sticky", top: 0, zIndex: 8, background: "hsl(var(--card))", boxShadow: "0 1px 0 hsl(var(--border))" }}>
               <tr>
                 <Th>Created</Th>
                 <Th>User</Th>
@@ -1126,7 +1173,7 @@ function FeedbackTab({ token }: { token: string }) {
             <tbody>
               {visibleItems.map((item) => (
                 <tr key={String(item.id)}>
-                  <Td style={{ fontSize: 11, whiteSpace: "nowrap" }}><strong>{String(item.stableId || "-")}</strong><br/>{item.createdAt ? new Date(String(item.createdAt)).toLocaleString() : "-"}</Td>
+                  <Td style={{ fontSize: 11, whiteSpace: "nowrap", position: "sticky", left: 0, zIndex: 4, background: "hsl(var(--card))" }}><strong>{String(item.stableId || "-")}</strong><br/>{item.createdAt ? new Date(String(item.createdAt)).toLocaleString() : "-"}</Td>
                   <Td>
                     <div style={{ fontSize: 12, fontWeight: 700 }}>{String(item.userFullName || "Unnamed")}</div>
                     <div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{String(item.userEmail || "")}</div>
@@ -1140,38 +1187,40 @@ function FeedbackTab({ token }: { token: string }) {
                   <Td style={{ fontSize: 12 }}>{String(item.module || "-")}</Td>
                   <Td style={{ minWidth: 280, maxWidth: 460, whiteSpace: "normal", overflowWrap: "anywhere" }}>{String(item.message || "")}</Td>
                   <Td style={{ minWidth: 170 }}>
-                    {(() => { const evidence = (item.evidence || {}) as Record<string, unknown>; const total = Number(evidence.total || 0), quarantined = Number(evidence.quarantined || 0), clean = Number(evidence.clean || 0), rejected = Number(evidence.rejected || 0); return <><div style={{ fontSize: 12, fontWeight: 800 }}>{total} file{total === 1 ? "" : "s"}</div><div style={{ fontSize: 11, color: quarantined ? "#b45309" : rejected ? "#b91c1c" : "#15803d" }}>{clean} clean · {quarantined} awaiting scan · {rejected} rejected</div><div style={{ fontSize: 11 }}>{String(item.packageState || "metadata-only")}</div></>; })()}
+                    {(() => { const evidence = (item.evidence || {}) as Record<string, unknown>; const total = Number(evidence.total || 0), quarantined = Number(evidence.quarantined || 0), clean = Number(evidence.clean || 0), rejected = Number(evidence.rejected || 0); return <><div style={{ fontSize: 12, fontWeight: 800 }}>{total} file{total === 1 ? "" : "s"}</div><div style={{ fontSize: 11, color: quarantined ? "#b45309" : rejected ? "#b91c1c" : "#15803d" }}>{clean} clean · {quarantined} awaiting scan · {rejected} rejected</div><div style={{ fontSize: 11 }}>Package: {String(item.packageState || "metadata-only")}</div><div style={{ fontSize: 11 }}>Telegram docs: {String(item.telegramDeliveryState || "not-sent").replace(/_/g, " ")}</div></>; })()}
                   </Td>
-                  <Td style={{ minWidth: 150 }}>
+                  <Td style={{ minWidth: 170, position: "sticky", right: 170, zIndex: 4, background: "hsl(var(--card))", boxShadow: "-1px 0 0 hsl(var(--border))" }}>
                     <select
                       value={String(item.status || "new")}
                       onChange={(event) => updateStatus(item.id, event.target.value)}
+                      disabled={pendingAction === `status:${Number(item.id)}`}
                       style={{ border: "1px solid hsl(var(--border))", borderRadius: 6, padding: "6px 8px", fontSize: 12, background: "hsl(var(--background))" }}
                     >
-                      {FEEDBACK_STATUS_OPTIONS.map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
+                      {FEEDBACK_STATUS_OPTIONS.filter((option) => option.value === String(item.status || "new") || (FEEDBACK_STATUS_TRANSITIONS[String(item.status || "new")] || []).includes(option.value)).map((option) => <option key={option.value} value={option.value}>{option.label}</option>)}
                     </select>
-                    <div style={{ marginTop: 6, fontSize: 11 }}>{item.ownerUserId ? `Owner #${String(item.ownerUserId)}` : "Unassigned"}</div>
+                    <div style={{ marginTop: 6, fontSize: 11 }}>{pendingAction === `status:${Number(item.id)}` ? "Saving…" : item.ownerUserId ? `Owned by reviewer #${String(item.ownerUserId)}` : "Unassigned"}</div>
                   </Td>
-                  <Td style={{ minWidth: 155 }}><div style={{ display: "grid", gap: 6 }}><Button variant="outline" size="sm" onClick={() => void openDetail(item.id)}>Review package</Button>{!item.ownerUserId && <Button variant="outline" size="sm" onClick={() => void claimFeedback(item)}>Claim</Button>}<Button variant="outline" size="sm" disabled={item.packageState !== "ready"} onClick={() => void downloadPackage(item)}>Download ZIP</Button><Button variant="outline" size="sm" disabled={!item.packageSnapshot} onClick={() => void downloadPackageSnapshot(item,"pdf")}>Automatic PDF</Button><Button variant="outline" size="sm" disabled={!item.packageSnapshot} onClick={() => void downloadPackageSnapshot(item,"json")}>Automatic JSON</Button><Button variant="outline" size="sm" onClick={() => void sendCustomerUpdate(item)}>Send update</Button></div></Td>
-                  <Td style={{ maxWidth: 260, overflowWrap: "anywhere" }}>
+                  <Td style={{ minWidth: 170, position: "sticky", right: 0, zIndex: 4, background: "hsl(var(--card))" }}><div style={{ display: "grid", gap: 6 }}><Button variant="outline" size="sm" onClick={() => void openDetail(item.id)}>Open complete review</Button>{!item.ownerUserId && <Button variant="outline" size="sm" disabled={pendingAction === `claim:${Number(item.id)}`} onClick={() => void claimFeedback(item)}>{pendingAction === `claim:${Number(item.id)}` ? "Claiming…" : "Claim as my item"}</Button>}<Button variant="outline" size="sm" disabled={item.packageState !== "ready"} title={item.packageState !== "ready" ? "Evidence remains locked until controlled scanning is complete" : "Download PDF, Word, Excel, JSON, and verified evidence together"} onClick={() => void downloadPackage(item)}>Download complete ZIP</Button><Button variant="outline" size="sm" disabled={!item.packageSnapshot} onClick={() => void downloadPackageSnapshot(item,"pdf")}>Download PDF report</Button><Button variant="outline" size="sm" disabled={!((item.packageSnapshot as Record<string, unknown> | null)?.docxSha256)} onClick={() => void downloadPackageSnapshot(item,"docx")}>Download Word report</Button><Button variant="outline" size="sm" disabled={!((item.packageSnapshot as Record<string, unknown> | null)?.workbookSha256)} onClick={() => void downloadPackageSnapshot(item,"xlsx")}>Download item Excel</Button><Button variant="outline" size="sm" disabled={!item.packageSnapshot} onClick={() => void downloadPackageSnapshot(item,"json")}>Download JSON record</Button><Button variant="outline" size="sm" onClick={() => void sendCustomerUpdate(item)}>Message customer</Button></div></Td>
+                  <Td style={{ width: 130 }}>
                     <a href={String(item.pageUrl || "#")} target="_blank" rel="noreferrer" style={{ color: "#1d4ed8", fontSize: 11 }}>
-                      {String(item.pageUrl || "-")}
+                      Open reported page ↗
                     </a>
                   </Td>
                 </tr>
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
-      {selectedId !== null && <section aria-label="Selected feedback package" style={{ marginTop: 18, padding: 18, border: "2px solid #2563eb", borderRadius: 12, background: "hsl(var(--card))" }}>
-        <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}><h3 style={{ margin: 0 }}>Feedback package review</h3><Button variant="outline" size="sm" onClick={() => { setSelectedId(null); setDetail(null); }}>Close</Button></div>
+      {selectedId !== null && <section role="dialog" aria-modal="true" aria-label="Selected feedback package" style={{ position: "fixed", top: 72, right: 16, bottom: 16, zIndex: 1500, width: "min(620px, calc(100vw - 32px))", overflowY: "auto", padding: 18, border: "2px solid #2563eb", borderRadius: 12, background: "hsl(var(--card))", boxShadow: "0 24px 70px rgba(15,23,42,.3)" }}>
+        <div style={{ position: "sticky", top: -18, zIndex: 2, margin: "-18px -18px 12px", padding: 18, display: "flex", justifyContent: "space-between", gap: 12, background: "hsl(var(--card))", borderBottom: "1px solid hsl(var(--border))" }}><div><h3 style={{ margin: 0 }}>Complete feedback review</h3><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>Evidence inventory, scan status, package history, and customer follow-up</div></div><Button variant="outline" size="sm" onClick={() => { setSelectedId(null); setDetail(null); }}>Close</Button></div>
         {detailLoading ? <p role="status">Loading complete package…</p> : detail ? <>
           <p><strong>{String(((detail.feedback || {}) as Record<string, unknown>).stableId || selectedId)}</strong> · Package: {String(detail.packageState || "unknown")} · Automatic snapshot: {detail.packageSnapshot ? String((detail.packageSnapshot as Record<string,unknown>).state || "ready") : "preparing"}</p>
           <h4>Evidence</h4>
-          {Array.isArray(detail.assets) && detail.assets.length ? <ul>{(detail.assets as Record<string, unknown>[]).map(asset => <li key={String(asset.id)}><strong>{String(asset.name)}</strong> — {String(asset.kind)} — {String(asset.scanState)} via {String(asset.scannerAdapter)} — {Number(asset.byteSize || 0).toLocaleString()} bytes</li>)}</ul> : <p>No files attached.</p>}
+          {Array.isArray(detail.assets) && detail.assets.length ? <ul>{(detail.assets as Record<string, unknown>[]).map(asset => <li key={String(asset.id)} style={{ marginBottom: 10 }}><strong>{String(asset.name)}</strong> — {String(asset.kind)} — {String(asset.scanState)} via {String(asset.scannerAdapter)} — {Number(asset.byteSize || 0).toLocaleString()} bytes<br/><span style={{ fontSize: 11, color: String(asset.scanState) === "clean" ? "#166534" : "#92400e" }}>{String(asset.scanState) === "clean" ? "Verified file is available in PDF/Word/ZIP and by secure download." : "File is recorded but its bytes stay locked until controlled scanning completes."}</span>{String(asset.scanState) === "clean" && <><br/><Button variant="outline" size="sm" onClick={() => void downloadEvidence(asset)}>Download verified file</Button></>}</li>)}</ul> : <p>No files attached.</p>}
           <h4>Activity</h4>
-          {Array.isArray(detail.history) && detail.history.length ? <ol>{(detail.history as Record<string, unknown>[]).map(event => <li key={String(event.id)}><strong>{String(event.eventType)}</strong> · {event.createdAt ? new Date(String(event.createdAt)).toLocaleString() : ""}{event.reason ? ` — ${String(event.reason)}` : ""}</li>)}</ol> : <p>No activity recorded.</p>}
+          {Array.isArray(detail.history) && detail.history.length ? <ol>{(detail.history as Record<string, unknown>[]).map(event => <li key={String(event.id)}><strong>{String(event.eventType).replace(/_/g, " ")}</strong> · {event.createdAt ? new Date(String(event.createdAt)).toLocaleString() : ""}{event.reason ? ` — ${String(event.reason)}` : ""}{String(event.eventType) === "feedback_telegram_delivery" ? ` — ${String(((event.afterState || {}) as Record<string,unknown>).artifactKind || "document")}: ${String(((event.afterState || {}) as Record<string,unknown>).state || "unknown")}` : ""}</li>)}</ol> : <p>No activity recorded.</p>}
         </> : <p role="alert">Package details could not be loaded.</p>}
       </section>}
     </div>
