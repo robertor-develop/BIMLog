@@ -1047,6 +1047,12 @@ function FeedbackTab({ token }: { token: string }) {
     catch (err) { setError(err instanceof Error ? err.message : "Failed to download package"); }
   }
 
+  async function downloadPackageSnapshot(item: Record<string, unknown>, format: "pdf" | "json") {
+    const reason = window.prompt("Export reason (required)", "Internal feedback follow-up"); if (!reason?.trim()) return;
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${Number(item.id)}/package-snapshot.${format}`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Automatic snapshot is not ready"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = `${String(item.stableId || "feedback")}-snapshot.${format}`; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
+    catch (err) { setError(err instanceof Error ? err.message : "Automatic snapshot is not ready"); }
+  }
+
   async function downloadFollowUpRegister() {
     const reason = window.prompt("Export reason (required)", "Customer feedback follow-up review"); if (!reason?.trim()) return;
     try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/follow-up.csv`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Follow-up register is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = "bimlog-feedback-follow-up.csv"; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
@@ -1146,7 +1152,7 @@ function FeedbackTab({ token }: { token: string }) {
                     </select>
                     <div style={{ marginTop: 6, fontSize: 11 }}>{item.ownerUserId ? `Owner #${String(item.ownerUserId)}` : "Unassigned"}</div>
                   </Td>
-                  <Td style={{ minWidth: 155 }}><div style={{ display: "grid", gap: 6 }}><Button variant="outline" size="sm" onClick={() => void openDetail(item.id)}>Review package</Button>{!item.ownerUserId && <Button variant="outline" size="sm" onClick={() => void claimFeedback(item)}>Claim</Button>}<Button variant="outline" size="sm" disabled={item.packageState !== "ready"} onClick={() => void downloadPackage(item)}>Download ZIP</Button><Button variant="outline" size="sm" onClick={() => void sendCustomerUpdate(item)}>Send update</Button></div></Td>
+                  <Td style={{ minWidth: 155 }}><div style={{ display: "grid", gap: 6 }}><Button variant="outline" size="sm" onClick={() => void openDetail(item.id)}>Review package</Button>{!item.ownerUserId && <Button variant="outline" size="sm" onClick={() => void claimFeedback(item)}>Claim</Button>}<Button variant="outline" size="sm" disabled={item.packageState !== "ready"} onClick={() => void downloadPackage(item)}>Download ZIP</Button><Button variant="outline" size="sm" disabled={!item.packageSnapshot} onClick={() => void downloadPackageSnapshot(item,"pdf")}>Automatic PDF</Button><Button variant="outline" size="sm" disabled={!item.packageSnapshot} onClick={() => void downloadPackageSnapshot(item,"json")}>Automatic JSON</Button><Button variant="outline" size="sm" onClick={() => void sendCustomerUpdate(item)}>Send update</Button></div></Td>
                   <Td style={{ maxWidth: 260, overflowWrap: "anywhere" }}>
                     <a href={String(item.pageUrl || "#")} target="_blank" rel="noreferrer" style={{ color: "#1d4ed8", fontSize: 11 }}>
                       {String(item.pageUrl || "-")}
@@ -1161,7 +1167,7 @@ function FeedbackTab({ token }: { token: string }) {
       {selectedId !== null && <section aria-label="Selected feedback package" style={{ marginTop: 18, padding: 18, border: "2px solid #2563eb", borderRadius: 12, background: "hsl(var(--card))" }}>
         <div style={{ display: "flex", justifyContent: "space-between", gap: 12 }}><h3 style={{ margin: 0 }}>Feedback package review</h3><Button variant="outline" size="sm" onClick={() => { setSelectedId(null); setDetail(null); }}>Close</Button></div>
         {detailLoading ? <p role="status">Loading complete package…</p> : detail ? <>
-          <p><strong>{String(((detail.feedback || {}) as Record<string, unknown>).stableId || selectedId)}</strong> · Package: {String(detail.packageState || "unknown")}</p>
+          <p><strong>{String(((detail.feedback || {}) as Record<string, unknown>).stableId || selectedId)}</strong> · Package: {String(detail.packageState || "unknown")} · Automatic snapshot: {detail.packageSnapshot ? String((detail.packageSnapshot as Record<string,unknown>).state || "ready") : "preparing"}</p>
           <h4>Evidence</h4>
           {Array.isArray(detail.assets) && detail.assets.length ? <ul>{(detail.assets as Record<string, unknown>[]).map(asset => <li key={String(asset.id)}><strong>{String(asset.name)}</strong> — {String(asset.kind)} — {String(asset.scanState)} via {String(asset.scannerAdapter)} — {Number(asset.byteSize || 0).toLocaleString()} bytes</li>)}</ul> : <p>No files attached.</p>}
           <h4>Activity</h4>

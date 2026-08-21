@@ -15,6 +15,8 @@ const checks: Array<[string, RegExp]> = [
   ["queue exposes the governed package", /downloadPackage.*Download ZIP/s],
   ["queue exposes customer follow-up", /sendCustomerUpdate.*Send update/s],
   ["queue exposes PostgreSQL follow-up register", /downloadFollowUpRegister.*Follow-up register/s],
+  ["queue exposes retained automatic PDF and JSON", /downloadPackageSnapshot.*Automatic PDF.*Automatic JSON/s],
+  ["detail exposes automatic snapshot state", /Automatic snapshot:.*packageSnapshot/s],
   ["detail shows scanner disposition and history", /Feedback package review.*scannerAdapter.*Activity/s],
 ];
 for (const [name, pattern] of checks) assert.match(`${app}\n${admin}`, pattern, name);

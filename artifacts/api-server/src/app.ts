@@ -61,6 +61,7 @@ import { pool } from "@workspace/db";
 import { ensureFeedbackSchema } from "./lib/feedback-schema-migration";
 import { startFeedbackNotificationWorker } from "./lib/feedback-notification-worker";
 import { startFeedbackScanWorker, verifyFeedbackScannerStartup } from "./lib/feedback-scan-worker";
+import { startFeedbackPackageSnapshotWorker } from "./lib/feedback-package-worker";
 import { storage as feedbackStorage } from "./lib/storage-adapter";
 
 const ENV_MODE =
@@ -1357,6 +1358,7 @@ export function startWorkers(): void {
   startOverdueNotifier();
   startFeedbackNotificationWorker();
   startFeedbackScanWorker();
+  startFeedbackPackageSnapshotWorker();
   if (telegramWorkersReady) {
     startTelegramProductWorker();
     startNotificationOutboxWorker();

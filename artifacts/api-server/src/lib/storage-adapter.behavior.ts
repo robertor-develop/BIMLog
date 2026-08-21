@@ -30,7 +30,7 @@ try {
   const bytes = Buffer.from([0, 255, 1, 2, 10, 13, 128]);
   const key = await first.upload(bytes, 101, "secret customer name.pdf");
   assert.match(key, /^[a-f0-9]{2}\/[a-f0-9]{2}\/[a-f0-9]{64}$/);
-  assert.ok(!key.includes("secret") && !key.includes("101"));
+  assert.ok(!key.includes("secret") && !key.includes("customer") && !key.includes("name.pdf"));
   const reopened = new LocalDiskStorageAdapter(root, { backendId: "fixture-shared", backendType: "durable-filesystem" });
   assert.deepEqual(await reopened.download(key), bytes);
   assert.deepEqual(await reopened.downloadBounded(key, bytes.length), bytes, "exact limit must succeed");

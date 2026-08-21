@@ -33,6 +33,7 @@ const canonical = (value: unknown): string => {
 };
 const packageName = (value: string) => value.replace(/[^A-Za-z0-9._-]+/g, "_").slice(0, 120) || "evidence.bin";
 const customerEvents = new Set(["created", "assets_added", "transcription_requested", "transcription_reviewed", "triage_updated", "reopened", ...FEEDBACK_CUSTOMER_EVENT_TYPES]);
+const packageExcludedEvents = new Set(["package_snapshot_created", "admin_package_exported", "admin_package_snapshot_exported", "admin_exported", "admin_follow_up_exported", "admin_asset_exported"]);
 const customerState = (value: unknown) => {
   if (!value || typeof value !== "object" || Array.isArray(value)) return null;
   const record = value as Record<string, unknown>, allowed = ["status", "version", "count", "scanState", "reviewState"];
@@ -56,7 +57,7 @@ export async function buildFeedbackPackage(args: {
     const downloadPath = args.visibility === "internal" ? `/api/v1/feedback/admin/${args.feedback.id}/assets/${asset.id}/download` : `/api/v1/feedback/${args.feedback.id}/assets/${asset.id}/download`;
     evidence.push({ ...asset, zipName: `evidence/${String(asset.id).padStart(6, "0")}-${packageName(asset.safeName)}`, downloadUrl: clean ? `${args.baseUrl}${downloadPath}` : null });
   }
-  const events = args.events.filter(event => args.visibility === "internal" || customerEvents.has(event.eventType)).map(event => ({
+  const events = args.events.filter(event => !packageExcludedEvents.has(event.eventType) && (args.visibility === "internal" || customerEvents.has(event.eventType))).map(event => ({
     id: event.id, type: event.eventType, at: event.createdAt.toISOString(),
     before: args.visibility === "customer" ? customerState(event.beforeState) : event.beforeState,
     after: args.visibility === "customer" ? customerState(event.afterState) : event.afterState,

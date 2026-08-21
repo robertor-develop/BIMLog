@@ -1,5 +1,5 @@
 import { createHash, randomUUID } from "node:crypto";
-import { Router } from "express";
+import { Router, type Response } from "express";
 import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import { db } from "@workspace/db";
 import { notificationsTable, projectMembersTable, projectsTable, usersTable } from "@workspace/db/schema";
@@ -8,7 +8,8 @@ import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
 import { boundedMultipart, createMemoryUpload } from "../middlewares/multipart";
 import { storage } from "../lib/storage-adapter";
 import { FEEDBACK_MAX_FILE_BYTES, FEEDBACK_RELEASE, inspectFeedbackEvidence } from "../lib/feedback-evidence-contract";
-import { buildFeedbackPackage, FeedbackPackageError, FEEDBACK_PACKAGE_MAX_ASSETS, FEEDBACK_PACKAGE_MAX_EVENTS, type FeedbackPackageVisibility } from "../lib/feedback-package";
+import { FeedbackPackageError, FEEDBACK_PACKAGE_MAX_EVENTS } from "../lib/feedback-package";
+import { buildFeedbackPackageFromAuthority } from "../lib/feedback-package-source";
 import { feedbackEmailCopyEnabled, feedbackEmailCopyHtml, FEEDBACK_CUSTOMER_EVENT_TYPES, FEEDBACK_STAFF_RESPONSE_TYPES } from "../lib/feedback-follow-up";
 import { sendEmail } from "../lib/email";
 
@@ -36,6 +37,18 @@ const asId = (value: unknown) => { const n = Number(value); return Number.isInte
 const bounded = (value: unknown, max: number) => String(value ?? "").trim().slice(0, max);
 const csvCell = (value: unknown) => { const normalized = String(value ?? "").replace(/[\r\n]+/g, " "); const neutral = /^[\s]*[=+\-@]/.test(normalized) ? `'${normalized}` : normalized; return `"${neutral.replace(/"/g, '""')}"`; };
 const publicBaseUrl = () => { try { const url = new URL(process.env.BIMLOG_PUBLIC_URL || "https://app.bimlog.com"); if (url.protocol !== "https:" && process.env.NODE_ENV === "production") throw new Error("HTTPS required"); return url.origin; } catch { return "https://app.bimlog.com"; } };
+const packageSnapshotDto = (state: Record<string, unknown> | undefined) => state ? ({
+  state: String(state.state || "unavailable"), sourceEventId: Number(state.sourceEventId) || null, release: String(state.release || FEEDBACK_RELEASE),
+  generatedAt: typeof state.generatedAt === "string" ? state.generatedAt : null,
+  pdfSha256: typeof state.pdfSha256 === "string" ? state.pdfSha256 : null,
+  manifestSha256: typeof state.manifestSha256 === "string" ? state.manifestSha256 : null,
+}) : null;
+async function latestPackageSnapshot(id: number, visibility: "customer" | "internal") {
+  const [event] = await db.select({ afterState: feedbackAuditEventsTable.afterState, createdAt: feedbackAuditEventsTable.createdAt }).from(feedbackAuditEventsTable)
+    .where(and(eq(feedbackAuditEventsTable.feedbackId, id), eq(feedbackAuditEventsTable.eventType, "package_snapshot_created"), sql`${feedbackAuditEventsTable.afterState}->>'visibility'=${visibility}`)).orderBy(desc(feedbackAuditEventsTable.id)).limit(1);
+  if (!event) return undefined;
+  return { ...(event.afterState as Record<string, unknown>), generatedAt: event.createdAt.toISOString() } as Record<string, unknown>;
+}
 const sanitizedPageUrl = (value: unknown) => {
   try { const url = new URL(bounded(value, 2048), "http://bimlog.local"); return url.pathname.slice(0, 2048) || "/"; }
   catch { return ""; }
@@ -274,8 +287,10 @@ router.get("/feedback/mine", authMiddleware, async (req, res) => {
   const relays=ids.length?await db.select({id:feedbackRelayJobsTable.id,feedbackId:feedbackRelayJobsTable.feedbackId,assetId:feedbackRelayJobsTable.assetId,lineageId:feedbackRelayJobsTable.lineageId,state:feedbackRelayJobsTable.state,version:feedbackRelayJobsTable.version,createdAt:feedbackRelayJobsTable.createdAt,updatedAt:feedbackRelayJobsTable.updatedAt}).from(feedbackRelayJobsTable).where(and(inArray(feedbackRelayJobsTable.feedbackId,ids),eq(feedbackRelayJobsTable.companyId,actor.companyId))).orderBy(feedbackRelayJobsTable.feedbackId,feedbackRelayJobsTable.assetId,feedbackRelayJobsTable.lineageId,desc(feedbackRelayJobsTable.version),desc(feedbackRelayJobsTable.updatedAt),desc(feedbackRelayJobsTable.id)):[];
   const currentByLineage=new Map<string,(typeof relays)[number]>();for(const relay of relays){const key=`${relay.feedbackId}:${relay.assetId}:${relay.lineageId}`;if(!currentByLineage.has(key))currentByLineage.set(key,relay);}const relaysByFeedback=new Map<number,Array<(typeof relays)[number]>>();for(const relay of currentByLineage.values()){const entries=relaysByFeedback.get(relay.feedbackId)||[];entries.push(relay);relaysByFeedback.set(relay.feedbackId,entries);}for(const entries of relaysByFeedback.values())entries.sort((left,right)=>left.assetId-right.assetId||right.updatedAt.getTime()-left.updatedAt.getTime()||right.version-left.version);
   const relayIds=[...currentByLineage.values()].map(relay=>relay.id);const custody=relayIds.length?await db.select({jobId:feedbackRelayCustodyEventsTable.jobId,sequence:feedbackRelayCustodyEventsTable.sequence,state:feedbackRelayCustodyEventsTable.toState,occurredAt:feedbackRelayCustodyEventsTable.occurredAt}).from(feedbackRelayCustodyEventsTable).where(inArray(feedbackRelayCustodyEventsTable.jobId,relayIds)).orderBy(feedbackRelayCustodyEventsTable.jobId,feedbackRelayCustodyEventsTable.sequence,feedbackRelayCustodyEventsTable.occurredAt):[];
+  const snapshotEvents=ids.length?await db.select({feedbackId:feedbackAuditEventsTable.feedbackId,afterState:feedbackAuditEventsTable.afterState,createdAt:feedbackAuditEventsTable.createdAt}).from(feedbackAuditEventsTable).where(and(inArray(feedbackAuditEventsTable.feedbackId,ids),eq(feedbackAuditEventsTable.eventType,"package_snapshot_created"),sql`${feedbackAuditEventsTable.afterState}->>'visibility'='customer'`)).orderBy(desc(feedbackAuditEventsTable.id)):[];
+  const snapshotByFeedback=new Map<number,Record<string,unknown>>();for(const event of snapshotEvents)if(!snapshotByFeedback.has(event.feedbackId))snapshotByFeedback.set(event.feedbackId,{...(event.afterState as Record<string,unknown>),generatedAt:event.createdAt.toISOString()});
   const transcriptionByFeedback=new Map<number,typeof feedbackTranscriptionJobsTable.$inferSelect>();for(const job of transcriptions)if(!transcriptionByFeedback.has(job.feedbackId))transcriptionByFeedback.set(job.feedbackId,job);
-  return res.json({feedback:visible.map(row=>({...customerFeedbackDto(row),transcription:transcriptionByFeedback.has(row.id)?transcriptionDto(transcriptionByFeedback.get(row.id)!):null,relays:(relaysByFeedback.get(row.id)||[]).map(relay=>({assetId:relay.assetId,state:relay.state,version:relay.version,createdAt:relay.createdAt,updatedAt:relay.updatedAt,reason:customerRelayReason(relay.state),history:custody.filter(event=>event.jobId===relay.id).map(event=>({sequence:event.sequence,state:event.state,at:event.occurredAt,reason:customerRelayReason(event.state)}))}))}))});
+  return res.json({feedback:visible.map(row=>({...customerFeedbackDto(row),packageSnapshot:packageSnapshotDto(snapshotByFeedback.get(row.id)),transcription:transcriptionByFeedback.has(row.id)?transcriptionDto(transcriptionByFeedback.get(row.id)!):null,relays:(relaysByFeedback.get(row.id)||[]).map(relay=>({assetId:relay.assetId,state:relay.state,version:relay.version,createdAt:relay.createdAt,updatedAt:relay.updatedAt,reason:customerRelayReason(relay.state),history:custody.filter(event=>event.jobId===relay.id).map(event=>({sequence:event.sequence,state:event.state,at:event.occurredAt,reason:customerRelayReason(event.state)}))}))}))});
 });
 
 router.post("/feedback/:id/reopen", authMiddleware, async (req, res) => {
@@ -354,30 +369,8 @@ router.get("/feedback/:id/assets/:assetId/download", authMiddleware, async (req,
   res.setHeader("X-Content-Type-Options", "nosniff"); return res.send(bytes);
 });
 
-async function packageSource(id: number, visibility: FeedbackPackageVisibility, customerUser?: NonNullable<Express.Request["user"]>) {
-  const source = await db.transaction(async tx => {
-    if (visibility === "customer" && (!customerUser || !await accessible(id, customerUser, tx))) return null;
-    const [feedback] = await tx.select({ id: feedbackItemsTable.id, stableId: feedbackItemsTable.stableId, userId: feedbackItemsTable.userId, feedbackType: feedbackItemsTable.feedbackType, priority: feedbackItemsTable.priority, module: feedbackItemsTable.module, pageUrl: feedbackItemsTable.pageUrl, message: feedbackItemsTable.message, status: feedbackItemsTable.status, version: feedbackItemsTable.version, targetRelease: feedbackItemsTable.targetRelease, dispositionReason: feedbackItemsTable.dispositionReason, customerVisible: feedbackItemsTable.customerVisible, createdAt: feedbackItemsTable.createdAt, updatedAt: feedbackItemsTable.updatedAt, resolvedAt: feedbackItemsTable.resolvedAt, submitterName: usersTable.fullName, submitterEmail: usersTable.email, projectId: feedbackItemsTable.projectId, projectName: projectsTable.name, projectCode: projectsTable.code })
-      .from(feedbackItemsTable).innerJoin(usersTable, eq(feedbackItemsTable.userId, usersTable.id)).leftJoin(projectsTable, eq(feedbackItemsTable.projectId, projectsTable.id)).where(eq(feedbackItemsTable.id, id)).limit(1);
-    if (!feedback) return null;
-    const events = await tx.select({ id: feedbackAuditEventsTable.id, eventType: feedbackAuditEventsTable.eventType, beforeState: feedbackAuditEventsTable.beforeState, afterState: feedbackAuditEventsTable.afterState, reason: feedbackAuditEventsTable.reason, createdAt: feedbackAuditEventsTable.createdAt }).from(feedbackAuditEventsTable).where(eq(feedbackAuditEventsTable.feedbackId, id)).orderBy(feedbackAuditEventsTable.createdAt, feedbackAuditEventsTable.id).limit(FEEDBACK_PACKAGE_MAX_EVENTS + 1);
-    const assets = await tx.select({ id: feedbackAssetsTable.id, kind: feedbackAssetsTable.kind, safeName: feedbackAssetsTable.safeName, mediaType: feedbackAssetsTable.mediaType, byteSize: feedbackAssetsTable.byteSize, sha256: feedbackAssetsTable.sha256, scanState: feedbackAssetsTable.scanState, scannedAt: feedbackAssetsTable.scannedAt, storagePath: feedbackAssetsTable.storagePath, createdAt: feedbackAssetsTable.createdAt }).from(feedbackAssetsTable).where(eq(feedbackAssetsTable.feedbackId, id)).orderBy(feedbackAssetsTable.createdAt, feedbackAssetsTable.id).limit(FEEDBACK_PACKAGE_MAX_ASSETS + 1);
-    return { feedback, events, assets };
-  });
-  if (!source) return null;
-  const boundedStorage = storage as typeof storage & { downloadBounded?: (key: string, maxBytes: number) => Promise<Buffer> };
-  const assets = [];
-  for (const asset of source.assets) {
-    let bytes: Buffer | undefined;
-    if (asset.scanState === "clean" && asset.scannedAt) {
-      if (!boundedStorage.downloadBounded) throw new FeedbackPackageError("Bounded evidence reads are unavailable", "PACKAGE_ASSET_UNAVAILABLE");
-      try { bytes = await boundedStorage.downloadBounded(asset.storagePath, FEEDBACK_MAX_FILE_BYTES); }
-      catch { throw new FeedbackPackageError(`Evidence ${asset.id} could not be read safely`, "PACKAGE_ASSET_UNAVAILABLE"); }
-    }
-    assets.push({ ...asset, bytes });
-  }
-  const row = source.feedback;
-  return buildFeedbackPackage({ visibility, baseUrl: publicBaseUrl(), events: source.events, assets, feedback: { id: row.id, stableId: row.stableId, feedbackType: row.feedbackType, priority: row.priority, module: row.module, pageUrl: row.pageUrl, message: row.message, status: row.status, version: row.version, targetRelease: row.targetRelease, dispositionReason: row.dispositionReason, customerVisible: row.customerVisible, createdAt: row.createdAt, updatedAt: row.updatedAt, resolvedAt: row.resolvedAt, submitter: { id: row.userId, name: row.submitterName, email: row.submitterEmail }, project: row.projectId ? { id: row.projectId, name: row.projectName, code: row.projectCode } : null } });
+async function packageSource(id: number, visibility: "customer" | "internal", customerUser?: NonNullable<Express.Request["user"]>) {
+  return buildFeedbackPackageFromAuthority({ feedbackId: id, visibility, baseUrl: publicBaseUrl(), authorize: visibility === "customer" ? async reader => !!customerUser && !!await accessible(id, customerUser, reader) : undefined });
 }
 
 router.get("/feedback/:id/package.zip", authMiddleware, async (req, res) => {
@@ -392,6 +385,22 @@ router.get("/feedback/admin/:id/package.zip", authMiddleware, isSuperAdminMiddle
   try { const result = await packageSource(id, "internal"); if (!result) return res.status(404).json({ code: "FEEDBACK_NOT_FOUND", error: "Feedback not found" }); await db.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId: req.user!.userId, eventType: "admin_package_exported", afterState: { release: FEEDBACK_RELEASE, manifestSha256: result.manifestSha256, archiveSha256: result.archiveSha256 }, reason }); res.setHeader("Content-Type", "application/zip"); res.setHeader("Content-Disposition", `attachment; filename="feedback-${id}-internal-package.zip"`); res.setHeader("X-Content-Type-Options", "nosniff"); res.setHeader("X-Feedback-Package-SHA256", result.archiveSha256); return res.send(result.archive); }
   catch (error) { const known = error instanceof FeedbackPackageError; return res.status(known && error.code === "PACKAGE_LIMIT" ? 413 : 409).json({ code: known ? `FEEDBACK_${error.code}` : "FEEDBACK_PACKAGE_FAILED", error: "Feedback package could not be generated safely" }); }
 });
+
+async function sendPackageSnapshot(res: Response, id: number, visibility: "customer" | "internal", format: "pdf" | "json") {
+  const state = await latestPackageSnapshot(id, visibility);
+  if (!state) return res.status(409).json({ code: "FEEDBACK_PACKAGE_SNAPSHOT_PENDING", error: "The automatic package snapshot is still being prepared" });
+  const pathField = format === "pdf" ? "pdfStoragePath" : "manifestStoragePath", bytesField = format === "pdf" ? "pdfByteCount" : "manifestByteCount", hashField = format === "pdf" ? "pdfSha256" : "manifestSha256";
+  const key = String(state[pathField] || ""), byteCount = Number(state[bytesField]), expectedSha256 = String(state[hashField] || "");
+  if (!key || !Number.isSafeInteger(byteCount) || byteCount <= 0 || !/^[a-f0-9]{64}$/.test(expectedSha256)) return res.status(409).json({ code: "FEEDBACK_PACKAGE_SNAPSHOT_INVALID", error: "The automatic package snapshot is incomplete" });
+  let bytes: Buffer; try { bytes = await storage.downloadBounded(key, byteCount); } catch { return res.status(502).json({ code: "FEEDBACK_PACKAGE_SNAPSHOT_READ_FAILED", error: "The automatic package snapshot could not be read safely" }); }
+  if (bytes.byteLength !== byteCount || createHash("sha256").update(bytes).digest("hex") !== expectedSha256) return res.status(409).json({ code: "FEEDBACK_PACKAGE_SNAPSHOT_INTEGRITY_FAILED", error: "The automatic package snapshot failed integrity verification" });
+  res.setHeader("Content-Type", format === "pdf" ? "application/pdf" : "application/json; charset=utf-8"); res.setHeader("Content-Disposition", `attachment; filename="feedback-${id}-snapshot.${format}"`); res.setHeader("X-Content-Type-Options", "nosniff"); res.setHeader("X-Feedback-Snapshot-SHA256", expectedSha256); return res.send(bytes);
+}
+
+router.get("/feedback/:id/package-snapshot.pdf", authMiddleware, async (req, res) => { const user=req.user,id=asId(req.params.id);if(!user)return res.status(401).json({code:"AUTH_REQUIRED",error:"Unauthorized"});if(!id||!await accessible(id,user))return res.status(403).json({code:"FEEDBACK_PACKAGE_DENIED",error:"Package access is denied"});return sendPackageSnapshot(res,id,"customer","pdf"); });
+router.get("/feedback/:id/package-snapshot.json", authMiddleware, async (req, res) => { const user=req.user,id=asId(req.params.id);if(!user)return res.status(401).json({code:"AUTH_REQUIRED",error:"Unauthorized"});if(!id||!await accessible(id,user))return res.status(403).json({code:"FEEDBACK_PACKAGE_DENIED",error:"Package access is denied"});return sendPackageSnapshot(res,id,"customer","json"); });
+router.get("/feedback/admin/:id/package-snapshot.pdf", authMiddleware, isSuperAdminMiddleware, async (req,res)=>{const id=asId(req.params.id),reason=bounded(req.get("X-Export-Reason"),500);if(!id||!reason)return res.status(400).json({code:"FEEDBACK_EXPORT_REASON_REQUIRED",error:"Feedback and an export reason are required"});await db.insert(feedbackAuditEventsTable).values({feedbackId:id,actorUserId:req.user!.userId,eventType:"admin_package_snapshot_exported",afterState:{format:"pdf",release:FEEDBACK_RELEASE},reason});return sendPackageSnapshot(res,id,"internal","pdf");});
+router.get("/feedback/admin/:id/package-snapshot.json", authMiddleware, isSuperAdminMiddleware, async (req,res)=>{const id=asId(req.params.id),reason=bounded(req.get("X-Export-Reason"),500);if(!id||!reason)return res.status(400).json({code:"FEEDBACK_EXPORT_REASON_REQUIRED",error:"Feedback and an export reason are required"});await db.insert(feedbackAuditEventsTable).values({feedbackId:id,actorUserId:req.user!.userId,eventType:"admin_package_snapshot_exported",afterState:{format:"json",release:FEEDBACK_RELEASE},reason});return sendPackageSnapshot(res,id,"internal","json");});
 
 router.get("/feedback/admin/:id/assets/:assetId/download", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
   const id = asId(req.params.id), assetId = asId(req.params.assetId), reason = bounded(req.get("X-Export-Reason"), 500); if (!id || !assetId) return res.status(400).json({ code: "FEEDBACK_ASSET_INVALID", error: "Invalid asset" }); if (!reason) return res.status(400).json({ code: "FEEDBACK_EXPORT_REASON_REQUIRED", error: "An export reason is required" });
@@ -412,9 +421,11 @@ router.get("/feedback/admin", authMiddleware, isSuperAdminMiddleware, async (_re
   const feedbackIds = rows.map(row => row.id);
   const assets = feedbackIds.length ? await db.select({ feedbackId: feedbackAssetsTable.feedbackId, scanState: feedbackAssetsTable.scanState })
     .from(feedbackAssetsTable).where(inArray(feedbackAssetsTable.feedbackId, feedbackIds)) : [];
+  const snapshots=feedbackIds.length?await db.select({feedbackId:feedbackAuditEventsTable.feedbackId,afterState:feedbackAuditEventsTable.afterState,createdAt:feedbackAuditEventsTable.createdAt}).from(feedbackAuditEventsTable).where(and(inArray(feedbackAuditEventsTable.feedbackId,feedbackIds),eq(feedbackAuditEventsTable.eventType,"package_snapshot_created"),sql`${feedbackAuditEventsTable.afterState}->>'visibility'='internal'`)).orderBy(desc(feedbackAuditEventsTable.id)):[];
+  const snapshotByFeedback=new Map<number,Record<string,unknown>>();for(const event of snapshots)if(!snapshotByFeedback.has(event.feedbackId))snapshotByFeedback.set(event.feedbackId,{...(event.afterState as Record<string,unknown>),generatedAt:event.createdAt.toISOString()});
   const evidence = new Map<number, { total: number; clean: number; quarantined: number; rejected: number }>();
   for (const asset of assets) { const current = evidence.get(asset.feedbackId) || { total: 0, clean: 0, quarantined: 0, rejected: 0 }; current.total += 1; if (asset.scanState === "clean") current.clean += 1; else if (asset.scanState === "rejected") current.rejected += 1; else current.quarantined += 1; evidence.set(asset.feedbackId, current); }
-  return res.json({ feedback: rows.map(row => { const counts = evidence.get(row.id) || { total: 0, clean: 0, quarantined: 0, rejected: 0 }; return { ...row, evidence: counts, packageState: counts.total === 0 ? "metadata-only" : counts.clean === counts.total ? "ready" : counts.rejected > 0 ? "rejected-evidence" : "awaiting-scan" }; }) });
+  return res.json({ feedback: rows.map(row => { const counts = evidence.get(row.id) || { total: 0, clean: 0, quarantined: 0, rejected: 0 }; return { ...row, evidence: counts, packageState: counts.total === 0 ? "metadata-only" : counts.clean === counts.total ? "ready" : counts.rejected > 0 ? "rejected-evidence" : "awaiting-scan",packageSnapshot:packageSnapshotDto(snapshotByFeedback.get(row.id)) }; }) });
 });
 
 router.get("/feedback/admin/:id/detail", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
@@ -423,7 +434,8 @@ router.get("/feedback/admin/:id/detail", authMiddleware, isSuperAdminMiddleware,
   if (!feedback) return res.status(404).json({ code: "FEEDBACK_NOT_FOUND", error: "Feedback not found" });
   const assets = await db.select({ id: feedbackAssetsTable.id, kind: feedbackAssetsTable.kind, name: feedbackAssetsTable.safeName, mediaType: feedbackAssetsTable.mediaType, byteSize: feedbackAssetsTable.byteSize, sha256: feedbackAssetsTable.sha256, scanState: feedbackAssetsTable.scanState, scannerAdapter: feedbackAssetsTable.scannerAdapter, scannedAt: feedbackAssetsTable.scannedAt, createdAt: feedbackAssetsTable.createdAt }).from(feedbackAssetsTable).where(eq(feedbackAssetsTable.feedbackId, id)).orderBy(feedbackAssetsTable.createdAt, feedbackAssetsTable.id);
   const history = await db.select({ id: feedbackAuditEventsTable.id, eventType: feedbackAuditEventsTable.eventType, reason: feedbackAuditEventsTable.reason, createdAt: feedbackAuditEventsTable.createdAt }).from(feedbackAuditEventsTable).where(eq(feedbackAuditEventsTable.feedbackId, id)).orderBy(feedbackAuditEventsTable.createdAt, feedbackAuditEventsTable.id).limit(FEEDBACK_PACKAGE_MAX_EVENTS);
-  return res.json({ feedback, assets, history, packageState: assets.length === 0 ? "metadata-only" : assets.every(asset => asset.scanState === "clean" && asset.scannedAt) ? "ready" : assets.some(asset => asset.scanState === "rejected") ? "rejected-evidence" : "awaiting-scan" });
+  const packageSnapshot=packageSnapshotDto(await latestPackageSnapshot(id,"internal"));
+  return res.json({ feedback, assets, history, packageState: assets.length === 0 ? "metadata-only" : assets.every(asset => asset.scanState === "clean" && asset.scannedAt) ? "ready" : assets.some(asset => asset.scanState === "rejected") ? "rejected-evidence" : "awaiting-scan",packageSnapshot });
 });
 
 router.get("/feedback/admin/export.csv", authMiddleware, isSuperAdminMiddleware, async (req, res) => {
