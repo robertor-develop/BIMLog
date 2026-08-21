@@ -206,20 +206,34 @@ async function createFeedbackWorkbook(manifest: Record<string, any>, evidence: A
     sheet.mergeCells(1, 1, 1, width); const cell = sheet.getCell(1, 1); cell.value = title; cell.font = { bold: true, size: 18, color: { argb: "FFFFFFFF" } }; cell.fill = { type: "pattern", pattern: "solid", fgColor: { argb: `FF${brand}` } }; cell.alignment = { vertical: "middle" }; sheet.getRow(1).height = 34;
   };
   const headerRow = (row: ExcelJS.Row) => { row.font = { bold: true, color: { argb: "FFFFFFFF" } }; row.fill = { type: "pattern", pattern: "solid", fgColor: { argb: `FF${brand}` } }; row.alignment = { vertical: "middle", wrapText: true }; row.height = 26; };
+  const configurePrint = (sheet: ExcelJS.Worksheet, orientation: "portrait" | "landscape", repeatRows: string) => {
+    sheet.pageSetup.orientation = orientation;
+    sheet.pageSetup.paperSize = 9;
+    sheet.pageSetup.fitToPage = true;
+    sheet.pageSetup.fitToWidth = 1;
+    sheet.pageSetup.fitToHeight = 0;
+    sheet.pageSetup.horizontalCentered = true;
+    sheet.pageSetup.margins = { left: 0.3, right: 0.3, top: 0.55, bottom: 0.55, header: 0.2, footer: 0.25 };
+    sheet.pageSetup.printTitlesRow = repeatRows;
+    sheet.headerFooter.oddFooter = `BIMLog by IgniteSmart · ${manifest.feedback.stableId} · ${manifest.release} · Page &P of &N`;
+  };
 
   const summary = workbook.addWorksheet("Follow-up", { views: [{ state: "frozen", ySplit: 1 }] }); titleRow(summary, "BIMLog Feedback Follow-up", 2);
+  configurePrint(summary, "portrait", "1:1");
   summary.columns = [{ width: 24 }, { width: 92 }];
   const fields: Array<[string, unknown]> = [["Feedback ID", manifest.feedback.stableId], ["Release", manifest.release], ["Status", manifest.feedback.status], ["Priority", manifest.feedback.priority], ["Type", manifest.feedback.feedbackType], ["Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : "None"], ["Submitter", manifest.feedback.submitter.name ?? "Unknown"], ["Submitted", manifest.feedback.createdAt], ["Updated", manifest.feedback.updatedAt], ["Target release", manifest.feedback.targetRelease ?? "Not assigned"], ["Decision / resolution", manifest.feedback.dispositionReason ?? "Pending review"], ["Message", manifest.feedback.message], ["Reported page", manifest.feedback.pageUrl], ["Metadata record", manifest.custody.metadataAuthority], ["File bytes", manifest.custody.byteStorage], ["Access", "Private BIMLog-authorized access"], ["Office link help", "If this workbook opens in Protected View, click Enable Editing. If links remain blocked, copy the complete BIMLog URL from the Evidence sheet into a signed-in browser, then click Download verified file."], ["Snapshot SHA-256", manifestSha256]];
   for (const [label, value] of fields) { const row = summary.addRow([label, String(value ?? "")]); row.getCell(1).font = { bold: true, color: { argb: `FF${brand}` } }; row.getCell(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: `FF${accent}` } }; row.eachCell(cell => { cell.border = { bottom: { style: "thin", color: { argb: `FF${grid}` } } }; cell.alignment = { vertical: "top", wrapText: true }; }); if (label === "Reported page") row.getCell(2).value = { text: String(value), hyperlink: String(value), tooltip: "Open reported page" }; }
   summary.getRow(13).height = 72;
 
   const evidenceSheet = workbook.addWorksheet("Evidence", { views: [{ state: "frozen", ySplit: 2 }] }); titleRow(evidenceSheet, "Evidence inventory and governed links", 10);
+  configurePrint(evidenceSheet, "landscape", "1:2");
   evidenceSheet.columns = [{ width: 8 }, { width: 38 }, { width: 16 }, { width: 22 }, { width: 14 }, { width: 16 }, { width: 66 }, { width: 24 }, { width: 58 }, { width: 44 }];
   const evidenceHeader = evidenceSheet.addRow(["ID", "File", "Kind", "Media type", "Bytes", "Scan state", "SHA-256", "Open in BIMLog", "BIMLog URL (copy/paste)", "Stored in"]); headerRow(evidenceHeader);
   for (const asset of evidence) { const row = evidenceSheet.addRow([asset.id, asset.safeName, asset.kind, asset.mediaType, asset.byteSize, asset.scanState, asset.sha256, { text: asset.downloadUrl ? "Open in BIMLog, then download" : "Open in BIMLog", hyperlink: asset.reviewUrl, tooltip: asset.downloadUrl ? "Open the evidence page, then click Download verified file" : "Open the evidence record; file bytes remain locked pending scan" }, asset.reviewUrl, manifest.custody.byteStorage]); row.eachCell(cell => { cell.alignment = { vertical: "top", wrapText: true }; cell.border = { bottom: { style: "thin", color: { argb: `FF${grid}` } } }; }); }
   evidenceSheet.autoFilter = { from: "A2", to: `J${evidence.length + 2}` };
 
   const previews = workbook.addWorksheet("Evidence previews", { views: [{ state: "frozen", ySplit: 1 }] }); titleRow(previews, "Verified screenshot and image previews", 8); previews.columns = [{ width: 4 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 4 }];
+  configurePrint(previews, "landscape", "1:1");
   let previewRow = 3; let imageCount = 0;
   for (const asset of evidence) if (asset.downloadUrl && asset.bytes && /^image\/(png|jpe?g)$/.test(asset.mediaType)) {
     const metadata = await sharp(asset.bytes, { limitInputPixels: MAX_EMBEDDED_IMAGE_PIXELS }).metadata(); if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_EMBEDDED_IMAGE_PIXELS) continue;
@@ -233,6 +247,7 @@ async function createFeedbackWorkbook(manifest: Record<string, any>, evidence: A
   if (!imageCount) { previews.mergeCells(3, 2, 5, 7); const note = previews.getCell(3, 2); note.value = "No verified image bytes are available yet. The evidence inventory retains secure review links and will include previews after controlled scanning completes."; note.alignment = { vertical: "middle", horizontal: "center", wrapText: true }; note.font = { italic: true, color: { argb: "FF92400E" } }; }
 
   const history = workbook.addWorksheet("Activity", { views: [{ state: "frozen", ySplit: 2 }] }); titleRow(history, "Meaningful feedback activity", 3); history.columns = [{ width: 28 }, { width: 42 }, { width: 90 }]; const activityHeader = history.addRow(["Date/time", "Activity", "Customer-visible note"]); headerRow(activityHeader);
+  configurePrint(history, "landscape", "1:2");
   for (const event of manifest.history) { const row = history.addRow([event.at, eventLabel(event.type), event.reason || "—"]); row.eachCell(cell => { cell.alignment = { vertical: "top", wrapText: true }; cell.border = { bottom: { style: "thin", color: { argb: `FF${grid}` } } }; }); }
   const output = await workbook.xlsx.writeBuffer(); return Buffer.from(output);
 }
