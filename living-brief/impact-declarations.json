@@ -12043,8 +12043,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Existing API, UI, PostgreSQL, App Storage, worker, and optional provider boundaries are extended without introducing a new platform component."
+          "result": "updated",
+          "reason": "The generated platform inventory now includes the durable Feedback Telegram worker and its executable behavior authority."
         },
         {
           "key": "plugin",
@@ -12079,10 +12079,11 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "c3b959869d31c5695bf2becd042b9a0e7f49b247481d75db593d747f4e237ed2"
+      "reviewedChangeSha256": "18bc00e6d000a03c1a94b4afa73a0071bce8ddca600d6bfef4114611f5c99632"
     }
   ]
 }

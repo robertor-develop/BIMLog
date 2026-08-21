@@ -221,6 +221,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feedback-scanner.behavior.ts
 - artifacts/api-server/src/lib/feedback-scanner.ts
 - artifacts/api-server/src/lib/feedback-schema-migration.ts
+- artifacts/api-server/src/lib/feedback-telegram-worker.behavior.ts
+- artifacts/api-server/src/lib/feedback-telegram-worker.ts
 - artifacts/api-server/src/lib/ffmpeg-capability.ts
 - artifacts/api-server/src/lib/financial-budget-browser.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-contract.ts
