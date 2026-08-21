@@ -12,7 +12,10 @@ import {
   boolean,
   uniqueIndex,
   check,
+  foreignKey,
+  ForeignKeyBuilder,
   type AnyPgColumn,
+  type PgTableExtraConfig,
 } from "drizzle-orm/pg-core";
 import { companiesTable, usersTable } from "./users";
 import { projectsTable } from "./projects";
@@ -32,9 +35,7 @@ export const feedbackItemsTable = pgTable(
     message: text("message").notNull(),
     status: text("status").default("open").notNull(),
     stableId: text("stable_id").notNull(),
-    companyId: integer("company_id")
-      .references(() => companiesTable.id)
-      .notNull(),
+    companyId: integer("company_id").notNull(),
     ownerUserId: integer("owner_user_id").references(() => usersTable.id),
     targetRelease: text("target_release"),
     dispositionReason: text("disposition_reason"),
@@ -49,7 +50,7 @@ export const feedbackItemsTable = pgTable(
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
     resolvedAt: timestamp("resolved_at"),
   },
-  (table) => ({
+  (table): PgTableExtraConfig => ({
     statusCreatedIdx: index("feedback_items_status_created_idx").on(
       table.status,
       table.createdAt.desc(),
@@ -75,6 +76,11 @@ export const feedbackItemsTable = pgTable(
       "feedback_items_version_chk",
       sql`${table.version} > 0`,
     ),
+    companyFk: foreignKey({
+      columns: [table.companyId],
+      foreignColumns: [companiesTable.id],
+      name: "feedback_items_company_id_fkey",
+    }),
   }),
 );
 
@@ -250,15 +256,9 @@ export const feedbackRelayJobsTable = pgTable(
     policyVersion: text("policy_version").notNull(),
     policySha256: text("policy_sha256").notNull(),
     lineageId: text("lineage_id").notNull(),
-    parentJobId: bigint("parent_job_id", { mode: "bigint" }).references(
-      (): AnyPgColumn => feedbackRelayJobsTable.id,
-    ),
-    receiptId: bigint("receipt_id", { mode: "bigint" }).references(
-      (): AnyPgColumn => feedbackRelayReceiptsTable.id,
-    ),
-    deletionProofId: bigint("deletion_proof_id", { mode: "bigint" }).references(
-      (): AnyPgColumn => feedbackRelayDeletionProofsTable.id,
-    ),
+    parentJobId: bigint("parent_job_id", { mode: "bigint" }),
+    receiptId: bigint("receipt_id", { mode: "bigint" }),
+    deletionProofId: bigint("deletion_proof_id", { mode: "bigint" }),
     expiresAt: timestamp("expires_at"),
     expiryOutcome: text("expiry_outcome"),
     attempts: integer("attempts").default(0).notNull(),
@@ -327,6 +327,25 @@ export const feedbackRelayJobsTable = pgTable(
       "feedback_relay_jobs_lease_chk",
       sql`(${table.leaseOwner} IS NULL AND ${table.leaseToken} IS NULL AND ${table.leaseExpiresAt} IS NULL) OR (${table.leaseOwner} IS NOT NULL AND ${table.leaseToken} IS NOT NULL AND ${table.leaseExpiresAt} IS NOT NULL)`,
     ),
+    expiryOutcomeCheck: check(
+      "feedback_relay_jobs_expiry_outcome_chk",
+      sql`${table.expiryOutcome} IS NULL OR ${table.expiryOutcome} IN ('temporary-absent','no-temporary-object')`,
+    ),
+    parentJobFk: new ForeignKeyBuilder((): { name: string; columns: AnyPgColumn[]; foreignColumns: AnyPgColumn[] } => ({
+      columns: [table.parentJobId],
+      foreignColumns: [feedbackRelayJobsTable.id],
+      name: "feedback_relay_jobs_parent_job_id_fkey",
+    })),
+    receiptFk: new ForeignKeyBuilder((): { name: string; columns: AnyPgColumn[]; foreignColumns: AnyPgColumn[] } => ({
+      columns: [table.receiptId],
+      foreignColumns: [feedbackRelayReceiptsTable.id],
+      name: "feedback_relay_jobs_receipt_id_fkey",
+    })),
+    deletionProofFk: new ForeignKeyBuilder((): { name: string; columns: AnyPgColumn[]; foreignColumns: AnyPgColumn[] } => ({
+      columns: [table.deletionProofId],
+      foreignColumns: [feedbackRelayDeletionProofsTable.id],
+      name: "feedback_relay_jobs_deletion_proof_id_fkey",
+    })),
   }),
 );
 
@@ -391,14 +410,14 @@ export const feedbackRelayNoncesTable = pgTable(
   {
     id: bigserial("id", { mode: "bigint" }).primaryKey(),
     authorityVersion: text("authority_version").default("current").notNull(),
-    jobId: bigint("job_id", { mode: "bigint" }).references(() => feedbackRelayJobsTable.id),
+    jobId: bigint("job_id", { mode: "bigint" }),
     receiverId: text("receiver_id"),
     direction: text("direction"),
     scopeId: text("scope_id"),
-    companyId: integer("company_id").references(() => companiesTable.id),
-    projectId: integer("project_id").references(() => projectsTable.id),
-    feedbackId: integer("feedback_id").references(() => feedbackItemsTable.id),
-    assetId: integer("asset_id").references(() => feedbackAssetsTable.id),
+    companyId: integer("company_id"),
+    projectId: integer("project_id"),
+    feedbackId: integer("feedback_id"),
+    assetId: integer("asset_id"),
     objectId: text("object_id"),
     requestHash: text("request_hash"),
     audience: text("audience").notNull(),
@@ -434,6 +453,11 @@ export const feedbackRelayNoncesTable = pgTable(
     currentScopeCheck: check("feedback_relay_nonces_current_scope_chk", sql`${table.authorityVersion}='legacy' OR (${table.jobId} IS NOT NULL AND ${table.receiverId} IS NOT NULL AND ${table.direction} IS NOT NULL AND ${table.scopeId} IS NOT NULL AND ${table.companyId} IS NOT NULL AND ${table.feedbackId} IS NOT NULL AND ${table.assetId} IS NOT NULL AND ${table.objectId} IS NOT NULL AND ${table.requestHash} IS NOT NULL)`),
     directionCheck: check("feedback_relay_nonces_direction_chk", sql`${table.direction} IS NULL OR ${table.direction} IN ('inbound','outbound')`),
     hashCheck: check("feedback_relay_nonces_hash_chk", sql`${table.requestHash} IS NULL OR ${table.requestHash} ~ '^[a-f0-9]{64}$'`),
+    jobFk: foreignKey({ columns: [table.jobId], foreignColumns: [feedbackRelayJobsTable.id], name: "feedback_relay_nonces_job_id_fkey" }),
+    companyFk: foreignKey({ columns: [table.companyId], foreignColumns: [companiesTable.id], name: "feedback_relay_nonces_company_id_fkey" }),
+    projectFk: foreignKey({ columns: [table.projectId], foreignColumns: [projectsTable.id], name: "feedback_relay_nonces_project_id_fkey" }),
+    feedbackFk: foreignKey({ columns: [table.feedbackId], foreignColumns: [feedbackItemsTable.id], name: "feedback_relay_nonces_feedback_id_fkey" }),
+    assetFk: foreignKey({ columns: [table.assetId], foreignColumns: [feedbackAssetsTable.id], name: "feedback_relay_nonces_asset_id_fkey" }),
   }),
 );
 
@@ -448,10 +472,10 @@ export const feedbackRelayReceiptsTable = pgTable(
     fencingToken: bigint("fencing_token", { mode: "bigint" }).notNull(),
     relayMode: text("relay_mode").notNull(),
     direction: text("direction").notNull(),
-    companyId: integer("company_id").references(() => companiesTable.id).notNull(),
-    projectId: integer("project_id").references(() => projectsTable.id),
-    feedbackId: integer("feedback_id").references(() => feedbackItemsTable.id).notNull(),
-    assetId: integer("asset_id").references(() => feedbackAssetsTable.id).notNull(),
+    companyId: integer("company_id").notNull(),
+    projectId: integer("project_id"),
+    feedbackId: integer("feedback_id").notNull(),
+    assetId: integer("asset_id").notNull(),
     policyId: text("policy_id").notNull(),
     policyVersion: text("policy_version").notNull(),
     policySha256: text("policy_sha256").notNull(),
@@ -495,6 +519,10 @@ export const feedbackRelayReceiptsTable = pgTable(
       "feedback_relay_receipts_verification_chk",
       sql`(${table.verificationState}='unverified' AND ${table.readbackVerifiedAt} IS NULL AND ${table.readbackSha256} IS NULL) OR (${table.verificationState}='verified' AND ${table.readbackSha256}=${table.sha256} AND ${table.verifiedAt}>=${table.receivedAt} AND ${table.readbackVerifiedAt}>=${table.verifiedAt} AND ${table.createdAt}>=${table.readbackVerifiedAt})`,
     ),
+    companyFk: foreignKey({ columns: [table.companyId], foreignColumns: [companiesTable.id], name: "feedback_relay_receipts_company_id_fkey" }),
+    projectFk: foreignKey({ columns: [table.projectId], foreignColumns: [projectsTable.id], name: "feedback_relay_receipts_project_id_fkey" }),
+    feedbackFk: foreignKey({ columns: [table.feedbackId], foreignColumns: [feedbackItemsTable.id], name: "feedback_relay_receipts_feedback_id_fkey" }),
+    assetFk: foreignKey({ columns: [table.assetId], foreignColumns: [feedbackAssetsTable.id], name: "feedback_relay_receipts_asset_id_fkey" }),
   }),
 );
 
