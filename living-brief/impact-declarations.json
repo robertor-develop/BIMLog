@@ -12384,6 +12384,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "aa114811a0290db63c9e5d6e9902cf20828ecf2532ba947ec7e8bdaeb2ce60fa"
+    },
+    {
+      "taskId": "bimlog-feedback-freshclam-config-compatibility-20260821",
+      "reviewedThroughCommit": "00145b81b3566eb3c9ae0d389a3ce698f9bc3dd3",
+      "reviewedAt": "2026-08-21T08:35:00-04:00",
+      "status": "freshclam_config_compatibility_closed_signed_database_proof_pending",
+      "captureTiming": "post_source_pre_replit_signed_database_execution",
+      "summary": "Binds the governed FreshClam configuration to its version-health invocation after exact Replit Shell execution proved the Nix package has no usable default configuration, and removes one deprecated configuration option without weakening scanner identity or evidence quarantine.",
+      "workstreams": [
+        "feedback-scanner-activation",
+        "feedback-replit-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves the approved evidence lifecycle and custody boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact launcher, configuration, Nix binaries, hashes, operations, and fail-closed behavior remain non-secret and bounded."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Quality records the reproduced default-configuration failure and requires a repeated signed-database clean/infected proof before publication."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer promise, reviewer workflow, release label, or product scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The Replit scanner launcher now supplies its governed FreshClam configuration during version health instead of consulting an absent host default."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, H-drive build, package, installation, or field state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "PDF, Word, Excel, JSON, ZIP, and evidence-link presentation rules are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external certification or compliance claim is added."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact compatibility commit, launcher/configuration hashes, observed Replit failure, and pending signed-database proof."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains signed-database, clean/infected, deployment, evidence-backfill, Telegram, and permanent receiver gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production row, attachment state, provider delivery, customer evidence, or permanent receiver content was altered."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4cb593ae254d124fb9508f2ead8a056677397dbd9d5e66ae9a3ab12acdab6404"
     }
   ]
 }
