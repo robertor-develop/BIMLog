@@ -19,7 +19,7 @@ function snapshot(label) {
   const status = git(["status", "--porcelain=v1", "--untracked-files=all"]).trim();
   if (status) throw new Error(`${label}: complete tracked/untracked worktree is not clean:\n${status}`);
   const paths = git(["ls-tree", "-r", "--name-only", head, "--", ...productionRoots]).split(/\r?\n/).filter(Boolean).sort();
-  if (paths.length !== 229) throw new Error(`${label}: expected 229 production inputs, resolved ${paths.length}`);
+  if (paths.length !== 256) throw new Error(`${label}: expected 256 production inputs, resolved ${paths.length}`);
   const inputs = Object.fromEntries(paths.map(relativePath => {
     const blobId = git(["rev-parse", `${head}:${relativePath}`]).trim();
     const gitBytes = execFileSync("git", ["cat-file", "blob", blobId], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 });
