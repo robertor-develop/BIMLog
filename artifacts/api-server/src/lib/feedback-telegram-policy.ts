@@ -1,0 +1,1 @@
+export const feedbackTelegramConfigurationDecision = (configured: boolean, optedInReviewerCount: number) => !configured ? "provider-not-configured" : optedInReviewerCount < 1 ? "no-opted-in-reviewer" : "ready";

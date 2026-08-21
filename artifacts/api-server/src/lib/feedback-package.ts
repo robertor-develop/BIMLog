@@ -78,7 +78,7 @@ export async function buildFeedbackPackage(args: {
       throw new FeedbackPackageError(`Evidence ${asset.id} failed bounded integrity verification`, "PACKAGE_INTEGRITY");
     if (clean) total += asset.byteSize;
     if (total > FEEDBACK_PACKAGE_MAX_BYTES) throw new FeedbackPackageError("Feedback evidence exceeds the package byte bound", "PACKAGE_LIMIT");
-    const reviewPath = args.visibility === "internal" ? `/admin/feedback?feedback=${encodeURIComponent(args.feedback.stableId)}&asset=${asset.id}` : `/feedback?view=mine&feedback=${encodeURIComponent(args.feedback.stableId)}&asset=${asset.id}`;
+    const reviewPath = args.visibility === "internal" ? `/admin?tab=feedback&feedback=${encodeURIComponent(args.feedback.stableId)}&asset=${asset.id}` : `/feedback?view=mine&feedback=${encodeURIComponent(args.feedback.stableId)}&asset=${asset.id}`;
     const downloadPath = `${reviewPath}&downloadAsset=${asset.id}`;
     evidence.push({ ...asset, zipName: `evidence/${String(asset.id).padStart(6, "0")}-${packageName(asset.safeName)}`, downloadUrl: clean ? `${args.baseUrl}${downloadPath}` : null, reviewUrl: `${args.baseUrl}${reviewPath}` });
   }
