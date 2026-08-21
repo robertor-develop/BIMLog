@@ -13076,6 +13076,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5470eb0d76f2bc6e4933fa3bd9e35ba7411e4848d5c9230734b37e342a95dbfd"
+    },
+    {
+      "taskId": "bimlog-feedback-v1.60.35.12-f-local-source-reconciliation-20260821",
+      "reviewedThroughCommit": "35f645aeca7f179befb8de95d5e5b7c4d9bacde6",
+      "reviewedAt": "2026-08-21T17:56:54-04:00",
+      "status": "local_source_and_disposable_database_evidence_accepted_final_build_browser_and_external_release_pending",
+      "captureTiming": "post_source_and_disposable_database_pre_final_build_pre_browser_pre_push",
+      "summary": "Reconciles v1.60.35.12-F through exact product source with durable independent encrypted backup scheduling, exact decrypt/readback verification, operations visibility, and disposable PostgreSQL lifecycle evidence while retaining final local and all external gates.",
+      "workstreams": [
+        "feedback-independent-encrypted-backup",
+        "feedback-backup-scheduling",
+        "feedback-backup-operations",
+        "feedback-disposable-postgresql-acceptance",
+        "feedback-external-release-boundary"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accountable intake, review, evidence, response, and fail-closed custody lifecycle is preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, provider, credential, push, publication, production, or customer authority boundary changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing exact-source, cryptographic integrity, disposable-database, browser, privacy, and zero-leak acceptance thresholds remain in force."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer Feedback promise and accountable reviewer workflow remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The official generator inventories the new backup worker and executable behavior surfaces."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin, H-drive build, package, installation, or field state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, DOCX, XLSX, JSON, ZIP, or visual report design changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No certification, external standard, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact Build 12 source, backup authority, local gates, disposable PostgreSQL proof, and truthful activation boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains final build, browser, review, push, Replit, production backup, scanner, Telegram, receiver, and customer gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No live bucket, secret, provider, receiver, remote, push, publication, production database, or customer action occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "26fc1be4e61b60267d6c618bacf3d5c736da5d8563668789b821fa5fa04e7820"
     }
   ]
 }
