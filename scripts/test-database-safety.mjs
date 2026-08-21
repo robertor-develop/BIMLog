@@ -402,7 +402,9 @@ const runtimeFinancialMigration = fs.readFileSync(
   path.resolve("artifacts/api-server/src/lib/financial-contract-migration.ts"),
   "utf8",
 );
-for (const name of explicitConstraintNames) {
+for (const name of explicitConstraintNames.filter((name) =>
+  name.startsWith("financial_contract_import_ses_"),
+)) {
   assert.ok(
     declarativeFinancialSchema.includes(name),
     `declarative schema missing ${name}`,
@@ -410,6 +412,26 @@ for (const name of explicitConstraintNames) {
   assert.ok(
     runtimeFinancialMigration.includes(name),
     `runtime migration missing ${name}`,
+  );
+}
+const declarativeFeedbackSchema = fs.readFileSync(
+  path.resolve("lib/db/src/schema/feedback-items.ts"),
+  "utf8",
+);
+const runtimeFeedbackMigration = fs.readFileSync(
+  path.resolve("artifacts/api-server/src/lib/feedback-schema-migration.ts"),
+  "utf8",
+);
+for (const name of explicitConstraintNames.filter((name) =>
+  name.startsWith("feedback_"),
+)) {
+  assert.ok(
+    declarativeFeedbackSchema.includes(name),
+    `declarative Feedback schema missing ${name}`,
+  );
+  assert.ok(
+    runtimeFeedbackMigration.includes(name),
+    `runtime Feedback migration missing ${name}`,
   );
 }
 assert.match(
