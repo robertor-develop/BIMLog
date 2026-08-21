@@ -12612,11 +12612,11 @@
     },
     {
       "taskId": "bimlog-feedback-current-reports-adaptable-workspace-20260821",
-      "reviewedThroughCommit": "41f4cc2edffe6a523663257b39e39bb8a644250b",
+      "reviewedThroughCommit": "b8622d46f16e98bc4722b35def80cea20ae514c6",
       "reviewedAt": "2026-08-21T10:19:00-04:00",
       "status": "local_source_and_controlled_browser_accepted_external_release_pending",
       "captureTiming": "post_current_authority_artifact_and_browser_acceptance_pre_push",
-      "summary": "Reconciles current-authority Feedback PDF Word Excel JSON ZIP reports, embedded clean evidence and authenticated links, compact human activity, the independently resizable/collapsible whole navigation and notification panel, clarified reviewer details, and exact 76/76 controlled Chromium evidence without claiming push, Replit publication, live scanner backfill, Telegram delivery, or permanent receiver activation.",
+      "summary": "Reconciles current-authority Feedback PDF Word Excel JSON ZIP reports, embedded clean evidence and authenticated links, compact human activity, the independently resizable/collapsible whole navigation and notification panel, clarified reviewer details, exact 76/76 controlled Chromium evidence, and the schema-owner-scoped database-safety fixture correction without claiming push, Replit publication, live scanner backfill, Telegram delivery, or permanent receiver activation.",
       "workstreams": [
         "feedback-current-authority-reports",
         "feedback-reviewer-experience",
@@ -12684,7 +12684,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "4d868a5960635dbb6889a5005e1116aae2a4ee54f0bf97b2aa1cdb35105f5564"
+      "reviewedChangeSha256": "23c691e0955ff7aab8397d4bd4718c99fc2165dbee8430cd3d276e7497ac972a"
     }
   ]
 }
