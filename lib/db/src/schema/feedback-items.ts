@@ -109,6 +109,15 @@ export const feedbackAssetsTable = pgTable(
     scanState: text("scan_state").default("quarantined").notNull(),
     scannerAdapter: text("scanner_adapter").default("default-deny").notNull(),
     scannedAt: timestamp("scanned_at"),
+    scanAttempts: integer("scan_attempts").default(0).notNull(),
+    scanNextAttemptAt: timestamp("scan_next_attempt_at"),
+    scanLeaseOwner: text("scan_lease_owner"),
+    scanLeaseToken: text("scan_lease_token"),
+    scanLeaseExpiresAt: timestamp("scan_lease_expires_at"),
+    scanFencingToken: bigint("scan_fencing_token", { mode: "number" }).default(0).notNull(),
+    scanLastErrorCode: text("scan_last_error_code"),
+    scanManualReviewAt: timestamp("scan_manual_review_at"),
+    scanUpdatedAt: timestamp("scan_updated_at").defaultNow().notNull(),
     retentionHold: boolean("retention_hold").default(true).notNull(),
     expiresAt: timestamp("expires_at"),
     provenance: jsonb("provenance")
@@ -127,10 +136,15 @@ export const feedbackAssetsTable = pgTable(
       table.sha256,
     ),
     uploadRequestIdx: uniqueIndex("feedback_assets_upload_request_idx").on(table.feedbackId,table.uploadedById,table.uploadRequestKey).where(sql`${table.uploadRequestKey} IS NOT NULL`),
+    scanClaimIdx: index("feedback_assets_scan_claim_idx").on(table.scanState,table.scanManualReviewAt,table.scanNextAttemptAt,table.scanLeaseExpiresAt,table.createdAt,table.id),
     scanStateCheck: check(
       "feedback_assets_scan_state_chk",
       sql`${table.scanState} IN ('quarantined','clean','rejected')`,
     ),
+    scanAttemptsCheck: check("feedback_assets_scan_attempts_chk", sql`${table.scanAttempts} >= 0`),
+    scanFencingCheck: check("feedback_assets_scan_fencing_chk", sql`${table.scanFencingToken} >= 0`),
+    scanLeaseCheck: check("feedback_assets_scan_lease_chk", sql`(${table.scanLeaseOwner} IS NULL AND ${table.scanLeaseToken} IS NULL AND ${table.scanLeaseExpiresAt} IS NULL) OR (${table.scanLeaseOwner} IS NOT NULL AND ${table.scanLeaseToken} IS NOT NULL AND ${table.scanLeaseExpiresAt} IS NOT NULL)`),
+    scanManualReviewCheck: check("feedback_assets_scan_manual_review_chk", sql`${table.scanManualReviewAt} IS NULL OR (${table.scanState} = 'quarantined' AND ${table.scanNextAttemptAt} IS NULL AND ${table.scanLeaseOwner} IS NULL)`),
   }),
 );
 
