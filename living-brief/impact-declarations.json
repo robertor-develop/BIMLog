@@ -12459,6 +12459,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4cb593ae254d124fb9508f2ead8a056677397dbd9d5e66ae9a3ab12acdab6404"
+    },
+    {
+      "taskId": "bimlog-feedback-first-run-scanner-database-20260821",
+      "reviewedThroughCommit": "f1341373808b2cf155e2160347936f041d5d3523",
+      "reviewedAt": "2026-08-21T08:45:00-04:00",
+      "status": "first_run_database_validation_closed_signed_database_proof_pending",
+      "captureTiming": "post_source_pre_replit_signed_database_execution",
+      "summary": "Makes every first-run scanner database validation precondition return explicitly before inventory or arithmetic so an absent database follows the governed FreshClam bootstrap instead of producing shell diagnostics.",
+      "workstreams": [
+        "feedback-scanner-activation",
+        "feedback-replit-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved evidence lifecycle and custody boundaries are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact launcher, configuration, Nix binaries, hashes, operations, and fail-closed authority remain bounded and non-secret."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Quality records the reproduced first-run validator defect and retains repeated signed-database clean/infected proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer promise, reviewer workflow, release label, or product scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The Replit scanner now treats an absent first-run database as a normal bootstrap precondition without unsafe continuation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin or H-drive build state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Feedback package presentation and evidence-link rules are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No certification or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact bootstrap commit/hash and pending operational proof."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains signed-database, deployment, evidence-backfill, Telegram, and receiver gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production row, attachment state, provider delivery, or receiver content changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "02c75d2c7d22840f522654a405f2bee8ddad89ae87774b5f8603abdef7ba9b80"
     }
   ]
 }
