@@ -3,7 +3,7 @@ import * as XLSX from "xlsx";
 export const FEEDBACK_FOLLOW_UP_HEADERS = [
   "Feedback ID", "Status", "Priority", "Next action", "Type", "Module", "Project", "Submitter", "Submitter email",
   "Owner user ID", "Target release", "Decision reason", "Customer visible", "Evidence total", "Evidence clean",
-  "Evidence quarantined", "Evidence rejected", "Package state", "Reviewer alert", "Telegram delivery", "Created", "Updated",
+  "Evidence quarantined", "Evidence rejected", "Package state", "Reviewer alert", "Telegram delivery", "Telegram outcomes", "Created", "Updated",
   "Resolved", "Last event", "Last event at", "Review link",
 ] as const;
 
@@ -15,6 +15,7 @@ export const feedbackNextAction = (row: FeedbackFollowUpRecord) => {
   if (Number(row.evidence_quarantined) > 0) return "Review scanner quarantine";
   if (Number(row.evidence_rejected) > 0) return "Review rejected evidence";
   if (String(row.reviewer_alert_state || "") !== "delivered") return "Restore reviewer alert";
+  if (["failed","partial","pending"].includes(String(row.telegram_delivery_state||""))) return "Review Telegram delivery";
   if (!row.owner_user_id) return "Claim for review";
   if (["new", "triaged", "accepted", "in_progress", "blocked", "fixed"].includes(row.status)) return "Advance review status";
   return "No open action";
@@ -24,7 +25,7 @@ export function feedbackFollowUpValues(row: FeedbackFollowUpRecord, baseUrl: str
     [row.project_code, row.project_name].filter(Boolean).join(" "), row.submitter_name, row.submitter_email, row.owner_user_id,
     row.target_release, row.disposition_reason, row.customer_visible, row.evidence_total, row.evidence_clean,
     row.evidence_quarantined, row.evidence_rejected, row.package_state || "not-generated", row.reviewer_alert_state || "pending",
-    row.telegram_delivery_state || "not-requested", iso(row.created_at), iso(row.updated_at), iso(row.resolved_at), row.last_event_type,
+    row.telegram_delivery_state || "not-requested", Array.isArray(row.telegram_delivery_outcomes)?row.telegram_delivery_outcomes.map(item=>{const outcome=item as Record<string,unknown>;return `${outcome.recipientUserId??"none"}:${outcome.artifactKind}=${outcome.state}`;}).join("; "):"", iso(row.created_at), iso(row.updated_at), iso(row.resolved_at), row.last_event_type,
     iso(row.last_event_at), feedbackReviewUrl(baseUrl, row.stable_id)].map(safeCell);
 }
 const csvCell = (value: unknown) => `"${String(value ?? "").replace(/"/g, '""')}"`;
@@ -34,9 +35,9 @@ export function buildFeedbackFollowUpCsv(rows: FeedbackFollowUpRecord[], baseUrl
 export function buildFeedbackFollowUpWorkbook(rows: FeedbackFollowUpRecord[], baseUrl: string) {
   const values = rows.map(row => feedbackFollowUpValues(row, baseUrl));
   const workbook = XLSX.utils.book_new(), sheet = XLSX.utils.aoa_to_sheet([[...FEEDBACK_FOLLOW_UP_HEADERS], ...values]);
-  sheet["!cols"] = FEEDBACK_FOLLOW_UP_HEADERS.map((header, index) => ({ wch: index === 11 ? 60 : index === 25 ? 72 : Math.max(14, Math.min(34, header.length + 5)) }));
-  sheet["!autofilter"] = { ref: `A1:Z${values.length + 1}` }; sheet["!freeze"] = { xSplit: 1, ySplit: 1 } as any;
-  for (let row = 2; row <= values.length + 1; row++) { const link = sheet[`Z${row}`]; if (link?.v) link.l = { Target: String(link.v), Tooltip: "Open feedback in BIMLog" }; }
+  sheet["!cols"] = FEEDBACK_FOLLOW_UP_HEADERS.map((header, index) => ({ wch: index === 11 ? 60 : index === 26 ? 72 : Math.max(14, Math.min(34, header.length + 5)) }));
+  sheet["!autofilter"] = { ref: `A1:AA${values.length + 1}` }; sheet["!freeze"] = { xSplit: 1, ySplit: 1 } as any;
+  for (let row = 2; row <= values.length + 1; row++) { const link = sheet[`AA${row}`]; if (link?.v) link.l = { Target: String(link.v), Tooltip: "Open feedback in BIMLog" }; }
   XLSX.utils.book_append_sheet(workbook, sheet, "Feedback follow-up");
   return Buffer.from(XLSX.write(workbook, { type: "buffer", bookType: "xlsx", compression: true, bookSST: true }));
 }
