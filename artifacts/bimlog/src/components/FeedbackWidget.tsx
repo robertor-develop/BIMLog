@@ -104,7 +104,13 @@ export function FeedbackWidget() {
   useEffect(() => { if (!token) terminateMedia(); }, [token]);
   useEffect(() => { if(error) errorRef.current?.focus(); }, [error]);
   useEffect(() => () => terminateMedia(), [location]);
-  useEffect(() => { if (token && location === "/feedback") { setOpen(true); void loadMine(); } }, [location, token]);
+  useEffect(() => {
+    const [path, query = ""] = location.split("?", 2);
+    if (!token || path !== "/feedback") return;
+    setOpen(true);
+    if (new URLSearchParams(query).get("view") === "mine") void loadMine();
+    else setReviewing(false);
+  }, [location, token]);
   useEffect(() => {
     if (!open || editingCapture) return;
     dialogRef.current?.focus();
@@ -281,7 +287,7 @@ export function FeedbackWidget() {
       <button
         ref={openerRef}
         type="button"
-        onClick={() => setOpen(true)}
+        onClick={() => { setReviewing(false); setOpen(true); }}
         aria-label={tt("Send BIMLog feedback", "Enviar comentarios a BIMLog")}
         title={tt("Send BIMLog feedback", "Enviar comentarios a BIMLog")}
         style={{
