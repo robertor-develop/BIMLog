@@ -11857,6 +11857,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "cdc324692f6421e00142e98e9f299f2a468107de22bfa40e643a5b4f368f3e88"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-expiry-definition-proof-20260821",
+      "reviewedThroughCommit": "d2baedb3a26686f6533d0d116add4dd048325670",
+      "reviewedAt": "2026-08-20T22:29:00.000-04:00",
+      "status": "local_exact_constraint_definition_proven_preview_pending",
+      "captureTiming": "post_development_parity_observation_pre_release",
+      "summary": "Binds the expiry-outcome parity expectation to PostgreSQL's exact normalized constraint definition so the strengthened gate proves the governed constraint rather than falsely rejecting equivalent source SQL.",
+      "workstreams": [
+        "replit-development-schema-sync",
+        "production-data-preservation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product or relational behavior changes; the proof matches PostgreSQL normalization."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Fail-closed database and publication rules remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact-definition assertion prevents false success and false rejection."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or customer workflow changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform component boundary or generated inventory changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin source, build, package, or installation changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design or package rendering behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact normalized constraint-definition proof."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires the exact parity pass and non-destructive preview before approval."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing immutable Feedback audit authority remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3d0a19ff6293f2d884e977b6028a858b9e80bcdf0e0c6d0a039ff25077daf50e"
     }
   ]
 }
