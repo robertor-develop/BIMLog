@@ -12007,6 +12007,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2262ad1bcf85e37c9497608adcd47a606d9589d242b53ab1bbab013934f12338"
+    },
+    {
+      "taskId": "bimlog-feedback-reviewer-packages-operations-reconciliation-20260821",
+      "reviewedThroughCommit": "854d9c16f0e2f8d3177e84ecffcd1dd2ebad5960",
+      "reviewedAt": "2026-08-21T06:08:51.846-04:00",
+      "status": "local_product_complete_external_release_pending",
+      "captureTiming": "post_implementation_pre_push",
+      "summary": "Completes the Feedback reviewer operating experience, resizable and collapsible notification inbox, governed PDF Word Excel JSON ZIP packages, master follow-up workbook, and durable Telegram document-delivery source while retaining scanner and permanent-receiver activation gates.",
+      "workstreams": [
+        "feedback-reviewer-operations",
+        "feedback-document-packages",
+        "feedback-notifications-and-custody"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "updated",
+          "reason": "Feedback now forms one accountable intake, evidence, package, reviewer, customer-response, follow-up, and delivery lifecycle while preserving explicit custody boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Fail-closed scanner, storage, provider, deployment, and receiver authorization rules remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Acceptance now includes legal lifecycle controls, visible ownership outcomes, usable sticky review layout, complete packages, durable provider receipts, and artifact rendering proof."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "The customer Feedback promise now includes discoverable internal follow-up, human and machine documents, accountable responses, and accessible reviewer operation."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing API, UI, PostgreSQL, App Storage, worker, and optional provider boundaries are extended without introducing a new platform component."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, H-drive build, package, installation, or field state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Feedback exports now include governed PDF and Word reports plus readable linked Excel follow-up workbooks with identity, pagination, and fingerprints."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact local product commit, completed reviewer and document capabilities, retained artifact proof, and truthful unactivated external gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Defines exact build, browser, push, Replit scanner, Telegram verification, publication, live smoke, and permanent receiver gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing immutable Feedback audit events remain the authority for package, status, customer message, and provider-delivery history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c3b959869d31c5695bf2becd042b9a0e7f49b247481d75db593d747f4e237ed2"
     }
   ]
 }
