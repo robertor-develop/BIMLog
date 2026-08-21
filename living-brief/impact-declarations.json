@@ -11781,6 +11781,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0c08c28f4648f2a056718c11696ba7277bad05c2b28d9c79229ff3ccbe26683e"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-constraint-name-preservation-20260821",
+      "reviewedThroughCommit": "e5458c4c14ff10cfada8df2ec10672127666e336",
+      "reviewedAt": "2026-08-20T22:20:00.000-04:00",
+      "status": "local_source_corrected_exact_constraint_preview_pending",
+      "captureTiming": "post_second_cancel_pre_release",
+      "summary": "Binds governed Feedback foreign keys and expiry outcome checks to their exact production names so Replit cannot propose destructive name-churn, and strengthens development parity to refuse their absence or definition drift.",
+      "workstreams": [
+        "feedback-automatic-package-snapshots",
+        "replit-development-schema-sync",
+        "production-data-preservation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves existing production relational authority and data."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed database and publication rules remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact constraint parity strengthens release evidence without weakening any gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or customer workflow changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform component or generated inventory boundary changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, build, package, or installation changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report design or package rendering behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the second cancelled preview and exact constraint-name correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires exact governed constraint parity and a non-destructive preview before approval."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing immutable Feedback audit authority remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cdc324692f6421e00142e98e9f299f2a468107de22bfa40e643a5b4f368f3e88"
     }
   ]
 }
