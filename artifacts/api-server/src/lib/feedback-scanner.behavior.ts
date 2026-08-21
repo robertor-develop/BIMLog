@@ -31,7 +31,10 @@ async function behavior() {
   const apiRoot = path.resolve(path.dirname(scannerSource), "../..");
   const launcherPath = path.join(apiRoot, "scripts", "feedback-clamav-replit.sh");
   const launcher = fs.readFileSync(launcherPath, "utf8");
-  const launcherHash = createHash("sha256").update(fs.readFileSync(launcherPath)).digest("hex");
+  // Git checks this shell launcher out with the platform EOL policy, while Replit
+  // executes the canonical LF blob. Bind the deployment authority to those
+  // canonical text bytes so Windows CRLF does not create a false mismatch.
+  const launcherHash = createHash("sha256").update(launcher.replace(/\r\n/g, "\n"), "utf8").digest("hex");
   const replit = fs.readFileSync(path.resolve(apiRoot, "../..", ".replit"), "utf8");
   assert.match(replit, new RegExp(`BIMLOG_FEEDBACK_SCANNER_EXECUTABLE_SHA256 = "${launcherHash}"`));
   assert.match(launcher, /FRESHCLAM_PATH=.*\/freshclam/);
