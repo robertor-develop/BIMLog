@@ -731,6 +731,8 @@ try {
   );
   console.log("feedback DB/HTTP contract: 38/38 passed");
 } finally {
+  server.closeIdleConnections();
+  server.closeAllConnections();
   await new Promise<void>((resolve) => server.close(() => resolve()));
   await appPool.end();
   await testPool.end();
