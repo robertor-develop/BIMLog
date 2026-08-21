@@ -466,7 +466,7 @@ router.get("/feedback/admin/follow-up.csv", authMiddleware, isSuperAdminMiddlewa
 router.get("/feedback/admin/operations-status", authMiddleware, isSuperAdminMiddleware, async (_req, res) => {
   const storageHealth = await storage.health(); const telegram = telegramProductHealth();
   return res.json({
-    storage: { backend: storageHealth.backendId, healthy: storageHealth.healthy, capabilities: storageHealth.capabilities, maxReadBytes: storageHealth.maxReadBytes },
+    storage: { backend: storageHealth.backendId, location: storageHealth.backendType === "replit-app-storage" && storageHealth.backendId === "bimlog-feedback-replit" ? "Private Replit App Storage bucket bimlog-feedback-temporary" : `Private ${storageHealth.backendType} backend ${storageHealth.backendId}`, metadataAuthority: "PostgreSQL", healthy: storageHealth.healthy, capabilities: storageHealth.capabilities, maxReadBytes: storageHealth.maxReadBytes },
     scanner: { configured: process.env.BIMLOG_FEEDBACK_SCANNER === "clamav-cli", mode: process.env.BIMLOG_FEEDBACK_SCANNER === "clamav-cli" ? "governed-clamav" : "quarantine-only" },
     telegramDocuments: { configured: telegram.configured, mode: telegram.configured ? "linked-superadmin-delivery" : "not-configured" },
     permanentComputerReceiver: { connected: false, root: "F:\\BIMLog\\Feedback", state: "not-mounted", explanation: "Replit cannot write to a private Windows drive until the governed receiver has a reachable TLS endpoint." },

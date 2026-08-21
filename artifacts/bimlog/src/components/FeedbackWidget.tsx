@@ -94,6 +94,7 @@ export function FeedbackWidget() {
   const dialogRef = useRef<HTMLDivElement | null>(null);
   const openerRef = useRef<HTMLButtonElement | null>(null);
   const errorRef = useRef<HTMLDivElement | null>(null);
+  const reportDownloadRef = useRef<string | null>(null);
   const idempotencyRef = useRef(randomKey());
 
   const tt = (en: string, spanish: string) => es ? spanish : en;
@@ -111,6 +112,26 @@ export function FeedbackWidget() {
     if (new URLSearchParams(search).get("view") === "mine") void loadMine();
     else setReviewing(false);
   }, [location, search, token]);
+  useEffect(() => {
+    if (!reviewing || !mine.length) return;
+    const requested = new URLSearchParams(search).get("feedback");
+    const match = requested ? mine.find(item => String(item.stableId) === requested) : undefined;
+    if (match && selectedFeedbackId !== match.id) void loadHistory(match.id);
+  }, [mine, reviewing, search, selectedFeedbackId]);
+  useEffect(() => {
+    if (!selectedFeedbackId || !reportedAssets.length || typeof window === "undefined") return;
+    const params = new URLSearchParams(search), requestedAsset = params.get("downloadAsset");
+    if (!requestedAsset) { reportDownloadRef.current = null; return; }
+    const assetId = Number(requestedAsset);
+    if (!Number.isInteger(assetId) || assetId < 1) return;
+    const key = `${selectedFeedbackId}:${assetId}`;
+    if (reportDownloadRef.current === key) return;
+    const asset = reportedAssets.find(candidate => candidate.id === assetId);
+    reportDownloadRef.current = key;
+    const clearDownloadRequest = () => { const url = new URL(window.location.href); url.searchParams.delete("downloadAsset"); window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`); };
+    if (!asset?.downloadUrl) { setError(tt("The linked evidence is unavailable or is not verified safe.", "La evidencia vinculada no está disponible o no está verificada como segura.")); clearDownloadRequest(); return; }
+    void downloadAsset(asset).finally(clearDownloadRequest);
+  }, [reportedAssets, search, selectedFeedbackId]);
   useEffect(() => {
     if (!open || editingCapture) return;
     dialogRef.current?.focus();

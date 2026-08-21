@@ -13,6 +13,12 @@ export const FEEDBACK_PACKAGE_MAX_EVENTS = 2_000;
 const MAX_EMBEDDED_IMAGE_PIXELS = 24_000_000;
 
 export type FeedbackPackageVisibility = "customer" | "internal";
+export type FeedbackPackageCustody = {
+  metadataAuthority: "PostgreSQL";
+  byteStorage: string;
+  backendId: string;
+  accessPolicy: "private-bimlog-authorized-access";
+};
 export type FeedbackPackageItem = {
   id: number; stableId: string; feedbackType: string; priority: string; module: string | null; pageUrl: string;
   message: string; status: string; version: number; targetRelease: string | null; dispositionReason: string | null;
@@ -59,7 +65,7 @@ const customerState = (value: unknown) => {
 };
 
 export async function buildFeedbackPackage(args: {
-  feedback: FeedbackPackageItem; events: FeedbackPackageEvent[]; assets: FeedbackPackageAsset[]; visibility: FeedbackPackageVisibility; baseUrl: string;
+  feedback: FeedbackPackageItem; events: FeedbackPackageEvent[]; assets: FeedbackPackageAsset[]; visibility: FeedbackPackageVisibility; baseUrl: string; custody: FeedbackPackageCustody;
 }) {
   if (args.assets.length > FEEDBACK_PACKAGE_MAX_ASSETS) throw new FeedbackPackageError("Feedback evidence count exceeds the package bound", "PACKAGE_LIMIT");
   if (args.events.length > FEEDBACK_PACKAGE_MAX_EVENTS) throw new FeedbackPackageError("Feedback history exceeds the package event bound", "PACKAGE_LIMIT");
@@ -72,8 +78,8 @@ export async function buildFeedbackPackage(args: {
       throw new FeedbackPackageError(`Evidence ${asset.id} failed bounded integrity verification`, "PACKAGE_INTEGRITY");
     if (clean) total += asset.byteSize;
     if (total > FEEDBACK_PACKAGE_MAX_BYTES) throw new FeedbackPackageError("Feedback evidence exceeds the package byte bound", "PACKAGE_LIMIT");
-    const downloadPath = args.visibility === "internal" ? `/api/v1/feedback/admin/${args.feedback.id}/assets/${asset.id}/download` : `/api/v1/feedback/${args.feedback.id}/assets/${asset.id}/download`;
     const reviewPath = args.visibility === "internal" ? `/admin/feedback?feedback=${encodeURIComponent(args.feedback.stableId)}&asset=${asset.id}` : `/feedback?view=mine&feedback=${encodeURIComponent(args.feedback.stableId)}&asset=${asset.id}`;
+    const downloadPath = `${reviewPath}&downloadAsset=${asset.id}`;
     evidence.push({ ...asset, zipName: `evidence/${String(asset.id).padStart(6, "0")}-${packageName(asset.safeName)}`, downloadUrl: clean ? `${args.baseUrl}${downloadPath}` : null, reviewUrl: `${args.baseUrl}${reviewPath}` });
   }
   const events = args.events.filter(event => !packageExcludedEvents.has(event.eventType) && (args.visibility === "internal" || customerEvents.has(event.eventType))).map(event => ({
@@ -83,7 +89,7 @@ export async function buildFeedbackPackage(args: {
     reason: args.visibility === "internal" || FEEDBACK_CUSTOMER_EVENT_TYPES.has(event.eventType) ? event.reason : null,
   }));
   const manifestObject = {
-    schema: "bimlog.feedback-package.v1", release: FEEDBACK_RELEASE, visibility: args.visibility,
+    schema: "bimlog.feedback-package.v1", release: FEEDBACK_RELEASE, visibility: args.visibility, custody: args.custody,
     feedback: { ...args.feedback, createdAt: args.feedback.createdAt.toISOString(), updatedAt: args.feedback.updatedAt.toISOString(), resolvedAt: args.feedback.resolvedAt?.toISOString() ?? null,
       submitter: args.visibility === "internal" ? args.feedback.submitter : { id: args.feedback.submitter.id, name: args.feedback.submitter.name, email: null },
       dispositionReason: args.visibility === "internal" ? args.feedback.dispositionReason : null },
@@ -110,18 +116,22 @@ async function createHumanPdf(manifest: Record<string, any>, evidence: Array<Fee
     doc.rect(0, 0, doc.page.width, 112).fill("#173b63"); doc.fillColor("#ffffff").fontSize(9).font("Helvetica-Bold").text("BIMLOG BY IGNITESMART", 50, 34); doc.fontSize(22).text("Feedback review package", 50, 53); doc.fontSize(10).font("Helvetica").text(`${manifest.feedback.stableId}  ·  ${manifest.release}`, 50, 84); doc.fillColor("#111827").y = 134;
     doc.fontSize(10); field("Submitted by", `${manifest.feedback.submitter.name ?? "Unknown"}${manifest.feedback.submitter.email ? ` <${manifest.feedback.submitter.email}>` : ""}`);
     field("Submitted", manifest.feedback.createdAt); field("Last updated", manifest.feedback.updatedAt); field("Status", manifest.feedback.status); field("Type / priority", `${manifest.feedback.feedbackType} / ${manifest.feedback.priority}`); field("Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : "None");
-    doc.moveDown(0.7).roundedRect(50, doc.y, doc.page.width - 100, 66, 6).fillAndStroke("#eef5fb", "#b8cadd"); doc.fillColor("#173b63").font("Helvetica-Bold").text("CUSTOMER MESSAGE", 64, doc.y + 13); doc.fillColor("#111827").font("Helvetica").text(manifest.feedback.message, 64, doc.y + 30, { width: doc.page.width - 128, height: 32, ellipsis: true }); doc.y += 74;
+    const messageWidth = doc.page.width - 128; doc.font("Helvetica").fontSize(10); const messageHeight = Math.min(150, Math.max(30, doc.heightOfString(manifest.feedback.message, { width: messageWidth }))); const messageTop = doc.y + 30; const messageBoxHeight = messageHeight + 48;
+    doc.moveDown(0.7).roundedRect(50, doc.y, doc.page.width - 100, messageBoxHeight, 6).fillAndStroke("#eef5fb", "#b8cadd"); doc.fillColor("#173b63").font("Helvetica-Bold").text("CUSTOMER MESSAGE", 64, doc.y + 13); doc.fillColor("#111827").font("Helvetica").text(manifest.feedback.message, 64, messageTop, { width: messageWidth, height: messageHeight, ellipsis: true }); doc.y = messageTop + messageHeight + 18;
     doc.moveDown(0.5).font("Helvetica-Bold").fillColor("#173b63").text("Meaningful activity"); doc.moveDown(0.25);
     for (const event of manifest.history) doc.font("Helvetica").fillColor("#111827").text(`${event.at}  ·  ${eventLabel(event.type)}${event.reason ? `  ·  ${event.reason}` : ""}`, { paragraphGap: 3 });
-    doc.addPage().font("Helvetica-Bold").fillColor("#173b63").fontSize(16).text("Evidence inventory"); doc.moveDown(0.3).font("Helvetica").fillColor("#475569").fontSize(9).text("Every link opens the governed BIMLog record. Verified files also provide an authenticated original download.");
-    for (const asset of manifest.evidence) { doc.moveDown(0.7).font("Helvetica-Bold").fillColor("#173b63").text(`${asset.id} · ${asset.name}`); doc.font("Helvetica").fillColor("#111827").text(`${asset.kind} · ${asset.mediaType} · ${asset.byteSize.toLocaleString()} bytes · ${asset.scanState === "clean" ? "verified safe" : asset.scanState}`); doc.fontSize(8).fillColor("#64748b").text(`SHA-256 ${asset.sha256}`).fontSize(10); doc.fillColor("#0563c1").text("Open evidence record (sign-in required)", { link: asset.reviewUrl, underline: true }).fillColor("#111827"); if (asset.secureDownloadUrl) doc.fillColor("#0563c1").text("Secure authenticated download", { link: asset.secureDownloadUrl, underline: true }).fillColor("#111827"); else doc.fillColor("#92400e").text("Preview and download remain locked until controlled scanning completes.").fillColor("#111827"); }
+    doc.addPage().font("Helvetica-Bold").fillColor("#173b63").fontSize(16).text("Evidence inventory"); doc.moveDown(0.3).font("Helvetica").fillColor("#475569").fontSize(9).text("File records are held in PostgreSQL. Verified bytes are held in the private storage location below. Links open BIMLog first so your signed-in session can authorize access.");
+    doc.moveDown(0.5).font("Helvetica-Bold").fillColor("#173b63").text("Metadata record: ", { continued: true }).font("Helvetica").fillColor("#111827").text(manifest.custody.metadataAuthority);
+    doc.font("Helvetica-Bold").fillColor("#173b63").text("File bytes: ", { continued: true }).font("Helvetica").fillColor("#111827").text(manifest.custody.byteStorage);
+    doc.font("Helvetica-Bold").fillColor("#173b63").text("Access: ", { continued: true }).font("Helvetica").fillColor("#111827").text("Private. Sign in to BIMLog; the application verifies your authority before downloading.");
+    for (const asset of manifest.evidence) { doc.moveDown(0.7).font("Helvetica-Bold").fillColor("#173b63").text(`${asset.id} · ${asset.name}`); doc.font("Helvetica").fillColor("#111827").text(`${asset.kind} · ${asset.mediaType} · ${asset.byteSize.toLocaleString()} bytes · ${asset.scanState === "clean" ? "verified safe" : asset.scanState}`); doc.fontSize(8).fillColor("#64748b").text(`SHA-256 ${asset.sha256}`).fontSize(10); doc.fillColor("#0563c1").text("Open evidence record in BIMLog", { link: asset.reviewUrl, underline: true }).fillColor("#111827"); if (asset.secureDownloadUrl) doc.fillColor("#0563c1").text("Open BIMLog and download verified file", { link: asset.secureDownloadUrl, underline: true }).fillColor("#111827"); else doc.fillColor("#92400e").text("Preview and download remain locked until controlled scanning completes.").fillColor("#111827"); }
     void (async () => {
       try {
         for (const asset of evidence) if (asset.scanState === "clean" && asset.scannedAt && asset.bytes && /^image\/(png|jpe?g)$/.test(asset.mediaType)) {
           const metadata = await sharp(asset.bytes, { limitInputPixels: MAX_EMBEDDED_IMAGE_PIXELS }).metadata();
           if (!metadata.width || !metadata.height || metadata.width * metadata.height > MAX_EMBEDDED_IMAGE_PIXELS) throw new FeedbackPackageError(`Image evidence ${asset.id} exceeds the render bound`, "PACKAGE_LIMIT");
           const rendered = await sharp(asset.bytes, { limitInputPixels: MAX_EMBEDDED_IMAGE_PIXELS }).rotate().resize({ width: 1500, height: 1900, fit: "inside", withoutEnlargement: true }).png().toBuffer();
-          doc.addPage().font("Helvetica-Bold").fillColor("#173b63").fontSize(15).text(`Image evidence ${asset.id}`); doc.font("Helvetica").fillColor("#475569").fontSize(9).text(`${asset.safeName} · ${asset.byteSize.toLocaleString()} bytes · verified safe`); doc.moveDown().image(rendered, { fit: [510, 635], align: "center", valign: "center" }); doc.moveDown(0.4).fillColor("#0563c1").text("Open secure original in BIMLog", { link: asset.downloadUrl!, underline: true }).fillColor("#111827");
+          doc.addPage().font("Helvetica-Bold").fillColor("#173b63").fontSize(15).text(`Image evidence ${asset.id}`); doc.font("Helvetica").fillColor("#475569").fontSize(9).text(`${asset.safeName} · ${asset.byteSize.toLocaleString()} bytes · verified safe`); doc.moveDown().image(rendered, { fit: [510, 635], align: "center", valign: "center" }); doc.moveDown(0.4).fillColor("#0563c1").text("Open BIMLog and download verified original", { link: asset.downloadUrl!, underline: true }).fillColor("#111827");
         }
         doc.addPage().fontSize(14).font("Helvetica-Bold").text("Package snapshot fingerprint");
         doc.moveDown(0.6).fontSize(10).font("Helvetica").text("This fingerprint binds the canonical JSON snapshot used to generate this human-readable report.");
@@ -148,7 +158,7 @@ async function createHumanDocx(manifest: Record<string, any>, evidence: Array<Fe
   const evidenceRows = [new TableRow({ children: ["File", "Type", "Scan", "Size", "Links"].map((text, index) => new TableCell({ width: { size: columnWidths[index], type: WidthType.DXA }, shading: { fill: "DDEBF7" }, children: [new Paragraph({ children: [new TextRun({ text, bold: true, color: "173B63" })] })] })) })];
   for (const asset of evidence) {
     const links = [new ExternalHyperlink({ link: asset.reviewUrl, children: [new TextRun({ text: "Open evidence record", style: "Hyperlink" })] })];
-    if (asset.downloadUrl) links.push(new ExternalHyperlink({ link: asset.downloadUrl, children: [new TextRun({ text: " · Secure download", style: "Hyperlink" })] }));
+    if (asset.downloadUrl) links.push(new ExternalHyperlink({ link: asset.downloadUrl, children: [new TextRun({ text: " · Open BIMLog and download", style: "Hyperlink" })] }));
     evidenceRows.push(new TableRow({ children: [
       new TableCell({ width: { size: columnWidths[0], type: WidthType.DXA }, children: [new Paragraph(asset.safeName), new Paragraph({ children: [new TextRun({ text: `SHA-256 ${asset.sha256}`, size: 16, color: "64748B" })] })] }),
       new TableCell({ width: { size: columnWidths[1], type: WidthType.DXA }, children: [new Paragraph(`${asset.kind} / ${asset.mediaType}`)] }),
@@ -172,6 +182,7 @@ async function createHumanDocx(manifest: Record<string, any>, evidence: Array<Fe
       new Paragraph({ heading: HeadingLevel.TITLE, children: [new TextRun("BIMLog Feedback Package")] }),
       field("Release", manifest.release), field("Feedback", manifest.feedback.stableId), field("Submitted by", `${manifest.feedback.submitter.name ?? "Unknown"}${manifest.feedback.submitter.email ? ` <${manifest.feedback.submitter.email}>` : ""}`), field("Submitted", manifest.feedback.createdAt), field("Updated", manifest.feedback.updatedAt), field("Status", manifest.feedback.status), field("Type / priority", `${manifest.feedback.feedbackType} / ${manifest.feedback.priority}`), field("Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : "None"), field("Reported page", manifest.feedback.pageUrl),
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("Customer message")] }), new Paragraph(manifest.feedback.message),
+      new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("Evidence custody")] }), field("Metadata record", manifest.custody.metadataAuthority), field("File bytes", manifest.custody.byteStorage), field("Access", "Private BIMLog-authorized access. Sign in before opening or downloading."),
       new Paragraph({ heading: HeadingLevel.HEADING_1, children: [new TextRun("Evidence inventory")] }),
       new Table({ width: { size: 9360, type: WidthType.DXA }, columnWidths, rows: evidenceRows }),
       ...imageSections,
@@ -194,15 +205,15 @@ async function createFeedbackWorkbook(manifest: Record<string, any>, evidence: A
 
   const summary = workbook.addWorksheet("Follow-up", { views: [{ state: "frozen", ySplit: 1 }] }); titleRow(summary, "BIMLog Feedback Follow-up", 2);
   summary.columns = [{ width: 24 }, { width: 92 }];
-  const fields: Array<[string, unknown]> = [["Feedback ID", manifest.feedback.stableId], ["Release", manifest.release], ["Status", manifest.feedback.status], ["Priority", manifest.feedback.priority], ["Type", manifest.feedback.feedbackType], ["Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : "None"], ["Submitter", manifest.feedback.submitter.name ?? "Unknown"], ["Submitted", manifest.feedback.createdAt], ["Updated", manifest.feedback.updatedAt], ["Target release", manifest.feedback.targetRelease ?? "Not assigned"], ["Decision / resolution", manifest.feedback.dispositionReason ?? "Pending review"], ["Message", manifest.feedback.message], ["Reported page", manifest.feedback.pageUrl], ["Snapshot SHA-256", manifestSha256]];
+  const fields: Array<[string, unknown]> = [["Feedback ID", manifest.feedback.stableId], ["Release", manifest.release], ["Status", manifest.feedback.status], ["Priority", manifest.feedback.priority], ["Type", manifest.feedback.feedbackType], ["Project", manifest.feedback.project ? `${manifest.feedback.project.code ?? ""} ${manifest.feedback.project.name ?? ""}`.trim() : "None"], ["Submitter", manifest.feedback.submitter.name ?? "Unknown"], ["Submitted", manifest.feedback.createdAt], ["Updated", manifest.feedback.updatedAt], ["Target release", manifest.feedback.targetRelease ?? "Not assigned"], ["Decision / resolution", manifest.feedback.dispositionReason ?? "Pending review"], ["Message", manifest.feedback.message], ["Reported page", manifest.feedback.pageUrl], ["Metadata record", manifest.custody.metadataAuthority], ["File bytes", manifest.custody.byteStorage], ["Access", "Private BIMLog-authorized access"], ["Snapshot SHA-256", manifestSha256]];
   for (const [label, value] of fields) { const row = summary.addRow([label, String(value ?? "")]); row.getCell(1).font = { bold: true, color: { argb: `FF${brand}` } }; row.getCell(1).fill = { type: "pattern", pattern: "solid", fgColor: { argb: `FF${accent}` } }; row.eachCell(cell => { cell.border = { bottom: { style: "thin", color: { argb: `FF${grid}` } } }; cell.alignment = { vertical: "top", wrapText: true }; }); if (label === "Reported page") row.getCell(2).value = { text: String(value), hyperlink: String(value), tooltip: "Open reported page" }; }
   summary.getRow(13).height = 72;
 
-  const evidenceSheet = workbook.addWorksheet("Evidence", { views: [{ state: "frozen", ySplit: 2 }] }); titleRow(evidenceSheet, "Evidence inventory and secure links", 9);
-  evidenceSheet.columns = [{ width: 8 }, { width: 38 }, { width: 16 }, { width: 22 }, { width: 14 }, { width: 16 }, { width: 66 }, { width: 24 }, { width: 24 }];
-  const evidenceHeader = evidenceSheet.addRow(["ID", "File", "Kind", "Media type", "Bytes", "Scan state", "SHA-256", "Review record", "Verified file"]); headerRow(evidenceHeader);
-  for (const asset of evidence) { const row = evidenceSheet.addRow([asset.id, asset.safeName, asset.kind, asset.mediaType, asset.byteSize, asset.scanState, asset.sha256, { text: "Open review", hyperlink: asset.reviewUrl, tooltip: "Open evidence record in BIMLog" }, asset.downloadUrl ? { text: "Secure download", hyperlink: asset.downloadUrl, tooltip: "Authenticated BIMLog download" } : "Locked pending scan"]); row.eachCell(cell => { cell.alignment = { vertical: "top", wrapText: true }; cell.border = { bottom: { style: "thin", color: { argb: `FF${grid}` } } }; }); }
-  evidenceSheet.autoFilter = { from: "A2", to: `I${evidence.length + 2}` };
+  const evidenceSheet = workbook.addWorksheet("Evidence", { views: [{ state: "frozen", ySplit: 2 }] }); titleRow(evidenceSheet, "Evidence inventory and governed links", 10);
+  evidenceSheet.columns = [{ width: 8 }, { width: 38 }, { width: 16 }, { width: 22 }, { width: 14 }, { width: 16 }, { width: 66 }, { width: 24 }, { width: 30 }, { width: 44 }];
+  const evidenceHeader = evidenceSheet.addRow(["ID", "File", "Kind", "Media type", "Bytes", "Scan state", "SHA-256", "Review record", "Verified file", "Stored in"]); headerRow(evidenceHeader);
+  for (const asset of evidence) { const row = evidenceSheet.addRow([asset.id, asset.safeName, asset.kind, asset.mediaType, asset.byteSize, asset.scanState, asset.sha256, { text: "Open review", hyperlink: asset.reviewUrl, tooltip: "Open evidence record in BIMLog" }, asset.downloadUrl ? { text: "Open BIMLog and download", hyperlink: asset.downloadUrl, tooltip: "BIMLog verifies your signed-in authority before downloading" } : "Locked pending scan", manifest.custody.byteStorage]); row.eachCell(cell => { cell.alignment = { vertical: "top", wrapText: true }; cell.border = { bottom: { style: "thin", color: { argb: `FF${grid}` } } }; }); }
+  evidenceSheet.autoFilter = { from: "A2", to: `J${evidence.length + 2}` };
 
   const previews = workbook.addWorksheet("Evidence previews", { views: [{ state: "frozen", ySplit: 1 }] }); titleRow(previews, "Verified screenshot and image previews", 8); previews.columns = [{ width: 4 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 18 }, { width: 4 }];
   let previewRow = 3; let imageCount = 0;
@@ -212,7 +223,7 @@ async function createFeedbackWorkbook(manifest: Record<string, any>, evidence: A
     previews.mergeCells(previewRow, 2, previewRow, 7); const caption = previews.getCell(previewRow, 2); caption.value = `${asset.safeName} · ${asset.mediaType} · ${asset.byteSize.toLocaleString()} bytes`; caption.font = { bold: true, color: { argb: `FF${brand}` } }; caption.alignment = { wrapText: true }; previewRow += 1;
     const imageId = workbook.addImage({ buffer: preview as unknown as ExcelJS.Buffer, extension: "png" }); previews.addImage(imageId, { tl: { col: 1.2, row: previewRow - 1 }, ext: { width: 700, height: Math.min(500, Math.max(180, Math.round(700 * metadata.height / metadata.width))) } });
     const rowsHigh = 27; for (let offset = 0; offset < rowsHigh; offset++) previews.getRow(previewRow + offset).height = 15; previewRow += rowsHigh;
-    previews.mergeCells(previewRow, 2, previewRow, 7); const links = previews.getCell(previewRow, 2); links.value = { text: "Open secure original in BIMLog", hyperlink: asset.downloadUrl, tooltip: "Authenticated download" }; links.font = { color: { argb: "FF0563C1" }, underline: true }; previewRow += 2; imageCount += 1;
+    previews.mergeCells(previewRow, 2, previewRow, 7); const links = previews.getCell(previewRow, 2); links.value = { text: "Open BIMLog and download verified original", hyperlink: asset.downloadUrl, tooltip: "BIMLog-authorized download" }; links.font = { color: { argb: "FF0563C1" }, underline: true }; previewRow += 2; imageCount += 1;
   }
   if (!imageCount) { previews.mergeCells(3, 2, 5, 7); const note = previews.getCell(3, 2); note.value = "No verified image bytes are available yet. The evidence inventory retains secure review links and will include previews after controlled scanning completes."; note.alignment = { vertical: "middle", horizontal: "center", wrapText: true }; note.font = { italic: true, color: { argb: "FF92400E" } }; }
 

@@ -33,6 +33,10 @@ export async function buildFeedbackPackageFromAuthority(args: {
     }
     assets.push({ ...asset, bytes });
   }
+  const storageHealth = await storage.health();
+  const byteStorage = storageHealth.backendType === "replit-app-storage" && storageHealth.backendId === "bimlog-feedback-replit"
+    ? "Private Replit App Storage bucket bimlog-feedback-temporary"
+    : `Private ${storageHealth.backendType} backend ${storageHealth.backendId}`;
   const row = source.feedback;
-  return buildFeedbackPackage({ visibility: args.visibility, baseUrl: args.baseUrl, events: source.events, assets, feedback: { id: row.id, stableId: row.stableId, feedbackType: row.feedbackType, priority: row.priority, module: row.module, pageUrl: row.pageUrl, message: row.message, status: row.status, version: row.version, targetRelease: row.targetRelease, dispositionReason: row.dispositionReason, customerVisible: row.customerVisible, createdAt: row.createdAt, updatedAt: row.updatedAt, resolvedAt: row.resolvedAt, submitter: { id: row.userId, name: row.submitterName, email: row.submitterEmail }, project: row.projectId ? { id: row.projectId, name: row.projectName, code: row.projectCode } : null } });
+  return buildFeedbackPackage({ visibility: args.visibility, baseUrl: args.baseUrl, events: source.events, assets, custody: { metadataAuthority: "PostgreSQL", byteStorage, backendId: storageHealth.backendId, accessPolicy: "private-bimlog-authorized-access" }, feedback: { id: row.id, stableId: row.stableId, feedbackType: row.feedbackType, priority: row.priority, module: row.module, pageUrl: row.pageUrl, message: row.message, status: row.status, version: row.version, targetRelease: row.targetRelease, dispositionReason: row.dispositionReason, customerVisible: row.customerVisible, createdAt: row.createdAt, updatedAt: row.updatedAt, resolvedAt: row.resolvedAt, submitter: { id: row.userId, name: row.submitterName, email: row.submitterEmail }, project: row.projectId ? { id: row.projectId, name: row.projectName, code: row.projectCode } : null } });
 }

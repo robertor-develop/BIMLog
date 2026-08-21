@@ -46,6 +46,7 @@ const assertions:Array<[string,RegExp]>=[
   ["visual markup editor replaces numeric crop",/FeedbackMarkupEditor/],
   ["plain feedback route opens a new submission",/location !== "\/feedback".*setOpen\(true\).*else setReviewing\(false\)/s],
   ["feedback notification route reads the reactive query and opens customer history",/useSearch\(\).*new URLSearchParams\(search\).*view.*mine.*loadMine\(\)/s],
+  ["report download requires an explicit positive asset id",/requestedAsset = params\.get\("downloadAsset"\).*if \(!requestedAsset\).*assetId < 1/s],
   ["floating feedback button always opens a new submission",/onClick=\{\(\) => \{ setReviewing\(false\); setOpen\(true\); \}\}/],
   ["customer sees automatic snapshot state",/Automatic PDF\/JSON snapshot.*Instantánea PDF\/JSON automática/s],
   ["customer downloads retained automatic PDF",/package-snapshot\.\$\{format\}.*Automatic PDF/s],

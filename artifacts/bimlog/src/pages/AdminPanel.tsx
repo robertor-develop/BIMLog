@@ -1002,6 +1002,7 @@ function FeedbackTab({ token }: { token: string }) {
   const [operations, setOperations] = useState<Record<string, any> | null>(null);
   const [pendingAction, setPendingAction] = useState<string | null>(null);
   const [success, setSuccess] = useState("");
+  const reportDownloadRef = useRef<string | null>(null);
   const topScrollRef = useRef<HTMLDivElement>(null);
   const tableScrollRef = useRef<HTMLDivElement>(null);
 
@@ -1032,6 +1033,23 @@ function FeedbackTab({ token }: { token: string }) {
     const match = requested ? items.find(item => String(item.stableId) === requested) : undefined;
     if (match) void openDetail(match.id);
   }, [items, selectedId]);
+
+  useEffect(() => {
+    if (!detail || selectedId === null || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const requestedAsset = params.get("downloadAsset");
+    if (!requestedAsset) { reportDownloadRef.current = null; return; }
+    const assetId = Number(requestedAsset);
+    if (!Number.isInteger(assetId) || assetId < 1) return;
+    const key = `${selectedId}:${assetId}`;
+    if (reportDownloadRef.current === key) return;
+    const assets = Array.isArray(detail.assets) ? detail.assets as Record<string, unknown>[] : [];
+    const asset = assets.find(candidate => Number(candidate.id) === assetId);
+    reportDownloadRef.current = key;
+    const clearDownloadRequest = () => { const url = new URL(window.location.href); url.searchParams.delete("downloadAsset"); window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`); };
+    if (!asset || String(asset.scanState) !== "clean") { setError("The linked evidence is unavailable or is not verified safe."); clearDownloadRequest(); return; }
+    void downloadEvidence(asset, "Opened from a generated BIMLog feedback report").finally(clearDownloadRequest);
+  }, [detail, selectedId]);
 
   async function updateStatus(id: unknown, status: string) {
     const numericId = Number(id);
@@ -1065,7 +1083,7 @@ function FeedbackTab({ token }: { token: string }) {
 
   function closeDetail() {
     setSelectedId(null); setDetail(null);
-    if (typeof window !== "undefined") { const url = new URL(window.location.href); url.searchParams.delete("feedback"); window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`); }
+    if (typeof window !== "undefined") { const url = new URL(window.location.href); url.searchParams.delete("feedback"); url.searchParams.delete("asset"); url.searchParams.delete("downloadAsset"); window.history.replaceState({}, "", `${url.pathname}${url.search}${url.hash}`); }
   }
 
   async function claimFeedback(item: Record<string, unknown>) {
@@ -1089,9 +1107,9 @@ function FeedbackTab({ token }: { token: string }) {
     catch (err) { setError(err instanceof Error ? err.message : "Failed to download package"); }
   }
 
-  async function downloadEvidence(asset: Record<string, unknown>) {
-    if (!selectedId) return; const reason = window.prompt("Export reason (required)", "Review verified customer evidence"); if (!reason?.trim()) return;
-    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${selectedId}/assets/${Number(asset.id)}/download`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Evidence is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = String(asset.name || "feedback-evidence"); anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); }
+  async function downloadEvidence(asset: Record<string, unknown>, reasonOverride?: string) {
+    if (!selectedId) return; const reason = reasonOverride || window.prompt("Export reason (required)", "Review verified customer evidence"); if (!reason?.trim()) return;
+    try { const response = await fetch(`${API_BASE}/api/v1/feedback/admin/${selectedId}/assets/${Number(asset.id)}/download`, { headers: { Authorization: `Bearer ${token}`, "X-Export-Reason": reason.trim() } }); if (!response.ok) { const data = await response.json().catch(() => ({})); throw new Error(data.error || "Evidence is unavailable"); } const blob = await response.blob(); const url = URL.createObjectURL(blob); const anchor = document.createElement("a"); anchor.href = url; anchor.download = String(asset.name || "feedback-evidence"); anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 0); setSuccess(`Downloaded verified file ${String(asset.name || asset.id)} from private BIMLog custody.`); }
     catch (err) { setError(err instanceof Error ? err.message : "Evidence is unavailable"); }
   }
 
@@ -1133,7 +1151,7 @@ function FeedbackTab({ token }: { token: string }) {
       </div>
 
       {operations && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(210px,1fr))", gap: 10, marginBottom: 16 }}>
-        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Temporary evidence custody</strong><div style={{ fontSize: 11, marginTop: 4 }}>{String(operations.storage?.backend || "unknown")} · {operations.storage?.healthy ? "healthy" : "unavailable"}</div></div>
+        <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Temporary evidence custody</strong><div style={{ fontSize: 11, marginTop: 4 }}>{String(operations.storage?.location || operations.storage?.backend || "unknown")} · {operations.storage?.healthy ? "healthy" : "unavailable"}</div><div style={{ fontSize: 10, marginTop: 4, color: "hsl(var(--muted-foreground))" }}>Metadata: PostgreSQL · Access: private through BIMLog</div></div>
         <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Controlled scanner</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.scanner?.configured ? "Active; quarantined files will be processed" : "Not active; files remain safely quarantined"}</div></div>
         <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Telegram Word / Excel</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.telegramDocuments?.configured ? "Active for linked super-admin chats" : "Not configured"}</div></div>
         <div style={{ border: "1px solid hsl(var(--border))", borderRadius: 9, padding: 11, background: "hsl(var(--card))" }}><strong style={{ fontSize: 12 }}>Permanent computer receiver</strong><div style={{ fontSize: 11, marginTop: 4 }}>{operations.permanentComputerReceiver?.connected ? "Connected" : `Not connected · target ${String(operations.permanentComputerReceiver?.root || "F:\\BIMLog\\Feedback")}`}</div></div>

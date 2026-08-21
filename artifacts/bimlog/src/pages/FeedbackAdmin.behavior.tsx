@@ -22,6 +22,9 @@ const checks: Array<[string, RegExp]> = [
   ["queue header and action columns remain visible", /position: "sticky".*Status \/ owner.*right: 0/s],
   ["reported page uses a readable link label", /Open reported page ↗/],
   ["detail explains that reports are generated from current authority", /Current report.*Generated when downloaded/s],
+  ["report links are consumed through the signed-in BIMLog UI", /downloadAsset.*Opened from a generated BIMLog feedback report.*Downloaded verified file/s],
+  ["report download requires an explicit positive asset id", /requestedAsset = params\.get\("downloadAsset"\).*if \(!requestedAsset\).*assetId < 1/s],
+  ["operations show the private byte store and PostgreSQL metadata authority", /operations\.storage\?\.location.*Metadata: PostgreSQL.*Access: private through BIMLog/s],
   ["detail is a clear modal review drawer and explains locked evidence", /aria-label="Feedback details".*The record is visible, but its bytes remain locked/s],
 ];
 for (const [name, pattern] of checks) assert.match(`${app}\n${admin}`, pattern, name);
