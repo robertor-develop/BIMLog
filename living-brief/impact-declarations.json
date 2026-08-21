@@ -12609,6 +12609,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "7dbf465b4c3842d092ecb72f5a75f98bcf426d42ee05c5f678a191384a5826fb"
+    },
+    {
+      "taskId": "bimlog-feedback-current-reports-adaptable-workspace-20260821",
+      "reviewedThroughCommit": "41f4cc2edffe6a523663257b39e39bb8a644250b",
+      "reviewedAt": "2026-08-21T10:19:00-04:00",
+      "status": "local_source_and_controlled_browser_accepted_external_release_pending",
+      "captureTiming": "post_current_authority_artifact_and_browser_acceptance_pre_push",
+      "summary": "Reconciles current-authority Feedback PDF Word Excel JSON ZIP reports, embedded clean evidence and authenticated links, compact human activity, the independently resizable/collapsible whole navigation and notification panel, clarified reviewer details, and exact 76/76 controlled Chromium evidence without claiming push, Replit publication, live scanner backfill, Telegram delivery, or permanent receiver activation.",
+      "workstreams": [
+        "feedback-current-authority-reports",
+        "feedback-reviewer-experience",
+        "feedback-browser-acceptance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved Feedback intake, evidence, reviewer, response, and custody lifecycle is preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, provider, secret, or authority boundary changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Quality now records current-authority artifact inspection and the exact 76/76 controlled Chromium seal."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accountable customer Feedback promise and release identity remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic platform inventory already contains the affected Feedback and navigation sources."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin or H-drive build state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Current PDF, Word, and Excel outputs are bound to current records, secure evidence links, embedded clean images, compact activity, and governed report identity."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No certification or external compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact source, artifact proof, browser receipt, and local-only truth."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains push, Replit, scanner backfill, Telegram, and permanent receiver gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production record, provider delivery, scanner promotion, or receiver content changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4d868a5960635dbb6889a5005e1116aae2a4ee54f0bf97b2aa1cdb35105f5564"
     }
   ]
 }
