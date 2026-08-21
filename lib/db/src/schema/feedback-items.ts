@@ -267,7 +267,7 @@ export const feedbackRelayJobsTable = pgTable(
     leaseToken: text("lease_token"),
     leaseExpiresAt: timestamp("lease_expires_at"),
     fencingToken: bigint("fencing_token", { mode: "bigint" })
-      .default(0n)
+      .default(sql`0`)
       .notNull(),
     holdVersion: integer("hold_version").default(0).notNull(),
     heldFromState: text("held_from_state"),
