@@ -429,7 +429,7 @@ export function MasterSidebar() {
                 <div style={{ display: "flex", justifyContent: notificationPanelCollapsed ? "center" : "space-between", alignItems: "center", gap: 8, padding: notificationPanelCollapsed ? "10px 8px" : "10px 22px 10px 14px", borderBottom: "1px solid #F3F4F6" }}>
                   {notificationPanelCollapsed ? <Bell aria-hidden style={{ width: 18, height: 18, color: "#1D4ED8" }} /> : <span style={{ fontWeight: 700, fontSize: 13, color: "#111" }}>{t("Notification Inbox", "Bandeja de Notificaciones")}</span>}
                   {!notificationPanelCollapsed && unreadCount > 0 && (
-                    <button onClick={markAllRead} style={{ background: "none", border: "none", fontSize: 11, color: "#2563EB", cursor: "pointer", fontWeight: 600 }}>
+                    <button type="button" onClick={markAllRead} style={{ background: "none", border: "none", fontSize: 11, color: "#2563EB", cursor: "pointer", fontWeight: 600 }}>
                       {t("Mark all read", "Marcar todo leído")}
                     </button>
                   )}
@@ -461,12 +461,12 @@ export function MasterSidebar() {
                 <div style={{ height: "calc(100% - 44px)", overflowY: "auto" }}>
                   {notifications.map(n => (
                     <div key={n.id} style={{ padding: "10px 14px", borderBottom: "1px solid #F9FAFB", background: n.isRead ? "white" : "#EFF6FF", display: "flex", gap: 8, alignItems: "flex-start" }}>
-                      <div style={{ flex: 1, cursor: "pointer" }} onClick={() => { markRead(n.id); if (n.actionUrl) setLocation(n.actionUrl); setShowBell(false); }}>
+                      <button type="button" aria-label={`${n.title}. ${n.message}`} style={{ flex: 1, cursor: "pointer", border: 0, padding: 0, background: "transparent", textAlign: "left" }} onClick={() => { void markRead(n.id); if (n.actionUrl) setLocation(n.actionUrl); setShowBell(false); }}>
                         <div style={{ fontSize: 12, fontWeight: 600, color: "#111", marginBottom: 2 }}>{n.title}</div>
                         <div style={{ fontSize: 11, color: "#6B7280", lineHeight: 1.4 }}>{n.message}</div>
                         <div style={{ fontSize: 10, color: "#9CA3AF", marginTop: 3 }}>{new Date(n.createdAt).toLocaleDateString()}</div>
-                      </div>
-                      <button onClick={() => deleteNotif(n.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 2, flexShrink: 0 }}>
+                      </button>
+                      <button type="button" aria-label={t(`Delete notification ${n.title}`, `Eliminar notificación ${n.title}`)} onClick={() => deleteNotif(n.id)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 2, flexShrink: 0 }}>
                         <X style={{ width: 12, height: 12 }} />
                       </button>
                     </div>

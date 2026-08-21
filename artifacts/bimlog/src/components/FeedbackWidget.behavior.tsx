@@ -51,6 +51,11 @@ const assertions:Array<[string,RegExp]>=[
   ["customer sees automatic snapshot state",/Automatic PDF\/JSON snapshot.*Instantánea PDF\/JSON automática/s],
   ["customer downloads retained automatic PDF",/package-snapshot\.\$\{format\}.*Automatic PDF/s],
   ["customer downloads retained automatic JSON",/package-snapshot\.\$\{format\}.*Automatic JSON/s],
+  ["submission distinguishes durable receipt from reviewer alert delivery",/notificationState.*The reviewer alert was delivered.*reviewer alert is blocked.*needs reconciliation.*remains safely recorded/s],
+  ["customer loads feedback-specific notification delivery records",/feedback\/notifications.*setFeedbackNotifications/s],
+  ["customer read acknowledgement uses the governed event endpoint",/feedback\/notifications\/\$\{eventId\}\/read.*method:"POST".*state:"read"/s],
+  ["customer notification states and controls are bilingual",/Feedback updates.*Actualizaciones del comentario.*Mark read.*Marcar como leída/s],
+  ["notification failures are assertive and retryable",/feedbackNotificationError.*role="alert" aria-live="assertive".*Try again/s],
 ];
 for(const [name,pattern] of assertions)assert.match(source,pattern,name);
 for(const [name,pattern] of [
