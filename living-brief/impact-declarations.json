@@ -12685,6 +12685,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "23c691e0955ff7aab8397d4bd4718c99fc2165dbee8430cd3d276e7497ac972a"
+    },
+    {
+      "taskId": "bimlog-feedback-report-links-custody-20260821",
+      "reviewedThroughCommit": "9944f912a071faea744334102879ab1690f15a05",
+      "reviewedAt": "2026-08-21T11:55:00-04:00",
+      "status": "local_source_and_artifact_proof_accepted_external_release_pending",
+      "captureTiming": "post_report_link_and_custody_correction_pre_push",
+      "summary": "Reconciles bearer-authenticated report downloads through the signed-in BIMLog UI and explicit PostgreSQL/private Replit App Storage custody disclosure across PDF, Word, Excel, JSON, and reviewer operations without claiming a Windows receiver copy or publication.",
+      "workstreams": [
+        "feedback-current-authority-reports",
+        "feedback-evidence-download-authority",
+        "feedback-storage-custody-truth"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved Feedback intake, review, evidence, and response lifecycle is preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, provider credential, or external authority boundary changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Quality now records rendered PDF and Word inspection, workbook inspection, and exact hyperlink-target verification."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accountable customer Feedback promise and release identity remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic platform inventory already contains the affected Feedback package, route, widget, and admin sources."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin or H-drive build state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "PDF, Word, and Excel now disclose custody and use BIMLog-mediated authenticated links rather than raw protected API targets."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No certification or external compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact source, artifact hashes, custody truth, and local-only proof."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains push, Replit publication, live authenticated download, scanner, and permanent receiver gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production record, provider object, customer data, or receiver content changed during local proof."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ff9ebc6f46e2f3e56e883de0328e8be889d1f0b70327be0949b0eb15bf53a332"
     }
   ]
 }
