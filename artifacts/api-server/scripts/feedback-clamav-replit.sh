@@ -85,15 +85,16 @@ database_age() {
 }
 
 validate_database() {
-  test -d "$DATABASE_DIR"
-  test -f "$DATABASE_READY"
-  test -z "$(find "$DATABASE_DIR" -type l -print -quit)"
-  test -n "$(find "$DATABASE_DIR" -maxdepth 1 -type f \( -name '*.cvd' -o -name '*.cld' -o -name '*.cud' -o -name '*.cbc' \) -print -quit)"
+  test -d "$DATABASE_DIR" || return 1
+  test -f "$DATABASE_READY" || return 1
+  test -z "$(find "$DATABASE_DIR" -type l -print -quit 2>/dev/null)" || return 1
+  test -n "$(find "$DATABASE_DIR" -maxdepth 1 -type f \( -name '*.cvd' -o -name '*.cld' -o -name '*.cud' -o -name '*.cbc' \) -print -quit 2>/dev/null)" || return 1
   local bytes
-  bytes="$(du -sb "$DATABASE_DIR" | awk '{print $1}')"
-  test "$bytes" -gt 0
-  test "$bytes" -le "$DATABASE_MAX_BYTES"
-  "$CLAMAV_PATH" --database="$DATABASE_DIR" --version >/dev/null 2>&1
+  bytes="$(du -sb "$DATABASE_DIR" 2>/dev/null | awk '{print $1}')" || return 1
+  [[ "$bytes" =~ ^[0-9]+$ ]] || return 1
+  test "$bytes" -gt 0 || return 1
+  test "$bytes" -le "$DATABASE_MAX_BYTES" || return 1
+  "$CLAMAV_PATH" --database="$DATABASE_DIR" --version >/dev/null 2>&1 || return 1
 }
 
 refresh_database() {
