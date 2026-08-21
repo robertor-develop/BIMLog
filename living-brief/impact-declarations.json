@@ -12159,6 +12159,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e6f80adddebb7232c6b67c13a440a758a143d00873b64d32f2e273b19f81fef2"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-scanner-binding-reconciliation-20260821",
+      "reviewedThroughCommit": "2e114c90ae2366e269fd78bd5952bb1b48154e38",
+      "reviewedAt": "2026-08-21T06:57:30.000-04:00",
+      "status": "scanner_configuration_bound_publication_pending",
+      "captureTiming": "post_configuration_pre_publish",
+      "summary": "Binds the exact visible-Replit-Shell ClamAV executable path, SHA-256, and version into tracked non-secret deployment configuration without claiming deployment startup, scan backfill, provider delivery, or permanent receiver activation.",
+      "workstreams": [
+        "feedback-scanner-activation",
+        "feedback-replit-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The scanner remains part of the existing accountable evidence lifecycle and does not change custody authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The binding is non-secret, hash/version pinned, and remains fail-closed until exact deployment startup verification."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Publication acceptance now requires the exact tracked scanner identity to survive a clean deployment build and startup health verification."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer promise or Feedback product scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform source inventory path was added or removed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, H-drive build, package, installation, or field state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "PDF, Word, Excel, JSON, and ZIP package design is unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact non-secret scanner path, hash, version, configuration commit, and truthful pre-publication state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Moves scanner binding to complete while retaining deployment startup, backfill, live smoke, Telegram, and receiver gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product audit event, production database row, customer evidence, or provider receipt changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "be1874120381d14877f154ca3f4df3bdbf81d83c2ec03cecf19e1996635c78fa"
     }
   ]
 }
