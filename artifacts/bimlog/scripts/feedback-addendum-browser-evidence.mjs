@@ -151,6 +151,7 @@ async function runNotificationPanel() {
       if(pathname==="/api/v1/integrations/telegram/status"&&method==="GET")return json({connected:false});
       if(pathname==="/api/v1/auth/me")return json({user:{id:501,email:"fixture@example.invalid",fullName:"Local Fixture",isSuperAdmin:false}});
       if(pathname==="/api/v1/users/me/company-profile")return json({profile:null});
+      if(pathname==="/api/v1/projects"&&method==="GET")return json({projects:[]});
       if(pathname==="/api/v1/config")return json({});
       if(pathname==="/api/v1/living-brief/eligibility")return json({eligible:false});
       S.unexpected.push({pathname,method});return json({preferences:[],channels:[],events:[]});
