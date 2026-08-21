@@ -11705,6 +11705,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a85f8eb854aa5ae26e4a572c90737d1b14e1c3cf970f1051f809b0a1377ee367"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-schema-sync-correction-20260820",
+      "reviewedThroughCommit": "c13263d0b5decd48fc9b49118a48ad241b5f8476",
+      "reviewedAt": "2026-08-20T21:58:36.305-04:00",
+      "status": "local_source_corrected_replit_sync_and_preview_pending",
+      "captureTiming": "post_blocker_correction_pre_release",
+      "summary": "Corrects Drizzle BigInt serialization and makes the Replit development-schema wrapper reject uncaught tool errors after an unsafe constraint-drop preview was cancelled before production approval.",
+      "workstreams": [
+        "feedback-automatic-package-snapshots",
+        "replit-development-schema-sync",
+        "production-data-preservation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves existing data and canonical schema authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed database and publication rules govern the correction."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction restores truthful failure detection and prevents destructive publication approval."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural platform path or component boundary changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source or artifact changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the cancelled unsafe preview and exact correction without claiming production migration."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires a clean development sync and non-destructive preview before publication approval."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing audit authority remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0c08c28f4648f2a056718c11696ba7277bad05c2b28d9c79229ff3ccbe26683e"
     }
   ]
 }
