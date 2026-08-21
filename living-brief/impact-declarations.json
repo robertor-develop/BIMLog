@@ -11478,6 +11478,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "84963a111a4671db4f6784c99221d9955a04961358915abb067389c8d614bb85"
+    },
+    {
+      "taskId": "bimlog-feedback-entry-default-hotfix-20260820",
+      "reviewedThroughCommit": "7fbcb3ec0978b3529ec67c27fa8063b62d108caa",
+      "reviewedAt": "2026-08-21T00:13:00.000Z",
+      "status": "entry_default_corrected_local_build_pending",
+      "captureTiming": "post_implementation_pre_release",
+      "summary": "Separates new-feedback entry from customer follow-up history so the floating button and plain route create feedback while explicit notification links open the existing-feedback view.",
+      "workstreams": [
+        "feedback-customer-entry",
+        "feedback-notification-routing"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction restores the intended customer feedback loop without changing platform doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing privacy, authorization, evidence, and external-action controls remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Acceptance now distinguishes default new-submission entry from explicit follow-up-history navigation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction aligns the existing customer feedback experience with the established product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route inventory or structural platform component is added or removed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, build, package, installation, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report artifact or report design-system behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact hotfix commit, corrected route semantics, and local validation boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining clean-build, push, synchronization, republish, and live verification gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Immutable feedback and notification audit behavior remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "84446544cdddc56848528c478ab78b25f113fe204d300ef0bcafaefc7a46ed3d"
     }
   ]
 }
