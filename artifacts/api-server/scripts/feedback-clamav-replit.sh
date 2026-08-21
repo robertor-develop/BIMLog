@@ -7,6 +7,8 @@ set -euo pipefail
 readonly CLAMAV_PATH="/nix/store/j01wsla7rfrgjv3605l561mni4b4ka05-clamav-1.4.3/bin/clamscan"
 readonly FRESHCLAM_PATH="/nix/store/j01wsla7rfrgjv3605l561mni4b4ka05-clamav-1.4.3/bin/freshclam"
 readonly CLAMAV_VERSION="ClamAV 1.4.3"
+readonly FRESHCLAM_CONFIG="/home/runner/workspace/artifacts/api-server/scripts/feedback-freshclam.conf"
+readonly FRESHCLAM_CONFIG_SHA256="ea4c360a6114a60aba9bf56ec7b0a264bc03baf55e4e3955fa2de4830921c78c"
 readonly DATABASE_ROOT="/tmp/bimlog-feedback-clamav"
 readonly DATABASE_DIR="${DATABASE_ROOT}/database"
 readonly DATABASE_READY="${DATABASE_DIR}/.bimlog-ready"
@@ -37,6 +39,9 @@ test "$resolved" = "$CLAMAV_PATH"
 test "$(clamscan --version)" = "$CLAMAV_VERSION"
 test "$(command -v freshclam)" = "$FRESHCLAM_PATH"
 test "$(freshclam --version)" = "$CLAMAV_VERSION"
+test -f "$FRESHCLAM_CONFIG"
+test ! -L "$FRESHCLAM_CONFIG"
+test "$(sha256sum "$FRESHCLAM_CONFIG" | awk '{print $1}')" = "$FRESHCLAM_CONFIG_SHA256"
 
 mkdir -p "$DATABASE_ROOT"
 chmod 700 "$DATABASE_ROOT"
@@ -95,7 +100,7 @@ refresh_database() {
   local log="${DATABASE_ROOT}/freshclam.log"
   mkdir -p "$DATABASE_DIR"
   chmod 700 "$DATABASE_DIR"
-  if ! "$FRESHCLAM_PATH" --datadir="$DATABASE_DIR" --quiet >"$log" 2>&1; then
+  if ! "$FRESHCLAM_PATH" --config-file="$FRESHCLAM_CONFIG" --datadir="$DATABASE_DIR" --quiet >"$log" 2>&1; then
     rm -f "$log"
     return 1
   fi
