@@ -12309,6 +12309,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c1b9964aa469b4b5b0acc6b09da66d45b591fce518664300db7451302c281c04"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-signature-bootstrap-reconciliation-20260821",
+      "reviewedThroughCommit": "5de30cc8e36098f2929754836abdfcbf89ee73b9",
+      "reviewedAt": "2026-08-21T08:00:00-04:00",
+      "status": "scanner_signature_bootstrap_implemented_replit_proof_pending",
+      "captureTiming": "post_source_pre_replit_execution",
+      "summary": "Adds a fail-closed FreshClam signature bootstrap and refresh authority to the exact Replit scanner launcher after operational scanning proved the Nix ClamAV package contained no signature database.",
+      "workstreams": [
+        "feedback-scanner-activation",
+        "feedback-replit-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction completes the existing accountable evidence lifecycle without changing customer, reviewer, or custody ownership authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact launcher, FreshClam configuration, Nix binaries, database age, inventory, locking, and deadlines remain non-secret and fail closed."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Quality acceptance now requires actual signed-database download plus clean, infected, failure, deployment-startup, and automatic backfill proof in Replit."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Feedback product promise, release label, customer workflow, or reviewer operating scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Replit startup now provisions and validates bounded Cisco Talos signature files before declaring its governed ClamAV scanner healthy."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, H-drive build, package, installation, or field state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "PDF, Word, Excel, JSON, ZIP, evidence-link, and master-register presentation rules are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external certification or compliance claim is added; the scanner database still requires operational acceptance."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact source commit, launcher and FreshClam configuration hashes, bounded refresh policy, and still-pending Replit proof."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains signed-database execution, clean and infected scans, deployment promotion, evidence backfill, Telegram, and permanent receiver gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production row, attachment state, provider delivery, customer evidence, or permanent receiver content was altered by this source change."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "86b19a4a03deaeefe3ebbccf892096dff24d817df7bdbb881452e1bd2bcd7966"
     }
   ]
 }
