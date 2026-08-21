@@ -118,9 +118,11 @@ acquire_lock
 if validate_database; then
   age="$(database_age)"
   if test "$age" -gt "$DATABASE_REFRESH_SECONDS"; then
-    if ! refresh_database && test "$age" -gt "$DATABASE_MAX_AGE_SECONDS"; then
-      echo "Scanner signatures exceeded their governed maximum age" >&2
-      exit 70
+    if ! refresh_database; then
+      if ! validate_database || test "$age" -gt "$DATABASE_MAX_AGE_SECONDS"; then
+        echo "Scanner signatures exceeded their governed maximum age" >&2
+        exit 70
+      fi
     fi
   fi
 else
