@@ -12761,6 +12761,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ff9ebc6f46e2f3e56e883de0328e8be889d1f0b70327be0949b0eb15bf53a332"
+    },
+    {
+      "taskId": "bimlog-feedback-office-links-20260821",
+      "reviewedThroughCommit": "14bd3a02dd296e54d797f04676b161be06aae1cf",
+      "reviewedAt": "2026-08-21T12:37:37-04:00",
+      "status": "local_source_and_office_render_proof_accepted_external_release_pending",
+      "captureTiming": "post_office_link_resilience_pre_push",
+      "summary": "Reconciles Protected View-resilient Word and Excel evidence access through visible copyable BIMLog URLs and signed-in evidence-page hyperlinks without weakening private file custody.",
+      "workstreams": [
+        "feedback-current-authority-reports",
+        "feedback-evidence-download-authority",
+        "feedback-office-document-usability"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accountable Feedback intake, review, response, and evidence lifecycle is preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, provider credential, or external authority boundary changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Quality records structural hyperlink validation plus isolated Word and Excel reopen/render inspection."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer Feedback promise and release identity remain unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic inventory already contains the affected Feedback package source and behavior proof."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin or H-drive build state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "updated",
+          "reason": "Word and Excel now remain usable when Office blocks external hyperlinks by presenting complete copyable BIMLog evidence-page URLs and explicit signed-in instructions."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No certification or external compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact source, Office-render proof hashes, immutable-old-report behavior, and local-only truth."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains push, Replit publication, fresh-report regeneration, live signed-in evidence-page/download verification, scanner, and receiver gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production record, provider object, customer data, or receiver content changed during local proof."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "2341d40e33ecbf2703a27b5353bff5c5aba900d0d0e2df1502d0346cf95cd566"
     }
   ]
 }
