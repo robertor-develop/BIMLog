@@ -12534,6 +12534,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "02c75d2c7d22840f522654a405f2bee8ddad89ae87774b5f8603abdef7ba9b80"
+    },
+    {
+      "taskId": "bimlog-feedback-signed-database-version-20260821",
+      "reviewedThroughCommit": "2e9d62c478dc70502d7e5bee7dabd26511859302",
+      "reviewedAt": "2026-08-21T09:00:00-04:00",
+      "status": "signed_database_version_suffix_closed_governed_wrapper_proof_pending",
+      "captureTiming": "post_source_pre_replit_governed_wrapper_execution",
+      "summary": "Preserves exact FreshClam executable-version authority while accepting the normal sequence/date suffix emitted after a signed database is installed; direct Replit clean and EICAR scans proved the database itself before this wrapper correction.",
+      "workstreams": [
+        "feedback-scanner-activation",
+        "feedback-replit-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The evidence lifecycle and custody boundaries are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Fixed paths, launcher/config hashes, base executable version, bounded operations, and fail-closed authority remain enforced."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Quality records the signed-database suffix reproduction and requires the repeated governed-wrapper proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer promise, reviewer workflow, release label, or scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The Replit launcher recognizes FreshClam's normal signed-database version suffix without weakening base executable identity."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin or H-drive build state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Feedback package presentation and evidence links are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No certification or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact suffix correction and direct database/scan observations."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains governed-wrapper, deployment, evidence-backfill, Telegram, and receiver gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production row, attachment state, provider delivery, or receiver content changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7dbf465b4c3842d092ecb72f5a75f98bcf426d42ee05c5f678a191384a5826fb"
     }
   ]
 }
