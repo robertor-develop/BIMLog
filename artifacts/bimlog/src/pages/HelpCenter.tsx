@@ -9,7 +9,7 @@ import { HELP_CATEGORIES, HELP_RELEASES, HELP_TOPICS, HELP_TROUBLESHOOTING, help
 type View = "manual" | "guides" | "troubleshooting" | "releases";
 
 const HELP_VIEWS: View[] = ["manual", "guides", "troubleshooting", "releases"];
-const HELP_RELEASE_VERSION = "v1.60.35.09-F";
+const HELP_RELEASE_VERSION = "v1.60.35.10-F";
 
 function queryValue(name: string) {
   if (typeof window === "undefined") return "";

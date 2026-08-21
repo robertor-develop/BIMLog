@@ -1,6 +1,6 @@
 # BIMLog Feedback pass-through relay and Roberto receiver
 
-Release identity: `v1.60.35.09-F`. Google Drive is excluded. PostgreSQL is the lifecycle/backlog authority; the receiver filesystem is a verified custody projection.
+Release identity: `v1.60.35.10-F`. Google Drive is excluded. PostgreSQL is the lifecycle/backlog authority; the receiver filesystem is a verified custody projection.
 
 ## One feedback, one package
 
