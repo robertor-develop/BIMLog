@@ -11628,6 +11628,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "448ea4852f301150c6685e641b09190fb1a09f2f992a781ec1253df95cfc2ff3"
+    },
+    {
+      "taskId": "bimlog-feedback-automatic-package-snapshots-20260820",
+      "reviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "reviewedAt": "2026-08-20T21:34:16.434-04:00",
+      "status": "local_source_implemented_release_pending",
+      "captureTiming": "post_implementation_pre_release",
+      "summary": "Adds durable customer and internal PDF/JSON feedback snapshots in governed storage while PostgreSQL remains the canonical follow-up authority and the complete evidence ZIP remains on demand.",
+      "workstreams": [
+        "feedback-automatic-package-snapshots",
+        "feedback-follow-up-register",
+        "feedback-customer-and-reviewer-downloads"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation preserves PostgreSQL as canonical authority and adds derived immutable artifacts with exact lineage."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing privacy, authorization, storage, evidence, and external-action rules govern the implementation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed PDF, canonical JSON, evidence-integrity, tenancy, idempotency, and retry gates apply without changing the quality authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation advances the approved closed-loop customer feedback workflow without changing product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform inventory must include the new shared package-source and automatic package-worker modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, build, package, installation, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The worker reuses the accepted governed Feedback PDF and canonical package contract without changing its design standard."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact automatic-snapshot source candidate and its truthful inactive external-provider boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records exact clean build, acceptance, push, Replit publication, and live verification gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing immutable feedback audit-event authority stores snapshot lineage and remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a85f8eb854aa5ae26e4a572c90737d1b14e1c3cf970f1051f809b0a1377ee367"
     }
   ]
 }

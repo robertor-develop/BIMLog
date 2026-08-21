@@ -1,12 +1,13 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
+  "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "f3795996ad1a9f9c31c885b571d10857f8612d9c25221beddff6c9dad276807d",
+  "bundleSha256": "0a7c9671b378fcbc326146882fcd6ba9cb3e7030c89a22de04bd160b22af6b27",
   "impact": {
-    "baselineCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
+    "baselineCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -23,11 +24,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "claude",
@@ -35,11 +36,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "quality",
@@ -47,11 +48,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "vision",
@@ -59,23 +60,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "b86372eadc783b32b46ffd84f5c602bb63d62099d3aa8d981b95ddf3c88df4ad",
-      "sourceChangedAt": "2026-08-20T17:59:23-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "sha256": "2af9e234ef00cf95e99f75793afd9a795128bb634dfc2835d2b88f3166d85927",
+      "sourceChangedAt": "2026-08-21T01:34:16.434Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "plugin",
@@ -83,11 +84,11 @@
       "sha256": "f58472f608069c6fa83e20ad45e3530886ac88648cac21c9622175d07d2ea2ff",
       "sourceChangedAt": "2026-08-18T09:12:23-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "report_design_system",
@@ -95,11 +96,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "standards_register",
@@ -107,35 +108,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "a1e9aecdb2bd1c79c37c9b7af25d6afcee05face6fc3483eb83cf91b395a288b",
-      "sourceChangedAt": "2026-08-21T00:45:09.000Z",
+      "sha256": "41151853c57fd1d01e6d218321e3dcd6aeaf76a4e70717c132e841d2a1e92cec",
+      "sourceChangedAt": "2026-08-21T01:34:16.434Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "dda229e18bc8efeb2835be3767e477883a6c48389dcedcc51d3fcc8883a79508",
-      "sourceChangedAt": "2026-08-21T00:45:09.000Z",
+      "sha256": "ee607fe4425854f382b1831b807ee40f56ed9e83775c5d0774967ef6732b2407",
+      "sourceChangedAt": "2026-08-21T01:34:16.434Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     },
     {
       "key": "audit",
@@ -143,11 +144,11 @@
       "sha256": "c64878fb9aec6abbef080bb1da14f09dd92af10407b31ac6c4b4710eb42446cc",
       "sourceChangedAt": "2026-08-01T10:59:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "semanticReviewTask": "bimlog-feedback-history-query-hotfix-20260821",
+      "reconciledThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewedThroughCommit": "95bc4614332894f71b692b5b564a70c5a43fa0d3",
+      "semanticReviewTask": "bimlog-feedback-automatic-package-snapshots-20260820",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-08-21T00:46:00.000Z"
+      "semanticReviewedAt": "2026-08-20T21:34:16.434-04:00"
     }
   ]
 }
