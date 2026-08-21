@@ -12837,6 +12837,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2341d40e33ecbf2703a27b5353bff5c5aba900d0d0e2df1502d0346cf95cd566"
+    },
+    {
+      "taskId": "bimlog-feedback-v1.60.35.10-f-source-reconciliation-20260821",
+      "reviewedThroughCommit": "96fa5fb12bf43c57ffb45cd5ab402c3424e8b891",
+      "reviewedAt": "2026-08-21T13:56:00-04:00",
+      "status": "local_source_reconciled_final_acceptance_pending",
+      "captureTiming": "post_product_and_browser_harness_source_pre_final_evidence_pre_push",
+      "summary": "Reconciles the v1.60.35.10-F reviewer UI/backend, durable notification recovery, current-snapshot per-artifact Telegram aggregation, reviewer-safe scanner-failure projection, current report/register authority, and exact pending external acceptance boundary through the product/browser-harness source head.",
+      "workstreams": [
+        "feedback-reviewer-operations",
+        "feedback-notification-reconciliation",
+        "feedback-telegram-document-delivery",
+        "feedback-scanner-reviewer-visibility",
+        "feedback-current-authority-reports",
+        "feedback-release-acceptance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing accountable intake, review, evidence, response, and fail-closed custody lifecycle is preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, credential, provider, publication, or production authority boundary changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing browser, document, security, redaction, typecheck, and exact-head evidence requirements remain authoritative; their final execution remains pending."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer Feedback promise and accountable reviewer workflow are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The official deterministic generator inventories the new Feedback register, notification behavior, reviewer projection, and Telegram policy sources."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin, H-drive build, package, installation, or field state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed PDF, DOCX, XLSX, JSON, ZIP, authenticated-link, image-preview, and custody requirements apply unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No certification, external standard, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact local v1.60.35.10-F source capabilities and distinguishes them from still-pending final evidence and external release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records exact browser, document, runtime, database, scanner, Telegram, receiver, push, publication, and live-verification gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No browser run, document acceptance, database execution, provider call, production mutation, push, publication, or customer event occurred in this reconciliation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a501b76247aade1d00c62c0efb9a0abbcd0ed82342dcbb5bb443ba8630c14a2f"
     }
   ]
 }
