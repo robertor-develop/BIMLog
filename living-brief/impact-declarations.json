@@ -11932,6 +11932,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3d0a19ff6293f2d884e977b6028a858b9e80bcdf0e0c6d0a039ff25077daf50e"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-legacy-constraint-compatibility-20260821",
+      "reviewedThroughCommit": "f3425d2f3bdd9dcff2b1faef40c37104c7b00ca2",
+      "reviewedAt": "2026-08-20T22:39:00.000-04:00",
+      "status": "local_constraint_compatibility_closed_preview_pending",
+      "captureTiming": "post_third_cancel_pre_release",
+      "summary": "Declares both governed exact Feedback constraints and already-installed legacy auto-named duplicate foreign keys so Replit publication cannot delete either authority set.",
+      "workstreams": [
+        "replit-development-schema-sync",
+        "production-data-preservation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing relational constraints and customer data remain preserved without migration deletion."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Fail-closed database and publication rules remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Compatibility declarations eliminate destructive name churn while retaining exact parity."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or customer workflow changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform component boundary or generated inventory changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin source, build, package, or installation changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design or package rendering behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the compatibility closure and third cancelled unsafe preview."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires zero destructive Feedback constraint SQL before approval."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing immutable Feedback audit authority remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "2262ad1bcf85e37c9497608adcd47a606d9589d242b53ab1bbab013934f12338"
     }
   ]
 }
