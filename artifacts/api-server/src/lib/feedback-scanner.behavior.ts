@@ -27,6 +27,16 @@ async function expectCode(code: string, run: () => Promise<unknown>) {
 }
 
 async function behavior() {
+  const scannerSource = fileURLToPath(import.meta.url);
+  const apiRoot = path.resolve(path.dirname(scannerSource), "../..");
+  const launcherPath = path.join(apiRoot, "scripts", "feedback-clamav-replit.sh");
+  const launcher = fs.readFileSync(launcherPath, "utf8");
+  const launcherHash = createHash("sha256").update(fs.readFileSync(launcherPath)).digest("hex");
+  const replit = fs.readFileSync(path.resolve(apiRoot, "../..", ".replit"), "utf8");
+  assert.match(replit, new RegExp(`BIMLOG_FEEDBACK_SCANNER_EXECUTABLE_SHA256 = "${launcherHash}"`));
+  assert.match(launcher, /FRESHCLAM_PATH=.*\/freshclam/);
+  assert.match(launcher, /DATABASE_MAX_AGE_SECONDS=172800/);
+  assert.match(launcher, /acquire_lock[\s\S]*refresh_database[\s\S]*--database="\$DATABASE_DIR"/);
   const executable = process.execPath;
   const executableHash = createHash("sha256").update(fs.readFileSync(executable)).digest("hex");
   const environment: NodeJS.ProcessEnv = {
@@ -40,7 +50,7 @@ async function behavior() {
   };
   const binding = parseFeedbackScannerEnvironment(environment);
   assert(Object.isFrozen(binding));
-  const script = fileURLToPath(import.meta.url);
+  const script = scannerSource;
   const scanner = createFeedbackScannerProofHarness(binding, ["--import", "tsx", script, "--scanner-fixture"], () => new Date("2026-08-20T12:00:00.000Z"));
   assert.deepEqual(await scanner.verifyStartup(), { healthy: true, scannerAdapter: "clamav-cli", scannerVersion: "ClamAV Fixture 1.0.0", executableSha256: executableHash });
 
@@ -76,7 +86,7 @@ async function behavior() {
   try { assert.throws(() => createFeedbackScannerProofHarness(binding, ["fixture"]), /unavailable in production/); }
   finally { if (previous === undefined) delete process.env.NODE_ENV; else process.env.NODE_ENV = previous; }
   assert(createFeedbackScannerFromEnvironment(environment));
-  console.log(JSON.stringify({ status: "PASS", tests: ["sealed-environment", "exact-executable-identity", "exact-version-health", "clean", "infected", "timeout", "abort", "output-cap", "ambiguous-output-deny", "hash-byte-media-binding", "fixture-production-deny", "invalid-authority"] }));
+  console.log(JSON.stringify({ status: "PASS", tests: ["signed-database-launcher", "sealed-environment", "exact-executable-identity", "exact-version-health", "clean", "infected", "timeout", "abort", "output-cap", "ambiguous-output-deny", "hash-byte-media-binding", "fixture-production-deny", "invalid-authority"] }));
 }
 
 if (process.argv.includes("--scanner-fixture")) await fixture();

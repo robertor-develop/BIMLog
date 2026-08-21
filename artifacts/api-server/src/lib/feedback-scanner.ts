@@ -98,7 +98,7 @@ export function parseFeedbackScannerEnvironment(environment: NodeJS.ProcessEnv =
     executableSha256,
     executableVersion,
     timeoutMs: boundedInteger(environment.BIMLOG_FEEDBACK_SCANNER_TIMEOUT_MS, 15_000, 1_000, 120_000, "Scanner timeout"),
-    versionTimeoutMs: boundedInteger(environment.BIMLOG_FEEDBACK_SCANNER_VERSION_TIMEOUT_MS, 5_000, 500, 30_000, "Scanner version timeout"),
+    versionTimeoutMs: boundedInteger(environment.BIMLOG_FEEDBACK_SCANNER_VERSION_TIMEOUT_MS, 5_000, 500, 120_000, "Scanner version timeout"),
     maxOutputBytes: boundedInteger(environment.BIMLOG_FEEDBACK_SCANNER_MAX_OUTPUT_BYTES, 16_384, 256, 1_048_576, "Scanner output limit"),
   });
 }
