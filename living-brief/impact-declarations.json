@@ -12234,6 +12234,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "be1874120381d14877f154ca3f4df3bdbf81d83c2ec03cecf19e1996635c78fa"
+    },
+    {
+      "taskId": "bimlog-feedback-replit-scanner-launcher-reconciliation-20260821",
+      "reviewedThroughCommit": "d0d8d7bb9ba5939ede74edd2e5f84c1ea8104aae",
+      "reviewedAt": "2026-08-21T07:38:30.000-04:00",
+      "status": "scanner_launcher_replit_verified_publication_pending",
+      "captureTiming": "post_replit_shell_proof_pre_publish",
+      "summary": "Corrects the Replit scanner authority for Nix process isolation by binding a direct committed launcher, the exact content-addressed ClamAV path and version, and a minimal runtime PATH; exact Replit Shell startup verification passes without weakening fail-closed identity checks.",
+      "workstreams": [
+        "feedback-scanner-activation",
+        "feedback-replit-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction activates the already-approved accountable evidence lifecycle without changing custody or customer workflow authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The launcher and scanner identities remain non-secret, exact, fixed-operation, version-bound, and fail closed."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Quality evidence now includes an exact Replit Shell startup proof for the committed scanner launcher after reproducing the deployment failure."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Feedback product promise or customer-facing scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The API scanner runtime now receives the declared Replit Nix PATH and invokes a committed fixed-operation launcher."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks plugin source, H-drive build, package, installation, or field state changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "PDF, Word, Excel, JSON, and ZIP package design is unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact launcher commit, hash, scanner store identity, Replit Shell proof, and still-pending deployment promotion."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Moves scanner launcher compatibility to complete while retaining deployment, backfill, Telegram, and receiver verification gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production database row, customer evidence, provider receipt, or permanent receiver content was changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c1b9964aa469b4b5b0acc6b09da66d45b591fce518664300db7451302c281c04"
     }
   ]
 }
