@@ -47,6 +47,8 @@ export function parseLensNextPublishRequest(value: unknown, routeProjectId: numb
   const identity = body.identity as Record<string, unknown>;
   const action = body.action as Record<string, unknown>;
   if (!identity || typeof identity !== "object" || Array.isArray(identity) || !action || typeof action !== "object" || Array.isArray(action)) throw new LensNextPublishError(400, "LENS_NEXT_REQUEST_INVALID", "Identity and action are required.");
+  const identityKeys = new Set(["projectId", "serverId", "viewpointId", "lifecycleStatus", "revisionNumber", "mutationVersion"]);
+  if (Object.keys(identity).some(key => !identityKeys.has(key))) throw new LensNextPublishError(400, "LENS_NEXT_REQUEST_INVALID", "Identity contains unsupported fields.");
   const projectId = positive(identity.projectId, "identity.projectId");
   const serverId = positive(identity.serverId, "identity.serverId");
   const revisionNumber = positive(identity.revisionNumber, "identity.revisionNumber");
@@ -55,6 +57,8 @@ export function parseLensNextPublishRequest(value: unknown, routeProjectId: numb
   const viewpointId = exactText(identity.viewpointId, "identity.viewpointId", 512);
   const type = action.type as Action;
   if (!(LENS_NEXT_ACTIONS as readonly string[]).includes(type)) throw new LensNextPublishError(400, "LENS_NEXT_ACTION_INVALID", "Action type is invalid.");
+  const actionKeys = new Set(type === "status" ? ["type", "status"] : type === "comment" ? ["type", "comment"] : ["type", "responsibleCompany"]);
+  if (Object.keys(action).some(key => !actionKeys.has(key))) throw new LensNextPublishError(400, "LENS_NEXT_ACTION_INVALID", "Action contains unsupported fields.");
   const normalized: LensNextPublishRequest["action"] = { type };
   if (type === "status") {
     const status = exactText(action.status, "action.status", 32);

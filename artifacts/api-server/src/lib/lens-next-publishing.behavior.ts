@@ -35,6 +35,8 @@ const checks: string[] = [];
 const parsed = parseLensNextPublishRequest(body(), 3, 7);
 assert.equal(parsed.action.type, "status"); checks.push("strict controlled contract parses");
 assert.throws(() => parseLensNextPublishRequest({ ...body(), extra: true }, 3, 7), LensNextPublishError); checks.push("unknown fields denied");
+assert.throws(() => parseLensNextPublishRequest({ ...body(), identity: { ...body().identity, extra: true } }, 3, 7), /unsupported fields/); checks.push("unknown identity fields denied");
+assert.throws(() => parseLensNextPublishRequest(body("publish-key-nested", { type: "status", status: "follow_up", comment: "hidden payload" }), 3, 7), /unsupported fields/); checks.push("action-specific fields enforced");
 assert.throws(() => parseLensNextPublishRequest({ ...body(), identity: { ...body().identity, serverId: 8 } }, 3, 7), /route and immutable/); checks.push("route identity mismatch denied");
 
 const pool = new MemoryPool();
