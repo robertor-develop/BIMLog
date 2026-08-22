@@ -13311,8 +13311,8 @@
     },
     {
       "taskId": "bimlog-lens-next-m8-controlled-publishing-20260822",
-      "reviewedThroughCommit": "f2510f2f7f92a308d9f5c35c06682d547543f0a6",
-      "reviewedAt": "2026-08-22T17:43:12-04:00",
+      "reviewedThroughCommit": "98e0ed974a488e4b4a514c40cd47d779a4d067cc",
+      "reviewedAt": "2026-08-22T17:55:00-04:00",
       "status": "local_source_and_ui_build_accepted_database_browser_field_and_release_pending",
       "captureTiming": "post_local_source_and_ui_build_pre_database_pre_browser_pre_push_pre_field",
       "summary": "Reconciles the bounded Lens Next M8 controlled issue-publishing authority with explicit review, server permissions, idempotency, conflict handling, immutable audit, and transactional rollback while preserving Legacy Lens and native boundaries.",
@@ -13381,11 +13381,10 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "a562e30926770eceb9198e7a01ba92fc105437328b7efbd020b262da5a0da0d7"
+      "reviewedChangeSha256": "35a1ba34e95521884cdd05b75035ec7b7bc09c7f890df0831cc4c2645ff3b902"
     }
   ]
 }
