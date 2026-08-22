@@ -500,3 +500,143 @@
   color: #64748b;
   white-space: nowrap;
 }
+
+/* M7 field repair: the Navisworks WebView owns its viewport and exposes two
+   independently scrollable panes. The normal BIMLog route remains bounded. */
+.lens-next-workspace--embedded {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+  background: #f7faf8;
+}
+
+.lens-next-workspace--embedded .lens-next {
+  width: 100%;
+  max-width: none;
+  height: 100%;
+  min-height: 0;
+  max-height: none;
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+}
+
+.lens-next-route-state--embedded {
+  position: fixed;
+  inset: 0;
+  z-index: 2147483000;
+  width: 100vw;
+  height: 100dvh;
+  min-height: 0;
+  background: #f7faf8;
+}
+
+.lens-next__body {
+  display: grid;
+  flex: 1 1 auto;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.lens-next__browser {
+  display: flex;
+  min-width: 0;
+  min-height: 0;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.lens-next__browser > .lens-next__field,
+.lens-next__browser > .lens-next__active-model,
+.lens-next__browser > .lens-next__view-settings,
+.lens-next__browser > .lens-next__filters,
+.lens-next__browser > .lens-next__alerts,
+.lens-next__browser > .lens-next__list-heading {
+  flex: 0 0 auto;
+}
+
+.lens-next__browser .lens-next__issue-list {
+  flex: 1 1 0;
+  min-height: 96px;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #7fa58f #eef4f0;
+  scrollbar-gutter: stable;
+}
+
+.lens-next__body > .lens-next__details {
+  min-width: 0;
+  min-height: 0;
+  max-height: none;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-color: #7fa58f #eef4f0;
+  scrollbar-gutter: stable;
+  border-top: 0;
+  box-shadow: none;
+}
+
+.lens-next__details--empty {
+  display: grid;
+  place-items: center;
+  color: var(--lens-next-muted);
+  text-align: center;
+}
+
+.lens-next__details--empty > div {
+  max-width: 360px;
+}
+
+.lens-next__details--empty h3 {
+  margin: 5px 0 8px;
+  color: var(--lens-next-ink);
+}
+
+@media (min-width: 561px) {
+  .lens-next-workspace--embedded .lens-next__body {
+    grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+  }
+
+  .lens-next-workspace--embedded .lens-next__browser {
+    border-right: 1px solid var(--lens-next-line);
+  }
+}
+
+@media (min-width: 720px) {
+  .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next {
+    width: min(100%, 980px);
+  }
+
+  .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__body {
+    grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+  }
+
+  .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__browser {
+    border-right: 1px solid var(--lens-next-line);
+  }
+}
+
+@media (max-width: 560px) {
+  .lens-next__body {
+    grid-template-columns: minmax(0, 1fr);
+    overflow-y: auto;
+  }
+
+  .lens-next__browser,
+  .lens-next__body > .lens-next__details {
+    min-height: 320px;
+    overflow-y: visible;
+  }
+
+  .lens-next__details--empty {
+    display: none;
+  }
+}

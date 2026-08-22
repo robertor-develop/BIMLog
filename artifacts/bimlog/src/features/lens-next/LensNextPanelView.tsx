@@ -293,7 +293,9 @@ export function LensNextPanelView({
         <ConnectionBadge label="Navisworks" state={bridgeState} />
       </div>
 
-      <label className="lens-next__field">
+      <div className="lens-next__body">
+        <section className="lens-next__browser" aria-label="Issue browser and filters">
+          <label className="lens-next__field">
         <span>Project</span>
         <select
           value={selectedProjectId ?? ""}
@@ -486,9 +488,10 @@ export function LensNextPanelView({
             onSelectIssue={onSelectIssue}
           />
         )}
-      </section>
+          </section>
+        </section>
 
-      {selectedIssue && (
+      {selectedIssue ? (
         <section
           className="lens-next__details"
           aria-label="Selected issue details"
@@ -564,7 +567,23 @@ export function LensNextPanelView({
             <HistoryView history={history} />
           )}
         </section>
-      )}
+      ) : (
+        <section
+          className="lens-next__details lens-next__details--empty"
+          aria-label="Selected issue details"
+          aria-live="polite"
+        >
+          <div>
+            <p className="lens-next__eyebrow">Issue details</p>
+            <h3>Select an issue</h3>
+            <p>
+              Choose an issue from the list to review its exact BIMLog identity
+              and open its temporary Working View.
+            </p>
+          </div>
+        </section>
+        )}
+      </div>
     </aside>
   );
 }

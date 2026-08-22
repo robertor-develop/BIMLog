@@ -47,6 +47,12 @@ export function LensNextWorkspace() {
     () => lensNextLaunchModeFromSearch(window.location.search),
     [],
   );
+  const workspaceClassName = launchMode === "navisworks"
+    ? "lens-next-workspace lens-next-workspace--embedded"
+    : "lens-next-workspace";
+  const routeStateClassName = launchMode === "navisworks"
+    ? "lens-next-route-state lens-next-route-state--embedded"
+    : "lens-next-route-state";
   const [selectedProjectId, setSelectedProjectId] = useState<number | null>(null);
   const [bridgeContext, setBridgeContext] =
     useState<LensNextBridgeProjectContext | null>(null);
@@ -135,20 +141,20 @@ export function LensNextWorkspace() {
   }, [resolution.projectId, selectedProjectId]);
 
   if (isLoading) {
-    return <main className="lens-next-route-state">Loading authorized BIMLog projects…</main>;
+    return <main className={routeStateClassName}>Loading authorized BIMLog projects…</main>;
   }
   if (isError) {
-    return <main className="lens-next-route-state" role="alert">Authorized projects could not be loaded.</main>;
+    return <main className={routeStateClassName} role="alert">Authorized projects could not be loaded.</main>;
   }
   if (!token || projects.length === 0) {
-    return <main className="lens-next-route-state" role="alert">No authorized BIMLog project is available.</main>;
+    return <main className={routeStateClassName} role="alert">No authorized BIMLog project is available.</main>;
   }
   if (resolution.status === "unauthorized_project") {
-    return <main className="lens-next-route-state" role="alert">{resolution.message}</main>;
+    return <main className={routeStateClassName} role="alert">{resolution.message}</main>;
   }
   if (launchMode === "navisworks" && resolution.status === "waiting_for_bridge") {
     return (
-      <main className="lens-next-route-state" aria-live="polite">
+      <main className={routeStateClassName} aria-live="polite">
         <strong>Connecting to Navisworks…</strong>
         <span>{resolution.message}</span>
         {bridgeDiscoveryError && <small>{bridgeDiscoveryError}</small>}
@@ -157,13 +163,18 @@ export function LensNextWorkspace() {
   }
 
   return (
-    <LensNextPanel
-      projects={projects}
-      selectedProjectId={resolution.projectId}
-      onProjectChange={setSelectedProjectId}
-      projectLocked={resolution.locked}
-      authToken={token}
-      bridgeSessionToken={bridgeSession?.token ?? ""}
-    />
+    <main
+      className={workspaceClassName}
+      data-lens-next-embedded={launchMode === "navisworks" ? "true" : "false"}
+    >
+      <LensNextPanel
+        projects={projects}
+        selectedProjectId={resolution.projectId}
+        onProjectChange={setSelectedProjectId}
+        projectLocked={resolution.locked}
+        authToken={token}
+        bridgeSessionToken={bridgeSession?.token ?? ""}
+      />
+    </main>
   );
 }
