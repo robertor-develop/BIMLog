@@ -779,6 +779,14 @@ schema-parity rule deterministically, preventing API builds from dirtying the tr
 - Local verification passed: focused M7 field-repair behavior 18/18, BIMLog UI TypeScript, production Vite build, and build artifact verification. The previously accepted M7 ZIP remains unchanged at `F:\BIMLog\LensNext-Pro\03_Builds\LensNext-v1.0.07-Pro-2021\BIMLog-Lens-Next-Navisworks2021-v1.0.07-Pro-Milestone7-20260820-165226.zip`, SHA-256 `C448827E1B3D657E272E0D82EE4A7D9DD8B42DA4C72CEB500E848B5533A3B356`.
 - This is local source/build evidence only. Push, Replit synchronization/publication, deployed verification, and the required real Navisworks Manage 2021 field acceptance remain separate gates.
 
+# Lens Next v1.0.08-Pro / M8 - Controlled Issue Publishing
+
+- Exact product source `f2510f2f7f92a308d9f5c35c06682d547543f0a6` adds a separate M8 publication contract for status, comment, and responsible-company updates. The legacy status/edit/reassign/void routes, Legacy Lens, native bridge registration, port `8766`, Saved Viewpoints, model files, and the accepted M7 ZIP remain unchanged.
+- Publishing is server-authorized from the current database user, active project membership, and configured `admin`/`write` permission. Read-only users receive a truthful disabled UI and the server independently refuses mutation. The UI requires a reason, an explicit review step, and a separate confirmation before transport.
+- Every request binds the exact project/server/viewpoint/lifecycle/revision identity plus a monotonic workflow mutation version. Stale drafts return a safe current snapshot with HTTP conflict; the UI never silently overwrites. Actor-scoped idempotency is serialized by a transaction advisory lock: an exact retry returns the original receipt and a divergent retry is rejected.
+- Status, comment, or assignment publication, mutation-version advance, and the immutable before/after audit receipt commit in one PostgreSQL transaction. A trigger rejects receipt update/delete. Any audit failure rolls the issue mutation back. History projects the recorded actor, company, reason, comment, before/after state, and timestamp.
+- Local focused gates pass: controlled publishing behavior 13/13, publishing UI authority 11/11, API and UI TypeScript, database source safety (189 tables, 256 indexes, 145 startup tables), database-safety fixtures, tracked-secret checks, mojibake, diff checks, and production Vite build/artifact verification. This is local source/build evidence only; disposable PostgreSQL HTTP concurrency proof, controlled browser proof, independent QA, push, Replit publication, deployed verification, and real Navisworks 2021 field acceptance remain pending.
+
 # Feedback packages v1.60.35.09-F - Local Candidate
 
 ## Reviewer operations and complete package successor

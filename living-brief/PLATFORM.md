@@ -288,6 +288,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-operations.behavior.ts
 - artifacts/api-server/src/lib/job-work-packages.behavior.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
+- artifacts/api-server/src/lib/lens-next-publishing.behavior.ts
+- artifacts/api-server/src/lib/lens-next-publishing.ts
 - artifacts/api-server/src/lib/linked-items-creation-ux.behavior.ts
 - artifacts/api-server/src/lib/living-brief-gate.behavior.ts
 - artifacts/api-server/src/lib/living-brief-gate.ts
@@ -375,6 +377,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/invitations.ts
 - lib/db/src/schema/job-intakes.ts
 - lib/db/src/schema/lens-imports.ts
+- lib/db/src/schema/lens-next-publishing.ts
 - lib/db/src/schema/lens-viewpoint-reports.ts
 - lib/db/src/schema/lens-viewpoint-sequence-counters.ts
 - lib/db/src/schema/lens-viewpoints.ts
