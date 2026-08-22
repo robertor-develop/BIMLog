@@ -38,6 +38,8 @@ export interface LensNextImmutableIssueIdentity {
 
 export interface LensNextIssue {
   identity: LensNextImmutableIssueIdentity;
+  mutationVersion: number;
+  publishingAllowed: boolean;
   displayId: string | null;
   navisworksGuid: string | null;
   bimlogPhysicalId: string | null;
@@ -55,6 +57,25 @@ export interface LensNextIssue {
   supersedesId: number | null;
   supersedesCode: string | null;
   screenshotUrl: string | null;
+}
+
+export type LensNextPublishAction =
+  | { type: "status"; status: LensNextStatus }
+  | { type: "comment"; comment: string }
+  | { type: "assignment"; responsibleCompany: string };
+
+export interface LensNextPublishResult {
+  replayed: boolean;
+  issue: {
+    serverId: number;
+    viewpointId: string;
+    lifecycleStatus: LensNextLifecycleState;
+    revisionNumber: number;
+    mutationVersion: number;
+    status: LensNextStatus;
+    responsibleCompany: string | null;
+  };
+  receipt: { requestId: string; idempotencyKey: string; requestHash: string; actionType: LensNextPublishAction["type"]; recordedAt: string };
 }
 
 export interface LensNextFilters {

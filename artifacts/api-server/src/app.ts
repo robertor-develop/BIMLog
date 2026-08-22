@@ -65,6 +65,7 @@ import { startFeedbackBackupWorker, verifyFeedbackBackupStartup } from "./lib/fe
 import { startFeedbackPackageSnapshotWorker } from "./lib/feedback-package-worker";
 import { startFeedbackTelegramDeliveryWorker } from "./lib/feedback-telegram-worker";
 import { storage as feedbackStorage } from "./lib/storage-adapter";
+import { ensureLensNextPublishingSchema } from "./lib/lens-next-publishing";
 
 const ENV_MODE =
   process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -114,6 +115,10 @@ const coordinatorStartupBarrier = (async () => {
     throw error;
   }
 })();
+
+const lensNextPublishingStartupBarrier = ensureLensNextPublishingSchema(pool).then(() => {
+  console.log("[migration] Lens Next controlled publishing authority ensured");
+});
 
 app.disable("etag");
 app.set("trust proxy", 1);
@@ -1341,6 +1346,7 @@ const meetingLensStartupBarrier = (async () => {
 })();
 
 export const startupBarrier = Promise.all([
+  lensNextPublishingStartupBarrier,
   feedbackStartupBarrier,
   verifyFeedbackScannerStartup(),
   verifyFeedbackBackupStartup(),

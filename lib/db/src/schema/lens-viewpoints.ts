@@ -37,6 +37,9 @@ export const lensViewpointsTable = pgTable("lens_viewpoints", {
   // new row with revision_number = old.revision_number + 1. Walk supersedes_id
   // backward to recover prior revisions.
   revisionNumber: integer("revision_number").notNull().default(1),
+  // Monotonic workflow-write version. Unlike revision_number, comments, status,
+  // and assignment publications all advance this value without changing identity.
+  mutationVersion: integer("mutation_version").notNull().default(1),
   importBatchId: integer("import_batch_id"),
   sourceProjectId: integer("source_project_id"),
   sourceServerId: integer("source_server_id"),

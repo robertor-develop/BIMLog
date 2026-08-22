@@ -19,6 +19,7 @@ import {
   type LensNextFilters,
   type LensNextHistory,
   type LensNextIssue,
+  type LensNextPublishAction,
   type LensNextProjectOption,
   type LensNextRefreshState,
 } from "./lens-next-types";
@@ -96,6 +97,9 @@ export function LensNextPanel({
   );
   const [historyError, setHistoryError] = useState<string | null>(null);
   const refreshSequence = useRef(0);
+  const publishAttempt = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
+  const [publishState, setPublishState] = useState<"idle" | "publishing" | "published" | "error">("idle");
+  const [publishMessage, setPublishMessage] = useState<string | null>(null);
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -340,6 +344,32 @@ export function LensNextPanel({
     }
   }, [authorizedProjectId, bridgeClient, bridgeContext, selectedIssue]);
 
+  const publishAction = useCallback(async (action: LensNextPublishAction, reason: string) => {
+    if (!apiClient || !selectedIssue || !selectedIssue.publishingAllowed) return;
+    const fingerprint = JSON.stringify({ serverId: selectedIssue.identity.serverId, mutationVersion: selectedIssue.mutationVersion, action, reason });
+    if (!publishAttempt.current || publishAttempt.current.fingerprint !== fingerprint) {
+      publishAttempt.current = { fingerprint, idempotencyKey: `lens-next-ui-${crypto.randomUUID()}` };
+    }
+    setPublishState("publishing");
+    setPublishMessage(null);
+    try {
+      const result = await apiClient.publishAction(selectedIssue, action, reason, publishAttempt.current.idempotencyKey, bridgeContext?.modelFingerprint ?? null);
+      setIssues(current => current.map(issue => issue.identity.serverId === result.issue.serverId ? {
+        ...issue,
+        mutationVersion: result.issue.mutationVersion,
+        status: result.issue.status,
+        responsibleCompany: result.issue.responsibleCompany,
+      } : issue));
+      publishAttempt.current = null;
+      setPublishState("published");
+      setPublishMessage(result.replayed ? "The prior verified publication receipt was returned." : "Published with an immutable BIMLog audit receipt.");
+      setHistory(null);
+    } catch (error) {
+      setPublishState("error");
+      setPublishMessage(error instanceof Error ? error.message : "Controlled publication failed");
+    }
+  }, [apiClient, bridgeContext?.modelFingerprint, selectedIssue]);
+
   return (
     <LensNextPanelView
       authorizedProjects={authorizedProjects}
@@ -377,10 +407,21 @@ export function LensNextPanel({
         setSelectedServerId(serverId);
         setHistory(null);
         setHistoryError(null);
+        publishAttempt.current = null;
+        setPublishState("idle");
+        setPublishMessage(null);
       }}
-      onCloseIssue={() => setSelectedServerId(null)}
+      onCloseIssue={() => {
+        setSelectedServerId(null);
+        publishAttempt.current = null;
+        setPublishState("idle");
+        setPublishMessage(null);
+      }}
       onOpenWorkingView={() => void openWorkingView()}
       onLoadHistory={() => void loadHistory()}
+      publishState={publishState}
+      publishMessage={publishMessage}
+      onPublishAction={(action, reason) => void publishAction(action, reason)}
     />
   );
 }

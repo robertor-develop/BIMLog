@@ -160,6 +160,7 @@ export function assertLensNextImmutableIdentity(
 function adaptLensIssue(
   value: unknown,
   expectedProjectId: number,
+  publishingAllowed = false,
 ): LensNextIssue {
   const row = recordOf(value, "Lens viewpoint");
   const projectId = positiveInteger(row.projectId, "viewpoint.projectId");
@@ -179,6 +180,8 @@ function adaptLensIssue(
       lifecycleStatus: row.lifecycleStatus,
       revisionNumber: row.revisionNumber,
     }),
+    mutationVersion: positiveInteger(row.mutationVersion ?? 1, "mutationVersion"),
+    publishingAllowed,
     displayId: nullableString(row.displayId),
     navisworksGuid: nullableString(row.navisworksGuid),
     bimlogPhysicalId: nullableString(row.bimlogPhysicalId),
@@ -208,8 +211,11 @@ export function adaptLensNextPullResponse(
   const body = recordOf(value, "lens-pull response");
   if (body.success !== true || !Array.isArray(body.viewpoints))
     throw new Error("invalid lens-pull response");
+  const publishing = body.publishing && typeof body.publishing === "object" && !Array.isArray(body.publishing)
+    ? body.publishing as Record<string, unknown> : null;
+  const publishingAllowed = publishing?.contractVersion === "lens-next-publish.v1" && publishing.allowed === true;
   const issues = body.viewpoints.map((row) =>
-    adaptLensIssue(row, expectedProjectId),
+    adaptLensIssue(row, expectedProjectId, publishingAllowed),
   );
   const seen = new Set<number>();
   for (const issue of issues) {

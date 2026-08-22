@@ -19,6 +19,7 @@ import { createHash, randomUUID } from "crypto";
 import { LensImportValidationError, validateAndHashLensImportRequest } from "../lib/lens-import-contract";
 import { getAppUrl } from "../lib/email";
 import AdmZip from "adm-zip";
+import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "../lib/lens-next-publishing";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -1098,6 +1099,8 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
       const rows = await db.select().from(lensViewpointsTable)
         .where(eq(lensViewpointsTable.projectId, projectId))
         .orderBy(desc(lensViewpointsTable.capturedAt));
+      const mutationVersions = await pool.query(`SELECT id,mutation_version FROM lens_viewpoints WHERE project_id=$1`, [projectId]);
+      const mutationVersionById = new Map(mutationVersions.rows.map(row => [Number(row.id), Number(row.mutation_version)]));
       // Resolve each row's predecessor (supersedesId) to its short code so the table can
       // show "supersedes FI-001" without a second round-trip.
       const codeOf = (row: { trade: string | null; tradeFloorSeq: number | null }): string | null => {
@@ -1130,6 +1133,7 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         supersedesId: r.supersedesId,
         supersedesCode: r.supersedesId != null && byId.has(r.supersedesId) ? codeOf(byId.get(r.supersedesId)!) : null,
         revisionNumber: r.revisionNumber,
+        mutationVersion: mutationVersionById.get(r.id) ?? 1,
         bimlogPhysicalId: r.bimlogPhysicalId,
         importBatchId: r.importBatchId,
         sourceProjectId: r.sourceProjectId,
@@ -1137,7 +1141,19 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         sourcePhysicalId: r.sourcePhysicalId,
         importedLineageStatus: r.importedLineageStatus,
       }));
-      res.json({ success: true, viewpoints });
+      const [currentUser] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+      const activeMembership = currentUser?.isSuperAdmin ? null : await pool.query(`SELECT role FROM project_members WHERE project_id=$1 AND user_id=$2 AND status='active'`, [projectId, req.user!.userId]);
+      const activeRole = currentUser?.isSuperAdmin ? "project_admin" : activeMembership?.rows[0]?.role ?? null;
+      const roleMeta = activeRole ? await getConfigOptionMeta("member_role", activeRole) : null;
+      res.json({
+        success: true,
+        publishing: {
+          contractVersion: "lens-next-publish.v1",
+          allowed: Boolean(currentUser?.isSuperAdmin || ["admin", "write"].includes(roleMeta?.permission ?? "")),
+          actions: ["status", "comment", "assignment"],
+        },
+        viewpoints,
+      });
     } catch (err) {
       res.status(500).json({ error: "lens_pull_failed", message: err instanceof Error ? err.message : String(err) });
     }
@@ -1797,6 +1813,37 @@ router.patch("/projects/:projectId/clash-reports/lens-viewpoints/batch-responsib
 
 // PATCH lens viewpoint status. Registered BEFORE the "/:reportId" routes so the
 // literal "lens-viewpoints" segment is not captured by the :reportId param.
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:id/publish",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const id = Number(req.params.id);
+    try {
+      const request = parseLensNextPublishRequest(req.body, projectId, id);
+      const [currentUser] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
+      const roleMeta = req.memberRole ? await getConfigOptionMeta("member_role", req.memberRole) : null;
+      const response = await publishLensNextAction(pool, {
+        userId: req.user!.userId,
+        fullName: req.user!.fullName,
+        companyName: req.user!.companyName,
+        isSuperAdmin: Boolean(currentUser?.isSuperAdmin),
+        role: req.memberRole ?? null,
+        permission: currentUser?.isSuperAdmin ? "admin" : roleMeta?.permission ?? null,
+      }, request);
+      res.status(response.replayed ? 200 : 201).json(response);
+    } catch (error) {
+      if (error instanceof LensNextPublishError) {
+        res.status(error.status).json({ error: error.code, message: error.message, current: error.current ?? null });
+        return;
+      }
+      const correlationId = randomUUID();
+      logLensImportInternal("lens-next-publish", correlationId, error);
+      res.status(500).json({ error: "LENS_NEXT_PUBLISH_FAILED", message: "The issue publication could not be committed.", correlationId });
+    }
+  },
+);
+
 router.patch("/projects/:projectId/clash-reports/lens-viewpoints/:id",
   authMiddleware,
   requireProjectMember(),
@@ -2122,6 +2169,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
           inArray(activityLogTable.entityId, chainIds),
         ))
         .orderBy(desc(activityLogTable.createdAt));
+      const publishEvents = await pool.query(`SELECT r.id,r.action_type,r.viewpoint_id,r.before_snapshot,r.after_snapshot,r.reason,r.comment,r.created_at,r.actor_user_id,u.full_name,c.name company_name FROM lens_next_publish_receipts r JOIN users u ON u.id=r.actor_user_id JOIN companies c ON c.id=u.company_id WHERE r.project_id=$1 AND r.viewpoint_id = ANY($2::int[]) ORDER BY r.created_at DESC,r.id DESC`, [projectId, chainIds]);
       res.json({
         success: true,
         // Newest revision first.
@@ -2136,7 +2184,17 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
           updatedAt: c.updatedAt,
           createdAt: c.createdAt,
         })),
-        events: events.map(e => ({
+        events: [...publishEvents.rows.map(e => ({
+          id: Number(e.id),
+          actionType: `lens_next_${e.action_type}_published`,
+          entityId: e.viewpoint_id,
+          fileNameBefore: JSON.stringify(e.before_snapshot),
+          fileNameAfter: JSON.stringify(e.after_snapshot),
+          details: e.comment ? `${e.reason}\n${e.comment}` : e.reason,
+          userFullName: e.full_name,
+          userCompanyName: e.company_name,
+          createdAt: e.created_at instanceof Date ? e.created_at.toISOString() : e.created_at,
+        })), ...events.map(e => ({
           id: e.id,
           actionType: e.actionType,
           entityId: e.entityId,
@@ -2146,7 +2204,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
           userFullName: e.userFullName,
           userCompanyName: e.userCompanyName,
           createdAt: e.createdAt instanceof Date ? e.createdAt.toISOString() : e.createdAt,
-        })),
+        }))].sort((a, b) => String(b.createdAt ?? "").localeCompare(String(a.createdAt ?? ""))),
       });
     } catch (err) {
       res.status(500).json({ error: "lens_history_failed", message: err instanceof Error ? err.message : String(err) });

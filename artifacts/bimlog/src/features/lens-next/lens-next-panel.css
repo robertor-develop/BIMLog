@@ -640,3 +640,19 @@
     display: none;
   }
 }
+.lens-next__publisher {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border, #d7dee7);
+  border-radius: 0.75rem;
+  background: #f8fafc;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.lens-next__publisher h4 { margin: 0; }
+.lens-next__publisher textarea { min-height: 4.5rem; resize: vertical; }
+.lens-next__publish-success { color: #166534; margin: 0; }
+.lens-next__publish-confirm { padding: 0.75rem; border-left: 4px solid #1d4ed8; background: #eff6ff; }
+.lens-next__publish-confirm p { margin: 0 0 0.75rem; }
+.lens-next__publish-confirm button + button { margin-left: 0.5rem; }

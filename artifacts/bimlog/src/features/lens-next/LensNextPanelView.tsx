@@ -13,6 +13,8 @@ import type {
   LensNextHistory,
   LensNextIssue,
   LensNextProjectOption,
+  LensNextPublishAction,
+  LensNextStatus,
   LensNextRefreshState,
 } from "./lens-next-types";
 
@@ -231,6 +233,9 @@ export interface LensNextPanelViewProps {
   onCloseIssue(): void;
   onOpenWorkingView(): void;
   onLoadHistory(): void;
+  publishState: "idle" | "publishing" | "published" | "error";
+  publishMessage: string | null;
+  onPublishAction(action: LensNextPublishAction, reason: string): void;
 }
 
 export function LensNextPanelView({
@@ -266,13 +271,24 @@ export function LensNextPanelView({
   onCloseIssue,
   onOpenWorkingView,
   onLoadHistory,
+  publishState,
+  publishMessage,
+  onPublishAction,
 }: LensNextPanelViewProps) {
+  const [publishKind, setPublishKind] = React.useState<LensNextPublishAction["type"]>("status");
+  const [publishStatus, setPublishStatus] = React.useState<LensNextStatus>("follow_up");
+  const [publishText, setPublishText] = React.useState("");
+  const [publishReason, setPublishReason] = React.useState("");
+  const [publishReviewReady, setPublishReviewReady] = React.useState(false);
+  React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
+  React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
+  const preparedAction: LensNextPublishAction = publishKind === "status" ? { type: "status", status: publishStatus } : publishKind === "comment" ? { type: "comment", comment: publishText.trim() } : { type: "assignment", responsibleCompany: publishText.trim() };
   return (
-    <aside className="lens-next" aria-label="BIMLog Lens Next read-only panel">
+    <aside className="lens-next" aria-label="BIMLog Lens Next controlled issue workspace">
       <header className="lens-next__header">
         <div>
-          <p className="lens-next__eyebrow">BIMLog · Read only</p>
-          <h2>Lens Next</h2>
+          <p className="lens-next__eyebrow">BIMLog · Controlled publishing</p>
+          <h2>Lens Next <small>v1.0.08-Pro · M8</small></h2>
         </div>
         <button
           type="button"
@@ -558,6 +574,37 @@ export function LensNextPanelView({
               {history === "loading" ? "Loading history…" : "View history"}
             </button>
           </div>
+          <section className="lens-next__publisher" aria-label="Controlled issue publishing">
+            <h4>Publish an issue update</h4>
+            {!selectedIssue.publishingAllowed ? (
+              <p className="lens-next__inline-error">Your current project role is read-only. No change will be sent.</p>
+            ) : (
+              <>
+                <label className="lens-next__field">
+                  <span>Update</span>
+                  <select value={publishKind} onChange={event => setPublishKind(event.target.value as LensNextPublishAction["type"])}>
+                    <option value="status">Status</option><option value="comment">Comment</option><option value="assignment">Responsible company</option>
+                  </select>
+                </label>
+                {publishKind === "status" ? (
+                  <label className="lens-next__field"><span>New status</span><select value={publishStatus} onChange={event => setPublishStatus(event.target.value as LensNextStatus)}>{LENS_NEXT_STATUSES.map(status => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}</select></label>
+                ) : (
+                  <label className="lens-next__field lens-next__field--wide"><span>{publishKind === "comment" ? "Comment" : "Responsible company"}</span><textarea maxLength={publishKind === "comment" ? 4000 : 256} value={publishText} onChange={event => setPublishText(event.target.value)} /></label>
+                )}
+                <label className="lens-next__field lens-next__field--wide"><span>Reason for audit history</span><textarea maxLength={1000} value={publishReason} onChange={event => setPublishReason(event.target.value)} /></label>
+                {!publishReviewReady ? (
+                  <button type="button" className="lens-next__primary" disabled={!publishReason.trim() || (publishKind !== "status" && !publishText.trim())} onClick={() => setPublishReviewReady(true)}>Review publication</button>
+                ) : (
+                  <div className="lens-next__publish-confirm" role="group" aria-label="Confirm controlled publication">
+                    <p><strong>Confirm:</strong> {publishKind === "status" ? `set status to ${STATUS_LABELS[publishStatus]}` : publishKind === "comment" ? `record comment “${publishText.trim()}”` : `assign to ${publishText.trim()}`}. This creates an immutable BIMLog audit receipt.</p>
+                    <button type="button" className="lens-next__primary" disabled={publishState === "publishing"} onClick={() => onPublishAction(preparedAction, publishReason.trim())}>{publishState === "publishing" ? "Publishing…" : "Confirm publish"}</button>
+                    <button type="button" disabled={publishState === "publishing"} onClick={() => setPublishReviewReady(false)}>Cancel</button>
+                  </div>
+                )}
+              </>
+            )}
+            {publishMessage && <p className={publishState === "error" ? "lens-next__inline-error" : "lens-next__publish-success"} role="status">{publishMessage}</p>}
+          </section>
           {historyError && (
             <p className="lens-next__inline-error" role="status">
               {historyError}

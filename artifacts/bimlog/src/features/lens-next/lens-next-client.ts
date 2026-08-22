@@ -11,6 +11,8 @@ import type {
   LensNextImmutableIssueIdentity,
   LensNextIssue,
   LensNextOpenWorkingViewResult,
+  LensNextPublishAction,
+  LensNextPublishResult,
 } from "./lens-next-types.ts";
 
 export const LENS_NEXT_BRIDGE_ORIGIN = "http://127.0.0.1:8766";
@@ -58,6 +60,7 @@ export interface LensNextApiClient {
     identity: LensNextImmutableIssueIdentity,
     signal?: AbortSignal,
   ): Promise<LensNextHistory>;
+  publishAction(issue: LensNextIssue, action: LensNextPublishAction, reason: string, idempotencyKey: string, modelFingerprint?: string | null, signal?: AbortSignal): Promise<LensNextPublishResult>;
 }
 
 export function createLensNextApiClient(
@@ -74,6 +77,14 @@ export function createLensNextApiClient(
       signal,
     });
     return jsonBody(response, "BIMLog read");
+  };
+  const post = async (path: string, body: unknown, signal?: AbortSignal): Promise<unknown> => {
+    const response = await fetchImpl(`${base}${path}`, {
+      method: "POST", credentials: "same-origin",
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      body: JSON.stringify(body), signal,
+    });
+    return jsonBody(response, "BIMLog controlled publish");
   };
   return Object.freeze({
     async loadIssues(projectId: number, signal?: AbortSignal) {
@@ -94,6 +105,23 @@ export function createLensNextApiClient(
         signal,
       );
       return adaptLensNextHistoryResponse(body, exactIdentity);
+    },
+    async publishAction(issue: LensNextIssue, action: LensNextPublishAction, reason: string, idempotencyKey: string, modelFingerprint?: string | null, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const requestId = defaultRequestId();
+      const raw = await post(`/projects/${identity.projectId}/clash-reports/lens-next/issues/${identity.serverId}/publish`, {
+        contractVersion: "lens-next-publish.v1",
+        requestId,
+        idempotencyKey,
+        identity: { ...identity, mutationVersion: issue.mutationVersion },
+        action,
+        reason: reason.trim(),
+        modelFingerprint: modelFingerprint?.trim() || null,
+      }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Controlled publish receipt is invalid");
+      const body = raw as Record<string, any>;
+      if (body.success !== true || body.contractVersion !== "lens-next-publish.v1" || !body.receipt || !body.issue) throw new Error("Controlled publish receipt is invalid");
+      return body as LensNextPublishResult;
     },
   });
 }
