@@ -13232,6 +13232,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1453dc1385efa5c9ca97b6641d9159a9c6176169f77cb9ec3294e892ea676458"
+    },
+    {
+      "taskId": "bimlog-lens-next-m7-embedded-field-repair-20260822",
+      "reviewedThroughCommit": "69b5c916cf27a2367400135d590ca6cbf7e9f690",
+      "reviewedAt": "2026-08-22T16:32:00-04:00",
+      "status": "local_source_and_ui_build_accepted_field_deployment_pending",
+      "captureTiming": "post_local_source_build_pre_push_pre_field_acceptance",
+      "summary": "Reconciles the bounded Lens Next M7 embedded two-pane and independent-scroll repair while preserving native, database, Saved Viewpoint, authentication, and M8 boundaries.",
+      "workstreams": [
+        "lens-next-m7-embedded-layout",
+        "lens-next-m7-working-view-preservation",
+        "lens-next-m7-field-acceptance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair preserves the existing BIMLog and Navisworks product boundary and accountable read-only issue workflow."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, credential, provider, database, native installation, or autonomous publication authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing fail-closed, exact-identity, local-build, and real-field acceptance requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The customer outcome remains a usable read-only issue-review panel inside Navisworks without model mutation."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform inventory path is added or removed; the existing Lens Next web surfaces are repaired in place."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No native plugin source, package, registration, installation path, bridge port, or accepted ZIP changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, DOCX, XLSX, JSON, ZIP, or governed report design surface changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, safety, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact M7 repair source, unchanged ZIP identity, local verification, and truthful pre-field boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the exact push, Replit Shell deployment, deployed verification, and real Navisworks 2021 field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No remote, Replit, provider, database, plugin installation, customer, or field action occurred during local repair."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6f2a91daa49846e755abde8296897eaf91c66ec48f73d52dd6661a88d6f6c873"
     }
   ]
 }
