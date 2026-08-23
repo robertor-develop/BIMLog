@@ -93,6 +93,9 @@ const css = readFileSync(
 );
 assert.match(css, /\.lens-next-workspace--embedded/);
 assert.match(css, /height:\s*100dvh/);
+assert.match(css, /\.lens-next-workspace--embedded\s*\{[\s\S]*overflow-y:\s*scroll/);
+assert.match(css, /\.lens-next-workspace--embedded \.lens-next\s*\{[\s\S]*height:\s*auto[\s\S]*overflow:\s*visible/);
+assert.match(css, /\.lens-next-workspace--embedded \.lens-next__body\s*\{[\s\S]*overflow:\s*visible/);
 assert.match(css, /grid-template-columns:\s*minmax\(280px, 0\.9fr\) minmax\(320px, 1\.1fr\)/);
 assert.match(css, /\.lens-next__browser \.lens-next__issue-list[\s\S]*overflow-y:\s*auto/);
 assert.match(css, /\.lens-next__body > \.lens-next__details[\s\S]*overflow-y:\s*auto/);
@@ -113,4 +116,4 @@ const panel = readFileSync(
 assert.match(panel, /bridgeClient\.openWorkingView\(selectedIssue, bridgeContext\)/);
 assert.match(panel, /onOpenWorkingView=\{\(\) => void openWorkingView\(\)\}/);
 
-console.log("Lens Next M7 field repair behavior: 18/18 passed");
+console.log("Lens Next M8 whole-workspace repair behavior: 21/21 passed");
