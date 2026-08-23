@@ -13497,8 +13497,8 @@
         },
         {
           "key": "platform",
-          "result": "updated",
-          "reason": "Records the simplified customer version label while preserving the accepted embedded workspace layout."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated structural platform map remains unchanged; release detail is carried by the plug-in, status, and open-loop authorities."
         },
         {
           "key": "plugin",
@@ -13533,11 +13533,10 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "8cd5399c1ff17d932fd5069d78778808eeac9cffd29880957c1ca4f6ed8bb39a"
+      "reviewedChangeSha256": "51539ea20be51f3d9adbe1700b9035cff85296fd671dbca3211517acd4c3374a"
     }
   ]
 }
