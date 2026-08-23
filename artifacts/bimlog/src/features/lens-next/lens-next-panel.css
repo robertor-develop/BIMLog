@@ -602,13 +602,47 @@
   color: var(--lens-next-ink);
 }
 
-@media (min-width: 561px) {
-  .lens-next-workspace--embedded .lens-next__body {
-    grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
-  }
+/* Navisworks embeds Lens Next as one side panel. The panel itself owns the
+   scrollbar; list and detail content must never create competing scrollbars. */
+.lens-next-workspace--embedded .lens-next__body {
+  display: block;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  scrollbar-width: auto;
+  scrollbar-color: #5f8f72 #e4eee8;
+  scrollbar-gutter: stable;
+}
 
+.lens-next-workspace--embedded .lens-next__browser,
+.lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list,
+.lens-next-workspace--embedded .lens-next__body > .lens-next__details {
+  min-height: 0;
+  overflow: visible;
+}
+
+.lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list {
+  flex: none;
+}
+
+.lens-next-workspace--embedded .lens-next__body::-webkit-scrollbar {
+  width: 11px;
+}
+
+.lens-next-workspace--embedded .lens-next__body::-webkit-scrollbar-track {
+  background: #e4eee8;
+}
+
+.lens-next-workspace--embedded .lens-next__body::-webkit-scrollbar-thumb {
+  min-height: 36px;
+  border: 2px solid #e4eee8;
+  border-radius: 999px;
+  background: #5f8f72;
+}
+
+@media (min-width: 561px) {
   .lens-next-workspace--embedded .lens-next__browser {
-    border-right: 1px solid var(--lens-next-line);
+    border-bottom: 1px solid var(--lens-next-line);
   }
 }
 
@@ -642,44 +676,10 @@
     display: none;
   }
 
-  .lens-next-workspace--embedded .lens-next__body {
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(220px, 1.15fr) minmax(180px, 0.85fr);
-    overflow: hidden;
-  }
-
   .lens-next-workspace--embedded .lens-next__browser {
     min-height: 0;
-    overflow: hidden;
     border-bottom: 1px solid var(--lens-next-line);
   }
-
-  .lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list,
-  .lens-next-workspace--embedded .lens-next__body > .lens-next__details {
-    min-height: 0;
-    overflow-x: hidden;
-    overflow-y: scroll;
-    overscroll-behavior: contain;
-    scrollbar-gutter: stable;
-  }
-}
-
-.lens-next__browser .lens-next__issue-list::-webkit-scrollbar,
-.lens-next__body > .lens-next__details::-webkit-scrollbar {
-  width: 11px;
-}
-
-.lens-next__browser .lens-next__issue-list::-webkit-scrollbar-track,
-.lens-next__body > .lens-next__details::-webkit-scrollbar-track {
-  background: #e4eee8;
-}
-
-.lens-next__browser .lens-next__issue-list::-webkit-scrollbar-thumb,
-.lens-next__body > .lens-next__details::-webkit-scrollbar-thumb {
-  min-height: 36px;
-  border: 2px solid #e4eee8;
-  border-radius: 999px;
-  background: #5f8f72;
 }
 .lens-next__publisher {
   margin-top: 1rem;
