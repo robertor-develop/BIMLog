@@ -23,5 +23,6 @@ check(model.includes("mutationVersion"), "pull adapter retains concurrency versi
 check(styles.includes(".lens-next-workspace--embedded {") && styles.includes("overflow-y: scroll"), "complete embedded workspace has one vertical scrollbar");
 check(styles.includes("including its header and every issue/detail control, owns one scrollbar"), "embedded scrollbar ownership is explicit");
 check(styles.includes(".lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list") && styles.includes("overflow: visible"), "embedded list and details defer scrolling to the whole panel");
+check(styles.includes("grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr)"), "embedded workspace keeps issue list and selected issue details side by side");
 check(styles.includes(".lens-next-workspace--embedded::-webkit-scrollbar") && styles.includes("width: 11px") && styles.includes("background: #5f8f72"), "whole-workspace scrollbar remains visible and usable");
 console.log(JSON.stringify({ status: "PASS", checks: checks.length, details: checks }));

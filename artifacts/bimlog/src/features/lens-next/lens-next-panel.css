@@ -611,7 +611,8 @@
 /* Navisworks embeds Lens Next as one side panel. The complete workspace,
    including its header and every issue/detail control, owns one scrollbar. */
 .lens-next-workspace--embedded .lens-next__body {
-  display: block;
+  display: grid;
+  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
   flex: none;
   overflow: visible;
 }
@@ -642,10 +643,8 @@
   background: #5f8f72;
 }
 
-@media (min-width: 561px) {
-  .lens-next-workspace--embedded .lens-next__browser {
-    border-bottom: 1px solid var(--lens-next-line);
-  }
+.lens-next-workspace--embedded .lens-next__browser {
+  border-right: 1px solid var(--lens-next-line);
 }
 
 @media (min-width: 720px) {
@@ -680,7 +679,13 @@
 
   .lens-next-workspace--embedded .lens-next__browser {
     min-height: 0;
+    border-right: 0;
     border-bottom: 1px solid var(--lens-next-line);
+  }
+
+  .lens-next-workspace--embedded .lens-next__body {
+    grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+    width: max(100%, 600px);
   }
 }
 .lens-next__publisher {
