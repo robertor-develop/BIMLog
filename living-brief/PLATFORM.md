@@ -573,3 +573,6 @@ It changes only when the code structure or curated architectural facts change.
   XLSX exports expose the same Contract Item quantities, rates, values, APU identity, and workflow metadata.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
+## Lens Next v1.0.08-Pro stale-identity navigation boundary
+
+The Navisworks adapter resolves an exact supplied Saved Viewpoint GUID first. If that valid-looking GUID is stale and unresolved, read-only navigation may continue only through exact BIMLog project/server metadata or one unique exact issue display code; ambiguity and non-exact matches remain denied. This fallback may select an existing Saved Viewpoint but may not create, edit, rename, delete, or save Saved Viewpoints or model content. The customer-facing embedded workspace displays `v1.0.08-Pro`; `M8` remains an internal delivery milestone rather than customer version text.

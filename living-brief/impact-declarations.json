@@ -13461,6 +13461,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ea6217bf81d97f28461b5b99be24166637200a2c123deeeedcb1d2090b393c4a"
+    },
+    {
+      "taskId": "bimlog-lens-next-stale-identity-version-label-20260823",
+      "reviewedThroughCommit": "b69bca7f96cbf2eafb1055007a0d45cdb56c5085",
+      "reviewedAt": "2026-08-23T17:56:00-04:00",
+      "status": "native_package_installed_web_build_passed_publish_and_field_verification_pending",
+      "captureTiming": "post_native_build_install_post_web_source_commit_pre_push_pre_publish_pre_field_verification",
+      "summary": "Records the exact stale Navisworks identity fallback correction and customer-facing version-label simplification while preserving the accepted split-pane and single-scroll workspace.",
+      "workstreams": [
+        "lens-next-stale-identity-working-view",
+        "lens-next-customer-version-label",
+        "lens-next-release-and-field-verification"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves accountable BIMLog issue identity and the existing BIMLog-to-Navisworks workflow."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, credential, provider, database, or autonomous publication authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds explicit stale-identity deny and unique exact-fallback tests plus a real Navisworks field gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The intended outcome remains reliable read-only issue navigation inside Navisworks."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the simplified customer version label while preserving the accepted embedded workspace layout."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the narrow exact metadata fallback, H-only package evidence, and installed native hashes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed PDF, DOCX, XLSX, JSON, ZIP report, or document design changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification, safety, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact source, package, test, installation, and truthful pending live-field boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires exact publication and real Navisworks Working View verification before acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records authorized Autodesk installation while distinguishing it from pending live load and field acceptance."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "8cd5399c1ff17d932fd5069d78778808eeac9cffd29880957c1ca4f6ed8bb39a"
     }
   ]
 }
