@@ -567,7 +567,8 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-color: #7fa58f #eef4f0;
+  scrollbar-width: auto;
+  scrollbar-color: #5f8f72 #e4eee8;
   scrollbar-gutter: stable;
 }
 
@@ -578,7 +579,8 @@
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  scrollbar-color: #7fa58f #eef4f0;
+  scrollbar-width: auto;
+  scrollbar-color: #5f8f72 #e4eee8;
   scrollbar-gutter: stable;
   border-top: 0;
   box-shadow: none;
@@ -639,6 +641,45 @@
   .lens-next__details--empty {
     display: none;
   }
+
+  .lens-next-workspace--embedded .lens-next__body {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(220px, 1.15fr) minmax(180px, 0.85fr);
+    overflow: hidden;
+  }
+
+  .lens-next-workspace--embedded .lens-next__browser {
+    min-height: 0;
+    overflow: hidden;
+    border-bottom: 1px solid var(--lens-next-line);
+  }
+
+  .lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list,
+  .lens-next-workspace--embedded .lens-next__body > .lens-next__details {
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+  }
+}
+
+.lens-next__browser .lens-next__issue-list::-webkit-scrollbar,
+.lens-next__body > .lens-next__details::-webkit-scrollbar {
+  width: 11px;
+}
+
+.lens-next__browser .lens-next__issue-list::-webkit-scrollbar-track,
+.lens-next__body > .lens-next__details::-webkit-scrollbar-track {
+  background: #e4eee8;
+}
+
+.lens-next__browser .lens-next__issue-list::-webkit-scrollbar-thumb,
+.lens-next__body > .lens-next__details::-webkit-scrollbar-thumb {
+  min-height: 36px;
+  border: 2px solid #e4eee8;
+  border-radius: 999px;
+  background: #5f8f72;
 }
 .lens-next__publisher {
   margin-top: 1rem;

@@ -5,6 +5,7 @@ const view = readFileSync(new URL("./LensNextPanelView.tsx", import.meta.url), "
 const panel = readFileSync(new URL("./LensNextPanel.tsx", import.meta.url), "utf8");
 const client = readFileSync(new URL("./lens-next-client.ts", import.meta.url), "utf8");
 const model = readFileSync(new URL("./lens-next-model.ts", import.meta.url), "utf8");
+const styles = readFileSync(new URL("./lens-next-panel.css", import.meta.url), "utf8");
 const checks: string[] = [];
 const check = (condition: unknown, label: string) => { assert.ok(condition, label); checks.push(label); };
 
@@ -19,4 +20,8 @@ check(client.includes('contractVersion: "lens-next-publish.v1"'), "client pins e
 check(client.includes('method: "POST"') && client.includes("Authorization: `Bearer ${token}`"), "authenticated POST transport");
 check(model.includes("publishing.allowed === true"), "server capability controls publisher visibility");
 check(model.includes("mutationVersion"), "pull adapter retains concurrency version");
+check(styles.includes(".lens-next-workspace--embedded .lens-next__body") && styles.includes("grid-template-rows: minmax(220px, 1.15fr) minmax(180px, 0.85fr)"), "narrow embedded workspace retains bounded list and detail panes");
+check(styles.includes(".lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list") && styles.includes("overflow-y: scroll"), "narrow embedded issue list has an independent vertical scrollbar");
+check(styles.includes(".lens-next-workspace--embedded .lens-next__body > .lens-next__details") && styles.includes("scrollbar-gutter: stable"), "narrow embedded details has an independent stable scrollbar");
+check(styles.includes("width: 11px") && styles.includes("background: #5f8f72"), "embedded scrollbars remain visible and usable");
 console.log(JSON.stringify({ status: "PASS", checks: checks.length, details: checks }));
