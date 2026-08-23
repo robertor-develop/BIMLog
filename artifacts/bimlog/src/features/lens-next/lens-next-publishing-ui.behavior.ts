@@ -10,6 +10,8 @@ const checks: string[] = [];
 const check = (condition: unknown, label: string) => { assert.ok(condition, label); checks.push(label); };
 
 check(view.includes("BIMLog · Controlled publishing"), "truthful M8 workspace label");
+check(view.includes("<small>v1.0.08-Pro</small>"), "customer-facing version omits internal milestone");
+check(!view.includes("v1.0.08-Pro · M8"), "internal milestone is absent from customer-facing version");
 check(view.includes("Your current project role is read-only"), "read-only role has fail-closed explanation");
 check(view.includes("Review publication") && view.includes("Confirm publish") && view.includes("Cancel"), "explicit review and confirmation step");
 check(view.includes("immutable BIMLog audit receipt"), "confirmation explains immutable audit consequence");
@@ -25,4 +27,5 @@ check(styles.includes("including its header and every issue/detail control, owns
 check(styles.includes(".lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list") && styles.includes("overflow: visible"), "embedded list and details defer scrolling to the whole panel");
 check(styles.includes("grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr)"), "embedded workspace keeps issue list and selected issue details side by side");
 check(styles.includes(".lens-next-workspace--embedded::-webkit-scrollbar") && styles.includes("width: 11px") && styles.includes("background: #5f8f72"), "whole-workspace scrollbar remains visible and usable");
+check(styles.includes(".lens-next h2 small") && styles.includes("font-size: 0.6em"), "customer-facing version is visually subordinate");
 console.log(JSON.stringify({ status: "PASS", checks: checks.length, details: checks }));

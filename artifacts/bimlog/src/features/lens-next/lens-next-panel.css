@@ -71,6 +71,11 @@
   font-size: 22px;
   letter-spacing: -0.03em;
 }
+.lens-next h2 small {
+  font-size: 0.6em;
+  font-weight: 500;
+  letter-spacing: 0;
+}
 .lens-next h3 {
   font-size: 18px;
   letter-spacing: -0.02em;
