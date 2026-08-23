@@ -13385,6 +13385,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "35a1ba34e95521884cdd05b75035ec7b7bc09c7f890df0831cc4c2645ff3b902"
+    },
+    {
+      "taskId": "bimlog-lens-next-m8-split-pane-reconciliation-20260823",
+      "reviewedThroughCommit": "11660980e5cff0e3d88d0f5985761a719da15529",
+      "reviewedAt": "2026-08-23T16:42:00-04:00",
+      "status": "split_pane_source_accepted_reconciled_build_publish_and_field_verification_pending",
+      "captureTiming": "post_implementation_push_post_local_ui_build_pre_reconciled_build_pre_publish_pre_field_verification",
+      "summary": "Reconciles the bounded Lens Next M8 embedded split-pane correction while preserving one whole-workspace scrollbar and every native, data, identity, publishing, and field-acceptance boundary.",
+      "workstreams": [
+        "lens-next-m8-embedded-split-pane",
+        "lens-next-m8-whole-workspace-scroll",
+        "lens-next-m8-release-and-field-verification"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves the accountable BIMLog-to-Navisworks workflow and existing system boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, credential, provider, database, or autonomous publication authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact build, one-scrollbar, two-pane, live deployment, and real-field verification gates remain explicit."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The product outcome remains a usable simultaneous issue browser and detail workspace inside Navisworks."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the in-place two-pane embedded layout and single outer-scroll ownership without adding platform surfaces."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No native plug-in source, H-drive package, installation path, bridge registration, Saved Viewpoint, or model file changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed PDF, DOCX, XLSX, JSON, ZIP, or report design changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification, safety, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact split-pane implementation, local asset build, push state, and truthful pre-publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains the reconciled Replit build, publication, live layout, close/reopen, minimize/restore, and Working View field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production database, provider, native installation, customer data, or successful publication changed during this reconciliation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ea6217bf81d97f28461b5b99be24166637200a2c123deeeedcb1d2090b393c4a"
     }
   ]
 }
