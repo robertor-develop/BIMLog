@@ -20,8 +20,8 @@ check(client.includes('contractVersion: "lens-next-publish.v1"'), "client pins e
 check(client.includes('method: "POST"') && client.includes("Authorization: `Bearer ${token}`"), "authenticated POST transport");
 check(model.includes("publishing.allowed === true"), "server capability controls publisher visibility");
 check(model.includes("mutationVersion"), "pull adapter retains concurrency version");
-check(styles.includes(".lens-next-workspace--embedded .lens-next__body") && styles.includes("overflow-y: scroll"), "embedded workspace has one whole-panel vertical scrollbar");
-check(styles.includes("list and detail content must never create competing scrollbars"), "embedded scrollbar ownership is explicit");
+check(styles.includes(".lens-next-workspace--embedded {") && styles.includes("overflow-y: scroll"), "complete embedded workspace has one vertical scrollbar");
+check(styles.includes("including its header and every issue/detail control, owns one scrollbar"), "embedded scrollbar ownership is explicit");
 check(styles.includes(".lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list") && styles.includes("overflow: visible"), "embedded list and details defer scrolling to the whole panel");
-check(styles.includes(".lens-next-workspace--embedded .lens-next__body::-webkit-scrollbar") && styles.includes("width: 11px") && styles.includes("background: #5f8f72"), "whole-panel scrollbar remains visible and usable");
+check(styles.includes(".lens-next-workspace--embedded::-webkit-scrollbar") && styles.includes("width: 11px") && styles.includes("background: #5f8f72"), "whole-workspace scrollbar remains visible and usable");
 console.log(JSON.stringify({ status: "PASS", checks: checks.length, details: checks }));

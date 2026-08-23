@@ -511,19 +511,25 @@
   height: 100dvh;
   min-height: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: scroll;
+  overscroll-behavior: contain;
+  scrollbar-width: auto;
+  scrollbar-color: #5f8f72 #e4eee8;
+  scrollbar-gutter: stable;
   background: #f7faf8;
 }
 
 .lens-next-workspace--embedded .lens-next {
   width: 100%;
   max-width: none;
-  height: 100%;
-  min-height: 0;
+  height: auto;
+  min-height: 100%;
   max-height: none;
   border: 0;
   border-radius: 0;
   box-shadow: none;
+  overflow: visible;
 }
 
 .lens-next-route-state--embedded {
@@ -602,16 +608,12 @@
   color: var(--lens-next-ink);
 }
 
-/* Navisworks embeds Lens Next as one side panel. The panel itself owns the
-   scrollbar; list and detail content must never create competing scrollbars. */
+/* Navisworks embeds Lens Next as one side panel. The complete workspace,
+   including its header and every issue/detail control, owns one scrollbar. */
 .lens-next-workspace--embedded .lens-next__body {
   display: block;
-  overflow-x: hidden;
-  overflow-y: scroll;
-  overscroll-behavior: contain;
-  scrollbar-width: auto;
-  scrollbar-color: #5f8f72 #e4eee8;
-  scrollbar-gutter: stable;
+  flex: none;
+  overflow: visible;
 }
 
 .lens-next-workspace--embedded .lens-next__browser,
@@ -625,15 +627,15 @@
   flex: none;
 }
 
-.lens-next-workspace--embedded .lens-next__body::-webkit-scrollbar {
+.lens-next-workspace--embedded::-webkit-scrollbar {
   width: 11px;
 }
 
-.lens-next-workspace--embedded .lens-next__body::-webkit-scrollbar-track {
+.lens-next-workspace--embedded::-webkit-scrollbar-track {
   background: #e4eee8;
 }
 
-.lens-next-workspace--embedded .lens-next__body::-webkit-scrollbar-thumb {
+.lens-next-workspace--embedded::-webkit-scrollbar-thumb {
   min-height: 36px;
   border: 2px solid #e4eee8;
   border-radius: 999px;
