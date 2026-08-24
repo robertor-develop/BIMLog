@@ -335,32 +335,12 @@ export function LensNextPanel({
     setBridgeError(null);
     try {
       if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
-      let stored: { visualStateJson: string; visualStateDigest: string };
-      if (selectedIssue.visualStateAvailable) {
-        stored = await apiClient.loadVisualState(selectedIssue);
-      } else {
-        // Governed one-time migration for legacy BIMLog rows. The native bridge
-        // resolves the exact immutable identity in the active model, captures
-        // its visual state, and BIMLog persists that package before it is used.
-        await bridgeClient.openWorkingView(selectedIssue, bridgeContext);
-        stored = await bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext);
-        await apiClient.saveVisualState(
-          selectedIssue,
-          stored.visualStateJson,
-          stored.visualStateDigest,
-        );
-        setIssues((current) =>
-          current.map((issue) =>
-            issue.identity.serverId === selectedIssue.identity.serverId
-              ? {
-                  ...issue,
-                  visualStateAvailable: true,
-                  visualStateDigest: stored.visualStateDigest,
-                }
-              : issue,
-          ),
+      if (!selectedIssue.visualStateAvailable) {
+        throw new Error(
+          "This BIMLog viewpoint record does not contain a visual-state package. Nothing was opened or searched in Navisworks.",
         );
       }
+      const stored = await apiClient.loadVisualState(selectedIssue);
       await bridgeClient.applyPlatformWorkingView(selectedIssue, bridgeContext, stored.visualStateJson);
       setBridgeState("connected");
     } catch (error) {
@@ -429,7 +409,7 @@ export function LensNextPanel({
       bridgeOpenEnabled={
         bridgeState === "connected" &&
         bridgeContext?.projectId === authorizedProjectId &&
-        selectedIssue !== null
+        selectedIssue?.visualStateAvailable === true
       }
       workingViewUnavailable={
         selectedIssue !== null && !selectedIssue.visualStateAvailable

@@ -13841,6 +13841,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "485bc0295bfc73eccbd11842bd2cc315668cf683fe64e863c84b5b9af1ba5ae6"
+    },
+    {
+      "taskId": "bimlog-lens-next-bimlog-only-working-view-final-correction-20260824",
+      "reviewedThroughCommit": "0a575cc59ca031ddabeb1e44288e7883ff7e422b",
+      "reviewedAt": "2026-08-24T15:30:00-04:00",
+      "status": "bimlog_only_working_view_corrected_local_gates_passed_release_pending",
+      "captureTiming": "same_task_after_production_read_only_inspection_and_local_build",
+      "summary": "Retires click-time local Saved Viewpoint migration and makes the Working View action consume only the selected BIMLog visual-state package.",
+      "workstreams": [
+        "lens-next-bimlog-source-of-truth",
+        "lens-next-platform-only-working-view",
+        "lens-next-metadata-only-record-handling"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Implements the existing one-source-of-truth product law."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No execution, credential, provider, or external-action authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing truthful-evidence and no-silent-fallback requirements govern this correction."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-roadmap change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural platform or schema change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The web action becomes apply-only; no native source change is required for this correction."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export format changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records BIMLog-only behavior, production data availability, and truthful release state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Removes click-time migration and records package-availability acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production mutation, push, publication, or field acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/lens-next-platform-source.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a36b2f87d5f5c1120a0042bb4282711d964a629cd650660b091da9ee41d6937d"
     }
   ]
 }
