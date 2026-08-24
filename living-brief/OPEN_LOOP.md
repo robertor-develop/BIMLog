@@ -1954,3 +1954,7 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Verify the explicit **Migrate & open working view** action against the governed Navisworks 2021 model: exact immutable identity must resolve without ambiguity; BIMLog must confirm persistence of the captured visual-state JSON and SHA-256 digest before native application; the resulting camera, selection, visibility, appearance, sectioning, and redline state must match the legacy Saved Viewpoint; and no Saved Viewpoint or model-file write may occur.
 - After the first successful migration, refresh and reopen the same issue and prove ordinary **Open working view** loads the authoritative package from BIMLog without another local lookup or capture. A missing or ambiguous native identity must fail closed without persisting guessed state.
 - Do not close this gate from browser-only evidence; acceptance requires the connected governed Navisworks model and a verified second open from BIMLog custody.
+
+# Lens Next v1.0.18 field acceptance
+
+- Restart Navisworks so the installed v1.0.18 native assemblies load, confirm the small toolbar status reads `LIVE · v1.0.18`, and retry **Migrate & open working view** on `1185RI-E11AC6`. Prove projection-specific camera values that are legitimately unset no longer abort capture, BIMLog persistence completes, the correct view opens, and a second open uses the stored BIMLog package.

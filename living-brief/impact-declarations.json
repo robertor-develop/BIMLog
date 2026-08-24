@@ -13765,6 +13765,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a0df202aa2982e16c8b5676a073bb7043cbbd7d30ebfcca1c52e0853791c2a8c"
+    },
+    {
+      "taskId": "bimlog-lens-next-v1-0-18-projection-safe-capture-20260824",
+      "reviewedThroughCommit": "5bf7e9a4b69f5a5f2efca728efb53acc27f7d8be",
+      "reviewedAt": "2026-08-24T13:23:00-04:00",
+      "status": "projection_safe_capture_built_installed_web_reconciliation_pending",
+      "captureTiming": "post_implementation_commit_post_native_package_install_pre_reconciled_build_pre_push_pre_publish",
+      "summary": "Makes legacy visual-state capture tolerate legitimately unset projection-specific camera properties and advances Lens Next presentation to v1.0.18.",
+      "workstreams": [
+        "lens-next-working-view-reconstruction",
+        "lens-next-native-camera-capture",
+        "lens-next-release-presentation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves BIMLog custody and the existing exact-identity migration boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, credential, provider, or automation authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds regression proof for projection-specific camera properties that Navisworks leaves unset."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated platform structure is unchanged; release-specific capture truth is recorded in status and field acceptance."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Advances the installed Navisworks 2021 package to v1.0.18 and fixes native camera capture."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or document format changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, legal, safety, or certification claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records build, package, installation, and remaining live-load acceptance truth."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires restart and connected migration plus second-open acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No live field acceptance or publication is claimed yet."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "485bc0295bfc73eccbd11842bd2cc315668cf683fe64e863c84b5b9af1ba5ae6"
     }
   ]
 }
