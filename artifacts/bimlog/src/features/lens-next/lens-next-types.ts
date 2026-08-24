@@ -57,6 +57,8 @@ export interface LensNextIssue {
   supersedesId: number | null;
   supersedesCode: string | null;
   screenshotUrl: string | null;
+  visualStateAvailable: boolean;
+  visualStateDigest: string | null;
 }
 
 export type LensNextPublishAction =

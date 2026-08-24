@@ -61,6 +61,8 @@ export interface LensNextApiClient {
     signal?: AbortSignal,
   ): Promise<LensNextHistory>;
   publishAction(issue: LensNextIssue, action: LensNextPublishAction, reason: string, idempotencyKey: string, modelFingerprint?: string | null, signal?: AbortSignal): Promise<LensNextPublishResult>;
+  saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, signal?: AbortSignal): Promise<void>;
+  loadVisualState(issue: LensNextIssue, signal?: AbortSignal): Promise<{ visualStateJson: string; visualStateDigest: string }>;
 }
 
 export function createLensNextApiClient(
@@ -122,6 +124,26 @@ export function createLensNextApiClient(
       const body = raw as Record<string, any>;
       if (body.success !== true || body.contractVersion !== "lens-next-publish.v1" || !body.receipt || !body.issue) throw new Error("Controlled publish receipt is invalid");
       return body as LensNextPublishResult;
+    },
+    async saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await post(`/projects/${identity.projectId}/clash-reports/lens-viewpoints/${identity.serverId}/visual-state`, {
+        identity, visualStateJson, visualStateDigest,
+      }, signal);
+      if (!raw || typeof raw !== "object" || (raw as Record<string, unknown>).success !== true)
+        throw new Error("BIMLog did not confirm visual-state persistence");
+    },
+    async loadVisualState(issue: LensNextIssue, signal?: AbortSignal) {
+      const identity = assertLensNextImmutableIdentity(issue.identity);
+      const raw = await get(`/projects/${identity.projectId}/clash-reports/lens-viewpoints/${identity.serverId}/visual-state`, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog visual-state response is invalid");
+      const body = raw as Record<string, unknown>;
+      const echoedIdentity = assertLensNextImmutableIdentity(body.identity);
+      if (!sameIdentity(identity, echoedIdentity)) throw new Error("BIMLog visual-state identity mismatch");
+      const visualStateJson = String(body.visualStateJson ?? "");
+      const visualStateDigest = String(body.visualStateDigest ?? "").toLowerCase();
+      if (!visualStateJson || !/^[0-9a-f]{64}$/.test(visualStateDigest)) throw new Error("BIMLog visual-state package is incomplete");
+      return Object.freeze({ visualStateJson, visualStateDigest });
     },
   });
 }
@@ -191,6 +213,17 @@ export interface LensNextBridgeClient {
     context: LensNextBridgeProjectContext,
     signal?: AbortSignal,
   ): Promise<LensNextOpenWorkingViewResult>;
+  applyPlatformWorkingView(
+    issue: LensNextIssue,
+    context: LensNextBridgeProjectContext,
+    visualStateJson: string,
+    signal?: AbortSignal,
+  ): Promise<LensNextOpenWorkingViewResult>;
+  captureCurrentVisualState(
+    issue: LensNextIssue,
+    context: LensNextBridgeProjectContext,
+    signal?: AbortSignal,
+  ): Promise<{ visualStateJson: string; visualStateDigest: string }>;
 }
 
 function defaultRequestId(): string {
@@ -328,6 +361,57 @@ export function createLensNextBridgeClient(
         requestId: request.requestId,
         identity: echoedIdentity,
       });
+    },
+    async applyPlatformWorkingView(
+      issue: LensNextIssue,
+      context: LensNextBridgeProjectContext,
+      visualStateJson: string,
+      signal?: AbortSignal,
+    ) {
+      if (!visualStateJson.trim()) throw new Error("platform_visual_state_unavailable");
+      const request = createLensNextOpenWorkingViewRequest(
+        issue.identity,
+        context,
+        { bimlogPhysicalId: issue.bimlogPhysicalId, navisworksGuid: issue.navisworksGuid },
+        requestIdFactory(),
+      );
+      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/apply-working-view`, {
+        method: "POST",
+        headers: { ...headers, "X-Request-Id": request.requestId },
+        body: JSON.stringify({
+          ...request,
+          command: "apply-working-view",
+          fields: { ...request.fields, visualStateJson },
+        }),
+        signal,
+      });
+      const raw = await jsonBody(response, "Lens Next apply-working-view");
+      const body = bridgePayload(raw, "working_view_applied");
+      const result = body.result as Record<string, unknown> | undefined;
+      if (body.requestId !== request.requestId || (result?.Applied !== true && result?.applied !== true))
+        throw new Error("bridge did not confirm the reconstructed working view");
+      const echoedIdentity = assertLensNextImmutableIdentity(body.identity);
+      if (!sameIdentity(issue.identity, echoedIdentity))
+        throw new Error("bridge identity echo does not match the request");
+      return Object.freeze({ opened: true, requestId: request.requestId, identity: echoedIdentity });
+    },
+    async captureCurrentVisualState(issue: LensNextIssue, context: LensNextBridgeProjectContext, signal?: AbortSignal) {
+      const request = createLensNextOpenWorkingViewRequest(issue.identity, context, {
+        bimlogPhysicalId: issue.bimlogPhysicalId, navisworksGuid: issue.navisworksGuid,
+      }, requestIdFactory());
+      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/capture-visual-state`, {
+        method: "POST",
+        headers: { ...headers, "X-Request-Id": request.requestId },
+        body: JSON.stringify({ ...request, command: "capture-visual-state", fields: { ...request.fields, includeScreenshot: "false" } }),
+        signal,
+      });
+      const raw = await jsonBody(response, "Lens Next capture-visual-state");
+      const body = bridgePayload(raw, "visual_state_captured");
+      const state = body.visualState;
+      if (!state || typeof state !== "object" || Array.isArray(state)) throw new Error("bridge visual-state payload is invalid");
+      const digest = String((state as Record<string, unknown>).DigestSha256 ?? (state as Record<string, unknown>).digestSha256 ?? "").trim();
+      if (!/^[0-9a-f]{64}$/i.test(digest)) throw new Error("bridge visual-state digest is invalid");
+      return Object.freeze({ visualStateJson: JSON.stringify(state), visualStateDigest: digest.toLowerCase() });
     },
   });
 }

@@ -771,6 +771,20 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
           ? String(v.responsibleCompany).trim()
           : null;
         const floorVal = v?.floor != null ? String(v.floor) : null;
+        const visualStateJson = typeof v?.visualStateJson === "string" && v.visualStateJson.trim()
+          ? v.visualStateJson.trim()
+          : null;
+        const visualStateDigest = typeof v?.visualStateDigest === "string" && /^[0-9a-f]{64}$/i.test(v.visualStateDigest.trim())
+          ? v.visualStateDigest.trim().toLowerCase()
+          : null;
+        if (visualStateJson && Buffer.byteLength(visualStateJson, "utf8") > 4 * 1024 * 1024) {
+          res.status(413).json({ error: "visual_state_too_large", message: "Lens visual state exceeds the 4 MiB native-bridge limit." });
+          return;
+        }
+        if ((visualStateJson && !visualStateDigest) || (!visualStateJson && visualStateDigest)) {
+          res.status(422).json({ error: "visual_state_incomplete", message: "Visual state JSON and its SHA-256 digest must be supplied together." });
+          return;
+        }
         // Part 5: only stored if the plugin sends it; never generated server-side.
         const issueGroupId = norm(v?.issueGroupId);
         // Optional sequence number the plugin optimistically assigned. Used only to
@@ -856,6 +870,8 @@ router.post("/projects/:projectId/clash-reports/lens-sync",
               priority: priorityNum,
               floor: floorVal,
               openItems: v?.openItems != null ? String(v.openItems) : null,
+              visualStateJson,
+              visualStateDigest,
               capturedAt: capturedAt && !Number.isNaN(capturedAt.getTime()) ? capturedAt : null,
               status: replayStatus,
               issueGroupId,
@@ -1140,6 +1156,8 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         sourceServerId: r.sourceServerId,
         sourcePhysicalId: r.sourcePhysicalId,
         importedLineageStatus: r.importedLineageStatus,
+        visualStateAvailable: Boolean(r.visualStateJson && r.visualStateDigest),
+        visualStateDigest: r.visualStateDigest,
       }));
       const [currentUser] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
       const activeMembership = currentUser?.isSuperAdmin ? null : await pool.query(`SELECT role FROM project_members WHERE project_id=$1 AND user_id=$2 AND status='active'`, [projectId, req.user!.userId]);
@@ -1157,6 +1175,55 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
     } catch (err) {
       res.status(500).json({ error: "lens_pull_failed", message: err instanceof Error ? err.message : String(err) });
     }
+  }
+);
+
+router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const serverId = Number(req.params.viewpointId);
+    const identity = req.body?.identity;
+    const visualStateJson = typeof req.body?.visualStateJson === "string" ? req.body.visualStateJson.trim() : "";
+    const visualStateDigest = typeof req.body?.visualStateDigest === "string" ? req.body.visualStateDigest.trim().toLowerCase() : "";
+    if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(serverId) || serverId <= 0) {
+      res.status(400).json({ error: "visual_state_identity_invalid" }); return;
+    }
+    if (!visualStateJson || Buffer.byteLength(visualStateJson, "utf8") > 4 * 1024 * 1024 || !/^[0-9a-f]{64}$/.test(visualStateDigest)) {
+      res.status(422).json({ error: "visual_state_invalid", message: "A bounded visual-state package and SHA-256 digest are required." }); return;
+    }
+    try { JSON.parse(visualStateJson); } catch {
+      res.status(422).json({ error: "visual_state_json_invalid" }); return;
+    }
+    const [row] = await db.select().from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId))).limit(1);
+    if (!row) { res.status(404).json({ error: "lens_viewpoint_not_found" }); return; }
+    if (!identity || Number(identity.serverId) !== row.id || Number(identity.projectId) !== row.projectId || String(identity.viewpointId) !== row.viewpointId || String(identity.lifecycleStatus) !== row.lifecycleStatus || Number(identity.revisionNumber) !== row.revisionNumber) {
+      res.status(409).json({ error: "visual_state_identity_mismatch" }); return;
+    }
+    await db.update(lensViewpointsTable).set({ visualStateJson, visualStateDigest, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, row.id));
+    res.json({ success: true, serverId: row.id, visualStateDigest });
+  }
+);
+
+router.get("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    const serverId = Number(req.params.viewpointId);
+    if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(serverId) || serverId <= 0) {
+      res.status(400).json({ error: "visual_state_identity_invalid" }); return;
+    }
+    const [row] = await db.select().from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId))).limit(1);
+    if (!row) { res.status(404).json({ error: "lens_viewpoint_not_found" }); return; }
+    if (!row.visualStateJson || !row.visualStateDigest) { res.status(404).json({ error: "visual_state_not_available" }); return; }
+    res.json({
+      success: true,
+      identity: { projectId: row.projectId, serverId: row.id, viewpointId: row.viewpointId, lifecycleStatus: row.lifecycleStatus, revisionNumber: row.revisionNumber },
+      visualStateJson: row.visualStateJson,
+      visualStateDigest: row.visualStateDigest,
+    });
   }
 );
 

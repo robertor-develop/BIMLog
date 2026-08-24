@@ -1019,6 +1019,12 @@ const livingBriefAndLensStartupBarrier = (async () => {
       `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS screenshot_url TEXT`,
     );
     await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS visual_state_json TEXT`,
+    );
+    await pool.query(
+      `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS visual_state_digest TEXT`,
+    );
+    await pool.query(
       `ALTER TABLE lens_viewpoints ADD COLUMN IF NOT EXISTS responsible_company TEXT`,
     );
     await pool.query(

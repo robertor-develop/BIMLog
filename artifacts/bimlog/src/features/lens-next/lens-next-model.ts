@@ -201,6 +201,8 @@ function adaptLensIssue(
     // The current lens-pull endpoint omits this field. Null is an intentional,
     // honest state rather than a fabricated or derived image.
     screenshotUrl: safeThumbnailUrl(row.screenshotUrl),
+    visualStateAvailable: row.visualStateAvailable === true,
+    visualStateDigest: nullableString(row.visualStateDigest),
   });
 }
 

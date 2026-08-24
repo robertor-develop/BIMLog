@@ -337,15 +337,28 @@ export function LensNextPanel({
     setBridgeState("connecting");
     setBridgeError(null);
     try {
-      await bridgeClient.openWorkingView(selectedIssue, bridgeContext);
+      if (selectedIssue.visualStateAvailable) {
+        if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
+        const stored = await apiClient.loadVisualState(selectedIssue);
+        await bridgeClient.applyPlatformWorkingView(selectedIssue, bridgeContext, stored.visualStateJson);
+      } else {
+        await bridgeClient.openWorkingView(selectedIssue, bridgeContext);
+        if (apiClient && selectedIssue.publishingAllowed) {
+          const captured = await bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext);
+          await apiClient.saveVisualState(selectedIssue, captured.visualStateJson, captured.visualStateDigest);
+          setIssues((current) => current.map((issue) => issue.identity.serverId === selectedIssue.identity.serverId
+            ? { ...issue, visualStateAvailable: true, visualStateDigest: captured.visualStateDigest }
+            : issue));
+        }
+      }
       setBridgeState("connected");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Exact-identity open failed";
-      if (message.includes("identity_not_found") || message.includes("(409)")) {
+      if (!selectedIssue.visualStateAvailable && (message.includes("identity_not_found") || message.includes("(409)"))) {
         setUnavailableWorkingViews((current) => new Set(current).add(selectedIssue.identity.serverId));
         setBridgeState("connected");
         setBridgeError(
-          "No matching Saved Viewpoint exists in the active Navisworks model for this BIMLog issue. The BIMLog record is still valid, but its Working View cannot be opened until its Navisworks identity is repaired.",
+          "This legacy BIMLog record has no stored visual-state package and no matching local Saved Viewpoint. Backfill its camera/model state once from the source viewpoint; future opens will reconstruct the temporary Working View directly from BIMLog.",
         );
         return;
       }
@@ -354,7 +367,7 @@ export function LensNextPanel({
         message,
       );
     }
-  }, [authorizedProjectId, bridgeClient, bridgeContext, selectedIssue]);
+  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, selectedIssue]);
 
   const publishAction = useCallback(async (action: LensNextPublishAction, reason: string) => {
     if (!apiClient || !selectedIssue || !selectedIssue.publishingAllowed) return;

@@ -37,6 +37,8 @@ const issue: LensNextIssue = {
   supersedesId: null,
   supersedesCode: null,
   screenshotUrl: null,
+  visualStateAvailable: false,
+  visualStateDigest: null,
 };
 
 const baseProps: LensNextPanelViewProps = {
@@ -121,6 +123,9 @@ const panel = readFileSync(
   "utf8",
 );
 assert.match(panel, /bridgeClient\.openWorkingView\(selectedIssue, bridgeContext\)/);
+assert.match(panel, /bridgeClient\.applyPlatformWorkingView\(selectedIssue, bridgeContext, stored\.visualStateJson\)/);
+assert.match(panel, /bridgeClient\.captureCurrentVisualState\(selectedIssue, bridgeContext\)/);
+assert.match(panel, /apiClient\.saveVisualState/);
 assert.match(panel, /onOpenWorkingView=\{\(\) => void openWorkingView\(\)\}/);
 
-console.log("Lens Next M8 whole-workspace repair behavior: 24/24 passed");
+console.log("Lens Next M8 whole-workspace repair behavior: 28/28 passed");

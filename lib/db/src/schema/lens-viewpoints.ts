@@ -18,6 +18,8 @@ export const lensViewpointsTable = pgTable("lens_viewpoints", {
   displayId: text("display_id"),
   navisworksGuid: text("navisworks_guid"),
   screenshotUrl: text("screenshot_url"),
+  visualStateJson: text("visual_state_json"),
+  visualStateDigest: text("visual_state_digest"),
   // Real server-assigned Trade+Floor sequence (from lens_viewpoint_sequence_counters).
   // Null for legacy rows that predate this system — display falls back to display_id.
   tradeFloorSeq: integer("trade_floor_seq"),
