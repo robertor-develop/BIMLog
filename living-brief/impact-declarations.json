@@ -13689,6 +13689,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "608179e7c49fc9ecdeb0b28be060e844ad097bb6cf90dbcac5c6898bc5e3a3ad"
+    },
+    {
+      "taskId": "bimlog-lens-next-governed-first-use-visual-migration-20260824",
+      "reviewedThroughCommit": "52c027dbd080cd1a6ff62116a37e99fee0f8ba28",
+      "reviewedAt": "2026-08-24T12:30:44-04:00",
+      "status": "governed_first_use_legacy_visual_migration_implemented_focused_gates_passed",
+      "captureTiming": "post_implementation_commit_post_focused_tests_pre_full_reconciled_build_pre_push_pre_publish",
+      "summary": "Adds an exact-identity, one-time legacy visual-state migration that persists verified native state into BIMLog before applying the Working View; subsequent opens remain BIMLog-only.",
+      "workstreams": [
+        "lens-next-legacy-visual-state-migration",
+        "lens-next-bimlog-source-of-truth",
+        "lens-next-working-view-reconstruction"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves BIMLog platform authority and governed custody."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, credential, provider, or autonomous publication authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Requires exact identity, persistence-before-apply, fail-closed ambiguity handling, and focused regression proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Supports the existing BIMLog-centered coordination vision."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Defines the bounded legacy ingestion step before BIMLog-only runtime reconstruction."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Permits exact read/capture only for an explicitly identified incomplete legacy record and prohibits Saved Viewpoint or model writes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or document format changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, legal, safety, or certification claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records implemented migration behavior and remaining release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires real Navisworks migration and second-open BIMLog-only acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production migration or field acceptance is claimed yet."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a0df202aa2982e16c8b5676a073bb7043cbbd7d30ebfcca1c52e0853791c2a8c"
     }
   ]
 }
