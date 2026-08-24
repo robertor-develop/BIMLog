@@ -13920,6 +13920,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a36b2f87d5f5c1120a0042bb4282711d964a629cd650660b091da9ee41d6937d"
+    },
+    {
+      "taskId": "bimlog-original-lens-historical-visual-migration-20260824",
+      "reviewedThroughCommit": "1de5c9453190c36a18e882157b9509393f384e58",
+      "reviewedAt": "2026-08-24T15:58:00-04:00",
+      "status": "original_lens_v1_60_36_historical_visual_migration_local_candidate",
+      "captureTiming": "same_task_after_original_lens_code_history_review_and_h_only_build",
+      "summary": "Adds a fail-closed one-time Original Lens migration that binds preserved BIMLog-managed Saved Viewpoints to exact BIMLog records and uploads complete visual-state packages without scanning model objects or reorganizing viewpoints.",
+      "workstreams": [
+        "original-lens-historical-viewpoint-recovery",
+        "bimlog-visual-state-custody",
+        "lens-next-platform-source-working-view"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The migration implements the existing BIMLog source-of-truth and governed-custody doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, production, push, publication, or installation authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing exact-identity, fail-closed, idempotence, and truthful-evidence controls govern the migration."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical viewpoint recovery completes the accepted Lens Next product objective without changing roadmap scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing visual-state API and schema are reused without structural platform or database change."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents the Original Lens v1.60.36 exact historical visual-state migration and runtime boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No registered external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the H-only v1.60.36 local candidate, package digest, tests, and pending external gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Replaces the metadata-only dead end with the explicit installation, migration, exception review, and field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production mutation, installation, migration execution, push, publication, or live acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b6af587f17fa9ddf67e1b00c21d42cc710c1a4f130dd3ef5fc2cf95a072ae7ab"
     }
   ]
 }
