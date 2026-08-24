@@ -10,8 +10,8 @@ const checks: string[] = [];
 const check = (condition: unknown, label: string) => { assert.ok(condition, label); checks.push(label); };
 
 check(view.includes("BIMLog · Controlled publishing"), "truthful M8 workspace label");
-check(view.includes("<small>v1.0.08-Pro</small>"), "customer-facing version omits internal milestone");
-check(!view.includes("v1.0.08-Pro · M8"), "internal milestone is absent from customer-facing version");
+check(!view.includes("<h2>Lens Next"), "redundant Lens Next version heading is absent from the embedded workspace");
+check(!view.includes("v1.0.08-Pro · M8"), "obsolete internal milestone is absent from the customer-facing workspace");
 check(view.includes("Your current project role is read-only"), "read-only role has fail-closed explanation");
 check(view.includes("Review publication") && view.includes("Confirm publish") && view.includes("Cancel"), "explicit review and confirmation step");
 check(view.includes("immutable BIMLog audit receipt"), "confirmation explains immutable audit consequence");

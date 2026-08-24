@@ -290,7 +290,6 @@ export function LensNextPanelView({
       <header className="lens-next__header">
         <div>
           <p className="lens-next__eyebrow">BIMLog · Controlled publishing</p>
-          <h2>Lens Next <small>v1.0.08-Pro</small></h2>
         </div>
         <button
           type="button"
