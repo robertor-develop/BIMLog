@@ -576,6 +576,11 @@ export function LensNextPanelView({
               {history === "loading" ? "Loading history…" : "View history"}
             </button>
           </div>
+          {workingViewUnavailable && (
+            <p className="lens-next__inline-error">
+              BIMLog has no authoritative visual-state package for this issue. Its Working View remains unavailable until the governed BIMLog data migration is completed.
+            </p>
+          )}
           <section className="lens-next__publisher" aria-label="Controlled issue publishing">
             <h4>Publish an issue update</h4>
             {!selectedIssue.publishingAllowed ? (

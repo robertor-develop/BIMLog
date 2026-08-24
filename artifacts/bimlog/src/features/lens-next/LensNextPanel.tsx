@@ -92,9 +92,6 @@ export function LensNextPanel({
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [bridgeError, setBridgeError] = useState<string | null>(null);
-  const [unavailableWorkingViews, setUnavailableWorkingViews] = useState<ReadonlySet<number>>(
-    () => new Set(),
-  );
   const [history, setHistory] = useState<LensNextHistory | "loading" | null>(
     null,
   );
@@ -337,31 +334,17 @@ export function LensNextPanel({
     setBridgeState("connecting");
     setBridgeError(null);
     try {
-      if (selectedIssue.visualStateAvailable) {
-        if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
-        const stored = await apiClient.loadVisualState(selectedIssue);
-        await bridgeClient.applyPlatformWorkingView(selectedIssue, bridgeContext, stored.visualStateJson);
-      } else {
-        await bridgeClient.openWorkingView(selectedIssue, bridgeContext);
-        if (apiClient && selectedIssue.publishingAllowed) {
-          const captured = await bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext);
-          await apiClient.saveVisualState(selectedIssue, captured.visualStateJson, captured.visualStateDigest);
-          setIssues((current) => current.map((issue) => issue.identity.serverId === selectedIssue.identity.serverId
-            ? { ...issue, visualStateAvailable: true, visualStateDigest: captured.visualStateDigest }
-            : issue));
-        }
+      if (!selectedIssue.visualStateAvailable) {
+        throw new Error(
+          "BIMLog has no authoritative visual-state package for this issue. Complete the governed BIMLog data migration before opening its Working View.",
+        );
       }
+      if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
+      const stored = await apiClient.loadVisualState(selectedIssue);
+      await bridgeClient.applyPlatformWorkingView(selectedIssue, bridgeContext, stored.visualStateJson);
       setBridgeState("connected");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Exact-identity open failed";
-      if (!selectedIssue.visualStateAvailable && (message.includes("identity_not_found") || message.includes("(409)"))) {
-        setUnavailableWorkingViews((current) => new Set(current).add(selectedIssue.identity.serverId));
-        setBridgeState("connected");
-        setBridgeError(
-          "This legacy BIMLog record has no stored visual-state package and no matching local Saved Viewpoint. Backfill its camera/model state once from the source viewpoint; future opens will reconstruct the temporary Working View directly from BIMLog.",
-        );
-        return;
-      }
       setBridgeState("error");
       setBridgeError(
         message,
@@ -426,10 +409,10 @@ export function LensNextPanel({
       bridgeOpenEnabled={
         bridgeState === "connected" &&
         bridgeContext?.projectId === authorizedProjectId &&
-        (selectedIssue === null || !unavailableWorkingViews.has(selectedIssue.identity.serverId))
+        selectedIssue?.visualStateAvailable === true
       }
       workingViewUnavailable={
-        selectedIssue !== null && unavailableWorkingViews.has(selectedIssue.identity.serverId)
+        selectedIssue !== null && !selectedIssue.visualStateAvailable
       }
       onRefresh={() => void loadIssues("refresh")}
       onSelectIssue={(serverId) => {
