@@ -13613,6 +13613,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ba41612972c7ec68685b2db497b0b889d3a46f8f33b3930c2e23c46c59cf24aa"
+    },
+    {
+      "taskId": "bimlog-lens-next-bimlog-only-working-view-authority-20260824",
+      "reviewedThroughCommit": "fce750315eb95cd29869d4479c1560a34dce96a7",
+      "reviewedAt": "2026-08-24T11:46:49-04:00",
+      "status": "bimlog_only_working_view_authority_implemented_local_gates_passed_release_and_data_migration_pending",
+      "captureTiming": "post_implementation_commit_post_focused_build_pre_full_reconciled_build_pre_push_pre_publish",
+      "summary": "Makes BIMLog the sole runtime authority for Lens Next Working Views and removes local Saved Viewpoint lookup, capture, and click-time backfill.",
+      "workstreams": [
+        "lens-next-bimlog-source-of-truth",
+        "lens-next-platform-only-working-view",
+        "lens-next-legacy-data-migration-boundary"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Strengthens BIMLog as the accountable platform authority without changing ecosystem ownership doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, provider, credential, autonomous publication, or external messaging authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Requires platform-only retrieval, apply-only native behavior, explicit missing-data handling, and regression proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction aligns the existing BIMLog-centered coordination vision with runtime behavior."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Clarifies that Working View reads use authoritative BIMLog custody and never a local runtime fallback."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Navisworks becomes apply-only for the user action and performs no Saved Viewpoint lookup or capture."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report, PDF, Word, spreadsheet, JSON, or ZIP format changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification, legal, safety, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the corrected source-of-truth behavior and the truthful incomplete-data migration boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires governed platform data migration and real Navisworks apply-only acceptance before completion."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production data mutation, publication, or field acceptance is claimed by this local correction."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4f490ce1db71a751e7afcc8e3fe28c6724a04eb54278ff4b370ea952b08f0510"
     }
   ]
 }
