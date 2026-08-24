@@ -13616,7 +13616,7 @@
     },
     {
       "taskId": "bimlog-lens-next-bimlog-only-working-view-authority-20260824",
-      "reviewedThroughCommit": "fce750315eb95cd29869d4479c1560a34dce96a7",
+      "reviewedThroughCommit": "da4fc8cab0618e2f5fdd5f9abf55f83d80f7a5bd",
       "reviewedAt": "2026-08-24T11:46:49-04:00",
       "status": "bimlog_only_working_view_authority_implemented_local_gates_passed_release_and_data_migration_pending",
       "captureTiming": "post_implementation_commit_post_focused_build_pre_full_reconciled_build_pre_push_pre_publish",
@@ -13688,7 +13688,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "4f490ce1db71a751e7afcc8e3fe28c6724a04eb54278ff4b370ea952b08f0510"
+      "reviewedChangeSha256": "608179e7c49fc9ecdeb0b28be060e844ad097bb6cf90dbcac5c6898bc5e3a3ad"
     }
   ]
 }
