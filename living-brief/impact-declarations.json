@@ -13537,6 +13537,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "51539ea20be51f3d9adbe1700b9035cff85296fd671dbca3211517acd4c3374a"
+    },
+    {
+      "taskId": "bimlog-lens-next-platform-working-view-reconstruction-20260824",
+      "reviewedThroughCommit": "47303fe9b6cf5af6a5a6814b01e08980d5e48d0e",
+      "reviewedAt": "2026-08-24T10:56:10-04:00",
+      "status": "platform_reconstruction_implemented_local_gates_passed_release_and_field_acceptance_pending",
+      "captureTiming": "post_implementation_commit_post_focused_build_pre_full_reconciled_build_pre_push_pre_publish",
+      "summary": "Connects Lens Next to governed platform visual-state custody and the existing native temporary-view reconstruction engine, with one-time exact local backfill for legacy records.",
+      "workstreams": [
+        "lens-next-platform-visual-state-custody",
+        "lens-next-temporary-working-view-reconstruction",
+        "lens-next-legacy-exact-source-backfill"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves BIMLog as the accountable issue authority and strengthens exact visual context portability."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No agent, credential, provider, autonomous publication, or external messaging authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds exact-identity storage, bounded payload, reconstruction, digest, and real Navisworks acceptance gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Supports the intended reliable BIMLog-to-Navisworks coordination workflow."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Adds nullable visual-state custody columns and authenticated read/write routes for exact Lens issues."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Uses the existing native capture/apply bridge to reconstruct temporary views without Saved Viewpoint mutation."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or document format changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard, certification, safety, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the implemented platform reconstruction path and truthful legacy-data limitation."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires production schema activation, one-time backfill, platform-only reopen, and no-Saved-Viewpoint-write proof."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production mutation, publication, or field acceptance is claimed by this local implementation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ba41612972c7ec68685b2db497b0b889d3a46f8f33b3930c2e23c46c59cf24aa"
     }
   ]
 }

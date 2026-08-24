@@ -781,6 +781,12 @@ schema-parity rule deterministically, preventing API builds from dirtying the tr
 
 # Lens Next v1.0.08-Pro / M8 - Controlled Issue Publishing
 
+## Platform-backed temporary Working View reconstruction
+
+- Implementation unit `47303fe9b6cf5af6a5a6814b01e08980d5e48d0e` connects the existing native temporary-view reconstruction engine to BIMLog platform custody. A visual-state package contains exact camera, selection, visibility, appearance overrides, sectioning, redlines, model references, immutable issue identity, model fingerprint, completeness declarations, and native digest. The package is stored separately from the issue list and fetched only for an authorized exact-identity open.
+- For a legacy record without platform visual state, an exact local Saved Viewpoint remains a one-time backfill source: Lens Next opens it, captures the current visual state through the read-only bridge, persists the bounded package under project write authorization, and then treats later opens as platform-backed reconstruction. Reconstruction applies only to the temporary current view and does not create, edit, rename, move, or save a Navisworks Saved Viewpoint.
+- Records with neither a stored package nor an exact local source remain honestly blocked because metadata and screenshots cannot recover a camera/model state without guessing. Focused behavior 28/28, API/UI typechecks, and the BIMLog production asset build pass locally. Full workspace reconciliation/build, push, Replit publication, production schema activation, live backfill, and real Navisworks acceptance remain separate gates.
+
 - Exact product source `98e0ed974a488e4b4a514c40cd47d779a4d067cc` adds a separate M8 publication contract for status, comment, and responsible-company updates. The legacy status/edit/reassign/void routes, Legacy Lens, native bridge registration, port `8766`, Saved Viewpoints, model files, and the accepted M7 ZIP remain unchanged.
 
 # Lens Next v1.0.08-Pro / M8 - Embedded split-pane correction
