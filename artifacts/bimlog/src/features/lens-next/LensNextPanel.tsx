@@ -92,6 +92,9 @@ export function LensNextPanel({
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null);
   const [apiError, setApiError] = useState<string | null>(null);
   const [bridgeError, setBridgeError] = useState<string | null>(null);
+  const [unavailableWorkingViews, setUnavailableWorkingViews] = useState<ReadonlySet<number>>(
+    () => new Set(),
+  );
   const [history, setHistory] = useState<LensNextHistory | "loading" | null>(
     null,
   );
@@ -337,9 +340,18 @@ export function LensNextPanel({
       await bridgeClient.openWorkingView(selectedIssue, bridgeContext);
       setBridgeState("connected");
     } catch (error) {
+      const message = error instanceof Error ? error.message : "Exact-identity open failed";
+      if (message.includes("identity_not_found") || message.includes("(409)")) {
+        setUnavailableWorkingViews((current) => new Set(current).add(selectedIssue.identity.serverId));
+        setBridgeState("connected");
+        setBridgeError(
+          "No matching Saved Viewpoint exists in the active Navisworks model for this BIMLog issue. The BIMLog record is still valid, but its Working View cannot be opened until its Navisworks identity is repaired.",
+        );
+        return;
+      }
       setBridgeState("error");
       setBridgeError(
-        error instanceof Error ? error.message : "Exact-identity open failed",
+        message,
       );
     }
   }, [authorizedProjectId, bridgeClient, bridgeContext, selectedIssue]);
@@ -400,11 +412,16 @@ export function LensNextPanel({
       lastRefreshedAt={lastRefreshedAt}
       bridgeOpenEnabled={
         bridgeState === "connected" &&
-        bridgeContext?.projectId === authorizedProjectId
+        bridgeContext?.projectId === authorizedProjectId &&
+        (selectedIssue === null || !unavailableWorkingViews.has(selectedIssue.identity.serverId))
+      }
+      workingViewUnavailable={
+        selectedIssue !== null && unavailableWorkingViews.has(selectedIssue.identity.serverId)
       }
       onRefresh={() => void loadIssues("refresh")}
       onSelectIssue={(serverId) => {
         setSelectedServerId(serverId);
+        setBridgeError(null);
         setHistory(null);
         setHistoryError(null);
         publishAttempt.current = null;

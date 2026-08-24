@@ -2,8 +2,10 @@
   display: flex;
   min-height: calc(100vh - 64px);
   align-items: stretch;
-  justify-content: center;
+  justify-content: flex-start;
   padding: 12px;
+  overflow-x: hidden;
+  overflow-y: auto;
   color: #10251c;
   background: #edf3ef;
 }
@@ -440,8 +442,8 @@
     padding: 24px;
   }
 
-  .lens-next {
-    max-height: calc(100vh - 112px);
+  .lens-next-workspace:not(.lens-next-workspace--embedded) {
+    padding: 24px;
   }
 }
 
@@ -654,15 +656,33 @@
 
 @media (min-width: 720px) {
   .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next {
-    width: min(100%, 980px);
+    width: 100%;
+    max-width: none;
+    height: auto;
+    min-height: calc(100dvh - 112px);
+    max-height: none;
+    overflow: visible;
   }
 
   .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__body {
-    grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
+    grid-template-columns: minmax(340px, 0.8fr) minmax(480px, 1.2fr);
+    overflow: visible;
+  }
+
+  .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__browser,
+  .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__browser .lens-next__issue-list,
+  .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__body > .lens-next__details {
+    min-height: 0;
+    max-height: none;
+    overflow: visible;
   }
 
   .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__browser {
     border-right: 1px solid var(--lens-next-line);
+  }
+
+  .lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__browser .lens-next__issue-list {
+    flex: none;
   }
 }
 

@@ -67,6 +67,7 @@ const baseProps: LensNextPanelViewProps = {
   historyError: null,
   lastRefreshedAt: "2026-08-22T12:00:00.000Z",
   bridgeOpenEnabled: true,
+  workingViewUnavailable: false,
   onRefresh: noop,
   onSelectIssue: noop,
   onCloseIssue: noop,
@@ -86,6 +87,10 @@ const selected = renderToStaticMarkup(
 assert.match(selected, /aria-label="Selected issue details"/);
 assert.match(selected, /LN-0223/);
 assert.match(selected, />Open working view<\/button>/);
+const unavailable = renderToStaticMarkup(
+  <LensNextPanelView {...baseProps} selectedIssue={issue} selectedServerId={22} bridgeOpenEnabled={false} workingViewUnavailable={true} />,
+);
+assert.match(unavailable, />Working view unavailable<\/button>/);
 
 const css = readFileSync(
   new URL("../src/features/lens-next/lens-next-panel.css", import.meta.url),
@@ -99,6 +104,8 @@ assert.match(css, /\.lens-next-workspace--embedded \.lens-next__body\s*\{[\s\S]*
 assert.match(css, /grid-template-columns:\s*minmax\(280px, 0\.9fr\) minmax\(320px, 1\.1fr\)/);
 assert.match(css, /\.lens-next__browser \.lens-next__issue-list[\s\S]*overflow-y:\s*auto/);
 assert.match(css, /\.lens-next__body > \.lens-next__details[\s\S]*overflow-y:\s*auto/);
+assert.match(css, /\.lens-next-workspace:not\(\.lens-next-workspace--embedded\) \.lens-next\s*\{[\s\S]*width:\s*100%[\s\S]*overflow:\s*visible/);
+assert.match(css, /\.lens-next-workspace:not\(\.lens-next-workspace--embedded\) \.lens-next__browser \.lens-next__issue-list,[\s\S]*overflow:\s*visible/);
 assert.match(css, /@media \(max-width: 560px\)/);
 
 const workspace = readFileSync(
@@ -116,4 +123,4 @@ const panel = readFileSync(
 assert.match(panel, /bridgeClient\.openWorkingView\(selectedIssue, bridgeContext\)/);
 assert.match(panel, /onOpenWorkingView=\{\(\) => void openWorkingView\(\)\}/);
 
-console.log("Lens Next M8 whole-workspace repair behavior: 21/21 passed");
+console.log("Lens Next M8 whole-workspace repair behavior: 24/24 passed");

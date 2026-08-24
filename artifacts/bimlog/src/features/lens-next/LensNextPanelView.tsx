@@ -228,6 +228,7 @@ export interface LensNextPanelViewProps {
   historyError: string | null;
   lastRefreshedAt: string | null;
   bridgeOpenEnabled: boolean;
+  workingViewUnavailable: boolean;
   onRefresh(): void;
   onSelectIssue(serverId: number): void;
   onCloseIssue(): void;
@@ -266,6 +267,7 @@ export function LensNextPanelView({
   historyError,
   lastRefreshedAt,
   bridgeOpenEnabled,
+  workingViewUnavailable,
   onRefresh,
   onSelectIssue,
   onCloseIssue,
@@ -564,7 +566,7 @@ export function LensNextPanelView({
               disabled={!bridgeOpenEnabled}
               onClick={onOpenWorkingView}
             >
-              Open working view
+              {workingViewUnavailable ? "Working view unavailable" : "Open working view"}
             </button>
             <button
               type="button"
