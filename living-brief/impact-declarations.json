@@ -13997,6 +13997,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b6af587f17fa9ddf67e1b00c21d42cc710c1a4f130dd3ef5fc2cf95a072ae7ab"
+    },
+    {
+      "taskId": "bimlog-lens-next-v1-0-20-historical-viewpoint-recovery-20260824",
+      "reviewedThroughCommit": "b235f031935aac8e6f0f7227efcb9a7f9bf580d4",
+      "reviewedAt": "2026-08-24T16:12:00-04:00",
+      "status": "lens_next_v1_0_20_exact_historical_recovery_local_candidate",
+      "captureTiming": "same_task_after_native_identity_root_cause_correction_and_h_only_package_build",
+      "summary": "Corrects Lens Next itself to recover an exact preserved Original Lens Saved Viewpoint on first open, persist its complete package to the selected BIMLog row, and reject stale GUIDs or non-exact substitutes.",
+      "workstreams": [
+        "lens-next-exact-historical-recovery",
+        "bimlog-visual-state-custody",
+        "working-view-409-root-cause"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves BIMLog as authoritative identity and permanent visual-state custody."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, production, push, publication, or installation authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing exact-identity, ambiguity denial, and truthful verification controls govern the correction."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This completes the accepted Lens Next historical viewpoint objective without roadmap expansion."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing BIMLog visual-state API and schema are reused without structural change."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents Lens Next v1.0.20 first-open recovery and exact Original Lens correlation rules."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export format changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards or compliance claims change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records v1.0.20 package identity, passing local gates, and pending external gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Lens Next installation, first-open, repeat-open, ambiguity, push, publication, and field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No installation, production mutation, push, publication, or live acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/lens-next-platform-source.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0645aafe42fa0034016f741b580db39a4d48e38e8a95fec726f1b4d020a5fc3a"
     }
   ]
 }

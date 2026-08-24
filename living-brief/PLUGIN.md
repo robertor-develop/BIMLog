@@ -122,13 +122,12 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 (POST .../reassign), ResolveActiveViewpointAsync (GET .../active). JsonViewpointResult.Id is int?
 (a collision-skip returns id:null).
 
-## Historical Original Lens visual-state migration (v1.60.36)
-- Original Lens-created physical Saved Viewpoints are the one-time source for recovering the historical camera/model visual state; BIMLog rows remain the authoritative identity and permanent runtime custody.
-- The explicit **Migrate Existing BIMLog Viewpoint Visuals** action pulls the configured project's `lens-pull` rows and enumerates only viewpoints inside recognized BIMLog-managed roots. It does not enumerate model objects.
-- Matching is fail-closed: exact project + `serverId` first, then exact non-empty Navisworks GUID, then one unique exact `viewpointId` or `displayId`. Trade, company, floor, note, title similarity, and arbitrary model search are never identity.
-- Duplicate physical candidates, ambiguous platform candidates, wrong-project metadata, and unmatched records are reported without upload. No Saved Viewpoint is renamed, moved, reordered, created, or deleted and the NWD is not saved.
-- For each exact match, Original Lens activates the preserved Saved Viewpoint, captures the complete Lens Next visual-state contract, uploads it to that exact BIMLog row, and restores the pre-migration working view. Matching SHA-256 digests are skipped so a repeat run is safe.
-- Ordinary Lens Next **Open working view** never performs this migration. After migration it fetches only the selected row's BIMLog package and applies a temporary Working View in Navisworks.
+## Lens Next historical Original Lens viewpoint recovery (v1.0.20)
+- BIMLog remains the authoritative identity and permanent visual-state custody. Preserved Original Lens Saved Viewpoints are read only as the one-time visual source for historical BIMLog rows that predate platform packages.
+- Lens Next's normal **Open working view** first loads an existing BIMLog package. If absent, the native adapter enumerates Saved Viewpoints only and retains only those carrying the Original Lens `source: BIMLogLens` marker.
+- Matching is fail-closed: exact project + `serverId` metadata, then exact project + `bimlogPhysicalId` metadata, then one unique exact display code derived from BIMLog `viewpointId`. A Navisworks GUID is accepted only when that same Saved Viewpoint is independently present in the correlated set.
+- Trade, company, floor, note, title similarity, arbitrary model search, and an uncorrelated stale GUID are never identity. Missing or multiple exact candidates remain blocked.
+- After exact recovery, Lens Next captures the complete visual-state contract, stores it on the selected BIMLog row, and applies the platform package as a temporary Working View. It does not rename, move, create, delete, or reorganize Saved Viewpoints and does not save the NWD.
 
 ## Open items / known limitations
 - **Protected v1.60.7 physical-mutation baseline.** Later identity, lineage, import/rebind,

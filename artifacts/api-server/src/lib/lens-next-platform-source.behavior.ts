@@ -15,13 +15,13 @@ const view = fs.readFileSync(
 assert.match(panel, /selectedIssue\.visualStateAvailable/);
 assert.match(panel, /apiClient\.loadVisualState\(selectedIssue\)/);
 assert.match(panel, /bridgeClient\.applyPlatformWorkingView/);
-assert.doesNotMatch(panel, /bridgeClient\.openWorkingView\(selectedIssue, bridgeContext\)/);
-assert.doesNotMatch(panel, /bridgeClient\.captureCurrentVisualState\(selectedIssue, bridgeContext\)/);
-assert.doesNotMatch(panel, /apiClient\.saveVisualState/);
+assert.match(panel, /bridgeClient\.openWorkingView\(selectedIssue, bridgeContext\)/);
+assert.match(panel, /bridgeClient\.captureCurrentVisualState\(selectedIssue, bridgeContext\)/);
+assert.match(panel, /apiClient\.saveVisualState/);
 assert.doesNotMatch(panel, /identity_not_found/);
 assert.match(view, /Open working view/);
-assert.match(view, /contains issue metadata but no visual-state package/);
-assert.match(view, /will not search or substitute a Navisworks Saved Viewpoint/);
+assert.match(view, /first exact open imports the matching Original Lens Saved Viewpoint into BIMLog/);
+assert.match(view, /No similar viewpoint or model object is substituted/);
 assert.match(view, /disabled=\{!bridgeOpenEnabled\}/);
 
 console.log(JSON.stringify({
@@ -30,10 +30,10 @@ console.log(JSON.stringify({
     "platform-state-required",
     "platform-state-fetched-on-open",
     "native-apply-after-platform-fetch",
-    "no-click-time-local-viewpoint-lookup",
-    "no-click-time-native-capture",
-    "no-click-time-platform-backfill",
+    "exact-original-lens-viewpoint-first-open",
+    "native-visual-capture-after-exact-open",
+    "platform-persistence-before-apply",
     "no-409-identity-fallback",
-    "missing-platform-state-visible-and-disabled",
+    "missing-platform-state-visible-and-migratable",
   ],
 }));

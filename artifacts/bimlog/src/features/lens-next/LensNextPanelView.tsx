@@ -577,7 +577,7 @@ export function LensNextPanelView({
           </div>
           {workingViewUnavailable && (
             <p className="lens-next__inline-notice">
-              This BIMLog viewpoint record contains issue metadata but no visual-state package. Open working view is unavailable; Lens Next will not search or substitute a Navisworks Saved Viewpoint.
+              This historical BIMLog record has no visual package yet. Its first exact open imports the matching Original Lens Saved Viewpoint into BIMLog, then opens the BIMLog package. No similar viewpoint or model object is substituted.
             </p>
           )}
           <section className="lens-next__publisher" aria-label="Controlled issue publishing">
