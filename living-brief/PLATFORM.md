@@ -288,6 +288,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-operations.behavior.ts
 - artifacts/api-server/src/lib/job-work-packages.behavior.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
+- artifacts/api-server/src/lib/lens-next-platform-source.behavior.ts
 - artifacts/api-server/src/lib/lens-next-publishing.behavior.ts
 - artifacts/api-server/src/lib/lens-next-publishing.ts
 - artifacts/api-server/src/lib/linked-items-creation-ux.behavior.ts
