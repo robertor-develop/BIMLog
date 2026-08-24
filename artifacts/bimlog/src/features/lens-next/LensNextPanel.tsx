@@ -334,13 +334,33 @@ export function LensNextPanel({
     setBridgeState("connecting");
     setBridgeError(null);
     try {
-      if (!selectedIssue.visualStateAvailable) {
-        throw new Error(
-          "BIMLog has no authoritative visual-state package for this issue. Complete the governed BIMLog data migration before opening its Working View.",
+      if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
+      let stored: { visualStateJson: string; visualStateDigest: string };
+      if (selectedIssue.visualStateAvailable) {
+        stored = await apiClient.loadVisualState(selectedIssue);
+      } else {
+        // Governed one-time migration for legacy BIMLog rows. The native bridge
+        // resolves the exact immutable identity in the active model, captures
+        // its visual state, and BIMLog persists that package before it is used.
+        await bridgeClient.openWorkingView(selectedIssue, bridgeContext);
+        stored = await bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext);
+        await apiClient.saveVisualState(
+          selectedIssue,
+          stored.visualStateJson,
+          stored.visualStateDigest,
+        );
+        setIssues((current) =>
+          current.map((issue) =>
+            issue.identity.serverId === selectedIssue.identity.serverId
+              ? {
+                  ...issue,
+                  visualStateAvailable: true,
+                  visualStateDigest: stored.visualStateDigest,
+                }
+              : issue,
+          ),
         );
       }
-      if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
-      const stored = await apiClient.loadVisualState(selectedIssue);
       await bridgeClient.applyPlatformWorkingView(selectedIssue, bridgeContext, stored.visualStateJson);
       setBridgeState("connected");
     } catch (error) {
@@ -409,7 +429,7 @@ export function LensNextPanel({
       bridgeOpenEnabled={
         bridgeState === "connected" &&
         bridgeContext?.projectId === authorizedProjectId &&
-        selectedIssue?.visualStateAvailable === true
+        selectedIssue !== null
       }
       workingViewUnavailable={
         selectedIssue !== null && !selectedIssue.visualStateAvailable

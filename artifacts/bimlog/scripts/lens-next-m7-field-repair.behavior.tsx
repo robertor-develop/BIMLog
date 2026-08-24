@@ -90,9 +90,9 @@ assert.match(selected, /aria-label="Selected issue details"/);
 assert.match(selected, /LN-0223/);
 assert.match(selected, />Open working view<\/button>/);
 const unavailable = renderToStaticMarkup(
-  <LensNextPanelView {...baseProps} selectedIssue={issue} selectedServerId={22} bridgeOpenEnabled={false} workingViewUnavailable={true} />,
+  <LensNextPanelView {...baseProps} selectedIssue={issue} selectedServerId={22} bridgeOpenEnabled={true} workingViewUnavailable={true} />,
 );
-assert.match(unavailable, />Working view unavailable<\/button>/);
+assert.match(unavailable, />Migrate &amp; open working view<\/button>/);
 
 const css = readFileSync(
   new URL("../src/features/lens-next/lens-next-panel.css", import.meta.url),

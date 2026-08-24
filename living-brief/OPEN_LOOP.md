@@ -1949,3 +1949,7 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 
 - Push and publish the exact web successor of `b69bca7f96cbf2eafb1055007a0d45cdb56c5085`, then verify the live embedded header reads only `Lens Next v1.0.08-Pro` with the smaller version text and no visible internal milestone.
 - Against the governed `1185 RIVER AV MODEL-06-11-26.nwd`, verify a migrated issue with an authoritative BIMLog visual-state package reconstructs exactly one temporary Working View while Navisworks remains apply-only. Verify an incomplete legacy record is visibly unavailable without a `409`, local Saved Viewpoint lookup, capture, upload, or model mutation. These real field actions remain acceptance gates.
+# Lens Next v1.0.08-Pro - Governed legacy visual-state migration acceptance
+
+- Verify the explicit **Migrate & open working view** action against the governed Navisworks 2021 model: exact immutable identity must resolve without ambiguity; BIMLog must confirm persistence of the captured visual-state JSON and SHA-256 digest before native application; the resulting camera, selection, visibility, appearance, sectioning, and redline state must match the legacy Saved Viewpoint; and no Saved Viewpoint or model-file write may occur.
+- After the first successful migration, refresh and reopen the same issue and prove ordinary **Open working view** loads the authoritative package from BIMLog without another local lookup or capture. A missing or ambiguous native identity must fail closed without persisting guessed state.

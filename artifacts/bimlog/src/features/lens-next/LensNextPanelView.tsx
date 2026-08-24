@@ -566,7 +566,7 @@ export function LensNextPanelView({
               disabled={!bridgeOpenEnabled}
               onClick={onOpenWorkingView}
             >
-              {workingViewUnavailable ? "Working view unavailable" : "Open working view"}
+              {workingViewUnavailable ? "Migrate & open working view" : "Open working view"}
             </button>
             <button
               type="button"
@@ -577,8 +577,8 @@ export function LensNextPanelView({
             </button>
           </div>
           {workingViewUnavailable && (
-            <p className="lens-next__inline-error">
-              BIMLog has no authoritative visual-state package for this issue. Its Working View remains unavailable until the governed BIMLog data migration is completed.
+            <p className="lens-next__inline-notice">
+              This legacy issue has no BIMLog visual-state package yet. Opening it will locate the exact Navisworks viewpoint once, save its complete visual state into BIMLog, and then reconstruct the Working View from BIMLog.
             </p>
           )}
           <section className="lens-next__publisher" aria-label="Controlled issue publishing">
