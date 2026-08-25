@@ -1965,3 +1965,8 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Preserve the Build 3 plan as preview-only. Do not add an execute button or issue any upload, download, Saved Viewpoint, visual-state, model, database, or publication mutation from this build.
 - Build 3 Living Brief sealing and the exact-clean full workspace production build are complete locally. Build 4 may add the first governed BIMLog-to-Navisworks reconstruction path for platform records that already contain complete authoritative visual-state packages; local-only upload and conflict resolution remain later builds.
 - Do not package, install, push, synchronize Replit, publish, deploy, migrate production data, or claim connected-model acceptance during Build 3.
+
+## Lens Next controlled rebuild — Build 4 remaining gate
+
+- Preserve platform-package-only reconstruction and the prohibition on click-time local search/capture/backfill. Complete exact-clean workspace closure before Build 5.
+- Build 5 may implement separately confirmed upload of exact Original Lens-managed local-only viewpoints into BIMLog. It must not upload unresolved identities, overwrite an existing platform record, or combine upload with Working View open.
