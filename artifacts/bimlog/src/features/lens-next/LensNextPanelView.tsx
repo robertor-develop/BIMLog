@@ -612,7 +612,7 @@ export function LensNextPanelView({
           </div>
           {workingViewUnavailable && (
             <p className="lens-next__inline-notice">
-              This historical BIMLog record has no visual package yet. Its first exact open imports the matching Original Lens Saved Viewpoint into BIMLog, then opens the BIMLog package. No similar viewpoint or model object is substituted.
+              This BIMLog record has no complete visual package yet. Build 4 will not search or capture a local Saved Viewpoint. Upload is handled separately by the governed synchronization workflow.
             </p>
           )}
           <section className="lens-next__publisher" aria-label="Controlled issue publishing">

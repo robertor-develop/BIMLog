@@ -353,25 +353,9 @@ export function LensNextPanel({
     setBridgeError(null);
     try {
       if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
-      let stored: { visualStateJson: string; visualStateDigest: string };
-      if (selectedIssue.visualStateAvailable) {
-        stored = await apiClient.loadVisualState(selectedIssue);
-      } else {
-        await bridgeClient.openWorkingView(selectedIssue, bridgeContext);
-        stored = await bridgeClient.captureCurrentVisualState(selectedIssue, bridgeContext);
-        await apiClient.saveVisualState(
-          selectedIssue,
-          stored.visualStateJson,
-          stored.visualStateDigest,
-        );
-        setIssues((current) =>
-          current.map((issue) =>
-            issue.identity.serverId === selectedIssue.identity.serverId
-              ? { ...issue, visualStateAvailable: true, visualStateDigest: stored.visualStateDigest }
-              : issue,
-          ),
-        );
-      }
+      if (!selectedIssue.visualStateAvailable || !selectedIssue.visualStateDigest)
+        throw new Error("BIMLog has no complete visual-state package for this viewpoint.");
+      const stored = await apiClient.loadVisualState(selectedIssue);
       await bridgeClient.applyPlatformWorkingView(selectedIssue, bridgeContext, stored.visualStateJson);
       setBridgeState("connected");
     } catch (error) {

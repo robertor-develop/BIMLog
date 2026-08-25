@@ -155,6 +155,15 @@ export function createLensNextApiClient(
       const visualStateJson = String(body.visualStateJson ?? "");
       const visualStateDigest = String(body.visualStateDigest ?? "").toLowerCase();
       if (!visualStateJson || !/^[0-9a-f]{64}$/.test(visualStateDigest)) throw new Error("BIMLog visual-state package is incomplete");
+      if (!issue.visualStateDigest || visualStateDigest !== issue.visualStateDigest.toLowerCase()) throw new Error("BIMLog visual-state digest changed after inventory refresh");
+      let embeddedDigest = "";
+      try {
+        const visualState = JSON.parse(visualStateJson) as Record<string, unknown>;
+        embeddedDigest = String(visualState.DigestSha256 ?? visualState.digestSha256 ?? "").toLowerCase();
+      } catch {
+        throw new Error("BIMLog visual-state JSON is invalid");
+      }
+      if (embeddedDigest !== visualStateDigest) throw new Error("BIMLog visual-state package digest is inconsistent");
       return Object.freeze({ visualStateJson, visualStateDigest });
     },
   });
