@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "ca051b20c8111611ed9b6d6573e4c33a8a1f437d",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "a476a79e83ed519a5559c857a6bf2efc5145a27716f14fe9421d3f6dd3332c3f",
+  "bundleSha256": "3420c7bbc8558585dfefa4d7f5ff76de57a9a25a8148f7ef831e164cb846a9bb",
   "impact": {
     "baselineCommit": "ca051b20c8111611ed9b6d6573e4c33a8a1f437d",
     "changedPaths": [
@@ -70,7 +70,7 @@
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "ddaccc81998338c7e69d9096044a9699e00412aa566467e1fbdfb45d45bee932",
-      "sourceChangedAt": "2026-08-25T15:39:00.000Z",
+      "sourceChangedAt": "2026-08-25T15:44:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "ca051b20c8111611ed9b6d6573e4c33a8a1f437d",
       "semanticReviewedThroughCommit": "ca051b20c8111611ed9b6d6573e4c33a8a1f437d",
@@ -117,8 +117,8 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "67692467e35d6ab6efafef2c408890b9082c52dff7e0c8d25580652bddd8394f",
-      "sourceChangedAt": "2026-08-25T15:39:00.000Z",
+      "sha256": "06c7f19e1db9e8d625d90baef69bb7a4c86da2ee91f944983d848bbad2035f19",
+      "sourceChangedAt": "2026-08-25T15:44:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "ca051b20c8111611ed9b6d6573e4c33a8a1f437d",
       "semanticReviewedThroughCommit": "ca051b20c8111611ed9b6d6573e4c33a8a1f437d",
@@ -129,8 +129,8 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "f52542cc5ad3bf03bb7108507df3138b43e837ba2edfa9e5dd503a9c15a47dd4",
-      "sourceChangedAt": "2026-08-25T15:39:00.000Z",
+      "sha256": "514c9af1d82f6cbdb2a091ec753b10384bcfe16a1e6ace2609a732c057c45a68",
+      "sourceChangedAt": "2026-08-25T15:44:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "ca051b20c8111611ed9b6d6573e4c33a8a1f437d",
       "semanticReviewedThroughCommit": "ca051b20c8111611ed9b6d6573e4c33a8a1f437d",

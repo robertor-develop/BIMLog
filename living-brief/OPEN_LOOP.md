@@ -1958,4 +1958,4 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 ## Lens Next controlled rebuild — Build 2 remaining gate
 
 - Preserve the authoritative two-stage binding: native starts unbound with the stable model key, BIMLog resolves only within authenticated project membership, and native accepts only the governed registry result. Manual Project ID configuration, fuzzy model-wide viewpoint search, and cross-project substitution remain prohibited.
-- Before Build 3, commit the Build 2 platform source and this Living Brief reconciliation, then pass the exact-clean full workspace production build. Do not execute a production schema migration, package or install the H-root plugin, push, synchronize Replit, publish, deploy, or claim connected-model acceptance in Build 2.
+- Build 2 platform source, Living Brief reconciliation, generated platform structure, and the exact-clean full workspace production build are complete locally. Preserve this source for Build 3. Do not execute a production schema migration, package or install the H-root plugin, push, synchronize Replit, publish, deploy, or claim connected-model acceptance in Build 2.
