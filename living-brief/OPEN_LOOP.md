@@ -1954,3 +1954,8 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Preserve Build 1 as read-only: automatic binding from one unique managed project identity and dual-inventory classification must not create, rename, move, delete, publish, or reconstruct any viewpoint.
 - Build 2 must add the governed platform model-binding authority required for a clean Navisworks model with no managed viewpoints. It must prove the active model against BIMLog without falling back to a manually saved project ID, and it must keep ambiguity fail-closed.
 - Do not package, install, push, publish, or claim connected 185 River Avenue / 521 East Streetmont acceptance until the applicable later build and release gates are explicitly completed.
+
+## Lens Next controlled rebuild — Build 2 remaining gate
+
+- Preserve the authoritative two-stage binding: native starts unbound with the stable model key, BIMLog resolves only within authenticated project membership, and native accepts only the governed registry result. Manual Project ID configuration, fuzzy model-wide viewpoint search, and cross-project substitution remain prohibited.
+- Before Build 3, commit the Build 2 platform source and this Living Brief reconciliation, then pass the exact-clean full workspace production build. Do not execute a production schema migration, package or install the H-root plugin, push, synchronize Replit, publish, deploy, or claim connected-model acceptance in Build 2.
