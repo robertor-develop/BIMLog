@@ -14308,6 +14308,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a7757e1caabf5e24786fd3aeabd66d9b79cff74cb941685a1f6bbd870729ab99"
+    },
+    {
+      "taskId": "bimlog-lens-next-controlled-rebuild-build3-sync-plan-20260825",
+      "reviewedThroughCommit": "6cd7595d760903b55922dea6bcf24a6cd2e9be9c",
+      "reviewedAt": "2026-08-25T14:59:58-04:00",
+      "status": "lens_next_controlled_rebuild_build3_validated_local",
+      "captureTiming": "same_task_after_platform_first_sync_plan_implementation_and_local_validation",
+      "summary": "Adds a deterministic read-only synchronization plan that uses BIMLog as authority, exact one-to-one managed identity, complete-inventory conflict detection, and explicit pull, upload, conflict, and blocked dispositions without executing reconciliation.",
+      "workstreams": [
+        "lens-next-platform-first-planning",
+        "lens-next-exact-inventory-reconciliation",
+        "lens-next-controlled-rebuild"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains platform-first and the local inventory cannot silently override platform authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, production, push, publication, installation, or deployment authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact ranked identity, complete-inventory collision detection, ambiguity refusal, and missing-package blocking implement existing fail-closed quality authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The preview advances the accepted Lens Next synchronization workflow without performing reconciliation writes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 3 consumes existing issue and visual-package availability fields and adds no API or schema mutation."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents the current-selection synchronization preview, exact action dispositions, and prohibition on execution in Build 3."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No registered external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 3 behavior, focused gates, read-only boundary, and absence of external release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records exact-clean closure and the governed BIMLog-to-Navisworks Build 4 entry gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No synchronization, production mutation, installation, push, publication, deployment, or live acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "16b07a96814ce4d0809a6db9dd9714df823cf267a248ab3c596cf8f6d2593a0d"
     }
   ]
 }
