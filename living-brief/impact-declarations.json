@@ -14384,6 +14384,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "592eec4816a85a3e1142a6afb386e8fb2dda35b659a874f1621a08b1c5a32bc7"
+    },
+    {
+      "taskId": "bimlog-lens-next-controlled-rebuild-build4-platform-reconstruction-20260825",
+      "reviewedThroughCommit": "94d60eb6974bdd6a4a8c1dd6315f602f0ddc47da",
+      "reviewedAt": "2026-08-25T19:45:47-04:00",
+      "status": "lens_next_controlled_rebuild_build4_validated_local",
+      "captureTiming": "same_task_after_platform_only_reconstruction_implementation_and_local_validation",
+      "summary": "Restricts Working View reconstruction to complete digest-consistent BIMLog visual packages and removes click-time local Saved Viewpoint search, capture, and platform backfill.",
+      "workstreams": [
+        "lens-next-platform-reconstruction",
+        "lens-next-visual-integrity",
+        "lens-next-controlled-rebuild"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole runtime visual-state authority for Working View reconstruction."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, production, push, publication, installation, or deployment authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Digest consistency, exact context, completeness, rollback, and missing-package denial implement existing fail-closed quality authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 4 advances the accepted platform-first reconstruction workflow without creating Saved Viewpoints."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 4 reads the existing visual-state endpoint and removes implicit backfill without schema or API mutation."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents platform-package-only temporary reconstruction and removal of first-open local migration."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No registered external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 4 implementation, focused gates, and absence of external release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records clean-head closure and the separately confirmed local-only upload Build 5 gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No local upload, model mutation, installation, production mutation, push, publication, deployment, or live acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6495883bff99e5f7caf23dd2b7e478a7e6eaadaf845ccd744b8ddc9b1913b0a3"
     }
   ]
 }
