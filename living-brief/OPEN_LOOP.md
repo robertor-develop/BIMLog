@@ -1968,5 +1968,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 
 ## Lens Next controlled rebuild — Build 4 remaining gate
 
-- Preserve platform-package-only reconstruction and the prohibition on click-time local search/capture/backfill. Complete exact-clean workspace closure before Build 5.
+- Preserve platform-package-only reconstruction and the prohibition on click-time local search/capture/backfill. Exact-clean Build 4 workspace closure is complete locally.
 - Build 5 may implement separately confirmed upload of exact Original Lens-managed local-only viewpoints into BIMLog. It must not upload unresolved identities, overwrite an existing platform record, or combine upload with Working View open.
