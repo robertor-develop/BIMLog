@@ -11,6 +11,7 @@ import type {
   LensNextImmutableIssueIdentity,
   LensNextIssue,
   LensNextLocalInventory,
+  LensNextModelBindingResolution,
   LensNextOpenWorkingViewResult,
   LensNextPublishAction,
   LensNextPublishResult,
@@ -56,6 +57,7 @@ export interface LensNextApiClientOptions {
 }
 
 export interface LensNextApiClient {
+  resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
   loadIssues(projectId: number, signal?: AbortSignal): Promise<LensNextIssue[]>;
   loadHistory(
     identity: LensNextImmutableIssueIdentity,
@@ -90,6 +92,15 @@ export function createLensNextApiClient(
     return jsonBody(response, "BIMLog controlled publish");
   };
   return Object.freeze({
+    async resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, signal?: AbortSignal) {
+      const raw = await post("/lens-next/model-bindings/resolve", { modelBindingKey, modelDisplayName, managedProjectId }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog model binding response is invalid");
+      const body = raw as Record<string, unknown>;
+      const projectId = Number(body.projectId);
+      const source = String(body.source ?? "") as LensNextModelBindingResolution["source"];
+      if (!Number.isSafeInteger(projectId) || projectId <= 0 || String(body.modelBindingKey ?? "") !== modelBindingKey || !["existing_registry", "managed_metadata", "unique_platform_identity"].includes(source)) throw new Error("BIMLog model binding response is invalid");
+      return Object.freeze({ projectId, modelBindingKey, source });
+    },
     async loadIssues(projectId: number, signal?: AbortSignal) {
       const exactProjectId = assertLensNextProjectId(projectId);
       const body = await get(
@@ -210,6 +221,7 @@ export interface LensNextBridgeClient {
     signal?: AbortSignal,
   ): Promise<LensNextBridgeProjectContext>;
   loadLocalInventory(signal?: AbortSignal): Promise<LensNextLocalInventory>;
+  bindProject(projectId: number, signal?: AbortSignal): Promise<LensNextBridgeProjectContext>;
   openWorkingView(
     issue: LensNextIssue,
     context: LensNextBridgeProjectContext,
@@ -306,17 +318,18 @@ export function createLensNextBridgeClient(
       const payload = bridgePayload(raw, "project_context");
       const sessionId = String(payload.sessionId ?? "").trim();
       const modelFingerprint = String(payload.modelFingerprint ?? "").trim();
-      const projectId = Number(payload.projectId);
+      const modelBindingKey = String(payload.modelBindingKey ?? "").trim();
+      const projectId = payload.projectId == null ? null : Number(payload.projectId);
       const managedViewpointCount = Number(payload.managedViewpointCount);
       const bindingSource = String(payload.bindingSource ?? "");
       if (
         !sessionId ||
         !modelFingerprint ||
-        !Number.isSafeInteger(projectId) ||
-        projectId <= 0 ||
+        (projectId !== null && (!Number.isSafeInteger(projectId) || projectId <= 0)) ||
+        !modelBindingKey ||
         !Number.isSafeInteger(managedViewpointCount) ||
         managedViewpointCount < 0 ||
-        bindingSource !== "navisworks_bimlog_metadata"
+        !["unbound", "navisworks_bimlog_metadata", "bimlog_model_registry"].includes(bindingSource)
       ) {
         throw new Error("bridge project context is incomplete");
       }
@@ -324,11 +337,12 @@ export function createLensNextBridgeClient(
         sessionId,
         projectId,
         modelFingerprint,
+        modelBindingKey,
         displayName:
           typeof payload.displayName === "string" && payload.displayName.trim()
             ? payload.displayName.trim()
             : null,
-        bindingSource: "navisworks_bimlog_metadata" as const,
+        bindingSource: bindingSource as LensNextBridgeProjectContext["bindingSource"],
         managedViewpointCount,
       });
     },
@@ -338,9 +352,10 @@ export function createLensNextBridgeClient(
       });
       const raw = await jsonBody(response, "Lens Next local inventory");
       const payload = bridgePayload(raw, "local_inventory");
-      const projectId = Number(payload.projectId);
+      const projectId = payload.projectId == null ? null : Number(payload.projectId);
       const modelFingerprint = String(payload.modelFingerprint ?? "").trim();
-      if (!Number.isSafeInteger(projectId) || projectId <= 0 || !/^[0-9a-f]{64}$/i.test(modelFingerprint) || !Array.isArray(payload.viewpoints))
+      const modelBindingKey = String(payload.modelBindingKey ?? "").trim();
+      if ((projectId !== null && (!Number.isSafeInteger(projectId) || projectId <= 0)) || !modelBindingKey || !/^[0-9a-f]{64}$/i.test(modelFingerprint) || !Array.isArray(payload.viewpoints))
         throw new Error("bridge local inventory is incomplete");
       const viewpoints = payload.viewpoints.map((rawView): LensNextLocalInventory["viewpoints"][number] => {
         if (!rawView || typeof rawView !== "object" || Array.isArray(rawView)) throw new Error("bridge local viewpoint is invalid");
@@ -350,7 +365,7 @@ export function createLensNextBridgeClient(
         const serverId = serverValue == null || String(serverValue).trim() === "" ? null : Number(serverValue);
         const navisworksGuid = String(view.NavisworksGuid ?? view.navisworksGuid ?? "").trim();
         const viewpointId = String(view.ViewpointId ?? view.viewpointId ?? "").trim();
-        if (localProjectId !== projectId || (serverId !== null && (!Number.isSafeInteger(serverId) || serverId <= 0)) || !navisworksGuid || !viewpointId)
+        if ((projectId !== null && localProjectId !== projectId) || !Number.isSafeInteger(localProjectId) || localProjectId <= 0 || (serverId !== null && (!Number.isSafeInteger(serverId) || serverId <= 0)) || !navisworksGuid || !viewpointId)
           throw new Error("bridge local viewpoint identity is incomplete");
         return Object.freeze({
           projectId: localProjectId,
@@ -364,7 +379,20 @@ export function createLensNextBridgeClient(
           exactManagedIdentity: Boolean(view.ExactManagedIdentity ?? view.exactManagedIdentity),
         });
       });
-      return Object.freeze({ projectId, modelFingerprint: modelFingerprint.toLowerCase(), viewpoints: Object.freeze(viewpoints) });
+      return Object.freeze({ projectId, modelFingerprint: modelFingerprint.toLowerCase(), modelBindingKey, viewpoints: Object.freeze(viewpoints) });
+    },
+    async bindProject(projectId: number, signal?: AbortSignal) {
+      const exactProjectId = assertLensNextProjectId(projectId);
+      const requestId = requestIdFactory();
+      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/project-binding`, {
+        method: "POST", headers, signal,
+        body: JSON.stringify({ protocolVersion: 1, command: "bind-project", requestId, idempotencyKey: requestId, fields: { projectId: String(exactProjectId), bindingSource: "bimlog_model_registry" } }),
+      });
+      const raw = await jsonBody(response, "Lens Next project binding");
+      const payload = bridgePayload(raw, "project_bound");
+      const context = await this.loadProjectContext(signal);
+      if (context.projectId !== exactProjectId || Number(payload.projectId) !== exactProjectId) throw new Error("Lens Next bridge project binding mismatch");
+      return context;
     },
     async openWorkingView(
       issue: LensNextIssue,

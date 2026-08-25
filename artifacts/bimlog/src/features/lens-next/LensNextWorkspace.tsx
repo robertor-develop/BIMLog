@@ -4,6 +4,7 @@ import { useAuthStore } from "../../store/auth";
 import { LensNextPanel } from "./LensNextPanel";
 import {
   bootstrapLensNextBridgeSession,
+  createLensNextApiClient,
   createLensNextBridgeClient,
 } from "./lens-next-client";
 import {
@@ -108,7 +109,16 @@ export function LensNextWorkspace() {
         });
         if (!(await client.probe(controller.signal)))
           throw new Error("Lens Next bridge did not confirm the active session.");
-        const context = await client.loadProjectContext(controller.signal);
+        let context = await client.loadProjectContext(controller.signal);
+        if (context.projectId === null) {
+          if (!token) throw new Error("An authenticated BIMLog session is required for model binding.");
+          const inventory = await client.loadLocalInventory(controller.signal);
+          const managedIds = [...new Set(inventory.viewpoints.map((view) => view.projectId))];
+          if (managedIds.length > 1) throw new Error("The active model contains multiple BIMLog project identities; binding was refused.");
+          const api = createLensNextApiClient({ token });
+          const binding = await api.resolveModelBinding(context.modelBindingKey, context.displayName, managedIds[0] ?? null, controller.signal);
+          context = await client.bindProject(binding.projectId, controller.signal);
+        }
         if (controller.signal.aborted) return;
         setBridgeContext(context);
         setBridgeDiscoveryError(null);
@@ -123,7 +133,7 @@ export function LensNextWorkspace() {
     };
     void load();
     return () => controller.abort();
-  }, [bridgeSession]);
+  }, [bridgeSession, token]);
 
   const resolution = useMemo(
     () => resolveLensNextLaunchProject(

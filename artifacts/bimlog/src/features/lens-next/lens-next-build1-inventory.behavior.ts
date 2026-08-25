@@ -10,7 +10,7 @@ const issue = (serverId: number, displayId: string, physical: string): LensNextI
   supersedesCode: null, screenshotUrl: null, visualStateAvailable: false, visualStateDigest: null,
 });
 const local: LensNextLocalInventory = {
-  projectId: 26, modelFingerprint: "a".repeat(64), viewpoints: [
+  projectId: 26, modelFingerprint: "a".repeat(64), modelBindingKey: "1185ri-model", viewpoints: [
     { projectId: 26, serverId: 1, viewpointId: "A", displayId: "A", bimlogPhysicalId: "p-a", navisworksGuid: "g-a", displayName: "A", folderPath: "BIMLog/Open", exactManagedIdentity: true },
     { projectId: 26, serverId: null, viewpointId: "B", displayId: "B", bimlogPhysicalId: "p-b", navisworksGuid: "g-b", displayName: "B", folderPath: "BIMLog/Open", exactManagedIdentity: true },
     { projectId: 26, serverId: null, viewpointId: "legacy", displayId: null, bimlogPhysicalId: null, navisworksGuid: "g-c", displayName: "legacy", folderPath: "BIMLog", exactManagedIdentity: false },

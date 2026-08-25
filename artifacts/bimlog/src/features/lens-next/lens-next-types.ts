@@ -136,10 +136,11 @@ export interface LensNextOpenWorkingViewRequest {
 
 export interface LensNextBridgeProjectContext {
   sessionId: string;
-  projectId: number;
+  projectId: number | null;
   modelFingerprint: string;
+  modelBindingKey: string;
   displayName: string | null;
-  bindingSource: "navisworks_bimlog_metadata";
+  bindingSource: "unbound" | "navisworks_bimlog_metadata" | "bimlog_model_registry";
   managedViewpointCount: number;
 }
 
@@ -156,9 +157,16 @@ export interface LensNextLocalViewpoint {
 }
 
 export interface LensNextLocalInventory {
-  projectId: number;
+  projectId: number | null;
   modelFingerprint: string;
+  modelBindingKey: string;
   viewpoints: readonly LensNextLocalViewpoint[];
+}
+
+export interface LensNextModelBindingResolution {
+  projectId: number;
+  modelBindingKey: string;
+  source: "existing_registry" | "managed_metadata" | "unique_platform_identity";
 }
 
 export interface LensNextInventorySummary {
