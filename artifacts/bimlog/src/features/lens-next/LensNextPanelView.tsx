@@ -13,6 +13,7 @@ import type {
   LensNextHistory,
   LensNextIssue,
   LensNextInventorySummary,
+  LensNextSyncPlan,
   LensNextProjectOption,
   LensNextPublishAction,
   LensNextStatus,
@@ -210,6 +211,7 @@ export interface LensNextPanelViewProps {
   bridgeModelFingerprint: string | null;
   bridgeBindingSource: string | null;
   inventorySummary: LensNextInventorySummary;
+  synchronizationPlan: LensNextSyncPlan;
   filteredIssues: readonly LensNextIssue[];
   issueGroups: readonly LensNextIssueGroupNode[];
   viewPreset: LensNextViewPresetId;
@@ -251,6 +253,7 @@ export function LensNextPanelView({
   bridgeModelFingerprint,
   bridgeBindingSource,
   inventorySummary,
+  synchronizationPlan,
   filteredIssues,
   issueGroups,
   viewPreset,
@@ -356,6 +359,25 @@ export function LensNextPanelView({
             <span><strong>{inventorySummary.conflicted}</strong> conflicts</span>
             <span><strong>{inventorySummary.unresolved}</strong> unresolved</span>
           </div>
+          <div className="lens-next__inventory-summary" aria-label="Current-view synchronization plan">
+            <span><strong>{synchronizationPlan.inSync}</strong> already synchronized</span>
+            <span><strong>{synchronizationPlan.pullFromBimlog}</strong> pull from BIMLog</span>
+            <span><strong>{synchronizationPlan.uploadToBimlog}</strong> upload to BIMLog</span>
+            <span><strong>{synchronizationPlan.manualConflict}</strong> manual review</span>
+            <span><strong>{synchronizationPlan.blocked}</strong> blocked</span>
+          </div>
+          <small>Current BIMLog view plus exact local-only managed items · preview is read-only · no synchronization has run.</small>
+          <details className="lens-next__sync-plan">
+            <summary>Review synchronization plan ({synchronizationPlan.items.length} items)</summary>
+            <ol>
+              {synchronizationPlan.items.map((item, index) => (
+                <li key={`${item.platformServerId ?? "local"}:${item.localNavisworksGuid ?? "platform"}:${index}`}>
+                  <strong>{item.displayId}</strong> · {item.disposition.replaceAll("_", " ")}
+                  <small>{item.reason}</small>
+                </li>
+              ))}
+            </ol>
+          </details>
           {bridgeModelFingerprint && <small>Model {bridgeModelFingerprint.slice(0, 12)}…</small>}
         </section>
       )}

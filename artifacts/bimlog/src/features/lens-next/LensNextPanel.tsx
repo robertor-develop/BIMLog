@@ -12,6 +12,7 @@ import {
   normalizeLensNextProjects,
   reconcileLensNextRefresh,
   reconcileLensNextInventories,
+  planLensNextSynchronization,
 } from "./lens-next-model";
 import {
   LENS_NEXT_DEFAULT_FILTERS,
@@ -129,6 +130,10 @@ export function LensNextPanel({
   const inventorySummary = useMemo(
     () => reconcileLensNextInventories(issues, localInventory),
     [issues, localInventory],
+  );
+  const synchronizationPlan = useMemo(
+    () => planLensNextSynchronization(filteredIssues, localInventory, issues),
+    [filteredIssues, issues, localInventory],
   );
 
   useEffect(() => {
@@ -414,6 +419,7 @@ export function LensNextPanel({
       bridgeModelFingerprint={bridgeContext?.modelFingerprint ?? null}
       bridgeBindingSource={bridgeContext?.bindingSource ?? null}
       inventorySummary={inventorySummary}
+      synchronizationPlan={synchronizationPlan}
       filteredIssues={filteredIssues}
       issueGroups={issueGroups}
       viewPreset={viewPreset}

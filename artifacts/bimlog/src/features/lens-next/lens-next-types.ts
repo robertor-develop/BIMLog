@@ -177,6 +177,31 @@ export interface LensNextInventorySummary {
   unresolved: number;
 }
 
+export type LensNextSyncDisposition =
+  | "in_sync"
+  | "pull_from_bimlog"
+  | "upload_to_bimlog"
+  | "manual_conflict"
+  | "blocked";
+
+export interface LensNextSyncPlanItem {
+  disposition: LensNextSyncDisposition;
+  platformServerId: number | null;
+  localNavisworksGuid: string | null;
+  displayId: string;
+  reason: string;
+}
+
+export interface LensNextSyncPlan {
+  items: readonly LensNextSyncPlanItem[];
+  inSync: number;
+  pullFromBimlog: number;
+  uploadToBimlog: number;
+  manualConflict: number;
+  blocked: number;
+  executable: false;
+}
+
 export interface LensNextOpenWorkingViewFields {
   sessionId: string;
   projectId: string;

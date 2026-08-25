@@ -10,11 +10,76 @@ import {
   type LensNextIssue,
   type LensNextLocalInventory,
   type LensNextInventorySummary,
+  type LensNextSyncPlan,
+  type LensNextSyncPlanItem,
   type LensNextLifecycleState,
   type LensNextOpenWorkingViewRequest,
   type LensNextProjectOption,
   type LensNextStatus,
 } from "./lens-next-types.ts";
+
+function exactIdentityRank(issue: LensNextIssue, view: LensNextLocalInventory["viewpoints"][number]): number {
+  if (!view.exactManagedIdentity || view.projectId !== issue.identity.projectId) return 0;
+  if (view.serverId === issue.identity.serverId) return 3;
+  if (view.bimlogPhysicalId && issue.bimlogPhysicalId && view.bimlogPhysicalId.toLowerCase() === issue.bimlogPhysicalId.toLowerCase()) return 2;
+  if (view.displayId && issue.displayId && view.displayId.toLowerCase() === issue.displayId.toLowerCase()) return 1;
+  return 0;
+}
+
+export function planLensNextSynchronization(
+  platformSelection: readonly LensNextIssue[],
+  local: LensNextLocalInventory | null,
+  authoritativePlatformInventory: readonly LensNextIssue[] = platformSelection,
+): LensNextSyncPlan {
+  const items: LensNextSyncPlanItem[] = [];
+  const claimedLocal = new Set<number>();
+  const selectedServerIds = new Set(platformSelection.map((issue) => issue.identity.serverId));
+  const topCandidates = authoritativePlatformInventory.map((issue) => {
+    if (!local) return [] as number[];
+    const ranked = local.viewpoints.map((view, index) => ({ index, rank: exactIdentityRank(issue, view) })).filter((candidate) => candidate.rank > 0);
+    const highest = ranked.reduce((value, candidate) => Math.max(value, candidate.rank), 0);
+    return ranked.filter((candidate) => candidate.rank === highest).map((candidate) => candidate.index);
+  });
+  const localClaimCounts = new Map<number, number>();
+  topCandidates.flat().forEach((index) => localClaimCounts.set(index, (localClaimCounts.get(index) ?? 0) + 1));
+
+  authoritativePlatformInventory.forEach((issue, platformIndex) => {
+    const candidates = topCandidates[platformIndex];
+    const displayId = issue.displayId ?? issue.identity.viewpointId;
+    const selected = selectedServerIds.has(issue.identity.serverId);
+    if (candidates.length === 1 && localClaimCounts.get(candidates[0]) === 1 && local) {
+      const view = local.viewpoints[candidates[0]];
+      claimedLocal.add(candidates[0]);
+      if (selected) items.push(Object.freeze({ disposition: "in_sync", platformServerId: issue.identity.serverId, localNavisworksGuid: view.navisworksGuid, displayId, reason: "One exact managed identity exists in BIMLog and Navisworks." }));
+    } else if (candidates.length > 0) {
+      candidates.forEach((index) => claimedLocal.add(index));
+      if (selected) items.push(Object.freeze({ disposition: "manual_conflict", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "Exact identity is not one-to-one; automatic reconciliation is prohibited." }));
+    } else if (selected && issue.visualStateAvailable && issue.visualStateDigest) {
+      items.push(Object.freeze({ disposition: "pull_from_bimlog", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "BIMLog has the authoritative visual package and Navisworks has no exact managed viewpoint." }));
+    } else if (selected) {
+      items.push(Object.freeze({ disposition: "blocked", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "BIMLog has no visual package to reconstruct this viewpoint." }));
+    }
+  });
+
+  local?.viewpoints.forEach((view, index) => {
+    if (claimedLocal.has(index)) return;
+    items.push(Object.freeze({
+      disposition: view.exactManagedIdentity ? "upload_to_bimlog" : "blocked",
+      platformServerId: null,
+      localNavisworksGuid: view.navisworksGuid,
+      displayId: view.displayId ?? view.displayName,
+      reason: view.exactManagedIdentity
+        ? "An exact Original Lens-managed viewpoint exists only in Navisworks."
+        : "The local viewpoint lacks exact BIMLog-managed identity.",
+    }));
+  });
+
+  const count = (disposition: LensNextSyncPlanItem["disposition"]) => items.filter((item) => item.disposition === disposition).length;
+  return Object.freeze({
+    items: Object.freeze(items), inSync: count("in_sync"), pullFromBimlog: count("pull_from_bimlog"),
+    uploadToBimlog: count("upload_to_bimlog"), manualConflict: count("manual_conflict"), blocked: count("blocked"), executable: false,
+  });
+}
 
 export function reconcileLensNextInventories(
   platform: readonly LensNextIssue[],
