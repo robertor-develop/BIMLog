@@ -122,12 +122,19 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 (POST .../reassign), ResolveActiveViewpointAsync (GET .../active). JsonViewpointResult.Id is int?
 (a collision-skip returns id:null).
 
-## Lens Next historical Original Lens viewpoint recovery (v1.0.20)
+## Lens Next historical Original Lens viewpoint recovery (v1.0.35)
 - BIMLog remains the authoritative identity and permanent visual-state custody. Preserved Original Lens Saved Viewpoints are read only as the one-time visual source for historical BIMLog rows that predate platform packages.
 - Lens Next's normal **Open working view** first loads an existing BIMLog package. If absent, the native adapter enumerates Saved Viewpoints only and retains only those carrying the Original Lens `source: BIMLogLens` marker.
+- Historical Original Lens identity is reconstructed last-write-wins across the complete sequence of managed merge comments. Project ID, server ID, physical ID, and workflow receipt are not required to coexist in one comment; the exact merged project/server or project/physical identity must match the selected BIMLog row.
 - Matching is fail-closed: exact project + `serverId` metadata, then exact project + `bimlogPhysicalId` metadata, then one unique exact display code derived from BIMLog `viewpointId`. A Navisworks GUID is accepted only when that same Saved Viewpoint is independently present in the correlated set.
 - Trade, company, floor, note, title similarity, arbitrary model search, and an uncorrelated stale GUID are never identity. Missing or multiple exact candidates remain blocked.
 - After exact recovery, Lens Next captures the complete visual-state contract, stores it on the selected BIMLog row, and applies the platform package as a temporary Working View. It does not rename, move, create, delete, or reorganize Saved Viewpoints and does not save the NWD.
+
+## Lens Next controlled rebuild — Build 1 binding and inventory
+
+- Runtime project binding no longer trusts the Project ID saved in local settings. Build 1 requires one unique project identity reconstructed from Original Lens-managed Saved Viewpoint comments in the active named document; no identity and mixed identities both deny startup.
+- The read-only native inventory returns only managed Saved Viewpoints and preserves their merged BIMLog identity, physical identity, Navisworks GUID, display name, and folder path. Unmanaged Saved Viewpoints are excluded and never mutated.
+- BIMLog remains platform-first. The web workspace compares the authoritative platform rows with the local managed inventory and reports matched, platform-only, Navisworks-only, conflicted, and unresolved counts. Build 1 performs no reconciliation writes; clean-model platform binding and governed mutations belong to later builds.
 
 ## Open items / known limitations
 - **Protected v1.60.7 physical-mutation baseline.** Later identity, lineage, import/rebind,

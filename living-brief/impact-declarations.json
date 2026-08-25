@@ -14077,6 +14077,160 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0645aafe42fa0034016f741b580db39a4d48e38e8a95fec726f1b4d020a5fc3a"
+    },
+    {
+      "taskId": "bimlog-lens-next-v1-0-35-original-lens-merge-comment-recovery-20260824",
+      "reviewedThroughCommit": "0d19224d67cbc7b102753743e9da1ec9d65fa1a7",
+      "reviewedAt": "2026-08-24T17:20:00-04:00",
+      "status": "lens_next_v1_0_35_split_comment_identity_recovery_local_candidate",
+      "captureTiming": "same_task_after_original_lens_metadata_storage_review_and_h_only_package_build",
+      "summary": "Corrects Lens Next historical recovery to merge Original Lens managed metadata comments last-write-wins before exact BIMLog identity correlation, advances the trial release to v1.0.35, and removes AppData as an installer destination.",
+      "workstreams": [
+        "lens-next-exact-historical-recovery",
+        "original-lens-merge-comment-compatibility",
+        "authorized-plugin-loadpath-enforcement"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves BIMLog identity authority and permanent visual-state custody."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, production, push, publication, or installation authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact merged identity, ambiguity denial, and fail-closed installation controls implement existing quality authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical viewpoint recovery remains within the accepted Lens Next objective."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing BIMLog visual-state API and schema remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents v1.0.35 Original Lens merge-comment compatibility and exact correlation."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No registered external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the v1.0.35 package, hashes, passing tests, stale AppData finding, and pending installation gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records authorized-path installation and connected Navisworks field verification as remaining gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No installation, production mutation, push, publication, or live acceptance occurred in this correction."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "02ff972334f80fc7bd79c647a25eeb0472b8d3208cd10b4192e5d2ba930451b0"
+    },
+    {
+      "taskId": "bimlog-lens-next-controlled-rebuild-build1-binding-inventory-20260825",
+      "reviewedThroughCommit": "439d7fca43669125843744562f8bd3b7a86070c5",
+      "reviewedAt": "2026-08-25T10:39:48-04:00",
+      "status": "lens_next_controlled_rebuild_build1_validated_local",
+      "captureTiming": "same_task_after_automatic_binding_dual_inventory_implementation_and_local_validation",
+      "summary": "Implements the read-only first build of the controlled Lens Next rebuild: exact automatic project binding from Original Lens-managed metadata, local managed-viewpoint inventory, and platform-first dual-inventory classification without reconciliation writes.",
+      "workstreams": [
+        "lens-next-automatic-binding",
+        "lens-next-read-only-dual-inventory",
+        "lens-next-controlled-rebuild"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains platform-first and no viewpoint authority is transferred to local configuration."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, production, push, publication, installation, or deployment authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Unique exact binding, mixed-identity denial, unmanaged-viewpoint exclusion, and read-only classification implement existing fail-closed quality authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The change advances the accepted Lens Next platform-first synchronization objective without introducing reconciliation writes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 1 reads the existing platform issue inventory and adds no database schema or platform mutation endpoint."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents automatic session binding, managed local inventory, and the Build 1 read-only boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No registered external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 1 implementation, local gates, exact boundary, and absence of external release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the Build 2 clean-model binding entry gate and preserves later package, install, push, publication, and field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No installation, production mutation, push, publication, deployment, or live acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4576504f92fa6aada9bdd452841779f14dd73849cc7e6fdf98662e5bc6d3eb39"
     }
   ]
 }

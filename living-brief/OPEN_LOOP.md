@@ -1945,6 +1945,12 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 
 - BIMLog is the sole viewpoint authority. **Open working view** may read only the selected record's BIMLog visual-state package and pass that package to Navisworks for temporary reconstruction. The click path must never search local Saved Viewpoints, capture the active model, migrate or backfill a record, substitute a similar view, create a Saved Viewpoint, or write the model file.
 - A BIMLog record without a package uses Lens Next's governed first-open recovery. Lens Next may read only Original Lens-managed Saved Viewpoints and must prove the selected BIMLog row by exact server/project metadata, exact physical metadata, or a unique exact BIMLog display code. A stale GUID alone, trade, company, floor, title similarity, and model-object search are not identity.
-- Install Lens Next v1.0.20, open the correct project model, select representative historical BIMLog records, and verify **Open working view** captures the exact preserved Saved Viewpoint once, persists its package to the same BIMLog row, and reconstructs the Working View without `409 identity_not_found`.
+- Install Lens Next v1.0.35 from the canonical H-root package into an authorized Autodesk load path, open the correct project model, select representative historical BIMLog records whose Original Lens identity is distributed across merge comments, and verify **Open working view** captures the exact preserved Saved Viewpoint once, persists its package to the same BIMLog row, and reconstructs the Working View without `409 identity_not_found`.
 - Verify ambiguous or missing exact identities remain blocked without substitution, and verify a second open reads the stored BIMLog package rather than repeating local recovery.
 - Push and publish the platform source, then repeat connected field verification for camera, selection, visibility, appearance, sectioning, and supported redlines. Installation, push, publication, and field verification remain separate explicit gates.
+
+## Lens Next controlled rebuild — Build 2 entry gate
+
+- Preserve Build 1 as read-only: automatic binding from one unique managed project identity and dual-inventory classification must not create, rename, move, delete, publish, or reconstruct any viewpoint.
+- Build 2 must add the governed platform model-binding authority required for a clean Navisworks model with no managed viewpoints. It must prove the active model against BIMLog without falling back to a manually saved project ID, and it must keep ambiguity fail-closed.
+- Do not package, install, push, publish, or claim connected 185 River Avenue / 521 East Streetmont acceptance until the applicable later build and release gates are explicitly completed.
