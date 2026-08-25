@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "6cd7595d760903b55922dea6bcf24a6cd2e9be9c",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "523ca272af9ddcc70557a3665c8e0a2d6ddc715df311fc6b7649a2a4420aad94",
+  "bundleSha256": "3652b17592b545aab710144244c76601bbc3de17f88d348ba4c9f03b727664fb",
   "impact": {
     "baselineCommit": "6cd7595d760903b55922dea6bcf24a6cd2e9be9c",
     "changedPaths": [
@@ -116,8 +116,8 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "0e7008467c412f6aa7262a228ce6f0300798ec27f0d7c6eaa141e1ac9dfc3d92",
-      "sourceChangedAt": "2026-08-25T18:59:58.000Z",
+      "sha256": "8519b90f99062d5eed0dc92d474cd4a6f25ccf495acce2eb36c17a8808fbda66",
+      "sourceChangedAt": "2026-08-25T19:06:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "6cd7595d760903b55922dea6bcf24a6cd2e9be9c",
       "semanticReviewedThroughCommit": "6cd7595d760903b55922dea6bcf24a6cd2e9be9c",
@@ -128,8 +128,8 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "5a161926cd882d8bab20296328104fa7133f01d1ff0448c6b6cb252bab640cce",
-      "sourceChangedAt": "2026-08-25T18:59:58.000Z",
+      "sha256": "8cef7290b8f59264912da799c0eba365f09d65d01b4a6f837f7a51c640cda230",
+      "sourceChangedAt": "2026-08-25T19:06:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "6cd7595d760903b55922dea6bcf24a6cd2e9be9c",
       "semanticReviewedThroughCommit": "6cd7595d760903b55922dea6bcf24a6cd2e9be9c",

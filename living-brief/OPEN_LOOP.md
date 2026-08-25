@@ -1963,5 +1963,5 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 ## Lens Next controlled rebuild — Build 3 remaining gate
 
 - Preserve the Build 3 plan as preview-only. Do not add an execute button or issue any upload, download, Saved Viewpoint, visual-state, model, database, or publication mutation from this build.
-- Complete Living Brief sealing and the exact-clean full workspace production build. Build 4 may then add the first governed BIMLog-to-Navisworks reconstruction path for platform records that already contain complete authoritative visual-state packages; local-only upload and conflict resolution remain later builds.
+- Build 3 Living Brief sealing and the exact-clean full workspace production build are complete locally. Build 4 may add the first governed BIMLog-to-Navisworks reconstruction path for platform records that already contain complete authoritative visual-state packages; local-only upload and conflict resolution remain later builds.
 - Do not package, install, push, synchronize Replit, publish, deploy, migrate production data, or claim connected-model acceptance during Build 3.
