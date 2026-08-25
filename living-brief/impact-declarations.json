@@ -14231,6 +14231,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4576504f92fa6aada9bdd452841779f14dd73849cc7e6fdf98662e5bc6d3eb39"
+    },
+    {
+      "taskId": "bimlog-lens-next-controlled-rebuild-build2-model-binding-20260825",
+      "reviewedThroughCommit": "ca051b20c8111611ed9b6d6573e4c33a8a1f437d",
+      "reviewedAt": "2026-08-25T11:34:43-04:00",
+      "status": "lens_next_controlled_rebuild_build2_validated_local",
+      "captureTiming": "same_task_after_authoritative_model_binding_implementation_and_local_validation",
+      "summary": "Adds governed platform model binding for clean Navisworks models through an authenticated BIMLog registry while preserving exact managed metadata, membership boundaries, ambiguity denial, and the read-only rebuild boundary.",
+      "workstreams": [
+        "lens-next-authoritative-model-binding",
+        "lens-next-clean-model-bootstrap",
+        "lens-next-controlled-rebuild"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the platform-first source of truth and local manual configuration gains no authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, production, push, publication, installation, or deployment authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated membership, exact registry precedence, conflict refusal, and ambiguity denial implement existing fail-closed quality authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 2 advances the accepted platform-first Lens Next synchronization plan without viewpoint reconciliation writes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Documents the additive model-binding registry and authenticated project-resolution contract for clean models."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents unbound native startup, authoritative session binding, disabled manual Project ID authority, and persistent registry provenance."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No registered external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 2 implementation, passing local gates, exact authority boundary, and absence of external release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the exact-clean Build 2 closure gate and preserves later package, install, push, publication, and field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production migration, installation, push, publication, deployment, or live acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e4a716fa3942f4ad8b4f9631e2bb50a8547daa923cbd5ffa9fa7d557239415ce"
     }
   ]
 }
