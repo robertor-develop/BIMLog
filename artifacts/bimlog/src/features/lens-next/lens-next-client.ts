@@ -10,6 +10,7 @@ import type {
   LensNextHistory,
   LensNextImmutableIssueIdentity,
   LensNextIssue,
+  LensNextLocalInventory,
   LensNextOpenWorkingViewResult,
   LensNextPublishAction,
   LensNextPublishResult,
@@ -208,6 +209,7 @@ export interface LensNextBridgeClient {
   loadProjectContext(
     signal?: AbortSignal,
   ): Promise<LensNextBridgeProjectContext>;
+  loadLocalInventory(signal?: AbortSignal): Promise<LensNextLocalInventory>;
   openWorkingView(
     issue: LensNextIssue,
     context: LensNextBridgeProjectContext,
@@ -305,11 +307,16 @@ export function createLensNextBridgeClient(
       const sessionId = String(payload.sessionId ?? "").trim();
       const modelFingerprint = String(payload.modelFingerprint ?? "").trim();
       const projectId = Number(payload.projectId);
+      const managedViewpointCount = Number(payload.managedViewpointCount);
+      const bindingSource = String(payload.bindingSource ?? "");
       if (
         !sessionId ||
         !modelFingerprint ||
         !Number.isSafeInteger(projectId) ||
-        projectId <= 0
+        projectId <= 0 ||
+        !Number.isSafeInteger(managedViewpointCount) ||
+        managedViewpointCount < 0 ||
+        bindingSource !== "navisworks_bimlog_metadata"
       ) {
         throw new Error("bridge project context is incomplete");
       }
@@ -321,7 +328,43 @@ export function createLensNextBridgeClient(
           typeof payload.displayName === "string" && payload.displayName.trim()
             ? payload.displayName.trim()
             : null,
+        bindingSource: "navisworks_bimlog_metadata" as const,
+        managedViewpointCount,
       });
+    },
+    async loadLocalInventory(signal?: AbortSignal) {
+      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/local-inventory`, {
+        method: "GET", headers, signal,
+      });
+      const raw = await jsonBody(response, "Lens Next local inventory");
+      const payload = bridgePayload(raw, "local_inventory");
+      const projectId = Number(payload.projectId);
+      const modelFingerprint = String(payload.modelFingerprint ?? "").trim();
+      if (!Number.isSafeInteger(projectId) || projectId <= 0 || !/^[0-9a-f]{64}$/i.test(modelFingerprint) || !Array.isArray(payload.viewpoints))
+        throw new Error("bridge local inventory is incomplete");
+      const viewpoints = payload.viewpoints.map((rawView): LensNextLocalInventory["viewpoints"][number] => {
+        if (!rawView || typeof rawView !== "object" || Array.isArray(rawView)) throw new Error("bridge local viewpoint is invalid");
+        const view = rawView as Record<string, unknown>;
+        const localProjectId = Number(view.ProjectId ?? view.projectId);
+        const serverValue = view.ServerId ?? view.serverId;
+        const serverId = serverValue == null || String(serverValue).trim() === "" ? null : Number(serverValue);
+        const navisworksGuid = String(view.NavisworksGuid ?? view.navisworksGuid ?? "").trim();
+        const viewpointId = String(view.ViewpointId ?? view.viewpointId ?? "").trim();
+        if (localProjectId !== projectId || (serverId !== null && (!Number.isSafeInteger(serverId) || serverId <= 0)) || !navisworksGuid || !viewpointId)
+          throw new Error("bridge local viewpoint identity is incomplete");
+        return Object.freeze({
+          projectId: localProjectId,
+          serverId,
+          viewpointId,
+          displayId: String(view.DisplayId ?? view.displayId ?? "").trim() || null,
+          bimlogPhysicalId: String(view.BimlogPhysicalId ?? view.bimlogPhysicalId ?? "").trim() || null,
+          navisworksGuid,
+          displayName: String(view.DisplayName ?? view.displayName ?? viewpointId).trim(),
+          folderPath: String(view.FolderPath ?? view.folderPath ?? "").trim(),
+          exactManagedIdentity: Boolean(view.ExactManagedIdentity ?? view.exactManagedIdentity),
+        });
+      });
+      return Object.freeze({ projectId, modelFingerprint: modelFingerprint.toLowerCase(), viewpoints: Object.freeze(viewpoints) });
     },
     async openWorkingView(
       issue: LensNextIssue,

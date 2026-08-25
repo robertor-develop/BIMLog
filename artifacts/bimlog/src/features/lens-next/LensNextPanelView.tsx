@@ -12,6 +12,7 @@ import type {
   LensNextFilters,
   LensNextHistory,
   LensNextIssue,
+  LensNextInventorySummary,
   LensNextProjectOption,
   LensNextPublishAction,
   LensNextStatus,
@@ -207,6 +208,8 @@ export interface LensNextPanelViewProps {
   projectLocked: boolean;
   bridgeDisplayName: string | null;
   bridgeModelFingerprint: string | null;
+  bridgeBindingSource: string | null;
+  inventorySummary: LensNextInventorySummary;
   filteredIssues: readonly LensNextIssue[];
   issueGroups: readonly LensNextIssueGroupNode[];
   viewPreset: LensNextViewPresetId;
@@ -246,6 +249,8 @@ export function LensNextPanelView({
   projectLocked,
   bridgeDisplayName,
   bridgeModelFingerprint,
+  bridgeBindingSource,
+  inventorySummary,
   filteredIssues,
   issueGroups,
   viewPreset,
@@ -343,6 +348,14 @@ export function LensNextPanelView({
       {(bridgeDisplayName || bridgeModelFingerprint) && (
         <section className="lens-next__active-model" aria-label="Active Navisworks model">
           <strong>{bridgeDisplayName ?? "Active Navisworks model"}</strong>
+          <small>Automatic binding: {bridgeBindingSource === "navisworks_bimlog_metadata" ? "verified BIMLog viewpoint metadata" : "unavailable"}</small>
+          <div className="lens-next__inventory-summary" aria-label="Read-only reconciliation preview">
+            <span><strong>{inventorySummary.matched}</strong> matched</span>
+            <span><strong>{inventorySummary.platformOnly}</strong> platform only</span>
+            <span><strong>{inventorySummary.navisworksOnly}</strong> Navisworks only</span>
+            <span><strong>{inventorySummary.conflicted}</strong> conflicts</span>
+            <span><strong>{inventorySummary.unresolved}</strong> unresolved</span>
+          </div>
           {bridgeModelFingerprint && <small>Model {bridgeModelFingerprint.slice(0, 12)}…</small>}
         </section>
       )}

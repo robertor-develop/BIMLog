@@ -8,11 +8,49 @@ import {
   type LensNextHistoryRevision,
   type LensNextImmutableIssueIdentity,
   type LensNextIssue,
+  type LensNextLocalInventory,
+  type LensNextInventorySummary,
   type LensNextLifecycleState,
   type LensNextOpenWorkingViewRequest,
   type LensNextProjectOption,
   type LensNextStatus,
 } from "./lens-next-types.ts";
+
+export function reconcileLensNextInventories(
+  platform: readonly LensNextIssue[],
+  local: LensNextLocalInventory | null,
+): LensNextInventorySummary {
+  if (!local) return Object.freeze({ matched: 0, platformOnly: platform.length, navisworksOnly: 0, conflicted: 0, unresolved: 0 });
+  const unmatched = new Set(local.viewpoints.map((_, index) => index));
+  let matched = 0;
+  let platformOnly = 0;
+  let conflicted = 0;
+  for (const issue of platform) {
+    const candidates = local.viewpoints.flatMap((view, index) => {
+      if (!unmatched.has(index)) return [];
+      const exactServer = view.serverId === issue.identity.serverId;
+      const exactPhysical = Boolean(view.bimlogPhysicalId && issue.bimlogPhysicalId && view.bimlogPhysicalId.toLowerCase() === issue.bimlogPhysicalId.toLowerCase());
+      const exactDisplay = Boolean(view.displayId && issue.displayId && view.displayId.toLowerCase() === issue.displayId.toLowerCase());
+      return exactServer || exactPhysical || exactDisplay ? [index] : [];
+    });
+    if (candidates.length === 1 && local.viewpoints[candidates[0]].exactManagedIdentity) {
+      unmatched.delete(candidates[0]);
+      matched += 1;
+    } else if (candidates.length > 0) {
+      candidates.forEach((index) => unmatched.delete(index));
+      conflicted += 1;
+    } else {
+      platformOnly += 1;
+    }
+  }
+  let navisworksOnly = 0;
+  let unresolved = 0;
+  unmatched.forEach((index) => {
+    if (local.viewpoints[index].exactManagedIdentity) navisworksOnly += 1;
+    else unresolved += 1;
+  });
+  return Object.freeze({ matched, platformOnly, navisworksOnly, conflicted, unresolved });
+}
 
 const FORBIDDEN_IDENTITY_KEYS = new Set([
   "label",

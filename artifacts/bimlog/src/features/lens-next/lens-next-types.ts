@@ -139,6 +139,34 @@ export interface LensNextBridgeProjectContext {
   projectId: number;
   modelFingerprint: string;
   displayName: string | null;
+  bindingSource: "navisworks_bimlog_metadata";
+  managedViewpointCount: number;
+}
+
+export interface LensNextLocalViewpoint {
+  projectId: number;
+  serverId: number | null;
+  viewpointId: string;
+  displayId: string | null;
+  bimlogPhysicalId: string | null;
+  navisworksGuid: string;
+  displayName: string;
+  folderPath: string;
+  exactManagedIdentity: boolean;
+}
+
+export interface LensNextLocalInventory {
+  projectId: number;
+  modelFingerprint: string;
+  viewpoints: readonly LensNextLocalViewpoint[];
+}
+
+export interface LensNextInventorySummary {
+  matched: number;
+  platformOnly: number;
+  navisworksOnly: number;
+  conflicted: number;
+  unresolved: number;
 }
 
 export interface LensNextOpenWorkingViewFields {

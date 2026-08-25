@@ -11,6 +11,7 @@ import {
   filterLensNextIssues,
   normalizeLensNextProjects,
   reconcileLensNextRefresh,
+  reconcileLensNextInventories,
 } from "./lens-next-model";
 import {
   LENS_NEXT_DEFAULT_FILTERS,
@@ -19,6 +20,7 @@ import {
   type LensNextFilters,
   type LensNextHistory,
   type LensNextIssue,
+  type LensNextLocalInventory,
   type LensNextPublishAction,
   type LensNextProjectOption,
   type LensNextRefreshState,
@@ -87,6 +89,7 @@ export function LensNextPanel({
     useState<LensNextConnectionState>("idle");
   const [bridgeContext, setBridgeContext] =
     useState<LensNextBridgeProjectContext | null>(null);
+  const [localInventory, setLocalInventory] = useState<LensNextLocalInventory | null>(null);
   const [refreshState, setRefreshState] =
     useState<LensNextRefreshState>("idle");
   const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null);
@@ -122,6 +125,10 @@ export function LensNextPanel({
   const filteredIssues = useMemo(
     () => filterLensNextIssues(issues, filters),
     [filters, issues],
+  );
+  const inventorySummary = useMemo(
+    () => reconcileLensNextInventories(issues, localInventory),
+    [issues, localInventory],
   );
 
   useEffect(() => {
@@ -265,6 +272,7 @@ export function LensNextPanel({
     if (!bridgeClient) {
       setBridgeState("disconnected");
       setBridgeContext(null);
+      setLocalInventory(null);
       setBridgeError("Lens Next bridge session unavailable.");
       return () => controller.abort();
     }
@@ -280,12 +288,17 @@ export function LensNextPanel({
         const context = await bridgeClient.loadProjectContext(
           controller.signal,
         );
+        const inventory = await bridgeClient.loadLocalInventory(controller.signal);
         if (controller.signal.aborted) return;
+        if (inventory.projectId !== context.projectId || inventory.modelFingerprint !== context.modelFingerprint.toLowerCase())
+          throw new Error("Navisworks binding and local inventory disagree; read-only startup was refused.");
         setBridgeContext(context);
+        setLocalInventory(inventory);
         setBridgeState("connected");
       } catch (error) {
         if (controller.signal.aborted) return;
         setBridgeContext(null);
+        setLocalInventory(null);
         setBridgeState("error");
         setBridgeError(
           error instanceof Error
@@ -399,6 +412,8 @@ export function LensNextPanel({
       projectLocked={projectLocked}
       bridgeDisplayName={bridgeContext?.displayName ?? null}
       bridgeModelFingerprint={bridgeContext?.modelFingerprint ?? null}
+      bridgeBindingSource={bridgeContext?.bindingSource ?? null}
+      inventorySummary={inventorySummary}
       filteredIssues={filteredIssues}
       issueGroups={issueGroups}
       viewPreset={viewPreset}
