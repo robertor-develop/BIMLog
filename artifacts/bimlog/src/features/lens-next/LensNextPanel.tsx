@@ -447,16 +447,17 @@ export function LensNextPanel({
   const createViewpoint = useCallback(async (draft: LensNextCreateDraft, reason: string) => {
     if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId) return;
     const viewpointId = crypto.randomUUID();
+    const auditReason = reason.trim() || "Created through Lens Next";
     setCreateMessage(null); setCreateState("capturing");
     try {
       const visualState = await bridgeClient.captureNewViewpoint(viewpointId, bridgeContext);
       setCreateState("creating");
-      const receipt = await apiClient.createViewpoint(authorizedProjectId, viewpointId, bridgeContext.modelFingerprint, visualState, draft, reason);
+      const receipt = await apiClient.createViewpoint(authorizedProjectId, viewpointId, bridgeContext.modelFingerprint, visualState, draft, auditReason);
       setCreateState("publishing");
       try {
-        const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, reason);
+        const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, auditReason);
         try {
-          await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, reason);
+          await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, auditReason);
         } catch (confirmationError) {
           setCreateState("error");
           setCreateMessage(`Created ${receipt.displayCode} in BIMLog and Navisworks, but BIMLog could not record local identity ${navisworksGuid}: ${confirmationError instanceof Error ? confirmationError.message : "identity confirmation failed"}. Do not create a duplicate.`);
