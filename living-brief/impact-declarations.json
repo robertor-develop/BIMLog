@@ -14916,6 +14916,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "bf8d8c254eca11689979aa986e9f5b816a50353599c20830ce258c83d7f89c78"
+    },
+    {
+      "taskId": "bimlog-lens-next-controlled-rebuild-build9-recovery-20260825",
+      "reviewedThroughCommit": "39189e52e9245fcf1c465ef112d650c1c6c8f7b6",
+      "reviewedAt": "2026-08-25T22:47:06-04:00",
+      "status": "lens_next_controlled_rebuild_build9_validated_local",
+      "captureTiming": "same_task_after_recovery_audit_implementation_and_exact_source_builds",
+      "summary": "Closes interrupted local identity confirmation with an explicit recovery disposition and an idempotent transactionally audited API confirmation.",
+      "workstreams": [
+        "lens-next-recovery-and-audit",
+        "lens-next-controlled-rebuild"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains authoritative and only exact managed identity may repair a missing confirmation."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, installation, push, publication, deployment, or production action occurred."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Idempotent exact replay, transactional audit, digest binding, and conflict refusal close the interrupted-run quality gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Recovery completes the governed user-confirmed reconciliation workflow without hidden automation."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing confirmation endpoint is strengthened without schema or authority changes."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents missing-confirmation recovery, exact replay, and mismatch refusal."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, spreadsheet, document, or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 9 exact source, recovery behavior, passing local gates, and absence of release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining package, integration, publication, and connected field-acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external or production mutation occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cb5958957e68aaf27b049a4e6bae6713446ab4fdf0fcffb3ece3cefd49f5f773"
     }
   ]
 }
