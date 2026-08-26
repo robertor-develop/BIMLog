@@ -222,6 +222,10 @@ export interface LensNextPanelViewProps {
   createState: "idle" | "capturing" | "creating" | "publishing" | "success" | "error";
   createMessage: string | null;
   onCreateViewpoint(draft: LensNextCreateDraft, reason: string): void;
+  layoutEnabled: boolean;
+  layoutState: "idle" | "running" | "success" | "error";
+  layoutMessage: string | null;
+  onMaterializeMyView(): void;
   filteredIssues: readonly LensNextIssue[];
   issueGroups: readonly LensNextIssueGroupNode[];
   viewPreset: LensNextViewPresetId;
@@ -272,6 +276,10 @@ export function LensNextPanelView({
   createState,
   createMessage,
   onCreateViewpoint,
+  layoutEnabled,
+  layoutState,
+  layoutMessage,
+  onMaterializeMyView,
   filteredIssues,
   issueGroups,
   viewPreset,
@@ -474,6 +482,8 @@ export function LensNextPanelView({
           </label>
         ))}
         <small className="lens-next__view-note">Personal grouping changes presentation only. It never changes issue identity, status, or another user’s view.</small>
+        <button type="button" disabled={!layoutEnabled || layoutState === "running"} onClick={onMaterializeMyView}>{layoutState === "running" ? "Organizing…" : "Organize Navisworks to match My View"}</button>
+        {layoutMessage && <small role="status">{layoutMessage}</small>}
       </section>
 
       <section className="lens-next__filters" aria-label="Issue filters">

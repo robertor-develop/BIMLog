@@ -20,6 +20,8 @@ import type {
   LensNextLocalViewpoint,
   LensNextCreateDraft,
   LensNextCreateReceipt,
+  LensNextLayoutItem,
+  LensNextLayoutReceipt,
   LensNextModelBindingResolution,
   LensNextOpenWorkingViewResult,
   LensNextPublishAction,
@@ -288,6 +290,7 @@ export interface LensNextBridgeClient {
   captureLocalViewpoint(localViewpoint: LensNextLocalViewpoint, context: LensNextBridgeProjectContext, signal?: AbortSignal): Promise<LensNextLocalCapture>;
   captureNewViewpoint(viewpointId: string, context: LensNextBridgeProjectContext, signal?: AbortSignal): Promise<Record<string, unknown>>;
   publishCreatedViewpoint(receipt: LensNextCreateReceipt, context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal): Promise<string>;
+  materializeMyView(items: readonly LensNextLayoutItem[], context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal): Promise<LensNextLayoutReceipt>;
 }
 
 function defaultRequestId(): string {
@@ -438,6 +441,7 @@ export function createLensNextBridgeClient(
           openItems: String(view.OpenItems ?? view.openItems ?? "").trim() || null,
           status: LENS_NEXT_STATUSES.includes(localStatus as LensNextStatus) ? localStatus as LensNextStatus : "open",
           exactManagedIdentity: Boolean(view.ExactManagedIdentity ?? view.exactManagedIdentity),
+          lensNextPublished: Boolean(view.LensNextPublished ?? view.lensNextPublished),
         });
       });
       return Object.freeze({ projectId, modelFingerprint: modelFingerprint.toLowerCase(), modelBindingKey, viewpoints: Object.freeze(viewpoints) });
@@ -575,6 +579,15 @@ export function createLensNextBridgeClient(
       const navisworksGuid = String(result?.NavisworksGuid ?? result?.navisworksGuid ?? "").toLowerCase();
       if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(navisworksGuid)) throw new Error("Navisworks did not return the created Saved Viewpoint identity");
       return navisworksGuid;
+    },
+    async materializeMyView(items: readonly LensNextLayoutItem[], context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal) {
+      if (!context.projectId || items.length === 0) throw new Error("At least one exact local Lens Next viewpoint is required");
+      const requestId = requestIdFactory();
+      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/materialize-my-view`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal, body: JSON.stringify({ protocolVersion: 1, command: "materialize-my-view", requestId, idempotencyKey: requestId, fields: { sessionId: context.sessionId, projectId: String(context.projectId), modelFingerprint: context.modelFingerprint, layoutJson: JSON.stringify(items), confirmationReason } }) });
+      const raw = await jsonBody(response, "Lens Next My View materialization"), body = bridgePayload(raw, "my_view_materialized");
+      const receipt = { requested: Number(body.Requested ?? body.requested), moved: Number(body.Moved ?? body.moved), alreadyPlaced: Number(body.AlreadyPlaced ?? body.alreadyPlaced) };
+      if (!Number.isSafeInteger(receipt.requested) || receipt.requested !== items.length || !Number.isSafeInteger(receipt.moved) || !Number.isSafeInteger(receipt.alreadyPlaced) || receipt.moved + receipt.alreadyPlaced !== receipt.requested) throw new Error("Navisworks returned an invalid My View layout receipt");
+      return Object.freeze(receipt);
     },
   });
 }

@@ -162,6 +162,7 @@ export interface LensNextLocalViewpoint {
   openItems?: string | null;
   status?: LensNextStatus;
   exactManagedIdentity: boolean;
+  lensNextPublished?: boolean;
 }
 
 export interface LensNextLocalInventory {
@@ -192,6 +193,8 @@ export interface LensNextCreateReceipt {
   serverId: number; viewpointId: string; visualStateDigest: string;
   revisionNumber: 1; lifecycleStatus: "active"; displayCode: string;
 }
+export interface LensNextLayoutItem { navisworksGuid: string; folderPath: string; }
+export interface LensNextLayoutReceipt { requested: number; moved: number; alreadyPlaced: number; }
 
 export interface LensNextModelBindingResolution {
   projectId: number;
