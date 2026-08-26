@@ -15215,6 +15215,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "618fae7064ab8804fcde721508659fd01b249142fcbd70c9570961ed9789c784"
+    },
+    {
+      "taskId": "bimlog-v1.60.35.13-f-exact-historical-working-view-20260826",
+      "reviewedThroughCommit": "0a0a20d6e0e9ecc937e5029daa31ca5e312a3373",
+      "reviewedAt": "2026-08-26T13:15:00-04:00",
+      "status": "release_reconciliation_candidate",
+      "captureTiming": "same_task_after_implementation_validation",
+      "summary": "Reconciles the exact historical Original Lens first-open migration, truthful bridge connection state, and BIMLog v1.60.35.13-F release identity after full focused validation.",
+      "workstreams": [
+        "lens-next-exact-historical-working-view",
+        "bimlog-v1.60.35.13-f-release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction stays within BIMLog construction issue and viewpoint authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release follows existing fail-closed build and publication controls."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "A dedicated regression proves direct packaged reconstruction, exact historical migration order, and refusal before persistence when identity recovery fails."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This completes the already-approved platform-first Lens Next workflow and adds no unrelated direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the same-record exact historical package backfill and subsequent BIMLog-authoritative reconstruction path."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records native exact-view activation, capture, persistence, reload, and reconstruction without similarity matching or model save."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact source, validation, GitHub push state, and the still-pending reconciled Replit build/publication gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining Replit build, publication, live version, and connected Navisworks acceptance checks."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No database migration, permission mutation, secret change, deletion, or model save occurs."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ae3c8e27fb364ef02be0f27bab58489fe7195019926bd925788543d998541e56"
     }
   ]
 }

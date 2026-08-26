@@ -935,3 +935,10 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - Ruben's deterministic field ZIP is H:\BIMLogPlugin2025\LensNext-v1.0.35\BIMLog-Lens-Next-Navisworks2025-v1.0.35.zip, 549502 bytes, SHA-256 C5243802376EC40E03B7996E662B62D0CCDDE50CFE64FBB1C4AD5F77DBCA7953. A second complete rebuild produced the identical hash.
 - Package-only installer validation passes without writing an Autodesk load path. The ZIP contains the dedicated 2025 bundle, persistent-screen install BAT, recoverable uninstall BAT, hash-validating PowerShell installers, Roberto/Ruben README, acceptance checklist, manifest, WebView2 runtime closure, and hash sidecar. Original Lens is not targeted.
 - No 2025 installation or connected Navisworks field acceptance occurred on this machine. Ruben's install, workflow verification, save/reopen proof, and acceptance remain pending.
+
+## BIMLog v1.60.35.13-F — Exact historical Working View recovery
+
+- Release source `0a0a20d6e0e9ecc937e5029daa31ca5e312a3373` corrects Lens Next first-open orchestration for historical Original Lens records that do not yet have a BIMLog visual-state package.
+- A packaged BIMLog record reconstructs directly from BIMLog. A historical record without a package now activates only the exact identity-matched Original Lens Saved Viewpoint, captures its complete visual state, persists it on the same BIMLog server record, reloads the accepted package, and reconstructs the temporary Working View from BIMLog. Missing or ambiguous exact identity fails closed without saving or creating a duplicate record.
+- A Working View business failure no longer changes a healthy native bridge badge to `Navisworks: Error`; that connection state is reserved for an actual bridge failure. Platform and Help surfaces identify this release as `v1.60.35.13-F`.
+- BIMLog typecheck, the complete Build 1–10 Lens Next behavior suite, exact historical migration regression, and production frontend build pass locally. GitHub `main` and `master` were atomically advanced to this source before Living Brief reconciliation; Replit correctly refused publication until this successor reconciliation and full build pass.

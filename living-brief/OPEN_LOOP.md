@@ -2014,3 +2014,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Deliver H:\BIMLogPlugin2025\LensNext-v1.0.35\BIMLog-Lens-Next-Navisworks2025-v1.0.35.zip and its .sha256 sidecar to Ruben.
 - Ruben must extract the complete ZIP, run INSTALL-BIMLOG-LENS-NEXT-2025.bat with Navisworks closed, retain the visible installer result, and complete FIELD-ACCEPTANCE-CHECKLIST.txt in Navisworks Manage 2025.
 - The release is locally packaged and validated, not installed, live-verified in Navisworks 2025, or customer accepted. A field failure reopens the exact failed acceptance item; it does not authorize changing Original Lens or bypassing H-root/package integrity gates.
+
+## BIMLog v1.60.35.13-F — Release and live acceptance gate
+
+- Commit the accepted Living Brief reconciliation successor, atomically advance GitHub `main` and `master`, synchronize a clean Replit release branch, and require the complete Replit workspace build to pass before publication.
+- Publish once, then verify the live header reports `v1.60.35.13-F`, the selected historical record follows exact local activation → capture → same-record persistence → BIMLog reconstruction, and a missing/ambiguous local identity performs no save or duplicate creation.
+- Verify separately on Ruben's Navisworks Manage 2025 machine that the bridge badge remains connected during a recoverable business failure and that successful migration survives refresh and a second Open Working View operation from the stored BIMLog package.
