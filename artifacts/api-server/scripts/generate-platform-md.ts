@@ -130,6 +130,11 @@ ${appRoutes()}
 - Soft-delete DELETE routes live inside their feature route files (see routes/index.ts comments).
 - Clash reports support a Navisworks plugin sync round-trip (fingerprint dedup; pull uses
   updatedAt > lastPluginSyncAt). Lens viewpoints use a manual refresh banner (polling removed).
+- Lens Next owns only BIMLog construction project/model binding, issue workflows, viewpoint
+  workflows, and their governed Navisworks 2021/2025 bridge contracts. It may consume versioned
+  external handoffs, but it must refuse marketing execution, portfolio finance/allocation
+  authority, legal approval authority, and Knowledge Intake routing authority. The Build 10
+  acceptance gate fails on semantic cross-platform authority drift.
 - Living Brief: all documents in living-brief/catalog.json are served in authority order through
   /api/v1/living-brief/* from the verified deployed source bundle. living_brief_documents is an
   exact, metadata-bearing database mirror; it never overrides source doctrine. Controlled admin

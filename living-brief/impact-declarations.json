@@ -15137,6 +15137,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-lens-next-build10-consolidated-acceptance-20260826",
+      "reviewedThroughCommit": "14e7ebba0343d8d6bd8e71dfffc1930c42570319",
+      "reviewedAt": "2026-08-26T02:10:00-04:00",
+      "status": "lens_next_build10_local_candidate",
+      "captureTiming": "same_task_after_implementation_validation",
+      "summary": "Consolidates Builds 1 through 10 into one local acceptance and recovery gate, including a mechanical BIMLog capability boundary and explicit cross-platform authority refusals.",
+      "workstreams": [
+        "lens-next-build10-consolidated-acceptance",
+        "lens-next-architecture-boundary"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The mechanical boundary implements the existing separation of BIMLog, IgniteSmart, BIMCapital, and BLIS authority without changing that doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The consolidated local gate follows existing fail-closed operating and release instructions."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 10 adds executable coverage for the already-required recovery, idempotence, authorization, persistence, and bounded-failure matrix."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 10 consolidates approved Lens Next behavior and adds no unrelated product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform map now records Lens Next ownership, consumers, versioned contracts, and prohibited cross-platform authorities."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the consolidated Builds 1 through 10 acceptance and recovery contract while preserving the v1.0.35 package."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export presentation behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact local Build 10 candidate, passing focused gate, ownership boundary, and no-external-action state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining controlled 2021/2025 installation and field-acceptance matrix."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No push, publication, deployment, migration, installation, customer action, deletion, or production mutation occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "618fae7064ab8804fcde721508659fd01b249142fcbd70c9570961ed9789c784"
     }
   ]
 }

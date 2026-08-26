@@ -2003,6 +2003,12 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Before release, create a governed H-root Navisworks 2021 package from the accepted source, verify its hashes and installation receipt, integrate/push the exact platform commits through the authorized Git workflow, synchronize Replit source, publish only from an exact clean source, and verify the live BIMLog release separately.
 - Connected field acceptance remains mandatory on controlled copies of representative models: empty local model pulling from BIMLog, exact Original Lens local-only upload, mixed inventory, conflict refusal, new viewpoint creation, My View materialization, interrupted confirmation retry, repeated reconciliation idempotence, manual model save/reopen, and exact Working View reconstruction. Local completion is not installation, publication, deployment, live verification, or customer acceptance.
 
+## Lens Next Build 10 remaining field gates
+
+- Run the consolidated acceptance matrix in real Navisworks Manage 2021 and 2025 on controlled copies where applicable: clean model, historical Original Lens model, mixed inventory, missing package, stale/ambiguous identity, interrupted confirmation, duplicate rerun, unauthorized user, manual save/close/reopen, and exact Working View reconstruction.
+- Verify no unrelated Saved Viewpoint, Original Lens structure, or model geometry changes; verify the model is never automatically saved. A field failure reopens only the exact failed matrix item.
+- Push, Replit synchronization, publication, production migration, installation, and customer action remain separately gated and are not authorized by the Build 10 local candidate.
+
 ## Lens Next v1.0.35 — Ruben Navisworks 2025 field gate
 
 - Deliver H:\BIMLogPlugin2025\LensNext-v1.0.35\BIMLog-Lens-Next-Navisworks2025-v1.0.35.zip and its .sha256 sidecar to Ruben.
