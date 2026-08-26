@@ -28,6 +28,8 @@ import { RfiImageCropEditor, type NormalizedCrop } from "@/components/rfi/RfiIma
 import { RfiSnippingWorkspace } from "@/components/rfi/RfiSnippingWorkspace";
 import { RfiImagePresentationControls } from "@/components/rfi/RfiImagePresentationControls";
 import { logClientError } from "@/lib/client-log";
+import { bootstrapLensNextBridgeSession, createLensNextApiClient, createLensNextBridgeClient } from "@/features/lens-next/lens-next-client";
+import { openBimlogWorkingView } from "@/features/lens-next/lens-next-working-view";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
@@ -2624,6 +2626,21 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const persistedEmail = rfi as Rfi & { emailDescription?: string | null; emailDraft?: string | null };
   const queryClient = useQueryClient();
   const { toast } = useToast();
+  const openSourceViewpoint = async () => {
+    const sourceViewpointId = String((rfi as { sourceViewpointId?: string | null }).sourceViewpointId || "").trim();
+    if (!sourceViewpointId) throw new Error(w("This RFI has no linked BIMLog viewpoint.", "Este RFI no tiene una vista BIMLog vinculada.", lang));
+    const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
+    if (!token) throw new Error(w("Your BIMLog session is no longer authenticated.", "Su sesion BIMLog ya no esta autenticada.", lang));
+    const session = await bootstrapLensNextBridgeSession(fetch);
+    const bridgeClient = createLensNextBridgeClient({ sessionToken: session.token });
+    const apiClient = createLensNextApiClient({ token });
+    let context = await bridgeClient.loadProjectContext();
+    if (context.projectId === null) context = await bridgeClient.bindProject(projectId);
+    if (context.projectId !== projectId) throw new Error(w("The active Navisworks model is bound to a different BIMLog project.", "El modelo activo de Navisworks esta vinculado a otro proyecto BIMLog.", lang));
+    const issue = (await apiClient.loadIssues(projectId)).find(candidate => candidate.identity.viewpointId === sourceViewpointId || candidate.displayId === sourceViewpointId);
+    if (!issue) throw new Error(w("The linked BIMLog viewpoint no longer exists.", "La vista BIMLog vinculada ya no existe.", lang));
+    await openBimlogWorkingView({ apiClient, bridgeClient }, issue, context);
+  };
   const [notificationContext,setNotificationContext]=useState<{watched:boolean;effectiveFrequency:string;inherited:boolean;telegramConnected:boolean}|null>(null);
   const [notificationSaving,setNotificationSaving]=useState(false);
   const [notificationError,setNotificationError]=useState<string|null>(null);
@@ -3672,7 +3689,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           close: handleCloseRfi,
           reopen: handleReopenRfi,
           "raise-change-order": () => { if (!raisingCo) void handleRaiseChangeOrder(); },
-          "jump-viewpoint": () => { void fetch(`http://localhost:8765/jump?code=${encodeURIComponent((rfi as { sourceViewpointId?: string | null }).sourceViewpointId || "")}`, { mode: "no-cors" }); },
+          "jump-viewpoint": () => { void openSourceViewpoint().then(() => toast({ title: w("Opened BIMLog Working View in Navisworks", "Vista de trabajo BIMLog abierta en Navisworks", lang) })).catch(error => toast({ title: error instanceof Error ? error.message : w("Lens Next could not open the Working View.", "Lens Next no pudo abrir la vista de trabajo.", lang), variant: "destructive" })); },
           "save-rfi": saveCanonicalRfi,
           cancel: () => { void cancelInfoEdit(); },
           "save-response": handleSaveResponse,

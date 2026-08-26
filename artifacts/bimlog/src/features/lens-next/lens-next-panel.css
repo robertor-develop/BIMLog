@@ -467,6 +467,21 @@
   background: rgba(248, 250, 252, 0.75);
 }
 .lens-next__view-note { grid-column: 1 / -1; color: #64748b; line-height: 1.35; }
+.lens-next__create-button {
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+  border: 0;
+  border-radius: 8px;
+  background: #059669;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+.lens-next__create-button:disabled {
+  cursor: not-allowed;
+  background: #94a3b8;
+}
 .lens-next__group { display: block; }
 .lens-next__group-title {
   margin: 8px 0 4px;

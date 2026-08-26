@@ -229,6 +229,9 @@ export interface LensNextPanelViewProps {
   reconciliationState: "idle" | "running" | "success" | "error";
   reconciliationMessage: string | null;
   onRunReconciliation(): void;
+  platformPullState: "idle" | "running" | "success" | "error";
+  platformPullMessage: string | null;
+  onPullPlatformViewpoints(): void;
   filteredIssues: readonly LensNextIssue[];
   issueGroups: readonly LensNextIssueGroupNode[];
   viewPreset: LensNextViewPresetId;
@@ -241,6 +244,10 @@ export interface LensNextPanelViewProps {
   onFiltersChange(next: LensNextFilters): void;
   trades: readonly string[];
   floors: readonly string[];
+  createTrades: readonly string[];
+  createFloors: readonly string[];
+  createResponsibleCompanies: readonly string[];
+  createReportTypes: readonly string[];
   apiState: LensNextConnectionState;
   bridgeState: LensNextConnectionState;
   refreshState: LensNextRefreshState;
@@ -286,6 +293,9 @@ export function LensNextPanelView({
   reconciliationState,
   reconciliationMessage,
   onRunReconciliation,
+  platformPullState,
+  platformPullMessage,
+  onPullPlatformViewpoints,
   filteredIssues,
   issueGroups,
   viewPreset,
@@ -298,6 +308,10 @@ export function LensNextPanelView({
   onFiltersChange,
   trades,
   floors,
+  createTrades,
+  createFloors,
+  createResponsibleCompanies,
+  createReportTypes,
   apiState,
   bridgeState,
   refreshState,
@@ -322,7 +336,7 @@ export function LensNextPanelView({
   const [publishText, setPublishText] = React.useState("");
   const [publishReason, setPublishReason] = React.useState("");
   const [publishReviewReady, setPublishReviewReady] = React.useState(false);
-  const [createDraft, setCreateDraft] = React.useState<LensNextCreateDraft>({ trade: "", note: "", responsibleCompany: "", reportType: "Coordination", floor: "", priority: 3, openItems: "", status: "open" });
+  const [createDraft, setCreateDraft] = React.useState<LensNextCreateDraft>({ trade: "", note: "", responsibleCompany: "", reportType: "COORDINATION", floor: "", priority: 3, openItems: "", status: "open" });
   const [createReason, setCreateReason] = React.useState("");
   const [createReviewReady, setCreateReviewReady] = React.useState(false);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
@@ -403,6 +417,10 @@ export function LensNextPanelView({
             <span><strong>{synchronizationPlan.blocked}</strong> blocked</span>
           </div>
           <small>Current BIMLog view plus exact local-only managed items. A confirmed run pulls complete BIMLog packages first, then uploads exact local-only managed viewpoints. It never overwrites or saves the model.</small>
+          <button type="button" disabled={synchronizationPlan.pullFromBimlog === 0 || platformPullState === "running"} onClick={onPullPlatformViewpoints}>
+            {platformPullState === "running" ? "Creating Navisworks viewpoints…" : `Pull BIMLog viewpoints into Navisworks (${synchronizationPlan.pullFromBimlog})`}
+          </button>
+          {platformPullMessage && <small role="status">{platformPullMessage}</small>}
           <button type="button" disabled={!synchronizationPlan.executable || reconciliationState === "running"} onClick={onRunReconciliation}>
             {reconciliationState === "running" ? "Reconciling…" : "Run confirmed reconciliation"}
           </button>
@@ -440,10 +458,10 @@ export function LensNextPanelView({
       <details className="lens-next__create" open>
         <summary>Create BIMLog viewpoint</summary>
         <div className="lens-next__filters">
-          <label className="lens-next__field"><span>Trade</span><input value={createDraft.trade} onChange={e => { setCreateDraft({ ...createDraft, trade: e.target.value }); setCreateReviewReady(false); }} /></label>
-          <label className="lens-next__field"><span>Floor</span><input value={createDraft.floor} onChange={e => { setCreateDraft({ ...createDraft, floor: e.target.value }); setCreateReviewReady(false); }} /></label>
-          <label className="lens-next__field"><span>Responsible company</span><input value={createDraft.responsibleCompany} onChange={e => { setCreateDraft({ ...createDraft, responsibleCompany: e.target.value }); setCreateReviewReady(false); }} /></label>
-          <label className="lens-next__field"><span>Report type</span><input value={createDraft.reportType} onChange={e => { setCreateDraft({ ...createDraft, reportType: e.target.value }); setCreateReviewReady(false); }} /></label>
+          <label className="lens-next__field"><span>Trade</span><select value={createDraft.trade} onChange={e => { setCreateDraft({ ...createDraft, trade: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select trade</option>{createTrades.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="lens-next__field"><span>Floor</span><select value={createDraft.floor} onChange={e => { setCreateDraft({ ...createDraft, floor: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select floor</option>{createFloors.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="lens-next__field"><span>Responsible company</span><select value={createDraft.responsibleCompany} onChange={e => { setCreateDraft({ ...createDraft, responsibleCompany: e.target.value }); setCreateReviewReady(false); }}><option value="">Unassigned</option>{createResponsibleCompanies.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
+          <label className="lens-next__field"><span>Report type</span><select value={createDraft.reportType} onChange={e => { setCreateDraft({ ...createDraft, reportType: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select report type</option>{createReportTypes.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Priority</span><select value={createDraft.priority} onChange={e => { setCreateDraft({ ...createDraft, priority: Number(e.target.value) }); setCreateReviewReady(false); }}>{[1,2,3,4,5].map(p => <option key={p} value={p}>P{p}</option>)}</select></label>
           <label className="lens-next__field"><span>Status</span><select value={createDraft.status} onChange={e => { setCreateDraft({ ...createDraft, status: e.target.value as LensNextStatus }); setCreateReviewReady(false); }}>{LENS_NEXT_STATUSES.map(status => <option key={status} value={status}>{STATUS_LABELS[status]}</option>)}</select></label>
           <label className="lens-next__field lens-next__field--wide"><span>Instruction</span><textarea value={createDraft.note} onChange={e => { setCreateDraft({ ...createDraft, note: e.target.value }); setCreateReviewReady(false); }} /></label>
@@ -451,9 +469,9 @@ export function LensNextPanelView({
           <label className="lens-next__field lens-next__field--wide"><span>Reason for audit history</span><textarea value={createReason} onChange={e => { setCreateReason(e.target.value); setCreateReviewReady(false); }} /></label>
         </div>
         {!createReviewReady ? (
-          <button type="button" disabled={!createEnabled || !createDraft.trade.trim() || !createDraft.floor.trim() || !createDraft.note.trim() || !createDraft.reportType.trim() || createReason.trim().length < 3} onClick={() => setCreateReviewReady(true)}>Review viewpoint creation</button>
+          <button className="lens-next__create-button" type="button" disabled={!createEnabled || !createDraft.trade.trim() || !createDraft.floor.trim() || !createDraft.note.trim() || !createDraft.reportType.trim() || createReason.trim().length < 3} onClick={() => setCreateReviewReady(true)}>Create BIMLog viewpoint</button>
         ) : (
-          <div className="lens-next__create-review"><p>Create one BIMLog issue and visual package first, then create one local Navisworks Saved Viewpoint. The model file will not be saved automatically.</p><button type="button" disabled={createState !== "idle" && createState !== "success" && createState !== "error"} onClick={() => { onCreateViewpoint(createDraft, createReason.trim()); setCreateReviewReady(false); }}>Confirm and create viewpoint</button></div>
+          <div className="lens-next__create-review"><p>Create one BIMLog issue and visual package first, then create one local Navisworks Saved Viewpoint. The model file will not be saved automatically.</p><button className="lens-next__create-button" type="button" disabled={createState !== "idle" && createState !== "success" && createState !== "error"} onClick={() => { onCreateViewpoint(createDraft, createReason.trim()); setCreateReviewReady(false); }}>Confirm and create BIMLog viewpoint</button></div>
         )}
         {createMessage && <p role="status">{createMessage}</p>}
       </details>

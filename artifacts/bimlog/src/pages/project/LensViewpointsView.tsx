@@ -5,10 +5,10 @@ import { useI18n } from "@/lib/i18n";
 import { Download, FileText, Link2, Crosshair, X, Copy, CheckCircle2, Trash2, RefreshCw, FileDown, History, Pencil, ArrowLeftRight, Ban, Layers, HelpCircle, Wrench } from "lucide-react";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
+import { bootstrapLensNextBridgeSession, createLensNextApiClient, createLensNextBridgeClient } from "@/features/lens-next/lens-next-client";
+import { openBimlogWorkingView } from "@/features/lens-next/lens-next-working-view";
 
 const API = "/api/v1";
-const PLUGIN_BASE = "http://localhost:8765";
-
 interface LensViewpoint {
   id: number;
   viewpointId: string;
@@ -401,27 +401,30 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [projectId]);
 
-  // Probe the local Navisworks plugin once on load. The platform runs on HTTPS
-  // while the plugin is a plain HTTP server on localhost, so a regular (CORS)
-  // fetch is rejected by the browser before we can read it (the plugin does not
-  // emit CORS / Private Network Access headers). Use no-cors: the request still
-  // reaches the plugin and an opaque response means it is reachable; an abort or
-  // network error (connection refused / timeout) means not connected.
+  // Lens Next owns its authenticated bridge on 127.0.0.1:8766. Do not report the
+  // legacy Original Lens 8765 endpoint as Lens Next connection state.
   useEffect(() => {
     let cancelled = false;
-    const ctrl = new AbortController();
-    const timer = setTimeout(() => ctrl.abort(), 1000);
-    (async () => {
+    let activeController: AbortController | null = null;
+    const probe = async () => {
+      activeController?.abort();
+      const ctrl = new AbortController();
+      activeController = ctrl;
+      const timer = setTimeout(() => ctrl.abort(), 2000);
       try {
-        await fetch(`${PLUGIN_BASE}/ping`, { mode: "no-cors", signal: ctrl.signal });
-        if (!cancelled) setPluginConnected(true);
+        const session = await bootstrapLensNextBridgeSession(fetch, ctrl.signal);
+        const bridge = createLensNextBridgeClient({ sessionToken: session.token });
+        const connected = await bridge.probe(ctrl.signal);
+        if (!cancelled) setPluginConnected(connected);
       } catch {
         if (!cancelled) setPluginConnected(false);
       } finally {
         clearTimeout(timer);
       }
-    })();
-    return () => { cancelled = true; clearTimeout(timer); ctrl.abort(); };
+    };
+    void probe();
+    const interval = window.setInterval(() => void probe(), 3000);
+    return () => { cancelled = true; window.clearInterval(interval); activeController?.abort(); };
   }, []);
 
   const showToast = (msg: string) => {
@@ -698,37 +701,31 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   // rejected by the browser before the request is even acted on. Use no-cors:
   // the GET still reaches the plugin and drives Navisworks; the opaque response
   // cannot be read, so a fetch that resolves means the plugin received it (jump
-  // succeeded) and a thrown error means the plugin is not reachable.
-  //
-  // Send immutable row identity first. Display labels are human-readable and can
-  // be repeated across unrelated lifecycle chains, so the plugin only uses the
-  // label when it resolves to one unambiguous saved viewpoint.
+  // Open through the authenticated Lens Next contract. Never call the legacy
+  // Original Lens localhost endpoint or resolve a row by a display label.
   const jumpToViewpoint = async (v: LensViewpoint) => {
-    const code = v.displayId || v.viewpointId;
-    if (code) {
-      const ctrl = new AbortController();
-      const timer = setTimeout(() => ctrl.abort(), 2000);
-      try {
-        const jumpParams = new URLSearchParams({
-          serverId: String(v.id),
-          projectId: String(projectId),
-          code,
-        });
-        if (v.navisworksGuid && v.navisworksGuid !== "00000000-0000-0000-0000-000000000000") {
-          jumpParams.set("guid", v.navisworksGuid);
-        }
-        await fetch(`${PLUGIN_BASE}/jump?${jumpParams.toString()}`, { mode: "no-cors", signal: ctrl.signal });
-        clearTimeout(timer);
-        setPluginConnected(true);
-        showToast(t("Navigated to viewpoint in Navisworks", "Navegado a la vista en Navisworks"));
-        return;
-      } catch {
-        clearTimeout(timer);
-        setPluginConnected(false);
-        /* plugin not running / timed out - fall through to the manual-search modal */
-      }
+    const ctrl = new AbortController();
+    const timer = setTimeout(() => ctrl.abort(), 8000);
+    try {
+      const session = await bootstrapLensNextBridgeSession(fetch, ctrl.signal);
+      const bridgeClient = createLensNextBridgeClient({ sessionToken: session.token });
+      if (!token) throw new Error(t("Your BIMLog session is no longer authenticated.", "Su sesion BIMLog ya no esta autenticada."));
+      const apiClient = createLensNextApiClient({ token });
+      let context = await bridgeClient.loadProjectContext(ctrl.signal);
+      if (context.projectId === null) context = await bridgeClient.bindProject(projectId, ctrl.signal);
+      if (context.projectId !== projectId) throw new Error(t("The active Navisworks model is bound to a different BIMLog project.", "El modelo activo de Navisworks esta vinculado a otro proyecto BIMLog."));
+      const issue = (await apiClient.loadIssues(projectId, ctrl.signal)).find(candidate => candidate.identity.serverId === v.id);
+      if (!issue) throw new Error(t("The BIMLog viewpoint no longer exists.", "La vista BIMLog ya no existe."));
+      await openBimlogWorkingView({ apiClient, bridgeClient }, issue, context, ctrl.signal);
+      setPluginConnected(true);
+      showToast(t("Opened BIMLog Working View in Navisworks", "Vista de trabajo BIMLog abierta en Navisworks"));
+    } catch (error) {
+      setPluginConnected(false);
+      showToast(error instanceof Error ? error.message : t("Lens Next could not open the Working View.", "Lens Next no pudo abrir la vista de trabajo."));
+      setJumpTarget(v);
+    } finally {
+      clearTimeout(timer);
     }
-    setJumpTarget(v);
   };
 
   const copyJumpId = async (v: LensViewpoint) => {

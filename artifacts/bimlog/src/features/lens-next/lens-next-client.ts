@@ -70,6 +70,7 @@ export interface LensNextApiClientOptions {
 export interface LensNextApiClient {
   resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
   loadIssues(projectId: number, signal?: AbortSignal): Promise<LensNextIssue[]>;
+  loadReferenceData(projectId: number, signal?: AbortSignal): Promise<{ floors: string[]; responsibleCompanies: string[] }>;
   loadHistory(
     identity: LensNextImmutableIssueIdentity,
     signal?: AbortSignal,
@@ -122,6 +123,28 @@ export function createLensNextApiClient(
         signal,
       );
       return adaptLensNextPullResponse(body, exactProjectId);
+    },
+    async loadReferenceData(projectId: number, signal?: AbortSignal) {
+      const exactProjectId = assertLensNextProjectId(projectId);
+      const [levelsRaw, membersRaw] = await Promise.all([
+        get(`/projects/${exactProjectId}/levels`, signal),
+        get(`/projects/${exactProjectId}/members`, signal),
+      ]);
+      const levelsBody = levelsRaw && typeof levelsRaw === "object" && !Array.isArray(levelsRaw)
+        ? levelsRaw as Record<string, unknown>
+        : null;
+      const floors = Array.isArray(levelsBody?.levels)
+        ? levelsBody.levels.map(value => String(value).trim()).filter(Boolean)
+        : [];
+      const responsibleCompanies = Array.isArray(membersRaw)
+        ? membersRaw
+            .map(member => member && typeof member === "object" ? String((member as Record<string, unknown>).userCompanyName ?? "").trim() : "")
+            .filter(Boolean)
+        : [];
+      return Object.freeze({
+        floors: [...new Set(floors)].sort(),
+        responsibleCompanies: [...new Set(responsibleCompanies)].sort(),
+      });
     },
     async loadHistory(
       identity: LensNextImmutableIssueIdentity,

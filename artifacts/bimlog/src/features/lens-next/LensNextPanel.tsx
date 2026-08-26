@@ -40,6 +40,13 @@ import {
 import "./lens-next-panel.css";
 import { openBimlogWorkingView } from "./lens-next-working-view";
 
+const LENS_NEXT_TRADE_OPTIONS = [
+  "Fire Protection", "Plumbing", "HVAC", "Electrical", "Structural",
+  "Architectural", "Mechanical", "General Contractor", "Owner", "Other",
+] as const;
+const LENS_NEXT_REPORT_TYPE_OPTIONS = ["SHOP", "SLEEVE", "COORDINATION", "FIELD", "OTHER"] as const;
+const LENS_NEXT_FALLBACK_FLOORS = ["CELLAR", "1", "2", "3", "4", "5", "ROOF", "Other"] as const;
+
 export interface LensNextPanelProps {
   projects: readonly LensNextProjectOption[];
   selectedProjectId: number | null;
@@ -80,6 +87,8 @@ export function LensNextPanel({
   }, [bridgeSessionToken, fetchImpl]);
 
   const [issues, setIssues] = useState<readonly LensNextIssue[]>([]);
+  const [referenceFloors, setReferenceFloors] = useState<readonly string[]>([]);
+  const [responsibleCompanies, setResponsibleCompanies] = useState<readonly string[]>([]);
   const [selectedServerId, setSelectedServerId] = useState<number | null>(null);
   const [filters, setFilters] = useState<LensNextFilters>({
     ...LENS_NEXT_DEFAULT_FILTERS,
@@ -117,6 +126,8 @@ export function LensNextPanel({
   const [layoutMessage, setLayoutMessage] = useState<string | null>(null);
   const [reconciliationState, setReconciliationState] = useState<"idle" | "running" | "success" | "error">("idle");
   const [reconciliationMessage, setReconciliationMessage] = useState<string | null>(null);
+  const [platformPullState, setPlatformPullState] = useState<"idle" | "running" | "success" | "error">("idle");
+  const [platformPullMessage, setPlatformPullMessage] = useState<string | null>(null);
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -206,9 +217,9 @@ export function LensNextPanel({
     () =>
       [
         ...new Set(
-          issues
+          [...LENS_NEXT_TRADE_OPTIONS, ...issues
             .map((issue) => issue.trade)
-            .filter((value): value is string => Boolean(value)),
+            .filter((value): value is string => Boolean(value))],
         ),
       ].sort(),
     [issues],
@@ -217,12 +228,16 @@ export function LensNextPanel({
     () =>
       [
         ...new Set(
-          issues
+          [...(referenceFloors.length ? referenceFloors : LENS_NEXT_FALLBACK_FLOORS), ...issues
             .map((issue) => issue.floor)
-            .filter((value): value is string => Boolean(value)),
+            .filter((value): value is string => Boolean(value))],
         ),
       ].sort(),
-    [issues],
+    [issues, referenceFloors],
+  );
+  const createResponsibleCompanies = useMemo(
+    () => [...new Set([...responsibleCompanies, ...issues.map(issue => issue.responsibleCompany).filter((value): value is string => Boolean(value)), "Other"])].sort(),
+    [issues, responsibleCompanies],
   );
 
   const loadIssues = useCallback(
@@ -243,12 +258,14 @@ export function LensNextPanel({
       setRefreshState("refreshing");
       setApiError(null);
       try {
-        const incoming = await apiClient.loadIssues(
-          authorizedProjectId,
-          signal,
-        );
+        const [incoming, referenceData] = await Promise.all([
+          apiClient.loadIssues(authorizedProjectId, signal),
+          apiClient.loadReferenceData(authorizedProjectId, signal),
+        ]);
         if (sequence !== refreshSequence.current || signal?.aborted) return;
         setIssues((current) => reconcileLensNextRefresh(current, incoming));
+        setReferenceFloors(referenceData.floors);
+        setResponsibleCompanies(referenceData.responsibleCompanies);
         setSelectedServerId((current) =>
           current !== null &&
           incoming.some((issue) => issue.identity.serverId === current)
@@ -524,6 +541,41 @@ export function LensNextPanel({
     }
   }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, issues, loadIssues, localInventory, synchronizationPlan]);
 
+  const pullPlatformViewpoints = useCallback(async () => {
+    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId) return;
+    const pulls = synchronizationPlan.items.filter(item => item.disposition === "pull_from_bimlog");
+    if (!pulls.length) {
+      setPlatformPullState("success");
+      setPlatformPullMessage("Every eligible BIMLog viewpoint is already present in Navisworks. Conflicts, blocked records, and records without complete visual packages were not changed.");
+      return;
+    }
+    const reason = window.prompt(`Reason for creating ${pulls.length} BIMLog-authoritative Saved Viewpoint(s) in Navisworks:`)?.trim();
+    if (!reason || !window.confirm(`Create ${pulls.length} exact BIMLog viewpoint(s) in Navisworks now? Existing Saved Viewpoints will not be overwritten, unmanaged folders will not be changed, and the model will not be saved automatically.`)) return;
+    setPlatformPullState("running");
+    setPlatformPullMessage(null);
+    let pulled = 0;
+    try {
+      for (const item of pulls) {
+        const issue = issues.find(candidate => candidate.identity.serverId === item.platformServerId);
+        if (!issue || issue.navisworksGuid || !issue.visualStateAvailable || !issue.visualStateDigest) throw new Error(`${item.displayId} is no longer an eligible BIMLog-only visual package; refresh and retry.`);
+        const stored = await apiClient.loadVisualState(issue);
+        await bridgeClient.applyPlatformWorkingView(issue, bridgeContext, stored.visualStateJson);
+        const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: stored.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayCode: issue.displayId ?? issue.identity.viewpointId };
+        const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, reason);
+        await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, reason);
+        pulled += 1;
+      }
+      setLocalInventory(await bridgeClient.loadLocalInventory());
+      await loadIssues("refresh");
+      setPlatformPullState("success");
+      setPlatformPullMessage(`Created ${pulled} BIMLog-authoritative Saved Viewpoint(s) in Navisworks. Save the NWF/NWD when ready.`);
+    } catch (error) {
+      setPlatformPullState("error");
+      setPlatformPullMessage(`Platform pull stopped after ${pulled} viewpoint(s): ${error instanceof Error ? error.message : "controlled platform pull failed"}. Existing viewpoints were preserved; refresh before retrying.`);
+      try { setLocalInventory(await bridgeClient.loadLocalInventory()); await loadIssues("refresh"); } catch { /* Preserve the primary failure. */ }
+    }
+  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, issues, loadIssues, synchronizationPlan]);
+
   return (
     <LensNextPanelView
       authorizedProjects={authorizedProjects}
@@ -550,6 +602,9 @@ export function LensNextPanel({
       reconciliationState={reconciliationState}
       reconciliationMessage={reconciliationMessage}
       onRunReconciliation={() => void runReconciliation()}
+      platformPullState={platformPullState}
+      platformPullMessage={platformPullMessage}
+      onPullPlatformViewpoints={() => void pullPlatformViewpoints()}
       filteredIssues={filteredIssues}
       issueGroups={issueGroups}
       viewPreset={viewPreset}
@@ -562,6 +617,10 @@ export function LensNextPanel({
       onFiltersChange={setFilters}
       trades={trades}
       floors={floors}
+      createTrades={trades}
+      createFloors={floors}
+      createResponsibleCompanies={createResponsibleCompanies}
+      createReportTypes={LENS_NEXT_REPORT_TYPE_OPTIONS}
       apiState={apiState}
       bridgeState={bridgeState}
       refreshState={refreshState}
