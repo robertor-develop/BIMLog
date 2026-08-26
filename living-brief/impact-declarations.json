@@ -14992,6 +14992,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "cb5958957e68aaf27b049a4e6bae6713446ab4fdf0fcffb3ece3cefd49f5f773"
+    },
+    {
+      "taskId": "bimlog-lens-next-v1.0.35-navisworks2025-field-package-20260825",
+      "reviewedThroughCommit": "de718498a50bd7a065d31725875a9c1c1ddb4226",
+      "reviewedAt": "2026-08-25T23:35:36-04:00",
+      "status": "lens_next_2025_package_validated_local",
+      "captureTiming": "same_task_after_deterministic_package_validation",
+      "summary": "Records the canonical H-root Navisworks 2025 field package, deterministic hash, automated test evidence, and Ruben's remaining connected acceptance gate.",
+      "workstreams": [
+        "lens-next-navisworks2025-package",
+        "lens-next-controlled-rebuild"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Packaging preserves BIMLog platform-first authority and changes no ecosystem doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The H-only fail-closed packaging boundary implements existing plugin storage authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Zero-warning builds, 30 core tests, 23 native tests, manifest validation, year isolation, and deterministic hashing satisfy existing quality gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The package enables already-approved field verification and adds no product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The platform source structure and runtime are unchanged by the external H-root package."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Build 1 through 9 behavior is packaged for 2025 without expanding native authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact ZIP, hash, tests, package-only validation, and no-install state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Ruben's Navisworks 2025 installation and connected acceptance gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No installation, production mutation, push, publication, deployment, or live field acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
