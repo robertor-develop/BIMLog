@@ -19,7 +19,7 @@ const view = (serverId: number | null, displayId: string, exactManagedIdentity =
 });
 
 const plan = planLensNextSynchronization(
-  [issue(1, "A", "physical-A"), issue(2, "B", "physical-B", true), issue(3, "C", "physical-C")],
+  [{ ...issue(1, "A", "physical-A"), navisworksGuid: "guid-A" }, issue(2, "B", "physical-B", true), issue(3, "C", "physical-C")],
   local([view(1, "A"), view(null, "D"), view(null, "legacy", false)]),
 );
 assert.deepEqual({ inSync: plan.inSync, pull: plan.pullFromBimlog, upload: plan.uploadToBimlog, conflict: plan.manualConflict, blocked: plan.blocked, executable: plan.executable },
@@ -40,7 +40,7 @@ assert.equal(shared.inSync, 0);
 const selectedOnly = planLensNextSynchronization(
   [issue(21, "SELECTED", "physical-SELECTED", true)],
   local([view(20, "FILTERED-OUT")]),
-  [issue(20, "FILTERED-OUT", "physical-FILTERED-OUT"), issue(21, "SELECTED", "physical-SELECTED", true)],
+  [{ ...issue(20, "FILTERED-OUT", "physical-FILTERED-OUT"), navisworksGuid: "guid-FILTERED-OUT" }, issue(21, "SELECTED", "physical-SELECTED", true)],
 );
 assert.equal(selectedOnly.pullFromBimlog, 1);
 assert.equal(selectedOnly.uploadToBimlog, 0, "a local match outside the current platform selection must not be misclassified as local-only");

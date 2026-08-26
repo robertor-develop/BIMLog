@@ -438,7 +438,7 @@ export function LensNextPanel({
       try {
         const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, reason);
         try {
-          await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid);
+          await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, reason);
         } catch (confirmationError) {
           setCreateState("error");
           setCreateMessage(`Created ${receipt.displayCode} in BIMLog and Navisworks, but BIMLog could not record local identity ${navisworksGuid}: ${confirmationError instanceof Error ? confirmationError.message : "identity confirmation failed"}. Do not create a duplicate.`);
@@ -479,13 +479,22 @@ export function LensNextPanel({
       setReconciliationMessage("Reconciliation refused before mutation: every manual-review and blocked item must be resolved first.");
       return;
     }
+    const confirmations = synchronizationPlan.items.filter(item => item.disposition === "confirm_local_identity");
     const pulls = synchronizationPlan.items.filter(item => item.disposition === "pull_from_bimlog");
     const uploads = synchronizationPlan.items.filter(item => item.disposition === "upload_to_bimlog");
-    const reason = window.prompt(`Reason for reconciling ${pulls.length} BIMLog pull(s) and ${uploads.length} Navisworks upload(s):`)?.trim();
+    const reason = window.prompt(`Reason for reconciling ${confirmations.length} recovered identity confirmation(s), ${pulls.length} BIMLog pull(s), and ${uploads.length} Navisworks upload(s):`)?.trim();
     if (!reason || !window.confirm(`Run one reconciliation now? BIMLog packages will be pulled first, then exact local-only managed viewpoints will be uploaded. Existing records will not be overwritten and the NWF/NWD will not be saved automatically.`)) return;
     setReconciliationState("running"); setReconciliationMessage(null);
-    let pulled = 0; let uploaded = 0;
+    let confirmed = 0; let pulled = 0; let uploaded = 0;
     try {
+      for (const item of confirmations) {
+        const issue = issues.find(candidate => candidate.identity.serverId === item.platformServerId);
+        const viewpoint = localInventory.viewpoints.find(candidate => candidate.navisworksGuid.toLowerCase() === item.localNavisworksGuid?.toLowerCase());
+        if (!issue || issue.navisworksGuid || !issue.visualStateDigest || !viewpoint || viewpoint.serverId !== issue.identity.serverId || !viewpoint.exactManagedIdentity) throw new Error(`${item.displayId} is no longer an exact recoverable identity; the run stopped.`);
+        const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: issue.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayCode: issue.displayId ?? issue.identity.viewpointId };
+        await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, viewpoint.navisworksGuid, reason);
+        confirmed += 1;
+      }
       for (const item of pulls) {
         const issue = issues.find(candidate => candidate.identity.serverId === item.platformServerId);
         if (!issue || issue.navisworksGuid || !issue.visualStateAvailable || !issue.visualStateDigest) throw new Error(`${item.displayId} is no longer an unbound BIMLog package; the run stopped.`);
@@ -493,7 +502,7 @@ export function LensNextPanel({
         await bridgeClient.applyPlatformWorkingView(issue, bridgeContext, stored.visualStateJson);
         const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: stored.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayCode: issue.displayId ?? issue.identity.viewpointId };
         const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, reason);
-        await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid);
+        await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, reason);
         pulled += 1;
       }
       for (const item of uploads) {
@@ -506,10 +515,10 @@ export function LensNextPanel({
       setLocalInventory(await bridgeClient.loadLocalInventory());
       await loadIssues("refresh");
       setReconciliationState("success");
-      setReconciliationMessage(`Reconciliation complete: ${pulled} pulled from BIMLog, ${uploaded} uploaded to BIMLog. Save the NWF/NWD when ready.`);
+      setReconciliationMessage(`Reconciliation complete: ${confirmed} recovered identity confirmation(s), ${pulled} pulled from BIMLog, ${uploaded} uploaded to BIMLog. Save the NWF/NWD when ready.`);
     } catch (error) {
       setReconciliationState("error");
-      setReconciliationMessage(`Reconciliation stopped after ${pulled} pull(s) and ${uploaded} upload(s): ${error instanceof Error ? error.message : "controlled reconciliation failed"}. Refresh before retrying; do not create duplicates.`);
+      setReconciliationMessage(`Reconciliation stopped after ${confirmed} recovered confirmation(s), ${pulled} pull(s), and ${uploaded} upload(s): ${error instanceof Error ? error.message : "controlled reconciliation failed"}. Refresh before retrying; do not create duplicates.`);
       try { setLocalInventory(await bridgeClient.loadLocalInventory()); await loadIssues("refresh"); } catch { /* Preserve the primary failure. */ }
     }
   }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, issues, loadIssues, localInventory, synchronizationPlan]);

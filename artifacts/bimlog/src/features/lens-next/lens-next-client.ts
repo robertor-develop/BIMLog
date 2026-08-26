@@ -79,7 +79,7 @@ export interface LensNextApiClient {
   loadVisualState(issue: LensNextIssue, signal?: AbortSignal): Promise<{ visualStateJson: string; visualStateDigest: string }>;
   uploadLocalViewpoint(localViewpoint: LensNextLocalViewpoint, modelFingerprint: string, visualState: Record<string, unknown>, confirmationReason: string, signal?: AbortSignal): Promise<LensNextLocalUploadReceipt>;
   createViewpoint(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal): Promise<LensNextCreateReceipt>;
-  confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, signal?: AbortSignal): Promise<void>;
+  confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, confirmationReason: string, signal?: AbortSignal): Promise<void>;
 }
 
 export function createLensNextApiClient(
@@ -202,8 +202,8 @@ export function createLensNextApiClient(
       if (body.success !== true || body.created !== true || !Number.isSafeInteger(receipt.serverId) || receipt.serverId <= 0 || receipt.viewpointId !== viewpointId || !/^[a-f0-9]{64}$/.test(receipt.visualStateDigest) || receipt.revisionNumber !== 1 || receipt.lifecycleStatus !== "active" || !receipt.displayCode) throw new Error("Atomic viewpoint creation receipt is invalid");
       return Object.freeze(receipt) as LensNextCreateReceipt;
     },
-    async confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, signal?: AbortSignal) {
-      const raw = await post(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-next/issues/${receipt.serverId}/local-viewpoint`, { contractVersion: "lens-next-local-confirm.v1", viewpointId: receipt.viewpointId, navisworksGuid, visualStateDigest: receipt.visualStateDigest }, signal);
+    async confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, confirmationReason: string, signal?: AbortSignal) {
+      const raw = await post(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-next/issues/${receipt.serverId}/local-viewpoint`, { contractVersion: "lens-next-local-confirm.v1", viewpointId: receipt.viewpointId, navisworksGuid, visualStateDigest: receipt.visualStateDigest, confirmationReason: confirmationReason.trim() }, signal);
       if (!raw || typeof raw !== "object" || (raw as Record<string, unknown>).success !== true || String((raw as Record<string, unknown>).navisworksGuid ?? "").toLowerCase() !== navisworksGuid.toLowerCase()) throw new Error("BIMLog did not confirm the local Saved Viewpoint identity");
     },
   });

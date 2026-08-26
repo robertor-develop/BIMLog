@@ -396,6 +396,7 @@ export function LensNextPanelView({
           </div>
           <div className="lens-next__inventory-summary" aria-label="Current-view synchronization plan">
             <span><strong>{synchronizationPlan.inSync}</strong> already synchronized</span>
+            <span><strong>{synchronizationPlan.confirmLocalIdentity}</strong> recover confirmation</span>
             <span><strong>{synchronizationPlan.pullFromBimlog}</strong> pull from BIMLog</span>
             <span><strong>{synchronizationPlan.uploadToBimlog}</strong> upload to BIMLog</span>
             <span><strong>{synchronizationPlan.manualConflict}</strong> manual review</span>

@@ -212,6 +212,7 @@ export interface LensNextInventorySummary {
 
 export type LensNextSyncDisposition =
   | "in_sync"
+  | "confirm_local_identity"
   | "pull_from_bimlog"
   | "upload_to_bimlog"
   | "manual_conflict"
@@ -228,6 +229,7 @@ export interface LensNextSyncPlanItem {
 export interface LensNextSyncPlan {
   items: readonly LensNextSyncPlanItem[];
   inSync: number;
+  confirmLocalIdentity: number;
   pullFromBimlog: number;
   uploadToBimlog: number;
   manualConflict: number;

@@ -752,11 +752,20 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/local
       const body = req.body ?? {}, viewpointId = String(body.viewpointId ?? "").trim();
       const navisworksGuid = String(body.navisworksGuid ?? "").trim().toLowerCase();
       const visualStateDigest = String(body.visualStateDigest ?? "").trim().toLowerCase();
-      if (body.contractVersion !== "lens-next-local-confirm.v1" || !Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(serverId) || serverId <= 0 || !viewpointId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(navisworksGuid) || !/^[a-f0-9]{64}$/.test(visualStateDigest))
+      const confirmationReason = String(body.confirmationReason ?? "").trim();
+      if (body.contractVersion !== "lens-next-local-confirm.v1" || !Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(serverId) || serverId <= 0 || !viewpointId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(navisworksGuid) || !/^[a-f0-9]{64}$/.test(visualStateDigest) || confirmationReason.length < 3)
         throw new LensNextLocalUploadError("local_confirmation_invalid", "The local Saved Viewpoint confirmation is invalid.", 422);
-      const rows = await db.update(lensViewpointsTable).set({ navisworksGuid, updatedAt: new Date() }).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId), eq(lensViewpointsTable.visualStateDigest, visualStateDigest), eq(lensViewpointsTable.lifecycleStatus, "active"), isNull(lensViewpointsTable.navisworksGuid))).returning({ id: lensViewpointsTable.id });
-      if (rows.length !== 1) throw new LensNextLocalUploadError("local_confirmation_conflict", "The exact BIMLog record could not accept this local Saved Viewpoint identity.", 409);
-      res.json({ success: true, contractVersion: "lens-next-local-confirm.v1", serverId, viewpointId, navisworksGuid });
+      const result = await db.transaction(async tx => {
+        const rows = await tx.update(lensViewpointsTable).set({ navisworksGuid, updatedAt: new Date() }).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId), eq(lensViewpointsTable.visualStateDigest, visualStateDigest), eq(lensViewpointsTable.lifecycleStatus, "active"), isNull(lensViewpointsTable.navisworksGuid))).returning({ id: lensViewpointsTable.id });
+        if (rows.length === 1) {
+          await tx.insert(activityLogTable).values({ projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName, actionType: "lens_next_local_identity_confirmed", entityType: "lens_viewpoint", entityId: serverId, details: confirmationReason });
+          return { replayed: false };
+        }
+        const [existing] = await tx.select({ navisworksGuid: lensViewpointsTable.navisworksGuid }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId), eq(lensViewpointsTable.visualStateDigest, visualStateDigest), eq(lensViewpointsTable.lifecycleStatus, "active")));
+        if (existing?.navisworksGuid?.toLowerCase() === navisworksGuid) return { replayed: true };
+        throw new LensNextLocalUploadError("local_confirmation_conflict", "The exact BIMLog record could not accept this local Saved Viewpoint identity.", 409);
+      });
+      res.json({ success: true, contractVersion: "lens-next-local-confirm.v1", serverId, viewpointId, navisworksGuid, replayed: result.replayed });
     } catch (error) {
       if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
       if ((error as { code?: string })?.code === "23505") { res.status(409).json({ error: "navisworks_guid_conflict", message: "This Navisworks Saved Viewpoint is already bound to another active BIMLog identity." }); return; }

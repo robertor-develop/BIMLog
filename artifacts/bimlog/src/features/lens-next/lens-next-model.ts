@@ -50,13 +50,19 @@ export function planLensNextSynchronization(
     if (candidates.length === 1 && localClaimCounts.get(candidates[0]) === 1 && local) {
       const view = local.viewpoints[candidates[0]];
       claimedLocal.add(candidates[0]);
-      if (selected) items.push(Object.freeze({ disposition: "in_sync", platformServerId: issue.identity.serverId, localNavisworksGuid: view.navisworksGuid, displayId, reason: "One exact managed identity exists in BIMLog and Navisworks." }));
+      if (selected && issue.navisworksGuid && issue.navisworksGuid.toLowerCase() !== view.navisworksGuid.toLowerCase()) {
+        items.push(Object.freeze({ disposition: "manual_conflict", platformServerId: issue.identity.serverId, localNavisworksGuid: view.navisworksGuid, displayId, reason: "BIMLog and the exact managed local viewpoint disagree on Navisworks GUID; automatic replacement is prohibited." }));
+      } else if (selected && !issue.navisworksGuid && issue.identity.lifecycleStatus === "active" && issue.visualStateAvailable && issue.visualStateDigest) {
+        items.push(Object.freeze({ disposition: "confirm_local_identity", platformServerId: issue.identity.serverId, localNavisworksGuid: view.navisworksGuid, displayId, reason: "The exact managed Saved Viewpoint exists locally, but BIMLog still needs its GUID confirmation." }));
+      } else if (selected && !issue.navisworksGuid) {
+        items.push(Object.freeze({ disposition: "blocked", platformServerId: issue.identity.serverId, localNavisworksGuid: view.navisworksGuid, displayId, reason: "The local identity cannot be confirmed because the active BIMLog visual package is incomplete or unavailable." }));
+      } else if (selected) items.push(Object.freeze({ disposition: "in_sync", platformServerId: issue.identity.serverId, localNavisworksGuid: view.navisworksGuid, displayId, reason: "One exact managed identity exists in BIMLog and Navisworks." }));
     } else if (candidates.length > 0) {
       candidates.forEach((index) => claimedLocal.add(index));
       if (selected) items.push(Object.freeze({ disposition: "manual_conflict", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "Exact identity is not one-to-one; automatic reconciliation is prohibited." }));
     } else if (selected && issue.navisworksGuid) {
       items.push(Object.freeze({ disposition: "manual_conflict", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "BIMLog records a Navisworks GUID that is absent from this model; replacing that identity requires manual recovery." }));
-    } else if (selected && issue.visualStateAvailable && issue.visualStateDigest) {
+    } else if (selected && issue.identity.lifecycleStatus === "active" && issue.visualStateAvailable && issue.visualStateDigest) {
       items.push(Object.freeze({ disposition: "pull_from_bimlog", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "BIMLog has the authoritative visual package and Navisworks has no exact managed viewpoint." }));
     } else if (selected) {
       items.push(Object.freeze({ disposition: "blocked", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "BIMLog has no visual package to reconstruct this viewpoint." }));
@@ -81,10 +87,11 @@ export function planLensNextSynchronization(
   const blocked = count("blocked");
   const pullFromBimlog = count("pull_from_bimlog");
   const uploadToBimlog = count("upload_to_bimlog");
+  const confirmLocalIdentity = count("confirm_local_identity");
   return Object.freeze({
-    items: Object.freeze(items), inSync: count("in_sync"), pullFromBimlog,
+    items: Object.freeze(items), inSync: count("in_sync"), confirmLocalIdentity, pullFromBimlog,
     uploadToBimlog, manualConflict, blocked,
-    executable: manualConflict === 0 && blocked === 0 && pullFromBimlog + uploadToBimlog > 0,
+    executable: manualConflict === 0 && blocked === 0 && confirmLocalIdentity + pullFromBimlog + uploadToBimlog > 0,
   });
 }
 
