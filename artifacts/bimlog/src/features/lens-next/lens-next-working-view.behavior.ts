@@ -1,0 +1,45 @@
+import assert from "node:assert/strict";
+import { openBimlogWorkingView } from "./lens-next-working-view";
+import type { LensNextIssue, LensNextBridgeProjectContext } from "./lens-next-types";
+
+const digest = "a".repeat(64);
+const issue = (packaged: boolean): LensNextIssue => ({
+  identity: { projectId: 35, serverId: 7, viewpointId: "VP-7", lifecycleStatus: "active", revisionNumber: 1 },
+  displayId: "VP-7", bimlogPhysicalId: "P-7", navisworksGuid: "11111111-1111-4111-8111-111111111111", issueGroupId: null,
+  mutationVersion: 1, status: "open", trade: "Mechanical", floor: "L2", priority: 2,
+  note: "Exact historical view", responsibleCompany: null, reportType: null, openItems: null,
+  capturedAt: null, syncedAt: null, supersedesId: null, supersedesCode: null, screenshotUrl: null,
+  visualStateAvailable: packaged, visualStateDigest: packaged ? digest : null, publishingAllowed: true,
+});
+const context: LensNextBridgeProjectContext = {
+  sessionId: "session", projectId: 35, modelFingerprint: "b".repeat(64), modelBindingKey: "model",
+  displayName: "model.nwd", bindingSource: "bimlog_model_registry", managedViewpointCount: 1,
+};
+
+const calls: string[] = [];
+const dependencies: any = {
+  apiClient: {
+    loadVisualState: async () => { calls.push("load"); return { visualStateJson: JSON.stringify({ DigestSha256: digest }), visualStateDigest: digest }; },
+    saveVisualState: async () => { calls.push("save"); },
+  },
+  bridgeClient: {
+    openWorkingView: async () => { calls.push("open-exact-local"); },
+    captureCurrentVisualState: async () => { calls.push("capture"); return { visualStateJson: JSON.stringify({ DigestSha256: digest }), visualStateDigest: digest }; },
+    applyPlatformWorkingView: async () => { calls.push("apply-platform"); },
+  },
+};
+
+await openBimlogWorkingView(dependencies, issue(true), context);
+assert.deepEqual(calls.splice(0), ["load", "apply-platform"]);
+
+const migrated = await openBimlogWorkingView(dependencies, issue(false), context);
+assert.equal(migrated.migratedHistoricalViewpoint, true);
+assert.deepEqual(calls.splice(0), ["open-exact-local", "capture", "save", "load", "apply-platform"]);
+
+dependencies.bridgeClient.openWorkingView = async () => { calls.push("open-exact-local"); throw new Error("identity_not_found"); };
+await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), context), /identity_not_found/);
+assert.deepEqual(calls.splice(0), ["open-exact-local"]);
+
+await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), { ...context, projectId: 99 }), /not bound/);
+assert.deepEqual(calls, []);
+console.log("PASS Lens Next exact historical first-open migration and platform reconstruction");

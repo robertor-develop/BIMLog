@@ -38,6 +38,7 @@ import {
   type LensNextViewSettings,
 } from "./lens-next-view-settings";
 import "./lens-next-panel.css";
+import { openBimlogWorkingView } from "./lens-next-working-view";
 
 export interface LensNextPanelProps {
   projects: readonly LensNextProjectOption[];
@@ -366,23 +367,23 @@ export function LensNextPanel({
       );
       return;
     }
-    setBridgeState("connecting");
     setBridgeError(null);
     try {
       if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
-      if (!selectedIssue.visualStateAvailable || !selectedIssue.visualStateDigest)
-        throw new Error("BIMLog has no complete visual-state package for this viewpoint.");
-      const stored = await apiClient.loadVisualState(selectedIssue);
-      await bridgeClient.applyPlatformWorkingView(selectedIssue, bridgeContext, stored.visualStateJson);
-      setBridgeState("connected");
+      const result = await openBimlogWorkingView(
+        { apiClient, bridgeClient },
+        selectedIssue,
+        bridgeContext,
+      );
+      if (result.migratedHistoricalViewpoint) {
+        setBridgeError("Historical Original Lens viewpoint recovered by exact identity and stored in BIMLog.");
+        await loadIssues("refresh");
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Exact-identity open failed";
-      setBridgeState("error");
-      setBridgeError(
-        message,
-      );
+      setBridgeError(message);
     }
-  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, selectedIssue]);
+  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues, selectedIssue]);
 
   const publishAction = useCallback(async (action: LensNextPublishAction, reason: string) => {
     if (!apiClient || !selectedIssue || !selectedIssue.publishingAllowed) return;
