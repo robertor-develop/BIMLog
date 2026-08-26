@@ -47,7 +47,7 @@ assert.equal(selectedOnly.uploadToBimlog, 0, "a local match outside the current 
 const viewSource = readFileSync(new URL("./LensNextPanelView.tsx", import.meta.url), "utf8");
 const styleSource = readFileSync(new URL("./lens-next-panel.css", import.meta.url), "utf8");
 assert.match(viewSource, /Review synchronization plan/);
-assert.match(viewSource, /preview is read-only · no synchronization has run/);
+assert.match(viewSource, /confirmed run pulls complete BIMLog packages first/);
 const syncPlanStyle = styleSource.match(/\.lens-next__sync-plan ol\{([^}]*)\}/)?.[1] ?? "";
 assert.doesNotMatch(syncPlanStyle, /overflow|max-height/, "the plan must use the existing whole-panel scrollbar");
 console.log("PASS Lens Next Build 3 platform-first synchronization plan");

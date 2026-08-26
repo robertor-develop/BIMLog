@@ -191,7 +191,7 @@ export interface LensNextCreateDraft {
 
 export interface LensNextCreateReceipt {
   serverId: number; viewpointId: string; visualStateDigest: string;
-  revisionNumber: 1; lifecycleStatus: "active"; displayCode: string;
+  revisionNumber: number; lifecycleStatus: LensNextLifecycleState; displayCode: string;
 }
 export interface LensNextLayoutItem { navisworksGuid: string; folderPath: string; }
 export interface LensNextLayoutReceipt { requested: number; moved: number; alreadyPlaced: number; }
@@ -232,7 +232,7 @@ export interface LensNextSyncPlan {
   uploadToBimlog: number;
   manualConflict: number;
   blocked: number;
-  executable: false;
+  executable: boolean;
 }
 
 export interface LensNextOpenWorkingViewFields {

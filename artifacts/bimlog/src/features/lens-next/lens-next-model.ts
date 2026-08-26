@@ -54,6 +54,8 @@ export function planLensNextSynchronization(
     } else if (candidates.length > 0) {
       candidates.forEach((index) => claimedLocal.add(index));
       if (selected) items.push(Object.freeze({ disposition: "manual_conflict", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "Exact identity is not one-to-one; automatic reconciliation is prohibited." }));
+    } else if (selected && issue.navisworksGuid) {
+      items.push(Object.freeze({ disposition: "manual_conflict", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "BIMLog records a Navisworks GUID that is absent from this model; replacing that identity requires manual recovery." }));
     } else if (selected && issue.visualStateAvailable && issue.visualStateDigest) {
       items.push(Object.freeze({ disposition: "pull_from_bimlog", platformServerId: issue.identity.serverId, localNavisworksGuid: null, displayId, reason: "BIMLog has the authoritative visual package and Navisworks has no exact managed viewpoint." }));
     } else if (selected) {
@@ -75,9 +77,14 @@ export function planLensNextSynchronization(
   });
 
   const count = (disposition: LensNextSyncPlanItem["disposition"]) => items.filter((item) => item.disposition === disposition).length;
+  const manualConflict = count("manual_conflict");
+  const blocked = count("blocked");
+  const pullFromBimlog = count("pull_from_bimlog");
+  const uploadToBimlog = count("upload_to_bimlog");
   return Object.freeze({
-    items: Object.freeze(items), inSync: count("in_sync"), pullFromBimlog: count("pull_from_bimlog"),
-    uploadToBimlog: count("upload_to_bimlog"), manualConflict: count("manual_conflict"), blocked: count("blocked"), executable: false,
+    items: Object.freeze(items), inSync: count("in_sync"), pullFromBimlog,
+    uploadToBimlog, manualConflict, blocked,
+    executable: manualConflict === 0 && blocked === 0 && pullFromBimlog + uploadToBimlog > 0,
   });
 }
 

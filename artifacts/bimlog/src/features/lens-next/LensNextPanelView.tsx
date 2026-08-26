@@ -226,6 +226,9 @@ export interface LensNextPanelViewProps {
   layoutState: "idle" | "running" | "success" | "error";
   layoutMessage: string | null;
   onMaterializeMyView(): void;
+  reconciliationState: "idle" | "running" | "success" | "error";
+  reconciliationMessage: string | null;
+  onRunReconciliation(): void;
   filteredIssues: readonly LensNextIssue[];
   issueGroups: readonly LensNextIssueGroupNode[];
   viewPreset: LensNextViewPresetId;
@@ -280,6 +283,9 @@ export function LensNextPanelView({
   layoutState,
   layoutMessage,
   onMaterializeMyView,
+  reconciliationState,
+  reconciliationMessage,
+  onRunReconciliation,
   filteredIssues,
   issueGroups,
   viewPreset,
@@ -395,7 +401,12 @@ export function LensNextPanelView({
             <span><strong>{synchronizationPlan.manualConflict}</strong> manual review</span>
             <span><strong>{synchronizationPlan.blocked}</strong> blocked</span>
           </div>
-          <small>Current BIMLog view plus exact local-only managed items · preview is read-only · no synchronization has run.</small>
+          <small>Current BIMLog view plus exact local-only managed items. A confirmed run pulls complete BIMLog packages first, then uploads exact local-only managed viewpoints. It never overwrites or saves the model.</small>
+          <button type="button" disabled={!synchronizationPlan.executable || reconciliationState === "running"} onClick={onRunReconciliation}>
+            {reconciliationState === "running" ? "Reconciling…" : "Run confirmed reconciliation"}
+          </button>
+          {!synchronizationPlan.executable && synchronizationPlan.manualConflict + synchronizationPlan.blocked > 0 && <small role="alert">Resolve every manual-review and blocked item before reconciliation can change either system.</small>}
+          {reconciliationMessage && <small role="status">{reconciliationMessage}</small>}
           <details className="lens-next__sync-plan">
             <summary>Review synchronization plan ({synchronizationPlan.items.length} items)</summary>
             <ol>
