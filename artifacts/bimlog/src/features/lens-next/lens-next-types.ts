@@ -183,6 +183,16 @@ export interface LensNextLocalUploadReceipt {
   visualStateDigest: string;
 }
 
+export interface LensNextCreateDraft {
+  trade: string; note: string; responsibleCompany: string; reportType: string;
+  floor: string; priority: number; openItems: string; status: LensNextStatus;
+}
+
+export interface LensNextCreateReceipt {
+  serverId: number; viewpointId: string; visualStateDigest: string;
+  revisionNumber: 1; lifecycleStatus: "active"; displayCode: string;
+}
+
 export interface LensNextModelBindingResolution {
   projectId: number;
   modelBindingKey: string;

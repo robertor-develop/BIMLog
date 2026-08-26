@@ -697,6 +697,73 @@ router.post("/projects/:projectId/clash-reports/lens-next/local-viewpoints/uploa
     }
   });
 
+router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      if (!Number.isSafeInteger(projectId) || projectId <= 0) throw new LensNextLocalUploadError("project_invalid", "Project identity is invalid.", 400);
+      const body = req.body ?? {};
+      if (body.contractVersion !== "lens-next-create.v1" || body.confirmed !== true || typeof body.confirmationReason !== "string" || body.confirmationReason.trim().length < 3)
+        throw new LensNextLocalUploadError("confirmation_required", "Explicit viewpoint creation confirmation and reason are required.", 422);
+      const viewpointId = String(body.viewpointId ?? "").trim();
+      const modelFingerprint = String(body.modelFingerprint ?? "").trim().toLowerCase();
+      const issue = body.issue ?? {};
+      const note = String(issue.note ?? "").trim();
+      const trade = String(issue.trade ?? "").trim();
+      const floor = String(issue.floor ?? "").trim();
+      const responsibleCompany = String(issue.responsibleCompany ?? "").trim();
+      const reportType = String(issue.reportType ?? "").trim();
+      const openItems = String(issue.openItems ?? "").trim();
+      const status = String(issue.status ?? "open");
+      const priority = Number(issue.priority);
+      if (!viewpointId || viewpointId.length > 160 || !/^[a-f0-9]{64}$/.test(modelFingerprint) || !note || !trade || !floor || !reportType || !Number.isInteger(priority) || priority < 1 || priority > 5 || !["open","follow_up","waiting_design","approved","resolved"].includes(status))
+        throw new LensNextLocalUploadError("create_fields_invalid", "Trade, instruction, report type, floor, priority, status, viewpoint identity, and model identity are required.", 422);
+      const result = await db.transaction(async tx => {
+        const existing = await tx.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId), eq(lensViewpointsTable.lifecycleStatus, "active"))).limit(1);
+        if (existing.length) throw new LensNextLocalUploadError("platform_identity_exists", "BIMLog already contains this viewpoint identity; creation will not overwrite it.", 409);
+        const [inserted] = await tx.insert(lensViewpointsTable).values({
+          projectId, viewpointId, note, trade, floor, responsibleCompany: responsibleCompany || null,
+          reportType, priority, openItems: openItems || null, status,
+          lifecycleStatus: "active", revisionNumber: 1, mutationVersion: 1, capturedAt: new Date(), syncedAt: new Date(),
+        }).returning();
+        if (!inserted) throw new LensNextLocalUploadError("atomic_insert_failed", "BIMLog did not create the viewpoint record.", 500);
+        const rebound = validateAndRebindLocalVisualState(body.visualState, { projectId, serverId: inserted.id, viewpointId, modelFingerprint });
+        const sequence = await assignTradeFloorSeq(projectId, trade, floor, null, tx);
+        await tx.update(lensViewpointsTable).set({ visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
+        const abbr = (trade.length > 2 ? trade.slice(0, 2) : trade).toUpperCase() || "??";
+        return { serverId: inserted.id, viewpointId, visualStateDigest: rebound.digest, revisionNumber: 1, lifecycleStatus: "active", displayCode: `${abbr}-${String(sequence.seq).padStart(3, "0")}` };
+      });
+      res.status(201).json({ success: true, contractVersion: "lens-next-create.v1", created: true, result });
+    } catch (error) {
+      if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
+      if ((error as { code?: string })?.code === "23505") { res.status(409).json({ error: "platform_identity_conflict", message: "A concurrent BIMLog record now owns this viewpoint identity; nothing was overwritten." }); return; }
+      res.status(500).json({ error: "lens_next_create_failed", message: "The atomic viewpoint creation failed; no partial record was committed." });
+    }
+  });
+
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/local-viewpoint",
+  authMiddleware,
+  requirePermission("admin", "write"),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId), serverId = Number(req.params.serverId);
+    try {
+      const body = req.body ?? {}, viewpointId = String(body.viewpointId ?? "").trim();
+      const navisworksGuid = String(body.navisworksGuid ?? "").trim().toLowerCase();
+      const visualStateDigest = String(body.visualStateDigest ?? "").trim().toLowerCase();
+      if (body.contractVersion !== "lens-next-local-confirm.v1" || !Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(serverId) || serverId <= 0 || !viewpointId || !/^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(navisworksGuid) || !/^[a-f0-9]{64}$/.test(visualStateDigest))
+        throw new LensNextLocalUploadError("local_confirmation_invalid", "The local Saved Viewpoint confirmation is invalid.", 422);
+      const rows = await db.update(lensViewpointsTable).set({ navisworksGuid, updatedAt: new Date() }).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId), eq(lensViewpointsTable.visualStateDigest, visualStateDigest), eq(lensViewpointsTable.lifecycleStatus, "active"), isNull(lensViewpointsTable.navisworksGuid))).returning({ id: lensViewpointsTable.id });
+      if (rows.length !== 1) throw new LensNextLocalUploadError("local_confirmation_conflict", "The exact BIMLog record could not accept this local Saved Viewpoint identity.", 409);
+      res.json({ success: true, contractVersion: "lens-next-local-confirm.v1", serverId, viewpointId, navisworksGuid });
+    } catch (error) {
+      if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
+      if ((error as { code?: string })?.code === "23505") { res.status(409).json({ error: "navisworks_guid_conflict", message: "This Navisworks Saved Viewpoint is already bound to another active BIMLog identity." }); return; }
+      res.status(500).json({ error: "local_confirmation_failed", message: "The local Saved Viewpoint identity was not recorded." });
+    }
+  });
+
 // Registered BEFORE the "/:reportId" routes so "lens-sync"/"lens-pull" are not
 // captured by the :reportId path parameter.
 router.post("/projects/:projectId/clash-reports/lens-sync",

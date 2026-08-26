@@ -18,6 +18,7 @@ import {
   LENS_NEXT_DEFAULT_FILTERS,
   type LensNextBridgeProjectContext,
   type LensNextConnectionState,
+  type LensNextCreateDraft,
   type LensNextFilters,
   type LensNextHistory,
   type LensNextIssue,
@@ -107,6 +108,8 @@ export function LensNextPanel({
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
   const [localUploadState, setLocalUploadState] = useState<"idle" | "capturing" | "uploading" | "success" | "error">("idle");
   const [localUploadMessage, setLocalUploadMessage] = useState<string | null>(null);
+  const [createState, setCreateState] = useState<"idle" | "capturing" | "creating" | "publishing" | "success" | "error">("idle");
+  const [createMessage, setCreateMessage] = useState<string | null>(null);
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -417,6 +420,38 @@ export function LensNextPanel({
     } catch (error) { setLocalUploadState("error"); setLocalUploadMessage(error instanceof Error ? error.message : "Atomic local upload failed; no partial record was committed."); }
   }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
 
+  const createViewpoint = useCallback(async (draft: LensNextCreateDraft, reason: string) => {
+    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId) return;
+    const viewpointId = crypto.randomUUID();
+    setCreateMessage(null); setCreateState("capturing");
+    try {
+      const visualState = await bridgeClient.captureNewViewpoint(viewpointId, bridgeContext);
+      setCreateState("creating");
+      const receipt = await apiClient.createViewpoint(authorizedProjectId, viewpointId, bridgeContext.modelFingerprint, visualState, draft, reason);
+      setCreateState("publishing");
+      try {
+        const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, reason);
+        try {
+          await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid);
+        } catch (confirmationError) {
+          setCreateState("error");
+          setCreateMessage(`Created ${receipt.displayCode} in BIMLog and Navisworks, but BIMLog could not record local identity ${navisworksGuid}: ${confirmationError instanceof Error ? confirmationError.message : "identity confirmation failed"}. Do not create a duplicate.`);
+          await loadIssues("refresh");
+          return;
+        }
+        setCreateState("success");
+        setCreateMessage(`Created ${receipt.displayCode} in BIMLog and Navisworks. Save the NWF/NWD when ready.`);
+      } catch (localError) {
+        setCreateState("error");
+        setCreateMessage(`BIMLog created ${receipt.displayCode} with its visual package, but Navisworks did not create the local Saved Viewpoint: ${localError instanceof Error ? localError.message : "local creation failed"}`);
+      }
+      await loadIssues("refresh");
+    } catch (error) {
+      setCreateState("error");
+      setCreateMessage(error instanceof Error ? error.message : "Viewpoint creation failed");
+    }
+  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
+
   return (
     <LensNextPanelView
       authorizedProjects={authorizedProjects}
@@ -432,6 +467,10 @@ export function LensNextPanel({
       localUploadState={localUploadState}
       localUploadMessage={localUploadMessage}
       onUploadLocalViewpoint={(viewpoint) => void uploadLocalViewpoint(viewpoint)}
+      createEnabled={bridgeState === "connected" && apiState === "connected" && bridgeContext?.projectId === authorizedProjectId}
+      createState={createState}
+      createMessage={createMessage}
+      onCreateViewpoint={(draft, reason) => void createViewpoint(draft, reason)}
       filteredIssues={filteredIssues}
       issueGroups={issueGroups}
       viewPreset={viewPreset}
