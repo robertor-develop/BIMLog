@@ -2,11 +2,12 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "40e29172324858969af6a549b4ec6c6efd9c03ff",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "edae4150b057d2574e9aae1a7e484f0b0cdc71ab1168d7fb3245f40a2cb78c90",
+  "bundleSha256": "b89800be7a07ceb3df8546beaa216a428a6e442ab63aaa1902be1f3acab99863",
   "impact": {
     "baselineCommit": "40e29172324858969af6a549b4ec6c6efd9c03ff",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -68,13 +69,13 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "ddaccc81998338c7e69d9096044a9699e00412aa566467e1fbdfb45d45bee932",
-      "sourceChangedAt": "2026-08-25T11:38:06-04:00",
-      "changeState": "accepted",
+      "sha256": "015df0634c4f088a4b8a641b4e6c2fe224c68dc6c225ba6aa31d33f777667bd4",
+      "sourceChangedAt": "2026-08-26T01:20:00.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "40e29172324858969af6a549b4ec6c6efd9c03ff",
       "semanticReviewedThroughCommit": "40e29172324858969af6a549b4ec6c6efd9c03ff",
       "semanticReviewTask": "bimlog-lens-next-controlled-rebuild-build5-strict-closure-20260825",
-      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewResult": "updated",
       "semanticReviewedAt": "2026-08-25T21:14:00-04:00"
     },
     {
@@ -116,8 +117,8 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "b12ad8bede64a0d4bee4eca8ee9fe56c4b6d0b10207f924a278cd544064a1195",
-      "sourceChangedAt": "2026-08-26T01:14:00.000Z",
+      "sha256": "20dbb252eca3cab6a7235e52263720d840ba8cb7219edcf01be40476cfbe1475",
+      "sourceChangedAt": "2026-08-26T01:20:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "40e29172324858969af6a549b4ec6c6efd9c03ff",
       "semanticReviewedThroughCommit": "40e29172324858969af6a549b4ec6c6efd9c03ff",
@@ -128,8 +129,8 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "a5dc1a34fa90851f94cb59a8663e94cdebc154f56f3e13b89980d0a1520bbefe",
-      "sourceChangedAt": "2026-08-26T01:14:00.000Z",
+      "sha256": "a2dff05c24910dbdd55d81fd1f69a42bb8972ebb260de9483ac2392f020844a7",
+      "sourceChangedAt": "2026-08-26T01:20:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "40e29172324858969af6a549b4ec6c6efd9c03ff",
       "semanticReviewedThroughCommit": "40e29172324858969af6a549b4ec6c6efd9c03ff",

@@ -1977,3 +1977,4 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Build 6 may add creation of a new BIMLog viewpoint from the active Navisworks working state through the full Lens Next issue form. Creation must originate in Lens Next, produce the platform record and visual package atomically, and create or stamp the governed local Saved Viewpoint only after the platform receipt is proven.
 - Build 5 is local source only. No production upload, package, install, push, Replit synchronization, publication, deployment, production migration, or connected-model acceptance occurred.
 - Preserve the explicit strict-TypeScript method signatures added during exact-clean closure; they are compile-time contract evidence, not a change to upload authority or behavior.
+- Preserve the generated PLATFORM.md entries for the dedicated local-upload contract and behavior proof.

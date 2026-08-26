@@ -14572,8 +14572,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No API, schema, transaction, or runtime platform behavior changes."
+          "result": "updated",
+          "reason": "Generated platform structure records the dedicated Build 5 local-upload contract and behavior proof."
         },
         {
           "key": "plugin",
@@ -14608,10 +14608,11 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b80da61d3c9f8c954a4c34738caef83fea584b134ea4c03de7a65b07c59909f2"
+      "reviewedChangeSha256": "10a5e96ac9a0fd873f24ff9cf8c04033ada29eac1bfb9a088eabdb5bf05c626d"
     }
   ]
 }
