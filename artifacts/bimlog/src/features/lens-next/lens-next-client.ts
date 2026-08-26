@@ -174,7 +174,7 @@ export function createLensNextApiClient(
       if (embeddedDigest !== visualStateDigest) throw new Error("BIMLog visual-state package digest is inconsistent");
       return Object.freeze({ visualStateJson, visualStateDigest });
     },
-    async uploadLocalViewpoint(localViewpoint, modelFingerprint, visualState, confirmationReason, signal) {
+    async uploadLocalViewpoint(localViewpoint: LensNextLocalViewpoint, modelFingerprint: string, visualState: Record<string, unknown>, confirmationReason: string, signal?: AbortSignal) {
       if (!localViewpoint.exactManagedIdentity || localViewpoint.serverId !== null) throw new Error("Only an exact local-only managed viewpoint can be uploaded");
       const raw = await post(`/projects/${assertLensNextProjectId(localViewpoint.projectId)}/clash-reports/lens-next/local-viewpoints/upload`, {
         contractVersion: "lens-next-local-upload.v1", confirmed: true, confirmationReason: confirmationReason.trim(),
@@ -525,7 +525,7 @@ export function createLensNextBridgeClient(
       if (!/^[0-9a-f]{64}$/i.test(digest)) throw new Error("bridge visual-state digest is invalid");
       return Object.freeze({ visualStateJson: JSON.stringify(state), visualStateDigest: digest.toLowerCase() });
     },
-    async captureLocalViewpoint(localViewpoint, context, signal) {
+    async captureLocalViewpoint(localViewpoint: LensNextLocalViewpoint, context: LensNextBridgeProjectContext, signal?: AbortSignal) {
       if (!localViewpoint.exactManagedIdentity || localViewpoint.serverId !== null || localViewpoint.projectId !== context.projectId) throw new Error("Exact local-only viewpoint context is required");
       const requestId = requestIdFactory();
       const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/capture-local-viewpoint`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal,
