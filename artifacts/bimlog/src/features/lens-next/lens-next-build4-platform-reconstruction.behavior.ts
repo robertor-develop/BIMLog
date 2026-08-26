@@ -3,7 +3,7 @@ import { readFileSync } from "node:fs";
 
 const panel = readFileSync(new URL("./LensNextPanel.tsx", import.meta.url), "utf8");
 const client = readFileSync(new URL("./lens-next-client.ts", import.meta.url), "utf8");
-const native = readFileSync("H:\\BIMLogPlugin2021\\LensNext-v1.0.08-Pro-M8\\native\\AutodeskVisualStateAdapter.cs", "utf8");
+const native = readFileSync("H:\\BIMLogPlugin2021\\LensNext-v1.0.35\\native\\AutodeskVisualStateAdapter.cs", "utf8");
 
 assert.match(panel, /!selectedIssue\.visualStateAvailable \|\| !selectedIssue\.visualStateDigest/);
 assert.match(panel, /apiClient\.loadVisualState\(selectedIssue\)/);

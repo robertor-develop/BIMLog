@@ -29,6 +29,7 @@ export {
   sortLensNextIssues,
 } from "./lens-next-model";
 export * from "./lens-next-types";
+export * from "./lens-next-architecture-boundary";
 export {
   clearLensNextBridgeSession,
   getLensNextBridgeSessionSnapshot,

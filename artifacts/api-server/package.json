@@ -23,6 +23,7 @@
     "test:lens-import-api": "tsx ./scripts/test-lens-import-api-evidence.ts",
     "test:lens-next-publishing": "tsx ./src/lib/lens-next-publishing.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-publishing-ui.behavior.ts",
     "test:lens-next-model-binding": "tsx ./src/lib/lens-next-model-binding.behavior.ts",
+    "test:lens-next-build10": "tsx ./src/lib/lens-next-model-binding.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-build1-inventory.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-build3-sync-plan.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-build4-platform-reconstruction.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-build5-local-upload.behavior.ts && tsx ./src/lib/lens-next-create.behavior.ts && tsx ./src/lib/lens-next-local-upload.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-build7-my-view.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-build8-reconciliation.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-build9-recovery.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-build10-release.behavior.ts && tsx ./src/lib/lens-next-publishing.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-publishing-ui.behavior.ts",
     "test:coordinator-register": "tsx ./scripts/coordinator-action-register-proof.ts",
     "test:coordinator-build2": "tsx ./scripts/coordinator-command-center-build2-proof.ts",
     "test:coordinator-build2-browser": "tsx ./scripts/coordinator-command-center-build2-browser-evidence.ts",
