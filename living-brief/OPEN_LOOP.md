@@ -1990,3 +1990,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Preserve the dedicated Lens Next My View root, exact publish-marker/GUID eligibility, explicit confirmation, fresh-index move, post-move verification, and prohibition on deletion or automatic NWF/NWD save.
 - Build 8 may add ongoing platform-first synchronization and reconciliation using the existing deterministic plan. It must preserve explicit conflict handling and may not let local folder placement or labels override BIMLog identity or visual authority.
 - Build 7 remains local source only. Packaging, installation, push, Replit synchronization, publication, deployment, production migration, and connected-model acceptance remain later gates.
+
+## Lens Next controlled rebuild — Build 8 remaining gate
+
+- Preserve one explicit reconciliation confirmation and the whole-run preflight barrier: any manual conflict or blocked item must prevent all mutation. Platform packages execute before exact managed local-only uploads; stale recorded Navisworks GUIDs are conflicts, not permission to replace identity.
+- Build 9 must complete recovery, audit, and interrupted-run acceptance without introducing automatic background reconciliation, overwrite, deletion, or automatic model save. Retrying after partial progress must start from freshly loaded BIMLog and Navisworks inventories and must never create duplicates.
+- Build 8 remains locally validated source only. Packaging, installation, push, Replit synchronization, publication, deployment, production migration, and connected-model acceptance remain later gates.

@@ -14840,6 +14840,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "eec2a6a0209905e4bc3a467a7b01a27a38e35c8f21b90adceb3097a157f36fb0"
+    },
+    {
+      "taskId": "bimlog-lens-next-controlled-rebuild-build8-reconciliation-20260825",
+      "reviewedThroughCommit": "f0330f7c630c89b0cab3396a7119af033c777361",
+      "reviewedAt": "2026-08-25T22:35:53-04:00",
+      "status": "lens_next_controlled_rebuild_build8_validated_local",
+      "captureTiming": "same_task_after_confirmed_reconciliation_implementation_and_local_validation",
+      "summary": "Adds one explicitly confirmed platform-first reconciliation run with a whole-run conflict barrier, BIMLog pulls before exact managed local uploads, and fail-closed stale identity handling.",
+      "workstreams": [
+        "lens-next-platform-first-reconciliation",
+        "lens-next-controlled-rebuild"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the first visual and identity authority; local-only uploads are limited to exact managed identities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, installation, push, publication, deployment, or production action occurred."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Whole-run preflight, ordered execution, stale-identity refusal, exact counts, and inventory refresh implement fail-closed quality authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The confirmed run advances governed BIMLog/Navisworks reconciliation without background or destructive automation."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 8 composes existing exact package, confirmation, and atomic upload contracts without adding schema or another authority."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents ordered reconstruction/upload behavior and the stale-identity recovery boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, spreadsheet, document, or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 8 behavior, exact source commit, passing local gates, and absence of release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Build 9 recovery and interrupted-run acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external or production mutation occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "bf8d8c254eca11689979aa986e9f5b816a50353599c20830ce258c83d7f89c78"
     }
   ]
 }
