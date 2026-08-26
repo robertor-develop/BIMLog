@@ -1,4 +1,8 @@
 import {
+  LENS_NEXT_STATUSES,
+  type LensNextStatus,
+} from "./lens-next-types.ts";
+import {
   adaptLensNextHistoryResponse,
   adaptLensNextPullResponse,
   assertLensNextImmutableIdentity,
@@ -11,6 +15,9 @@ import type {
   LensNextImmutableIssueIdentity,
   LensNextIssue,
   LensNextLocalInventory,
+  LensNextLocalCapture,
+  LensNextLocalUploadReceipt,
+  LensNextLocalViewpoint,
   LensNextModelBindingResolution,
   LensNextOpenWorkingViewResult,
   LensNextPublishAction,
@@ -66,6 +73,7 @@ export interface LensNextApiClient {
   publishAction(issue: LensNextIssue, action: LensNextPublishAction, reason: string, idempotencyKey: string, modelFingerprint?: string | null, signal?: AbortSignal): Promise<LensNextPublishResult>;
   saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, signal?: AbortSignal): Promise<void>;
   loadVisualState(issue: LensNextIssue, signal?: AbortSignal): Promise<{ visualStateJson: string; visualStateDigest: string }>;
+  uploadLocalViewpoint(localViewpoint: LensNextLocalViewpoint, modelFingerprint: string, visualState: Record<string, unknown>, confirmationReason: string, signal?: AbortSignal): Promise<LensNextLocalUploadReceipt>;
 }
 
 export function createLensNextApiClient(
@@ -166,6 +174,18 @@ export function createLensNextApiClient(
       if (embeddedDigest !== visualStateDigest) throw new Error("BIMLog visual-state package digest is inconsistent");
       return Object.freeze({ visualStateJson, visualStateDigest });
     },
+    async uploadLocalViewpoint(localViewpoint, modelFingerprint, visualState, confirmationReason, signal) {
+      if (!localViewpoint.exactManagedIdentity || localViewpoint.serverId !== null) throw new Error("Only an exact local-only managed viewpoint can be uploaded");
+      const raw = await post(`/projects/${assertLensNextProjectId(localViewpoint.projectId)}/clash-reports/lens-next/local-viewpoints/upload`, {
+        contractVersion: "lens-next-local-upload.v1", confirmed: true, confirmationReason: confirmationReason.trim(),
+        modelFingerprint, localViewpoint, visualState,
+      }, signal);
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Atomic local upload receipt is invalid");
+      const body = raw as Record<string, any>, result = body.result as Record<string, unknown>;
+      const receipt = { serverId: Number(result?.serverId), viewpointId: String(result?.viewpointId ?? ""), navisworksGuid: String(result?.navisworksGuid ?? ""), visualStateDigest: String(result?.visualStateDigest ?? "") };
+      if (body.success !== true || body.created !== true || !Number.isSafeInteger(receipt.serverId) || receipt.serverId <= 0 || receipt.viewpointId !== localViewpoint.viewpointId || receipt.navisworksGuid.toLowerCase() !== localViewpoint.navisworksGuid.toLowerCase() || !/^[a-f0-9]{64}$/.test(receipt.visualStateDigest)) throw new Error("Atomic local upload receipt is invalid");
+      return Object.freeze(receipt);
+    },
   });
 }
 
@@ -247,6 +267,7 @@ export interface LensNextBridgeClient {
     context: LensNextBridgeProjectContext,
     signal?: AbortSignal,
   ): Promise<{ visualStateJson: string; visualStateDigest: string }>;
+  captureLocalViewpoint(localViewpoint: LensNextLocalViewpoint, context: LensNextBridgeProjectContext, signal?: AbortSignal): Promise<LensNextLocalCapture>;
 }
 
 function defaultRequestId(): string {
@@ -374,6 +395,9 @@ export function createLensNextBridgeClient(
         const serverId = serverValue == null || String(serverValue).trim() === "" ? null : Number(serverValue);
         const navisworksGuid = String(view.NavisworksGuid ?? view.navisworksGuid ?? "").trim();
         const viewpointId = String(view.ViewpointId ?? view.viewpointId ?? "").trim();
+        const localStatus = String(view.Status ?? view.status ?? "open").trim().toLowerCase();
+        const priorityText = String(view.Priority ?? view.priority ?? "").replace(/^P/i, "");
+        const localPriority = priorityText ? Number(priorityText) : null;
         if ((projectId !== null && localProjectId !== projectId) || !Number.isSafeInteger(localProjectId) || localProjectId <= 0 || (serverId !== null && (!Number.isSafeInteger(serverId) || serverId <= 0)) || !navisworksGuid || !viewpointId)
           throw new Error("bridge local viewpoint identity is incomplete");
         return Object.freeze({
@@ -385,6 +409,14 @@ export function createLensNextBridgeClient(
           navisworksGuid,
           displayName: String(view.DisplayName ?? view.displayName ?? viewpointId).trim(),
           folderPath: String(view.FolderPath ?? view.folderPath ?? "").trim(),
+          note: String(view.Note ?? view.note ?? "").trim() || null,
+          trade: String(view.Trade ?? view.trade ?? "").trim() || null,
+          responsibleCompany: String(view.ResponsibleCompany ?? view.responsibleCompany ?? "").trim() || null,
+          reportType: String(view.ReportType ?? view.reportType ?? "").trim() || null,
+          floor: String(view.Floor ?? view.floor ?? "").trim() || null,
+          priority: localPriority !== null && Number.isInteger(localPriority) && localPriority >= 1 && localPriority <= 5 ? localPriority : null,
+          openItems: String(view.OpenItems ?? view.openItems ?? "").trim() || null,
+          status: LENS_NEXT_STATUSES.includes(localStatus as LensNextStatus) ? localStatus as LensNextStatus : "open",
           exactManagedIdentity: Boolean(view.ExactManagedIdentity ?? view.exactManagedIdentity),
         });
       });
@@ -492,6 +524,16 @@ export function createLensNextBridgeClient(
       const digest = String((state as Record<string, unknown>).DigestSha256 ?? (state as Record<string, unknown>).digestSha256 ?? "").trim();
       if (!/^[0-9a-f]{64}$/i.test(digest)) throw new Error("bridge visual-state digest is invalid");
       return Object.freeze({ visualStateJson: JSON.stringify(state), visualStateDigest: digest.toLowerCase() });
+    },
+    async captureLocalViewpoint(localViewpoint, context, signal) {
+      if (!localViewpoint.exactManagedIdentity || localViewpoint.serverId !== null || localViewpoint.projectId !== context.projectId) throw new Error("Exact local-only viewpoint context is required");
+      const requestId = requestIdFactory();
+      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/capture-local-viewpoint`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal,
+        body: JSON.stringify({ protocolVersion: 1, command: "capture-local-viewpoint", requestId, idempotencyKey: requestId, fields: { sessionId: context.sessionId, projectId: String(localViewpoint.projectId), navisworksGuid: localViewpoint.navisworksGuid, modelFingerprint: context.modelFingerprint, includeScreenshot: "false" } }) });
+      const raw = await jsonBody(response, "Lens Next exact local capture"), body = bridgePayload(raw, "local_viewpoint_captured");
+      const echoed = body.localViewpoint as Record<string, unknown>, visualState = body.visualState;
+      if (!echoed || !visualState || typeof visualState !== "object" || Array.isArray(visualState) || String(echoed.NavisworksGuid ?? echoed.navisworksGuid).toLowerCase() !== localViewpoint.navisworksGuid.toLowerCase()) throw new Error("Bridge local capture identity mismatch");
+      return Object.freeze({ localViewpoint, visualState: visualState as Record<string, unknown> });
     },
   });
 }

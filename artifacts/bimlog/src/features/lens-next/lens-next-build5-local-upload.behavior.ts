@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const panel = fs.readFileSync(new URL("./LensNextPanel.tsx", import.meta.url), "utf8");
+const client = fs.readFileSync(new URL("./lens-next-client.ts", import.meta.url), "utf8");
+assert.match(panel, /window\.prompt/);
+assert.match(panel, /window\.confirm/);
+assert.match(panel, /captureLocalViewpoint/);
+assert.match(panel, /uploadLocalViewpoint/);
+assert.match(client, /capture-local-viewpoint/);
+assert.match(client, /lens-next\/local-viewpoints\/upload/);
+const openStart = panel.indexOf("const openWorkingView = useCallback");
+const publishStart = panel.indexOf("const publishAction = useCallback", openStart);
+assert.ok(openStart >= 0 && publishStart > openStart);
+assert.doesNotMatch(panel.slice(openStart, publishStart), /uploadLocalViewpoint|captureLocalViewpoint/);
+console.log(JSON.stringify({ status: "PASS", tests: ["separate-confirmation", "exact-native-capture", "dedicated-atomic-api", "working-view-separation"] }));

@@ -153,6 +153,14 @@ export interface LensNextLocalViewpoint {
   navisworksGuid: string;
   displayName: string;
   folderPath: string;
+  note?: string | null;
+  trade?: string | null;
+  responsibleCompany?: string | null;
+  reportType?: string | null;
+  floor?: string | null;
+  priority?: number | null;
+  openItems?: string | null;
+  status?: LensNextStatus;
   exactManagedIdentity: boolean;
 }
 
@@ -161,6 +169,18 @@ export interface LensNextLocalInventory {
   modelFingerprint: string;
   modelBindingKey: string;
   viewpoints: readonly LensNextLocalViewpoint[];
+}
+
+export interface LensNextLocalCapture {
+  localViewpoint: LensNextLocalViewpoint;
+  visualState: Record<string, unknown>;
+}
+
+export interface LensNextLocalUploadReceipt {
+  serverId: number;
+  viewpointId: string;
+  navisworksGuid: string;
+  visualStateDigest: string;
 }
 
 export interface LensNextModelBindingResolution {

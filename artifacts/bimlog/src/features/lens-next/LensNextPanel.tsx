@@ -22,6 +22,7 @@ import {
   type LensNextHistory,
   type LensNextIssue,
   type LensNextLocalInventory,
+  type LensNextLocalViewpoint,
   type LensNextPublishAction,
   type LensNextProjectOption,
   type LensNextRefreshState,
@@ -104,6 +105,8 @@ export function LensNextPanel({
   const publishAttempt = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
   const [publishState, setPublishState] = useState<"idle" | "publishing" | "published" | "error">("idle");
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
+  const [localUploadState, setLocalUploadState] = useState<"idle" | "capturing" | "uploading" | "success" | "error">("idle");
+  const [localUploadMessage, setLocalUploadMessage] = useState<string | null>(null);
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -135,6 +138,11 @@ export function LensNextPanel({
     () => planLensNextSynchronization(filteredIssues, localInventory, issues),
     [filteredIssues, issues, localInventory],
   );
+  const uploadableLocalViewpoints = useMemo(() => {
+    if (!localInventory) return [];
+    const guids = new Set(synchronizationPlan.items.filter(item => item.disposition === "upload_to_bimlog" && item.localNavisworksGuid).map(item => item.localNavisworksGuid!.toLowerCase()));
+    return localInventory.viewpoints.filter(viewpoint => viewpoint.exactManagedIdentity && viewpoint.serverId === null && guids.has(viewpoint.navisworksGuid.toLowerCase()));
+  }, [localInventory, synchronizationPlan]);
 
   useEffect(() => {
     if (authorizedProjectId === null) return;
@@ -393,6 +401,22 @@ export function LensNextPanel({
     }
   }, [apiClient, bridgeContext?.modelFingerprint, selectedIssue]);
 
+  const uploadLocalViewpoint = useCallback(async (viewpoint: LensNextLocalViewpoint) => {
+    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null) return;
+    if (viewpoint.projectId !== authorizedProjectId || bridgeContext.projectId !== authorizedProjectId) { setLocalUploadState("error"); setLocalUploadMessage("Project/model identity mismatch; upload refused."); return; }
+    const reason = window.prompt(`Reason for uploading ${viewpoint.displayId ?? viewpoint.viewpointId} from Navisworks into BIMLog:`)?.trim();
+    if (!reason || !window.confirm(`Create one new BIMLog record and visual package for ${viewpoint.displayId ?? viewpoint.viewpointId}? Existing BIMLog records will not be overwritten.`)) return;
+    setLocalUploadMessage(null); setLocalUploadState("capturing");
+    try {
+      const captured = await bridgeClient.captureLocalViewpoint(viewpoint, bridgeContext);
+      setLocalUploadState("uploading");
+      const receipt = await apiClient.uploadLocalViewpoint(viewpoint, bridgeContext.modelFingerprint, captured.visualState, reason);
+      setLocalUploadState("success"); setLocalUploadMessage(`Created BIMLog server record ${receipt.serverId} with a verified visual package.`);
+      setLocalInventory(await bridgeClient.loadLocalInventory());
+      await loadIssues("refresh");
+    } catch (error) { setLocalUploadState("error"); setLocalUploadMessage(error instanceof Error ? error.message : "Atomic local upload failed; no partial record was committed."); }
+  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues]);
+
   return (
     <LensNextPanelView
       authorizedProjects={authorizedProjects}
@@ -404,6 +428,10 @@ export function LensNextPanel({
       bridgeBindingSource={bridgeContext?.bindingSource ?? null}
       inventorySummary={inventorySummary}
       synchronizationPlan={synchronizationPlan}
+      uploadableLocalViewpoints={uploadableLocalViewpoints}
+      localUploadState={localUploadState}
+      localUploadMessage={localUploadMessage}
+      onUploadLocalViewpoint={(viewpoint) => void uploadLocalViewpoint(viewpoint)}
       filteredIssues={filteredIssues}
       issueGroups={issueGroups}
       viewPreset={viewPreset}

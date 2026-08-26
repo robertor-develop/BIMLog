@@ -12,6 +12,7 @@ import type {
   LensNextFilters,
   LensNextHistory,
   LensNextIssue,
+  LensNextLocalViewpoint,
   LensNextInventorySummary,
   LensNextSyncPlan,
   LensNextProjectOption,
@@ -212,6 +213,10 @@ export interface LensNextPanelViewProps {
   bridgeBindingSource: string | null;
   inventorySummary: LensNextInventorySummary;
   synchronizationPlan: LensNextSyncPlan;
+  uploadableLocalViewpoints: readonly LensNextLocalViewpoint[];
+  localUploadState: "idle" | "capturing" | "uploading" | "success" | "error";
+  localUploadMessage: string | null;
+  onUploadLocalViewpoint(viewpoint: LensNextLocalViewpoint): void;
   filteredIssues: readonly LensNextIssue[];
   issueGroups: readonly LensNextIssueGroupNode[];
   viewPreset: LensNextViewPresetId;
@@ -254,6 +259,10 @@ export function LensNextPanelView({
   bridgeBindingSource,
   inventorySummary,
   synchronizationPlan,
+  uploadableLocalViewpoints,
+  localUploadState,
+  localUploadMessage,
+  onUploadLocalViewpoint,
   filteredIssues,
   issueGroups,
   viewPreset,
@@ -378,6 +387,20 @@ export function LensNextPanelView({
               ))}
             </ol>
           </details>
+          {uploadableLocalViewpoints.length > 0 && (
+            <section className="lens-next__local-uploads" aria-label="Confirmed local viewpoint uploads">
+              <strong>Navisworks-only BIMLog viewpoints</strong>
+              {uploadableLocalViewpoints.map(viewpoint => (
+                <div key={viewpoint.navisworksGuid}>
+                  <span>{viewpoint.displayId ?? viewpoint.viewpointId}</span>
+                  <button type="button" disabled={localUploadState === "capturing" || localUploadState === "uploading"} onClick={() => onUploadLocalViewpoint(viewpoint)}>
+                    {localUploadState === "capturing" ? "Capturing…" : localUploadState === "uploading" ? "Uploading…" : "Review upload"}
+                  </button>
+                </div>
+              ))}
+              {localUploadMessage && <small role="status">{localUploadMessage}</small>}
+            </section>
+          )}
           {bridgeModelFingerprint && <small>Model {bridgeModelFingerprint.slice(0, 12)}…</small>}
         </section>
       )}
