@@ -240,3 +240,5 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
   side offers suggestions).
 - v1.6.3 confirmed live in Navisworks 2021 by Roberto (recursion + 8-folder mirror + two-way
   status filing all verified) and packaged for Ruben (2025 zip).
+- Build 6 adds a separate create workflow. It captures the active view under a newly generated client identity, commits the BIMLog record and digest-verified visual package atomically, and only then creates one local Saved Viewpoint carrying the returned server identity, revision, model fingerprint, visual digest, operation ID, and audit reason.
+- The local Saved Viewpoint GUID is returned to BIMLog through a dedicated exact-identity confirmation. Creation never routes through Original Lens bulk sync, never creates from an unconfirmed draft, never modifies model geometry, and never saves the NWF/NWD automatically.

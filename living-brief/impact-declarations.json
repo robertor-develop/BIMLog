@@ -14613,6 +14613,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "10a5e96ac9a0fd873f24ff9cf8c04033ada29eac1bfb9a088eabdb5bf05c626d"
+    },
+    {
+      "taskId": "bimlog-lens-next-controlled-rebuild-build6-viewpoint-creation-20260825",
+      "reviewedThroughCommit": "ed41d8cde8edafb20d571980a9260f72edf53b8b",
+      "reviewedAt": "2026-08-25T22:01:14-04:00",
+      "status": "lens_next_controlled_rebuild_build6_validated_local",
+      "captureTiming": "same_task_after_platform_first_viewpoint_creation_implementation_and_local_validation",
+      "summary": "Adds explicitly confirmed platform-first Lens Next viewpoint creation with atomic BIMLog issue and visual-package authority followed by one governed local Saved Viewpoint stamp and exact GUID confirmation.",
+      "workstreams": [
+        "lens-next-viewpoint-creation",
+        "lens-next-visual-integrity",
+        "lens-next-controlled-rebuild"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog receives and verifies the authoritative record and visual package before local Saved Viewpoint creation."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, push, publication, installation, deployment, or production operation occurred."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Explicit review, atomicity, digest verification, exact identity confirmation, and no-overwrite behavior implement existing fail-closed quality authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The full Original Lens-style creation function is restored inside the governed Lens Next platform-first architecture."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Documents dedicated atomic create and exact local-GUID confirmation contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents capture-before-commit and controlled local Saved Viewpoint creation after platform receipt."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 6 behavior, approval boundary, passing local gates, and absence of release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records preservation rules and the Build 7 My View folder-materialization entry gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No installation, push, publication, deployment, production migration, or live acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cf5e39476b6fd784e6bde37cb1ae96e7dbabd0c54c94e5102f5f44700dc21751"
     }
   ]
 }
