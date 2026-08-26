@@ -1970,3 +1970,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 
 - Preserve platform-package-only reconstruction and the prohibition on click-time local search/capture/backfill. Exact-clean Build 4 workspace closure is complete locally.
 - Build 5 may implement separately confirmed upload of exact Original Lens-managed local-only viewpoints into BIMLog. It must not upload unresolved identities, overwrite an existing platform record, or combine upload with Working View open.
+
+## Lens Next controlled rebuild — Build 5 remaining gate
+
+- Preserve the dedicated single-item confirmation, exact local managed GUID resolution, atomic record-plus-package transaction, digest rebind, and no-overwrite conflict refusal. Do not route Lens Next through the legacy bulk `lens-sync` endpoint.
+- Build 6 may add creation of a new BIMLog viewpoint from the active Navisworks working state through the full Lens Next issue form. Creation must originate in Lens Next, produce the platform record and visual package atomically, and create or stamp the governed local Saved Viewpoint only after the platform receipt is proven.
+- Build 5 is local source only. No production upload, package, install, push, Replit synchronization, publication, deployment, production migration, or connected-model acceptance occurred.

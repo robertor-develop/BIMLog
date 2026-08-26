@@ -136,6 +136,11 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - The read-only native inventory returns only managed Saved Viewpoints and preserves their merged BIMLog identity, physical identity, Navisworks GUID, display name, and folder path. Unmanaged Saved Viewpoints are excluded and never mutated.
 - BIMLog remains platform-first. The web workspace compares the authoritative platform rows with the local managed inventory and reports matched, platform-only, Navisworks-only, conflicted, and unresolved counts. Build 1 performs no reconciliation writes; clean-model platform binding and governed mutations belong to later builds.
 
+## Lens Next controlled rebuild — Build 5 local-only upload
+
+- An exact Original Lens-managed local-only viewpoint may be uploaded only from the synchronization plan and only after a separate reason plus explicit confirmation. The native bridge opens the exact GUID after rechecking current project/model context and managed local-only identity, then captures the visual contract without changing Saved Viewpoint structure.
+- The platform uses a dedicated single-item API, not legacy bulk sync. It refuses any existing GUID/viewpoint/display identity and commits the new BIMLog record, rebound verified visual package, and sequence together. Working View open never invokes this path.
+
 ## Open items / known limitations
 - **Protected v1.60.7 physical-mutation baseline.** Later identity, lineage, import/rebind,
   `Guid.Empty`, ambiguity, and preserve-first protections must surround rather than replace the physical

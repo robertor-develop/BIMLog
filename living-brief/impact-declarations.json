@@ -14460,6 +14460,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9ed14e103abd79e495d3746a70cc50a675edf167bcd502d1d744de3a39a9302d"
+    },
+    {
+      "taskId": "bimlog-lens-next-controlled-rebuild-build5-local-upload-20260825",
+      "reviewedThroughCommit": "1d18daa2c83e66442341c071a7c42cf05ba5dc1e",
+      "reviewedAt": "2026-08-25T21:05:00-04:00",
+      "status": "lens_next_controlled_rebuild_build5_validated_local",
+      "captureTiming": "same_task_after_exact_local_upload_implementation_and_local_validation",
+      "summary": "Adds separately confirmed exact local-only managed viewpoint capture and atomic BIMLog record plus visual-package creation without overwrite or Working View coupling.",
+      "workstreams": [
+        "lens-next-local-upload",
+        "lens-next-visual-integrity",
+        "lens-next-controlled-rebuild"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog becomes permanent authority only after the atomic upload receipt; local state cannot overwrite platform state."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No credential, provider, production, push, publication, installation, or deployment authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact managed identity, explicit confirmation, digest verification, atomicity, and conflict refusal implement existing fail-closed quality authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 5 advances the accepted platform-first Lens Next synchronization workflow."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Documents the dedicated atomic single-item local upload API and no-overwrite contract."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents exact local GUID capture, separate confirmation, and Working View separation."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or export presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No registered external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 5 behavior, passing local gates, and absence of external release actions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Build 5 preservation rules and the Build 6 viewpoint-creation entry gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production upload, installation, push, publication, deployment, migration, or live acceptance occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3593741d39112f5f9d696a9f20542d14a13bb21426938690a85526b07d21d482"
     }
   ]
 }
