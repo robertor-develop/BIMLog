@@ -536,6 +536,11 @@ It changes only when the code structure or curated architectural facts change.
   external handoffs, but it must refuse marketing execution, portfolio finance/allocation
   authority, legal approval authority, and Knowledge Intake routing authority. The Build 10
   acceptance gate fails on semantic cross-platform authority drift.
+- Lens Next local upload and create preserve the `lens-next-visual-digest.v1` SHA-256 value
+  stream while labeling canonical tokens for mismatch diagnosis. A mismatch remains fail-closed
+  HTTP 409 with no issue/package mutation; server diagnostics record both digests and the first
+  differing field. The existing XML export reads Navisworks Saved Viewpoints and does not silently
+  substitute BIMLog web viewpoint records.
 - Living Brief: all documents in living-brief/catalog.json are served in authority order through
   /api/v1/living-brief/* from the verified deployed source bundle. living_brief_documents is an
   exact, metadata-bearing database mirror; it never overrides source doctrine. Controlled admin

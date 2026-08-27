@@ -256,3 +256,10 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 
 - For a selected BIMLog record with a complete visual package, **Open Working View** loads and reconstructs only that package. For a historical Original Lens record without a package, the same action uses the native exact-identity resolver to activate the matching managed Saved Viewpoint, captures its full supported visual state, persists it on the same BIMLog server record, reloads the accepted package, and reconstructs the temporary Working View.
 - Exact recovery does not use similarity, title fragments, trade, floor, or broad model search; missing or ambiguous identity performs no persistence. The workflow creates no duplicate platform issue, does not silently overwrite another record, does not mutate Original Lens structure, and does not save the Navisworks model automatically.
+
+## Lens Next v1.0.44 visual-digest diagnostics
+
+- Native capture now emits the SHA-256 algorithm, `lens-next-visual-digest.v1` contract, computed digest, truncation flag, canonical byte length, and exact canonical input as Base64. Diagnostics are excluded from the digest itself, so the visual-state contract remains stable and non-recursive.
+- BIMLog recomputes the same labeled canonical token stream. A mismatch remains fail-closed HTTP 409, but now records both digests and identifies the first differing field and values instead of returning only a generic rejection. The embedded workspace exposes a bounded digest/field summary to the operator.
+- The H-only Navisworks 2025 v1.0.44 package builds with zero warnings/errors; core tests pass 33/33 and native tests pass 28/28. The ZIP SHA-256 is `1EEBFCB2AC33FCF3B91D84B2E13B0BABEA56A03683961BB3A14DB55473C11B24`. Installation and connected field acceptance remain separate.
+- XML export remains the Navisworks Saved Viewpoints export. It does not claim to export BIMLog web viewpoint records; any platform-record XML export is a separate future capability.

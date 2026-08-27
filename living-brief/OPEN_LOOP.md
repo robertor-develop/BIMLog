@@ -2020,3 +2020,10 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Commit the accepted Living Brief reconciliation successor, atomically advance GitHub `main` and `master`, synchronize a clean Replit release branch, and require the complete Replit workspace build to pass before publication.
 - Publish once, then verify the live header reports `v1.60.35.13-F`, the selected historical record follows exact local activation → capture → same-record persistence → BIMLog reconstruction, and a missing/ambiguous local identity performs no save or duplicate creation.
 - Verify separately on Ruben's Navisworks Manage 2025 machine that the bridge badge remains connected during a recoverable business failure and that successful migration survives refresh and a second Open Working View operation from the stored BIMLog package.
+
+## Lens Next v1.0.44 / BIMLog v1.60.35.16-F — Remaining field and release gates
+
+- Install the complete v1.0.44 package with Navisworks closed and verify both installed Lens Next DLLs report file version `1.0.44.0` before reproducing. A report showing `1.0.42.0` is stale deployment evidence and cannot accept or reject this correction.
+- Push and publish BIMLog v1.60.35.16-F only through the separate authorized release gate. Then repeat one create/upload failure path and retain the native `Visual digest diagnostics` line plus the server `LensNextDigestMismatch` record. If the digests differ, the first field/value pair is the actionable defect; if they match, investigate the next exact failure without changing digest semantics.
+- Confirm successful create, refresh, second open, and model save/reopen in Navisworks Manage 2025. Verify no duplicate issue, Saved Viewpoint, or model save is produced by retry.
+- Decide separately whether BIMLog web viewpoint records need a new governed XML export. Do not relabel the existing Navisworks Saved Viewpoints XML export or infer that it contains platform-only viewpoints.

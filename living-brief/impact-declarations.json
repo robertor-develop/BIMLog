@@ -15291,6 +15291,84 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ae3c8e27fb364ef02be0f27bab58489fe7195019926bd925788543d998541e56"
+    },
+    {
+      "taskId": "bimlog-v1.60.35.16-f-lens-next-digest-diagnostics-20260827",
+      "reviewedThroughCommit": "0dc6643af20f698b37bd72b540bcf472e5276f7f",
+      "reviewedAt": "2026-08-27T10:48:03.7265446-04:00",
+      "status": "release_reconciliation_candidate",
+      "captureTiming": "same_task_after_implementation_validation",
+      "summary": "Reconciles exact cross-language Lens Next digest diagnostics, the v1.0.44 H-root package, stale v1.0.42 field evidence, and the Saved Viewpoints XML boundary.",
+      "workstreams": [
+        "lens-next-visual-digest-diagnostics",
+        "bimlog-v1.60.35.16-f-release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction stays within BIMLog construction viewpoint authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed build, installation, and publication gates are preserved."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed and cross-language regression standards apply without changing quality doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new product authority or unrelated direction is introduced."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records labeled canonical comparison and fail-closed mismatch transport."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records v1.0.44 native diagnostics, package identity, and the Navisworks XML boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact implementation, package, validation, and stale installed-version evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining install, release, field acceptance, and separate XML product decision gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No push, publication, deployment, installation, model save, or production mutation occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a3c7497187e14eb3860c1d70ef10f5e165b4b7d03e3f88bd8262c215e41848ea"
     }
   ]
 }
