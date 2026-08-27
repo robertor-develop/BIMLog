@@ -691,7 +691,7 @@ router.post("/projects/:projectId/clash-reports/lens-next/local-viewpoints/uploa
       });
       res.status(201).json({ success: true, contractVersion: "lens-next-local-upload.v1", created: true, result });
     } catch (error) {
-      if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
+      if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message, digestDiagnostics: error.digestDiagnostics }); return; }
       if ((error as { code?: string })?.code === "23505") { res.status(409).json({ error: "platform_identity_conflict", message: "A concurrent BIMLog record now owns this viewpoint identity; nothing was overwritten." }); return; }
       res.status(500).json({ error: "lens_next_local_upload_failed", message: "The atomic local viewpoint upload failed; no partial record was committed." });
     }
@@ -737,7 +737,7 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
       });
       res.status(201).json({ success: true, contractVersion: "lens-next-create.v1", created: true, result });
     } catch (error) {
-      if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message }); return; }
+      if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message, digestDiagnostics: error.digestDiagnostics }); return; }
       if ((error as { code?: string })?.code === "23505") { res.status(409).json({ error: "platform_identity_conflict", message: "A concurrent BIMLog record now owns this viewpoint identity; nothing was overwritten." }); return; }
       res.status(500).json({ error: "lens_next_create_failed", message: "The atomic viewpoint creation failed; no partial record was committed." });
     }

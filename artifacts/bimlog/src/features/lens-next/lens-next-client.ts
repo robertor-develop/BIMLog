@@ -54,8 +54,14 @@ async function jsonBody(response: Response, label: string): Promise<unknown> {
       body && typeof body === "object" && "message" in body
         ? String((body as { message: unknown }).message)
         : "";
+    const diagnostics = body && typeof body === "object" && "digestDiagnostics" in body
+      ? (body as { digestDiagnostics?: { localDigest?: unknown; serverDigest?: unknown; firstMismatch?: { field?: unknown } | null } }).digestDiagnostics
+      : null;
+    const digestDetail = diagnostics
+      ? ` [local=${String(diagnostics.localDigest ?? "missing").slice(0, 12)} server=${String(diagnostics.serverDigest ?? "missing").slice(0, 12)} first=${String(diagnostics.firstMismatch?.field ?? "undetermined")}]`
+      : "";
     throw new Error(
-      `${label} failed (${response.status})${detail ? `: ${detail}` : ""}`,
+      `${label} failed (${response.status})${detail ? `: ${detail}` : ""}${digestDetail}`,
     );
   }
   return body;
