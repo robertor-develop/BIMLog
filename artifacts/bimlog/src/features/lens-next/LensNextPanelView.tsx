@@ -258,6 +258,9 @@ export interface LensNextPanelViewProps {
   lastRefreshedAt: string | null;
   bridgeOpenEnabled: boolean;
   workingViewUnavailable: boolean;
+  visualRepairState: "idle" | "repairing" | "success" | "error";
+  visualRepairMessage: string | null;
+  onRepairCurrentWorkingView(): void;
   onRefresh(): void;
   onSelectIssue(serverId: number): void;
   onCloseIssue(): void;
@@ -322,6 +325,9 @@ export function LensNextPanelView({
   lastRefreshedAt,
   bridgeOpenEnabled,
   workingViewUnavailable,
+  visualRepairState,
+  visualRepairMessage,
+  onRepairCurrentWorkingView,
   onRefresh,
   onSelectIssue,
   onCloseIssue,
@@ -707,9 +713,15 @@ export function LensNextPanelView({
             </button>
           </div>
           {workingViewUnavailable && (
-            <p className="lens-next__inline-notice">
-              This BIMLog record has no complete visual package yet. Build 4 will not search or capture a local Saved Viewpoint. Upload is handled separately by the governed synchronization workflow.
-            </p>
+            <section className="lens-next__visual-repair" aria-label="Repair missing platform visual package">
+              <p className="lens-next__inline-notice">
+                This platform record has no complete visual package or exact Navisworks identity. Open its original Saved Viewpoint manually, then attach the current view to this exact BIMLog record once.
+              </p>
+              <button type="button" disabled={visualRepairState === "repairing"} onClick={onRepairCurrentWorkingView}>
+                {visualRepairState === "repairing" ? "Repairing platform package…" : "Repair from current Navisworks view"}
+              </button>
+              {visualRepairMessage && <p role="status" className={visualRepairState === "error" ? "lens-next__inline-error" : "lens-next__publish-success"}>{visualRepairMessage}</p>}
+            </section>
           )}
           <section className="lens-next__publisher" aria-label="Controlled issue publishing">
             <h4>Publish an issue update</h4>

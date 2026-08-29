@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { reconcileLensNextInventories } from "./lens-next-model.ts";
+import { lensNextCollectionFingerprint, reconcileLensNextInventories, reconcileLensNextRefresh } from "./lens-next-model.ts";
 import type { LensNextIssue, LensNextLocalInventory } from "./lens-next-types.ts";
 
 const issue = (serverId: number, displayId: string, physical: string): LensNextIssue => ({
@@ -22,4 +22,15 @@ assert.deepEqual(reconcileLensNextInventories([issue(1, "A", "p-a"), issue(3, "C
 assert.deepEqual(reconcileLensNextInventories([], local), {
   matched: 0, platformOnly: 0, navisworksOnly: 2, conflicted: 0, unresolved: 1,
 });
+
+for (const count of [0, 5, 10, 20, 1000]) {
+  const platform = Array.from({ length: count }, (_, index) => issue(index + 1, `DYNAMIC-${index + 1}`, `physical-${index + 1}`));
+  const summary = reconcileLensNextInventories(platform, { ...local, viewpoints: [] });
+  assert.deepEqual(summary, { matched: 0, platformOnly: count, navisworksOnly: 0, conflicted: 0, unresolved: 0 });
+}
+
+const beforePackage = issue(99, "DYNAMIC-99", "physical-99");
+const afterPackage = { ...beforePackage, visualStateAvailable: true, visualStateDigest: "f".repeat(64) };
+assert.notEqual(lensNextCollectionFingerprint([beforePackage]), lensNextCollectionFingerprint([afterPackage]));
+assert.equal(reconcileLensNextRefresh([beforePackage], [afterPackage])[0].visualStateAvailable, true);
 console.log("PASS Lens Next Build 1 read-only dual inventory classification");

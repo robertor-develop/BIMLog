@@ -410,6 +410,9 @@ export function lensNextCollectionFingerprint(
         issue.identity.viewpointId,
         issue.identity.lifecycleStatus,
         issue.identity.revisionNumber,
+        issue.mutationVersion,
+        issue.navisworksGuid,
+        issue.bimlogPhysicalId,
         issue.status,
         issue.priority,
         issue.trade,
@@ -418,6 +421,8 @@ export function lensNextCollectionFingerprint(
         issue.openItems,
         issue.responsibleCompany,
         issue.screenshotUrl,
+        issue.visualStateAvailable,
+        issue.visualStateDigest,
       ]),
   );
 }

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { openBimlogWorkingView } from "./lens-next-working-view";
+import { openBimlogWorkingView, repairBimlogWorkingViewFromCurrent } from "./lens-next-working-view";
 import type { LensNextIssue, LensNextBridgeProjectContext } from "./lens-next-types";
 
 const digest = "a".repeat(64);
@@ -39,6 +39,14 @@ assert.deepEqual(calls.splice(0), ["open-exact-local", "capture", "save", "load"
 dependencies.bridgeClient.openWorkingView = async () => { calls.push("open-exact-local"); throw new Error("identity_not_found"); };
 await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), context), /identity_not_found/);
 assert.deepEqual(calls.splice(0), ["open-exact-local"]);
+
+const legacyWithoutGuid = { ...issue(false), navisworksGuid: null };
+await assert.rejects(() => openBimlogWorkingView(dependencies, legacyWithoutGuid, context), /no visual package or exact Navisworks identity/);
+assert.deepEqual(calls.splice(0), []);
+
+const repaired = await repairBimlogWorkingViewFromCurrent(dependencies, legacyWithoutGuid, context);
+assert.equal(repaired.visualStateDigest, digest);
+assert.deepEqual(calls.splice(0), ["capture", "save", "load", "apply-platform"]);
 
 await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), { ...context, projectId: 99 }), /not bound/);
 assert.deepEqual(calls, []);

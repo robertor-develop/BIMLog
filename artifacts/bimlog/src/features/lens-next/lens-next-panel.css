@@ -510,9 +510,11 @@
 
 .lens-next__active-model {
   display: flex;
+  flex-direction: column;
   justify-content: space-between;
   gap: 0.75rem;
-  align-items: center;
+  align-items: stretch;
+  min-width: 0;
   padding: 0.65rem 0.8rem;
   border: 1px solid #dbe4ee;
   background: #f8fafc;
@@ -520,7 +522,8 @@
 
 .lens-next__active-model small {
   color: #64748b;
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 /* M7 field repair: the Navisworks WebView owns its viewport and exposes two
@@ -724,8 +727,8 @@
   }
 
   .lens-next-workspace--embedded .lens-next__body {
-    grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
-    width: max(100%, 600px);
+    grid-template-columns: minmax(0, 1fr);
+    width: 100%;
   }
 }
 .lens-next__publisher {
@@ -744,5 +747,6 @@
 .lens-next__publish-confirm { padding: 0.75rem; border-left: 4px solid #1d4ed8; background: #eff6ff; }
 .lens-next__publish-confirm p { margin: 0 0 0.75rem; }
 .lens-next__publish-confirm button + button { margin-left: 0.5rem; }
-.lens-next__inventory-summary{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;margin-top:8px}.lens-next__inventory-summary span{display:flex;flex-direction:column;padding:7px;border:1px solid #d9e5df;border-radius:7px;background:#fff;font-size:10px;color:#52645b}.lens-next__inventory-summary strong{font-size:15px;color:#153b2a}@media(max-width:760px){.lens-next__inventory-summary{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.lens-next__inventory-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px;margin-top:8px;min-width:0}.lens-next__inventory-summary span{display:flex;min-width:0;flex-direction:column;padding:7px;border:1px solid #d9e5df;border-radius:7px;background:#fff;font-size:10px;line-height:1.25;color:#52645b;overflow-wrap:anywhere}.lens-next__inventory-summary strong{font-size:15px;color:#153b2a}
 .lens-next__sync-plan{margin-top:8px;border:1px solid #d9e5df;border-radius:7px;background:#fff}.lens-next__sync-plan summary{cursor:pointer;padding:8px;font-weight:700;color:#153b2a}.lens-next__sync-plan ol{margin:0;padding:0 10px 10px 32px}.lens-next__sync-plan li{padding:6px 0;border-top:1px solid #edf2ef;color:#263d32}.lens-next__sync-plan li small{display:block;margin-top:2px}
+.lens-next__visual-repair{display:grid;gap:8px;margin:10px 0;padding:10px;border:1px solid #f59e0b;border-radius:8px;background:#fffbeb}.lens-next__visual-repair p{margin:0}.lens-next__visual-repair button{justify-self:start}

@@ -38,7 +38,7 @@ import {
   type LensNextViewSettings,
 } from "./lens-next-view-settings";
 import "./lens-next-panel.css";
-import { openBimlogWorkingView } from "./lens-next-working-view";
+import { openBimlogWorkingView, repairBimlogWorkingViewFromCurrent } from "./lens-next-working-view";
 
 const LENS_NEXT_TRADE_OPTIONS = [
   "Fire Protection", "Plumbing", "HVAC", "Electrical", "Structural",
@@ -128,6 +128,8 @@ export function LensNextPanel({
   const [reconciliationMessage, setReconciliationMessage] = useState<string | null>(null);
   const [platformPullState, setPlatformPullState] = useState<"idle" | "running" | "success" | "error">("idle");
   const [platformPullMessage, setPlatformPullMessage] = useState<string | null>(null);
+  const [visualRepairState, setVisualRepairState] = useState<"idle" | "repairing" | "success" | "error">("idle");
+  const [visualRepairMessage, setVisualRepairMessage] = useState<string | null>(null);
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -402,6 +404,29 @@ export function LensNextPanel({
     }
   }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues, selectedIssue]);
 
+  const repairCurrentWorkingView = useCallback(async () => {
+    if (!apiClient || !bridgeClient || !bridgeContext || !selectedIssue || authorizedProjectId === null) return;
+    if (selectedIssue.identity.projectId !== authorizedProjectId || bridgeContext.projectId !== authorizedProjectId) {
+      setVisualRepairState("error");
+      setVisualRepairMessage("Project/model identity mismatch; visual repair refused.");
+      return;
+    }
+    const displayId = selectedIssue.displayId ?? selectedIssue.identity.viewpointId;
+    const reason = window.prompt(`Confirm that Navisworks is displaying the exact original view for ${displayId}. Enter the repair reason:`)?.trim();
+    if (!reason || !window.confirm(`Attach the CURRENT Navisworks camera, selection, hidden items, appearance overrides, model references, and clipping planes to platform record ${displayId}? This updates that exact BIMLog record and creates no duplicate.`)) return;
+    setVisualRepairState("repairing");
+    setVisualRepairMessage(null);
+    try {
+      const result = await repairBimlogWorkingViewFromCurrent({ apiClient, bridgeClient }, selectedIssue, bridgeContext);
+      await loadIssues("refresh");
+      setVisualRepairState("success");
+      setVisualRepairMessage(`Platform visual package repaired and round-trip verified (${result.visualStateDigest.slice(0, 12)}…). Open working view is now available.`);
+    } catch (error) {
+      setVisualRepairState("error");
+      setVisualRepairMessage(error instanceof Error ? error.message : "Platform visual repair failed.");
+    }
+  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues, selectedIssue]);
+
   const publishAction = useCallback(async (action: LensNextPublishAction, reason: string) => {
     if (!apiClient || !selectedIssue || !selectedIssue.publishingAllowed) return;
     const fingerprint = JSON.stringify({ serverId: selectedIssue.identity.serverId, mutationVersion: selectedIssue.mutationVersion, action, reason });
@@ -638,6 +663,9 @@ export function LensNextPanel({
       workingViewUnavailable={
         selectedIssue !== null && !selectedIssue.visualStateAvailable
       }
+      visualRepairState={visualRepairState}
+      visualRepairMessage={visualRepairMessage}
+      onRepairCurrentWorkingView={() => void repairCurrentWorkingView()}
       onRefresh={() => void loadIssues("refresh")}
       onSelectIssue={(serverId) => {
         setSelectedServerId(serverId);
@@ -647,12 +675,16 @@ export function LensNextPanel({
         publishAttempt.current = null;
         setPublishState("idle");
         setPublishMessage(null);
+        setVisualRepairState("idle");
+        setVisualRepairMessage(null);
       }}
       onCloseIssue={() => {
         setSelectedServerId(null);
         publishAttempt.current = null;
         setPublishState("idle");
         setPublishMessage(null);
+        setVisualRepairState("idle");
+        setVisualRepairMessage(null);
       }}
       onOpenWorkingView={() => void openWorkingView()}
       onLoadHistory={() => void loadHistory()}
