@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState, useSyncExternalStore } from "react";
+import { useCallback, useEffect, useMemo, useState, useSyncExternalStore } from "react";
 import { useListProjects } from "@workspace/api-client-react";
 import { useAuthStore } from "../../store/auth";
 import { LensNextPanel } from "./LensNextPanel";
@@ -63,6 +63,7 @@ export function LensNextWorkspace() {
   const [bridgeContext, setBridgeContext] =
     useState<LensNextBridgeProjectContext | null>(null);
   const [bridgeDiscoveryError, setBridgeDiscoveryError] = useState<string | null>(null);
+  const [bindingBusy, setBindingBusy] = useState(false);
   const bridgeSession = useSyncExternalStore(
     subscribeLensNextBridgeSession,
     getLensNextBridgeSessionSnapshot,
@@ -118,12 +119,11 @@ export function LensNextWorkspace() {
         let context = await client.loadProjectContext(controller.signal);
         if (context.projectId === null) {
           if (!token) throw new Error("An authenticated BIMLog session is required for model binding.");
-          const inventory = await client.loadLocalInventory(controller.signal);
-          const managedIds = [...new Set(inventory.viewpoints.map((view) => view.projectId))];
-          if (managedIds.length > 1) throw new Error("The active model contains multiple BIMLog project identities; binding was refused.");
           const api = createLensNextApiClient({ token });
-          const binding = await api.resolveModelBinding(context.modelBindingKey, context.displayName, managedIds[0] ?? null, controller.signal);
-          context = await client.bindProject(binding.projectId, controller.signal);
+          const binding = await api.resolveModelBinding(context.modelBindingKey, context.displayName, null, null, controller.signal);
+          if (binding.projectId !== null) {
+            context = await client.bindProject(binding.projectId, "platform-binding", controller.signal);
+          }
         }
         if (controller.signal.aborted) return;
         setBridgeContext(context);
@@ -140,6 +140,30 @@ export function LensNextWorkspace() {
     void load();
     return () => controller.abort();
   }, [bridgeOrigin, bridgeSession, token]);
+
+  const bindExplicitProject = useCallback(async () => {
+    if (!token || !bridgeSession || !bridgeContext || bridgeContext.projectId !== null || selectedProjectId === null) return;
+    setBindingBusy(true);
+    setBridgeDiscoveryError(null);
+    try {
+      const api = createLensNextApiClient({ token });
+      const binding = await api.resolveModelBinding(
+        bridgeContext.modelBindingKey,
+        bridgeContext.displayName,
+        null,
+        selectedProjectId,
+      );
+      if (binding.projectId !== selectedProjectId || binding.source !== "explicit_user_selection")
+        throw new Error("BIMLog did not confirm the explicit project selection.");
+      const client = createLensNextBridgeClient({ sessionToken: bridgeSession.token, bridgeOrigin });
+      const context = await client.bindProject(selectedProjectId, "explicit-user-selection");
+      setBridgeContext(context);
+    } catch (error) {
+      setBridgeDiscoveryError(error instanceof Error ? error.message : "Lens Next project binding failed.");
+    } finally {
+      setBindingBusy(false);
+    }
+  }, [bridgeContext, bridgeOrigin, bridgeSession, selectedProjectId, token]);
 
   const resolution = useMemo(
     () => resolveLensNextLaunchProject(
@@ -174,6 +198,30 @@ export function LensNextWorkspace() {
         <strong>Connecting to Navisworks…</strong>
         <span>{resolution.message}</span>
         {bridgeDiscoveryError && <small>{bridgeDiscoveryError}</small>}
+      </main>
+    );
+  }
+  if (resolution.status === "unbound_project") {
+    return (
+      <main className={routeStateClassName} aria-live="polite">
+        <strong>This Navisworks model is not bound to a BIMLog project.</strong>
+        <span>{resolution.message}</span>
+        <label htmlFor="lens-next-explicit-project">Authorized BIMLog project</label>
+        <select
+          id="lens-next-explicit-project"
+          value={selectedProjectId ?? ""}
+          disabled={bindingBusy}
+          onChange={(event) => setSelectedProjectId(event.target.value ? Number(event.target.value) : null)}
+        >
+          <option value="">Select a project…</option>
+          {projects.map((project) => (
+            <option key={project.id} value={project.id}>{project.code ? `${project.code} · ` : ""}{project.name}</option>
+          ))}
+        </select>
+        <button type="button" disabled={selectedProjectId === null || bindingBusy} onClick={() => void bindExplicitProject()}>
+          {bindingBusy ? "Binding…" : "Bind this model"}
+        </button>
+        {bridgeDiscoveryError && <small role="alert">{bridgeDiscoveryError}</small>}
       </main>
     );
   }

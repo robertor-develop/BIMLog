@@ -219,7 +219,7 @@ export interface LensNextPanelViewProps {
   localUploadMessage: string | null;
   onUploadLocalViewpoint(viewpoint: LensNextLocalViewpoint): void;
   createEnabled: boolean;
-  createState: "idle" | "capturing" | "creating" | "publishing" | "success" | "error";
+  createState: "idle" | "capturing" | "creating" | "success" | "error";
   createMessage: string | null;
   onCreateViewpoint(draft: LensNextCreateDraft, reason: string): void;
   layoutEnabled: boolean;
@@ -406,7 +406,7 @@ export function LensNextPanelView({
       {(bridgeDisplayName || bridgeModelFingerprint) && (
         <section className="lens-next__active-model" aria-label="Active Navisworks model">
           <strong>{bridgeDisplayName ?? "Active Navisworks model"}</strong>
-          <small>Automatic binding: {bridgeBindingSource === "navisworks_bimlog_metadata" ? "verified BIMLog viewpoint metadata" : "unavailable"}</small>
+          <small>Binding authority: {bridgeBindingSource === "managed-marker" ? "verified BIMLog managed marker" : bridgeBindingSource === "platform-binding" ? "authorized platform binding" : bridgeBindingSource === "explicit-user-selection" ? "explicit authorized selection" : "unbound"}</small>
           <div className="lens-next__inventory-summary" aria-label="Read-only reconciliation preview">
             <span><strong>{inventorySummary.matched}</strong> matched</span>
             <span><strong>{inventorySummary.platformOnly}</strong> platform only</span>
@@ -477,7 +477,7 @@ export function LensNextPanelView({
         {!createReviewReady ? (
           <button className="lens-next__create-button" type="button" disabled={!createEnabled || !createDraft.trade.trim() || !createDraft.floor.trim() || !createDraft.note.trim() || !createDraft.reportType.trim()} onClick={() => setCreateReviewReady(true)}>Review viewpoint creation</button>
         ) : (
-          <div className="lens-next__create-review"><p>Create one BIMLog issue and visual package first, then create one local Navisworks Saved Viewpoint. The model file will not be saved automatically.</p><button className="lens-next__create-button" type="button" disabled={createState !== "idle" && createState !== "success" && createState !== "error"} onClick={() => { onCreateViewpoint(createDraft, createReason.trim()); setCreateReviewReady(false); }}>Confirm and create viewpoint</button></div>
+          <div className="lens-next__create-review"><p>Create one BIMLog issue with its visual package. No Navisworks Saved Viewpoint is created and the model file is not modified.</p><button className="lens-next__create-button" type="button" disabled={createState !== "idle" && createState !== "success" && createState !== "error"} onClick={() => { onCreateViewpoint(createDraft, createReason.trim()); setCreateReviewReady(false); }}>Confirm and create BIMLog issue</button></div>
         )}
         {createMessage && <p role="status">{createMessage}</p>}
       </details>

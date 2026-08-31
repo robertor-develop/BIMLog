@@ -102,8 +102,8 @@ assert.equal(reopened.viewpoints[0].navisworksGuid, guid(81));
 
 const panel = readFileSync(new URL("./LensNextPanel.tsx", import.meta.url), "utf8");
 const route = readFileSync(new URL("../../../../api-server/src/routes/clash_reports.ts", import.meta.url), "utf8");
-const native2021 = readFileSync("H:\\BIMLogPlugin2021\\LensNext-v1.0.35\\native\\AutodeskPublishedViewpointAdapter.cs", "utf8");
-const native2025 = readFileSync("H:\\BIMLogPlugin2025\\LensNext-v1.0.35\\native\\AutodeskPublishedViewpointAdapter.cs", "utf8");
+const native2021 = readFileSync(new URL("../../../../../plugins/BIMLogLensNext/native/AutodeskPublishedViewpointAdapter.cs", import.meta.url), "utf8");
+const native2025 = readFileSync(new URL("../../../../../plugins/BIMLogLensNext/native/AutodeskPublishedViewpointAdapter.cs", import.meta.url), "utf8");
 
 // Complete governed order and bounded recovery behavior.
 assert.ok(panel.indexOf("for (const item of confirmations)") < panel.indexOf("for (const item of pulls)"));

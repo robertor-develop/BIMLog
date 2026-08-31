@@ -140,7 +140,7 @@ export interface LensNextBridgeProjectContext {
   modelFingerprint: string;
   modelBindingKey: string;
   displayName: string | null;
-  bindingSource: "unbound" | "navisworks_bimlog_metadata" | "bimlog_model_registry";
+  bindingSource: "unbound" | "managed-marker" | "platform-binding" | "explicit-user-selection";
   managedViewpointCount: number;
 }
 
@@ -191,15 +191,15 @@ export interface LensNextCreateDraft {
 
 export interface LensNextCreateReceipt {
   serverId: number; viewpointId: string; visualStateDigest: string;
-  revisionNumber: number; lifecycleStatus: LensNextLifecycleState; displayCode: string;
+  revisionNumber: number; lifecycleStatus: LensNextLifecycleState; displayId: string; displayCode: string;
 }
 export interface LensNextLayoutItem { navisworksGuid: string; folderPath: string; }
 export interface LensNextLayoutReceipt { requested: number; moved: number; alreadyPlaced: number; }
 
 export interface LensNextModelBindingResolution {
-  projectId: number;
+  projectId: number | null;
   modelBindingKey: string;
-  source: "existing_registry" | "managed_metadata" | "unique_platform_identity";
+  source: "existing_registry" | "managed_metadata" | "explicit_user_selection" | "explicit_user_selection_required";
 }
 
 export interface LensNextInventorySummary {

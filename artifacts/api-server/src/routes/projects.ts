@@ -8,7 +8,7 @@ import { getRolesByPermission, getDefaultValue } from "../middlewares/config-val
 import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { waitForFeaturePolicyMigration } from "../lib/feature-policy-migration";
-import { normalizeLensNextModelKey, uniquePlatformProjectMatch } from "../lib/lens-next-model-binding";
+import { normalizeLensNextModelKey, selectSingleAuthorizedLensNextBinding } from "../lib/lens-next-model-binding";
 
 const router: IRouter = Router();
 
@@ -106,33 +106,32 @@ router.post("/lens-next/model-bindings/resolve", authMiddleware, async (req, res
   try {
     const userId = req.user!.userId;
     const modelBindingKey = normalizeLensNextModelKey(req.body?.modelBindingKey);
-    const modelDisplayName = String(req.body?.modelDisplayName ?? "").trim().slice(0, 500) || modelBindingKey;
     const managedProjectId = req.body?.managedProjectId == null ? null : Number(req.body.managedProjectId);
+    const explicitProjectId = req.body?.explicitProjectId == null ? null : Number(req.body.explicitProjectId);
     if (managedProjectId !== null && (!Number.isSafeInteger(managedProjectId) || managedProjectId <= 0)) {
       res.status(400).json({ error: "invalid_managed_project_id" }); return;
+    }
+    if (explicitProjectId !== null && (!Number.isSafeInteger(explicitProjectId) || explicitProjectId <= 0)) {
+      res.status(400).json({ error: "invalid_explicit_project_id" }); return;
     }
     const memberships = await db.select({ projectId: projectMembersTable.projectId }).from(projectMembersTable).where(eq(projectMembersTable.userId, userId));
     const authorizedIds = memberships.map((row) => row.projectId);
     if (authorizedIds.length === 0) { res.status(403).json({ error: "no_authorized_projects" }); return; }
-    const authorizedProjects = await db.select({ id: projectsTable.id, name: projectsTable.name, code: projectsTable.code, location: projectsTable.location })
-      .from(projectsTable).where(inArray(projectsTable.id, authorizedIds));
-    const [existing] = await db.select().from(lensNextModelBindingsTable).where(and(eq(lensNextModelBindingsTable.modelBindingKey, modelBindingKey), eq(lensNextModelBindingsTable.status, "active"))).limit(1);
-    if (existing) {
-      if (!authorizedIds.includes(existing.projectId)) { res.status(403).json({ error: "model_binding_not_authorized" }); return; }
-      if (managedProjectId !== null && managedProjectId !== existing.projectId) { res.status(409).json({ error: "model_binding_conflict" }); return; }
-      res.json({ projectId: existing.projectId, modelBindingKey, source: "existing_registry" }); return;
+    if (managedProjectId !== null) {
+      if (!authorizedIds.includes(managedProjectId)) { res.status(403).json({ error: "managed_project_not_authorized" }); return; }
+      res.json({ projectId: managedProjectId, modelBindingKey, source: "managed_metadata" }); return;
     }
-    const managed = managedProjectId === null ? null : authorizedProjects.find((project) => project.id === managedProjectId) ?? null;
-    if (managedProjectId !== null && !managed) { res.status(403).json({ error: "managed_project_not_authorized" }); return; }
-    const inferred = managed ?? uniquePlatformProjectMatch(modelBindingKey, authorizedProjects);
-    if (!inferred) { res.status(409).json({ error: "model_binding_not_found", message: "BIMLog has no unique authoritative project binding for this model." }); return; }
-    const source = managed ? "managed_metadata" : "unique_platform_identity";
-    await db.insert(lensNextModelBindingsTable).values({
-      projectId: inferred.id, modelBindingKey, modelDisplayName, evidenceSource: source, status: "active", boundById: userId,
-    }).onConflictDoNothing({ target: lensNextModelBindingsTable.modelBindingKey });
-    const [bound] = await db.select().from(lensNextModelBindingsTable).where(and(eq(lensNextModelBindingsTable.modelBindingKey, modelBindingKey), eq(lensNextModelBindingsTable.status, "active"))).limit(1);
-    if (!bound || bound.projectId !== inferred.id) { res.status(409).json({ error: "model_binding_conflict" }); return; }
-    res.json({ projectId: bound.projectId, modelBindingKey, source });
+    if (explicitProjectId !== null) {
+      if (!authorizedIds.includes(explicitProjectId)) { res.status(403).json({ error: "explicit_project_not_authorized" }); return; }
+      res.json({ projectId: explicitProjectId, modelBindingKey, source: "explicit_user_selection" }); return;
+    }
+    const existing = await db.select().from(lensNextModelBindingsTable)
+      .where(and(eq(lensNextModelBindingsTable.modelBindingKey, modelBindingKey), eq(lensNextModelBindingsTable.status, "active")));
+    const existingProjectId = selectSingleAuthorizedLensNextBinding(existing.map((row) => row.projectId), authorizedIds);
+    if (existingProjectId !== null) {
+      res.json({ projectId: existingProjectId, modelBindingKey, source: "existing_registry" }); return;
+    }
+    res.json({ projectId: null, modelBindingKey, source: "explicit_user_selection_required" });
   } catch (error) {
     if (error instanceof Error && error.message === "invalid_model_binding_key") { res.status(400).json({ error: error.message }); return; }
     res.status(500).json({ error: "model_binding_resolution_failed" });

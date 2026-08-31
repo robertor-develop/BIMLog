@@ -1,14 +1,18 @@
 import assert from "node:assert/strict";
-import { normalizeLensNextModelKey, uniquePlatformProjectMatch } from "./lens-next-model-binding";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+import { normalizeLensNextModelKey, selectSingleAuthorizedLensNextBinding } from "./lens-next-model-binding";
 
-const projects = [
-  { id: 26, name: "ELARA EAST", code: "ELA01", location: "1185 River Avenue" },
-  { id: 35, name: "521 East Tremont", code: "521ET" },
-];
 assert.equal(normalizeLensNextModelKey("1185-river-av-model-06-11-26"), "1185-river-av-model-06-11-26");
-assert.equal(uniquePlatformProjectMatch("1185-river-av-model-06-11-26", projects)?.id, 26);
-assert.equal(uniquePlatformProjectMatch("521-east-tremont-federated", projects)?.id, 35);
-assert.equal(uniquePlatformProjectMatch("unrelated-model", projects), null);
-assert.equal(uniquePlatformProjectMatch("shared", [{ id: 1, name: "Shared", code: null }, { id: 2, name: "Shared", code: null }]), null);
 assert.throws(() => normalizeLensNextModelKey("../bad"));
-console.log("PASS Lens Next Build 2 authoritative model-binding resolution");
+assert.equal(selectSingleAuthorizedLensNextBinding([26], [23, 26, 27, 35]), 26);
+assert.equal(selectSingleAuthorizedLensNextBinding([30], [23, 26, 27, 35]), null);
+assert.equal(selectSingleAuthorizedLensNextBinding([26, 35], [23, 26, 27, 35]), null);
+assert.equal(selectSingleAuthorizedLensNextBinding([26, 26], [26]), 26);
+const routeSource = readFileSync(fileURLToPath(new URL("../routes/projects.ts", import.meta.url)), "utf8");
+assert.doesNotMatch(routeSource, /uniquePlatformProjectMatch|unique_platform_identity/);
+assert.match(routeSource, /explicitProjectId/);
+assert.match(routeSource, /explicit_project_not_authorized/);
+assert.match(routeSource, /projectId: null, modelBindingKey, source: "explicit_user_selection_required"/);
+assert.match(routeSource, /selectSingleAuthorizedLensNextBinding/);
+console.log("PASS Lens Next authoritative model-binding resolution requires exact authority and keeps same-model projects distinct");

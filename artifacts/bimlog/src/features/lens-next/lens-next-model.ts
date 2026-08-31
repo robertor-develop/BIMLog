@@ -315,8 +315,8 @@ function adaptLensIssue(
     syncedAt: nullableTimestamp(row.syncedAt),
     supersedesId: nullablePositiveInteger(row.supersedesId, "supersedesId"),
     supersedesCode: nullableString(row.supersedesCode),
-    // The current lens-pull endpoint omits this field. Null is an intentional,
-    // honest state rather than a fabricated or derived image.
+    // Null is an intentional, honest state when no verified capture exists;
+    // never fabricate or derive an image from unrelated model metadata.
     screenshotUrl: safeThumbnailUrl(row.screenshotUrl),
     visualStateAvailable: row.visualStateAvailable === true,
     visualStateDigest: nullableString(row.visualStateDigest),
