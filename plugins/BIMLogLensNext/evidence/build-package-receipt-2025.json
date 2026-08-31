@@ -1,22 +1,22 @@
 {
-  "schemaVersion": "bimlog-lens-next-build-receipt-v1",
-  "status": "BUILD_PACKAGE_PASS_NO_INSTALL",
-  "productYear": 2025,
-  "release": "v1.0.49",
-  "sourceRoot": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext",
-  "packageRoot": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\package-v1.0.49-2025",
-  "zipPath": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\BIMLog-Lens-Next-Navisworks2025-v1.0.49.zip",
-  "zipBytes": 561618,
-  "zipSha256": "3810F8BFD9FD139DC37569FC98BAF4F7B11590843AE1641151D1C259785A6536",
-  "coreDllSha256": "27CF4D36D89CFA46E208B35078F9EE7C488532A11A2140B527955C9EE7179D70",
-  "nativeDllSha256": "98F86211FBFCC41B0936608606354CF60D49259826C9CBE9F7D4C842F2A069EB",
-  "nativeDllFileVersion": "1.0.49.0",
-  "tests": {
-    "core": "passed",
-    "native2025": "passed",
-    "packagedInstallerPackageOnly": "passed",
-    "releaseIdentityConsistency": "passed"
-  },
-  "installPerformed": false,
-  "fieldAcceptance": "pending Ruben Navisworks Manage 2025"
+    "schemaVersion":  "bimlog-lens-next-build-receipt-v1",
+    "status":  "BUILD_PACKAGE_PASS_NO_INSTALL",
+    "productYear":  2025,
+    "release":  "v1.0.50",
+    "sourceRoot":  "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext",
+    "packageRoot":  "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\package-v1.0.50-2025",
+    "zipPath":  "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\BIMLog-Lens-Next-Navisworks2025-v1.0.50.zip",
+    "zipBytes":  548504,
+    "zipSha256":  "60F2CBE44EAC4D807AB244B77C2E7C8E40228075845CEAB43FC3A0BEF37932B9",
+    "coreDllSha256":  "1ACDA372B06FFB875CFA105C01FF557E72287F25D6B06D782CAECFC2ACB5E20E",
+    "nativeDllSha256":  "86504978C33BDFCA3D1B5850B79C0ED5DA1AD6DD5DBD3C67BD096F29F97D7814",
+    "nativeDllFileVersion":  "1.0.50.0",
+    "tests":  {
+                  "core":  "passed",
+                  "native2025":  "passed",
+                  "packagedInstallerPackageOnly":  "passed",
+                  "releaseIdentityConsistency":  "passed"
+              },
+    "installPerformed":  false,
+    "fieldAcceptance":  "pending Ruben Navisworks Manage 2025"
 }
