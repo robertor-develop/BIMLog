@@ -368,11 +368,31 @@ export function normalizeJobIntakeData(raw: unknown) {
       )
         ? String(contract.perspective)
         : "downstream",
-      agreementKind: ["quote", "base", "additional"].includes(
+      title: optionalText(
+        contract.title,
+        `commercial.contracts[${index}].title`,
+        200,
+      ),
+      engagementId: optionalText(
+        contract.engagementId,
+        `commercial.contracts[${index}].engagementId`,
+        100,
+      ),
+      parentContractId: optionalText(
+        contract.parentContractId,
+        `commercial.contracts[${index}].parentContractId`,
+        100,
+      ),
+      agreementKind: ["quote", "base", "additional", "change_order", "addition", "amendment"].includes(
         String(contract.agreementKind),
       )
         ? String(contract.agreementKind)
         : "base",
+      status: ["draft", "proposed", "sent", "negotiating", "accepted", "active", "rejected", "superseded", "cancelled", "completed"].includes(
+        String(contract.status),
+      )
+        ? String(contract.status)
+        : "draft",
       contractType: [
         "owner_prime",
         "subcontract",
@@ -400,7 +420,12 @@ export function normalizeJobIntakeData(raw: unknown) {
     };
   });
   const contractLegalKeys = new Set<string>();
+  const availableEngagementIds = new Set(engagements.map((engagement: any) => engagement.id));
   for (const contract of normalizedContracts) {
+    if (contract.engagementId && !availableEngagementIds.has(contract.engagementId))
+      throw new FinancialControlError(400, "JOB_INTAKE_CONTRACT_ENGAGEMENT_INVALID", "Every selected agreement relationship must exist in this Intake.");
+    if (contract.parentContractId && (!contractIds.has(contract.parentContractId) || contract.parentContractId === contract.id))
+      throw new FinancialControlError(400, "JOB_INTAKE_CONTRACT_PARENT_INVALID", "Every selected parent agreement must be a different agreement in this Intake.");
     if (!contract.contractNumber) continue;
     const legalKey = `${contract.perspective}:${contract.contractNumber.toLowerCase()}`;
     if (contractLegalKeys.has(legalKey))
@@ -801,8 +826,10 @@ export function jobIntakeCompletion(
     data.commercial.contracts.length > 0 &&
     data.commercial.contracts.every(
       (contract: any) =>
-        contract.contractNumber &&
+        (contract.agreementKind === "quote" ? contract.quotationNumber : contract.contractNumber) &&
         contract.counterpartyName &&
+        (!data.relationships.engagements.length || contract.engagementId) &&
+        (!new Set(["change_order", "addition", "amendment"]).has(contract.agreementKind) || contract.parentContractId) &&
         assignedContractIds.has(contract.id),
     );
   const budgetReady = !!data.commercial.budgetSnapshotId && contractItemsReady;
@@ -921,11 +948,23 @@ export function jobIntakeCompletion(
       },
     capabilities.contracts &&
       data.commercial.contracts.some(
-        (contract: any) => !contract.contractNumber,
+        (contract: any) => contract.agreementKind === "quote" ? !contract.quotationNumber : !contract.contractNumber,
       ) && {
         code: "contract_number",
-        en: "Enter the negotiated number for every contract profile.",
-        es: "Ingrese el número de contrato negociado.",
+        en: "Enter the real quote or contract number before activation.",
+        es: "Ingrese el número real de cotización o contrato antes de activar.",
+      },
+    capabilities.contracts && data.relationships.engagements.length > 0 &&
+      data.commercial.contracts.some((contract: any) => !contract.engagementId) && {
+        code: "contract_relationship",
+        en: "Connect every agreement to its provider/customer relationship.",
+        es: "Conecte cada acuerdo con su relación proveedor/cliente.",
+      },
+    capabilities.contracts &&
+      data.commercial.contracts.some((contract: any) => new Set(["change_order", "addition", "amendment"]).has(contract.agreementKind) && !contract.parentContractId) && {
+        code: "contract_parent",
+        en: "Select the base agreement for every change, addition, or amendment.",
+        es: "Seleccione el acuerdo base para cada cambio, adición o enmienda.",
       },
     capabilities.contracts &&
       data.commercial.contracts.some(

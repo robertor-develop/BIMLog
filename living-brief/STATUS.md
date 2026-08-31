@@ -1,5 +1,21 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P04 INTAKE-APU-04 local agreement-lifecycle candidate - 2026-08-31
+
+- The simple Job Intake experience now renders quotes, base contracts, change orders, additions,
+  and amendments as one bilingual visual agreement board backed by the existing canonical
+  Commercial contract profiles.
+- Each agreement may bind to one provider/customer relationship. A change order, addition, or
+  amendment may reference one different parent agreement; invalid relationship and parent IDs
+  fail closed while legacy drafts without a company map remain readable.
+- Lifecycle state is explicit from Draft through Proposed, Sent, Negotiating, Accepted, Active,
+  Rejected, Superseded, Cancelled, and Completed. BIMLog does not manufacture quotation,
+  contract, purchase-order, or other legal identifiers; drafts visibly retain blank optional
+  numbers until an authorized person enters the real value.
+- Desktop English and exact-390 Spanish component-fixture inspection pass without horizontal
+  overflow. Focused Intake/APU behavior and TypeScript gates pass locally. This is not integrated,
+  pushed, published, deployed, production-migrated, or customer accepted.
+
 ## BIMLog v1.05.N01-P03 INTAKE-APU-03 local company-map candidate - 2026-08-31
 
 - The Job Intake simple experience now includes a bilingual visual company map showing
