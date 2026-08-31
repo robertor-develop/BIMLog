@@ -712,7 +712,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
       if (!token) throw new Error(t("Your BIMLog session is no longer authenticated.", "Su sesion BIMLog ya no esta autenticada."));
       const apiClient = createLensNextApiClient({ token });
       let context = await bridgeClient.loadProjectContext(ctrl.signal);
-      if (context.projectId === null) context = await bridgeClient.bindProject(projectId, ctrl.signal);
+      if (context.projectId === null) context = await bridgeClient.bindProject(projectId, "explicit-user-selection", ctrl.signal);
       if (context.projectId !== projectId) throw new Error(t("The active Navisworks model is bound to a different BIMLog project.", "El modelo activo de Navisworks esta vinculado a otro proyecto BIMLog."));
       const issue = (await apiClient.loadIssues(projectId, ctrl.signal)).find(candidate => candidate.identity.serverId === v.id);
       if (!issue) throw new Error(t("The BIMLog viewpoint no longer exists.", "La vista BIMLog ya no existe."));

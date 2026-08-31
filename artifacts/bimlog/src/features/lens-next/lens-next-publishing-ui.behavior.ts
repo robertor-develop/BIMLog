@@ -23,10 +23,10 @@ check(client.includes('contractVersion: "lens-next-publish.v1"'), "client pins e
 check(client.includes('method: "POST"') && client.includes("Authorization: `Bearer ${token}`"), "authenticated POST transport");
 check(model.includes("publishing.allowed === true"), "server capability controls publisher visibility");
 check(model.includes("mutationVersion"), "pull adapter retains concurrency version");
-check(styles.includes(".lens-next-workspace--embedded {") && styles.includes("overflow-y: scroll"), "complete embedded workspace has one vertical scrollbar");
-check(styles.includes("including its header and every issue/detail control, owns one scrollbar"), "embedded scrollbar ownership is explicit");
-check(styles.includes(".lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list") && styles.includes("overflow: visible"), "embedded list and details defer scrolling to the whole panel");
-check(styles.includes("grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr)"), "embedded workspace keeps issue list and selected issue details side by side");
-check(styles.includes(".lens-next-workspace--embedded::-webkit-scrollbar") && styles.includes("width: 11px") && styles.includes("background: #5f8f72"), "whole-workspace scrollbar remains visible and usable");
+check(styles.includes(".lens-next-workspace--embedded {") && styles.includes("overflow: hidden"), "embedded viewport stays fixed beneath native window chrome");
+check(styles.includes("Header chrome stays visible") && styles.includes("scroll independently"), "two-pane scrollbar ownership is explicit");
+check(styles.includes(".lens-next-workspace--embedded .lens-next__browser,") && styles.includes("overflow-y: auto"), "issue browser and selected details scroll independently");
+check(styles.includes("grid-template-columns: clamp(380px, 42vw, 520px) minmax(360px, 1fr)"), "embedded workspace keeps stable readable list and detail columns");
+check(styles.includes("@media (max-width: 760px)") && styles.includes("grid-template-columns: minmax(0, 1fr)"), "narrow embedded windows stack without compressed controls");
 check(styles.includes(".lens-next h2 small") && styles.includes("font-size: 0.6em"), "customer-facing version is visually subordinate");
 console.log(JSON.stringify({ status: "PASS", checks: checks.length, details: checks }));

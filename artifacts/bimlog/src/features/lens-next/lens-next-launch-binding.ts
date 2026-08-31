@@ -7,6 +7,7 @@ export type LensNextLaunchMode = "browser" | "navisworks";
 export type LensNextLaunchBindingStatus =
   | "browser"
   | "waiting_for_bridge"
+  | "unbound_project"
   | "bound"
   | "unauthorized_project";
 
@@ -33,6 +34,14 @@ export function resolveLensNextLaunchProject(
   launchMode: LensNextLaunchMode,
 ): LensNextLaunchProjectResolution {
   if (bridgeContext) {
+    if (bridgeContext.projectId === null) {
+      return Object.freeze({
+        projectId: authorized(currentProjectId, projects) ? currentProjectId : null,
+        locked: false,
+        status: "unbound_project" as const,
+        message: "Select an authorized BIMLog project for this unbound Navisworks model.",
+      });
+    }
     if (!authorized(bridgeContext.projectId, projects)) {
       return Object.freeze({
         projectId: null,

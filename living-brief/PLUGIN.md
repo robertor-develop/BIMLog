@@ -279,3 +279,8 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - BIMLog remains the source of truth and accepts existing v1.0.50 captures only when their native canonical input, embedded SHA-256, declared algorithm/contract, complete token stream, and JSON visual state agree. The compatibility comparison is limited to legacy floating-point fields and their .NET formatting precision; a material camera or appearance change remains HTTP 409 with no platform mutation.
 - Rebinding an accepted legacy capture preserves its verified native visual tokens and changes only the exact BIMLog identity tokens before rehashing. That package therefore validates again in the installed v1 native DLL while new v1.0.51 packages use the exact v2 contract.
 - Both deterministic bundles report DLL file version `1.0.51.0` and contain their year-specific persistent-screen BAT installer. The 2021 ZIP is 559392 bytes with SHA-256 `C01038088CB02C690761322BDBF164966DB8A0A60ECF492D145E3F242D85507C`; the 2025 ZIP is 562218 bytes with SHA-256 `9D80C50227F99A9E8A75237090E9E7388A684FD43E1DFF5921F9D99BDC6EE956`.
+
+## Lens Next v1.05.N01-P01 shared release identity
+
+- The first shared-version release starts exactly at `v1.05.N01-P01`; legacy `v1.0.51` is not converted into either counter. Human-facing labels, manifests, installers, receipts, and archive names use the shared label. Windows DLL and Autodesk `AppVersion` fields use compatible numeric identity `1.5.1.1`.
+- Shared core contracts pass 35/35 and both Navisworks 2021 and 2025 year suites pass 37/37. The deterministic 2021 ZIP SHA-256 is `5550AB22CF483A87CF19EB4B411EEDFACC3DC14DB4E1958FF3E251D35CB89B77`; the 2025 ZIP SHA-256 is `7953460FEA83D380A99F28C60C32D590A8BE01B24F4C0E12A022978E9883C028`.

@@ -50,7 +50,7 @@ namespace BIMLogLensNext.Native.Tests
                 Run("xml_export_resolves_inherited_com_contract", XmlExportResolvesInheritedComContract);
                 Run("xml_export_writes_validated_file", XmlExportWritesValidatedFile);
                 Run("xml_export_failure_preserves_existing_file", XmlExportFailurePreservesExistingFile);
-                Run("runtime_preserves_configured_project_when_model_marker_is_absent", RuntimePreservesConfiguredProjectFallback);
+                Run("runtime_ignores_configured_project_when_model_marker_is_absent", RuntimeIgnoresConfiguredProjectFallback);
                 Run("health_tick_does_not_mutate_floating_window", HealthTickDoesNotMutateFloatingWindow);
                 Run("header_reports_current_version_beside_live", HeaderReportsCurrentVersionBesideLive);
                 Run("visual_capture_wire_payload_uses_web_contract_keys", VisualCaptureWirePayloadUsesWebContractKeys);
@@ -464,17 +464,19 @@ namespace BIMLogLensNext.Native.Tests
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
-            Equal("v1.0.51", LensNextConstants.ProductVersionLabel);
+            Equal("v1.05.N01-P01", LensNextConstants.ProductVersionLabel);
         }
 
-        private static void RuntimePreservesConfiguredProjectFallback()
+        private static void RuntimeIgnoresConfiguredProjectFallback()
         {
             var source = File.ReadAllText(Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextNativeRuntime.cs")));
-            True(source.Contains("var configuredProjectId = Config.ProjectId;"));
-            True(source.Contains("Config.ProjectId = configuredProjectId > 0 ? configuredProjectId : 0;"));
-            False(source.Contains("exactProjectId > 0 ? exactProjectId : 0;"));
+            True(source.Contains("Config.ProjectId + \" is a legacy candidate only and was ignored"));
+            True(source.Contains("authoritativeProjectId"));
+            True(source.Contains("\"managed-marker\""));
+            False(source.Contains("Config.ProjectId = configuredProjectId"));
+            False(source.Contains("Using configured Project="));
         }
 
         private static void HealthTickDoesNotMutateFloatingWindow()

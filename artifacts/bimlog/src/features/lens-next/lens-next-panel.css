@@ -526,8 +526,8 @@
   overflow-wrap: anywhere;
 }
 
-/* M7 field repair: the Navisworks WebView owns its viewport and exposes two
-   independently scrollable panes. The normal BIMLog route remains bounded. */
+/* The Navisworks WebView owns a fixed viewport. Header chrome stays visible
+   while the browser and detail columns scroll independently. */
 .lens-next-workspace--embedded {
   position: fixed;
   inset: 0;
@@ -536,8 +536,7 @@
   height: 100dvh;
   min-height: 0;
   padding: 0;
-  overflow-x: hidden;
-  overflow-y: scroll;
+  overflow: hidden;
   overscroll-behavior: contain;
   scrollbar-width: auto;
   scrollbar-color: #5f8f72 #e4eee8;
@@ -548,13 +547,13 @@
 .lens-next-workspace--embedded .lens-next {
   width: 100%;
   max-width: none;
-  height: auto;
+  height: 100%;
   min-height: 100%;
   max-height: none;
   border: 0;
   border-radius: 0;
   box-shadow: none;
-  overflow: visible;
+  overflow: hidden;
 }
 
 .lens-next-route-state--embedded {
@@ -633,24 +632,27 @@
   color: var(--lens-next-ink);
 }
 
-/* Navisworks embeds Lens Next as one side panel. The complete workspace,
-   including its header and every issue/detail control, owns one scrollbar. */
+/* A stable two-pane workspace prevents the summary cards and form fields from
+   collapsing into unreadable slivers at common floating-window sizes. */
 .lens-next-workspace--embedded .lens-next__body {
   display: grid;
-  grid-template-columns: minmax(280px, 0.9fr) minmax(320px, 1.1fr);
-  flex: none;
-  overflow: visible;
+  grid-template-columns: clamp(380px, 42vw, 520px) minmax(360px, 1fr);
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .lens-next-workspace--embedded .lens-next__browser,
-.lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list,
 .lens-next-workspace--embedded .lens-next__body > .lens-next__details {
   min-height: 0;
-  overflow: visible;
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
 
 .lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list {
-  flex: none;
+  flex: 0 0 auto;
+  min-height: 240px;
+  overflow: visible;
 }
 
 .lens-next-workspace--embedded::-webkit-scrollbar {
@@ -704,7 +706,7 @@
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 760px) {
   .lens-next__body {
     grid-template-columns: minmax(0, 1fr);
     overflow-y: auto;
@@ -721,7 +723,7 @@
   }
 
   .lens-next-workspace--embedded .lens-next__browser {
-    min-height: 0;
+    min-height: 420px;
     border-right: 0;
     border-bottom: 1px solid var(--lens-next-line);
   }
@@ -729,6 +731,12 @@
   .lens-next-workspace--embedded .lens-next__body {
     grid-template-columns: minmax(0, 1fr);
     width: 100%;
+    overflow-y: auto;
+  }
+
+  .lens-next-workspace--embedded .lens-next__browser,
+  .lens-next-workspace--embedded .lens-next__body > .lens-next__details {
+    overflow: visible;
   }
 }
 .lens-next__publisher {
@@ -747,6 +755,33 @@
 .lens-next__publish-confirm { padding: 0.75rem; border-left: 4px solid #1d4ed8; background: #eff6ff; }
 .lens-next__publish-confirm p { margin: 0 0 0.75rem; }
 .lens-next__publish-confirm button + button { margin-left: 0.5rem; }
-.lens-next__inventory-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(96px,1fr));gap:6px;margin-top:8px;min-width:0}.lens-next__inventory-summary span{display:flex;min-width:0;flex-direction:column;padding:7px;border:1px solid #d9e5df;border-radius:7px;background:#fff;font-size:10px;line-height:1.25;color:#52645b;overflow-wrap:anywhere}.lens-next__inventory-summary strong{font-size:15px;color:#153b2a}
+.lens-next__inventory-summary {
+  display: grid;
+  width: 100%;
+  min-width: 0;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+.lens-next__inventory-summary span {
+  display: flex;
+  min-width: 0;
+  min-height: 52px;
+  box-sizing: border-box;
+  flex-direction: column;
+  justify-content: center;
+  padding: 7px;
+  border: 1px solid #d9e5df;
+  border-radius: 7px;
+  background: #fff;
+  color: #52645b;
+  font-size: 10px;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.lens-next__inventory-summary strong {
+  color: #153b2a;
+  font-size: 15px;
+}
 .lens-next__sync-plan{margin-top:8px;border:1px solid #d9e5df;border-radius:7px;background:#fff}.lens-next__sync-plan summary{cursor:pointer;padding:8px;font-weight:700;color:#153b2a}.lens-next__sync-plan ol{margin:0;padding:0 10px 10px 32px}.lens-next__sync-plan li{padding:6px 0;border-top:1px solid #edf2ef;color:#263d32}.lens-next__sync-plan li small{display:block;margin-top:2px}
 .lens-next__visual-repair{display:grid;gap:8px;margin:10px 0;padding:10px;border:1px solid #f59e0b;border-radius:8px;background:#fffbeb}.lens-next__visual-repair p{margin:0}.lens-next__visual-repair button{justify-self:start}

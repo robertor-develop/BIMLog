@@ -94,7 +94,7 @@ export interface LensNextApiClientOptions {
 }
 
 export interface LensNextApiClient {
-  resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
+  resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId?: number | null, signal?: AbortSignal): Promise<LensNextModelBindingResolution>;
   loadIssues(projectId: number, signal?: AbortSignal): Promise<LensNextIssue[]>;
   loadReferenceData(projectId: number, signal?: AbortSignal): Promise<{ floors: string[]; responsibleCompanies: string[] }>;
   loadHistory(
@@ -133,13 +133,14 @@ export function createLensNextApiClient(
     return jsonBody(response, "BIMLog controlled publish");
   };
   return Object.freeze({
-    async resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, signal?: AbortSignal) {
-      const raw = await post("/lens-next/model-bindings/resolve", { modelBindingKey, modelDisplayName, managedProjectId }, signal);
+    async resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId: number | null = null, signal?: AbortSignal) {
+      const raw = await post("/lens-next/model-bindings/resolve", { modelBindingKey, modelDisplayName, managedProjectId, explicitProjectId }, signal);
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog model binding response is invalid");
       const body = raw as Record<string, unknown>;
-      const projectId = Number(body.projectId);
+      const projectId = body.projectId == null ? null : Number(body.projectId);
       const source = String(body.source ?? "") as LensNextModelBindingResolution["source"];
-      if (!Number.isSafeInteger(projectId) || projectId <= 0 || String(body.modelBindingKey ?? "") !== modelBindingKey || !["existing_registry", "managed_metadata", "unique_platform_identity"].includes(source)) throw new Error("BIMLog model binding response is invalid");
+      const requiresSelection = source === "explicit_user_selection_required";
+      if ((requiresSelection ? projectId !== null : projectId === null || !Number.isSafeInteger(projectId) || projectId <= 0) || String(body.modelBindingKey ?? "") !== modelBindingKey || !["existing_registry", "managed_metadata", "explicit_user_selection", "explicit_user_selection_required"].includes(source)) throw new Error("BIMLog model binding response is invalid");
       return Object.freeze({ projectId, modelBindingKey, source });
     },
     async loadIssues(projectId: number, signal?: AbortSignal) {
@@ -247,8 +248,8 @@ export function createLensNextApiClient(
       }, signal);
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Atomic viewpoint creation receipt is invalid");
       const body = raw as Record<string, any>, result = body.result as Record<string, unknown>;
-      const receipt = { serverId: Number(result?.serverId), viewpointId: String(result?.viewpointId ?? ""), visualStateDigest: String(result?.visualStateDigest ?? ""), revisionNumber: Number(result?.revisionNumber), lifecycleStatus: String(result?.lifecycleStatus ?? ""), displayCode: String(result?.displayCode ?? "") };
-      if (body.success !== true || body.created !== true || !Number.isSafeInteger(receipt.serverId) || receipt.serverId <= 0 || receipt.viewpointId !== viewpointId || !/^[a-f0-9]{64}$/.test(receipt.visualStateDigest) || receipt.revisionNumber !== 1 || receipt.lifecycleStatus !== "active" || !receipt.displayCode) throw new Error("Atomic viewpoint creation receipt is invalid");
+      const receipt = { serverId: Number(result?.serverId), viewpointId: String(result?.viewpointId ?? ""), visualStateDigest: String(result?.visualStateDigest ?? ""), revisionNumber: Number(result?.revisionNumber), lifecycleStatus: String(result?.lifecycleStatus ?? ""), displayId: String(result?.displayId ?? ""), displayCode: String(result?.displayCode ?? "") };
+      if (body.success !== true || body.created !== true || !Number.isSafeInteger(receipt.serverId) || receipt.serverId <= 0 || receipt.viewpointId !== viewpointId || !/^[a-f0-9]{64}$/.test(receipt.visualStateDigest) || receipt.revisionNumber !== 1 || receipt.lifecycleStatus !== "active" || !receipt.displayId || receipt.displayCode !== receipt.displayId) throw new Error("Atomic viewpoint creation receipt is invalid");
       return Object.freeze(receipt) as LensNextCreateReceipt;
     },
     async confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, confirmationReason: string, signal?: AbortSignal) {
@@ -333,7 +334,7 @@ export interface LensNextBridgeClient {
     signal?: AbortSignal,
   ): Promise<LensNextBridgeProjectContext>;
   loadLocalInventory(signal?: AbortSignal): Promise<LensNextLocalInventory>;
-  bindProject(projectId: number, signal?: AbortSignal): Promise<LensNextBridgeProjectContext>;
+  bindProject(projectId: number, bindingSource: "platform-binding" | "explicit-user-selection", signal?: AbortSignal): Promise<LensNextBridgeProjectContext>;
   openWorkingView(
     issue: LensNextIssue,
     context: LensNextBridgeProjectContext,
@@ -464,7 +465,7 @@ export function createLensNextBridgeClient(
         !modelBindingKey ||
         !Number.isSafeInteger(managedViewpointCount) ||
         managedViewpointCount < 0 ||
-        !["unbound", "navisworks_bimlog_metadata", "bimlog_model_registry"].includes(bindingSource)
+        !["unbound", "managed-marker", "platform-binding", "explicit-user-selection"].includes(bindingSource)
       ) {
         throw new Error("bridge project context is incomplete");
       }
@@ -528,12 +529,13 @@ export function createLensNextBridgeClient(
       });
       return Object.freeze({ projectId, modelFingerprint: modelFingerprint.toLowerCase(), modelBindingKey, viewpoints: Object.freeze(viewpoints) });
     },
-    async bindProject(projectId: number, signal?: AbortSignal) {
+    async bindProject(projectId: number, bindingSource: "platform-binding" | "explicit-user-selection", signal?: AbortSignal) {
       const exactProjectId = assertLensNextProjectId(projectId);
+      if (!["platform-binding", "explicit-user-selection"].includes(bindingSource)) throw new Error("Lens Next bridge project binding source is invalid");
       const requestId = requestIdFactory();
       const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/project-binding`, {
         method: "POST", headers, signal,
-        body: JSON.stringify({ protocolVersion: 1, command: "bind-project", requestId, idempotencyKey: requestId, fields: { projectId: String(exactProjectId), bindingSource: "bimlog_model_registry" } }),
+        body: JSON.stringify({ protocolVersion: 1, command: "bind-project", requestId, idempotencyKey: requestId, fields: { projectId: String(exactProjectId), bindingSource } }),
       });
       const raw = await jsonBody(response, "Lens Next project binding");
       const payload = bridgePayload(raw, "project_bound");
@@ -645,7 +647,7 @@ export function createLensNextBridgeClient(
       if (!context.projectId) throw new Error("A bound BIMLog project is required");
       const requestId = requestIdFactory();
       const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/capture-new-viewpoint`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal,
-        body: JSON.stringify({ protocolVersion: 1, command: "capture-new-viewpoint", requestId, idempotencyKey: requestId, fields: { sessionId: context.sessionId, projectId: String(context.projectId), viewpointId, modelFingerprint: context.modelFingerprint, includeScreenshot: "false" } }) });
+        body: JSON.stringify({ protocolVersion: 1, command: "capture-new-viewpoint", requestId, idempotencyKey: requestId, fields: { sessionId: context.sessionId, projectId: String(context.projectId), viewpointId, modelFingerprint: context.modelFingerprint, includeScreenshot: "true" } }) });
       const raw = await jsonBody(response, "Lens Next new viewpoint capture"), body = bridgePayload(raw, "new_viewpoint_captured");
       const state = body.visualState;
       if (!state || typeof state !== "object" || Array.isArray(state)) throw new Error("Bridge new viewpoint capture is invalid");

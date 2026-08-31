@@ -686,7 +686,7 @@ router.post("/projects/:projectId/clash-reports/lens-next/local-viewpoints/uploa
         if (!inserted) throw new LensNextLocalUploadError("atomic_insert_failed", "BIMLog did not create the local viewpoint record.", 500);
         const rebound = validateAndRebindLocalVisualState(body.visualState, { projectId, serverId: inserted.id, viewpointId, modelFingerprint });
         const sequence = await assignTradeFloorSeq(projectId, inserted.trade, inserted.floor, null, tx);
-        await tx.update(lensViewpointsTable).set({ visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
+        await tx.update(lensViewpointsTable).set({ screenshotUrl: rebound.screenshotDataUrl, visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
         return { serverId: inserted.id, viewpointId, navisworksGuid, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq };
       });
       res.status(201).json({ success: true, contractVersion: "lens-next-local-upload.v1", created: true, result });
@@ -731,9 +731,10 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
         if (!inserted) throw new LensNextLocalUploadError("atomic_insert_failed", "BIMLog did not create the viewpoint record.", 500);
         const rebound = validateAndRebindLocalVisualState(body.visualState, { projectId, serverId: inserted.id, viewpointId, modelFingerprint });
         const sequence = await assignTradeFloorSeq(projectId, trade, floor, null, tx);
-        await tx.update(lensViewpointsTable).set({ visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
         const abbr = (trade.length > 2 ? trade.slice(0, 2) : trade).toUpperCase() || "??";
-        return { serverId: inserted.id, viewpointId, visualStateDigest: rebound.digest, revisionNumber: 1, lifecycleStatus: "active", displayCode: `${abbr}-${String(sequence.seq).padStart(3, "0")}` };
+        const displayId = `${abbr}-${String(sequence.seq).padStart(3, "0")}`;
+        await tx.update(lensViewpointsTable).set({ displayId, screenshotUrl: rebound.screenshotDataUrl, visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
+        return { serverId: inserted.id, viewpointId, displayId, visualStateDigest: rebound.digest, revisionNumber: 1, lifecycleStatus: "active", displayCode: displayId };
       });
       res.status(201).json({ success: true, contractVersion: "lens-next-create.v1", created: true, result });
     } catch (error) {
@@ -1284,6 +1285,7 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         sourceServerId: r.sourceServerId,
         sourcePhysicalId: r.sourcePhysicalId,
         importedLineageStatus: r.importedLineageStatus,
+        screenshotUrl: r.screenshotUrl,
         visualStateAvailable: Boolean(r.visualStateJson && r.visualStateDigest),
         visualStateDigest: r.visualStateDigest,
       }));

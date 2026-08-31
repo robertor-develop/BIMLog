@@ -817,3 +817,7 @@ three-constraint/three-index drop-recreate preview is retained as a hash-bound r
 Focused database safety, source reconciliation, lock-matched typechecks, affected API build, privacy/secret,
 mojibake, Living Brief, and diff gates passed. No manual production DDL, database write, Replit mutation,
 provider/credential action, publication, deployment, customer access, or unrelated-candidate integration occurred.
+
+## Lens Next production binding migration — 2026-08-31
+
+- Owner authorization covered the production binding audit and migration. The preflight used a read-only transaction through `PROD_DATABASE_URL`, printed no credential, and proved zero total rows and zero collisions. The committed transaction replaced the global `model_binding_key` unique index with the active project-scoped `(project_id, model_binding_key)` unique index and added the non-unique key lookup index. Post-commit catalog inspection verified the expected four indexes and unchanged zero-row table.
