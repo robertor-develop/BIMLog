@@ -15,6 +15,18 @@ assert.equal(parsed.ServerId, 91);
 assert.equal(parsed.DigestSha256, rebound.digest);
 assert.equal(lensNextVisualStateDigest(parsed), rebound.digest);
 assert.throws(() => validateAndRebindLocalVisualState({ ...state, DigestSha256: "0".repeat(64) }, { projectId: 7, serverId: 92, viewpointId: "LOCAL-7", modelFingerprint: "a".repeat(64) }), /digest/i);
+const screenshotBytes = Buffer.from("lens-next-thumbnail-fixture", "utf8");
+const screenshotDataUrl = `data:image/jpeg;base64,${screenshotBytes.toString("base64")}`;
+const screenshotState: any = {
+  ...state,
+  ScreenshotDataUrl: screenshotDataUrl,
+  ScreenshotSha256: createHash("sha256").update(screenshotBytes).digest("hex"),
+};
+screenshotState.DigestSha256 = lensNextVisualStateDigest(screenshotState);
+const screenshotRebound = validateAndRebindLocalVisualState(screenshotState, { projectId: 7, serverId: 94, viewpointId: "LOCAL-7", modelFingerprint: "a".repeat(64) });
+assert.equal(screenshotRebound.screenshotDataUrl, screenshotDataUrl);
+const invalidScreenshotState = { ...screenshotState, ScreenshotDataUrl: "data:image/jpeg;base64,AAAA" };
+assert.equal(validateAndRebindLocalVisualState(invalidScreenshotState, { projectId: 7, serverId: 95, viewpointId: "LOCAL-7", modelFingerprint: "a".repeat(64) }).screenshotDataUrl, null);
 const vector: any = {
   SchemaVersion: "bimlog.lens_next.visual_state.v1", ProjectId: 28, ServerId: 1, ViewpointId: "local-viewpoint-1", LifecycleStatus: "active", RevisionNumber: 1,
   ModelFingerprint: "0123456789abcdef".repeat(4), Camera: null, SelectedElements: [], HiddenElements: [], AppearanceOverrides: [], ModelReferences: [],
@@ -87,4 +99,4 @@ assert.match(block, /platform_identity_exists/);
 assert.match(block, /display_id_conflict/);
 assert.match(block, /digestDiagnostics/);
 assert.doesNotMatch(block, /lens-sync/);
-console.log(JSON.stringify({ status: "PASS", tests: ["exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "no-overwrite", "display-conflict-deny"] }));
+console.log(JSON.stringify({ status: "PASS", tests: ["exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "no-overwrite", "display-conflict-deny"] }));

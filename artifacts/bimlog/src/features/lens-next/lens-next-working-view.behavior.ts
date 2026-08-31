@@ -13,23 +13,35 @@ const issue = (packaged: boolean): LensNextIssue => ({
 });
 const context: LensNextBridgeProjectContext = {
   sessionId: "session", projectId: 35, modelFingerprint: "b".repeat(64), modelBindingKey: "model",
-  displayName: "model.nwd", bindingSource: "bimlog_model_registry", managedViewpointCount: 1,
+  displayName: "model.nwd", bindingSource: "platform-binding", managedViewpointCount: 1,
 };
 
 const calls: string[] = [];
+const visualState = {
+  DigestSha256: digest,
+  ModelFingerprint: context.modelFingerprint,
+  Camera: { Position: { X: 1, Y: 2, Z: 3 }, Rotation: { A: 0, B: 0, C: 0, D: 1 } },
+  SelectedElements: [{ ModelIndex: 0, InstanceGuid: "selected" }],
+  HiddenElements: [{ ModelIndex: 0, InstanceGuid: "hidden" }],
+  AppearanceOverrides: [{ ModelIndex: 0, InstanceGuid: "colored" }],
+  ModelReferences: [{ ModelIndex: 0, SourcePath: "model.nwd" }],
+  SectioningJson: "{\"Enabled\":true}",
+};
+let appliedVisualStateJson: string | null = null;
 const dependencies: any = {
   apiClient: {
-    loadVisualState: async () => { calls.push("load"); return { visualStateJson: JSON.stringify({ DigestSha256: digest }), visualStateDigest: digest }; },
+    loadVisualState: async () => { calls.push("load"); return { visualStateJson: JSON.stringify(visualState), visualStateDigest: digest }; },
     saveVisualState: async () => { calls.push("save"); },
   },
   bridgeClient: {
     captureCurrentVisualState: async () => { calls.push("capture"); return { visualStateJson: JSON.stringify({ DigestSha256: digest }), visualStateDigest: digest }; },
-    applyPlatformWorkingView: async () => { calls.push("apply-platform"); },
+    applyPlatformWorkingView: async (_issue: unknown, _context: unknown, json: string) => { calls.push("apply-platform"); appliedVisualStateJson = json; },
   },
 };
 
 await openBimlogWorkingView(dependencies, issue(true), context);
 assert.deepEqual(calls.splice(0), ["load", "apply-platform"]);
+assert.deepEqual(JSON.parse(appliedVisualStateJson!), visualState);
 
 const legacyWithoutGuid = { ...issue(false), navisworksGuid: null };
 await assert.rejects(
@@ -44,4 +56,4 @@ assert.deepEqual(calls.splice(0), ["capture", "save", "load", "apply-platform"])
 
 await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), { ...context, projectId: 99 }), /not bound/);
 assert.deepEqual(calls, []);
-console.log("PASS Lens Next platform-first open, blocked missing state, and explicit repair");
+console.log("PASS Lens Next platform-first full-payload open, blocked missing state, and explicit repair");

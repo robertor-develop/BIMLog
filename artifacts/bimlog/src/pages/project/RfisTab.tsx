@@ -2635,7 +2635,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     const bridgeClient = createLensNextBridgeClient({ sessionToken: session.token });
     const apiClient = createLensNextApiClient({ token });
     let context = await bridgeClient.loadProjectContext();
-    if (context.projectId === null) context = await bridgeClient.bindProject(projectId);
+    if (context.projectId === null) context = await bridgeClient.bindProject(projectId, "explicit-user-selection");
     if (context.projectId !== projectId) throw new Error(w("The active Navisworks model is bound to a different BIMLog project.", "El modelo activo de Navisworks esta vinculado a otro proyecto BIMLog.", lang));
     const issue = (await apiClient.loadIssues(projectId)).find(candidate => candidate.identity.viewpointId === sourceViewpointId || candidate.displayId === sourceViewpointId);
     if (!issue) throw new Error(w("The linked BIMLog viewpoint no longer exists.", "La vista BIMLog vinculada ya no existe.", lang));

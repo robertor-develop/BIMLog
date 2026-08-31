@@ -4,7 +4,7 @@ import { readFileSync } from "node:fs";
 const panel = readFileSync(new URL("./LensNextPanel.tsx", import.meta.url), "utf8");
 const workingView = readFileSync(new URL("./lens-next-working-view.ts", import.meta.url), "utf8");
 const client = readFileSync(new URL("./lens-next-client.ts", import.meta.url), "utf8");
-const native = readFileSync("H:\\BIMLogPlugin2021\\LensNext-v1.0.35\\native\\AutodeskVisualStateAdapter.cs", "utf8");
+const native = readFileSync(new URL("../../../../../plugins/BIMLogLensNext/native/AutodeskVisualStateAdapter.cs", import.meta.url), "utf8");
 
 assert.match(panel, /openBimlogWorkingView/);
 assert.match(workingView, /!issue\.visualStateAvailable \|\| !issue\.visualStateDigest/);
@@ -23,4 +23,8 @@ assert.match(client, /visual-state digest changed after inventory refresh/);
 assert.match(client, /visual-state package digest is inconsistent/);
 assert.match(native, /Temporary BIMLog working view reconstructed without creating a SavedViewpoint/);
 assert.match(native, /Visual-state digest validation failed/);
+for (const component of ["ApplyCamera(state.Camera)", "ApplySelection(state.SelectedElements)", "ApplyVisibility(state.HiddenElements)", "ApplyAppearance(state.AppearanceOverrides)", "InvokeSectioningSetter(state.SectioningJson)"])
+  assert.ok(native.includes(component), `direct working view must restore ${component}`);
+assert.match(native, /state\.ModelReferences = scan\.Models/);
+assert.match(native, /different model fingerprint/);
 console.log("PASS Lens Next Build 4 governed BIMLog-to-Navisworks reconstruction boundary");

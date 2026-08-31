@@ -123,7 +123,7 @@ export function LensNextPanel({
   const [publishMessage, setPublishMessage] = useState<string | null>(null);
   const [localUploadState, setLocalUploadState] = useState<"idle" | "capturing" | "uploading" | "success" | "error">("idle");
   const [localUploadMessage, setLocalUploadMessage] = useState<string | null>(null);
-  const [createState, setCreateState] = useState<"idle" | "capturing" | "creating" | "publishing" | "success" | "error">("idle");
+  const [createState, setCreateState] = useState<"idle" | "capturing" | "creating" | "success" | "error">("idle");
   const [createMessage, setCreateMessage] = useState<string | null>(null);
   const [layoutState, setLayoutState] = useState<"idle" | "running" | "success" | "error">("idle");
   const [layoutMessage, setLayoutMessage] = useState<string | null>(null);
@@ -481,24 +481,9 @@ export function LensNextPanel({
       const visualState = await bridgeClient.captureNewViewpoint(viewpointId, bridgeContext);
       setCreateState("creating");
       const receipt = await apiClient.createViewpoint(authorizedProjectId, viewpointId, bridgeContext.modelFingerprint, visualState, draft, auditReason);
-      setCreateState("publishing");
-      try {
-        const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, auditReason);
-        try {
-          await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, auditReason);
-        } catch (confirmationError) {
-          setCreateState("error");
-          setCreateMessage(`Created ${receipt.displayCode} in BIMLog and Navisworks, but BIMLog could not record local identity ${navisworksGuid}: ${confirmationError instanceof Error ? confirmationError.message : "identity confirmation failed"}. Do not create a duplicate.`);
-          await loadIssues("refresh");
-          return;
-        }
-        setCreateState("success");
-        setCreateMessage(`Created ${receipt.displayCode} in BIMLog and Navisworks. Save the NWF/NWD when ready.`);
-      } catch (localError) {
-        setCreateState("error");
-        setCreateMessage(`BIMLog created ${receipt.displayCode} with its visual package, but Navisworks did not create the local Saved Viewpoint: ${localError instanceof Error ? localError.message : "local creation failed"}`);
-      }
       await loadIssues("refresh");
+      setCreateState("success");
+      setCreateMessage(`Created ${receipt.displayId} in BIMLog with its visual package. Open Working View restores it directly; no Navisworks Saved Viewpoint was created.`);
     } catch (error) {
       setCreateState("error");
       setCreateMessage(error instanceof Error ? error.message : "Viewpoint creation failed");
@@ -538,7 +523,7 @@ export function LensNextPanel({
         const issue = issues.find(candidate => candidate.identity.serverId === item.platformServerId);
         const viewpoint = localInventory.viewpoints.find(candidate => candidate.navisworksGuid.toLowerCase() === item.localNavisworksGuid?.toLowerCase());
         if (!issue || issue.navisworksGuid || !issue.visualStateDigest || !viewpoint || viewpoint.serverId !== issue.identity.serverId || !viewpoint.exactManagedIdentity) throw new Error(`${item.displayId} is no longer an exact recoverable identity; the run stopped.`);
-        const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: issue.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayCode: issue.displayId ?? issue.identity.viewpointId };
+        const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: issue.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayId: issue.displayId ?? issue.identity.viewpointId, displayCode: issue.displayId ?? issue.identity.viewpointId };
         await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, viewpoint.navisworksGuid, reason);
         confirmed += 1;
       }
@@ -547,7 +532,7 @@ export function LensNextPanel({
         if (!issue || issue.navisworksGuid || !issue.visualStateAvailable || !issue.visualStateDigest) throw new Error(`${item.displayId} is no longer an unbound BIMLog package; the run stopped.`);
         const stored = await apiClient.loadVisualState(issue);
         await bridgeClient.applyPlatformWorkingView(issue, bridgeContext, stored.visualStateJson);
-        const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: stored.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayCode: issue.displayId ?? issue.identity.viewpointId };
+        const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: stored.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayId: issue.displayId ?? issue.identity.viewpointId, displayCode: issue.displayId ?? issue.identity.viewpointId };
         const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, reason);
         await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, reason);
         pulled += 1;
@@ -589,7 +574,7 @@ export function LensNextPanel({
         if (!issue || issue.navisworksGuid || !issue.visualStateAvailable || !issue.visualStateDigest) throw new Error(`${item.displayId} is no longer an eligible BIMLog-only visual package; refresh and retry.`);
         const stored = await apiClient.loadVisualState(issue);
         await bridgeClient.applyPlatformWorkingView(issue, bridgeContext, stored.visualStateJson);
-        const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: stored.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayCode: issue.displayId ?? issue.identity.viewpointId };
+        const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: stored.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayId: issue.displayId ?? issue.identity.viewpointId, displayCode: issue.displayId ?? issue.identity.viewpointId };
         const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, reason);
         await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, reason);
         pulled += 1;

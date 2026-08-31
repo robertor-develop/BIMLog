@@ -307,7 +307,7 @@ namespace BIMLogLensNext.Native
             _documentFileName = Path.GetFullPath(_document.FileName);
             _contract = new AutodeskReadOnlyAdapterContract(projectId, modelFingerprint);
             _onProjectBound = onProjectBound;
-            _bindingSource = string.IsNullOrWhiteSpace(projectId) ? "unbound" : "navisworks_bimlog_metadata";
+            _bindingSource = string.IsNullOrWhiteSpace(projectId) ? "unbound" : "managed-marker";
         }
 
         public LensNextProjectContext ReadProjectContext()
@@ -378,11 +378,12 @@ namespace BIMLogLensNext.Native
         public LensNextProjectContext BindProject(string projectId, string bindingSource)
         {
             EnsureSameDocument();
-            if (!string.Equals(bindingSource, "bimlog_model_registry", StringComparison.Ordinal))
-                throw new InvalidOperationException("Only an authoritative BIMLog model-registry binding is accepted.");
+            if (!string.Equals(bindingSource, "platform-binding", StringComparison.Ordinal) &&
+                !string.Equals(bindingSource, "explicit-user-selection", StringComparison.Ordinal))
+                throw new InvalidOperationException("Only an authorized platform binding or explicit user selection is accepted.");
             var detected = DetectManagedProjectId(_document);
             if (!string.IsNullOrWhiteSpace(detected) && !string.Equals(detected, projectId, StringComparison.Ordinal))
-                throw new InvalidOperationException("The BIMLog registry binding conflicts with managed viewpoint metadata in this model.");
+                throw new InvalidOperationException("The requested BIMLog project binding conflicts with the model's managed marker.");
             _contract.BindProject(projectId);
             _bindingSource = bindingSource;
             _onProjectBound?.Invoke(int.Parse(projectId));

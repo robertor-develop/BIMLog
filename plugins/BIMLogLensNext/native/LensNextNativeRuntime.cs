@@ -56,19 +56,13 @@ namespace BIMLogLensNext.Native
 
                 _documentFile = System.IO.Path.GetFullPath(document.FileName);
                 ModelFingerprint = LensNextModelFingerprint.ComputeContextFingerprint(_documentFile);
-                var configuredProjectId = Config.ProjectId;
                 var detectedProjectId = AutodeskLensNextReadOnlyAdapter.DetectManagedProjectId(document);
                 int exactProjectId;
-                if (int.TryParse(detectedProjectId, out exactProjectId) && exactProjectId > 0)
-                {
-                    Config.ProjectId = exactProjectId;
-                }
-                else
-                {
-                    Config.ProjectId = configuredProjectId > 0 ? configuredProjectId : 0;
-                    if (Config.ProjectId > 0)
-                        LensNextNativeLog.Info("No exact managed project marker was found. Using configured Project=" + Config.ProjectId + ".");
-                }
+                var authoritativeProjectId = int.TryParse(detectedProjectId, out exactProjectId) && exactProjectId > 0
+                    ? exactProjectId.ToString()
+                    : null;
+                if (authoritativeProjectId == null && Config.ProjectId > 0)
+                    LensNextNativeLog.Info("Configured Project=" + Config.ProjectId + " is a legacy candidate only and was ignored because the model has no authoritative managed marker.");
 
                 var token = CreateToken();
                 var sessionId = "lens-next-session-" + Guid.NewGuid().ToString("N");
@@ -77,9 +71,8 @@ namespace BIMLogLensNext.Native
                 BridgeOrigin = "http://127.0.0.1:" + bridgePort;
                 var adapter = new AutodeskLensNextReadOnlyAdapter(
                     document,
-                    Config.ProjectId > 0 ? Config.ProjectId.ToString() : null,
-                    ModelFingerprint,
-                    projectId => Config.ProjectId = projectId);
+                    authoritativeProjectId,
+                    ModelFingerprint);
 
                 var bridge = new LensNextReadOnlyBridge(
                     token,
@@ -103,7 +96,8 @@ namespace BIMLogLensNext.Native
                 _host.Start();
                 Status = "Running on " + BridgeOrigin;
                 LensNextNativeLog.Info(
-                    "Bridge started. Project=" + (Config.ProjectId > 0 ? Config.ProjectId.ToString() : "unbound") +
+                    "Bridge started. Project=" + (authoritativeProjectId ?? "unbound") +
+                    " BindingSource=" + (authoritativeProjectId == null ? "unbound" : "managed-marker") +
                     " Model=" + ModelFingerprint.Substring(0, 12) +
                     " Session=" + sessionId);
             }

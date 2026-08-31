@@ -1,6 +1,8 @@
 [CmdletBinding()]
-param([string]$Version = '1.0.51')
+param([string]$Version = 'v1.05.N01-P01')
 $ErrorActionPreference = 'Stop'
+$binaryVersion = '1.5.1.1'
+if ($Version -ne 'v1.05.N01-P01') { throw 'STOP: stale or unexpected release requested.' }
 $year = 2021
 $sourceRoot = [IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\')
 $canonicalRoot = $sourceRoot
@@ -20,12 +22,12 @@ function Assert-CanonicalPath([string]$Path) {
 }
 Assert-CanonicalPath $sourceRoot | Out-Null
 $buildRoot = Assert-CanonicalPath (Join-Path $sourceRoot '.build')
-$packageRoot = Assert-CanonicalPath (Join-Path $sourceRoot "package-v$Version-$year")
+$packageRoot = Assert-CanonicalPath (Join-Path $sourceRoot "package-$Version-$year")
 $bundleName = "BIMLogLensNext$year.bundle"
 $bundleRoot = Assert-CanonicalPath (Join-Path $packageRoot $bundleName)
 $contentsRoot = Assert-CanonicalPath (Join-Path $bundleRoot 'Contents')
 $evidenceRoot = Assert-CanonicalPath (Join-Path $sourceRoot 'evidence')
-$zipPath = Assert-CanonicalPath (Join-Path $sourceRoot "BIMLog-Lens-Next-Navisworks$year-v$Version.zip")
+$zipPath = Assert-CanonicalPath (Join-Path $sourceRoot "BIMLog-Lens-Next-Navisworks$year-$Version.zip")
 $shaPath = "$zipPath.sha256"
 function Get-RelativePath([string]$BasePath,[string]$ChildPath) {
   $baseUri=[Uri]::new(([IO.Path]::GetFullPath($BasePath).TrimEnd('\')+'\'))
@@ -60,16 +62,16 @@ foreach($name in @("BIMLogLensNext.Native$year.dll","BIMLogLensNext.Native$year.
 Copy-Item -LiteralPath (Join-Path $nativeOutput 'runtimes') -Destination $contentsRoot -Recurse -Force
 foreach($name in @('INSTALL-BIMLOG-LENS-NEXT-2021.bat','UNINSTALL-BIMLOG-LENS-NEXT-2021.bat','Install-BIMLogLensNext2021.ps1','Uninstall-BIMLogLensNext2021.ps1','README-ROBERTO-RUBEN.txt','FIELD-ACCEPTANCE-CHECKLIST.txt','COLLECT-LENS-NEXT-FAILURE-DETAILS.bat','Collect-LensNextFailureDetails.ps1')){Copy-Item -LiteralPath (Join-Path $sourceRoot $name) -Destination $packageRoot -Force}
 $manifestFiles=Get-ChildItem -LiteralPath $packageRoot -Recurse -File|Sort-Object FullName|ForEach-Object{[ordered]@{path=(Get-RelativePath $packageRoot $_.FullName).Replace('\','/');bytes=$_.Length;sha256=(Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash}}
-$manifest=[ordered]@{schemaVersion='bimlog-lens-next-package-v1';product='BIMLog Lens Next';productYear=$year;release="v$Version";installBundle=$bundleName;installTarget="C:\ProgramData\Autodesk\ApplicationPlugins\$bundleName";originalLensPreserved=$true;files=$manifestFiles}
+$manifest=[ordered]@{schemaVersion='bimlog-lens-next-package-v1';product='BIMLog Lens Next';productYear=$year;release=$Version;binaryVersion=$binaryVersion;installBundle=$bundleName;installTarget="C:\ProgramData\Autodesk\ApplicationPlugins\$bundleName";originalLensPreserved=$true;files=$manifestFiles}
 [IO.File]::WriteAllText((Join-Path $packageRoot 'manifest.json'),($manifest|ConvertTo-Json -Depth 8)+[Environment]::NewLine,[Text.UTF8Encoding]::new($false))
 $packagedXml=[xml](Get-Content -LiteralPath (Join-Path $bundleRoot 'PackageContents.xml') -Raw)
-if($packagedXml.ApplicationPackage.AppVersion -ne $Version){throw "STOP: packaged Autodesk AppVersion does not match v$Version."}
+if($packagedXml.ApplicationPackage.AppVersion -ne $binaryVersion){throw "STOP: packaged Autodesk AppVersion does not match $binaryVersion."}
 $packagedNative=Join-Path $contentsRoot "BIMLogLensNext.Native$year.dll"
-if((Get-Item -LiteralPath $packagedNative).VersionInfo.FileVersion -ne "$Version.0"){throw "STOP: packaged native DLL version does not match v$Version."}
-$expectedRelease="v$Version"
+if((Get-Item -LiteralPath $packagedNative).VersionInfo.FileVersion -ne $binaryVersion){throw "STOP: packaged native DLL version does not match $binaryVersion."}
+$expectedRelease=$Version
 foreach($textFile in (Get-ChildItem -LiteralPath $packageRoot -Recurse -File | Where-Object Extension -in @('.ps1','.bat','.txt','.xml','.json'))){
   $text=Get-Content -LiteralPath $textFile.FullName -Raw
-  foreach($match in [regex]::Matches($text,'v1\.0\.\d+')){if($match.Value -ne $expectedRelease){throw "STOP: stale release identity $($match.Value) in $($textFile.FullName)."}}
+  foreach($match in [regex]::Matches($text,'v1\.(?:0\.\d+|05\.N\d{2,}-P\d{2,})')){if($match.Value -ne $expectedRelease){throw "STOP: stale release identity $($match.Value) in $($textFile.FullName)."}}
 }
 & (Join-Path $packageRoot 'Install-BIMLogLensNext2021.ps1') -PackageOnly
 if($LASTEXITCODE){throw 'STOP: packaged installer package-only acceptance failed.'}
@@ -79,6 +81,6 @@ try{$archive=[IO.Compression.ZipArchive]::new($stream,[IO.Compression.ZipArchive
 $zipHash=(Get-FileHash -LiteralPath $zipPath -Algorithm SHA256).Hash
 [IO.File]::WriteAllText($shaPath,"$zipHash  $(Split-Path -Leaf $zipPath)$([Environment]::NewLine)",[Text.UTF8Encoding]::new($false))
 $nativeDll=$packagedNative
-$receipt=[ordered]@{schemaVersion='bimlog-lens-next-build-receipt-v1';status='BUILD_PACKAGE_PASS_NO_INSTALL';productYear=$year;release="v$Version";sourceRoot=$sourceRoot;packageRoot=$packageRoot;zipPath=$zipPath;zipBytes=(Get-Item -LiteralPath $zipPath).Length;zipSha256=$zipHash;coreDllSha256=(Get-FileHash -LiteralPath (Join-Path $contentsRoot 'BIMLogLensNext.dll') -Algorithm SHA256).Hash;nativeDllSha256=(Get-FileHash -LiteralPath $nativeDll -Algorithm SHA256).Hash;nativeDllFileVersion=(Get-Item -LiteralPath $nativeDll).VersionInfo.FileVersion;tests=[ordered]@{core='passed';native2021='passed';packagedInstallerPackageOnly='passed';releaseIdentityConsistency='passed'};installPerformed=$false;fieldAcceptance='pending Roberto Navisworks Manage 2021'}
+$receipt=[ordered]@{schemaVersion='bimlog-lens-next-build-receipt-v1';status='BUILD_PACKAGE_PASS_NO_INSTALL';productYear=$year;release=$Version;binaryVersion=$binaryVersion;sourceRoot=$sourceRoot;packageRoot=$packageRoot;zipPath=$zipPath;zipBytes=(Get-Item -LiteralPath $zipPath).Length;zipSha256=$zipHash;coreDllSha256=(Get-FileHash -LiteralPath (Join-Path $contentsRoot 'BIMLogLensNext.dll') -Algorithm SHA256).Hash;nativeDllSha256=(Get-FileHash -LiteralPath $nativeDll -Algorithm SHA256).Hash;nativeDllFileVersion=(Get-Item -LiteralPath $nativeDll).VersionInfo.FileVersion;tests=[ordered]@{core='passed';native2021='passed';packagedInstallerPackageOnly='passed';releaseIdentityConsistency='passed'};installPerformed=$false;fieldAcceptance='pending Roberto Navisworks Manage 2021'}
 [IO.File]::WriteAllText((Join-Path $evidenceRoot 'build-package-receipt-2021.json'),($receipt|ConvertTo-Json -Depth 8)+[Environment]::NewLine,[Text.UTF8Encoding]::new($false))
 $receipt|ConvertTo-Json -Depth 8

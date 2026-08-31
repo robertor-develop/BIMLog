@@ -142,7 +142,21 @@ function digestMismatchDiagnostics(state: any, embedded: string, recomputed: str
   };
 }
 
-export function validateAndRebindLocalVisualState(raw: unknown, input: { projectId: number; serverId: number; viewpointId: string; modelFingerprint: string }): { json: string; digest: string } {
+function verifiedScreenshotDataUrl(state: any): string | null {
+  const dataUrl = String(field(state, "ScreenshotDataUrl", "screenshotDataUrl") ?? "").trim();
+  if (!dataUrl) return null;
+  const match = /^data:image\/(jpeg|png);base64,([A-Za-z0-9+/]+={0,2})$/.exec(dataUrl);
+  if (!match) { console.warn("[LensNextThumbnail] Captured screenshot was not a supported image data URL and was omitted."); return null; }
+  let bytes: Buffer;
+  try { bytes = Buffer.from(match[2], "base64"); } catch { console.warn("[LensNextThumbnail] Captured screenshot base64 was invalid and was omitted."); return null; }
+  if (bytes.length === 0 || bytes.length > 3 * 1024 * 1024) { console.warn("[LensNextThumbnail] Captured screenshot size was invalid and was omitted."); return null; }
+  const expected = String(field(state, "ScreenshotSha256", "screenshotSha256") ?? "").trim().toLowerCase();
+  const computed = createHash("sha256").update(bytes).digest("hex");
+  if (!/^[a-f0-9]{64}$/.test(expected) || computed !== expected) { console.warn("[LensNextThumbnail] Captured screenshot hash was invalid and was omitted."); return null; }
+  return dataUrl;
+}
+
+export function validateAndRebindLocalVisualState(raw: unknown, input: { projectId: number; serverId: number; viewpointId: string; modelFingerprint: string }): { json: string; digest: string; screenshotDataUrl: string | null } {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new LensNextLocalUploadError("visual_state_invalid", "Exact local visual state is required.");
   const state = structuredClone(raw as Record<string, unknown>) as any;
   const contractVersion = digestContractVersion(state);
@@ -187,5 +201,5 @@ export function validateAndRebindLocalVisualState(raw: unknown, input: { project
   state.DigestSha256 = digest;
   const json = JSON.stringify(state);
   if (Buffer.byteLength(json, "utf8") > 4 * 1024 * 1024) throw new LensNextLocalUploadError("visual_state_too_large", "Lens visual state exceeds the 4 MiB limit.", 413);
-  return { json, digest };
+  return { json, digest, screenshotDataUrl: verifiedScreenshotDataUrl(state) };
 }
