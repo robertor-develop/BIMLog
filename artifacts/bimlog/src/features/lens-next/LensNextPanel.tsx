@@ -661,10 +661,13 @@ export function LensNextPanel({
       bridgeOpenEnabled={
         bridgeState === "connected" &&
         bridgeContext?.projectId === authorizedProjectId &&
-        selectedIssue !== null
+        selectedIssue !== null &&
+        selectedIssue.visualStateAvailable &&
+        Boolean(selectedIssue.visualStateDigest)
       }
       workingViewUnavailable={
-        selectedIssue !== null && !selectedIssue.visualStateAvailable
+        selectedIssue !== null &&
+        (!selectedIssue.visualStateAvailable || !selectedIssue.visualStateDigest)
       }
       visualRepairState={visualRepairState}
       visualRepairMessage={visualRepairMessage}

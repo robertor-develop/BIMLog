@@ -2,8 +2,13 @@ import type { LensNextApiClient, LensNextBridgeClient } from "./lens-next-client
 import type { LensNextBridgeProjectContext, LensNextIssue } from "./lens-next-types";
 
 export interface LensNextWorkingViewDependencies {
+  apiClient: Pick<LensNextApiClient, "loadVisualState">;
+  bridgeClient: Pick<LensNextBridgeClient, "applyPlatformWorkingView">;
+}
+
+export interface LensNextVisualRepairDependencies {
   apiClient: Pick<LensNextApiClient, "loadVisualState" | "saveVisualState">;
-  bridgeClient: Pick<LensNextBridgeClient, "openWorkingView" | "captureCurrentVisualState" | "applyPlatformWorkingView">;
+  bridgeClient: Pick<LensNextBridgeClient, "captureCurrentVisualState" | "applyPlatformWorkingView">;
 }
 
 export interface LensNextWorkingViewResult {
@@ -16,9 +21,10 @@ export interface LensNextVisualRepairResult {
 }
 
 /**
- * Opens a BIMLog-authoritative Working View. Historical Original Lens records
- * without a platform package are migrated in place by exact identity first;
- * they are never duplicated and never resolved by a similarity search.
+ * Opens a BIMLog-authoritative Working View from the visual package stored on
+ * the platform. A normal open never searches for, activates, or captures a
+ * local Saved Viewpoint. Missing historical packages require the separate,
+ * explicit repair workflow while the exact original view is already open.
  */
 export async function openBimlogWorkingView(
   dependencies: LensNextWorkingViewDependencies,
@@ -29,27 +35,14 @@ export async function openBimlogWorkingView(
   if (issue.identity.projectId !== context.projectId)
     throw new Error("The active Navisworks model is not bound to this BIMLog viewpoint.");
 
-  if (issue.visualStateAvailable && issue.visualStateDigest) {
-    const stored = await dependencies.apiClient.loadVisualState(issue, signal);
-    await dependencies.bridgeClient.applyPlatformWorkingView(issue, context, stored.visualStateJson, signal);
-    return Object.freeze({ migratedHistoricalViewpoint: false, visualStateDigest: stored.visualStateDigest });
-  }
+  if (!issue.visualStateAvailable || !issue.visualStateDigest)
+    throw new Error(
+      "BIMLog is the source of truth, but this platform record has no stored visual package. Open is blocked; display the exact original view in Navisworks and use Repair from current Navisworks view.",
+    );
 
-  // Exact historical recovery: activate the Original Lens Saved Viewpoint,
-  // capture its complete state, persist it on the same BIMLog record, then
-  // reconstruct from the package BIMLog has just accepted.
-  await dependencies.bridgeClient.openWorkingView(issue, context, signal);
-  const captured = await dependencies.bridgeClient.captureCurrentVisualState(issue, context, signal);
-  await dependencies.apiClient.saveVisualState(issue, captured.visualStateJson, captured.visualStateDigest, signal);
-
-  const migratedIssue: LensNextIssue = Object.freeze({
-    ...issue,
-    visualStateAvailable: true,
-    visualStateDigest: captured.visualStateDigest,
-  });
-  const stored = await dependencies.apiClient.loadVisualState(migratedIssue, signal);
-  await dependencies.bridgeClient.applyPlatformWorkingView(migratedIssue, context, stored.visualStateJson, signal);
-  return Object.freeze({ migratedHistoricalViewpoint: true, visualStateDigest: stored.visualStateDigest });
+  const stored = await dependencies.apiClient.loadVisualState(issue, signal);
+  await dependencies.bridgeClient.applyPlatformWorkingView(issue, context, stored.visualStateJson, signal);
+  return Object.freeze({ migratedHistoricalViewpoint: false, visualStateDigest: stored.visualStateDigest });
 }
 
 
@@ -61,7 +54,7 @@ export async function openBimlogWorkingView(
  * platform round trip is verified before success is reported.
  */
 export async function repairBimlogWorkingViewFromCurrent(
-  dependencies: LensNextWorkingViewDependencies,
+  dependencies: LensNextVisualRepairDependencies,
   issue: LensNextIssue,
   context: LensNextBridgeProjectContext,
   signal?: AbortSignal,

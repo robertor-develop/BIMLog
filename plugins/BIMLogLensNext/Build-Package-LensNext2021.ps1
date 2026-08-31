@@ -1,5 +1,5 @@
 [CmdletBinding()]
-param([string]$Version = '1.0.49')
+param([string]$Version = '1.0.50')
 $ErrorActionPreference = 'Stop'
 $year = 2021
 $sourceRoot = [IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\')

@@ -1,5 +1,5 @@
 @echo off
 setlocal
-title BIMLog Lens Next 2021 v1.0.49 Uninstaller
+title BIMLog Lens Next 2021 v1.0.50 Uninstaller
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Uninstall-BIMLogLensNext2021.ps1"
 exit /b %errorlevel%

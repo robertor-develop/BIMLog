@@ -23,7 +23,6 @@ const dependencies: any = {
     saveVisualState: async () => { calls.push("save"); },
   },
   bridgeClient: {
-    openWorkingView: async () => { calls.push("open-exact-local"); },
     captureCurrentVisualState: async () => { calls.push("capture"); return { visualStateJson: JSON.stringify({ DigestSha256: digest }), visualStateDigest: digest }; },
     applyPlatformWorkingView: async () => { calls.push("apply-platform"); },
   },
@@ -32,24 +31,12 @@ const dependencies: any = {
 await openBimlogWorkingView(dependencies, issue(true), context);
 assert.deepEqual(calls.splice(0), ["load", "apply-platform"]);
 
-const migrated = await openBimlogWorkingView(dependencies, issue(false), context);
-assert.equal(migrated.migratedHistoricalViewpoint, true);
-assert.deepEqual(calls.splice(0), ["open-exact-local", "capture", "save", "load", "apply-platform"]);
-
-dependencies.bridgeClient.openWorkingView = async () => { calls.push("open-exact-local"); throw new Error("identity_not_found"); };
-await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), context), /identity_not_found/);
-assert.deepEqual(calls.splice(0), ["open-exact-local"]);
-
 const legacyWithoutGuid = { ...issue(false), navisworksGuid: null };
-dependencies.bridgeClient.openWorkingView = async () => { calls.push("open-exact-name"); };
-const migratedByExactName = await openBimlogWorkingView(dependencies, legacyWithoutGuid, context);
-assert.equal(migratedByExactName.migratedHistoricalViewpoint, true);
-assert.deepEqual(calls.splice(0), ["open-exact-name", "capture", "save", "load", "apply-platform"]);
-
-dependencies.bridgeClient.openWorkingView = async () => { throw new Error("legacy_viewpoint_name_not_found"); };
-await assert.rejects(() => openBimlogWorkingView(dependencies, legacyWithoutGuid, context), /legacy_viewpoint_name_not_found/);
-dependencies.bridgeClient.openWorkingView = async () => { throw new Error("legacy_viewpoint_name_ambiguous"); };
-await assert.rejects(() => openBimlogWorkingView(dependencies, legacyWithoutGuid, context), /legacy_viewpoint_name_ambiguous/);
+await assert.rejects(
+  () => openBimlogWorkingView(dependencies, legacyWithoutGuid, context),
+  /BIMLog is the source of truth.*no stored visual package.*Open is blocked/,
+);
+assert.deepEqual(calls.splice(0), []);
 
 const repaired = await repairBimlogWorkingViewFromCurrent(dependencies, legacyWithoutGuid, context);
 assert.equal(repaired.visualStateDigest, digest);
@@ -57,4 +44,4 @@ assert.deepEqual(calls.splice(0), ["capture", "save", "load", "apply-platform"])
 
 await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), { ...context, projectId: 99 }), /not bound/);
 assert.deepEqual(calls, []);
-console.log("PASS Lens Next exact historical first-open migration and platform reconstruction");
+console.log("PASS Lens Next platform-first open, blocked missing state, and explicit repair");

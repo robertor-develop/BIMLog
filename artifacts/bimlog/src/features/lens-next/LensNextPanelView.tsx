@@ -715,7 +715,7 @@ export function LensNextPanelView({
           {workingViewUnavailable && (
             <section className="lens-next__visual-repair" aria-label="Repair missing platform visual package">
               <p className="lens-next__inline-notice">
-                This platform record has no complete visual package or exact Navisworks identity. Open its original Saved Viewpoint manually, then attach the current view to this exact BIMLog record once.
+                BIMLog is the source of truth, and this platform record has no complete visual package. Open working view is blocked: Lens Next will not search or capture a local Saved Viewpoint automatically. Display the exact original view in Navisworks, then attach the current view to this exact BIMLog record once. Upload is handled separately by the governed synchronization workflow.
               </p>
               <button type="button" disabled={visualRepairState === "repairing"} onClick={onRepairCurrentWorkingView}>
                 {visualRepairState === "repairing" ? "Repairing platform package…" : "Repair from current Navisworks view"}

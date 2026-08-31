@@ -1,7 +1,7 @@
 @echo off
 setlocal
-title BIMLog Lens Next 2025 v1.0.49 Installer
-echo BIMLog Lens Next 2025 v1.0.49
+title BIMLog Lens Next 2025 v1.0.50 Installer
+echo BIMLog Lens Next 2025 v1.0.50
 echo Close Navisworks Manage 2025 before continuing.
 echo.
 powershell.exe -NoProfile -ExecutionPolicy Bypass -File "%~dp0Install-BIMLogLensNext2025.ps1"
