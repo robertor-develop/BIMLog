@@ -28,7 +28,27 @@ import type {
   LensNextPublishResult,
 } from "./lens-next-types.ts";
 
-export const LENS_NEXT_BRIDGE_ORIGIN = "http://127.0.0.1:8766";
+export const LENS_NEXT_BRIDGE_MIN_PORT = 8766;
+export const LENS_NEXT_BRIDGE_MAX_PORT = 8865;
+
+export function validateLensNextBridgeOrigin(value: string): string {
+  let uri: URL;
+  try { uri = new URL(value); } catch { throw new Error("Lens Next bridge origin is invalid"); }
+  const port = Number(uri.port);
+  if (uri.protocol !== "http:" || uri.hostname !== "127.0.0.1" ||
+      !Number.isInteger(port) || port < LENS_NEXT_BRIDGE_MIN_PORT || port > LENS_NEXT_BRIDGE_MAX_PORT ||
+      uri.username || uri.password || uri.pathname !== "/" || uri.search || uri.hash) {
+    throw new Error("Lens Next bridge origin must be an approved 127.0.0.1 port");
+  }
+  return `http://127.0.0.1:${port}`;
+}
+
+export function lensNextBridgeOriginFromSearch(search: string): string {
+  const params = new URLSearchParams(search.startsWith("?") ? search : `?${search}`);
+  const value = params.get("bridgeOrigin");
+  if (!value) throw new Error("Lens Next bridge origin is required for Navisworks launch");
+  return validateLensNextBridgeOrigin(value);
+}
 
 type FetchLike = (
   input: RequestInfo | URL,
@@ -249,10 +269,23 @@ export interface LensNextBridgeBootstrapSession {
 }
 
 export async function bootstrapLensNextBridgeSession(
-  fetchImpl: FetchLike = globalThis.fetch.bind(globalThis),
-  signal?: AbortSignal,
+  bridgeOriginOrFetch: string | FetchLike = "http://127.0.0.1:8766",
+  fetchOrSignal?: FetchLike | AbortSignal,
+  signalOverride?: AbortSignal,
 ): Promise<LensNextBridgeBootstrapSession> {
-  const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/session`, {
+  const bridgeOrigin = typeof bridgeOriginOrFetch === "string"
+    ? bridgeOriginOrFetch
+    : "http://127.0.0.1:8766";
+  const fetchImpl = typeof bridgeOriginOrFetch === "function"
+    ? bridgeOriginOrFetch
+    : typeof fetchOrSignal === "function"
+      ? fetchOrSignal
+      : globalThis.fetch.bind(globalThis);
+  const signal = fetchOrSignal instanceof AbortSignal
+    ? fetchOrSignal
+    : signalOverride;
+  const origin = validateLensNextBridgeOrigin(bridgeOrigin);
+  const response = await fetchImpl(`${origin}/v1/session`, {
     method: "GET",
     mode: "cors",
     cache: "no-store",
@@ -289,6 +322,7 @@ export async function bootstrapLensNextBridgeSession(
 
 export interface LensNextBridgeClientOptions {
   sessionToken: string;
+  bridgeOrigin?: string;
   fetchImpl?: FetchLike;
   requestIdFactory?: () => string;
 }
@@ -364,22 +398,41 @@ function bridgePayload(
 export function createLensNextBridgeClient(
   options: LensNextBridgeClientOptions,
 ): LensNextBridgeClient {
-  const sessionToken = requiredToken(
+  let sessionToken = requiredToken(
     options.sessionToken,
     "Lens Next bridge session token",
   );
   const fetchImpl = options.fetchImpl ?? globalThis.fetch.bind(globalThis);
+  const bridgeOrigin = validateLensNextBridgeOrigin(
+    options.bridgeOrigin ?? "http://127.0.0.1:8766",
+  );
   const requestIdFactory = options.requestIdFactory ?? defaultRequestId;
-  const headers = {
+  const requestHeaders = () => ({
     Accept: "application/json",
     Authorization: `Bearer ${sessionToken}`,
     "Content-Type": "application/json",
     "X-BIMLog-Lens-Next-Protocol": "1",
+  });
+  const fetchWithSessionRenewal: FetchLike = async (input, init) => {
+    let response = await fetchImpl(input, init);
+    if (response.status !== 401) return response;
+    const renewed = await bootstrapLensNextBridgeSession(
+      bridgeOrigin,
+      fetchImpl,
+      init?.signal ?? undefined,
+    );
+    sessionToken = renewed.token;
+    headers.Authorization = `Bearer ${sessionToken}`;
+    const renewedHeaders = new Headers(init?.headers);
+    renewedHeaders.set("Authorization", `Bearer ${sessionToken}`);
+    response = await fetchImpl(input, { ...init, headers: renewedHeaders });
+    return response;
   };
+  const headers = requestHeaders();
   return Object.freeze({
     async probe(signal?: AbortSignal) {
       try {
-        const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/ping`, {
+        const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/ping`, {
           method: "GET",
           headers,
           signal,
@@ -392,8 +445,8 @@ export function createLensNextBridgeClient(
       }
     },
     async loadProjectContext(signal?: AbortSignal) {
-      const response = await fetchImpl(
-        `${LENS_NEXT_BRIDGE_ORIGIN}/v1/project-context`,
+      const response = await fetchWithSessionRenewal(
+        `${bridgeOrigin}/v1/project-context`,
         { method: "GET", headers, signal },
       );
       const raw = await jsonBody(response, "Lens Next project-context");
@@ -429,7 +482,7 @@ export function createLensNextBridgeClient(
       });
     },
     async loadLocalInventory(signal?: AbortSignal) {
-      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/local-inventory`, {
+      const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/local-inventory`, {
         method: "GET", headers, signal,
       });
       const raw = await jsonBody(response, "Lens Next local inventory");
@@ -478,7 +531,7 @@ export function createLensNextBridgeClient(
     async bindProject(projectId: number, signal?: AbortSignal) {
       const exactProjectId = assertLensNextProjectId(projectId);
       const requestId = requestIdFactory();
-      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/project-binding`, {
+      const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/project-binding`, {
         method: "POST", headers, signal,
         body: JSON.stringify({ protocolVersion: 1, command: "bind-project", requestId, idempotencyKey: requestId, fields: { projectId: String(exactProjectId), bindingSource: "bimlog_model_registry" } }),
       });
@@ -502,8 +555,8 @@ export function createLensNextBridgeClient(
         },
         requestIdFactory(),
       );
-      const response = await fetchImpl(
-        `${LENS_NEXT_BRIDGE_ORIGIN}/v1/open-working-view`,
+      const response = await fetchWithSessionRenewal(
+        `${bridgeOrigin}/v1/open-working-view`,
         {
           method: "POST",
           headers: { ...headers, "X-Request-Id": request.requestId },
@@ -540,7 +593,7 @@ export function createLensNextBridgeClient(
         { bimlogPhysicalId: issue.bimlogPhysicalId, navisworksGuid: issue.navisworksGuid },
         requestIdFactory(),
       );
-      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/apply-working-view`, {
+      const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/apply-working-view`, {
         method: "POST",
         headers: { ...headers, "X-Request-Id": request.requestId },
         body: JSON.stringify({
@@ -564,7 +617,7 @@ export function createLensNextBridgeClient(
       const request = createLensNextOpenWorkingViewRequest(issue.identity, context, {
         bimlogPhysicalId: issue.bimlogPhysicalId, navisworksGuid: issue.navisworksGuid,
       }, requestIdFactory());
-      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/capture-visual-state`, {
+      const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/capture-visual-state`, {
         method: "POST",
         headers: { ...headers, "X-Request-Id": request.requestId },
         body: JSON.stringify({ ...request, command: "capture-visual-state", fields: { ...request.fields, includeScreenshot: "false" } }),
@@ -581,7 +634,7 @@ export function createLensNextBridgeClient(
     async captureLocalViewpoint(localViewpoint: LensNextLocalViewpoint, context: LensNextBridgeProjectContext, signal?: AbortSignal) {
       if (!localViewpoint.exactManagedIdentity || localViewpoint.serverId !== null || localViewpoint.projectId !== context.projectId) throw new Error("Exact local-only viewpoint context is required");
       const requestId = requestIdFactory();
-      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/capture-local-viewpoint`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal,
+      const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/capture-local-viewpoint`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal,
         body: JSON.stringify({ protocolVersion: 1, command: "capture-local-viewpoint", requestId, idempotencyKey: requestId, fields: { sessionId: context.sessionId, projectId: String(localViewpoint.projectId), navisworksGuid: localViewpoint.navisworksGuid, modelFingerprint: context.modelFingerprint, includeScreenshot: "false" } }) });
       const raw = await jsonBody(response, "Lens Next exact local capture"), body = bridgePayload(raw, "local_viewpoint_captured");
       const echoed = body.localViewpoint as Record<string, unknown>, visualState = body.visualState;
@@ -591,7 +644,7 @@ export function createLensNextBridgeClient(
     async captureNewViewpoint(viewpointId: string, context: LensNextBridgeProjectContext, signal?: AbortSignal) {
       if (!context.projectId) throw new Error("A bound BIMLog project is required");
       const requestId = requestIdFactory();
-      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/capture-new-viewpoint`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal,
+      const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/capture-new-viewpoint`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal,
         body: JSON.stringify({ protocolVersion: 1, command: "capture-new-viewpoint", requestId, idempotencyKey: requestId, fields: { sessionId: context.sessionId, projectId: String(context.projectId), viewpointId, modelFingerprint: context.modelFingerprint, includeScreenshot: "false" } }) });
       const raw = await jsonBody(response, "Lens Next new viewpoint capture"), body = bridgePayload(raw, "new_viewpoint_captured");
       const state = body.visualState;
@@ -602,7 +655,7 @@ export function createLensNextBridgeClient(
       if (!context.projectId) throw new Error("A bound BIMLog project is required");
       const requestId = requestIdFactory();
       const fields = { sessionId: context.sessionId, projectId: String(context.projectId), serverId: String(receipt.serverId), viewpointId: receipt.viewpointId, lifecycleStatus: receipt.lifecycleStatus, revisionNumber: String(receipt.revisionNumber), modelFingerprint: context.modelFingerprint, displayName: receipt.displayCode, confirmationReason, operationId: requestId, expectedVisualDigest: receipt.visualStateDigest, updateExisting: "false", publishedRecordId: "", publishedNavisworksGuid: "", publishVersion: "" };
-      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/publish-working-view`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal, body: JSON.stringify({ protocolVersion: 1, command: "publish-working-view", requestId, idempotencyKey: requestId, fields }) });
+      const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/publish-working-view`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal, body: JSON.stringify({ protocolVersion: 1, command: "publish-working-view", requestId, idempotencyKey: requestId, fields }) });
       const raw = await jsonBody(response, "Lens Next local Saved Viewpoint creation");
       const body = bridgePayload(raw, "viewpoint_published"), result = body.result as Record<string, unknown> | undefined;
       const navisworksGuid = String(result?.NavisworksGuid ?? result?.navisworksGuid ?? "").toLowerCase();
@@ -612,7 +665,7 @@ export function createLensNextBridgeClient(
     async materializeMyView(items: readonly LensNextLayoutItem[], context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal) {
       if (!context.projectId || items.length === 0) throw new Error("At least one exact local Lens Next viewpoint is required");
       const requestId = requestIdFactory();
-      const response = await fetchImpl(`${LENS_NEXT_BRIDGE_ORIGIN}/v1/materialize-my-view`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal, body: JSON.stringify({ protocolVersion: 1, command: "materialize-my-view", requestId, idempotencyKey: requestId, fields: { sessionId: context.sessionId, projectId: String(context.projectId), modelFingerprint: context.modelFingerprint, layoutJson: JSON.stringify(items), confirmationReason } }) });
+      const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/materialize-my-view`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal, body: JSON.stringify({ protocolVersion: 1, command: "materialize-my-view", requestId, idempotencyKey: requestId, fields: { sessionId: context.sessionId, projectId: String(context.projectId), modelFingerprint: context.modelFingerprint, layoutJson: JSON.stringify(items), confirmationReason } }) });
       const raw = await jsonBody(response, "Lens Next My View materialization"), body = bridgePayload(raw, "my_view_materialized");
       const receipt = { requested: Number(body.Requested ?? body.requested), moved: Number(body.Moved ?? body.moved), alreadyPlaced: Number(body.AlreadyPlaced ?? body.alreadyPlaced) };
       if (!Number.isSafeInteger(receipt.requested) || receipt.requested !== items.length || !Number.isSafeInteger(receipt.moved) || !Number.isSafeInteger(receipt.alreadyPlaced) || receipt.moved + receipt.alreadyPlaced !== receipt.requested) throw new Error("Navisworks returned an invalid My View layout receipt");

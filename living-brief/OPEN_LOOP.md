@@ -2027,3 +2027,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Push and publish BIMLog v1.60.35.16-F only through the separate authorized release gate. Then repeat one create/upload failure path and retain the native `Visual digest diagnostics` line plus the server `LensNextDigestMismatch` record. If the digests differ, the first field/value pair is the actionable defect; if they match, investigate the next exact failure without changing digest semantics.
 - Confirm successful create, refresh, second open, and model save/reopen in Navisworks Manage 2025. Verify no duplicate issue, Saved Viewpoint, or model save is produced by retry.
 - Decide separately whether BIMLog web viewpoint records need a new governed XML export. Do not relabel the existing Navisworks Saved Viewpoints XML export or infer that it contains platform-only viewpoints.
+
+## Lens Next v1.0.49 — Remaining live acceptance gate
+
+- Obtain an exact Constitution-compliant authorization for the new Lens Next C-root bundle targets before installation. The current exception names only the Legacy paths and cannot be inferred to include `BIMLogLensNext2021.bundle` or `BIMLogLensNext2025.bundle`.
+- After that authority exists, install the hash-verified 2021 package with Navisworks closed and execute the complete project 26 / ELA01 ELARA EAST matrix against `1185 RIVER AV MODEL-06-11-26.nwd`: dynamic inventory, filters/search, every row open result, unique historical migration and second open, missing/ambiguous errors, expiry renewal without visible reload, responsive chrome, settings, diagnostics, disposable create/cleanup only when safe, and validated XML export with before/after receipts.
+- Navisworks Manage 2025 is absent on this host. Its package/static gates are complete; live 2025 field acceptance remains pending an installed, authorized host and a non-customer acceptance model.

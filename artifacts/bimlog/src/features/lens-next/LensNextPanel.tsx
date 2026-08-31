@@ -54,6 +54,7 @@ export interface LensNextPanelProps {
   projectLocked?: boolean;
   authToken: string;
   bridgeSessionToken: string;
+  bridgeOrigin: string;
   apiBaseUrl?: string;
   autoRefreshMs?: number;
   fetchImpl?: typeof fetch;
@@ -66,6 +67,7 @@ export function LensNextPanel({
   projectLocked = false,
   authToken,
   bridgeSessionToken,
+  bridgeOrigin,
   apiBaseUrl = "/api/v1",
   autoRefreshMs = 10_000,
   fetchImpl,
@@ -82,9 +84,10 @@ export function LensNextPanel({
     if (!bridgeSessionToken.trim()) return null;
     return createLensNextBridgeClient({
       sessionToken: bridgeSessionToken,
+      bridgeOrigin,
       fetchImpl,
     });
-  }, [bridgeSessionToken, fetchImpl]);
+  }, [bridgeOrigin, bridgeSessionToken, fetchImpl]);
 
   const [issues, setIssues] = useState<readonly LensNextIssue[]>([]);
   const [referenceFloors, setReferenceFloors] = useState<readonly string[]>([]);
@@ -325,7 +328,7 @@ export function LensNextPanel({
         const connected = await bridgeClient.probe(controller.signal);
         if (!connected)
           throw new Error(
-            "Lens Next bridge is not reachable at 127.0.0.1:8766.",
+            `Lens Next bridge is not reachable at ${bridgeOrigin}.`,
           );
         const context = await bridgeClient.loadProjectContext(
           controller.signal,

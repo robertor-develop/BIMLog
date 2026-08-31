@@ -41,8 +41,15 @@ await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), con
 assert.deepEqual(calls.splice(0), ["open-exact-local"]);
 
 const legacyWithoutGuid = { ...issue(false), navisworksGuid: null };
-await assert.rejects(() => openBimlogWorkingView(dependencies, legacyWithoutGuid, context), /no visual package or exact Navisworks identity/);
-assert.deepEqual(calls.splice(0), []);
+dependencies.bridgeClient.openWorkingView = async () => { calls.push("open-exact-name"); };
+const migratedByExactName = await openBimlogWorkingView(dependencies, legacyWithoutGuid, context);
+assert.equal(migratedByExactName.migratedHistoricalViewpoint, true);
+assert.deepEqual(calls.splice(0), ["open-exact-name", "capture", "save", "load", "apply-platform"]);
+
+dependencies.bridgeClient.openWorkingView = async () => { throw new Error("legacy_viewpoint_name_not_found"); };
+await assert.rejects(() => openBimlogWorkingView(dependencies, legacyWithoutGuid, context), /legacy_viewpoint_name_not_found/);
+dependencies.bridgeClient.openWorkingView = async () => { throw new Error("legacy_viewpoint_name_ambiguous"); };
+await assert.rejects(() => openBimlogWorkingView(dependencies, legacyWithoutGuid, context), /legacy_viewpoint_name_ambiguous/);
 
 const repaired = await repairBimlogWorkingViewFromCurrent(dependencies, legacyWithoutGuid, context);
 assert.equal(repaired.visualStateDigest, digest);

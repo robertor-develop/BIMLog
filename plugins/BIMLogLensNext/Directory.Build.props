@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <LensNextCanonicalRoot>$(MSBuildThisFileDirectory)</LensNextCanonicalRoot>
+    <BaseOutputPath>$(MSBuildThisFileDirectory).build\bin\$(MSBuildProjectName)\</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(MSBuildThisFileDirectory).build\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+    <MSBuildProjectExtensionsPath>$(MSBuildThisFileDirectory).build\obj\$(MSBuildProjectName)\</MSBuildProjectExtensionsPath>
+  </PropertyGroup>
+  <Target Name="ValidateLensNextCanonicalFWorktree" BeforeTargets="PrepareForBuild">
+    <Error Condition="$([System.String]::Copy('$(MSBuildProjectFullPath)').StartsWith('$(LensNextCanonicalRoot)', System.StringComparison.OrdinalIgnoreCase)) != 'True'" Text="BIMLog Lens Next source and outputs must remain inside the canonical F worktree plugin root." />
+    <Error Condition="$([System.String]::Copy('$([System.IO.Path]::GetFullPath('$(OutputPath)'))').StartsWith('$(LensNextCanonicalRoot)', System.StringComparison.OrdinalIgnoreCase)) != 'True'" Text="BIMLog Lens Next output escaped the canonical F worktree plugin root." />
+    <Error Condition="$([System.String]::Copy('$([System.IO.Path]::GetFullPath('$(IntermediateOutputPath)'))').StartsWith('$(LensNextCanonicalRoot)', System.StringComparison.OrdinalIgnoreCase)) != 'True'" Text="BIMLog Lens Next intermediate output escaped the canonical F worktree plugin root." />
+  </Target>
+</Project>

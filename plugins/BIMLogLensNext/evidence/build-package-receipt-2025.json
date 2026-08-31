@@ -1,0 +1,22 @@
+{
+  "schemaVersion": "bimlog-lens-next-build-receipt-v1",
+  "status": "BUILD_PACKAGE_PASS_NO_INSTALL",
+  "productYear": 2025,
+  "release": "v1.0.49",
+  "sourceRoot": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext",
+  "packageRoot": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\package-v1.0.49-2025",
+  "zipPath": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\BIMLog-Lens-Next-Navisworks2025-v1.0.49.zip",
+  "zipBytes": 561618,
+  "zipSha256": "3810F8BFD9FD139DC37569FC98BAF4F7B11590843AE1641151D1C259785A6536",
+  "coreDllSha256": "27CF4D36D89CFA46E208B35078F9EE7C488532A11A2140B527955C9EE7179D70",
+  "nativeDllSha256": "98F86211FBFCC41B0936608606354CF60D49259826C9CBE9F7D4C842F2A069EB",
+  "nativeDllFileVersion": "1.0.49.0",
+  "tests": {
+    "core": "passed",
+    "native2025": "passed",
+    "packagedInstallerPackageOnly": "passed",
+    "releaseIdentityConsistency": "passed"
+  },
+  "installPerformed": false,
+  "fieldAcceptance": "pending Ruben Navisworks Manage 2025"
+}

@@ -35,10 +35,6 @@ export async function openBimlogWorkingView(
     return Object.freeze({ migratedHistoricalViewpoint: false, visualStateDigest: stored.visualStateDigest });
   }
 
-  if (!issue.navisworksGuid) {
-    throw new Error("This platform record has no visual package or exact Navisworks identity. Open its original view manually, then use Repair from current Navisworks view once.");
-  }
-
   // Exact historical recovery: activate the Original Lens Saved Viewpoint,
   // capture its complete state, persist it on the same BIMLog record, then
   // reconstruct from the package BIMLog has just accepted.

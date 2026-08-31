@@ -1,0 +1,43 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net48</TargetFramework>
+    <AssemblyName>BIMLogLensNext.Native2025</AssemblyName>
+    <RootNamespace>BIMLogLensNext.Native</RootNamespace>
+    <LangVersion>7.3</LangVersion>
+    <Deterministic>true</Deterministic>
+    <Version>1.0.49</Version>
+    <AssemblyVersion>1.0.49.0</AssemblyVersion>
+    <FileVersion>1.0.49.0</FileVersion>
+    <InformationalVersion>1.0.49</InformationalVersion>
+    <NavisworksProductYear>2025</NavisworksProductYear>
+    <NavisworksReferenceRoot>H:\BIMLogPlugin2025\refs</NavisworksReferenceRoot>
+    <NavisworksApiSha256>D6426063E03A97C34BA805F20C1D1ADD35BCC5C63EFEA87F8AF40F49E82BF155</NavisworksApiSha256>
+    <NavisworksAutomationSha256>476F7E78D5566A1071AB43E3C23B523585A6B8E1F85F3C9F1E8D4DF861DC8729</NavisworksAutomationSha256>
+    <NavisworksClashSha256>D272A4510C4FDA3E3E90A72E3C0C392CB687170C052C8698296E59BB0FFFC90A</NavisworksClashSha256>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Include="..\AutodeskReadOnlyAdapter.cs" Link="AutodeskReadOnlyAdapter.cs" />
+    <Compile Include="..\AutodeskVisualStateAdapter.cs" Link="AutodeskVisualStateAdapter.cs" />
+    <Compile Include="..\AutodeskPublishedViewpointAdapter.cs" Link="AutodeskPublishedViewpointAdapter.cs" />
+    <Compile Include="..\AutodeskMyViewLayoutAdapter.cs" Link="AutodeskMyViewLayoutAdapter.cs" />
+    <Compile Include="..\AutodeskPluginEntryPoints.cs" Link="AutodeskPluginEntryPoints.cs" />
+    <Compile Include="..\NativeReferenceBinding.cs" Link="NativeReferenceBinding.cs" />
+    <Compile Include="..\LensNextNativeConfig.cs" Link="LensNextNativeConfig.cs" />
+    <Compile Include="..\LensNextModelFingerprint.cs" Link="LensNextModelFingerprint.cs" />
+    <Compile Include="..\LensNextUiRequestPump.cs" Link="LensNextUiRequestPump.cs" />
+    <Compile Include="..\LensNextHttpBridgeHost.cs" Link="LensNextHttpBridgeHost.cs" />
+    <Compile Include="..\LensNextNativeRuntime.cs" Link="LensNextNativeRuntime.cs" />
+    <Compile Include="..\LensNextSettingsForm.cs" Link="LensNextSettingsForm.cs" />
+    <Compile Include="..\LensNextDockPanelControl.cs" Link="LensNextDockPanelControl.cs" />
+    <Compile Include="..\LensNextNativeLog.cs" Link="LensNextNativeLog.cs" />
+    <ProjectReference Include="..\..\BIMLogLensNext.csproj" />
+    <Reference Include="Autodesk.Navisworks.Api" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Api.dll" Private="false" />
+    <Reference Include="Autodesk.Navisworks.Automation" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Automation.dll" Private="false" />
+    <Reference Include="Autodesk.Navisworks.Clash" HintPath="$(NavisworksReferenceRoot)\Autodesk.Navisworks.Clash.dll" Private="false" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Web.Extensions" />
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.4129.50" />
+  </ItemGroup>
+  <Import Project="..\NavisworksReferenceGate.targets" />
+</Project>

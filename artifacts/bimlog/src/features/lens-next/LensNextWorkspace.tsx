@@ -6,6 +6,8 @@ import {
   bootstrapLensNextBridgeSession,
   createLensNextApiClient,
   createLensNextBridgeClient,
+  lensNextBridgeOriginFromSearch,
+  validateLensNextBridgeOrigin,
 } from "./lens-next-client";
 import {
   lensNextLaunchModeFromSearch,
@@ -48,6 +50,9 @@ export function LensNextWorkspace() {
     () => lensNextLaunchModeFromSearch(window.location.search),
     [],
   );
+  const bridgeOrigin = useMemo(() => launchMode === "navisworks"
+    ? lensNextBridgeOriginFromSearch(window.location.search)
+    : validateLensNextBridgeOrigin("http://127.0.0.1:8766"), [launchMode]);
   const workspaceClassName = launchMode === "navisworks"
     ? "lens-next-workspace lens-next-workspace--embedded"
     : "lens-next-workspace";
@@ -71,7 +76,7 @@ export function LensNextWorkspace() {
     const retryMs = launchMode === "navisworks" ? 2_000 : 10_000;
     const connect = async () => {
       try {
-        const session = await bootstrapLensNextBridgeSession(undefined, controller.signal);
+        const session = await bootstrapLensNextBridgeSession(bridgeOrigin, undefined, controller.signal);
         if (controller.signal.aborted) return;
         injectLensNextBridgeSession({
           protocolVersion: 1,
@@ -94,7 +99,7 @@ export function LensNextWorkspace() {
       controller.abort();
       if (timer !== null) window.clearTimeout(timer);
     };
-  }, [bridgeSession, launchMode]);
+  }, [bridgeOrigin, bridgeSession, launchMode]);
 
   useEffect(() => {
     if (!bridgeSession) {
@@ -106,6 +111,7 @@ export function LensNextWorkspace() {
       try {
         const client = createLensNextBridgeClient({
           sessionToken: bridgeSession.token,
+          bridgeOrigin,
         });
         if (!(await client.probe(controller.signal)))
           throw new Error("Lens Next bridge did not confirm the active session.");
@@ -133,7 +139,7 @@ export function LensNextWorkspace() {
     };
     void load();
     return () => controller.abort();
-  }, [bridgeSession, token]);
+  }, [bridgeOrigin, bridgeSession, token]);
 
   const resolution = useMemo(
     () => resolveLensNextLaunchProject(
@@ -179,6 +185,7 @@ export function LensNextWorkspace() {
     >
       <LensNextPanel
         projects={projects}
+        bridgeOrigin={bridgeOrigin}
         selectedProjectId={resolution.projectId}
         onProjectChange={setSelectedProjectId}
         projectLocked={resolution.locked}
