@@ -16094,7 +16094,7 @@
     },
     {
       "taskId": "bimlog-intake-apu-04-agreement-lifecycle-20260831",
-      "reviewedThroughCommit": "95ef04c6ade5a744e0bbc2a8cb1447a36a8be893",
+      "reviewedThroughCommit": "b8e5e21ce7de8c256597a4e9531998aeadc83f5f",
       "reviewedAt": "2026-08-31T18:21:55-04:00",
       "status": "implementation_candidate",
       "captureTiming": "same_task_after_agreement_lifecycle_implementation_behavior_and_visual_review",
@@ -16147,13 +16147,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "Records v1.05.N01-P04 as a local relationship-bound agreement-lifecycle candidate and separates all external gates."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed P04 baseline already records accurate local status; this evidence refresh adds no further status change."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "Moves agreement lifecycle source to local candidate and identifies Build 05 multiple-APU ownership plus remaining release gates."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed P04 baseline already records Build 05 and remaining gates; this evidence refresh adds no new open loop."
         },
         {
           "key": "audit",
@@ -16162,18 +16162,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/package.json",
-        "artifacts/api-server/src/lib/job-intake-contract.ts",
-        "artifacts/bimlog/src/components/job-intake/CompanyJobMap.tsx",
-        "artifacts/bimlog/src/components/job-intake/SimpleJobIntakeExperience.visual.tsx",
-        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
-        "bimlog-shared-version.json",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "6935b81deedc0548c10daebdf1647a5b72995f2172565e3a59a09d17f9fbf9f2"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
