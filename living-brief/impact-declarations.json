@@ -16020,7 +16020,7 @@
     },
     {
       "taskId": "bimlog-intake-apu-03-company-map-20260831",
-      "reviewedThroughCommit": "08c9a1ea89e10bf2bff97afb079eb9003b273140",
+      "reviewedThroughCommit": "6199c28ad3cd8dc1b92e4afb0155b6650a5d5cb9",
       "reviewedAt": "2026-08-31T17:45:00-04:00",
       "status": "implementation_candidate",
       "captureTiming": "same_task_after_lens_n01_intake_p02_reconciliation_and_company_map_implementation",
@@ -16073,13 +16073,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "Records the reconciled N01/P02 baseline and v1.05.N01-P03 local map candidate."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed v1.05.N01-P03 baseline already contains the accurate status; this evidence refresh adds no further status change."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "Records remaining visual, persistence, integration, release, and Build 04 binding gates."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed v1.05.N01-P03 baseline already contains the accurate remaining gates; this evidence refresh adds no new open loop."
         },
         {
           "key": "audit",
@@ -16088,17 +16088,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/package.json",
-        "artifacts/api-server/src/lib/job-intake-contract.ts",
-        "artifacts/bimlog/src/components/job-intake/SimpleJobIntakeExperience.visual.tsx",
-        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
-        "bimlog-shared-version.json",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "dd2929d09f05becc0a41cc5deab0fb911467a8f25887707d60b786ef657ab983"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
