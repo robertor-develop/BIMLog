@@ -2068,3 +2068,10 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - After Stage One review, separately authorize any version change, packaging, installation, push, Replit synchronization, publication, or Telegram delivery. None is implied by the source recovery commit.
 - Execute connected field acceptance in Navisworks Manage 2021 and 2025 on controlled models: authoritative/ambiguous binding, dynamic platform inventory, create without Saved Viewpoint or model save, persisted display ID and thumbnail after refresh, exact platform-only Working View reconstruction, tamper rejection, minimize/maximize/resize, independent pane scrolling, settings, diagnostics, and XML export.
 - Project 30 access/provenance, the historical project-26 target identity, Ruben's 2025 runtime proof, and production source identity remain unverified and must not be inferred from Stage One automated evidence.
+
+## Lens Next v1.05.N01-P01 — remaining release and field gates
+
+- The production binding-index migration is complete and verified. Do not restore the former global uniqueness rule unless a rollback audit proves that no legitimate cross-project active keys exist.
+- Complete the repository-wide build/pre-push gates, commit the schema/version/package reconciliation, and advance governed source branches only from the exact green commit. Replit publication must use Shell, not Replit Agent, and must pass the complete workspace build before publication.
+- Before installing either native package, close the matching Navisworks process and verify the ZIP hash, manifest release `v1.05.N01-P01`, year, Autodesk series, BAT launcher, and native DLL file version `1.5.1.1`.
+- Connected Navisworks Manage 2021 and 2025 field acceptance remains required: authoritative project binding, dynamic platform inventory, create without a Saved Viewpoint/model save, persisted display ID and thumbnail, exact platform-only Working View reconstruction, tamper rejection, minimize/maximize/resize, pane scrolling, settings, diagnostics, and validated XML export. Do not claim 2025 runtime acceptance on this host because Navisworks Manage 2025 is not installed here.

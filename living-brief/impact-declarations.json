@@ -15751,6 +15751,105 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "21b58f532870957641f5a6843d4d2cafcc418625290669ac29413020d7404cf8"
+    },
+    {
+      "taskId": "bimlog-lens-next-v105-n01-p01-production-binding-migration-20260831",
+      "reviewedThroughCommit": "2aee8ab84830ccf0a039c9f6e3e93c0629c2653c",
+      "reviewedAt": "2026-08-31T16:51:06.8685993-04:00",
+      "status": "production_migration_and_dual_year_candidate_reviewed",
+      "captureTiming": "post_production_migration_post_dual_year_package_validation_pre_commit_pre_push_pre_publish_pre_install_pre_field_acceptance",
+      "summary": "Records the production project-scoped Lens Next binding migration, the first shared-version adoption at v1.05.N01-P01, and the validated 2021/2025 deterministic package candidates.",
+      "workstreams": [
+        "lens-next-production-binding-scope",
+        "lens-next-shared-version-first-adoption",
+        "lens-next-dual-year-package-validation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole project, issue, viewpoint, and persisted visual-package authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed governance, build, installation, publication, and field-acceptance gates remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The migration and version transition retain the existing dual-year automated quality gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work corrects accepted Lens Next behavior and release identity without adding unrelated product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The project-scoped binding repair enforces the existing platform-first authority model without changing generated platform structure."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the first shared release label, compatible binary version, dual-year package identities, and validation totals."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout, PDF, XML presentation, or report design doctrine changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the production audit and migration, version adoption, test totals, and exact package identities."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining governed commit, publication, installation, delivery, and connected field-acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the owner-authorized production DDL boundary, zero-row evidence, and post-migration index verification."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "lib/db/src/schema/lens-next-model-bindings.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
+        "plugins/BIMLogLensNext/Build-Package-LensNext.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
+        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2021.ps1",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2025.ps1",
+        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json",
+        "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+        "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+        "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
+        "plugins/BIMLogLensNext/src/LensNextConstants.cs"
+      ],
+      "reviewedChangeSha256": "1807e0a01894be8e1255bfee0ff52cf80f80a6608b4511429dc28aead2a9bf0c"
     }
   ]
 }
