@@ -16165,6 +16165,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-intake-apu-05-multiple-apu-builder-20260831",
+      "reviewedThroughCommit": "701b62c1bf826d30c3d23777704b2f2cdf70c0f6",
+      "reviewedAt": "2026-08-31T19:57:00-04:00",
+      "status": "implementation_candidate",
+      "captureTiming": "same_task_after_multiple_apu_implementation_behavior_and_visual_review",
+      "summary": "Advances only the platform counter to P05 and adds agreement-owned editable APU drafts, transparent templates and calculation methods, while preserving immutable Generic APU versions as the approved commercial authority.",
+      "workstreams": [
+        "job-intake-multiple-apu",
+        "generic-apu-composition",
+        "shared-bimlog-version-governance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains construction-record authority and links rather than duplicates approved Commercial pricing."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing isolated build, visual, evidence, release, and human-authority rules remain applicable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The builder is bilingual, responsive, plain-language, deterministic, and explicit about editable defaults versus authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Agreement-owned multiple APUs implement the already accepted Job Intake and APU program direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform audit was rerun after the additive APU contract and production component changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next source, native package, model binding, or plugin acceptance evidence changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed PDF, spreadsheet, report identity, or export presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance, or regulatory claim changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed P05 baseline already records the local implementation and passed focused and visual gates; this evidence refresh adds no status change."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed P05 baseline already records Build 06 and all remaining integration and external gates; this evidence refresh adds no open loop."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production mutation, schema migration, push, publication, deployment, legal approval, or financial commitment occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
