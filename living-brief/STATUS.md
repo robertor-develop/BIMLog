@@ -1,5 +1,22 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P01 INTAKE-APU-01 local foundation candidate - 2026-08-31
+
+- First shared-format adoption is exactly `v1.05.N01-P01`; no legacy version supplied either
+  counter. Lens Next owns `N`; platform, Job Intake, and APU own `P`.
+- The new compatibility contract composes the existing canonical Job Intake, Commercial,
+  Generic APU, Job Operations, resource, time, and budget authorities as Job -> Participants ->
+  Engagements -> Contracts -> APUs -> Work packages. It creates no parallel financial store and
+  performs no production data migration.
+- The foundation accepts multiple companies, provider/customer relationships, contracts,
+  contract-owned APUs, parent-bound change orders/additional work, and APU-owned work packages.
+  It refuses unknown participants, contracts, APUs, invalid statuses/types, duplicate identities,
+  and parentless change orders.
+- The complete simplified UX doctrine, Ruben feedback acceptance, role-based progressive
+  disclosure, rate vocabulary, and ten-build program are frozen in `INTAKE_APU.md`.
+- This is a local source candidate only. UI implementation, visual acceptance, integration,
+  push, publication, deployment, live verification, and customer acceptance remain separate.
+
 ## BIMLog v1.60.33.06 Build 6 Team Capacity local candidate - 2026-08-14
 
 - The local production-artifact proof now accepts an explicit caller-selected non-privileged

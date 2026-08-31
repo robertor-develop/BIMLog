@@ -13,10 +13,11 @@
     "check:tracked-secret-exposure": "node scripts/check-tracked-secret-exposure.mjs",
     "test:tracked-secret-exposure": "node scripts/check-tracked-secret-exposure.mjs --self-test && node scripts/check-tracked-secret-exposure.mjs",
     "check:database-safety": "node scripts/check-database-safety.mjs",
+    "check:shared-version": "node scripts/check-bimlog-shared-version.mjs",
     "test:database-safety": "node scripts/test-database-safety.mjs",
     "attest:publication-source": "node scripts/check-database-safety.mjs --attest-source",
-    "gate:pre-push": "pnpm run test:tracked-secret-exposure && pnpm run test:database-safety && pnpm run build && pnpm --filter @workspace/api-server run test:production-artifact",
-    "build": "node scripts/check-tracked-secret-exposure.mjs && node scripts/check-database-safety.mjs && node scripts/check-mojibake.mjs && node scripts/check-living-brief.mjs && node ./node_modules/typescript/bin/tsc --build && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck && pnpm -r --if-present run build",
+    "gate:pre-push": "pnpm run check:shared-version && pnpm run test:tracked-secret-exposure && pnpm run test:database-safety && pnpm run build && pnpm --filter @workspace/api-server run test:production-artifact",
+    "build": "node scripts/check-bimlog-shared-version.mjs && node scripts/check-tracked-secret-exposure.mjs && node scripts/check-database-safety.mjs && node scripts/check-mojibake.mjs && node scripts/check-living-brief.mjs && node ./node_modules/typescript/bin/tsc --build && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
   },

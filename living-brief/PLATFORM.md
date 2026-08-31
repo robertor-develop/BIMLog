@@ -591,3 +591,10 @@ It changes only when the code structure or curated architectural facts change.
   XLSX exports expose the same Contract Item quantities, rates, values, APU identity, and workflow metadata.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
+# Job Intake and Multi-APU composition
+
+The canonical simplified product experience and multi-company/multi-contract/multi-APU
+composition are defined in `INTAKE_APU.md`. This platform composes existing authorities; Job
+Intake remains the pre-activation draft, Commercial owns contracts and immutable commercial
+versions, Generic APU owns calculations and versioned templates, and Job Operations owns work
+items, packages, assignments, time, and delivery evidence.

@@ -2,6 +2,19 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## BIMLog v1.05.N01-P01 Job Intake and Multi-APU program - 2026-08-31
+
+1. Complete `INTAKE-APU-01` focused behavior, typecheck, Living Brief, secret, database-safety,
+   mojibake, and clean-diff gates without changing Lens Next or production data.
+2. Build `INTAKE-APU-02` as the two-minute bilingual seven-question experience with autosave,
+   resume, plain-language review, intelligent defaults, and optional Advanced controls.
+3. Continue the remaining builds in `INTAKE_APU.md`; every UI build requires desktop and
+   exact-390 English/Spanish visual acceptance.
+4. Before any shared-version integration, reread the latest canonical shared version, increment
+   only `P`, and preserve the latest verified `N`. Stop on concurrent ambiguity.
+5. Preserve existing Job Intake, Commercial contract, APU, budget, Job Operations, resource,
+   time-entry, immutable-baseline, and Lens Next authorities. Do not create competing stores.
+
 ## BIMLog v1.60.33.06 Build 6 Team Capacity release gates - 2026-08-14
 
 - The exact-artifact proof's fixed PostgreSQL port collided with an unrelated managed local

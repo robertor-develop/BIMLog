@@ -15673,6 +15673,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0e2cfaf57a29f9637ad23f8f0e3f0a40f8f895c24ce537a6eaf836e6156624b0"
+    },
+    {
+      "taskId": "bimlog-intake-apu-01-shared-version-foundation-20260831",
+      "reviewedThroughCommit": "1f98cb575b14225983bd6f190f2fc31ee4bb1f42",
+      "reviewedAt": "2026-08-31T15:30:00-04:00",
+      "status": "implementation_candidate",
+      "captureTiming": "same_task_after_architecture_review_and_foundation_behavior_validation",
+      "summary": "Establishes the first shared BIMLog version, the Job Intake/APU composition authority, multi-company and multi-contract normalization, and mechanical counter-ownership enforcement without a production migration.",
+      "workstreams": [
+        "job-intake-apu-foundation",
+        "shared-bimlog-version-governance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole construction operations authority; no competing ecosystem product is created."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Records the shared-format first-adoption rule, independent counter ownership, preservation rule, and mandatory pre-integration verification."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing regression, tenancy, evidence, and migration safety requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The foundation implements the already approved simple multi-company Job Intake and APU direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Defines the canonical Job, Participant, Engagement, Contract, APU, Work Package, and Resource Assignment composition boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next behavior and native plugin ownership are not modified."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering, PDF, spreadsheet, or presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, or compliance claim is introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the isolated v1.05.N01-P01 foundation candidate and its non-production status."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining user-facing builds, integration, release, and acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No database migration, customer-data mutation, secret change, push, or publication occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "fb7f56e296c751b9dd19153f8ebd35ec262f7040aadedaf1875d745b79ba40d1"
     }
   ]
 }

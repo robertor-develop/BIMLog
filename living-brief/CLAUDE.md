@@ -620,6 +620,20 @@ inline badge. If one side's design changes, the other side must be reviewed too.
 - Navisworks 2025 canonical source/build/package root: `H:\BIMLogPlugin2025`.
 - Use version naming `v1.60.6`, `v1.60.7`, `v1.60.8`, etc. for plugin releases.
 
+### Shared BIMLog platform and Lens Next version authority
+
+- The shared BIMLog release identity is `v1.05.Nxx-Pxx`. This shared identity is
+  separate from year-specific native plugin package identities.
+- When the repository contains only a legacy identity such as `v1.0.51`, the
+  first shared identity is exactly `v1.05.N01-P01`. Never convert or infer either
+  counter from a legacy version.
+- BIMLog MAIN 04 / Lens Next owns only `N`. MAIN 00 / Platform, Job Intake and
+  APU owns only `P`. Each owner increments its counter by one and preserves the
+  latest value owned by the other workstream; neither counter may be reset.
+- Immediately before integration or release, reread the latest canonical shared
+  version and run `check:shared-version`. A stale branch must reconcile the other
+  owner's latest counter before it may claim a release identity.
+
 ## Navisworks API lessons - never repeat these
 - SavedItemCollection uses `.Add()` not `.AddCopy()`.
 - GroupItem has no public constructor. Use `existingGroupItem.CreateCopyWithoutChildren()`.
