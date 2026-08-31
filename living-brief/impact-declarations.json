@@ -15596,6 +15596,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "8163d361ec74ca75ef165beeb36b35a08ffd644ce43da4f750a13bc7d2f608ab"
+    },
+    {
+      "taskId": "bimlog-lens-next-v1.0.51-digest-systemic-repair-20260831",
+      "reviewedThroughCommit": "f166a644510496aa9e21d5ea6304d69fb5f86161",
+      "reviewedAt": "2026-08-31T08:57:03.2717795-04:00",
+      "status": "release_reconciliation_candidate",
+      "captureTiming": "same_task_after_digest_implementation_validation_and_dual_year_packaging_before_push_publication_and_field_acceptance",
+      "summary": "Reconciles the Lens Next v1.0.51 cross-language visual-digest repair, verified v1 compatibility, exact v2 binary64 contract, dual-year packages, regression evidence, and remaining publication and field gates.",
+      "workstreams": [
+        "lens-next-cross-language-digest-v2",
+        "lens-next-legacy-v1-capture-compatibility",
+        "lens-next-dual-year-v1.0.51-release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole construction viewpoint and stored visual-package authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed source, build, publication, installation, and acceptance gates remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation adds cross-language fixed vectors, tamper denial, serializer round-trip proof, and full regressions under the existing systemic-quality doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The repair corrects the accepted Lens Next workflow without adding unrelated product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the exact digest v2 binary64 contract, verified legacy v1 compatibility, and fail-closed mismatch behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records shared 2021/2025 v1.0.51 native behavior, compatibility boundary, package identities, and hashes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design, PDF, or export presentation doctrine changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact implementation commit, root cause, validation totals, package hashes, and uncompleted live gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the required push, Replit build/publication, live v1 compatibility proof, 2021 exact repair/open, Telegram delivery, and 2025 field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer viewpoint repair, issue mutation, model save, database migration, deletion, secret change, or production publication occurred in the implementation unit."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3ea396a2c83e7d6eb44e9cecb703b34fbb071bf3d6896ddfcc415ac34a262387"
     }
   ]
 }
