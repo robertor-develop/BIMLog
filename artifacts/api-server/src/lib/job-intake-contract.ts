@@ -252,6 +252,48 @@ export function normalizeJobIntakeData(raw: unknown) {
   const review =
     input.review && typeof input.review === "object" ? input.review : {};
   const scopeItems = Array.isArray(input.scopeItems) ? input.scopeItems : [];
+  const relationshipInput =
+    input.relationships && typeof input.relationships === "object"
+      ? input.relationships
+      : {};
+  const participantInput = Array.isArray(relationshipInput.participants)
+    ? relationshipInput.participants
+    : [];
+  const engagementInput = Array.isArray(relationshipInput.engagements)
+    ? relationshipInput.engagements
+    : [];
+  if (participantInput.length > 50)
+    throw new FinancialControlError(400, "JOB_INTAKE_PARTICIPANT_LIMIT", "An Intake accepts up to 50 participating companies.");
+  if (engagementInput.length > 100)
+    throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENT_LIMIT", "An Intake accepts up to 100 company relationships.");
+  const participantIds = new Set<string>();
+  const participantRoles = new Set(["owner", "general_contractor", "customer", "service_provider", "trade_contractor", "consultant", "vendor", "other"]);
+  const participants = participantInput.map((rawParticipant: any, index: number) => {
+    const participant = rawParticipant && typeof rawParticipant === "object" ? rawParticipant : {};
+    const id = optionalText(participant.id, `relationships.participants[${index}].id`, 100);
+    if (!id) throw new FinancialControlError(400, "JOB_INTAKE_PARTICIPANT_ID_REQUIRED", "Every participating company requires a stable ID.");
+    if (participantIds.has(id)) throw new FinancialControlError(400, "JOB_INTAKE_PARTICIPANT_ID_DUPLICATE", "Participating company IDs must be unique.");
+    participantIds.add(id);
+    const role = participantRoles.has(String(participant.role)) ? String(participant.role) : "other";
+    const companyName = optionalText(participant.companyName, `relationships.participants[${index}].companyName`, 200);
+    if (!companyName) throw new FinancialControlError(400, "COMPANY_NAME_REQUIRED", "Every company in the job map needs a name.");
+    return { id, companyId: optionalId(participant.companyId, `relationships.participants[${index}].companyId`), companyName, role, contactName: optionalText(participant.contactName, `relationships.participants[${index}].contactName`, 200) };
+  });
+  const engagementIds = new Set<string>();
+  const engagements = engagementInput.map((rawEngagement: any, index: number) => {
+    const engagement = rawEngagement && typeof rawEngagement === "object" ? rawEngagement : {};
+    const id = optionalText(engagement.id, `relationships.engagements[${index}].id`, 100);
+    if (!id) throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENT_ID_REQUIRED", "Every company relationship requires a stable ID.");
+    if (engagementIds.has(id)) throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENT_ID_DUPLICATE", "Company relationship IDs must be unique.");
+    engagementIds.add(id);
+    const providerParticipantId = optionalText(engagement.providerParticipantId, `relationships.engagements[${index}].providerParticipantId`, 100);
+    const customerParticipantId = optionalText(engagement.customerParticipantId, `relationships.engagements[${index}].customerParticipantId`, 100);
+    if (!providerParticipantId || !customerParticipantId || !participantIds.has(providerParticipantId) || !participantIds.has(customerParticipantId))
+      throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENT_PARTICIPANT_INVALID", "Every relationship must connect two participating companies in this Intake.");
+    if (providerParticipantId === customerParticipantId)
+      throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENT_PARTIES_MUST_DIFFER", "A company cannot hire itself in the same relationship.");
+    return { id, providerParticipantId, customerParticipantId, description: optionalText(engagement.description, `relationships.engagements[${index}].description`, 300) };
+  });
   const assignments = Array.isArray(team.assignments) ? team.assignments : [];
   const contractInputs = Array.isArray(commercial.contracts)
     ? commercial.contracts
@@ -552,6 +594,7 @@ export function normalizeJobIntakeData(raw: unknown) {
     },
   );
   return {
+    relationships: { participants, engagements },
     identity: {
       jobName: optionalText(identity.jobName, "identity.jobName", 300),
       jobCode: optionalText(identity.jobCode, "identity.jobCode", 60),

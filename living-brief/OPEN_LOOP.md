@@ -4,6 +4,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.05.N01-P01 Job Intake and Multi-APU program - 2026-08-31
 
+- `INTAKE-APU-03` implements the local visual multi-company map at `v1.05.N01-P03` after
+  reconciling MAIN 04 Lens Next `N01`. Complete desktop and exact-390 English/Spanish visual
+  acceptance and verify autosave/reload of participants and relationships against an isolated
+  authorized API/database before integration.
+- Build 04 must bind each quote, base contract, change order, addition, or amendment to one
+  provider/customer relationship and render that ownership without inventing legal identifiers.
+
 - `INTAKE-APU-02` implements the local seven-question bilingual candidate at
   `v1.05.N01-P02`. Complete desktop and exact-390 English/Spanish visual acceptance before
   integration. Confirm autosave/resume and simple-to-Advanced round trips against an isolated

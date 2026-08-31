@@ -1,5 +1,20 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P03 INTAKE-APU-03 local company-map candidate - 2026-08-31
+
+- The Job Intake simple experience now includes a bilingual visual company map showing
+  participating companies, their project roles, and explicit provider-to-customer service
+  relationships without duplicating the job.
+- Up to 50 participating companies and 100 relationships are stored inside the existing
+  canonical Job Intake JSON draft. Stable IDs, valid roles, known endpoints, distinct parties,
+  autosave, recovery, revision locking, and bounded text remain enforced by the server.
+- The map can seed the provider/customer pair from current Intake identity, add owners, general
+  contractors, trades, consultants, vendors, and other participants, and remove a company with
+  its dependent relationship edges. Contracts and scope remain counted from their canonical
+  existing stores; Build 04 will add their explicit visual bindings and lifecycle controls.
+- MAIN 04 Lens Next `N01` and the platform `P02` chain were reconciled before `P03`; no Lens code,
+  native package, or acceptance evidence was replaced.
+
 ## BIMLog v1.05.N01-P02 INTAKE-APU-02 local experience candidate - 2026-08-31
 
 - Job Intake now opens with seven plain bilingual questions and keeps the complete existing

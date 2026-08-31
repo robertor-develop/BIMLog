@@ -2,6 +2,7 @@ import React from "react";
 import { createServer } from "node:http";
 import { renderToStaticMarkup } from "react-dom/server";
 import { SimpleJobIntakeExperience } from "./SimpleJobIntakeExperience";
+import { CompanyJobMap } from "./CompanyJobMap";
 
 const data = {
   identity: { jobName: "River Avenue", jobCode: "RA-01", clientCompany: "General Contractor", primaryContact: "Ruben", location: "New York, NY", currency: "USD" },
@@ -15,7 +16,8 @@ const css = `*{box-sizing:border-box}body{margin:0;background:#eef3f8;color:#0f1
 const server = createServer((request, response) => {
   const spanish = new URL(request.url || "/", "http://127.0.0.1").searchParams.get("lang") === "es";
   const tt = (en: string, es: string) => spanish ? es : en;
-  const body = renderToStaticMarkup(<SimpleJobIntakeExperience data={data} setData={() => undefined} members={[{ id: 7, name: "Ana" }]} defaultRate="35.47" tt={tt} onAdvanced={() => undefined}/>);
+  const mapData = { ...data, relationships: { participants: [{ id: "BIMTECH", companyName: "BIMTech", role: "service_provider", contactName: "Ana" }, { id: "GC", companyName: "General Contractor", role: "general_contractor", contactName: "Ruben" }, { id: "OWNER", companyName: "River Avenue Owner", role: "owner", contactName: "" }], engagements: [{ id: "E1", providerParticipantId: "BIMTECH", customerParticipantId: "GC", description: "HVAC shop drawings" }, { id: "E2", providerParticipantId: "GC", customerParticipantId: "OWNER", description: "General construction" }] } };
+  const body = renderToStaticMarkup(<><SimpleJobIntakeExperience data={mapData} setData={() => undefined} members={[{ id: 7, name: "Ana" }]} defaultRate="35.47" tt={tt} onAdvanced={() => undefined}/><CompanyJobMap data={mapData} setData={() => undefined} tt={tt}/></>);
   response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
   response.end(`<!doctype html><html lang="${spanish ? "es" : "en"}"><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Simple Job Intake QA</title><style>${css}</style></head><body><main class="shell">${body}</main></body></html>`);
 });

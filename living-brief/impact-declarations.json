@@ -16017,6 +16017,88 @@
         "plugins/BIMLogLensNext/src/LensNextConstants.cs"
       ],
       "reviewedChangeSha256": "4c1b4d476f4a8b6258d589e4905857698777d0246f83560e2d4d1499b9dfb9ed"
+    },
+    {
+      "taskId": "bimlog-intake-apu-03-company-map-20260831",
+      "reviewedThroughCommit": "08c9a1ea89e10bf2bff97afb079eb9003b273140",
+      "reviewedAt": "2026-08-31T17:45:00-04:00",
+      "status": "implementation_candidate",
+      "captureTiming": "same_task_after_lens_n01_intake_p02_reconciliation_and_company_map_implementation",
+      "summary": "Preserves the reconciled Lens Next N01 and Intake P02 histories, advances only P to P03, and adds bounded participating-company and provider/customer relationship authority inside the canonical Job Intake draft.",
+      "workstreams": [
+        "lens-next-n01-intake-p02-reconciliation",
+        "job-intake-company-map",
+        "shared-bimlog-version-governance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole Job Intake and construction-relationship authority; no ecosystem ownership changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing shared-version, isolation, release, visual, and evidence gates remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing tenancy, authorization, bounded input, bilingual, responsive, and regression requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The visual relationship map implements the accepted multi-company Job Intake direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the additive canonical Intake relationship contract and new company-map UI and QA surfaces."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Preserves and reconciles MAIN 04 Lens Next N01 source, project-scoped bindings, packages, and evidence without modification."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or export contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the reconciled N01/P02 baseline and v1.05.N01-P03 local map candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining visual, persistence, integration, release, and Build 04 binding gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The merge preserves prior Lens audit history; this candidate performs no production mutation, migration, push, or publication."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/bimlog/src/components/job-intake/SimpleJobIntakeExperience.visual.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "bimlog-shared-version.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dd2929d09f05becc0a41cc5deab0fb911467a8f25887707d60b786ef657ab983"
     }
   ]
 }

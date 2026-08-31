@@ -282,6 +282,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.behavior.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.ts
 - artifacts/api-server/src/lib/job-budget-governance.behavior.ts
+- artifacts/api-server/src/lib/job-company-map.behavior.ts
 - artifacts/api-server/src/lib/job-document-connections.behavior.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
 - artifacts/api-server/src/lib/job-intake-migration.ts
