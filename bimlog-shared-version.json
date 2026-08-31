@@ -1,7 +1,7 @@
 {
   "schemaVersion": "bimlog-shared-version.v1",
-  "version": "v1.05.N01-P01",
-  "adoption": "FIRST_SHARED_FORMAT_ADOPTION",
+  "version": "v1.05.N01-P02",
+  "adoption": "SHARED_FORMAT_ACTIVE",
   "lensNextCounterOwner": "BIMLog MAIN 04 / Lens Next",
   "platformCounterOwner": "MAIN 00 / Platform, Job Intake and APU",
   "legacySourceVersion": "v1.0.51",

@@ -4,6 +4,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.05.N01-P01 Job Intake and Multi-APU program - 2026-08-31
 
+- `INTAKE-APU-02` implements the local seven-question bilingual candidate at
+  `v1.05.N01-P02`. Complete desktop and exact-390 English/Spanish visual acceptance before
+  integration. Confirm autosave/resume and simple-to-Advanced round trips against an isolated
+  authorized API/database; no production data is used by this source build.
+
 1. Complete `INTAKE-APU-01` focused behavior, typecheck, Living Brief, secret, database-safety,
    mojibake, and clean-diff gates without changing Lens Next or production data.
 2. Build `INTAKE-APU-02` as the two-minute bilingual seven-question experience with autosave,

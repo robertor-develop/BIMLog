@@ -326,6 +326,11 @@ export function normalizeJobIntakeData(raw: unknown) {
       )
         ? String(contract.perspective)
         : "downstream",
+      agreementKind: ["quote", "base", "additional"].includes(
+        String(contract.agreementKind),
+      )
+        ? String(contract.agreementKind)
+        : "base",
       contractType: [
         "owner_prime",
         "subcontract",

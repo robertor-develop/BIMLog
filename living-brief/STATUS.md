@@ -1,5 +1,18 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P02 INTAKE-APU-02 local experience candidate - 2026-08-31
+
+- Job Intake now opens with seven plain bilingual questions and keeps the complete existing
+  technical workspace behind an explicit Advanced setup control.
+- The simple flow writes directly into the canonical Job Intake identity, primary contract,
+  first Contract Item, team assignment, and review records. Existing autosave, browser recovery,
+  revision control, activation, Commercial enrichment, and advanced editing remain authoritative.
+- Required job/customer/scope/estimate/team information is visible before review. Documents,
+  formal contract numbers, extra contracts, detailed APUs, levels, and work-package decomposition
+  remain optional or available in Advanced setup.
+- This is a local UI candidate only. Desktop and exact-390 English/Spanish visual acceptance,
+  integration, push, publication, deployment, live verification, and user acceptance remain open.
+
 ## BIMLog v1.05.N01-P01 INTAKE-APU-01 local foundation candidate - 2026-08-31
 
 - First shared-format adoption is exactly `v1.05.N01-P01`; no legacy version supplied either

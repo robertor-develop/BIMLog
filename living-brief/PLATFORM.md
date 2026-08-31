@@ -156,6 +156,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-service.ts
+- artifacts/api-server/src/lib/bimlog-shared-version.behavior.ts
+- artifacts/api-server/src/lib/bimlog-shared-version.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
@@ -275,6 +277,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/help-center.behavior.ts
 - artifacts/api-server/src/lib/import-intelligence.ts
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
+- artifacts/api-server/src/lib/intake-apu-foundation.behavior.ts
+- artifacts/api-server/src/lib/intake-apu-foundation.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.behavior.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.ts
 - artifacts/api-server/src/lib/job-budget-governance.behavior.ts
@@ -591,10 +595,3 @@ It changes only when the code structure or curated architectural facts change.
   XLSX exports expose the same Contract Item quantities, rates, values, APU identity, and workflow metadata.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
-# Job Intake and Multi-APU composition
-
-The canonical simplified product experience and multi-company/multi-contract/multi-APU
-composition are defined in `INTAKE_APU.md`. This platform composes existing authorities; Job
-Intake remains the pre-activation draft, Commercial owns contracts and immutable commercial
-versions, Generic APU owns calculations and versioned templates, and Job Operations owns work
-items, packages, assignments, time, and delivery evidence.

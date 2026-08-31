@@ -15752,6 +15752,86 @@
         "package.json"
       ],
       "reviewedChangeSha256": "fb7f56e296c751b9dd19153f8ebd35ec262f7040aadedaf1875d745b79ba40d1"
+    },
+    {
+      "taskId": "bimlog-intake-apu-02-simple-experience-20260831",
+      "reviewedThroughCommit": "c7695f385ef5ad48591d155763a24f924894efd5",
+      "reviewedAt": "2026-08-31T16:25:00-04:00",
+      "status": "implementation_candidate",
+      "captureTiming": "same_task_after_behavior_typecheck_and_bilingual_visual_validation",
+      "summary": "Adds the default two-minute bilingual seven-question Job Intake experience over the canonical autosaved draft while preserving the complete Advanced setup workspace.",
+      "workstreams": [
+        "job-intake-simple-experience",
+        "shared-bimlog-version-governance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole construction operations and Job Intake authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing shared-version, isolated-worktree, release, and visual-acceptance controls remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing bilingual, responsive, regression, evidence, and activation safety requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The simple experience implements the accepted progressive-disclosure product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic inventory records the new simple Job Intake component and its QA fixtures; the UI still creates no parallel store or database migration."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and native plugin behavior are untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the v1.05.N01-P02 local experience candidate and validation boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining isolated persistence, integration, release, and acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production data, migration, secret, push, publication, or deployment action occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "bimlog-shared-version.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "866112c4094ec90307799c1cafff616b589f5d2890bea54a3ff2cfad52a2fbb4"
     }
   ]
 }
