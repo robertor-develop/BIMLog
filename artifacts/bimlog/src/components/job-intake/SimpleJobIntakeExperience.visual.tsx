@@ -4,11 +4,13 @@ import { renderToStaticMarkup } from "react-dom/server";
 import { SimpleJobIntakeExperience } from "./SimpleJobIntakeExperience";
 import { CompanyJobMap } from "./CompanyJobMap";
 import { AgreementLifecycleBoard } from "./AgreementLifecycleBoard";
+import { MultiApuBuilder } from "./MultiApuBuilder";
 
 const data = {
   identity: { jobName: "River Avenue", jobCode: "RA-01", clientCompany: "General Contractor", primaryContact: "Ruben", location: "New York, NY", currency: "USD" },
   commercial: { contracts: [{ id: "PRIMARY", title: "HVAC coordination proposal", counterpartyName: "General Contractor", agreementKind: "quote", status: "sent", engagementId: "E1", contractType: "consultant_agreement" }, { id: "ADD-1", title: "Level 12 added scope", agreementKind: "addition", status: "proposed", engagementId: "E1", parentContractId: "PRIMARY", contractType: "other_commitment" }] },
   scopeItems: [{ id: "CI-1", name: "HVAC shop drawings", plannedHours: "80", billingHourlyRate: "35.47", contractId: "PRIMARY" }],
+  apuDrafts: [{ id: "APU-1", contractId: "PRIMARY", title: "HVAC drafting", templateKey: "drafting", method: "hours_hourly_rate", hours: "80", hourlyRate: "35.47", quantity: "1", unitCost: "0", fixedAmount: "0", currency: "USD", rateProvenance: "portfolio_default", canonicalVersionId: null }],
   delivery: { workflowTemplate: "bim-submittal" },
   team: { projectLeaderUserId: 7, assignments: [{ id: "A-1", userId: 7, personName: "Ana", role: "BIM Coordinator", scopeItemId: "CI-1", plannedHours: "80" }] },
   review: { scopeConfirmed: false, teamConfirmed: false },
@@ -18,7 +20,7 @@ const server = createServer((request, response) => {
   const spanish = new URL(request.url || "/", "http://127.0.0.1").searchParams.get("lang") === "es";
   const tt = (en: string, es: string) => spanish ? es : en;
   const mapData = { ...data, relationships: { participants: [{ id: "BIMTECH", companyName: "BIMTech", role: "service_provider", contactName: "Ana" }, { id: "GC", companyName: "General Contractor", role: "general_contractor", contactName: "Ruben" }, { id: "OWNER", companyName: "River Avenue Owner", role: "owner", contactName: "" }], engagements: [{ id: "E1", providerParticipantId: "BIMTECH", customerParticipantId: "GC", description: "HVAC shop drawings" }, { id: "E2", providerParticipantId: "GC", customerParticipantId: "OWNER", description: "General construction" }] } };
-  const body = renderToStaticMarkup(<><SimpleJobIntakeExperience data={mapData} setData={() => undefined} members={[{ id: 7, name: "Ana" }]} defaultRate="35.47" tt={tt} onAdvanced={() => undefined}/><CompanyJobMap data={mapData} setData={() => undefined} tt={tt}/><AgreementLifecycleBoard data={mapData} setData={() => undefined} tt={tt}/></>);
+  const body = renderToStaticMarkup(<><SimpleJobIntakeExperience data={mapData} setData={() => undefined} members={[{ id: 7, name: "Ana" }]} defaultRate="35.47" tt={tt} onAdvanced={() => undefined}/><CompanyJobMap data={mapData} setData={() => undefined} tt={tt}/><AgreementLifecycleBoard data={mapData} setData={() => undefined} tt={tt}/><MultiApuBuilder data={mapData} setData={() => undefined} tt={tt}/></>);
   response.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
   response.end(`<!doctype html><html lang="${spanish ? "es" : "en"}"><head><meta name="viewport" content="width=device-width,initial-scale=1"><title>Simple Job Intake QA</title><style>${css}</style></head><body><main class="shell">${body}</main></body></html>`);
 });

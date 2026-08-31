@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { FinancialControlError } from "./financial-control-contract";
+import { normalizeJobApuDrafts } from "./job-apu-builder";
 import {
   boundedText,
   decimalFromScaled,
@@ -483,6 +484,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         item.apuPlanVersion,
         `scopeItems[${index}].apuPlanVersion`,
       ),
+      apuDraftId: optionalText(item.apuDraftId, `scopeItems[${index}].apuDraftId`, 100),
       budgetSnapshotLineId: optionalText(
         item.budgetSnapshotLineId,
         `scopeItems[${index}].budgetSnapshotLineId`,
@@ -573,6 +575,10 @@ export function normalizeJobIntakeData(raw: unknown) {
       "JOB_INTAKE_CONTRACT_ITEM_PROFILE_INVALID",
       "Every Contract Item must reference a contract profile in this Intake.",
     );
+  const apuDrafts = normalizeJobApuDrafts(input.apuDrafts, contractIds);
+  const apuDraftIds = new Set(apuDrafts.map((item) => item.id));
+  if (normalizedItems.some((item) => item.apuDraftId && !apuDraftIds.has(item.apuDraftId)))
+    throw new FinancialControlError(400, "JOB_INTAKE_APU_DRAFT_INVALID", "Every selected APU draft must exist in this Intake.");
   const normalizedAssignments = assignments.map(
     (rawAssignment: any, index: number) => {
       const assignment =
@@ -644,6 +650,7 @@ export function normalizeJobIntakeData(raw: unknown) {
       ),
     },
     scopeItems: normalizedItems,
+    apuDrafts,
     commercial: {
       contracts: normalizedContracts,
       quotationNumber: optionalText(

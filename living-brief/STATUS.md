@@ -1,5 +1,19 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P05 INTAKE-APU-05 local multiple-APU candidate - 2026-08-31
+
+- Simple Job Intake now groups multiple editable APU drafts beneath each existing agreement and
+  offers Drafting, BIM Coordination, and Custom starting templates without creating a competing
+  contract, budget, or approved-pricing store.
+- The guided builder supports Hours x Rate, Quantity x Unit Cost, and Fixed Amount methods with
+  immediate calculated totals. Portfolio rates 35.47 and 37.99 are visibly labeled suggested,
+  editable defaults with provenance; they are never presented as legal or financial authority.
+- Every APU draft has a stable ID and agreement binding. Unknown agreements, duplicate IDs,
+  malformed decimals, and more than 100 APU drafts fail closed. A linked canonical Generic APU
+  version is visibly read-only; revision creates a successor rather than overwriting approval.
+- Focused behavior, TypeScript, desktop English, and exact-390 Spanish visual gates pass locally.
+  Integration, push, publication, deployment, production migration, and customer acceptance remain separate.
+
 ## BIMLog v1.05.N01-P04 INTAKE-APU-04 local agreement-lifecycle candidate - 2026-08-31
 
 - The simple Job Intake experience now renders quotes, base contracts, change orders, additions,

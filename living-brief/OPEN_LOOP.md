@@ -4,11 +4,18 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.05.N01-P01 Job Intake and Multi-APU program - 2026-08-31
 
+- `INTAKE-APU-05` implements the local multiple-APU builder at `v1.05.N01-P05` using editable
+  agreement-owned drafts and immutable canonical Generic APU version links. Remaining gates are
+  deterministic Living Brief sealing, exact-clean full workspace build, integration, authorized
+  API/database autosave/reload proof, and external release/acceptance. Build 06 must add
+  floor/zone/task/deliverable work-package decomposition under these APU identities without
+  creating another schedule or document authority.
+
 - `INTAKE-APU-04` implements the local agreement-lifecycle board at `v1.05.N01-P04`.
   Remaining gates are deterministic Living Brief sealing, exact-clean full workspace build,
   integration, authorized API/database autosave/reload proof, and external release/acceptance.
-  Build 05 must attach multiple canonical Generic APU versions to their owning contract without
-  duplicating pricing, budget, or approved-baseline authority.
+  Build 05 now attaches multiple APU drafts and immutable canonical-version links to their owning
+  agreement without duplicating pricing, budget, or approved-baseline authority.
 - `INTAKE-APU-03` implements the local visual multi-company map at `v1.05.N01-P03` after
   reconciling MAIN 04 Lens Next `N01`. Complete desktop and exact-390 English/Spanish visual
   acceptance and verify autosave/reload of participants and relationships against an isolated

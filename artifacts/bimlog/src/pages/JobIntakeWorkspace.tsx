@@ -16,6 +16,7 @@ import { ContractItemBulkEditor } from "@/components/job-intake/ContractItemBulk
 import { SimpleJobIntakeExperience } from "@/components/job-intake/SimpleJobIntakeExperience";
 import { CompanyJobMap } from "@/components/job-intake/CompanyJobMap";
 import { AgreementLifecycleBoard } from "@/components/job-intake/AgreementLifecycleBoard";
+import { MultiApuBuilder } from "@/components/job-intake/MultiApuBuilder";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
@@ -94,6 +95,7 @@ const blank = {
     targetCompletionDate: "",
   },
   scopeItems: [] as any[],
+  apuDrafts: [] as any[],
   commercial: {
     contracts: [
       {
@@ -962,6 +964,7 @@ export function JobIntakeWorkspace() {
         {!advanced && <SimpleJobIntakeExperience data={data} setData={setData} members={intake.members ?? []} defaultRate={capabilities.costValuePlanner ? latestRate : "0"} tt={tt} onAdvanced={() => setAdvanced(true)}/>}
         {!advanced && <CompanyJobMap data={data} setData={setData} tt={tt}/>}
         {!advanced && <AgreementLifecycleBoard data={data} setData={setData} tt={tt}/>}
+        {!advanced && capabilities.costValuePlanner && <MultiApuBuilder data={data} setData={setData} tt={tt}/>}
         {advanced && <div className="ji-advanced-head"><h2>{tt("Advanced setup", "Configuración avanzada")}</h2><button type="button" onClick={() => setAdvanced(false)}>{tt("Return to seven questions", "Volver a las siete preguntas")}</button></div>}
         {advanced && (
         <fieldset className="ji-workspace" disabled={busy}>
