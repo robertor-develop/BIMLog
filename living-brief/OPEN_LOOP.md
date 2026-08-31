@@ -2030,6 +2030,12 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 
 ## Lens Next v1.0.49 — Remaining live acceptance gate
 
-- Obtain an exact Constitution-compliant authorization for the new Lens Next C-root bundle targets before installation. The current exception names only the Legacy paths and cannot be inferred to include `BIMLogLensNext2021.bundle` or `BIMLogLensNext2025.bundle`.
+- Use only Roberto's one-time authorization already granted in this release task for the exact 2021 target `C:\ProgramData\Autodesk\ApplicationPlugins\BIMLogLensNext2021.bundle`; do not infer authority for the 2025 target or any other C-root path.
 - After that authority exists, install the hash-verified 2021 package with Navisworks closed and execute the complete project 26 / ELA01 ELARA EAST matrix against `1185 RIVER AV MODEL-06-11-26.nwd`: dynamic inventory, filters/search, every row open result, unique historical migration and second open, missing/ambiguous errors, expiry renewal without visible reload, responsive chrome, settings, diagnostics, disposable create/cleanup only when safe, and validated XML export with before/after receipts.
 - Navisworks Manage 2025 is absent on this host. Its package/static gates are complete; live 2025 field acceptance remains pending an installed, authorized host and a non-customer acceptance model.
+
+## Lens Next v1.0.49 — Reconciled publication and acceptance gates
+
+- Commit this Living Brief reconciliation successor, atomically advance GitHub `main` and `master`, then align a clean Replit `master` to that exact pushed commit without merging preserved checkpoint history. Require the complete workspace build to pass before the one authorized publication attempt.
+- After publication, verify the production health/readiness surfaces, deployed source identity where exposed, Lens Next route loading, platform-authoritative dynamic inventory, and the absence of periodic embedded-workspace navigation or session-expiry flicker. A failed build or publication attempt stops the release and requires complete-log inspection before another authorization.
+- Install and field-test the hash-verified 2021 v1.0.49 package only under the separately granted exact C-root authority, with Navisworks closed before installation, then execute the project 26 / ELA01 ELARA EAST matrix against `1185 RIVER AV MODEL-06-11-26.nwd`. Navisworks 2025 remains unavailable on this host; deliver its exact package for Ruben's separate 2025 acceptance without claiming local 2025 runtime proof.
