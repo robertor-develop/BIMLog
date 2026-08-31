@@ -8,6 +8,9 @@
     "changedPaths": [
       "artifacts/api-server/package.json",
       "artifacts/api-server/src/lib/job-intake-contract.ts",
+      "artifacts/bimlog/src/components/job-intake/SimpleJobIntakeExperience.behavior.tsx",
+      "artifacts/bimlog/src/components/job-intake/SimpleJobIntakeExperience.tsx",
+      "artifacts/bimlog/src/components/job-intake/SimpleJobIntakeExperience.visual.tsx",
       "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
       "bimlog-shared-version.json",
       "living-brief/OPEN_LOOP.md",

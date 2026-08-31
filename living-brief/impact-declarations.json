@@ -15824,6 +15824,9 @@
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
         "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/bimlog/src/components/job-intake/SimpleJobIntakeExperience.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/SimpleJobIntakeExperience.tsx",
+        "artifacts/bimlog/src/components/job-intake/SimpleJobIntakeExperience.visual.tsx",
         "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
         "bimlog-shared-version.json",
         "living-brief/OPEN_LOOP.md",
@@ -15831,7 +15834,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "866112c4094ec90307799c1cafff616b589f5d2890bea54a3ff2cfad52a2fbb4"
+      "reviewedChangeSha256": "9860457553688735d61f2483df776fce66eab5ce2a50ad98277217dc368aed38"
     }
   ]
 }
