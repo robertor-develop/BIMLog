@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Reflection;
+using System.Web.Script.Serialization;
 using BIMLogLensNext;
 
 namespace BIMLogLensNext.Native.Tests
@@ -53,6 +54,7 @@ namespace BIMLogLensNext.Native.Tests
                 Run("health_tick_does_not_mutate_floating_window", HealthTickDoesNotMutateFloatingWindow);
                 Run("header_reports_current_version_beside_live", HeaderReportsCurrentVersionBesideLive);
                 Run("visual_capture_wire_payload_uses_web_contract_keys", VisualCaptureWirePayloadUsesWebContractKeys);
+                Run("visual_capture_wire_preserves_digest_double_bits", VisualCaptureWirePreservesDigestDoubleBits);
                 Console.WriteLine("PASS " + _passed + "/" + _passed + " Navisworks " + ExpectedProductYear.Value);
                 return 0;
             }
@@ -462,7 +464,7 @@ namespace BIMLogLensNext.Native.Tests
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
-            Equal("v1.0.50", LensNextConstants.ProductVersionLabel);
+            Equal("v1.0.51", LensNextConstants.ProductVersionLabel);
         }
 
         private static void RuntimePreservesConfiguredProjectFallback()
@@ -515,6 +517,42 @@ namespace BIMLogLensNext.Native.Tests
             False(wire.ContainsKey("RequestId"));
             False(wire.ContainsKey("Identity"));
             False(wire.ContainsKey("VisualState"));
+        }
+
+        private static void VisualCaptureWirePreservesDigestDoubleBits()
+        {
+            const double cameraX = 370.12345678901235d;
+            var method = typeof(LensNextHttpBridgeHost).GetMethod(
+                "WirePayload",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            True(method != null);
+            var payload = new LensNextVisualCapturePayload
+            {
+                RequestId = "request-double-1",
+                Identity = new LensNextWireIdentity { ProjectId = 28, ServerId = 1, ViewpointId = "local-viewpoint-v2" },
+                VisualState = new LensNextVisualState
+                {
+                    ProjectId = 28,
+                    ServerId = 1,
+                    ViewpointId = "local-viewpoint-v2",
+                    Camera = new LensNextCameraState
+                    {
+                        Position = new LensNextPointState { X = cameraX, Y = -42.125d, Z = 0d }
+                    }
+                }
+            };
+            var wire = method.Invoke(null, new object[] { payload });
+            var serializer = new JavaScriptSerializer();
+            var decoded = serializer.DeserializeObject(serializer.Serialize(wire)) as Dictionary<string, object>;
+            True(decoded != null);
+            var visualState = decoded["visualState"] as Dictionary<string, object>;
+            True(visualState != null);
+            var camera = visualState["Camera"] as Dictionary<string, object>;
+            True(camera != null);
+            var position = camera["Position"] as Dictionary<string, object>;
+            True(position != null);
+            var wireX = Convert.ToDouble(position["X"]);
+            Equal(BitConverter.DoubleToInt64Bits(cameraX), BitConverter.DoubleToInt64Bits(wireX));
         }
         private static ImmutableWorkingViewIdentity Identity(string project, string model, string guid) =>
             new ImmutableWorkingViewIdentity { ProjectId = project, ModelFingerprint = model, NavisworksGuid = guid };
