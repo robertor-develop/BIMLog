@@ -15822,12 +15822,17 @@
         }
       ],
       "reviewedChangedPaths": [
+        "lib/db/scripts/migrate-lens-next-model-bindings-project-scope.sql",
         "lib/db/src/schema/lens-next-model-bindings.ts",
         "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/PLUGIN.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N01-P01.zip",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N01-P01.zip.sha256",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N01-P01.zip",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N01-P01.zip.sha256",
         "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
         "plugins/BIMLogLensNext/Build-Package-LensNext.ps1",
         "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
@@ -15849,7 +15854,7 @@
         "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
         "plugins/BIMLogLensNext/src/LensNextConstants.cs"
       ],
-      "reviewedChangeSha256": "1807e0a01894be8e1255bfee0ff52cf80f80a6608b4511429dc28aead2a9bf0c"
+      "reviewedChangeSha256": "4c1b4d476f4a8b6258d589e4905857698777d0246f83560e2d4d1499b9dfb9ed"
     }
   ]
 }

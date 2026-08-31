@@ -6,12 +6,17 @@
   "impact": {
     "baselineCommit": "2aee8ab84830ccf0a039c9f6e3e93c0629c2653c",
     "changedPaths": [
+      "lib/db/scripts/migrate-lens-next-model-bindings-project-scope.sql",
       "lib/db/src/schema/lens-next-model-bindings.ts",
       "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/PLUGIN.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
+      "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N01-P01.zip",
+      "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N01-P01.zip.sha256",
+      "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N01-P01.zip",
+      "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N01-P01.zip.sha256",
       "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
       "plugins/BIMLogLensNext/Build-Package-LensNext.ps1",
       "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
