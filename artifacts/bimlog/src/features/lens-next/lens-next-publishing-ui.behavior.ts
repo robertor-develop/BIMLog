@@ -10,6 +10,7 @@ const checks: string[] = [];
 const check = (condition: unknown, label: string) => { assert.ok(condition, label); checks.push(label); };
 
 check(view.includes("BIMLog · Controlled publishing"), "truthful M8 workspace label");
+check(view.includes('{filteredIssues.length === 1 ? "issue" : "issues"}') && view.includes('{synchronizationPlan.items.length === 1 ? "item" : "items"}'), "issue and synchronization-plan counts use correct singular grammar");
 check(!view.includes("<h2>Lens Next"), "redundant Lens Next version heading is absent from the embedded workspace");
 check(!view.includes("v1.0.08-Pro · M8"), "obsolete internal milestone is absent from the customer-facing workspace");
 check(view.includes("Your current project role is read-only"), "read-only role has fail-closed explanation");

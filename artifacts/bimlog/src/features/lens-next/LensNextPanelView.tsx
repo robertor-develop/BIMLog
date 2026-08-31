@@ -433,7 +433,7 @@ export function LensNextPanelView({
           {!synchronizationPlan.executable && synchronizationPlan.manualConflict + synchronizationPlan.blocked > 0 && <small role="alert">Resolve every manual-review and blocked item before reconciliation can change either system.</small>}
           {reconciliationMessage && <small role="status">{reconciliationMessage}</small>}
           <details className="lens-next__sync-plan">
-            <summary>Review synchronization plan ({synchronizationPlan.items.length} items)</summary>
+            <summary>Review synchronization plan ({synchronizationPlan.items.length} {synchronizationPlan.items.length === 1 ? "item" : "items"})</summary>
             <ol>
               {synchronizationPlan.items.map((item, index) => (
                 <li key={`${item.platformServerId ?? "local"}:${item.localNavisworksGuid ?? "platform"}:${index}`}>
@@ -475,9 +475,9 @@ export function LensNextPanelView({
           <label className="lens-next__field lens-next__field--wide"><span>Reason for audit history (optional)</span><textarea value={createReason} onChange={e => { setCreateReason(e.target.value); setCreateReviewReady(false); }} /></label>
         </div>
         {!createReviewReady ? (
-          <button className="lens-next__create-button" type="button" disabled={!createEnabled || !createDraft.trade.trim() || !createDraft.floor.trim() || !createDraft.note.trim() || !createDraft.reportType.trim()} onClick={() => setCreateReviewReady(true)}>Create BIMLog viewpoint</button>
+          <button className="lens-next__create-button" type="button" disabled={!createEnabled || !createDraft.trade.trim() || !createDraft.floor.trim() || !createDraft.note.trim() || !createDraft.reportType.trim()} onClick={() => setCreateReviewReady(true)}>Review viewpoint creation</button>
         ) : (
-          <div className="lens-next__create-review"><p>Create one BIMLog issue and visual package first, then create one local Navisworks Saved Viewpoint. The model file will not be saved automatically.</p><button className="lens-next__create-button" type="button" disabled={createState !== "idle" && createState !== "success" && createState !== "error"} onClick={() => { onCreateViewpoint(createDraft, createReason.trim()); setCreateReviewReady(false); }}>Confirm and create BIMLog viewpoint</button></div>
+          <div className="lens-next__create-review"><p>Create one BIMLog issue and visual package first, then create one local Navisworks Saved Viewpoint. The model file will not be saved automatically.</p><button className="lens-next__create-button" type="button" disabled={createState !== "idle" && createState !== "success" && createState !== "error"} onClick={() => { onCreateViewpoint(createDraft, createReason.trim()); setCreateReviewReady(false); }}>Confirm and create viewpoint</button></div>
         )}
         {createMessage && <p role="status">{createMessage}</p>}
       </details>
@@ -617,7 +617,7 @@ export function LensNextPanelView({
       )}
 
       <div className="lens-next__list-heading">
-        <strong>{filteredIssues.length} issues</strong>
+        <strong>{filteredIssues.length} {filteredIssues.length === 1 ? "issue" : "issues"}</strong>
         <small>
           {lastRefreshedAt
             ? `Updated ${formatTimestamp(lastRefreshedAt)}`
