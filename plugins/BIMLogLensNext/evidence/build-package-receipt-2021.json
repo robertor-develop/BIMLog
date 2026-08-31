@@ -1,22 +1,22 @@
 {
-    "schemaVersion":  "bimlog-lens-next-build-receipt-v1",
-    "status":  "BUILD_PACKAGE_PASS_NO_INSTALL",
-    "productYear":  2021,
-    "release":  "v1.0.50",
-    "sourceRoot":  "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext",
-    "packageRoot":  "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\package-v1.0.50-2021",
-    "zipPath":  "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\BIMLog-Lens-Next-Navisworks2021-v1.0.50.zip",
-    "zipBytes":  545797,
-    "zipSha256":  "3E4EB97127485767ED9D9B9E89A0C589F8DDB564FE5C5F5481E5B687B0AF99F8",
-    "coreDllSha256":  "8FAC21F95ADB68FFD42EE07AF55802DD885B2650747071C799BDF14A357F222A",
-    "nativeDllSha256":  "3D1C8299BA6104660FAD6E3D70DE641CACB4CC97D65734714A2DA840118FB056",
-    "nativeDllFileVersion":  "1.0.50.0",
-    "tests":  {
-                  "core":  "passed",
-                  "native2021":  "passed",
-                  "packagedInstallerPackageOnly":  "passed",
-                  "releaseIdentityConsistency":  "passed"
-              },
-    "installPerformed":  false,
-    "fieldAcceptance":  "pending Roberto Navisworks Manage 2021"
+  "schemaVersion": "bimlog-lens-next-build-receipt-v1",
+  "status": "BUILD_PACKAGE_PASS_NO_INSTALL",
+  "productYear": 2021,
+  "release": "v1.0.51",
+  "sourceRoot": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext",
+  "packageRoot": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\package-v1.0.51-2021",
+  "zipPath": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-m8-publishing-20260822\\plugins\\BIMLogLensNext\\BIMLog-Lens-Next-Navisworks2021-v1.0.51.zip",
+  "zipBytes": 559392,
+  "zipSha256": "C01038088CB02C690761322BDBF164966DB8A0A60ECF492D145E3F242D85507C",
+  "coreDllSha256": "34936C4A1AA1757FF3CB24B5276DF743BAF1899C5DFD963FA0C796CF5E8B571C",
+  "nativeDllSha256": "195E9C93847A0AA643C4BE300D682E7BA85FAACAE8E1BE1DEB9325B54F314991",
+  "nativeDllFileVersion": "1.0.51.0",
+  "tests": {
+    "core": "passed",
+    "native2021": "passed",
+    "packagedInstallerPackageOnly": "passed",
+    "releaseIdentityConsistency": "passed"
+  },
+  "installPerformed": false,
+  "fieldAcceptance": "pending Roberto Navisworks Manage 2021"
 }

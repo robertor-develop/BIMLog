@@ -159,22 +159,24 @@ namespace BIMLogLensNext
     public static class LensNextVisualStateDigest
     {
         public const string Algorithm = "SHA-256";
-        public const string ContractVersion = "lens-next-visual-digest.v1";
+        public const string ContractVersion = "lens-next-visual-digest.v2";
+        public const string LegacyContractVersion = "lens-next-visual-digest.v1";
 
         public static string Compute(LensNextVisualState state)
         {
             if (state == null) throw new ArgumentNullException(nameof(state));
-            return Hash(Canonicalize(state));
+            return Hash(Canonicalize(state, ResolveContractVersion(state)));
         }
 
         public static LensNextDigestDiagnostics Diagnose(LensNextVisualState state, bool truncated)
         {
             if (state == null) throw new ArgumentNullException(nameof(state));
-            var canonical = Canonicalize(state);
+            var contractVersion = ResolveContractVersion(state);
+            var canonical = Canonicalize(state, contractVersion);
             return new LensNextDigestDiagnostics
             {
                 Algorithm = Algorithm,
-                ContractVersion = ContractVersion,
+                ContractVersion = contractVersion,
                 CanonicalInputBase64 = Convert.ToBase64String(Encoding.UTF8.GetBytes(canonical)),
                 CanonicalLength = canonical.Length,
                 ComputedDigest = Hash(canonical),
@@ -182,7 +184,15 @@ namespace BIMLogLensNext
             };
         }
 
-        private static string Canonicalize(LensNextVisualState state)
+        private static string ResolveContractVersion(LensNextVisualState state)
+        {
+            var requested = state.DigestDiagnostics == null ? null : state.DigestDiagnostics.ContractVersion;
+            if (string.IsNullOrWhiteSpace(requested) || string.Equals(requested, ContractVersion, StringComparison.Ordinal)) return ContractVersion;
+            if (string.Equals(requested, LegacyContractVersion, StringComparison.Ordinal)) return LegacyContractVersion;
+            throw new InvalidOperationException("Unsupported Lens Next visual digest contract: " + requested);
+        }
+
+        private static string Canonicalize(LensNextVisualState state, string contractVersion)
         {
             var builder = new StringBuilder();
             Append(builder, state.SchemaVersion);
@@ -192,7 +202,7 @@ namespace BIMLogLensNext
             Append(builder, state.LifecycleStatus);
             Append(builder, state.RevisionNumber);
             Append(builder, state.ModelFingerprint);
-            AppendCamera(builder, state.Camera);
+            AppendCamera(builder, state.Camera, contractVersion);
             foreach (var item in (state.SelectedElements ?? new List<LensNextElementReference>()).OrderBy(Key, StringComparer.Ordinal)) AppendElement(builder, "S", item);
             foreach (var item in (state.HiddenElements ?? new List<LensNextElementReference>()).OrderBy(Key, StringComparer.Ordinal)) AppendElement(builder, "H", item);
             foreach (var item in (state.AppearanceOverrides ?? new List<LensNextAppearanceOverride>()).OrderBy(item => Key(item == null ? null : item.Element), StringComparer.Ordinal))
@@ -201,7 +211,7 @@ namespace BIMLogLensNext
                 Append(builder, item == null ? null : item.Red);
                 Append(builder, item == null ? null : item.Green);
                 Append(builder, item == null ? null : item.Blue);
-                Append(builder, item == null ? null : item.Transparency);
+                AppendDouble(builder, item == null ? null : item.Transparency, contractVersion);
             }
             foreach (var model in (state.ModelReferences ?? new List<LensNextModelReference>()).OrderBy(model => model == null ? "" : model.Source, StringComparer.Ordinal))
             {
@@ -231,14 +241,23 @@ namespace BIMLogLensNext
             Append(builder, item == null ? null : item.ModelSource);
             Append(builder, item == null ? null : item.InstanceGuid);
         }
-        private static void AppendCamera(StringBuilder builder, LensNextCameraState camera)
+        private static void AppendCamera(StringBuilder builder, LensNextCameraState camera, string contractVersion)
         {
             if (camera == null) { Append(builder, "camera:null"); return; }
-            AppendPoint(builder, camera.Position); AppendRotation(builder, camera.Rotation); AppendPoint(builder, camera.WorldUpVector);
-            Append(builder, camera.Projection); Append(builder, camera.FocalDistance); Append(builder, camera.HorizontalExtentAtFocalDistance); Append(builder, camera.VerticalExtentAtFocalDistance);
+            AppendPoint(builder, camera.Position, contractVersion); AppendRotation(builder, camera.Rotation, contractVersion); AppendPoint(builder, camera.WorldUpVector, contractVersion);
+            Append(builder, camera.Projection); AppendDouble(builder, camera.FocalDistance, contractVersion); AppendDouble(builder, camera.HorizontalExtentAtFocalDistance, contractVersion); AppendDouble(builder, camera.VerticalExtentAtFocalDistance, contractVersion);
         }
-        private static void AppendPoint(StringBuilder builder, LensNextPointState value) { if (value == null) { Append(builder, "point:null"); return; } Append(builder, value.X); Append(builder, value.Y); Append(builder, value.Z); }
-        private static void AppendRotation(StringBuilder builder, LensNextRotationState value) { if (value == null) { Append(builder, "rotation:null"); return; } Append(builder, value.A); Append(builder, value.B); Append(builder, value.C); Append(builder, value.D); }
+        private static void AppendPoint(StringBuilder builder, LensNextPointState value, string contractVersion) { if (value == null) { Append(builder, "point:null"); return; } AppendDouble(builder, value.X, contractVersion); AppendDouble(builder, value.Y, contractVersion); AppendDouble(builder, value.Z, contractVersion); }
+        private static void AppendRotation(StringBuilder builder, LensNextRotationState value, string contractVersion) { if (value == null) { Append(builder, "rotation:null"); return; } AppendDouble(builder, value.A, contractVersion); AppendDouble(builder, value.B, contractVersion); AppendDouble(builder, value.C, contractVersion); AppendDouble(builder, value.D, contractVersion); }
+        private static void AppendDouble(StringBuilder builder, double value, string contractVersion) { AppendDouble(builder, (double?)value, contractVersion); }
+        private static void AppendDouble(StringBuilder builder, double? value, string contractVersion)
+        {
+            if (!value.HasValue) { Append(builder, null); return; }
+            if (string.Equals(contractVersion, LegacyContractVersion, StringComparison.Ordinal)) { Append(builder, value.Value); return; }
+            var normalized = value.Value == 0d ? 0d : value.Value;
+            if (double.IsNaN(normalized) || double.IsInfinity(normalized)) throw new InvalidOperationException("Lens Next visual digest requires finite floating-point values.");
+            Append(builder, "f64:" + BitConverter.DoubleToInt64Bits(normalized).ToString("x16", CultureInfo.InvariantCulture));
+        }
         private static void Append(StringBuilder builder, object value)
         {
             builder.Append(value == null

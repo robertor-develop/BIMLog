@@ -45,9 +45,11 @@ namespace BIMLogLensNext.Tests
                 Run("m7_publish_dispatches_exactly_once", M7PublishDispatchesExactlyOnce);
                 Run("new_viewpoint_capture_uses_canonical_typed_payload", NewViewpointCaptureUsesCanonicalTypedPayload);
                 Run("visual_state_digest_matches_platform_null_token_contract", VisualStateDigestMatchesPlatformNullTokenContract);
+                Run("visual_state_digest_v2_float_tokens_match_platform", VisualStateDigestV2FloatTokensMatchPlatform);
+                Run("visual_state_digest_v1_remains_backward_compatible", VisualStateDigestV1RemainsBackwardCompatible);
                 Run("visual_state_digest_diagnostics_are_exact_and_non_recursive", VisualStateDigestDiagnosticsAreExactAndNonRecursive);
 
-                Console.WriteLine("PASS " + _passed + "/33");
+                Console.WriteLine("PASS " + _passed + "/35");
                 return 0;
             }
             catch (Exception exception)
@@ -546,6 +548,51 @@ namespace BIMLogLensNext.Tests
                 LensNextVisualStateDigest.Compute(state));
         }
 
+        private static void VisualStateDigestV2FloatTokensMatchPlatform()
+        {
+            var state = NumericDigestState("local-viewpoint-v2");
+
+            Equal(
+                "55bad86cd7f9d4fb5f935b8b8aef597348322a15fd4f439557af357dc55ff918",
+                LensNextVisualStateDigest.Compute(state));
+        }
+
+        private static void VisualStateDigestV1RemainsBackwardCompatible()
+        {
+            var state = NumericDigestState("local-viewpoint-numeric");
+            state.DigestDiagnostics = new LensNextDigestDiagnostics
+            {
+                ContractVersion = LensNextVisualStateDigest.LegacyContractVersion
+            };
+
+            Equal(
+                "ab7839da83846b1d0d76d03215a958c5cb76045e65ddcdf22e29cf04ae959023",
+                LensNextVisualStateDigest.Compute(state));
+        }
+
+        private static LensNextVisualState NumericDigestState(string viewpointId)
+        {
+            return new LensNextVisualState
+            {
+                ProjectId = 28,
+                ServerId = 1,
+                ViewpointId = viewpointId,
+                LifecycleStatus = "active",
+                RevisionNumber = 1,
+                ModelFingerprint = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef",
+                Camera = new LensNextCameraState
+                {
+                    Position = new LensNextPointState { X = 370.12345678901235d, Y = -42.125d, Z = -0d },
+                    Rotation = new LensNextRotationState { A = 0d, B = 0d, C = 0d, D = 1d },
+                    WorldUpVector = new LensNextPointState { X = 0d, Y = 1d, Z = 0d },
+                    Projection = "Perspective",
+                    FocalDistance = 250.5d,
+                    HorizontalExtentAtFocalDistance = 400.25d,
+                    VerticalExtentAtFocalDistance = 300.125d
+                }
+            };
+        }
+
         private static void VisualStateDigestDiagnosticsAreExactAndNonRecursive()
         {
             var state = new LensNextVisualState
@@ -559,7 +606,7 @@ namespace BIMLogLensNext.Tests
             };
             var diagnostics = LensNextVisualStateDigest.Diagnose(state, true);
             Equal("SHA-256", diagnostics.Algorithm);
-            Equal("lens-next-visual-digest.v1", diagnostics.ContractVersion);
+            Equal("lens-next-visual-digest.v2", diagnostics.ContractVersion);
             Equal(LensNextVisualStateDigest.Compute(state), diagnostics.ComputedDigest);
             True(diagnostics.Truncated);
             True(diagnostics.CanonicalLength > 0);

@@ -1,4 +1,4 @@
 <Project Sdk="Microsoft.NET.Sdk">
   <PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net48</TargetFramework><PlatformTarget>AnyCPU</PlatformTarget><LangVersion>7.3</LangVersion><Deterministic>true</Deterministic></PropertyGroup>
-  <ItemGroup><Compile Include="..\AdapterContractTests.cs" Link="AdapterContractTests.cs" /><ProjectReference Include="..\..\2021\BIMLogLensNext.Native2021.csproj" /></ItemGroup>
+  <ItemGroup><Compile Include="..\AdapterContractTests.cs" Link="AdapterContractTests.cs" /><ProjectReference Include="..\..\2021\BIMLogLensNext.Native2021.csproj" /><Reference Include="System.Web.Extensions" /></ItemGroup>
 </Project>

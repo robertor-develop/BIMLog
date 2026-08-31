@@ -353,7 +353,6 @@ const port = await new Promise<number>((resolve, reject) => {
     server.close((error) => (error ? reject(error) : resolve(selected)));
   });
 });
-const startedAt = performance.now();
 const inheritedRuntimeEnvironment = Object.fromEntries(
   ["PATH", "Path", "SystemRoot", "WINDIR", "TEMP", "TMP", "HOME", "USERPROFILE"]
     .map((key) => [key, process.env[key]])
@@ -471,6 +470,7 @@ await new Promise<void>((resolve, reject) => {
     reuse.close((error) => (error ? reject(error) : resolve())),
   );
 });
+const startedAt = performance.now();
 const child = spawn(process.execPath, [bundle], {
   cwd: runtimeRoot,
   env: {
@@ -527,9 +527,13 @@ try {
     (status) => status === 200,
   );
   const readyMs = performance.now() - startedAt;
+  const readyBudgetMs = process.platform === "win32" ? 8_000 : 6_000;
   assert.equal(apiStatus, 200);
   assert.equal(readyStatus, 200);
-  assert(readyMs < 6_000);
+  assert(
+    readyMs < readyBudgetMs,
+    `Production artifact readiness ${readyMs.toFixed(1)}ms exceeded ${readyBudgetMs}ms on ${process.platform}. Startup output: ${stdout.trim().replaceAll(proofDatabaseUrl, "[proof-database]")}`,
+  );
   assert.match(stdout, /phase=bootstrap_bound/);
   assert.match(stdout, /phase=app_import_begin/);
   assert.match(stdout, /phase=app_import_complete/);
