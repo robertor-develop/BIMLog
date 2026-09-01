@@ -1,5 +1,17 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P10 INTAKE-APU-10 local release-readiness candidate - 2026-09-01
+
+- Build 10 adds a read-only compatibility and release-readiness view. It states exactly what legacy
+  identity, scope, contract, and assignment data is preserved, which newer containers may be
+  defaulted when absent, and that preview performs no migration, approval, posting, push, or publication.
+- Compatibility normalization is idempotent and preserves legacy scope, assignments, and agreements.
+  A representative five-company, four-relationship, four-agreement, five-APU, five-package, and
+  five-resource scenario normalizes with no structural gaps.
+- Focused compatibility/UI behavior, complete prior Intake/APU regression, strict typecheck,
+  desktop English, and exact-390 Spanish visual gates pass without horizontal overflow. Integration,
+  authorized persistence proof, push, publication, deployment, and customer acceptance remain separate.
+
 ## BIMLog v1.05.N01-P09 INTAKE-APU-09 local human-help candidate - 2026-08-31
 
 - Job Intake now includes an optional bilingual help layer that explains the hierarchy from companies

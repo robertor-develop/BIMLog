@@ -21,6 +21,7 @@ import { WorkPackageBuilder } from "@/components/job-intake/WorkPackageBuilder";
 import { ResourcePlanBuilder } from "@/components/job-intake/ResourcePlanBuilder";
 import { JobCommandCenter } from "@/components/job-intake/JobCommandCenter";
 import { IntakeHelpGuide } from "@/components/job-intake/IntakeHelpGuide";
+import { IntakeReleaseReadiness } from "@/components/job-intake/IntakeReleaseReadiness";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
@@ -968,6 +969,7 @@ export function JobIntakeWorkspace() {
           </section>
         )}
         {!advanced && <IntakeHelpGuide tt={tt}/>}
+        {!advanced && <IntakeReleaseReadiness data={data} documents={intake.documents ?? []} tt={tt}/>}
         {!advanced && <JobCommandCenter data={data} documents={intake.documents ?? []} completion={completion} status={intake.status ?? "draft"} tt={tt}/>}
         {!advanced && <SimpleJobIntakeExperience data={data} setData={setData} members={intake.members ?? []} defaultRate={capabilities.costValuePlanner ? latestRate : "0"} tt={tt} onAdvanced={() => setAdvanced(true)}/>}
         {!advanced && <CompanyJobMap data={data} setData={setData} tt={tt}/>}

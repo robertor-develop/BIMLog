@@ -4,6 +4,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.05.N01-P01 Job Intake and Multi-APU program - 2026-08-31
 
+- `INTAKE-APU-10` completes the planned local program at `v1.05.N01-P10` with legacy compatibility
+  preview, idempotent normalization proof, representative complete-scenario validation, and a
+  bilingual read-only release-readiness surface. Remaining gates are deterministic Living Brief
+  sealing, exact-clean full build, integration into the authorized BIMLog baseline, isolated
+  API/database save-reload proof, owner release review, push, Replit publication, live verification,
+  and customer acceptance. None is implied by this local candidate.
+
 - `INTAKE-APU-09` adds the contextual help, hierarchy explanation, approval boundaries, keyboard
   accessibility, bilingual terminology, jump navigation, and responsive acceptance at
   `v1.05.N01-P09`. Remaining gates are deterministic Living Brief sealing, exact-clean full build,
