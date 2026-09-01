@@ -5,7 +5,7 @@ $packageRoot=[IO.Path]::GetFullPath($PSScriptRoot)
 $manifestPath=Join-Path $packageRoot 'manifest.json'
 if(-not(Test-Path -LiteralPath $manifestPath -PathType Leaf)){throw 'STOP: manifest.json is missing.'}
 $manifest=Get-Content -LiteralPath $manifestPath -Raw|ConvertFrom-Json
-if($manifest.productYear -ne 2021 -or $manifest.release -ne 'v1.05.N05-P01' -or $manifest.binaryVersion -ne '1.5.5.1'){throw 'STOP: wrong product year or release.'}
+if($manifest.productYear -ne 2021 -or $manifest.release -ne 'v1.05.N06-P02' -or $manifest.binaryVersion -ne '1.5.6.2'){throw 'STOP: wrong product year or release.'}
 foreach($file in $manifest.files){
   $path=[IO.Path]::GetFullPath((Join-Path $packageRoot $file.path))
   if(-not $path.StartsWith($packageRoot.TrimEnd('\')+'\',[StringComparison]::OrdinalIgnoreCase)){throw "STOP: manifest path escaped package: $($file.path)"}

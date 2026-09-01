@@ -12,5 +12,7 @@
   </PropertyGroup>
   <ItemGroup>
     <ProjectReference Include="..\BIMLogLensNext.csproj" />
+    <Reference Include="System.Web.Extensions" />
+    <Content Include="..\..\..\contracts\lens-next\lens-next-visual-digest-v3-vectors.json" Link="lens-next-visual-digest-v3-vectors.json" CopyToOutputDirectory="PreserveNewest" />
   </ItemGroup>
 </Project>

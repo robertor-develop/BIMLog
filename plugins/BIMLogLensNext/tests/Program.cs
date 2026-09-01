@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Text;
+using System.Web.Script.Serialization;
 
 namespace BIMLogLensNext.Tests
 {
@@ -51,6 +54,7 @@ namespace BIMLogLensNext.Tests
                 Run("visual_state_digest_v2_float_tokens_match_platform", VisualStateDigestV2FloatTokensMatchPlatform);
                 Run("visual_state_digest_v1_remains_backward_compatible", VisualStateDigestV1RemainsBackwardCompatible);
                 Run("visual_state_digest_diagnostics_are_exact_and_non_recursive", VisualStateDigestDiagnosticsAreExactAndNonRecursive);
+                Run("visual_state_digest_v3_shared_vectors_A_through_L", VisualStateDigestV3SharedVectorsAThroughL);
                 Run("readiness_A_camera_only_opens", ReadinessACameraOnly);
                 Run("readiness_B_camera_selection_opens", ReadinessBCameraSelection);
                 Run("readiness_C_camera_hidden_opens", ReadinessCCameraHidden);
@@ -829,6 +833,61 @@ namespace BIMLogLensNext.Tests
             True(Convert.FromBase64String(diagnostics.CanonicalInputBase64).Length > 0);
             state.DigestDiagnostics = diagnostics;
             Equal(diagnostics.ComputedDigest, LensNextVisualStateDigest.Compute(state));
+        }
+
+        private static void VisualStateDigestV3SharedVectorsAThroughL()
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "lens-next-visual-digest-v3-vectors.json");
+            var fixture = new JavaScriptSerializer { MaxJsonLength = 16 * 1024 * 1024 }
+                .Deserialize<DigestVectorFixture>(File.ReadAllText(path, Encoding.UTF8));
+            Equal(LensNextVisualStateDigest.ContractVersionV3, fixture.ContractVersion);
+            Equal(10, fixture.Vectors.Count);
+            Equal(2, fixture.TamperCases.Count);
+            foreach (var vector in fixture.Vectors)
+            {
+                var diagnostics = LensNextVisualStateDigest.Diagnose(vector.State, vector.State.DigestDiagnostics != null && vector.State.DigestDiagnostics.Truncated);
+                Equal(vector.CanonicalInputBase64, diagnostics.CanonicalInputBase64);
+                Equal(vector.CanonicalByteLength, diagnostics.CanonicalLength);
+                Equal(vector.Sha256, diagnostics.ComputedDigest);
+            }
+
+            var serializer = new JavaScriptSerializer { MaxJsonLength = 16 * 1024 * 1024 };
+            foreach (var tamper in fixture.TamperCases)
+            {
+                var source = fixture.Vectors.First(value => value.Id == tamper.SourceVector);
+                var state = serializer.Deserialize<LensNextVisualState>(serializer.Serialize(source.State));
+                if (tamper.Id == "K") state.SelectedElements[0].Model.ModelInstanceDiscriminator = tamper.MutationValue;
+                else if (tamper.Id == "L") state.ModelReferences[0].TransformFingerprint = tamper.MutationValue;
+                else throw new InvalidOperationException("Unknown tamper vector " + tamper.Id + ".");
+                Equal(tamper.OriginalSha256, source.Sha256);
+                Equal(tamper.TamperedSha256, LensNextVisualStateDigest.Compute(state));
+                NotEqual(tamper.OriginalSha256, tamper.TamperedSha256);
+            }
+        }
+
+        private sealed class DigestVectorFixture
+        {
+            public string ContractVersion { get; set; }
+            public List<DigestVector> Vectors { get; set; }
+            public List<DigestTamperCase> TamperCases { get; set; }
+        }
+
+        private sealed class DigestVector
+        {
+            public string Id { get; set; }
+            public LensNextVisualState State { get; set; }
+            public string CanonicalInputBase64 { get; set; }
+            public int CanonicalByteLength { get; set; }
+            public string Sha256 { get; set; }
+        }
+
+        private sealed class DigestTamperCase
+        {
+            public string Id { get; set; }
+            public string SourceVector { get; set; }
+            public string MutationValue { get; set; }
+            public string OriginalSha256 { get; set; }
+            public string TamperedSha256 { get; set; }
         }
         private static LensNextBridgeRequest PublishRequest()
         {

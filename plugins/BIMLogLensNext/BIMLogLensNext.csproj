@@ -10,10 +10,10 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <Version>1.5.5.1</Version>
-    <AssemblyVersion>1.5.5.1</AssemblyVersion>
-    <FileVersion>1.5.5.1</FileVersion>
-    <InformationalVersion>v1.05.N05-P01</InformationalVersion>
+    <Version>1.5.6.2</Version>
+    <AssemblyVersion>1.5.6.2</AssemblyVersion>
+    <FileVersion>1.5.6.2</FileVersion>
+    <InformationalVersion>v1.05.N06-P02</InformationalVersion>
   </PropertyGroup>
   <ItemGroup>
     <Compile Remove="tests\**\*.cs" />

@@ -68,6 +68,8 @@ namespace BIMLogLensNext.Native.Tests
                 Run("visual_capture_wire_preserves_digest_double_bits", VisualCaptureWirePreservesDigestDoubleBits);
                 Run("bridge_request_json_is_strict_utf8", BridgeRequestJsonIsStrictUtf8);
                 Run("digest_mismatch_diagnostics_name_unicode_model_source", DigestMismatchDiagnosticsNameUnicodeModelSource);
+                Run("v3_capture_uses_explicit_model_scoped_identity", V3CaptureUsesExplicitModelScopedIdentity);
+                Run("v3_capture_emits_required_component_metrics", V3CaptureEmitsRequiredComponentMetrics);
                 Console.WriteLine("PASS " + _passed + "/" + _passed + " Navisworks " + ExpectedProductYear.Value);
                 return 0;
             }
@@ -500,7 +502,7 @@ namespace BIMLogLensNext.Native.Tests
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
-            Equal("v1.05.N05-P01", LensNextConstants.ProductVersionLabel);
+            Equal("v1.05.N06-P02", LensNextConstants.ProductVersionLabel);
         }
 
         private static void RuntimeIgnoresConfiguredProjectFallback()
@@ -533,10 +535,37 @@ namespace BIMLogLensNext.Native.Tests
             var apply = source.Substring(applyStart, applyEnd - applyStart);
             Equal(2, CountOccurrences(apply, "BuildResolutionIndex(AllElementReferences("));
             var resolveStart = source.IndexOf("private ModelItemCollection ResolveExact", StringComparison.Ordinal);
-            var resolveEnd = source.IndexOf("private LensNextElementReference Element", resolveStart, StringComparison.Ordinal);
+            var resolveEnd = source.IndexOf("private static bool ConfirmationMatches", resolveStart, StringComparison.Ordinal);
             var resolve = source.Substring(resolveStart, resolveEnd - resolveStart);
             False(resolve.Contains("Descendants("));
             True(source.Contains("var resolution = BuildResolutionIndex(AllElementReferences(state))"));
+        }
+
+        private static void V3CaptureUsesExplicitModelScopedIdentity()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            True(source.Contains("ContractVersion = LensNextVisualStateDigest.ContractVersionV3"));
+            True(source.Contains("\"instance-guid\""));
+            True(source.Contains("\"autodesk-stable-id\""));
+            True(source.Contains("\"source-element-id\""));
+            True(source.Contains("\"exact-tree-path\""));
+            True(source.Contains("category.HasStableId"));
+            True(source.Contains("category.GetInt64StableId()"));
+            True(source.Contains("ModelInstanceDiscriminator"));
+            True(source.Contains("candidates.Count > 1"));
+            False(source.Contains("InstanceHashCode"));
+            False(source.Contains("lens-next-ref-v2:"));
+        }
+
+        private static void V3CaptureEmitsRequiredComponentMetrics()
+        {
+            var contract = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\src\LensNextVisualStateContracts.cs")));
+            var adapter = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            foreach (var metric in new[] { "ItemsVisited", "ActiveItemsDetected", "ReferencesStored", "InstanceGuidReferences", "FallbackReferences", "UnresolvedReferences", "AmbiguousReferences", "CappedReferences", "EnumerationFailures", "InspectionFailures", "Reason", "ElapsedMs" })
+                True(contract.Contains("public " ) && contract.Contains(metric));
+            foreach (var stage in new[] { "capture-readiness-started", "capture-readiness-evaluated", "capture-readiness-passed", "capture-readiness-blocked" })
+                True(adapter.Contains(stage));
+            True(adapter.Contains("AppearanceInspectionFailures"));
         }
 
         private static void ApplyEmitsCorrelatedStageTelemetry()
@@ -563,11 +592,13 @@ namespace BIMLogLensNext.Native.Tests
         {
             var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
             var scanStart = source.IndexOf("private ScanResult CaptureModelState", StringComparison.Ordinal);
-            var scanEnd = source.IndexOf("private IEnumerable<ModelItem> Descendants", scanStart, StringComparison.Ordinal);
+            var scanEnd = source.IndexOf("private static void StoreReference", scanStart, StringComparison.Ordinal);
             var scan = source.Substring(scanStart, scanEnd - scanStart);
             False(scan.Contains("MaximumScannedElements"));
-            True(scan.Contains("VisibilityTruncated"));
-            True(scan.Contains("AppearanceTruncated"));
+            True(scan.Contains("VisibilityUnresolved"));
+            True(scan.Contains("AppearanceInspectionFailures"));
+            True(source.Contains("VisibilityTruncated =>"));
+            True(source.Contains("AppearanceTruncated =>"));
             True(source.Contains("LensNextVisualReadiness.EnsureCaptureCanReopen(state)"));
         }
 
