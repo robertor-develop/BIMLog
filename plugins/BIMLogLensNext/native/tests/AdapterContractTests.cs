@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Reflection;
+using System.Text;
 using System.Web.Script.Serialization;
 using BIMLogLensNext;
 
@@ -46,6 +47,12 @@ namespace BIMLogLensNext.Native.Tests
                 Run("camera_capture_allows_projection_specific_values_to_be_unset", CameraCaptureAllowsUnsetProjectionValues);
                 Run("bridge_dispatches_immediately_without_idle_starvation", BridgeDispatchesImmediatelyWithoutIdleStarvation);
                 Run("capture_timeout_covers_governed_model_scan", CaptureTimeoutCoversGovernedModelScan);
+                Run("apply_waits_for_real_completion_without_false_timeout", ApplyWaitsForRealCompletionWithoutFalseTimeout);
+                Run("apply_resolves_visual_elements_in_one_model_scan", ApplyResolvesVisualElementsInOneModelScan);
+                Run("apply_emits_correlated_stage_telemetry", ApplyEmitsCorrelatedStageTelemetry);
+                Run("apply_requires_authoritative_persisted_digest", ApplyRequiresAuthoritativePersistedDigest);
+                Run("apply_request_id_collapses_native_retries", ApplyRequestIdCollapsesNativeRetries);
+                Run("rollback_capture_omits_diagnostic_blob", RollbackCaptureOmitsDiagnosticBlob);
                 Run("health_ping_bypasses_busy_ui_thread", HealthPingBypassesBusyUiThread);
                 Run("xml_export_resolves_inherited_com_contract", XmlExportResolvesInheritedComContract);
                 Run("xml_export_writes_validated_file", XmlExportWritesValidatedFile);
@@ -55,6 +62,8 @@ namespace BIMLogLensNext.Native.Tests
                 Run("header_reports_current_version_beside_live", HeaderReportsCurrentVersionBesideLive);
                 Run("visual_capture_wire_payload_uses_web_contract_keys", VisualCaptureWirePayloadUsesWebContractKeys);
                 Run("visual_capture_wire_preserves_digest_double_bits", VisualCaptureWirePreservesDigestDoubleBits);
+                Run("bridge_request_json_is_strict_utf8", BridgeRequestJsonIsStrictUtf8);
+                Run("digest_mismatch_diagnostics_name_unicode_model_source", DigestMismatchDiagnosticsNameUnicodeModelSource);
                 Console.WriteLine("PASS " + _passed + "/" + _passed + " Navisworks " + ExpectedProductYear.Value);
                 return 0;
             }
@@ -464,7 +473,7 @@ namespace BIMLogLensNext.Native.Tests
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
-            Equal("v1.05.N01-P01", LensNextConstants.ProductVersionLabel);
+            Equal("v1.05.N02-P01", LensNextConstants.ProductVersionLabel);
         }
 
         private static void RuntimeIgnoresConfiguredProjectFallback()
@@ -477,6 +486,87 @@ namespace BIMLogLensNext.Native.Tests
             True(source.Contains("\"managed-marker\""));
             False(source.Contains("Config.ProjectId = configuredProjectId"));
             False(source.Contains("Using configured Project="));
+        }
+
+        private static void ApplyWaitsForRealCompletionWithoutFalseTimeout()
+        {
+            var host = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextHttpBridgeHost.cs")));
+            var pump = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextUiRequestPump.cs")));
+            True(host.Contains("command == LensNextBridgeCommands.ApplyWorkingView"));
+            True(host.Contains("return Timeout.Infinite"));
+            True(pump.Contains("timeoutMilliseconds == Timeout.Infinite"));
+            True(pump.Contains("WaitUntilCompleted(work)"));
+        }
+
+        private static void ApplyResolvesVisualElementsInOneModelScan()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            var applyStart = source.IndexOf("public LensNextVisualApplyResult ApplyWorkingVisualStateJson", StringComparison.Ordinal);
+            var applyEnd = source.IndexOf("private LensNextCameraState CaptureCamera", applyStart, StringComparison.Ordinal);
+            var apply = source.Substring(applyStart, applyEnd - applyStart);
+            Equal(2, CountOccurrences(apply, "BuildResolutionIndex(AllElementReferences("));
+            var resolveStart = source.IndexOf("private ModelItemCollection ResolveExact", StringComparison.Ordinal);
+            var resolveEnd = source.IndexOf("private LensNextElementReference Element", resolveStart, StringComparison.Ordinal);
+            var resolve = source.Substring(resolveStart, resolveEnd - resolveStart);
+            False(resolve.Contains("Descendants("));
+            True(source.Contains("var resolution = BuildResolutionIndex(AllElementReferences(state))"));
+        }
+
+        private static void ApplyEmitsCorrelatedStageTelemetry()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            foreach (var stage in new[]
+            {
+                "request-validated", "project-session-model-verified", "visual-package-parsed",
+                "digest-validation-started", "digest-validation-completed", "rollback-capture-started",
+                "rollback-capture-completed", "model-reference-resolution-started",
+                "model-reference-resolution-completed", "camera-applied", "sectioning-applied",
+                "visibility-applied", "appearance-applied", "selection-applied",
+                "redraw-refresh-completed", "completed", "failed"
+            }) True(source.Contains("\"" + stage + "\""));
+            True(source.Contains("\" Request=\" + operationId"));
+            True(source.Contains("\" ElapsedMs=\" + timer.ElapsedMilliseconds"));
+            True(source.Contains("StoredDigest=" + "\" + storedVisualStateDigest"));
+            True(source.Contains("ReceivedDigest=" + "\" + receivedDigest"));
+            True(source.Contains("DigestContractVersion="));
+            True(source.Contains("CanonicalLength="));
+        }
+
+        private static void ApplyRequestIdCollapsesNativeRetries()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextUiRequestPump.cs")));
+            True(source.Contains("_applyOperations.TryGetValue(request.RequestId, out existing)"));
+            True(source.Contains("Stage=idempotent-join"));
+            True(source.Contains("idempotency_conflict"));
+            True(source.Contains("string.Equals(existing.Fingerprint, fingerprint, StringComparison.Ordinal)"));
+            True(source.Contains("return AwaitResponse(work, timeoutMilliseconds)"));
+        }
+
+        private static void ApplyRequiresAuthoritativePersistedDigest()
+        {
+            var bridge = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\src\LensNextReadOnlyBridge.cs")));
+            var adapter = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            True(bridge.Contains("visual_state_digest_required"));
+            True(bridge.Contains("storedVisualStateDigest"));
+            True(adapter.Contains("The persisted BIMLog digest does not match the received Visual Package digest."));
+            True(adapter.Contains("StoredDigest="));
+            True(adapter.Contains("ReceivedDigest="));
+            True(adapter.Contains("RecomputedDigest="));
+        }
+
+        private static void RollbackCaptureOmitsDiagnosticBlob()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            True(source.Contains("CaptureCurrentVisualState(identity, false, false)"));
+            True(source.Contains("if (emitDigestDiagnostics)"));
+            True(source.Contains("CaptureCurrentVisualState(identity, includeScreenshot, true)"));
+        }
+
+        private static int CountOccurrences(string source, string value)
+        {
+            var count = 0;
+            for (var index = 0; (index = source.IndexOf(value, index, StringComparison.Ordinal)) >= 0; index += value.Length) count++;
+            return count;
         }
 
         private static void HealthTickDoesNotMutateFloatingWindow()
@@ -555,6 +645,62 @@ namespace BIMLogLensNext.Native.Tests
             True(position != null);
             var wireX = Convert.ToDouble(position["X"]);
             Equal(BitConverter.DoubleToInt64Bits(cameraX), BitConverter.DoubleToInt64Bits(wireX));
+        }
+
+        private static void BridgeRequestJsonIsStrictUtf8()
+        {
+            const string json = "{\"fields\":{\"visualStateJson\":\"C:\\\\Users\\\\sebas\\\\OneDrive\\\\Документы\\\\model.rvt\"}}";
+            var method = typeof(LensNextHttpBridgeHost).GetMethod(
+                "ReadUtf8JsonBody",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            True(method != null);
+            using (var stream = new MemoryStream(new UTF8Encoding(false, true).GetBytes(json)))
+            {
+                Equal(json, (string)method.Invoke(null, new object[] { stream }));
+            }
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                @"..\..\..\..\..\native\LensNextHttpBridgeHost.cs")));
+            False(source.Contains("request.ContentEncoding"));
+            True(source.Contains("new UTF8Encoding(false, true)"));
+        }
+        private static void DigestMismatchDiagnosticsNameUnicodeModelSource()
+        {
+            var correct = new LensNextVisualState
+            {
+                SchemaVersion = LensNextVisualStateSchema.Version,
+                ProjectId = 29,
+                ServerId = 682,
+                ViewpointId = "f7d60dc0-38aa-467a-8eb4-211393284525",
+                LifecycleStatus = "active",
+                RevisionNumber = 1,
+                ModelFingerprint = new string('a', 64),
+                ModelReferences = new List<LensNextModelReference>
+                {
+                    new LensNextModelReference { Source = @"C:\Users\sebas\OneDrive\Документы\model.rvt" }
+                }
+            };
+            var corrupted = new LensNextVisualState
+            {
+                SchemaVersion = correct.SchemaVersion,
+                ProjectId = correct.ProjectId,
+                ServerId = correct.ServerId,
+                ViewpointId = correct.ViewpointId,
+                LifecycleStatus = correct.LifecycleStatus,
+                RevisionNumber = correct.RevisionNumber,
+                ModelFingerprint = correct.ModelFingerprint,
+                ModelReferences = new List<LensNextModelReference>
+                {
+                    new LensNextModelReference { Source = @"C:\Users\sebas\OneDrive\Ð”Ð¾ÐºÑƒÐ¼ÐµÐ½Ñ‚Ñ‹\model.rvt" }
+                }
+            };
+            correct.DigestDiagnostics = LensNextVisualStateDigest.Diagnose(corrupted, false);
+            var current = LensNextVisualStateDigest.Diagnose(correct, false);
+            var method = typeof(AutodeskLensNextReadOnlyAdapter).GetMethod(
+                "FirstCanonicalMismatchField",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            True(method != null);
+            Equal("models[0].source", (string)method.Invoke(null, new object[] { correct, current.CanonicalInputBase64 }));
         }
         private static ImmutableWorkingViewIdentity Identity(string project, string model, string guid) =>
             new ImmutableWorkingViewIdentity { ProjectId = project, ModelFingerprint = model, NavisworksGuid = guid };

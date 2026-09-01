@@ -1,4 +1,4 @@
-BIMLog Lens Next v1.05.N01-P01 - Navisworks Manage 2021/2025 Field Acceptance
+BIMLog Lens Next v1.05.N02-P01 - Navisworks Manage 2021/2025 Field Acceptance
 Tester: Ruben
 Date:
 Machine:

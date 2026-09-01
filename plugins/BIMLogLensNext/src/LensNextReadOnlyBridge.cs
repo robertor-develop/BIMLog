@@ -196,7 +196,10 @@ namespace BIMLogLensNext
             var visualStateJson = Value(request.Fields, "visualStateJson");
             if (string.IsNullOrWhiteSpace(visualStateJson))
                 return LensNextBridgeResponse.Blocked("visual_state_required", "A BIMLog visual-state payload is required.");
-            var result = _dispatcher.Invoke(() => visualAdapter.ApplyWorkingVisualStateJson(identity, visualStateJson));
+            var storedVisualStateDigest = Value(request.Fields, "visualStateDigest");
+            if (string.IsNullOrWhiteSpace(storedVisualStateDigest))
+                return LensNextBridgeResponse.Blocked("visual_state_digest_required", "The authoritative BIMLog visual-state digest is required.");
+            var result = _dispatcher.Invoke(() => visualAdapter.ApplyWorkingVisualStateJson(identity, visualStateJson, storedVisualStateDigest, request.RequestId));
             if (result == null || !result.Applied)
                 return LensNextBridgeResponse.Blocked("working_view_apply_failed", result == null ? "Working-view reconstruction failed." : result.Message);
             return LensNextBridgeResponse.Ok("working_view_applied", new LensNextWorkingViewAppliedPayload

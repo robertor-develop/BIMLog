@@ -27,7 +27,9 @@ namespace BIMLogLensNext
             bool includeScreenshot);
         LensNextVisualApplyResult ApplyWorkingVisualStateJson(
             ImmutableWorkingViewIdentity identity,
-            string visualStateJson);
+            string visualStateJson,
+            string storedVisualStateDigest,
+            string operationId);
     }
 
     public sealed class LensNextProjectContext

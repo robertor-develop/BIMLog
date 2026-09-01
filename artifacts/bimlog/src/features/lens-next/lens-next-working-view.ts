@@ -41,7 +41,7 @@ export async function openBimlogWorkingView(
     );
 
   const stored = await dependencies.apiClient.loadVisualState(issue, signal);
-  await dependencies.bridgeClient.applyPlatformWorkingView(issue, context, stored.visualStateJson, signal);
+  await dependencies.bridgeClient.applyPlatformWorkingView(issue, context, stored.visualStateJson, stored.visualStateDigest, signal);
   return Object.freeze({ migratedHistoricalViewpoint: false, visualStateDigest: stored.visualStateDigest });
 }
 
@@ -72,6 +72,6 @@ export async function repairBimlogWorkingViewFromCurrent(
     visualStateDigest: captured.visualStateDigest,
   });
   const stored = await dependencies.apiClient.loadVisualState(migratedIssue, signal);
-  await dependencies.bridgeClient.applyPlatformWorkingView(migratedIssue, context, stored.visualStateJson, signal);
+  await dependencies.bridgeClient.applyPlatformWorkingView(migratedIssue, context, stored.visualStateJson, stored.visualStateDigest, signal);
   return Object.freeze({ visualStateDigest: stored.visualStateDigest });
 }
