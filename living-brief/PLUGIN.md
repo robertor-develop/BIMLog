@@ -291,3 +291,9 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - Total elapsed time is not an apply failure. The synchronous bridge waits for real UI-thread completion and emits cumulative stage timing for validation, authoritative digest verification, rollback capture, one-pass model/reference resolution, camera, sectioning, visibility, appearance, selection, implicit Navisworks redraw, and completion/failure.
 - Digest validation is strict and precedes mutation. The platform's persisted digest, the received package digest, and the native recomputation must match the same contract. The native apply resolves all referenced items before the first mutation and retains full-fidelity atomic rollback behavior.
 - The embedded UI disables repeated Open Working View activation while the operation is active and reports success only after native completion. Health/session renewal does not restart the runtime or navigate the WebView, and the health tick does not continuously normalize the floating window.
+
+## Lens Next v1.05.N03-P01 dual-year package identity
+
+- `v1.05.N03-P01` is the packaged form of the long-running Working View apply contract. It increments only the Lens Next N counter from N02 to N03 and preserves the independently owned Platform/APU P01 counter. Windows DLL and Autodesk metadata use numeric version `1.5.3.1`.
+- Shared contracts pass 35/35 and both Navisworks 2021 and 2025 native suites pass 45/45. The 2021 ZIP SHA-256 is `65B08F00D0940FD8014598510B4110C40D237C8C3299ED6C75C51DDA276B9306`; the 2025 ZIP SHA-256 is `A9020A628DDA1EB9424122B914C840A4638E5008E607D6B4FD20C6B5C6BC9E99`.
+- Packaging changes no BIMLog source-of-truth boundary: Working View consumes the selected platform package, rejects digest or identity conflicts before mutation, and never substitutes a local Saved Viewpoint.
