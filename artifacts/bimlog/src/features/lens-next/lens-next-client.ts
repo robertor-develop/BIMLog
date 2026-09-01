@@ -127,7 +127,7 @@ export function createLensNextApiClient(
   const post = async (path: string, body: unknown, signal?: AbortSignal): Promise<unknown> => {
     const response = await fetchImpl(`${base}${path}`, {
       method: "POST", credentials: "same-origin",
-      headers: { Accept: "application/json", Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}`, "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify(body), signal,
     });
     return jsonBody(response, "BIMLog controlled publish");
@@ -344,6 +344,7 @@ export interface LensNextBridgeClient {
     issue: LensNextIssue,
     context: LensNextBridgeProjectContext,
     visualStateJson: string,
+    visualStateDigest: string,
     signal?: AbortSignal,
   ): Promise<LensNextOpenWorkingViewResult>;
   captureCurrentVisualState(
@@ -411,7 +412,7 @@ export function createLensNextBridgeClient(
   const requestHeaders = () => ({
     Accept: "application/json",
     Authorization: `Bearer ${sessionToken}`,
-    "Content-Type": "application/json",
+    "Content-Type": "application/json; charset=utf-8",
     "X-BIMLog-Lens-Next-Protocol": "1",
   });
   const fetchWithSessionRenewal: FetchLike = async (input, init) => {
@@ -586,9 +587,11 @@ export function createLensNextBridgeClient(
       issue: LensNextIssue,
       context: LensNextBridgeProjectContext,
       visualStateJson: string,
+      visualStateDigest: string,
       signal?: AbortSignal,
     ) {
       if (!visualStateJson.trim()) throw new Error("platform_visual_state_unavailable");
+      if (!/^[0-9a-f]{64}$/i.test(visualStateDigest)) throw new Error("platform_visual_state_digest_invalid");
       const request = createLensNextOpenWorkingViewRequest(
         issue.identity,
         context,
@@ -601,7 +604,7 @@ export function createLensNextBridgeClient(
         body: JSON.stringify({
           ...request,
           command: "apply-working-view",
-          fields: { ...request.fields, visualStateJson },
+          fields: { ...request.fields, visualStateDigest: visualStateDigest.toLowerCase(), visualStateJson },
         }),
         signal,
       });

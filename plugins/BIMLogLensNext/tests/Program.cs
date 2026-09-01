@@ -824,7 +824,9 @@ namespace BIMLogLensNext.Tests
 
             public LensNextVisualApplyResult ApplyWorkingVisualStateJson(
                 ImmutableWorkingViewIdentity identity,
-                string visualStateJson)
+                string visualStateJson,
+                string storedVisualStateDigest,
+                string operationId)
             {
                 return new LensNextVisualApplyResult { Applied = true };
             }        }

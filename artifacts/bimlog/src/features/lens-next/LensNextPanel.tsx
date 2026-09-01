@@ -133,6 +133,8 @@ export function LensNextPanel({
   const [platformPullMessage, setPlatformPullMessage] = useState<string | null>(null);
   const [visualRepairState, setVisualRepairState] = useState<"idle" | "repairing" | "success" | "error">("idle");
   const [visualRepairMessage, setVisualRepairMessage] = useState<string | null>(null);
+  const workingViewInFlight = useRef(false);
+  const [workingViewState, setWorkingViewState] = useState<"idle" | "opening" | "success" | "error">("idle");
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -370,6 +372,7 @@ export function LensNextPanel({
   }, [apiClient, selectedIssue]);
 
   const openWorkingView = useCallback(async () => {
+    if (workingViewInFlight.current) return;
     if (
       !bridgeClient ||
       !bridgeContext ||
@@ -389,6 +392,8 @@ export function LensNextPanel({
       );
       return;
     }
+    workingViewInFlight.current = true;
+    setWorkingViewState("opening");
     setBridgeError(null);
     try {
       if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
@@ -401,9 +406,13 @@ export function LensNextPanel({
         setBridgeError("Historical Original Lens viewpoint recovered by exact identity and stored in BIMLog.");
         await loadIssues("refresh");
       }
+      setWorkingViewState("success");
     } catch (error) {
       const message = error instanceof Error ? error.message : "Exact-identity open failed";
       setBridgeError(message);
+      setWorkingViewState("error");
+    } finally {
+      workingViewInFlight.current = false;
     }
   }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, loadIssues, selectedIssue]);
 
@@ -531,7 +540,7 @@ export function LensNextPanel({
         const issue = issues.find(candidate => candidate.identity.serverId === item.platformServerId);
         if (!issue || issue.navisworksGuid || !issue.visualStateAvailable || !issue.visualStateDigest) throw new Error(`${item.displayId} is no longer an unbound BIMLog package; the run stopped.`);
         const stored = await apiClient.loadVisualState(issue);
-        await bridgeClient.applyPlatformWorkingView(issue, bridgeContext, stored.visualStateJson);
+        await bridgeClient.applyPlatformWorkingView(issue, bridgeContext, stored.visualStateJson, stored.visualStateDigest);
         const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: stored.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayId: issue.displayId ?? issue.identity.viewpointId, displayCode: issue.displayId ?? issue.identity.viewpointId };
         const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, reason);
         await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, reason);
@@ -573,7 +582,7 @@ export function LensNextPanel({
         const issue = issues.find(candidate => candidate.identity.serverId === item.platformServerId);
         if (!issue || issue.navisworksGuid || !issue.visualStateAvailable || !issue.visualStateDigest) throw new Error(`${item.displayId} is no longer an eligible BIMLog-only visual package; refresh and retry.`);
         const stored = await apiClient.loadVisualState(issue);
-        await bridgeClient.applyPlatformWorkingView(issue, bridgeContext, stored.visualStateJson);
+        await bridgeClient.applyPlatformWorkingView(issue, bridgeContext, stored.visualStateJson, stored.visualStateDigest);
         const receipt: LensNextCreateReceipt = { serverId: issue.identity.serverId, viewpointId: issue.identity.viewpointId, visualStateDigest: stored.visualStateDigest, revisionNumber: issue.identity.revisionNumber, lifecycleStatus: issue.identity.lifecycleStatus, displayId: issue.displayId ?? issue.identity.viewpointId, displayCode: issue.displayId ?? issue.identity.viewpointId };
         const navisworksGuid = await bridgeClient.publishCreatedViewpoint(receipt, bridgeContext, reason);
         await apiClient.confirmCreatedLocalViewpoint(authorizedProjectId, receipt, navisworksGuid, reason);
@@ -648,8 +657,10 @@ export function LensNextPanel({
         bridgeContext?.projectId === authorizedProjectId &&
         selectedIssue !== null &&
         selectedIssue.visualStateAvailable &&
-        Boolean(selectedIssue.visualStateDigest)
+        Boolean(selectedIssue.visualStateDigest) &&
+        workingViewState !== "opening"
       }
+      workingViewState={workingViewState}
       workingViewUnavailable={
         selectedIssue !== null &&
         (!selectedIssue.visualStateAvailable || !selectedIssue.visualStateDigest)
@@ -668,6 +679,7 @@ export function LensNextPanel({
         setPublishMessage(null);
         setVisualRepairState("idle");
         setVisualRepairMessage(null);
+        setWorkingViewState("idle");
       }}
       onCloseIssue={() => {
         setSelectedServerId(null);
@@ -676,6 +688,7 @@ export function LensNextPanel({
         setPublishMessage(null);
         setVisualRepairState("idle");
         setVisualRepairMessage(null);
+        setWorkingViewState("idle");
       }}
       onOpenWorkingView={() => void openWorkingView()}
       onLoadHistory={() => void loadHistory()}

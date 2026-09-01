@@ -10,6 +10,7 @@ using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
+using System.Text;
 using System.Web.Script.Serialization;
 using Autodesk.Navisworks.Api;
 using NavisworksApplication = Autodesk.Navisworks.Api.Application;
@@ -21,6 +22,11 @@ namespace BIMLogLensNext.Native
         private readonly JavaScriptSerializer _visualJson = new JavaScriptSerializer { MaxJsonLength = 16 * 1024 * 1024 };
 
         public LensNextVisualState CaptureCurrentVisualState(ImmutableWorkingViewIdentity identity, bool includeScreenshot)
+        {
+            return CaptureCurrentVisualState(identity, includeScreenshot, true);
+        }
+
+        private LensNextVisualState CaptureCurrentVisualState(ImmutableWorkingViewIdentity identity, bool includeScreenshot, bool emitDigestDiagnostics)
         {
             var captureTimer = Stopwatch.StartNew();
             LensNextNativeLog.Info("Visual capture started. Screenshot=" + includeScreenshot);
@@ -85,50 +91,97 @@ namespace BIMLogLensNext.Native
 
             state.DigestSha256 = LensNextVisualStateDigest.Compute(state);
             state.DigestDiagnostics = LensNextVisualStateDigest.Diagnose(state, scan.Truncated);
-            LensNextNativeLog.Info(
-                "Visual digest diagnostics. Algorithm=" + state.DigestDiagnostics.Algorithm +
-                " Contract=" + state.DigestDiagnostics.ContractVersion +
-                " Computed=" + state.DigestDiagnostics.ComputedDigest +
-                " Truncated=" + state.DigestDiagnostics.Truncated +
-                " CanonicalLength=" + state.DigestDiagnostics.CanonicalLength +
-                " CanonicalInputBase64=" + state.DigestDiagnostics.CanonicalInputBase64);
+            if (emitDigestDiagnostics)
+            {
+                LensNextNativeLog.Info(
+                    "Visual digest diagnostics. Algorithm=" + state.DigestDiagnostics.Algorithm +
+                    " Contract=" + state.DigestDiagnostics.ContractVersion +
+                    " Computed=" + state.DigestDiagnostics.ComputedDigest +
+                    " Truncated=" + state.DigestDiagnostics.Truncated +
+                    " CanonicalLength=" + state.DigestDiagnostics.CanonicalLength +
+                    " CanonicalInputBase64=" + state.DigestDiagnostics.CanonicalInputBase64);
+            }
             LensNextNativeLog.Info("Visual capture complete. ElapsedMs=" + captureTimer.ElapsedMilliseconds);
             return state;
         }
 
-        public LensNextVisualApplyResult ApplyWorkingVisualStateJson(ImmutableWorkingViewIdentity identity, string visualStateJson)
+        public LensNextVisualApplyResult ApplyWorkingVisualStateJson(ImmutableWorkingViewIdentity identity, string visualStateJson, string storedVisualStateDigest, string operationId)
         {
+            var applyTimer = Stopwatch.StartNew();
+            operationId = string.IsNullOrWhiteSpace(operationId) ? "unknown" : operationId;
+            LogApplyStage(operationId, "request-validated", applyTimer, null);
             EnsureSameDocument();
-            if (!_contract.MatchesContext(identity)) return Failed("Model/project context mismatch.", false, false);
+            if (!_contract.MatchesContext(identity)) { LogApplyStage(operationId, "failed", applyTimer, "Model/project context mismatch."); return Failed("Model/project context mismatch.", false, false); }
+            LogApplyStage(operationId, "project-session-model-verified", applyTimer, "Project=" + identity.ProjectId + " Viewpoint=" + identity.ViewpointId);
             LensNextVisualState state;
             try { state = _visualJson.Deserialize<LensNextVisualState>(visualStateJson); }
-            catch (Exception ex) { return Failed("Visual-state JSON is invalid: " + ex.Message, false, false); }
+            catch (Exception ex) { LogApplyStage(operationId, "failed", applyTimer, "Visual-state JSON is invalid: " + ex.Message); return Failed("Visual-state JSON is invalid: " + ex.Message, false, false); }
+            LogApplyStage(operationId, "visual-package-parsed", applyTimer, "Bytes=" + Encoding.UTF8.GetByteCount(visualStateJson));
+            var receivedDigest = state == null ? null : state.DigestSha256;
+            LogApplyStage(operationId, "digest-validation-started", applyTimer, "StoredDigest=" + storedVisualStateDigest + " ReceivedDigest=" + receivedDigest);
+            if (string.IsNullOrWhiteSpace(storedVisualStateDigest) || !string.Equals(storedVisualStateDigest, receivedDigest, StringComparison.OrdinalIgnoreCase))
+            {
+                const string persistedMismatch = "The persisted BIMLog digest does not match the received Visual Package digest.";
+                LogApplyStage(operationId, "failed", applyTimer, persistedMismatch);
+                return Failed(persistedMismatch, false, false);
+            }
             var contractError = ValidateState(identity, state);
-            if (contractError != null) return Failed(contractError, false, false);
+            if (contractError != null) { LogApplyStage(operationId, "failed", applyTimer, contractError); return Failed(contractError, false, false); }
+            var diagnostics = LensNextVisualStateDigest.Diagnose(state, state.DigestDiagnostics != null && state.DigestDiagnostics.Truncated);
+            LogApplyStage(operationId, "digest-validation-completed", applyTimer,
+                "StoredDigest=" + storedVisualStateDigest +
+                " ReceivedDigest=" + receivedDigest +
+                " RecomputedDigest=" + diagnostics.ComputedDigest +
+                " DigestContractVersion=" + diagnostics.ContractVersion +
+                " CanonicalLength=" + diagnostics.CanonicalLength +
+                " ProjectId=" + state.ProjectId +
+                " IssueId=" + state.ServerId +
+                " ViewpointId=" + state.ViewpointId +
+                " ModelFingerprint=" + state.ModelFingerprint);
             if (state.Completeness != null && !state.Completeness.CanReconstructWithoutGuessing)
-                return Failed("Visual state declares a required component incomplete or unsupported; Lens Next will not guess.", false, false);
+            {
+                const string incomplete = "Visual state declares a required component incomplete or unsupported; Lens Next will not guess.";
+                LogApplyStage(operationId, "failed", applyTimer, incomplete);
+                return Failed(incomplete, false, false);
+            }
 
             LensNextVisualState rollback = null;
-            try { rollback = CaptureCurrentVisualState(identity, false); } catch { }
+            try
+            {
+                LogApplyStage(operationId, "rollback-capture-started", applyTimer, null);
+                rollback = CaptureCurrentVisualState(identity, false, false);
+                LogApplyStage(operationId, "rollback-capture-completed", applyTimer, "Hidden=" + rollback.HiddenElements.Count + " Appearance=" + rollback.AppearanceOverrides.Count);
+            }
+            catch (Exception ex) { LogApplyStage(operationId, "rollback-capture-unavailable", applyTimer, ex.GetType().Name); }
             var applied = new List<string>();
             try
             {
-                ApplyCamera(state.Camera); applied.Add("camera");
-                ApplySelection(state.SelectedElements); applied.Add("selection");
-                ApplyVisibility(state.HiddenElements); applied.Add("visibility");
-                ApplyAppearance(state.AppearanceOverrides); applied.Add("appearanceOverrides");
+                LogApplyStage(operationId, "model-reference-resolution-started", applyTimer, null);
+                ValidateModelReferences(state.ModelReferences);
+                var resolution = BuildResolutionIndex(AllElementReferences(state));
+                ResolveExact(AllElementReferences(state), true, resolution);
+                LogApplyStage(operationId, "model-reference-resolution-completed", applyTimer, "Resolved=" + resolution.Count);
+                ApplyCamera(state.Camera); applied.Add("camera"); LogApplyStage(operationId, "camera-applied", applyTimer, null);
                 if (!string.IsNullOrWhiteSpace(state.SectioningJson)) { InvokeSectioningSetter(state.SectioningJson); applied.Add("sectioning"); }
+                LogApplyStage(operationId, "sectioning-applied", applyTimer, string.IsNullOrWhiteSpace(state.SectioningJson) ? "Required=false" : "Required=true");
+                ApplyVisibility(state.HiddenElements, resolution); applied.Add("visibility"); LogApplyStage(operationId, "visibility-applied", applyTimer, "Count=" + (state.HiddenElements == null ? 0 : state.HiddenElements.Count));
+                ApplyAppearance(state.AppearanceOverrides, resolution); applied.Add("appearanceOverrides"); LogApplyStage(operationId, "appearance-applied", applyTimer, "Count=" + (state.AppearanceOverrides == null ? 0 : state.AppearanceOverrides.Count));
+                ApplySelection(state.SelectedElements, resolution); applied.Add("selection"); LogApplyStage(operationId, "selection-applied", applyTimer, "Count=" + (state.SelectedElements == null ? 0 : state.SelectedElements.Count));
                 if (!string.IsNullOrWhiteSpace(state.RedlinesJson)) { InvokeCurrentViewStringSetter("SetRedlines", state.RedlinesJson); applied.Add("redlines"); }
+                LogApplyStage(operationId, "redraw-refresh-completed", applyTimer, "Mode=implicit-navisworks-view-update");
+                LogApplyStage(operationId, "completed", applyTimer, "Components=" + string.Join(",", applied));
                 return new LensNextVisualApplyResult { Applied = true, Message = "Temporary BIMLog working view reconstructed without creating a SavedViewpoint.", AppliedComponents = applied };
             }
             catch (Exception ex)
             {
+                LogApplyStage(operationId, "failed", applyTimer, ex.GetType().Name + ":" + ex.Message);
                 var rollbackSucceeded = false;
                 if (rollback != null)
                 {
                     try
                     {
-                        ApplyCamera(rollback.Camera); ApplySelection(rollback.SelectedElements); ApplyVisibility(rollback.HiddenElements); ApplyAppearance(rollback.AppearanceOverrides);
+                        var rollbackResolution = BuildResolutionIndex(AllElementReferences(rollback));
+                        ApplyCamera(rollback.Camera); ApplySelection(rollback.SelectedElements, rollbackResolution); ApplyVisibility(rollback.HiddenElements, rollbackResolution); ApplyAppearance(rollback.AppearanceOverrides, rollbackResolution);
                         if (!string.IsNullOrWhiteSpace(rollback.SectioningJson)) InvokeSectioningSetter(rollback.SectioningJson);
                         if (!string.IsNullOrWhiteSpace(rollback.RedlinesJson)) InvokeCurrentViewStringSetter("SetRedlines", rollback.RedlinesJson);
                         rollbackSucceeded = true;
@@ -229,43 +282,85 @@ namespace BIMLogLensNext.Native
             catch { return null; }
         }
 
-        private void ApplySelection(List<LensNextElementReference> references)
+        private void ApplySelection(List<LensNextElementReference> references, Dictionary<string, List<ResolvedElementCandidate>> resolution)
         {
-            var items = ResolveExact(references, false); _document.CurrentSelection.CopyFrom(items);
+            var items = ResolveExact(references, true, resolution); _document.CurrentSelection.CopyFrom(items);
         }
 
-        private void ApplyVisibility(List<LensNextElementReference> hidden)
+        private void ApplyVisibility(List<LensNextElementReference> hidden, Dictionary<string, List<ResolvedElementCandidate>> resolution)
         {
+            var items = ResolveExact(hidden, true, resolution);
             _document.Models.ResetAllHidden();
-            var items = ResolveExact(hidden, true); if (items.Count > 0) _document.Models.SetHidden(items, true);
+            if (items.Count > 0) _document.Models.SetHidden(items, true);
         }
 
-        private void ApplyAppearance(List<LensNextAppearanceOverride> overrides)
+        private void ApplyAppearance(List<LensNextAppearanceOverride> overrides, Dictionary<string, List<ResolvedElementCandidate>> resolution)
         {
-            _document.Models.ResetAllPermanentMaterials();
+            var resolved = new List<KeyValuePair<LensNextAppearanceOverride, ModelItem>>();
             foreach (var value in overrides ?? new List<LensNextAppearanceOverride>())
             {
                 if (value == null || value.Element == null) continue;
-                var items = ResolveExact(new List<LensNextElementReference> { value.Element }, true);
+                var items = ResolveExact(new List<LensNextElementReference> { value.Element }, true, resolution);
                 if (items.Count != 1) throw new InvalidOperationException("Appearance override element could not be resolved exactly.");
-                if (value.Red.HasValue && value.Green.HasValue && value.Blue.HasValue)
-                    _document.Models.OverridePermanentColor(items, Autodesk.Navisworks.Api.Color.FromByteRGB(value.Red.Value, value.Green.Value, value.Blue.Value));
-                if (value.Transparency.HasValue) _document.Models.OverridePermanentTransparency(items, value.Transparency.Value);
+                resolved.Add(new KeyValuePair<LensNextAppearanceOverride, ModelItem>(value, items[0]));
+            }
+            _document.Models.ResetAllPermanentMaterials();
+            foreach (var group in resolved.Where(pair => pair.Key.Red.HasValue && pair.Key.Green.HasValue && pair.Key.Blue.HasValue)
+                         .GroupBy(pair => pair.Key.Red.Value + ":" + pair.Key.Green.Value + ":" + pair.Key.Blue.Value))
+            {
+                var first = group.First().Key;
+                var items = new ModelItemCollection();
+                foreach (var pair in group) items.Add(pair.Value);
+                _document.Models.OverridePermanentColor(items, Autodesk.Navisworks.Api.Color.FromByteRGB(first.Red.Value, first.Green.Value, first.Blue.Value));
+            }
+            foreach (var group in resolved.Where(pair => pair.Key.Transparency.HasValue).GroupBy(pair => pair.Key.Transparency.Value))
+            {
+                var items = new ModelItemCollection();
+                foreach (var pair in group) items.Add(pair.Value);
+                _document.Models.OverridePermanentTransparency(items, group.Key);
             }
         }
 
         private sealed class ResolvedElementCandidate { public ModelItem Item; public string ModelSource; }
-        private ModelItemCollection ResolveExact(IEnumerable<LensNextElementReference> references, bool requireAll)
+        private static IEnumerable<LensNextElementReference> AllElementReferences(LensNextVisualState state)
         {
-            var requested = (references ?? Enumerable.Empty<LensNextElementReference>())
-                .Where(value => value != null && Guid.TryParse(value.InstanceGuid, out _))
-                .GroupBy(value => (value.ModelSource ?? "") + "|" + value.InstanceGuid, StringComparer.OrdinalIgnoreCase)
-                .Select(group => group.First()).ToList();
-            var result = new ModelItemCollection();
-            if (requested.Count == 0) return result;
+            if (state == null) return Enumerable.Empty<LensNextElementReference>();
+            return (state.SelectedElements ?? new List<LensNextElementReference>())
+                .Concat(state.HiddenElements ?? new List<LensNextElementReference>())
+                .Concat((state.AppearanceOverrides ?? new List<LensNextAppearanceOverride>())
+                    .Where(value => value != null && value.Element != null)
+                    .Select(value => value.Element));
+        }
 
-            var wantedGuids = new HashSet<string>(requested.Select(value => Guid.Parse(value.InstanceGuid).ToString("D")), StringComparer.OrdinalIgnoreCase);
+        private void ValidateModelReferences(IEnumerable<LensNextModelReference> references)
+        {
+            var required = (references ?? Enumerable.Empty<LensNextModelReference>())
+                .Where(value => value != null && !string.IsNullOrWhiteSpace(value.Source))
+                .ToList();
+            var loaded = _document.Models.Cast<Model>().Select(ModelRef).ToList();
+            foreach (var expected in required)
+            {
+                var matches = loaded.Where(actual => string.Equals(actual.Source, expected.Source, StringComparison.OrdinalIgnoreCase)).ToList();
+                if (matches.Count == 0) throw new InvalidOperationException("A required visual-state model reference is missing: " + expected.Source);
+                if (!string.IsNullOrWhiteSpace(expected.ModelGuid) && !matches.Any(actual => string.Equals(actual.ModelGuid, expected.ModelGuid, StringComparison.OrdinalIgnoreCase)))
+                    throw new InvalidOperationException("A required visual-state model GUID changed: " + expected.Source);
+                if (!string.IsNullOrWhiteSpace(expected.TransformFingerprint) && !matches.Any(actual => string.Equals(actual.TransformFingerprint, expected.TransformFingerprint, StringComparison.OrdinalIgnoreCase)))
+                    throw new InvalidOperationException("A required visual-state model transform changed: " + expected.Source);
+            }
+        }
+
+        private static void LogApplyStage(string operationId, string stage, Stopwatch timer, string detail)
+        {
+            LensNextNativeLog.Info("Apply lifecycle. Stage=" + stage + " Request=" + operationId + " ElapsedMs=" + timer.ElapsedMilliseconds + (string.IsNullOrWhiteSpace(detail) ? "" : " " + detail));
+        }
+
+        private Dictionary<string, List<ResolvedElementCandidate>> BuildResolutionIndex(IEnumerable<LensNextElementReference> references)
+        {
+            var wantedGuids = new HashSet<string>((references ?? Enumerable.Empty<LensNextElementReference>())
+                .Where(value => value != null && Guid.TryParse(value.InstanceGuid, out _))
+                .Select(value => Guid.Parse(value.InstanceGuid).ToString("D")), StringComparer.OrdinalIgnoreCase);
             var candidatesByGuid = new Dictionary<string, List<ResolvedElementCandidate>>(StringComparer.OrdinalIgnoreCase);
+            if (wantedGuids.Count == 0) return candidatesByGuid;
             foreach (Model model in _document.Models)
             {
                 var source = ModelSource(model);
@@ -280,6 +375,17 @@ namespace BIMLogLensNext.Native
                     list.Add(new ResolvedElementCandidate { Item = item, ModelSource = source });
                 }
             }
+            return candidatesByGuid;
+        }
+
+        private ModelItemCollection ResolveExact(IEnumerable<LensNextElementReference> references, bool requireAll, Dictionary<string, List<ResolvedElementCandidate>> candidatesByGuid)
+        {
+            var requested = (references ?? Enumerable.Empty<LensNextElementReference>())
+                .Where(value => value != null && Guid.TryParse(value.InstanceGuid, out _))
+                .GroupBy(value => (value.ModelSource ?? "") + "|" + value.InstanceGuid, StringComparer.OrdinalIgnoreCase)
+                .Select(group => group.First()).ToList();
+            var result = new ModelItemCollection();
+            if (requested.Count == 0) return result;
 
             foreach (var reference in requested)
             {
@@ -435,9 +541,69 @@ namespace BIMLogLensNext.Native
             if(state==null)return "Visual state is required."; if(state.SchemaVersion!=LensNextVisualStateSchema.Version)return "Visual-state schema version is unsupported.";
             if(state.ProjectId!=Positive(identity.ProjectId,"projectId")||state.ServerId!=Positive(identity.ServerId,"serverId")||state.ViewpointId!=identity.ViewpointId||state.LifecycleStatus!=identity.LifecycleStatus||state.RevisionNumber!=Positive(identity.RevisionNumber,"revisionNumber"))return "Visual-state immutable identity does not match the requested issue.";
             if(!string.Equals(state.ModelFingerprint,identity.ModelFingerprint,StringComparison.Ordinal))return "Visual state was captured against a different model fingerprint.";
-            var digest=LensNextVisualStateDigest.Compute(state); if(!string.IsNullOrWhiteSpace(state.DigestSha256)&&!string.Equals(state.DigestSha256,digest,StringComparison.OrdinalIgnoreCase))return "Visual-state digest validation failed.";
+            var digest=LensNextVisualStateDigest.Compute(state);
+            if(!string.IsNullOrWhiteSpace(state.DigestSha256)&&!string.Equals(state.DigestSha256,digest,StringComparison.OrdinalIgnoreCase))
+            {
+                var diagnostics=LensNextVisualStateDigest.Diagnose(state,state.DigestDiagnostics!=null&&state.DigestDiagnostics.Truncated);
+                LensNextNativeLog.Error(
+                    "Visual-state digest validation failed. Received="+state.DigestSha256+
+                    " Recomputed="+digest+
+                    " CanonicalLength="+diagnostics.CanonicalLength+
+                    " FirstMismatchField="+FirstCanonicalMismatchField(state,diagnostics.CanonicalInputBase64)+
+                    " Contract="+diagnostics.ContractVersion+
+                    " Project="+state.ProjectId+
+                    " Viewpoint="+state.ViewpointId,
+                    null);
+                return "Visual-state digest validation failed.";
+            }
             return null;
         }
+        private static string FirstCanonicalMismatchField(LensNextVisualState state,string recomputedBase64)
+        {
+            try
+            {
+                var received=state.DigestDiagnostics==null?null:state.DigestDiagnostics.CanonicalInputBase64;
+                if(string.IsNullOrWhiteSpace(received))return "canonical-input-unavailable";
+                var left=Encoding.UTF8.GetString(Convert.FromBase64String(received)).Split('\u001f');
+                var right=Encoding.UTF8.GetString(Convert.FromBase64String(recomputedBase64)).Split('\u001f');
+                var labels=CanonicalFieldLabels(state);
+                var count=Math.Max(left.Length,right.Length);
+                for(var index=0;index<count;index++)
+                {
+                    var a=index<left.Length?left[index]:"<missing>";
+                    var b=index<right.Length?right[index]:"<missing>";
+                    if(!string.Equals(a,b,StringComparison.Ordinal))return index<labels.Count?labels[index]:"canonical-token["+index+"]";
+                }
+                return "digest-only";
+            }
+            catch(Exception exception){return "diagnostic-error:"+exception.GetType().Name;}
+        }
+        private static List<string> CanonicalFieldLabels(LensNextVisualState state)
+        {
+            var labels=new List<string>{"schemaVersion","projectId","serverId","viewpointId","lifecycleStatus","revisionNumber","modelFingerprint"};
+            if(state.Camera==null)labels.Add("camera");
+            else
+            {
+                AddPointLabels(labels,"camera.position",state.Camera.Position);
+                AddRotationLabels(labels,"camera.rotation",state.Camera.Rotation);
+                AddPointLabels(labels,"camera.worldUpVector",state.Camera.WorldUpVector);
+                labels.AddRange(new[]{"camera.projection","camera.focalDistance","camera.horizontalExtentAtFocalDistance","camera.verticalExtentAtFocalDistance"});
+            }
+            var selected=(state.SelectedElements??new List<LensNextElementReference>()).OrderBy(ElementKey,StringComparer.Ordinal).ToList();
+            for(var i=0;i<selected.Count;i++)AddElementLabels(labels,"selected["+i+"]");
+            var hidden=(state.HiddenElements??new List<LensNextElementReference>()).OrderBy(ElementKey,StringComparer.Ordinal).ToList();
+            for(var i=0;i<hidden.Count;i++)AddElementLabels(labels,"hidden["+i+"]");
+            var appearance=(state.AppearanceOverrides??new List<LensNextAppearanceOverride>()).OrderBy(item=>ElementKey(item==null?null:item.Element),StringComparer.Ordinal).ToList();
+            for(var i=0;i<appearance.Count;i++){AddElementLabels(labels,"appearance["+i+"].element");labels.AddRange(new[]{"appearance["+i+"].red","appearance["+i+"].green","appearance["+i+"].blue","appearance["+i+"].transparency"});}
+            var models=(state.ModelReferences??new List<LensNextModelReference>()).OrderBy(model=>model==null?"":model.Source,StringComparer.Ordinal).ToList();
+            for(var i=0;i<models.Count;i++)labels.AddRange(new[]{"models["+i+"].source","models["+i+"].modelGuid","models["+i+"].transformFingerprint"});
+            labels.AddRange(new[]{"sectioningJson","redlinesJson","screenshotSha256"});
+            return labels;
+        }
+        private static string ElementKey(LensNextElementReference item){return item==null?"":(item.ModelSource??"")+"|"+(item.InstanceGuid??"");}
+        private static void AddElementLabels(List<string> labels,string prefix){labels.AddRange(new[]{prefix+".kind",prefix+".modelSource",prefix+".instanceGuid"});}
+        private static void AddPointLabels(List<string> labels,string prefix,LensNextPointState point){if(point==null)labels.Add(prefix);else labels.AddRange(new[]{prefix+".x",prefix+".y",prefix+".z"});}
+        private static void AddRotationLabels(List<string> labels,string prefix,LensNextRotationState rotation){if(rotation==null)labels.Add(prefix);else labels.AddRange(new[]{prefix+".a",prefix+".b",prefix+".c",prefix+".d"});}
         private static LensNextVisualApplyResult Failed(string message,bool attempted,bool succeeded)=>new LensNextVisualApplyResult{Applied=false,Message=message,RollbackAttempted=attempted,RollbackSucceeded=succeeded};
     }
 }

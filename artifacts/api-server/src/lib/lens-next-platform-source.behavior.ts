@@ -18,8 +18,12 @@ const workingView = fs.readFileSync(
 
 assert.match(panel, /selectedIssue\.visualStateAvailable/);
 assert.match(panel, /selectedIssue\.visualStateAvailable\s*&&\s*Boolean\(selectedIssue\.visualStateDigest\)/);
+assert.match(panel, /if \(workingViewInFlight\.current\) return/);
+assert.match(panel, /workingViewInFlight\.current = true/);
+assert.match(panel, /workingViewInFlight\.current = false/);
+assert.match(panel, /setWorkingViewState\("success"\)/);
 assert.match(workingView, /apiClient\.loadVisualState\(issue, signal\)/);
-assert.match(workingView, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, signal\)/);
+assert.match(workingView, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, stored\.visualStateDigest, signal\)/);
 const openFunction = workingView.slice(
   workingView.indexOf("export async function openBimlogWorkingView"),
   workingView.indexOf("export async function repairBimlogWorkingViewFromCurrent"),
@@ -32,7 +36,8 @@ assert.match(openFunction, /BIMLog is the source of truth/);
 assert.match(view, /Open working view/);
 assert.match(view, /will not search or capture a local Saved Viewpoint/);
 assert.match(view, /Upload is handled separately by the governed synchronization workflow/);
-assert.match(view, /disabled=\{!bridgeOpenEnabled\}/);
+assert.match(view, /disabled=\{!bridgeOpenEnabled \|\| workingViewState === "opening"\}/);
+assert.match(view, /Opening working view…/);
 
 console.log(JSON.stringify({
   status: "PASS",

@@ -257,6 +257,7 @@ export interface LensNextPanelViewProps {
   historyError: string | null;
   lastRefreshedAt: string | null;
   bridgeOpenEnabled: boolean;
+  workingViewState: "idle" | "opening" | "success" | "error";
   workingViewUnavailable: boolean;
   visualRepairState: "idle" | "repairing" | "success" | "error";
   visualRepairMessage: string | null;
@@ -324,6 +325,7 @@ export function LensNextPanelView({
   historyError,
   lastRefreshedAt,
   bridgeOpenEnabled,
+  workingViewState,
   workingViewUnavailable,
   visualRepairState,
   visualRepairMessage,
@@ -699,10 +701,10 @@ export function LensNextPanelView({
             <button
               type="button"
               className="lens-next__primary"
-              disabled={!bridgeOpenEnabled}
+              disabled={!bridgeOpenEnabled || workingViewState === "opening"}
               onClick={onOpenWorkingView}
             >
-              Open working view
+              {workingViewState === "opening" ? "Opening working view…" : "Open working view"}
             </button>
             <button
               type="button"

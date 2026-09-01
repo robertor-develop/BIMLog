@@ -1,5 +1,8 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -13,10 +16,13 @@ namespace BIMLogLensNext.Native
             public LensNextBridgeResponse Response;
             public readonly ManualResetEventSlim Completed = new ManualResetEventSlim(false);
             public volatile bool Expired;
+            public string Fingerprint;
         }
 
         private readonly object _sync = new object();
         private readonly Queue<WorkItem> _queue = new Queue<WorkItem>();
+        private readonly Dictionary<string, WorkItem> _applyOperations = new Dictionary<string, WorkItem>(StringComparer.Ordinal);
+        private readonly Queue<string> _applyOperationOrder = new Queue<string>();
         private readonly LensNextReadOnlyBridge _bridge;
         private readonly int _ownerThreadId;
         private readonly Control _uiDispatcher;
@@ -38,23 +44,99 @@ namespace BIMLogLensNext.Native
                 return _bridge.Execute(request);
             if (Thread.CurrentThread.ManagedThreadId == _ownerThreadId) return _bridge.Execute(request);
 
-            var work = new WorkItem { Request = request };
-            lock (_sync) _queue.Enqueue(work);
-            LensNextNativeLog.Info("UI dispatch queued. Request=" + (request == null ? "null" : request.Command) + " OwnerThread=" + _ownerThreadId + " CallerThread=" + Thread.CurrentThread.ManagedThreadId);
+            WorkItem work;
+            var joinedExistingApply = false;
+            lock (_sync)
+            {
+                if (request != null && request.Command == LensNextBridgeCommands.ApplyWorkingView && !string.IsNullOrWhiteSpace(request.RequestId))
+                {
+                    var fingerprint = Fingerprint(request);
+                    WorkItem existing;
+                    if (_applyOperations.TryGetValue(request.RequestId, out existing))
+                    {
+                        if (!string.Equals(existing.Fingerprint, fingerprint, StringComparison.Ordinal))
+                            return LensNextBridgeResponse.Blocked("idempotency_conflict", "The apply request ID was reused with a different payload.");
+                        work = existing;
+                        joinedExistingApply = true;
+                    }
+                    else
+                    {
+                        work = new WorkItem { Request = request, Fingerprint = fingerprint };
+                        _applyOperations[request.RequestId] = work;
+                        _applyOperationOrder.Enqueue(request.RequestId);
+                        TrimCompletedApplyOperations();
+                        _queue.Enqueue(work);
+                    }
+                }
+                else
+                {
+                    work = new WorkItem { Request = request };
+                    _queue.Enqueue(work);
+                }
+            }
+            if (joinedExistingApply)
+            {
+                LensNextNativeLog.Info("Apply lifecycle. Stage=idempotent-join Request=" + request.RequestId);
+                return AwaitResponse(work, timeoutMilliseconds);
+            }
+            LensNextNativeLog.Info("UI dispatch queued. Request=" + (request == null ? "null" : request.Command) + " Correlation=" + (request == null ? "null" : request.RequestId) + " OwnerThread=" + _ownerThreadId + " CallerThread=" + Thread.CurrentThread.ManagedThreadId);
             try { _uiDispatcher.BeginInvoke(new Action(DrainQueue)); }
             catch (Exception ex)
             {
                 work.Expired = true;
                 LensNextNativeLog.Error("UI dispatch BeginInvoke failed.", ex);
-                return LensNextBridgeResponse.Blocked("ui_dispatch_failed", "Navisworks rejected the UI operation.");
+                work.Response = LensNextBridgeResponse.Blocked("ui_dispatch_failed", "Navisworks rejected the UI operation.");
+                work.Completed.Set();
+                return work.Response;
             }
-            if (!work.Completed.Wait(Math.Max(250, timeoutMilliseconds)))
+            return AwaitResponse(work, timeoutMilliseconds);
+        }
+
+        private LensNextBridgeResponse AwaitResponse(WorkItem work, int timeoutMilliseconds)
+        {
+            var completed = timeoutMilliseconds == Timeout.Infinite
+                ? WaitUntilCompleted(work)
+                : work.Completed.Wait(Math.Max(250, timeoutMilliseconds));
+            if (!completed)
             {
                 work.Expired = true;
                 LensNextNativeLog.Error("UI dispatch timed out. OwnerThread=" + _ownerThreadId + " CallerThread=" + Thread.CurrentThread.ManagedThreadId + " TimeoutMs=" + timeoutMilliseconds);
                 return LensNextBridgeResponse.Blocked("ui_dispatch_timeout", "Navisworks did not execute the requested UI operation before the bridge timeout.");
             }
             return work.Response ?? LensNextBridgeResponse.Blocked("ui_dispatch_failed", "Navisworks did not return a bridge response.");
+        }
+
+        private void TrimCompletedApplyOperations()
+        {
+            while (_applyOperationOrder.Count > 256)
+            {
+                var oldest = _applyOperationOrder.Peek();
+                WorkItem candidate;
+                if (!_applyOperations.TryGetValue(oldest, out candidate) || candidate.Completed.IsSet)
+                {
+                    _applyOperationOrder.Dequeue();
+                    _applyOperations.Remove(oldest);
+                    continue;
+                }
+                break;
+            }
+        }
+
+        private static string Fingerprint(LensNextBridgeRequest request)
+        {
+            var canonical = new StringBuilder()
+                .Append(request.ProtocolVersion).Append('\u001f')
+                .Append(request.Command ?? "").Append('\u001f');
+            foreach (var pair in (request.Fields ?? new Dictionary<string, string>()).OrderBy(value => value.Key, StringComparer.Ordinal))
+                canonical.Append(pair.Key).Append('\u001e').Append(pair.Value ?? "<null>").Append('\u001f');
+            using (var sha = SHA256.Create())
+                return string.Concat(sha.ComputeHash(Encoding.UTF8.GetBytes(canonical.ToString())).Select(value => value.ToString("x2")));
+        }
+
+        private static bool WaitUntilCompleted(WorkItem work)
+        {
+            work.Completed.Wait();
+            return true;
         }
 
         public void RenewSession(string sessionToken, DateTimeOffset sessionExpiresAt)
@@ -81,7 +163,12 @@ namespace BIMLogLensNext.Native
                     work.Completed.Set();
                     continue;
                 }
-                try { work.Response = _bridge.Execute(work.Request); }
+                try
+                {
+                    LensNextNativeLog.Info("Apply lifecycle. Stage=ui-execution-started Request=" + (work.Request == null ? "null" : work.Request.RequestId) + " Command=" + (work.Request == null ? "null" : work.Request.Command));
+                    work.Response = _bridge.Execute(work.Request);
+                    LensNextNativeLog.Info("Apply lifecycle. Stage=ui-execution-finished Request=" + (work.Request == null ? "null" : work.Request.RequestId) + " Command=" + (work.Request == null ? "null" : work.Request.Command));
+                }
                 catch (Exception ex) { work.Response = LensNextBridgeResponse.Blocked("bridge_exception", ex.Message); }
                 finally { work.Completed.Set(); }
             }
