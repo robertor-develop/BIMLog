@@ -201,7 +201,7 @@ namespace BIMLogLensNext
             {
                 return BridgeRequestValidation.Reject("unknown_visual_field");
             }
-            if (request.Command == LensNextBridgeCommands.ApplyWorkingView &&
+            if ((request.Command == LensNextBridgeCommands.ApplyWorkingView || request.Command == LensNextBridgeCommands.RestoreExactVisualState) &&
                 fields.Keys.Any(key => !ApplyWorkingViewFields.Contains(key)))
             {
                 return BridgeRequestValidation.Reject("unknown_apply_working_view_field");
@@ -233,13 +233,13 @@ namespace BIMLogLensNext
                         return BridgeRequestValidation.Reject("new_capture_field_required");
                 }
             }
-            if (request.Command == LensNextBridgeCommands.ApplyWorkingView &&
+            if ((request.Command == LensNextBridgeCommands.ApplyWorkingView || request.Command == LensNextBridgeCommands.RestoreExactVisualState) &&
                 (!fields.ContainsKey("visualStateJson") || string.IsNullOrWhiteSpace(fields["visualStateJson"])))
             {
                 return BridgeRequestValidation.Reject("visual_state_required");
             }
             string visualStateDigest;
-            if (request.Command == LensNextBridgeCommands.ApplyWorkingView &&
+            if ((request.Command == LensNextBridgeCommands.ApplyWorkingView || request.Command == LensNextBridgeCommands.RestoreExactVisualState) &&
                 (!fields.TryGetValue("visualStateDigest", out visualStateDigest) ||
                  string.IsNullOrWhiteSpace(visualStateDigest) ||
                  visualStateDigest.Length != 64 ||

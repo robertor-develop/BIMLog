@@ -15,6 +15,7 @@ namespace BIMLogLensNext
         public const string CaptureLocalViewpoint = "capture-local-viewpoint";
         public const string CaptureNewViewpoint = "capture-new-viewpoint";
         public const string ApplyWorkingView = "apply-working-view";
+        public const string RestoreExactVisualState = "restore-exact-visual-state";
         public const string PublishWorkingView = "publish-working-view";
         public const string MaterializeMyView = "materialize-my-view";
 
@@ -32,11 +33,12 @@ namespace BIMLogLensNext
             CaptureVisualState,
             CaptureLocalViewpoint,
             CaptureNewViewpoint,
-            ApplyWorkingView
+            ApplyWorkingView,
+            RestoreExactVisualState
         });
 
         public static IReadOnlyCollection<string> TemporaryWorkingStateCommands { get; } =
-            Array.AsReadOnly(new[] { ApplyWorkingView });
+            Array.AsReadOnly(new[] { ApplyWorkingView, RestoreExactVisualState });
 
         public static IReadOnlyCollection<string> PersistentSavedViewpointWriteCommands { get; } =
             Array.AsReadOnly(new[] { PublishWorkingView, MaterializeMyView });

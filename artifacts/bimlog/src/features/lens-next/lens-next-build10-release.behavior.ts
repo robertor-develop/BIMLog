@@ -108,7 +108,7 @@ const native2025 = readFileSync(new URL("../../../../../plugins/BIMLogLensNext/n
 // Complete governed order and bounded recovery behavior.
 assert.ok(panel.indexOf("for (const item of confirmations)") < panel.indexOf("for (const item of pulls)"));
 assert.ok(panel.indexOf("for (const item of pulls)") < panel.indexOf("for (const item of uploads)"));
-assert.match(panel, /loadVisualState\(issue\)[\s\S]*applyPlatformWorkingView[\s\S]*publishCreatedViewpoint[\s\S]*confirmCreatedLocalViewpoint/);
+assert.match(panel, /loadVisualState\(issue\)[\s\S]*applyPlatformWorkingView[\s\S]*createLocalSavedViewpoint[\s\S]*confirmCreatedLocalViewpoint/);
 assert.match(panel, /Refresh before retrying; do not create duplicates/);
 assert.match(panel, /publishingAllowed/);
 assert.match(route, /requirePermission\("admin", "write"\)/);
