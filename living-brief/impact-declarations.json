@@ -16081,8 +16081,15 @@
           "reason": "No database schema or data mutation, push, deployment, package, install, or external delivery occurred."
         }
       ],
-      "reviewedChangedPaths": [],
-      "reviewedChangeSha256": ""
+      "reviewedChangedPaths": [
+        "contracts/lens-next/DIGEST-V3-PLATFORM-CONTRACT-REPORT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4839a0d053f4748da7cbe96dc28952bda581a13face85b67e119f85e5cbb2c4b"
     }
   ]
 }
