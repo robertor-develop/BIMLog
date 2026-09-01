@@ -2089,3 +2089,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Advance only exact green descendants to the governed GitHub branches. In Replit, use Shell only—never Replit Agent—align the preserved publish-wrapper lineage to the pushed successor, run the complete build, and publish only from the exact passing source. Verify the live Lens Next route and browser console after publication.
 - Deliver only the hash-verified Navisworks 2025 ZIP `BIMLog-Lens-Next-Navisworks2025-v1.05.N03-P01.zip` with SHA-256 `A9020A628DDA1EB9424122B914C840A4638E5008E607D6B4FD20C6B5C6BC9E99` to Roberto's authorized private Telegram recipient.
 - Publication and delivery do not establish Navisworks acceptance. On this host, installed 2021 acceptance must still prove a distinctive full-fidelity create/refresh/open/restart/reopen sequence on the governed 1185 model. Ruben's 2025 host must separately prove exact package installation, long-running full-fidelity Open Working View, save/reopen persistence, session stability, no flicker, no duplicate apply, diagnostics, settings, and validated XML export.
+## Lens Next digest v3 coordinated release gates
+
+- Reconcile the Platform v3 contract report and Living Brief against implementation commit `92f93ce9d2f824a47d7a290bfe516de0a3a2a000`, then run the clean production artifact and publication-source gates.
+- Push and publish the Platform-owned `v1.05.N05-P02` change only through the approved Replit Shell release path; verify production v1 and v2 compatibility plus v3 acceptance/tamper denial.
+- Do not let Main 04 emit v3 or create an N06 field package until production Platform v3 support is verified.
+- After Platform approval, Main 04 must consume the exact shared A–L fixture, implement native v3 canonicalization and ElementReference/ModelReference v2, and complete the previously approved create → persist → fetch → apply → restart → apply proof before any field delivery.

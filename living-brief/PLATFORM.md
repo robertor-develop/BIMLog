@@ -296,6 +296,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/lens-next-platform-source.behavior.ts
 - artifacts/api-server/src/lib/lens-next-publishing.behavior.ts
 - artifacts/api-server/src/lib/lens-next-publishing.ts
+- artifacts/api-server/src/lib/lens-next-visual-digest-v3.behavior.ts
 - artifacts/api-server/src/lib/linked-items-creation-ux.behavior.ts
 - artifacts/api-server/src/lib/living-brief-gate.behavior.ts
 - artifacts/api-server/src/lib/living-brief-gate.ts
