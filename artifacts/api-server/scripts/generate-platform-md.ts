@@ -141,6 +141,12 @@ ${appRoutes()}
   remain fail-closed HTTP 409 with no issue/package mutation. Server diagnostics record both
   digests and the first differing field. The existing XML export reads Navisworks Saved Viewpoints
   and does not silently substitute BIMLog web viewpoint records.
+- Lens Next normal create/open navigation uses the purpose-specific \`lens-next-navigation.v1\`
+  contract. The persisted navigation package contains project/model identity, camera, optional
+  sectioning, and an independently stored screenshot; screenshot bytes do not affect its digest.
+  Normal navigation deliberately excludes full-model visibility and appearance scans. The N06
+  exact-state engine is retained only behind the explicit \`restore-exact-visual-state\` diagnostic
+  action and is not part of normal issue creation or Open Working View.
 - Living Brief: all documents in living-brief/catalog.json are served in authority order through
   /api/v1/living-brief/* from the verified deployed source bundle. living_brief_documents is an
   exact, metadata-bearing database mirror; it never overrides source doctrine. Controlled admin
