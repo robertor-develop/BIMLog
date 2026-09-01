@@ -1,8 +1,8 @@
 [CmdletBinding()]
-param([string]$Version = 'v1.05.N02-P01')
+param([string]$Version = 'v1.05.N03-P01')
 $ErrorActionPreference = 'Stop'
-$binaryVersion = '1.5.2.1'
-if ($Version -ne 'v1.05.N02-P01') { throw 'STOP: stale or unexpected release requested.' }
+$binaryVersion = '1.5.3.1'
+if ($Version -ne 'v1.05.N03-P01') { throw 'STOP: stale or unexpected release requested.' }
 $year = 2021
 $sourceRoot = [IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\')
 $canonicalRoot = $sourceRoot

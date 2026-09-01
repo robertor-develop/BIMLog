@@ -473,7 +473,7 @@ namespace BIMLogLensNext.Native.Tests
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
-            Equal("v1.05.N02-P01", LensNextConstants.ProductVersionLabel);
+            Equal("v1.05.N03-P01", LensNextConstants.ProductVersionLabel);
         }
 
         private static void RuntimeIgnoresConfiguredProjectFallback()
