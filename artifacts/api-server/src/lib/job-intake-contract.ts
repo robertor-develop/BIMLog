@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { FinancialControlError } from "./financial-control-contract";
 import { normalizeJobApuDrafts } from "./job-apu-builder";
+import { normalizeJobWorkPackages } from "./job-work-package-builder";
 import {
   boundedText,
   decimalFromScaled,
@@ -579,6 +580,10 @@ export function normalizeJobIntakeData(raw: unknown) {
   const apuDraftIds = new Set(apuDrafts.map((item) => item.id));
   if (normalizedItems.some((item) => item.apuDraftId && !apuDraftIds.has(item.apuDraftId)))
     throw new FinancialControlError(400, "JOB_INTAKE_APU_DRAFT_INVALID", "Every selected APU draft must exist in this Intake.");
+  const workPackages = normalizeJobWorkPackages(
+    input.workPackages,
+    new Map(apuDrafts.map((apu) => [apu.id, apu.contractId])),
+  );
   const normalizedAssignments = assignments.map(
     (rawAssignment: any, index: number) => {
       const assignment =
@@ -651,6 +656,7 @@ export function normalizeJobIntakeData(raw: unknown) {
     },
     scopeItems: normalizedItems,
     apuDrafts,
+    workPackages,
     commercial: {
       contracts: normalizedContracts,
       quotationNumber: optionalText(

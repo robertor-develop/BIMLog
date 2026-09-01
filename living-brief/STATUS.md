@@ -1,5 +1,17 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P06 INTAKE-APU-06 local work-package candidate - 2026-08-31
+
+- Each agreement-owned APU may now be divided into optional work packages by floor, zone, task,
+  and deliverable without duplicating the job, APU, schedule, task, or document authorities.
+- Work-package fields use progressive disclosure: users may create only the detail they need now,
+  leave irrelevant dimensions blank, and add further decomposition later.
+- Every package has a stable ID and known APU parent. The server derives its agreement from that
+  parent and refuses missing APUs, duplicate IDs, oversized text, and more than 500 packages.
+- Focused behavior, TypeScript, desktop English, and exact-390 Spanish visual gates pass locally
+  without horizontal overflow. Integration, push, publication, deployment, production migration,
+  and customer acceptance remain separate.
+
 ## BIMLog v1.05.N01-P05 INTAKE-APU-05 local multiple-APU candidate - 2026-08-31
 
 - Simple Job Intake now groups multiple editable APU drafts beneath each existing agreement and

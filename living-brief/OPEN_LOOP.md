@@ -4,6 +4,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.05.N01-P01 Job Intake and Multi-APU program - 2026-08-31
 
+- `INTAKE-APU-06` implements optional APU-owned floor/zone/task/deliverable work packages at
+  `v1.05.N01-P06`. Remaining gates are bilingual visual acceptance, deterministic Living Brief
+  sealing, exact-clean full workspace build, integration, authorized API/database autosave/reload
+  proof, and external release/acceptance. Build 07 must connect resources, internal rates, planned
+  hours, redelegation, and incentive inputs to these existing packages without creating payroll or
+  accounting authority.
+
 - `INTAKE-APU-05` implements the local multiple-APU builder at `v1.05.N01-P05` using editable
   agreement-owned drafts and immutable canonical Generic APU version links. Remaining gates are
   deterministic Living Brief sealing, exact-clean full workspace build, integration, authorized
