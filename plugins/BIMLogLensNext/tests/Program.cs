@@ -49,7 +49,8 @@ namespace BIMLogLensNext.Tests
                 Run("m7_pilot_capabilities_are_explicit", M7PilotCapabilitiesAreExplicit);
                 Run("m7_confirmation_is_required", M7ConfirmationIsRequired);
                 Run("m7_publish_dispatches_exactly_once", M7PublishDispatchesExactlyOnce);
-                Run("new_viewpoint_capture_uses_canonical_typed_payload", NewViewpointCaptureUsesCanonicalTypedPayload);
+                Run("new_viewpoint_capture_uses_minimal_navigation_payload", NewViewpointCaptureUsesCanonicalTypedPayload);
+                Run("navigation_digest_matches_platform_float_vector", NavigationDigestMatchesPlatformFloatVector);
                 Run("visual_state_digest_matches_platform_null_token_contract", VisualStateDigestMatchesPlatformNullTokenContract);
                 Run("visual_state_digest_v2_float_tokens_match_platform", VisualStateDigestV2FloatTokensMatchPlatform);
                 Run("visual_state_digest_v1_remains_backward_compatible", VisualStateDigestV1RemainsBackwardCompatible);
@@ -124,7 +125,7 @@ namespace BIMLogLensNext.Tests
         private static void OnlyReadCommandsAreExposed()
         {
             var capabilities = new LensNextCapabilities();
-            Equal(10, capabilities.Commands.Count);
+            Equal(11, capabilities.Commands.Count);
             True(capabilities.VisualCaptureEnabled);
             True(capabilities.WorkingViewReconstructionEnabled);
             False(capabilities.PlatformVisualWriteEnabled);
@@ -588,7 +589,7 @@ namespace BIMLogLensNext.Tests
             var capabilities = new LensNextCapabilities(true);
 
             Equal("m7_local_pilot", capabilities.Mode);
-            Equal(12, capabilities.Commands.Count);
+            Equal(13, capabilities.Commands.Count);
             True(capabilities.Commands.Contains(
                 LensNextBridgeCommands.PublishWorkingView
             ));
@@ -739,12 +740,15 @@ namespace BIMLogLensNext.Tests
             var response = Bridge(new FakeAdapter(), new RecordingDispatcher()).Execute(request);
             True(response.Success);
             Equal("new_viewpoint_captured", response.Code);
-            var payload = response.Payload as LensNextVisualCapturePayload;
+            var payload = response.Payload as LensNextNavigationCapturePayload;
             True(payload != null);
             Equal(request.RequestId, payload.RequestId);
             Equal(1, payload.Identity.ProjectId);
             Equal("viewpoint-new-1", payload.Identity.ViewpointId);
-            True(payload.VisualState != null);
+            True(payload.NavigationView != null);
+            Equal(LensNextNavigationSchema.ContractVersion, payload.NavigationView.ContractVersion);
+            True(payload.NavigationView.Camera != null);
+            Equal(0, payload.NavigationView.SelectedElements.Count);
         }
 
         private static void VisualStateDigestMatchesPlatformNullTokenContract()
@@ -833,6 +837,28 @@ namespace BIMLogLensNext.Tests
             True(Convert.FromBase64String(diagnostics.CanonicalInputBase64).Length > 0);
             state.DigestDiagnostics = diagnostics;
             Equal(diagnostics.ComputedDigest, LensNextVisualStateDigest.Compute(state));
+        }
+
+        private static void NavigationDigestMatchesPlatformFloatVector()
+        {
+            var navigation = new LensNextNavigationView
+            {
+                ContractVersion = LensNextNavigationSchema.ContractVersion,
+                SchemaVersion = LensNextNavigationSchema.Version,
+                ProjectId = 29,
+                ServerId = 1,
+                ViewpointId = "local-nav-1",
+                LifecycleStatus = "active",
+                RevisionNumber = 1,
+                ModelFingerprint = string.Concat(Enumerable.Repeat("0123456789abcdef", 4)),
+                Camera = NumericDigestState("ignored").Camera,
+                SectioningJson = null,
+                SelectedElements = new List<LensNextElementReference>()
+            };
+            Equal("d4618c4ba468325bd41de8284c3e75f40a63d76af8d4cf367c961a5e03a58b27", LensNextNavigationDigest.Compute(navigation));
+            navigation.ScreenshotDataUrl = "data:image/jpeg;base64,AAAA";
+            navigation.ScreenshotSha256 = new string('f', 64);
+            Equal("d4618c4ba468325bd41de8284c3e75f40a63d76af8d4cf367c961a5e03a58b27", LensNextNavigationDigest.Compute(navigation));
         }
 
         private static void VisualStateDigestV3SharedVectorsAThroughL()
@@ -1103,6 +1129,36 @@ namespace BIMLogLensNext.Tests
                     CapturedAt = DateTimeOffset.UtcNow.ToString("o"),
                     CaptureSource = "test"
                 };
+            }
+
+            public LensNextNavigationView CaptureCurrentNavigationView(
+                ImmutableWorkingViewIdentity identity,
+                bool includeScreenshot)
+            {
+                var value = new LensNextNavigationView
+                {
+                    ContractVersion = LensNextNavigationSchema.ContractVersion,
+                    SchemaVersion = LensNextNavigationSchema.Version,
+                    ProjectId = int.Parse(identity.ProjectId),
+                    ServerId = int.Parse(identity.ServerId),
+                    ViewpointId = identity.ViewpointId,
+                    LifecycleStatus = identity.LifecycleStatus,
+                    RevisionNumber = int.Parse(identity.RevisionNumber),
+                    ModelFingerprint = identity.ModelFingerprint,
+                    Camera = NumericDigestState(identity.ViewpointId).Camera
+                };
+                value.DigestSha256 = LensNextNavigationDigest.Compute(value);
+                return value;
+            }
+
+            public LensNextNavigationApplyResult ApplyNavigationViewJson(
+                ImmutableWorkingViewIdentity identity,
+                string navigationJson,
+                string storedDigest,
+                string operationId)
+            {
+                ApplyCalls++;
+                return new LensNextNavigationApplyResult { Applied = true };
             }
 
             public LensNextVisualApplyResult ApplyWorkingVisualStateJson(

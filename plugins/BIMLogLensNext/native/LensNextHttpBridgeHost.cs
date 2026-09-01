@@ -150,7 +150,7 @@ namespace BIMLogLensNext.Native
 
         private static int TimeoutFor(string command)
         {
-            if (command == LensNextBridgeCommands.ApplyWorkingView)
+            if (command == LensNextBridgeCommands.RestoreExactVisualState)
                 return Timeout.Infinite;
             return command == LensNextBridgeCommands.CaptureVisualState ||
                    command == LensNextBridgeCommands.CaptureLocalViewpoint ||
@@ -171,6 +171,7 @@ namespace BIMLogLensNext.Native
             if (request.HttpMethod == "POST" && path == "/v1/capture-local-viewpoint") return LensNextBridgeCommands.CaptureLocalViewpoint;
             if (request.HttpMethod == "POST" && path == "/v1/capture-new-viewpoint") return LensNextBridgeCommands.CaptureNewViewpoint;
             if (request.HttpMethod == "POST" && path == "/v1/apply-working-view") return LensNextBridgeCommands.ApplyWorkingView;
+            if (request.HttpMethod == "POST" && path == "/v1/restore-exact-visual-state") return LensNextBridgeCommands.RestoreExactVisualState;
             if (request.HttpMethod == "POST" && path == "/v1/publish-working-view") return LensNextBridgeCommands.PublishWorkingView;
             if (request.HttpMethod == "POST" && path == "/v1/materialize-my-view") return LensNextBridgeCommands.MaterializeMyView;
             return null;
@@ -296,6 +297,16 @@ namespace BIMLogLensNext.Native
             if (captured != null) return new Dictionary<string, object>
             {
                 { "requestId", captured.RequestId }, { "identity", captured.Identity }, { "visualState", captured.VisualState }
+            };
+            var navigationCaptured = payload as LensNextNavigationCapturePayload;
+            if (navigationCaptured != null) return new Dictionary<string, object>
+            {
+                { "requestId", navigationCaptured.RequestId }, { "identity", navigationCaptured.Identity }, { "navigationView", navigationCaptured.NavigationView }
+            };
+            var navigationApplied = payload as LensNextNavigationAppliedPayload;
+            if (navigationApplied != null) return new Dictionary<string, object>
+            {
+                { "requestId", navigationApplied.RequestId }, { "identity", navigationApplied.Identity }, { "result", navigationApplied.Result }
             };
             var applied = payload as LensNextWorkingViewAppliedPayload;
             if (applied != null) return new Dictionary<string, object>

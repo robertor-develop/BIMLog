@@ -21,6 +21,94 @@ namespace BIMLogLensNext.Native
     {
         private readonly JavaScriptSerializer _visualJson = new JavaScriptSerializer { MaxJsonLength = 16 * 1024 * 1024 };
 
+        public LensNextNavigationView CaptureCurrentNavigationView(ImmutableWorkingViewIdentity identity, bool includeScreenshot)
+        {
+            var timer = Stopwatch.StartNew();
+            EnsureSameDocument();
+            if (!_contract.MatchesContext(identity)) throw new InvalidOperationException("The navigation capture does not match the active BIMLog project/model context.");
+            var navigation = new LensNextNavigationView
+            {
+                ContractVersion = LensNextNavigationSchema.ContractVersion,
+                SchemaVersion = LensNextNavigationSchema.Version,
+                ProjectId = Positive(identity.ProjectId, "projectId"),
+                ServerId = Positive(identity.ServerId, "serverId"),
+                ViewpointId = identity.ViewpointId,
+                LifecycleStatus = identity.LifecycleStatus,
+                RevisionNumber = Positive(identity.RevisionNumber, "revisionNumber"),
+                ModelFingerprint = identity.ModelFingerprint,
+                Camera = CaptureCamera(),
+                SectioningJson = TryGetSectioningJson(),
+                SelectedElements = new List<LensNextElementReference>()
+            };
+            if (navigation.Camera == null) throw new InvalidOperationException("The active Navisworks camera is unavailable.");
+            if (includeScreenshot)
+            {
+                var screenshot = CaptureScreenshot();
+                navigation.ScreenshotDataUrl = screenshot.DataUrl;
+                navigation.ScreenshotSha256 = screenshot.Sha256;
+            }
+            navigation.DigestSha256 = LensNextNavigationDigest.Compute(navigation);
+            LensNextNativeLog.Info("Navigation capture complete. Request=" + identity.ViewpointId + " Camera=true Sectioning=" + (!string.IsNullOrWhiteSpace(navigation.SectioningJson)) + " Selection=0 Screenshot=" + (!string.IsNullOrWhiteSpace(navigation.ScreenshotDataUrl)) + " ElapsedMs=" + timer.ElapsedMilliseconds);
+            return navigation;
+        }
+
+        public LensNextNavigationApplyResult ApplyNavigationViewJson(ImmutableWorkingViewIdentity identity, string navigationJson, string storedDigest, string operationId)
+        {
+            var timer = Stopwatch.StartNew();
+            var applied = new List<string>();
+            var warnings = new List<string>();
+            EnsureSameDocument();
+            if (!_contract.MatchesContext(identity)) return NavigationFailed("Model/project context mismatch.", warnings);
+            LensNextCameraState camera;
+            string sectioning;
+            List<LensNextElementReference> selected;
+            try
+            {
+                var envelope = _visualJson.Deserialize<Dictionary<string, object>>(navigationJson);
+                object contractValue;
+                var contractVersion = envelope != null && (envelope.TryGetValue("ContractVersion", out contractValue) || envelope.TryGetValue("contractVersion", out contractValue)) ? Convert.ToString(contractValue, CultureInfo.InvariantCulture) : null;
+                if (string.Equals(contractVersion, LensNextNavigationSchema.ContractVersion, StringComparison.Ordinal))
+                {
+                    var value = _visualJson.Deserialize<LensNextNavigationView>(navigationJson);
+                    if (value == null || value.Camera == null || value.ProjectId != Positive(identity.ProjectId, "projectId") || value.ServerId != Positive(identity.ServerId, "serverId") || !string.Equals(value.ViewpointId, identity.ViewpointId, StringComparison.Ordinal) || !string.Equals(value.LifecycleStatus, identity.LifecycleStatus, StringComparison.Ordinal) || value.RevisionNumber != Positive(identity.RevisionNumber, "revisionNumber") || !string.Equals(value.ModelFingerprint, identity.ModelFingerprint, StringComparison.Ordinal))
+                        return NavigationFailed("The BIMLog navigation identity does not match the active record.", warnings);
+                    var recomputed = LensNextNavigationDigest.Compute(value);
+                    if (string.IsNullOrWhiteSpace(storedDigest) || !string.Equals(storedDigest, value.DigestSha256, StringComparison.OrdinalIgnoreCase) || !string.Equals(storedDigest, recomputed, StringComparison.OrdinalIgnoreCase))
+                        return NavigationFailed("BIMLog navigation digest validation failed.", warnings);
+                    camera = value.Camera; sectioning = value.SectioningJson; selected = value.SelectedElements ?? new List<LensNextElementReference>();
+                }
+                else
+                {
+                    var historical = _visualJson.Deserialize<LensNextVisualState>(navigationJson);
+                    var contractError = ValidateState(identity, historical);
+                    if (contractError != null) return NavigationFailed(contractError, warnings);
+                    var recomputed = LensNextVisualStateDigest.Compute(historical);
+                    if (!string.Equals(storedDigest, historical.DigestSha256, StringComparison.OrdinalIgnoreCase) || !string.Equals(storedDigest, recomputed, StringComparison.OrdinalIgnoreCase))
+                        return NavigationFailed("Historical BIMLog Visual Package digest validation failed.", warnings);
+                    camera = historical.Camera; sectioning = historical.SectioningJson; selected = historical.SelectedElements ?? new List<LensNextElementReference>();
+                    warnings.Add("Historical Visual Package opened through the lightweight navigation projection; exact visibility and appearance were not restored.");
+                }
+            }
+            catch (Exception ex) { return NavigationFailed("BIMLog navigation payload is invalid: " + ex.Message, warnings); }
+
+            try { ApplyCamera(camera); applied.Add("camera"); }
+            catch (Exception ex) { return NavigationFailed("Camera apply failed: " + ex.Message, warnings); }
+            if (!string.IsNullOrWhiteSpace(sectioning))
+            {
+                try { InvokeSectioningSetter(sectioning); applied.Add("sectioning"); }
+                catch (Exception ex) { warnings.Add("Optional sectioning was not applied: " + ex.Message); }
+            }
+            if (selected.Count > 0)
+                warnings.Add("Optional selection was not applied because navigation must not scan the full model; camera navigation completed.");
+            LensNextNativeLog.Info("Navigation apply complete. Request=" + operationId + " Components=" + string.Join(",", applied) + " Warnings=" + warnings.Count + " ElapsedMs=" + timer.ElapsedMilliseconds);
+            return new LensNextNavigationApplyResult { Applied = true, Message = "BIMLog navigation applied to the active Navisworks view without creating a Saved Viewpoint.", AppliedComponents = applied, OptionalWarnings = warnings };
+        }
+
+        private static LensNextNavigationApplyResult NavigationFailed(string message, IReadOnlyCollection<string> warnings)
+        {
+            return new LensNextNavigationApplyResult { Applied = false, Message = message, AppliedComponents = new string[0], OptionalWarnings = warnings ?? new string[0] };
+        }
+
         public LensNextVisualState CaptureCurrentVisualState(ImmutableWorkingViewIdentity identity, bool includeScreenshot)
         {
             return CaptureCurrentVisualState(identity, includeScreenshot, true);

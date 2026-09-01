@@ -75,7 +75,7 @@ function Thumbnail({ issue }: { issue: LensNextIssue }) {
     <img
       className="lens-next__thumbnail"
       src={issue.screenshotUrl}
-      alt={`Viewpoint ${displayCode(issue)}`}
+      alt={`Issue ${displayCode(issue)}`}
     />
   );
 }
@@ -221,7 +221,7 @@ export interface LensNextPanelViewProps {
   createEnabled: boolean;
   createState: "idle" | "capturing" | "creating" | "success" | "error";
   createMessage: string | null;
-  onCreateViewpoint(draft: LensNextCreateDraft, reason: string): void;
+  onCreateIssue(draft: LensNextCreateDraft, reason: string): void;
   layoutEnabled: boolean;
   layoutState: "idle" | "running" | "success" | "error";
   layoutMessage: string | null;
@@ -289,7 +289,7 @@ export function LensNextPanelView({
   createEnabled,
   createState,
   createMessage,
-  onCreateViewpoint,
+  onCreateIssue,
   layoutEnabled,
   layoutState,
   layoutMessage,
@@ -464,7 +464,7 @@ export function LensNextPanelView({
       )}
 
       <details className="lens-next__create" open>
-        <summary>Create BIMLog viewpoint</summary>
+        <summary>Create BIMLog Issue</summary>
         <div className="lens-next__filters">
           <label className="lens-next__field"><span>Trade</span><select value={createDraft.trade} onChange={e => { setCreateDraft({ ...createDraft, trade: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select trade</option>{createTrades.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
           <label className="lens-next__field"><span>Floor</span><select value={createDraft.floor} onChange={e => { setCreateDraft({ ...createDraft, floor: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select floor</option>{createFloors.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
@@ -477,9 +477,9 @@ export function LensNextPanelView({
           <label className="lens-next__field lens-next__field--wide"><span>Reason for audit history (optional)</span><textarea value={createReason} onChange={e => { setCreateReason(e.target.value); setCreateReviewReady(false); }} /></label>
         </div>
         {!createReviewReady ? (
-          <button className="lens-next__create-button" type="button" disabled={!createEnabled || !createDraft.trade.trim() || !createDraft.floor.trim() || !createDraft.note.trim() || !createDraft.reportType.trim()} onClick={() => setCreateReviewReady(true)}>Review viewpoint creation</button>
+          <button className="lens-next__create-button" type="button" disabled={!createEnabled || !createDraft.trade.trim() || !createDraft.floor.trim() || !createDraft.note.trim() || !createDraft.reportType.trim()} onClick={() => setCreateReviewReady(true)}>Review Issue Creation</button>
         ) : (
-          <div className="lens-next__create-review"><p>Create one BIMLog issue with its visual package. No Navisworks Saved Viewpoint is created and the model file is not modified.</p><button className="lens-next__create-button" type="button" disabled={createState !== "idle" && createState !== "success" && createState !== "error"} onClick={() => { onCreateViewpoint(createDraft, createReason.trim()); setCreateReviewReady(false); }}>Confirm and create BIMLog issue</button></div>
+          <div className="lens-next__create-review"><p>Create one BIMLog Issue with its Visual Package and screenshot. No local Navisworks Saved Viewpoint is created and the model file is not modified.</p><button className="lens-next__create-button" type="button" disabled={createState !== "idle" && createState !== "success" && createState !== "error"} onClick={() => { onCreateIssue(createDraft, createReason.trim()); setCreateReviewReady(false); }}>Confirm and Create BIMLog Issue</button></div>
         )}
         {createMessage && <p role="status">{createMessage}</p>}
       </details>
@@ -704,7 +704,7 @@ export function LensNextPanelView({
               disabled={!bridgeOpenEnabled || workingViewState === "opening"}
               onClick={onOpenWorkingView}
             >
-              {workingViewState === "opening" ? "Opening working view…" : "Open working view"}
+              {workingViewState === "opening" ? "Opening Working View…" : "Open Working View"}
             </button>
             <button
               type="button"
@@ -717,7 +717,7 @@ export function LensNextPanelView({
           {workingViewUnavailable && (
             <section className="lens-next__visual-repair" aria-label="Repair missing platform visual package">
               <p className="lens-next__inline-notice">
-                BIMLog is the source of truth, and this platform record has no complete visual package. Open working view is blocked: Lens Next will not search or capture a local Saved Viewpoint automatically. Display the exact original view in Navisworks, then attach the current view to this exact BIMLog record once. Upload is handled separately by the governed synchronization workflow.
+                BIMLog is the source of truth, and this Issue has no complete Visual Package. Open Working View is blocked: Lens Next will not search or capture a local Saved Viewpoint automatically. Display the exact original view in Navisworks, then attach the current view to this exact BIMLog Issue once. Upload is handled separately by the governed synchronization workflow.
               </p>
               <button type="button" disabled={visualRepairState === "repairing"} onClick={onRepairCurrentWorkingView}>
                 {visualRepairState === "repairing" ? "Repairing platform package…" : "Repair from current Navisworks view"}

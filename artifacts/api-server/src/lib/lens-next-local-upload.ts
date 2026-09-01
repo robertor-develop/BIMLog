@@ -263,6 +263,60 @@ function verifiedScreenshotDataUrl(state: any): string | null {
   return dataUrl;
 }
 
+const LENS_NEXT_NAVIGATION_CONTRACT_VERSION = "lens-next-navigation.v1";
+
+const isLensNextNavigationView = (value: any): boolean =>
+  String(field(value, "ContractVersion", "contractVersion") ?? "") === LENS_NEXT_NAVIGATION_CONTRACT_VERSION;
+
+function lensNextNavigationDigestTokens(value: any): DigestToken[] {
+  const parts: DigestToken[] = [];
+  append(parts, "contractVersion", field(value, "ContractVersion", "contractVersion"));
+  append(parts, "schemaVersion", field(value, "SchemaVersion", "schemaVersion"));
+  append(parts, "projectId", field(value, "ProjectId", "projectId"));
+  append(parts, "serverId", field(value, "ServerId", "serverId"));
+  append(parts, "viewpointId", field(value, "ViewpointId", "viewpointId"));
+  append(parts, "lifecycleStatus", field(value, "LifecycleStatus", "lifecycleStatus"));
+  append(parts, "revisionNumber", field(value, "RevisionNumber", "revisionNumber"));
+  append(parts, "modelFingerprint", field(value, "ModelFingerprint", "modelFingerprint"));
+  const camera = field(value, "Camera", "camera");
+  if (!camera) append(parts, "camera", "camera:null"); else {
+    appendPoint(parts, "camera.position", field(camera, "Position", "position"), "point:null", LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    const rotation = field(camera, "Rotation", "rotation");
+    if (!rotation) append(parts, "camera.rotation", "rotation:null"); else {
+      appendDouble(parts, "camera.rotation.a", field(rotation, "A", "a"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+      appendDouble(parts, "camera.rotation.b", field(rotation, "B", "b"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+      appendDouble(parts, "camera.rotation.c", field(rotation, "C", "c"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+      appendDouble(parts, "camera.rotation.d", field(rotation, "D", "d"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    }
+    appendPoint(parts, "camera.worldUpVector", field(camera, "WorldUpVector", "worldUpVector"), "point:null", LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    append(parts, "camera.projection", field(camera, "Projection", "projection"));
+    appendDouble(parts, "camera.focalDistance", field(camera, "FocalDistance", "focalDistance"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    appendDouble(parts, "camera.horizontalExtentAtFocalDistance", field(camera, "HorizontalExtentAtFocalDistance", "horizontalExtentAtFocalDistance"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    appendDouble(parts, "camera.verticalExtentAtFocalDistance", field(camera, "VerticalExtentAtFocalDistance", "verticalExtentAtFocalDistance"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+  }
+  append(parts, "sectioningJson", field(value, "SectioningJson", "sectioningJson"));
+  const selected = field(value, "SelectedElements", "selectedElements") ?? [];
+  if (!Array.isArray(selected) || selected.length !== 0)
+    throw new LensNextLocalUploadError("navigation_selection_unsupported", "Navigation v1 accepts no selected elements unless bounded deterministic capture is available.", 409);
+  append(parts, "selected.length", 0);
+  return parts;
+}
+
+export const lensNextNavigationDigest = (value: any): string => sha256(canonicalInput(lensNextNavigationDigestTokens(value)));
+
+function validateNavigationView(value: any, suppliedDigest: string, expected: LensNextPersistedVisualStateIdentity): string {
+  if (!value || typeof value !== "object" || Array.isArray(value) || !isLensNextNavigationView(value) || Number(field(value, "SchemaVersion", "schemaVersion")) !== 1 || !field(value, "Camera", "camera"))
+    throw new LensNextLocalUploadError("navigation_view_invalid", "BIMLog navigation view is invalid or has no camera.", 422);
+  const supplied = String(suppliedDigest ?? "").trim().toLowerCase();
+  const embedded = String(field(value, "DigestSha256", "digestSha256") ?? "").trim().toLowerCase();
+  const recomputed = lensNextNavigationDigest(value);
+  if (!/^[a-f0-9]{64}$/.test(supplied) || supplied !== embedded || embedded !== recomputed)
+    throw new LensNextLocalUploadError("navigation_digest_mismatch", "BIMLog navigation digest validation failed.", 409, { contractVersion: LENS_NEXT_NAVIGATION_CONTRACT_VERSION, localDigest: embedded, serverDigest: recomputed });
+  if (Number(field(value, "ProjectId", "projectId")) !== expected.projectId || Number(field(value, "ServerId", "serverId")) !== expected.serverId || String(field(value, "ViewpointId", "viewpointId")) !== expected.viewpointId || String(field(value, "LifecycleStatus", "lifecycleStatus")) !== expected.lifecycleStatus || Number(field(value, "RevisionNumber", "revisionNumber")) !== expected.revisionNumber)
+    throw new LensNextLocalUploadError("navigation_identity_mismatch", "BIMLog navigation identity does not match the issue record.", 409);
+  return supplied;
+}
+
 export type LensNextPersistedVisualStateIdentity = {
   projectId: number;
   serverId: number;
@@ -275,12 +329,13 @@ export function validatePersistedLensNextVisualState(
   visualStateJson: string,
   visualStateDigest: string,
   expected: LensNextPersistedVisualStateIdentity,
-): { state: Record<string, unknown>; digest: string; contractVersion: DigestContractVersion } {
+): { state: Record<string, unknown>; digest: string; contractVersion: string } {
   let state: any;
   try { state = JSON.parse(visualStateJson); }
   catch { throw new LensNextLocalUploadError("visual_state_json_invalid", "BIMLog visual-state JSON is invalid.", 422); }
   if (!state || typeof state !== "object" || Array.isArray(state))
     throw new LensNextLocalUploadError("visual_state_invalid", "BIMLog visual-state package is invalid.", 422);
+  if (isLensNextNavigationView(state)) return { state, digest: validateNavigationView(state, visualStateDigest, expected), contractVersion: LENS_NEXT_NAVIGATION_CONTRACT_VERSION };
   const supplied = String(visualStateDigest ?? "").trim().toLowerCase();
   const embedded = String(field(state, "DigestSha256", "digestSha256") ?? "").trim().toLowerCase();
   const contractVersion = digestContractVersion(state);
@@ -310,6 +365,17 @@ export function validatePersistedLensNextVisualState(
 export function validateAndRebindLocalVisualState(raw: unknown, input: { projectId: number; serverId: number; viewpointId: string; modelFingerprint: string }): { json: string; digest: string; screenshotDataUrl: string | null } {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new LensNextLocalUploadError("visual_state_invalid", "Exact local visual state is required.");
   const state = structuredClone(raw as Record<string, unknown>) as any;
+  if (isLensNextNavigationView(state)) {
+    const capturedDigest = String(field(state, "DigestSha256", "digestSha256") ?? "").trim().toLowerCase();
+    const captured = lensNextNavigationDigest(state);
+    if (!/^[a-f0-9]{64}$/.test(capturedDigest) || capturedDigest !== captured || Number(field(state, "ProjectId", "projectId")) !== input.projectId || Number(field(state, "ServerId", "serverId")) !== 1 || String(field(state, "ModelFingerprint", "modelFingerprint")) !== input.modelFingerprint)
+      throw new LensNextLocalUploadError("navigation_capture_invalid", "The captured lightweight navigation view failed integrity or context validation.", 409);
+    state.ProjectId = input.projectId; state.ServerId = input.serverId; state.ViewpointId = input.viewpointId; state.LifecycleStatus = "active"; state.RevisionNumber = 1;
+    state.DigestSha256 = lensNextNavigationDigest(state);
+    const json = JSON.stringify(state);
+    if (Buffer.byteLength(json, "utf8") > 4 * 1024 * 1024) throw new LensNextLocalUploadError("navigation_view_too_large", "Lens navigation view exceeds the 4 MiB limit.", 413);
+    return { json, digest: state.DigestSha256, screenshotDataUrl: verifiedScreenshotDataUrl(state) };
+  }
   const contractVersion = digestContractVersion(state);
   const embedded = String(field(state,"DigestSha256","digestSha256") ?? "").toLowerCase();
   const recomputed = lensNextVisualStateDigest(state);

@@ -22,6 +22,14 @@ namespace BIMLogLensNext
 
     public interface ILensNextVisualNavisworksAdapter
     {
+        LensNextNavigationView CaptureCurrentNavigationView(
+            ImmutableWorkingViewIdentity identity,
+            bool includeScreenshot);
+        LensNextNavigationApplyResult ApplyNavigationViewJson(
+            ImmutableWorkingViewIdentity identity,
+            string navigationJson,
+            string storedDigest,
+            string operationId);
         LensNextVisualState CaptureCurrentVisualState(
             ImmutableWorkingViewIdentity identity,
             bool includeScreenshot);
