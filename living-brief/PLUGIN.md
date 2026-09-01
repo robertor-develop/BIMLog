@@ -297,3 +297,8 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - `v1.05.N03-P01` is the packaged form of the long-running Working View apply contract. It increments only the Lens Next N counter from N02 to N03 and preserves the independently owned Platform/APU P01 counter. Windows DLL and Autodesk metadata use numeric version `1.5.3.1`.
 - Shared contracts pass 35/35 and both Navisworks 2021 and 2025 native suites pass 45/45. The 2021 ZIP SHA-256 is `65B08F00D0940FD8014598510B4110C40D237C8C3299ED6C75C51DDA276B9306`; the 2025 ZIP SHA-256 is `A9020A628DDA1EB9424122B914C840A4638E5008E607D6B4FD20C6B5C6BC9E99`.
 - Packaging changes no BIMLog source-of-truth boundary: Working View consumes the selected platform package, rejects digest or identity conflicts before mutation, and never substitutes a local Saved Viewpoint.
+## Lens Next digest v3 coordination boundary
+
+- New native packages may emit `lens-next-visual-digest.v3` only after the Platform deployment is verified to accept v1, v2, and v3. Historical packages retain their original contract version and are never migrated.
+- Native and Platform implementations must consume `contracts/lens-next/lens-next-visual-digest-v3-vectors.json` as the single A–L byte/digest authority. ElementReference v2 and ModelReference v2 fields are authoritative and any mutation must fail validation.
+- The current shared Lens field identity remains `v1.05.N05-P01`. Platform owns the next P-only increment to `v1.05.N05-P02`; Lens Next must preserve P02 when the complete N06 candidate is eventually authorized.

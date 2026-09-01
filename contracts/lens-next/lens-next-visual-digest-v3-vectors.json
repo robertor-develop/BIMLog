@@ -1,0 +1,525 @@
+{
+  "contractVersion": "lens-next-visual-digest.v3",
+  "algorithm": "SHA-256",
+  "encoding": "UTF-8",
+  "separator": "U+001F after every token",
+  "vectors": [
+    {
+      "id": "A",
+      "label": "InstanceGuid element identity",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": null,
+        "SelectedElements": [
+          {
+            "ReferenceVersion": "lens-next-element-reference.v2",
+            "PersistenceScope": "same-document-reopen",
+            "Strategy": "instance-guid",
+            "Model": {
+              "ReferenceVersion": "lens-next-model-reference.v2",
+              "ModelGuid": "11111111-2222-3333-4444-555555555555",
+              "SourceGuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+              "SourceFileNameNormalized": "1185 river ave model.rvt",
+              "CurrentFileNameNormalized": "1185 river ave model.nwd",
+              "TransformFingerprint": "f64:3ff0000000000000,f64:0000000000000000,f64:8000000000000000",
+              "ModelInstanceDiscriminator": "instance-01"
+            },
+            "InstanceGuid": "{ABCDEFAB-1234-5678-90AB-ABCDEFABCDEF}",
+            "StableCategoryId": null,
+            "SourceElementId": null,
+            "HierarchyIndexPath": null,
+            "Confirmation": {
+              "ClassName": "Autodesk.Navisworks.Api.ModelItem",
+              "DisplayName": "Supply Дuct",
+              "StablePropertyFingerprint": "sha256:abababababababababababababababababababababababababababababababab"
+            }
+          }
+        ],
+        "HiddenElements": [],
+        "AppearanceOverrides": [],
+        "ModelReferences": [],
+        "SectioningJson": null,
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9jYW1lcmE6bnVsbB8xH1MfbGVucy1uZXh0LWVsZW1lbnQtcmVmZXJlbmNlLnYyH3NhbWUtZG9jdW1lbnQtcmVvcGVuH2luc3RhbmNlLWd1aWQfbGVucy1uZXh0LW1vZGVsLXJlZmVyZW5jZS52Mh8xMTExMTExMS0yMjIyLTMzMzMtNDQ0NC01NTU1NTU1NTU1NTUfYWFhYWFhYWEtYmJiYi1jY2NjLWRkZGQtZWVlZWVlZWVlZWVlHzExODUgcml2ZXIgYXZlIG1vZGVsLnJ2dB8xMTg1IHJpdmVyIGF2ZSBtb2RlbC5ud2QfZjY0OjNmZjAwMDAwMDAwMDAwMDAsZjY0OjAwMDAwMDAwMDAwMDAwMDAsZjY0OjgwMDAwMDAwMDAwMDAwMDAfaW5zdGFuY2UtMDEfYWJjZGVmYWItMTIzNC01Njc4LTkwYWItYWJjZGVmYWJjZGVmHzxudWxsPh88bnVsbD4fPG51bGw+HzxudWxsPh88bnVsbD4fPG51bGw+HzxudWxsPh88bnVsbD4fPG51bGw+H0F1dG9kZXNrLk5hdmlzd29ya3MuQXBpLk1vZGVsSXRlbR9TdXBwbHkg0JR1Y3Qfc2hhMjU2OmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIfMB8wHzAfPG51bGw+HzxudWxsPh88bnVsbD4f",
+      "canonicalByteLength": 684,
+      "sha256": "cbaddaf4c097cff9b10d89e70625131b39d2856c35ab14d6084f0c890c103ad3"
+    },
+    {
+      "id": "B",
+      "label": "Autodesk stable-ID element identity",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": null,
+        "SelectedElements": [],
+        "HiddenElements": [
+          {
+            "ReferenceVersion": "lens-next-element-reference.v2",
+            "PersistenceScope": "source-version-stable",
+            "Strategy": "autodesk-stable-id",
+            "Model": {
+              "ReferenceVersion": "lens-next-model-reference.v2",
+              "ModelGuid": "11111111-2222-3333-4444-555555555555",
+              "SourceGuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+              "SourceFileNameNormalized": "1185 river ave model.rvt",
+              "CurrentFileNameNormalized": "1185 river ave model.nwd",
+              "TransformFingerprint": "f64:3ff0000000000000,f64:0000000000000000,f64:8000000000000000",
+              "ModelInstanceDiscriminator": "instance-01"
+            },
+            "InstanceGuid": null,
+            "StableCategoryId": {
+              "CategoryName": "LcOaNode",
+              "ValueKind": "int64",
+              "Value": "9007199254740991"
+            },
+            "SourceElementId": null,
+            "HierarchyIndexPath": null,
+            "Confirmation": {
+              "ClassName": "Autodesk.Navisworks.Api.ModelItem",
+              "DisplayName": "Supply Дuct",
+              "StablePropertyFingerprint": "sha256:abababababababababababababababababababababababababababababababab"
+            }
+          }
+        ],
+        "AppearanceOverrides": [],
+        "ModelReferences": [],
+        "SectioningJson": null,
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9jYW1lcmE6bnVsbB8wHzEfSB9sZW5zLW5leHQtZWxlbWVudC1yZWZlcmVuY2UudjIfc291cmNlLXZlcnNpb24tc3RhYmxlH2F1dG9kZXNrLXN0YWJsZS1pZB9sZW5zLW5leHQtbW9kZWwtcmVmZXJlbmNlLnYyHzExMTExMTExLTIyMjItMzMzMy00NDQ0LTU1NTU1NTU1NTU1NR9hYWFhYWFhYS1iYmJiLWNjY2MtZGRkZC1lZWVlZWVlZWVlZWUfMTE4NSByaXZlciBhdmUgbW9kZWwucnZ0HzExODUgcml2ZXIgYXZlIG1vZGVsLm53ZB9mNjQ6M2ZmMDAwMDAwMDAwMDAwMCxmNjQ6MDAwMDAwMDAwMDAwMDAwMCxmNjQ6ODAwMDAwMDAwMDAwMDAwMB9pbnN0YW5jZS0wMR88bnVsbD4fTGNPYU5vZGUfaW50NjQfOTAwNzE5OTI1NDc0MDk5MR88bnVsbD4fPG51bGw+HzxudWxsPh88bnVsbD4fPG51bGw+HzxudWxsPh9BdXRvZGVzay5OYXZpc3dvcmtzLkFwaS5Nb2RlbEl0ZW0fU3VwcGx5INCUdWN0H3NoYTI1NjphYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiHzAfMB88bnVsbD4fPG51bGw+HzxudWxsPh8=",
+      "canonicalByteLength": 671,
+      "sha256": "738b9a524a2566f005d1a89114037a94d6324dd38620458f7cc6cf5dd8a74f79"
+    },
+    {
+      "id": "C",
+      "label": "source-element-ID identity",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": null,
+        "SelectedElements": [],
+        "HiddenElements": [],
+        "AppearanceOverrides": [
+          {
+            "Element": {
+              "ReferenceVersion": "lens-next-element-reference.v2",
+              "PersistenceScope": "source-reload-stable",
+              "Strategy": "source-element-id",
+              "Model": {
+                "ReferenceVersion": "lens-next-model-reference.v2",
+                "ModelGuid": "11111111-2222-3333-4444-555555555555",
+                "SourceGuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+                "SourceFileNameNormalized": "1185 river ave model.rvt",
+                "CurrentFileNameNormalized": "1185 river ave model.nwd",
+                "TransformFingerprint": "f64:3ff0000000000000,f64:0000000000000000,f64:8000000000000000",
+                "ModelInstanceDiscriminator": "instance-01"
+              },
+              "InstanceGuid": null,
+              "StableCategoryId": null,
+              "SourceElementId": {
+                "Namespace": "revit",
+                "CategoryName": "Element",
+                "PropertyName": "Id",
+                "ValueType": "string",
+                "Value": "Узел-42"
+              },
+              "HierarchyIndexPath": null,
+              "Confirmation": {
+                "ClassName": "Autodesk.Navisworks.Api.ModelItem",
+                "DisplayName": "Supply Дuct",
+                "StablePropertyFingerprint": "sha256:abababababababababababababababababababababababababababababababab"
+              }
+            },
+            "Red": 12,
+            "Green": 34,
+            "Blue": 56,
+            "Transparency": 0.375
+          }
+        ],
+        "ModelReferences": [],
+        "SectioningJson": null,
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9jYW1lcmE6bnVsbB8wHzAfMR9BH2xlbnMtbmV4dC1lbGVtZW50LXJlZmVyZW5jZS52Mh9zb3VyY2UtcmVsb2FkLXN0YWJsZR9zb3VyY2UtZWxlbWVudC1pZB9sZW5zLW5leHQtbW9kZWwtcmVmZXJlbmNlLnYyHzExMTExMTExLTIyMjItMzMzMy00NDQ0LTU1NTU1NTU1NTU1NR9hYWFhYWFhYS1iYmJiLWNjY2MtZGRkZC1lZWVlZWVlZWVlZWUfMTE4NSByaXZlciBhdmUgbW9kZWwucnZ0HzExODUgcml2ZXIgYXZlIG1vZGVsLm53ZB9mNjQ6M2ZmMDAwMDAwMDAwMDAwMCxmNjQ6MDAwMDAwMDAwMDAwMDAwMCxmNjQ6ODAwMDAwMDAwMDAwMDAwMB9pbnN0YW5jZS0wMR88bnVsbD4fPG51bGw+HzxudWxsPh88bnVsbD4fcmV2aXQfRWxlbWVudB9JZB9zdHJpbmcf0KPQt9C10LstNDIfPG51bGw+H0F1dG9kZXNrLk5hdmlzd29ya3MuQXBpLk1vZGVsSXRlbR9TdXBwbHkg0JR1Y3Qfc2hhMjU2OmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIfMTIfMzQfNTYfZjY0OjNmZDgwMDAwMDAwMDAwMDAfMB88bnVsbD4fPG51bGw+HzxudWxsPh8=",
+      "canonicalByteLength": 689,
+      "sha256": "7faf54b5d7277bba28bd977d295f750b8b98f5475fa7a06c5b80e197e8c11f36"
+    },
+    {
+      "id": "D",
+      "label": "exact-tree-path fallback",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": null,
+        "SelectedElements": [
+          {
+            "ReferenceVersion": "lens-next-element-reference.v2",
+            "PersistenceScope": "same-document-reopen",
+            "Strategy": "exact-tree-path",
+            "Model": {
+              "ReferenceVersion": "lens-next-model-reference.v2",
+              "ModelGuid": "11111111-2222-3333-4444-555555555555",
+              "SourceGuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+              "SourceFileNameNormalized": "1185 river ave model.rvt",
+              "CurrentFileNameNormalized": "1185 river ave model.nwd",
+              "TransformFingerprint": "f64:3ff0000000000000,f64:0000000000000000,f64:8000000000000000",
+              "ModelInstanceDiscriminator": "instance-01"
+            },
+            "InstanceGuid": null,
+            "StableCategoryId": null,
+            "SourceElementId": null,
+            "HierarchyIndexPath": [
+              0,
+              17,
+              4,
+              2147483647
+            ],
+            "Confirmation": {
+              "ClassName": "Autodesk.Navisworks.Api.ModelItem",
+              "DisplayName": "Supply Дuct",
+              "StablePropertyFingerprint": "sha256:abababababababababababababababababababababababababababababababab"
+            }
+          }
+        ],
+        "HiddenElements": [],
+        "AppearanceOverrides": [],
+        "ModelReferences": [],
+        "SectioningJson": null,
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9jYW1lcmE6bnVsbB8xH1MfbGVucy1uZXh0LWVsZW1lbnQtcmVmZXJlbmNlLnYyH3NhbWUtZG9jdW1lbnQtcmVvcGVuH2V4YWN0LXRyZWUtcGF0aB9sZW5zLW5leHQtbW9kZWwtcmVmZXJlbmNlLnYyHzExMTExMTExLTIyMjItMzMzMy00NDQ0LTU1NTU1NTU1NTU1NR9hYWFhYWFhYS1iYmJiLWNjY2MtZGRkZC1lZWVlZWVlZWVlZWUfMTE4NSByaXZlciBhdmUgbW9kZWwucnZ0HzExODUgcml2ZXIgYXZlIG1vZGVsLm53ZB9mNjQ6M2ZmMDAwMDAwMDAwMDAwMCxmNjQ6MDAwMDAwMDAwMDAwMDAwMCxmNjQ6ODAwMDAwMDAwMDAwMDAwMB9pbnN0YW5jZS0wMR88bnVsbD4fPG51bGw+HzxudWxsPh88bnVsbD4fPG51bGw+HzxudWxsPh88bnVsbD4fPG51bGw+HzxudWxsPh80HzAfMTcfNB8yMTQ3NDgzNjQ3H0F1dG9kZXNrLk5hdmlzd29ya3MuQXBpLk1vZGVsSXRlbR9TdXBwbHkg0JR1Y3Qfc2hhMjU2OmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWJhYmFiYWIfMB8wHzAfPG51bGw+HzxudWxsPh88bnVsbD4f",
+      "canonicalByteLength": 669,
+      "sha256": "523dd9326227dec8edab5f6738e21e789fd0afa9452f67582828d98ca482106f"
+    },
+    {
+      "id": "E",
+      "label": "duplicate model metadata with discriminator",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": null,
+        "SelectedElements": [],
+        "HiddenElements": [],
+        "AppearanceOverrides": [],
+        "ModelReferences": [
+          {
+            "ReferenceVersion": "lens-next-model-reference.v2",
+            "ModelGuid": "11111111-2222-3333-4444-555555555555",
+            "SourceGuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "SourceFileNameNormalized": "1185 river ave model.rvt",
+            "CurrentFileNameNormalized": "1185 river ave model.nwd",
+            "TransformFingerprint": "f64:3ff0000000000000,f64:0000000000000000,f64:8000000000000000",
+            "ModelInstanceDiscriminator": "instance-02"
+          },
+          {
+            "ReferenceVersion": "lens-next-model-reference.v2",
+            "ModelGuid": "11111111-2222-3333-4444-555555555555",
+            "SourceGuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "SourceFileNameNormalized": "1185 river ave model.rvt",
+            "CurrentFileNameNormalized": "1185 river ave model.nwd",
+            "TransformFingerprint": "f64:3ff0000000000000,f64:0000000000000000,f64:8000000000000000",
+            "ModelInstanceDiscriminator": "instance-01"
+          }
+        ],
+        "SectioningJson": null,
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9jYW1lcmE6bnVsbB8wHzAfMB8yH2xlbnMtbmV4dC1tb2RlbC1yZWZlcmVuY2UudjIfMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1H2FhYWFhYWFhLWJiYmItY2NjYy1kZGRkLWVlZWVlZWVlZWVlZR8xMTg1IHJpdmVyIGF2ZSBtb2RlbC5ydnQfMTE4NSByaXZlciBhdmUgbW9kZWwubndkH2Y2NDozZmYwMDAwMDAwMDAwMDAwLGY2NDowMDAwMDAwMDAwMDAwMDAwLGY2NDo4MDAwMDAwMDAwMDAwMDAwH2luc3RhbmNlLTAxH2xlbnMtbmV4dC1tb2RlbC1yZWZlcmVuY2UudjIfMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1H2FhYWFhYWFhLWJiYmItY2NjYy1kZGRkLWVlZWVlZWVlZWVlZR8xMTg1IHJpdmVyIGF2ZSBtb2RlbC5ydnQfMTE4NSByaXZlciBhdmUgbW9kZWwubndkH2Y2NDozZmYwMDAwMDAwMDAwMDAwLGY2NDowMDAwMDAwMDAwMDAwMDAwLGY2NDo4MDAwMDAwMDAwMDAwMDAwH2luc3RhbmNlLTAyHzxudWxsPh88bnVsbD4fPG51bGw+Hw==",
+      "canonicalByteLength": 625,
+      "sha256": "6c5da56f8f0f302d32304eb287377250dfaf925ba3d7c60b9114f3711e6ae9e6"
+    },
+    {
+      "id": "F",
+      "label": "Guid.Empty source object",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": null,
+        "SelectedElements": [],
+        "HiddenElements": [],
+        "AppearanceOverrides": [],
+        "ModelReferences": [
+          {
+            "ReferenceVersion": "lens-next-model-reference.v2",
+            "ModelGuid": "11111111-2222-3333-4444-555555555555",
+            "SourceGuid": "00000000-0000-0000-0000-000000000000",
+            "SourceFileNameNormalized": "1185 river ave model.rvt",
+            "CurrentFileNameNormalized": "1185 river ave model.nwd",
+            "TransformFingerprint": "f64:3ff0000000000000,f64:0000000000000000,f64:8000000000000000",
+            "ModelInstanceDiscriminator": "instance-01"
+          }
+        ],
+        "SectioningJson": null,
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9jYW1lcmE6bnVsbB8wHzAfMB8xH2xlbnMtbmV4dC1tb2RlbC1yZWZlcmVuY2UudjIfMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1HzAwMDAwMDAwLTAwMDAtMDAwMC0wMDAwLTAwMDAwMDAwMDAwMB8xMTg1IHJpdmVyIGF2ZSBtb2RlbC5ydnQfMTE4NSByaXZlciBhdmUgbW9kZWwubndkH2Y2NDozZmYwMDAwMDAwMDAwMDAwLGY2NDowMDAwMDAwMDAwMDAwMDAwLGY2NDo4MDAwMDAwMDAwMDAwMDAwH2luc3RhbmNlLTAxHzxudWxsPh88bnVsbD4fPG51bGw+Hw==",
+      "canonicalByteLength": 397,
+      "sha256": "a054ed36620d90ba3f3100a9d6b1a734f0e9c6e791ade3eb9a1a7140c96a8dbc"
+    },
+    {
+      "id": "G",
+      "label": "null optional fields",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": null,
+        "SelectedElements": [
+          {
+            "ReferenceVersion": "lens-next-element-reference.v2",
+            "PersistenceScope": "source-reload-stable",
+            "Strategy": "exact-tree-path",
+            "Model": {
+              "ReferenceVersion": "lens-next-model-reference.v2",
+              "ModelGuid": null,
+              "SourceGuid": null,
+              "SourceFileNameNormalized": "1185 river ave model.rvt",
+              "CurrentFileNameNormalized": null,
+              "TransformFingerprint": null,
+              "ModelInstanceDiscriminator": "instance-01"
+            },
+            "InstanceGuid": null,
+            "StableCategoryId": null,
+            "SourceElementId": null,
+            "HierarchyIndexPath": [],
+            "Confirmation": null
+          }
+        ],
+        "HiddenElements": [],
+        "AppearanceOverrides": [],
+        "ModelReferences": [],
+        "SectioningJson": null,
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9jYW1lcmE6bnVsbB8xH1MfbGVucy1uZXh0LWVsZW1lbnQtcmVmZXJlbmNlLnYyH3NvdXJjZS1yZWxvYWQtc3RhYmxlH2V4YWN0LXRyZWUtcGF0aB9sZW5zLW5leHQtbW9kZWwtcmVmZXJlbmNlLnYyHzxudWxsPh88bnVsbD4fMTE4NSByaXZlciBhdmUgbW9kZWwucnZ0HzxudWxsPh88bnVsbD4faW5zdGFuY2UtMDEfPG51bGw+HzxudWxsPh88bnVsbD4fPG51bGw+HzxudWxsPh88bnVsbD4fPG51bGw+HzxudWxsPh88bnVsbD4fMB88bnVsbD4fPG51bGw+HzxudWxsPh8wHzAfMB88bnVsbD4fPG51bGw+HzxudWxsPh8=",
+      "canonicalByteLength": 419,
+      "sha256": "eb67bc75138f6e2f71b59055357c3545f6416a3e90deb570cd7c08065657ac74"
+    },
+    {
+      "id": "H",
+      "label": "populated transform and IEEE-754 camera",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": {
+          "Position": {
+            "X": 1.5,
+            "Y": 0,
+            "Z": 1e+100
+          },
+          "Rotation": {
+            "A": 0,
+            "B": 0.5,
+            "C": -0.25,
+            "D": 1
+          },
+          "WorldUpVector": {
+            "X": 0,
+            "Y": 1,
+            "Z": 0
+          },
+          "Projection": "Perspective",
+          "FocalDistance": 42.125,
+          "HorizontalExtentAtFocalDistance": 100.25,
+          "VerticalExtentAtFocalDistance": 50.125
+        },
+        "SelectedElements": [],
+        "HiddenElements": [],
+        "AppearanceOverrides": [],
+        "ModelReferences": [
+          {
+            "ReferenceVersion": "lens-next-model-reference.v2",
+            "ModelGuid": "11111111-2222-3333-4444-555555555555",
+            "SourceGuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "SourceFileNameNormalized": "1185 river ave model.rvt",
+            "CurrentFileNameNormalized": "1185 river ave model.nwd",
+            "TransformFingerprint": "m44:f64:3ff0000000000000,f64:8000000000000000,f64:400921fb54442d18",
+            "ModelInstanceDiscriminator": "instance-01"
+          }
+        ],
+        "SectioningJson": null,
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9mNjQ6M2ZmODAwMDAwMDAwMDAwMB9mNjQ6MDAwMDAwMDAwMDAwMDAwMB9mNjQ6NTRiMjQ5YWQyNTk0YzM3ZB9mNjQ6MDAwMDAwMDAwMDAwMDAwMB9mNjQ6M2ZlMDAwMDAwMDAwMDAwMB9mNjQ6YmZkMDAwMDAwMDAwMDAwMB9mNjQ6M2ZmMDAwMDAwMDAwMDAwMB9mNjQ6MDAwMDAwMDAwMDAwMDAwMB9mNjQ6M2ZmMDAwMDAwMDAwMDAwMB9mNjQ6MDAwMDAwMDAwMDAwMDAwMB9QZXJzcGVjdGl2ZR9mNjQ6NDA0NTEwMDAwMDAwMDAwMB9mNjQ6NDA1OTEwMDAwMDAwMDAwMB9mNjQ6NDA0OTEwMDAwMDAwMDAwMB8wHzAfMB8xH2xlbnMtbmV4dC1tb2RlbC1yZWZlcmVuY2UudjIfMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1H2FhYWFhYWFhLWJiYmItY2NjYy1kZGRkLWVlZWVlZWVlZWVlZR8xMTg1IHJpdmVyIGF2ZSBtb2RlbC5ydnQfMTE4NSByaXZlciBhdmUgbW9kZWwubndkH200NDpmNjQ6M2ZmMDAwMDAwMDAwMDAwMCxmNjQ6ODAwMDAwMDAwMDAwMDAwMCxmNjQ6NDAwOTIxZmI1NDQ0MmQxOB9pbnN0YW5jZS0wMR88bnVsbD4fPG51bGw+HzxudWxsPh8=",
+      "canonicalByteLength": 674,
+      "sha256": "c53c35580d9086cbf53ad0b788e707ed948616dd1cfff4c3eb2242caace5c0d7"
+    },
+    {
+      "id": "I",
+      "label": "empty authoritative arrays",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": null,
+        "SelectedElements": [],
+        "HiddenElements": [],
+        "AppearanceOverrides": [],
+        "ModelReferences": [],
+        "SectioningJson": null,
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9jYW1lcmE6bnVsbB8wHzAfMB8wHzxudWxsPh88bnVsbD4fPG51bGw+Hw==",
+      "canonicalByteLength": 169,
+      "sha256": "ab82998da6eb153fda1d4833760bfa11391ef500ec26122557db24b43c11647a"
+    },
+    {
+      "id": "J",
+      "label": "Unicode and normalized path strings",
+      "state": {
+        "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+        "ProjectId": 29,
+        "ServerId": 1,
+        "ViewpointId": "local-v3-golden",
+        "LifecycleStatus": "active",
+        "RevisionNumber": 1,
+        "ModelFingerprint": "1212121212121212121212121212121212121212121212121212121212121212",
+        "Camera": null,
+        "SelectedElements": [],
+        "HiddenElements": [],
+        "AppearanceOverrides": [],
+        "ModelReferences": [
+          {
+            "ReferenceVersion": "lens-next-model-reference.v2",
+            "ModelGuid": "11111111-2222-3333-4444-555555555555",
+            "SourceGuid": "aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee",
+            "SourceFileNameNormalized": "c:\\проекты\\élara\\1185 河.rvt",
+            "CurrentFileNameNormalized": "d:/bim/ñ/1185 河.nwd",
+            "TransformFingerprint": "f64:3ff0000000000000,f64:0000000000000000,f64:8000000000000000",
+            "ModelInstanceDiscriminator": "модель-一"
+          }
+        ],
+        "SectioningJson": "{\"Enabled\":true,\"Planes\":[],\"Nested\":{\"Linked\":false}}",
+        "RedlinesJson": null,
+        "ScreenshotSha256": null,
+        "DigestDiagnostics": {
+          "Algorithm": "SHA-256",
+          "ContractVersion": "lens-next-visual-digest.v3",
+          "Truncated": false
+        }
+      },
+      "canonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjkfMR9sb2NhbC12My1nb2xkZW4fYWN0aXZlHzEfMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMjEyMTIxMh9jYW1lcmE6bnVsbB8wHzAfMB8xH2xlbnMtbmV4dC1tb2RlbC1yZWZlcmVuY2UudjIfMTExMTExMTEtMjIyMi0zMzMzLTQ0NDQtNTU1NTU1NTU1NTU1H2FhYWFhYWFhLWJiYmItY2NjYy1kZGRkLWVlZWVlZWVlZWVlZR9jOlzQv9GA0L7QtdC60YLRi1zDqWxhcmFcMTE4NSDmsrMucnZ0H2Q6L2JpbS/DsS8xMTg1IOaysy5ud2QfZjY0OjNmZjAwMDAwMDAwMDAwMDAsZjY0OjAwMDAwMDAwMDAwMDAwMDAsZjY0OjgwMDAwMDAwMDAwMDAwMDAf0LzQvtC00LXQu9GMLeS4gB97IkVuYWJsZWQiOnRydWUsIlBsYW5lcyI6W10sIk5lc3RlZCI6eyJMaW5rZWQiOmZhbHNlfX0fPG51bGw+HzxudWxsPh8=",
+      "canonicalByteLength": 461,
+      "sha256": "8a2e84f6e12eba5c3e33b00c2bcf26f829b3e138ab821a64203b1e1b4550bb90"
+    }
+  ],
+  "tamperCases": [
+    {
+      "id": "K",
+      "label": "tampered ElementReference",
+      "sourceVector": "A",
+      "mutationPath": "SelectedElements[0].Model.ModelInstanceDiscriminator",
+      "mutationValue": "instance-tampered",
+      "originalSha256": "cbaddaf4c097cff9b10d89e70625131b39d2856c35ab14d6084f0c890c103ad3",
+      "tamperedSha256": "665ff69b69c30db336a20d896f879eae58125b0329825a21bd4076fe00c0c9bc"
+    },
+    {
+      "id": "L",
+      "label": "tampered ModelReference",
+      "sourceVector": "E",
+      "mutationPath": "ModelReferences[0].TransformFingerprint",
+      "mutationValue": "m44:tampered",
+      "originalSha256": "6c5da56f8f0f302d32304eb287377250dfaf925ba3d7c60b9114f3711e6ae9e6",
+      "tamperedSha256": "dd5e78788b0eea7986f821058f9b2ce14d4a4958acc276b008c1420568cc5fb0"
+    }
+  ]
+}

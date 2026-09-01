@@ -20,7 +20,7 @@ import { LensImportValidationError, validateAndHashLensImportRequest } from "../
 import { getAppUrl } from "../lib/email";
 import AdmZip from "adm-zip";
 import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "../lib/lens-next-publishing";
-import { LensNextLocalUploadError, validateAndRebindLocalVisualState } from "../lib/lens-next-local-upload";
+import { LensNextLocalUploadError, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -1323,13 +1323,21 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/vis
     if (!visualStateJson || Buffer.byteLength(visualStateJson, "utf8") > 4 * 1024 * 1024 || !/^[0-9a-f]{64}$/.test(visualStateDigest)) {
       res.status(422).json({ error: "visual_state_invalid", message: "A bounded visual-state package and SHA-256 digest are required." }); return;
     }
-    try { JSON.parse(visualStateJson); } catch {
-      res.status(422).json({ error: "visual_state_json_invalid" }); return;
-    }
     const [row] = await db.select().from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId))).limit(1);
     if (!row) { res.status(404).json({ error: "lens_viewpoint_not_found" }); return; }
     if (!identity || Number(identity.serverId) !== row.id || Number(identity.projectId) !== row.projectId || String(identity.viewpointId) !== row.viewpointId || String(identity.lifecycleStatus) !== row.lifecycleStatus || Number(identity.revisionNumber) !== row.revisionNumber) {
       res.status(409).json({ error: "visual_state_identity_mismatch" }); return;
+    }
+    try {
+      validatePersistedLensNextVisualState(visualStateJson, visualStateDigest, {
+        projectId: row.projectId, serverId: row.id, viewpointId: row.viewpointId,
+        lifecycleStatus: row.lifecycleStatus, revisionNumber: row.revisionNumber,
+      });
+    } catch (error) {
+      if (error instanceof LensNextLocalUploadError) {
+        res.status(error.status).json({ error: error.code, message: error.message, digestDiagnostics: error.digestDiagnostics }); return;
+      }
+      throw error;
     }
     await db.update(lensViewpointsTable).set({ visualStateJson, visualStateDigest, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, row.id));
     res.json({ success: true, serverId: row.id, visualStateDigest });
@@ -1348,6 +1356,17 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visu
     const [row] = await db.select().from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId))).limit(1);
     if (!row) { res.status(404).json({ error: "lens_viewpoint_not_found" }); return; }
     if (!row.visualStateJson || !row.visualStateDigest) { res.status(404).json({ error: "visual_state_not_available" }); return; }
+    try {
+      validatePersistedLensNextVisualState(row.visualStateJson, row.visualStateDigest, {
+        projectId: row.projectId, serverId: row.id, viewpointId: row.viewpointId,
+        lifecycleStatus: row.lifecycleStatus, revisionNumber: row.revisionNumber,
+      });
+    } catch (error) {
+      if (error instanceof LensNextLocalUploadError) {
+        res.status(error.status).json({ error: error.code, message: error.message, digestDiagnostics: error.digestDiagnostics }); return;
+      }
+      throw error;
+    }
     res.json({
       success: true,
       identity: { projectId: row.projectId, serverId: row.id, viewpointId: row.viewpointId, lifecycleStatus: row.lifecycleStatus, revisionNumber: row.revisionNumber },

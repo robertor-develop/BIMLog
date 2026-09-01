@@ -157,14 +157,14 @@ namespace BIMLogLensNext.Native
             exportXml.Click += (sender, args) => ExportViewpointsXml();
             bar.Controls.Add(exportXml);
 
-            var createViewpoint = new Button
+            var createIssue = new Button
             {
-                Text = "Create Viewpoint",
+                Text = "Create Issue",
                 AutoSize = true,
                 FlatStyle = FlatStyle.Flat
             };
-            createViewpoint.FlatAppearance.BorderColor = Border;
-            createViewpoint.Click += async (sender, args) =>
+            createIssue.FlatAppearance.BorderColor = Border;
+            createIssue.Click += async (sender, args) =>
             {
                 if (!_webViewReady || _webView.CoreWebView2 == null)
                 {
@@ -173,14 +173,14 @@ namespace BIMLogLensNext.Native
                 }
                 await _webView.CoreWebView2.ExecuteScriptAsync("(() => { const form=document.querySelector('details.lens-next__create'); if(!form)return false; form.open=true; form.scrollIntoView({behavior:'smooth',block:'start'}); return true; })()");
             };
-            bar.Controls.Add(createViewpoint);
+            bar.Controls.Add(createIssue);
 
             bar.Resize += (sender, args) =>
             {
                 diagnostics.Location = new Point(Math.Max(210, bar.Width - diagnostics.Width - 8), 9);
                 exportXml.Location = new Point(Math.Max(150, diagnostics.Left - exportXml.Width - 6), 9);
-                createViewpoint.Location = new Point(Math.Max(100, exportXml.Left - createViewpoint.Width - 6), 9);
-                settings.Location = new Point(Math.Max(60, createViewpoint.Left - settings.Width - 6), 9);
+                createIssue.Location = new Point(Math.Max(100, exportXml.Left - createIssue.Width - 6), 9);
+                settings.Location = new Point(Math.Max(60, createIssue.Left - settings.Width - 6), 9);
                 _reloadButton.Location = new Point(Math.Max(92, settings.Left - _reloadButton.Width - 6), 9);
                 _context.Location = new Point(Math.Max(170, _reloadButton.Left - 160), 24);
                 _context.Size = new Size(Math.Max(0, _reloadButton.Left - _context.Left - 8), 16);
