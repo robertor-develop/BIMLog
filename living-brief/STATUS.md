@@ -1,5 +1,17 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P08 INTAKE-APU-08 local Job Command Center candidate - 2026-08-31
+
+- The Job Intake workspace now opens with one bilingual operational picture of the existing job
+  identity, companies, agreements, APUs, work packages, resources, documents, planned hours, and
+  planned internal cost. It is a read-only composition, not a competing authority or data store.
+- Structural readiness is derived deterministically. Missing identity, company relationships,
+  agreement bindings, APUs, packages, or resource ownership becomes a plain-language action linked
+  to the exact existing editor that resolves it; no legal, commercial, or operational fact is invented.
+- Command-center behavior, all earlier Intake/APU focused behaviors, API and BIMLog strict typechecks,
+  desktop English, and exact-390 Spanish visual gates pass locally without horizontal overflow.
+  Push, publication, deployment, production migration, and customer acceptance remain separate.
+
 ## BIMLog v1.05.N01-P07 INTAKE-APU-07 local resource-planning candidate - 2026-08-31
 
 - Each APU work package may now carry one or more planned people or role placeholders, hours,

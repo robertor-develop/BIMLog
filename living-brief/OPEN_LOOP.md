@@ -4,6 +4,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 ## BIMLog v1.05.N01-P01 Job Intake and Multi-APU program - 2026-08-31
 
+- `INTAKE-APU-08` assembles the existing job authorities into the read-only Job Command Center at
+  `v1.05.N01-P08`. Focused behavior, complete prior Intake/APU regression, strict typecheck, and
+  bilingual responsive visual gates pass. Remaining gates are deterministic Living Brief sealing,
+  exact-clean full workspace build, integration, authorized API/database autosave/reload proof, and
+  external release/acceptance. Build 09 must add the contextual help, terminology, accessibility,
+  and final bilingual/responsive usability polish without duplicating product authority.
+
 - `INTAKE-APU-07` implements work-package-owned resource planning at `v1.05.N01-P07`, including
   roles, planned hours, internal rates, redelegation, and incentive inputs with explicit non-payroll
   boundaries. Remaining gates are bilingual visual acceptance, deterministic Living Brief sealing,

@@ -633,6 +633,7 @@ export async function applyJobIntakeDocumentMapping(input: {
           contractValue: "0",
           unit: "Hours",
           apuPlanVersion: inheritedApuVersion,
+          apuDraftId: "",
           budgetSnapshotLineId: "",
           projectCostNodeId: "",
           scheduleItemPlacementId: null,
