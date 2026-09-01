@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
-import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextVisualStateDigest, validateAndRebindLocalVisualState } from "./lens-next-local-upload";
+import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextVisualStateDigest, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "./lens-next-local-upload";
 
 const state: any = {
   SchemaVersion: 1, ProjectId: 7, ServerId: 1, ViewpointId: "LOCAL-7", LifecycleStatus: "active", RevisionNumber: 1,
@@ -14,6 +14,11 @@ const parsed = JSON.parse(rebound.json);
 assert.equal(parsed.ServerId, 91);
 assert.equal(parsed.DigestSha256, rebound.digest);
 assert.equal(lensNextVisualStateDigest(parsed), rebound.digest);
+validatePersistedLensNextVisualState(rebound.json, rebound.digest, { projectId: 7, serverId: 91, viewpointId: "LOCAL-7", lifecycleStatus: "active", revisionNumber: 1 });
+assert.throws(
+  () => validatePersistedLensNextVisualState(rebound.json, "0".repeat(64), { projectId: 7, serverId: 91, viewpointId: "LOCAL-7", lifecycleStatus: "active", revisionNumber: 1 }),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "visual_state_digest_mismatch",
+);
 const unicodeState: any = {
   ...state,
   ProjectId: 29,
@@ -103,6 +108,7 @@ const legacyNumericRebound = validateAndRebindLocalVisualState(legacyNumericStat
 const legacyNumericParsed = JSON.parse(legacyNumericRebound.json);
 assert.equal(legacyNumericParsed.DigestDiagnostics.ContractVersion, LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION);
 assert.equal(lensNextVisualStateDigest(legacyNumericParsed), legacyNumericRebound.digest);
+validatePersistedLensNextVisualState(legacyNumericRebound.json, legacyNumericRebound.digest, { projectId: 28, serverId: 92, viewpointId: "local-viewpoint-numeric", lifecycleStatus: "active", revisionNumber: 1 });
 assert.throws(
   () => validateAndRebindLocalVisualState({ ...legacyNumericState, Camera: { ...legacyNumericState.Camera, Position: { ...legacyNumericState.Camera.Position, X: 371.12345678901235 } } }, { projectId: 28, serverId: 93, viewpointId: "local-viewpoint-numeric", modelFingerprint: "0123456789abcdef".repeat(4) }),
   (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "visual_state_digest_mismatch",
@@ -117,4 +123,10 @@ assert.match(block, /platform_identity_exists/);
 assert.match(block, /display_id_conflict/);
 assert.match(block, /digestDiagnostics/);
 assert.doesNotMatch(block, /lens-sync/);
-console.log(JSON.stringify({ status: "PASS", tests: ["exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "utf8-unicode-rebind-and-apply", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "no-overwrite", "display-conflict-deny"] }));
+const persistedPostStart = route.indexOf('router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state"');
+const persistedGetStart = route.indexOf('router.get("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state"', persistedPostStart);
+const persistedEnd = route.indexOf('router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel"', persistedGetStart);
+assert.ok(persistedPostStart >= 0 && persistedGetStart > persistedPostStart && persistedEnd > persistedGetStart);
+assert.match(route.slice(persistedPostStart, persistedGetStart), /validatePersistedLensNextVisualState/);
+assert.match(route.slice(persistedGetStart, persistedEnd), /validatePersistedLensNextVisualState/);
+console.log(JSON.stringify({ status: "PASS", tests: ["exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "utf8-unicode-rebind-and-apply", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "persisted-write-validation", "persisted-read-validation", "no-overwrite", "display-conflict-deny"] }));
