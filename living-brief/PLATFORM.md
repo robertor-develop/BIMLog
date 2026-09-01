@@ -279,6 +279,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/initial-feature-catalog.ts
 - artifacts/api-server/src/lib/intake-apu-foundation.behavior.ts
 - artifacts/api-server/src/lib/intake-apu-foundation.ts
+- artifacts/api-server/src/lib/intake-release-readiness.behavior.ts
+- artifacts/api-server/src/lib/intake-release-readiness.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.behavior.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.ts
 - artifacts/api-server/src/lib/job-agreement-lifecycle.behavior.ts

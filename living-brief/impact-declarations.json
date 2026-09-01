@@ -16536,6 +16536,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-intake-apu-10-release-readiness-20260901",
+      "reviewedThroughCommit": "003077d7925a2b4a3e5880bd79117ef12805285a",
+      "reviewedAt": "2026-09-01T11:19:25-04:00",
+      "status": "implementation_candidate",
+      "captureTiming": "same_task_after_compatibility_complete_scenario_regression_and_bilingual_visual_review",
+      "summary": "Advances only the platform counter to P10 and completes the local Intake/APU program with legacy compatibility preview, idempotent normalization, representative scenario proof, and read-only release readiness.",
+      "workstreams": [
+        "job-intake-compatibility",
+        "complete-scenario-release-readiness",
+        "shared-bimlog-version-governance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release view preserves external financial, payment, tax, legal, invoice, and accounting authorities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing isolated build, evidence, release, and human-authority rules remain applicable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Compatibility, full scenario, regression, strict typecheck, and bilingual responsive visual gates pass."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 10 completes the accepted ten-build Job Intake and Multi-APU program."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The platform audit was rerun after adding compatibility and release-readiness production modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next source, package, binding, or native acceptance changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or export contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or regulatory claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed P10 baseline already records implementation and passed local gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed P10 baseline already records remaining integration, persistence, and external gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production mutation, persistence, push, publication, deployment, payment, or legal approval occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e559bab815d227003933bf57186d6995b40671f924088513d66a1113c61c0335"
     }
   ]
 }
