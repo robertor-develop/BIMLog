@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { FinancialControlError } from "./financial-control-contract";
 import { normalizeJobApuDrafts } from "./job-apu-builder";
 import { normalizeJobWorkPackages } from "./job-work-package-builder";
+import { normalizeJobResourcePlans } from "./job-resource-plan";
 import {
   boundedText,
   decimalFromScaled,
@@ -584,6 +585,10 @@ export function normalizeJobIntakeData(raw: unknown) {
     input.workPackages,
     new Map(apuDrafts.map((apu) => [apu.id, apu.contractId])),
   );
+  const resourcePlans = normalizeJobResourcePlans(
+    input.resourcePlans,
+    new Set(workPackages.map((item) => item.id)),
+  );
   const normalizedAssignments = assignments.map(
     (rawAssignment: any, index: number) => {
       const assignment =
@@ -657,6 +662,7 @@ export function normalizeJobIntakeData(raw: unknown) {
     scopeItems: normalizedItems,
     apuDrafts,
     workPackages,
+    resourcePlans,
     commercial: {
       contracts: normalizedContracts,
       quotationNumber: optionalText(

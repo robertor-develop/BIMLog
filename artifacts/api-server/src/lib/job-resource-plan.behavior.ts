@@ -1,0 +1,4 @@
+import assert from "node:assert/strict";
+import { normalizeJobResourcePlans, summarizeJobResourcePlans } from "./job-resource-plan";
+const rows=normalizeJobResourcePlans([{id:"R1",workPackageId:"WP1",personName:"Ana",role:"BIM Coordinator",plannedHours:"20",internalHourlyRate:"37.99",incentiveType:"percent",incentiveValue:"5"},{id:"R2",workPackageId:"WP1",personName:"Luis",role:"Draftsperson",plannedHours:"40",internalHourlyRate:"35.47",delegationStatus:"redelegated",delegatedBy:"Ana"}],new Set(["WP1"]));
+assert.deepEqual(summarizeJobResourcePlans(rows),{assignments:2,plannedHours:"60.00",plannedInternalCost:"2178.60",redelegated:1});assert.equal(rows[0].plannedInternalCost,"759.80");assert.throws(()=>normalizeJobResourcePlans([{id:"BAD",workPackageId:"MISSING"}],new Set()),/belong to a work package/);console.log("Job resource-plan behavior: PASS");

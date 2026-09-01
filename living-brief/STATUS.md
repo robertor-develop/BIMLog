@@ -1,5 +1,17 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P07 INTAKE-APU-07 local resource-planning candidate - 2026-08-31
+
+- Each APU work package may now carry one or more planned people or role placeholders, hours,
+  internal hourly rates, planning incentives, redelegation state, delegator, and notes.
+- Planned internal cost is calculated deterministically from hours x internal rate. Incentives are
+  visibly planning inputs only and do not create payroll, invoice, tax, payment, or accounting records.
+- Every resource plan has a stable ID and known work-package parent. Unknown packages, duplicate
+  IDs, malformed decimals, oversized text, and more than 1,000 assignments fail closed.
+- Focused behavior, TypeScript, desktop English, and exact-390 Spanish visual gates pass locally
+  without horizontal overflow. Integration, push, publication, deployment, production migration,
+  and customer acceptance remain separate.
+
 ## BIMLog v1.05.N01-P06 INTAKE-APU-06 local work-package candidate - 2026-08-31
 
 - Each agreement-owned APU may now be divided into optional work packages by floor, zone, task,
