@@ -1,5 +1,16 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N01-P09 INTAKE-APU-09 local human-help candidate - 2026-08-31
+
+- Job Intake now includes an optional bilingual help layer that explains the hierarchy from companies
+  through resources, what the user is and is not approving, and which payroll, payment, tax, legal,
+  invoice, and accounting authorities remain outside this draft screen.
+- Native disclosure controls, visible keyboard focus, semantic headings, notes, and navigation links
+  make the guidance accessible without adding a competing workflow or authority.
+- Focused behavior, complete prior Intake/APU regression, strict typecheck, desktop English, and
+  exact-390 Spanish visual gates pass without horizontal overflow. Push, publication, deployment,
+  production migration, and customer acceptance remain separate.
+
 ## BIMLog v1.05.N01-P08 INTAKE-APU-08 local Job Command Center candidate - 2026-08-31
 
 - The Job Intake workspace now opens with one bilingual operational picture of the existing job

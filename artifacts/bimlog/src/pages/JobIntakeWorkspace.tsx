@@ -20,6 +20,7 @@ import { MultiApuBuilder } from "@/components/job-intake/MultiApuBuilder";
 import { WorkPackageBuilder } from "@/components/job-intake/WorkPackageBuilder";
 import { ResourcePlanBuilder } from "@/components/job-intake/ResourcePlanBuilder";
 import { JobCommandCenter } from "@/components/job-intake/JobCommandCenter";
+import { IntakeHelpGuide } from "@/components/job-intake/IntakeHelpGuide";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 
@@ -966,6 +967,7 @@ export function JobIntakeWorkspace() {
             )}
           </section>
         )}
+        {!advanced && <IntakeHelpGuide tt={tt}/>}
         {!advanced && <JobCommandCenter data={data} documents={intake.documents ?? []} completion={completion} status={intake.status ?? "draft"} tt={tt}/>}
         {!advanced && <SimpleJobIntakeExperience data={data} setData={setData} members={intake.members ?? []} defaultRate={capabilities.costValuePlanner ? latestRate : "0"} tt={tt} onAdvanced={() => setAdvanced(true)}/>}
         {!advanced && <CompanyJobMap data={data} setData={setData} tt={tt}/>}
