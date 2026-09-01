@@ -11,7 +11,6 @@ namespace BIMLogLensNext
     {
         public const string Version = "bimlog.lens_next.visual_state.v1";
         public const int MaximumElementReferences = 5000;
-        public const int MaximumScannedElements = 250000;
     }
 
     public sealed class LensNextPointState
@@ -68,6 +67,13 @@ namespace BIMLogLensNext
         public bool Captured { get; set; }
         public bool RequiredForReconstruction { get; set; }
         public string Message { get; set; }
+        // Nullable N05 readiness metadata preserves the distinction between an
+        // explicit value and a legacy package that never recorded the value.
+        public bool? Active { get; set; }
+        public bool? Complete { get; set; }
+        public bool? Truncated { get; set; }
+        public int? Count { get; set; }
+        public string Status { get; set; }
     }
 
     public sealed class LensNextVisualCompleteness
@@ -95,7 +101,117 @@ namespace BIMLogLensNext
 
         public bool CanReconstructWithoutGuessing => Components()
             .Where(component => component != null && component.RequiredForReconstruction)
-            .All(component => component.Supported && component.Captured);
+            .All(component => component.Supported && (component.Complete ?? component.Captured));
+    }
+
+    public sealed class LensNextVisualComponentReadiness
+    {
+        public string ComponentName { get; set; }
+        public bool Active { get; set; }
+        public bool Present { get; set; }
+        public bool Required { get; set; }
+        public bool Captured { get; set; }
+        public bool Complete { get; set; }
+        public bool Supported { get; set; }
+        public bool Truncated { get; set; }
+        public int? Count { get; set; }
+        public string Status { get; set; }
+        public string Reason { get; set; }
+        public bool BlocksFullRestore => Required && (!Supported || !Captured || !Complete || Truncated);
+
+        public string Diagnostic()
+        {
+            return "Component=" + ComponentName +
+                   " Required=" + Required.ToString().ToLowerInvariant() +
+                   " Active=" + Active.ToString().ToLowerInvariant() +
+                   " Present=" + Present.ToString().ToLowerInvariant() +
+                   " Captured=" + Captured.ToString().ToLowerInvariant() +
+                   " Complete=" + Complete.ToString().ToLowerInvariant() +
+                   " Supported=" + Supported.ToString().ToLowerInvariant() +
+                   " Truncated=" + Truncated.ToString().ToLowerInvariant() +
+                   (Count.HasValue ? " Count=" + Count.Value.ToString(CultureInfo.InvariantCulture) : "") +
+                   " Status=" + (Status ?? "unspecified") +
+                   " Reason=" + (Reason ?? "No reason recorded.");
+        }
+    }
+
+    public sealed class LensNextVisualReadinessReport
+    {
+        public const string CurrentContractVersion = "lens-next-visual-readiness.v1";
+        public string ContractVersion { get; set; } = CurrentContractVersion;
+        public List<LensNextVisualComponentReadiness> Components { get; set; } = new List<LensNextVisualComponentReadiness>();
+        public IEnumerable<LensNextVisualComponentReadiness> BlockingComponents => Components.Where(component => component.BlocksFullRestore);
+        public bool CanApplyFullRestore => !BlockingComponents.Any();
+        public string Outcome => CanApplyFullRestore ? "full" : "blocked";
+        public string BlockingDiagnostic => string.Join(" | ", BlockingComponents.Select(component => component.Diagnostic()));
+    }
+
+    public static class LensNextVisualReadiness
+    {
+        public static LensNextVisualReadinessReport Evaluate(LensNextVisualState state)
+        {
+            if (state == null) throw new ArgumentNullException(nameof(state));
+            var completeness = state.Completeness;
+            var report = new LensNextVisualReadinessReport();
+            report.Components.Add(Component("camera", completeness == null ? null : completeness.Camera, state.Camera != null, null, true, false));
+            report.Components.Add(Component("selection", completeness == null ? null : completeness.Selection, true, Count(state.SelectedElements), Count(state.SelectedElements) > 0, false));
+            report.Components.Add(Component("visibility", completeness == null ? null : completeness.Visibility, true, Count(state.HiddenElements), Count(state.HiddenElements) > 0, IsLegacyGloballyTruncated(state, completeness == null ? null : completeness.Visibility)));
+            report.Components.Add(Component("appearanceOverrides", completeness == null ? null : completeness.AppearanceOverrides, true, Count(state.AppearanceOverrides), Count(state.AppearanceOverrides) > 0, IsLegacyGloballyTruncated(state, completeness == null ? null : completeness.AppearanceOverrides)));
+            report.Components.Add(Component("modelReferences", completeness == null ? null : completeness.ModelReferences, true, Count(state.ModelReferences), Count(state.ModelReferences) > 0, false));
+            report.Components.Add(Component("sectioning", completeness == null ? null : completeness.Sectioning, !string.IsNullOrWhiteSpace(state.SectioningJson), !string.IsNullOrWhiteSpace(state.SectioningJson) ? 1 : 0, !string.IsNullOrWhiteSpace(state.SectioningJson), false));
+            report.Components.Add(Component("redlines", completeness == null ? null : completeness.Redlines, !string.IsNullOrWhiteSpace(state.RedlinesJson), !string.IsNullOrWhiteSpace(state.RedlinesJson) ? 1 : 0, !string.IsNullOrWhiteSpace(state.RedlinesJson), false));
+            report.Components.Add(Component("screenshot", completeness == null ? null : completeness.Screenshot, !string.IsNullOrWhiteSpace(state.ScreenshotDataUrl), !string.IsNullOrWhiteSpace(state.ScreenshotDataUrl) ? 1 : 0, false, false));
+            return report;
+        }
+
+        public static void EnsureCaptureCanReopen(LensNextVisualState state)
+        {
+            var report = Evaluate(state);
+            if (!report.CanApplyFullRestore)
+                throw new InvalidOperationException("Visual Package capture cannot claim a complete reopenable working view: " + report.BlockingDiagnostic);
+        }
+
+        private static LensNextVisualComponentReadiness Component(string name, LensNextVisualComponentState recorded, bool present, int? count, bool inferredActive, bool legacyTruncated)
+        {
+            var active = recorded != null && recorded.Active.HasValue ? recorded.Active.Value : inferredActive;
+            var required = name == "camera" || name == "modelReferences" ? true : active;
+            if (recorded != null && !recorded.Active.HasValue) required = recorded.RequiredForReconstruction;
+            if (name == "screenshot") required = false;
+            var captured = recorded == null ? present : recorded.Captured;
+            var complete = recorded == null ? present : (recorded.Complete ?? recorded.Captured);
+            var supported = recorded == null || recorded.Supported;
+            var truncated = recorded != null && recorded.Truncated.HasValue ? recorded.Truncated.Value : legacyTruncated;
+            return new LensNextVisualComponentReadiness
+            {
+                ComponentName = name,
+                Active = active,
+                Present = present,
+                Required = required,
+                Captured = captured,
+                Complete = complete,
+                Supported = supported,
+                Truncated = truncated,
+                Count = count ?? (recorded == null ? null : recorded.Count),
+                Status = recorded == null ? (present ? "legacy-present" : "legacy-absent") : (recorded.Status ?? LegacyStatus(recorded, truncated)),
+                Reason = recorded == null ? "Legacy package omitted component readiness metadata." : recorded.Message
+            };
+        }
+
+        private static bool IsLegacyGloballyTruncated(LensNextVisualState state, LensNextVisualComponentState component)
+        {
+            return component != null && !component.Truncated.HasValue && !component.Captured &&
+                   state.DigestDiagnostics != null && state.DigestDiagnostics.Truncated;
+        }
+
+        private static string LegacyStatus(LensNextVisualComponentState component, bool truncated)
+        {
+            if (truncated) return "truncated";
+            if (!component.Supported) return "unsupported";
+            if (!(component.Complete ?? component.Captured)) return "failed";
+            return component.Captured ? "captured" : "absent";
+        }
+
+        private static int Count<T>(ICollection<T> values) => values == null ? 0 : values.Count;
     }
 
     public sealed class LensNextVisualState

@@ -50,11 +50,19 @@ namespace BIMLogLensNext
             },
             StringComparer.Ordinal);
 
-        private static readonly HashSet<string> VisualFields = new HashSet<string>(
+        private static readonly HashSet<string> CaptureVisualFields = new HashSet<string>(
             new[]
             {
                 "sessionId", "projectId", "serverId", "viewpointId", "lifecycleStatus",
                 "revisionNumber", "modelFingerprint", "includeScreenshot", "visualStateJson"
+            },
+            StringComparer.Ordinal);
+
+        private static readonly HashSet<string> ApplyWorkingViewFields = new HashSet<string>(
+            new[]
+            {
+                "sessionId", "projectId", "serverId", "viewpointId", "lifecycleStatus",
+                "revisionNumber", "modelFingerprint", "visualStateJson", "visualStateDigest"
             },
             StringComparer.Ordinal);
 
@@ -148,17 +156,18 @@ namespace BIMLogLensNext
                 return BridgeRequestValidation.Reject("idempotency_key_mismatch");
             }
 
-            var isPublishing =
-                request.Command == LensNextBridgeCommands.PublishWorkingView;
+            var isPublishing = request.Command == LensNextBridgeCommands.PublishWorkingView;
             var isLayout = request.Command == LensNextBridgeCommands.MaterializeMyView;
+            var isPersistentSavedViewpointWrite =
+                LensNextBridgeCommands.PersistentSavedViewpointWriteCommands.Contains(request.Command);
 
             if (
-                !LensNextBridgeCommands.ReadOnlyCommands.Contains(request.Command) &&
-                !((isPublishing || isLayout) && _viewpointPublishingEnabled)
+                !LensNextBridgeCommands.AllowedWithoutSavedViewpointPublishing.Contains(request.Command) &&
+                !(isPersistentSavedViewpointWrite && _viewpointPublishingEnabled)
             )
             {
                 return BridgeRequestValidation.Reject(
-                    (isPublishing || isLayout)
+                    isPersistentSavedViewpointWrite
                         ? "viewpoint_publishing_disabled"
                         : "command_not_allowed"
                 );
@@ -187,11 +196,15 @@ namespace BIMLogLensNext
                 return BridgeRequestValidation.Reject("unknown_open_field");
             }
 
-            if ((request.Command == LensNextBridgeCommands.CaptureVisualState ||
-                 request.Command == LensNextBridgeCommands.ApplyWorkingView) &&
-                fields.Keys.Any(key => !VisualFields.Contains(key)))
+            if (request.Command == LensNextBridgeCommands.CaptureVisualState &&
+                fields.Keys.Any(key => !CaptureVisualFields.Contains(key)))
             {
                 return BridgeRequestValidation.Reject("unknown_visual_field");
+            }
+            if (request.Command == LensNextBridgeCommands.ApplyWorkingView &&
+                fields.Keys.Any(key => !ApplyWorkingViewFields.Contains(key)))
+            {
+                return BridgeRequestValidation.Reject("unknown_apply_working_view_field");
             }
             if (request.Command == LensNextBridgeCommands.CaptureLocalViewpoint &&
                 fields.Keys.Any(key => !LocalCaptureFields.Contains(key)))
@@ -224,6 +237,15 @@ namespace BIMLogLensNext
                 (!fields.ContainsKey("visualStateJson") || string.IsNullOrWhiteSpace(fields["visualStateJson"])))
             {
                 return BridgeRequestValidation.Reject("visual_state_required");
+            }
+            string visualStateDigest;
+            if (request.Command == LensNextBridgeCommands.ApplyWorkingView &&
+                (!fields.TryGetValue("visualStateDigest", out visualStateDigest) ||
+                 string.IsNullOrWhiteSpace(visualStateDigest) ||
+                 visualStateDigest.Length != 64 ||
+                 visualStateDigest.Any(character => !Uri.IsHexDigit(character))))
+            {
+                return BridgeRequestValidation.Reject("visual_state_digest_invalid");
             }
 
             if (isPublishing)

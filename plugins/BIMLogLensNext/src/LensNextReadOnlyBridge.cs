@@ -44,7 +44,9 @@ namespace BIMLogLensNext
             var validation = _validator.Validate(request);
             if (!validation.Accepted)
             {
-                return LensNextBridgeResponse.Blocked(validation.Code, "Request blocked by the read-only bridge contract.");
+                return LensNextBridgeResponse.Blocked(
+                    validation.Code,
+                    "Request blocked by the bridge contract. Code=" + validation.Code + ".");
             }
 
             switch (request.Command)

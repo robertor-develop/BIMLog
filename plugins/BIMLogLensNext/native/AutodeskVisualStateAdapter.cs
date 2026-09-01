@@ -43,26 +43,39 @@ namespace BIMLogLensNext.Native
 
             state.Camera = CaptureCamera();
             LensNextNativeLog.Info("Visual capture camera complete. ElapsedMs=" + captureTimer.ElapsedMilliseconds);
-            Mark(state.Completeness.Camera, state.Camera != null, state.Camera != null ? "Exact active camera captured." : "Camera unavailable.");
+            Configure(state.Completeness.Camera, true, state.Camera != null, state.Camera != null, false, null,
+                state.Camera != null ? "captured" : "failed", state.Camera != null ? "Exact active camera captured." : "Camera unavailable.");
 
-            state.SelectedElements = CaptureSelection();
+            var selection = CaptureSelection();
+            state.SelectedElements = selection.References;
             LensNextNativeLog.Info("Visual capture selection complete. Count=" + state.SelectedElements.Count + " ElapsedMs=" + captureTimer.ElapsedMilliseconds);
-            Mark(state.Completeness.Selection, true, "Current selection captured by immutable model-item references.");
+            Configure(state.Completeness.Selection, selection.Active, true, selection.Complete, selection.Truncated, selection.TotalCount,
+                selection.Truncated ? "truncated" : "captured",
+                selection.Truncated ? "Selection exceeded the bounded reference limit or included items without immutable references." : "Current selection captured by immutable model-item references; an empty selection is complete.");
 
             var scan = CaptureModelState();
             LensNextNativeLog.Info("Visual capture model scan complete. Hidden=" + scan.Hidden.Count + " Appearance=" + scan.Appearance.Count + " Models=" + scan.Models.Count + " Truncated=" + scan.Truncated + " ElapsedMs=" + captureTimer.ElapsedMilliseconds);
             state.HiddenElements = scan.Hidden;
             state.AppearanceOverrides = scan.Appearance;
             state.ModelReferences = scan.Models;
-            Mark(state.Completeness.Visibility, !scan.Truncated, scan.Truncated ? "Model scan exceeded the bounded capture limit; visibility is incomplete." : "Hidden-element state captured.");
-            Mark(state.Completeness.AppearanceOverrides, !scan.Truncated, scan.Truncated ? "Appearance scan exceeded the bounded capture limit." : "Active color/transparency overrides captured where different from original appearance.");
-            Mark(state.Completeness.ModelReferences, true, "Model/reference context captured.");
+            Configure(state.Completeness.Visibility, scan.HiddenDetected > 0, true, !scan.VisibilityTruncated, scan.VisibilityTruncated, scan.HiddenDetected,
+                scan.VisibilityTruncated ? "truncated" : "captured",
+                scan.VisibilityTruncated ? "Active hidden state exceeded the bounded reference limit or included items without immutable references." : "Hidden-element state captured; an empty hidden list is complete.");
+            Configure(state.Completeness.AppearanceOverrides, scan.AppearanceDetected > 0, true, !scan.AppearanceTruncated, scan.AppearanceTruncated, scan.AppearanceDetected,
+                scan.AppearanceTruncated ? "truncated" : "captured",
+                scan.AppearanceTruncated ? "Active appearance state exceeded the bounded reference limit or included items without immutable references." : "Active color/transparency overrides captured where different from original appearance; an empty override list is complete.");
+            Configure(state.Completeness.ModelReferences, scan.Models.Count > 0, true, true, false, scan.Models.Count, "captured", "Model/reference context captured.");
 
             state.SectioningJson = TryGetSectioningJson();
             var sectionSetterAvailable = HasSectioningSetter();
             state.Completeness.Sectioning.RequiredForReconstruction = !string.IsNullOrWhiteSpace(state.SectioningJson);
+            state.Completeness.Sectioning.Active = state.Completeness.Sectioning.RequiredForReconstruction;
             state.Completeness.Sectioning.Supported = !state.Completeness.Sectioning.RequiredForReconstruction || sectionSetterAvailable;
             state.Completeness.Sectioning.Captured = !state.Completeness.Sectioning.RequiredForReconstruction || !string.IsNullOrWhiteSpace(state.SectioningJson);
+            state.Completeness.Sectioning.Complete = state.Completeness.Sectioning.Captured && state.Completeness.Sectioning.Supported;
+            state.Completeness.Sectioning.Truncated = false;
+            state.Completeness.Sectioning.Count = state.Completeness.Sectioning.RequiredForReconstruction ? 1 : 0;
+            state.Completeness.Sectioning.Status = state.Completeness.Sectioning.RequiredForReconstruction ? (sectionSetterAvailable ? "captured" : "unsupported") : "inactive";
             state.Completeness.Sectioning.Message = !string.IsNullOrWhiteSpace(state.SectioningJson)
                 ? (sectionSetterAvailable ? "Sectioning payload captured and can be reapplied." : "Sectioning was captured but this Navisworks API does not expose a safe setter; reconstruction will block.")
                 : "No active sectioning payload is required for this working view.";
@@ -71,8 +84,13 @@ namespace BIMLogLensNext.Native
             state.RedlinesJson = TryGetCurrentViewJson("GetRedlines");
             var redlineSetterAvailable = HasCurrentViewMethod("SetRedlines");
             state.Completeness.Redlines.RequiredForReconstruction = hasSavedRedlines;
+            state.Completeness.Redlines.Active = hasSavedRedlines;
             state.Completeness.Redlines.Supported = !hasSavedRedlines || (!string.IsNullOrWhiteSpace(state.RedlinesJson) && redlineSetterAvailable);
             state.Completeness.Redlines.Captured = !hasSavedRedlines || !string.IsNullOrWhiteSpace(state.RedlinesJson);
+            state.Completeness.Redlines.Complete = state.Completeness.Redlines.Captured && state.Completeness.Redlines.Supported;
+            state.Completeness.Redlines.Truncated = false;
+            state.Completeness.Redlines.Count = hasSavedRedlines ? 1 : 0;
+            state.Completeness.Redlines.Status = hasSavedRedlines ? (state.Completeness.Redlines.Complete.Value ? "captured" : "unsupported") : "inactive";
             state.Completeness.Redlines.Message = hasSavedRedlines
                 ? (!string.IsNullOrWhiteSpace(state.RedlinesJson) && redlineSetterAvailable ? "Redline payload captured and can be reapplied." : "Existing saved-viewpoint redlines cannot be safely reconstructed as a temporary Working View; operation will block rather than guess.")
                 : "No redlines are required for this temporary working view.";
@@ -81,16 +99,21 @@ namespace BIMLogLensNext.Native
             {
                 var shot = CaptureScreenshot();
                 state.ScreenshotDataUrl = shot.DataUrl; state.ScreenshotSha256 = shot.Sha256;
-                Mark(state.Completeness.Screenshot, !string.IsNullOrWhiteSpace(shot.DataUrl), string.IsNullOrWhiteSpace(shot.DataUrl) ? "Screenshot capture failed." : "Navisworks window screenshot captured.");
+                Configure(state.Completeness.Screenshot, !string.IsNullOrWhiteSpace(shot.DataUrl), true, !string.IsNullOrWhiteSpace(shot.DataUrl), false,
+                    !string.IsNullOrWhiteSpace(shot.DataUrl) ? 1 : 0, string.IsNullOrWhiteSpace(shot.DataUrl) ? "failed" : "captured",
+                    string.IsNullOrWhiteSpace(shot.DataUrl) ? "Screenshot capture failed; screenshots are evidence and are not required to reconstruct a working view." : "Navisworks window screenshot captured.");
+                state.Completeness.Screenshot.RequiredForReconstruction = false;
             }
             else
             {
                 state.Completeness.Screenshot.Supported = true; state.Completeness.Screenshot.Captured = false;
-                state.Completeness.Screenshot.RequiredForReconstruction = false; state.Completeness.Screenshot.Message = "Screenshot omitted by request.";
+                state.Completeness.Screenshot.RequiredForReconstruction = false; state.Completeness.Screenshot.Active = false;
+                state.Completeness.Screenshot.Complete = true; state.Completeness.Screenshot.Truncated = false; state.Completeness.Screenshot.Count = 0;
+                state.Completeness.Screenshot.Status = "omitted"; state.Completeness.Screenshot.Message = "Screenshot omitted by request; screenshots are not required to reconstruct a working view.";
             }
 
             state.DigestSha256 = LensNextVisualStateDigest.Compute(state);
-            state.DigestDiagnostics = LensNextVisualStateDigest.Diagnose(state, scan.Truncated);
+            state.DigestDiagnostics = LensNextVisualStateDigest.Diagnose(state, scan.Truncated || selection.Truncated);
             if (emitDigestDiagnostics)
             {
                 LensNextNativeLog.Info(
@@ -101,6 +124,7 @@ namespace BIMLogLensNext.Native
                     " CanonicalLength=" + state.DigestDiagnostics.CanonicalLength +
                     " CanonicalInputBase64=" + state.DigestDiagnostics.CanonicalInputBase64);
             }
+            if (emitDigestDiagnostics) LensNextVisualReadiness.EnsureCaptureCanReopen(state);
             LensNextNativeLog.Info("Visual capture complete. ElapsedMs=" + captureTimer.ElapsedMilliseconds);
             return state;
         }
@@ -138,9 +162,13 @@ namespace BIMLogLensNext.Native
                 " IssueId=" + state.ServerId +
                 " ViewpointId=" + state.ViewpointId +
                 " ModelFingerprint=" + state.ModelFingerprint);
-            if (state.Completeness != null && !state.Completeness.CanReconstructWithoutGuessing)
+            var readiness = LensNextVisualReadiness.Evaluate(state);
+            LogApplyStage(operationId, "component-readiness-evaluated", applyTimer,
+                "Outcome=" + readiness.Outcome + " Contract=" + readiness.ContractVersion + " Components=" +
+                string.Join(" || ", readiness.Components.Select(component => component.Diagnostic())));
+            if (!readiness.CanApplyFullRestore)
             {
-                const string incomplete = "Visual state declares a required component incomplete or unsupported; Lens Next will not guess.";
+                var incomplete = "Working View cannot be restored exactly: " + readiness.BlockingDiagnostic;
                 LogApplyStage(operationId, "failed", applyTimer, incomplete);
                 return Failed(incomplete, false, false);
             }
@@ -233,25 +261,62 @@ namespace BIMLogLensNext.Native
             _document.CurrentViewpoint.CopyFrom(view);
         }
 
-        private List<LensNextElementReference> CaptureSelection()
+        private sealed class SelectionCaptureResult
         {
-            return _document.CurrentSelection.SelectedItems.Cast<ModelItem>().Select(Element).Where(item => item != null).Take(LensNextVisualStateSchema.MaximumElementReferences).ToList();
+            public List<LensNextElementReference> References = new List<LensNextElementReference>();
+            public int TotalCount;
+            public bool Active => TotalCount > 0;
+            public bool Truncated;
+            public bool Complete => !Truncated;
+        }
+        private SelectionCaptureResult CaptureSelection()
+        {
+            var result = new SelectionCaptureResult();
+            foreach (var item in _document.CurrentSelection.SelectedItems.Cast<ModelItem>())
+            {
+                result.TotalCount++;
+                var reference = Element(item);
+                if (reference == null || result.References.Count >= LensNextVisualStateSchema.MaximumElementReferences) result.Truncated = true;
+                else result.References.Add(reference);
+            }
+            return result;
         }
 
-        private sealed class ScanResult { public List<LensNextElementReference> Hidden = new List<LensNextElementReference>(); public List<LensNextAppearanceOverride> Appearance = new List<LensNextAppearanceOverride>(); public List<LensNextModelReference> Models = new List<LensNextModelReference>(); public bool Truncated; }
+        private sealed class ScanResult
+        {
+            public List<LensNextElementReference> Hidden = new List<LensNextElementReference>();
+            public List<LensNextAppearanceOverride> Appearance = new List<LensNextAppearanceOverride>();
+            public List<LensNextModelReference> Models = new List<LensNextModelReference>();
+            public int Scanned;
+            public int HiddenDetected;
+            public int AppearanceDetected;
+            public bool VisibilityTruncated;
+            public bool AppearanceTruncated;
+            public bool Truncated => VisibilityTruncated || AppearanceTruncated;
+        }
         private ScanResult CaptureModelState()
         {
-            var result = new ScanResult(); var scanned = 0;
+            var result = new ScanResult();
             foreach (Model model in _document.Models)
             {
                 result.Models.Add(ModelRef(model));
                 foreach (var item in Descendants(model.RootItem))
                 {
-                    scanned++; if (scanned > LensNextVisualStateSchema.MaximumScannedElements) { result.Truncated = true; return result; }
-                    var reference = Element(item); if (reference == null) continue;
-                    if (item.IsHidden && result.Hidden.Count < LensNextVisualStateSchema.MaximumElementReferences) result.Hidden.Add(reference);
+                    result.Scanned++;
+                    var reference = Element(item);
+                    if (item.IsHidden)
+                    {
+                        result.HiddenDetected++;
+                        if (reference == null || result.Hidden.Count >= LensNextVisualStateSchema.MaximumElementReferences) result.VisibilityTruncated = true;
+                        else result.Hidden.Add(reference);
+                    }
                     var appearance = Appearance(item, reference);
-                    if (appearance != null && result.Appearance.Count < LensNextVisualStateSchema.MaximumElementReferences) result.Appearance.Add(appearance);
+                    if (appearance != null)
+                    {
+                        result.AppearanceDetected++;
+                        if (reference == null || result.Appearance.Count >= LensNextVisualStateSchema.MaximumElementReferences) result.AppearanceTruncated = true;
+                        else result.Appearance.Add(appearance);
+                    }
                 }
             }
             return result;
@@ -530,12 +595,23 @@ namespace BIMLogLensNext.Native
         {
             return new LensNextVisualCompleteness
             {
-                Camera=Component(true,true), Selection=Component(true,true), Visibility=Component(true,true), Sectioning=Component(false,true),
-                AppearanceOverrides=Component(true,true), Redlines=Component(false,true), Screenshot=Component(true,false), ModelReferences=Component(true,true)
+                Camera=Component(true,false), Selection=Component(true,false), Visibility=Component(true,false), Sectioning=Component(false,false),
+                AppearanceOverrides=Component(true,false), Redlines=Component(false,false), Screenshot=Component(true,false), ModelReferences=Component(true,false)
             };
         }
         private static LensNextVisualComponentState Component(bool supported,bool required) => new LensNextVisualComponentState{Supported=supported,Captured=false,RequiredForReconstruction=required};
-        private static void Mark(LensNextVisualComponentState c,bool captured,string message){c.Supported=true;c.Captured=captured;c.Message=message;}
+        private static void Configure(LensNextVisualComponentState component, bool active, bool supported, bool complete, bool truncated, int? count, string status, string message)
+        {
+            component.Active = active;
+            component.RequiredForReconstruction = active;
+            component.Supported = supported;
+            component.Captured = complete;
+            component.Complete = complete;
+            component.Truncated = truncated;
+            component.Count = count;
+            component.Status = status;
+            component.Message = message;
+        }
         private static string ValidateState(ImmutableWorkingViewIdentity identity,LensNextVisualState state)
         {
             if(state==null)return "Visual state is required."; if(state.SchemaVersion!=LensNextVisualStateSchema.Version)return "Visual-state schema version is unsupported.";

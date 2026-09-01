@@ -28,6 +28,8 @@ namespace BIMLogLensNext.Native.Tests
                 Run("legacy_no_guid_uses_full_ordinal_display_name_only", LegacyNoGuidUsesFullOrdinalDisplayNameOnly);
                 Run("bridge_port_range_is_bounded_and_dynamic", BridgePortRangeIsBoundedAndDynamic);
                 Run("health_tick_never_restarts_or_navigates_for_expiry", HealthTickNeverRestartsOrNavigatesForExpiry);
+                Run("session_renews_in_place_without_runtime_rotation", SessionRenewsInPlaceWithoutRuntimeRotation);
+                Run("saved_viewpoint_publishing_config_defaults_off_and_is_honored", SavedViewpointPublishingConfigDefaultsOffAndIsHonored);
                 Run("missing_or_zero_guid_denies", MissingOrZeroGuidDenies);
                 Run("legacy_metadata_fallback_is_exact", LegacyMetadataFallbackIsExact);
                 Run("original_lens_split_merge_comments_resolve_exact_identity", OriginalLensSplitMergeCommentsResolveExactIdentity);
@@ -50,6 +52,8 @@ namespace BIMLogLensNext.Native.Tests
                 Run("apply_waits_for_real_completion_without_false_timeout", ApplyWaitsForRealCompletionWithoutFalseTimeout);
                 Run("apply_resolves_visual_elements_in_one_model_scan", ApplyResolvesVisualElementsInOneModelScan);
                 Run("apply_emits_correlated_stage_telemetry", ApplyEmitsCorrelatedStageTelemetry);
+                Run("capture_cannot_claim_a_package_that_apply_will_reject", CaptureCannotClaimUnreopenablePackage);
+                Run("apply_readiness_failure_names_every_blocking_component", ApplyReadinessNamesBlockingComponents);
                 Run("apply_requires_authoritative_persisted_digest", ApplyRequiresAuthoritativePersistedDigest);
                 Run("apply_request_id_collapses_native_retries", ApplyRequestIdCollapsesNativeRetries);
                 Run("rollback_capture_omits_diagnostic_blob", RollbackCaptureOmitsDiagnosticBlob);
@@ -165,6 +169,29 @@ namespace BIMLogLensNext.Native.Tests
             False(body.Contains("SessionExpired"));
             False(body.Contains("StartOrRestart"));
             False(body.Contains("NavigateWorkspace"));
+        }
+
+        private static void SessionRenewsInPlaceWithoutRuntimeRotation()
+        {
+            var host = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextHttpBridgeHost.cs")));
+            var sessionStart = host.IndexOf("path == \"/v1/session\"", StringComparison.Ordinal);
+            var sessionEnd = host.IndexOf("var command = CommandFor(request, path)", sessionStart, StringComparison.Ordinal);
+            True(sessionStart >= 0 && sessionEnd > sessionStart);
+            var renewal = host.Substring(sessionStart, sessionEnd - sessionStart);
+            True(renewal.Contains("_pump.RenewSession(_sessionToken, _expiresAt)"));
+            False(renewal.Contains("StartOrRestart"));
+            False(renewal.Contains("Stop()"));
+            False(renewal.Contains("NavigateWorkspace"));
+        }
+
+        private static void SavedViewpointPublishingConfigDefaultsOffAndIsHonored()
+        {
+            var config = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextNativeConfig.cs")));
+            var runtime = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextNativeRuntime.cs")));
+            True(config.Contains("ViewpointPublishingEnabled { get; set; } = false"));
+            True(runtime.Contains("Config.ViewpointPublishingEnabled"));
+            False(runtime.Contains("new ImmutableIdentityResolver(),\n                    true,"));
+            False(runtime.Contains("new ImmutableIdentityResolver(),\r\n                    true,"));
         }
 
         private static void ExactLegacyGuidDoesNotRequireLensNextComments()
@@ -473,7 +500,7 @@ namespace BIMLogLensNext.Native.Tests
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
-            Equal("v1.05.N03-P01", LensNextConstants.ProductVersionLabel);
+            Equal("v1.05.N05-P01", LensNextConstants.ProductVersionLabel);
         }
 
         private static void RuntimeIgnoresConfiguredProjectFallback()
@@ -530,6 +557,27 @@ namespace BIMLogLensNext.Native.Tests
             True(source.Contains("ReceivedDigest=" + "\" + receivedDigest"));
             True(source.Contains("DigestContractVersion="));
             True(source.Contains("CanonicalLength="));
+        }
+
+        private static void CaptureCannotClaimUnreopenablePackage()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            var scanStart = source.IndexOf("private ScanResult CaptureModelState", StringComparison.Ordinal);
+            var scanEnd = source.IndexOf("private IEnumerable<ModelItem> Descendants", scanStart, StringComparison.Ordinal);
+            var scan = source.Substring(scanStart, scanEnd - scanStart);
+            False(scan.Contains("MaximumScannedElements"));
+            True(scan.Contains("VisibilityTruncated"));
+            True(scan.Contains("AppearanceTruncated"));
+            True(source.Contains("LensNextVisualReadiness.EnsureCaptureCanReopen(state)"));
+        }
+
+        private static void ApplyReadinessNamesBlockingComponents()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            True(source.Contains("LensNextVisualReadiness.Evaluate(state)"));
+            True(source.Contains("component-readiness-evaluated"));
+            True(source.Contains("readiness.BlockingDiagnostic"));
+            False(source.Contains("Visual state declares a required component incomplete or unsupported"));
         }
 
         private static void ApplyRequestIdCollapsesNativeRetries()

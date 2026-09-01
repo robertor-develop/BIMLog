@@ -40,6 +40,9 @@ namespace BIMLogLensNext.Tests
                 Run("role_policy_blocks_viewer_resolution", RolePolicyBlocksViewerResolution);
                 Run("optimistic_concurrency_detects_version_conflict", OptimisticConcurrencyDetectsVersionConflict);
                 Run("m7_publishing_defaults_off", M7PublishingDefaultsOff);
+                Run("apply_working_view_allowed_when_viewpoint_publishing_disabled", ApplyWorkingViewAllowedWhenViewpointPublishingDisabled);
+                Run("apply_working_view_requires_authoritative_digest", ApplyWorkingViewRequiresAuthoritativeDigest);
+                Run("bridge_command_effect_matrix_is_explicit", BridgeCommandEffectMatrixIsExplicit);
                 Run("m7_pilot_capabilities_are_explicit", M7PilotCapabilitiesAreExplicit);
                 Run("m7_confirmation_is_required", M7ConfirmationIsRequired);
                 Run("m7_publish_dispatches_exactly_once", M7PublishDispatchesExactlyOnce);
@@ -48,8 +51,21 @@ namespace BIMLogLensNext.Tests
                 Run("visual_state_digest_v2_float_tokens_match_platform", VisualStateDigestV2FloatTokensMatchPlatform);
                 Run("visual_state_digest_v1_remains_backward_compatible", VisualStateDigestV1RemainsBackwardCompatible);
                 Run("visual_state_digest_diagnostics_are_exact_and_non_recursive", VisualStateDigestDiagnosticsAreExactAndNonRecursive);
+                Run("readiness_A_camera_only_opens", ReadinessACameraOnly);
+                Run("readiness_B_camera_selection_opens", ReadinessBCameraSelection);
+                Run("readiness_C_camera_hidden_opens", ReadinessCCameraHidden);
+                Run("readiness_D_camera_appearance_opens", ReadinessDCameraAppearance);
+                Run("readiness_E_active_supported_sectioning_opens", ReadinessEActiveSectioning);
+                Run("readiness_F_inactive_sectioning_opens", ReadinessFInactiveSectioning);
+                Run("readiness_G_empty_selection_is_complete", ReadinessGEmptySelection);
+                Run("readiness_H_empty_appearance_is_complete", ReadinessHEmptyAppearance);
+                Run("readiness_I_empty_hidden_is_complete", ReadinessIEmptyHidden);
+                Run("readiness_J_unsupported_inactive_does_not_block", ReadinessJUnsupportedInactive);
+                Run("readiness_K_unsupported_active_names_component", ReadinessKUnsupportedActive);
+                Run("readiness_L_truncated_active_names_component", ReadinessLTruncatedActive);
+                Run("readiness_M_current_capture_claim_reopens", ReadinessMCurrentCaptureRoundTrip);
 
-                Console.WriteLine("PASS " + _passed + "/35");
+                Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
             }
             catch (Exception exception)
@@ -381,6 +397,188 @@ namespace BIMLogLensNext.Tests
             Equal(0, adapter.SavedViewpointWrites);
         }
 
+        private static void ReadinessACameraOnly() => Full(CameraOnly());
+
+        private static void ReadinessBCameraSelection()
+        {
+            var state = CameraOnly();
+            state.SelectedElements.Add(Element("selected-1"));
+            state.Completeness.Selection = Component(true, true, true, false, 1, "captured");
+            Full(state);
+        }
+
+        private static void ReadinessCCameraHidden()
+        {
+            var state = CameraOnly();
+            state.HiddenElements.Add(Element("hidden-1"));
+            state.Completeness.Visibility = Component(true, true, true, false, 1, "captured");
+            Full(state);
+        }
+
+        private static void ReadinessDCameraAppearance()
+        {
+            var state = CameraOnly();
+            state.AppearanceOverrides.Add(new LensNextAppearanceOverride { Element = Element("appearance-1"), Red = 1, Green = 2, Blue = 3 });
+            state.Completeness.AppearanceOverrides = Component(true, true, true, false, 1, "captured");
+            Full(state);
+        }
+
+        private static void ReadinessEActiveSectioning()
+        {
+            var state = CameraOnly();
+            state.SectioningJson = "{\"enabled\":true}";
+            state.Completeness.Sectioning = Component(true, true, true, false, 1, "captured");
+            Full(state);
+        }
+
+        private static void ReadinessFInactiveSectioning() => Full(CameraOnly());
+        private static void ReadinessGEmptySelection() => Full(CameraOnly());
+        private static void ReadinessHEmptyAppearance() => Full(CameraOnly());
+        private static void ReadinessIEmptyHidden() => Full(CameraOnly());
+
+        private static void ReadinessJUnsupportedInactive()
+        {
+            var state = CameraOnly();
+            state.Completeness.Sectioning = Component(false, false, true, false, 0, "inactive");
+            Full(state);
+        }
+
+        private static void ReadinessKUnsupportedActive()
+        {
+            var state = CameraOnly();
+            state.SectioningJson = "{\"enabled\":true}";
+            state.Completeness.Sectioning = Component(false, true, false, false, 1, "unsupported");
+            var report = LensNextVisualReadiness.Evaluate(state);
+            False(report.CanApplyFullRestore);
+            True(report.BlockingDiagnostic.Contains("Component=sectioning"));
+            True(report.BlockingDiagnostic.Contains("Supported=false"));
+        }
+
+        private static void ReadinessLTruncatedActive()
+        {
+            var state = CameraOnly();
+            state.HiddenElements.Add(Element("hidden-1"));
+            state.Completeness.Visibility = Component(true, true, false, true, 5001, "truncated");
+            var report = LensNextVisualReadiness.Evaluate(state);
+            False(report.CanApplyFullRestore);
+            True(report.BlockingDiagnostic.Contains("Component=visibility"));
+            True(report.BlockingDiagnostic.Contains("Truncated=true"));
+            Throws<InvalidOperationException>(() => LensNextVisualReadiness.EnsureCaptureCanReopen(state));
+        }
+
+        private static void ReadinessMCurrentCaptureRoundTrip()
+        {
+            var state = CameraOnly();
+            state.SelectedElements.Add(Element("selected-1"));
+            state.HiddenElements.Add(Element("hidden-1"));
+            state.AppearanceOverrides.Add(new LensNextAppearanceOverride { Element = Element("appearance-1"), Transparency = 0.5 });
+            state.SectioningJson = "{\"enabled\":true}";
+            state.Completeness.Selection = Component(true, true, true, false, 1, "captured");
+            state.Completeness.Visibility = Component(true, true, true, false, 1, "captured");
+            state.Completeness.AppearanceOverrides = Component(true, true, true, false, 1, "captured");
+            state.Completeness.Sectioning = Component(true, true, true, false, 1, "captured");
+            var before = LensNextVisualStateDigest.Compute(state);
+            LensNextVisualReadiness.EnsureCaptureCanReopen(state);
+            Full(state);
+            state.Completeness.Visibility.Status = "verified-after-roundtrip";
+            state.Completeness.Visibility.Message = "Readiness metadata changed without changing authoritative visual content.";
+            Equal(before, LensNextVisualStateDigest.Compute(state));
+        }
+
+        private static LensNextVisualState CameraOnly()
+        {
+            return new LensNextVisualState
+            {
+                Camera = new LensNextCameraState
+                {
+                    Position = new LensNextPointState { X = 1, Y = 2, Z = 3 },
+                    Rotation = new LensNextRotationState { A = 0, B = 0, C = 0, D = 1 },
+                    WorldUpVector = new LensNextPointState { X = 0, Y = 1, Z = 0 },
+                    Projection = "Perspective"
+                },
+                Completeness = new LensNextVisualCompleteness
+                {
+                    Camera = Component(true, true, true, false, null, "captured"),
+                    Selection = Component(true, false, true, false, 0, "captured"),
+                    Visibility = Component(true, false, true, false, 0, "captured"),
+                    AppearanceOverrides = Component(true, false, true, false, 0, "captured"),
+                    ModelReferences = Component(true, true, true, false, 0, "captured"),
+                    Sectioning = Component(true, false, true, false, 0, "inactive"),
+                    Redlines = Component(true, false, true, false, 0, "inactive"),
+                    Screenshot = Component(true, false, true, false, 0, "omitted")
+                }
+            };
+        }
+
+        private static LensNextVisualComponentState Component(bool supported, bool active, bool complete, bool truncated, int? count, string status)
+        {
+            return new LensNextVisualComponentState
+            {
+                Supported = supported,
+                Captured = complete,
+                RequiredForReconstruction = active,
+                Active = active,
+                Complete = complete,
+                Truncated = truncated,
+                Count = count,
+                Status = status,
+                Message = status
+            };
+        }
+
+        private static LensNextElementReference Element(string guid) => new LensNextElementReference { InstanceGuid = guid, ModelSource = "model.nwd" };
+        private static void Full(LensNextVisualState state)
+        {
+            var report = LensNextVisualReadiness.Evaluate(state);
+            True(report.CanApplyFullRestore);
+            Equal("full", report.Outcome);
+        }
+
+        private static void ApplyWorkingViewAllowedWhenViewpointPublishingDisabled()
+        {
+            var adapter = new FakeAdapter();
+            var dispatcher = new RecordingDispatcher();
+            var response = Bridge(adapter, dispatcher, false).Execute(ApplyRequest());
+
+            True(response.Success);
+            Equal("working_view_applied", response.Code);
+            Equal(1, adapter.ApplyCalls);
+            Equal(1, dispatcher.InvokeCalls);
+            Equal(0, adapter.PublishCalls);
+            Equal(0, adapter.SavedViewpointWrites);
+        }
+
+        private static void ApplyWorkingViewRequiresAuthoritativeDigest()
+        {
+            var adapter = new FakeAdapter();
+            var dispatcher = new RecordingDispatcher();
+            var request = ApplyRequest();
+            request.Fields = request.Fields
+                .Where(pair => pair.Key != "visualStateDigest")
+                .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+
+            var response = Bridge(adapter, dispatcher, false).Execute(request);
+
+            False(response.Success);
+            Equal("visual_state_digest_invalid", response.Code);
+            Equal(0, adapter.ApplyCalls);
+            Equal(0, dispatcher.InvokeCalls);
+        }
+
+        private static void BridgeCommandEffectMatrixIsExplicit()
+        {
+            True(LensNextBridgeCommands.AllowedWithoutSavedViewpointPublishing.Contains(
+                LensNextBridgeCommands.ApplyWorkingView));
+            True(LensNextBridgeCommands.TemporaryWorkingStateCommands.Contains(
+                LensNextBridgeCommands.ApplyWorkingView));
+            False(LensNextBridgeCommands.PersistentSavedViewpointWriteCommands.Contains(
+                LensNextBridgeCommands.ApplyWorkingView));
+            True(LensNextBridgeCommands.PersistentSavedViewpointWriteCommands.Contains(
+                LensNextBridgeCommands.PublishWorkingView));
+            False(LensNextBridgeCommands.AllowedWithoutSavedViewpointPublishing.Contains(
+                LensNextBridgeCommands.PublishWorkingView));
+        }
+
         private static void M7PilotCapabilitiesAreExplicit()
         {
             var capabilities = new LensNextCapabilities(true);
@@ -500,6 +698,24 @@ namespace BIMLogLensNext.Tests
                 ["modelFingerprint"] = "model-sha256-1",
                 ["bimlogPhysicalId"] = "physical-1",
                 ["navisworksGuid"] = "nav-guid-1"
+            };
+            return request;
+        }
+
+        private static LensNextBridgeRequest ApplyRequest()
+        {
+            var request = Request(LensNextBridgeCommands.ApplyWorkingView);
+            request.Fields = new Dictionary<string, string>
+            {
+                ["sessionId"] = "session-1",
+                ["projectId"] = "1",
+                ["serverId"] = "101",
+                ["viewpointId"] = "viewpoint-1",
+                ["lifecycleStatus"] = "active",
+                ["revisionNumber"] = "2",
+                ["modelFingerprint"] = "model-sha256-1",
+                ["visualStateJson"] = "{}",
+                ["visualStateDigest"] = new string('a', 64)
             };
             return request;
         }
@@ -710,6 +926,13 @@ namespace BIMLogLensNext.Tests
             }
         }
 
+        private static void Throws<T>(Action action) where T : Exception
+        {
+            try { action(); }
+            catch (T) { return; }
+            throw new InvalidOperationException("Expected " + typeof(T).Name + ".");
+        }
+
         private static void NotEqual<T>(T left, T right)
         {
             if (EqualityComparer<T>.Default.Equals(left, right))
@@ -741,6 +964,7 @@ namespace BIMLogLensNext.Tests
             public int SavedViewpointWrites { get; private set; }
             public int PlatformWrites { get; private set; }
             public int PublishCalls { get; private set; }
+            public int ApplyCalls { get; private set; }
             public LensNextPublishRequest LastPublishRequest {
                 get;
                 private set;
@@ -828,6 +1052,7 @@ namespace BIMLogLensNext.Tests
                 string storedVisualStateDigest,
                 string operationId)
             {
+                ApplyCalls++;
                 return new LensNextVisualApplyResult { Applied = true };
             }        }
     }
