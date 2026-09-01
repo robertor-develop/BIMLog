@@ -16387,6 +16387,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-intake-apu-08-job-command-center-20260831",
+      "reviewedThroughCommit": "bfedba14079085a8a70fe80f05615e303b4bfca3",
+      "reviewedAt": "2026-08-31T21:22:36-04:00",
+      "status": "implementation_candidate",
+      "captureTiming": "same_task_after_job_command_center_behavior_typecheck_and_bilingual_visual_review",
+      "summary": "Advances only the platform counter to P08 and composes existing Job Intake authorities into one bilingual read-only operational picture with deterministic gap guidance.",
+      "workstreams": [
+        "job-intake-command-center",
+        "operational-readiness-composition",
+        "shared-bimlog-version-governance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The command center reads BIMLog job authorities without assuming BIMCapital, payroll, payment, tax, or legal authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing isolated build, evidence, release, and human-authority rules remain applicable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Behavior, strict typecheck, desktop English, and exact-390 Spanish visual and overflow checks pass."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "One understandable operational picture implements the accepted simple-front-end Job Intake direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform audit was rerun after adding the command-center composition and compatibility field."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next source, package, model, binding, or native acceptance changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report, PDF, spreadsheet, or export presentation contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, compliance, or regulatory claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed P08 baseline already records implementation and passed focused and visual gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The committed P08 baseline already records Build 09 and remaining integration and external gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production mutation, schema migration, push, publication, deployment, payment, or legal approval occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "172536d371fff115407e863bc589d467c77dd1ab34ae809258d9446dde241599"
     }
   ]
 }

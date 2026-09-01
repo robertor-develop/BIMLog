@@ -282,7 +282,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.behavior.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.ts
 - artifacts/api-server/src/lib/job-agreement-lifecycle.behavior.ts
+- artifacts/api-server/src/lib/job-apu-builder.behavior.ts
+- artifacts/api-server/src/lib/job-apu-builder.ts
 - artifacts/api-server/src/lib/job-budget-governance.behavior.ts
+- artifacts/api-server/src/lib/job-command-center.behavior.ts
+- artifacts/api-server/src/lib/job-command-center.ts
 - artifacts/api-server/src/lib/job-company-map.behavior.ts
 - artifacts/api-server/src/lib/job-document-connections.behavior.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
@@ -292,6 +296,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake.behavior.ts
 - artifacts/api-server/src/lib/job-operations-service.ts
 - artifacts/api-server/src/lib/job-operations.behavior.ts
+- artifacts/api-server/src/lib/job-resource-plan.behavior.ts
+- artifacts/api-server/src/lib/job-resource-plan.ts
+- artifacts/api-server/src/lib/job-work-package-builder.behavior.ts
+- artifacts/api-server/src/lib/job-work-package-builder.ts
 - artifacts/api-server/src/lib/job-work-packages.behavior.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
 - artifacts/api-server/src/lib/lens-next-create.behavior.ts
