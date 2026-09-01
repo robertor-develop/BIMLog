@@ -596,5 +596,11 @@ It changes only when the code structure or curated architectural facts change.
   the immutable item snapshot preserves the APU content, evaluation, fingerprint, BIM Submittal display,
   and Phase to Revision to Version to Task workflow selection. Contract detail, searchable PDF, and native
   XLSX exports expose the same Contract Item quantities, rates, values, APU identity, and workflow metadata.
+
+## N07 deterministic map provenance
+
+- The `lens-next-navigation.v1` entry is emitted by `artifacts/api-server/scripts/generate-platform-md.ts`;
+  build-gate fix `b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7` makes the generated and committed
+  platform authority identical.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.

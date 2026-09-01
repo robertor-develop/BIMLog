@@ -2100,3 +2100,6 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Merge exact commit `f62adc2c3de01bf31d2ad0532797c2171176b19c` into the preserved Replit publish-wrapper history through Replit Shell only, run the complete governed production build, publish once, and verify the deployed health and Lens Next surface in Chrome. No database migration is authorized or required.
 - On the installed Navisworks Manage 2021 host, open `C:\Users\soporte\Desktop\1185 RIVER AV MODEL-06-11-26.nwd`, create one brand-new issue from a distinctive camera, verify human-readable ID and thumbnail with no Saved Viewpoint, move away, open once, restart Navisworks, and open the same issue again. Any failure produces one report before another product patch.
 - After the production and connected acceptance gates pass, deliver only the hash-verified 2025 N07 ZIP to Roberto's authorized private Telegram recipient. Ruben's actual Navisworks 2025 runtime acceptance remains a separate customer field gate.
+### N07 final publication successor
+
+- Reconcile through generator-fix commit `b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7`, require the exact Replit Shell production build to pass, then publish once and execute the already recorded Chrome and connected Navisworks acceptance sequence before Telegram delivery.

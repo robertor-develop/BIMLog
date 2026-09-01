@@ -16166,6 +16166,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3ec98b4c3c7d0c804ff3377fdcd9762bcc8f8d9b7b36e0b06d74d14cd9ebe6e1"
+    },
+    {
+      "taskId": "bimlog-lens-next-n07-platform-map-successor-20260901",
+      "reviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
+      "reviewedAt": "2026-09-01T19:46:00.0000000-04:00",
+      "status": "deterministic_platform_map_reconciled_publication_pending",
+      "captureTiming": "post_generator_fix_post_github_push_pre_replit_green_build_pre_publish_pre_connected_acceptance_pre_delivery",
+      "summary": "Reconciles the deterministic platform-map generator successor without changing the reviewed N07 runtime, schema, packages, or native behavior.",
+      "workstreams": [
+        "lens-next-n07-deterministic-platform-map",
+        "lens-next-governed-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog authority boundaries are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release and acceptance controls remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The fix makes generated and committed authority deterministic."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product-mode change occurred."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records deterministic generator provenance for the existing N07 navigation entry."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "N07 native behavior and package hashes are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact build-gate fix and remaining release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records final build, publication, acceptance, and delivery gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production or customer mutation is claimed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "8fdb49c9b3ac5de954001d8c05f038b9207dc6e7a52305043ace175bee039f2e"
     }
   ]
 }
