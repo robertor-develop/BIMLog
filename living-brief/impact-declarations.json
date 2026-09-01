@@ -16159,12 +16159,13 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d7cf226936706b66b06b1b27ff777c1414b3ddfead197c6068f38dc265636139"
+      "reviewedChangeSha256": "3ec98b4c3c7d0c804ff3377fdcd9762bcc8f8d9b7b36e0b06d74d14cd9ebe6e1"
     }
   ]
 }

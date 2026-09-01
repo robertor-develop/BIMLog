@@ -6,6 +6,7 @@
   "impact": {
     "baselineCommit": "f62adc2c3de01bf31d2ad0532797c2171176b19c",
     "changedPaths": [
+      "artifacts/api-server/scripts/generate-platform-md.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
@@ -14,6 +15,7 @@
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
