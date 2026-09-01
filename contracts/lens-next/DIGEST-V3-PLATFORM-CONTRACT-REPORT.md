@@ -3,7 +3,7 @@
 Date: 2026-09-01
 Platform implementation commit: `92f93ce9d2f824a47d7a290bfe516de0a3a2a000`
 Contract: `lens-next-visual-digest.v3`
-Status: source implemented and locally verified; production deployment not yet performed
+Status: source implemented and clean-production-build verified; production deployment not yet performed
 
 ## Outcome
 
@@ -150,7 +150,8 @@ Automated Platform tests mutate and reject all 23 authoritative identity slots: 
 - The existing v1 bounded .NET floating-point evidence path remains unchanged and its tamper denial still passes.
 - The complete Lens Next Build 1–10 behavior sequence passed, including the new v3 test.
 - API TypeScript strict typecheck passed.
-- The production API build reached the expected Living Brief clean-source gate; final production artifact assembly must run from the reconciled clean commit before deployment.
+- The production API build passed from reconciled clean commit `380fabffb5ee052a43c434d675ac45bf93a5fd6a`, including deterministic `PLATFORM.md`, server bundling, and runtime-closure verification of 15 direct packages, 15 dependencies, and 16,142 files.
+- The referenced TypeScript project build, Living Brief integrity check (11 required documents, 38 internal links, 40 standards links), `git diff --check`, and clean worktree status passed after artifact assembly.
 
 ## Database impact
 
@@ -163,10 +164,10 @@ The exact current shared field/package identity present in the authorized source
 ## Deployment plan and readiness
 
 1. Reconcile and commit this report/Living Brief against implementation commit `92f93ce9d2f824a47d7a290bfe516de0a3a2a000`.
-2. Run the clean production build and publication-source gates.
+2. Clean production build and publication-source gates passed at reconciled commit `380fabffb5ee052a43c434d675ac45bf93a5fd6a`.
 3. Push the reviewed Platform commit.
 4. Publish through Replit Shell only.
 5. Verify production still accepts known v1 and v2 packages, rejects tampering, and accepts a v3 API fixture.
 6. Only after production verification may Main 04 emit v3 from Lens Next.
 
-Current readiness: **implementation and local regression ready; production not yet v3-ready because push, Replit publication, and post-deploy verification have not occurred.** Main 04 must not switch native capture to v3 yet.
+Current readiness: **implementation, local regression, clean production artifact, and publication-source gates are ready; production is not yet v3-ready because push, Replit publication, and post-deploy verification have not occurred.** Main 04 must not switch native capture to v3 yet.
