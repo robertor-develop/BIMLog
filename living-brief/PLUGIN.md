@@ -284,3 +284,10 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 
 - The first shared-version release starts exactly at `v1.05.N01-P01`; legacy `v1.0.51` is not converted into either counter. Human-facing labels, manifests, installers, receipts, and archive names use the shared label. Windows DLL and Autodesk `AppVersion` fields use compatible numeric identity `1.5.1.1`.
 - Shared core contracts pass 35/35 and both Navisworks 2021 and 2025 year suites pass 37/37. The deterministic 2021 ZIP SHA-256 is `5550AB22CF483A87CF19EB4B411EEDFACC3DC14DB4E1958FF3E251D35CB89B77`; the 2025 ZIP SHA-256 is `7953460FEA83D380A99F28C60C32D590A8BE01B24F4C0E12A022978E9883C028`.
+
+## Lens Next long-running Working View apply contract
+
+- A normal `apply-working-view` command is one correlated logical operation. Its request ID and exact payload fingerprint provide native idempotency: identical retries join the same in-flight/completed result, while reuse with a different payload fails closed.
+- Total elapsed time is not an apply failure. The synchronous bridge waits for real UI-thread completion and emits cumulative stage timing for validation, authoritative digest verification, rollback capture, one-pass model/reference resolution, camera, sectioning, visibility, appearance, selection, implicit Navisworks redraw, and completion/failure.
+- Digest validation is strict and precedes mutation. The platform's persisted digest, the received package digest, and the native recomputation must match the same contract. The native apply resolves all referenced items before the first mutation and retains full-fidelity atomic rollback behavior.
+- The embedded UI disables repeated Open Working View activation while the operation is active and reports success only after native completion. Health/session renewal does not restart the runtime or navigate the WebView, and the health tick does not continuously normalize the floating window.
