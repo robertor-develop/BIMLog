@@ -16350,7 +16350,7 @@
     },
     {
       "taskId": "bimlog-platform-storage-authority-preflight-p03-20260901",
-      "reviewedThroughCommit": "11122c9bb4915aa233dc5ce03ef5e31454745f90",
+      "reviewedThroughCommit": "bf80b3c10bdf9af7b292129d5ccb29e9ed3a700a",
       "reviewedAt": "2026-09-01T20:00:00.000Z",
       "status": "accepted_source",
       "captureTiming": "immediate_same_task_chain",
@@ -16394,7 +16394,7 @@
           "summary": "Publication is gated on a clean production artifact proof, exact pushed commit, visible Replit Shell build, and Chrome verification."
         }
       ],
-      "summary": "Moves durable-storage authority validation ahead of full production application import and records the P03 shared release identity without changing Lens-owned N08 or persisted data.",
+      "summary": "Moves durable-storage authority validation ahead of full application import, serializes database startup DDL to prevent fresh-artifact deadlocks, and records P03 without changing Lens-owned N08 or persisted data.",
       "workstreams": [
         "platform-production-startup-authority",
         "lens-next-dual-year-p03-release",
@@ -16414,7 +16414,7 @@
         {
           "key": "quality",
           "result": "updated",
-          "reason": "Requires storage authority to fail closed before database or application initialization."
+          "reason": "Requires storage authority to fail closed before initialization and database startup DDL to execute without concurrency deadlocks."
         },
         {
           "key": "vision",
@@ -16424,7 +16424,7 @@
         {
           "key": "platform",
           "result": "updated",
-          "reason": "Records the production startup ordering and P03 platform-owned release increment."
+          "reason": "Records storage preflight, ordered database startup, readiness gating, and the P03 platform-owned release increment."
         },
         {
           "key": "plugin",
@@ -16444,7 +16444,7 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records the root cause, repair boundary, release identity, and gated completion state."
+          "reason": "Records both production-artifact startup root causes, repair boundaries, release identity, and gated completion state."
         },
         {
           "key": "open_loop",
@@ -16459,34 +16459,12 @@
       ],
       "reviewedChangedPaths": [
         "artifacts/api-server/scripts/generate-platform-md.ts",
-        "artifacts/api-server/src/index.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/PLATFORM.md",
-        "living-brief/PLUGIN.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
-        "plugins/BIMLogLensNext/Build-Package-LensNext.ps1",
-        "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
-        "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
-        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
-        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
-        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
-        "plugins/BIMLogLensNext/Install-BIMLogLensNext2021.ps1",
-        "plugins/BIMLogLensNext/Install-BIMLogLensNext2025.ps1",
-        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
-        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
-        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
-        "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
-        "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json",
-        "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
-        "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
-        "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
-        "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
-        "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
-        "plugins/BIMLogLensNext/src/LensNextConstants.cs"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d4329b0d39e128cea3f85296e8f58076513f5250d39fe945064e80f9834cac58"
+      "reviewedChangeSha256": "a9806dc6bcdd88ef33d93700ee764dcaae2a39d8105a4491bce262f6411c1cc1"
     }
   ]
 }

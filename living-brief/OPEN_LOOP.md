@@ -2123,7 +2123,8 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 
 - Prove invalid durable storage authority exits naturally from the built production artifact before any
   database/application initialization, with no readiness success or TCP listener. Prove valid startup and
-  the existing authenticated storage closure against the isolated loopback proof database.
+  the existing authenticated storage closure against the isolated loopback proof database. The valid proof
+  must also complete the ordered database-startup queue without PostgreSQL deadlock before readiness opens.
 - Rebuild and verify both Navisworks years as `v1.05.N08-P03` / `1.5.8.3`, preserving N08 and advancing only
   Platform-owned P03. Record deterministic archive and core/native/manifest hashes before distribution.
 - Push only the exact green commit. Through the visible Replit Shell—never Replit Agent—align the governed

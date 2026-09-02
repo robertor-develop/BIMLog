@@ -177,6 +177,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/cost-value-performance.behavior.ts
 - artifacts/api-server/src/lib/cost-value-plan-service.ts
 - artifacts/api-server/src/lib/cost-value-plan.behavior.ts
+- artifacts/api-server/src/lib/database-startup-serialization.behavior.ts
 - artifacts/api-server/src/lib/email.ts
 - artifacts/api-server/src/lib/entitlement-contract.ts
 - artifacts/api-server/src/lib/entitlement-resolver.behavior.ts
@@ -624,6 +625,10 @@ It changes only when the code structure or curated architectural facts change.
   invalid durable storage authority therefore fails closed before database or application initialization.
 - Valid production startup uses the same cached storage singleton and retains the existing readiness,
   listener, authentication, and durable-storage contracts. This repair changes no schema or persisted data.
+- Every database startup initializer is registered on one ordered process-local queue. This preserves
+  each initializer's existing fatal or nonfatal behavior while preventing independent PostgreSQL pool
+  clients from deadlocking on overlapping DDL during a fresh production-artifact startup. Readiness
+  remains closed until the entire queue drains successfully.
 - The production-artifact gate requires an invalid authority child to exit naturally with the sanitized
   FEEDBACK_STORAGE_AUTHORITY_INVALID code and without readiness or TCP binding; the valid artifact must
   still start and pass the existing authenticated storage closure proof.

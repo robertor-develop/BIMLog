@@ -1061,10 +1061,15 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - The production entrypoint now loads the storage adapter first. Invalid or missing authority terminates
   before database/application import; valid startup reuses the same cached adapter and changes no schema,
   database row, Lens navigation behavior, Legacy Lens behavior, or persisted visual package.
+- Exact-artifact execution then exposed a second startup defect: the valid child launched independent schema
+  initializers concurrently across the PostgreSQL pool and deadlocked on overlapping DDL. All established
+  database startup work now runs through one ordered queue, and readiness waits for that queue to drain.
+  Existing fatal/nonfatal migration semantics are preserved; no schema definition or data operation changed.
 - P03 is the Platform/APU-owned counter increment. Lens remains N08; package identity is
   `v1.05.N08-P03` and binary identity is `1.5.8.3`. Shared core contracts pass 54/54; both year adapters
   pass 51/51; package integrity and package-only installer validation pass for both years.
 - The 2021 ZIP is 574516 bytes / SHA-256
   `8C482115D46EB270490B60E893DEF942AB5FEE9A1380DE754B12D98BDDAB5F71`. The 2025 ZIP is 577330 bytes /
   SHA-256 `190F8F2B94BCD8E1645B5687F0A63AB22F8D55021DED67772E8BA3D75DD22E0B`.
-  Clean production artifact proof, publication, Chrome verification, and Telegram delivery remain gated.
+  Focused startup serialization and strict API typecheck gates pass. Clean production artifact proof,
+  publication, Chrome verification, and Telegram delivery remain gated.
