@@ -2137,9 +2137,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   gates are green against source `b2a9df745ba39e2d99c362468086e898850bf212` plus reconciled documentation.
 - The exact 2021/2025 package and component hashes for `v1.05.N09-P04` / `1.5.9.4` are recorded in STATUS,
   PLUGIN, AUDIT, and the tracked build receipts. N09 is preserved and only Platform-owned P04 advanced.
-- Push the exact green head. In visible Replit Shell, align to that exact remote source and rerun the governed build.
-  Publish once; Promote must complete without `/api` health failure. Do not use Replit Agent or retry a failed paid
-  publish without consuming the new failure evidence.
-- In Chrome, verify live `/api`, `/api/v1/healthz`, the shared release label, authentication, and Lens Next loading.
-  Then send the single verified 2025 P04 ZIP to Roberto's private Telegram. Ruben's connected Navisworks field test
-  remains separate from deployment acceptance.
+- Closed: green head `0b72c4c14cd53dc43543f2900feeceacec8e3595` was pushed to both release refs; the
+  visible Replit Shell tree matched the remote, and the full governed build passed.
+- Closed: controlled publication `86e8e01a` passed every Replit stage and is HEALTHY. Chrome verified live
+  `v1.05.N09-P04`, authenticated dashboard data, `/api` HTTP 200, and `/api/v1/healthz` HTTP 200.
+- Send the single verified 2025 P04 ZIP to Roberto's private Telegram. Ruben's connected Navisworks field test
+  remains separate from deployment acceptance and must not be represented as locally completed.
