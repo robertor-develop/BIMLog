@@ -821,3 +821,23 @@ provider/credential action, publication, deployment, customer access, or unrelat
 ## Lens Next production binding migration — 2026-08-31
 
 - Owner authorization covered the production binding audit and migration. The preflight used a read-only transaction through `PROD_DATABASE_URL`, printed no credential, and proved zero total rows and zero collisions. The committed transaction replaced the global `model_binding_key` unique index with the active project-scoped `(project_id, model_binding_key)` unique index and added the non-unique key lookup index. Post-commit catalog inspection verified the expected four indexes and unchanged zero-row table.
+## Replit Promote startup-liveness failure audit — September 2, 2026
+
+Deployment `8809d211` passed Provision, Security, Build, and Bundle, then failed Promote. Provider logs repeatedly
+reported `/api` health failure while the production process was still importing the application. The same logs show
+`app_import_complete elapsed_ms=23889` followed immediately by `bootstrap_bound port=8080`, proving the application
+was viable but the listener opened after the provider's promotion window. The prior production deployment remained
+live; no database rollback or destructive action occurred.
+
+Corrective source `b2a9df745ba39e2d99c362468086e898850bf212` keeps the P03 storage-authority preflight before any bind, restores
+early listener binding only after that synchronous validation, limits pre-ready HTTP 200 to exact `/api` liveness,
+and keeps canonical readiness and business traffic unavailable until initialization completes. A failed import
+changes bootstrap responses to 503 and closes the listener. This audit records source correction only; successful
+build, push, Replit alignment, controlled Publish, and production verification remain separately evidenced gates.
+
+The subsequent governed clean build passed the full workspace build and API runtime-closure assembly. Controlled
+dual-year packaging passed 54/54 shared contracts, 52/52 native contracts per year, package integrity, and
+package-only installer validation. The exact 2025 delivery candidate is
+`BIMLog-Lens-Next-Navisworks2025-v1.05.N09-P04.zip`, 577566 bytes, SHA-256
+`190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`. Publication and production verification
+remain separate until their provider and live-browser receipts are recorded.

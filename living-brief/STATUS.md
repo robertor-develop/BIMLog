@@ -1076,3 +1076,37 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
   with no TCP/readiness, while valid restricted storage and the isolated proof database return HTTP 200
   from both readiness surfaces in 7,014.4 ms with no PostgreSQL deadlock. Publication, Chrome verification,
   and Telegram delivery remain gated.
+## BIMLog / Lens Next v1.05.N09-P04 Replit promotion repair — 2026-09-02
+
+- Failed Replit deployment `8809d211` completed Provision, Security, Build, and Bundle, then failed Promote because
+  the deployment health probe repeatedly reached `/api` before the production listener existed. Exact telemetry
+  proves the full application import and ordered startup queue completed in 23,889 ms, after the provider health
+  window had already rejected the deployment. The previous production deployment remained live.
+- Source `b2a9df745ba39e2d99c362468086e898850bf212` preserves synchronous fail-closed durable-storage validation, then
+  binds the bootstrap listener before the full application import. During initialization exact `/api` returns an
+  explicit liveness-only HTTP 200 with `ready:false`; `/api/v1/healthz` and all business routes remain HTTP 503 until
+  the startup barrier completes. Initialization failure removes liveness and closes the listener.
+- This is the Platform-owned P04 increment and preserves Lens-owned N09. Shared release identity is
+  `v1.05.N09-P04`; Windows binary identity is `1.5.9.4`. No database schema, row, Lens capture/apply contract,
+  Legacy Lens behavior, or historical issue is changed.
+- Focused bootstrap/readiness and strict API typecheck gates pass. Full artifact build, dual-year package receipts,
+  push, exact Replit Shell alignment, one controlled Publish, Chrome live verification, Telegram delivery, and
+  Ruben field verification remain completion gates.
+
+### N09-P04 clean-build and dual-year package evidence — 2026-09-02
+
+- The clean governed root build passes, including configuration/privacy gates, database safety, all TypeScript
+  projects, frontend production build, API runtime closure, and Living Brief validation. The focused bootstrap suite
+  proves `/api` liveness is HTTP 200 during initialization while canonical readiness and business routes remain 503.
+- Shared Lens contracts pass 54/54. Navisworks 2021 and 2025 native contracts pass 52/52 each; package integrity,
+  package-only installer, year identity, BAT launcher, and release-identity gates pass for both packages.
+- The controlled 2021 ZIP is 574720 bytes with SHA-256
+  `877EF261940B63E4E86C168B233AE9E35FE7CCDA4B93F1BC4D96827D243FDA59`; its core DLL SHA-256 is
+  `181A9D33CCD468339981F3F91DD3FE7525BBA4BD1AC8BBE07164E200A59F1EB5` and native DLL SHA-256 is
+  `79D63A4A683AE025EB0770F1E1935DCAEECD9817D9B0E5B6D646C5F99A8D0914`.
+- The controlled 2025 ZIP is 577566 bytes with SHA-256
+  `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`; its core DLL SHA-256 is
+  `181A9D33CCD468339981F3F91DD3FE7525BBA4BD1AC8BBE07164E200A59F1EB5` and native DLL SHA-256 is
+  `E337A36B5A8ED2FCAA48AFC6D6E9C822937415F9158384AB91E0ABCE4B052A30`. Binary version is `1.5.9.4`.
+- Push, exact Replit Shell alignment, one controlled Publish, Chrome production verification, Telegram delivery,
+  and Ruben's connected Navisworks 2025 field verification remain separate gates.

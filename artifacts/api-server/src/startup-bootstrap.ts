@@ -22,7 +22,11 @@ interface BootstrapOptions {
 const DEFAULT_INITIALIZATION_TIMEOUT_MS = 45_000;
 
 const NOT_READY_BODY = {
-  starting: JSON.stringify({ status: "starting" }),
+  starting: JSON.stringify({
+    status: "starting",
+    service: "bimlog-api",
+    ready: false,
+  }),
   failed: JSON.stringify({ status: "failed" }),
 } as const;
 
@@ -65,10 +69,15 @@ export function createApplicationBootstrap(
     if (state !== "ready" || !application) {
       const path = request.url?.split("?", 1)[0];
       if (state === "starting" && path === "/api") {
-        response.statusCode = 404;
+        // Replit's deployment promoter probes the artifact service path, /api,
+        // as a liveness check while the application import is still running.
+        // This response means only that the process is alive. The canonical
+        // /api/v1/healthz endpoint remains 503 until the app is actually ready.
+        response.statusCode = 200;
         response.setHeader("Cache-Control", "no-store");
-        response.setHeader("Content-Type", "text/plain; charset=utf-8");
-        response.end("Cannot GET /api\n");
+        response.setHeader("Content-Type", "application/json; charset=utf-8");
+        response.setHeader("Retry-After", "1");
+        response.end(NOT_READY_BODY.starting);
         return;
       }
 
