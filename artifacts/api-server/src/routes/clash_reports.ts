@@ -702,7 +702,24 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
   requirePermission("admin", "write"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
+    const correlationId = randomUUID();
+    const clientRequestId = String(req.get("x-request-id") ?? "").trim() || null;
+    let transactionStarted = false;
+    let transactionCommitted = false;
+    let stage = "request_validation";
+    res.setHeader("X-Correlation-Id", correlationId);
+    const trace = (outcome: "START" | "PASS" | "FAIL" | "SKIP", details: Record<string, unknown> = {}) => {
+      console.log("[lens-next-create]", {
+        correlationId,
+        clientRequestId,
+        projectId: Number.isSafeInteger(projectId) ? projectId : null,
+        stage,
+        outcome,
+        ...details,
+      });
+    };
     try {
+      trace("START", { contentLength: req.get("content-length") ?? null });
       if (!Number.isSafeInteger(projectId) || projectId <= 0) throw new LensNextLocalUploadError("project_invalid", "Project identity is invalid.", 400);
       const body = req.body ?? {};
       if (body.contractVersion !== "lens-next-create.v1" || body.confirmed !== true || typeof body.confirmationReason !== "string" || body.confirmationReason.trim().length < 3)
@@ -720,27 +737,86 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
       const priority = Number(issue.priority);
       if (!viewpointId || viewpointId.length > 160 || !/^[a-f0-9]{64}$/.test(modelFingerprint) || !note || !trade || !floor || !reportType || !Number.isInteger(priority) || priority < 1 || priority > 5 || !["open","follow_up","waiting_design","approved","resolved"].includes(status))
         throw new LensNextLocalUploadError("create_fields_invalid", "Trade, instruction, report type, floor, priority, status, viewpoint identity, and model identity are required.", 422);
+      trace("PASS", {
+        contractVersion: body.contractVersion,
+        viewpointId,
+        modelFingerprint,
+        navigationContractVersion: String(body.visualState?.ContractVersion ?? body.visualState?.contractVersion ?? "") || null,
+        screenshotPresent: Boolean(body.visualState?.ScreenshotDataUrl ?? body.visualState?.screenshotDataUrl),
+        issue: { trade, floor, reportType, priority, status, responsibleCompanyPresent: Boolean(responsibleCompany), openItemsPresent: Boolean(openItems) },
+      });
+      transactionStarted = true;
       const result = await db.transaction(async tx => {
+        stage = "duplicate_identity_query";
+        trace("START", { viewpointId });
         const existing = await tx.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.viewpointId, viewpointId), eq(lensViewpointsTable.lifecycleStatus, "active"))).limit(1);
         if (existing.length) throw new LensNextLocalUploadError("platform_identity_exists", "BIMLog already contains this viewpoint identity; creation will not overwrite it.", 409);
+        trace("PASS");
+        stage = "provisional_viewpoint_insert";
+        trace("START");
         const [inserted] = await tx.insert(lensViewpointsTable).values({
           projectId, viewpointId, note, trade, floor, responsibleCompany: responsibleCompany || null,
           reportType, priority, openItems: openItems || null, status,
           lifecycleStatus: "active", revisionNumber: 1, mutationVersion: 1, capturedAt: new Date(), syncedAt: new Date(),
         }).returning();
         if (!inserted) throw new LensNextLocalUploadError("atomic_insert_failed", "BIMLog did not create the viewpoint record.", 500);
+        trace("PASS", { provisionalServerId: inserted.id });
+        stage = "visual_package_validation_rebinding";
+        trace("START", { provisionalServerId: inserted.id });
         const rebound = validateAndRebindLocalVisualState(body.visualState, { projectId, serverId: inserted.id, viewpointId, modelFingerprint });
+        trace("PASS", { provisionalServerId: inserted.id, digest: rebound.digest, visualStateBytes: Buffer.byteLength(rebound.json, "utf8"), screenshotAccepted: Boolean(rebound.screenshotDataUrl) });
+        stage = "trade_sequence_assignment";
+        trace("START", { trade });
+        stage = "floor_sequence_assignment";
+        trace("START", { floor });
+        stage = "trade_floor_sequence_assignment";
         const sequence = await assignTradeFloorSeq(projectId, trade, floor, null, tx);
+        stage = "trade_sequence_assignment";
+        trace("PASS", { sequence: sequence.seq });
+        stage = "floor_sequence_assignment";
+        trace("PASS", { sequence: sequence.seq });
+        stage = "display_id_construction";
+        trace("START", { sequence: sequence.seq });
         const abbr = (trade.length > 2 ? trade.slice(0, 2) : trade).toUpperCase() || "??";
         const displayId = `${abbr}-${String(sequence.seq).padStart(3, "0")}`;
+        trace("PASS", { displayId });
+        stage = "final_visual_package_update";
+        trace("START", { provisionalServerId: inserted.id, displayId });
         await tx.update(lensViewpointsTable).set({ displayId, screenshotUrl: rebound.screenshotDataUrl, visualStateJson: rebound.json, visualStateDigest: rebound.digest, tradeFloorSeq: sequence.seq, tradeFloorSeqCorrection: sequence.correction, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, inserted.id));
+        trace("PASS", { provisionalServerId: inserted.id, displayId });
+        stage = "audit_relationship_work";
+        trace("SKIP", { reason: "No audit or relationship write exists in the current atomic-create transaction." });
         return { serverId: inserted.id, viewpointId, displayId, visualStateDigest: rebound.digest, revisionNumber: 1, lifecycleStatus: "active", displayCode: displayId };
       });
+      transactionCommitted = true;
+      stage = "transaction_commit";
+      trace("PASS", { serverId: result.serverId, displayId: result.displayId });
       res.status(201).json({ success: true, contractVersion: "lens-next-create.v1", created: true, result });
     } catch (error) {
+      const failure = error as Error & { code?: string; constraint?: string; table?: string; column?: string; detail?: string; cause?: unknown };
+      const cause = failure?.cause as Error & { code?: string; constraint?: string; table?: string; column?: string; detail?: string } | undefined;
+      trace("FAIL", {
+        errorClass: failure?.constructor?.name ?? failure?.name ?? "UnknownError",
+        errorName: failure?.name ?? null,
+        errorMessage: failure?.message ?? String(error),
+        stack: failure?.stack ?? null,
+        causeClass: cause?.constructor?.name ?? cause?.name ?? null,
+        causeName: cause?.name ?? null,
+        causeMessage: cause?.message ?? null,
+        causeStack: cause?.stack ?? null,
+        databaseCode: failure?.code ?? cause?.code ?? null,
+        constraint: failure?.constraint ?? cause?.constraint ?? null,
+        table: failure?.table ?? cause?.table ?? null,
+        column: failure?.column ?? cause?.column ?? null,
+        detail: failure?.detail ?? cause?.detail ?? null,
+      });
+      if (transactionStarted && !transactionCommitted) {
+        stage = "transaction_rollback";
+        trace("PASS");
+      }
       if (error instanceof LensNextLocalUploadError) { res.status(error.status).json({ error: error.code, message: error.message, digestDiagnostics: error.digestDiagnostics }); return; }
       if ((error as { code?: string })?.code === "23505") { res.status(409).json({ error: "platform_identity_conflict", message: "A concurrent BIMLog record now owns this viewpoint identity; nothing was overwritten." }); return; }
-      res.status(500).json({ error: "lens_next_create_failed", message: "The atomic viewpoint creation failed; no partial record was committed." });
+      res.status(500).json({ error: "lens_next_create_failed", message: "The atomic viewpoint creation failed; no partial record was committed.", correlationId });
     }
   });
 
