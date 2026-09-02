@@ -245,7 +245,7 @@ ${appRoutes()}
 
 ## Lens Next atomic-create correlated stage telemetry
 
-- `POST /api/v1/projects/:projectId/clash-reports/lens-next/issues/create` emits one server-generated correlation ID, returns it in `X-Correlation-Id`, and records any incoming `X-Request-Id` without trusting it as authority.
+- \`POST /api/v1/projects/:projectId/clash-reports/lens-next/issues/create\` emits one server-generated correlation ID, returns it in \`X-Correlation-Id\`, and records any incoming \`X-Request-Id\` without trusting it as authority.
 - Sanitized START/PASS/FAIL events cover validation, duplicate detection, provisional insert, visual-package validation/rebind, sequence allocation, display-ID construction, final update, commit, and rollback. The transaction has no separate audit/relationship write and records that stage as skipped.
 - Failure events include outer and nested exception class, message, stack, and available PostgreSQL code/constraint/table/column/detail. Authentication headers, cookies, tokens, and screenshot payload bytes are never logged.
 - This telemetry is diagnostic only: response and persistence contracts, transaction boundaries, schema, sequence behavior, release identity, and Lens native behavior remain unchanged until the exact production exception is proven.
