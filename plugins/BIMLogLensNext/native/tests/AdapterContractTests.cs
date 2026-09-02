@@ -47,6 +47,7 @@ namespace BIMLogLensNext.Native.Tests
                 Run("dock_pane_has_recovery_command", DockPaneHasRecoveryCommand);
                 Run("floating_close_hides_instead_of_destroying", FloatingCloseHidesInsteadOfDestroying);
                 Run("camera_capture_allows_projection_specific_values_to_be_unset", CameraCaptureAllowsUnsetProjectionValues);
+                Run("camera_apply_uses_writable_current_viewpoint_copy", CameraApplyUsesWritableCurrentViewpointCopy);
                 Run("bridge_dispatches_immediately_without_idle_starvation", BridgeDispatchesImmediatelyWithoutIdleStarvation);
                 Run("normal_navigation_uses_bounded_timeout_and_exact_restore_waits_for_completion", NormalNavigationUsesBoundedTimeoutAndExactRestoreWaitsForCompletion);
                 Run("normal_navigation_avoids_full_model_state_engine", NormalNavigationAvoidsFullModelStateEngine);
@@ -383,6 +384,21 @@ namespace BIMLogLensNext.Native.Tests
             True(pump.Contains("WaitUntilCompleted(work)"));
         }
 
+        private static void CameraApplyUsesWritableCurrentViewpointCopy()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            var applyStart = source.IndexOf("private void ApplyCamera", StringComparison.Ordinal);
+            var applyEnd = source.IndexOf("private sealed class SelectionCaptureResult", applyStart, StringComparison.Ordinal);
+            True(applyStart >= 0 && applyEnd > applyStart);
+            var apply = source.Substring(applyStart, applyEnd - applyStart);
+            True(apply.Contains("_document.CurrentViewpoint.CreateCopy()"));
+            True(apply.Contains("_document.CurrentViewpoint.CopyFrom(writableView)"));
+            True(apply.Contains("writableView.IsReadOnly"));
+            False(apply.Contains("_document.CurrentViewpoint.ToViewpoint()"));
+        }
+
         private static void HealthPingBypassesBusyUiThread()
         {
             var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextUiRequestPump.cs")));
@@ -507,7 +523,7 @@ namespace BIMLogLensNext.Native.Tests
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
-            Equal("v1.05.N08-P03", LensNextConstants.ProductVersionLabel);
+            Equal("v1.05.N09-P03", LensNextConstants.ProductVersionLabel);
         }
 
         private static void RuntimeIgnoresConfiguredProjectFallback()

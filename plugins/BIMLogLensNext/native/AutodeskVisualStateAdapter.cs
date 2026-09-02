@@ -92,7 +92,11 @@ namespace BIMLogLensNext.Native
             catch (Exception ex) { return NavigationFailed("BIMLog navigation payload is invalid: " + ex.Message, warnings); }
 
             try { ApplyCamera(camera); applied.Add("camera"); }
-            catch (Exception ex) { return NavigationFailed("Camera apply failed: " + ex.Message, warnings); }
+            catch (Exception ex)
+            {
+                LensNextNativeLog.Error("Camera apply failed while copying a writable Autodesk.Navisworks.Api.Viewpoint into DocumentCurrentViewpoint.", ex);
+                return NavigationFailed("Camera apply failed: " + ex.Message, warnings);
+            }
             if (!string.IsNullOrWhiteSpace(sectioning))
             {
                 try { InvokeSectioningSetter(sectioning); applied.Add("sectioning"); }
@@ -366,15 +370,18 @@ namespace BIMLogLensNext.Native
         private void ApplyCamera(LensNextCameraState camera)
         {
             if (camera == null || camera.Position == null || camera.Rotation == null) throw new InvalidOperationException("Camera payload is incomplete.");
-            var view = _document.CurrentViewpoint.ToViewpoint();
-            view.Position = new Point3D(camera.Position.X, camera.Position.Y, camera.Position.Z);
-            view.Rotation = new Rotation3D(camera.Rotation.A, camera.Rotation.B, camera.Rotation.C, camera.Rotation.D);
-            if (camera.WorldUpVector != null) view.WorldUpVector = new UnitVector3D(camera.WorldUpVector.X, camera.WorldUpVector.Y, camera.WorldUpVector.Z);
-            ViewpointProjection projection;
-            if (!Enum.TryParse(camera.Projection, true, out projection)) throw new InvalidOperationException("Camera projection is unsupported: " + camera.Projection);
-            view.Projection = projection;
-            if (camera.FocalDistance.HasValue && camera.FocalDistance.Value > 0) view.FocalDistance = camera.FocalDistance.Value;
-            _document.CurrentViewpoint.CopyFrom(view);
+            using (var writableView = _document.CurrentViewpoint.CreateCopy())
+            {
+                LensNextNativeLog.Info("Camera apply target created. Type=" + writableView.GetType().FullName + " IsReadOnly=" + writableView.IsReadOnly + " ApplyMethod=DocumentCurrentViewpoint.CopyFrom(Viewpoint)");
+                writableView.Position = new Point3D(camera.Position.X, camera.Position.Y, camera.Position.Z);
+                writableView.Rotation = new Rotation3D(camera.Rotation.A, camera.Rotation.B, camera.Rotation.C, camera.Rotation.D);
+                if (camera.WorldUpVector != null) writableView.WorldUpVector = new UnitVector3D(camera.WorldUpVector.X, camera.WorldUpVector.Y, camera.WorldUpVector.Z);
+                ViewpointProjection projection;
+                if (!Enum.TryParse(camera.Projection, true, out projection)) throw new InvalidOperationException("Camera projection is unsupported: " + camera.Projection);
+                writableView.Projection = projection;
+                if (camera.FocalDistance.HasValue && camera.FocalDistance.Value > 0) writableView.FocalDistance = camera.FocalDistance.Value;
+                _document.CurrentViewpoint.CopyFrom(writableView);
+            }
         }
 
         private sealed class SelectionCaptureResult
