@@ -16350,7 +16350,7 @@
     },
     {
       "taskId": "bimlog-platform-storage-authority-preflight-p03-20260901",
-      "reviewedThroughCommit": "bf80b3c10bdf9af7b292129d5ccb29e9ed3a700a",
+      "reviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
       "reviewedAt": "2026-09-01T20:00:00.000Z",
       "status": "accepted_source",
       "captureTiming": "immediate_same_task_chain",
@@ -16458,13 +16458,11 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/scripts/generate-platform-md.ts",
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "a9806dc6bcdd88ef33d93700ee764dcaae2a39d8105a4491bce262f6411c1cc1"
+      "reviewedChangeSha256": "c84a185a53624434b8f8809307fd54d8e3e2237c9d5dfd610f2abc8747d6f5b8"
     }
   ]
 }

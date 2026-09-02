@@ -1071,5 +1071,8 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - The 2021 ZIP is 574516 bytes / SHA-256
   `8C482115D46EB270490B60E893DEF942AB5FEE9A1380DE754B12D98BDDAB5F71`. The 2025 ZIP is 577330 bytes /
   SHA-256 `190F8F2B94BCD8E1645B5687F0A63AB22F8D55021DED67772E8BA3D75DD22E0B`.
-  Focused startup serialization and strict API typecheck gates pass. Clean production artifact proof,
-  publication, Chrome verification, and Telegram delivery remain gated.
+  Focused startup serialization and strict API typecheck gates pass. The exact standalone artifact at
+  source `a9fabd537c6c5fba70d3dae392c8501c73143992` passes: invalid authority exits naturally in 982.8 ms
+  with no TCP/readiness, while valid restricted storage and the isolated proof database return HTTP 200
+  from both readiness surfaces in 7,014.4 ms with no PostgreSQL deadlock. Publication, Chrome verification,
+  and Telegram delivery remain gated.

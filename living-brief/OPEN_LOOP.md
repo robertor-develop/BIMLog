@@ -2121,10 +2121,10 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 
 ## Lens Next v1.05.N08-P03 release completion gates
 
-- Prove invalid durable storage authority exits naturally from the built production artifact before any
-  database/application initialization, with no readiness success or TCP listener. Prove valid startup and
-  the existing authenticated storage closure against the isolated loopback proof database. The valid proof
-  must also complete the ordered database-startup queue without PostgreSQL deadlock before readiness opens.
+- Exact-artifact startup proof is complete for source `a9fabd537c6c5fba70d3dae392c8501c73143992`:
+  invalid durable storage authority exits naturally in 982.8 ms with no TCP/readiness, and valid restricted
+  storage plus the isolated loopback proof database reaches both readiness surfaces in 7,014.4 ms after the
+  ordered database-startup queue completes without PostgreSQL deadlock.
 - Rebuild and verify both Navisworks years as `v1.05.N08-P03` / `1.5.8.3`, preserving N08 and advancing only
   Platform-owned P03. Record deterministic archive and core/native/manifest hashes before distribution.
 - Push only the exact green commit. Through the visible Replit Shell—never Replit Agent—align the governed
