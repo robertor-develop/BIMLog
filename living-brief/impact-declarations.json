@@ -16696,14 +16696,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/scripts/generate-platform-md.ts",
-        "living-brief/AUDIT.md",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "194dfed0b1317e6e20ebcc102b529c2b528bc1eaeef1fdb64ef8b1b8494192ad"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
