@@ -306,7 +306,17 @@ namespace BIMLogLensNext.Native
             var navigationApplied = payload as LensNextNavigationAppliedPayload;
             if (navigationApplied != null) return new Dictionary<string, object>
             {
-                { "requestId", navigationApplied.RequestId }, { "identity", navigationApplied.Identity }, { "result", navigationApplied.Result }
+                { "requestId", navigationApplied.RequestId },
+                { "identity", new Dictionary<string, object>
+                    {
+                        { "projectId", navigationApplied.Identity.ProjectId },
+                        { "serverId", navigationApplied.Identity.ServerId },
+                        { "viewpointId", navigationApplied.Identity.ViewpointId },
+                        { "lifecycleStatus", navigationApplied.Identity.LifecycleStatus },
+                        { "revisionNumber", navigationApplied.Identity.RevisionNumber }
+                    }
+                },
+                { "result", navigationApplied.Result }
             };
             var applied = payload as LensNextWorkingViewAppliedPayload;
             if (applied != null) return new Dictionary<string, object>
