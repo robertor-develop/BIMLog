@@ -2,10 +2,12 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "bc4e8d42ffa8379c0fc49daa7f39fef21161f70f",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "686cae35e8a26bec164cfb4a67d5dacd27fe5ef9bf8cb679bdd3c9f592cbeaa7",
+  "bundleSha256": "a473f298b5ff26ff3aa6403e918ea3b6be1f1de17c0d7123e74bd3cbeaa11b82",
   "impact": {
     "baselineCommit": "bc4e8d42ffa8379c0fc49daa7f39fef21161f70f",
     "changedPaths": [
+      "living-brief/OPEN_LOOP.md",
+      "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
@@ -114,9 +116,9 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "459e3d179a3cb8df38c31ca2d78f3aa03622aff6d02ea7809aee308f9c64ff48",
-      "sourceChangedAt": "2026-09-02T12:31:50-04:00",
-      "changeState": "accepted",
+      "sha256": "101a4022930a82853c29dae2b20f8ed4ac79715ca9994ecd1cac96a6e727c612",
+      "sourceChangedAt": "2026-09-02T22:48:00.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "bc4e8d42ffa8379c0fc49daa7f39fef21161f70f",
       "semanticReviewedThroughCommit": "bc4e8d42ffa8379c0fc49daa7f39fef21161f70f",
       "semanticReviewTask": "bimlog-lens-next-atomic-create-observability-20260902",
@@ -126,9 +128,9 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "875618a8aa45d7bd6ff3bbf20076dbf96a69d0304814f1b63be9454d5c625f50",
-      "sourceChangedAt": "2026-09-02T12:31:50-04:00",
-      "changeState": "accepted",
+      "sha256": "6526ab72534c43b3fa23e9fff87a2ef29e0424cb3f63d01e8c6767f51ebf12e6",
+      "sourceChangedAt": "2026-09-02T22:48:00.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "bc4e8d42ffa8379c0fc49daa7f39fef21161f70f",
       "semanticReviewedThroughCommit": "bc4e8d42ffa8379c0fc49daa7f39fef21161f70f",
       "semanticReviewTask": "bimlog-lens-next-atomic-create-observability-20260902",
