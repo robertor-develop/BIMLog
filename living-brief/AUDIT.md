@@ -850,3 +850,8 @@ Controlled publication `86e8e01a` passed Provision, Security checks, Build, Bund
 HEALTHY. Chrome verified the authenticated production dashboard displays `v1.05.N09-P04`; same-origin requests to
 `/api` and `/api/v1/healthz` both returned HTTP 200. This closes the Platform publication gate without claiming
 Ruben's separate connected Navisworks 2025 field acceptance.
+
+Telegram's provider acknowledged private delivery event
+`bimlog-lens-next-n09-p04-2025-roberto-20260902-v1` at `2026-09-02T14:54:14.6650169Z` for the exact 577566-byte
+2025 archive with SHA-256 `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`.
+Provider acknowledgement is evidence of send acceptance, not independent proof that a Telegram client displayed it.

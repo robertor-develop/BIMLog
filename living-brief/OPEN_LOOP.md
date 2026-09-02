@@ -2141,5 +2141,7 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   visible Replit Shell tree matched the remote, and the full governed build passed.
 - Closed: controlled publication `86e8e01a` passed every Replit stage and is HEALTHY. Chrome verified live
   `v1.05.N09-P04`, authenticated dashboard data, `/api` HTTP 200, and `/api/v1/healthz` HTTP 200.
-- Send the single verified 2025 P04 ZIP to Roberto's private Telegram. Ruben's connected Navisworks field test
-  remains separate from deployment acceptance and must not be represented as locally completed.
+- Closed: Telegram's provider acknowledged private delivery event
+  `bimlog-lens-next-n09-p04-2025-roberto-20260902-v1` for the exact verified 2025 P04 ZIP; client visibility is not
+  independently provable. Ruben's connected Navisworks field test remains separate from deployment acceptance and
+  must not be represented as locally completed.

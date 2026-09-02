@@ -1114,5 +1114,7 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - One controlled Replit publication (`86e8e01a`) completed Provision, Security checks, Build, Bundle, and Promote;
   the deployment is HEALTHY. Chrome verified the live dashboard displays `v1.05.N09-P04`, authenticated project
   data loads, `/api` returns HTTP 200, and `/api/v1/healthz` returns HTTP 200.
-- Telegram delivery is recorded separately. Ruben's connected Navisworks 2025 create/open/restart/open field
-  verification remains the only external acceptance gate.
+- Telegram provider acknowledged private delivery event
+  `bimlog-lens-next-n09-p04-2025-roberto-20260902-v1` for the exact verified 2025 ZIP; Telegram client visibility
+  cannot be independently confirmed. Ruben's connected Navisworks 2025 create/open/restart/open field verification
+  remains the only external acceptance gate.
