@@ -16579,9 +16579,11 @@
         "living-brief/OPEN_LOOP.md",
         "living-brief/PLUGIN.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json"
       ],
-      "reviewedChangeSha256": "6adf910f4a87f2c1a63e3f987f685ff2d95bb93d6dda39fe7737a1f8984208dd"
+      "reviewedChangeSha256": "77007490c950c13b52603823afd2a888080ad8e71ee84f6664668b59959d7f3c"
     }
   ]
 }
