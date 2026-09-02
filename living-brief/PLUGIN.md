@@ -329,3 +329,10 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
   `8C482115D46EB270490B60E893DEF942AB5FEE9A1380DE754B12D98BDDAB5F71`. The deterministic 2025 ZIP is
   577330 bytes with SHA-256 `190F8F2B94BCD8E1645B5687F0A63AB22F8D55021DED67772E8BA3D75DD22E0B`
   and contains the 2025 BAT installer.
+## Lens Next v1.05.N09-P04 shared platform release identity
+
+- P04 advances only the Platform/APU-owned P counter and preserves Lens-owned N09. Human/package identity is
+  `v1.05.N09-P04`; Windows DLL and Autodesk metadata use `1.5.9.4` for Navisworks 2021 and 2025.
+- This release carries the already accepted N09 camera-apply primitive unchanged. P04 changes only platform startup
+  liveness and shared release metadata; capture, screenshot, sectioning, digest, visibility, appearance, element
+  identity, Saved Viewpoints, and database contracts are unchanged.

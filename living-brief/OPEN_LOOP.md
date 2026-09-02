@@ -2131,3 +2131,15 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   publish lineage, run the complete build, publish once, then verify production health and Lens Next in Chrome.
 - After verified publication, send only the hash-verified 2025 P03 ZIP to Roberto's private Telegram. Ruben's
   connected Navisworks 2025 install/create/open/restart/open acceptance remains a separate field gate.
+## v1.05.N09-P04 startup publication completion gates
+
+- Run the complete generated Living Brief, root build, standalone production-artifact closure, and both Navisworks
+  package/test gates against source `b2a9df745ba39e2d99c362468086e898850bf212` plus its reconciled documentation.
+- Record the 2021/2025 package and component hashes for `v1.05.N09-P04` / `1.5.9.4`, preserving N09 and advancing
+  only Platform-owned P04.
+- Push the exact green head. In visible Replit Shell, align to that exact remote source and rerun the governed build.
+  Publish once; Promote must complete without `/api` health failure. Do not use Replit Agent or retry a failed paid
+  publish without consuming the new failure evidence.
+- In Chrome, verify live `/api`, `/api/v1/healthz`, the shared release label, authentication, and Lens Next loading.
+  Then send the single verified 2025 P04 ZIP to Roberto's private Telegram. Ruben's connected Navisworks field test
+  remains separate from deployment acceptance.

@@ -16463,6 +16463,125 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c84a185a53624434b8f8809307fd54d8e3e2237c9d5dfd610f2abc8747d6f5b8"
+    },
+    {
+      "taskId": "bimlog-replit-promotion-liveness-p04-20260902",
+      "reviewedThroughCommit": "b2a9df745ba39e2d99c362468086e898850bf212",
+      "reviewedAt": "2026-09-02T10:03:55.000-04:00",
+      "status": "accepted_source_build_and_publication_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository_and_failed_deployment_logs",
+          "repair_startup_liveness_contract",
+          "run_local_validation",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "production_verification",
+          "telegram_delivery"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "The production listener opened only after a 23.889-second application import, exceeding Replit Promote's liveness window."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "A failed paid publish requires exact log diagnosis, corrected artifact proof, one controlled republish, and live verification."
+        }
+      ],
+      "summary": "Preserves fail-closed storage authority while restoring an early exact-/api liveness response, truthful readiness, and the shared N09-P04 release identity.",
+      "workstreams": [
+        "platform-production-startup-liveness",
+        "shared-n09-p04-release",
+        "governed-replit-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole persisted platform and issue authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Replit Shell, publication, and customer acceptance controls remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Requires provider liveness to coexist with truthful application readiness and fail-closed initialization."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product roadmap, persona, or ownership boundary changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the exact liveness/readiness split, failed deployment evidence, and P04 startup order."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the shared N09-P04 identity while preserving the accepted N09 camera implementation."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, XML, PDF, DOCX, or visual presentation contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records root cause, exact repair boundary, shared release identity, and remaining gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records build, package, push, Replit Publish, Chrome, Telegram, and field gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records deployment 8809d211 evidence and confirms no destructive database action occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6adf910f4a87f2c1a63e3f987f685ff2d95bb93d6dda39fe7737a1f8984208dd"
     }
   ]
 }

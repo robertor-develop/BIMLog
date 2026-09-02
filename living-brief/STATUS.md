@@ -1076,3 +1076,19 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
   with no TCP/readiness, while valid restricted storage and the isolated proof database return HTTP 200
   from both readiness surfaces in 7,014.4 ms with no PostgreSQL deadlock. Publication, Chrome verification,
   and Telegram delivery remain gated.
+## BIMLog / Lens Next v1.05.N09-P04 Replit promotion repair — 2026-09-02
+
+- Failed Replit deployment `8809d211` completed Provision, Security, Build, and Bundle, then failed Promote because
+  the deployment health probe repeatedly reached `/api` before the production listener existed. Exact telemetry
+  proves the full application import and ordered startup queue completed in 23,889 ms, after the provider health
+  window had already rejected the deployment. The previous production deployment remained live.
+- Source `b2a9df745ba39e2d99c362468086e898850bf212` preserves synchronous fail-closed durable-storage validation, then
+  binds the bootstrap listener before the full application import. During initialization exact `/api` returns an
+  explicit liveness-only HTTP 200 with `ready:false`; `/api/v1/healthz` and all business routes remain HTTP 503 until
+  the startup barrier completes. Initialization failure removes liveness and closes the listener.
+- This is the Platform-owned P04 increment and preserves Lens-owned N09. Shared release identity is
+  `v1.05.N09-P04`; Windows binary identity is `1.5.9.4`. No database schema, row, Lens capture/apply contract,
+  Legacy Lens behavior, or historical issue is changed.
+- Focused bootstrap/readiness and strict API typecheck gates pass. Full artifact build, dual-year package receipts,
+  push, exact Replit Shell alignment, one controlled Publish, Chrome live verification, Telegram delivery, and
+  Ruben field verification remain completion gates.
