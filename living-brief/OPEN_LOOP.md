@@ -2103,3 +2103,31 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 ### N07 final publication successor
 
 - Reconcile through generator-fix commit `b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7`, require the exact Replit Shell production build to pass, then publish once and execute the already recorded Chrome and connected Navisworks acceptance sequence before Telegram delivery.
+
+## Lens Next v1.05.N08-P02 release completion gates
+
+- Commit and push only the exact green N08 successor, then align the preserved Replit publish-wrapper
+  lineage through the visible Replit Shell. Require a clean workspace and the complete governed build
+  before one publication; no database migration is required or authorized by this repair.
+- Verify production health and the Lens Next route in Chrome. Explicit current v1/v2/v3/navigation
+  packages must retain their prior acceptance/tamper behavior, while a metadata-less historical package
+  with unavailable canonical evidence must return the dedicated quarantine explanation without mutation.
+- Send only `BIMLog-Lens-Next-Navisworks2025-v1.05.N08-P02.zip` with SHA-256
+  `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112` to Roberto's authorized private
+  Telegram recipient after publication verification.
+- Telegram delivery is not Navisworks 2025 acceptance. Ruben must install N08, create a brand-new issue,
+  move to a different camera, open once, restart Navisworks, and open the same issue again. Historical
+  metadata-less packages remain honestly quarantined and are not valid N08 success fixtures.
+
+## Lens Next v1.05.N08-P03 release completion gates
+
+- Exact-artifact startup proof is complete for source `a9fabd537c6c5fba70d3dae392c8501c73143992`:
+  invalid durable storage authority exits naturally in 982.8 ms with no TCP/readiness, and valid restricted
+  storage plus the isolated loopback proof database reaches both readiness surfaces in 7,014.4 ms after the
+  ordered database-startup queue completes without PostgreSQL deadlock.
+- Rebuild and verify both Navisworks years as `v1.05.N08-P03` / `1.5.8.3`, preserving N08 and advancing only
+  Platform-owned P03. Record deterministic archive and core/native/manifest hashes before distribution.
+- Push only the exact green commit. Through the visible Replit Shell—never Replit Agent—align the governed
+  publish lineage, run the complete build, publish once, then verify production health and Lens Next in Chrome.
+- After verified publication, send only the hash-verified 2025 P03 ZIP to Roberto's private Telegram. Ruben's
+  connected Navisworks 2025 install/create/open/restart/open acceptance remains a separate field gate.

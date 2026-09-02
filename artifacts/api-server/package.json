@@ -16,7 +16,7 @@
     "test:feedback-addendum-db": "tsx ./src/lib/feedback-http-db.behavior.ts",
     "test:feedback-backup-db": "tsx ./src/lib/feedback-backup-db.behavior.ts",
     "test:sendgrid-transport": "tsx ./scripts/test-sendgrid-transport.ts",
-    "test:startup-bootstrap": "tsx ./scripts/test-startup-bootstrap.ts",
+    "test:startup-bootstrap": "tsx ./scripts/test-startup-bootstrap.ts && tsx ./src/lib/database-startup-serialization.behavior.ts",
     "test:startup-bundle": "tsx ./scripts/test-startup-bundle.ts",
     "test:production-artifact": "tsx ./scripts/test-production-artifact-closure.ts",
     "test:lens-import": "tsx ./scripts/test-lens-import-contract.ts",

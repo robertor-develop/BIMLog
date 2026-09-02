@@ -60,8 +60,14 @@ import { ensureProcoreRfiImportSchema } from "./lib/procore-rfi-import-migration
 import { pool } from "@workspace/db";
 import { ensureFeedbackSchema } from "./lib/feedback-schema-migration";
 import { startFeedbackNotificationWorker } from "./lib/feedback-notification-worker";
-import { startFeedbackScanWorker, verifyFeedbackScannerStartup } from "./lib/feedback-scan-worker";
-import { startFeedbackBackupWorker, verifyFeedbackBackupStartup } from "./lib/feedback-backup-worker";
+import {
+  startFeedbackScanWorker,
+  verifyFeedbackScannerStartup,
+} from "./lib/feedback-scan-worker";
+import {
+  startFeedbackBackupWorker,
+  verifyFeedbackBackupStartup,
+} from "./lib/feedback-backup-worker";
 import { startFeedbackPackageSnapshotWorker } from "./lib/feedback-package-worker";
 import { startFeedbackTelegramDeliveryWorker } from "./lib/feedback-telegram-worker";
 import { storage as feedbackStorage } from "./lib/storage-adapter";
@@ -91,21 +97,50 @@ console.log(`[ENV] NODE_ENV: ${process.env.NODE_ENV || "not set"}`);
 console.log("========================================");
 
 const app: Express = express();
+
+// PostgreSQL DDL takes table and catalog locks whose acquisition order varies
+// between migrations. Starting every schema initializer at module evaluation
+// allowed independent pool clients to deadlock on a fresh deployment. Keep the
+// existing migration order and failure semantics, but execute database startup
+// work through one process-local queue and hold readiness until it drains.
+let databaseStartupTail: Promise<void> = Promise.resolve();
+let databaseStartupFailure: unknown;
+let databaseStartupFailed = false;
+
+function queueDatabaseStartup<T>(task: () => Promise<T>): Promise<T> {
+  const queued = databaseStartupTail.then(task);
+  databaseStartupTail = queued.then(
+    () => undefined,
+    (error: unknown) => {
+      if (!databaseStartupFailed) databaseStartupFailure = error;
+      databaseStartupFailed = true;
+    },
+  );
+  return queued;
+}
+
+async function waitForDatabaseStartup(): Promise<void> {
+  await databaseStartupTail;
+  if (databaseStartupFailed) throw databaseStartupFailure;
+}
+
 app.get("/api", (_req: Request, res: Response) => {
   res.status(200).json({ status: "ok", service: "bimlog-api" });
 });
 let procoreRfiImportSchemaState: "starting" | "ready" | "failed" = "starting";
-void ensureProcoreRfiImportSchema(pool)
-  .then(() => {
-    procoreRfiImportSchemaState = "ready";
-    console.log("[migration] Procore RFI import tables ensured");
-  })
-  .catch((error: unknown) => {
-    procoreRfiImportSchemaState = "failed";
-    console.error("[migration] Procore RFI import migration failed:", error);
-  });
+void queueDatabaseStartup(() =>
+  ensureProcoreRfiImportSchema(pool)
+    .then(() => {
+      procoreRfiImportSchemaState = "ready";
+      console.log("[migration] Procore RFI import tables ensured");
+    })
+    .catch((error: unknown) => {
+      procoreRfiImportSchemaState = "failed";
+      console.error("[migration] Procore RFI import migration failed:", error);
+    }),
+);
 
-const coordinatorStartupBarrier = (async () => {
+const coordinatorStartupBarrier = queueDatabaseStartup(async () => {
   try {
     await startCoordinatorSavedViewMigration();
     await startCoordinatorBulkActionMigration();
@@ -114,11 +149,15 @@ const coordinatorStartupBarrier = (async () => {
     console.error("[migration] coordinator data migration failed");
     throw error;
   }
-})();
-
-const lensNextPublishingStartupBarrier = ensureLensNextPublishingSchema(pool).then(() => {
-  console.log("[migration] Lens Next controlled publishing authority ensured");
 });
+
+const lensNextPublishingStartupBarrier = queueDatabaseStartup(() =>
+  ensureLensNextPublishingSchema(pool).then(() => {
+    console.log(
+      "[migration] Lens Next controlled publishing authority ensured",
+    );
+  }),
+);
 
 app.disable("etag");
 app.set("trust proxy", 1);
@@ -261,7 +300,7 @@ app.get("/api/v1/env-check", (_req: Request, res: Response) => {
 
 app.use("/api/v1", router);
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     startGenericApuPersistenceMigration();
     await waitForGenericApuPersistenceMigration();
@@ -273,9 +312,9 @@ app.use("/api/v1", router);
     );
     throw error;
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     startTeamResourcePlanningMigration();
     await waitForTeamResourcePlanningMigration();
@@ -287,9 +326,9 @@ app.use("/api/v1", router);
     );
     throw error;
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     startProjectInvitationMigration();
     await waitForProjectInvitationMigration();
@@ -298,9 +337,9 @@ app.use("/api/v1", router);
     console.error("[migration] Project invitation migration failed:", error);
     throw error;
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await startFinancialBudgetMigration();
     await startFinancialContractMigration();
@@ -312,18 +351,18 @@ app.use("/api/v1", router);
     console.error("[migration] Job Intake migration failed:", error);
     throw error;
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await ensureAiControlPlaneSchema();
     console.log("[migration] AI control-plane tables ensured");
   } catch (e) {
     console.error("[migration] AI control-plane migration failed:", e);
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_clash_links (
       id serial PRIMARY KEY,
@@ -376,18 +415,18 @@ app.use("/api/v1", router);
   } catch (e) {
     console.error("[migration] meeting Clash link migration failed:", e);
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await startFeaturePolicyMigration();
     console.log("[migration] feature policy control tables ensured");
   } catch {
     console.error("[migration] feature policy control migration failed");
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await startCommercialEntitlementMigration();
     await startFinancialControlMigration();
@@ -400,18 +439,18 @@ app.use("/api/v1", router);
   } catch {
     console.error("[migration] financial budget migration failed");
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await startFeatureCatalogMigration();
     console.log("[migration] feature catalog tables ensured");
   } catch {
     console.error("[migration] feature catalog migration failed");
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await pool.query(
       `ALTER TABLE naming_conventions ADD COLUMN IF NOT EXISTS setup_status text NOT NULL DEFAULT 'not_started'`,
@@ -423,9 +462,9 @@ app.use("/api/v1", router);
   } catch (e) {
     console.error("[migration] setup_status migration failed:", e);
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await pool.query(`ALTER TABLE clashes ADD COLUMN IF NOT EXISTS name text`);
     await pool.query(
@@ -468,9 +507,9 @@ app.use("/api/v1", router);
   } catch (e) {
     console.error("[migration] clashes plugin-sync migration failed:", e);
   }
-})();
+});
 
-const rfiMigrationReady = (async () => {
+const rfiMigrationReady = queueDatabaseStartup(async () => {
   try {
     await pool.query(
       `ALTER TABLE rfis ADD COLUMN IF NOT EXISTS send_status text DEFAULT 'draft'`,
@@ -610,11 +649,11 @@ const rfiMigrationReady = (async () => {
     console.error("[migration] rfis send-accountability migration failed:", e);
     return false;
   }
-})();
+});
 
 let telegramWorkersReady = false;
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await pool.query(
       `ALTER TABLE submittals ADD COLUMN IF NOT EXISTS trade TEXT`,
@@ -632,9 +671,9 @@ let telegramWorkersReady = false;
       e,
     );
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_rfi_links (
       id serial PRIMARY KEY,
@@ -659,9 +698,9 @@ let telegramWorkersReady = false;
   } catch (e) {
     console.error("[migration] meeting RFI link migration failed:", e);
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_submittal_links (
       id serial PRIMARY KEY,
@@ -690,9 +729,9 @@ let telegramWorkersReady = false;
   } catch (e) {
     console.error("[migration] meeting Submittal link migration failed:", e);
   }
-})();
+});
 
-const telegramStartupBarrier = (async () => {
+const telegramStartupBarrier = queueDatabaseStartup(async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS notification_channels (
       id serial PRIMARY KEY,
@@ -819,9 +858,9 @@ const telegramStartupBarrier = (async () => {
     );
     throw e;
   }
-})();
+});
 
-const scheduleStartupBarrier = (async () => {
+const scheduleStartupBarrier = queueDatabaseStartup(async () => {
   try {
     await pool.query(
       `ALTER TABLE project_milestones ADD COLUMN IF NOT EXISTS building_level TEXT`,
@@ -902,9 +941,9 @@ const scheduleStartupBarrier = (async () => {
     console.error("[migration] schedule planner migration failed:", e);
     throw e;
   }
-})();
+});
 
-(async () => {
+queueDatabaseStartup(async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_schedule_bucket_links (
       id serial PRIMARY KEY,
@@ -971,9 +1010,9 @@ const scheduleStartupBarrier = (async () => {
       e,
     );
   }
-})();
+});
 
-const feedbackStartupBarrier = (async () => {
+const feedbackStartupBarrier = queueDatabaseStartup(async () => {
   try {
     await pool.query("SELECT 1");
     const storageHealth = await feedbackStorage.health();
@@ -987,9 +1026,9 @@ const feedbackStartupBarrier = (async () => {
     process.exitCode = 1;
     throw e;
   }
-})();
+});
 
-const livingBriefAndLensStartupBarrier = (async () => {
+const livingBriefAndLensStartupBarrier = queueDatabaseStartup(async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS lens_viewpoints (
       id SERIAL PRIMARY KEY,
@@ -1308,9 +1347,9 @@ const livingBriefAndLensStartupBarrier = (async () => {
     );
     throw e;
   }
-})();
+});
 
-const meetingLensStartupBarrier = (async () => {
+const meetingLensStartupBarrier = queueDatabaseStartup(async () => {
   try {
     await pool.query(`CREATE TABLE IF NOT EXISTS meeting_lens_viewpoint_links (
       id SERIAL PRIMARY KEY,
@@ -1349,9 +1388,10 @@ const meetingLensStartupBarrier = (async () => {
     );
     throw e;
   }
-})();
+});
 
 export const startupBarrier = Promise.all([
+  waitForDatabaseStartup(),
   lensNextPublishingStartupBarrier,
   feedbackStartupBarrier,
   verifyFeedbackScannerStartup(),

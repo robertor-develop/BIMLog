@@ -1,0 +1,48 @@
+{
+  "id": "server-58-354541-036A03",
+  "storedDigest": "83ffa5fad8c7ecc1b3d70c87c8a1653fb3ae78ef52fdad8d17d962bc4055176f",
+  "expectedCurrentDigest": "82ccd3e460c73af76f2fa960dfe1976d419d01b8f7348298e5706c9fe35e13c3",
+  "expectedCanonicalByteLength": 1168,
+  "expectedCanonicalInputBase64": "YmltbG9nLmxlbnNfbmV4dC52aXN1YWxfc3RhdGUudjEfMjgfNTgfMzU0NTQxLTAzNkEwMyB8IEZJLUwxLTAwNiB8IENPT1JESU5BVElPTiB8IEwxIHwgUDMgfCBGUCBJTiBPQ05GTElDVCBXSVRIH3N1cGVyc2VkZWQfMR9lZTE2MTg4ZWFjMWUzOTY3YmYxMjA0NGJjZmI4YTJlNWJhY2M2YzFjMTIwNWQ2YjJhYzZjNGNkZjM2MzNmZmFmH2Y2NDo0MDU4NDQ1MmJlNmZjNTNlH2Y2NDo0MDUyMmNhZjhlYzg4OTM5H2Y2NDo0MDRiOThlZDgzZGQ5ZTIwH2Y2NDozZmQ4NWFiMmE0YmI4Y2QwH2Y2NDpiZjZiYmEzMjlhZDEwOGNmH2Y2NDpiZjgwZDg0MTZkNGNjYTcxH2Y2NDozZmVkOTc1NTlhMjZhMDdiH2Y2NDowMDAwMDAwMDAwMDAwMDAwH2Y2NDowMDAwMDAwMDAwMDAwMDAwH2Y2NDozZmYwMDAwMDAwMDAwMDAwH1BlcnNwZWN0aXZlHzxudWxsPh88bnVsbD4fPG51bGw+H1MfPG51bGw+HzU0ZjNmYTYyLWIwYjAtNTEwMS04MzA1LWI3NGMwMjdiNWYyYh9BcmNoXzIwMjRfNjY1MThfMzUtNDUgNDFzdCBTdF9kZXRhY2hlZC5ydnQfZjJkOGZmMWItMmZhZi01NThlLThjOGEtZTBmMGM3NDY2N2YzHzMyYjgwMjA4YzZkZjYzODg0YjNkNTg3NjRmYTM1ZDY2ZjZjMzc3NDlkODFlMjhhYzk3NjkxMjdjMGEwMGUxZjQfRDpcQklNVEVDSCBDT1JQXDM1LTQ1IDQxU1QgQVNUT1JJQSAtIDM1LTQ1IDQxU1QgQVNUT1JJQVwxNl9DT09SRFwxX05BVklTXDJfTldEXDM1LTQ1IDQxU1RfQ09PUkRfTU9ERUwgTldELm53ZB81YjkyYTI1ZS1kNTkzLTRiOWItOTI1NC03MmZjMjU3OGIwYzkfYTJjNjk5Y2E1YzJmODA4YTVhNjY1OTA0NTg2N2Q1MDNmYTI4MGUyNWIzYzc1NzJjNTIxZDA3NWJjNjY1ZWI3NB9TdHJ1Y18yMDI0X0M1MDAyLjAwXzM1LTQ1IDQxc3QgU3RfZGV0YWNoZWQucnZ0H2U5NmQ3NDdkLWYwOGMtNTAyMS04YmExLTc3NDQ3ZWE5YjgzYx8zMmI4MDIwOGM2ZGY2Mzg4NGIzZDU4NzY0ZmEzNWQ2NmY2YzM3NzQ5ZDgxZTI4YWM5NzY5MTI3YzBhMDBlMWY0H3siVHlwZSI6IkNsaXBQbGFuZVNldCIsIlZlcnNpb24iOjEsIlBsYW5lcyI6W3siVHlwZSI6IkNsaXBQbGFuZSIsIlZlcnNpb24iOjEsIk5vcm1hbCI6WzAsMCwtMV0sIkRpc3RhbmNlIjotNTMuMTYyMDk4MTExNywiRW5hYmxlZCI6dHJ1ZX1dLCJMaW5rZWQiOmZhbHNlLCJFbmFibGVkIjp0cnVlfR88bnVsbD4fPG51bGw+Hw==",
+  "expectedDisposition": "historical_digest_evidence_unavailable",
+  "expectedIdentity": {
+    "projectId": 28,
+    "serverId": 58,
+    "viewpointId": "354541-036A03 | FI-L1-006 | COORDINATION | L1 | P3 | FP IN OCNFLICT WITH",
+    "lifecycleStatus": "superseded",
+    "revisionNumber": 1
+  },
+  "state": {
+    "SchemaVersion": "bimlog.lens_next.visual_state.v1",
+    "ProjectId": 28,
+    "ServerId": 58,
+    "ViewpointId": "354541-036A03 | FI-L1-006 | COORDINATION | L1 | P3 | FP IN OCNFLICT WITH",
+    "LifecycleStatus": "superseded",
+    "RevisionNumber": 1,
+    "ModelFingerprint": "ee16188eac1e3967bf12044bcfb8a2e5bacc6c1c1205d6b2ac6c4cdf3633ffaf",
+    "CapturedAt": "2026-08-27T01:53:27.0335982+00:00",
+    "CaptureSource": "BIMLog Lens Next / Navisworks 2021",
+    "Camera": {
+      "Position": { "X": 97.0675502864369, "Y": 72.69821519454571, "Z": 55.19474838563133 },
+      "Rotation": { "A": 0.3805357559887854, "B": -0.0033846844076218306, "C": -0.008224974773473922, "D": 0.9247234354743478 },
+      "WorldUpVector": { "X": 0, "Y": 0, "Z": 1 },
+      "Projection": "Perspective",
+      "FocalDistance": null,
+      "HorizontalExtentAtFocalDistance": null,
+      "VerticalExtentAtFocalDistance": null
+    },
+    "SelectedElements": [{ "InstanceGuid": "54f3fa62-b0b0-5101-8305-b74c027b5f2b", "ModelSource": null }],
+    "HiddenElements": [],
+    "AppearanceOverrides": [],
+    "ModelReferences": [
+      { "Source": "Arch_2024_66518_35-45 41st St_detached.rvt", "ModelGuid": "f2d8ff1b-2faf-558e-8c8a-e0f0c74667f3", "TransformFingerprint": "32b80208c6df63884b3d58764fa35d66f6c37749d81e28ac9769127c0a00e1f4" },
+      { "Source": "Struc_2024_C5002.00_35-45 41st St_detached.rvt", "ModelGuid": "e96d747d-f08c-5021-8ba1-77447ea9b83c", "TransformFingerprint": "32b80208c6df63884b3d58764fa35d66f6c37749d81e28ac9769127c0a00e1f4" },
+      { "Source": "D:\\BIMTECH CORP\\35-45 41ST ASTORIA - 35-45 41ST ASTORIA\\16_COORD\\1_NAVIS\\2_NWD\\35-45 41ST_COORD_MODEL NWD.nwd", "ModelGuid": "5b92a25e-d593-4b9b-9254-72fc2578b0c9", "TransformFingerprint": "a2c699ca5c2f808a5a6659045867d503fa280e25b3c7572c521d075bc665eb74" }
+    ],
+    "SectioningJson": "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,0,-1],\"Distance\":-53.1620981117,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}",
+    "RedlinesJson": null,
+    "ScreenshotDataUrl": null,
+    "ScreenshotSha256": null,
+    "DigestSha256": "83ffa5fad8c7ecc1b3d70c87c8a1653fb3ae78ef52fdad8d17d962bc4055176f"
+  }
+}

@@ -1035,3 +1035,44 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 ### N07 deterministic platform-map successor — 2026-09-01
 
 - Build-gate fix `b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7` persists the already reviewed N07 navigation boundary in the deterministic `generate-platform-md.ts` authority. It changes no runtime, schema, database, package, or native behavior; the remaining state is Replit build, publication, connected acceptance, and Telegram delivery.
+
+## Lens Next v1.05.N08-P02 historical unversioned digest quarantine — 2026-09-01
+
+- Forensic comparison of the real historical field payload proved that its stored and embedded digest
+  agree with each other but differ from the exact current v2 canonical bytes. Because the row has no
+  contract metadata or preserved canonical evidence, its original digest algorithm cannot be proven.
+- Platform validation now returns the dedicated `historical_digest_evidence_unavailable` result for
+  that exact class. It preserves the row and all explicit current contracts, rejects tampering, and
+  requires a new Lens Next capture instead of guessing a legacy algorithm or rewriting history.
+- API typecheck and the complete Lens Next Build 1–10 behavior suite pass. Shared native contracts pass
+  54/54 and both year adapters pass 51/51. Package integrity, version consistency, and package-only
+  installer checks pass for Navisworks 2021 and 2025.
+- Release identity is `v1.05.N08-P02` / binary `1.5.8.2`. The 2021 archive is 587910 bytes / SHA-256
+  `D31990B0186BE45C7521A69F377C6DA6F76DCE9171222BE75FE72606FC0AA438`; the 2025 archive is 590734 bytes /
+  SHA-256 `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112`.
+- This status is local verified source/package evidence. Push, Replit Shell publication, Chrome production
+  verification, Telegram delivery, and Ruben's Navisworks 2025 field acceptance remain distinct gates.
+
+## Lens Next v1.05.N08-P03 production startup authority repair — 2026-09-01
+
+- The production artifact could begin full application and database initialization before validating its
+  durable storage authority. Consequently, the invalid-authority closure child could hang on an unavailable
+  database instead of exiting naturally with the required fail-closed storage error.
+- The production entrypoint now loads the storage adapter first. Invalid or missing authority terminates
+  before database/application import; valid startup reuses the same cached adapter and changes no schema,
+  database row, Lens navigation behavior, Legacy Lens behavior, or persisted visual package.
+- Exact-artifact execution then exposed a second startup defect: the valid child launched independent schema
+  initializers concurrently across the PostgreSQL pool and deadlocked on overlapping DDL. All established
+  database startup work now runs through one ordered queue, and readiness waits for that queue to drain.
+  Existing fatal/nonfatal migration semantics are preserved; no schema definition or data operation changed.
+- P03 is the Platform/APU-owned counter increment. Lens remains N08; package identity is
+  `v1.05.N08-P03` and binary identity is `1.5.8.3`. Shared core contracts pass 54/54; both year adapters
+  pass 51/51; package integrity and package-only installer validation pass for both years.
+- The 2021 ZIP is 574516 bytes / SHA-256
+  `8C482115D46EB270490B60E893DEF942AB5FEE9A1380DE754B12D98BDDAB5F71`. The 2025 ZIP is 577330 bytes /
+  SHA-256 `190F8F2B94BCD8E1645B5687F0A63AB22F8D55021DED67772E8BA3D75DD22E0B`.
+  Focused startup serialization and strict API typecheck gates pass. The exact standalone artifact at
+  source `a9fabd537c6c5fba70d3dae392c8501c73143992` passes: invalid authority exits naturally in 982.8 ms
+  with no TCP/readiness, while valid restricted storage and the isolated proof database return HTTP 200
+  from both readiness surfaces in 7,014.4 ms with no PostgreSQL deadlock. Publication, Chrome verification,
+  and Telegram delivery remain gated.

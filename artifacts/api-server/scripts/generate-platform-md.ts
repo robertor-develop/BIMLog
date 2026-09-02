@@ -202,6 +202,33 @@ ${appRoutes()}
   platform authority identical.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
+
+## N08 historical unversioned digest boundary
+
+- Platform persistence continues to validate every explicitly versioned v1, v2, v3, and
+  lens-next-navigation.v1 package under its declared contract. A historical package that has no
+  contract metadata cannot be silently reinterpreted under the current v2 canonicalizer.
+- When that historical package has matching stored and embedded digests plus exact issue identity,
+  but lacks the original canonical evidence needed to prove its algorithm, BIMLog returns the
+  dedicated historical_digest_evidence_unavailable quarantine result. It does not mutate the row,
+  weaken digest validation, or claim that a current recomputation proves the old package.
+- The permanent cross-language vector records the exact historical bytes, stored digest, current-v2
+  recomputation, and expected quarantine result. Current navigation and explicit versioned visual
+  packages retain their existing acceptance and tamper-denial behavior.
+
+## N08-P03 production startup authority preflight
+
+- The production entrypoint loads the storage adapter before the full application import. Missing or
+  invalid durable storage authority therefore fails closed before database or application initialization.
+- Valid production startup uses the same cached storage singleton and retains the existing readiness,
+  listener, authentication, and durable-storage contracts. This repair changes no schema or persisted data.
+- Every database startup initializer is registered on one ordered process-local queue. This preserves
+  each initializer's existing fatal or nonfatal behavior while preventing independent PostgreSQL pool
+  clients from deadlocking on overlapping DDL during a fresh production-artifact startup. Readiness
+  remains closed until the entire queue drains successfully.
+- The production-artifact gate requires an invalid authority child to exit naturally with the sanitized
+  FEEDBACK_STORAGE_AUTHORITY_INVALID code and without readiness or TCP binding; the valid artifact must
+  still start and pass the existing authenticated storage closure proof.
 `;
 
   const outDir = path.join(REPO_ROOT, "living-brief");

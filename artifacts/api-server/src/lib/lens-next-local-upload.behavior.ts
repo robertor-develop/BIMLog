@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
-import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextNavigationDigest, lensNextVisualStateDigest, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "./lens-next-local-upload";
+import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextNavigationDigest, lensNextVisualStateCanonicalInput, lensNextVisualStateDigest, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "./lens-next-local-upload";
 
 const state: any = {
   SchemaVersion: 1, ProjectId: 7, ServerId: 1, ViewpointId: "LOCAL-7", LifecycleStatus: "active", RevisionNumber: 1,
@@ -137,6 +137,16 @@ assert.throws(
   (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "visual_state_digest_mismatch",
 );
 const route = fs.readFileSync(new URL("../routes/clash_reports.ts", import.meta.url), "utf8");
+const historicalVector = JSON.parse(fs.readFileSync(new URL("../../../../contracts/lens-next/n07-p02-historical-digest-vector.json", import.meta.url), "utf8"));
+assert.equal(lensNextVisualStateDigest(historicalVector.state), historicalVector.expectedCurrentDigest);
+assert.equal(Buffer.byteLength(lensNextVisualStateCanonicalInput(historicalVector.state), "utf8"), historicalVector.expectedCanonicalByteLength);
+assert.throws(
+  () => validatePersistedLensNextVisualState(JSON.stringify(historicalVector.state), historicalVector.storedDigest, historicalVector.expectedIdentity),
+  (error: unknown) => error instanceof LensNextLocalUploadError
+    && error.code === historicalVector.expectedDisposition
+    && error.digestDiagnostics?.historicalCanonicalEvidenceAvailable === false
+    && error.digestDiagnostics?.storedAndEmbeddedDigestMatch === true,
+);
 const start = route.indexOf('router.post("/projects/:projectId/clash-reports/lens-next/local-viewpoints/upload"');
 const end = route.indexOf('// Registered BEFORE', start);
 const block = route.slice(start, end);
@@ -152,4 +162,4 @@ const persistedEnd = route.indexOf('router.get("/projects/:projectId/clash-repor
 assert.ok(persistedPostStart >= 0 && persistedGetStart > persistedPostStart && persistedEnd > persistedGetStart);
 assert.match(route.slice(persistedPostStart, persistedGetStart), /validatePersistedLensNextVisualState/);
 assert.match(route.slice(persistedGetStart, persistedEnd), /validatePersistedLensNextVisualState/);
-console.log(JSON.stringify({ status: "PASS", tests: ["lightweight-navigation-cross-language-vector", "navigation-screenshot-digest-independence", "navigation-platform-rebind", "navigation-camera-tamper-denial", "exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "utf8-unicode-rebind-and-apply", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "persisted-write-validation", "persisted-read-validation", "no-overwrite", "display-conflict-deny"] }));
+console.log(JSON.stringify({ status: "PASS", tests: ["lightweight-navigation-cross-language-vector", "navigation-screenshot-digest-independence", "navigation-platform-rebind", "navigation-camera-tamper-denial", "exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "utf8-unicode-rebind-and-apply", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "historical-unversioned-quarantine-vector", "persisted-write-validation", "persisted-read-validation", "no-overwrite", "display-conflict-deny"] }));

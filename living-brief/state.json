@@ -1,21 +1,18 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
+  "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "5c6d2da00b969cae34e6babb5637fd7f59b2a3844a2b45e0a4b86d1933ddd930",
+  "bundleSha256": "e7fb2521b9c47c06e7e819dfe9ea0384afab850588d2f77e301fb0cc2bec873d",
   "impact": {
-    "baselineCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
+    "baselineCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
     "changedPaths": [
-      "artifacts/api-server/scripts/generate-platform-md.ts",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -26,11 +23,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "claude",
@@ -38,11 +35,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "quality",
@@ -50,11 +47,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "vision",
@@ -62,35 +59,35 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "d7703cf0d1b70dc6b22fd38ad0b208e220ab9191e15417904d8aff47377d0c7a",
-      "sourceChangedAt": "2026-09-01T23:46:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
+      "sha256": "f21810f3c3f37be68c7b87202f02bab89c29cd47b1e317329f5f25f5824ba956",
+      "sourceChangedAt": "2026-09-01T23:35:10-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "plugin",
       "file": "PLUGIN.md",
-      "sha256": "85d72e26a5c97b7b518be87dfd028f50a0e322108d9bbb92e15052c3348c7c1c",
-      "sourceChangedAt": "2026-09-01T16:11:21-04:00",
+      "sha256": "864c2770ae4495770e8b4074e022b12eef61e22d2d14f52592a0fe5495f6a870",
+      "sourceChangedAt": "2026-09-01T23:15:45-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -98,11 +95,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "standards_register",
@@ -110,35 +107,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "7b39be0eee68ecf36ceede51171e5da4dddb18c2a018f2c23c5b2c17ff020c25",
-      "sourceChangedAt": "2026-09-01T23:46:00.000Z",
+      "sha256": "8a7a4b0bad310a51719d8430b502afc5ae91554b0bdff94dc3b98a076e7001d5",
+      "sourceChangedAt": "2026-09-02T03:38:30.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "c2f372415b648fdab032a3a4bc79bf76e391a72c13734521c7d0c4959f1b65ed",
-      "sourceChangedAt": "2026-09-01T23:46:00.000Z",
+      "sha256": "6a02f204f9387d3eda96b603c4eaeccc9d16134356130c8e936ca47ffc7ae78b",
+      "sourceChangedAt": "2026-09-02T03:38:30.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     },
     {
       "key": "audit",
@@ -146,11 +143,11 @@
       "sha256": "388f440cc7a0c9e0845b5804e94414dc49395e33007fad5549141599cf22fb8d",
       "sourceChangedAt": "2026-08-31T16:58:23-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "semanticReviewTask": "bimlog-lens-next-n07-platform-map-successor-20260901",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-01T19:46:00.0000000-04:00"
+      "reconciledThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
+      "semanticReviewTask": "bimlog-platform-storage-authority-preflight-p03-20260901",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-01T20:00:00.000Z"
     }
   ]
 }

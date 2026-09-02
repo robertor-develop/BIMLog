@@ -325,6 +325,12 @@ export type LensNextPersistedVisualStateIdentity = {
   revisionNumber: number;
 };
 
+const isHistoricalUnversionedVisualState = (state: any): boolean => {
+  const contractVersion = String(field(state, "ContractVersion", "contractVersion") ?? "").trim();
+  const diagnostics = field(state, "DigestDiagnostics", "digestDiagnostics");
+  return !contractVersion && diagnostics == null;
+};
+
 export function validatePersistedLensNextVisualState(
   visualStateJson: string,
   visualStateDigest: string,
@@ -342,6 +348,11 @@ export function validatePersistedLensNextVisualState(
   const recomputed = lensNextVisualStateDigest(state);
   const evidence = nativeCanonicalEvidence(state);
   const serverTokens = lensNextVisualStateDigestTokens(state, contractVersion);
+  const identityMatches = Number(field(state, "ProjectId", "projectId")) === expected.projectId
+    && Number(field(state, "ServerId", "serverId")) === expected.serverId
+    && String(field(state, "ViewpointId", "viewpointId")) === expected.viewpointId
+    && String(field(state, "LifecycleStatus", "lifecycleStatus")) === expected.lifecycleStatus
+    && Number(field(state, "RevisionNumber", "revisionNumber")) === expected.revisionNumber;
   const verifiedLegacyCanonical = contractVersion === LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION
     && evidence.algorithm === LENS_NEXT_DIGEST_ALGORITHM
     && evidence.contractVersion === LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION
@@ -351,13 +362,24 @@ export function validatePersistedLensNextVisualState(
     && legacyCanonicalMatchesState(serverTokens, evidence.tokens);
   if (!/^[a-f0-9]{64}$/.test(supplied) || supplied !== embedded || (recomputed !== embedded && !verifiedLegacyCanonical)) {
     const diagnostics = digestMismatchDiagnostics(state, embedded, recomputed);
+    if (/^[a-f0-9]{64}$/.test(supplied) && supplied === embedded && identityMatches && isHistoricalUnversionedVisualState(state)) {
+      throw new LensNextLocalUploadError(
+        "historical_digest_evidence_unavailable",
+        "This historical BIMLog Visual Package predates persisted digest-contract evidence and cannot be cryptographically verified. Recreate the issue in Lens Next to establish an authoritative working view.",
+        409,
+        {
+          ...diagnostics,
+          classification: "historical-unversioned-quarantine",
+          captureSource: field(state, "CaptureSource", "captureSource"),
+          capturedAt: field(state, "CapturedAt", "capturedAt"),
+          storedAndEmbeddedDigestMatch: true,
+          historicalCanonicalEvidenceAvailable: false,
+        },
+      );
+    }
     throw new LensNextLocalUploadError("visual_state_digest_mismatch", "BIMLog visual-state digest validation failed.", 409, diagnostics);
   }
-  if (Number(field(state, "ProjectId", "projectId")) !== expected.projectId
-    || Number(field(state, "ServerId", "serverId")) !== expected.serverId
-    || String(field(state, "ViewpointId", "viewpointId")) !== expected.viewpointId
-    || String(field(state, "LifecycleStatus", "lifecycleStatus")) !== expected.lifecycleStatus
-    || Number(field(state, "RevisionNumber", "revisionNumber")) !== expected.revisionNumber)
+  if (!identityMatches)
     throw new LensNextLocalUploadError("visual_state_identity_mismatch", "BIMLog visual-state identity does not match the issue record.", 409);
   return { state, digest: supplied, contractVersion };
 }
