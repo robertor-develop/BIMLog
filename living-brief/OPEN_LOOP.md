@@ -2133,10 +2133,10 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   connected Navisworks 2025 install/create/open/restart/open acceptance remains a separate field gate.
 ## v1.05.N09-P04 startup publication completion gates
 
-- Run the complete generated Living Brief, root build, standalone production-artifact closure, and both Navisworks
-  package/test gates against source `b2a9df745ba39e2d99c362468086e898850bf212` plus its reconciled documentation.
-- Record the 2021/2025 package and component hashes for `v1.05.N09-P04` / `1.5.9.4`, preserving N09 and advancing
-  only Platform-owned P04.
+- Complete generated Living Brief, root-build/runtime-closure, focused startup, and both Navisworks package/test
+  gates are green against source `b2a9df745ba39e2d99c362468086e898850bf212` plus reconciled documentation.
+- The exact 2021/2025 package and component hashes for `v1.05.N09-P04` / `1.5.9.4` are recorded in STATUS,
+  PLUGIN, AUDIT, and the tracked build receipts. N09 is preserved and only Platform-owned P04 advanced.
 - Push the exact green head. In visible Replit Shell, align to that exact remote source and rerun the governed build.
   Publish once; Promote must complete without `/api` health failure. Do not use Replit Agent or retry a failed paid
   publish without consuming the new failure evidence.

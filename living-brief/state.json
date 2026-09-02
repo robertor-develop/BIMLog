@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "b2a9df745ba39e2d99c362468086e898850bf212",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "56e030ab31bdd47cb699503e4afee569520cf2c58d4287055ed787db77d4c7cd",
+  "bundleSha256": "b0d40ce07154b3f898256c37bf8af09c19d0adfb559572a98fc8c86dbf640767",
   "impact": {
     "baselineCommit": "b2a9df745ba39e2d99c362468086e898850bf212",
     "changedPaths": [
@@ -10,7 +10,9 @@
       "living-brief/OPEN_LOOP.md",
       "living-brief/PLUGIN.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json"
+      "living-brief/impact-declarations.json",
+      "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
+      "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -82,7 +84,7 @@
     {
       "key": "plugin",
       "file": "PLUGIN.md",
-      "sha256": "c53f83219f74fc229ca2ac6a0ce9576a3d0e740981c47e69587fadd12a816a35",
+      "sha256": "28307ff07c15aa86b608714e63b752a3ee74283a58cb86e70dd4c8f4797c5e71",
       "sourceChangedAt": "2026-09-02T14:03:55.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "b2a9df745ba39e2d99c362468086e898850bf212",
@@ -118,7 +120,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "1999cf060153997ecc94f6cf1300c6c11d8e497635e24d29347508fda2e73b53",
+      "sha256": "0dd972a50fd952e3ae434423bd54925f59713c7f11e5ec9583dd59912fb5d2d0",
       "sourceChangedAt": "2026-09-02T14:03:55.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "b2a9df745ba39e2d99c362468086e898850bf212",
@@ -130,7 +132,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "0d07380b4f6160a8db6905cd0194f0cd6038cf87f7754b4804fc5b2dbf574b29",
+      "sha256": "2baf80b030502c76518790fd0c2460dfab27af806abca8b8c82d54f789c58031",
       "sourceChangedAt": "2026-09-02T14:03:55.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "b2a9df745ba39e2d99c362468086e898850bf212",
@@ -142,7 +144,7 @@
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "4e730caf98e8d3fd2b22dd933c9e98ea8a748702f7ff0dab85908d3654f5bf41",
+      "sha256": "e00114ccb839b1a25fa09c6f927e3db0f6921807fdc2cb28a35ff1012d411940",
       "sourceChangedAt": "2026-09-02T14:03:55.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "b2a9df745ba39e2d99c362468086e898850bf212",

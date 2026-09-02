@@ -834,3 +834,10 @@ early listener binding only after that synchronous validation, limits pre-ready 
 and keeps canonical readiness and business traffic unavailable until initialization completes. A failed import
 changes bootstrap responses to 503 and closes the listener. This audit records source correction only; successful
 build, push, Replit alignment, controlled Publish, and production verification remain separately evidenced gates.
+
+The subsequent governed clean build passed the full workspace build and API runtime-closure assembly. Controlled
+dual-year packaging passed 54/54 shared contracts, 52/52 native contracts per year, package integrity, and
+package-only installer validation. The exact 2025 delivery candidate is
+`BIMLog-Lens-Next-Navisworks2025-v1.05.N09-P04.zip`, 577566 bytes, SHA-256
+`190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`. Publication and production verification
+remain separate until their provider and live-browser receipts are recorded.

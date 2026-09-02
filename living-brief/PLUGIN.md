@@ -336,3 +336,6 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - This release carries the already accepted N09 camera-apply primitive unchanged. P04 changes only platform startup
   liveness and shared release metadata; capture, screenshot, sectioning, digest, visibility, appearance, element
   identity, Saved Viewpoints, and database contracts are unchanged.
+- Shared core contracts pass 54/54 and both year adapters pass 52/52. The controlled 2021 ZIP SHA-256 is
+  `877EF261940B63E4E86C168B233AE9E35FE7CCDA4B93F1BC4D96827D243FDA59`; the controlled 2025 ZIP SHA-256 is
+  `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B` and contains the 2025 BAT installer.
