@@ -1110,3 +1110,10 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
   `E337A36B5A8ED2FCAA48AFC6D6E9C822937415F9158384AB91E0ABCE4B052A30`. Binary version is `1.5.9.4`.
 - Push, exact Replit Shell alignment, one controlled Publish, Chrome production verification, Telegram delivery,
   and Ruben's connected Navisworks 2025 field verification remain separate gates.
+
+## Lens Next atomic-create exception observability — 2026-09-02
+
+- Replit integration commit \`5b63d2c96f3138753add8b47e61926da11f93881\` adds sanitized, correlation-bound stage telemetry only to \`POST /api/v1/projects/:projectId/clash-reports/lens-next/issues/create\`.
+- The route records START/PASS/FAIL for validation, duplicate detection, provisional insert, visual validation/rebind, sequencing, display-ID generation, final update, commit, and rollback. Failure telemetry includes nested exception and PostgreSQL/ORM diagnostics while excluding secrets and screenshot bytes.
+- This observability candidate changes no API contract, schema, persisted row, Lens version, native capture/apply behavior, Saved Viewpoint behavior, or timeout architecture.
+- API strict typecheck and the complete Lens Next Build 1–10 behavior suite pass. Governed build, one Replit Shell publication, self-reproduction, exact exception proof, root repair, and full local create/open/restart acceptance remain gated.

@@ -16584,6 +16584,126 @@
         "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json"
       ],
       "reviewedChangeSha256": "77007490c950c13b52603823afd2a888080ad8e71ee84f6664668b59959d7f3c"
+    },
+    {
+      "taskId": "bimlog-lens-next-atomic-create-observability-20260902",
+      "reviewedThroughCommit": "5b63d2c96f3138753add8b47e61926da11f93881",
+      "reviewedAt": "2026-09-02T12:20:00.000-04:00",
+      "status": "authorized_observability_build_and_reproduction_pending",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository_and_field_failure_evidence",
+          "add_sanitized_route_observability",
+          "run_local_validation",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "production_verification",
+          "telegram_delivery"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "A successful 71 ms native capture reaches the atomic create route, which rolls back with a generic 500 after provisional insertion without exposing the exact transaction-stage exception."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "The observability candidate must pass the governed build before one controlled Replit Shell publication; no repair, schema change, version increment, package, or Ruben retest is permitted before exact exception proof."
+        }
+      ],
+      "summary": "Adds correlation-bound sanitized stage telemetry to the existing Lens Next atomic issue-create route without changing its contract, transaction, schema, release identity, or native behavior.",
+      "workstreams": [
+        "lens-next-atomic-create-observability",
+        "controlled-production-reproduction",
+        "rollback-verification"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole persisted issue and navigation authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Replit Shell, publication, rollback, and customer-acceptance controls remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Requires stage-complete, correlation-bound, sanitized proof before repairing the atomic-create 500."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product roadmap, persona, or ownership boundary changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the atomic create stage map, correlation contract, exception diagnostics, and unchanged rollback boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens native source, capture/apply behavior, binary, package, or release identity changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, XML, PDF, DOCX, or visual presentation contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the observability-only candidate, passing focused gates, and remaining end-to-end incident gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records governed build, publish, reproduction, exact exception, rollback, repair, and local acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the authorized diagnostic boundary and prohibition on repair before exact production proof."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "194dfed0b1317e6e20ebcc102b529c2b528bc1eaeef1fdb64ef8b1b8494192ad"
     }
   ]
 }

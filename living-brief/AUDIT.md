@@ -841,3 +841,9 @@ package-only installer validation. The exact 2025 delivery candidate is
 `BIMLog-Lens-Next-Navisworks2025-v1.05.N09-P04.zip`, 577566 bytes, SHA-256
 `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`. Publication and production verification
 remain separate until their provider and live-browser receipts are recorded.
+
+## Atomic-create observability authorization — 2026-09-02
+
+- Authorized scope is limited to sanitized stage instrumentation for the Lens Next atomic issue-create route at Replit integration commit \`5b63d2c96f3138753add8b47e61926da11f93881\`.
+- The instrumentation introduces no schema migration, row mutation beyond the existing transaction, version increment, native build, package, or customer test. Existing rollback behavior remains the only permitted outcome on failure.
+- Production publication is permitted only after the governed build is green. The next evidence must be a self-generated correlation-bound failure timeline, exact exception, and rollback verification before any functional repair.

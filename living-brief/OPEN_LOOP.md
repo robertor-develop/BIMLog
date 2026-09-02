@@ -2143,3 +2143,11 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - In Chrome, verify live `/api`, `/api/v1/healthz`, the shared release label, authentication, and Lens Next loading.
   Then send the single verified 2025 P04 ZIP to Roberto's private Telegram. Ruben's connected Navisworks field test
   remains separate from deployment acceptance.
+
+## Lens Next atomic-create exception investigation gates
+
+- Run the complete governed build against Replit integration commit \`5b63d2c96f3138753add8b47e61926da11f93881\`; publish exactly once through the visible Replit Shell workflow only after it is green.
+- Reproduce one controlled fresh Lens Next issue creation without Ruben, capture the response correlation ID, and correlate it to the production stage timeline and complete sanitized exception/DB diagnostics.
+- Verify the provisional row rolled back and no screenshot, visual package, sequence advance, display-ID artifact, or audit orphan remained.
+- Repair only the operation proven by that evidence. A schema change remains prohibited without separate review and approval.
+- Before packaging or Telegram delivery, pass fresh issue create/persist/fetch, camera move/open/restore, restart/reopen/restore, and a second fresh issue create/open using the frozen lightweight native capture path.
