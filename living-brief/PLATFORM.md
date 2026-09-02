@@ -604,3 +604,16 @@ It changes only when the code structure or curated architectural facts change.
   platform authority identical.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
+
+## N08 historical unversioned digest boundary
+
+- Platform persistence continues to validate every explicitly versioned v1, v2, v3, and
+  lens-next-navigation.v1 package under its declared contract. A historical package that has no
+  contract metadata cannot be silently reinterpreted under the current v2 canonicalizer.
+- When that historical package has matching stored and embedded digests plus exact issue identity,
+  but lacks the original canonical evidence needed to prove its algorithm, BIMLog returns the
+  dedicated historical_digest_evidence_unavailable quarantine result. It does not mutate the row,
+  weaken digest validation, or claim that a current recomputation proves the old package.
+- The permanent cross-language vector records the exact historical bytes, stored digest, current-v2
+  recomputation, and expected quarantine result. Current navigation and explicit versioned visual
+  packages retain their existing acceptance and tamper-denial behavior.

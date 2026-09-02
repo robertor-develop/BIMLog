@@ -56,6 +56,7 @@ namespace BIMLogLensNext.Tests
                 Run("visual_state_digest_v1_remains_backward_compatible", VisualStateDigestV1RemainsBackwardCompatible);
                 Run("visual_state_digest_diagnostics_are_exact_and_non_recursive", VisualStateDigestDiagnosticsAreExactAndNonRecursive);
                 Run("visual_state_digest_v3_shared_vectors_A_through_L", VisualStateDigestV3SharedVectorsAThroughL);
+                Run("historical_unversioned_digest_vector_remains_quarantined", HistoricalUnversionedDigestVectorRemainsQuarantined);
                 Run("readiness_A_camera_only_opens", ReadinessACameraOnly);
                 Run("readiness_B_camera_selection_opens", ReadinessBCameraSelection);
                 Run("readiness_C_camera_hidden_opens", ReadinessCCameraHidden);
@@ -891,6 +892,22 @@ namespace BIMLogLensNext.Tests
             }
         }
 
+        private static void HistoricalUnversionedDigestVectorRemainsQuarantined()
+        {
+            var path = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "n07-p02-historical-digest-vector.json");
+            var fixture = new JavaScriptSerializer { MaxJsonLength = 16 * 1024 * 1024 }
+                .Deserialize<HistoricalDigestVectorFixture>(File.ReadAllText(path, Encoding.UTF8));
+            Equal("historical_digest_evidence_unavailable", fixture.ExpectedDisposition);
+            Equal(fixture.StoredDigest, fixture.State.DigestSha256);
+            True(fixture.State.DigestDiagnostics == null);
+            var diagnostics = LensNextVisualStateDigest.Diagnose(fixture.State, false);
+            Equal(LensNextVisualStateDigest.ContractVersion, diagnostics.ContractVersion);
+            Equal(fixture.ExpectedCurrentDigest, diagnostics.ComputedDigest);
+            Equal(fixture.ExpectedCanonicalByteLength, diagnostics.CanonicalLength);
+            Equal(fixture.ExpectedCanonicalInputBase64, diagnostics.CanonicalInputBase64);
+            NotEqual(fixture.StoredDigest, diagnostics.ComputedDigest);
+        }
+
         private sealed class DigestVectorFixture
         {
             public string ContractVersion { get; set; }
@@ -914,6 +931,16 @@ namespace BIMLogLensNext.Tests
             public string MutationValue { get; set; }
             public string OriginalSha256 { get; set; }
             public string TamperedSha256 { get; set; }
+        }
+
+        private sealed class HistoricalDigestVectorFixture
+        {
+            public LensNextVisualState State { get; set; }
+            public string StoredDigest { get; set; }
+            public string ExpectedCurrentDigest { get; set; }
+            public int ExpectedCanonicalByteLength { get; set; }
+            public string ExpectedCanonicalInputBase64 { get; set; }
+            public string ExpectedDisposition { get; set; }
         }
         private static LensNextBridgeRequest PublishRequest()
         {

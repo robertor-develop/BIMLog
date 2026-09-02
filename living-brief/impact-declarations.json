@@ -16243,6 +16243,110 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "8fdb49c9b3ac5de954001d8c05f038b9207dc6e7a52305043ace175bee039f2e"
+    },
+    {
+      "taskId": "bimlog-lens-next-n08-historical-digest-quarantine-20260901",
+      "reviewedThroughCommit": "1bf565b3c3c477aaa4b89f4bdf8cd5538cf1747c",
+      "reviewedAt": "2026-09-01T21:54:34.5011861-04:00",
+      "status": "n08_historical_digest_quarantine_local_green_release_pending",
+      "captureTiming": "post_local_dual_year_package_pre_push_pre_replit_publish_pre_telegram_delivery_pre_field_acceptance",
+      "summary": "Reconciles the proven historical-unversioned digest quarantine, permanent cross-language vector, and N08-P02 dual-year release evidence without weakening any explicit digest contract or mutating historical records.",
+      "workstreams": [
+        "lens-next-n08-historical-digest-quarantine",
+        "lens-next-dual-year-release",
+        "lens-next-governed-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole persisted issue and navigation authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release, publication, and customer-acceptance controls remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The change adds deterministic negative evidence and preserves fail-closed validation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, user mode, or product ownership boundary changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the dedicated metadata-less historical quarantine while preserving explicit v1, v2, v3, and navigation validation."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records N08-P02 identity, the shared historical vector, dual-year automated evidence, and package hashes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, XML presentation, document, or report design contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the proven root cause, exact local gates, release identity, and package hashes."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records push, Replit Shell build/publication, Chrome verification, Telegram delivery, and separate field acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No database/schema mutation, production publication, customer issue mutation, or delivery is claimed by this local reconciliation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/lens-next-local-upload.behavior.ts",
+        "artifacts/api-server/src/lib/lens-next-local-upload.ts",
+        "contracts/lens-next/n07-p02-historical-digest-vector.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
+        "plugins/BIMLogLensNext/Build-Package-LensNext.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
+        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2021.ps1",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2025.ps1",
+        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json",
+        "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+        "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+        "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
+        "plugins/BIMLogLensNext/src/LensNextConstants.cs",
+        "plugins/BIMLogLensNext/tests/BIMLogLensNext.Tests.csproj",
+        "plugins/BIMLogLensNext/tests/Program.cs"
+      ],
+      "reviewedChangeSha256": "0596d4242158fcd8f31854d45e08bc82f0addbddeeec4c9fd59707ab2169e9ac"
     }
   ]
 }

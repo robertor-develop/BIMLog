@@ -1035,3 +1035,20 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 ### N07 deterministic platform-map successor — 2026-09-01
 
 - Build-gate fix `b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7` persists the already reviewed N07 navigation boundary in the deterministic `generate-platform-md.ts` authority. It changes no runtime, schema, database, package, or native behavior; the remaining state is Replit build, publication, connected acceptance, and Telegram delivery.
+
+## Lens Next v1.05.N08-P02 historical unversioned digest quarantine — 2026-09-01
+
+- Forensic comparison of the real historical field payload proved that its stored and embedded digest
+  agree with each other but differ from the exact current v2 canonical bytes. Because the row has no
+  contract metadata or preserved canonical evidence, its original digest algorithm cannot be proven.
+- Platform validation now returns the dedicated `historical_digest_evidence_unavailable` result for
+  that exact class. It preserves the row and all explicit current contracts, rejects tampering, and
+  requires a new Lens Next capture instead of guessing a legacy algorithm or rewriting history.
+- API typecheck and the complete Lens Next Build 1–10 behavior suite pass. Shared native contracts pass
+  54/54 and both year adapters pass 51/51. Package integrity, version consistency, and package-only
+  installer checks pass for Navisworks 2021 and 2025.
+- Release identity is `v1.05.N08-P02` / binary `1.5.8.2`. The 2021 archive is 587910 bytes / SHA-256
+  `D31990B0186BE45C7521A69F377C6DA6F76DCE9171222BE75FE72606FC0AA438`; the 2025 archive is 590734 bytes /
+  SHA-256 `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112`.
+- This status is local verified source/package evidence. Push, Replit Shell publication, Chrome production
+  verification, Telegram delivery, and Ruben's Navisworks 2025 field acceptance remain distinct gates.

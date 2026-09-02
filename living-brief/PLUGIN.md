@@ -302,3 +302,17 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - New native packages may emit `lens-next-visual-digest.v3` only after the Platform deployment is verified to accept v1, v2, and v3. Historical packages retain their original contract version and are never migrated.
 - Native and Platform implementations must consume `contracts/lens-next/lens-next-visual-digest-v3-vectors.json` as the single A–L byte/digest authority. ElementReference v2 and ModelReference v2 fields are authoritative and any mutation must fail validation.
 - The current shared Lens field identity remains `v1.05.N05-P01`. Platform owns the next P-only increment to `v1.05.N05-P02`; Lens Next must preserve P02 when the complete N06 candidate is eventually authorized.
+
+## Lens Next v1.05.N08-P02 historical-digest release
+
+- N08 preserves the Platform/APU-owned P02 counter and advances only the Lens-owned N counter.
+  Human/package identity is `v1.05.N08-P02`; Windows DLL and Autodesk metadata use `1.5.8.2`.
+- The shared native contract consumes the same permanent historical-unversioned vector as the
+  Platform and proves that the old stored digest remains embedded while current v2 bytes compute a
+  different digest. That package remains quarantined honestly instead of being guessed or rewritten.
+- Shared core contracts pass 54/54. The Navisworks 2021 and 2025 native suites pass 51/51 each;
+  package integrity, release identity, and package-only installer checks pass for both years.
+- The deterministic 2021 ZIP is 587910 bytes with SHA-256
+  `D31990B0186BE45C7521A69F377C6DA6F76DCE9171222BE75FE72606FC0AA438`. The deterministic 2025 ZIP
+  is 590734 bytes with SHA-256
+  `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112` and contains the 2025 BAT installer.

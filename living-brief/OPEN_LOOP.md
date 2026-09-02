@@ -2103,3 +2103,18 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 ### N07 final publication successor
 
 - Reconcile through generator-fix commit `b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7`, require the exact Replit Shell production build to pass, then publish once and execute the already recorded Chrome and connected Navisworks acceptance sequence before Telegram delivery.
+
+## Lens Next v1.05.N08-P02 release completion gates
+
+- Commit and push only the exact green N08 successor, then align the preserved Replit publish-wrapper
+  lineage through the visible Replit Shell. Require a clean workspace and the complete governed build
+  before one publication; no database migration is required or authorized by this repair.
+- Verify production health and the Lens Next route in Chrome. Explicit current v1/v2/v3/navigation
+  packages must retain their prior acceptance/tamper behavior, while a metadata-less historical package
+  with unavailable canonical evidence must return the dedicated quarantine explanation without mutation.
+- Send only `BIMLog-Lens-Next-Navisworks2025-v1.05.N08-P02.zip` with SHA-256
+  `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112` to Roberto's authorized private
+  Telegram recipient after publication verification.
+- Telegram delivery is not Navisworks 2025 acceptance. Ruben must install N08, create a brand-new issue,
+  move to a different camera, open once, restart Navisworks, and open the same issue again. Historical
+  metadata-less packages remain honestly quarantined and are not valid N08 success fixtures.
