@@ -5,10 +5,10 @@
     <RootNamespace>BIMLogLensNext.Native</RootNamespace>
     <LangVersion>7.3</LangVersion>
     <Deterministic>true</Deterministic>
-    <Version>1.5.9.3</Version>
-    <AssemblyVersion>1.5.9.3</AssemblyVersion>
-    <FileVersion>1.5.9.3</FileVersion>
-    <InformationalVersion>v1.05.N09-P03</InformationalVersion>
+    <Version>1.5.9.4</Version>
+    <AssemblyVersion>1.5.9.4</AssemblyVersion>
+    <FileVersion>1.5.9.4</FileVersion>
+    <InformationalVersion>v1.05.N09-P04</InformationalVersion>
     <NavisworksProductYear>2021</NavisworksProductYear>
     <NavisworksReferenceRoot>C:\Program Files\Autodesk\Navisworks Manage 2021</NavisworksReferenceRoot>
     <NavisworksApiSha256>C6DFF483062BAD5D6EA56067D2F6258C89D705177B1BBEDB68FC66735E6CE075</NavisworksApiSha256>
