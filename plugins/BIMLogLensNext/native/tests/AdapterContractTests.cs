@@ -66,6 +66,7 @@ namespace BIMLogLensNext.Native.Tests
                 Run("health_tick_does_not_mutate_floating_window", HealthTickDoesNotMutateFloatingWindow);
                 Run("header_reports_current_version_beside_live", HeaderReportsCurrentVersionBesideLive);
                 Run("visual_capture_wire_payload_uses_web_contract_keys", VisualCaptureWirePayloadUsesWebContractKeys);
+                Run("navigation_apply_wire_identity_uses_web_contract_keys", NavigationApplyWireIdentityUsesWebContractKeys);
                 Run("visual_capture_wire_preserves_digest_double_bits", VisualCaptureWirePreservesDigestDoubleBits);
                 Run("bridge_request_json_is_strict_utf8", BridgeRequestJsonIsStrictUtf8);
                 Run("digest_mismatch_diagnostics_name_unicode_model_source", DigestMismatchDiagnosticsNameUnicodeModelSource);
@@ -722,6 +723,37 @@ namespace BIMLogLensNext.Native.Tests
             False(wire.ContainsKey("RequestId"));
             False(wire.ContainsKey("Identity"));
             False(wire.ContainsKey("VisualState"));
+        }
+
+        private static void NavigationApplyWireIdentityUsesWebContractKeys()
+        {
+            var method = typeof(LensNextHttpBridgeHost).GetMethod(
+                "WirePayload",
+                BindingFlags.NonPublic | BindingFlags.Static);
+            True(method != null);
+            var payload = new LensNextNavigationAppliedPayload
+            {
+                RequestId = "request-apply-1",
+                Identity = new LensNextWireIdentity
+                {
+                    ProjectId = 29,
+                    ServerId = 687,
+                    ViewpointId = "viewpoint-apply-1",
+                    LifecycleStatus = "active",
+                    RevisionNumber = 1
+                },
+                Result = new LensNextNavigationApplyResult { Applied = true }
+            };
+            var serializer = new JavaScriptSerializer();
+            var decoded = serializer.DeserializeObject(
+                serializer.Serialize(method.Invoke(null, new object[] { payload }))) as Dictionary<string, object>;
+            True(decoded != null);
+            var identity = decoded["identity"] as Dictionary<string, object>;
+            True(identity != null);
+            foreach (var key in new[] { "projectId", "serverId", "viewpointId", "lifecycleStatus", "revisionNumber" })
+                True(identity.ContainsKey(key));
+            foreach (var key in new[] { "ProjectId", "ServerId", "ViewpointId", "LifecycleStatus", "RevisionNumber" })
+                False(identity.ContainsKey(key));
         }
 
         private static void VisualCaptureWirePreservesDigestDoubleBits()
