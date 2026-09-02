@@ -316,3 +316,16 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
   `D31990B0186BE45C7521A69F377C6DA6F76DCE9171222BE75FE72606FC0AA438`. The deterministic 2025 ZIP
   is 590734 bytes with SHA-256
   `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112` and contains the 2025 BAT installer.
+
+## Lens Next v1.05.N08-P03 platform-startup release identity
+
+- P03 advances only the Platform/APU-owned P counter and preserves Lens-owned N08. Human/package identity
+  is `v1.05.N08-P03`; Windows DLL and Autodesk metadata use `1.5.8.3` for both Navisworks years.
+- The native Lens behavior remains the reviewed N08 implementation. Both 2021 and 2025 packages are rebuilt
+  from the same controlled source so their displayed shared release identity remains aligned with Platform.
+- Shared core contracts pass 54/54 and both Navisworks 2021 and 2025 adapters pass 51/51. Package integrity,
+  package-only installers, and release-identity consistency pass for both years.
+- The deterministic 2021 ZIP is 574516 bytes with SHA-256
+  `8C482115D46EB270490B60E893DEF942AB5FEE9A1380DE754B12D98BDDAB5F71`. The deterministic 2025 ZIP is
+  577330 bytes with SHA-256 `190F8F2B94BCD8E1645B5687F0A63AB22F8D55021DED67772E8BA3D75DD22E0B`
+  and contains the 2025 BAT installer.

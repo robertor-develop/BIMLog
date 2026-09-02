@@ -1052,3 +1052,19 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
   SHA-256 `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112`.
 - This status is local verified source/package evidence. Push, Replit Shell publication, Chrome production
   verification, Telegram delivery, and Ruben's Navisworks 2025 field acceptance remain distinct gates.
+
+## Lens Next v1.05.N08-P03 production startup authority repair — 2026-09-01
+
+- The production artifact could begin full application and database initialization before validating its
+  durable storage authority. Consequently, the invalid-authority closure child could hang on an unavailable
+  database instead of exiting naturally with the required fail-closed storage error.
+- The production entrypoint now loads the storage adapter first. Invalid or missing authority terminates
+  before database/application import; valid startup reuses the same cached adapter and changes no schema,
+  database row, Lens navigation behavior, Legacy Lens behavior, or persisted visual package.
+- P03 is the Platform/APU-owned counter increment. Lens remains N08; package identity is
+  `v1.05.N08-P03` and binary identity is `1.5.8.3`. Shared core contracts pass 54/54; both year adapters
+  pass 51/51; package integrity and package-only installer validation pass for both years.
+- The 2021 ZIP is 574516 bytes / SHA-256
+  `8C482115D46EB270490B60E893DEF942AB5FEE9A1380DE754B12D98BDDAB5F71`. The 2025 ZIP is 577330 bytes /
+  SHA-256 `190F8F2B94BCD8E1645B5687F0A63AB22F8D55021DED67772E8BA3D75DD22E0B`.
+  Clean production artifact proof, publication, Chrome verification, and Telegram delivery remain gated.

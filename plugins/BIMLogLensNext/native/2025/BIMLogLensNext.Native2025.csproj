@@ -5,10 +5,10 @@
     <RootNamespace>BIMLogLensNext.Native</RootNamespace>
     <LangVersion>7.3</LangVersion>
     <Deterministic>true</Deterministic>
-    <Version>1.5.8.2</Version>
-    <AssemblyVersion>1.5.8.2</AssemblyVersion>
-    <FileVersion>1.5.8.2</FileVersion>
-    <InformationalVersion>v1.05.N08-P02</InformationalVersion>
+    <Version>1.5.8.3</Version>
+    <AssemblyVersion>1.5.8.3</AssemblyVersion>
+    <FileVersion>1.5.8.3</FileVersion>
+    <InformationalVersion>v1.05.N08-P03</InformationalVersion>
     <NavisworksProductYear>2025</NavisworksProductYear>
     <NavisworksReferenceRoot>H:\BIMLogPlugin2025\refs</NavisworksReferenceRoot>
     <NavisworksApiSha256>D6426063E03A97C34BA805F20C1D1ADD35BCC5C63EFEA87F8AF40F49E82BF155</NavisworksApiSha256>

@@ -1,4 +1,5 @@
 import { createApplicationBootstrap } from "./startup-bootstrap";
+import "./lib/storage-adapter";
 
 const rawPort = process.env["PORT"];
 

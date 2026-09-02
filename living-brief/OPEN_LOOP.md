@@ -2118,3 +2118,15 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Telegram delivery is not Navisworks 2025 acceptance. Ruben must install N08, create a brand-new issue,
   move to a different camera, open once, restart Navisworks, and open the same issue again. Historical
   metadata-less packages remain honestly quarantined and are not valid N08 success fixtures.
+
+## Lens Next v1.05.N08-P03 release completion gates
+
+- Prove invalid durable storage authority exits naturally from the built production artifact before any
+  database/application initialization, with no readiness success or TCP listener. Prove valid startup and
+  the existing authenticated storage closure against the isolated loopback proof database.
+- Rebuild and verify both Navisworks years as `v1.05.N08-P03` / `1.5.8.3`, preserving N08 and advancing only
+  Platform-owned P03. Record deterministic archive and core/native/manifest hashes before distribution.
+- Push only the exact green commit. Through the visible Replit Shell—never Replit Agent—align the governed
+  publish lineage, run the complete build, publish once, then verify production health and Lens Next in Chrome.
+- After verified publication, send only the hash-verified 2025 P03 ZIP to Roberto's private Telegram. Ruben's
+  connected Navisworks 2025 install/create/open/restart/open acceptance remains a separate field gate.

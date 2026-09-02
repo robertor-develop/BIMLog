@@ -1,23 +1,23 @@
 {
-  "schemaVersion": "bimlog-lens-next-build-receipt-v1",
-  "status": "BUILD_PACKAGE_PASS_NO_INSTALL",
-  "productYear": 2025,
-  "release": "v1.05.N08-P02",
-  "binaryVersion": "1.5.8.2",
-  "sourceRoot": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-forensic-recovery-20260831\\plugins\\BIMLogLensNext",
-  "packageRoot": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-forensic-recovery-20260831\\plugins\\BIMLogLensNext\\package-v1.05.N08-P02-2025",
-  "zipPath": "F:\\BIMLog\\Worktrees\\bimlog-lens-next-forensic-recovery-20260831\\plugins\\BIMLogLensNext\\BIMLog-Lens-Next-Navisworks2025-v1.05.N08-P02.zip",
-  "zipBytes": 590734,
-  "zipSha256": "E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112",
-  "coreDllSha256": "E4453C8C4CB16A2DEB271AB8E6016832F0695C9CB013CF0C1B3D9CFB4C11AC79",
-  "nativeDllSha256": "C3DBD38E1AC9052461E60B50C5874DD40C22516692B5458231B54D05AFEA4E48",
-  "nativeDllFileVersion": "1.5.8.2",
-  "tests": {
-    "core": "passed",
-    "native2025": "passed",
-    "packagedInstallerPackageOnly": "passed",
-    "releaseIdentityConsistency": "passed"
-  },
-  "installPerformed": false,
-  "fieldAcceptance": "pending Ruben Navisworks Manage 2025"
+    "schemaVersion":  "bimlog-lens-next-build-receipt-v1",
+    "status":  "BUILD_PACKAGE_PASS_NO_INSTALL",
+    "productYear":  2025,
+    "release":  "v1.05.N08-P03",
+    "binaryVersion":  "1.5.8.3",
+    "sourceRoot":  "F:\\BIMLog\\Worktrees\\bimlog-lens-next-forensic-recovery-20260831\\plugins\\BIMLogLensNext",
+    "packageRoot":  "F:\\BIMLog\\Worktrees\\bimlog-lens-next-forensic-recovery-20260831\\plugins\\BIMLogLensNext\\package-v1.05.N08-P03-2025",
+    "zipPath":  "F:\\BIMLog\\Worktrees\\bimlog-lens-next-forensic-recovery-20260831\\plugins\\BIMLogLensNext\\BIMLog-Lens-Next-Navisworks2025-v1.05.N08-P03.zip",
+    "zipBytes":  577330,
+    "zipSha256":  "190F8F2B94BCD8E1645B5687F0A63AB22F8D55021DED67772E8BA3D75DD22E0B",
+    "coreDllSha256":  "7FD07D2F400557EDD931B623598C0BBEB410BDCCD8E595C07ED9FA7DA3FA44EB",
+    "nativeDllSha256":  "9B7238701363DB75807009A5F03FF5955BD908EF1F4E635C9F8495D91C8013F9",
+    "nativeDllFileVersion":  "1.5.8.3",
+    "tests":  {
+                  "core":  "passed",
+                  "native2025":  "passed",
+                  "packagedInstallerPackageOnly":  "passed",
+                  "releaseIdentityConsistency":  "passed"
+              },
+    "installPerformed":  false,
+    "fieldAcceptance":  "pending Ruben Navisworks Manage 2025"
 }

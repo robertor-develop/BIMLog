@@ -16347,6 +16347,146 @@
         "plugins/BIMLogLensNext/tests/Program.cs"
       ],
       "reviewedChangeSha256": "0596d4242158fcd8f31854d45e08bc82f0addbddeeec4c9fd59707ab2169e9ac"
+    },
+    {
+      "taskId": "bimlog-platform-storage-authority-preflight-p03-20260901",
+      "reviewedThroughCommit": "11122c9bb4915aa233dc5ce03ef5e31454745f90",
+      "reviewedAt": "2026-09-01T20:00:00.000Z",
+      "status": "accepted_source",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "repair_startup_ordering",
+          "run_local_validation",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "production_operation",
+          "telegram_delivery"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "systemic_quality_failure",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The production entrypoint allowed database/application initialization to precede fail-closed durable-storage authority validation."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Publication is gated on a clean production artifact proof, exact pushed commit, visible Replit Shell build, and Chrome verification."
+        }
+      ],
+      "summary": "Moves durable-storage authority validation ahead of full production application import and records the P03 shared release identity without changing Lens-owned N08 or persisted data.",
+      "workstreams": [
+        "platform-production-startup-authority",
+        "lens-next-dual-year-p03-release",
+        "governed-publication-and-delivery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole persisted issue and navigation authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release, publication, and customer-acceptance controls remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Requires storage authority to fail closed before database or application initialization."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, user mode, or product ownership boundary changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the production startup ordering and P03 platform-owned release increment."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records dual-year P03 identity while preserving the reviewed N08 native behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, XML presentation, document, or report design contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the root cause, repair boundary, release identity, and gated completion state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records build, artifact, push, Replit Shell, Chrome, delivery, and field gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records that this repair changes no schema or production data and requires exact release receipts."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/index.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
+        "plugins/BIMLogLensNext/Build-Package-LensNext.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
+        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2021.ps1",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2025.ps1",
+        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json",
+        "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+        "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+        "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
+        "plugins/BIMLogLensNext/src/LensNextConstants.cs"
+      ],
+      "reviewedChangeSha256": "d4329b0d39e128cea3f85296e8f58076513f5250d39fe945064e80f9834cac58"
     }
   ]
 }

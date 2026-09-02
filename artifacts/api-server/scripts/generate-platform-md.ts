@@ -215,6 +215,16 @@ ${appRoutes()}
 - The permanent cross-language vector records the exact historical bytes, stored digest, current-v2
   recomputation, and expected quarantine result. Current navigation and explicit versioned visual
   packages retain their existing acceptance and tamper-denial behavior.
+
+## N08-P03 production startup authority preflight
+
+- The production entrypoint loads the storage adapter before the full application import. Missing or
+  invalid durable storage authority therefore fails closed before database or application initialization.
+- Valid production startup uses the same cached storage singleton and retains the existing readiness,
+  listener, authentication, and durable-storage contracts. This repair changes no schema or persisted data.
+- The production-artifact gate requires an invalid authority child to exit naturally with the sanitized
+  FEEDBACK_STORAGE_AUTHORITY_INVALID code and without readiness or TCP binding; the valid artifact must
+  still start and pass the existing authenticated storage closure proof.
 `;
 
   const outDir = path.join(REPO_ROOT, "living-brief");
