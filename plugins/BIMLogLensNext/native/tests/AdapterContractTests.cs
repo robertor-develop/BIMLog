@@ -47,6 +47,7 @@ namespace BIMLogLensNext.Native.Tests
                 Run("dock_pane_has_recovery_command", DockPaneHasRecoveryCommand);
                 Run("floating_close_hides_instead_of_destroying", FloatingCloseHidesInsteadOfDestroying);
                 Run("camera_capture_allows_projection_specific_values_to_be_unset", CameraCaptureAllowsUnsetProjectionValues);
+                Run("camera_capture_records_document_linear_unit_without_transform", CameraCaptureRecordsDocumentLinearUnitWithoutTransform);
                 Run("camera_apply_uses_writable_current_viewpoint_copy", CameraApplyUsesWritableCurrentViewpointCopy);
                 Run("bridge_dispatches_immediately_without_idle_starvation", BridgeDispatchesImmediatelyWithoutIdleStarvation);
                 Run("normal_navigation_uses_bounded_timeout_and_exact_restore_waits_for_completion", NormalNavigationUsesBoundedTimeoutAndExactRestoreWaitsForCompletion);
@@ -398,6 +399,22 @@ namespace BIMLogLensNext.Native.Tests
             True(apply.Contains("_document.CurrentViewpoint.CopyFrom(writableView)"));
             True(apply.Contains("writableView.IsReadOnly"));
             False(apply.Contains("_document.CurrentViewpoint.ToViewpoint()"));
+        }
+
+        private static void CameraCaptureRecordsDocumentLinearUnitWithoutTransform()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(
+                AppDomain.CurrentDomain.BaseDirectory,
+                @"..\..\..\..\..\native\AutodeskVisualStateAdapter.cs")));
+            var captureStart = source.IndexOf("private LensNextCameraState CaptureCamera", StringComparison.Ordinal);
+            var captureEnd = source.IndexOf("private static double? OptionalPositiveCameraValue", captureStart, StringComparison.Ordinal);
+            True(captureStart >= 0 && captureEnd > captureStart);
+            var capture = source.Substring(captureStart, captureEnd - captureStart);
+            True(capture.Contains("SourceLinearUnit = _document.Units.ToString()"));
+            True(capture.Contains("Position = Point(view.Position)"));
+            True(capture.Contains("Rotation = Rotation(view.Rotation)"));
+            False(capture.Contains("ConvertUnits"));
+            False(capture.Contains("UnitTransform"));
         }
 
         private static void HealthPingBypassesBusyUiThread()

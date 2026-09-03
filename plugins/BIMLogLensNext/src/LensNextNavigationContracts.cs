@@ -59,6 +59,7 @@ namespace BIMLogLensNext
         private static void AppendCamera(List<string> tokens, LensNextCameraState camera)
         {
             if (camera == null) { tokens.Add("camera:null"); return; }
+            if (!string.IsNullOrEmpty(camera.SourceLinearUnit)) tokens.Add(camera.SourceLinearUnit);
             AppendPoint(tokens, camera.Position, "point:null");
             if (camera.Rotation == null) tokens.Add("rotation:null");
             else { tokens.Add(Float(camera.Rotation.A)); tokens.Add(Float(camera.Rotation.B)); tokens.Add(Float(camera.Rotation.C)); tokens.Add(Float(camera.Rotation.D)); }

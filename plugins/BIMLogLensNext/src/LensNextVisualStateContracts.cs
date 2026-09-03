@@ -32,6 +32,7 @@ namespace BIMLogLensNext
 
     public sealed class LensNextCameraState
     {
+        public string SourceLinearUnit { get; set; }
         public LensNextPointState Position { get; set; }
         public LensNextRotationState Rotation { get; set; }
         public LensNextPointState WorldUpVector { get; set; }
@@ -566,6 +567,7 @@ namespace BIMLogLensNext
         private static void AppendCamera(StringBuilder builder, LensNextCameraState camera, string contractVersion)
         {
             if (camera == null) { Append(builder, "camera:null"); return; }
+            if (!string.IsNullOrEmpty(camera.SourceLinearUnit)) Append(builder, camera.SourceLinearUnit);
             AppendPoint(builder, camera.Position, contractVersion); AppendRotation(builder, camera.Rotation, contractVersion); AppendPoint(builder, camera.WorldUpVector, contractVersion);
             Append(builder, camera.Projection); AppendDouble(builder, camera.FocalDistance, contractVersion); AppendDouble(builder, camera.HorizontalExtentAtFocalDistance, contractVersion); AppendDouble(builder, camera.VerticalExtentAtFocalDistance, contractVersion);
         }

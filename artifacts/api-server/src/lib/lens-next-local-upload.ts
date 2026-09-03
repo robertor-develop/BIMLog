@@ -126,6 +126,8 @@ function lensNextVisualStateDigestTokens(state: any, contractVersion = digestCon
   append(parts, "modelFingerprint", field(state, "ModelFingerprint", "modelFingerprint"));
   const camera = field(state, "Camera", "camera");
   if (!camera) append(parts, "camera", "camera:null"); else {
+    const sourceLinearUnit = field(camera, "SourceLinearUnit", "sourceLinearUnit");
+    if (sourceLinearUnit != null && String(sourceLinearUnit).length > 0) append(parts, "camera.sourceLinearUnit", sourceLinearUnit);
     appendPoint(parts, "camera.position", field(camera, "Position", "position"), "point:null", contractVersion);
     const rotation = field(camera, "Rotation", "rotation");
     if (!rotation) append(parts, "camera.rotation", "rotation:null"); else { appendDouble(parts, "camera.rotation.a", field(rotation, "A", "a"), contractVersion); appendDouble(parts, "camera.rotation.b", field(rotation, "B", "b"), contractVersion); appendDouble(parts, "camera.rotation.c", field(rotation, "C", "c"), contractVersion); appendDouble(parts, "camera.rotation.d", field(rotation, "D", "d"), contractVersion); }
@@ -280,6 +282,8 @@ function lensNextNavigationDigestTokens(value: any): DigestToken[] {
   append(parts, "modelFingerprint", field(value, "ModelFingerprint", "modelFingerprint"));
   const camera = field(value, "Camera", "camera");
   if (!camera) append(parts, "camera", "camera:null"); else {
+    const sourceLinearUnit = field(camera, "SourceLinearUnit", "sourceLinearUnit");
+    if (sourceLinearUnit != null && String(sourceLinearUnit).length > 0) append(parts, "camera.sourceLinearUnit", sourceLinearUnit);
     appendPoint(parts, "camera.position", field(camera, "Position", "position"), "point:null", LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
     const rotation = field(camera, "Rotation", "rotation");
     if (!rotation) append(parts, "camera.rotation", "rotation:null"); else {

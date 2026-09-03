@@ -345,6 +345,7 @@ namespace BIMLogLensNext.Native
             var view = _document.CurrentViewpoint.ToViewpoint();
             return new LensNextCameraState
             {
+                SourceLinearUnit = _document.Units.ToString(),
                 Position = Point(view.Position), Rotation = Rotation(view.Rotation), WorldUpVector = Point(view.WorldUpVector),
                 Projection = view.Projection.ToString(),
                 FocalDistance = OptionalPositiveCameraValue(() => view.FocalDistance),

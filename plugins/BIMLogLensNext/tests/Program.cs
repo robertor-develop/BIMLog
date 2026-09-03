@@ -53,6 +53,7 @@ namespace BIMLogLensNext.Tests
                 Run("m7_publish_dispatches_exactly_once", M7PublishDispatchesExactlyOnce);
                 Run("new_viewpoint_capture_uses_minimal_navigation_payload", NewViewpointCaptureUsesCanonicalTypedPayload);
                 Run("navigation_digest_matches_platform_float_vector", NavigationDigestMatchesPlatformFloatVector);
+                Run("source_linear_unit_is_additive_and_digest_protected", SourceLinearUnitIsAdditiveAndDigestProtected);
                 Run("visual_state_digest_matches_platform_null_token_contract", VisualStateDigestMatchesPlatformNullTokenContract);
                 Run("visual_state_digest_v2_float_tokens_match_platform", VisualStateDigestV2FloatTokensMatchPlatform);
                 Run("visual_state_digest_v1_remains_backward_compatible", VisualStateDigestV1RemainsBackwardCompatible);
@@ -1240,6 +1241,48 @@ namespace BIMLogLensNext.Tests
             navigation.ScreenshotDataUrl = "data:image/jpeg;base64,AAAA";
             navigation.ScreenshotSha256 = new string('f', 64);
             Equal("d4618c4ba468325bd41de8284c3e75f40a63d76af8d4cf367c961a5e03a58b27", LensNextNavigationDigest.Compute(navigation));
+        }
+
+        private static void SourceLinearUnitIsAdditiveAndDigestProtected()
+        {
+            var serializer = new JavaScriptSerializer();
+            var historicalCamera = serializer.Deserialize<LensNextCameraState>("{\"Position\":{\"X\":1,\"Y\":2,\"Z\":3},\"Rotation\":{\"A\":0,\"B\":0,\"C\":0,\"D\":1}}");
+            Equal(null, historicalCamera.SourceLinearUnit);
+
+            var navigation = new LensNextNavigationView
+            {
+                ContractVersion = LensNextNavigationSchema.ContractVersion,
+                SchemaVersion = LensNextNavigationSchema.Version,
+                ProjectId = 29,
+                ServerId = 1,
+                ViewpointId = "source-unit-navigation",
+                LifecycleStatus = "active",
+                RevisionNumber = 1,
+                ModelFingerprint = string.Concat(Enumerable.Repeat("0123456789abcdef", 4)),
+                Camera = NumericDigestState("ignored").Camera,
+                SelectedElements = new List<LensNextElementReference>()
+            };
+            var historicalDigest = LensNextNavigationDigest.Compute(navigation);
+            var x = navigation.Camera.Position.X;
+            var rotationD = navigation.Camera.Rotation.D;
+            navigation.Camera.SourceLinearUnit = "Feet";
+            var feetDigest = LensNextNavigationDigest.Compute(navigation);
+            NotEqual(historicalDigest, feetDigest);
+            navigation.Camera.SourceLinearUnit = "Meters";
+            NotEqual(feetDigest, LensNextNavigationDigest.Compute(navigation));
+            Equal(x, navigation.Camera.Position.X);
+            Equal(rotationD, navigation.Camera.Rotation.D);
+
+            var visual = NumericDigestState("source-unit-visual");
+            visual.DigestDiagnostics = new LensNextDigestDiagnostics { ContractVersion = LensNextVisualStateDigest.ContractVersionV3 };
+            var visualHistoricalDigest = LensNextVisualStateDigest.Compute(visual);
+            visual.Camera.SourceLinearUnit = "Feet";
+            NotEqual(visualHistoricalDigest, LensNextVisualStateDigest.Compute(visual));
+
+            visual.Camera.SourceLinearUnit = "UnknownFutureUnit";
+            True(!string.IsNullOrWhiteSpace(LensNextVisualStateDigest.Compute(visual)));
+            Equal(x, visual.Camera.Position.X);
+            Equal(rotationD, visual.Camera.Rotation.D);
         }
 
         private static void VisualStateDigestV3SharedVectorsAThroughL()

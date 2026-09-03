@@ -41,6 +41,22 @@ const navigation: any = {
 };
 navigation.DigestSha256 = lensNextNavigationDigest(navigation);
 assert.equal(navigation.DigestSha256, "d4618c4ba468325bd41de8284c3e75f40a63d76af8d4cf367c961a5e03a58b27");
+const navigationWithUnit = structuredClone(navigation);
+navigationWithUnit.Camera.SourceLinearUnit = "Feet";
+navigationWithUnit.DigestSha256 = lensNextNavigationDigest(navigationWithUnit);
+assert.notEqual(navigationWithUnit.DigestSha256, navigation.DigestSha256, "source unit must participate in the navigation digest");
+const navigationWithTamperedUnit = structuredClone(navigationWithUnit);
+navigationWithTamperedUnit.Camera.SourceLinearUnit = "Meters";
+assert.notEqual(lensNextNavigationDigest(navigationWithTamperedUnit), navigationWithUnit.DigestSha256, "source unit tampering must change the navigation digest");
+const unitRebound = validateAndRebindLocalVisualState(navigationWithUnit, { projectId: 29, serverId: 703, viewpointId: "N07-UNIT", modelFingerprint: navigation.ModelFingerprint });
+assert.equal(JSON.parse(unitRebound.json).Camera.SourceLinearUnit, "Feet");
+assert.throws(
+  () => validateAndRebindLocalVisualState(navigationWithTamperedUnit, { projectId: 29, serverId: 704, viewpointId: "N07-UNIT-TAMPER", modelFingerprint: navigation.ModelFingerprint }),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "navigation_capture_invalid",
+);
+const historicalNavigation = structuredClone(navigation);
+assert.equal(historicalNavigation.Camera.SourceLinearUnit, undefined);
+assert.equal(lensNextNavigationDigest(historicalNavigation), navigation.DigestSha256, "historical navigation digest must remain unchanged");
 const navigationWithScreenshot = { ...navigation, ScreenshotDataUrl: "data:image/jpeg;base64,AAAA", ScreenshotSha256: "f".repeat(64) };
 assert.equal(lensNextNavigationDigest(navigationWithScreenshot), navigation.DigestSha256, "screenshot evidence must not alter the navigation digest");
 const navigationRebound = validateAndRebindLocalVisualState(navigation, { projectId: 29, serverId: 701, viewpointId: "N07-NEW", modelFingerprint: navigation.ModelFingerprint });
