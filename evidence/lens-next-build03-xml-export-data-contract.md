@@ -326,3 +326,36 @@ Collision behavior relies on UUIDv5's 122 effective identity bits; no random GUI
 timestamp-only identity, customer constant, Navisworks Saved Viewpoint GUID, or
 local Saved Viewpoint state participates.
 
+## Build 08 exchange-metadata and target-schema checkpoint
+
+The proven emitted exchange metadata is deliberately limited to:
+
+- XML declaration version `1.0` with UTF-8 encoding, produced by the isolated writer;
+- `exchange@filename="BIMLog"`;
+- `exchange@filepath="BIMLog"`;
+- the existing product-controlled `viewfolder@name="BIMLog Viewpoints"`.
+
+`filename` and `filepath` identify the BIMLog exporter namespace only. They do not
+represent a customer model name, disk path, project, or model identity. No generator
+attribute or XML export-version attribute is emitted because the repository does not
+prove those attribute names as part of a target Navisworks exchange contract.
+
+`UNITS_PROVEN=NO`. The authoritative visual package stores raw Autodesk doubles but
+does not store a linear-unit identifier, scale, or coordinate-basis declaration.
+Therefore the exchange root has no `units` attribute. A later units build must prove
+the source unit and the exact target-schema unit token/conversion before emitting one.
+
+`TARGET_SCHEMA_PROVEN=NO`. Repository inspection found only:
+
+- `plugins/BIMLogLensNext/native/LensNextDockPanelControl.cs`, which invokes the
+  Autodesk `XmlViewpointsExportPlugin` but does not expose a schema URI/version;
+- `plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs`, whose fake plugin
+  writes only a minimal `<exchange />` document;
+- `artifacts/api-server/test-xml.cjs`, an unvalidated parser sample containing only
+  the W3C XML Schema-instance namespace and no schema location.
+
+None proves a Navisworks exchange schema URL or version, so no `xmlns:xsi`,
+`xsi:noNamespaceSchemaLocation`, `nw-exchange` URI, schema version, units, or scale
+is emitted. Build 08 preserves the Build 05 ordering, Build 06 names, Build 07 UUIDs,
+and emits no camera or sectioning data.
+

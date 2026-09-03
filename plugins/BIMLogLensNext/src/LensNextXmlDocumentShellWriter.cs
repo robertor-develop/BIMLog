@@ -46,6 +46,7 @@ namespace BIMLogLensNext
                 throw new DirectoryNotFoundException("The XML output directory does not exist: " + directory);
 
             var temporaryPath = Path.Combine(directory, "." + Path.GetFileName(fullPath) + "." + Guid.NewGuid().ToString("N") + ".tmp");
+            var metadata = LensNextXmlExchangeMetadata.ProductControlled();
             try
             {
                 var settings = new XmlWriterSettings
@@ -63,6 +64,8 @@ namespace BIMLogLensNext
                 {
                     writer.WriteStartDocument();
                     writer.WriteStartElement(RootElementName);
+                    writer.WriteAttributeString("filename", metadata.FileName);
+                    writer.WriteAttributeString("filepath", metadata.FilePath);
                     writer.WriteStartElement(ViewpointsElementName);
                     writer.WriteStartElement(ViewFolderElementName);
                     writer.WriteAttributeString("name", ViewFolderName);

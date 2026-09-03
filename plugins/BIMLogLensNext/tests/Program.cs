@@ -83,6 +83,8 @@ namespace BIMLogLensNext.Tests
                 Run("xml_export_guid_v5_matches_rfc_vector", XmlExportGuidV5MatchesRfcVector);
                 Run("xml_export_guids_are_identity_stable_and_distinct", XmlExportGuidsAreIdentityStableAndDistinct);
                 Run("xml_export_guids_ignore_order_and_name", XmlExportGuidsIgnoreOrderAndName);
+                Run("xml_exchange_metadata_is_proven_and_minimal", XmlExchangeMetadataIsProvenAndMinimal);
+                Run("xml_exchange_metadata_output_is_deterministic", XmlExchangeMetadataOutputIsDeterministic);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -127,7 +129,9 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null };
                 document.Load(first);
                 Equal(LensNextXmlDocumentShellWriter.RootElementName, document.DocumentElement.Name);
-                Equal(0, document.DocumentElement.Attributes.Count);
+                Equal(2, document.DocumentElement.Attributes.Count);
+                Equal("BIMLog", document.DocumentElement.GetAttribute("filename"));
+                Equal("BIMLog", document.DocumentElement.GetAttribute("filepath"));
                 var viewpoints = document.DocumentElement.SelectNodes("viewpoints");
                 Equal(1, viewpoints.Count);
                 var folders = document.DocumentElement.SelectNodes("viewpoints/viewfolder");
@@ -293,6 +297,48 @@ namespace BIMLogLensNext.Tests
                 Equal(string.Join(",", normal.ViewGuids), string.Join(",", shuffled.ViewGuids));
                 NotEqual(normal.ViewGuids[0], normal.ViewGuids[1]);
                 True(normal.ViewGuids.All(value => Guid.TryParseExact(value, "D", out _)));
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExchangeMetadataIsProvenAndMinimal()
+        {
+            var metadata = LensNextXmlExchangeMetadata.ProductControlled();
+            Equal("BIMLog", metadata.FileName);
+            Equal("BIMLog", metadata.FilePath);
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-xml-metadata-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "metadata.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { ExportInput(71, 1, null) });
+                var document = new XmlDocument { XmlResolver = null };
+                document.Load(path);
+                Equal(2, document.DocumentElement.Attributes.Count);
+                Equal("BIMLog", document.DocumentElement.GetAttribute("filename"));
+                Equal("BIMLog", document.DocumentElement.GetAttribute("filepath"));
+                foreach (var forbidden in new[] { "units", "schema", "xmlns", "generator", "version" })
+                    False(document.DocumentElement.HasAttribute(forbidden));
+                var raw = File.ReadAllText(path);
+                foreach (var forbidden in new[] { "units=", "schemaLocation", "nw-exchange", "<viewpoint>", "<viewpoint ", "<camera", "position", "rotation", "projection", "focal", "sectioning" })
+                    False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExchangeMetadataOutputIsDeterministic()
+        {
+            var input = ExportInput(72, 1, DateTimeOffset.Parse("2026-06-01T00:00:00Z"));
+            input.DisplayId = "ME-072"; input.Note = "Deterministic";
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-xml-metadata-repeat-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var first = Path.Combine(directory, "first.xml");
+                var second = Path.Combine(directory, "second.xml");
+                LensNextXmlDocumentShellWriter.Write(first, 26, new[] { input });
+                LensNextXmlDocumentShellWriter.Write(second, 26, new[] { input });
+                True(File.ReadAllBytes(first).SequenceEqual(File.ReadAllBytes(second)));
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
