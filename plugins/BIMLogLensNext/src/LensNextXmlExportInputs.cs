@@ -12,6 +12,8 @@ namespace BIMLogLensNext
         public string ViewpointId { get; set; }
         public string LifecycleStatus { get; set; }
         public int RevisionNumber { get; set; }
+        public string DisplayId { get; set; }
+        public string Note { get; set; }
         public int? Priority { get; set; }
         public DateTimeOffset? CapturedAt { get; set; }
         public string VisualStateDigest { get; set; }
@@ -21,6 +23,32 @@ namespace BIMLogLensNext
         public string PackageLifecycleStatus { get; set; }
         public int PackageRevisionNumber { get; set; }
         public string PackageDigest { get; set; }
+    }
+
+    public static class LensNextXmlExportNamePolicy
+    {
+        public static string BaseName(LensNextXmlExportInput record)
+        {
+            if (record == null) throw new ArgumentNullException(nameof(record));
+            var identity = string.IsNullOrWhiteSpace(record.DisplayId)
+                ? record.ViewpointId == null ? string.Empty : record.ViewpointId.Trim()
+                : record.DisplayId.Trim();
+            if (string.IsNullOrWhiteSpace(identity))
+                throw new InvalidDataException("The BIMLog viewpoint has no authoritative export-name identity.");
+            var title = record.Note == null ? string.Empty : record.Note.Trim();
+            return title.Length == 0 ? identity : identity + " - " + title;
+        }
+
+        public static IReadOnlyList<string> UniqueNames(IReadOnlyList<LensNextXmlExportInput> ordered)
+        {
+            if (ordered == null) throw new ArgumentNullException(nameof(ordered));
+            var baseNames = ordered.Select(BaseName).ToArray();
+            var counts = baseNames.GroupBy(value => value, StringComparer.Ordinal)
+                .ToDictionary(group => group.Key, group => group.Count(), StringComparer.Ordinal);
+            return baseNames.Select((value, index) => counts[value] == 1
+                ? value
+                : value + " [" + ordered[index].ServerId + "]").ToArray();
+        }
     }
 
     public static class LensNextXmlExportInputSelector

@@ -15,7 +15,7 @@ namespace BIMLogLensNext
 
         public static void Write(string destinationPath)
         {
-            WriteShell(destinationPath);
+            WriteDocument(destinationPath, new string[0]);
         }
 
         public static IReadOnlyList<LensNextXmlExportInput> Write(
@@ -24,11 +24,11 @@ namespace BIMLogLensNext
             IEnumerable<LensNextXmlExportInput> records)
         {
             var ordered = LensNextXmlExportInputSelector.SelectOrdered(authoritativeProjectId, records);
-            WriteShell(destinationPath);
+            WriteDocument(destinationPath, LensNextXmlExportNamePolicy.UniqueNames(ordered));
             return ordered;
         }
 
-        private static void WriteShell(string destinationPath)
+        private static void WriteDocument(string destinationPath, IReadOnlyList<string> viewNames)
         {
             if (string.IsNullOrWhiteSpace(destinationPath))
                 throw new ArgumentException("An XML output path is required.", nameof(destinationPath));
@@ -62,6 +62,12 @@ namespace BIMLogLensNext
                     writer.WriteStartElement(ViewpointsElementName);
                     writer.WriteStartElement(ViewFolderElementName);
                     writer.WriteAttributeString("name", ViewFolderName);
+                    foreach (var viewName in viewNames)
+                    {
+                        writer.WriteStartElement("view");
+                        writer.WriteAttributeString("name", viewName);
+                        writer.WriteEndElement();
+                    }
                     writer.WriteEndElement();
                     writer.WriteEndElement();
                     writer.WriteEndElement();

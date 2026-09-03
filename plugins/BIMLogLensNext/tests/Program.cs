@@ -77,6 +77,9 @@ namespace BIMLogLensNext.Tests
                 Run("xml_export_input_ties_use_server_id", XmlExportInputTiesUseServerId);
                 Run("xml_export_inputs_reject_cross_project_and_invalid_package", XmlExportInputsRejectCrossProjectAndInvalidPackage);
                 Run("xml_export_inputs_preserve_active_lifecycle_policy", XmlExportInputsPreserveActiveLifecyclePolicy);
+                Run("xml_export_names_use_authoritative_display_and_title", XmlExportNamesUseAuthoritativeDisplayAndTitle);
+                Run("xml_export_names_handle_missing_and_duplicate_titles", XmlExportNamesHandleMissingAndDuplicateTitles);
+                Run("xml_export_names_escape_special_and_preserve_long_titles", XmlExportNamesEscapeSpecialAndPreserveLongTitles);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -163,9 +166,9 @@ namespace BIMLogLensNext.Tests
                 var ordered = LensNextXmlDocumentShellWriter.Write(path, 26, shuffled);
                 Equal("13,12,11", string.Join(",", ordered.Select(value => value.ServerId)));
                 var xml = File.ReadAllText(path);
-                False(xml.Contains("13"));
                 False(xml.Contains("camera"));
                 Equal(1, new XmlDocumentShell(path).ViewFolderCount);
+                Equal("VP-13,VP-12,VP-11", string.Join(",", new XmlDocumentShell(path).ViewNames));
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -203,6 +206,52 @@ namespace BIMLogLensNext.Tests
             Equal(1, selected[0].ServerId);
         }
 
+        private static void XmlExportNamesUseAuthoritativeDisplayAndTitle()
+        {
+            var record = ExportInput(21, 1, null);
+            record.DisplayId = "FI-021";
+            record.Note = "Pipe conflict";
+            Equal("FI-021 - Pipe conflict", LensNextXmlExportNamePolicy.BaseName(record));
+        }
+
+        private static void XmlExportNamesHandleMissingAndDuplicateTitles()
+        {
+            var first = ExportInput(31, 1, null); first.DisplayId = "FI-031";
+            var second = ExportInput(32, 1, null); second.DisplayId = "EL-032"; second.Note = "Shared conflict";
+            var third = ExportInput(33, 1, null); third.DisplayId = "PL-033"; third.Note = "Shared conflict";
+            Equal("FI-031", LensNextXmlExportNamePolicy.BaseName(first));
+            var names = LensNextXmlExportNamePolicy.UniqueNames(new[] { first, second, third });
+            Equal("FI-031,EL-032 - Shared conflict,PL-033 - Shared conflict", string.Join(",", names));
+
+            var duplicate = ExportInput(34, 1, null); duplicate.DisplayId = "FI-031";
+            var disambiguated = LensNextXmlExportNamePolicy.UniqueNames(new[] { first, duplicate });
+            Equal("FI-031 [31],FI-031 [34]", string.Join(",", disambiguated));
+        }
+
+        private static void XmlExportNamesEscapeSpecialAndPreserveLongTitles()
+        {
+            var special = ExportInput(41, 1, null); special.DisplayId = "ME-041"; special.Note = "Pipe & Duct <Conflict> \"A\"";
+            var longTitle = new string('L', 4096);
+            var longRecord = ExportInput(42, 2, null); longRecord.DisplayId = "ME-042"; longRecord.Note = longTitle;
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-xml-names-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "names.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { longRecord, special });
+                var shell = new XmlDocumentShell(path);
+                Equal("ME-041 - Pipe & Duct <Conflict> \"A\"", shell.ViewNames[0]);
+                Equal("ME-042 - " + longTitle, shell.ViewNames[1]);
+                var raw = File.ReadAllText(path);
+                True(raw.Contains("&amp;"));
+                True(raw.Contains("&lt;Conflict&gt;"));
+                True(raw.Contains("&quot;A&quot;"));
+                foreach (var forbidden in new[] { "guid=", "<viewpoint>", "<viewpoint ", "<camera", "position", "rotation", "projection", "focal", "sectioning", "units=", "schema" })
+                    False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
         private static LensNextXmlExportInput ExportInput(int serverId, int? priority, DateTimeOffset? capturedAt)
         {
             var digest = new string('a', 64);
@@ -223,8 +272,10 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null };
                 document.Load(path);
                 ViewFolderCount = document.DocumentElement.SelectNodes("viewpoints/viewfolder").Count;
+                ViewNames = document.DocumentElement.SelectNodes("viewpoints/viewfolder/view").Cast<XmlElement>().Select(value => value.GetAttribute("name")).ToArray();
             }
             public int ViewFolderCount { get; }
+            public IReadOnlyList<string> ViewNames { get; }
         }
 
         private static void IdentifiersAreIsolated()

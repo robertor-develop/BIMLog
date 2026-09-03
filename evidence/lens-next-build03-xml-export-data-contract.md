@@ -281,3 +281,25 @@ Input enumeration/database order is irrelevant. Build 05 emits no `view` node,
 name, GUID, camera value, unit, schema attribute, or sectioning value, and it never
 consults the Navisworks Saved Viewpoints collection.
 
+## Build 06 export-name checkpoint
+
+There is no dedicated authoritative viewpoint-title column. The minimal export-name
+policy therefore uses only existing authoritative BIMLog values:
+
+1. use trimmed `display_id` as the visible identity;
+2. when `display_id` is absent, use trimmed authoritative `viewpoint_id`;
+3. when stored `note` is non-empty, append ` - ` plus the trimmed note;
+4. otherwise emit the identity alone.
+
+The note is the stored BIMLog issue/viewpoint descriptor; no other field is
+promoted into a title. Names are written through `XmlWriter`, so XML metacharacters
+are escaped without changing their parsed value. Long values are preserved without
+randomness or truncation.
+
+The active-project database policy normally makes non-null display IDs unique. If
+two selected records nevertheless produce the same complete visible name, append
+` [serverId]` to each colliding name, using the authoritative positive server ID.
+This is deterministic and changes no BIMLog identifier. Build 06 emits only empty
+`view` elements with a `name` attribute. It emits no GUID, viewpoint/camera payload,
+units, schema attributes, sectioning, or Saved Viewpoint-derived value.
+
