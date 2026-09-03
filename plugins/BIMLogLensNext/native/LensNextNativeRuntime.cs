@@ -81,7 +81,7 @@ namespace BIMLogLensNext.Native
                     adapter,
                     new InlineUiThreadDispatcher(),
                     new ImmutableIdentityResolver(),
-                    true,
+                    Config.ViewpointPublishingEnabled,
                     BridgeOrigin);
 
                 _pump = new LensNextUiRequestPump(bridge, _uiDispatcher);

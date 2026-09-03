@@ -24,7 +24,7 @@ const pullLoop = panel.indexOf("for (const item of pulls)");
 const uploadLoop = panel.indexOf("for (const item of uploads)");
 assert.ok(pullLoop > 0 && uploadLoop > pullLoop, "BIMLog pulls must execute before Navisworks uploads");
 assert.match(panel, /manualConflict > 0 \|\| synchronizationPlan\.blocked > 0/);
-assert.match(panel, /loadVisualState\(issue\)[\s\S]*applyPlatformWorkingView[\s\S]*publishCreatedViewpoint[\s\S]*confirmCreatedLocalViewpoint/);
+assert.match(panel, /loadVisualState\(issue\)[\s\S]*applyPlatformWorkingView[\s\S]*createLocalSavedViewpoint[\s\S]*confirmCreatedLocalViewpoint/);
 assert.match(panel, /captureLocalViewpoint\(viewpoint[\s\S]*uploadLocalViewpoint\(viewpoint/);
 assert.doesNotMatch(panel, /lens-sync|saveNwf|saveNwd/i);
 

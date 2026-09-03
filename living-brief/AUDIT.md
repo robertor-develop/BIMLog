@@ -821,3 +821,37 @@ provider/credential action, publication, deployment, customer access, or unrelat
 ## Lens Next production binding migration — 2026-08-31
 
 - Owner authorization covered the production binding audit and migration. The preflight used a read-only transaction through `PROD_DATABASE_URL`, printed no credential, and proved zero total rows and zero collisions. The committed transaction replaced the global `model_binding_key` unique index with the active project-scoped `(project_id, model_binding_key)` unique index and added the non-unique key lookup index. Post-commit catalog inspection verified the expected four indexes and unchanged zero-row table.
+## Replit Promote startup-liveness failure audit — September 2, 2026
+
+Deployment `8809d211` passed Provision, Security, Build, and Bundle, then failed Promote. Provider logs repeatedly
+reported `/api` health failure while the production process was still importing the application. The same logs show
+`app_import_complete elapsed_ms=23889` followed immediately by `bootstrap_bound port=8080`, proving the application
+was viable but the listener opened after the provider's promotion window. The prior production deployment remained
+live; no database rollback or destructive action occurred.
+
+Corrective source `b2a9df745ba39e2d99c362468086e898850bf212` keeps the P03 storage-authority preflight before any bind, restores
+early listener binding only after that synchronous validation, limits pre-ready HTTP 200 to exact `/api` liveness,
+and keeps canonical readiness and business traffic unavailable until initialization completes. A failed import
+changes bootstrap responses to 503 and closes the listener. This audit records source correction only; successful
+build, push, Replit alignment, controlled Publish, and production verification remain separately evidenced gates.
+
+The subsequent governed clean build passed the full workspace build and API runtime-closure assembly. Controlled
+dual-year packaging passed 54/54 shared contracts, 52/52 native contracts per year, package integrity, and
+package-only installer validation. The exact 2025 delivery candidate is
+`BIMLog-Lens-Next-Navisworks2025-v1.05.N09-P04.zip`, 577566 bytes, SHA-256
+`190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`. Publication and production verification
+remain separate until their provider and live-browser receipts are recorded.
+
+## N09-P04 successful production publication — September 2, 2026
+
+Green release head `0b72c4c14cd53dc43543f2900feeceacec8e3595` was pushed to `origin/main` and
+`origin/master`. The visible Replit Shell completed the full governed build from a clean tree matching the remote.
+Controlled publication `86e8e01a` passed Provision, Security checks, Build, Bundle, and Promote and reported
+HEALTHY. Chrome verified the authenticated production dashboard displays `v1.05.N09-P04`; same-origin requests to
+`/api` and `/api/v1/healthz` both returned HTTP 200. This closes the Platform publication gate without claiming
+Ruben's separate connected Navisworks 2025 field acceptance.
+
+Telegram's provider acknowledged private delivery event
+`bimlog-lens-next-n09-p04-2025-roberto-20260902-v1` at `2026-09-02T14:54:14.6650169Z` for the exact 577566-byte
+2025 archive with SHA-256 `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`.
+Provider acknowledgement is evidence of send acceptance, not independent proof that a Telegram client displayed it.

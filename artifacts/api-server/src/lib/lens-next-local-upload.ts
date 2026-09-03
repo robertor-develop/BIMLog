@@ -11,15 +11,21 @@ const ordinal = (left: string, right: string) => left < right ? -1 : left > righ
 type DigestToken = { field: string; value: string };
 
 export const LENS_NEXT_DIGEST_ALGORITHM = "SHA-256";
+// Missing contract metadata continues to mean v2. This is deliberate historical
+// compatibility; v3 is emitted only by an explicitly upgraded native client.
 export const LENS_NEXT_DIGEST_CONTRACT_VERSION = "lens-next-visual-digest.v2";
 export const LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION = "lens-next-visual-digest.v1";
-type DigestContractVersion = typeof LENS_NEXT_DIGEST_CONTRACT_VERSION | typeof LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION;
+export const LENS_NEXT_DIGEST_CONTRACT_VERSION_V3 = "lens-next-visual-digest.v3";
+export const LENS_NEXT_ELEMENT_REFERENCE_VERSION_V2 = "lens-next-element-reference.v2";
+export const LENS_NEXT_MODEL_REFERENCE_VERSION_V2 = "lens-next-model-reference.v2";
+type DigestContractVersion = typeof LENS_NEXT_DIGEST_CONTRACT_VERSION | typeof LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION | typeof LENS_NEXT_DIGEST_CONTRACT_VERSION_V3;
 
 const digestContractVersion = (state: any): DigestContractVersion => {
   const diagnostics = field(state, "DigestDiagnostics", "digestDiagnostics");
   const requested = String(field(diagnostics, "ContractVersion", "contractVersion") ?? "");
   if (!requested || requested === LENS_NEXT_DIGEST_CONTRACT_VERSION) return LENS_NEXT_DIGEST_CONTRACT_VERSION;
   if (requested === LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION) return LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION;
+  if (requested === LENS_NEXT_DIGEST_CONTRACT_VERSION_V3) return LENS_NEXT_DIGEST_CONTRACT_VERSION_V3;
   throw new LensNextLocalUploadError("visual_state_digest_contract_unsupported", `Unsupported Lens Next visual digest contract: ${requested}`, 409);
 };
 
@@ -41,6 +47,77 @@ const appendDouble = (parts: DigestToken[], name: string, value: unknown, contra
 const appendElement = (parts: DigestToken[], name: string, prefix: string, index: number, value: any) => { append(parts, `${name}[${index}].prefix`, prefix); append(parts, `${name}[${index}].modelSource`, field(value, "ModelSource", "modelSource")); append(parts, `${name}[${index}].instanceGuid`, field(value, "InstanceGuid", "instanceGuid")); };
 const appendPoint = (parts: DigestToken[], name: string, value: any, nullToken: string, contractVersion: DigestContractVersion): void => { if (!value) { append(parts, name, nullToken); return; } appendDouble(parts, `${name}.x`, field(value, "X", "x"), contractVersion); appendDouble(parts, `${name}.y`, field(value, "Y", "y"), contractVersion); appendDouble(parts, `${name}.z`, field(value, "Z", "z"), contractVersion); };
 
+const v3Guid = (value: unknown, fieldName: string): string | null => {
+  if (value == null) return null;
+  const normalized = String(value).trim().replace(/^\{(.+)\}$/, "$1").toLowerCase();
+  if (!/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(normalized))
+    throw new LensNextLocalUploadError("visual_state_identity_invalid", `Lens visual state contains an invalid ${fieldName}.`, 409);
+  return normalized;
+};
+const v3Integer = (value: unknown, fieldName: string): number => {
+  const number = Number(value);
+  if (!Number.isSafeInteger(number)) throw new LensNextLocalUploadError("visual_state_identity_invalid", `Lens visual state contains an invalid ${fieldName}.`, 409);
+  return number;
+};
+const modelReferenceOf = (element: any): any => field(element, "Model", "model") ?? element;
+
+function appendModelReferenceV2(parts: DigestToken[], name: string, value: any): void {
+  append(parts, `${name}.referenceVersion`, field(value, "ReferenceVersion", "referenceVersion"));
+  append(parts, `${name}.modelGuid`, v3Guid(field(value, "ModelGuid", "modelGuid"), `${name}.modelGuid`));
+  append(parts, `${name}.sourceGuid`, v3Guid(field(value, "SourceGuid", "sourceGuid"), `${name}.sourceGuid`));
+  append(parts, `${name}.sourceFileNameNormalized`, field(value, "SourceFileNameNormalized", "sourceFileNameNormalized"));
+  append(parts, `${name}.currentFileNameNormalized`, field(value, "CurrentFileNameNormalized", "currentFileNameNormalized"));
+  append(parts, `${name}.transformFingerprint`, field(value, "TransformFingerprint", "transformFingerprint"));
+  append(parts, `${name}.modelInstanceDiscriminator`, field(value, "ModelInstanceDiscriminator", "modelInstanceDiscriminator"));
+}
+
+function appendElementReferenceV2(parts: DigestToken[], name: string, value: any): void {
+  append(parts, `${name}.referenceVersion`, field(value, "ReferenceVersion", "referenceVersion"));
+  append(parts, `${name}.persistenceScope`, field(value, "PersistenceScope", "persistenceScope"));
+  append(parts, `${name}.strategy`, field(value, "Strategy", "strategy"));
+  appendModelReferenceV2(parts, `${name}.model`, modelReferenceOf(value));
+  append(parts, `${name}.instanceGuid`, v3Guid(field(value, "InstanceGuid", "instanceGuid"), `${name}.instanceGuid`));
+  const stable = field(value, "StableCategoryId", "stableCategoryId");
+  append(parts, `${name}.stableCategoryId.categoryName`, field(stable, "CategoryName", "categoryName"));
+  append(parts, `${name}.stableCategoryId.valueKind`, field(stable, "ValueKind", "valueKind"));
+  append(parts, `${name}.stableCategoryId.value`, field(stable, "Value", "value"));
+  const source = field(value, "SourceElementId", "sourceElementId");
+  append(parts, `${name}.sourceElementId.namespace`, field(source, "Namespace", "namespace"));
+  append(parts, `${name}.sourceElementId.categoryName`, field(source, "CategoryName", "categoryName"));
+  append(parts, `${name}.sourceElementId.propertyName`, field(source, "PropertyName", "propertyName"));
+  append(parts, `${name}.sourceElementId.valueType`, field(source, "ValueType", "valueType"));
+  append(parts, `${name}.sourceElementId.value`, field(source, "Value", "value"));
+  const pathValue = field(value, "HierarchyIndexPath", "hierarchyIndexPath");
+  const path = pathValue == null ? null : Array.isArray(pathValue) ? pathValue.map((segment, index) => v3Integer(segment, `${name}.hierarchyIndexPath[${index}]`)) : (() => { throw new LensNextLocalUploadError("visual_state_identity_invalid", `Lens visual state contains an invalid ${name}.hierarchyIndexPath.`, 409); })();
+  append(parts, `${name}.hierarchyIndexPath.length`, path?.length ?? null);
+  path?.forEach((segment, index) => append(parts, `${name}.hierarchyIndexPath[${index}]`, segment));
+  const confirmation = field(value, "Confirmation", "confirmation");
+  append(parts, `${name}.confirmation.className`, field(confirmation, "ClassName", "className"));
+  append(parts, `${name}.confirmation.displayName`, field(confirmation, "DisplayName", "displayName"));
+  append(parts, `${name}.confirmation.stablePropertyFingerprint`, field(confirmation, "StablePropertyFingerprint", "stablePropertyFingerprint"));
+}
+
+const canonicalTokensForSort = (appendReference: (parts: DigestToken[], name: string, value: any) => void, value: any): string => {
+  const parts: DigestToken[] = [];
+  appendReference(parts, "sort", value);
+  return parts.map(token => `${Buffer.byteLength(token.value, "utf8")}:${token.value}`).join("|");
+};
+
+function validateV3ModelReference(value: any, name: string): void {
+  if (!value || typeof value !== "object" || field(value, "ReferenceVersion", "referenceVersion") !== LENS_NEXT_MODEL_REFERENCE_VERSION_V2)
+    throw new LensNextLocalUploadError("visual_state_identity_invalid", `${name} must use ${LENS_NEXT_MODEL_REFERENCE_VERSION_V2}.`, 409);
+}
+
+function validateV3ElementReference(value: any, name: string): void {
+  if (!value || typeof value !== "object" || field(value, "ReferenceVersion", "referenceVersion") !== LENS_NEXT_ELEMENT_REFERENCE_VERSION_V2)
+    throw new LensNextLocalUploadError("visual_state_identity_invalid", `${name} must use ${LENS_NEXT_ELEMENT_REFERENCE_VERSION_V2}.`, 409);
+  if (!["same-document-reopen", "source-version-stable", "source-reload-stable"].includes(String(field(value, "PersistenceScope", "persistenceScope"))))
+    throw new LensNextLocalUploadError("visual_state_identity_invalid", `${name} has an invalid persistence scope.`, 409);
+  if (!["instance-guid", "autodesk-stable-id", "source-element-id", "exact-tree-path"].includes(String(field(value, "Strategy", "strategy"))))
+    throw new LensNextLocalUploadError("visual_state_identity_invalid", `${name} has an invalid strategy.`, 409);
+  validateV3ModelReference(modelReferenceOf(value), `${name}.model`);
+}
+
 function lensNextVisualStateDigestTokens(state: any, contractVersion = digestContractVersion(state)): DigestToken[] {
   const parts: DigestToken[] = [];
   append(parts, "schemaVersion", field(state, "SchemaVersion", "schemaVersion")); append(parts, "projectId", field(state, "ProjectId", "projectId"));
@@ -56,20 +133,50 @@ function lensNextVisualStateDigestTokens(state: any, contractVersion = digestCon
     append(parts, "camera.projection", field(camera, "Projection", "projection")); appendDouble(parts, "camera.focalDistance", field(camera, "FocalDistance", "focalDistance"), contractVersion);
     appendDouble(parts, "camera.horizontalExtentAtFocalDistance", field(camera, "HorizontalExtentAtFocalDistance", "horizontalExtentAtFocalDistance"), contractVersion); appendDouble(parts, "camera.verticalExtentAtFocalDistance", field(camera, "VerticalExtentAtFocalDistance", "verticalExtentAtFocalDistance"), contractVersion);
   }
-  [...(field(state, "SelectedElements", "selectedElements") ?? [])].sort((a,b) => ordinal(elementKey(a), elementKey(b))).forEach((value, index) => appendElement(parts, "selected", "S", index, value));
-  [...(field(state, "HiddenElements", "hiddenElements") ?? [])].sort((a,b) => ordinal(elementKey(a), elementKey(b))).forEach((value, index) => appendElement(parts, "hidden", "H", index, value));
-  [...(field(state, "AppearanceOverrides", "appearanceOverrides") ?? [])].sort((a,b) => ordinal(elementKey(field(a,"Element","element")), elementKey(field(b,"Element","element")))).forEach((value, index) => {
-    appendElement(parts, "appearance", "A", index, field(value, "Element", "element")); append(parts, `appearance[${index}].red`, field(value, "Red", "red")); append(parts, `appearance[${index}].green`, field(value, "Green", "green")); append(parts, `appearance[${index}].blue`, field(value, "Blue", "blue")); appendDouble(parts, `appearance[${index}].transparency`, field(value, "Transparency", "transparency"), contractVersion);
-  });
-  [...(field(state, "ModelReferences", "modelReferences") ?? [])].sort((a,b) => ordinal(String(field(a,"Source","source") ?? ""), String(field(b,"Source","source") ?? ""))).forEach((value, index) => {
-    append(parts, `models[${index}].source`, field(value,"Source","source")); append(parts, `models[${index}].modelGuid`, field(value,"ModelGuid","modelGuid")); append(parts, `models[${index}].transformFingerprint`, field(value,"TransformFingerprint","transformFingerprint"));
-  });
+  if (contractVersion === LENS_NEXT_DIGEST_CONTRACT_VERSION_V3) {
+    const selected = [...(field(state, "SelectedElements", "selectedElements") ?? [])];
+    const hidden = [...(field(state, "HiddenElements", "hiddenElements") ?? [])];
+    const appearance = [...(field(state, "AppearanceOverrides", "appearanceOverrides") ?? [])];
+    const models = [...(field(state, "ModelReferences", "modelReferences") ?? [])];
+    selected.forEach((value, index) => validateV3ElementReference(value, `selected[${index}]`));
+    hidden.forEach((value, index) => validateV3ElementReference(value, `hidden[${index}]`));
+    appearance.forEach((value, index) => validateV3ElementReference(field(value, "Element", "element"), `appearance[${index}].element`));
+    models.forEach((value, index) => validateV3ModelReference(value, `models[${index}]`));
+    append(parts, "selected.length", selected.length);
+    selected.sort((a,b) => ordinal(canonicalTokensForSort(appendElementReferenceV2, a), canonicalTokensForSort(appendElementReferenceV2, b))).forEach((value, index) => {
+      append(parts, `selected[${index}].prefix`, "S"); appendElementReferenceV2(parts, `selected[${index}]`, value);
+    });
+    append(parts, "hidden.length", hidden.length);
+    hidden.sort((a,b) => ordinal(canonicalTokensForSort(appendElementReferenceV2, a), canonicalTokensForSort(appendElementReferenceV2, b))).forEach((value, index) => {
+      append(parts, `hidden[${index}].prefix`, "H"); appendElementReferenceV2(parts, `hidden[${index}]`, value);
+    });
+    append(parts, "appearance.length", appearance.length);
+    appearance.sort((a,b) => ordinal(canonicalTokensForSort(appendElementReferenceV2, field(a,"Element","element")), canonicalTokensForSort(appendElementReferenceV2, field(b,"Element","element")))).forEach((value, index) => {
+      append(parts, `appearance[${index}].prefix`, "A"); appendElementReferenceV2(parts, `appearance[${index}].element`, field(value, "Element", "element"));
+      append(parts, `appearance[${index}].red`, field(value, "Red", "red")); append(parts, `appearance[${index}].green`, field(value, "Green", "green")); append(parts, `appearance[${index}].blue`, field(value, "Blue", "blue")); appendDouble(parts, `appearance[${index}].transparency`, field(value, "Transparency", "transparency"), contractVersion);
+    });
+    append(parts, "models.length", models.length);
+    models.sort((a,b) => ordinal(canonicalTokensForSort(appendModelReferenceV2, a), canonicalTokensForSort(appendModelReferenceV2, b))).forEach((value, index) => appendModelReferenceV2(parts, `models[${index}]`, value));
+  } else {
+    [...(field(state, "SelectedElements", "selectedElements") ?? [])].sort((a,b) => ordinal(elementKey(a), elementKey(b))).forEach((value, index) => appendElement(parts, "selected", "S", index, value));
+    [...(field(state, "HiddenElements", "hiddenElements") ?? [])].sort((a,b) => ordinal(elementKey(a), elementKey(b))).forEach((value, index) => appendElement(parts, "hidden", "H", index, value));
+    [...(field(state, "AppearanceOverrides", "appearanceOverrides") ?? [])].sort((a,b) => ordinal(elementKey(field(a,"Element","element")), elementKey(field(b,"Element","element")))).forEach((value, index) => {
+      appendElement(parts, "appearance", "A", index, field(value, "Element", "element")); append(parts, `appearance[${index}].red`, field(value, "Red", "red")); append(parts, `appearance[${index}].green`, field(value, "Green", "green")); append(parts, `appearance[${index}].blue`, field(value, "Blue", "blue")); appendDouble(parts, `appearance[${index}].transparency`, field(value, "Transparency", "transparency"), contractVersion);
+    });
+    [...(field(state, "ModelReferences", "modelReferences") ?? [])].sort((a,b) => ordinal(String(field(a,"Source","source") ?? ""), String(field(b,"Source","source") ?? ""))).forEach((value, index) => {
+      append(parts, `models[${index}].source`, field(value,"Source","source")); append(parts, `models[${index}].modelGuid`, field(value,"ModelGuid","modelGuid")); append(parts, `models[${index}].transformFingerprint`, field(value,"TransformFingerprint","transformFingerprint"));
+    });
+  }
   append(parts, "sectioningJson", field(state,"SectioningJson","sectioningJson")); append(parts, "redlinesJson", field(state,"RedlinesJson","redlinesJson")); append(parts, "screenshotSha256", field(state,"ScreenshotSha256","screenshotSha256"));
   return parts;
 }
 
 const canonicalInput = (tokens: DigestToken[]) => tokens.map(token => `${token.value}\u001f`).join("");
 const sha256 = (canonical: string) => createHash("sha256").update(canonical, "utf8").digest("hex");
+
+export function lensNextVisualStateCanonicalInput(state: any): string {
+  return canonicalInput(lensNextVisualStateDigestTokens(state));
+}
 
 export function lensNextVisualStateDigest(state: any): string {
   const contractVersion = digestContractVersion(state);
@@ -156,9 +263,141 @@ function verifiedScreenshotDataUrl(state: any): string | null {
   return dataUrl;
 }
 
+const LENS_NEXT_NAVIGATION_CONTRACT_VERSION = "lens-next-navigation.v1";
+
+const isLensNextNavigationView = (value: any): boolean =>
+  String(field(value, "ContractVersion", "contractVersion") ?? "") === LENS_NEXT_NAVIGATION_CONTRACT_VERSION;
+
+function lensNextNavigationDigestTokens(value: any): DigestToken[] {
+  const parts: DigestToken[] = [];
+  append(parts, "contractVersion", field(value, "ContractVersion", "contractVersion"));
+  append(parts, "schemaVersion", field(value, "SchemaVersion", "schemaVersion"));
+  append(parts, "projectId", field(value, "ProjectId", "projectId"));
+  append(parts, "serverId", field(value, "ServerId", "serverId"));
+  append(parts, "viewpointId", field(value, "ViewpointId", "viewpointId"));
+  append(parts, "lifecycleStatus", field(value, "LifecycleStatus", "lifecycleStatus"));
+  append(parts, "revisionNumber", field(value, "RevisionNumber", "revisionNumber"));
+  append(parts, "modelFingerprint", field(value, "ModelFingerprint", "modelFingerprint"));
+  const camera = field(value, "Camera", "camera");
+  if (!camera) append(parts, "camera", "camera:null"); else {
+    appendPoint(parts, "camera.position", field(camera, "Position", "position"), "point:null", LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    const rotation = field(camera, "Rotation", "rotation");
+    if (!rotation) append(parts, "camera.rotation", "rotation:null"); else {
+      appendDouble(parts, "camera.rotation.a", field(rotation, "A", "a"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+      appendDouble(parts, "camera.rotation.b", field(rotation, "B", "b"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+      appendDouble(parts, "camera.rotation.c", field(rotation, "C", "c"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+      appendDouble(parts, "camera.rotation.d", field(rotation, "D", "d"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    }
+    appendPoint(parts, "camera.worldUpVector", field(camera, "WorldUpVector", "worldUpVector"), "point:null", LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    append(parts, "camera.projection", field(camera, "Projection", "projection"));
+    appendDouble(parts, "camera.focalDistance", field(camera, "FocalDistance", "focalDistance"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    appendDouble(parts, "camera.horizontalExtentAtFocalDistance", field(camera, "HorizontalExtentAtFocalDistance", "horizontalExtentAtFocalDistance"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+    appendDouble(parts, "camera.verticalExtentAtFocalDistance", field(camera, "VerticalExtentAtFocalDistance", "verticalExtentAtFocalDistance"), LENS_NEXT_DIGEST_CONTRACT_VERSION_V3);
+  }
+  append(parts, "sectioningJson", field(value, "SectioningJson", "sectioningJson"));
+  const selected = field(value, "SelectedElements", "selectedElements") ?? [];
+  if (!Array.isArray(selected) || selected.length !== 0)
+    throw new LensNextLocalUploadError("navigation_selection_unsupported", "Navigation v1 accepts no selected elements unless bounded deterministic capture is available.", 409);
+  append(parts, "selected.length", 0);
+  return parts;
+}
+
+export const lensNextNavigationDigest = (value: any): string => sha256(canonicalInput(lensNextNavigationDigestTokens(value)));
+
+function validateNavigationView(value: any, suppliedDigest: string, expected: LensNextPersistedVisualStateIdentity): string {
+  if (!value || typeof value !== "object" || Array.isArray(value) || !isLensNextNavigationView(value) || Number(field(value, "SchemaVersion", "schemaVersion")) !== 1 || !field(value, "Camera", "camera"))
+    throw new LensNextLocalUploadError("navigation_view_invalid", "BIMLog navigation view is invalid or has no camera.", 422);
+  const supplied = String(suppliedDigest ?? "").trim().toLowerCase();
+  const embedded = String(field(value, "DigestSha256", "digestSha256") ?? "").trim().toLowerCase();
+  const recomputed = lensNextNavigationDigest(value);
+  if (!/^[a-f0-9]{64}$/.test(supplied) || supplied !== embedded || embedded !== recomputed)
+    throw new LensNextLocalUploadError("navigation_digest_mismatch", "BIMLog navigation digest validation failed.", 409, { contractVersion: LENS_NEXT_NAVIGATION_CONTRACT_VERSION, localDigest: embedded, serverDigest: recomputed });
+  if (Number(field(value, "ProjectId", "projectId")) !== expected.projectId || Number(field(value, "ServerId", "serverId")) !== expected.serverId || String(field(value, "ViewpointId", "viewpointId")) !== expected.viewpointId || String(field(value, "LifecycleStatus", "lifecycleStatus")) !== expected.lifecycleStatus || Number(field(value, "RevisionNumber", "revisionNumber")) !== expected.revisionNumber)
+    throw new LensNextLocalUploadError("navigation_identity_mismatch", "BIMLog navigation identity does not match the issue record.", 409);
+  return supplied;
+}
+
+export type LensNextPersistedVisualStateIdentity = {
+  projectId: number;
+  serverId: number;
+  viewpointId: string;
+  lifecycleStatus: string;
+  revisionNumber: number;
+};
+
+const isHistoricalUnversionedVisualState = (state: any): boolean => {
+  const contractVersion = String(field(state, "ContractVersion", "contractVersion") ?? "").trim();
+  const diagnostics = field(state, "DigestDiagnostics", "digestDiagnostics");
+  return !contractVersion && diagnostics == null;
+};
+
+export function validatePersistedLensNextVisualState(
+  visualStateJson: string,
+  visualStateDigest: string,
+  expected: LensNextPersistedVisualStateIdentity,
+): { state: Record<string, unknown>; digest: string; contractVersion: string } {
+  let state: any;
+  try { state = JSON.parse(visualStateJson); }
+  catch { throw new LensNextLocalUploadError("visual_state_json_invalid", "BIMLog visual-state JSON is invalid.", 422); }
+  if (!state || typeof state !== "object" || Array.isArray(state))
+    throw new LensNextLocalUploadError("visual_state_invalid", "BIMLog visual-state package is invalid.", 422);
+  if (isLensNextNavigationView(state)) return { state, digest: validateNavigationView(state, visualStateDigest, expected), contractVersion: LENS_NEXT_NAVIGATION_CONTRACT_VERSION };
+  const supplied = String(visualStateDigest ?? "").trim().toLowerCase();
+  const embedded = String(field(state, "DigestSha256", "digestSha256") ?? "").trim().toLowerCase();
+  const contractVersion = digestContractVersion(state);
+  const recomputed = lensNextVisualStateDigest(state);
+  const evidence = nativeCanonicalEvidence(state);
+  const serverTokens = lensNextVisualStateDigestTokens(state, contractVersion);
+  const identityMatches = Number(field(state, "ProjectId", "projectId")) === expected.projectId
+    && Number(field(state, "ServerId", "serverId")) === expected.serverId
+    && String(field(state, "ViewpointId", "viewpointId")) === expected.viewpointId
+    && String(field(state, "LifecycleStatus", "lifecycleStatus")) === expected.lifecycleStatus
+    && Number(field(state, "RevisionNumber", "revisionNumber")) === expected.revisionNumber;
+  const verifiedLegacyCanonical = contractVersion === LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION
+    && evidence.algorithm === LENS_NEXT_DIGEST_ALGORITHM
+    && evidence.contractVersion === LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION
+    && evidence.computedDigest === embedded
+    && evidence.canonical.length > 0
+    && sha256(evidence.canonical) === embedded
+    && legacyCanonicalMatchesState(serverTokens, evidence.tokens);
+  if (!/^[a-f0-9]{64}$/.test(supplied) || supplied !== embedded || (recomputed !== embedded && !verifiedLegacyCanonical)) {
+    const diagnostics = digestMismatchDiagnostics(state, embedded, recomputed);
+    if (/^[a-f0-9]{64}$/.test(supplied) && supplied === embedded && identityMatches && isHistoricalUnversionedVisualState(state)) {
+      throw new LensNextLocalUploadError(
+        "historical_digest_evidence_unavailable",
+        "This historical BIMLog Visual Package predates persisted digest-contract evidence and cannot be cryptographically verified. Recreate the issue in Lens Next to establish an authoritative working view.",
+        409,
+        {
+          ...diagnostics,
+          classification: "historical-unversioned-quarantine",
+          captureSource: field(state, "CaptureSource", "captureSource"),
+          capturedAt: field(state, "CapturedAt", "capturedAt"),
+          storedAndEmbeddedDigestMatch: true,
+          historicalCanonicalEvidenceAvailable: false,
+        },
+      );
+    }
+    throw new LensNextLocalUploadError("visual_state_digest_mismatch", "BIMLog visual-state digest validation failed.", 409, diagnostics);
+  }
+  if (!identityMatches)
+    throw new LensNextLocalUploadError("visual_state_identity_mismatch", "BIMLog visual-state identity does not match the issue record.", 409);
+  return { state, digest: supplied, contractVersion };
+}
+
 export function validateAndRebindLocalVisualState(raw: unknown, input: { projectId: number; serverId: number; viewpointId: string; modelFingerprint: string }): { json: string; digest: string; screenshotDataUrl: string | null } {
   if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new LensNextLocalUploadError("visual_state_invalid", "Exact local visual state is required.");
   const state = structuredClone(raw as Record<string, unknown>) as any;
+  if (isLensNextNavigationView(state)) {
+    const capturedDigest = String(field(state, "DigestSha256", "digestSha256") ?? "").trim().toLowerCase();
+    const captured = lensNextNavigationDigest(state);
+    if (!/^[a-f0-9]{64}$/.test(capturedDigest) || capturedDigest !== captured || Number(field(state, "ProjectId", "projectId")) !== input.projectId || Number(field(state, "ServerId", "serverId")) !== 1 || String(field(state, "ModelFingerprint", "modelFingerprint")) !== input.modelFingerprint)
+      throw new LensNextLocalUploadError("navigation_capture_invalid", "The captured lightweight navigation view failed integrity or context validation.", 409);
+    state.ProjectId = input.projectId; state.ServerId = input.serverId; state.ViewpointId = input.viewpointId; state.LifecycleStatus = "active"; state.RevisionNumber = 1;
+    state.DigestSha256 = lensNextNavigationDigest(state);
+    const json = JSON.stringify(state);
+    if (Buffer.byteLength(json, "utf8") > 4 * 1024 * 1024) throw new LensNextLocalUploadError("navigation_view_too_large", "Lens navigation view exceeds the 4 MiB limit.", 413);
+    return { json, digest: state.DigestSha256, screenshotDataUrl: verifiedScreenshotDataUrl(state) };
+  }
   const contractVersion = digestContractVersion(state);
   const embedded = String(field(state,"DigestSha256","digestSha256") ?? "").toLowerCase();
   const recomputed = lensNextVisualStateDigest(state);

@@ -105,7 +105,7 @@ export interface LensNextApiClient {
   saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, signal?: AbortSignal): Promise<void>;
   loadVisualState(issue: LensNextIssue, signal?: AbortSignal): Promise<{ visualStateJson: string; visualStateDigest: string }>;
   uploadLocalViewpoint(localViewpoint: LensNextLocalViewpoint, modelFingerprint: string, visualState: Record<string, unknown>, confirmationReason: string, signal?: AbortSignal): Promise<LensNextLocalUploadReceipt>;
-  createViewpoint(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal): Promise<LensNextCreateReceipt>;
+  createIssue(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal): Promise<LensNextCreateReceipt>;
   confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, confirmationReason: string, signal?: AbortSignal): Promise<void>;
 }
 
@@ -127,7 +127,7 @@ export function createLensNextApiClient(
   const post = async (path: string, body: unknown, signal?: AbortSignal): Promise<unknown> => {
     const response = await fetchImpl(`${base}${path}`, {
       method: "POST", credentials: "same-origin",
-      headers: { Accept: "application/json", Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}`, "Content-Type": "application/json; charset=utf-8" },
       body: JSON.stringify(body), signal,
     });
     return jsonBody(response, "BIMLog controlled publish");
@@ -242,14 +242,14 @@ export function createLensNextApiClient(
       if (body.success !== true || body.created !== true || !Number.isSafeInteger(receipt.serverId) || receipt.serverId <= 0 || receipt.viewpointId !== localViewpoint.viewpointId || receipt.navisworksGuid.toLowerCase() !== localViewpoint.navisworksGuid.toLowerCase() || !/^[a-f0-9]{64}$/.test(receipt.visualStateDigest)) throw new Error("Atomic local upload receipt is invalid");
       return Object.freeze(receipt);
     },
-    async createViewpoint(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal) {
+    async createIssue(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal) {
       const raw = await post(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-next/issues/create`, {
         contractVersion: "lens-next-create.v1", confirmed: true, confirmationReason: confirmationReason.trim(), viewpointId, modelFingerprint, visualState, issue,
       }, signal);
-      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Atomic viewpoint creation receipt is invalid");
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("Atomic issue creation receipt is invalid");
       const body = raw as Record<string, any>, result = body.result as Record<string, unknown>;
       const receipt = { serverId: Number(result?.serverId), viewpointId: String(result?.viewpointId ?? ""), visualStateDigest: String(result?.visualStateDigest ?? ""), revisionNumber: Number(result?.revisionNumber), lifecycleStatus: String(result?.lifecycleStatus ?? ""), displayId: String(result?.displayId ?? ""), displayCode: String(result?.displayCode ?? "") };
-      if (body.success !== true || body.created !== true || !Number.isSafeInteger(receipt.serverId) || receipt.serverId <= 0 || receipt.viewpointId !== viewpointId || !/^[a-f0-9]{64}$/.test(receipt.visualStateDigest) || receipt.revisionNumber !== 1 || receipt.lifecycleStatus !== "active" || !receipt.displayId || receipt.displayCode !== receipt.displayId) throw new Error("Atomic viewpoint creation receipt is invalid");
+      if (body.success !== true || body.created !== true || !Number.isSafeInteger(receipt.serverId) || receipt.serverId <= 0 || receipt.viewpointId !== viewpointId || !/^[a-f0-9]{64}$/.test(receipt.visualStateDigest) || receipt.revisionNumber !== 1 || receipt.lifecycleStatus !== "active" || !receipt.displayId || receipt.displayCode !== receipt.displayId) throw new Error("Atomic issue creation receipt is invalid");
       return Object.freeze(receipt) as LensNextCreateReceipt;
     },
     async confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, confirmationReason: string, signal?: AbortSignal) {
@@ -344,6 +344,7 @@ export interface LensNextBridgeClient {
     issue: LensNextIssue,
     context: LensNextBridgeProjectContext,
     visualStateJson: string,
+    visualStateDigest: string,
     signal?: AbortSignal,
   ): Promise<LensNextOpenWorkingViewResult>;
   captureCurrentVisualState(
@@ -352,8 +353,8 @@ export interface LensNextBridgeClient {
     signal?: AbortSignal,
   ): Promise<{ visualStateJson: string; visualStateDigest: string }>;
   captureLocalViewpoint(localViewpoint: LensNextLocalViewpoint, context: LensNextBridgeProjectContext, signal?: AbortSignal): Promise<LensNextLocalCapture>;
-  captureNewViewpoint(viewpointId: string, context: LensNextBridgeProjectContext, signal?: AbortSignal): Promise<Record<string, unknown>>;
-  publishCreatedViewpoint(receipt: LensNextCreateReceipt, context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal): Promise<string>;
+  captureNewIssueNavigationView(viewpointId: string, context: LensNextBridgeProjectContext, signal?: AbortSignal): Promise<Record<string, unknown>>;
+  createLocalSavedViewpoint(receipt: LensNextCreateReceipt, context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal): Promise<string>;
   materializeMyView(items: readonly LensNextLayoutItem[], context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal): Promise<LensNextLayoutReceipt>;
 }
 
@@ -411,7 +412,7 @@ export function createLensNextBridgeClient(
   const requestHeaders = () => ({
     Accept: "application/json",
     Authorization: `Bearer ${sessionToken}`,
-    "Content-Type": "application/json",
+    "Content-Type": "application/json; charset=utf-8",
     "X-BIMLog-Lens-Next-Protocol": "1",
   });
   const fetchWithSessionRenewal: FetchLike = async (input, init) => {
@@ -586,9 +587,11 @@ export function createLensNextBridgeClient(
       issue: LensNextIssue,
       context: LensNextBridgeProjectContext,
       visualStateJson: string,
+      visualStateDigest: string,
       signal?: AbortSignal,
     ) {
       if (!visualStateJson.trim()) throw new Error("platform_visual_state_unavailable");
+      if (!/^[0-9a-f]{64}$/i.test(visualStateDigest)) throw new Error("platform_visual_state_digest_invalid");
       const request = createLensNextOpenWorkingViewRequest(
         issue.identity,
         context,
@@ -601,7 +604,7 @@ export function createLensNextBridgeClient(
         body: JSON.stringify({
           ...request,
           command: "apply-working-view",
-          fields: { ...request.fields, visualStateJson },
+          fields: { ...request.fields, visualStateDigest: visualStateDigest.toLowerCase(), visualStateJson },
         }),
         signal,
       });
@@ -643,17 +646,19 @@ export function createLensNextBridgeClient(
       if (!echoed || !visualState || typeof visualState !== "object" || Array.isArray(visualState) || String(echoed.NavisworksGuid ?? echoed.navisworksGuid).toLowerCase() !== localViewpoint.navisworksGuid.toLowerCase()) throw new Error("Bridge local capture identity mismatch");
       return Object.freeze({ localViewpoint, visualState: visualState as Record<string, unknown> });
     },
-    async captureNewViewpoint(viewpointId: string, context: LensNextBridgeProjectContext, signal?: AbortSignal) {
+    async captureNewIssueNavigationView(viewpointId: string, context: LensNextBridgeProjectContext, signal?: AbortSignal) {
       if (!context.projectId) throw new Error("A bound BIMLog project is required");
       const requestId = requestIdFactory();
       const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/capture-new-viewpoint`, { method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal,
         body: JSON.stringify({ protocolVersion: 1, command: "capture-new-viewpoint", requestId, idempotencyKey: requestId, fields: { sessionId: context.sessionId, projectId: String(context.projectId), viewpointId, modelFingerprint: context.modelFingerprint, includeScreenshot: "true" } }) });
-      const raw = await jsonBody(response, "Lens Next new viewpoint capture"), body = bridgePayload(raw, "new_viewpoint_captured");
-      const state = body.visualState;
-      if (!state || typeof state !== "object" || Array.isArray(state)) throw new Error("Bridge new viewpoint capture is invalid");
-      return state as Record<string, unknown>;
+      const raw = await jsonBody(response, "Lens Next new issue navigation capture"), body = bridgePayload(raw, "new_viewpoint_captured");
+      const navigation = body.navigationView;
+      if (!navigation || typeof navigation !== "object" || Array.isArray(navigation)) throw new Error("Bridge new issue navigation capture is invalid");
+      const contract = String((navigation as Record<string, unknown>).ContractVersion ?? (navigation as Record<string, unknown>).contractVersion ?? "");
+      if (contract !== "lens-next-navigation.v1") throw new Error("Bridge returned the wrong navigation contract");
+      return navigation as Record<string, unknown>;
     },
-    async publishCreatedViewpoint(receipt: LensNextCreateReceipt, context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal) {
+    async createLocalSavedViewpoint(receipt: LensNextCreateReceipt, context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal) {
       if (!context.projectId) throw new Error("A bound BIMLog project is required");
       const requestId = requestIdFactory();
       const fields = { sessionId: context.sessionId, projectId: String(context.projectId), serverId: String(receipt.serverId), viewpointId: receipt.viewpointId, lifecycleStatus: receipt.lifecycleStatus, revisionNumber: String(receipt.revisionNumber), modelFingerprint: context.modelFingerprint, displayName: receipt.displayCode, confirmationReason, operationId: requestId, expectedVisualDigest: receipt.visualStateDigest, updateExisting: "false", publishedRecordId: "", publishedNavisworksGuid: "", publishVersion: "" };

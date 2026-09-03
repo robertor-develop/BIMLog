@@ -284,3 +284,58 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 
 - The first shared-version release starts exactly at `v1.05.N01-P01`; legacy `v1.0.51` is not converted into either counter. Human-facing labels, manifests, installers, receipts, and archive names use the shared label. Windows DLL and Autodesk `AppVersion` fields use compatible numeric identity `1.5.1.1`.
 - Shared core contracts pass 35/35 and both Navisworks 2021 and 2025 year suites pass 37/37. The deterministic 2021 ZIP SHA-256 is `5550AB22CF483A87CF19EB4B411EEDFACC3DC14DB4E1958FF3E251D35CB89B77`; the 2025 ZIP SHA-256 is `7953460FEA83D380A99F28C60C32D590A8BE01B24F4C0E12A022978E9883C028`.
+
+## Lens Next long-running Working View apply contract
+
+- A normal `apply-working-view` command is one correlated logical operation. Its request ID and exact payload fingerprint provide native idempotency: identical retries join the same in-flight/completed result, while reuse with a different payload fails closed.
+- Total elapsed time is not an apply failure. The synchronous bridge waits for real UI-thread completion and emits cumulative stage timing for validation, authoritative digest verification, rollback capture, one-pass model/reference resolution, camera, sectioning, visibility, appearance, selection, implicit Navisworks redraw, and completion/failure.
+- Digest validation is strict and precedes mutation. The platform's persisted digest, the received package digest, and the native recomputation must match the same contract. The native apply resolves all referenced items before the first mutation and retains full-fidelity atomic rollback behavior.
+- The embedded UI disables repeated Open Working View activation while the operation is active and reports success only after native completion. Health/session renewal does not restart the runtime or navigate the WebView, and the health tick does not continuously normalize the floating window.
+
+## Lens Next v1.05.N03-P01 dual-year package identity
+
+- `v1.05.N03-P01` is the packaged form of the long-running Working View apply contract. It increments only the Lens Next N counter from N02 to N03 and preserves the independently owned Platform/APU P01 counter. Windows DLL and Autodesk metadata use numeric version `1.5.3.1`.
+- Shared contracts pass 35/35 and both Navisworks 2021 and 2025 native suites pass 45/45. The 2021 ZIP SHA-256 is `65B08F00D0940FD8014598510B4110C40D237C8C3299ED6C75C51DDA276B9306`; the 2025 ZIP SHA-256 is `A9020A628DDA1EB9424122B914C840A4638E5008E607D6B4FD20C6B5C6BC9E99`.
+- Packaging changes no BIMLog source-of-truth boundary: Working View consumes the selected platform package, rejects digest or identity conflicts before mutation, and never substitutes a local Saved Viewpoint.
+## Lens Next digest v3 coordination boundary
+
+- New native packages may emit `lens-next-visual-digest.v3` only after the Platform deployment is verified to accept v1, v2, and v3. Historical packages retain their original contract version and are never migrated.
+- Native and Platform implementations must consume `contracts/lens-next/lens-next-visual-digest-v3-vectors.json` as the single A–L byte/digest authority. ElementReference v2 and ModelReference v2 fields are authoritative and any mutation must fail validation.
+- The current shared Lens field identity remains `v1.05.N05-P01`. Platform owns the next P-only increment to `v1.05.N05-P02`; Lens Next must preserve P02 when the complete N06 candidate is eventually authorized.
+
+## Lens Next v1.05.N08-P02 historical-digest release
+
+- N08 preserves the Platform/APU-owned P02 counter and advances only the Lens-owned N counter.
+  Human/package identity is `v1.05.N08-P02`; Windows DLL and Autodesk metadata use `1.5.8.2`.
+- The shared native contract consumes the same permanent historical-unversioned vector as the
+  Platform and proves that the old stored digest remains embedded while current v2 bytes compute a
+  different digest. That package remains quarantined honestly instead of being guessed or rewritten.
+- Shared core contracts pass 54/54. The Navisworks 2021 and 2025 native suites pass 51/51 each;
+  package integrity, release identity, and package-only installer checks pass for both years.
+- The deterministic 2021 ZIP is 587910 bytes with SHA-256
+  `D31990B0186BE45C7521A69F377C6DA6F76DCE9171222BE75FE72606FC0AA438`. The deterministic 2025 ZIP
+  is 590734 bytes with SHA-256
+  `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112` and contains the 2025 BAT installer.
+
+## Lens Next v1.05.N08-P03 platform-startup release identity
+
+- P03 advances only the Platform/APU-owned P counter and preserves Lens-owned N08. Human/package identity
+  is `v1.05.N08-P03`; Windows DLL and Autodesk metadata use `1.5.8.3` for both Navisworks years.
+- The native Lens behavior remains the reviewed N08 implementation. Both 2021 and 2025 packages are rebuilt
+  from the same controlled source so their displayed shared release identity remains aligned with Platform.
+- Shared core contracts pass 54/54 and both Navisworks 2021 and 2025 adapters pass 51/51. Package integrity,
+  package-only installers, and release-identity consistency pass for both years.
+- The deterministic 2021 ZIP is 574516 bytes with SHA-256
+  `8C482115D46EB270490B60E893DEF942AB5FEE9A1380DE754B12D98BDDAB5F71`. The deterministic 2025 ZIP is
+  577330 bytes with SHA-256 `190F8F2B94BCD8E1645B5687F0A63AB22F8D55021DED67772E8BA3D75DD22E0B`
+  and contains the 2025 BAT installer.
+## Lens Next v1.05.N09-P04 shared platform release identity
+
+- P04 advances only the Platform/APU-owned P counter and preserves Lens-owned N09. Human/package identity is
+  `v1.05.N09-P04`; Windows DLL and Autodesk metadata use `1.5.9.4` for Navisworks 2021 and 2025.
+- This release carries the already accepted N09 camera-apply primitive unchanged. P04 changes only platform startup
+  liveness and shared release metadata; capture, screenshot, sectioning, digest, visibility, appearance, element
+  identity, Saved Viewpoints, and database contracts are unchanged.
+- Shared core contracts pass 54/54 and both year adapters pass 52/52. The controlled 2021 ZIP SHA-256 is
+  `877EF261940B63E4E86C168B233AE9E35FE7CCDA4B93F1BC4D96827D243FDA59`; the controlled 2025 ZIP SHA-256 is
+  `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B` and contains the 2025 BAT installer.

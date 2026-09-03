@@ -111,9 +111,11 @@ ${appRoutes()}
 ## Curated interconnections and gotchas (maintained in the generator)
 - All API routes are served under the /api/v1 prefix. res.redirect in route files MUST
   include /api/v1 or it 404s.
-- Replit monorepo deployments probe GET /api. The early-bound startup listener keeps both
-  /api and /api/v1/healthz non-successful until initialization completes; the ready app returns
-  HTTP 200 from both paths.
+- Replit monorepo deployment promotion probes GET /api. After the synchronous durable-storage
+  authority preflight succeeds, the early-bound listener returns HTTP 200 from exact /api with
+  an explicit {status:"starting",ready:false} liveness body while application initialization runs.
+  /api/v1/healthz and every other route remain HTTP 503 until the real application is ready;
+  the ready app then owns both paths and returns HTTP 200 from its canonical handlers.
 - Auth: JWT Bearer; payload carries isSuperAdmin. authMiddleware verifies; requireProjectMember
   / requirePermission gate project access (super admins bypass membership);
   isSuperAdminMiddleware re-checks users.is_super_admin.
@@ -141,6 +143,12 @@ ${appRoutes()}
   remain fail-closed HTTP 409 with no issue/package mutation. Server diagnostics record both
   digests and the first differing field. The existing XML export reads Navisworks Saved Viewpoints
   and does not silently substitute BIMLog web viewpoint records.
+- Lens Next normal create/open navigation uses the purpose-specific \`lens-next-navigation.v1\`
+  contract. The persisted navigation package contains project/model identity, camera, optional
+  sectioning, and an independently stored screenshot; screenshot bytes do not affect its digest.
+  Normal navigation deliberately excludes full-model visibility and appearance scans. The N06
+  exact-state engine is retained only behind the explicit \`restore-exact-visual-state\` diagnostic
+  action and is not part of normal issue creation or Open Working View.
 - Living Brief: all documents in living-brief/catalog.json are served in authority order through
   /api/v1/living-brief/* from the verified deployed source bundle. living_brief_documents is an
   exact, metadata-bearing database mirror; it never overrides source doctrine. Controlled admin
@@ -188,8 +196,52 @@ ${appRoutes()}
   the immutable item snapshot preserves the APU content, evaluation, fingerprint, BIM Submittal display,
   and Phase to Revision to Version to Task workflow selection. Contract detail, searchable PDF, and native
   XLSX exports expose the same Contract Item quantities, rates, values, APU identity, and workflow metadata.
+
+## N07 deterministic map provenance
+
+- The \`lens-next-navigation.v1\` entry is emitted by \`artifacts/api-server/scripts/generate-platform-md.ts\`;
+  build-gate fix \`b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7\` makes the generated and committed
+  platform authority identical.
 - Build: bimlog needs PORT set (PORT=3000 pnpm build); api-server bundles to dist/index.cjs via
   esbuild and this generator runs as a pre-build step.
+
+## N08 historical unversioned digest boundary
+
+- Platform persistence continues to validate every explicitly versioned v1, v2, v3, and
+  lens-next-navigation.v1 package under its declared contract. A historical package that has no
+  contract metadata cannot be silently reinterpreted under the current v2 canonicalizer.
+- When that historical package has matching stored and embedded digests plus exact issue identity,
+  but lacks the original canonical evidence needed to prove its algorithm, BIMLog returns the
+  dedicated historical_digest_evidence_unavailable quarantine result. It does not mutate the row,
+  weaken digest validation, or claim that a current recomputation proves the old package.
+- The permanent cross-language vector records the exact historical bytes, stored digest, current-v2
+  recomputation, and expected quarantine result. Current navigation and explicit versioned visual
+  packages retain their existing acceptance and tamper-denial behavior.
+
+## N08-P03 production startup authority preflight
+
+- The production entrypoint loads the storage adapter before the full application import. Missing or
+  invalid durable storage authority therefore fails closed before database or application initialization.
+- Valid production startup uses the same cached storage singleton and retains the existing readiness,
+  listener, authentication, and durable-storage contracts. This repair changes no schema or persisted data.
+- Every database startup initializer is registered on one ordered process-local queue. This preserves
+  each initializer's existing fatal or nonfatal behavior while preventing independent PostgreSQL pool
+  clients from deadlocking on overlapping DDL during a fresh production-artifact startup. Readiness
+  remains closed until the entire queue drains successfully.
+- The production-artifact gate requires an invalid authority child to exit naturally with the sanitized
+  FEEDBACK_STORAGE_AUTHORITY_INVALID code and without readiness or TCP binding; the valid artifact must
+  still start and pass the existing authenticated storage closure proof.
+
+## N09-P04 Replit promotion liveness correction
+
+- Replit deployment \`8809d211\` proved that application import and ordered database startup required
+  23.889 seconds while Promote repeatedly rejected the unbound \`/api\` service. The process eventually
+  bound correctly, but only after the provider's promotion health window had already failed.
+- The entrypoint now binds immediately after the synchronous storage-authority preflight and before the
+  full application import. Exact \`/api\` is a liveness-only HTTP 200 during that bounded interval;
+  \`/api/v1/healthz\` stays HTTP 503 until the real Express application and startup barrier are complete.
+- Initialization failure changes all bootstrap responses to HTTP 503 and closes the listener. Workers
+  still start exactly once and only after the ready transition. This changes no schema or persisted data.
 `;
 
   const outDir = path.join(REPO_ROOT, "living-brief");

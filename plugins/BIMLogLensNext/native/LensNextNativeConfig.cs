@@ -11,7 +11,7 @@ namespace BIMLogLensNext.Native
         public string BimLogWebUrl { get; set; } = "https://bimlog.app";
         public int ProjectId { get; set; }
         public int AutoRefreshSeconds { get; set; } = 10;
-        public bool ViewpointPublishingEnabled { get; set; } = true;
+        public bool ViewpointPublishingEnabled { get; set; } = false;
         public List<string> AllowedWebOrigins { get; set; } = new List<string> { "https://bimlog.app", "https://www.bimlog.app" };
 
         public static string ConfigDirectory => Path.Combine(

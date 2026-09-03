@@ -1,4 +1,5 @@
 import { createApplicationBootstrap } from "./startup-bootstrap";
+import "./lib/storage-adapter";
 
 const rawPort = process.env["PORT"];
 
@@ -18,15 +19,18 @@ const bootstrap = createApplicationBootstrap(() => import("./app"));
 
 async function main(): Promise<void> {
   try {
-    await bootstrap.initialize();
     await new Promise<void>((resolve, reject) => {
       bootstrap.server.once("error", reject);
       bootstrap.server.listen(port, () => resolve());
     });
     console.log(`[startup] phase=bootstrap_bound port=${port}`);
+    await bootstrap.initialize();
     bootstrap.startWorkers();
   } catch {
     process.exitCode = 1;
+    if (bootstrap.server.listening) {
+      bootstrap.server.close();
+    }
   }
 }
 

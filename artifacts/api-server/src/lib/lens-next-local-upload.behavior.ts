@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
-import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextVisualStateDigest, validateAndRebindLocalVisualState } from "./lens-next-local-upload";
+import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextNavigationDigest, lensNextVisualStateCanonicalInput, lensNextVisualStateDigest, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "./lens-next-local-upload";
 
 const state: any = {
   SchemaVersion: 1, ProjectId: 7, ServerId: 1, ViewpointId: "LOCAL-7", LifecycleStatus: "active", RevisionNumber: 1,
@@ -14,6 +14,52 @@ const parsed = JSON.parse(rebound.json);
 assert.equal(parsed.ServerId, 91);
 assert.equal(parsed.DigestSha256, rebound.digest);
 assert.equal(lensNextVisualStateDigest(parsed), rebound.digest);
+validatePersistedLensNextVisualState(rebound.json, rebound.digest, { projectId: 7, serverId: 91, viewpointId: "LOCAL-7", lifecycleStatus: "active", revisionNumber: 1 });
+assert.throws(
+  () => validatePersistedLensNextVisualState(rebound.json, "0".repeat(64), { projectId: 7, serverId: 91, viewpointId: "LOCAL-7", lifecycleStatus: "active", revisionNumber: 1 }),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "visual_state_digest_mismatch",
+);
+const unicodeState: any = {
+  ...state,
+  ProjectId: 29,
+  ViewpointId: "OT-001",
+  ModelFingerprint: "c".repeat(64),
+  ModelReferences: [{
+    ModelId: "model-1",
+    Source: "C:\\Users\\sebas\\OneDrive\\Документы\\35-42 41ST ST. ELARA WEST_dromero3STG7.rvt",
+    ContentHash: "b".repeat(64),
+  }],
+};
+const navigation: any = {
+  ContractVersion: "lens-next-navigation.v1", SchemaVersion: 1, ProjectId: 29, ServerId: 1, ViewpointId: "local-nav-1", LifecycleStatus: "active", RevisionNumber: 1,
+  ModelFingerprint: "0123456789abcdef".repeat(4),
+  Camera: {
+    Position: { X: 370.12345678901235, Y: -42.125, Z: -0 }, Rotation: { A: 0, B: 0, C: 0, D: 1 }, WorldUpVector: { X: 0, Y: 1, Z: 0 },
+    Projection: "Perspective", FocalDistance: 250.5, HorizontalExtentAtFocalDistance: 400.25, VerticalExtentAtFocalDistance: 300.125,
+  },
+  SectioningJson: null, SelectedElements: [], ScreenshotDataUrl: null, ScreenshotSha256: null,
+};
+navigation.DigestSha256 = lensNextNavigationDigest(navigation);
+assert.equal(navigation.DigestSha256, "d4618c4ba468325bd41de8284c3e75f40a63d76af8d4cf367c961a5e03a58b27");
+const navigationWithScreenshot = { ...navigation, ScreenshotDataUrl: "data:image/jpeg;base64,AAAA", ScreenshotSha256: "f".repeat(64) };
+assert.equal(lensNextNavigationDigest(navigationWithScreenshot), navigation.DigestSha256, "screenshot evidence must not alter the navigation digest");
+const navigationRebound = validateAndRebindLocalVisualState(navigation, { projectId: 29, serverId: 701, viewpointId: "N07-NEW", modelFingerprint: navigation.ModelFingerprint });
+const persistedNavigation = JSON.parse(navigationRebound.json);
+assert.equal(persistedNavigation.ServerId, 701);
+assert.equal(persistedNavigation.ViewpointId, "N07-NEW");
+assert.equal(lensNextNavigationDigest(persistedNavigation), navigationRebound.digest);
+validatePersistedLensNextVisualState(navigationRebound.json, navigationRebound.digest, { projectId: 29, serverId: 701, viewpointId: "N07-NEW", lifecycleStatus: "active", revisionNumber: 1 });
+assert.throws(
+  () => validateAndRebindLocalVisualState({ ...navigation, Camera: { ...navigation.Camera, Position: { ...navigation.Camera.Position, X: 371.12345678901235 } } }, { projectId: 29, serverId: 702, viewpointId: "N07-TAMPER", modelFingerprint: navigation.ModelFingerprint }),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "navigation_capture_invalid",
+);
+unicodeState.DigestSha256 = lensNextVisualStateDigest(unicodeState);
+const unicodeRebound = validateAndRebindLocalVisualState(unicodeState, { projectId: 29, serverId: 682, viewpointId: "OT-001", modelFingerprint: "c".repeat(64) });
+const unicodeWireBytes = Buffer.from(unicodeRebound.json, "utf8");
+const unicodeApplied = JSON.parse(unicodeWireBytes.toString("utf8"));
+assert.equal(unicodeApplied.ModelReferences[0].Source, unicodeState.ModelReferences[0].Source);
+assert.equal(lensNextVisualStateDigest(unicodeApplied), unicodeRebound.digest);
+assert.equal(unicodeApplied.DigestDiagnostics.ComputedDigest, unicodeRebound.digest);
 assert.throws(() => validateAndRebindLocalVisualState({ ...state, DigestSha256: "0".repeat(64) }, { projectId: 7, serverId: 92, viewpointId: "LOCAL-7", modelFingerprint: "a".repeat(64) }), /digest/i);
 const screenshotBytes = Buffer.from("lens-next-thumbnail-fixture", "utf8");
 const screenshotDataUrl = `data:image/jpeg;base64,${screenshotBytes.toString("base64")}`;
@@ -85,11 +131,22 @@ const legacyNumericRebound = validateAndRebindLocalVisualState(legacyNumericStat
 const legacyNumericParsed = JSON.parse(legacyNumericRebound.json);
 assert.equal(legacyNumericParsed.DigestDiagnostics.ContractVersion, LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION);
 assert.equal(lensNextVisualStateDigest(legacyNumericParsed), legacyNumericRebound.digest);
+validatePersistedLensNextVisualState(legacyNumericRebound.json, legacyNumericRebound.digest, { projectId: 28, serverId: 92, viewpointId: "local-viewpoint-numeric", lifecycleStatus: "active", revisionNumber: 1 });
 assert.throws(
   () => validateAndRebindLocalVisualState({ ...legacyNumericState, Camera: { ...legacyNumericState.Camera, Position: { ...legacyNumericState.Camera.Position, X: 371.12345678901235 } } }, { projectId: 28, serverId: 93, viewpointId: "local-viewpoint-numeric", modelFingerprint: "0123456789abcdef".repeat(4) }),
   (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "visual_state_digest_mismatch",
 );
 const route = fs.readFileSync(new URL("../routes/clash_reports.ts", import.meta.url), "utf8");
+const historicalVector = JSON.parse(fs.readFileSync(new URL("../../../../contracts/lens-next/n07-p02-historical-digest-vector.json", import.meta.url), "utf8"));
+assert.equal(lensNextVisualStateDigest(historicalVector.state), historicalVector.expectedCurrentDigest);
+assert.equal(Buffer.byteLength(lensNextVisualStateCanonicalInput(historicalVector.state), "utf8"), historicalVector.expectedCanonicalByteLength);
+assert.throws(
+  () => validatePersistedLensNextVisualState(JSON.stringify(historicalVector.state), historicalVector.storedDigest, historicalVector.expectedIdentity),
+  (error: unknown) => error instanceof LensNextLocalUploadError
+    && error.code === historicalVector.expectedDisposition
+    && error.digestDiagnostics?.historicalCanonicalEvidenceAvailable === false
+    && error.digestDiagnostics?.storedAndEmbeddedDigestMatch === true,
+);
 const start = route.indexOf('router.post("/projects/:projectId/clash-reports/lens-next/local-viewpoints/upload"');
 const end = route.indexOf('// Registered BEFORE', start);
 const block = route.slice(start, end);
@@ -99,4 +156,10 @@ assert.match(block, /platform_identity_exists/);
 assert.match(block, /display_id_conflict/);
 assert.match(block, /digestDiagnostics/);
 assert.doesNotMatch(block, /lens-sync/);
-console.log(JSON.stringify({ status: "PASS", tests: ["exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "no-overwrite", "display-conflict-deny"] }));
+const persistedPostStart = route.indexOf('router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state"');
+const persistedGetStart = route.indexOf('router.get("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state"', persistedPostStart);
+const persistedEnd = route.indexOf('router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel"', persistedGetStart);
+assert.ok(persistedPostStart >= 0 && persistedGetStart > persistedPostStart && persistedEnd > persistedGetStart);
+assert.match(route.slice(persistedPostStart, persistedGetStart), /validatePersistedLensNextVisualState/);
+assert.match(route.slice(persistedGetStart, persistedEnd), /validatePersistedLensNextVisualState/);
+console.log(JSON.stringify({ status: "PASS", tests: ["lightweight-navigation-cross-language-vector", "navigation-screenshot-digest-independence", "navigation-platform-rebind", "navigation-camera-tamper-denial", "exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "utf8-unicode-rebind-and-apply", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "historical-unversioned-quarantine-vector", "persisted-write-validation", "persisted-read-validation", "no-overwrite", "display-conflict-deny"] }));

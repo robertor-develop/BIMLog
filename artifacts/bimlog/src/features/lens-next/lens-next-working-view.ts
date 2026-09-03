@@ -12,7 +12,7 @@ export interface LensNextVisualRepairDependencies {
 }
 
 export interface LensNextWorkingViewResult {
-  migratedHistoricalViewpoint: boolean;
+  migratedHistoricalIssue: boolean;
   visualStateDigest: string;
 }
 
@@ -33,7 +33,7 @@ export async function openBimlogWorkingView(
   signal?: AbortSignal,
 ): Promise<LensNextWorkingViewResult> {
   if (issue.identity.projectId !== context.projectId)
-    throw new Error("The active Navisworks model is not bound to this BIMLog viewpoint.");
+    throw new Error("The active Navisworks model is not bound to this BIMLog issue.");
 
   if (!issue.visualStateAvailable || !issue.visualStateDigest)
     throw new Error(
@@ -41,8 +41,8 @@ export async function openBimlogWorkingView(
     );
 
   const stored = await dependencies.apiClient.loadVisualState(issue, signal);
-  await dependencies.bridgeClient.applyPlatformWorkingView(issue, context, stored.visualStateJson, signal);
-  return Object.freeze({ migratedHistoricalViewpoint: false, visualStateDigest: stored.visualStateDigest });
+  await dependencies.bridgeClient.applyPlatformWorkingView(issue, context, stored.visualStateJson, stored.visualStateDigest, signal);
+  return Object.freeze({ migratedHistoricalIssue: false, visualStateDigest: stored.visualStateDigest });
 }
 
 
@@ -60,7 +60,7 @@ export async function repairBimlogWorkingViewFromCurrent(
   signal?: AbortSignal,
 ): Promise<LensNextVisualRepairResult> {
   if (issue.identity.projectId !== context.projectId)
-    throw new Error("The active Navisworks model is not bound to this BIMLog viewpoint.");
+    throw new Error("The active Navisworks model is not bound to this BIMLog issue.");
   if (issue.visualStateAvailable || issue.visualStateDigest)
     throw new Error("This platform record already has a visual package. Refresh and open it normally.");
 
@@ -72,6 +72,6 @@ export async function repairBimlogWorkingViewFromCurrent(
     visualStateDigest: captured.visualStateDigest,
   });
   const stored = await dependencies.apiClient.loadVisualState(migratedIssue, signal);
-  await dependencies.bridgeClient.applyPlatformWorkingView(migratedIssue, context, stored.visualStateJson, signal);
+  await dependencies.bridgeClient.applyPlatformWorkingView(migratedIssue, context, stored.visualStateJson, stored.visualStateDigest, signal);
   return Object.freeze({ visualStateDigest: stored.visualStateDigest });
 }

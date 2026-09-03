@@ -1137,3 +1137,118 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - This is the first release under the shared version convention and therefore starts exactly at `v1.05.N01-P01`; no counter was derived from legacy `v1.0.51`. The human/package release identity is `v1.05.N01-P01`, while Windows and Autodesk metadata use the compatible binary version `1.5.1.1`.
 - Shared core contracts pass 35/35 in each deterministic build. Navisworks 2021 and 2025 native contracts each pass 37/37, including layout, bridge, visual-state digest, XML export, settings/diagnostics contracts, and platform-only open behavior. Both package-integrity and package-only installer gates pass.
 - The 2021 ZIP is 546514 bytes with SHA-256 `5550AB22CF483A87CF19EB4B411EEDFACC3DC14DB4E1958FF3E251D35CB89B77`. The 2025 ZIP is 549366 bytes with SHA-256 `7953460FEA83D380A99F28C60C32D590A8BE01B24F4C0E12A022978E9883C028`. Both contain their year-specific BAT installer and native DLL file version `1.5.1.1`.
+
+## Lens Next N02 Working View systemic recovery — 2026-08-31
+
+- Recovery implementation commit `ca6862d6086f9b91964e6fd0de69b6bc1664f41a` closes the artificial five-second `apply-working-view` caller failure. The field operation had already started on the Navisworks UI thread and was still making progress through its required rollback capture when the HTTP/UI-dispatch caller stopped waiting; the first measured rollback snapshots completed in 9,882 ms and 10,103 ms.
+- `apply-working-view` now waits synchronously for the actual UI operation result instead of applying a replacement fixed deadline. Correlated request/stage telemetry distinguishes validation, digest verification, rollback capture, one-pass model/reference resolution, camera, sectioning, visibility, appearance, selection, implicit Navisworks redraw, completion, and failure. The request ID and payload fingerprint collapse same-request retries while conflicting payload reuse fails closed.
+- BIMLog remains the sole visual-package authority. The exact persisted digest is carried from the platform read through the frontend and local bridge, compared with the embedded digest, and recomputed before any Navisworks mutation. Full-fidelity camera, sectioning, visibility, appearance, selection, and model-reference restore remains atomic through a contract-complete rollback snapshot; diagnostic canonical Base64 is omitted only from that internal rollback capture.
+- The apply path now builds one model/reference index for the union of selection, hidden, and appearance references and resolves every required reference before mutation. Repeated window normalization was removed from the health tick; normalization remains explicit restore behavior only. The UI shows `Opening working view…`, disables duplicate activation, and reports success only after native completion.
+- Automated evidence passes: shared .NET contracts 35/35; Navisworks 2021 native contracts 45/45; Navisworks 2025 native contracts 45/45; the complete Lens Next Build 1–10 behavior matrix; API and frontend strict typechecks; and the verified production frontend build. The current field identity remains `v1.05.N02-P01`; no N03 package was built or sent, no installation occurred, and connected real-model/restart acceptance remains pending.
+
+## Lens Next v1.05.N03-P01 packaged release candidate — 2026-08-31
+
+- Roberto approved the N03 build, push, Replit Shell publication, and authorized Telegram delivery. Release commit `95c8e5140d75c7b456cd52fcd5773bd4ffc0aac9` advances only the Lens Next-owned N counter and preserves the Platform/APU-owned P counter: human/package identity `v1.05.N03-P01`, compatible binary identity `1.5.3.1`.
+- The N03 package contains the systemic Working View lifecycle repair from `ca6862d6086f9b91964e6fd0de69b6bc1664f41a`: actual UI-thread completion, strict authoritative digest validation, same-request idempotency, stage telemetry, pre-mutation reference resolution, full rollback, duplicate-click suppression, and removal of periodic window normalization.
+- Shared contracts pass 35/35; the Navisworks 2021 and 2025 native suites pass 45/45 each; package integrity and package-only installer validation pass for both years. The complete Lens Next Build 1–10 behavior matrix, API/frontend typechecks, production frontend build, mojibake scan, and diff check pass.
+- The deterministic 2021 ZIP is 553083 bytes with SHA-256 `65B08F00D0940FD8014598510B4110C40D237C8C3299ED6C75C51DDA276B9306`. The deterministic 2025 ZIP is 555932 bytes with SHA-256 `A9020A628DDA1EB9424122B914C840A4638E5008E607D6B4FD20C6B5C6BC9E99`; it includes the 2025 BAT installer and native DLL version `1.5.3.1`.
+- This entry records a green packaged source candidate. GitHub advancement, Replit Shell build/publication, Telegram delivery, production verification, installed 2021 proof, and Ruben's connected 2025 acceptance remain separate until their exact receipts are recorded.
+## Lens Next digest v3 Platform contract clean-build-ready — 2026-09-01
+
+- Platform implementation commit `92f93ce9d2f824a47d7a290bfe516de0a3a2a000` adds explicit `lens-next-visual-digest.v3` validation for ElementReference v2 and ModelReference v2 while preserving historical v1/v2 canonicalization byte-for-byte.
+- The shared A–L fixture is `contracts/lens-next/lens-next-visual-digest-v3-vectors.json`, SHA-256 `25E8BF94286DB34D05518BB0D2403B77BD0EBDD9381EE42861D8AA80399DEDC7`. Ten positive vectors, two named tamper vectors, and 23 independent authoritative-field mutations pass.
+- Lens Next visual-state POST and GET persistence boundaries now recompute the digest and validate exact issue identity. Legacy `lens-sync`, database schema, historical packages, Legacy Lens, and Saved Viewpoint architecture were not changed.
+- The current shared field/package identity is `v1.05.N05-P01`; the next Platform-owned identity is `v1.05.N05-P02`, preserving N05. No native N increment occurred.
+- Local behavior, strict referenced TypeScript build, deterministic documentation, and the clean production runtime-closure build pass. The closure contains 15 direct packages, 15 dependencies, and 16,142 files. Production is not yet v3-ready: push, Replit Shell publication, and post-deploy v1/v2/v3 verification remain open.
+## Lens Next v1.05.N07-P02 lightweight normal workflow — 2026-09-01
+
+- Implementation commit `f62adc2c3de01bf31d2ad0532797c2171176b19c` replaces the normal create/open path with `lens-next-navigation.v1`: camera, model/project identity, optional sectioning, and separately persisted screenshot. Normal navigation no longer scans or restores full-model visibility/appearance state and never creates a Navisworks Saved Viewpoint.
+- The N06 exact-state engine remains available only through the explicit `restore-exact-visual-state` diagnostic action. Platform persistence validates and rebinds the navigation digest to the existing BIMLog issue identity without schema changes; BIMLog remains the sole issue and persisted navigation authority.
+- Shared contracts pass 53/53; Navisworks 2021 and 2025 native suites pass 51/51 each; package integrity, installer identity, API/frontend typechecks, cross-language digest vectors, screenshot independence, platform rebind, and camera-tamper denial pass. The release identity is `v1.05.N07-P02` / binary `1.5.7.2`.
+- The deterministic 2025 ZIP is `BIMLog-Lens-Next-Navisworks2025-v1.05.N07-P02.zip`, SHA-256 `D28E0C003BC6DDB0EE46BC754C5BACBB06315287CFD2D20BBE8DB384C1B103EB`. GitHub `main` now contains N07; production publication and connected create/open/restart acceptance remain separate gates.
+### N07 deterministic platform-map successor — 2026-09-01
+
+- Build-gate fix `b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7` persists the already reviewed N07 navigation boundary in the deterministic `generate-platform-md.ts` authority. It changes no runtime, schema, database, package, or native behavior; the remaining state is Replit build, publication, connected acceptance, and Telegram delivery.
+
+## Lens Next v1.05.N08-P02 historical unversioned digest quarantine — 2026-09-01
+
+- Forensic comparison of the real historical field payload proved that its stored and embedded digest
+  agree with each other but differ from the exact current v2 canonical bytes. Because the row has no
+  contract metadata or preserved canonical evidence, its original digest algorithm cannot be proven.
+- Platform validation now returns the dedicated `historical_digest_evidence_unavailable` result for
+  that exact class. It preserves the row and all explicit current contracts, rejects tampering, and
+  requires a new Lens Next capture instead of guessing a legacy algorithm or rewriting history.
+- API typecheck and the complete Lens Next Build 1–10 behavior suite pass. Shared native contracts pass
+  54/54 and both year adapters pass 51/51. Package integrity, version consistency, and package-only
+  installer checks pass for Navisworks 2021 and 2025.
+- Release identity is `v1.05.N08-P02` / binary `1.5.8.2`. The 2021 archive is 587910 bytes / SHA-256
+  `D31990B0186BE45C7521A69F377C6DA6F76DCE9171222BE75FE72606FC0AA438`; the 2025 archive is 590734 bytes /
+  SHA-256 `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112`.
+- This status is local verified source/package evidence. Push, Replit Shell publication, Chrome production
+  verification, Telegram delivery, and Ruben's Navisworks 2025 field acceptance remain distinct gates.
+
+## Lens Next v1.05.N08-P03 production startup authority repair — 2026-09-01
+
+- The production artifact could begin full application and database initialization before validating its
+  durable storage authority. Consequently, the invalid-authority closure child could hang on an unavailable
+  database instead of exiting naturally with the required fail-closed storage error.
+- The production entrypoint now loads the storage adapter first. Invalid or missing authority terminates
+  before database/application import; valid startup reuses the same cached adapter and changes no schema,
+  database row, Lens navigation behavior, Legacy Lens behavior, or persisted visual package.
+- Exact-artifact execution then exposed a second startup defect: the valid child launched independent schema
+  initializers concurrently across the PostgreSQL pool and deadlocked on overlapping DDL. All established
+  database startup work now runs through one ordered queue, and readiness waits for that queue to drain.
+  Existing fatal/nonfatal migration semantics are preserved; no schema definition or data operation changed.
+- P03 is the Platform/APU-owned counter increment. Lens remains N08; package identity is
+  `v1.05.N08-P03` and binary identity is `1.5.8.3`. Shared core contracts pass 54/54; both year adapters
+  pass 51/51; package integrity and package-only installer validation pass for both years.
+- The 2021 ZIP is 574516 bytes / SHA-256
+  `8C482115D46EB270490B60E893DEF942AB5FEE9A1380DE754B12D98BDDAB5F71`. The 2025 ZIP is 577330 bytes /
+  SHA-256 `190F8F2B94BCD8E1645B5687F0A63AB22F8D55021DED67772E8BA3D75DD22E0B`.
+  Focused startup serialization and strict API typecheck gates pass. The exact standalone artifact at
+  source `a9fabd537c6c5fba70d3dae392c8501c73143992` passes: invalid authority exits naturally in 982.8 ms
+  with no TCP/readiness, while valid restricted storage and the isolated proof database return HTTP 200
+  from both readiness surfaces in 7,014.4 ms with no PostgreSQL deadlock. Publication, Chrome verification,
+  and Telegram delivery remain gated.
+## BIMLog / Lens Next v1.05.N09-P04 Replit promotion repair — 2026-09-02
+
+- Failed Replit deployment `8809d211` completed Provision, Security, Build, and Bundle, then failed Promote because
+  the deployment health probe repeatedly reached `/api` before the production listener existed. Exact telemetry
+  proves the full application import and ordered startup queue completed in 23,889 ms, after the provider health
+  window had already rejected the deployment. The previous production deployment remained live.
+- Source `b2a9df745ba39e2d99c362468086e898850bf212` preserves synchronous fail-closed durable-storage validation, then
+  binds the bootstrap listener before the full application import. During initialization exact `/api` returns an
+  explicit liveness-only HTTP 200 with `ready:false`; `/api/v1/healthz` and all business routes remain HTTP 503 until
+  the startup barrier completes. Initialization failure removes liveness and closes the listener.
+- This is the Platform-owned P04 increment and preserves Lens-owned N09. Shared release identity is
+  `v1.05.N09-P04`; Windows binary identity is `1.5.9.4`. No database schema, row, Lens capture/apply contract,
+  Legacy Lens behavior, or historical issue is changed.
+- Focused bootstrap/readiness and strict API typecheck gates pass. Full artifact build, dual-year package receipts,
+  push, exact Replit Shell alignment, one controlled Publish, Chrome live verification, Telegram delivery, and
+  Ruben field verification remain completion gates.
+
+### N09-P04 clean-build and dual-year package evidence — 2026-09-02
+
+- The clean governed root build passes, including configuration/privacy gates, database safety, all TypeScript
+  projects, frontend production build, API runtime closure, and Living Brief validation. The focused bootstrap suite
+  proves `/api` liveness is HTTP 200 during initialization while canonical readiness and business routes remain 503.
+- Shared Lens contracts pass 54/54. Navisworks 2021 and 2025 native contracts pass 52/52 each; package integrity,
+  package-only installer, year identity, BAT launcher, and release-identity gates pass for both packages.
+- The controlled 2021 ZIP is 574720 bytes with SHA-256
+  `877EF261940B63E4E86C168B233AE9E35FE7CCDA4B93F1BC4D96827D243FDA59`; its core DLL SHA-256 is
+  `181A9D33CCD468339981F3F91DD3FE7525BBA4BD1AC8BBE07164E200A59F1EB5` and native DLL SHA-256 is
+  `79D63A4A683AE025EB0770F1E1935DCAEECD9817D9B0E5B6D646C5F99A8D0914`.
+- The controlled 2025 ZIP is 577566 bytes with SHA-256
+  `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`; its core DLL SHA-256 is
+  `181A9D33CCD468339981F3F91DD3FE7525BBA4BD1AC8BBE07164E200A59F1EB5` and native DLL SHA-256 is
+  `E337A36B5A8ED2FCAA48AFC6D6E9C822937415F9158384AB91E0ABCE4B052A30`. Binary version is `1.5.9.4`.
+- Green head `0b72c4c14cd53dc43543f2900feeceacec8e3595` was pushed to both `origin/main` and
+  `origin/master`. The visible Replit Shell was clean at HEAD `12d3c2763b768e8e6a4fc6005720b9a46881840f`,
+  its tree matched `origin/master`, and the complete governed Replit build passed.
+- One controlled Replit publication (`86e8e01a`) completed Provision, Security checks, Build, Bundle, and Promote;
+  the deployment is HEALTHY. Chrome verified the live dashboard displays `v1.05.N09-P04`, authenticated project
+  data loads, `/api` returns HTTP 200, and `/api/v1/healthz` returns HTTP 200.
+- Telegram provider acknowledged private delivery event
+  `bimlog-lens-next-n09-p04-2025-roberto-20260902-v1` for the exact verified 2025 ZIP; Telegram client visibility
+  cannot be independently confirmed. Ruben's connected Navisworks 2025 create/open/restart/open field verification
+  remains the only external acceptance gate.

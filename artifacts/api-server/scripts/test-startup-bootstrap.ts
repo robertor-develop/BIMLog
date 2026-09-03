@@ -71,17 +71,31 @@ const delayed = createApplicationBootstrap(() => delayedImport.promise, {
     error: (message, error) => delayedLogs.push({ message, error }),
   },
 });
-const delayedInitialization = delayed.initialize();
-assert.equal(delayed.server.listening, false);
-delayedImport.resolve({ default: application });
-await delayedInitialization;
-assert.equal(delayed.getState(), "ready" satisfies StartupState);
-assert.equal(delayed.server.listening, false);
 const delayedListener = await listen(delayed.server);
+const delayedInitialization = delayed.initialize();
 assert(
   delayedListener.elapsedMs < 1_000,
   `listener took ${delayedListener.elapsedMs.toFixed(1)}ms to bind`,
 );
+assert.deepEqual(await response(delayedListener.url, "/api"), {
+  status: 200,
+  body: JSON.stringify({
+    status: "starting",
+    service: "bimlog-api",
+    ready: false,
+  }),
+});
+assert.deepEqual(await response(delayedListener.url, "/api/v1/healthz"), {
+  status: 503,
+  body: JSON.stringify({ status: "starting", service: "bimlog-api", ready: false }),
+});
+assert.deepEqual(await response(delayedListener.url, "/other"), {
+  status: 503,
+  body: JSON.stringify({ status: "starting", service: "bimlog-api", ready: false }),
+});
+delayedImport.resolve({ default: application });
+await delayedInitialization;
+assert.equal(delayed.getState(), "ready" satisfies StartupState);
 assert.deepEqual(await response(delayedListener.url, "/api/v1/healthz"), {
   status: 200,
   body: JSON.stringify({ status: "ok" }),
@@ -140,10 +154,14 @@ const timedOut = createApplicationBootstrap(
   () => new Promise<{ default: RequestListener }>(() => undefined),
   { initializationTimeoutMs: 25 },
 );
+const timedOutListener = await listen(timedOut.server);
 await assert.rejects(timedOut.initialize(), /exceeded 25ms/);
 assert.equal(timedOut.getState(), "failed" satisfies StartupState);
-assert.equal(timedOut.server.listening, false);
-assert.equal(timedOut.server.address(), null);
+assert.deepEqual(await response(timedOutListener.url, "/api"), {
+  status: 503,
+  body: JSON.stringify({ status: "failed" }),
+});
+await close(timedOut.server);
 
 const barrier = deferred<void>();
 let workerStarts = 0;
@@ -183,10 +201,11 @@ assert.equal(discoveryCalls, 1);
 console.log(
   JSON.stringify({
     listenerBoundWithinMs: Number(delayedListener.elapsedMs.toFixed(1)),
-    socketStayedClosedUntilInitialization: true,
+    apiLivenessSucceededDuringInitialization: true,
+    readinessStayed503UntilReady: true,
     apiAndHealthzSucceededAfterReady: true,
     readyAfterImport: true,
-    failedAndTimedOutImportsNeverListened: true,
+    invalidStorageCanStillFailBeforeListenAndTimedOutImportsLoseLiveness: true,
     providerSecretsSanitizedFromStartupFailure: true,
     startupBarrierPrecedesReadyAndWorkers: true,
     doubleWorkerStartSuppressed: true,

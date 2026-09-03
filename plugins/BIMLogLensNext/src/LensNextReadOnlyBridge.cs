@@ -44,7 +44,9 @@ namespace BIMLogLensNext
             var validation = _validator.Validate(request);
             if (!validation.Accepted)
             {
-                return LensNextBridgeResponse.Blocked(validation.Code, "Request blocked by the read-only bridge contract.");
+                return LensNextBridgeResponse.Blocked(
+                    validation.Code,
+                    "Request blocked by the bridge contract. Code=" + validation.Code + ".");
             }
 
             switch (request.Command)
@@ -69,6 +71,8 @@ namespace BIMLogLensNext
                     return CaptureNewViewpoint(request);
                 case LensNextBridgeCommands.ApplyWorkingView:
                     return ApplyWorkingView(request);
+                case LensNextBridgeCommands.RestoreExactVisualState:
+                    return RestoreExactVisualState(request);
                 case LensNextBridgeCommands.PublishWorkingView:
                     return PublishWorkingView(request);
                 case LensNextBridgeCommands.MaterializeMyView:
@@ -175,13 +179,13 @@ namespace BIMLogLensNext
                 LifecycleStatus = "active", RevisionNumber = "1", ModelFingerprint = fingerprint
             };
             var includeScreenshot = string.Equals(Value(request.Fields, "includeScreenshot"), "true", StringComparison.OrdinalIgnoreCase);
-            var state = _dispatcher.Invoke(() => visualAdapter.CaptureCurrentVisualState(identity, includeScreenshot));
-            if (state == null) return LensNextBridgeResponse.Blocked("visual_capture_failed", "Navisworks did not return a visual state.");
-            return LensNextBridgeResponse.Ok("new_viewpoint_captured", new LensNextVisualCapturePayload
+            var navigation = _dispatcher.Invoke(() => visualAdapter.CaptureCurrentNavigationView(identity, includeScreenshot));
+            if (navigation == null) return LensNextBridgeResponse.Blocked("navigation_capture_failed", "Navisworks did not return a navigation view.");
+            return LensNextBridgeResponse.Ok("new_viewpoint_captured", new LensNextNavigationCapturePayload
             {
                 RequestId = request.RequestId,
                 Identity = WireIdentity(identity),
-                VisualState = state
+                NavigationView = navigation
             });
         }
 
@@ -196,15 +200,33 @@ namespace BIMLogLensNext
             var visualStateJson = Value(request.Fields, "visualStateJson");
             if (string.IsNullOrWhiteSpace(visualStateJson))
                 return LensNextBridgeResponse.Blocked("visual_state_required", "A BIMLog visual-state payload is required.");
-            var result = _dispatcher.Invoke(() => visualAdapter.ApplyWorkingVisualStateJson(identity, visualStateJson));
+            var storedVisualStateDigest = Value(request.Fields, "visualStateDigest");
+            if (string.IsNullOrWhiteSpace(storedVisualStateDigest))
+                return LensNextBridgeResponse.Blocked("visual_state_digest_required", "The authoritative BIMLog visual-state digest is required.");
+            var result = _dispatcher.Invoke(() => visualAdapter.ApplyNavigationViewJson(identity, visualStateJson, storedVisualStateDigest, request.RequestId));
             if (result == null || !result.Applied)
-                return LensNextBridgeResponse.Blocked("working_view_apply_failed", result == null ? "Working-view reconstruction failed." : result.Message);
-            return LensNextBridgeResponse.Ok("working_view_applied", new LensNextWorkingViewAppliedPayload
+                return LensNextBridgeResponse.Blocked("working_view_apply_failed", result == null ? "Working-view navigation failed." : result.Message);
+            return LensNextBridgeResponse.Ok("working_view_applied", new LensNextNavigationAppliedPayload
             {
                 RequestId = request.RequestId,
                 Identity = WireIdentity(identity),
                 Result = result
             });
+        }
+
+        private LensNextBridgeResponse RestoreExactVisualState(LensNextBridgeRequest request)
+        {
+            var visualAdapter = _adapter as ILensNextVisualNavisworksAdapter;
+            if (visualAdapter == null) return LensNextBridgeResponse.Blocked("exact_visual_restore_unsupported", "This Navisworks adapter cannot restore exact visual state.");
+            var identity = IdentityFromFields(request.Fields);
+            var validation = ValidateSessionIdentity(identity);
+            if (validation != null) return validation;
+            var visualStateJson = Value(request.Fields, "visualStateJson");
+            var digest = Value(request.Fields, "visualStateDigest");
+            if (string.IsNullOrWhiteSpace(visualStateJson) || string.IsNullOrWhiteSpace(digest)) return LensNextBridgeResponse.Blocked("visual_state_required", "A full BIMLog Visual Package and digest are required.");
+            var result = _dispatcher.Invoke(() => visualAdapter.ApplyWorkingVisualStateJson(identity, visualStateJson, digest, request.RequestId));
+            if (result == null || !result.Applied) return LensNextBridgeResponse.Blocked("exact_visual_restore_failed", result == null ? "Exact visual-state restoration failed." : result.Message);
+            return LensNextBridgeResponse.Ok("exact_visual_state_restored", new LensNextWorkingViewAppliedPayload { RequestId = request.RequestId, Identity = WireIdentity(identity), Result = result });
         }
 
         private LensNextBridgeResponse PublishWorkingView(

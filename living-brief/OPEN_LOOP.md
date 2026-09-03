@@ -2147,3 +2147,73 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Complete the repository-wide build/pre-push gates, commit the schema/version/package reconciliation, and advance governed source branches only from the exact green commit. Replit publication must use Shell, not Replit Agent, and must pass the complete workspace build before publication.
 - Before installing either native package, close the matching Navisworks process and verify the ZIP hash, manifest release `v1.05.N01-P01`, year, Autodesk series, BAT launcher, and native DLL file version `1.5.1.1`.
 - Connected Navisworks Manage 2021 and 2025 field acceptance remains required: authoritative project binding, dynamic platform inventory, create without a Saved Viewpoint/model save, persisted display ID and thumbnail, exact platform-only Working View reconstruction, tamper rejection, minimize/maximize/resize, pane scrolling, settings, diagnostics, and validated XML export. Do not claim 2025 runtime acceptance on this host because Navisworks Manage 2025 is not installed here.
+
+## Lens Next N02 Working View recovery — remaining acceptance gates
+
+- Do not build or distribute an N03 candidate until Roberto reviews the N03 Working View Recovery Report. At packaging time, increment only Lens Next counter N and preserve the latest independently owned Platform/APU P counter exactly; the locally observed shared identity is currently `v1.05.N02-P01`.
+- The automated recovery gates are green, but connected local Navisworks 2021 proof has not run against commit `ca6862d6086f9b91964e6fd0de69b6bc1664f41a`. A separately authorized installation is required before testing `C:\Users\soporte\Desktop\1185 RIVER AV MODEL-06-11-26.nwd`: create from a distinctive full visual state, refresh, move away, open once through actual completion, verify camera/sectioning/visibility/appearance/selection, restart Navisworks, and reopen the same BIMLog issue.
+- Record real small, medium, and Ruben-scale package timings from the new stage telemetry before defining a no-progress watchdog or performance target. Total elapsed time is telemetry, not failure, while stages advance. Do not substitute another fixed total timeout.
+- Navisworks Manage 2025 remains unavailable on this host. After local 2021 acceptance and Roberto's explicit package/delivery approval, Ruben's controlled 2025 sequence remains the customer field gate, including >20-minute session stability and absence of window flicker or duplicate apply.
+
+## Lens Next v1.05.N03-P01 — authorized release gates
+
+- The earlier N03 review prohibition is satisfied and superseded by Roberto's explicit build, push, Replit Shell publication, and Telegram-delivery authorization. Release commit `95c8e5140d75c7b456cd52fcd5773bd4ffc0aac9` and both deterministic N03 archives are complete.
+- Advance only exact green descendants to the governed GitHub branches. In Replit, use Shell only—never Replit Agent—align the preserved publish-wrapper lineage to the pushed successor, run the complete build, and publish only from the exact passing source. Verify the live Lens Next route and browser console after publication.
+- Deliver only the hash-verified Navisworks 2025 ZIP `BIMLog-Lens-Next-Navisworks2025-v1.05.N03-P01.zip` with SHA-256 `A9020A628DDA1EB9424122B914C840A4638E5008E607D6B4FD20C6B5C6BC9E99` to Roberto's authorized private Telegram recipient.
+- Publication and delivery do not establish Navisworks acceptance. On this host, installed 2021 acceptance must still prove a distinctive full-fidelity create/refresh/open/restart/reopen sequence on the governed 1185 model. Ruben's 2025 host must separately prove exact package installation, long-running full-fidelity Open Working View, save/reopen persistence, session stability, no flicker, no duplicate apply, diagnostics, settings, and validated XML export.
+## Lens Next digest v3 coordinated release gates
+
+- The Platform v3 contract report, Living Brief, clean production artifact, and publication-source gates are complete. Implementation commit `92f93ce9d2f824a47d7a290bfe516de0a3a2a000` remains the behavioral source unit; report proof is recorded through `33b9e015ce4a69704b49af6e8288d48c4cc237ae`.
+- Push and publish the Platform-owned `v1.05.N05-P02` change only through the approved Replit Shell release path; verify production v1 and v2 compatibility plus v3 acceptance/tamper denial.
+- Do not let Main 04 emit v3 or create an N06 field package until production Platform v3 support is verified.
+- After Platform approval, Main 04 must consume the exact shared A–L fixture, implement native v3 canonicalization and ElementReference/ModelReference v2, and complete the previously approved create → persist → fetch → apply → restart → apply proof before any field delivery.
+## Lens Next v1.05.N07-P02 release completion gates
+
+- Merge exact commit `f62adc2c3de01bf31d2ad0532797c2171176b19c` into the preserved Replit publish-wrapper history through Replit Shell only, run the complete governed production build, publish once, and verify the deployed health and Lens Next surface in Chrome. No database migration is authorized or required.
+- On the installed Navisworks Manage 2021 host, open `C:\Users\soporte\Desktop\1185 RIVER AV MODEL-06-11-26.nwd`, create one brand-new issue from a distinctive camera, verify human-readable ID and thumbnail with no Saved Viewpoint, move away, open once, restart Navisworks, and open the same issue again. Any failure produces one report before another product patch.
+- After the production and connected acceptance gates pass, deliver only the hash-verified 2025 N07 ZIP to Roberto's authorized private Telegram recipient. Ruben's actual Navisworks 2025 runtime acceptance remains a separate customer field gate.
+### N07 final publication successor
+
+- Reconcile through generator-fix commit `b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7`, require the exact Replit Shell production build to pass, then publish once and execute the already recorded Chrome and connected Navisworks acceptance sequence before Telegram delivery.
+
+## Lens Next v1.05.N08-P02 release completion gates
+
+- Commit and push only the exact green N08 successor, then align the preserved Replit publish-wrapper
+  lineage through the visible Replit Shell. Require a clean workspace and the complete governed build
+  before one publication; no database migration is required or authorized by this repair.
+- Verify production health and the Lens Next route in Chrome. Explicit current v1/v2/v3/navigation
+  packages must retain their prior acceptance/tamper behavior, while a metadata-less historical package
+  with unavailable canonical evidence must return the dedicated quarantine explanation without mutation.
+- Send only `BIMLog-Lens-Next-Navisworks2025-v1.05.N08-P02.zip` with SHA-256
+  `E2E24810C6A6693C6DAA98DAF31490927A5987C54D6BB21FCFE5B66466B5E112` to Roberto's authorized private
+  Telegram recipient after publication verification.
+- Telegram delivery is not Navisworks 2025 acceptance. Ruben must install N08, create a brand-new issue,
+  move to a different camera, open once, restart Navisworks, and open the same issue again. Historical
+  metadata-less packages remain honestly quarantined and are not valid N08 success fixtures.
+
+## Lens Next v1.05.N08-P03 release completion gates
+
+- Exact-artifact startup proof is complete for source `a9fabd537c6c5fba70d3dae392c8501c73143992`:
+  invalid durable storage authority exits naturally in 982.8 ms with no TCP/readiness, and valid restricted
+  storage plus the isolated loopback proof database reaches both readiness surfaces in 7,014.4 ms after the
+  ordered database-startup queue completes without PostgreSQL deadlock.
+- Rebuild and verify both Navisworks years as `v1.05.N08-P03` / `1.5.8.3`, preserving N08 and advancing only
+  Platform-owned P03. Record deterministic archive and core/native/manifest hashes before distribution.
+- Push only the exact green commit. Through the visible Replit Shell—never Replit Agent—align the governed
+  publish lineage, run the complete build, publish once, then verify production health and Lens Next in Chrome.
+- After verified publication, send only the hash-verified 2025 P03 ZIP to Roberto's private Telegram. Ruben's
+  connected Navisworks 2025 install/create/open/restart/open acceptance remains a separate field gate.
+## v1.05.N09-P04 startup publication completion gates
+
+- Complete generated Living Brief, root-build/runtime-closure, focused startup, and both Navisworks package/test
+  gates are green against source `b2a9df745ba39e2d99c362468086e898850bf212` plus reconciled documentation.
+- The exact 2021/2025 package and component hashes for `v1.05.N09-P04` / `1.5.9.4` are recorded in STATUS,
+  PLUGIN, AUDIT, and the tracked build receipts. N09 is preserved and only Platform-owned P04 advanced.
+- Closed: green head `0b72c4c14cd53dc43543f2900feeceacec8e3595` was pushed to both release refs; the
+  visible Replit Shell tree matched the remote, and the full governed build passed.
+- Closed: controlled publication `86e8e01a` passed every Replit stage and is HEALTHY. Chrome verified live
+  `v1.05.N09-P04`, authenticated dashboard data, `/api` HTTP 200, and `/api/v1/healthz` HTTP 200.
+- Closed: Telegram's provider acknowledged private delivery event
+  `bimlog-lens-next-n09-p04-2025-roberto-20260902-v1` for the exact verified 2025 P04 ZIP; client visibility is not
+  independently provable. Ruben's connected Navisworks field test remains separate from deployment acceptance and
+  must not be represented as locally completed.

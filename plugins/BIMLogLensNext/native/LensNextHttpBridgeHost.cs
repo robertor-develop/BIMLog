@@ -135,7 +135,9 @@ namespace BIMLogLensNext.Native
                 bridgeRequest.SessionToken = token;
                 bridgeRequest.Origin = _bridgeOrigin;
 
+                LensNextNativeLog.Info("Apply lifecycle. Stage=request-received Request=" + bridgeRequest.RequestId + " Command=" + command);
                 var result = _pump.Execute(bridgeRequest, TimeoutFor(command));
+                LensNextNativeLog.Info("Apply lifecycle. Stage=request-completed Request=" + bridgeRequest.RequestId + " Command=" + command + " Success=" + result.Success + " Code=" + result.Code);
                 Write(response, result.Success ? 200 : 409, WireEnvelope(result));
             }
             catch (Exception ex)
@@ -148,6 +150,8 @@ namespace BIMLogLensNext.Native
 
         private static int TimeoutFor(string command)
         {
+            if (command == LensNextBridgeCommands.RestoreExactVisualState)
+                return Timeout.Infinite;
             return command == LensNextBridgeCommands.CaptureVisualState ||
                    command == LensNextBridgeCommands.CaptureLocalViewpoint ||
                    command == LensNextBridgeCommands.CaptureNewViewpoint
@@ -167,6 +171,7 @@ namespace BIMLogLensNext.Native
             if (request.HttpMethod == "POST" && path == "/v1/capture-local-viewpoint") return LensNextBridgeCommands.CaptureLocalViewpoint;
             if (request.HttpMethod == "POST" && path == "/v1/capture-new-viewpoint") return LensNextBridgeCommands.CaptureNewViewpoint;
             if (request.HttpMethod == "POST" && path == "/v1/apply-working-view") return LensNextBridgeCommands.ApplyWorkingView;
+            if (request.HttpMethod == "POST" && path == "/v1/restore-exact-visual-state") return LensNextBridgeCommands.RestoreExactVisualState;
             if (request.HttpMethod == "POST" && path == "/v1/publish-working-view") return LensNextBridgeCommands.PublishWorkingView;
             if (request.HttpMethod == "POST" && path == "/v1/materialize-my-view") return LensNextBridgeCommands.MaterializeMyView;
             return null;
@@ -174,8 +179,7 @@ namespace BIMLogLensNext.Native
 
         private LensNextBridgeRequest ParsePost(HttpListenerRequest request, string command)
         {
-            string body;
-            using (var reader = new StreamReader(request.InputStream, request.ContentEncoding ?? Encoding.UTF8)) body = reader.ReadToEnd();
+            var body = ReadUtf8JsonBody(request.InputStream);
             if (body.Length > 8 * 1024 * 1024) throw new InvalidOperationException("Lens Next bridge request body is too large.");
             var raw = _json.Deserialize<Dictionary<string, object>>(body) ?? new Dictionary<string, object>();
             var requestId = StringValue(raw, "requestId") ?? request.Headers["X-Request-Id"] ?? Guid.NewGuid().ToString("N");
@@ -189,6 +193,14 @@ namespace BIMLogLensNext.Native
             if (fieldMap != null)
                 foreach (var pair in fieldMap) fields[pair.Key] = pair.Value == null ? null : Convert.ToString(pair.Value, System.Globalization.CultureInfo.InvariantCulture);
             return new LensNextBridgeRequest { ProtocolVersion = protocol, RequestId = requestId, IdempotencyKey = idempotency, Command = command, Fields = fields };
+        }
+
+        private static string ReadUtf8JsonBody(Stream input)
+        {
+            if (input == null) throw new ArgumentNullException(nameof(input));
+            var strictUtf8 = new UTF8Encoding(false, true);
+            using (var reader = new StreamReader(input, strictUtf8, false, 4096, true))
+                return reader.ReadToEnd();
         }
 
         private static LensNextBridgeRequest CreateGetRequest(HttpListenerRequest request, string command)
@@ -285,6 +297,16 @@ namespace BIMLogLensNext.Native
             if (captured != null) return new Dictionary<string, object>
             {
                 { "requestId", captured.RequestId }, { "identity", captured.Identity }, { "visualState", captured.VisualState }
+            };
+            var navigationCaptured = payload as LensNextNavigationCapturePayload;
+            if (navigationCaptured != null) return new Dictionary<string, object>
+            {
+                { "requestId", navigationCaptured.RequestId }, { "identity", navigationCaptured.Identity }, { "navigationView", navigationCaptured.NavigationView }
+            };
+            var navigationApplied = payload as LensNextNavigationAppliedPayload;
+            if (navigationApplied != null) return new Dictionary<string, object>
+            {
+                { "requestId", navigationApplied.RequestId }, { "identity", navigationApplied.Identity }, { "result", navigationApplied.Result }
             };
             var applied = payload as LensNextWorkingViewAppliedPayload;
             if (applied != null) return new Dictionary<string, object>

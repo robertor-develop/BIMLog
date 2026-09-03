@@ -16,7 +16,10 @@ const check = (condition: unknown, message: string) => {
 const importMatch = appSource.match(
   /import\s*\{([\s\S]*?)\}\s*from\s*["']\.\/lib\/generic-apu-persistence-migration["'];/,
 );
-check(importMatch, "app.ts must import the accepted Generic APU migration module");
+check(
+  importMatch,
+  "app.ts must import the accepted Generic APU migration module",
+);
 check(
   /\bstartGenericApuPersistenceMigration\b/.test(importMatch?.[1] ?? ""),
   "app.ts must import the migration start function",
@@ -27,13 +30,18 @@ check(
 );
 
 const startupMatch = appSource.match(
-  /\(async\s*\(\)\s*=>\s*\{\s*try\s*\{([\s\S]*?startGenericApuPersistenceMigration\(\);[\s\S]*?waitForGenericApuPersistenceMigration\(\);[\s\S]*?)\}\s*catch\s*\(\s*error\s*\)\s*\{([\s\S]*?Generic APU persistence migration failed[\s\S]*?)\}\s*\}\)\(\);/,
+  /queueDatabaseStartup\(async\s*\(\)\s*=>\s*\{\s*try\s*\{([\s\S]*?startGenericApuPersistenceMigration\(\);[\s\S]*?waitForGenericApuPersistenceMigration\(\);[\s\S]*?)\}\s*catch\s*\(\s*error\s*\)\s*\{([\s\S]*?Generic APU persistence migration failed[\s\S]*?)\}\s*\}\);/,
 );
-check(startupMatch, "app.ts must register one explicit Generic APU startup boundary");
+check(
+  startupMatch,
+  "app.ts must register Generic APU work through the serialized database startup boundary",
+);
 
 const startupBody = startupMatch?.[1] ?? "";
 const failureBody = startupMatch?.[2] ?? "";
-const startOffset = startupBody.indexOf("startGenericApuPersistenceMigration();");
+const startOffset = startupBody.indexOf(
+  "startGenericApuPersistenceMigration();",
+);
 const waitOffset = startupBody.indexOf(
   "await waitForGenericApuPersistenceMigration();",
 );
@@ -41,8 +49,14 @@ const readyOffset = startupBody.indexOf(
   'console.log("[migration] Generic APU persistence tables ensured")',
 );
 check(startOffset >= 0, "startup must begin the accepted migration");
-check(waitOffset > startOffset, "startup must wait only after starting migration");
-check(readyOffset > waitOffset, "readiness must be logged only after migration wait");
+check(
+  waitOffset > startOffset,
+  "startup must wait only after starting migration",
+);
+check(
+  readyOffset > waitOffset,
+  "readiness must be logged only after migration wait",
+);
 check(
   /console\.error\([\s\S]*Generic APU persistence migration failed[\s\S]*error[\s\S]*\)/.test(
     failureBody,
@@ -55,7 +69,9 @@ check(
 );
 
 const routeRegistration = appSource.indexOf('app.use("/api/v1", router);');
-const startupRegistration = appSource.indexOf("startGenericApuPersistenceMigration();");
+const startupRegistration = appSource.indexOf(
+  "startGenericApuPersistenceMigration();",
+);
 const featureCatalogRegistration = appSource.indexOf(
   "await startFeatureCatalogMigration();",
 );
@@ -69,7 +85,9 @@ check(
 );
 
 check(
-  /let\s+ready:\s*Promise<void>\s*\|\s*null\s*=\s*null;/.test(migrationSource) &&
+  /let\s+ready:\s*Promise<void>\s*\|\s*null\s*=\s*null;/.test(
+    migrationSource,
+  ) &&
     /return\s+ready\s*\?\?\s*\(ready\s*=\s*ensureGenericApuPersistenceSchema\(\)\);/.test(
       migrationSource,
     ),

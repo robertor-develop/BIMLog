@@ -1,4 +1,4 @@
-BIMLog Lens Next v1.05.N01-P01 - Navisworks Manage 2021/2025 Field Acceptance
+BIMLog Lens Next v1.05.N09-P04 - Navisworks Manage 2021/2025 Field Acceptance
 Tester: Ruben
 Date:
 Machine:
@@ -9,10 +9,10 @@ Model:
 [ ] Navisworks Manage 2025 starts without an add-in load error.
 [ ] BIMLog Lens Next opens and reopens after closing.
 [ ] Correct BIMLog project is selected or binding guidance is clear.
-[ ] Platform-first viewpoint inventory loads.
+[ ] Platform-first BIMLog Issue inventory loads.
 [ ] Existing BIMLog Saved Viewpoints reconcile without touching unrelated viewpoints.
 [ ] My View filters rebuild the expected BIMLog folder/view structure.
-[ ] A new controlled BIMLog viewpoint can be created and published.
+[ ] A BIMLog Issue is created with its Visual Package and screenshot, without creating a local Saved Viewpoint.
 [ ] Open Working View reconstructs the selected BIMLog visual state.
 [ ] Status/history publication works and produces an audit record.
 [ ] Original BIMLog Lens still loads unchanged if it was previously installed.

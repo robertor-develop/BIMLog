@@ -14,17 +14,18 @@ const openFunction = workingView.slice(
 );
 assert.doesNotMatch(openFunction, /bridgeClient\.openWorkingView|captureCurrentVisualState|saveVisualState/);
 assert.match(openFunction, /apiClient\.loadVisualState\(issue, signal\)/);
-assert.match(openFunction, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, signal\)/);
+assert.match(openFunction, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, stored\.visualStateDigest, signal\)/);
 assert.match(workingView, /bridgeClient\.captureCurrentVisualState\(issue, context, signal\)/);
 assert.match(workingView, /apiClient\.saveVisualState\(issue, captured\.visualStateJson, captured\.visualStateDigest, signal\)/);
 assert.match(workingView, /apiClient\.loadVisualState\(migratedIssue, signal\)/);
-assert.match(workingView, /bridgeClient\.applyPlatformWorkingView\(migratedIssue, context, stored\.visualStateJson, signal\)/);
+assert.match(workingView, /bridgeClient\.applyPlatformWorkingView\(migratedIssue, context, stored\.visualStateJson, stored\.visualStateDigest, signal\)/);
 assert.match(client, /visual-state digest changed after inventory refresh/);
 assert.match(client, /visual-state package digest is inconsistent/);
 assert.match(native, /Temporary BIMLog working view reconstructed without creating a SavedViewpoint/);
 assert.match(native, /Visual-state digest validation failed/);
-for (const component of ["ApplyCamera(state.Camera)", "ApplySelection(state.SelectedElements)", "ApplyVisibility(state.HiddenElements)", "ApplyAppearance(state.AppearanceOverrides)", "InvokeSectioningSetter(state.SectioningJson)"])
+for (const component of ["ApplyCamera(state.Camera)", "ApplySelection(state.SelectedElements, resolution)", "ApplyVisibility(state.HiddenElements, resolution)", "ApplyAppearance(state.AppearanceOverrides, resolution)", "InvokeSectioningSetter(state.SectioningJson)"])
   assert.ok(native.includes(component), `direct working view must restore ${component}`);
+assert.match(native, /ResolveExact\(AllElementReferences\(state\), true, resolution\)/);
 assert.match(native, /state\.ModelReferences = scan\.Models/);
 assert.match(native, /different model fingerprint/);
 console.log("PASS Lens Next Build 4 governed BIMLog-to-Navisworks reconstruction boundary");

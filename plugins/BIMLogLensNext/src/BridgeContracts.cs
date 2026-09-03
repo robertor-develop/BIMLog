@@ -15,10 +15,14 @@ namespace BIMLogLensNext
         public const string CaptureLocalViewpoint = "capture-local-viewpoint";
         public const string CaptureNewViewpoint = "capture-new-viewpoint";
         public const string ApplyWorkingView = "apply-working-view";
+        public const string RestoreExactVisualState = "restore-exact-visual-state";
         public const string PublishWorkingView = "publish-working-view";
         public const string MaterializeMyView = "materialize-my-view";
 
-        public static IReadOnlyCollection<string> ReadOnlyCommands { get; } = Array.AsReadOnly(new[]
+        // Commands that are allowed without permission to mutate the persistent
+        // Navisworks Saved Viewpoint collection. ApplyWorkingView is intentionally
+        // included: it changes only the current temporary working state.
+        public static IReadOnlyCollection<string> AllowedWithoutSavedViewpointPublishing { get; } = Array.AsReadOnly(new[]
         {
             Ping,
             Capabilities,
@@ -29,8 +33,20 @@ namespace BIMLogLensNext
             CaptureVisualState,
             CaptureLocalViewpoint,
             CaptureNewViewpoint,
-            ApplyWorkingView
+            ApplyWorkingView,
+            RestoreExactVisualState
         });
+
+        public static IReadOnlyCollection<string> TemporaryWorkingStateCommands { get; } =
+            Array.AsReadOnly(new[] { ApplyWorkingView, RestoreExactVisualState });
+
+        public static IReadOnlyCollection<string> PersistentSavedViewpointWriteCommands { get; } =
+            Array.AsReadOnly(new[] { PublishWorkingView, MaterializeMyView });
+
+        // Compatibility alias for existing capability consumers. New policy code
+        // must use the effect-specific collections above.
+        public static IReadOnlyCollection<string> ReadOnlyCommands =>
+            AllowedWithoutSavedViewpointPublishing;
 
         public static IReadOnlyCollection<string> PilotWriteCommands { get; } =
             Array.AsReadOnly(new[]
