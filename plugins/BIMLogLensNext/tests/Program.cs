@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Web.Script.Serialization;
+using System.Xml;
 
 namespace BIMLogLensNext.Tests
 {
@@ -70,6 +71,8 @@ namespace BIMLogLensNext.Tests
                 Run("readiness_K_unsupported_active_names_component", ReadinessKUnsupportedActive);
                 Run("readiness_L_truncated_active_names_component", ReadinessLTruncatedActive);
                 Run("readiness_M_current_capture_claim_reopens", ReadinessMCurrentCaptureRoundTrip);
+                Run("xml_document_shell_is_deterministic_and_empty", XmlDocumentShellIsDeterministicAndEmpty);
+                Run("xml_document_shell_rejects_invalid_output_path", XmlDocumentShellRejectsInvalidOutputPath);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -88,6 +91,55 @@ namespace BIMLogLensNext.Tests
             var response = Bridge(new FakeAdapter(), new RecordingDispatcher()).Execute(request);
             False(response.Success);
             Equal("idempotency_key_mismatch", response.Code);
+        }
+
+        private static void XmlDocumentShellIsDeterministicAndEmpty()
+        {
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-xml-shell-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var first = Path.Combine(directory, "first.xml");
+                var second = Path.Combine(directory, "second.xml");
+                LensNextXmlDocumentShellWriter.Write(first);
+                LensNextXmlDocumentShellWriter.Write(second);
+
+                var firstBytes = File.ReadAllBytes(first);
+                var secondBytes = File.ReadAllBytes(second);
+                True(firstBytes.SequenceEqual(secondBytes));
+                False(firstBytes.Length >= 3 && firstBytes[0] == 0xEF && firstBytes[1] == 0xBB && firstBytes[2] == 0xBF);
+
+                var xml = Encoding.UTF8.GetString(firstBytes);
+                True(xml.StartsWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>", StringComparison.Ordinal));
+                foreach (var forbidden in new[] { "camera", "viewpoint ", "units=", "schema", "focal", "position", "rotation", "section" })
+                    False(xml.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
+
+                var document = new XmlDocument { XmlResolver = null };
+                document.Load(first);
+                Equal(LensNextXmlDocumentShellWriter.RootElementName, document.DocumentElement.Name);
+                Equal(0, document.DocumentElement.Attributes.Count);
+                var viewpoints = document.DocumentElement.SelectNodes("viewpoints");
+                Equal(1, viewpoints.Count);
+                var folders = document.DocumentElement.SelectNodes("viewpoints/viewfolder");
+                Equal(1, folders.Count);
+                var folder = (XmlElement)folders[0];
+                Equal(1, folder.Attributes.Count);
+                Equal(LensNextXmlDocumentShellWriter.ViewFolderName, folder.GetAttribute("name"));
+                Equal(0, folder.ChildNodes.Count);
+            }
+            finally
+            {
+                try { Directory.Delete(directory, true); } catch { }
+            }
+        }
+
+        private static void XmlDocumentShellRejectsInvalidOutputPath()
+        {
+            Throws<ArgumentException>(() => LensNextXmlDocumentShellWriter.Write(null));
+            Throws<ArgumentException>(() => LensNextXmlDocumentShellWriter.Write(Path.Combine(Path.GetTempPath(), "not-xml.txt")));
+            var missingDirectory = Path.Combine(Path.GetTempPath(), "bimlog-missing-" + Guid.NewGuid().ToString("N"), "shell.xml");
+            Throws<DirectoryNotFoundException>(() => LensNextXmlDocumentShellWriter.Write(missingDirectory));
+            False(File.Exists(missingDirectory));
         }
 
         private static void IdentifiersAreIsolated()
