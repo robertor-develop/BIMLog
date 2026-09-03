@@ -2148,6 +2148,7 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 ## v1.05.N10-P05 atomic Lens Next create telemetry
 
 - Preserve implementation commit `a22220b3c34982cc5c1db9f226312c0e9c35980d`: only the Platform outer-catch failure event and visible P05 labels changed; Native N10, transaction behavior, database/schema, and all create business logic are frozen.
-- Complete the governed build, push the exact accepted source, align and build from the visible Replit Shell, publish once, and verify the deployed commit and visible `v1.05.N10-P05` identity.
+- First publication attempt failed at the Replit 8 GiB image limit; recovery is limited to persistent .replitignore exclusions for verified development-only/generated content while preserving the deterministic API runtime closure.
+- Complete the governed build, commit and push the packaging-only repair, publish once, then verify deployed commit, visible v1.05.N10-P05 identity, and health.
 - If a safe controlled internal account/environment already exists, perform one create request and retain the sanitized atomic failure event. Otherwise stop after deployment and wait for the next naturally occurring request. Ruben/customer environments are prohibited for diagnosis.
 - Do not diagnose or repair `pool.connect()`, transaction construction, or `BEGIN` until the complete retained exception proves the cause.

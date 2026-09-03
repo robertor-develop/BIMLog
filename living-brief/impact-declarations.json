@@ -16661,6 +16661,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b2fdfaa11e2d3a61f2c1b7f3e6efdc640d8b47efaaf515d18047eee2ba40d6df"
+    },
+    {
+      "taskId": "bimlog-platform-p05-deployment-image-recovery-20260903",
+      "reviewedThroughCommit": "451c59c9088f2d9b9e4c1ab8a0e3d02ecbc4a986",
+      "reviewedAt": "2026-09-03T11:34:24Z",
+      "status": "deployment_packaging_repair_validated_publish_pending",
+      "captureTiming": "same_task_after_packaging_repair_before_release_build_push_and_publication",
+      "summary": "Excludes only verified development and generated deployment inputs, preserves the deterministic API runtime closure, and changes no product, Native, database, or transaction behavior.",
+      "workstreams": [
+        "platform-p05-release-recovery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deployment packaging exclusions do not change this authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deployment packaging exclusions do not change this authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deployment packaging exclusions do not change this authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deployment packaging exclusions do not change this authority."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deployment packaging exclusions do not change this authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deployment packaging exclusions do not change this authority."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deployment packaging exclusions do not change this authority."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deployment packaging exclusions do not change this authority."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the failed 8 GiB P05 publish, evidence-backed deployment context cause, and 1.4 GiB repaired bundle input."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the packaging-only recovery and remaining publish plus live-verification gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deployment packaging exclusions do not change this authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4abfc157b9b1e0a283e94dd4812c8a7ed9e5508ed212881d0687985e22995a0b"
     }
   ]
 }

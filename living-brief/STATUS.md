@@ -6,6 +6,9 @@
 - The failure event is one JSON physical line and safely extracts event time, correlation/project/route/stage identity, exception class/name/message/cause/stack, and PostgreSQL code, constraint, detail, schema, table, column, routine, and source context. Hostile getters cannot make serialization throw.
 - The transaction call, callback, ordering, business/validation/identity logic, database/schema, and Native source/package remain unchanged. Native stays N10 / `1.5.10.4`; only Platform advances P04 to P05.
 - Local focused serialization, hostile-error, API/frontend typecheck, mojibake, and database-source safety gates pass. Push, Replit alignment/build, publication, live version verification, and one safe internal reproduction remain separate gates.
+- The first P05 publish attempt failed at Replit bundle creation because the 7.8 GiB workspace deployment context included generated Windows sync-agent output, root dependencies, Git/LFS metadata, caches, and source archives.
+- The minimum persistent repair extends .replitignore only; measured deployment input falls to 1.4 GiB while the complete 1.4 GiB API runtime closure remains included.
+- Production remains P04 until the repaired P05 bundle is published and independently live-verified.
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity local candidate - 2026-08-14
 
