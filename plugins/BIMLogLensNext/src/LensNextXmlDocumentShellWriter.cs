@@ -27,7 +27,10 @@ namespace BIMLogLensNext
             var names = LensNextXmlExportNamePolicy.UniqueNames(ordered);
             var views = new LensNextXmlExportView[ordered.Count];
             for (var index = 0; index < ordered.Count; index++)
-                views[index] = new LensNextXmlExportView(names[index], LensNextXmlExportGuidPolicy.ForRecord(ordered[index]));
+                views[index] = new LensNextXmlExportView(
+                    names[index],
+                    LensNextXmlExportGuidPolicy.ForRecord(ordered[index]),
+                    LensNextXmlPosition.FromValidatedCamera(ordered[index].PackageCamera));
             WriteDocument(destinationPath, views);
             return ordered;
         }
@@ -74,6 +77,15 @@ namespace BIMLogLensNext
                         writer.WriteStartElement("view");
                         writer.WriteAttributeString("name", view.Name);
                         writer.WriteAttributeString("guid", view.Guid.ToString("D"));
+                        writer.WriteStartElement("viewpoint");
+                        writer.WriteStartElement("position");
+                        writer.WriteStartElement("pos3f");
+                        writer.WriteAttributeString("x", view.Position.XInvariant);
+                        writer.WriteAttributeString("y", view.Position.YInvariant);
+                        writer.WriteAttributeString("z", view.Position.ZInvariant);
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
                         writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
@@ -94,9 +106,15 @@ namespace BIMLogLensNext
 
         private sealed class LensNextXmlExportView
         {
-            public LensNextXmlExportView(string name, Guid guid) { Name = name; Guid = guid; }
+            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position)
+            {
+                Name = name;
+                Guid = guid;
+                Position = position;
+            }
             public string Name { get; }
             public Guid Guid { get; }
+            public LensNextXmlPosition Position { get; }
         }
     }
 }

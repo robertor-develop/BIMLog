@@ -359,3 +359,26 @@ None proves a Navisworks exchange schema URL or version, so no `xmlns:xsi`,
 is emitted. Build 08 preserves the Build 05 ordering, Build 06 names, Build 07 UUIDs,
 and emits no camera or sectioning data.
 
+## Build 09 raw camera-position checkpoint
+
+Build 09 maps only the validated authoritative package value
+`Camera.Position.{X,Y,Z}` into the isolated export representation:
+
+```text
+view/viewpoint/position/pos3f@x,@y,@z
+```
+
+The three stored IEEE-754 doubles are copied without unit conversion, axis conversion,
+negation, swizzling, clamping, or default substitution. Each coordinate is serialized
+with the .NET round-trip (`R`) format and `InvariantCulture`, preserving deterministic
+dot-decimal output and round-trip parsing back to the same double value.
+
+An active record is rejected under the existing export integrity policy when its
+validated package camera or position is missing, or when any coordinate is NaN or
+positive/negative infinity. No `0,0,0` fallback is introduced.
+
+This checkpoint does not claim Navisworks XML compatibility or unit correctness. It
+does not emit rotation, world-up vector, projection, focal/FOV data, sectioning, units,
+schema location, or schema version. Build 05 ordering, Build 06 naming, Build 07 UUIDs,
+and Build 08 exchange metadata remain unchanged.
+

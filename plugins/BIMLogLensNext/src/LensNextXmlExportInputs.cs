@@ -23,6 +23,7 @@ namespace BIMLogLensNext
         public string PackageLifecycleStatus { get; set; }
         public int PackageRevisionNumber { get; set; }
         public string PackageDigest { get; set; }
+        public LensNextCameraState PackageCamera { get; set; }
     }
 
     public static class LensNextXmlExportNamePolicy
@@ -99,6 +100,7 @@ namespace BIMLogLensNext
                 !string.Equals(record.PackageLifecycleStatus, record.LifecycleStatus, StringComparison.Ordinal) ||
                 record.PackageRevisionNumber != record.RevisionNumber)
                 throw new InvalidDataException("The active BIMLog viewpoint package identity is mismatched.");
+            LensNextXmlPosition.FromValidatedCamera(record.PackageCamera);
         }
 
         private static bool IsLifecycle(string value) =>
