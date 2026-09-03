@@ -257,3 +257,27 @@ necessary only if the fixed target schema requires one and it cannot be
 deterministically derived from the stored values. No capture change is implemented
 or authorized by this contract.
 
+## Build 05 membership and ordering checkpoint
+
+The isolated export-input selector accepts only records supplied for one positive,
+authoritative BIMLog project ID. Any cross-project record rejects the collection.
+Only `active` records are selected, preserving the existing default BIMLog export
+and report lifecycle scope; `superseded` and `voided` records remain audit/history
+records and are not silently promoted into the current export.
+
+Every selected active record must have a complete positive identity and a validated
+package identity matching project ID, server ID, viewpoint ID, lifecycle status,
+and revision number. Its record digest and package digest must both be SHA-256 and
+must match. An invalid identity or digest rejects the collection rather than being
+treated as exportable.
+
+Ordering reuses the current Lens Next issue ordering rule:
+
+1. priority ascending (`1` before `5`, null last);
+2. capture timestamp descending (newest first, missing timestamp last);
+3. authoritative server viewpoint ID ascending as the unique deterministic tie-break.
+
+Input enumeration/database order is irrelevant. Build 05 emits no `view` node,
+name, GUID, camera value, unit, schema attribute, or sectioning value, and it never
+consults the Navisworks Saved Viewpoints collection.
+

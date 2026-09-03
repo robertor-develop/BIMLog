@@ -73,6 +73,10 @@ namespace BIMLogLensNext.Tests
                 Run("readiness_M_current_capture_claim_reopens", ReadinessMCurrentCaptureRoundTrip);
                 Run("xml_document_shell_is_deterministic_and_empty", XmlDocumentShellIsDeterministicAndEmpty);
                 Run("xml_document_shell_rejects_invalid_output_path", XmlDocumentShellRejectsInvalidOutputPath);
+                Run("xml_export_inputs_are_stably_ordered", XmlExportInputsAreStablyOrdered);
+                Run("xml_export_input_ties_use_server_id", XmlExportInputTiesUseServerId);
+                Run("xml_export_inputs_reject_cross_project_and_invalid_package", XmlExportInputsRejectCrossProjectAndInvalidPackage);
+                Run("xml_export_inputs_preserve_active_lifecycle_policy", XmlExportInputsPreserveActiveLifecyclePolicy);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -140,6 +144,87 @@ namespace BIMLogLensNext.Tests
             var missingDirectory = Path.Combine(Path.GetTempPath(), "bimlog-missing-" + Guid.NewGuid().ToString("N"), "shell.xml");
             Throws<DirectoryNotFoundException>(() => LensNextXmlDocumentShellWriter.Write(missingDirectory));
             False(File.Exists(missingDirectory));
+        }
+
+        private static void XmlExportInputsAreStablyOrdered()
+        {
+            var old = DateTimeOffset.Parse("2026-01-01T00:00:00Z");
+            var recent = DateTimeOffset.Parse("2026-02-01T00:00:00Z");
+            var normal = new[] { ExportInput(11, 2, recent), ExportInput(12, 1, old), ExportInput(13, 1, recent) };
+            var shuffled = new[] { normal[2], normal[0], normal[1] };
+            Equal("13,12,11", string.Join(",", LensNextXmlExportInputSelector.SelectOrdered(26, normal).Select(value => value.ServerId)));
+            Equal("13,12,11", string.Join(",", LensNextXmlExportInputSelector.SelectOrdered(26, shuffled).Select(value => value.ServerId)));
+
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-xml-order-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "ordered.xml");
+                var ordered = LensNextXmlDocumentShellWriter.Write(path, 26, shuffled);
+                Equal("13,12,11", string.Join(",", ordered.Select(value => value.ServerId)));
+                var xml = File.ReadAllText(path);
+                False(xml.Contains("13"));
+                False(xml.Contains("camera"));
+                Equal(1, new XmlDocumentShell(path).ViewFolderCount);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportInputTiesUseServerId()
+        {
+            var captured = DateTimeOffset.Parse("2026-03-01T00:00:00Z");
+            var tied = new[] { ExportInput(30, 2, captured), ExportInput(10, 2, captured), ExportInput(20, 2, captured) };
+            Equal("10,20,30", string.Join(",", LensNextXmlExportInputSelector.SelectOrdered(26, tied).Select(value => value.ServerId)));
+        }
+
+        private static void XmlExportInputsRejectCrossProjectAndInvalidPackage()
+        {
+            var crossProject = ExportInput(10, 1, null);
+            crossProject.ProjectId = 27;
+            crossProject.PackageProjectId = 27;
+            Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { crossProject }));
+
+            var wrongIdentity = ExportInput(11, 1, null);
+            wrongIdentity.PackageServerId = 999;
+            Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { wrongIdentity }));
+
+            var wrongDigest = ExportInput(12, 1, null);
+            wrongDigest.PackageDigest = new string('b', 64);
+            Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { wrongDigest }));
+        }
+
+        private static void XmlExportInputsPreserveActiveLifecyclePolicy()
+        {
+            var active = ExportInput(1, 1, null);
+            var superseded = ExportInput(2, 1, null); superseded.LifecycleStatus = "superseded"; superseded.PackageLifecycleStatus = "superseded";
+            var voided = ExportInput(3, 1, null); voided.LifecycleStatus = "voided"; voided.PackageLifecycleStatus = "voided";
+            var selected = LensNextXmlExportInputSelector.SelectOrdered(26, new[] { voided, active, superseded });
+            Equal(1, selected.Count);
+            Equal(1, selected[0].ServerId);
+        }
+
+        private static LensNextXmlExportInput ExportInput(int serverId, int? priority, DateTimeOffset? capturedAt)
+        {
+            var digest = new string('a', 64);
+            return new LensNextXmlExportInput
+            {
+                ProjectId = 26, ServerId = serverId, ViewpointId = "VP-" + serverId,
+                LifecycleStatus = "active", RevisionNumber = 1, Priority = priority, CapturedAt = capturedAt,
+                VisualStateDigest = digest, PackageProjectId = 26, PackageServerId = serverId,
+                PackageViewpointId = "VP-" + serverId, PackageLifecycleStatus = "active",
+                PackageRevisionNumber = 1, PackageDigest = digest
+            };
+        }
+
+        private sealed class XmlDocumentShell
+        {
+            public XmlDocumentShell(string path)
+            {
+                var document = new XmlDocument { XmlResolver = null };
+                document.Load(path);
+                ViewFolderCount = document.DocumentElement.SelectNodes("viewpoints/viewfolder").Count;
+            }
+            public int ViewFolderCount { get; }
         }
 
         private static void IdentifiersAreIsolated()

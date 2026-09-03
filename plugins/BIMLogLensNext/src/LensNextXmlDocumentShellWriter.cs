@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Collections.Generic;
 using System.Text;
 using System.Xml;
 
@@ -13,6 +14,21 @@ namespace BIMLogLensNext
         public const string ViewFolderName = "BIMLog Viewpoints";
 
         public static void Write(string destinationPath)
+        {
+            WriteShell(destinationPath);
+        }
+
+        public static IReadOnlyList<LensNextXmlExportInput> Write(
+            string destinationPath,
+            int authoritativeProjectId,
+            IEnumerable<LensNextXmlExportInput> records)
+        {
+            var ordered = LensNextXmlExportInputSelector.SelectOrdered(authoritativeProjectId, records);
+            WriteShell(destinationPath);
+            return ordered;
+        }
+
+        private static void WriteShell(string destinationPath)
         {
             if (string.IsNullOrWhiteSpace(destinationPath))
                 throw new ArgumentException("An XML output path is required.", nameof(destinationPath));
