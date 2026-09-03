@@ -3,3 +3,16 @@
 
 # No need to store the pnpm store twice.
 .local
+
+# Exclude development-only and generated content from the deployment image.
+/.git
+/.cache
+/node_modules
+/attached_assets
+/artifacts/sync-agent
+/artifacts/mockup-sandbox
+/bimlog_src.tar.gz
+/*.zip
+/*.tar.gz
+/*.log
+**/*.map
