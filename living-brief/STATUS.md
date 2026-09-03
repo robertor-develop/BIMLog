@@ -1124,3 +1124,4 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - The field-proven writable Navisworks camera apply remains frozen and unchanged.
 - Native `apply-working-view` success responses now serialize the identity object with the established lower-camel web-contract keys (`projectId`, `serverId`, `viewpointId`, `lifecycleStatus`, and `revisionNumber`). This removes the false frontend `unknown identity key is forbidden: ProjectId` error that appeared after a successful camera apply.
 - The change adds a focused dual-year native regression and changes no capture, camera, sectioning, selection, visibility, appearance, Saved Viewpoint, timeout, Platform API, database, or release-version behavior.
+- Semantic reconciliation is bound to accepted implementation commit `28b214eb68e4893ea25363c915345d2439de89b4`.

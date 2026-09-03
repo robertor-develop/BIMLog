@@ -2158,3 +2158,4 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Require both Navisworks 2021 and 2025 native contract suites to prove lower-camel identity wire keys and reject PascalCase keys.
 - Merge the reviewed normalization through the visible Replit Shell, pass the governed build, and republish the web surface because the frontend consumes the corrected native response contract.
 - Preserve the frozen writable `Viewpoint` plus `DocumentCurrentViewpoint.CopyFrom(Viewpoint)` camera path. Do not issue a new field package until fresh create/persist/open/restart/open acceptance passes.
+- Publication may proceed only after this exact reconciliation passes the complete governed build.

@@ -16702,6 +16702,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f291e0501fee368ddfea87b79785acacff34365a0f73c965144d0b36e8f39a34"
+    },
+    {
+      "taskId": "bimlog-lens-next-apply-identity-normalization-20260902",
+      "reviewedThroughCommit": "28b214eb68e4893ea25363c915345d2439de89b4",
+      "reviewedAt": "2026-09-02T19:45:00.000-04:00",
+      "summary": "Accepts the focused lower-camel apply-working-view identity wire normalization while preserving the field-proven writable Navisworks camera apply and every frozen capture and persistence boundary.",
+      "workstreams": [
+        "lens-next-apply-identity-wire-contract",
+        "dual-year-native-regression",
+        "controlled-replit-publication"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole persisted issue and navigation authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Replit Shell publication and customer acceptance controls remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds an exact regression proving lower-camel identity keys and rejecting PascalCase wire keys."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product roadmap, persona, or ownership boundary changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Platform endpoint, request contract, transaction, schema, or database behavior changed."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the native apply response wire normalization while freezing camera capture and apply behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, XML, PDF, DOCX, or visual presentation contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulation, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the accepted identity normalization and the unchanged frozen camera implementation."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the governed build, publication, and remaining local acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing incident evidence and authorization boundary remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4533a4f33baf71c4156eb17a35961ed330a7d5fdc7448b02e89f6d5f2b1986bf"
     }
   ]
 }
