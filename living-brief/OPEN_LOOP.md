@@ -2,6 +2,14 @@
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
+## BIMLog v1.05.N09-P10 Intake/APU release gates - 2026-09-02
+
+- Integration commit `1314006b4409a6d193f95b5c7c12cd4d5b319fbc` combines the complete P10 Intake/APU
+  program with current N09 production history. Remaining gates are the exact-source governed build,
+  GitHub push, Replit Shell synchronization, controlled publication, and Chrome live verification.
+- Production database changes are not authorized or required by this integration. Any destructive
+  migration preview must be refused rather than approved.
+
 ## BIMLog v1.05.N01-P01 Job Intake and Multi-APU program - 2026-08-31
 
 - `INTAKE-APU-10` completes the planned local program at `v1.05.N01-P10` with legacy compatibility

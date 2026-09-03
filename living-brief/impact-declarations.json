@@ -17340,6 +17340,82 @@
         "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json"
       ],
       "reviewedChangeSha256": "fa496612c2c654f1e92880dc4961c1136e0cde6b308acfbc024088dbce54ec78"
+    },
+    {
+      "taskId": "bimlog-intake-apu-p10-n09-integration-20260902",
+      "reviewedThroughCommit": "1314006b4409a6d193f95b5c7c12cd4d5b319fbc",
+      "reviewedAt": "2026-09-02T20:00:00-04:00",
+      "status": "integration_candidate",
+      "captureTiming": "same_task_after_history_preserving_merge_before_push_and_publication",
+      "summary": "Integrates the complete ten-build Intake/APU P10 program with the current Lens N09 production history and reconciles the shared release identity as v1.05.N09-P10.",
+      "workstreams": [
+        "job-intake-apu-complete-program",
+        "lens-next-n09-history-preservation",
+        "shared-release-integration"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains the sole construction operations authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source, release, and deployment gates remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing bilingual, responsive, regression, evidence, and database-safety requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted Job Intake and Multi-APU direction is integrated without expanding product scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The merge composes already reviewed Platform and Intake/APU source histories without a new platform authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The current N09 Lens implementation and package history are preserved without modification."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or export presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the N09-P10 integration identity and remaining release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the exact push, Replit Shell publication, and Chrome verification gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production database mutation or destructive operation occurred during integration."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ec945f9b2373099764b8b4d7950df9be715fce23ae204826bbb44a0ea30c2104"
     }
   ]
 }

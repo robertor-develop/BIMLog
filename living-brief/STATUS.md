@@ -1,5 +1,14 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N09-P10 Intake/APU integration candidate - 2026-09-02
+
+- Integration commit `1314006b4409a6d193f95b5c7c12cd4d5b319fbc` preserves the complete ten-build
+  Intake/APU history while merging the current production Lens/Platform history without overwrite.
+- The shared release identity is `v1.05.N09-P10`: Lens retains the latest verified `N09` counter and
+  Intake/APU advances only the Platform-owned counter to `P10`.
+- The governed pre-push build, GitHub push, Replit synchronization/publication, and live verification
+  are the remaining release gates; none is claimed until its exact evidence is recorded.
+
 ## BIMLog v1.05.N01-P10 INTAKE-APU-10 local release-readiness candidate - 2026-09-01
 
 - Build 10 adds a read-only compatibility and release-readiness view. It states exactly what legacy
