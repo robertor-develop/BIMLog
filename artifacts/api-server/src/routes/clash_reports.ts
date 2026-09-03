@@ -21,6 +21,7 @@ import { getAppUrl } from "../lib/email";
 import AdmZip from "adm-zip";
 import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "../lib/lens-next-publishing";
 import { LensNextLocalUploadError, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
+import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-telemetry";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -745,6 +746,7 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
         screenshotPresent: Boolean(body.visualState?.ScreenshotDataUrl ?? body.visualState?.screenshotDataUrl),
         issue: { trade, floor, reportType, priority, status, responsibleCompanyPresent: Boolean(responsibleCompany), openItemsPresent: Boolean(openItems) },
       });
+      stage = "transaction_start";
       transactionStarted = true;
       const result = await db.transaction(async tx => {
         stage = "duplicate_identity_query";
@@ -793,23 +795,7 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
       trace("PASS", { serverId: result.serverId, displayId: result.displayId });
       res.status(201).json({ success: true, contractVersion: "lens-next-create.v1", created: true, result });
     } catch (error) {
-      const failure = error as Error & { code?: string; constraint?: string; table?: string; column?: string; detail?: string; cause?: unknown };
-      const cause = failure?.cause as Error & { code?: string; constraint?: string; table?: string; column?: string; detail?: string } | undefined;
-      trace("FAIL", {
-        errorClass: failure?.constructor?.name ?? failure?.name ?? "UnknownError",
-        errorName: failure?.name ?? null,
-        errorMessage: failure?.message ?? String(error),
-        stack: failure?.stack ?? null,
-        causeClass: cause?.constructor?.name ?? cause?.name ?? null,
-        causeName: cause?.name ?? null,
-        causeMessage: cause?.message ?? null,
-        causeStack: cause?.stack ?? null,
-        databaseCode: failure?.code ?? cause?.code ?? null,
-        constraint: failure?.constraint ?? cause?.constraint ?? null,
-        table: failure?.table ?? cause?.table ?? null,
-        column: failure?.column ?? cause?.column ?? null,
-        detail: failure?.detail ?? cause?.detail ?? null,
-      });
+      try { console.error(serializeLensNextCreateFailure({ error, correlationId, projectId, stage })); } catch {}
       if (transactionStarted && !transactionCommitted) {
         stage = "transaction_rollback";
         trace("PASS");
