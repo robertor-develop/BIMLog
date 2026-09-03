@@ -1,5 +1,5 @@
 BIMLog Lens Next for Navisworks Manage 2025
-Release: v1.05.N09-P04
+Release: v1.05.N10-P04
 
 THIS IS THE RUBEN 2025 FIELD-TEST PACKAGE.
 
