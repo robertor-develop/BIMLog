@@ -80,6 +80,9 @@ namespace BIMLogLensNext.Tests
                 Run("xml_export_names_use_authoritative_display_and_title", XmlExportNamesUseAuthoritativeDisplayAndTitle);
                 Run("xml_export_names_handle_missing_and_duplicate_titles", XmlExportNamesHandleMissingAndDuplicateTitles);
                 Run("xml_export_names_escape_special_and_preserve_long_titles", XmlExportNamesEscapeSpecialAndPreserveLongTitles);
+                Run("xml_export_guid_v5_matches_rfc_vector", XmlExportGuidV5MatchesRfcVector);
+                Run("xml_export_guids_are_identity_stable_and_distinct", XmlExportGuidsAreIdentityStableAndDistinct);
+                Run("xml_export_guids_ignore_order_and_name", XmlExportGuidsIgnoreOrderAndName);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -169,6 +172,7 @@ namespace BIMLogLensNext.Tests
                 False(xml.Contains("camera"));
                 Equal(1, new XmlDocumentShell(path).ViewFolderCount);
                 Equal("VP-13,VP-12,VP-11", string.Join(",", new XmlDocumentShell(path).ViewNames));
+                True(new XmlDocumentShell(path).ViewGuids.All(value => Guid.TryParseExact(value, "D", out _)));
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -246,8 +250,49 @@ namespace BIMLogLensNext.Tests
                 True(raw.Contains("&amp;"));
                 True(raw.Contains("&lt;Conflict&gt;"));
                 True(raw.Contains("&quot;A&quot;"));
-                foreach (var forbidden in new[] { "guid=", "<viewpoint>", "<viewpoint ", "<camera", "position", "rotation", "projection", "focal", "sectioning", "units=", "schema" })
+                foreach (var forbidden in new[] { "<viewpoint>", "<viewpoint ", "<camera", "position", "rotation", "projection", "focal", "sectioning", "units=", "schema" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportGuidV5MatchesRfcVector()
+        {
+            var dnsNamespace = new Guid("6ba7b810-9dad-11d1-80b4-00c04fd430c8");
+            Equal(new Guid("21f7f8de-8051-5b89-8680-0195ef798b6a"), LensNextXmlExportGuidPolicy.CreateVersion5(dnsNamespace, "www.widgets.com"));
+        }
+
+        private static void XmlExportGuidsAreIdentityStableAndDistinct()
+        {
+            var first = ExportInput(51, 1, null);
+            var repeat = ExportInput(51, 5, DateTimeOffset.Parse("2026-05-01T00:00:00Z"));
+            repeat.DisplayId = "RENAMED"; repeat.Note = "Changed name";
+            var differentViewpoint = ExportInput(52, 1, null);
+            var revision = ExportInput(51, 1, null); revision.RevisionNumber = 2; revision.PackageRevisionNumber = 2;
+            Equal(LensNextXmlExportGuidPolicy.ForRecord(first), LensNextXmlExportGuidPolicy.ForRecord(repeat));
+            NotEqual(LensNextXmlExportGuidPolicy.ForRecord(first), LensNextXmlExportGuidPolicy.ForRecord(differentViewpoint));
+            NotEqual(LensNextXmlExportGuidPolicy.ForRecord(first), LensNextXmlExportGuidPolicy.ForRecord(revision));
+            Equal(5, LensNextXmlExportGuidPolicy.ForRecord(first).ToByteArray()[7] >> 4);
+        }
+
+        private static void XmlExportGuidsIgnoreOrderAndName()
+        {
+            var first = ExportInput(61, 1, null); first.DisplayId = "DUPLICATE";
+            var second = ExportInput(62, 1, null); second.DisplayId = "DUPLICATE";
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-xml-guids-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var normalPath = Path.Combine(directory, "normal.xml");
+                var shuffledPath = Path.Combine(directory, "shuffled.xml");
+                LensNextXmlDocumentShellWriter.Write(normalPath, 26, new[] { first, second });
+                LensNextXmlDocumentShellWriter.Write(shuffledPath, 26, new[] { second, first });
+                var normal = new XmlDocumentShell(normalPath);
+                var shuffled = new XmlDocumentShell(shuffledPath);
+                Equal(string.Join(",", normal.ViewNames), string.Join(",", shuffled.ViewNames));
+                Equal(string.Join(",", normal.ViewGuids), string.Join(",", shuffled.ViewGuids));
+                NotEqual(normal.ViewGuids[0], normal.ViewGuids[1]);
+                True(normal.ViewGuids.All(value => Guid.TryParseExact(value, "D", out _)));
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -273,9 +318,11 @@ namespace BIMLogLensNext.Tests
                 document.Load(path);
                 ViewFolderCount = document.DocumentElement.SelectNodes("viewpoints/viewfolder").Count;
                 ViewNames = document.DocumentElement.SelectNodes("viewpoints/viewfolder/view").Cast<XmlElement>().Select(value => value.GetAttribute("name")).ToArray();
+                ViewGuids = document.DocumentElement.SelectNodes("viewpoints/viewfolder/view").Cast<XmlElement>().Select(value => value.GetAttribute("guid")).ToArray();
             }
             public int ViewFolderCount { get; }
             public IReadOnlyList<string> ViewNames { get; }
+            public IReadOnlyList<string> ViewGuids { get; }
         }
 
         private static void IdentifiersAreIsolated()

@@ -303,3 +303,26 @@ This is deterministic and changes no BIMLog identifier. Build 06 emits only empt
 `view` elements with a `name` attribute. It emits no GUID, viewpoint/camera payload,
 units, schema attributes, sectioning, or Saved Viewpoint-derived value.
 
+## Build 07 export-GUID checkpoint
+
+Each exported `view` receives an interoperability-only deterministic UUIDv5. The
+UUID namespace is the RFC 4122 URL namespace
+`6ba7b811-9dad-11d1-80b4-00c04fd430c8`. The canonical UTF-8 name is:
+
+`bimlog:lens-next:xml-view-guid:v1|project={projectId}|server={serverId}|viewpoint={UTF8-byte-length}:{exact-viewpointId}|revision={revisionNumber}`
+
+Numeric fields use invariant decimal formatting. The authoritative viewpoint ID is
+used exactly as stored, without case folding or trimming; its UTF-8 byte length
+prevents delimiter ambiguity. UUID construction follows RFC 4122 version 5:
+namespace bytes are converted from .NET `Guid` layout to network byte order, the
+namespace plus canonical UTF-8 name is SHA-1 hashed, the first 16 bytes are used,
+version and RFC variant bits are set, and bytes are converted back to .NET layout.
+The standard RFC test vector is part of the focused proof.
+
+The policy is revision-specific because BIMLog's immutable identity includes the
+authoritative server row and revision number. A title/display-name change does not
+change the GUID. A different project, server row, viewpoint ID, or revision does.
+Collision behavior relies on UUIDv5's 122 effective identity bits; no random GUID,
+timestamp-only identity, customer constant, Navisworks Saved Viewpoint GUID, or
+local Saved Viewpoint state participates.
+

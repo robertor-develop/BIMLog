@@ -15,7 +15,7 @@ namespace BIMLogLensNext
 
         public static void Write(string destinationPath)
         {
-            WriteDocument(destinationPath, new string[0]);
+            WriteDocument(destinationPath, new LensNextXmlExportView[0]);
         }
 
         public static IReadOnlyList<LensNextXmlExportInput> Write(
@@ -24,11 +24,15 @@ namespace BIMLogLensNext
             IEnumerable<LensNextXmlExportInput> records)
         {
             var ordered = LensNextXmlExportInputSelector.SelectOrdered(authoritativeProjectId, records);
-            WriteDocument(destinationPath, LensNextXmlExportNamePolicy.UniqueNames(ordered));
+            var names = LensNextXmlExportNamePolicy.UniqueNames(ordered);
+            var views = new LensNextXmlExportView[ordered.Count];
+            for (var index = 0; index < ordered.Count; index++)
+                views[index] = new LensNextXmlExportView(names[index], LensNextXmlExportGuidPolicy.ForRecord(ordered[index]));
+            WriteDocument(destinationPath, views);
             return ordered;
         }
 
-        private static void WriteDocument(string destinationPath, IReadOnlyList<string> viewNames)
+        private static void WriteDocument(string destinationPath, IReadOnlyList<LensNextXmlExportView> views)
         {
             if (string.IsNullOrWhiteSpace(destinationPath))
                 throw new ArgumentException("An XML output path is required.", nameof(destinationPath));
@@ -62,10 +66,11 @@ namespace BIMLogLensNext
                     writer.WriteStartElement(ViewpointsElementName);
                     writer.WriteStartElement(ViewFolderElementName);
                     writer.WriteAttributeString("name", ViewFolderName);
-                    foreach (var viewName in viewNames)
+                    foreach (var view in views)
                     {
                         writer.WriteStartElement("view");
-                        writer.WriteAttributeString("name", viewName);
+                        writer.WriteAttributeString("name", view.Name);
+                        writer.WriteAttributeString("guid", view.Guid.ToString("D"));
                         writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
@@ -82,6 +87,13 @@ namespace BIMLogLensNext
                 try { if (File.Exists(temporaryPath)) File.Delete(temporaryPath); } catch { }
                 throw;
             }
+        }
+
+        private sealed class LensNextXmlExportView
+        {
+            public LensNextXmlExportView(string name, Guid guid) { Name = name; Guid = guid; }
+            public string Name { get; }
+            public Guid Guid { get; }
         }
     }
 }
