@@ -91,6 +91,10 @@ namespace BIMLogLensNext.Tests
                 Run("xml_camera_position_round_trips_representative_doubles", XmlCameraPositionRoundTripsRepresentativeDoubles);
                 Run("xml_camera_position_rejects_missing_and_non_finite_values", XmlCameraPositionRejectsMissingAndNonFiniteValues);
                 Run("xml_camera_position_emits_no_other_camera_semantics", XmlCameraPositionEmitsNoOtherCameraSemantics);
+                Run("xml_orientation_raw_native_contract_is_deterministic", XmlOrientationRawNativeContractIsDeterministic);
+                Run("xml_orientation_sign_equivalence_is_explicit", XmlOrientationSignEquivalenceIsExplicit);
+                Run("xml_orientation_rejects_invalid_quaternions", XmlOrientationRejectsInvalidQuaternions);
+                Run("xml_orientation_proof_does_not_mutate_camera_or_xml", XmlOrientationProofDoesNotMutateCameraOrXml);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -417,6 +421,81 @@ namespace BIMLogLensNext.Tests
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlOrientationRawNativeContractIsDeterministic()
+        {
+            var cases = new[]
+            {
+                new LensNextRotationState { A = 0d, B = 0d, C = 0d, D = 1d },
+                new LensNextRotationState { A = Math.Sqrt(0.5d), B = 0d, C = 0d, D = Math.Sqrt(0.5d) },
+                new LensNextRotationState { A = 0d, B = -Math.Sqrt(0.5d), C = 0d, D = Math.Sqrt(0.5d) },
+                new LensNextRotationState { A = 0.18257418583505536d, B = -0.36514837167011072d, C = 0.5477225575051661d, D = 0.73029674334022143d }
+            };
+
+            foreach (var rotation in cases)
+            {
+                var first = LensNextXmlOrientationProof.FromNativeRotation(rotation);
+                var second = LensNextXmlOrientationProof.FromNativeRotation(rotation);
+                Equal(rotation.A, first.A);
+                Equal(rotation.B, first.B);
+                Equal(rotation.C, first.C);
+                Equal(rotation.D, first.D);
+                Equal(first.AInvariant + "," + first.BInvariant + "," + first.CInvariant + "," + first.DInvariant,
+                    second.AInvariant + "," + second.BInvariant + "," + second.CInvariant + "," + second.DInvariant);
+            }
+        }
+
+        private static void XmlOrientationSignEquivalenceIsExplicit()
+        {
+            var rotation = new LensNextRotationState { A = 0.18257418583505536d, B = -0.36514837167011072d, C = 0.5477225575051661d, D = 0.73029674334022143d };
+            var negated = new LensNextRotationState { A = -rotation.A, B = -rotation.B, C = -rotation.C, D = -rotation.D };
+            True(LensNextXmlOrientationProof.SpatiallyEquivalent(rotation, negated));
+            True(LensNextXmlOrientationProof.SpatiallyEquivalent(rotation, rotation));
+            NotEqual(LensNextXmlOrientationProof.FromNativeRotation(rotation).AInvariant,
+                LensNextXmlOrientationProof.FromNativeRotation(negated).AInvariant);
+        }
+
+        private static void XmlOrientationRejectsInvalidQuaternions()
+        {
+            Throws<InvalidDataException>(() => LensNextXmlOrientationProof.FromNativeRotation(null));
+            Throws<InvalidDataException>(() => LensNextXmlOrientationProof.FromNativeRotation(new LensNextRotationState()));
+            Throws<InvalidDataException>(() => LensNextXmlOrientationProof.FromNativeRotation(new LensNextRotationState { A = double.NaN, D = 1d }));
+            Throws<InvalidDataException>(() => LensNextXmlOrientationProof.FromNativeRotation(new LensNextRotationState { A = double.PositiveInfinity, D = 1d }));
+        }
+
+        private static void XmlOrientationProofDoesNotMutateCameraOrXml()
+        {
+            var camera = new LensNextCameraState
+            {
+                SourceLinearUnit = "Feet",
+                Position = new LensNextPointState { X = 12.25d, Y = -4.5d, Z = 99d },
+                Rotation = new LensNextRotationState { A = 0.1d, B = 0.2d, C = 0.3d, D = 0.9d }
+            };
+            var before = new[] { camera.Position.X, camera.Position.Y, camera.Position.Z, camera.Rotation.A, camera.Rotation.B, camera.Rotation.C, camera.Rotation.D };
+            LensNextXmlOrientationProof.FromNativeRotation(camera.Rotation);
+            Equal("Feet", camera.SourceLinearUnit);
+            True(before.SequenceEqual(new[] { camera.Position.X, camera.Position.Y, camera.Position.Z, camera.Rotation.A, camera.Rotation.B, camera.Rotation.C, camera.Rotation.D }));
+
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build11-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "proof.xml");
+                LensNextXmlDocumentShellWriter.Write(path);
+                var document = new XmlDocument();
+                document.Load(path);
+                True(document.SelectSingleNode("//*[local-name()='rotation']") == null);
+                True(document.SelectSingleNode("//*[local-name()='quaternion']") == null);
+                True(document.SelectSingleNode("//*[local-name()='up']") == null);
+                True(document.SelectSingleNode("//*[local-name()='projection']") == null);
+                True(document.SelectSingleNode("//*[local-name()='focal']") == null);
+                True(document.SelectSingleNode("//*[local-name()='sectioning']") == null);
+            }
+            finally
+            {
+                Directory.Delete(directory, true);
+            }
         }
 
         private static double[] WriteAndReadPosition(LensNextXmlExportInput input)
