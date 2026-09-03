@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## BIMLog v1.05.N10-P05 Lens Next create observability candidate — 2026-09-03
+
+- Platform commit `a22220b3c34982cc5c1db9f226312c0e9c35980d` changes only the Lens Next create outer-catch failure telemetry and the visible Platform version labels.
+- The failure event is one JSON physical line and safely extracts event time, correlation/project/route/stage identity, exception class/name/message/cause/stack, and PostgreSQL code, constraint, detail, schema, table, column, routine, and source context. Hostile getters cannot make serialization throw.
+- The transaction call, callback, ordering, business/validation/identity logic, database/schema, and Native source/package remain unchanged. Native stays N10 / `1.5.10.4`; only Platform advances P04 to P05.
+- Local focused serialization, hostile-error, API/frontend typecheck, mojibake, and database-source safety gates pass. Push, Replit alignment/build, publication, live version verification, and one safe internal reproduction remain separate gates.
+
 ## BIMLog v1.60.33.06 Build 6 Team Capacity local candidate - 2026-08-14
 
 - The local production-artifact proof now accepts an explicit caller-selected non-privileged

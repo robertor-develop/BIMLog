@@ -2145,3 +2145,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
   `bimlog-lens-next-n09-p04-2025-roberto-20260902-v1` for the exact verified 2025 P04 ZIP; client visibility is not
   independently provable. Ruben's connected Navisworks field test remains separate from deployment acceptance and
   must not be represented as locally completed.
+## v1.05.N10-P05 atomic Lens Next create telemetry
+
+- Preserve implementation commit `a22220b3c34982cc5c1db9f226312c0e9c35980d`: only the Platform outer-catch failure event and visible P05 labels changed; Native N10, transaction behavior, database/schema, and all create business logic are frozen.
+- Complete the governed build, push the exact accepted source, align and build from the visible Replit Shell, publish once, and verify the deployed commit and visible `v1.05.N10-P05` identity.
+- If a safe controlled internal account/environment already exists, perform one create request and retain the sanitized atomic failure event. Otherwise stop after deployment and wait for the next naturally occurring request. Ruben/customer environments are prohibited for diagnosis.
+- Do not diagnose or repair `pool.connect()`, transaction construction, or `BEGIN` until the complete retained exception proves the cause.

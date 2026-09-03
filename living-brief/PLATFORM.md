@@ -289,6 +289,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-operations.behavior.ts
 - artifacts/api-server/src/lib/job-work-packages.behavior.ts
 - artifacts/api-server/src/lib/lens-import-contract.ts
+- artifacts/api-server/src/lib/lens-next-create-failure-telemetry.behavior.ts
+- artifacts/api-server/src/lib/lens-next-create-failure-telemetry.ts
 - artifacts/api-server/src/lib/lens-next-create.behavior.ts
 - artifacts/api-server/src/lib/lens-next-local-upload.behavior.ts
 - artifacts/api-server/src/lib/lens-next-local-upload.ts

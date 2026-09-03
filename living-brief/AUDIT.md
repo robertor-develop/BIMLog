@@ -855,3 +855,9 @@ Telegram's provider acknowledged private delivery event
 `bimlog-lens-next-n09-p04-2025-roberto-20260902-v1` at `2026-09-02T14:54:14.6650169Z` for the exact 577566-byte
 2025 archive with SHA-256 `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`.
 Provider acknowledgement is evidence of send acceptance, not independent proof that a Telegram client displayed it.
+
+## Lens Next create atomic failure telemetry — September 3, 2026
+
+Field evidence proved request validation passed before `db.transaction(...)`, while the first callback-stage event never appeared and the route returned its existing generic HTTP 500. The exact transaction-start cause remained unknown because the outer catch logged a structured object that Replit fragmented across physical lines and did not retain as one complete exception event.
+
+Platform implementation `a22220b3c34982cc5c1db9f226312c0e9c35980d` replaces only that outer failure emission with one JSON physical line. Safe field extraction preserves correlation, route and stage identity plus exception/PostgreSQL diagnostics even when an error or cause has hostile throwing getters. The existing HTTP correlation ID behavior remains unchanged. The transaction implementation, ordering, callback, business logic, database/schema, Native N10 source, DLL, and package are unchanged. No root-cause transaction repair, database action, native build, package creation, installation, customer test, external action, or deployment occurred during implementation.
