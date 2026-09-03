@@ -2152,3 +2152,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Repair only the operation proven by that evidence. A schema change remains prohibited without separate review and approval.
 - Before packaging or Telegram delivery, pass fresh issue create/persist/fetch, camera move/open/restore, restart/reopen/restore, and a second fresh issue create/open using the frozen lightweight native capture path.
 - The generator-only TypeScript correction discovered by the governed build is included in this same observability candidate; rerun the complete build and publish only after the Living Brief gate accepts the reconciled candidate.
+
+## Apply identity normalization completion gates
+
+- Require both Navisworks 2021 and 2025 native contract suites to prove lower-camel identity wire keys and reject PascalCase keys.
+- Merge the reviewed normalization through the visible Replit Shell, pass the governed build, and republish the web surface because the frontend consumes the corrected native response contract.
+- Preserve the frozen writable `Viewpoint` plus `DocumentCurrentViewpoint.CopyFrom(Viewpoint)` camera path. Do not issue a new field package until fresh create/persist/open/restart/open acceptance passes.

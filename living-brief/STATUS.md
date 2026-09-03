@@ -1118,3 +1118,9 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - This observability candidate changes no API contract, schema, persisted row, Lens version, native capture/apply behavior, Saved Viewpoint behavior, or timeout architecture.
 - API strict typecheck and the complete Lens Next Build 1–10 behavior suite pass. Governed build, one Replit Shell publication, self-reproduction, exact exception proof, root repair, and full local create/open/restart acceptance remain gated.
 - Governed-build verification exposed and corrected one documentation-generator syntax defect only: Markdown code spans inside the generated Platform template are now escaped. No runtime, API, database, Lens, camera, capture, or release behavior changed.
+
+## Lens Next apply identity wire normalization — 2026-09-02
+
+- The field-proven writable Navisworks camera apply remains frozen and unchanged.
+- Native `apply-working-view` success responses now serialize the identity object with the established lower-camel web-contract keys (`projectId`, `serverId`, `viewpointId`, `lifecycleStatus`, and `revisionNumber`). This removes the false frontend `unknown identity key is forbidden: ProjectId` error that appeared after a successful camera apply.
+- The change adds a focused dual-year native regression and changes no capture, camera, sectioning, selection, visibility, appearance, Saved Viewpoint, timeout, Platform API, database, or release-version behavior.
