@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup><TargetFramework>net48</TargetFramework><PlatformTarget>x64</PlatformTarget><LangVersion>7.3</LangVersion><AssemblyName>Build19SectioningProbe</AssemblyName><RootNamespace>Build19SectioningProbe</RootNamespace></PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="Autodesk.Navisworks.Api"><HintPath>C:\Program Files\Autodesk\Navisworks Manage 2021\Autodesk.Navisworks.Api.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Autodesk.Navisworks.ComApi"><HintPath>C:\Program Files\Autodesk\Navisworks Manage 2021\Autodesk.Navisworks.ComApi.dll</HintPath><Private>false</Private></Reference>
+    <Reference Include="Autodesk.Navisworks.Interop.ComApi"><HintPath>C:\Program Files\Autodesk\Navisworks Manage 2021\Autodesk.Navisworks.Interop.ComApi.dll</HintPath><Private>false</Private></Reference>
+  </ItemGroup>
+</Project>

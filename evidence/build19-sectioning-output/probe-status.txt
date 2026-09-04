@@ -1,0 +1,2 @@
+TrySetClippingPlanes=True
+MultipleTrySetClippingPlanes=True
