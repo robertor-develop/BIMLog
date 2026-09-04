@@ -42,16 +42,38 @@ namespace BIMLogLensNext
         public string Reason { get; }
     }
 
+    public sealed class LensNextXmlExportDiagnostic
+    {
+        internal LensNextXmlExportDiagnostic(LensNextXmlExportInput record, string result, string reasonCode, string reasonDetail)
+        {
+            ServerId = record.ServerId;
+            ViewpointId = record.ViewpointId;
+            DisplayId = string.IsNullOrWhiteSpace(record.DisplayId) ? null : record.DisplayId.Trim();
+            Result = result;
+            ReasonCode = reasonCode;
+            ReasonDetail = reasonDetail;
+        }
+
+        public int ServerId { get; }
+        public string ViewpointId { get; }
+        public string DisplayId { get; }
+        public string Result { get; }
+        public string ReasonCode { get; }
+        public string ReasonDetail { get; }
+    }
+
     public sealed class LensNextXmlExportResult : IReadOnlyList<LensNextXmlExportInput>
     {
         internal LensNextXmlExportResult(
             int requestedCount,
             IReadOnlyList<LensNextXmlExportInput> serializedViewpoints,
-            IReadOnlyList<LensNextXmlSkippedViewpoint> skippedViewpoints)
+            IReadOnlyList<LensNextXmlSkippedViewpoint> skippedViewpoints,
+            IReadOnlyList<LensNextXmlExportDiagnostic> diagnostics)
         {
             RequestedCount = requestedCount;
             SerializedViewpoints = serializedViewpoints;
             SkippedViewpoints = skippedViewpoints;
+            Diagnostics = diagnostics;
         }
 
         public int RequestedCount { get; }
@@ -59,6 +81,7 @@ namespace BIMLogLensNext
         public int SkippedCount => SkippedViewpoints.Count;
         public IReadOnlyList<LensNextXmlExportInput> SerializedViewpoints { get; }
         public IReadOnlyList<LensNextXmlSkippedViewpoint> SkippedViewpoints { get; }
+        public IReadOnlyList<LensNextXmlExportDiagnostic> Diagnostics { get; }
         public int Count => SerializedViewpoints.Count;
         public LensNextXmlExportInput this[int index] => SerializedViewpoints[index];
         public IEnumerator<LensNextXmlExportInput> GetEnumerator() => SerializedViewpoints.GetEnumerator();
@@ -133,22 +156,25 @@ namespace BIMLogLensNext
                 .ToArray();
             var exportable = new List<LensNextXmlExportInput>();
             var skipped = new List<LensNextXmlSkippedViewpoint>();
+            var diagnostics = new List<LensNextXmlExportDiagnostic>();
             foreach (var record in ordered)
             {
                 try
                 {
                     ValidateExportableRecord(record);
                     exportable.Add(record);
+                    diagnostics.Add(new LensNextXmlExportDiagnostic(record, "EXPORTED", "exported", null));
                 }
                 catch (InvalidDataException exception)
                 {
                     skipped.Add(new LensNextXmlSkippedViewpoint(record, exception.Message));
+                    diagnostics.Add(new LensNextXmlExportDiagnostic(record, "SKIPPED", DiagnosticReasonCode(record), exception.Message));
                 }
             }
             if (exportable.Count == 0)
                 throw new InvalidDataException("The BIMLog XML export contains zero exportable active viewpoints (requested " +
                     active.Count + ", skipped " + skipped.Count + ").");
-            return new LensNextXmlExportResult(active.Count, exportable.ToArray(), skipped.ToArray());
+            return new LensNextXmlExportResult(active.Count, exportable.ToArray(), skipped.ToArray(), diagnostics.ToArray());
         }
 
         private static void ValidateActiveRecordIntegrity(LensNextXmlExportInput record)
@@ -175,6 +201,24 @@ namespace BIMLogLensNext
             LensNextXmlProjection.FromValidatedCamera(record.PackageCamera);
             LensNextXmlCameraScale.FromValidatedCamera(record.PackageCamera);
             LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson);
+        }
+
+        private static string DiagnosticReasonCode(LensNextXmlExportInput record)
+        {
+            if (Fails(() => LensNextXmlPosition.FromValidatedCamera(record.PackageCamera)))
+                return record.PackageCamera == null ? "missing_camera" : "invalid_position";
+            if (Fails(() => LensNextXmlRotation.FromValidatedCamera(record.PackageCamera))) return "invalid_rotation";
+            if (Fails(() => LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera))) return "invalid_up_vector";
+            if (Fails(() => LensNextXmlProjection.FromValidatedCamera(record.PackageCamera))) return "invalid_projection";
+            if (Fails(() => LensNextXmlCameraScale.FromValidatedCamera(record.PackageCamera))) return "invalid_scale";
+            if (Fails(() => LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson))) return "invalid_sectioning";
+            throw new InvalidOperationException("The rejected BIMLog XML export record has no reproducible diagnostic category.");
+        }
+
+        private static bool Fails(Action validation)
+        {
+            try { validation(); return false; }
+            catch (InvalidDataException) { return true; }
         }
 
         private static bool IsLifecycle(string value) =>

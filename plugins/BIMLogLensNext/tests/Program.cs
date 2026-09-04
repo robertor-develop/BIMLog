@@ -131,6 +131,10 @@ namespace BIMLogLensNext.Tests
                 Run("xml_export_skips_malformed_present_sectioning", XmlExportSkipsMalformedPresentSectioning);
                 Run("xml_export_rejects_zero_valid_records_without_output", XmlExportRejectsZeroValidRecordsWithoutOutput);
                 Run("xml_export_collection_integrity_remains_fatal", XmlExportCollectionIntegrityRemainsFatal);
+                Run("xml_export_diagnostics_report_each_requested_result", XmlExportDiagnosticsReportEachRequestedResult);
+                Run("xml_export_diagnostics_use_stable_specific_reason_codes", XmlExportDiagnosticsUseStableSpecificReasonCodes);
+                Run("xml_export_diagnostics_are_deterministically_ordered", XmlExportDiagnosticsAreDeterministicallyOrdered);
+                Run("xml_export_collection_fatal_diagnostics_preserve_destination", XmlExportCollectionFatalDiagnosticsPreserveDestination);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -1316,6 +1320,76 @@ namespace BIMLogLensNext.Tests
             ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, identity }), "identity");
             var duplicate = ExportInput(201, 1, null);
             ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, duplicate }), "duplicate");
+        }
+
+        private static void XmlExportDiagnosticsReportEachRequestedResult()
+        {
+            var first = ExportInput(211, 1, null); first.DisplayId = "ME-211";
+            var second = ExportInput(212, 2, null); second.DisplayId = "ME-212";
+            var third = ExportInput(213, 3, null); third.DisplayId = null;
+            var result = WriteExportResult("diagnostics-valid", new[] { third, first, second });
+            Equal(3, result.Diagnostics.Count);
+            Equal("211,212,213", string.Join(",", result.Diagnostics.Select(value => value.ServerId)));
+            Equal("EXPORTED,EXPORTED,EXPORTED", string.Join(",", result.Diagnostics.Select(value => value.Result)));
+            Equal("exported,exported,exported", string.Join(",", result.Diagnostics.Select(value => value.ReasonCode)));
+            Equal("ME-211", result.Diagnostics[0].DisplayId); Equal("VP-211", result.Diagnostics[0].ViewpointId);
+            True(result.Diagnostics.All(value => value.ReasonDetail == null)); True(result.Diagnostics[2].DisplayId == null);
+        }
+
+        private static void XmlExportDiagnosticsUseStableSpecificReasonCodes()
+        {
+            var valid = ExportInput(221, 1, null);
+            var missingCamera = ExportInput(222, 2, null); missingCamera.PackageCamera = null;
+            var invalidPosition = ExportInput(223, 3, null); invalidPosition.PackageCamera.Position.Y = double.PositiveInfinity;
+            var invalidRotation = ExportInput(224, 4, null); invalidRotation.PackageCamera.Rotation = new LensNextRotationState();
+            var invalidSectioning = ExportInput(225, 5, null); invalidSectioning.PackageSectioningJson = "{";
+            var result = WriteExportResult("diagnostics-reasons", new[] { invalidSectioning, invalidRotation, invalidPosition, missingCamera, valid });
+            Equal(5, result.Diagnostics.Count); Equal(1, result.SerializedCount); Equal(4, result.SkippedCount);
+            Equal("exported,missing_camera,invalid_position,invalid_rotation,invalid_sectioning",
+                string.Join(",", result.Diagnostics.Select(value => value.ReasonCode)));
+            Equal("EXPORTED,SKIPPED,SKIPPED,SKIPPED,SKIPPED", string.Join(",", result.Diagnostics.Select(value => value.Result)));
+            True(result.Diagnostics.Skip(1).All(value => !string.IsNullOrWhiteSpace(value.ReasonDetail)));
+            True(result.Diagnostics.Skip(1).All(value => value.ReasonDetail.IndexOf("{", StringComparison.Ordinal) < 0));
+            NotEqual(result.Diagnostics[1].ReasonCode, result.Diagnostics[2].ReasonCode);
+            NotEqual(result.Diagnostics[2].ReasonCode, result.Diagnostics[3].ReasonCode);
+            NotEqual(result.Diagnostics[3].ReasonCode, result.Diagnostics[4].ReasonCode);
+        }
+
+        private static void XmlExportDiagnosticsAreDeterministicallyOrdered()
+        {
+            var first = ExportInput(231, 2, DateTimeOffset.Parse("2026-01-01T00:00:00Z"));
+            var second = ExportInput(232, 1, DateTimeOffset.Parse("2026-02-01T00:00:00Z")); second.PackageCamera.Position = null;
+            var third = ExportInput(233, 1, DateTimeOffset.Parse("2026-01-01T00:00:00Z"));
+            var normal = WriteExportResult("diagnostics-order-a", new[] { first, second, third });
+            var shuffled = WriteExportResult("diagnostics-order-b", new[] { third, first, second });
+            var normalSummary = string.Join("|", normal.Diagnostics.Select(value => value.ServerId + ":" + value.Result + ":" + value.ReasonCode));
+            var shuffledSummary = string.Join("|", shuffled.Diagnostics.Select(value => value.ServerId + ":" + value.Result + ":" + value.ReasonCode));
+            Equal("232:SKIPPED:invalid_position|233:EXPORTED:exported|231:EXPORTED:exported", normalSummary);
+            Equal(normalSummary, shuffledSummary);
+            Equal("233,231", string.Join(",", normal.SerializedViewpoints.Select(value => value.ServerId)));
+        }
+
+        private static void XmlExportCollectionFatalDiagnosticsPreserveDestination()
+        {
+            var valid = ExportInput(241, 1, null);
+            var contaminated = ExportInput(242, 2, null); contaminated.ProjectId = 99; contaminated.PackageProjectId = 99;
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build22-fatal-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "existing.xml"); File.WriteAllText(path, "preserve-collection-fatal");
+                ThrowsMessage<InvalidDataException>(() => LensNextXmlDocumentShellWriter.Write(path, 26, new[] { valid, contaminated }), "cross-project");
+                Equal("preserve-collection-fatal", File.ReadAllText(path));
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static LensNextXmlExportResult WriteExportResult(string suffix, IEnumerable<LensNextXmlExportInput> records)
+        {
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build22-" + suffix + "-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try { return LensNextXmlDocumentShellWriter.Write(Path.Combine(directory, "result.xml"), 26, records); }
+            finally { try { Directory.Delete(directory, true); } catch { } }
         }
 
         private static double[] WriteAndReadUpVector(LensNextXmlExportInput input)
