@@ -16,6 +16,7 @@
     <InformationalVersion>v1.05.N10-P04</InformationalVersion>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="System.Web.Extensions" />
     <Compile Remove="tests\**\*.cs" />
     <Compile Remove="native\**\*.cs" />
     <None Remove="tests\**\*" />

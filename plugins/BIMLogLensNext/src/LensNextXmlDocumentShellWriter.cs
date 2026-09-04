@@ -34,7 +34,8 @@ namespace BIMLogLensNext
                     LensNextXmlRotation.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlUpVector.FromOptionalValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlProjection.FromValidatedCamera(ordered[index].PackageCamera),
-                    LensNextXmlCameraScale.FromValidatedCamera(ordered[index].PackageCamera));
+                    LensNextXmlCameraScale.FromValidatedCamera(ordered[index].PackageCamera),
+                    LensNextXmlSectioning.FromOptionalJson(ordered[index].PackageSectioningJson));
             WriteDocument(destinationPath, views);
             return ordered;
         }
@@ -116,6 +117,30 @@ namespace BIMLogLensNext
                             writer.WriteEndElement();
                         }
                         writer.WriteEndElement();
+                        if (view.Sectioning != null)
+                        {
+                            writer.WriteStartElement("clipplaneset");
+                            writer.WriteAttributeString("enabled", view.Sectioning.EnabledToken);
+                            writer.WriteAttributeString("linked", view.Sectioning.LinkedToken);
+                            writer.WriteAttributeString("mode", "planes");
+                            writer.WriteStartElement("clipplanes");
+                            foreach (var plane in view.Sectioning.Planes)
+                            {
+                                writer.WriteStartElement("clipplane");
+                                writer.WriteAttributeString("state", plane.State);
+                                writer.WriteStartElement("plane");
+                                writer.WriteAttributeString("distance", plane.DistanceInvariant);
+                                writer.WriteStartElement("vec3f");
+                                writer.WriteAttributeString("x", plane.XInvariant);
+                                writer.WriteAttributeString("y", plane.YInvariant);
+                                writer.WriteAttributeString("z", plane.ZInvariant);
+                                writer.WriteEndElement();
+                                writer.WriteEndElement();
+                                writer.WriteEndElement();
+                            }
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                        }
                         writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
@@ -136,7 +161,7 @@ namespace BIMLogLensNext
 
         private sealed class LensNextXmlExportView
         {
-            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector, LensNextXmlProjection projection, LensNextXmlCameraScale cameraScale)
+            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector, LensNextXmlProjection projection, LensNextXmlCameraScale cameraScale, LensNextXmlSectioning sectioning)
             {
                 Name = name;
                 Guid = guid;
@@ -145,6 +170,7 @@ namespace BIMLogLensNext
                 UpVector = upVector;
                 Projection = projection;
                 CameraScale = cameraScale;
+                Sectioning = sectioning;
             }
             public string Name { get; }
             public Guid Guid { get; }
@@ -153,6 +179,7 @@ namespace BIMLogLensNext
             public LensNextXmlUpVector UpVector { get; }
             public LensNextXmlProjection Projection { get; }
             public LensNextXmlCameraScale CameraScale { get; }
+            public LensNextXmlSectioning Sectioning { get; }
         }
     }
 }

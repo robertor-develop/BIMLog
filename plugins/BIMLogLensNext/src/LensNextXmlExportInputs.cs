@@ -24,6 +24,7 @@ namespace BIMLogLensNext
         public int PackageRevisionNumber { get; set; }
         public string PackageDigest { get; set; }
         public LensNextCameraState PackageCamera { get; set; }
+        public string PackageSectioningJson { get; set; }
     }
 
     public static class LensNextXmlExportNamePolicy
@@ -105,6 +106,7 @@ namespace BIMLogLensNext
             LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera);
             LensNextXmlProjection.FromValidatedCamera(record.PackageCamera);
             LensNextXmlCameraScale.FromValidatedCamera(record.PackageCamera);
+            LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson);
         }
 
         private static bool IsLifecycle(string value) =>

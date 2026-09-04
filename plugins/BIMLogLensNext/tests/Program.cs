@@ -121,6 +121,10 @@ namespace BIMLogLensNext.Tests
                 Run("xml_camera_scale_rejects_missing_invalid_and_impossible_geometry", XmlCameraScaleRejectsMissingInvalidAndImpossibleGeometry);
                 Run("xml_camera_scale_is_deterministic_and_non_mutating", XmlCameraScaleIsDeterministicAndNonMutating);
                 Run("xml_camera_scale_emits_only_proven_fields", XmlCameraScaleEmitsOnlyProvenFields);
+                Run("xml_sectioning_maps_enabled_single_plane", XmlSectioningMapsEnabledSinglePlane);
+                Run("xml_sectioning_maps_linked_mixed_multi_plane", XmlSectioningMapsLinkedMixedMultiPlane);
+                Run("xml_sectioning_preserves_disabled_empty_and_absent_states", XmlSectioningPreservesDisabledEmptyAndAbsentStates);
+                Run("xml_sectioning_rejects_malformed_missing_nonfinite_and_unsupported", XmlSectioningRejectsMalformedMissingNonfiniteAndUnsupported);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -1120,6 +1124,73 @@ namespace BIMLogLensNext.Tests
                     double.Parse(camera.GetAttribute("aspect"), CultureInfo.InvariantCulture),
                     double.Parse(camera.GetAttribute("height"), CultureInfo.InvariantCulture)
                 };
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlSectioningMapsEnabledSinglePlane()
+        {
+            var input = ExportInput(171, 1, null);
+            input.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,0,-1],\"Distance\":-53.1620981117,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}";
+            var document = WriteAndReadDocument(input, "single");
+            var set = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
+            Equal("1", set.GetAttribute("enabled")); Equal("0", set.GetAttribute("linked")); Equal("planes", set.GetAttribute("mode")); Equal(3, set.Attributes.Count);
+            var plane = (XmlElement)set.SelectSingleNode("clipplanes/clipplane");
+            Equal("enabled", plane.GetAttribute("state")); Equal(1, plane.Attributes.Count);
+            var equation = (XmlElement)plane.SelectSingleNode("plane"); var normal = (XmlElement)equation.SelectSingleNode("vec3f");
+            Equal("-53.1620981117", equation.GetAttribute("distance"));
+            Equal("0", normal.GetAttribute("x")); Equal("0", normal.GetAttribute("y")); Equal("-1", normal.GetAttribute("z"));
+        }
+
+        private static void XmlSectioningMapsLinkedMixedMultiPlane()
+        {
+            var input = ExportInput(172, 1, null);
+            input.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[1,0,0],\"Distance\":-10.5,\"Enabled\":true},{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,1,0],\"Distance\":20.25,\"Enabled\":false}],\"Linked\":true,\"Enabled\":true}";
+            var document = WriteAndReadDocument(input, "multiple");
+            var set = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
+            Equal("1", set.GetAttribute("linked"));
+            var planes = set.SelectNodes("clipplanes/clipplane"); Equal(2, planes.Count);
+            Equal("enabled", ((XmlElement)planes[0]).GetAttribute("state")); Equal("disabled", ((XmlElement)planes[1]).GetAttribute("state"));
+            Equal("1", ((XmlElement)planes[0].SelectSingleNode("plane/vec3f")).GetAttribute("x"));
+            Equal("1", ((XmlElement)planes[1].SelectSingleNode("plane/vec3f")).GetAttribute("y"));
+            Equal("-10.5", ((XmlElement)planes[0].SelectSingleNode("plane")).GetAttribute("distance"));
+            Equal("20.25", ((XmlElement)planes[1].SelectSingleNode("plane")).GetAttribute("distance"));
+        }
+
+        private static void XmlSectioningPreservesDisabledEmptyAndAbsentStates()
+        {
+            var disabled = ExportInput(173, 1, null);
+            disabled.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[],\"Linked\":false,\"Enabled\":false}";
+            var disabledDocument = WriteAndReadDocument(disabled, "disabled");
+            var set = (XmlElement)disabledDocument.SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
+            Equal("0", set.GetAttribute("enabled")); Equal(0, set.SelectNodes("clipplanes/clipplane").Count);
+            var absent = ExportInput(174, 1, null); absent.PackageSectioningJson = null;
+            True(WriteAndReadDocument(absent, "absent").SelectSingleNode("//clipplaneset") == null);
+        }
+
+        private static void XmlSectioningRejectsMalformedMissingNonfiniteAndUnsupported()
+        {
+            Throws<InvalidDataException>(() => LensNextXmlSectioning.FromOptionalJson("{"));
+            Throws<InvalidDataException>(() => LensNextXmlSectioning.FromOptionalJson("{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Distance\":1,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}"));
+            Throws<InvalidDataException>(() => LensNextXmlSectioning.FromOptionalJson("{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[1e309,0,0],\"Distance\":1,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}"));
+            Throws<InvalidDataException>(() => LensNextXmlSectioning.FromOptionalJson("{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[1,0,0],\"Distance\":1e309,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}"));
+            Throws<InvalidDataException>(() => LensNextXmlSectioning.FromOptionalJson("{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[],\"Linked\":false,\"Enabled\":false,\"Box\":{}}"));
+            var input = ExportInput(175, 1, null); input.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[],\"Linked\":false,\"Enabled\":false}";
+            var set = (XmlElement)WriteAndReadDocument(input, "scope").SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
+            False(set.HasAttribute("current"));
+            True(set.SelectSingleNode(".//*[@alignment]") == null);
+            True(set.SelectSingleNode("range") == null); True(set.SelectSingleNode("box") == null); True(set.SelectSingleNode("box-rotation") == null);
+            True(set.SelectSingleNode(".//*[@Version or @version]") == null);
+        }
+
+        private static XmlDocument WriteAndReadDocument(LensNextXmlExportInput input, string suffix)
+        {
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build20-sectioning-" + suffix + "-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "sectioning.xml"); LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path); return document;
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
