@@ -83,7 +83,8 @@ namespace BIMLogLensNext
                         writer.WriteAttributeString("guid", view.Guid.ToString("D"));
                         writer.WriteStartElement("viewpoint");
                         writer.WriteAttributeString("focal", view.CameraScale.FocalInvariant);
-                        writer.WriteAttributeString("fov", view.CameraScale.FieldOfViewInvariant);
+                        if (view.CameraScale.EmitFieldOfViewAttribute)
+                            writer.WriteAttributeString("fov", view.CameraScale.FieldOfViewInvariant);
                         writer.WriteStartElement("camera");
                         writer.WriteAttributeString("projection", view.Projection.Token);
                         writer.WriteAttributeString("aspect", view.CameraScale.AspectInvariant);

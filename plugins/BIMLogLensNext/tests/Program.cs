@@ -115,6 +115,7 @@ namespace BIMLogLensNext.Tests
                 Run("xml_projection_is_deterministic_and_preserves_camera_components", XmlProjectionIsDeterministicAndPreservesCameraComponents);
                 Run("xml_projection_emits_no_additional_camera_semantics", XmlProjectionEmitsNoAdditionalCameraSemantics);
                 Run("xml_camera_scale_maps_perspective_semantics", XmlCameraScaleMapsPerspectiveSemantics);
+                Run("xml_camera_scale_matches_navisworks_perspective_fov_presence_boundary", XmlCameraScaleMatchesNavisworksPerspectiveFovPresenceBoundary);
                 Run("xml_camera_scale_maps_orthographic_semantics", XmlCameraScaleMapsOrthographicSemantics);
                 Run("xml_camera_scale_rejects_missing_invalid_and_impossible_geometry", XmlCameraScaleRejectsMissingInvalidAndImpossibleGeometry);
                 Run("xml_camera_scale_is_deterministic_and_non_mutating", XmlCameraScaleIsDeterministicAndNonMutating);
@@ -952,6 +953,39 @@ namespace BIMLogLensNext.Tests
             Equal(2d * Math.Atan(6d / (2d * 10d)), scale[1]);
             Equal(8d / 6d, scale[2]);
             Equal(6d, scale[3]);
+        }
+
+        private static void XmlCameraScaleMatchesNavisworksPerspectiveFovPresenceBoundary()
+        {
+            var minimum = Math.PI / 18d;
+            AssertPerspectiveFovPresence(minimum - 0.000001d, false);
+            AssertPerspectiveFovPresence(minimum, true);
+            AssertPerspectiveFovPresence(minimum + 0.000001d, true);
+        }
+
+        private static void AssertPerspectiveFovPresence(double angle, bool expectedPresence)
+        {
+            const double focal = 100d;
+            var input = ExportInput(169, 1, null);
+            input.PackageCamera.Projection = "Perspective";
+            input.PackageCamera.FocalDistance = focal;
+            input.PackageCamera.VerticalExtentAtFocalDistance = 2d * focal * Math.Tan(angle / 2d);
+            input.PackageCamera.HorizontalExtentAtFocalDistance = 1.5d * input.PackageCamera.VerticalExtentAtFocalDistance.Value;
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build17a-fov-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "fov-presence.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
+                var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
+                Equal(expectedPresence, viewpoint.HasAttribute("fov"));
+                True(Math.Abs(angle - double.Parse(camera.GetAttribute("height"), CultureInfo.InvariantCulture)) <= 2E-16d);
+                Equal(focal, double.Parse(viewpoint.GetAttribute("focal"), CultureInfo.InvariantCulture));
+                Equal(1.5d, double.Parse(camera.GetAttribute("aspect"), CultureInfo.InvariantCulture));
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
         }
 
         private static void XmlCameraScaleRejectsMissingInvalidAndImpossibleGeometry()

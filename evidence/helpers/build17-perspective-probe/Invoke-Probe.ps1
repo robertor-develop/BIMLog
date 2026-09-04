@@ -10,7 +10,7 @@ $application = New-Object Autodesk.Navisworks.Api.Automation.NavisworksApplicati
 try {
     $application.DisableProgress()
     $application.AddPluginAssembly((Join-Path $root "bin\Release\net48\Build17PerspectiveProbe.dll"))
-    $status = $application.ExecuteAddInPlugin("Build17PerspectiveProbe.BIMLog", @([IO.Path]::GetFullPath($OutputDirectory)))
+    $status = $application.ExecuteAddInPlugin("Build17APerspectiveProbe.BIMLog", @([IO.Path]::GetFullPath($OutputDirectory)))
     if ($status -ne 0) { throw "Probe plugin returned status $status." }
 }
 finally {
