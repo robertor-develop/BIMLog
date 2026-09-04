@@ -18,12 +18,13 @@ namespace BIMLogLensNext
             WriteDocument(destinationPath, new LensNextXmlExportView[0]);
         }
 
-        public static IReadOnlyList<LensNextXmlExportInput> Write(
+        public static LensNextXmlExportResult Write(
             string destinationPath,
             int authoritativeProjectId,
             IEnumerable<LensNextXmlExportInput> records)
         {
-            var ordered = LensNextXmlExportInputSelector.SelectOrdered(authoritativeProjectId, records);
+            var result = LensNextXmlExportInputSelector.SelectForExport(authoritativeProjectId, records);
+            var ordered = result.SerializedViewpoints;
             var names = LensNextXmlExportNamePolicy.UniqueNames(ordered);
             var views = new LensNextXmlExportView[ordered.Count];
             for (var index = 0; index < ordered.Count; index++)
@@ -37,7 +38,7 @@ namespace BIMLogLensNext
                     LensNextXmlCameraScale.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlSectioning.FromOptionalJson(ordered[index].PackageSectioningJson));
             WriteDocument(destinationPath, views);
-            return ordered;
+            return result;
         }
 
         private static void WriteDocument(string destinationPath, IReadOnlyList<LensNextXmlExportView> views)

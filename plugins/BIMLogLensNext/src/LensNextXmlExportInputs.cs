@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.IO;
 using System.Linq;
 
@@ -25,6 +26,43 @@ namespace BIMLogLensNext
         public string PackageDigest { get; set; }
         public LensNextCameraState PackageCamera { get; set; }
         public string PackageSectioningJson { get; set; }
+    }
+
+    public sealed class LensNextXmlSkippedViewpoint
+    {
+        internal LensNextXmlSkippedViewpoint(LensNextXmlExportInput record, string reason)
+        {
+            ServerId = record.ServerId;
+            ViewpointId = record.ViewpointId;
+            Reason = reason;
+        }
+
+        public int ServerId { get; }
+        public string ViewpointId { get; }
+        public string Reason { get; }
+    }
+
+    public sealed class LensNextXmlExportResult : IReadOnlyList<LensNextXmlExportInput>
+    {
+        internal LensNextXmlExportResult(
+            int requestedCount,
+            IReadOnlyList<LensNextXmlExportInput> serializedViewpoints,
+            IReadOnlyList<LensNextXmlSkippedViewpoint> skippedViewpoints)
+        {
+            RequestedCount = requestedCount;
+            SerializedViewpoints = serializedViewpoints;
+            SkippedViewpoints = skippedViewpoints;
+        }
+
+        public int RequestedCount { get; }
+        public int SerializedCount => SerializedViewpoints.Count;
+        public int SkippedCount => SkippedViewpoints.Count;
+        public IReadOnlyList<LensNextXmlExportInput> SerializedViewpoints { get; }
+        public IReadOnlyList<LensNextXmlSkippedViewpoint> SkippedViewpoints { get; }
+        public int Count => SerializedViewpoints.Count;
+        public LensNextXmlExportInput this[int index] => SerializedViewpoints[index];
+        public IEnumerator<LensNextXmlExportInput> GetEnumerator() => SerializedViewpoints.GetEnumerator();
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
     }
 
     public static class LensNextXmlExportNamePolicy
@@ -59,13 +97,21 @@ namespace BIMLogLensNext
             int authoritativeProjectId,
             IEnumerable<LensNextXmlExportInput> records)
         {
+            return SelectForExport(authoritativeProjectId, records).SerializedViewpoints;
+        }
+
+        public static LensNextXmlExportResult SelectForExport(
+            int authoritativeProjectId,
+            IEnumerable<LensNextXmlExportInput> records)
+        {
             if (authoritativeProjectId <= 0)
                 throw new ArgumentOutOfRangeException(nameof(authoritativeProjectId), "An authoritative BIMLog project ID is required.");
             if (records == null) throw new ArgumentNullException(nameof(records));
 
+            var supplied = records.ToArray();
             var active = new List<LensNextXmlExportInput>();
             var serverIds = new HashSet<int>();
-            foreach (var record in records)
+            foreach (var record in supplied)
             {
                 if (record == null) throw new InvalidDataException("The BIMLog export collection contains a null record.");
                 if (record.ProjectId != authoritativeProjectId)
@@ -74,20 +120,38 @@ namespace BIMLogLensNext
                     throw new InvalidDataException("The BIMLog viewpoint lifecycle state is invalid.");
                 if (!string.Equals(record.LifecycleStatus, "active", StringComparison.Ordinal)) continue;
 
-                ValidateActiveRecord(record);
+                ValidateActiveRecordIntegrity(record);
                 if (!serverIds.Add(record.ServerId))
                     throw new InvalidDataException("The BIMLog export collection contains a duplicate server viewpoint ID.");
                 active.Add(record);
             }
 
-            return active
+            var ordered = active
                 .OrderBy(record => record.Priority ?? int.MaxValue)
                 .ThenByDescending(record => record.CapturedAt.HasValue ? record.CapturedAt.Value.UtcDateTime.Ticks : 0L)
                 .ThenBy(record => record.ServerId)
                 .ToArray();
+            var exportable = new List<LensNextXmlExportInput>();
+            var skipped = new List<LensNextXmlSkippedViewpoint>();
+            foreach (var record in ordered)
+            {
+                try
+                {
+                    ValidateExportableRecord(record);
+                    exportable.Add(record);
+                }
+                catch (InvalidDataException exception)
+                {
+                    skipped.Add(new LensNextXmlSkippedViewpoint(record, exception.Message));
+                }
+            }
+            if (exportable.Count == 0)
+                throw new InvalidDataException("The BIMLog XML export contains zero exportable active viewpoints (requested " +
+                    active.Count + ", skipped " + skipped.Count + ").");
+            return new LensNextXmlExportResult(active.Count, exportable.ToArray(), skipped.ToArray());
         }
 
-        private static void ValidateActiveRecord(LensNextXmlExportInput record)
+        private static void ValidateActiveRecordIntegrity(LensNextXmlExportInput record)
         {
             if (record.ServerId <= 0 || string.IsNullOrWhiteSpace(record.ViewpointId) || record.RevisionNumber <= 0)
                 throw new InvalidDataException("The active BIMLog viewpoint identity is incomplete.");
@@ -101,6 +165,10 @@ namespace BIMLogLensNext
                 !string.Equals(record.PackageLifecycleStatus, record.LifecycleStatus, StringComparison.Ordinal) ||
                 record.PackageRevisionNumber != record.RevisionNumber)
                 throw new InvalidDataException("The active BIMLog viewpoint package identity is mismatched.");
+        }
+
+        private static void ValidateExportableRecord(LensNextXmlExportInput record)
+        {
             LensNextXmlPosition.FromValidatedCamera(record.PackageCamera);
             LensNextXmlRotation.FromValidatedCamera(record.PackageCamera);
             LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera);

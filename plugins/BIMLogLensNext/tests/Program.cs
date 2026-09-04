@@ -125,6 +125,12 @@ namespace BIMLogLensNext.Tests
                 Run("xml_sectioning_maps_linked_mixed_multi_plane", XmlSectioningMapsLinkedMixedMultiPlane);
                 Run("xml_sectioning_preserves_disabled_empty_and_absent_states", XmlSectioningPreservesDisabledEmptyAndAbsentStates);
                 Run("xml_sectioning_rejects_malformed_missing_nonfinite_and_unsupported", XmlSectioningRejectsMalformedMissingNonfiniteAndUnsupported);
+                Run("xml_export_reports_all_valid_records", XmlExportReportsAllValidRecords);
+                Run("xml_export_skips_invalid_camera_records_individually", XmlExportSkipsInvalidCameraRecordsIndividually);
+                Run("xml_export_preserves_optional_camera_and_sectioning_absence", XmlExportPreservesOptionalCameraAndSectioningAbsence);
+                Run("xml_export_skips_malformed_present_sectioning", XmlExportSkipsMalformedPresentSectioning);
+                Run("xml_export_rejects_zero_valid_records_without_output", XmlExportRejectsZeroValidRecordsWithoutOutput);
+                Run("xml_export_collection_integrity_remains_fatal", XmlExportCollectionIntegrityRemainsFatal);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -1195,6 +1201,123 @@ namespace BIMLogLensNext.Tests
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
 
+        private static void XmlExportReportsAllValidRecords()
+        {
+            var records = new[] { ExportInput(183, 2, null), ExportInput(181, 1, null), ExportInput(182, 1, null) };
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build21-valid-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "valid.xml");
+                var result = LensNextXmlDocumentShellWriter.Write(path, 26, records);
+                Equal(3, result.RequestedCount); Equal(3, result.SerializedCount); Equal(0, result.SkippedCount);
+                Equal("181,182,183", string.Join(",", result.Select(record => record.ServerId)));
+                Equal(3, new XmlDocumentShell(path).ViewNames.Count);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportSkipsInvalidCameraRecordsIndividually()
+        {
+            var validFirst = ExportInput(191, 1, DateTimeOffset.Parse("2026-01-03T00:00:00Z"));
+            var validSecond = ExportInput(192, 2, DateTimeOffset.Parse("2026-01-02T00:00:00Z"));
+            var missingCamera = ExportInput(193, 1, null); missingCamera.PackageCamera = null;
+            var invalidPosition = ExportInput(194, 1, null); invalidPosition.PackageCamera.Position.X = double.NaN;
+            var invalidRotation = ExportInput(195, 1, null); invalidRotation.PackageCamera.Rotation = new LensNextRotationState();
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build21-skips-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var cases = new[]
+                {
+                    new { Record = missingCamera, Reason = "The active BIMLog viewpoint package camera position is missing." },
+                    new { Record = invalidPosition, Reason = "The active BIMLog viewpoint package camera position must contain three finite coordinates." },
+                    new { Record = invalidRotation, Reason = "The active BIMLog viewpoint package camera rotation must not be a zero-length quaternion." }
+                };
+                foreach (var value in cases)
+                {
+                    var path = Path.Combine(directory, "skip-" + value.Record.ServerId + ".xml");
+                    var result = LensNextXmlDocumentShellWriter.Write(path, 26, new[] { value.Record, validSecond, validFirst });
+                    Equal(3, result.RequestedCount); Equal(2, result.SerializedCount); Equal(1, result.SkippedCount);
+                    Equal(value.Record.ServerId, result.SkippedViewpoints[0].ServerId); Equal(value.Reason, result.SkippedViewpoints[0].Reason);
+                    Equal("191,192", string.Join(",", result.Select(record => record.ServerId)));
+                    var shell = new XmlDocumentShell(path);
+                    Equal("VP-191,VP-192", string.Join(",", shell.ViewNames));
+                    Equal(2, shell.ViewGuids.Count); Equal(LensNextXmlExportGuidPolicy.ForRecord(validFirst).ToString("D"), shell.ViewGuids[0]);
+                }
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportPreservesOptionalCameraAndSectioningAbsence()
+        {
+            var input = ExportInput(196, 1, null);
+            input.PackageCamera.WorldUpVector = null;
+            input.PackageSectioningJson = null;
+            input.PackageCamera.Position = new LensNextPointState { X = 41.25, Y = -7.5, Z = 3.125 };
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build21-optional-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "optional.xml");
+                var result = LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
+                Equal(1, result.SerializedCount); Equal(0, result.SkippedCount);
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                True(document.SelectSingleNode("//up") == null); True(document.SelectSingleNode("//clipplaneset") == null);
+                var position = (XmlElement)document.SelectSingleNode("//position/pos3f");
+                Equal("41.25", position.GetAttribute("x")); Equal("-7.5", position.GetAttribute("y")); Equal("3.125", position.GetAttribute("z"));
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportRejectsZeroValidRecordsWithoutOutput()
+        {
+            var missing = ExportInput(197, 1, null); missing.PackageCamera = null;
+            var invalid = ExportInput(198, 1, null); invalid.PackageCamera.Rotation = new LensNextRotationState();
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build21-zero-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "zero.xml");
+                ThrowsMessage<InvalidDataException>(() => LensNextXmlDocumentShellWriter.Write(path, 26, new[] { missing, invalid }), "zero exportable active viewpoints");
+                False(File.Exists(path));
+                var existingPath = Path.Combine(directory, "existing.xml"); File.WriteAllText(existingPath, "preserve-existing-export");
+                ThrowsMessage<InvalidDataException>(() => LensNextXmlDocumentShellWriter.Write(existingPath, 26, new[] { missing, invalid }), "requested 2, skipped 2");
+                Equal("preserve-existing-export", File.ReadAllText(existingPath));
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportSkipsMalformedPresentSectioning()
+        {
+            var valid = ExportInput(199, 1, null);
+            var malformedSectioning = ExportInput(200, 2, null); malformedSectioning.PackageSectioningJson = "{";
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build21-sectioning-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "sectioning.xml");
+                var result = LensNextXmlDocumentShellWriter.Write(path, 26, new[] { valid, malformedSectioning });
+                Equal(2, result.RequestedCount); Equal(1, result.SerializedCount); Equal(1, result.SkippedCount);
+                Equal(200, result.SkippedViewpoints[0].ServerId); True(result.SkippedViewpoints[0].Reason.Contains("malformed"));
+                Equal(1, new XmlDocumentShell(path).ViewNames.Count);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportCollectionIntegrityRemainsFatal()
+        {
+            var valid = ExportInput(201, 1, null);
+            var crossProject = ExportInput(202, 1, null); crossProject.ProjectId = 27; crossProject.PackageProjectId = 27;
+            ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, crossProject }), "cross-project");
+            var digest = ExportInput(203, 1, null); digest.PackageDigest = new string('b', 64);
+            ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, digest }), "digest");
+            var identity = ExportInput(204, 1, null); identity.PackageServerId = 999;
+            ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, identity }), "identity");
+            var duplicate = ExportInput(201, 1, null);
+            ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, duplicate }), "duplicate");
+        }
+
         private static double[] WriteAndReadUpVector(LensNextXmlExportInput input)
         {
             var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build14-up-" + Guid.NewGuid().ToString("N"));
@@ -2262,6 +2385,17 @@ namespace BIMLogLensNext.Tests
         {
             try { action(); }
             catch (T) { return; }
+            throw new InvalidOperationException("Expected " + typeof(T).Name + ".");
+        }
+
+        private static void ThrowsMessage<T>(Action action, string expectedMessagePart) where T : Exception
+        {
+            try { action(); }
+            catch (T exception)
+            {
+                True(exception.Message.IndexOf(expectedMessagePart, StringComparison.OrdinalIgnoreCase) >= 0);
+                return;
+            }
             throw new InvalidOperationException("Expected " + typeof(T).Name + ".");
         }
 
