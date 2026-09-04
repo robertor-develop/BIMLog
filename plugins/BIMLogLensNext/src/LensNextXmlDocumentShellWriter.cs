@@ -32,7 +32,8 @@ namespace BIMLogLensNext
                     LensNextXmlExportGuidPolicy.ForRecord(ordered[index]),
                     LensNextXmlPosition.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlRotation.FromValidatedCamera(ordered[index].PackageCamera),
-                    LensNextXmlUpVector.FromOptionalValidatedCamera(ordered[index].PackageCamera));
+                    LensNextXmlUpVector.FromOptionalValidatedCamera(ordered[index].PackageCamera),
+                    LensNextXmlProjection.FromValidatedCamera(ordered[index].PackageCamera));
             WriteDocument(destinationPath, views);
             return ordered;
         }
@@ -80,6 +81,8 @@ namespace BIMLogLensNext
                         writer.WriteAttributeString("name", view.Name);
                         writer.WriteAttributeString("guid", view.Guid.ToString("D"));
                         writer.WriteStartElement("viewpoint");
+                        writer.WriteStartElement("camera");
+                        writer.WriteAttributeString("projection", view.Projection.Token);
                         writer.WriteStartElement("position");
                         writer.WriteStartElement("pos3f");
                         writer.WriteAttributeString("x", view.Position.XInvariant);
@@ -93,6 +96,7 @@ namespace BIMLogLensNext
                         writer.WriteAttributeString("b", view.Rotation.BInvariant);
                         writer.WriteAttributeString("c", view.Rotation.CInvariant);
                         writer.WriteAttributeString("d", view.Rotation.DInvariant);
+                        writer.WriteEndElement();
                         writer.WriteEndElement();
                         writer.WriteEndElement();
                         if (view.UpVector != null)
@@ -126,19 +130,21 @@ namespace BIMLogLensNext
 
         private sealed class LensNextXmlExportView
         {
-            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector)
+            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector, LensNextXmlProjection projection)
             {
                 Name = name;
                 Guid = guid;
                 Position = position;
                 Rotation = rotation;
                 UpVector = upVector;
+                Projection = projection;
             }
             public string Name { get; }
             public Guid Guid { get; }
             public LensNextXmlPosition Position { get; }
             public LensNextXmlRotation Rotation { get; }
             public LensNextXmlUpVector UpVector { get; }
+            public LensNextXmlProjection Projection { get; }
         }
     }
 }

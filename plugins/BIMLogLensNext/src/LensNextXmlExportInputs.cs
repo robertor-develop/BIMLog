@@ -103,6 +103,7 @@ namespace BIMLogLensNext
             LensNextXmlPosition.FromValidatedCamera(record.PackageCamera);
             LensNextXmlRotation.FromValidatedCamera(record.PackageCamera);
             LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera);
+            LensNextXmlProjection.FromValidatedCamera(record.PackageCamera);
         }
 
         private static bool IsLifecycle(string value) =>
