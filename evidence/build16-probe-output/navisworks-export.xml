@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<exchange xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://download.autodesk.com/us/navisworks/schemas/nw-exchange-12.0.xsd" units="m" filename="" filepath="">
+  <viewpoints>
+    <view name="BUILD16_PERSPECTIVE">
+      <viewpoint tool="none" render="preview" lighting="headlight" focal="10.0000000000" fov="0.5829135890">
+        <camera projection="persp" near="1.0000000000" far="10.0000000000" aspect="1.3333333333" height="0.5829135890">
+          <position>
+            <pos3f x="0.0000000000" y="0.0000000000" z="1.0000000000"/>
+          </position>
+          <rotation>
+            <quaternion a="0.0000000000" b="0.0000000000" c="0.0000000000" d="1.0000000000"/>
+          </rotation>
+        </camera>
+      </viewpoint>
+      <clipplaneset linked="0" current="0" mode="planes" enabled="0">
+        <range>
+          <box3f>
+            <min>
+              <pos3f x="1.0000000000" y="1.0000000000" z="1.0000000000"/>
+            </min>
+            <max>
+              <pos3f x="0.0000000000" y="0.0000000000" z="0.0000000000"/>
+            </max>
+          </box3f>
+        </range>
+        <clipplanes>
+          <clipplane state="default" distance="0.0000000000" alignment="top">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="bottom">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="front">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="back">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="left">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="right">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+        </clipplanes>
+        <box>
+          <box3f>
+            <min>
+              <pos3f x="1.0000000000" y="1.0000000000" z="1.0000000000"/>
+            </min>
+            <max>
+              <pos3f x="0.0000000000" y="0.0000000000" z="0.0000000000"/>
+            </max>
+          </box3f>
+        </box>
+        <box-rotation>
+          <rotation>
+            <quaternion a="0.0000000000" b="0.0000000000" c="0.0000000000" d="1.0000000000"/>
+          </rotation>
+        </box-rotation>
+      </clipplaneset>
+    </view>
+    <view name="BUILD16_ORTHOGRAPHIC">
+      <viewpoint tool="none" render="preview" lighting="headlight" focal="10.0000000000" fov="0.5829135890">
+        <camera projection="ortho" near="1.0000000000" far="10.0000000000" aspect="1.3333333333" height="6.0000000000">
+          <position>
+            <pos3f x="0.0000000000" y="0.0000000000" z="1.0000000000"/>
+          </position>
+          <rotation>
+            <quaternion a="0.0000000000" b="0.0000000000" c="0.0000000000" d="1.0000000000"/>
+          </rotation>
+        </camera>
+      </viewpoint>
+      <clipplaneset linked="0" current="0" mode="planes" enabled="0">
+        <range>
+          <box3f>
+            <min>
+              <pos3f x="1.0000000000" y="1.0000000000" z="1.0000000000"/>
+            </min>
+            <max>
+              <pos3f x="0.0000000000" y="0.0000000000" z="0.0000000000"/>
+            </max>
+          </box3f>
+        </range>
+        <clipplanes>
+          <clipplane state="default" distance="0.0000000000" alignment="top">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="bottom">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="front">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="back">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="left">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+          <clipplane state="default" distance="0.0000000000" alignment="right">
+            <plane distance="0.0000000000">
+              <vec3f x="0.0000000000" y="1.0000000000" z="0.0000000000"/>
+            </plane>
+          </clipplane>
+        </clipplanes>
+        <box>
+          <box3f>
+            <min>
+              <pos3f x="1.0000000000" y="1.0000000000" z="1.0000000000"/>
+            </min>
+            <max>
+              <pos3f x="0.0000000000" y="0.0000000000" z="0.0000000000"/>
+            </max>
+          </box3f>
+        </box>
+        <box-rotation>
+          <rotation>
+            <quaternion a="0.0000000000" b="0.0000000000" c="0.0000000000" d="1.0000000000"/>
+          </rotation>
+        </box-rotation>
+      </clipplaneset>
+    </view>
+  </viewpoints>
+</exchange>

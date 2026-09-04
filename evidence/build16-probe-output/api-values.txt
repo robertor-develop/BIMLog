@@ -1,0 +1,2 @@
+BUILD16_PERSPECTIVE|Projection=Perspective|FocalDistance=10|HorizontalExtent=8|VerticalExtent=6|HeightField=0.5829135889557342|AspectRatio=1.3333333333333333
+BUILD16_ORTHOGRAPHIC|Projection=Orthographic|FocalDistance=10|HorizontalExtent=8|VerticalExtent=6|HeightField=6|AspectRatio=1.3333333333333333

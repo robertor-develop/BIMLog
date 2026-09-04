@@ -33,7 +33,8 @@ namespace BIMLogLensNext
                     LensNextXmlPosition.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlRotation.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlUpVector.FromOptionalValidatedCamera(ordered[index].PackageCamera),
-                    LensNextXmlProjection.FromValidatedCamera(ordered[index].PackageCamera));
+                    LensNextXmlProjection.FromValidatedCamera(ordered[index].PackageCamera),
+                    LensNextXmlCameraScale.FromValidatedCamera(ordered[index].PackageCamera));
             WriteDocument(destinationPath, views);
             return ordered;
         }
@@ -81,8 +82,12 @@ namespace BIMLogLensNext
                         writer.WriteAttributeString("name", view.Name);
                         writer.WriteAttributeString("guid", view.Guid.ToString("D"));
                         writer.WriteStartElement("viewpoint");
+                        writer.WriteAttributeString("focal", view.CameraScale.FocalInvariant);
+                        writer.WriteAttributeString("fov", view.CameraScale.FieldOfViewInvariant);
                         writer.WriteStartElement("camera");
                         writer.WriteAttributeString("projection", view.Projection.Token);
+                        writer.WriteAttributeString("aspect", view.CameraScale.AspectInvariant);
+                        writer.WriteAttributeString("height", view.CameraScale.HeightInvariant);
                         writer.WriteStartElement("position");
                         writer.WriteStartElement("pos3f");
                         writer.WriteAttributeString("x", view.Position.XInvariant);
@@ -130,7 +135,7 @@ namespace BIMLogLensNext
 
         private sealed class LensNextXmlExportView
         {
-            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector, LensNextXmlProjection projection)
+            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector, LensNextXmlProjection projection, LensNextXmlCameraScale cameraScale)
             {
                 Name = name;
                 Guid = guid;
@@ -138,6 +143,7 @@ namespace BIMLogLensNext
                 Rotation = rotation;
                 UpVector = upVector;
                 Projection = projection;
+                CameraScale = cameraScale;
             }
             public string Name { get; }
             public Guid Guid { get; }
@@ -145,6 +151,7 @@ namespace BIMLogLensNext
             public LensNextXmlRotation Rotation { get; }
             public LensNextXmlUpVector UpVector { get; }
             public LensNextXmlProjection Projection { get; }
+            public LensNextXmlCameraScale CameraScale { get; }
         }
     }
 }
