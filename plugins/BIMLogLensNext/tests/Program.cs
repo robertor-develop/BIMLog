@@ -135,6 +135,10 @@ namespace BIMLogLensNext.Tests
                 Run("xml_export_diagnostics_use_stable_specific_reason_codes", XmlExportDiagnosticsUseStableSpecificReasonCodes);
                 Run("xml_export_diagnostics_are_deterministically_ordered", XmlExportDiagnosticsAreDeterministicallyOrdered);
                 Run("xml_export_collection_fatal_diagnostics_preserve_destination", XmlExportCollectionFatalDiagnosticsPreserveDestination);
+                Run("xml_export_summary_reports_success_and_validated_output", XmlExportSummaryReportsSuccessAndValidatedOutput);
+                Run("xml_export_summary_reports_partial_success_and_reconciled_counts", XmlExportSummaryReportsPartialSuccessAndReconciledCounts);
+                Run("xml_export_summary_reports_zero_valid_failure", XmlExportSummaryReportsZeroValidFailure);
+                Run("xml_export_summary_reports_collection_fatal_without_fabricated_counts", XmlExportSummaryReportsCollectionFatalWithoutFabricatedCounts);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -1389,6 +1393,87 @@ namespace BIMLogLensNext.Tests
             var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build22-" + suffix + "-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(directory);
             try { return LensNextXmlDocumentShellWriter.Write(Path.Combine(directory, "result.xml"), 26, records); }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportSummaryReportsSuccessAndValidatedOutput()
+        {
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build23-success-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, ".", "success.xml");
+                var result = LensNextXmlDocumentShellWriter.Write(path, 26,
+                    new[] { ExportInput(251, 3, null), ExportInput(252, 1, null), ExportInput(253, 2, null) });
+                var summary = result.Summary;
+                Equal(3, summary.RequestedCount.Value); Equal(3, summary.SerializedCount.Value); Equal(0, summary.SkippedCount.Value);
+                Equal(summary.RequestedCount.Value, summary.SerializedCount.Value + summary.SkippedCount.Value);
+                Equal(Path.GetFullPath(path), summary.OutputPath); True(summary.OutputWritten);
+                Equal("utf-8", summary.XmlEncoding); Equal("exchange", summary.XmlRoot); Equal("BIMLog Viewpoints", summary.ViewFolderName);
+                Equal("NOT_EMITTED", summary.UnitsStatus); Equal("NOT_EMITTED", summary.SchemaStatus);
+                Equal("PASS", summary.ValidationResult); Equal("SUCCESS", summary.ExportResult); True(summary.FailureDetail == null);
+                Equal(3, new XmlDocumentShell(path).ViewNames.Count); Equal(3, result.Diagnostics.Count);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportSummaryReportsPartialSuccessAndReconciledCounts()
+        {
+            var first = ExportInput(261, 1, null);
+            var skipped = ExportInput(262, 2, null); skipped.PackageCamera = null;
+            var third = ExportInput(263, 3, null);
+            var result = WriteExportResult("summary-partial", new[] { third, skipped, first });
+            var summary = result.Summary;
+            Equal(3, summary.RequestedCount.Value); Equal(2, summary.SerializedCount.Value); Equal(1, summary.SkippedCount.Value);
+            Equal(summary.RequestedCount.Value, summary.SerializedCount.Value + summary.SkippedCount.Value);
+            Equal("PASS", summary.ValidationResult); Equal("PARTIAL_SUCCESS", summary.ExportResult); True(summary.OutputWritten);
+            Equal("261:EXPORTED:exported|262:SKIPPED:missing_camera|263:EXPORTED:exported",
+                string.Join("|", result.Diagnostics.Select(value => value.ServerId + ":" + value.Result + ":" + value.ReasonCode)));
+        }
+
+        private static void XmlExportSummaryReportsZeroValidFailure()
+        {
+            var first = ExportInput(271, 1, null); first.PackageCamera = null;
+            var second = ExportInput(272, 2, null); second.PackageCamera.Rotation = new LensNextRotationState();
+            var path = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build23-zero-" + Guid.NewGuid().ToString("N") + ".xml");
+            try
+            {
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { first, second });
+                throw new InvalidOperationException("Expected InvalidDataException.");
+            }
+            catch (InvalidDataException exception)
+            {
+                var summary = LensNextXmlExportFailure.SummaryFor(exception);
+                Equal("FAIL", summary.ExportResult); Equal("FAIL", summary.ValidationResult);
+                Equal(2, summary.RequestedCount.Value); Equal(0, summary.SerializedCount.Value); Equal(2, summary.SkippedCount.Value);
+                Equal(Path.GetFullPath(path), summary.OutputPath); False(summary.OutputWritten); False(File.Exists(path));
+            }
+        }
+
+        private static void XmlExportSummaryReportsCollectionFatalWithoutFabricatedCounts()
+        {
+            var valid = ExportInput(281, 1, null);
+            var fatal = ExportInput(282, 2, null); fatal.ProjectId = 99; fatal.PackageProjectId = 99;
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build23-fatal-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "fatal.xml"); File.WriteAllText(path, "preserve-fatal-output");
+                try
+                {
+                    LensNextXmlDocumentShellWriter.Write(path, 26, new[] { valid, fatal });
+                    throw new InvalidOperationException("Expected InvalidDataException.");
+                }
+                catch (InvalidDataException exception)
+                {
+                    var summary = LensNextXmlExportFailure.SummaryFor(exception);
+                    Equal("FAIL", summary.ExportResult); Equal("FAIL", summary.ValidationResult);
+                    True(summary.RequestedCount == null); True(summary.SkippedCount == null);
+                    Equal(0, summary.SerializedCount.Value); False(summary.OutputWritten);
+                    Equal(Path.GetFullPath(path), summary.OutputPath); Equal("preserve-fatal-output", File.ReadAllText(path));
+                    True(exception.Message.Contains("cross-project"));
+                }
+            }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
 

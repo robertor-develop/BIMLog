@@ -3,6 +3,7 @@ using System.IO;
 using System.Collections.Generic;
 using System.Text;
 using System.Xml;
+using System.Linq;
 
 namespace BIMLogLensNext
 {
@@ -23,7 +24,18 @@ namespace BIMLogLensNext
             int authoritativeProjectId,
             IEnumerable<LensNextXmlExportInput> records)
         {
-            var result = LensNextXmlExportInputSelector.SelectForExport(authoritativeProjectId, records);
+            LensNextXmlExportResult result;
+            try
+            {
+                result = LensNextXmlExportInputSelector.SelectForExport(authoritativeProjectId, records);
+            }
+            catch (InvalidDataException exception)
+            {
+                var requested = exception.Data.Contains("BIMLog.RequestedCount") ? (int?)Convert.ToInt32(exception.Data["BIMLog.RequestedCount"]) : null;
+                var skipped = exception.Data.Contains("BIMLog.SkippedCount") ? (int?)Convert.ToInt32(exception.Data["BIMLog.SkippedCount"]) : null;
+                AttachFailure(destinationPath, exception, requested, skipped);
+                throw;
+            }
             var ordered = result.SerializedViewpoints;
             var names = LensNextXmlExportNamePolicy.UniqueNames(ordered);
             var views = new LensNextXmlExportView[ordered.Count];
@@ -38,7 +50,64 @@ namespace BIMLogLensNext
                     LensNextXmlCameraScale.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlSectioning.FromOptionalJson(ordered[index].PackageSectioningJson));
             WriteDocument(destinationPath, views);
+            var outputPath = Path.GetFullPath(destinationPath);
+            ValidateWrittenDocument(outputPath, result.SerializedCount);
+            result.Summary = LensNextXmlExportSummary.Passed(
+                outputPath, result.RequestedCount, result.SerializedCount, result.SkippedCount);
             return result;
+        }
+
+        private static void AttachFailure(
+            string destinationPath,
+            InvalidDataException exception,
+            int? requestedCount,
+            int? skippedCount)
+        {
+            string outputPath;
+            try { outputPath = string.IsNullOrWhiteSpace(destinationPath) ? destinationPath : Path.GetFullPath(destinationPath); }
+            catch { outputPath = destinationPath; }
+            exception.Data[LensNextXmlExportFailure.SummaryDataKey] =
+                LensNextXmlExportSummary.Failed(outputPath, requestedCount, skippedCount, exception.Message);
+        }
+
+        private static void ValidateWrittenDocument(string outputPath, int expectedViewCount)
+        {
+            var document = new XmlDocument { XmlResolver = null };
+            document.Load(outputPath);
+            var declaration = document.FirstChild as XmlDeclaration;
+            if (declaration == null || !string.Equals(declaration.Encoding, "utf-8", StringComparison.OrdinalIgnoreCase))
+                throw new InvalidDataException("The written BIMLog XML export encoding declaration is invalid.");
+            if (document.DocumentElement == null ||
+                !string.Equals(document.DocumentElement.Name, RootElementName, StringComparison.Ordinal))
+                throw new InvalidDataException("The written BIMLog XML export root is invalid.");
+            var viewpoints = document.DocumentElement.SelectNodes(ViewpointsElementName);
+            var folders = document.DocumentElement.SelectNodes(ViewpointsElementName + "/" + ViewFolderElementName);
+            if (viewpoints.Count != 1 || folders.Count != 1 ||
+                !string.Equals(((XmlElement)folders[0]).GetAttribute("name"), ViewFolderName, StringComparison.Ordinal))
+                throw new InvalidDataException("The written BIMLog XML export structure is invalid.");
+            if (((XmlElement)folders[0]).SelectNodes("view").Count != expectedViewCount)
+                throw new InvalidDataException("The written BIMLog XML export viewpoint count does not match the serialized result.");
+
+            var prohibitedElements = new[] { "range", "box", "box-rotation" };
+            if (prohibitedElements.Any(name => document.GetElementsByTagName(name).Count != 0))
+                throw new InvalidDataException("The written BIMLog XML export contains an unproven element.");
+            foreach (XmlElement element in document.SelectNodes("//*"))
+            {
+                foreach (XmlAttribute attribute in element.Attributes)
+                {
+                    var name = attribute.LocalName;
+                    if (string.Equals(name, "units", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(name, "schema", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(name, "schemaLocation", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(name, "current", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(name, "alignment", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(name, "near", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(name, "far", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(name, "linear", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(name, "angular", StringComparison.OrdinalIgnoreCase))
+                        throw new InvalidDataException("The written BIMLog XML export contains an unproven attribute.");
+                }
+            }
         }
 
         private static void WriteDocument(string destinationPath, IReadOnlyList<LensNextXmlExportView> views)

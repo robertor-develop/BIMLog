@@ -82,6 +82,7 @@ namespace BIMLogLensNext
         public IReadOnlyList<LensNextXmlExportInput> SerializedViewpoints { get; }
         public IReadOnlyList<LensNextXmlSkippedViewpoint> SkippedViewpoints { get; }
         public IReadOnlyList<LensNextXmlExportDiagnostic> Diagnostics { get; }
+        public LensNextXmlExportSummary Summary { get; internal set; }
         public int Count => SerializedViewpoints.Count;
         public LensNextXmlExportInput this[int index] => SerializedViewpoints[index];
         public IEnumerator<LensNextXmlExportInput> GetEnumerator() => SerializedViewpoints.GetEnumerator();
@@ -172,8 +173,13 @@ namespace BIMLogLensNext
                 }
             }
             if (exportable.Count == 0)
-                throw new InvalidDataException("The BIMLog XML export contains zero exportable active viewpoints (requested " +
+            {
+                var exception = new InvalidDataException("The BIMLog XML export contains zero exportable active viewpoints (requested " +
                     active.Count + ", skipped " + skipped.Count + ").");
+                exception.Data["BIMLog.RequestedCount"] = active.Count;
+                exception.Data["BIMLog.SkippedCount"] = skipped.Count;
+                throw exception;
+            }
             return new LensNextXmlExportResult(active.Count, exportable.ToArray(), skipped.ToArray(), diagnostics.ToArray());
         }
 
@@ -232,4 +238,5 @@ namespace BIMLogLensNext
                 (character >= 'a' && character <= 'f') ||
                 (character >= 'A' && character <= 'F'));
     }
+
 }
