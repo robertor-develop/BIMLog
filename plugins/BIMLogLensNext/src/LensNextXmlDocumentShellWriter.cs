@@ -30,7 +30,8 @@ namespace BIMLogLensNext
                 views[index] = new LensNextXmlExportView(
                     names[index],
                     LensNextXmlExportGuidPolicy.ForRecord(ordered[index]),
-                    LensNextXmlPosition.FromValidatedCamera(ordered[index].PackageCamera));
+                    LensNextXmlPosition.FromValidatedCamera(ordered[index].PackageCamera),
+                    LensNextXmlRotation.FromValidatedCamera(ordered[index].PackageCamera));
             WriteDocument(destinationPath, views);
             return ordered;
         }
@@ -85,6 +86,14 @@ namespace BIMLogLensNext
                         writer.WriteAttributeString("z", view.Position.ZInvariant);
                         writer.WriteEndElement();
                         writer.WriteEndElement();
+                        writer.WriteStartElement("rotation");
+                        writer.WriteStartElement("quaternion");
+                        writer.WriteAttributeString("a", view.Rotation.AInvariant);
+                        writer.WriteAttributeString("b", view.Rotation.BInvariant);
+                        writer.WriteAttributeString("c", view.Rotation.CInvariant);
+                        writer.WriteAttributeString("d", view.Rotation.DInvariant);
+                        writer.WriteEndElement();
+                        writer.WriteEndElement();
                         writer.WriteEndElement();
                         writer.WriteEndElement();
                     }
@@ -106,15 +115,17 @@ namespace BIMLogLensNext
 
         private sealed class LensNextXmlExportView
         {
-            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position)
+            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation)
             {
                 Name = name;
                 Guid = guid;
                 Position = position;
+                Rotation = rotation;
             }
             public string Name { get; }
             public Guid Guid { get; }
             public LensNextXmlPosition Position { get; }
+            public LensNextXmlRotation Rotation { get; }
         }
     }
 }

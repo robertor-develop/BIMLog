@@ -95,6 +95,11 @@ namespace BIMLogLensNext.Tests
                 Run("xml_orientation_sign_equivalence_is_explicit", XmlOrientationSignEquivalenceIsExplicit);
                 Run("xml_orientation_rejects_invalid_quaternions", XmlOrientationRejectsInvalidQuaternions);
                 Run("xml_orientation_proof_does_not_mutate_camera_or_xml", XmlOrientationProofDoesNotMutateCameraOrXml);
+                Run("xml_camera_rotation_maps_raw_components", XmlCameraRotationMapsRawComponents);
+                Run("xml_camera_rotation_preserves_equivalent_signs", XmlCameraRotationPreservesEquivalentSigns);
+                Run("xml_camera_rotation_is_stable_across_name_and_order", XmlCameraRotationIsStableAcrossNameAndOrder);
+                Run("xml_camera_rotation_rejects_missing_non_finite_and_zero", XmlCameraRotationRejectsMissingNonFiniteAndZero);
+                Run("xml_camera_rotation_emits_only_proven_scope", XmlCameraRotationEmitsOnlyProvenScope);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -264,7 +269,7 @@ namespace BIMLogLensNext.Tests
                 True(raw.Contains("&amp;"));
                 True(raw.Contains("&lt;Conflict&gt;"));
                 True(raw.Contains("&quot;A&quot;"));
-                foreach (var forbidden in new[] { "<camera", "rotation", "projection", "focal", "sectioning", "units=", "schema" })
+                foreach (var forbidden in new[] { "<camera", "projection", "focal", "sectioning", "units=", "schema" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -330,7 +335,7 @@ namespace BIMLogLensNext.Tests
                 foreach (var forbidden in new[] { "units", "schema", "xmlns", "generator", "version" })
                     False(document.DocumentElement.HasAttribute(forbidden));
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "units=", "schemaLocation", "nw-exchange", "<camera", "rotation", "projection", "focal", "sectioning" })
+                foreach (var forbidden in new[] { "units=", "schemaLocation", "nw-exchange", "<camera", "projection", "focal", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -417,7 +422,7 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/position/pos3f").Count);
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "rotation", "up", "projection", "focal", "sectioning", "units=", "schemaLocation", "nw-exchange" })
+                foreach (var forbidden in new[] { "up", "projection", "focal", "sectioning", "units=", "schemaLocation", "nw-exchange" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -498,6 +503,125 @@ namespace BIMLogLensNext.Tests
             }
         }
 
+        private static void XmlCameraRotationMapsRawComponents()
+        {
+            var cases = new[]
+            {
+                new LensNextRotationState { A = 0d, B = 0d, C = 0d, D = 1d },
+                new LensNextRotationState { A = Math.Sqrt(0.5d), B = 0d, C = 0d, D = Math.Sqrt(0.5d) },
+                new LensNextRotationState { A = 0.18257418583505536d, B = -0.36514837167011072d, C = 0.5477225575051661d, D = 0.73029674334022143d }
+            };
+            for (var index = 0; index < cases.Length; index++)
+            {
+                var input = ExportInput(120 + index, 1, null);
+                input.PackageCamera.Rotation = cases[index];
+                var actual = WriteAndReadRotation(input);
+                Equal(cases[index].A, actual[0]);
+                Equal(cases[index].B, actual[1]);
+                Equal(cases[index].C, actual[2]);
+                Equal(cases[index].D, actual[3]);
+            }
+        }
+
+        private static void XmlCameraRotationPreservesEquivalentSigns()
+        {
+            var positive = ExportInput(123, 1, null);
+            positive.PackageCamera.Rotation = new LensNextRotationState { A = 0.1d, B = -0.2d, C = 0.3d, D = -0.9d };
+            var negative = ExportInput(124, 1, null);
+            negative.PackageCamera.Rotation = new LensNextRotationState { A = -0.1d, B = 0.2d, C = -0.3d, D = 0.9d };
+            var first = WriteAndReadRotation(positive);
+            var second = WriteAndReadRotation(negative);
+            Equal(positive.PackageCamera.Rotation.A, first[0]);
+            Equal(negative.PackageCamera.Rotation.A, second[0]);
+            True(first.Zip(second, (left, right) => left == -right).All(value => value));
+        }
+
+        private static void XmlCameraRotationIsStableAcrossNameAndOrder()
+        {
+            var first = ExportInput(125, 1, null);
+            first.DisplayId = "ORIGINAL";
+            first.PackageCamera.Rotation = new LensNextRotationState { A = -0.4d, B = 0.3d, C = -0.2d, D = 0.8d };
+            var second = ExportInput(126, 2, null);
+            second.PackageCamera.Rotation = new LensNextRotationState { A = 0d, B = 0d, C = 0d, D = 1d };
+            var before = WriteAndReadRotationsByGuid(new[] { first, second });
+            first.DisplayId = "RENAMED";
+            first.Note = "Name changes are presentation only";
+            var after = WriteAndReadRotationsByGuid(new[] { second, first });
+            Equal(string.Join(",", before[LensNextXmlExportGuidPolicy.ForRecord(first)]),
+                string.Join(",", after[LensNextXmlExportGuidPolicy.ForRecord(first)]));
+            Equal(string.Join(",", before[LensNextXmlExportGuidPolicy.ForRecord(second)]),
+                string.Join(",", after[LensNextXmlExportGuidPolicy.ForRecord(second)]));
+        }
+
+        private static void XmlCameraRotationRejectsMissingNonFiniteAndZero()
+        {
+            var missing = ExportInput(127, 1, null); missing.PackageCamera.Rotation = null;
+            Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { missing }));
+            foreach (var invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+            {
+                var values = new[]
+                {
+                    new LensNextRotationState { A = invalid, D = 1d },
+                    new LensNextRotationState { B = invalid, D = 1d },
+                    new LensNextRotationState { C = invalid, D = 1d },
+                    new LensNextRotationState { D = invalid, A = 1d }
+                };
+                foreach (var rotation in values)
+                {
+                    var input = ExportInput(128, 1, null); input.PackageCamera.Rotation = rotation;
+                    Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { input }));
+                }
+            }
+            var zero = ExportInput(129, 1, null); zero.PackageCamera.Rotation = new LensNextRotationState();
+            Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { zero }));
+        }
+
+        private static void XmlCameraRotationEmitsOnlyProvenScope()
+        {
+            var input = ExportInput(130, 1, null);
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build12-scope-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "scope.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/position/pos3f").Count);
+                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/rotation/quaternion").Count);
+                var raw = File.ReadAllText(path);
+                foreach (var forbidden in new[] { "<up", "projection", "focal", "fov", "sectioning", "units=", "schemaLocation", "nw-exchange" })
+                    False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static double[] WriteAndReadRotation(LensNextXmlExportInput input)
+        {
+            return WriteAndReadRotationsByGuid(new[] { input })[LensNextXmlExportGuidPolicy.ForRecord(input)];
+        }
+
+        private static Dictionary<Guid, double[]> WriteAndReadRotationsByGuid(IEnumerable<LensNextXmlExportInput> inputs)
+        {
+            var records = inputs.ToArray();
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build12-rotation-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "rotation.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, records);
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                return document.SelectNodes("/exchange/viewpoints/viewfolder/view").Cast<XmlElement>().ToDictionary(
+                    view => Guid.Parse(view.GetAttribute("guid")),
+                    view =>
+                    {
+                        var quaternion = (XmlElement)view.SelectSingleNode("viewpoint/rotation/quaternion");
+                        return new[] { "a", "b", "c", "d" }.Select(attribute =>
+                            double.Parse(quaternion.GetAttribute(attribute), CultureInfo.InvariantCulture)).ToArray();
+                    });
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
         private static double[] WriteAndReadPosition(LensNextXmlExportInput input)
         {
             var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-xml-position-" + Guid.NewGuid().ToString("N"));
@@ -530,7 +654,8 @@ namespace BIMLogLensNext.Tests
                 PackageRevisionNumber = 1, PackageDigest = digest,
                 PackageCamera = new LensNextCameraState
                 {
-                    Position = new LensNextPointState { X = 1, Y = 2, Z = 3 }
+                    Position = new LensNextPointState { X = 1, Y = 2, Z = 3 },
+                    Rotation = new LensNextRotationState { A = 0, B = 0, C = 0, D = 1 }
                 }
             };
         }
