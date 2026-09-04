@@ -100,6 +100,11 @@ namespace BIMLogLensNext.Tests
                 Run("xml_camera_rotation_is_stable_across_name_and_order", XmlCameraRotationIsStableAcrossNameAndOrder);
                 Run("xml_camera_rotation_rejects_missing_non_finite_and_zero", XmlCameraRotationRejectsMissingNonFiniteAndZero);
                 Run("xml_camera_rotation_emits_only_proven_scope", XmlCameraRotationEmitsOnlyProvenScope);
+                Run("quaternion_norm_is_scale_safe_and_non_mutating", QuaternionNormIsScaleSafeAndNonMutating);
+                Run("quaternion_acceptance_recognizes_sign_and_scale_equivalence", QuaternionAcceptanceRecognizesSignAndScaleEquivalence);
+                Run("quaternion_acceptance_uses_proven_angular_tolerance", QuaternionAcceptanceUsesProvenAngularTolerance);
+                Run("quaternion_acceptance_rejects_malformed_values", QuaternionAcceptanceRejectsMalformedValues);
+                Run("quaternion_acceptance_leaves_build12_xml_unchanged", QuaternionAcceptanceLeavesBuild12XmlUnchanged);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -620,6 +625,103 @@ namespace BIMLogLensNext.Tests
                     });
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void QuaternionNormIsScaleSafeAndNonMutating()
+        {
+            var compound = new LensNextRotationState { A = 0.18257418583505536d, B = -0.36514837167011072d, C = 0.5477225575051661d, D = 0.73029674334022143d };
+            var before = new[] { compound.A, compound.B, compound.C, compound.D };
+            var norm = LensNextQuaternionAcceptance.Evaluate(compound);
+            Equal(1d, Math.Round(Math.Sqrt(norm.NormalizedComponents.Sum(value => value * value)), 14));
+            True(before.SequenceEqual(new[] { compound.A, compound.B, compound.C, compound.D }));
+
+            var tiny = new LensNextRotationState { A = double.Epsilon, B = -double.Epsilon, C = double.Epsilon, D = double.Epsilon };
+            var tinyNorm = LensNextQuaternionAcceptance.Evaluate(tiny);
+            Equal(double.Epsilon, tinyNorm.Scale);
+            Equal(2d, tinyNorm.ScaledMagnitude);
+
+            var large = new LensNextRotationState { A = double.MaxValue, B = -double.MaxValue, C = double.MaxValue, D = double.MaxValue };
+            var largeNorm = LensNextQuaternionAcceptance.Evaluate(large);
+            Equal(double.MaxValue, largeNorm.Scale);
+            Equal(2d, largeNorm.ScaledMagnitude);
+            True(largeNorm.NormalizedComponents.All(value => !double.IsNaN(value) && !double.IsInfinity(value)));
+        }
+
+        private static void QuaternionAcceptanceRecognizesSignAndScaleEquivalence()
+        {
+            var identity = new LensNextRotationState { D = 1d };
+            var axis = new LensNextRotationState { A = Math.Sqrt(0.5d), D = Math.Sqrt(0.5d) };
+            var compound = new LensNextRotationState { A = 0.18257418583505536d, B = -0.36514837167011072d, C = 0.5477225575051661d, D = 0.73029674334022143d };
+            foreach (var value in new[] { identity, axis, compound })
+            {
+                var negated = new LensNextRotationState { A = -value.A, B = -value.B, C = -value.C, D = -value.D };
+                var slightlyNonUnit = new LensNextRotationState { A = value.A * 1.0000001d, B = value.B * 1.0000001d, C = value.C * 1.0000001d, D = value.D * 1.0000001d };
+                True(LensNextQuaternionAcceptance.AngularErrorRadians(value, negated) <=
+                    LensNextQuaternionAcceptance.OrientationComparisonToleranceRadians);
+                True(LensNextQuaternionAcceptance.Equivalent(value, negated));
+                True(LensNextQuaternionAcceptance.Equivalent(value, slightlyNonUnit));
+            }
+        }
+
+        private static void QuaternionAcceptanceUsesProvenAngularTolerance()
+        {
+            var identity = new LensNextRotationState { D = 1d };
+            var within = RotationAroundX(LensNextQuaternionAcceptance.OrientationComparisonToleranceRadians * 0.5d);
+            var outside = RotationAroundX(LensNextQuaternionAcceptance.OrientationComparisonToleranceRadians * 2d);
+            True(LensNextQuaternionAcceptance.Equivalent(identity, within));
+            False(LensNextQuaternionAcceptance.Equivalent(identity, outside));
+
+            var compound = new LensNextRotationState { A = 0.18257418583505536d, B = -0.36514837167011072d, C = 0.5477225575051661d, D = 0.73029674334022143d };
+            var floatRoundTrip = new LensNextRotationState
+            {
+                A = (float)compound.A,
+                B = (float)compound.B,
+                C = (float)compound.C,
+                D = (float)compound.D
+            };
+            True(LensNextQuaternionAcceptance.Equivalent(compound, floatRoundTrip));
+        }
+
+        private static void QuaternionAcceptanceRejectsMalformedValues()
+        {
+            Throws<InvalidDataException>(() => LensNextQuaternionAcceptance.Evaluate(null));
+            Throws<InvalidDataException>(() => LensNextQuaternionAcceptance.Evaluate(new LensNextRotationState()));
+            foreach (var invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+                Throws<InvalidDataException>(() => LensNextQuaternionAcceptance.Evaluate(new LensNextRotationState { A = invalid, D = 1d }));
+        }
+
+        private static void QuaternionAcceptanceLeavesBuild12XmlUnchanged()
+        {
+            var input = ExportInput(131, 1, null);
+            input.PackageCamera.SourceLinearUnit = "Feet";
+            input.PackageCamera.Rotation = new LensNextRotationState { A = 0.10000001d, B = -0.20000002d, C = 0.30000003d, D = -0.90000009d };
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build13-unchanged-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var beforePath = Path.Combine(directory, "before.xml");
+                var afterPath = Path.Combine(directory, "after.xml");
+                LensNextXmlDocumentShellWriter.Write(beforePath, 26, new[] { input });
+                LensNextQuaternionAcceptance.Evaluate(input.PackageCamera.Rotation);
+                LensNextXmlDocumentShellWriter.Write(afterPath, 26, new[] { input });
+                True(File.ReadAllBytes(beforePath).SequenceEqual(File.ReadAllBytes(afterPath)));
+                Equal("Feet", input.PackageCamera.SourceLinearUnit);
+                var document = new XmlDocument { XmlResolver = null }; document.Load(afterPath);
+                var quaternion = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/rotation/quaternion");
+                Equal(input.PackageCamera.Rotation.A.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("a"));
+                Equal(input.PackageCamera.Rotation.B.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("b"));
+                Equal(input.PackageCamera.Rotation.C.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("c"));
+                Equal(input.PackageCamera.Rotation.D.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("d"));
+                var raw = File.ReadAllText(afterPath);
+                foreach (var forbidden in new[] { "<up", "projection", "focal", "fov", "sectioning", "units=", "schemaLocation", "nw-exchange" })
+                    False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static LensNextRotationState RotationAroundX(double angleRadians)
+        {
+            return new LensNextRotationState { A = Math.Sin(angleRadians / 2d), D = Math.Cos(angleRadians / 2d) };
         }
 
         private static double[] WriteAndReadPosition(LensNextXmlExportInput input)
