@@ -117,6 +117,7 @@ namespace BIMLogLensNext.Tests
                 Run("xml_camera_scale_maps_perspective_semantics", XmlCameraScaleMapsPerspectiveSemantics);
                 Run("xml_camera_scale_matches_navisworks_perspective_fov_presence_boundary", XmlCameraScaleMatchesNavisworksPerspectiveFovPresenceBoundary);
                 Run("xml_camera_scale_maps_orthographic_semantics", XmlCameraScaleMapsOrthographicSemantics);
+                Run("xml_camera_scale_matches_build18_orthographic_cases", XmlCameraScaleMatchesBuild18OrthographicCases);
                 Run("xml_camera_scale_rejects_missing_invalid_and_impossible_geometry", XmlCameraScaleRejectsMissingInvalidAndImpossibleGeometry);
                 Run("xml_camera_scale_is_deterministic_and_non_mutating", XmlCameraScaleIsDeterministicAndNonMutating);
                 Run("xml_camera_scale_emits_only_proven_fields", XmlCameraScaleEmitsOnlyProvenFields);
@@ -961,6 +962,52 @@ namespace BIMLogLensNext.Tests
             AssertPerspectiveFovPresence(minimum - 0.000001d, false);
             AssertPerspectiveFovPresence(minimum, true);
             AssertPerspectiveFovPresence(minimum + 0.000001d, true);
+        }
+
+        private static void XmlCameraScaleMatchesBuild18OrthographicCases()
+        {
+            AssertOrthographicFovPresence(10d, 300d, 200d, true);
+            AssertOrthographicFovPresence(10d, 80d, 60d, true);
+            AssertOrthographicFovPresence(100d, 10d, 5d, false);
+            var minimum = Math.PI / 18d;
+            AssertOrthographicAnglePresence(minimum - 0.000001d, false);
+            AssertOrthographicAnglePresence(minimum, true);
+            AssertOrthographicAnglePresence(minimum + 0.000001d, true);
+        }
+
+        private static void AssertOrthographicAnglePresence(double angle, bool expectedPresence)
+        {
+            const double focal = 100d;
+            var vertical = 2d * focal * Math.Tan(angle / 2d);
+            AssertOrthographicFovPresence(focal, 1.5d * vertical, vertical, expectedPresence);
+        }
+
+        private static void AssertOrthographicFovPresence(double focal, double horizontal, double vertical, bool expectedPresence)
+        {
+            var input = ExportInput(170, 1, null);
+            input.PackageCamera.Projection = "Orthographic";
+            input.PackageCamera.FocalDistance = focal;
+            input.PackageCamera.HorizontalExtentAtFocalDistance = horizontal;
+            input.PackageCamera.VerticalExtentAtFocalDistance = vertical;
+            var fieldScale = Math.Max(vertical, focal);
+            var expectedFov = 2d * Math.Atan2(vertical / fieldScale, 2d * (focal / fieldScale));
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build18a-ortho-fov-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "orthographic-fov.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
+                var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
+                Equal(expectedPresence, viewpoint.HasAttribute("fov"));
+                if (expectedPresence)
+                    True(Math.Abs(expectedFov - double.Parse(viewpoint.GetAttribute("fov"), CultureInfo.InvariantCulture)) <= 2E-16d);
+                Equal(focal, double.Parse(viewpoint.GetAttribute("focal"), CultureInfo.InvariantCulture));
+                True(Math.Abs(horizontal / vertical - double.Parse(camera.GetAttribute("aspect"), CultureInfo.InvariantCulture)) <= 2E-16d);
+                Equal(vertical, double.Parse(camera.GetAttribute("height"), CultureInfo.InvariantCulture));
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
         }
 
         private static void AssertPerspectiveFovPresence(double angle, bool expectedPresence)

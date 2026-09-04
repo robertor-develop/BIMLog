@@ -6,7 +6,7 @@ namespace BIMLogLensNext
 {
     public sealed class LensNextXmlCameraScale
     {
-        private const double NavisworksPerspectiveFovAttributeMinimum = Math.PI / 18d;
+        private const double NavisworksFovAttributeMinimum = Math.PI / 18d;
 
         private LensNextXmlCameraScale(double focal, double fieldOfView, double aspect, double height, bool emitFieldOfViewAttribute)
         {
@@ -46,7 +46,7 @@ namespace BIMLogLensNext
                 fieldOfView,
                 aspect,
                 height,
-                !perspective || fieldOfView >= NavisworksPerspectiveFovAttributeMinimum);
+                fieldOfView >= NavisworksFovAttributeMinimum);
         }
 
         private static double Positive(double? value, string field)
