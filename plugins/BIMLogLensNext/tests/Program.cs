@@ -14,10 +14,15 @@ namespace BIMLogLensNext.Tests
         private const string Token = "short-lived-test-session-token";
         private static int _passed;
 
-        private static int Main()
+        private static int Main(string[] args)
         {
             try
             {
+                if (args.Length == 3 && string.Equals(args[0], "--build24-evidence", StringComparison.Ordinal))
+                {
+                    GenerateBuild24Evidence(args[1], args[2]);
+                    return 0;
+                }
                 Run("identifiers_are_isolated", IdentifiersAreIsolated);
                 Run("native_registration_provenance_is_exact", NativeRegistrationProvenanceIsExact);
                 Run("write_flags_default_off", WriteFlagsDefaultOff);
@@ -139,6 +144,7 @@ namespace BIMLogLensNext.Tests
                 Run("xml_export_summary_reports_partial_success_and_reconciled_counts", XmlExportSummaryReportsPartialSuccessAndReconciledCounts);
                 Run("xml_export_summary_reports_zero_valid_failure", XmlExportSummaryReportsZeroValidFailure);
                 Run("xml_export_summary_reports_collection_fatal_without_fabricated_counts", XmlExportSummaryReportsCollectionFatalWithoutFabricatedCounts);
+                Run("xml_export_integrated_three_view_fixture_is_deterministic", XmlExportIntegratedThreeViewFixtureIsDeterministic);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -1533,6 +1539,112 @@ namespace BIMLogLensNext.Tests
                     VerticalExtentAtFocalDistance = 6d
                 }
             };
+        }
+
+        private static LensNextXmlExportInput[] Build24IntegratedFixtures()
+        {
+            var perspective = ExportInput(160, 1, DateTimeOffset.Parse("2026-01-03T00:00:00Z"));
+            perspective.PackageCamera.Position = new LensNextPointState { X = 1.5d, Y = 0d, Z = 1e100d };
+            perspective.PackageCamera.Rotation = new LensNextRotationState { A = 0d, B = 0.5d, C = -0.25d, D = 1d };
+            perspective.PackageCamera.WorldUpVector = new LensNextPointState { X = 0d, Y = 1d, Z = 0d };
+            perspective.PackageCamera.FocalDistance = 42.125d;
+            perspective.PackageCamera.HorizontalExtentAtFocalDistance = 100.25d;
+            perspective.PackageCamera.VerticalExtentAtFocalDistance = 50.125d;
+
+            var orthographic = ExportInput(161, 2, DateTimeOffset.Parse("2026-01-02T00:00:00Z"));
+            orthographic.PackageCamera.Position = new LensNextPointState { X = 12.25d, Y = -4.5d, Z = 99d };
+            orthographic.PackageCamera.Rotation = new LensNextRotationState { A = Math.Sqrt(0.5d), B = 0d, C = 0d, D = Math.Sqrt(0.5d) };
+            orthographic.PackageCamera.WorldUpVector = new LensNextPointState { X = -0.25d, Y = 0.5d, Z = 0.75d };
+            orthographic.PackageCamera.Projection = "Orthographic";
+            orthographic.PackageCamera.FocalDistance = 10d;
+            orthographic.PackageCamera.HorizontalExtentAtFocalDistance = 8d;
+            orthographic.PackageCamera.VerticalExtentAtFocalDistance = 6d;
+            orthographic.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,0,-1],\"Distance\":-53.1620981117,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}";
+
+            var multiPlane = ExportInput(172, 3, DateTimeOffset.Parse("2026-01-01T00:00:00Z"));
+            multiPlane.PackageCamera.Position = new LensNextPointState { X = -1d, Y = -2.5d, Z = -300.125d };
+            multiPlane.PackageCamera.Rotation = new LensNextRotationState { A = 0.18257418583505536d, B = -0.36514837167011072d, C = 0.5477225575051661d, D = 0.73029674334022143d };
+            multiPlane.PackageCamera.WorldUpVector = new LensNextPointState { X = 0d, Y = 0d, Z = 1d };
+            multiPlane.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[1,0,0],\"Distance\":-10.5,\"Enabled\":true},{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,1,0],\"Distance\":20.25,\"Enabled\":false}],\"Linked\":true,\"Enabled\":true}";
+            return new[] { multiPlane, perspective, orthographic };
+        }
+
+        private static void XmlExportIntegratedThreeViewFixtureIsDeterministic()
+        {
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build24-integrated-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var first = Path.Combine(directory, "first.xml"); var firstComparison = Path.Combine(directory, "first.json");
+                var second = Path.Combine(directory, "second.xml"); var secondComparison = Path.Combine(directory, "second.json");
+                GenerateBuild24Evidence(first, firstComparison); GenerateBuild24Evidence(second, secondComparison);
+                True(File.ReadAllBytes(first).SequenceEqual(File.ReadAllBytes(second)));
+                var document = new XmlDocument { XmlResolver = null }; document.Load(first);
+                Equal(3, document.SelectNodes("/exchange/viewpoints/viewfolder/view").Count);
+                Equal("VP-160,VP-161,VP-172", string.Join(",", document.SelectNodes("/exchange/viewpoints/viewfolder/view").Cast<XmlElement>().Select(value => value.GetAttribute("name"))));
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void GenerateBuild24Evidence(string xmlPath, string comparisonPath)
+        {
+            var records = Build24IntegratedFixtures();
+            var result = LensNextXmlDocumentShellWriter.Write(xmlPath, 26, records);
+            Equal(3, result.Summary.RequestedCount.Value); Equal(3, result.Summary.SerializedCount.Value); Equal(0, result.Summary.SkippedCount.Value);
+            Equal("SUCCESS", result.Summary.ExportResult); Equal("PASS", result.Summary.ValidationResult);
+            var document = new XmlDocument { XmlResolver = null }; document.Load(xmlPath);
+            var views = document.SelectNodes("/exchange/viewpoints/viewfolder/view").Cast<XmlElement>().ToArray(); Equal(3, views.Length);
+            var ordered = records.OrderBy(value => value.Priority).ToArray();
+            var comparisons = new List<object>();
+            for (var index = 0; index < ordered.Length; index++)
+            {
+                var source = ordered[index]; var view = views[index];
+                var position = (XmlElement)view.SelectSingleNode("viewpoint/camera/position/pos3f");
+                var rotation = (XmlElement)view.SelectSingleNode("viewpoint/camera/rotation/quaternion");
+                Equal(LensNextXmlExportNamePolicy.BaseName(source), view.GetAttribute("name"));
+                Equal(LensNextXmlExportGuidPolicy.ForRecord(source).ToString("D"), view.GetAttribute("guid"));
+                Equal(source.PackageCamera.Position.X, double.Parse(position.GetAttribute("x"), CultureInfo.InvariantCulture));
+                Equal(source.PackageCamera.Position.Y, double.Parse(position.GetAttribute("y"), CultureInfo.InvariantCulture));
+                Equal(source.PackageCamera.Position.Z, double.Parse(position.GetAttribute("z"), CultureInfo.InvariantCulture));
+                Equal(source.PackageCamera.Rotation.A, double.Parse(rotation.GetAttribute("a"), CultureInfo.InvariantCulture));
+                Equal(source.PackageCamera.Rotation.B, double.Parse(rotation.GetAttribute("b"), CultureInfo.InvariantCulture));
+                Equal(source.PackageCamera.Rotation.C, double.Parse(rotation.GetAttribute("c"), CultureInfo.InvariantCulture));
+                Equal(source.PackageCamera.Rotation.D, double.Parse(rotation.GetAttribute("d"), CultureInfo.InvariantCulture));
+                comparisons.Add(new
+                {
+                    serverId = source.ServerId,
+                    viewpointId = source.ViewpointId,
+                    expectedName = LensNextXmlExportNamePolicy.BaseName(source),
+                    actualName = view.GetAttribute("name"),
+                    expectedGuid = LensNextXmlExportGuidPolicy.ForRecord(source).ToString("D"),
+                    actualGuid = view.GetAttribute("guid"),
+                    sourceProjection = source.PackageCamera.Projection,
+                    xmlProjection = ((XmlElement)view.SelectSingleNode("viewpoint/camera")).GetAttribute("projection"),
+                    sourcePosition = new[] { source.PackageCamera.Position.X, source.PackageCamera.Position.Y, source.PackageCamera.Position.Z },
+                    xmlPosition = new[] { position.GetAttribute("x"), position.GetAttribute("y"), position.GetAttribute("z") },
+                    sourceRotation = new[] { source.PackageCamera.Rotation.A, source.PackageCamera.Rotation.B, source.PackageCamera.Rotation.C, source.PackageCamera.Rotation.D },
+                    xmlRotation = new[] { rotation.GetAttribute("a"), rotation.GetAttribute("b"), rotation.GetAttribute("c"), rotation.GetAttribute("d") },
+                    sourceUpPresent = source.PackageCamera.WorldUpVector != null,
+                    xmlUpPresent = view.SelectSingleNode("viewpoint/up/vec3f") != null,
+                    sourceClipPlaneCount = LensNextXmlSectioning.FromOptionalJson(source.PackageSectioningJson)?.Planes.Count ?? 0,
+                    xmlClipPlaneCount = view.SelectNodes("clipplaneset/clipplanes/clipplane").Count
+                });
+            }
+            var forbidden = new[] { "range", "box", "box-rotation" };
+            True(forbidden.All(name => document.GetElementsByTagName(name).Count == 0));
+            var comparison = new
+            {
+                fixtureProvenance = "Existing controlled Build 12/14/16/18/20 test values; no customer data",
+                requestedCount = result.RequestedCount,
+                serializedCount = result.SerializedCount,
+                skippedCount = result.SkippedCount,
+                exportResult = result.Summary.ExportResult,
+                validationResult = result.Summary.ValidationResult,
+                orderedViewpoints = comparisons
+            };
+            File.WriteAllText(comparisonPath, new JavaScriptSerializer().Serialize(comparison), new UTF8Encoding(false));
+            Console.WriteLine("BUILD24_XML=" + Path.GetFullPath(xmlPath));
+            Console.WriteLine("BUILD24_COMPARISON=" + Path.GetFullPath(comparisonPath));
         }
 
         private sealed class XmlDocumentShell
