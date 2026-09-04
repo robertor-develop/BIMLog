@@ -31,7 +31,8 @@ namespace BIMLogLensNext
                     names[index],
                     LensNextXmlExportGuidPolicy.ForRecord(ordered[index]),
                     LensNextXmlPosition.FromValidatedCamera(ordered[index].PackageCamera),
-                    LensNextXmlRotation.FromValidatedCamera(ordered[index].PackageCamera));
+                    LensNextXmlRotation.FromValidatedCamera(ordered[index].PackageCamera),
+                    LensNextXmlUpVector.FromOptionalValidatedCamera(ordered[index].PackageCamera));
             WriteDocument(destinationPath, views);
             return ordered;
         }
@@ -94,6 +95,16 @@ namespace BIMLogLensNext
                         writer.WriteAttributeString("d", view.Rotation.DInvariant);
                         writer.WriteEndElement();
                         writer.WriteEndElement();
+                        if (view.UpVector != null)
+                        {
+                            writer.WriteStartElement("up");
+                            writer.WriteStartElement("vec3f");
+                            writer.WriteAttributeString("x", view.UpVector.XInvariant);
+                            writer.WriteAttributeString("y", view.UpVector.YInvariant);
+                            writer.WriteAttributeString("z", view.UpVector.ZInvariant);
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                        }
                         writer.WriteEndElement();
                         writer.WriteEndElement();
                     }
@@ -115,17 +126,19 @@ namespace BIMLogLensNext
 
         private sealed class LensNextXmlExportView
         {
-            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation)
+            public LensNextXmlExportView(string name, Guid guid, LensNextXmlPosition position, LensNextXmlRotation rotation, LensNextXmlUpVector upVector)
             {
                 Name = name;
                 Guid = guid;
                 Position = position;
                 Rotation = rotation;
+                UpVector = upVector;
             }
             public string Name { get; }
             public Guid Guid { get; }
             public LensNextXmlPosition Position { get; }
             public LensNextXmlRotation Rotation { get; }
+            public LensNextXmlUpVector UpVector { get; }
         }
     }
 }

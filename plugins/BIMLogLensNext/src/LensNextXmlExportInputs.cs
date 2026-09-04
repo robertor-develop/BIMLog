@@ -102,6 +102,7 @@ namespace BIMLogLensNext
                 throw new InvalidDataException("The active BIMLog viewpoint package identity is mismatched.");
             LensNextXmlPosition.FromValidatedCamera(record.PackageCamera);
             LensNextXmlRotation.FromValidatedCamera(record.PackageCamera);
+            LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera);
         }
 
         private static bool IsLifecycle(string value) =>

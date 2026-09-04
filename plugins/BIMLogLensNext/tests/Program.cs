@@ -105,6 +105,11 @@ namespace BIMLogLensNext.Tests
                 Run("quaternion_acceptance_uses_proven_angular_tolerance", QuaternionAcceptanceUsesProvenAngularTolerance);
                 Run("quaternion_acceptance_rejects_malformed_values", QuaternionAcceptanceRejectsMalformedValues);
                 Run("quaternion_acceptance_leaves_build12_xml_unchanged", QuaternionAcceptanceLeavesBuild12XmlUnchanged);
+                Run("xml_up_vector_maps_raw_components", XmlUpVectorMapsRawComponents);
+                Run("xml_up_vector_missing_is_explicitly_omitted", XmlUpVectorMissingIsExplicitlyOmitted);
+                Run("xml_up_vector_rejects_zero_and_non_finite", XmlUpVectorRejectsZeroAndNonFinite);
+                Run("xml_up_vector_preserves_position_rotation_and_source_unit", XmlUpVectorPreservesPositionRotationAndSourceUnit);
+                Run("xml_up_vector_emits_no_unproven_semantics", XmlUpVectorEmitsNoUnprovenSemantics);
 
                 Console.WriteLine("PASS " + _passed + "/" + _passed);
                 return 0;
@@ -722,6 +727,113 @@ namespace BIMLogLensNext.Tests
         private static LensNextRotationState RotationAroundX(double angleRadians)
         {
             return new LensNextRotationState { A = Math.Sin(angleRadians / 2d), D = Math.Cos(angleRadians / 2d) };
+        }
+
+        private static void XmlUpVectorMapsRawComponents()
+        {
+            var cases = new[]
+            {
+                new LensNextPointState { X = 0d, Y = 0d, Z = 1d },
+                new LensNextPointState { X = -0.25d, Y = 0.5d, Z = -0.75d },
+                new LensNextPointState { X = 2d, Y = -3d, Z = 4d }
+            };
+            for (var index = 0; index < cases.Length; index++)
+            {
+                var input = ExportInput(140 + index, 1, null);
+                input.PackageCamera.WorldUpVector = cases[index];
+                var actual = WriteAndReadUpVector(input);
+                Equal(cases[index].X, actual[0]);
+                Equal(cases[index].Y, actual[1]);
+                Equal(cases[index].Z, actual[2]);
+            }
+        }
+
+        private static void XmlUpVectorMissingIsExplicitlyOmitted()
+        {
+            var input = ExportInput(143, 1, null);
+            input.PackageCamera.WorldUpVector = null;
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build14-missing-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "missing.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                True(document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/up") == null);
+                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/position/pos3f").Count);
+                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/rotation/quaternion").Count);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlUpVectorRejectsZeroAndNonFinite()
+        {
+            var zero = ExportInput(144, 1, null); zero.PackageCamera.WorldUpVector = new LensNextPointState();
+            Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { zero }));
+            foreach (var invalid in new[] { double.NaN, double.PositiveInfinity, double.NegativeInfinity })
+            {
+                foreach (var vector in new[]
+                {
+                    new LensNextPointState { X = invalid, Z = 1d },
+                    new LensNextPointState { Y = invalid, Z = 1d },
+                    new LensNextPointState { Z = invalid, X = 1d }
+                })
+                {
+                    var input = ExportInput(145, 1, null); input.PackageCamera.WorldUpVector = vector;
+                    Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { input }));
+                }
+            }
+        }
+
+        private static void XmlUpVectorPreservesPositionRotationAndSourceUnit()
+        {
+            var input = ExportInput(146, 1, null);
+            input.PackageCamera.SourceLinearUnit = "Feet";
+            input.PackageCamera.Position = new LensNextPointState { X = -12.5d, Y = 0.125d, Z = 400.75d };
+            input.PackageCamera.Rotation = new LensNextRotationState { A = -0.1d, B = 0.2d, C = -0.3d, D = 0.9d };
+            input.PackageCamera.WorldUpVector = new LensNextPointState { X = -0.25d, Y = 0.5d, Z = 0.75d };
+            var positionBefore = new[] { input.PackageCamera.Position.X, input.PackageCamera.Position.Y, input.PackageCamera.Position.Z };
+            var rotationBefore = new[] { input.PackageCamera.Rotation.A, input.PackageCamera.Rotation.B, input.PackageCamera.Rotation.C, input.PackageCamera.Rotation.D };
+            WriteAndReadUpVector(input);
+            True(positionBefore.SequenceEqual(new[] { input.PackageCamera.Position.X, input.PackageCamera.Position.Y, input.PackageCamera.Position.Z }));
+            True(rotationBefore.SequenceEqual(new[] { input.PackageCamera.Rotation.A, input.PackageCamera.Rotation.B, input.PackageCamera.Rotation.C, input.PackageCamera.Rotation.D }));
+            Equal("Feet", input.PackageCamera.SourceLinearUnit);
+            True(LensNextQuaternionAcceptance.Equivalent(input.PackageCamera.Rotation, input.PackageCamera.Rotation));
+        }
+
+        private static void XmlUpVectorEmitsNoUnprovenSemantics()
+        {
+            var input = ExportInput(147, 1, null);
+            input.PackageCamera.WorldUpVector = new LensNextPointState { X = 0d, Y = 1d, Z = 0d };
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build14-scope-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "scope.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/up/vec3f").Count);
+                var raw = File.ReadAllText(path);
+                foreach (var forbidden in new[] { "projection", "focal", "fov", "sectioning", "units=", "schemaLocation", "nw-exchange" })
+                    False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static double[] WriteAndReadUpVector(LensNextXmlExportInput input)
+        {
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build14-up-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "up.xml");
+                LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                var vector = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/up/vec3f");
+                return new[] { "x", "y", "z" }.Select(attribute =>
+                    double.Parse(vector.GetAttribute(attribute), CultureInfo.InvariantCulture)).ToArray();
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
         }
 
         private static double[] WriteAndReadPosition(LensNextXmlExportInput input)
