@@ -483,7 +483,7 @@ namespace BIMLogLensNext.Native.Tests
 
         private static void XmlExportWritesValidatedFile()
         {
-            var directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "xml-export-test-" + Guid.NewGuid().ToString("N"));
+            var directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(directory);
             try
             {
@@ -502,7 +502,7 @@ namespace BIMLogLensNext.Native.Tests
 
         private static void XmlExportFailurePreservesExistingFile()
         {
-            var directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "xml-export-test-" + Guid.NewGuid().ToString("N"));
+            var directory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(directory);
             try
             {
