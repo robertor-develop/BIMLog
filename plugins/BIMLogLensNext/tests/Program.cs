@@ -1162,6 +1162,7 @@ namespace BIMLogLensNext.Tests
             var document = WriteAndReadDocument(input, "single");
             var set = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
             Equal("1", set.GetAttribute("enabled")); Equal("0", set.GetAttribute("linked")); Equal("planes", set.GetAttribute("mode")); Equal(3, set.Attributes.Count);
+            AssertPlanesModeEmptyRangeSentinel(set);
             var plane = (XmlElement)set.SelectSingleNode("clipplanes/clipplane");
             Equal("enabled", plane.GetAttribute("state")); Equal(1, plane.Attributes.Count);
             var equation = (XmlElement)plane.SelectSingleNode("plane"); var normal = (XmlElement)equation.SelectSingleNode("vec3f");
@@ -1176,6 +1177,7 @@ namespace BIMLogLensNext.Tests
             var document = WriteAndReadDocument(input, "multiple");
             var set = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
             Equal("1", set.GetAttribute("linked"));
+            AssertPlanesModeEmptyRangeSentinel(set);
             var planes = set.SelectNodes("clipplanes/clipplane"); Equal(2, planes.Count);
             Equal("enabled", ((XmlElement)planes[0]).GetAttribute("state")); Equal("disabled", ((XmlElement)planes[1]).GetAttribute("state"));
             Equal("1", ((XmlElement)planes[0].SelectSingleNode("plane/vec3f")).GetAttribute("x"));
@@ -1191,6 +1193,7 @@ namespace BIMLogLensNext.Tests
             var disabledDocument = WriteAndReadDocument(disabled, "disabled");
             var set = (XmlElement)disabledDocument.SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
             Equal("0", set.GetAttribute("enabled")); Equal(0, set.SelectNodes("clipplanes/clipplane").Count);
+            AssertPlanesModeEmptyRangeSentinel(set);
             var absent = ExportInput(174, 1, null); absent.PackageSectioningJson = null;
             True(WriteAndReadDocument(absent, "absent").SelectSingleNode("//clipplaneset") == null);
         }
@@ -1206,8 +1209,20 @@ namespace BIMLogLensNext.Tests
             var set = (XmlElement)WriteAndReadDocument(input, "scope").SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
             False(set.HasAttribute("current"));
             True(set.SelectSingleNode(".//*[@alignment]") == null);
-            True(set.SelectSingleNode("range") == null); True(set.SelectSingleNode("box") == null); True(set.SelectSingleNode("box-rotation") == null);
+            AssertPlanesModeEmptyRangeSentinel(set); True(set.SelectSingleNode("box") == null); True(set.SelectSingleNode("box-rotation") == null);
             True(set.SelectSingleNode(".//*[@Version or @version]") == null);
+        }
+
+        private static void AssertPlanesModeEmptyRangeSentinel(XmlElement set)
+        {
+            var range = (XmlElement)set.SelectSingleNode("range/box3f");
+            True(range != null);
+            var minimum = (XmlElement)range.SelectSingleNode("min/pos3f");
+            var maximum = (XmlElement)range.SelectSingleNode("max/pos3f");
+            True(minimum != null); True(maximum != null);
+            Equal("1", minimum.GetAttribute("x")); Equal("1", minimum.GetAttribute("y")); Equal("1", minimum.GetAttribute("z"));
+            Equal("0", maximum.GetAttribute("x")); Equal("0", maximum.GetAttribute("y")); Equal("0", maximum.GetAttribute("z"));
+            Equal("range,clipplanes", string.Join(",", set.ChildNodes.Cast<XmlNode>().Where(node => node.NodeType == XmlNodeType.Element).Select(node => node.Name)));
         }
 
         private static XmlDocument WriteAndReadDocument(LensNextXmlExportInput input, string suffix)
@@ -1637,7 +1652,9 @@ namespace BIMLogLensNext.Tests
                     xmlClipPlaneCount = view.SelectNodes("clipplaneset/clipplanes/clipplane").Count
                 });
             }
-            var forbidden = new[] { "range", "box", "box-rotation" };
+            Equal(2, document.GetElementsByTagName("range").Count);
+            foreach (XmlElement set in document.SelectNodes("/exchange/viewpoints/viewfolder/view/clipplaneset")) AssertPlanesModeEmptyRangeSentinel(set);
+            var forbidden = new[] { "box", "box-rotation" };
             True(forbidden.All(name => document.GetElementsByTagName(name).Count == 0));
             var comparison = new
             {

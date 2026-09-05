@@ -95,7 +95,7 @@ namespace BIMLogLensNext
             if (((XmlElement)folders[0]).SelectNodes("view").Count != expectedViewCount)
                 throw new InvalidDataException("The written BIMLog XML export viewpoint count does not match the serialized result.");
 
-            var prohibitedElements = new[] { "range", "box", "box-rotation" };
+            var prohibitedElements = new[] { "box", "box-rotation" };
             if (prohibitedElements.Any(name => document.GetElementsByTagName(name).Count != 0))
                 throw new InvalidDataException("The written BIMLog XML export contains an unproven element.");
             foreach (XmlElement element in document.SelectNodes("//*"))
@@ -202,6 +202,24 @@ namespace BIMLogLensNext
                             writer.WriteAttributeString("enabled", view.Sectioning.EnabledToken);
                             writer.WriteAttributeString("linked", view.Sectioning.LinkedToken);
                             writer.WriteAttributeString("mode", "planes");
+                            writer.WriteStartElement("range");
+                            writer.WriteStartElement("box3f");
+                            writer.WriteStartElement("min");
+                            writer.WriteStartElement("pos3f");
+                            writer.WriteAttributeString("x", "1");
+                            writer.WriteAttributeString("y", "1");
+                            writer.WriteAttributeString("z", "1");
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                            writer.WriteStartElement("max");
+                            writer.WriteStartElement("pos3f");
+                            writer.WriteAttributeString("x", "0");
+                            writer.WriteAttributeString("y", "0");
+                            writer.WriteAttributeString("z", "0");
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
                             writer.WriteStartElement("clipplanes");
                             foreach (var plane in view.Sectioning.Planes)
                             {

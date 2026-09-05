@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<exchange xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://download.autodesk.com/us/navisworks/schemas/nw-exchange-12.0.xsd" filename="BIMLog" filepath="BIMLog">
+  <viewpoints>
+    <viewfolder name="BIMLog Viewpoints">
+      <view name="VP-160" guid="d6616019-16e4-5840-ad94-cb07e4b4dcf5">
+        <viewpoint focal="42.125" fov="1.0734040905522821">
+          <camera projection="persp" aspect="2" height="1.0734040905522821">
+            <position>
+              <pos3f x="1.5" y="0" z="1E+100" />
+            </position>
+            <rotation>
+              <quaternion a="0" b="0.5" c="-0.25" d="1" />
+            </rotation>
+          </camera>
+          <up>
+            <vec3f x="0" y="1" z="0" />
+          </up>
+        </viewpoint>
+      </view>
+      <view name="VP-161" guid="1dac4577-cbe7-5839-86c7-a5fd10de0fe7">
+        <viewpoint focal="10" fov="0.5829135889557342">
+          <camera projection="ortho" aspect="1.3333333333333333" height="6">
+            <position>
+              <pos3f x="12.25" y="-4.5" z="99" />
+            </position>
+            <rotation>
+              <quaternion a="0.70710678118654757" b="0" c="0" d="0.70710678118654757" />
+            </rotation>
+          </camera>
+          <up>
+            <vec3f x="-0.25" y="0.5" z="0.75" />
+          </up>
+        </viewpoint>
+        <clipplaneset enabled="1" linked="0" mode="planes">
+          <range>
+            <box3f>
+              <min>
+                <pos3f x="1" y="1" z="1" />
+              </min>
+              <max>
+                <pos3f x="0" y="0" z="0" />
+              </max>
+            </box3f>
+          </range>
+          <clipplanes>
+            <clipplane state="enabled">
+              <plane distance="-53.1620981117">
+                <vec3f x="0" y="0" z="-1" />
+              </plane>
+            </clipplane>
+          </clipplanes>
+        </clipplaneset>
+      </view>
+      <view name="VP-172" guid="e7b0cbc4-1079-57b7-82ca-edcd9bc8bc82">
+        <viewpoint focal="10" fov="0.5829135889557342">
+          <camera projection="persp" aspect="1.3333333333333333" height="0.5829135889557342">
+            <position>
+              <pos3f x="-1" y="-2.5" z="-300.125" />
+            </position>
+            <rotation>
+              <quaternion a="0.18257418583505536" b="-0.36514837167011072" c="0.54772255750516607" d="0.73029674334022143" />
+            </rotation>
+          </camera>
+          <up>
+            <vec3f x="0" y="0" z="1" />
+          </up>
+        </viewpoint>
+        <clipplaneset enabled="1" linked="1" mode="planes">
+          <range>
+            <box3f>
+              <min>
+                <pos3f x="1" y="1" z="1" />
+              </min>
+              <max>
+                <pos3f x="0" y="0" z="0" />
+              </max>
+            </box3f>
+          </range>
+          <clipplanes>
+            <clipplane state="enabled">
+              <plane distance="-10.5">
+                <vec3f x="1" y="0" z="0" />
+              </plane>
+            </clipplane>
+            <clipplane state="disabled">
+              <plane distance="20.25">
+                <vec3f x="0" y="1" z="0" />
+              </plane>
+            </clipplane>
+          </clipplanes>
+        </clipplaneset>
+      </view>
+    </viewfolder>
+  </viewpoints>
+</exchange>
