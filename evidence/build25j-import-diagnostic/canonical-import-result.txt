@@ -1,0 +1,17 @@
+PROBE=BUILD 25J Genuine XML Import Probe
+IMPORT_PLUGIN_NAME=XmlViewpointsImportPlugin
+IMPORT_PLUGIN_ID=XmlViewpointsImportPlugin
+IMPORT_ENTRYPOINT=ComApiBridge.State.DriveIOPlugin
+XML_PATH=F:\BIMLog\Worktrees\bimlog-lens-next-build25j-import-diagnostic-20260905\evidence\build19-sectioning-output\navisworks-export.xml
+XML_SHA256=BED08C7F2725F7992A831596BD1F09AC35CE6139780DAE90656DB3E565D0D5F5
+HASH_VERIFIED=YES
+PLUGIN_RECORD_FOUND=NO
+SAVED_VIEWPOINTS_BEFORE=0
+OPTIONS_CREATED=YES
+IMPORT_RESULT=EXCEPTION
+IMPORT_RETURN_CODE=NOT_RETURNED
+EXCEPTION_0_TYPE=System.Runtime.InteropServices.COMException
+EXCEPTION_0_MESSAGE=<<Navisworks Error - Unspecific>>
+EXCEPTION_0_HRESULT=0x80040000
+EXCEPTION_0_COM_ERROR_CODE=0x80040000
+EXCEPTION_0_STACK=   at System.Dynamic.ComRuntimeHelpers.CheckThrowException(Int32 hresult, ExcepInfo& excepInfo, UInt32 argErr, String message)     at CallSite.Target(Closure , CallSite , ComObject , String , String , Object )     at System.Dynamic.UpdateDelegates.UpdateAndExecute4[T0,T1,T2,T3,TRet](CallSite site, T0 arg0, T1 arg1, T2 arg2, T3 arg3)     at System.Dynamic.UpdateDelegates.UpdateAndExecute4[T0,T1,T2,T3,TRet](CallSite site, T0 arg0, T1 arg1, T2 arg2, T3 arg3)     at Build25JImportProbe.ImportProbePlugin.Execute(String[] parameters)

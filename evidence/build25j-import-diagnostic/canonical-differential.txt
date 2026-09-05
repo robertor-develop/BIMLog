@@ -1,0 +1,27 @@
+BUILD=25J
+TARGET_XML=F:\BIMLog\Worktrees\bimlog-lens-next-build25h-float-compatibility-20260905\evidence\build25h-float-compatibility\bimlog-three-viewpoints.xml
+TARGET_SHA256=4AEF4159BB77FC88E5659ED12CA94B8BA4669CB58B03B9DEC827CB17437593CA
+CANONICAL_XML=F:\BIMLog\Worktrees\bimlog-lens-next-build25j-import-diagnostic-20260905\evidence\build19-sectioning-output\navisworks-export.xml
+CANONICAL_SHA256=BED08C7F2725F7992A831596BD1F09AC35CE6139780DAE90656DB3E565D0D5F5
+
+GENUINE_IMPORT_RESULT=eExport_FAIL
+GENUINE_IMPORT_RETURN_CODE=3
+RETURN_CODE_EVIDENCE=Autodesk.Navisworks.Api.Interop.ComApi.nwEExportStatus maps eExport_FAIL to integer 3.
+SAVED_VIEWPOINTS_BEFORE=0
+SAVED_VIEWPOINTS_AFTER=0
+EXCEPTION=NONE
+
+EVIDENCE_BACKED_DIFFERENCES=
+root: canonical emits units="m", filename="", filepath=""; target omits units and emits filename="BIMLog", filepath="BIMLog".
+hierarchy: canonical emits view directly under viewpoints; target groups views under viewfolder name="BIMLog Viewpoints".
+view: canonical emits name; target emits name and guid.
+viewpoint: canonical emits tool/render/lighting; target does not. Target emits focal/fov according to its proven camera policy.
+camera: canonical emits near/far; target does not. Both emit projection/aspect/height.
+camera children: target additionally emits up. Position and quaternion lexical precision differs.
+viewer: canonical emits viewer; target does not.
+clipplaneset: canonical emits current; target does not.
+clipplane: canonical emits distance/alignment attributes; target does not.
+section box: canonical emits box and box-rotation; target intentionally does not.
+
+IMPORTER_RELEVANCE_PROVEN=NO
+NOTE=The canonical differences are factual but the genuine importer returned only its generic eExport_FAIL status for the target. No individual difference is identified by the importer as causal, so none is promoted to a proven blocker.
