@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.IO;
 
 namespace BIMLogLensNext
@@ -19,10 +18,10 @@ namespace BIMLogLensNext
         public double C { get; }
         public double D { get; }
 
-        public string AInvariant => Format(A);
-        public string BInvariant => Format(B);
-        public string CInvariant => Format(C);
-        public string DInvariant => Format(D);
+        public string AInvariant => LensNextXmlFloat.Format(A, "camera rotation A");
+        public string BInvariant => LensNextXmlFloat.Format(B, "camera rotation B");
+        public string CInvariant => LensNextXmlFloat.Format(C, "camera rotation C");
+        public string DInvariant => LensNextXmlFloat.Format(D, "camera rotation D");
 
         public static LensNextXmlRotation FromValidatedCamera(LensNextCameraState camera)
         {
@@ -31,6 +30,10 @@ namespace BIMLogLensNext
             if (!IsFinite(camera.Rotation.A) || !IsFinite(camera.Rotation.B) ||
                 !IsFinite(camera.Rotation.C) || !IsFinite(camera.Rotation.D))
                 throw new InvalidDataException("The active BIMLog viewpoint package camera rotation must contain four finite components.");
+            LensNextXmlFloat.RequireRepresentable(camera.Rotation.A, "camera rotation A");
+            LensNextXmlFloat.RequireRepresentable(camera.Rotation.B, "camera rotation B");
+            LensNextXmlFloat.RequireRepresentable(camera.Rotation.C, "camera rotation C");
+            LensNextXmlFloat.RequireRepresentable(camera.Rotation.D, "camera rotation D");
 
             var scale = Math.Max(
                 Math.Max(Math.Abs(camera.Rotation.A), Math.Abs(camera.Rotation.B)),
@@ -45,7 +48,6 @@ namespace BIMLogLensNext
                 camera.Rotation.D);
         }
 
-        private static string Format(double value) => value.ToString("R", CultureInfo.InvariantCulture);
         private static bool IsFinite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
     }
 }

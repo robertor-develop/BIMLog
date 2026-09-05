@@ -95,6 +95,7 @@ namespace BIMLogLensNext.Tests
                 Run("xml_camera_position_maps_raw_coordinates", XmlCameraPositionMapsRawCoordinates);
                 Run("xml_camera_position_round_trips_representative_doubles", XmlCameraPositionRoundTripsRepresentativeDoubles);
                 Run("xml_camera_position_rejects_missing_and_non_finite_values", XmlCameraPositionRejectsMissingAndNonFiniteValues);
+                Run("xml_float_representability_is_enforced_across_emitted_fields", XmlFloatRepresentabilityIsEnforcedAcrossEmittedFields);
                 Run("xml_camera_position_emits_no_other_camera_semantics", XmlCameraPositionEmitsNoOtherCameraSemantics);
                 Run("xml_orientation_raw_native_contract_is_deterministic", XmlOrientationRawNativeContractIsDeterministic);
                 Run("xml_orientation_sign_equivalence_is_explicit", XmlOrientationSignEquivalenceIsExplicit);
@@ -417,7 +418,7 @@ namespace BIMLogLensNext.Tests
                 new[] { 1.0, 2.5, 300.125 },
                 new[] { -1.0, -2.5, -300.125 },
                 new[] { 0.0, 0.0, 0.0 },
-                new[] { 1.0e150, -1.0e150, 0.125 }
+                new[] { 1.0e30, -1.0e30, 0.125 }
             };
             foreach (var values in cases)
             {
@@ -437,7 +438,7 @@ namespace BIMLogLensNext.Tests
             {
                 X = 0.1,
                 Y = -123456789.12345679,
-                Z = double.Epsilon
+                Z = (double)float.Epsilon
             };
             var coordinates = WriteAndReadPosition(input);
             Equal(input.PackageCamera.Position.X, coordinates[0]);
@@ -460,6 +461,36 @@ namespace BIMLogLensNext.Tests
                 Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { invalidY }));
                 Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { invalidZ }));
             }
+        }
+
+        private static void XmlFloatRepresentabilityIsEnforcedAcrossEmittedFields()
+        {
+            var tooLarge = (double)float.MaxValue * 2d;
+            var tooSmall = (double)float.Epsilon / 2d;
+
+            foreach (var invalid in new[] { tooLarge, -tooLarge, tooSmall, -tooSmall })
+            {
+                var position = ExportInput(187, 1, null); position.PackageCamera.Position.X = invalid;
+                Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { position }));
+
+                var rotation = ExportInput(188, 1, null); rotation.PackageCamera.Rotation.A = invalid;
+                Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { rotation }));
+
+                var up = ExportInput(189, 1, null); up.PackageCamera.WorldUpVector = new LensNextPointState { X = invalid, Y = 1d, Z = 0d };
+                Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { up }));
+
+                var scale = ExportInput(190, 1, null); scale.PackageCamera.FocalDistance = Math.Abs(invalid);
+                Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { scale }));
+
+                var sectioning = ExportInput(191, 1, null);
+                sectioning.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[1,0,0],\"Distance\":" + invalid.ToString("R", CultureInfo.InvariantCulture) + ",\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}";
+                Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { sectioning }));
+            }
+
+            var valid = ExportInput(192, 1, null);
+            valid.PackageCamera.Position = new LensNextPointState { X = 1e30d, Y = -1e30d, Z = 0.125d };
+            var coordinates = WriteAndReadPosition(valid);
+            Equal(1e30d, coordinates[0]); Equal(-1e30d, coordinates[1]); Equal(0.125d, coordinates[2]);
         }
 
         private static void XmlCameraPositionEmitsNoOtherCameraSemantics()
@@ -965,9 +996,9 @@ namespace BIMLogLensNext.Tests
             Equal(expectedFov, scale[3]);
 
             var large = ExportInput(168, 1, null);
-            large.PackageCamera.FocalDistance = double.MaxValue;
-            large.PackageCamera.HorizontalExtentAtFocalDistance = double.MaxValue;
-            large.PackageCamera.VerticalExtentAtFocalDistance = double.MaxValue;
+            large.PackageCamera.FocalDistance = 1e30d;
+            large.PackageCamera.HorizontalExtentAtFocalDistance = 1e30d;
+            large.PackageCamera.VerticalExtentAtFocalDistance = 1e30d;
             var largeScale = WriteAndReadCameraScale(large);
             Equal(2d * Math.Atan(0.5d), largeScale[1]);
             Equal(1d, largeScale[2]);
@@ -1260,6 +1291,7 @@ namespace BIMLogLensNext.Tests
             var missingCamera = ExportInput(193, 1, null); missingCamera.PackageCamera = null;
             var invalidPosition = ExportInput(194, 1, null); invalidPosition.PackageCamera.Position.X = double.NaN;
             var invalidRotation = ExportInput(195, 1, null); invalidRotation.PackageCamera.Rotation = new LensNextRotationState();
+            var unrepresentablePosition = ExportInput(206, 1, null); unrepresentablePosition.PackageCamera.Position.Z = 1e100d;
             var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build21-skips-" + Guid.NewGuid().ToString("N"));
             Directory.CreateDirectory(directory);
             try
@@ -1268,7 +1300,8 @@ namespace BIMLogLensNext.Tests
                 {
                     new { Record = missingCamera, Reason = "The active BIMLog viewpoint package camera position is missing." },
                     new { Record = invalidPosition, Reason = "The active BIMLog viewpoint package camera position must contain three finite coordinates." },
-                    new { Record = invalidRotation, Reason = "The active BIMLog viewpoint package camera rotation must not be a zero-length quaternion." }
+                    new { Record = invalidRotation, Reason = "The active BIMLog viewpoint package camera rotation must not be a zero-length quaternion." },
+                    new { Record = unrepresentablePosition, Reason = "The BIMLog camera position Z cannot be represented faithfully as a finite Navisworks XML xs:float: is outside the finite xs:float range." }
                 };
                 foreach (var value in cases)
                 {
@@ -1566,7 +1599,7 @@ namespace BIMLogLensNext.Tests
         private static LensNextXmlExportInput[] Build24IntegratedFixtures()
         {
             var perspective = ExportInput(160, 1, DateTimeOffset.Parse("2026-01-03T00:00:00Z"));
-            perspective.PackageCamera.Position = new LensNextPointState { X = 1.5d, Y = 0d, Z = 1e100d };
+            perspective.PackageCamera.Position = new LensNextPointState { X = 1.5d, Y = 0d, Z = 1250.75d };
             perspective.PackageCamera.Rotation = new LensNextRotationState { A = 0d, B = 0.5d, C = -0.25d, D = 1d };
             perspective.PackageCamera.WorldUpVector = new LensNextPointState { X = 0d, Y = 1d, Z = 0d };
             perspective.PackageCamera.FocalDistance = 42.125d;

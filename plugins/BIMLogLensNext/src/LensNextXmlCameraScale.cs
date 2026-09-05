@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.IO;
 
 namespace BIMLogLensNext
@@ -10,10 +9,10 @@ namespace BIMLogLensNext
 
         private LensNextXmlCameraScale(double focal, double fieldOfView, double aspect, double height, bool emitFieldOfViewAttribute)
         {
-            FocalInvariant = Invariant(focal);
-            FieldOfViewInvariant = Invariant(fieldOfView);
-            AspectInvariant = Invariant(aspect);
-            HeightInvariant = Invariant(height);
+            FocalInvariant = LensNextXmlFloat.Format(focal, "camera focal distance");
+            FieldOfViewInvariant = LensNextXmlFloat.Format(fieldOfView, "camera field of view");
+            AspectInvariant = LensNextXmlFloat.Format(aspect, "camera aspect");
+            HeightInvariant = LensNextXmlFloat.Format(height, "camera height");
             EmitFieldOfViewAttribute = emitFieldOfViewAttribute;
         }
 
@@ -59,6 +58,5 @@ namespace BIMLogLensNext
         private static bool FinitePositive(double value) =>
             value > 0d && !double.IsNaN(value) && !double.IsInfinity(value);
 
-        private static string Invariant(double value) => value.ToString("R", CultureInfo.InvariantCulture);
     }
 }

@@ -13,15 +13,16 @@ namespace BIMLogLensNext
         internal LensNextXmlClipPlane(bool enabled, double x, double y, double z, double distance)
         {
             State = enabled ? "enabled" : "disabled";
-            XInvariant = Invariant(x); YInvariant = Invariant(y); ZInvariant = Invariant(z);
-            DistanceInvariant = Invariant(distance);
+            XInvariant = LensNextXmlFloat.Format(x, "section plane normal X");
+            YInvariant = LensNextXmlFloat.Format(y, "section plane normal Y");
+            ZInvariant = LensNextXmlFloat.Format(z, "section plane normal Z");
+            DistanceInvariant = LensNextXmlFloat.Format(distance, "section plane distance");
         }
         public string State { get; }
         public string XInvariant { get; }
         public string YInvariant { get; }
         public string ZInvariant { get; }
         public string DistanceInvariant { get; }
-        private static string Invariant(double value) => value.ToString("R", CultureInfo.InvariantCulture);
     }
 
     public sealed class LensNextXmlSectioning

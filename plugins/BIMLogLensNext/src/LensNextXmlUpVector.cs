@@ -1,5 +1,4 @@
 using System;
-using System.Globalization;
 using System.IO;
 
 namespace BIMLogLensNext
@@ -17,9 +16,9 @@ namespace BIMLogLensNext
         public double Y { get; }
         public double Z { get; }
 
-        public string XInvariant => Format(X);
-        public string YInvariant => Format(Y);
-        public string ZInvariant => Format(Z);
+        public string XInvariant => LensNextXmlFloat.Format(X, "camera up vector X");
+        public string YInvariant => LensNextXmlFloat.Format(Y, "camera up vector Y");
+        public string ZInvariant => LensNextXmlFloat.Format(Z, "camera up vector Z");
 
         public static LensNextXmlUpVector FromOptionalValidatedCamera(LensNextCameraState camera)
         {
@@ -28,6 +27,9 @@ namespace BIMLogLensNext
             if (camera.WorldUpVector == null) return null;
             if (!IsFinite(camera.WorldUpVector.X) || !IsFinite(camera.WorldUpVector.Y) || !IsFinite(camera.WorldUpVector.Z))
                 throw new InvalidDataException("The active BIMLog viewpoint package camera up vector must contain three finite components.");
+            LensNextXmlFloat.RequireRepresentable(camera.WorldUpVector.X, "camera up vector X");
+            LensNextXmlFloat.RequireRepresentable(camera.WorldUpVector.Y, "camera up vector Y");
+            LensNextXmlFloat.RequireRepresentable(camera.WorldUpVector.Z, "camera up vector Z");
 
             var scale = Math.Max(
                 Math.Max(Math.Abs(camera.WorldUpVector.X), Math.Abs(camera.WorldUpVector.Y)),
@@ -41,7 +43,6 @@ namespace BIMLogLensNext
                 camera.WorldUpVector.Z);
         }
 
-        private static string Format(double value) => value.ToString("R", CultureInfo.InvariantCulture);
         private static bool IsFinite(double value) => !double.IsNaN(value) && !double.IsInfinity(value);
     }
 }
