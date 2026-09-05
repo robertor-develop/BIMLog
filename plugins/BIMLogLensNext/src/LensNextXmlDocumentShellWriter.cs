@@ -13,6 +13,8 @@ namespace BIMLogLensNext
         public const string ViewpointsElementName = "viewpoints";
         public const string ViewFolderElementName = "viewfolder";
         public const string ViewFolderName = "BIMLog Viewpoints";
+        public const string XmlSchemaInstanceNamespace = "http://www.w3.org/2001/XMLSchema-instance";
+        public const string NavisworksExchangeSchemaLocation = "http://download.autodesk.com/us/navisworks/schemas/nw-exchange-12.0.xsd";
 
         public static void Write(string destinationPath)
         {
@@ -80,6 +82,11 @@ namespace BIMLogLensNext
             if (document.DocumentElement == null ||
                 !string.Equals(document.DocumentElement.Name, RootElementName, StringComparison.Ordinal))
                 throw new InvalidDataException("The written BIMLog XML export root is invalid.");
+            if (!string.Equals(
+                    document.DocumentElement.GetAttribute("noNamespaceSchemaLocation", XmlSchemaInstanceNamespace),
+                    NavisworksExchangeSchemaLocation,
+                    StringComparison.Ordinal))
+                throw new InvalidDataException("The written BIMLog XML export Navisworks schema declaration is invalid.");
             var viewpoints = document.DocumentElement.SelectNodes(ViewpointsElementName);
             var folders = document.DocumentElement.SelectNodes(ViewpointsElementName + "/" + ViewFolderElementName);
             if (viewpoints.Count != 1 || folders.Count != 1 ||
@@ -142,6 +149,8 @@ namespace BIMLogLensNext
                 {
                     writer.WriteStartDocument();
                     writer.WriteStartElement(RootElementName);
+                    writer.WriteAttributeString("xmlns", "xsi", null, XmlSchemaInstanceNamespace);
+                    writer.WriteAttributeString("xsi", "noNamespaceSchemaLocation", XmlSchemaInstanceNamespace, NavisworksExchangeSchemaLocation);
                     writer.WriteAttributeString("filename", metadata.FileName);
                     writer.WriteAttributeString("filepath", metadata.FilePath);
                     writer.WriteStartElement(ViewpointsElementName);

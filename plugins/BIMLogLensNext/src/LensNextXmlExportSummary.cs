@@ -25,7 +25,7 @@ namespace BIMLogLensNext
             XmlRoot = LensNextXmlDocumentShellWriter.RootElementName;
             ViewFolderName = LensNextXmlDocumentShellWriter.ViewFolderName;
             UnitsStatus = "NOT_EMITTED";
-            SchemaStatus = "NOT_EMITTED";
+            SchemaStatus = "PROVEN";
             ValidationResult = validationResult;
             ExportResult = exportResult;
             FailureDetail = failureDetail;

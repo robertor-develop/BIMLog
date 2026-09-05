@@ -183,15 +183,19 @@ namespace BIMLogLensNext.Tests
 
                 var xml = Encoding.UTF8.GetString(firstBytes);
                 True(xml.StartsWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>", StringComparison.Ordinal));
-                foreach (var forbidden in new[] { "camera", "viewpoint ", "units=", "schema", "focal", "position", "rotation", "section" })
+                foreach (var forbidden in new[] { "camera", "viewpoint ", "units=", "focal", "position", "rotation", "section" })
                     False(xml.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
+                True(xml.IndexOf("xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"", StringComparison.Ordinal) >= 0);
+                True(xml.IndexOf("xsi:noNamespaceSchemaLocation=\"http://download.autodesk.com/us/navisworks/schemas/nw-exchange-12.0.xsd\"", StringComparison.Ordinal) >= 0);
 
                 var document = new XmlDocument { XmlResolver = null };
                 document.Load(first);
                 Equal(LensNextXmlDocumentShellWriter.RootElementName, document.DocumentElement.Name);
-                Equal(2, document.DocumentElement.Attributes.Count);
+                Equal(4, document.DocumentElement.Attributes.Count);
                 Equal("BIMLog", document.DocumentElement.GetAttribute("filename"));
                 Equal("BIMLog", document.DocumentElement.GetAttribute("filepath"));
+                Equal(LensNextXmlDocumentShellWriter.NavisworksExchangeSchemaLocation,
+                    document.DocumentElement.GetAttribute("noNamespaceSchemaLocation", LensNextXmlDocumentShellWriter.XmlSchemaInstanceNamespace));
                 var viewpoints = document.DocumentElement.SelectNodes("viewpoints");
                 Equal(1, viewpoints.Count);
                 var folders = document.DocumentElement.SelectNodes("viewpoints/viewfolder");
@@ -314,7 +318,7 @@ namespace BIMLogLensNext.Tests
                 True(raw.Contains("&amp;"));
                 True(raw.Contains("&lt;Conflict&gt;"));
                 True(raw.Contains("&quot;A&quot;"));
-                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "units=", "schema" })
+                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -374,14 +378,17 @@ namespace BIMLogLensNext.Tests
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { ExportInput(71, 1, null) });
                 var document = new XmlDocument { XmlResolver = null };
                 document.Load(path);
-                Equal(2, document.DocumentElement.Attributes.Count);
+                Equal(4, document.DocumentElement.Attributes.Count);
                 Equal("BIMLog", document.DocumentElement.GetAttribute("filename"));
                 Equal("BIMLog", document.DocumentElement.GetAttribute("filepath"));
-                foreach (var forbidden in new[] { "units", "schema", "xmlns", "generator", "version" })
+                Equal(LensNextXmlDocumentShellWriter.NavisworksExchangeSchemaLocation,
+                    document.DocumentElement.GetAttribute("noNamespaceSchemaLocation", LensNextXmlDocumentShellWriter.XmlSchemaInstanceNamespace));
+                foreach (var forbidden in new[] { "units", "schema", "generator", "version" })
                     False(document.DocumentElement.HasAttribute(forbidden));
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "units=", "schemaLocation", "nw-exchange", "near=", "far=", "linear=", "angular=", "sectioning" })
+                foreach (var forbidden in new[] { "units=", "near=", "far=", "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
+                True(raw.IndexOf("xsi:noNamespaceSchemaLocation=\"" + LensNextXmlDocumentShellWriter.NavisworksExchangeSchemaLocation + "\"", StringComparison.Ordinal) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -467,7 +474,7 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/position/pos3f").Count);
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "up", "near=", "far=", "linear=", "angular=", "sectioning", "units=", "schemaLocation", "nw-exchange" })
+                foreach (var forbidden in new[] { "up", "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -634,7 +641,7 @@ namespace BIMLogLensNext.Tests
                 Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/position/pos3f").Count);
                 Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/rotation/quaternion").Count);
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "<up", "near=", "far=", "linear=", "angular=", "sectioning", "units=", "schemaLocation", "nw-exchange" })
+                foreach (var forbidden in new[] { "<up", "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -753,7 +760,7 @@ namespace BIMLogLensNext.Tests
                 Equal(input.PackageCamera.Rotation.C.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("c"));
                 Equal(input.PackageCamera.Rotation.D.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("d"));
                 var raw = File.ReadAllText(afterPath);
-                foreach (var forbidden in new[] { "<up", "near=", "far=", "linear=", "angular=", "sectioning", "units=", "schemaLocation", "nw-exchange" })
+                foreach (var forbidden in new[] { "<up", "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -849,7 +856,7 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/up/vec3f").Count);
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "units=", "schemaLocation", "nw-exchange" })
+                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -923,7 +930,7 @@ namespace BIMLogLensNext.Tests
                 Equal(1, camera.SelectNodes("position/pos3f").Count);
                 Equal(1, camera.SelectNodes("rotation/quaternion").Count);
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "units=", "schemaLocation", "nw-exchange" })
+                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -1120,7 +1127,7 @@ namespace BIMLogLensNext.Tests
                 True(camera.HasAttribute("aspect"));
                 True(camera.HasAttribute("height"));
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "clipplane", "lighting=", "render=", "tool=", "units=", "schemaLocation", "nw-exchange" })
+                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "clipplane", "lighting=", "render=", "tool=", "units=" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -1416,7 +1423,7 @@ namespace BIMLogLensNext.Tests
                 Equal(summary.RequestedCount.Value, summary.SerializedCount.Value + summary.SkippedCount.Value);
                 Equal(Path.GetFullPath(path), summary.OutputPath); True(summary.OutputWritten);
                 Equal("utf-8", summary.XmlEncoding); Equal("exchange", summary.XmlRoot); Equal("BIMLog Viewpoints", summary.ViewFolderName);
-                Equal("NOT_EMITTED", summary.UnitsStatus); Equal("NOT_EMITTED", summary.SchemaStatus);
+                Equal("NOT_EMITTED", summary.UnitsStatus); Equal("PROVEN", summary.SchemaStatus);
                 Equal("PASS", summary.ValidationResult); Equal("SUCCESS", summary.ExportResult); True(summary.FailureDetail == null);
                 Equal(3, new XmlDocumentShell(path).ViewNames.Count); Equal(3, result.Diagnostics.Count);
             }
