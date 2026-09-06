@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Text;
 using System.Windows.Forms;
 using Autodesk.Navisworks.Api;
@@ -68,4 +69,76 @@ namespace Build26ACameraProbe
     [Plugin("Build26ACaptureCase3", "BIMLog", DisplayName = "BUILD 26A Capture CASE 3 - VP-172")]
     [AddInPlugin(AddInLocation.AddIn)]
     public sealed class Case3Plugin : AddInPlugin { public override int Execute(params string[] parameters) => CameraCapture.Execute("CASE_3", "VP-172"); }
+
+    [Plugin("Build26AInternalCameraRoundtrip", "BIMLog", DisplayName = "BUILD 26A Internal Camera Roundtrip")]
+    public sealed class InternalRoundtripPlugin : AddInPlugin
+    {
+        private sealed class CameraCase
+        {
+            public string Id; public double[] Position; public double[] Rotation; public double[] Up;
+            public ViewpointProjection Projection; public double Focal; public double Horizontal; public double Vertical;
+        }
+
+        public override int Execute(params string[] parameters)
+        {
+            if (parameters == null || parameters.Length != 1) throw new ArgumentException("One evidence output path is required.");
+            var outputPath = Path.GetFullPath(parameters[0]);
+            var cases = new[]
+            {
+                new CameraCase { Id="CASE_1", Position=new[]{1.5,0,1250.75}, Rotation=new[]{0.0,0.5,-0.25,1.0}, Up=new[]{0.0,1.0,0.0}, Projection=ViewpointProjection.Perspective, Focal=42.125, Horizontal=100.25, Vertical=50.125 },
+                new CameraCase { Id="CASE_2", Position=new[]{12.25,-4.5,99.0}, Rotation=new[]{Math.Sqrt(0.5),0.0,0.0,Math.Sqrt(0.5)}, Up=new[]{-0.25,0.5,0.75}, Projection=ViewpointProjection.Orthographic, Focal=10.0, Horizontal=8.0, Vertical=6.0 },
+                new CameraCase { Id="CASE_3", Position=new[]{-1.0,-2.5,-300.125}, Rotation=new[]{0.18257418583505536,-0.36514837167011072,0.5477225575051661,0.73029674334022143}, Up=new[]{0.0,0.0,1.0}, Projection=ViewpointProjection.Perspective, Focal=10.0, Horizontal=8.0, Vertical=6.0 }
+            };
+            var document = Autodesk.Navisworks.Api.Application.ActiveDocument;
+            var report = new StringBuilder().AppendLine("BUILD26A_INTERNAL_CAMERA_API_ROUNDTRIP");
+            foreach (var value in cases)
+            {
+                using (var writable = document.CurrentViewpoint.CreateCopy())
+                {
+                    writable.Position = new Point3D(value.Position[0], value.Position[1], value.Position[2]);
+                    writable.Rotation = new Rotation3D(value.Rotation[0], value.Rotation[1], value.Rotation[2], value.Rotation[3]);
+                    writable.WorldUpVector = new UnitVector3D(value.Up[0], value.Up[1], value.Up[2]);
+                    writable.Projection = value.Projection;
+                    writable.FocalDistance = value.Focal;
+                    writable.SetExtentsAtFocalDistance(value.Horizontal, value.Vertical);
+                    document.CurrentViewpoint.CopyFrom(writable);
+                }
+                using (var actual = document.CurrentViewpoint.ToViewpoint())
+                {
+                    var positionError = MaxAbs(value.Position, new[]{actual.Position.X,actual.Position.Y,actual.Position.Z});
+                    var rotationError = AngularError(value.Rotation, new[]{actual.Rotation.A,actual.Rotation.B,actual.Rotation.C,actual.Rotation.D});
+                    var upError = VectorAngularError(value.Up, new[]{actual.WorldUpVector.X,actual.WorldUpVector.Y,actual.WorldUpVector.Z});
+                    var focalError = Math.Abs(value.Focal - actual.FocalDistance);
+                    var horizontalError = Math.Abs(value.Horizontal - actual.HorizontalExtentAtFocalDistance);
+                    var verticalError = Math.Abs(value.Vertical - actual.VerticalExtentAtFocalDistance);
+                    report.AppendLine(value.Id + "_POSITION_ERROR=" + R(positionError));
+                    report.AppendLine(value.Id + "_ROTATION_ANGULAR_ERROR=" + R(rotationError));
+                    report.AppendLine(value.Id + "_UP_ANGULAR_ERROR=" + R(upError));
+                    report.AppendLine(value.Id + "_PROJECTION_EXPECTED=" + value.Projection);
+                    report.AppendLine(value.Id + "_PROJECTION_ACTUAL=" + actual.Projection);
+                    report.AppendLine(value.Id + "_FOCAL_ERROR=" + R(focalError));
+                    report.AppendLine(value.Id + "_HORIZONTAL_EXTENT_ERROR=" + R(horizontalError));
+                    report.AppendLine(value.Id + "_VERTICAL_EXTENT_ERROR=" + R(verticalError));
+                }
+            }
+            Directory.CreateDirectory(Path.GetDirectoryName(outputPath));
+            File.WriteAllText(outputPath, report.ToString(), new UTF8Encoding(false));
+            return 0;
+        }
+
+        private static string R(double value) => value.ToString("R", CultureInfo.InvariantCulture);
+        private static double MaxAbs(double[] a, double[] b) => a.Zip(b, (x,y) => Math.Abs(x-y)).Max();
+        private static double AngularError(double[] a, double[] b)
+        {
+            var an=Math.Sqrt(a.Sum(x=>x*x)); var bn=Math.Sqrt(b.Sum(x=>x*x));
+            var dot=Math.Abs(a.Zip(b,(x,y)=>x*y).Sum()/(an*bn));
+            return 2.0*Math.Acos(Math.Min(1.0,Math.Max(-1.0,dot)));
+        }
+        private static double VectorAngularError(double[] a, double[] b)
+        {
+            var an=Math.Sqrt(a.Sum(x=>x*x)); var bn=Math.Sqrt(b.Sum(x=>x*x));
+            var dot=a.Zip(b,(x,y)=>x*y).Sum()/(an*bn);
+            return Math.Acos(Math.Min(1.0,Math.Max(-1.0,dot)));
+        }
+    }
 }
