@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage SchemaVersion="1.0" AutodeskProduct="Navisworks" Name="BUILD 26A Read-Only Camera Capture" Description="Test-only imported-camera measurement probe" AppVersion="1.0.0.0" ProductCode="{9EE85300-80D8-4FC4-AC6D-026A20210905}" UpgradeCode="{CD0FD641-1222-44AF-B633-026A20210905}">
+  <CompanyDetails Name="IgniteSmart" />
+  <Components Description="Navisworks Manage 2021 test-only camera measurement">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN" SeriesMin="Nw18" SeriesMax="Nw18" />
+    <ComponentEntry AppName="BUILD 26A Read-Only Camera Capture" AppType="ManagedPlugin" ModuleName="./Contents/Build26ACameraProbe.dll" />
+  </Components>
+</ApplicationPackage>
