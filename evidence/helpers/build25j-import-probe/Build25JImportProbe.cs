@@ -19,7 +19,8 @@ namespace Build25JImportProbe
         {
             "4AEF4159BB77FC88E5659ED12CA94B8BA4669CB58B03B9DEC827CB17437593CA",
             "BED08C7F2725F7992A831596BD1F09AC35CE6139780DAE90656DB3E565D0D5F5",
-            "E8D6EC4CB6F9726220DC68A156E9435A257374F37AD89234C663F6AB60CC2A99"
+            "E8D6EC4CB6F9726220DC68A156E9435A257374F37AD89234C663F6AB60CC2A99",
+            "1938B6755464619D1FE3F8CAA04F7BED3E4C56B3C01994AA2E75800919A5B7EB"
         };
         private const string ImportPluginName = "XmlViewpointsImportPlugin";
 
@@ -49,7 +50,7 @@ namespace Build25JImportProbe
                 var actualHash = Hash(xmlPath);
                 report.AppendLine("XML_SHA256=" + actualHash);
                 if (!AllowedHashes.Contains(actualHash, StringComparer.Ordinal))
-                    throw new InvalidDataException("XML SHA-256 is not one of the two locked Build 25J target/canonical hashes.");
+                    throw new InvalidDataException("XML SHA-256 is not one of the locked diagnostic target/canonical hashes.");
                 report.AppendLine("HASH_VERIFIED=YES");
 
                 var record = Autodesk.Navisworks.Api.Application.Plugins.PluginRecords
