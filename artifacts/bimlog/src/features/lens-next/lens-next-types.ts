@@ -193,6 +193,29 @@ export interface LensNextCreateReceipt {
   serverId: number; viewpointId: string; visualStateDigest: string;
   revisionNumber: number; lifecycleStatus: LensNextLifecycleState; displayId: string; displayCode: string;
 }
+export interface LensNextXmlExportSummary {
+  requestedCount: number | null;
+  serializedCount: number | null;
+  skippedCount: number | null;
+  outputPath: string | null;
+  outputWritten: boolean;
+  validationResult: "PASS" | "FAIL";
+  exportResult: "SUCCESS" | "PARTIAL_SUCCESS" | "FAIL";
+  failureDetail: string | null;
+}
+export interface LensNextXmlExportDiagnostic {
+  serverId: number;
+  viewpointId: string;
+  displayId: string | null;
+  result: "EXPORTED" | "SKIPPED";
+  reasonCode: string;
+  reasonDetail: string | null;
+}
+export interface LensNextXmlExportOperationResult {
+  cancelled: boolean;
+  summary: LensNextXmlExportSummary | null;
+  diagnostics: readonly LensNextXmlExportDiagnostic[];
+}
 export interface LensNextLayoutItem { navisworksGuid: string; folderPath: string; }
 export interface LensNextLayoutReceipt { requested: number; moved: number; alreadyPlaced: number; }
 

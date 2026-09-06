@@ -232,6 +232,10 @@ export interface LensNextPanelViewProps {
   platformPullState: "idle" | "running" | "success" | "error";
   platformPullMessage: string | null;
   onPullPlatformViewpoints(): void;
+  xmlExportEnabled: boolean;
+  xmlExportState: "idle" | "loading" | "exporting" | "success" | "error";
+  xmlExportMessage: string | null;
+  onExportViewpointsXml(): void;
   filteredIssues: readonly LensNextIssue[];
   issueGroups: readonly LensNextIssueGroupNode[];
   viewPreset: LensNextViewPresetId;
@@ -300,6 +304,10 @@ export function LensNextPanelView({
   platformPullState,
   platformPullMessage,
   onPullPlatformViewpoints,
+  xmlExportEnabled,
+  xmlExportState,
+  xmlExportMessage,
+  onExportViewpointsXml,
   filteredIssues,
   issueGroups,
   viewPreset,
@@ -429,6 +437,10 @@ export function LensNextPanelView({
             {platformPullState === "running" ? "Creating Navisworks viewpoints…" : `Pull BIMLog viewpoints into Navisworks (${synchronizationPlan.pullFromBimlog})`}
           </button>
           {platformPullMessage && <small role="status">{platformPullMessage}</small>}
+          <button type="button" data-lens-next-action="export-viewpoints-xml" disabled={!xmlExportEnabled} onClick={onExportViewpointsXml}>
+            {xmlExportState === "loading" ? "Loading BIMLog viewpoints…" : xmlExportState === "exporting" ? "Exporting XML…" : "Export Viewpoints XML"}
+          </button>
+          {xmlExportMessage && <small role={xmlExportState === "error" ? "alert" : "status"}>{xmlExportMessage}</small>}
           <button type="button" disabled={!synchronizationPlan.executable || reconciliationState === "running"} onClick={onRunReconciliation}>
             {reconciliationState === "running" ? "Reconciling…" : "Run confirmed reconciliation"}
           </button>

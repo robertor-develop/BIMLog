@@ -85,6 +85,7 @@ namespace BIMLogLensNext
             },
             StringComparer.Ordinal);
         private static readonly HashSet<string> LayoutFields = new HashSet<string>(new[] { "sessionId", "projectId", "modelFingerprint", "layoutJson", "confirmationReason" }, StringComparer.Ordinal);
+        private static readonly HashSet<string> XmlExportFields = new HashSet<string>(new[] { "sessionId", "projectId", "modelFingerprint", "recordsJson" }, StringComparer.Ordinal);
 
         private string _sessionToken;
         private DateTimeOffset _sessionExpiresAt;
@@ -158,6 +159,7 @@ namespace BIMLogLensNext
 
             var isPublishing = request.Command == LensNextBridgeCommands.PublishWorkingView;
             var isLayout = request.Command == LensNextBridgeCommands.MaterializeMyView;
+            var isXmlExport = request.Command == LensNextBridgeCommands.ExportViewpointsXml;
             var isPersistentSavedViewpointWrite =
                 LensNextBridgeCommands.PersistentSavedViewpointWriteCommands.Contains(request.Command);
 
@@ -325,6 +327,15 @@ namespace BIMLogLensNext
                 {
                     string value;
                     if (!fields.TryGetValue(required, out value) || string.IsNullOrWhiteSpace(value)) return BridgeRequestValidation.Reject("layout_field_required");
+                }
+            }
+            if (isXmlExport)
+            {
+                if (fields.Keys.Any(key => !XmlExportFields.Contains(key))) return BridgeRequestValidation.Reject("unknown_xml_export_field");
+                foreach (var required in new[] { "sessionId", "projectId", "modelFingerprint", "recordsJson" })
+                {
+                    string value;
+                    if (!fields.TryGetValue(required, out value) || string.IsNullOrWhiteSpace(value)) return BridgeRequestValidation.Reject("xml_export_field_required");
                 }
             }
 

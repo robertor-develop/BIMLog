@@ -18,6 +18,7 @@ namespace BIMLogLensNext
         public const string RestoreExactVisualState = "restore-exact-visual-state";
         public const string PublishWorkingView = "publish-working-view";
         public const string MaterializeMyView = "materialize-my-view";
+        public const string ExportViewpointsXml = "export-viewpoints-xml";
 
         // Commands that are allowed without permission to mutate the persistent
         // Navisworks Saved Viewpoint collection. ApplyWorkingView is intentionally
@@ -34,7 +35,8 @@ namespace BIMLogLensNext
             CaptureLocalViewpoint,
             CaptureNewViewpoint,
             ApplyWorkingView,
-            RestoreExactVisualState
+            RestoreExactVisualState,
+            ExportViewpointsXml
         });
 
         public static IReadOnlyCollection<string> TemporaryWorkingStateCommands { get; } =

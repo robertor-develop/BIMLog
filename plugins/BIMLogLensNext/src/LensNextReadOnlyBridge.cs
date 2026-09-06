@@ -77,6 +77,8 @@ namespace BIMLogLensNext
                     return PublishWorkingView(request);
                 case LensNextBridgeCommands.MaterializeMyView:
                     return MaterializeMyView(request);
+                case LensNextBridgeCommands.ExportViewpointsXml:
+                    return ExportViewpointsXml(request);
                 default:
                     return LensNextBridgeResponse.Blocked("command_not_allowed_read_only", "Command is unavailable.");
             }
@@ -85,6 +87,20 @@ namespace BIMLogLensNext
         public void RenewSession(string sessionToken, DateTimeOffset sessionExpiresAt)
         {
             _validator.RenewSession(sessionToken, sessionExpiresAt);
+        }
+
+        private LensNextBridgeResponse ExportViewpointsXml(LensNextBridgeRequest request)
+        {
+            if (!string.Equals(Value(request.Fields, "sessionId"), _sessionId, StringComparison.Ordinal))
+                return LensNextBridgeResponse.Blocked("session_context_mismatch", "The XML export request does not belong to the active bridge session.");
+            var adapter = _adapter as ILensNextXmlExportNavisworksAdapter;
+            if (adapter == null)
+                return LensNextBridgeResponse.Blocked("xml_export_unsupported", "This Navisworks adapter does not support BIMLog XML export.");
+            var result = _dispatcher.Invoke(() => adapter.ExportViewpointsXml(
+                Value(request.Fields, "projectId"),
+                Value(request.Fields, "modelFingerprint"),
+                Value(request.Fields, "recordsJson")));
+            return LensNextBridgeResponse.Ok(result.Cancelled ? "xml_export_cancelled" : "xml_export_result", result);
         }
 
         private LensNextBridgeResponse ReadProjectContext()

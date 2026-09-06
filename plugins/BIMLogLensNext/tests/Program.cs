@@ -1755,7 +1755,8 @@ namespace BIMLogLensNext.Tests
         private static void OnlyReadCommandsAreExposed()
         {
             var capabilities = new LensNextCapabilities();
-            Equal(11, capabilities.Commands.Count);
+            Equal(12, capabilities.Commands.Count);
+            True(capabilities.Commands.Contains(LensNextBridgeCommands.ExportViewpointsXml));
             True(capabilities.VisualCaptureEnabled);
             True(capabilities.WorkingViewReconstructionEnabled);
             False(capabilities.PlatformVisualWriteEnabled);
@@ -2219,7 +2220,7 @@ namespace BIMLogLensNext.Tests
             var capabilities = new LensNextCapabilities(true);
 
             Equal("m7_local_pilot", capabilities.Mode);
-            Equal(13, capabilities.Commands.Count);
+            Equal(14, capabilities.Commands.Count);
             True(capabilities.Commands.Contains(
                 LensNextBridgeCommands.PublishWorkingView
             ));

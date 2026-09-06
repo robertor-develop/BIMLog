@@ -131,6 +131,8 @@ export function LensNextPanel({
   const [reconciliationMessage, setReconciliationMessage] = useState<string | null>(null);
   const [platformPullState, setPlatformPullState] = useState<"idle" | "running" | "success" | "error">("idle");
   const [platformPullMessage, setPlatformPullMessage] = useState<string | null>(null);
+  const [xmlExportState, setXmlExportState] = useState<"idle" | "loading" | "exporting" | "success" | "error">("idle");
+  const [xmlExportMessage, setXmlExportMessage] = useState<string | null>(null);
   const [visualRepairState, setVisualRepairState] = useState<"idle" | "repairing" | "success" | "error">("idle");
   const [visualRepairMessage, setVisualRepairMessage] = useState<string | null>(null);
   const workingViewInFlight = useRef(false);
@@ -599,6 +601,28 @@ export function LensNextPanel({
     }
   }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, issues, loadIssues, synchronizationPlan]);
 
+  const exportViewpointsXml = useCallback(async () => {
+    if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId) return;
+    const candidates = issues.filter(issue => issue.identity.projectId === authorizedProjectId && issue.identity.lifecycleStatus === "active" && issue.visualStateAvailable && Boolean(issue.visualStateDigest));
+    if (!candidates.length) { setXmlExportState("error"); setXmlExportMessage("No active BIMLog viewpoints with authoritative Visual Packages are available to export."); return; }
+    setXmlExportState("loading"); setXmlExportMessage(`Loading ${candidates.length} authoritative BIMLog Visual Package(s)…`);
+    try {
+      const loaded = await Promise.all(candidates.map(async issue => [issue.identity.serverId, await apiClient.loadVisualState(issue)] as const));
+      setXmlExportState("exporting"); setXmlExportMessage("Choose the Navisworks XML destination.");
+      const result = await bridgeClient.exportViewpointsXml(candidates, new Map(loaded), bridgeContext);
+      if (result.cancelled) { setXmlExportState("idle"); setXmlExportMessage("XML export cancelled. No destination file was written."); return; }
+      const summary = result.summary;
+      if (!summary || summary.exportResult === "FAIL") {
+        setXmlExportState("error"); setXmlExportMessage(summary?.failureDetail ?? "XML export failed before a valid destination was written."); return;
+      }
+      setXmlExportState("success");
+      const skipped = result.diagnostics.filter(item => item.result === "SKIPPED").map(item => `${item.displayId ?? item.viewpointId}: ${item.reasonCode}`).join("; ");
+      setXmlExportMessage(`${summary.exportResult === "PARTIAL_SUCCESS" ? "Partial export" : "Export complete"}: ${summary.serializedCount} serialized, ${summary.skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} ${summary.outputPath}`);
+    } catch (error) {
+      setXmlExportState("error"); setXmlExportMessage(error instanceof Error ? error.message : "XML export failed");
+    }
+  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, issues]);
+
   return (
     <LensNextPanelView
       authorizedProjects={authorizedProjects}
@@ -628,6 +652,10 @@ export function LensNextPanel({
       platformPullState={platformPullState}
       platformPullMessage={platformPullMessage}
       onPullPlatformViewpoints={() => void pullPlatformViewpoints()}
+      xmlExportEnabled={bridgeState === "connected" && apiState === "connected" && bridgeContext?.projectId === authorizedProjectId && xmlExportState !== "loading" && xmlExportState !== "exporting"}
+      xmlExportState={xmlExportState}
+      xmlExportMessage={xmlExportMessage}
+      onExportViewpointsXml={() => void exportViewpointsXml()}
       filteredIssues={filteredIssues}
       issueGroups={issueGroups}
       viewPreset={viewPreset}

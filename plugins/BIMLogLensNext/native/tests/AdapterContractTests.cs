@@ -63,6 +63,8 @@ namespace BIMLogLensNext.Native.Tests
                 Run("xml_export_resolves_inherited_com_contract", XmlExportResolvesInheritedComContract);
                 Run("xml_export_writes_validated_file", XmlExportWritesValidatedFile);
                 Run("xml_export_failure_preserves_existing_file", XmlExportFailurePreservesExistingFile);
+                Run("lens_next_xml_export_uses_authoritative_exporter_without_saved_viewpoint_mutation", LensNextXmlExportUsesAuthoritativeExporter);
+                Run("lens_next_xml_export_bridge_is_scoped_and_cancel_safe", LensNextXmlExportBridgeIsScopedAndCancelSafe);
                 Run("runtime_ignores_configured_project_when_model_marker_is_absent", RuntimeIgnoresConfiguredProjectFallback);
                 Run("health_tick_does_not_mutate_floating_window", HealthTickDoesNotMutateFloatingWindow);
                 Run("header_reports_current_version_beside_live", HeaderReportsCurrentVersionBesideLive);
@@ -137,7 +139,7 @@ namespace BIMLogLensNext.Native.Tests
 
         private static void Phase2CommandsRemainAbsent()
         {
-            Equal(11, LensNextBridgeCommands.ReadOnlyCommands.Count);
+            Equal(12, LensNextBridgeCommands.ReadOnlyCommands.Count);
             foreach (var command in LensNextBridgeCommands.ReadOnlyCommands)
             {
                 False(command.StartsWith("phase2-", StringComparison.Ordinal));
@@ -535,13 +537,37 @@ namespace BIMLogLensNext.Native.Tests
             True(method != null);
             return method;
         }
+        private static void LensNextXmlExportUsesAuthoritativeExporter()
+        {
+            var source = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\AutodeskXmlExportAdapter.cs")));
+            True(source.Contains("LensNextXmlDocumentShellWriter.Write"));
+            True(source.Contains("context.ProjectId, projectId"));
+            True(source.Contains("context.ModelFingerprint, modelFingerprint"));
+            True(source.Contains("SaveFileDialog"));
+            True(source.Contains("DialogResult.OK"));
+            False(source.Contains("SavedViewpoints"));
+            False(source.Contains("DocumentCurrentViewpoint"));
+            False(source.Contains("CopyFrom"));
+        }
+
+        private static void LensNextXmlExportBridgeIsScopedAndCancelSafe()
+        {
+            True(LensNextBridgeCommands.AllowedWithoutSavedViewpointPublishing.Contains(LensNextBridgeCommands.ExportViewpointsXml));
+            False(LensNextBridgeCommands.PersistentSavedViewpointWriteCommands.Contains(LensNextBridgeCommands.ExportViewpointsXml));
+            var host = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextHttpBridgeHost.cs")));
+            True(host.Contains("/v1/export-viewpoints-xml"));
+            True(host.Contains("LensNextBridgeCommands.ExportViewpointsXml"));
+            var dock = File.ReadAllText(Path.GetFullPath(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
+            True(dock.Contains("Export Viewpoints XML"));
+            True(dock.Contains("data-lens-next-action=\\\"export-viewpoints-xml\\\""));
+        }
         private static void HeaderReportsCurrentVersionBesideLive()
         {
             var source = File.ReadAllText(Path.GetFullPath(Path.Combine(
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
-            Equal("v1.05.N10-P04", LensNextConstants.ProductVersionLabel);
+            Equal("v1.05.N11-P05", LensNextConstants.ProductVersionLabel);
         }
 
         private static void RuntimeIgnoresConfiguredProjectFallback()

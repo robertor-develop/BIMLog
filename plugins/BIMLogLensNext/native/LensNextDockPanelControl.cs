@@ -149,12 +149,20 @@ namespace BIMLogLensNext.Native
 
             var exportXml = new Button
             {
-                Text = "Export XML",
+                Text = "Export Viewpoints XML",
                 AutoSize = true,
                 FlatStyle = FlatStyle.Flat
             };
             exportXml.FlatAppearance.BorderColor = Border;
-            exportXml.Click += (sender, args) => ExportViewpointsXml();
+            exportXml.Click += async (sender, args) =>
+            {
+                if (!_webViewReady || _webView.CoreWebView2 == null)
+                {
+                    MessageBox.Show("Connect Lens Next first.", "BIMLog Lens Next", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                await _webView.CoreWebView2.ExecuteScriptAsync("(() => { const action=document.querySelector('[data-lens-next-action=\"export-viewpoints-xml\"]'); if(!action)return false; action.click(); return true; })()");
+            };
             bar.Controls.Add(exportXml);
 
             var createIssue = new Button

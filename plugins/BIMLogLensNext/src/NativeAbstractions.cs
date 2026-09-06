@@ -40,6 +40,21 @@ namespace BIMLogLensNext
             string operationId);
     }
 
+    public interface ILensNextXmlExportNavisworksAdapter
+    {
+        LensNextXmlExportOperationResult ExportViewpointsXml(
+            string projectId,
+            string modelFingerprint,
+            string recordsJson);
+    }
+
+    public sealed class LensNextXmlExportOperationResult
+    {
+        public bool Cancelled { get; set; }
+        public LensNextXmlExportSummary Summary { get; set; }
+        public IReadOnlyList<LensNextXmlExportDiagnostic> Diagnostics { get; set; }
+    }
+
     public sealed class LensNextProjectContext
     {
         public string SessionId { get; set; }

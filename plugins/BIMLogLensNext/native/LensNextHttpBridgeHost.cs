@@ -152,6 +152,8 @@ namespace BIMLogLensNext.Native
         {
             if (command == LensNextBridgeCommands.RestoreExactVisualState)
                 return Timeout.Infinite;
+            if (command == LensNextBridgeCommands.ExportViewpointsXml)
+                return Timeout.Infinite;
             return command == LensNextBridgeCommands.CaptureVisualState ||
                    command == LensNextBridgeCommands.CaptureLocalViewpoint ||
                    command == LensNextBridgeCommands.CaptureNewViewpoint
@@ -174,6 +176,7 @@ namespace BIMLogLensNext.Native
             if (request.HttpMethod == "POST" && path == "/v1/restore-exact-visual-state") return LensNextBridgeCommands.RestoreExactVisualState;
             if (request.HttpMethod == "POST" && path == "/v1/publish-working-view") return LensNextBridgeCommands.PublishWorkingView;
             if (request.HttpMethod == "POST" && path == "/v1/materialize-my-view") return LensNextBridgeCommands.MaterializeMyView;
+            if (request.HttpMethod == "POST" && path == "/v1/export-viewpoints-xml") return LensNextBridgeCommands.ExportViewpointsXml;
             return null;
         }
 

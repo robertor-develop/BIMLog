@@ -26,6 +26,7 @@ import type {
   LensNextOpenWorkingViewResult,
   LensNextPublishAction,
   LensNextPublishResult,
+  LensNextXmlExportOperationResult,
 } from "./lens-next-types.ts";
 
 export const LENS_NEXT_BRIDGE_MIN_PORT = 8766;
@@ -356,6 +357,7 @@ export interface LensNextBridgeClient {
   captureNewIssueNavigationView(viewpointId: string, context: LensNextBridgeProjectContext, signal?: AbortSignal): Promise<Record<string, unknown>>;
   createLocalSavedViewpoint(receipt: LensNextCreateReceipt, context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal): Promise<string>;
   materializeMyView(items: readonly LensNextLayoutItem[], context: LensNextBridgeProjectContext, confirmationReason: string, signal?: AbortSignal): Promise<LensNextLayoutReceipt>;
+  exportViewpointsXml(issues: readonly LensNextIssue[], packages: ReadonlyMap<number, { visualStateJson: string; visualStateDigest: string }>, context: LensNextBridgeProjectContext, signal?: AbortSignal): Promise<LensNextXmlExportOperationResult>;
 }
 
 function defaultRequestId(): string {
@@ -635,6 +637,64 @@ export function createLensNextBridgeClient(
       const digest = String((state as Record<string, unknown>).DigestSha256 ?? (state as Record<string, unknown>).digestSha256 ?? "").trim();
       if (!/^[0-9a-f]{64}$/i.test(digest)) throw new Error("bridge visual-state digest is invalid");
       return Object.freeze({ visualStateJson: JSON.stringify(state), visualStateDigest: digest.toLowerCase() });
+    },
+    async exportViewpointsXml(
+      issues: readonly LensNextIssue[],
+      packages: ReadonlyMap<number, { visualStateJson: string; visualStateDigest: string }>,
+      context: LensNextBridgeProjectContext,
+      signal?: AbortSignal,
+    ) {
+      if (!context.projectId) throw new Error("A bound BIMLog project is required for XML export");
+      const records = issues.map(issue => {
+        if (issue.identity.projectId !== context.projectId) throw new Error("Cross-project XML export is forbidden");
+        const stored = packages.get(issue.identity.serverId);
+        if (!stored) throw new Error(`The authoritative Visual Package for ${issue.displayId ?? issue.identity.viewpointId} is unavailable`);
+        const parsed = JSON.parse(stored.visualStateJson) as Record<string, unknown>;
+        return {
+          ProjectId: issue.identity.projectId, ServerId: issue.identity.serverId,
+          ViewpointId: issue.identity.viewpointId, LifecycleStatus: issue.identity.lifecycleStatus,
+          RevisionNumber: issue.identity.revisionNumber, DisplayId: issue.displayId, Note: issue.note,
+          Priority: issue.priority, CapturedAt: issue.capturedAt, VisualStateDigest: stored.visualStateDigest,
+          Package: {
+            ProjectId: parsed.ProjectId ?? parsed.projectId, ServerId: parsed.ServerId ?? parsed.serverId,
+            ViewpointId: parsed.ViewpointId ?? parsed.viewpointId, LifecycleStatus: parsed.LifecycleStatus ?? parsed.lifecycleStatus,
+            RevisionNumber: parsed.RevisionNumber ?? parsed.revisionNumber, Camera: parsed.Camera ?? parsed.camera,
+            SectioningJson: parsed.SectioningJson ?? parsed.sectioningJson,
+            DigestSha256: parsed.DigestSha256 ?? parsed.digestSha256,
+          },
+        };
+      });
+      const requestId = requestIdFactory();
+      const response = await fetchWithSessionRenewal(`${bridgeOrigin}/v1/export-viewpoints-xml`, {
+        method: "POST", headers: { ...headers, "X-Request-Id": requestId }, signal,
+        body: JSON.stringify({ protocolVersion: 1, command: "export-viewpoints-xml", requestId, idempotencyKey: requestId,
+          fields: { sessionId: context.sessionId, projectId: String(context.projectId), modelFingerprint: context.modelFingerprint, recordsJson: JSON.stringify(records) } }),
+      });
+      const raw = await jsonBody(response, "Lens Next XML export");
+      if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("XML export response is invalid");
+      const envelope = raw as Record<string, unknown>;
+      const code = String(envelope.code ?? "");
+      if (envelope.success !== true || !["xml_export_result", "xml_export_cancelled"].includes(code))
+        throw new Error(String(envelope.message ?? "XML export failed"));
+      const payload = envelope.payload as Record<string, unknown> | null;
+      if (!payload) throw new Error("XML export result is missing");
+      const summaryRaw = (payload.Summary ?? payload.summary) as Record<string, unknown> | null;
+      const diagnosticsRaw = (payload.Diagnostics ?? payload.diagnostics) as unknown;
+      const summary = summaryRaw ? {
+        requestedCount: summaryRaw.RequestedCount == null ? null : Number(summaryRaw.RequestedCount),
+        serializedCount: summaryRaw.SerializedCount == null ? null : Number(summaryRaw.SerializedCount),
+        skippedCount: summaryRaw.SkippedCount == null ? null : Number(summaryRaw.SkippedCount),
+        outputPath: String(summaryRaw.OutputPath ?? "") || null,
+        outputWritten: Boolean(summaryRaw.OutputWritten), validationResult: String(summaryRaw.ValidationResult) as "PASS" | "FAIL",
+        exportResult: String(summaryRaw.ExportResult) as "SUCCESS" | "PARTIAL_SUCCESS" | "FAIL",
+        failureDetail: String(summaryRaw.FailureDetail ?? "") || null,
+      } : null;
+      const diagnostics = Array.isArray(diagnosticsRaw) ? diagnosticsRaw.map(value => {
+        const item = value as Record<string, unknown>;
+        return { serverId: Number(item.ServerId), viewpointId: String(item.ViewpointId), displayId: String(item.DisplayId ?? "") || null,
+          result: String(item.Result) as "EXPORTED" | "SKIPPED", reasonCode: String(item.ReasonCode), reasonDetail: String(item.ReasonDetail ?? "") || null };
+      }) : [];
+      return Object.freeze({ cancelled: Boolean(payload.Cancelled ?? payload.cancelled), summary, diagnostics: Object.freeze(diagnostics) });
     },
     async captureLocalViewpoint(localViewpoint: LensNextLocalViewpoint, context: LensNextBridgeProjectContext, signal?: AbortSignal) {
       if (!localViewpoint.exactManagedIdentity || localViewpoint.serverId !== null || localViewpoint.projectId !== context.projectId) throw new Error("Exact local-only viewpoint context is required");
