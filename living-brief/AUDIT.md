@@ -874,6 +874,10 @@ Acceptance evidence traced atomic create failure to the mismatch between floor-s
 
 The same acceptance session exposed intermittent stale refresh and responsiveness degradation. Source inspection proved the issue list used an unconditional interval, allowing slow paired issue/reference requests to overlap; the sequence guard then discarded the earlier response, permitting sustained overlap and stale UI. Commit `c8c1c765c714a3e072aec75ec289bcd7aa3b236e` schedules the next automatic read only after the current read settles, aborts it on context teardown, and retains stale-response rejection. The native liveness path remains non-periodic and no Native UI-thread primitive changed.
 
+## 2026-09-07 - Lens Next v1.05.N12-P09 Native/package metadata alignment
+
+Build 36B aligns the unchanged N12 Navisworks 2025 binary/package identity from P08 to the already-live combined P09 release. Only version constants, assembly/package metadata, 2025 installer guards/labels, acceptance text, adapter expectation, and release documentation changed. The governed H-root build passed core 123/123, Navisworks 2025 adapter 56/56, package integrity, and package-only installer validation. No functional Native, Platform, database, schema, or deployment behavior changed; Ruben field acceptance remains pending.
+
 ## Lens Next create atomic failure telemetry — September 3, 2026
 
 Field evidence proved request validation passed before `db.transaction(...)`, while the first callback-stage event never appeared and the route returned its existing generic HTTP 500. The exact transaction-start cause remained unknown because the outer catch logged a structured object that Replit fragmented across physical lines and did not retain as one complete exception event.

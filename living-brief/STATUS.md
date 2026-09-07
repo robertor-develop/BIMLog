@@ -1157,3 +1157,9 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - This is a Platform-only candidate at `v1.05.N12-P09`; Native remains byte/behavior unchanged at file version `1.5.12.8`. Deployment and promotion remain separate gates.
 - Governance reconciliation is bound to implementation commit `96994fa84a4f3dcb8514c7d74bfddf245abb249e` before clean release assembly.
 - Responsiveness follow-up commit `c8c1c765c714a3e072aec75ec289bcd7aa3b236e` replaces the unconditional 10-second issue-list interval with a completion-based, cancellable schedule. A slow Platform response can no longer overlap the next automatic refresh or cause successive valid responses to be discarded as stale. Native bridge/UI-thread behavior is unchanged.
+
+## Lens Next v1.05.N12-P09 final shared release identity — 2026-09-07
+
+- The unchanged N12 Native implementation is metadata-aligned to the already-live P09 Platform release identity: human/package version `v1.05.N12-P09` and Windows/Autodesk file version `1.5.12.9`.
+- This alignment changes release, assembly, installer, and package identity only. Create, Open Working View, camera, XML, bridge/port 8766, refresh, RFI, Submittal, reference-attachment, database, schema, and Platform behavior are unchanged.
+- The genuine Navisworks 2025 build passes core contracts 123/123 and the 2025 adapter 56/56 under the governed H-root. Package-only installer and release-identity checks pass; installation and Ruben field acceptance remain separate gates.

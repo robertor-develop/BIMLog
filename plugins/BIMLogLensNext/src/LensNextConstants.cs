@@ -5,7 +5,7 @@ namespace BIMLogLensNext
 {
     public static class LensNextConstants
     {
-        public const string ProductVersionLabel = "v1.05.N12-P08";
+        public const string ProductVersionLabel = "v1.05.N12-P09";
         public const string AssemblyName = "BIMLogLensNext";
         public const string DllName = "BIMLogLensNext.dll";
         public const string NativePluginAssemblyName2021 = "BIMLogLensNext.Native2021";

@@ -2173,3 +2173,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - A controlled Platform publication is separately governed and is required before Roberto can see the repaired web UI in the installed Native shell. Until that publication and visible-browser verification occur, report the candidate as blocked from Roberto acceptance rather than claiming the source-only UI is live.
 - Retain the immutable `v1.05.N10-P05` fallback and the Build 26 live post-import camera readback release gate.
 - Build 32 automatic refresh must remain completion-based and cancellable; do not restore interval-driven overlapping issue/reference requests. Controlled live publication and acceptance remain required before calling responsiveness field-accepted.
+
+## Lens Next v1.05.N12-P09 final release handoff
+
+- Preserve the P09 metadata-only Native/package alignment and exact governed 2025 package artifact; do not introduce functional drift after the release gates pass.
+- Ruben's real Navisworks Manage 2025 field acceptance remains pending for Create, Open Working View, responsiveness, linking, reference attachment, XML export/import camera, Help, diagnostic cleanliness, and port 8766 stability.
+- The immutable production fallback remains `v1.05.N10-P05`. Any field failure must retain exact action, expected/actual behavior, and screenshot/error before a corrective build is authorized.

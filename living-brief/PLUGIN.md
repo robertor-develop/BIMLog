@@ -345,3 +345,9 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - Human/package identity is `v1.05.N11-P07`; Windows DLL and Autodesk package metadata use `1.5.11.7` for Navisworks 2021 and 2025.
 - The metadata alignment does not alter capture, Working View restore, XML camera/sectioning serialization, viewpoint identity/digests, Saved Viewpoint behavior, bridge port 8766, database/schema, or deployment state.
 - Shared XML contracts pass 123/123 and both year adapter suites pass 56/56. Package-only validation performs no installation. Exact candidate archive/component hashes are retained in the permanent Build 30 evidence directory after final assembly.
+
+## Lens Next v1.05.N12-P09 Navisworks 2025 package identity
+
+- Human/package identity is `v1.05.N12-P09`; Windows DLL and Autodesk package metadata use `1.5.12.9` for the Navisworks 2025 field package.
+- P09 is a shared release-identity alignment for the unchanged N12 Native implementation. It does not change camera capture/restore, XML, bridge port 8766, Saved Viewpoints, linking, attachments, or any other Native behavior.
+- The 2025 package is compiled against the exact Nw22 reference set and validated by the core 123/123 and Navisworks 2025 adapter 56/56 suites before package-only installer verification.
