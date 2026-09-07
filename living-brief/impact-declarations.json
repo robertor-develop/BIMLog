@@ -16735,6 +16735,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4abfc157b9b1e0a283e94dd4812c8a7ed9e5508ed212881d0687985e22995a0b"
+    },
+    {
+      "taskId": "lens-next-build29-reference-attachments-20260907",
+      "reviewedThroughCommit": "9e77eaa23cdc7bf1aa8ac24a4c9fcd77f2fc287a",
+      "reviewedAt": "2026-09-07T10:06:24Z",
+      "status": "accepted_source_candidate_release_deferred",
+      "captureTiming": "same_task_after_implementation_and_regression_before_production_api_assembly",
+      "summary": "Records the Platform-only Lens Next reference-attachment integration, existing storage and relationship reuse, server-side file controls, unchanged schema and Native boundaries, and the remaining release gate.",
+      "workstreams": [
+        "lens-next-build29-reference-attachments"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reference attachments do not change ecosystem capability ownership or external authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows existing upload, storage, authorization, and release governance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed validation and regression requirements remain authoritative and pass."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "A lightweight viewpoint reference does not change the accepted BIMLog product vision."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic inventory adds the isolated Lens reference-attachment validation module."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native plugin, bridge, camera, Working View, and Saved Viewpoint behavior are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, unit, schema, or compliance assertion changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 29 implementation scope, test evidence, P07 candidate identity, and no-release state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining production assembly, freeze evidence, and deferred release camera gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No deployment, database mutation, destructive action, or new audit policy occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "60347f49671939e2fdeacb84fe5c13818088a04862ab7ce4001bc9b62e149af6"
     }
   ]
 }

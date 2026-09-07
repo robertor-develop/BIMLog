@@ -2152,3 +2152,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Complete the governed build, commit and push the packaging-only repair, publish once, then verify deployed commit, visible v1.05.N10-P05 identity, and health.
 - If a safe controlled internal account/environment already exists, perform one create request and retain the sanitized atomic failure event. Otherwise stop after deployment and wait for the next naturally occurring request. Ruben/customer environments are prohibited for diagnosis.
 - Do not diagnose or repair `pool.connect()`, transaction construction, or `BEGIN` until the complete retained exception proves the cause.
+
+## Lens Next Build 29 reference-attachment candidate
+
+- Preserve implementation commit `9e77eaa23cdc7bf1aa8ac24a4c9fcd77f2fc287a` and its narrow reuse of `files`, `linked_items`, governed object storage, bounded multipart parsing, and authenticated project-scoped downloads. No schema or storage-provider change is permitted.
+- Complete the reconciled production API assembly and freeze evidence for `BUILD29_REFERENCE_ATTACHMENTS_ACCEPTED`; do not deploy, publish, package, or mutate Native.
+- Retain the deferred Build 26 live post-import camera readback as the coherent XML release gate. Reference attachments must remain excluded from camera, digest, XML, Working View, Saved Viewpoints, and RFI/Submittal semantics.

@@ -1128,3 +1128,10 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
   `bimlog-lens-next-n09-p04-2025-roberto-20260902-v1` for the exact verified 2025 ZIP; Telegram client visibility
   cannot be independently confirmed. Ruben's connected Navisworks 2025 create/open/restart/open field verification
   remains the only external acceptance gate.
+
+## Lens Next Build 29 reference attachments — accepted source candidate
+
+- Implementation commit `9e77eaa23cdc7bf1aa8ac24a4c9fcd77f2fc287a` adds Platform-only, project-scoped reference attachments for authoritative active Lens Next viewpoints by reusing the existing `files`, `linked_items`, governed storage adapter, bounded multipart parser, and authenticated file download route.
+- The accepted policy allows PDF, PNG, JPG, and JPEG only, verifies extension, MIME, and file signatures, enforces an inclusive 5 MiB server-side maximum, stores exact bytes without a new image/PDF processing subsystem, and removes an underlying object only after its last relationship is removed.
+- Camera, Working View, viewpoint identity/digests, XML export, RFI/Submittal linking, Native behavior, database/schema, deployment, and the immutable `v1.05.N10-P05` fallback remain unchanged. Platform identity advances from P06 to candidate `v1.05.N11-P07`; no release or deployment is claimed.
+- Focused attachment/linking, XML 123/123, Navisworks 2021 adapter 56/56, core Lens Next, storage 19/19, Help Center/typecheck, and production web build gates pass. Production API assembly awaits this required Living Brief reconciliation.
