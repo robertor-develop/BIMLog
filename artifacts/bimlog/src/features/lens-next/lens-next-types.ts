@@ -211,6 +211,12 @@ export interface LensNextLinksResult {
   links: readonly LensNextLinkedItem[];
   eligible: readonly LensNextLinkCandidate[];
 }
+export interface LensNextReferenceAttachment {
+  linkId: number; fileId: number; fileName: string; fileSize: number;
+  mimeType: "application/pdf" | "image/png" | "image/jpeg";
+  createdAt: string; downloadUrl: string;
+}
+export interface LensNextAttachmentsResult { attachments: readonly LensNextReferenceAttachment[]; }
 export interface LensNextXmlExportSummary {
   requestedCount: number | null;
   serializedCount: number | null;

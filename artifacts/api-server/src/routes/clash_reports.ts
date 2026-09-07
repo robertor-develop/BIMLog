@@ -1,7 +1,7 @@
 ﻿import { Router } from "express";
 import { db, pool } from "@workspace/db";
 import type { Request } from "express";
-import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable } from "@workspace/db/schema";
+import { clashReportsTable, clashesTable, lensViewpointsTable, lensViewpointReportsTable, lensViewpointEventsTable, lensViewpointSequenceCountersTable, filesTable } from "@workspace/db/schema";
 import { eq, desc, and, isNull, isNotNull, ne, or, sql, inArray } from "drizzle-orm";
 import { getCompanyLogo } from "../lib/pdf-logo";
 import {
@@ -10,7 +10,7 @@ import {
 } from "../lib/pdf-kit";
 import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable, projectDirectoryTable, rfisTable, submittalsTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
-import { getConfigOptionMeta } from "../middlewares/config-validator";
+import { getConfigOptionMeta, getDefaultValue } from "../middlewares/config-validator";
 import { singleFileUpload } from "../middlewares/multipart";
 import * as XLSX from "xlsx";
 import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions, canonicalSpreadsheetWriteOptions, spreadsheetDateOnlyToUtcDate } from "@workspace/api-zod";
@@ -22,6 +22,8 @@ import AdmZip from "adm-zip";
 import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "../lib/lens-next-publishing";
 import { LensNextLocalUploadError, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
 import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-telemetry";
+import { storage } from "../lib/storage-adapter";
+import { LENS_REFERENCE_MAX_BYTES, validateLensReferenceFile } from "../lib/lens-next-reference-attachment";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -843,6 +845,15 @@ const validPositiveId = (value: unknown): number | null => {
   return Number.isSafeInteger(id) && id > 0 ? id : null;
 };
 
+const lensReferenceUpload = singleFileUpload({ fileSize: LENS_REFERENCE_MAX_BYTES, files: 1, fields: 0, parts: 1 });
+
+async function readLensReferenceAttachments(projectId: number, serverId: number) {
+  const links = await db.select({ linkId: linkedItemsTable.id, fileId: filesTable.id, fileName: filesTable.fileName, fileSize: filesTable.fileSizeBytes, mimeType: filesTable.fileType, createdAt: filesTable.createdAt })
+    .from(linkedItemsTable).innerJoin(filesTable, and(eq(filesTable.id, linkedItemsTable.toId), eq(filesTable.projectId, projectId), eq(filesTable.source, "lens-viewpoint-reference")))
+    .where(and(eq(linkedItemsTable.projectId, projectId), eq(linkedItemsTable.fromType, "lens_viewpoint"), eq(linkedItemsTable.fromId, serverId), eq(linkedItemsTable.toType, "file"), eq(linkedItemsTable.linkType, "reference"))).orderBy(linkedItemsTable.id);
+  return links.map(item => ({ ...item, fileSize: item.fileSize ?? 0, downloadUrl: `/api/v1/projects/${projectId}/files/${item.fileId}/download` }));
+}
+
 async function readLensLinkedItems(projectId: number, serverId: number) {
   const links = await db.select().from(linkedItemsTable).where(and(
     eq(linkedItemsTable.projectId, projectId),
@@ -921,6 +932,66 @@ router.delete("/projects/:projectId/clash-reports/lens-next/issues/:serverId/lin
   ))).returning({ id: linkedItemsTable.id });
   if (removed.length !== 1) { res.status(404).json({ error: "link_not_found", message: "Linked BIMLog item not found for this viewpoint and project." }); return; }
   res.json({ success: true, ...(await readLensLinkedItems(projectId, serverId)) });
+});
+
+router.get("/projects/:projectId/clash-reports/lens-next/issues/:serverId/attachments", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = validPositiveId(req.params.projectId), serverId = validPositiveId(req.params.serverId);
+  if (!projectId || !serverId) { res.status(400).json({ error: "invalid_identifier", message: "Project and viewpoint identifiers must be positive integers." }); return; }
+  const [viewpoint] = await db.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.lifecycleStatus, "active"))).limit(1);
+  if (!viewpoint) { res.status(404).json({ error: "viewpoint_not_found", message: "Active Lens viewpoint not found in this project." }); return; }
+  res.json({ success: true, attachments: await readLensReferenceAttachments(projectId, serverId) });
+});
+
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/attachments", authMiddleware, requirePermission("admin", "write"), lensReferenceUpload, async (req, res) => {
+  const projectId = validPositiveId(req.params.projectId), serverId = validPositiveId(req.params.serverId);
+  if (!projectId || !serverId) { res.status(400).json({ error: "invalid_identifier", message: "Project and viewpoint identifiers must be positive integers." }); return; }
+  if (!req.file) { res.status(400).json({ error: "reference_file_required", message: "Select one reference file to upload." }); return; }
+  let storagePath: string | null = null;
+  try {
+    const { fileName, mimeType } = validateLensReferenceFile(req.file);
+    const [viewpoint] = await db.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.lifecycleStatus, "active"))).limit(1);
+    if (!viewpoint) throw Object.assign(new Error("Active Lens viewpoint not found in this project."), { status: 404, code: "viewpoint_not_found" });
+    storagePath = await storage.upload(req.file.buffer, projectId, `lens-reference-${randomUUID()}-${fileName}`);
+    const hash = createHash("sha256").update(req.file.buffer).digest("hex"), status = await getDefaultValue("file_status");
+    await db.transaction(async tx => {
+      const [lockedViewpoint] = await tx.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.lifecycleStatus, "active"))).for("update").limit(1);
+      if (!lockedViewpoint) throw Object.assign(new Error("Active Lens viewpoint not found in this project."), { status: 404, code: "viewpoint_not_found" });
+      const [file] = await tx.insert(filesTable).values({ projectId, fileName, fileSize: req.file!.size, fileSizeBytes: req.file!.size, fileType: mimeType, status, uploadedById: req.user!.userId, fileHash: hash, documentRelationship: "reference", documentRelationshipDeclaredAt: new Date(), source: "lens-viewpoint-reference", storagePath, fileMetadata: { lensNextReference: true } }).returning({ id: filesTable.id });
+      if (!file) throw new Error("Reference file metadata was not created.");
+      await tx.insert(linkedItemsTable).values({ projectId, fromType: "lens_viewpoint", fromId: serverId, toType: "file", toId: file.id, linkType: "reference", createdById: req.user!.userId });
+    });
+    storagePath = null;
+    res.status(201).json({ success: true, attachments: await readLensReferenceAttachments(projectId, serverId) });
+  } catch (error) {
+    if (storagePath) try { await storage.delete(storagePath); } catch (cleanupError) { console.error("[lens-next-reference-cleanup]", { projectId, serverId, storagePath, error: cleanupError instanceof Error ? cleanupError.message : "cleanup_failed" }); }
+    const safe = error as { status?: number; code?: string; message?: string };
+    res.status(safe.status ?? 500).json({ error: safe.code ?? "reference_upload_failed", message: safe.message ?? "The reference attachment could not be uploaded." });
+  }
+});
+
+router.delete("/projects/:projectId/clash-reports/lens-next/issues/:serverId/attachments/:attachmentId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = validPositiveId(req.params.projectId), serverId = validPositiveId(req.params.serverId), attachmentId = validPositiveId(req.params.attachmentId);
+  if (!projectId || !serverId || !attachmentId) { res.status(400).json({ error: "invalid_identifier", message: "Attachment identifiers must be positive integers." }); return; }
+  try {
+    const storagePath = await db.transaction(async tx => {
+      const [viewpoint] = await tx.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.lifecycleStatus, "active"))).for("update").limit(1);
+      if (!viewpoint) throw Object.assign(new Error("Active Lens viewpoint not found in this project."), { status: 404, code: "viewpoint_not_found" });
+      const [link] = await tx.select({ id: linkedItemsTable.id, fileId: filesTable.id, storagePath: filesTable.storagePath }).from(linkedItemsTable).innerJoin(filesTable, and(eq(filesTable.id, linkedItemsTable.toId), eq(filesTable.projectId, projectId), eq(filesTable.source, "lens-viewpoint-reference"))).where(and(eq(linkedItemsTable.id, attachmentId), eq(linkedItemsTable.projectId, projectId), eq(linkedItemsTable.fromType, "lens_viewpoint"), eq(linkedItemsTable.fromId, serverId), eq(linkedItemsTable.toType, "file"), eq(linkedItemsTable.linkType, "reference"))).limit(1);
+      if (!link) throw Object.assign(new Error("Reference attachment not found for this viewpoint and project."), { status: 404, code: "attachment_not_found" });
+      const [file] = await tx.select({ id: filesTable.id }).from(filesTable).where(and(eq(filesTable.id, link.fileId), eq(filesTable.projectId, projectId))).for("update").limit(1);
+      if (!file) throw Object.assign(new Error("Reference attachment metadata is unavailable."), { status: 404, code: "attachment_not_found" });
+      await tx.delete(linkedItemsTable).where(eq(linkedItemsTable.id, link.id));
+      const remaining = await tx.select({ id: linkedItemsTable.id }).from(linkedItemsTable).where(or(and(eq(linkedItemsTable.fromType, "file"), eq(linkedItemsTable.fromId, file.id)), and(eq(linkedItemsTable.toType, "file"), eq(linkedItemsTable.toId, file.id)))).limit(1);
+      if (remaining.length) return null;
+      await tx.delete(filesTable).where(and(eq(filesTable.id, file.id), eq(filesTable.projectId, projectId), eq(filesTable.source, "lens-viewpoint-reference")));
+      return link.storagePath;
+    });
+    if (storagePath) await storage.delete(storagePath);
+    res.json({ success: true, attachments: await readLensReferenceAttachments(projectId, serverId) });
+  } catch (error) {
+    const safe = error as { status?: number; code?: string; message?: string };
+    res.status(safe.status ?? 500).json({ error: safe.code ?? "reference_remove_failed", message: safe.message ?? "The reference attachment could not be removed." });
+  }
 });
 
 // Registered BEFORE the "/:reportId" routes so "lens-sync"/"lens-pull" are not

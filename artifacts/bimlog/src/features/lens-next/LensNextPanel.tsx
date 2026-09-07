@@ -28,6 +28,8 @@ import {
   type LensNextCreateReceipt,
   type LensNextPublishAction,
   type LensNextLinksResult,
+  type LensNextAttachmentsResult,
+  type LensNextReferenceAttachment,
   type LensNextLinkedItemType,
   type LensNextProjectOption,
   type LensNextRefreshState,
@@ -121,6 +123,8 @@ export function LensNextPanel({
   const [historyError, setHistoryError] = useState<string | null>(null);
   const [linkedItems, setLinkedItems] = useState<LensNextLinksResult | "loading" | null>(null);
   const [linkedItemsError, setLinkedItemsError] = useState<string | null>(null);
+  const [referenceAttachments, setReferenceAttachments] = useState<LensNextAttachmentsResult | "loading" | null>(null);
+  const [referenceAttachmentsError, setReferenceAttachmentsError] = useState<string | null>(null);
   const refreshSequence = useRef(0);
   const publishAttempt = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
   const [publishState, setPublishState] = useState<"idle" | "publishing" | "published" | "error">("idle");
@@ -386,6 +390,38 @@ export function LensNextPanel({
     });
     return () => controller.abort();
   }, [apiClient, selectedIssue]);
+
+  useEffect(() => {
+    if (!apiClient || !selectedIssue) { setReferenceAttachments(null); setReferenceAttachmentsError(null); return; }
+    const controller = new AbortController(); setReferenceAttachments("loading"); setReferenceAttachmentsError(null);
+    apiClient.loadReferenceAttachments(selectedIssue.identity, controller.signal).then(setReferenceAttachments).catch(error => {
+      if (!controller.signal.aborted) { setReferenceAttachments(null); setReferenceAttachmentsError(error instanceof Error ? error.message : "Reference attachments could not be loaded"); }
+    });
+    return () => controller.abort();
+  }, [apiClient, selectedIssue]);
+
+  const uploadReferenceAttachment = useCallback(async (file: File) => {
+    if (!apiClient || !selectedIssue || selectedIssue.identity.projectId !== authorizedProjectId) return;
+    setReferenceAttachmentsError(null);
+    try { setReferenceAttachments(await apiClient.uploadReferenceAttachment(selectedIssue.identity, file)); }
+    catch (error) { setReferenceAttachmentsError(error instanceof Error ? error.message : "Reference upload failed"); }
+  }, [apiClient, authorizedProjectId, selectedIssue]);
+
+  const removeReferenceAttachment = useCallback(async (attachmentId: number) => {
+    if (!apiClient || !selectedIssue || selectedIssue.identity.projectId !== authorizedProjectId) return;
+    setReferenceAttachmentsError(null);
+    try { setReferenceAttachments(await apiClient.removeReferenceAttachment(selectedIssue.identity, attachmentId)); }
+    catch (error) { setReferenceAttachmentsError(error instanceof Error ? error.message : "Reference removal failed"); }
+  }, [apiClient, authorizedProjectId, selectedIssue]);
+
+  const openReferenceAttachment = useCallback(async (attachment: LensNextReferenceAttachment) => {
+    if (!apiClient) return;
+    setReferenceAttachmentsError(null);
+    try {
+      const blob = await apiClient.downloadReferenceAttachment(attachment), url = URL.createObjectURL(blob), anchor = document.createElement("a");
+      anchor.href = url; anchor.download = attachment.fileName; anchor.rel = "noopener"; anchor.click(); setTimeout(() => URL.revokeObjectURL(url), 30_000);
+    } catch (error) { setReferenceAttachmentsError(error instanceof Error ? error.message : "Reference download failed"); }
+  }, [apiClient]);
 
   const linkBimlogItem = useCallback(async (type: LensNextLinkedItemType, id: number) => {
     if (!apiClient || !selectedIssue || selectedIssue.identity.projectId !== authorizedProjectId) return;
@@ -696,6 +732,11 @@ export function LensNextPanel({
       linkedItemsError={linkedItemsError}
       onLinkBimlogItem={(type, id) => void linkBimlogItem(type, id)}
       onRemoveLinkedItem={(linkId) => void removeLinkedItem(linkId)}
+      referenceAttachments={referenceAttachments}
+      referenceAttachmentsError={referenceAttachmentsError}
+      onUploadReferenceAttachment={(file) => void uploadReferenceAttachment(file)}
+      onOpenReferenceAttachment={(attachment) => void openReferenceAttachment(attachment)}
+      onRemoveReferenceAttachment={(attachmentId) => void removeReferenceAttachment(attachmentId)}
       filters={filters}
       onFiltersChange={setFilters}
       trades={trades}

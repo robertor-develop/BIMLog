@@ -23,6 +23,7 @@ import type {
   LensNextLayoutItem,
   LensNextLayoutReceipt,
   LensNextLinksResult,
+  LensNextAttachmentsResult,
   LensNextLinkedItemType,
   LensNextModelBindingResolution,
   LensNextOpenWorkingViewResult,
@@ -113,6 +114,10 @@ export interface LensNextApiClient {
   loadLinkedItems(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal): Promise<LensNextLinksResult>;
   linkBimlogItem(identity: LensNextImmutableIssueIdentity, targetType: LensNextLinkedItemType, targetId: number, signal?: AbortSignal): Promise<LensNextLinksResult>;
   removeLinkedItem(identity: LensNextImmutableIssueIdentity, linkId: number, signal?: AbortSignal): Promise<LensNextLinksResult>;
+  loadReferenceAttachments(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal): Promise<LensNextAttachmentsResult>;
+  uploadReferenceAttachment(identity: LensNextImmutableIssueIdentity, file: File, signal?: AbortSignal): Promise<LensNextAttachmentsResult>;
+  removeReferenceAttachment(identity: LensNextImmutableIssueIdentity, attachmentId: number, signal?: AbortSignal): Promise<LensNextAttachmentsResult>;
+  downloadReferenceAttachment(attachment: LensNextAttachmentsResult["attachments"][number], signal?: AbortSignal): Promise<Blob>;
 }
 
 export function createLensNextApiClient(
@@ -155,6 +160,16 @@ export function createLensNextApiClient(
       });
     };
     return Object.freeze({ links: adapt(body.links, true) as LensNextLinksResult["links"], eligible: adapt(body.eligible, false) as LensNextLinksResult["eligible"] });
+  };
+  const adaptAttachments = (raw: unknown): LensNextAttachmentsResult => {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw) || (raw as Record<string, unknown>).success !== true || !Array.isArray((raw as Record<string, unknown>).attachments)) throw new Error("BIMLog reference-attachments response is invalid");
+    const attachments = ((raw as Record<string, unknown>).attachments as unknown[]).map(value => {
+      if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("BIMLog reference-attachments response is invalid");
+      const item = value as Record<string, unknown>, linkId = Number(item.linkId), fileId = Number(item.fileId), fileSize = Number(item.fileSize), mimeType = String(item.mimeType);
+      if (![linkId, fileId].every(id => Number.isSafeInteger(id) && id > 0) || !Number.isSafeInteger(fileSize) || fileSize < 0 || !["application/pdf", "image/png", "image/jpeg"].includes(mimeType)) throw new Error("BIMLog reference-attachments response is invalid");
+      return Object.freeze({ linkId, fileId, fileName: String(item.fileName ?? ""), fileSize, mimeType: mimeType as "application/pdf" | "image/png" | "image/jpeg", createdAt: String(item.createdAt ?? ""), downloadUrl: String(item.downloadUrl ?? "") });
+    });
+    return Object.freeze({ attachments });
   };
   return Object.freeze({
     async resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId: number | null = null, signal?: AbortSignal) {
@@ -293,6 +308,26 @@ export function createLensNextApiClient(
       const exact = assertLensNextImmutableIdentity(identity);
       if (!Number.isSafeInteger(linkId) || linkId <= 0) throw new Error("A valid BIMLog link is required");
       return adaptLinks(await remove(`/projects/${exact.projectId}/clash-reports/lens-next/issues/${exact.serverId}/links/${linkId}`, signal));
+    },
+    async loadReferenceAttachments(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal) {
+      const exact = assertLensNextImmutableIdentity(identity);
+      return adaptAttachments(await get(`/projects/${exact.projectId}/clash-reports/lens-next/issues/${exact.serverId}/attachments`, signal));
+    },
+    async uploadReferenceAttachment(identity: LensNextImmutableIssueIdentity, file: File, signal?: AbortSignal) {
+      const exact = assertLensNextImmutableIdentity(identity), form = new FormData(); form.append("file", file, file.name);
+      const response = await fetchImpl(`${base}/projects/${exact.projectId}/clash-reports/lens-next/issues/${exact.serverId}/attachments`, { method: "POST", credentials: "same-origin", headers: { Accept: "application/json", Authorization: `Bearer ${token}` }, body: form, signal });
+      return adaptAttachments(await jsonBody(response, "BIMLog reference upload"));
+    },
+    async removeReferenceAttachment(identity: LensNextImmutableIssueIdentity, attachmentId: number, signal?: AbortSignal) {
+      const exact = assertLensNextImmutableIdentity(identity);
+      if (!Number.isSafeInteger(attachmentId) || attachmentId <= 0) throw new Error("Attachment identity is invalid");
+      return adaptAttachments(await remove(`/projects/${exact.projectId}/clash-reports/lens-next/issues/${exact.serverId}/attachments/${attachmentId}`, signal));
+    },
+    async downloadReferenceAttachment(attachment: LensNextAttachmentsResult["attachments"][number], signal?: AbortSignal) {
+      if (!attachment.downloadUrl.startsWith("/api/v1/projects/")) throw new Error("Attachment download path is invalid");
+      const response = await fetchImpl(attachment.downloadUrl, { method: "GET", credentials: "same-origin", headers: { Authorization: `Bearer ${token}` }, signal });
+      if (!response.ok) throw new Error(`BIMLog reference download failed (${response.status})`);
+      return response.blob();
     },
   });
 }

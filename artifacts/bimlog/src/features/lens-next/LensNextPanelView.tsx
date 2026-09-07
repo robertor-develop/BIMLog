@@ -7,7 +7,7 @@ import {
   type LensNextViewDimension,
   type LensNextViewPresetId,
 } from "./lens-next-view-settings";
-import type { LensNextLinksResult, LensNextLinkedItemType } from "./lens-next-types";
+import type { LensNextAttachmentsResult, LensNextLinksResult, LensNextLinkedItemType, LensNextReferenceAttachment } from "./lens-next-types";
 import type {
   LensNextConnectionState,
   LensNextCreateDraft,
@@ -249,6 +249,11 @@ export interface LensNextPanelViewProps {
   linkedItemsError: string | null;
   onLinkBimlogItem(type: LensNextLinkedItemType, authoritativeId: number): void;
   onRemoveLinkedItem(linkId: number): void;
+  referenceAttachments: LensNextAttachmentsResult | "loading" | null;
+  referenceAttachmentsError: string | null;
+  onUploadReferenceAttachment(file: File): void;
+  onOpenReferenceAttachment(attachment: LensNextReferenceAttachment): void;
+  onRemoveReferenceAttachment(attachmentId: number): void;
   filters: LensNextFilters;
   onFiltersChange(next: LensNextFilters): void;
   trades: readonly string[];
@@ -325,6 +330,11 @@ export function LensNextPanelView({
   linkedItemsError,
   onLinkBimlogItem,
   onRemoveLinkedItem,
+  referenceAttachments,
+  referenceAttachmentsError,
+  onUploadReferenceAttachment,
+  onOpenReferenceAttachment,
+  onRemoveReferenceAttachment,
   filters,
   onFiltersChange,
   trades,
@@ -736,6 +746,14 @@ export function LensNextPanelView({
               </div>
             )}
             {linkedItemsError && <p className="lens-next__inline-error" role="status">{linkedItemsError}</p>}
+          </section>
+          <section className="lens-next__publisher" aria-label="Reference attachments">
+            <h4>Reference Attachments</h4>
+            {referenceAttachments === "loading" ? <p role="status">Loading references…</p> : referenceAttachments && referenceAttachments.attachments.length ? (
+              <ul>{referenceAttachments.attachments.map(attachment => <li key={attachment.linkId}>{attachment.fileName} ({Math.ceil(attachment.fileSize / 1024)} KB) <button type="button" onClick={() => onOpenReferenceAttachment(attachment)}>Open/Download</button> {selectedIssue.publishingAllowed && <button type="button" onClick={() => onRemoveReferenceAttachment(attachment.linkId)}>Remove</button>}</li>)}</ul>
+            ) : <p>No reference attachments.</p>}
+            {selectedIssue.publishingAllowed && <label className="lens-next__field lens-next__field--wide"><span>Add Reference (PDF, JPG, PNG; max 5 MB)</span><input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={event => { const file = event.target.files?.[0]; event.currentTarget.value = ""; if (!file) return; if (file.size > 5 * 1024 * 1024) { window.alert("Reference files must be no larger than 5 MB."); return; } onUploadReferenceAttachment(file); }} /></label>}
+            {referenceAttachmentsError && <p className="lens-next__inline-error" role="status">{referenceAttachmentsError}</p>}
           </section>
           <div className="lens-next__actions">
             <button
