@@ -16992,11 +16992,11 @@
     },
     {
       "taskId": "lens-next-build32-create-open-working-view-regression-repair-20260907",
-      "reviewedThroughCommit": "96994fa84a4f3dcb8514c7d74bfddf245abb249e",
+      "reviewedThroughCommit": "c8c1c765c714a3e072aec75ec289bcd7aa3b236e",
       "reviewedAt": "2026-09-07T13:25:00-04:00",
       "status": "candidate_source_validated_deployment_deferred",
       "captureTiming": "same_task_after_implementation_before_release_candidate_assembly",
-      "summary": "Repairs atomic Lens Next issue creation display allocation and fail-closed navigation capture-placeholder identity compatibility without changing Native, XML, camera, database schema, or established linking and attachment behavior.",
+      "summary": "Repairs atomic Lens Next issue creation display allocation, fail-closed navigation capture-placeholder identity compatibility, and overlapping automatic refresh cadence without changing Native, XML, camera, database schema, or established linking and attachment behavior.",
       "workstreams": [
         "lens-next-build32-create-open-working-view-regression-repair"
       ],
@@ -17058,11 +17058,12 @@
         }
       ],
       "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "8cda6b0c7f700a00605921418d0962b39b5ee8c0b32a0914b89439cfff572dc1"
+      "reviewedChangeSha256": "822f44c8acadbfbdd16f7701088835aedc6c066c0d8a488604d98aa5d89bb9bd"
     }
   ]
 }

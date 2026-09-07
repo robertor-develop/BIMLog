@@ -2172,3 +2172,4 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - The Build 32 release candidate must be assembled only from the clean reconciled successor to implementation commit `96994fa84a4f3dcb8514c7d74bfddf245abb249e`; publication remains prohibited in this build.
 - A controlled Platform publication is separately governed and is required before Roberto can see the repaired web UI in the installed Native shell. Until that publication and visible-browser verification occur, report the candidate as blocked from Roberto acceptance rather than claiming the source-only UI is live.
 - Retain the immutable `v1.05.N10-P05` fallback and the Build 26 live post-import camera readback release gate.
+- Build 32 automatic refresh must remain completion-based and cancellable; do not restore interval-driven overlapping issue/reference requests. Controlled live publication and acceptance remain required before calling responsiveness field-accepted.
