@@ -317,11 +317,23 @@ export function LensNextPanel({
   useEffect(() => {
     if (autoRefreshMs < 10_000 || authorizedProjectId === null || !apiClient)
       return;
-    const timer = window.setInterval(
-      () => void loadIssues("refresh"),
-      autoRefreshMs,
-    );
-    return () => window.clearInterval(timer);
+    let stopped = false;
+    let timer: number | null = null;
+    let controller: AbortController | null = null;
+    const schedule = () => {
+      timer = window.setTimeout(async () => {
+        controller = new AbortController();
+        await loadIssues("refresh", controller.signal);
+        controller = null;
+        if (!stopped) schedule();
+      }, autoRefreshMs);
+    };
+    schedule();
+    return () => {
+      stopped = true;
+      if (timer !== null) window.clearTimeout(timer);
+      controller?.abort();
+    };
   }, [apiClient, authorizedProjectId, autoRefreshMs, loadIssues]);
 
   useEffect(() => {
