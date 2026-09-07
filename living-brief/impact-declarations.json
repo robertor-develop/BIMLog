@@ -17060,10 +17060,11 @@
       "reviewedChangedPaths": [
         "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "822f44c8acadbfbdd16f7701088835aedc6c066c0d8a488604d98aa5d89bb9bd"
+      "reviewedChangeSha256": "201025ce2021dbd2e5fa4d91393dca303a45df1eae97214b5e115f3c01e51dbd"
     }
   ]
 }
