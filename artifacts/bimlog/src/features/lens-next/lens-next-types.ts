@@ -193,6 +193,24 @@ export interface LensNextCreateReceipt {
   serverId: number; viewpointId: string; visualStateDigest: string;
   revisionNumber: number; lifecycleStatus: LensNextLifecycleState; displayId: string; displayCode: string;
 }
+export type LensNextLinkedItemType = "rfi" | "submittal";
+export interface LensNextLinkedItem {
+  linkId: number;
+  type: LensNextLinkedItemType;
+  authoritativeId: number;
+  displayId: string;
+  title: string;
+}
+export interface LensNextLinkCandidate {
+  type: LensNextLinkedItemType;
+  authoritativeId: number;
+  displayId: string;
+  title: string;
+}
+export interface LensNextLinksResult {
+  links: readonly LensNextLinkedItem[];
+  eligible: readonly LensNextLinkCandidate[];
+}
 export interface LensNextXmlExportSummary {
   requestedCount: number | null;
   serializedCount: number | null;

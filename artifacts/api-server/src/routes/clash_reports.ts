@@ -8,7 +8,7 @@ import {
   PALETTE, statusText, priorityText, computeContentHash, createPdfDocument,
   drawBrandedHeader, drawCoverPage, sectionBar, drawTable, addPageNumbers, REPORT_THEMES, reportFileName,
 } from "../lib/pdf-kit";
-import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable, projectDirectoryTable } from "@workspace/db/schema";
+import { projectsTable, usersTable, companiesTable, activityLogTable, linkedItemsTable, agentInsightsTable, projectDirectoryTable, rfisTable, submittalsTable } from "@workspace/db/schema";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getConfigOptionMeta } from "../middlewares/config-validator";
 import { singleFileUpload } from "../middlewares/multipart";
@@ -835,6 +835,93 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/local
       res.status(500).json({ error: "local_confirmation_failed", message: "The local Saved Viewpoint identity was not recorded." });
     }
   });
+
+type LensLinkedItemType = "rfi" | "submittal";
+const lensLinkTypes = new Set<LensLinkedItemType>(["rfi", "submittal"]);
+const validPositiveId = (value: unknown): number | null => {
+  const id = Number(value);
+  return Number.isSafeInteger(id) && id > 0 ? id : null;
+};
+
+async function readLensLinkedItems(projectId: number, serverId: number) {
+  const links = await db.select().from(linkedItemsTable).where(and(
+    eq(linkedItemsTable.projectId, projectId),
+    or(
+      and(eq(linkedItemsTable.fromType, "lens_viewpoint"), eq(linkedItemsTable.fromId, serverId), inArray(linkedItemsTable.toType, ["rfi", "submittal"])),
+      and(eq(linkedItemsTable.toType, "lens_viewpoint"), eq(linkedItemsTable.toId, serverId), inArray(linkedItemsTable.fromType, ["rfi", "submittal"])),
+    ),
+  )).orderBy(linkedItemsTable.id);
+  const targetOf = (link: typeof links[number]) => link.fromType === "lens_viewpoint" ? { type: link.toType, id: link.toId } : { type: link.fromType, id: link.fromId };
+  const rfiIds = links.map(targetOf).filter(target => target.type === "rfi").map(target => target.id);
+  const submittalIds = links.map(targetOf).filter(target => target.type === "submittal").map(target => target.id);
+  type LinkTarget = { id: number; number: string; title: string };
+  const [rfis, submittals, eligibleRfis, eligibleSubmittals] = await Promise.all([
+    rfiIds.length ? db.select({ id: rfisTable.id, number: rfisTable.number, title: rfisTable.subject }).from(rfisTable).where(and(eq(rfisTable.projectId, projectId), inArray(rfisTable.id, rfiIds), isNull(rfisTable.deletedAt))) : Promise.resolve([] as LinkTarget[]),
+    submittalIds.length ? db.select({ id: submittalsTable.id, number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable).where(and(eq(submittalsTable.projectId, projectId), inArray(submittalsTable.id, submittalIds), isNull(submittalsTable.deletedAt))) : Promise.resolve([] as LinkTarget[]),
+    db.select({ id: rfisTable.id, number: rfisTable.number, title: rfisTable.subject }).from(rfisTable).where(and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt))).orderBy(rfisTable.number, rfisTable.id),
+    db.select({ id: submittalsTable.id, number: submittalsTable.number, title: submittalsTable.title }).from(submittalsTable).where(and(eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt))).orderBy(submittalsTable.number, submittalsTable.id),
+  ]);
+  const targets = new Map<string, { id: number; number: string; title: string }>();
+  rfis.forEach(item => targets.set(`rfi:${item.id}`, item));
+  submittals.forEach(item => targets.set(`submittal:${item.id}`, item));
+  return {
+    links: links.flatMap(link => {
+      const target = targetOf(link), item = targets.get(`${target.type}:${target.id}`);
+      return item ? [{ linkId: link.id, type: target.type as LensLinkedItemType, authoritativeId: item.id, displayId: item.number, title: item.title }] : [];
+    }),
+    eligible: [
+      ...eligibleRfis.map(item => ({ type: "rfi" as const, authoritativeId: item.id, displayId: item.number, title: item.title })),
+      ...eligibleSubmittals.map(item => ({ type: "submittal" as const, authoritativeId: item.id, displayId: item.number, title: item.title })),
+    ],
+  };
+}
+
+router.get("/projects/:projectId/clash-reports/lens-next/issues/:serverId/links", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = validPositiveId(req.params.projectId), serverId = validPositiveId(req.params.serverId);
+  if (!projectId || !serverId) { res.status(400).json({ error: "invalid_identifier", message: "Project and viewpoint identifiers must be positive integers." }); return; }
+  const [viewpoint] = await db.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.lifecycleStatus, "active"))).limit(1);
+  if (!viewpoint) { res.status(404).json({ error: "viewpoint_not_found", message: "Active Lens viewpoint not found in this project." }); return; }
+  res.json({ success: true, ...(await readLensLinkedItems(projectId, serverId)) });
+});
+
+router.post("/projects/:projectId/clash-reports/lens-next/issues/:serverId/links", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = validPositiveId(req.params.projectId), serverId = validPositiveId(req.params.serverId);
+  const targetType = String(req.body?.targetType ?? "") as LensLinkedItemType;
+  const targetId = validPositiveId(req.body?.targetId);
+  if (!projectId || !serverId || !targetId || !lensLinkTypes.has(targetType)) { res.status(400).json({ error: "invalid_link", message: "A valid authoritative RFI or Submittal identifier is required." }); return; }
+  try {
+    const created = await db.transaction(async tx => {
+      const [viewpoint] = await tx.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.lifecycleStatus, "active"))).for("update").limit(1);
+      if (!viewpoint) throw Object.assign(new Error("Active Lens viewpoint not found in this project."), { status: 404, code: "viewpoint_not_found" });
+      const [target] = targetType === "rfi"
+        ? await tx.select({ id: rfisTable.id }).from(rfisTable).where(and(eq(rfisTable.id, targetId), eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt))).limit(1)
+        : await tx.select({ id: submittalsTable.id }).from(submittalsTable).where(and(eq(submittalsTable.id, targetId), eq(submittalsTable.projectId, projectId), isNull(submittalsTable.deletedAt))).limit(1);
+      if (!target) throw Object.assign(new Error(`${targetType === "rfi" ? "RFI" : "Submittal"} not found or ineligible in this project.`), { status: 404, code: "target_not_found" });
+      const [duplicate] = await tx.select({ id: linkedItemsTable.id }).from(linkedItemsTable).where(and(eq(linkedItemsTable.projectId, projectId), or(
+        and(eq(linkedItemsTable.fromType, "lens_viewpoint"), eq(linkedItemsTable.fromId, serverId), eq(linkedItemsTable.toType, targetType), eq(linkedItemsTable.toId, targetId)),
+        and(eq(linkedItemsTable.toType, "lens_viewpoint"), eq(linkedItemsTable.toId, serverId), eq(linkedItemsTable.fromType, targetType), eq(linkedItemsTable.fromId, targetId)),
+      ))).limit(1);
+      if (duplicate) throw Object.assign(new Error("This exact BIMLog item is already linked."), { status: 409, code: "duplicate_link" });
+      const [link] = await tx.insert(linkedItemsTable).values({ projectId, fromType: "lens_viewpoint", fromId: serverId, toType: targetType, toId: targetId, linkType: "related", createdById: req.user!.userId }).returning({ id: linkedItemsTable.id });
+      return link;
+    });
+    res.status(201).json({ success: true, linkId: created.id, ...(await readLensLinkedItems(projectId, serverId)) });
+  } catch (error) {
+    const safe = error as { status?: number; code?: string; message?: string };
+    res.status(safe.status ?? 500).json({ error: safe.code ?? "lens_link_failed", message: safe.message ?? "The BIMLog item link could not be created." });
+  }
+});
+
+router.delete("/projects/:projectId/clash-reports/lens-next/issues/:serverId/links/:linkId", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
+  const projectId = validPositiveId(req.params.projectId), serverId = validPositiveId(req.params.serverId), linkId = validPositiveId(req.params.linkId);
+  if (!projectId || !serverId || !linkId) { res.status(400).json({ error: "invalid_identifier", message: "Link identifiers must be positive integers." }); return; }
+  const removed = await db.delete(linkedItemsTable).where(and(eq(linkedItemsTable.id, linkId), eq(linkedItemsTable.projectId, projectId), or(
+    and(eq(linkedItemsTable.fromType, "lens_viewpoint"), eq(linkedItemsTable.fromId, serverId), inArray(linkedItemsTable.toType, ["rfi", "submittal"])),
+    and(eq(linkedItemsTable.toType, "lens_viewpoint"), eq(linkedItemsTable.toId, serverId), inArray(linkedItemsTable.fromType, ["rfi", "submittal"])),
+  ))).returning({ id: linkedItemsTable.id });
+  if (removed.length !== 1) { res.status(404).json({ error: "link_not_found", message: "Linked BIMLog item not found for this viewpoint and project." }); return; }
+  res.json({ success: true, ...(await readLensLinkedItems(projectId, serverId)) });
+});
 
 // Registered BEFORE the "/:reportId" routes so "lens-sync"/"lens-pull" are not
 // captured by the :reportId path parameter.

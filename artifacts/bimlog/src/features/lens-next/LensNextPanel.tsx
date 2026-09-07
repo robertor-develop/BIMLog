@@ -27,6 +27,8 @@ import {
   type LensNextLayoutItem,
   type LensNextCreateReceipt,
   type LensNextPublishAction,
+  type LensNextLinksResult,
+  type LensNextLinkedItemType,
   type LensNextProjectOption,
   type LensNextRefreshState,
 } from "./lens-next-types";
@@ -117,6 +119,8 @@ export function LensNextPanel({
     null,
   );
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [linkedItems, setLinkedItems] = useState<LensNextLinksResult | "loading" | null>(null);
+  const [linkedItemsError, setLinkedItemsError] = useState<string | null>(null);
   const refreshSequence = useRef(0);
   const publishAttempt = useRef<{ fingerprint: string; idempotencyKey: string } | null>(null);
   const [publishState, setPublishState] = useState<"idle" | "publishing" | "published" | "error">("idle");
@@ -372,6 +376,30 @@ export function LensNextPanel({
       );
     }
   }, [apiClient, selectedIssue]);
+
+  useEffect(() => {
+    if (!apiClient || !selectedIssue) { setLinkedItems(null); setLinkedItemsError(null); return; }
+    const controller = new AbortController();
+    setLinkedItems("loading"); setLinkedItemsError(null);
+    apiClient.loadLinkedItems(selectedIssue.identity, controller.signal).then(setLinkedItems).catch(error => {
+      if (!controller.signal.aborted) { setLinkedItems(null); setLinkedItemsError(error instanceof Error ? error.message : "Linked BIMLog items could not be loaded"); }
+    });
+    return () => controller.abort();
+  }, [apiClient, selectedIssue]);
+
+  const linkBimlogItem = useCallback(async (type: LensNextLinkedItemType, id: number) => {
+    if (!apiClient || !selectedIssue || selectedIssue.identity.projectId !== authorizedProjectId) return;
+    setLinkedItemsError(null);
+    try { setLinkedItems(await apiClient.linkBimlogItem(selectedIssue.identity, type, id)); }
+    catch (error) { setLinkedItemsError(error instanceof Error ? error.message : "BIMLog item link failed"); }
+  }, [apiClient, authorizedProjectId, selectedIssue]);
+
+  const removeLinkedItem = useCallback(async (linkId: number) => {
+    if (!apiClient || !selectedIssue || selectedIssue.identity.projectId !== authorizedProjectId) return;
+    setLinkedItemsError(null);
+    try { setLinkedItems(await apiClient.removeLinkedItem(selectedIssue.identity, linkId)); }
+    catch (error) { setLinkedItemsError(error instanceof Error ? error.message : "BIMLog item unlink failed"); }
+  }, [apiClient, authorizedProjectId, selectedIssue]);
 
   const openWorkingView = useCallback(async () => {
     if (workingViewInFlight.current) return;
@@ -664,6 +692,10 @@ export function LensNextPanel({
       onCustomGroupByChange={(next) => { setCustomGroupBy(next); setViewPreset("custom"); }}
       selectedServerId={selectedServerId}
       selectedIssue={selectedIssue}
+      linkedItems={linkedItems}
+      linkedItemsError={linkedItemsError}
+      onLinkBimlogItem={(type, id) => void linkBimlogItem(type, id)}
+      onRemoveLinkedItem={(linkId) => void removeLinkedItem(linkId)}
       filters={filters}
       onFiltersChange={setFilters}
       trades={trades}

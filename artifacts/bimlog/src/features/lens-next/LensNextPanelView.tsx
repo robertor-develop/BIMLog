@@ -7,6 +7,7 @@ import {
   type LensNextViewDimension,
   type LensNextViewPresetId,
 } from "./lens-next-view-settings";
+import type { LensNextLinksResult, LensNextLinkedItemType } from "./lens-next-types";
 import type {
   LensNextConnectionState,
   LensNextCreateDraft,
@@ -244,6 +245,10 @@ export interface LensNextPanelViewProps {
   onCustomGroupByChange(next: readonly LensNextViewDimension[]): void;
   selectedServerId: number | null;
   selectedIssue: LensNextIssue | null;
+  linkedItems: LensNextLinksResult | "loading" | null;
+  linkedItemsError: string | null;
+  onLinkBimlogItem(type: LensNextLinkedItemType, authoritativeId: number): void;
+  onRemoveLinkedItem(linkId: number): void;
   filters: LensNextFilters;
   onFiltersChange(next: LensNextFilters): void;
   trades: readonly string[];
@@ -316,6 +321,10 @@ export function LensNextPanelView({
   onCustomGroupByChange,
   selectedServerId,
   selectedIssue,
+  linkedItems,
+  linkedItemsError,
+  onLinkBimlogItem,
+  onRemoveLinkedItem,
   filters,
   onFiltersChange,
   trades,
@@ -355,7 +364,10 @@ export function LensNextPanelView({
   const [createDraft, setCreateDraft] = React.useState<LensNextCreateDraft>({ trade: "", note: "", responsibleCompany: "", reportType: "COORDINATION", floor: "", priority: 3, openItems: "", status: "open" });
   const [createReason, setCreateReason] = React.useState("");
   const [createReviewReady, setCreateReviewReady] = React.useState(false);
+  const [linkType, setLinkType] = React.useState<LensNextLinkedItemType>("rfi");
+  const [linkTargetId, setLinkTargetId] = React.useState("");
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
+  React.useEffect(() => { setLinkType("rfi"); setLinkTargetId(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
   const preparedAction: LensNextPublishAction = publishKind === "status" ? { type: "status", status: publishStatus } : publishKind === "comment" ? { type: "comment", comment: publishText.trim() } : { type: "assignment", responsibleCompany: publishText.trim() };
   return (
@@ -709,6 +721,22 @@ export function LensNextPanelView({
               selectedIssue.openItems ??
               "No issue description recorded."}
           </p>
+          <section className="lens-next__publisher" aria-label="Linked BIMLog items">
+            <h4>Linked BIMLog Items</h4>
+            {linkedItems === "loading" ? <p role="status">Loading links…</p> : linkedItems && linkedItems.links.length ? (
+              <ul>
+                {linkedItems.links.map(item => <li key={item.linkId}><strong>{item.type === "rfi" ? "RFI" : "Submittal"}</strong> {item.displayId} — {item.title} {selectedIssue.publishingAllowed && <button type="button" onClick={() => onRemoveLinkedItem(item.linkId)}>Remove</button>}</li>)}
+              </ul>
+            ) : <p>No linked BIMLog items.</p>}
+            {selectedIssue.publishingAllowed && linkedItems && linkedItems !== "loading" && (
+              <div className="lens-next__publish-confirm">
+                <label className="lens-next__field"><span>Type</span><select value={linkType} onChange={event => { setLinkType(event.target.value as LensNextLinkedItemType); setLinkTargetId(""); }}><option value="rfi">Existing RFI</option><option value="submittal">Existing Submittal</option></select></label>
+                <label className="lens-next__field lens-next__field--wide"><span>Authoritative BIMLog item</span><select value={linkTargetId} onChange={event => setLinkTargetId(event.target.value)}><option value="">Select an existing item</option>{linkedItems.eligible.filter(item => item.type === linkType && !linkedItems.links.some(link => link.type === item.type && link.authoritativeId === item.authoritativeId)).map(item => <option key={`${item.type}:${item.authoritativeId}`} value={item.authoritativeId}>{item.displayId} — {item.title}</option>)}</select></label>
+                <button type="button" className="lens-next__primary" disabled={!linkTargetId} onClick={() => { onLinkBimlogItem(linkType, Number(linkTargetId)); setLinkTargetId(""); }}>Link BIMLog Item</button>
+              </div>
+            )}
+            {linkedItemsError && <p className="lens-next__inline-error" role="status">{linkedItemsError}</p>}
+          </section>
           <div className="lens-next__actions">
             <button
               type="button"

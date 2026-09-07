@@ -22,6 +22,8 @@ import type {
   LensNextCreateReceipt,
   LensNextLayoutItem,
   LensNextLayoutReceipt,
+  LensNextLinksResult,
+  LensNextLinkedItemType,
   LensNextModelBindingResolution,
   LensNextOpenWorkingViewResult,
   LensNextPublishAction,
@@ -108,6 +110,9 @@ export interface LensNextApiClient {
   uploadLocalViewpoint(localViewpoint: LensNextLocalViewpoint, modelFingerprint: string, visualState: Record<string, unknown>, confirmationReason: string, signal?: AbortSignal): Promise<LensNextLocalUploadReceipt>;
   createIssue(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal): Promise<LensNextCreateReceipt>;
   confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, confirmationReason: string, signal?: AbortSignal): Promise<void>;
+  loadLinkedItems(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal): Promise<LensNextLinksResult>;
+  linkBimlogItem(identity: LensNextImmutableIssueIdentity, targetType: LensNextLinkedItemType, targetId: number, signal?: AbortSignal): Promise<LensNextLinksResult>;
+  removeLinkedItem(identity: LensNextImmutableIssueIdentity, linkId: number, signal?: AbortSignal): Promise<LensNextLinksResult>;
 }
 
 export function createLensNextApiClient(
@@ -132,6 +137,24 @@ export function createLensNextApiClient(
       body: JSON.stringify(body), signal,
     });
     return jsonBody(response, "BIMLog controlled publish");
+  };
+  const remove = async (path: string, signal?: AbortSignal): Promise<unknown> => {
+    const response = await fetchImpl(`${base}${path}`, { method: "DELETE", credentials: "same-origin", headers: { Accept: "application/json", Authorization: `Bearer ${token}` }, signal });
+    return jsonBody(response, "BIMLog controlled removal");
+  };
+  const adaptLinks = (raw: unknown): LensNextLinksResult => {
+    if (!raw || typeof raw !== "object" || Array.isArray(raw) || (raw as Record<string, unknown>).success !== true) throw new Error("BIMLog linked-items response is invalid");
+    const body = raw as Record<string, unknown>;
+    const adapt = (value: unknown, linked: boolean) => {
+      if (!Array.isArray(value)) throw new Error("BIMLog linked-items response is invalid");
+      return value.map(entry => {
+        if (!entry || typeof entry !== "object" || Array.isArray(entry)) throw new Error("BIMLog linked-items response is invalid");
+        const item = entry as Record<string, unknown>, type = String(item.type ?? ""), authoritativeId = Number(item.authoritativeId), linkId = linked ? Number(item.linkId) : undefined;
+        if (!(["rfi", "submittal"] as string[]).includes(type) || !Number.isSafeInteger(authoritativeId) || authoritativeId <= 0 || (linked && (!Number.isSafeInteger(linkId) || linkId! <= 0))) throw new Error("BIMLog linked-items response is invalid");
+        return Object.freeze({ ...(linked ? { linkId } : {}), type, authoritativeId, displayId: String(item.displayId ?? ""), title: String(item.title ?? "") });
+      });
+    };
+    return Object.freeze({ links: adapt(body.links, true) as LensNextLinksResult["links"], eligible: adapt(body.eligible, false) as LensNextLinksResult["eligible"] });
   };
   return Object.freeze({
     async resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId: number | null = null, signal?: AbortSignal) {
@@ -256,6 +279,20 @@ export function createLensNextApiClient(
     async confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, confirmationReason: string, signal?: AbortSignal) {
       const raw = await post(`/projects/${assertLensNextProjectId(projectId)}/clash-reports/lens-next/issues/${receipt.serverId}/local-viewpoint`, { contractVersion: "lens-next-local-confirm.v1", viewpointId: receipt.viewpointId, navisworksGuid, visualStateDigest: receipt.visualStateDigest, confirmationReason: confirmationReason.trim() }, signal);
       if (!raw || typeof raw !== "object" || (raw as Record<string, unknown>).success !== true || String((raw as Record<string, unknown>).navisworksGuid ?? "").toLowerCase() !== navisworksGuid.toLowerCase()) throw new Error("BIMLog did not confirm the local Saved Viewpoint identity");
+    },
+    async loadLinkedItems(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal) {
+      const exact = assertLensNextImmutableIdentity(identity);
+      return adaptLinks(await get(`/projects/${exact.projectId}/clash-reports/lens-next/issues/${exact.serverId}/links`, signal));
+    },
+    async linkBimlogItem(identity: LensNextImmutableIssueIdentity, targetType: LensNextLinkedItemType, targetId: number, signal?: AbortSignal) {
+      const exact = assertLensNextImmutableIdentity(identity);
+      if (!["rfi", "submittal"].includes(targetType) || !Number.isSafeInteger(targetId) || targetId <= 0) throw new Error("A valid authoritative BIMLog item is required");
+      return adaptLinks(await post(`/projects/${exact.projectId}/clash-reports/lens-next/issues/${exact.serverId}/links`, { targetType, targetId }, signal));
+    },
+    async removeLinkedItem(identity: LensNextImmutableIssueIdentity, linkId: number, signal?: AbortSignal) {
+      const exact = assertLensNextImmutableIdentity(identity);
+      if (!Number.isSafeInteger(linkId) || linkId <= 0) throw new Error("A valid BIMLog link is required");
+      return adaptLinks(await remove(`/projects/${exact.projectId}/clash-reports/lens-next/issues/${exact.serverId}/links/${linkId}`, signal));
     },
   });
 }
