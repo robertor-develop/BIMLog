@@ -2,13 +2,12 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "f90e1a38941d03a4a22d3763afae8af13f59dcdd",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "aeac1e1711e2cf582dae45f026e934b0f8eb407a238ceee59e5cc658291d64ae",
+  "bundleSha256": "d162ce1ede49c3feb8a70d66823598ec9ccbaf8dcb0518852f97af29eaa27169",
   "impact": {
     "baselineCommit": "f90e1a38941d03a4a22d3763afae8af13f59dcdd",
     "changedPaths": [
       "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
       "living-brief/PLUGIN.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -71,13 +70,13 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "c4549d87adae5ca6719bfa409178fbd8c0afde5e7c03ef9ccc7f71a8279b87f8",
-      "sourceChangedAt": "2026-09-07T00:00:00.000Z",
-      "changeState": "candidate",
+      "sha256": "f48bd6ba4a8ff10826af747aaaf3dfe03c5ee2aadd8f8d7ca13301b44999567e",
+      "sourceChangedAt": "2026-09-07T06:09:53-04:00",
+      "changeState": "accepted",
       "reconciledThroughCommit": "f90e1a38941d03a4a22d3763afae8af13f59dcdd",
       "semanticReviewedThroughCommit": "f90e1a38941d03a4a22d3763afae8af13f59dcdd",
       "semanticReviewTask": "lens-next-build30-n11-p07-release-candidate-20260907",
-      "semanticReviewResult": "updated",
+      "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-07T00:00:00Z"
     },
     {

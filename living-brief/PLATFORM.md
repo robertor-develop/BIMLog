@@ -648,9 +648,3 @@ It changes only when the code structure or curated architectural facts change.
   `/api/v1/healthz` stays HTTP 503 until the real Express application and startup barrier are complete.
 - Initialization failure changes all bootstrap responses to HTTP 503 and closes the listener. Workers
   still start exactly once and only after the ready transition. This changes no schema or persisted data.
-
-## Lens Next Build 30 release-candidate platform boundary
-
-- The accepted Platform behavior from Builds 28 and 29 remains at P07. Build 30 adds no route, persistence, schema, storage, authorization, or deployment behavior.
-- The combined release-candidate regression exercises existing project-scoped link and attachment contracts together and verifies they remain isolated from camera, digest, XML, Saved Viewpoints, and the native port 8766 contract.
-- Native/package metadata is aligned to the already accepted shared `v1.05.N11-P07` identity; this does not advance the Platform counter.

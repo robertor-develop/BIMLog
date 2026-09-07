@@ -16844,8 +16844,8 @@
         },
         {
           "key": "platform",
-          "result": "updated",
-          "reason": "Records that P07 behavior is unchanged and the combined journey adds no Platform contract."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic inventory is unchanged because Build 30 adds no Platform runtime contract."
         },
         {
           "key": "plugin",
@@ -16881,12 +16881,11 @@
       "reviewedChangedPaths": [
         "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/PLUGIN.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "382b5e109d1e70892c9f3af7bfc8b98a73d8f821777cf591d62ae2d7779dde11"
+      "reviewedChangeSha256": "a689d6dd4f55dd0dfbed854a8a7e85c6497d9d20ec2c08028caa3ab1f941d5a5"
     }
   ]
 }
