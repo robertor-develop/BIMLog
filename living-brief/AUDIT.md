@@ -862,6 +862,12 @@ Build 30 began from accepted Build 29 source `c0468c5c4629222be82ae7deae28ffad67
 
 No camera capture/restore, XML formula, sectioning, identity/digest, Saved Viewpoint, bridge port, database/schema, deployment, or customer environment was changed. Package scripts produced and validated both Navisworks-year candidates without installing them. The immutable `v1.05.N10-P05` production fallback and the deferred Build 26 live post-import camera readback gate remain explicit.
 
+## Lens Next Build 31E release-acceptance UI gap repair — September 7, 2026
+
+Inspection of the frozen N11-P07 source proved the RFI, Submittal, and reference-attachment API/client paths and selected-issue detail sections already existed. The acceptance gap was discoverability: a generic item-type selector and generic link/upload labels did not map cleanly to the requested product actions, no Lens Next-specific customer guide existed, and a native `Diagnostics` button exposed operator-only runtime information.
+
+The narrow correction adds explicit RFI/Submittal selectors and confirmation labels, an explicit reference-attachment label, and a customer-facing Help & Guide documenting only actual product actions and restrictions. The native Diagnostics control is no longer constructed or wired. No backend route, database/schema, camera, XML, digest, Working View, Saved Viewpoint, or authorization/storage behavior changed. Shared release identity advances to `v1.05.N12-P08` / `1.5.12.8`; deployment remains a separate governed action.
+
 ## Lens Next create atomic failure telemetry — September 3, 2026
 
 Field evidence proved request validation passed before `db.transaction(...)`, while the first callback-stage event never appeared and the route returned its existing generic HTTP 500. The exact transaction-start cause remained unknown because the outer catch logged a structured object that Replit fragmented across physical lines and did not retain as one complete exception event.

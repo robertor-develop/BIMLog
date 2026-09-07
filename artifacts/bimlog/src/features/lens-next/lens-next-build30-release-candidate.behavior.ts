@@ -46,5 +46,5 @@ assert.match(integration, /eq\(filesTable\.projectId, projectId\)/);
 assert.match(integration, /requirePermission\("admin", "write"\)/);
 assert.match(constants, /BridgeMinimumPort = 8766/);
 assert.match(constants, /BridgePort = BridgeMinimumPort/);
-assert.match(constants, /ProductVersionLabel = "v1\.05\.N11-P07"/);
+assert.match(constants, /ProductVersionLabel = "v1\.05\.N12-P08"/);
 console.log("BUILD30_RELEASE_CANDIDATE_JOURNEY=PASS combined=viewpoint+rfi+submittal+attachment isolation=project,authorization,camera,digest,xml,saved-viewpoint");

@@ -1,5 +1,5 @@
 import React from "react";
-import { ImageOff, X } from "lucide-react";
+import { HelpCircle, ImageOff, X } from "lucide-react";
 import { LENS_NEXT_STATUSES } from "./lens-next-types";
 import {
   LENS_NEXT_VIEW_DIMENSIONS,
@@ -376,6 +376,7 @@ export function LensNextPanelView({
   const [createReviewReady, setCreateReviewReady] = React.useState(false);
   const [linkType, setLinkType] = React.useState<LensNextLinkedItemType>("rfi");
   const [linkTargetId, setLinkTargetId] = React.useState("");
+  const [guideOpen, setGuideOpen] = React.useState(false);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => { setLinkType("rfi"); setLinkTargetId(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
@@ -386,15 +387,29 @@ export function LensNextPanelView({
         <div>
           <p className="lens-next__eyebrow">BIMLog · Controlled publishing</p>
         </div>
-        <button
-          type="button"
-          className="lens-next__refresh"
-          onClick={onRefresh}
-          disabled={refreshState === "refreshing"}
-        >
-          {refreshState === "refreshing" ? "Refreshing…" : "Refresh"}
-        </button>
+        <div className="lens-next__header-actions">
+          <button type="button" className="lens-next__help" onClick={() => setGuideOpen(true)}><HelpCircle aria-hidden="true" size={16} /> Help &amp; Guide</button>
+          <button type="button" className="lens-next__refresh" onClick={onRefresh} disabled={refreshState === "refreshing"}>{refreshState === "refreshing" ? "Refreshing…" : "Refresh"}</button>
+        </div>
       </header>
+
+      {guideOpen && (
+        <div className="lens-next__guide-backdrop" role="presentation" onMouseDown={() => setGuideOpen(false)}>
+          <section className="lens-next__guide" role="dialog" aria-modal="true" aria-labelledby="lens-next-guide-title" onMouseDown={event => event.stopPropagation()}>
+            <header><h2 id="lens-next-guide-title">Lens Next Help &amp; Guide</h2><button type="button" aria-label="Close Help and Guide" onClick={() => setGuideOpen(false)}><X aria-hidden="true" size={18} /></button></header>
+            <ol>
+              <li><strong>Create Issue:</strong> open <em>Create BIMLog Issue</em>, enter the issue details, choose <em>Review Issue Creation</em>, then <em>Confirm and Create BIMLog Issue</em>.</li>
+              <li><strong>Open Working View:</strong> select an issue in the issue list, then choose <em>Open Working View</em> in its details.</li>
+              <li><strong>Export Viewpoints XML:</strong> choose <em>Export Viewpoints XML</em> in the active-model section and select a destination. In Navisworks, open Saved Viewpoints and choose <em>Import Viewpoints</em> to import that file.</li>
+              <li><strong>Link an RFI:</strong> select an issue, open <em>Linked BIMLog Items</em>, choose <em>Link RFI</em>, select an existing RFI, and confirm with <em>Link RFI</em>.</li>
+              <li><strong>Link a Submittal:</strong> select an issue, open <em>Linked BIMLog Items</em>, choose <em>Link Submittal</em>, select an existing Submittal, and confirm with <em>Link Submittal</em>.</li>
+              <li><strong>Add a reference:</strong> select an issue and choose <em>Add Reference Attachment</em> under <em>Reference Attachments</em>. PDF, JPG, JPEG, and PNG files up to 5 MB are accepted.</li>
+              <li><strong>Remove:</strong> use <em>Remove</em> beside a linked item or reference attachment. Removing a reference does not change the issue camera or other links.</li>
+            </ol>
+            <p>Only items from the current authorized BIMLog project can be linked.</p>
+          </section>
+        </div>
+      )}
 
       <div
         className="lens-next__connections"
@@ -733,6 +748,7 @@ export function LensNextPanelView({
           </p>
           <section className="lens-next__publisher" aria-label="Linked BIMLog items">
             <h4>Linked BIMLog Items</h4>
+            <p className="lens-next__section-help">Connect this viewpoint to an existing item in the current BIMLog project.</p>
             {linkedItems === "loading" ? <p role="status">Loading links…</p> : linkedItems && linkedItems.links.length ? (
               <ul>
                 {linkedItems.links.map(item => <li key={item.linkId}><strong>{item.type === "rfi" ? "RFI" : "Submittal"}</strong> {item.displayId} — {item.title} {selectedIssue.publishingAllowed && <button type="button" onClick={() => onRemoveLinkedItem(item.linkId)}>Remove</button>}</li>)}
@@ -740,19 +756,20 @@ export function LensNextPanelView({
             ) : <p>No linked BIMLog items.</p>}
             {selectedIssue.publishingAllowed && linkedItems && linkedItems !== "loading" && (
               <div className="lens-next__publish-confirm">
-                <label className="lens-next__field"><span>Type</span><select value={linkType} onChange={event => { setLinkType(event.target.value as LensNextLinkedItemType); setLinkTargetId(""); }}><option value="rfi">Existing RFI</option><option value="submittal">Existing Submittal</option></select></label>
+                <div className="lens-next__link-type" role="group" aria-label="BIMLog item type"><button type="button" aria-pressed={linkType === "rfi"} onClick={() => { setLinkType("rfi"); setLinkTargetId(""); }}>Link RFI</button><button type="button" aria-pressed={linkType === "submittal"} onClick={() => { setLinkType("submittal"); setLinkTargetId(""); }}>Link Submittal</button></div>
                 <label className="lens-next__field lens-next__field--wide"><span>Authoritative BIMLog item</span><select value={linkTargetId} onChange={event => setLinkTargetId(event.target.value)}><option value="">Select an existing item</option>{linkedItems.eligible.filter(item => item.type === linkType && !linkedItems.links.some(link => link.type === item.type && link.authoritativeId === item.authoritativeId)).map(item => <option key={`${item.type}:${item.authoritativeId}`} value={item.authoritativeId}>{item.displayId} — {item.title}</option>)}</select></label>
-                <button type="button" className="lens-next__primary" disabled={!linkTargetId} onClick={() => { onLinkBimlogItem(linkType, Number(linkTargetId)); setLinkTargetId(""); }}>Link BIMLog Item</button>
+                <button type="button" className="lens-next__primary" disabled={!linkTargetId} onClick={() => { onLinkBimlogItem(linkType, Number(linkTargetId)); setLinkTargetId(""); }}>{linkType === "rfi" ? "Link RFI" : "Link Submittal"}</button>
               </div>
             )}
             {linkedItemsError && <p className="lens-next__inline-error" role="status">{linkedItemsError}</p>}
           </section>
           <section className="lens-next__publisher" aria-label="Reference attachments">
             <h4>Reference Attachments</h4>
+            <p className="lens-next__section-help">Add a small supporting file without changing the viewpoint or its camera.</p>
             {referenceAttachments === "loading" ? <p role="status">Loading references…</p> : referenceAttachments && referenceAttachments.attachments.length ? (
               <ul>{referenceAttachments.attachments.map(attachment => <li key={attachment.linkId}>{attachment.fileName} ({Math.ceil(attachment.fileSize / 1024)} KB) <button type="button" onClick={() => onOpenReferenceAttachment(attachment)}>Open/Download</button> {selectedIssue.publishingAllowed && <button type="button" onClick={() => onRemoveReferenceAttachment(attachment.linkId)}>Remove</button>}</li>)}</ul>
             ) : <p>No reference attachments.</p>}
-            {selectedIssue.publishingAllowed && <label className="lens-next__field lens-next__field--wide"><span>Add Reference (PDF, JPG, PNG; max 5 MB)</span><input type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={event => { const file = event.target.files?.[0]; event.currentTarget.value = ""; if (!file) return; if (file.size > 5 * 1024 * 1024) { window.alert("Reference files must be no larger than 5 MB."); return; } onUploadReferenceAttachment(file); }} /></label>}
+            {selectedIssue.publishingAllowed && <label className="lens-next__field lens-next__field--wide"><span>Add Reference Attachment (PDF, JPG, PNG; max 5 MB)</span><input aria-label="Add Reference Attachment" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={event => { const file = event.target.files?.[0]; event.currentTarget.value = ""; if (!file) return; if (file.size > 5 * 1024 * 1024) { window.alert("Reference files must be no larger than 5 MB."); return; } onUploadReferenceAttachment(file); }} /></label>}
             {referenceAttachmentsError && <p className="lens-next__inline-error" role="status">{referenceAttachmentsError}</p>}
           </section>
           <div className="lens-next__actions">

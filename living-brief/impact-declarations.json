@@ -16886,6 +16886,109 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a689d6dd4f55dd0dfbed854a8a7e85c6497d9d20ec2c08028caa3ab1f941d5a5"
+    },
+    {
+      "taskId": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
+      "reviewedAt": "2026-09-07T11:00:00-04:00",
+      "status": "candidate_source_validated_deployment_deferred",
+      "captureTiming": "same_task_after_implementation_before_clean_production_assembly",
+      "summary": "Repairs Lens Next acceptance discoverability with explicit RFI, Submittal, and reference-attachment controls, adds customer guidance, removes native operator diagnostics from the customer surface, and advances the unreleased shared identity to N12-P08.",
+      "workstreams": [
+        "lens-next-build31e-release-acceptance-ui-repair"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No capability authority or ecosystem ownership boundary changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work follows existing governance, testing, release, and deployment controls."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing usability, regression, evidence, and fail-closed gates apply unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Discoverability and help repair do not alter product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated architecture inventory is structurally unchanged; this candidate changes labels, guidance, and release metadata only."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records removal of the customer-visible Diagnostics control and the N12-P08 native candidate identity."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, schema, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the proven UI gap, bounded correction, version, regression evidence, and deployment boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining governed Platform publication and visible acceptance gate."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the exact root cause and confirms protected primitives and persistence contracts remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-attachments.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-build30-release-candidate.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-linking.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
+        "plugins/BIMLogLensNext/Build-Package-LensNext.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
+        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2021.ps1",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2025.ps1",
+        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
+        "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+        "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+        "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/LensNextDockPanelControl.cs",
+        "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
+        "plugins/BIMLogLensNext/src/LensNextConstants.cs"
+      ],
+      "reviewedChangeSha256": "5200cc9db1983faa91513b5dfcecdfa7bec57eb957213c1d36572007c6e4b6a8"
     }
   ]
 }

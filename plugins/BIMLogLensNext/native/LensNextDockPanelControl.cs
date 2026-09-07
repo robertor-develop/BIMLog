@@ -137,16 +137,6 @@ namespace BIMLogLensNext.Native
             settings.Click += (sender, args) => Settings();
             bar.Controls.Add(settings);
 
-            var diagnostics = new Button
-            {
-                Text = "Diagnostics",
-                AutoSize = true,
-                FlatStyle = FlatStyle.Flat
-            };
-            diagnostics.FlatAppearance.BorderColor = Border;
-            diagnostics.Click += (sender, args) => CopyDiagnostics();
-            bar.Controls.Add(diagnostics);
-
             var exportXml = new Button
             {
                 Text = "Export Viewpoints XML",
@@ -185,8 +175,7 @@ namespace BIMLogLensNext.Native
 
             bar.Resize += (sender, args) =>
             {
-                diagnostics.Location = new Point(Math.Max(210, bar.Width - diagnostics.Width - 8), 9);
-                exportXml.Location = new Point(Math.Max(150, diagnostics.Left - exportXml.Width - 6), 9);
+                exportXml.Location = new Point(Math.Max(150, bar.Width - exportXml.Width - 8), 9);
                 createIssue.Location = new Point(Math.Max(100, exportXml.Left - createIssue.Width - 6), 9);
                 settings.Location = new Point(Math.Max(60, createIssue.Left - settings.Width - 6), 9);
                 _reloadButton.Location = new Point(Math.Max(92, settings.Left - _reloadButton.Width - 6), 9);

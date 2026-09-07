@@ -2164,3 +2164,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Complete the exact clean production API assembly and freeze reproducible dual-year package/evidence hashes for the reconciled Build 30 source. Do not deploy, install, publish, or overwrite the immutable `v1.05.N10-P05` fallback.
 - Preserve Build 27 XML, Build 28 linking, and Build 29 attachment behavior as accepted. Build 30 permits only coherent release metadata and regression/evidence hardening; no new feature or camera/XML/digest/schema mutation is authorized.
 - Build 26 live post-import camera readback remains the deferred release gate and must be recorded without representing it as completed.
+
+## Lens Next Build 31E acceptance UI closure
+
+- Preserve the explicit selected-issue controls and customer Help & Guide in the `v1.05.N12-P08` candidate. Do not reintroduce native diagnostic/probe controls into the customer ribbon or dock pane.
+- A controlled Platform publication is separately governed and is required before Roberto can see the repaired web UI in the installed Native shell. Until that publication and visible-browser verification occur, report the candidate as blocked from Roberto acceptance rather than claiming the source-only UI is live.
+- Retain the immutable `v1.05.N10-P05` fallback and the Build 26 live post-import camera readback release gate.
