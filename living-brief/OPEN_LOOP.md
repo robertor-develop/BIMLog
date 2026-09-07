@@ -2179,3 +2179,4 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Preserve the P09 metadata-only Native/package alignment and exact governed 2025 package artifact; do not introduce functional drift after the release gates pass.
 - Ruben's real Navisworks Manage 2025 field acceptance remains pending for Create, Open Working View, responsiveness, linking, reference attachment, XML export/import camera, Help, diagnostic cleanliness, and port 8766 stability.
 - The immutable production fallback remains `v1.05.N10-P05`. Any field failure must retain exact action, expected/actual behavior, and screenshot/error before a corrective build is authorized.
+- After the exact P09 artifact is frozen and handed off, only Ruben field evidence remains open; no rebuild or version change follows a complete PASS.

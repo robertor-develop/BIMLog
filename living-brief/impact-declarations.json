@@ -17065,6 +17065,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "201025ce2021dbd2e5fa4d91393dca303a45df1eae97214b5e115f3c01e51dbd"
+    },
+    {
+      "taskId": "lens-next-build36b-final-p09-2025-package-release-20260907",
+      "reviewedThroughCommit": "13e295becd38d378af13c89628efabb7d6e2e4c4",
+      "reviewedAt": "2026-09-07T19:43:21-04:00",
+      "status": "release_metadata_validated_field_acceptance_pending",
+      "captureTiming": "same_task_after_metadata_commit_before_final_freeze",
+      "summary": "Aligns unchanged N12 Navisworks 2025 release and package identity to the already-live P09 Platform release without functional product, database, schema, or deployment changes.",
+      "workstreams": [
+        "lens-next-build36b-final-p09-2025-package-release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership or capability boundary changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed packaging, evidence, and field-gate rules apply unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing build, artifact inspection, regression, and field acceptance requirements apply unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release identity alignment does not alter product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Platform structure, route, dependency, or deployment change."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the P09 Navisworks 2025 package identity, file version, and unchanged Native behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported document presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards, schema, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the shared P09 identity and successful governed 2025 build gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records pending Ruben field acceptance and retained fallback."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact metadata-only scope and validation evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "760908f23dcaab0f15f87e9230993f5b6e39be0a7eb49bfd6cf99c34cd6a2299"
     }
   ]
 }

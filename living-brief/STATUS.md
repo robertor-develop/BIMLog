@@ -1163,3 +1163,4 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - The unchanged N12 Native implementation is metadata-aligned to the already-live P09 Platform release identity: human/package version `v1.05.N12-P09` and Windows/Autodesk file version `1.5.12.9`.
 - This alignment changes release, assembly, installer, and package identity only. Create, Open Working View, camera, XML, bridge/port 8766, refresh, RFI, Submittal, reference-attachment, database, schema, and Platform behavior are unchanged.
 - The genuine Navisworks 2025 build passes core contracts 123/123 and the 2025 adapter 56/56 under the governed H-root. Package-only installer and release-identity checks pass; installation and Ruben field acceptance remain separate gates.
+- Governance reconciliation is bound to metadata implementation commit `13e295becd38d378af13c89628efabb7d6e2e4c4`; the final state/evidence commit follows without further product mutation.
