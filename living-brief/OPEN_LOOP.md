@@ -2158,3 +2158,9 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Preserve implementation commit `9e77eaa23cdc7bf1aa8ac24a4c9fcd77f2fc287a` and its narrow reuse of `files`, `linked_items`, governed object storage, bounded multipart parsing, and authenticated project-scoped downloads. No schema or storage-provider change is permitted.
 - Complete the reconciled production API assembly and freeze evidence for `BUILD29_REFERENCE_ATTACHMENTS_ACCEPTED`; do not deploy, publish, package, or mutate Native.
 - Retain the deferred Build 26 live post-import camera readback as the coherent XML release gate. Reference attachments must remain excluded from camera, digest, XML, Working View, Saved Viewpoints, and RFI/Submittal semantics.
+
+## Lens Next Build 30 N11-P07 release-candidate closure
+
+- Complete the exact clean production API assembly and freeze reproducible dual-year package/evidence hashes for the reconciled Build 30 source. Do not deploy, install, publish, or overwrite the immutable `v1.05.N10-P05` fallback.
+- Preserve Build 27 XML, Build 28 linking, and Build 29 attachment behavior as accepted. Build 30 permits only coherent release metadata and regression/evidence hardening; no new feature or camera/XML/digest/schema mutation is authorized.
+- Build 26 live post-import camera readback remains the deferred release gate and must be recorded without representing it as completed.

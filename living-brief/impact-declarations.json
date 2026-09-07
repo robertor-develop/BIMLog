@@ -16810,6 +16810,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "60347f49671939e2fdeacb84fe5c13818088a04862ab7ce4001bc9b62e149af6"
+    },
+    {
+      "taskId": "lens-next-build30-n11-p07-release-candidate-20260907",
+      "reviewedThroughCommit": "f90e1a38941d03a4a22d3763afae8af13f59dcdd",
+      "reviewedAt": "2026-09-07T00:00:00Z",
+      "status": "accepted_release_candidate_deployment_deferred",
+      "captureTiming": "same_task_after_release_hardening_before_production_api_assembly",
+      "summary": "Reconciles the Build 27 through Build 29 feature lineage, coherent N11-P07 native and package metadata, combined release-candidate behavior proof, unchanged protected primitives, and deferred live camera gate.",
+      "workstreams": [
+        "lens-next-build30-release-candidate"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem capability owner, authority boundary, or external handoff contract changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release hardening follows existing governance, build, evidence, and no-deployment controls."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed validation and complete regression requirements remain authoritative."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Consolidating accepted features does not alter the accepted BIMLog product vision."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records that P07 behavior is unchanged and the combined journey adds no Platform contract."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records coherent N11-P07 package and binary identity for both Navisworks years."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, unit, schema, or compliance assertion changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 30 provenance, test state, version alignment, and no-release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records remaining assembly, evidence freeze, and deferred live camera gate."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact bounded metadata hardening and unchanged product and deployment boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "382b5e109d1e70892c9f3af7bfc8b98a73d8f821777cf591d62ae2d7779dde11"
     }
   ]
 }

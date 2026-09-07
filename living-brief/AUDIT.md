@@ -856,6 +856,12 @@ Telegram's provider acknowledged private delivery event
 2025 archive with SHA-256 `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B`.
 Provider acknowledgement is evidence of send acceptance, not independent proof that a Telegram client displayed it.
 
+## Lens Next Build 30 release-candidate hardening — September 7, 2026
+
+Build 30 began from accepted Build 29 source `c0468c5c4629222be82ae7deae28ffad67053a76`, with accepted Build 27 and Build 28 commits proven in ancestry. The only product-surface correction is release metadata alignment from stale native/package P05 references to the already accepted shared `v1.05.N11-P07` identity and binary `1.5.11.7`; a focused combined-journey contract was added for release evidence.
+
+No camera capture/restore, XML formula, sectioning, identity/digest, Saved Viewpoint, bridge port, database/schema, deployment, or customer environment was changed. Package scripts produced and validated both Navisworks-year candidates without installing them. The immutable `v1.05.N10-P05` production fallback and the deferred Build 26 live post-import camera readback gate remain explicit.
+
 ## Lens Next create atomic failure telemetry — September 3, 2026
 
 Field evidence proved request validation passed before `db.transaction(...)`, while the first callback-stage event never appeared and the route returned its existing generic HTTP 500. The exact transaction-start cause remained unknown because the outer catch logged a structured object that Replit fragmented across physical lines and did not retain as one complete exception event.

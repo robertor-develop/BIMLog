@@ -1135,3 +1135,11 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - The accepted policy allows PDF, PNG, JPG, and JPEG only, verifies extension, MIME, and file signatures, enforces an inclusive 5 MiB server-side maximum, stores exact bytes without a new image/PDF processing subsystem, and removes an underlying object only after its last relationship is removed.
 - Camera, Working View, viewpoint identity/digests, XML export, RFI/Submittal linking, Native behavior, database/schema, deployment, and the immutable `v1.05.N10-P05` fallback remain unchanged. Platform identity advances from P06 to candidate `v1.05.N11-P07`; no release or deployment is claimed.
 - Focused attachment/linking, XML 123/123, Navisworks 2021 adapter 56/56, core Lens Next, storage 19/19, Help Center/typecheck, and production web build gates pass. Production API assembly awaits this required Living Brief reconciliation.
+
+## Lens Next v1.05.N11-P07 Build 30 release candidate — 2026-09-07
+
+- Build 30 consolidates the accepted Build 27 XML product integration, Build 28 RFI/Submittal linking, and Build 29 reference attachments without adding product behavior. Their accepted commits remain ancestors of the release-candidate lineage.
+- Native and package metadata are coherently aligned to `v1.05.N11-P07` / `1.5.11.7`; camera capture/restore, viewpoint identity, visual and camera digests, XML formulas, sectioning, Saved Viewpoint behavior, port 8766, database/schema, and production deployment are unchanged.
+- The combined controlled journey proves one authoritative viewpoint can retain an RFI link, Submittal link, and reference attachment while project scope, authorization, independent removal, camera/digest/XML isolation, and authenticated download remain intact.
+- Focused XML contracts pass 123/123; Navisworks 2021 and 2025 adapter contracts pass 56/56; focused linking, attachment, combined-journey, core Lens Next, Platform/UI, frontend typecheck, and frontend production build gates pass. Exact production API assembly and immutable release-candidate evidence are the remaining Build 30 closure gates.
+- This is a prepared release candidate only. Nothing is deployed or installed, `v1.05.N10-P05` remains the production fallback, and Build 26 live post-import camera readback remains a deferred release gate.

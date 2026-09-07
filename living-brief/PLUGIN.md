@@ -339,3 +339,9 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - Shared core contracts pass 54/54 and both year adapters pass 52/52. The controlled 2021 ZIP SHA-256 is
   `877EF261940B63E4E86C168B233AE9E35FE7CCDA4B93F1BC4D96827D243FDA59`; the controlled 2025 ZIP SHA-256 is
   `190C6399F199AB3DFA1FDE56A991EF37D1244A84A9634043005055575F12AB2B` and contains the 2025 BAT installer.
+
+## Lens Next v1.05.N11-P07 Build 30 release-candidate identity
+
+- Human/package identity is `v1.05.N11-P07`; Windows DLL and Autodesk package metadata use `1.5.11.7` for Navisworks 2021 and 2025.
+- The metadata alignment does not alter capture, Working View restore, XML camera/sectioning serialization, viewpoint identity/digests, Saved Viewpoint behavior, bridge port 8766, database/schema, or deployment state.
+- Shared XML contracts pass 123/123 and both year adapter suites pass 56/56. Package-only validation performs no installation. Exact candidate archive/component hashes are retained in the permanent Build 30 evidence directory after final assembly.
