@@ -258,7 +258,9 @@ export function createLensNextApiClient(
       const visualStateJson = String(body.visualStateJson ?? "");
       const visualStateDigest = String(body.visualStateDigest ?? "").toLowerCase();
       if (!visualStateJson || !/^[0-9a-f]{64}$/.test(visualStateDigest)) throw new Error("BIMLog visual-state package is incomplete");
-      if (!issue.visualStateDigest || visualStateDigest !== issue.visualStateDigest.toLowerCase()) throw new Error("BIMLog visual-state digest changed after inventory refresh");
+      const identityReboundFromCapturePlaceholder = body.identityReboundFromCapturePlaceholder === true;
+      const previousVisualStateDigest = String(body.previousVisualStateDigest ?? "").trim().toLowerCase();
+      if (!issue.visualStateDigest || (visualStateDigest !== issue.visualStateDigest.toLowerCase() && (!identityReboundFromCapturePlaceholder || previousVisualStateDigest !== issue.visualStateDigest.toLowerCase()))) throw new Error("BIMLog visual-state digest changed after inventory refresh");
       let embeddedDigest = "";
       try {
         const visualState = JSON.parse(visualStateJson) as Record<string, unknown>;

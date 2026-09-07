@@ -20,7 +20,7 @@ import { LensImportValidationError, validateAndHashLensImportRequest } from "../
 import { getAppUrl } from "../lib/email";
 import AdmZip from "adm-zip";
 import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "../lib/lens-next-publishing";
-import { LensNextLocalUploadError, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
+import { LensNextLocalUploadError, rebindLegacyNavigationServerIdentity, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
 import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-telemetry";
 import { storage } from "../lib/storage-adapter";
 import { LENS_REFERENCE_MAX_BYTES, validateLensReferenceFile } from "../lib/lens-next-reference-attachment";
@@ -261,6 +261,23 @@ async function assignTradeFloorSeq(
   // that does not match the real assigned one. Absent today (plugin sends none).
   const correction = claimedSeq != null && claimedSeq !== seq ? 1 : null;
   return { seq, correction };
+}
+
+async function assignAvailableTradeFloorDisplay(
+  projectId: number,
+  trade: string,
+  floor: string,
+  exec: { execute: (q: ReturnType<typeof sql>) => Promise<unknown>; select: typeof db.select },
+): Promise<{ seq: number; correction: number | null; displayId: string }> {
+  const abbr = (trade.length > 2 ? trade.slice(0, 2) : trade).toUpperCase() || "??";
+  await exec.execute(sql`SELECT pg_advisory_xact_lock(${projectId}, hashtext(${abbr}))`);
+  for (;;) {
+    const sequence = await assignTradeFloorSeq(projectId, trade, floor, null, exec);
+    const displayId = `${abbr}-${String(sequence.seq).padStart(3, "0")}`;
+    const collision = await exec.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable)
+      .where(and(eq(lensViewpointsTable.projectId, projectId), eq(lensViewpointsTable.displayId, displayId), eq(lensViewpointsTable.lifecycleStatus, "active"))).limit(1);
+    if (!collision.length) return { ...sequence, displayId };
+  }
 }
 
 const upload = singleFileUpload({ fileSize: 50 * 1024 * 1024 });
@@ -774,15 +791,14 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
         stage = "floor_sequence_assignment";
         trace("START", { floor });
         stage = "trade_floor_sequence_assignment";
-        const sequence = await assignTradeFloorSeq(projectId, trade, floor, null, tx);
+        const sequence = await assignAvailableTradeFloorDisplay(projectId, trade, floor, tx as any);
         stage = "trade_sequence_assignment";
         trace("PASS", { sequence: sequence.seq });
         stage = "floor_sequence_assignment";
         trace("PASS", { sequence: sequence.seq });
         stage = "display_id_construction";
         trace("START", { sequence: sequence.seq });
-        const abbr = (trade.length > 2 ? trade.slice(0, 2) : trade).toUpperCase() || "??";
-        const displayId = `${abbr}-${String(sequence.seq).padStart(3, "0")}`;
+        const displayId = sequence.displayId;
         trace("PASS", { displayId });
         stage = "final_visual_package_update";
         trace("START", { provisionalServerId: inserted.id, displayId });
@@ -1576,6 +1592,8 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visu
     const [row] = await db.select().from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId))).limit(1);
     if (!row) { res.status(404).json({ error: "lens_viewpoint_not_found" }); return; }
     if (!row.visualStateJson || !row.visualStateDigest) { res.status(404).json({ error: "visual_state_not_available" }); return; }
+    let identityReboundFromCapturePlaceholder = false;
+    let previousVisualStateDigest: string | null = null;
     try {
       validatePersistedLensNextVisualState(row.visualStateJson, row.visualStateDigest, {
         projectId: row.projectId, serverId: row.id, viewpointId: row.viewpointId,
@@ -1583,15 +1601,33 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visu
       });
     } catch (error) {
       if (error instanceof LensNextLocalUploadError) {
+        if (error.code === "navigation_identity_mismatch") {
+          try {
+            const rebound = rebindLegacyNavigationServerIdentity(row.visualStateJson, row.visualStateDigest, {
+              projectId: row.projectId, serverId: row.id, viewpointId: row.viewpointId,
+              lifecycleStatus: row.lifecycleStatus, revisionNumber: row.revisionNumber,
+            });
+            previousVisualStateDigest = row.visualStateDigest;
+            row.visualStateJson = rebound.json;
+            row.visualStateDigest = rebound.digest;
+            identityReboundFromCapturePlaceholder = true;
+          } catch (rebindError) {
+            if (rebindError instanceof LensNextLocalUploadError) { res.status(rebindError.status).json({ error: rebindError.code, message: rebindError.message, digestDiagnostics: rebindError.digestDiagnostics }); return; }
+            throw rebindError;
+          }
+        } else {
         res.status(error.status).json({ error: error.code, message: error.message, digestDiagnostics: error.digestDiagnostics }); return;
+        }
       }
-      throw error;
+      else throw error;
     }
     res.json({
       success: true,
       identity: { projectId: row.projectId, serverId: row.id, viewpointId: row.viewpointId, lifecycleStatus: row.lifecycleStatus, revisionNumber: row.revisionNumber },
       visualStateJson: row.visualStateJson,
       visualStateDigest: row.visualStateDigest,
+      identityReboundFromCapturePlaceholder,
+      previousVisualStateDigest,
     });
   }
 );

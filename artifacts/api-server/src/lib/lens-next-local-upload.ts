@@ -329,6 +329,35 @@ export type LensNextPersistedVisualStateIdentity = {
   revisionNumber: number;
 };
 
+export function rebindLegacyNavigationServerIdentity(
+  visualStateJson: string,
+  visualStateDigest: string,
+  expected: LensNextPersistedVisualStateIdentity,
+): { json: string; digest: string } {
+  let state: any;
+  try { state = JSON.parse(visualStateJson); }
+  catch { throw new LensNextLocalUploadError("visual_state_json_invalid", "BIMLog visual-state JSON is invalid.", 422); }
+  if (!isLensNextNavigationView(state))
+    throw new LensNextLocalUploadError("navigation_identity_mismatch", "BIMLog navigation identity does not match the issue record.", 409);
+  const capturedIdentity: LensNextPersistedVisualStateIdentity = {
+    projectId: Number(field(state, "ProjectId", "projectId")),
+    serverId: Number(field(state, "ServerId", "serverId")),
+    viewpointId: String(field(state, "ViewpointId", "viewpointId")),
+    lifecycleStatus: String(field(state, "LifecycleStatus", "lifecycleStatus")),
+    revisionNumber: Number(field(state, "RevisionNumber", "revisionNumber")),
+  };
+  if (capturedIdentity.serverId !== 1 || capturedIdentity.projectId !== expected.projectId || capturedIdentity.viewpointId !== expected.viewpointId || capturedIdentity.lifecycleStatus !== expected.lifecycleStatus || capturedIdentity.revisionNumber !== expected.revisionNumber)
+    throw new LensNextLocalUploadError("navigation_identity_mismatch", "BIMLog navigation identity does not match the issue record.", 409);
+  validateNavigationView(state, visualStateDigest, capturedIdentity);
+  const rebound = structuredClone(state);
+  if (Object.prototype.hasOwnProperty.call(rebound, "ServerId")) rebound.ServerId = expected.serverId;
+  else rebound.serverId = expected.serverId;
+  const digest = lensNextNavigationDigest(rebound);
+  if (Object.prototype.hasOwnProperty.call(rebound, "DigestSha256")) rebound.DigestSha256 = digest;
+  else rebound.digestSha256 = digest;
+  return { json: JSON.stringify(rebound), digest };
+}
+
 const isHistoricalUnversionedVisualState = (state: any): boolean => {
   const contractVersion = String(field(state, "ContractVersion", "contractVersion") ?? "").trim();
   const diagnostics = field(state, "DigestDiagnostics", "digestDiagnostics");

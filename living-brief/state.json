@@ -1,43 +1,24 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
+  "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "bea242b8739d426824f7a55623c611f21da67b060381b7a52b55a0cdbcf753be",
+  "bundleSha256": "92759e37563068ed270620745a48fe02e2ebc807f335f46e9d4b9d7d5f6f444e",
   "impact": {
-    "baselineCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
+    "baselineCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
     "changedPaths": [
       "artifacts/api-server/src/lib/help-center.behavior.ts",
+      "artifacts/api-server/src/lib/lens-next-create.behavior.ts",
+      "artifacts/api-server/src/lib/lens-next-local-upload.behavior.ts",
+      "artifacts/api-server/src/lib/lens-next-local-upload.ts",
+      "artifacts/api-server/src/routes/clash_reports.ts",
       "artifacts/bimlog/src/components/layout/Navbar.tsx",
-      "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
-      "artifacts/bimlog/src/features/lens-next/lens-next-attachments.behavior.ts",
-      "artifacts/bimlog/src/features/lens-next/lens-next-build30-release-candidate.behavior.ts",
-      "artifacts/bimlog/src/features/lens-next/lens-next-linking.behavior.ts",
-      "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+      "artifacts/bimlog/src/features/lens-next/lens-next-client.behavior.ts",
+      "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
       "artifacts/bimlog/src/pages/HelpCenter.tsx",
       "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json",
-      "plugins/BIMLogLensNext/BIMLogLensNext.csproj",
-      "plugins/BIMLogLensNext/Build-Package-LensNext.ps1",
-      "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
-      "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
-      "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
-      "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
-      "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
-      "plugins/BIMLogLensNext/Install-BIMLogLensNext2021.ps1",
-      "plugins/BIMLogLensNext/Install-BIMLogLensNext2025.ps1",
-      "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
-      "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
-      "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
-      "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
-      "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
-      "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
-      "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
-      "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
-      "plugins/BIMLogLensNext/native/LensNextDockPanelControl.cs",
-      "plugins/BIMLogLensNext/native/tests/AdapterContractTests.cs",
-      "plugins/BIMLogLensNext/src/LensNextConstants.cs"
+      "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -53,11 +34,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "claude",
@@ -65,11 +46,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "quality",
@@ -77,11 +58,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "vision",
@@ -89,11 +70,11 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "platform",
@@ -101,11 +82,11 @@
       "sha256": "f48bd6ba4a8ff10826af747aaaf3dfe03c5ee2aadd8f8d7ca13301b44999567e",
       "sourceChangedAt": "2026-09-07T07:42:20-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "plugin",
@@ -113,11 +94,11 @@
       "sha256": "af06237c1279624244cd1eca25402b441d25af911c6295c3dbc31c9671ead9c1",
       "sourceChangedAt": "2026-09-07T07:40:57-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "report_design_system",
@@ -125,11 +106,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "standards_register",
@@ -137,47 +118,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "e1ee8e64ee5d95874b09d2f77f7a338365b5eafc31b8458c7a30daec70f97f73",
-      "sourceChangedAt": "2026-09-07T15:03:35.000Z",
+      "sha256": "eab27c87978832afebb1a2f2a935c99731ed9e7a4ff8910f03cc16611c900997",
+      "sourceChangedAt": "2026-09-07T17:25:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "56131de9ce44409c69e4d02094109105db2cbb716716e71ccf863e2e20602dfa",
-      "sourceChangedAt": "2026-09-07T15:03:35.000Z",
+      "sha256": "583af55fd81e42f393cc95027f3cbac4633b9ed4ce09fc393d5fab797882df8c",
+      "sourceChangedAt": "2026-09-07T17:25:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "d7a4e243538c0a89f88ec23f80dcf476f0f504c8f06ff54d40d89b21e0e38c94",
-      "sourceChangedAt": "2026-09-07T15:03:35.000Z",
+      "sha256": "bd1eba48b91c7b0ccc5b2857d05862600aff375e39015fbfd1e9dbe9b745cbc9",
+      "sourceChangedAt": "2026-09-07T17:25:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewedThroughCommit": "95a621be4a18f3d4a439a2d15f35cc78c1aa7fcc",
-      "semanticReviewTask": "lens-next-build31e-release-acceptance-ui-gap-help-repair-20260907",
+      "reconciledThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "semanticReviewTask": "lens-next-build32-create-open-working-view-regression-repair-20260907",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-07T11:00:00-04:00"
+      "semanticReviewedAt": "2026-09-07T13:25:00-04:00"
     }
   ]
 }

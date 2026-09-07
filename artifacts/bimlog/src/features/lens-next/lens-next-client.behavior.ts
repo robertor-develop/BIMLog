@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import {
+  createLensNextApiClient,
   createLensNextBridgeClient,
   lensNextBridgeOriginFromSearch,
   validateLensNextBridgeOrigin,
@@ -95,4 +96,31 @@ assert.equal(JSON.parse(applyBodies[0]).requestId, applyRequestId);
 assert.equal(JSON.parse(applyBodies[0]).idempotencyKey, applyRequestId);
 assert.equal(JSON.parse(applyBodies[0]).fields.visualStateDigest, "d".repeat(64));
 
-console.log("PASS Lens Next strict bridge origin, safe token renewal, and stable apply idempotency");
+const priorDigest = "c".repeat(64);
+const reboundDigest = "d".repeat(64);
+const apiClient = createLensNextApiClient({
+  token: "test-token",
+  fetchImpl: async () => Response.json({
+    success: true,
+    identity: { projectId: 29, serverId: 691, viewpointId: "legacy-navigation", lifecycleStatus: "active", revisionNumber: 1 },
+    visualStateJson: JSON.stringify({ DigestSha256: reboundDigest }),
+    visualStateDigest: reboundDigest,
+    identityReboundFromCapturePlaceholder: true,
+    previousVisualStateDigest: priorDigest,
+  }),
+});
+const reboundState = await apiClient.loadVisualState({ identity: { projectId: 29, serverId: 691, viewpointId: "legacy-navigation", lifecycleStatus: "active", revisionNumber: 1 }, visualStateDigest: priorDigest } as any);
+assert.equal(reboundState.visualStateDigest, reboundDigest);
+await assert.rejects(() => createLensNextApiClient({
+  token: "test-token",
+  fetchImpl: async () => Response.json({
+    success: true,
+    identity: { projectId: 29, serverId: 691, viewpointId: "legacy-navigation", lifecycleStatus: "active", revisionNumber: 1 },
+    visualStateJson: JSON.stringify({ DigestSha256: reboundDigest }),
+    visualStateDigest: reboundDigest,
+    identityReboundFromCapturePlaceholder: true,
+    previousVisualStateDigest: "e".repeat(64),
+  }),
+}).loadVisualState({ identity: { projectId: 29, serverId: 691, viewpointId: "legacy-navigation", lifecycleStatus: "active", revisionNumber: 1 }, visualStateDigest: priorDigest } as any), /digest changed/);
+
+console.log("PASS Lens Next strict bridge origin, safe token renewal, stable apply idempotency, and fail-closed legacy navigation placeholder rebind");

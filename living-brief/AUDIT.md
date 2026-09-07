@@ -868,6 +868,10 @@ Inspection of the frozen N11-P07 source proved the RFI, Submittal, and reference
 
 The narrow correction adds explicit RFI/Submittal selectors and confirmation labels, an explicit reference-attachment label, and a customer-facing Help & Guide documenting only actual product actions and restrictions. The native Diagnostics control is no longer constructed or wired. No backend route, database/schema, camera, XML, digest, Working View, Saved Viewpoint, or authorization/storage behavior changed. Shared release identity advances to `v1.05.N12-P08` / `1.5.12.8`; deployment remains a separate governed action.
 
+## 2026-09-07 - Lens Next Build 32 bounded regression repair
+
+Acceptance evidence traced atomic create failure to the mismatch between floor-scoped counters and the project-wide active display-ID uniqueness constraint; the failure occurred on the final display/package update and the surrounding transaction correctly rolled back. Open Working View failure was an exact `ServerId` mismatch: a valid navigation-v1 capture retained provisional identity `1` while the selected active BIMLog record had its assigned server identity. The correction allocates an unused display ID under a transaction advisory lock and permits only a cryptographically verified placeholder-1 navigation package with exact project, viewpoint, lifecycle, and revision identity to produce a rebound read projection. It does not accept arbitrary stale IDs or mutate camera, Native, XML, database schema, or protected authorization boundaries.
+
 ## Lens Next create atomic failure telemetry — September 3, 2026
 
 Field evidence proved request validation passed before `db.transaction(...)`, while the first callback-stage event never appeared and the route returned its existing generic HTTP 500. The exact transaction-start cause remained unknown because the outer catch logged a structured object that Replit fragmented across physical lines and did not retain as one complete exception event.

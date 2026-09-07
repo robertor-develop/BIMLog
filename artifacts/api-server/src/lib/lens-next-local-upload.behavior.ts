@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
-import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextNavigationDigest, lensNextVisualStateCanonicalInput, lensNextVisualStateDigest, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "./lens-next-local-upload";
+import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextNavigationDigest, lensNextVisualStateCanonicalInput, lensNextVisualStateDigest, rebindLegacyNavigationServerIdentity, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "./lens-next-local-upload";
 
 const state: any = {
   SchemaVersion: 1, ProjectId: 7, ServerId: 1, ViewpointId: "LOCAL-7", LifecycleStatus: "active", RevisionNumber: 1,
@@ -65,6 +65,21 @@ assert.equal(persistedNavigation.ServerId, 701);
 assert.equal(persistedNavigation.ViewpointId, "N07-NEW");
 assert.equal(lensNextNavigationDigest(persistedNavigation), navigationRebound.digest);
 validatePersistedLensNextVisualState(navigationRebound.json, navigationRebound.digest, { projectId: 29, serverId: 701, viewpointId: "N07-NEW", lifecycleStatus: "active", revisionNumber: 1 });
+const capturedNavigationJson = JSON.stringify(navigation);
+const legacyNavigationRebound = rebindLegacyNavigationServerIdentity(capturedNavigationJson, navigation.DigestSha256, { projectId: 29, serverId: 691, viewpointId: navigation.ViewpointId, lifecycleStatus: "active", revisionNumber: 1 });
+const legacyNavigationParsed = JSON.parse(legacyNavigationRebound.json);
+assert.equal(legacyNavigationParsed.ServerId, 691);
+assert.equal(legacyNavigationParsed.ProjectId, 29);
+assert.equal(legacyNavigationParsed.ViewpointId, navigation.ViewpointId);
+validatePersistedLensNextVisualState(legacyNavigationRebound.json, legacyNavigationRebound.digest, { projectId: 29, serverId: 691, viewpointId: navigation.ViewpointId, lifecycleStatus: "active", revisionNumber: 1 });
+assert.throws(
+  () => rebindLegacyNavigationServerIdentity(capturedNavigationJson, navigation.DigestSha256, { projectId: 30, serverId: 691, viewpointId: navigation.ViewpointId, lifecycleStatus: "active", revisionNumber: 1 }),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "navigation_identity_mismatch",
+);
+assert.throws(
+  () => rebindLegacyNavigationServerIdentity(capturedNavigationJson, navigation.DigestSha256, { projectId: 29, serverId: 691, viewpointId: "different-viewpoint", lifecycleStatus: "active", revisionNumber: 1 }),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "navigation_identity_mismatch",
+);
 assert.throws(
   () => validateAndRebindLocalVisualState({ ...navigation, Camera: { ...navigation.Camera, Position: { ...navigation.Camera.Position, X: 371.12345678901235 } } }, { projectId: 29, serverId: 702, viewpointId: "N07-TAMPER", modelFingerprint: navigation.ModelFingerprint }),
   (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "navigation_capture_invalid",
