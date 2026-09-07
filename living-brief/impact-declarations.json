@@ -16992,7 +16992,7 @@
     },
     {
       "taskId": "lens-next-build32-create-open-working-view-regression-repair-20260907",
-      "reviewedThroughCommit": "f947af6e0acc2f2d19e0b20db7ef57d700fec073",
+      "reviewedThroughCommit": "96994fa84a4f3dcb8514c7d74bfddf245abb249e",
       "reviewedAt": "2026-09-07T13:25:00-04:00",
       "status": "candidate_source_validated_deployment_deferred",
       "captureTiming": "same_task_after_implementation_before_release_candidate_assembly",
@@ -17058,21 +17058,11 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/help-center.behavior.ts",
-        "artifacts/api-server/src/lib/lens-next-create.behavior.ts",
-        "artifacts/api-server/src/lib/lens-next-local-upload.behavior.ts",
-        "artifacts/api-server/src/lib/lens-next-local-upload.ts",
-        "artifacts/api-server/src/routes/clash_reports.ts",
-        "artifacts/bimlog/src/components/layout/Navbar.tsx",
-        "artifacts/bimlog/src/features/lens-next/lens-next-client.behavior.ts",
-        "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
-        "artifacts/bimlog/src/pages/HelpCenter.tsx",
-        "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "5364b921c1184874f50bc7024efe08f3f6f1cec0f1cf8f172e6c1a82b2daf085"
+      "reviewedChangeSha256": "8cda6b0c7f700a00605921418d0962b39b5ee8c0b32a0914b89439cfff572dc1"
     }
   ]
 }
