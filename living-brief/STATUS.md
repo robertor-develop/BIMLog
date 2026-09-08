@@ -1166,7 +1166,7 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - Governance reconciliation is bound to metadata implementation commit `13e295becd38d378af13c89628efabb7d6e2e4c4`; the final state/evidence commit follows without further product mutation.
 # Job Intake / Multi-APU recovery authority — September 8, 2026
 
-Roberto authorized a controlled, continuous recovery of the complete original Job Intake and Multi-APU product contract, with up to 40 micro-builds available only when evidence requires them. The current `v1.05.N12-P09` lineage does not contain historical integrated Intake/APU commit `1314006b4409a6d193f95b5c7c12cd4d5b319fbc` or its Intake APU 01–10 ancestry. Current source therefore cannot be described as the completed original multi-company product even though it contains later Smart Intake, multi-contract, Generic APU, budget, and operations capabilities.
+Roberto authorized a controlled, continuous recovery of the complete original Job Intake and Multi-APU product contract. There is no artificial micro-build ceiling: use exactly as many bounded builds as evidence requires, whether fewer than 30 or more than 60, without manufacturing build numbers or stopping early to satisfy a count. The current `v1.05.N12-P09` lineage does not contain historical integrated Intake/APU commit `1314006b4409a6d193f95b5c7c12cd4d5b319fbc` or its Intake APU 01–10 ancestry. Current source therefore cannot be described as the completed original multi-company product even though it contains later Smart Intake, multi-contract, Generic APU, budget, and operations capabilities.
 
 The binding product hierarchy for this recovery is:
 

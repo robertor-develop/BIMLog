@@ -2182,7 +2182,7 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - After the exact P09 artifact is frozen and handed off, only Ruben field evidence remains open; no rebuild or version change follows a complete PASS.
 # Active: complete Job Intake / Multi-APU recovery program — authorized September 8, 2026
 
-Roberto authorized continuous item-by-item repair with a planned evidence-driven sequence and an absolute ceiling of 40 micro-builds. The ceiling is contingency, not a target. Successful in-scope builds continue without repeated approval. Stop only for a real schema/database migration, destructive data action, security/authorization change, unresolved business-rule decision, external/customer action, publication, or a failed/blocked gate that cannot be corrected inside the current micro-build.
+Roberto authorized continuous item-by-item repair with a planned evidence-driven sequence and no artificial micro-build ceiling. The work may take 30, 40, 50, 60, or more builds when evidence requires it; the count is neither a target nor a stopping condition. Successful in-scope builds continue without repeated approval. Stop only for a real schema/database migration, destructive data action, security/authorization change, unresolved business-rule decision, external/customer action, publication, or a failed/blocked gate that cannot be corrected inside the current micro-build.
 
 ## Non-divergence contract
 
@@ -2228,4 +2228,4 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 
 ## Micro-build allocation
 
-Use Builds 1–12 for the original master sequence: discovery/reconciliation; simplification; clarity; client/contact; contract structure; Contract Item/APU linkage; rate authority; team/assignments; APU history; budget association; sensitive confirmation and navigation; integrated acceptance. Use Builds 13–40 only for isolated requirements above that cannot be completed safely inside those builds or for defects proven by integrated testing. Never consume a build merely to advance a number.
+Use Builds 1–12 for the original master sequence: discovery/reconciliation; simplification; clarity; client/contact; contract structure; Contract Item/APU linkage; rate authority; team/assignments; APU history; budget association; sensitive confirmation and navigation; integrated acceptance. Use Build 13 onward for isolated requirements that cannot be completed safely inside those builds or for defects proven by integrated testing. Continue for as many builds as necessary to close the denominator. Never consume a build merely to advance a number, and never stop because a numeric ceiling was reached.

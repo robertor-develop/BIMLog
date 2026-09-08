@@ -17288,6 +17288,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6f0d78b6d85e130b5e54bef7fea6f3bad6588ff3f35a725e74316d151a20edeb"
+    },
+    {
+      "taskId": "job-intake-recovery-no-artificial-build-ceiling-20260908",
+      "reviewedThroughCommit": "7097b22e726ee95953fec16c0304b41c0d4043bb",
+      "reviewedAt": "2026-09-08T00:17:00-04:00",
+      "status": "scheduling_authority_clarified",
+      "captureTiming": "same_task_after_roberto_clarified_build_count_before_build2_product_mutation",
+      "summary": "Removes the artificial 40-build ceiling while preserving the fixed recovery scope, denominator, stop conditions, and evidence requirements.",
+      "workstreams": [
+        "job-intake-multi-apu-complete-recovery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The clarification preserves consolidation and evidence rules."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution remains bounded by scope and stop conditions rather than an arbitrary count."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "All completion and acceptance gates remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product scope or roadmap change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Platform source or runtime change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Navisworks change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report contract change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records that completion is evidence-driven with no numeric ceiling."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Replaces the obsolete 40-build ceiling and preserves the full denominator."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserves Roberto's explicit scheduling clarification."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0cbc5398dcfe8c364c19dfbe12d48024bcdcbe2ad0e61e15a7c895d9daf43199"
     }
   ]
 }

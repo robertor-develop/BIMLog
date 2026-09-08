@@ -909,3 +909,5 @@ Existing storage can represent the target without a database migration. `job_int
 The supplied 20-row smoke workbook was read without mutation. Its recorded overall result is `FAIL`: rows 12–15 and 18 are PASS; rows 3, 7, and 19 are FAIL; rows 1, 2, 4, 5, 6, 8, 9, 11, 16, and 20 are MEJORAR; rows 10 and 17 have no result. Therefore only 5/20 rows were explicitly PASS, and 15/20 still require proof or correction. The recovery denominator must close all 20, including the unscored rows, before release freeze.
 
 No product, Native, Platform, database, schema, deployment, production, or customer state changed in Build 1. The next build is the two-minute progressive-disclosure Intake simplification on the current lineage.
+
+Roberto subsequently clarified that 40 was illustrative, not a maximum. The recovery therefore has no numeric build ceiling: it continues through 30, 40, 50, 60, or more bounded micro-builds if required by evidence, and may finish sooner only when the complete denominator and acceptance gates actually pass. This clarification changes scheduling governance only and does not change product scope or behavior.
