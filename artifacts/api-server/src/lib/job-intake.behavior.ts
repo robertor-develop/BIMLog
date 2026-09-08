@@ -10,6 +10,8 @@ import {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const read = (relative: string) =>
   fs.readFileSync(path.resolve(here, relative), "utf8");
+const operationsService = read("./job-operations-service.ts");
+const operationsUi = read("../../../bimlog/src/pages/JobOperationsWorkspace.tsx");
 const data = normalizeJobIntakeData({
   identity: {
     jobName: "River Avenue",
@@ -374,6 +376,11 @@ assert.match(service, /JOB_INTAKE_CLIENT_COMPANY_OUT_OF_SCOPE/);
 assert.match(service, /JOB_INTAKE_PRIMARY_CONTACT_OUT_OF_SCOPE/);
 assert.match(service, /JOB_INTAKE_PARTICIPANT_OUT_OF_SCOPE/);
 assert.match(service, /JOB_INTAKE_ENGAGEMENT_CONTACT_OUT_OF_SCOPE/);
+assert.match(service, /parentContractProfileId: contract\.parentContractId/);
+assert.match(service, /clientCompanyId: data\.identity\.clientCompanyId/);
+assert.match(operationsService, /reportingContracts/);
+assert.match(operationsService, /quotationNumber/);
+assert.match(operationsUi, /Contract reporting identity/);
 assert.match(ui, /Activate operational job/);
 assert.match(ui, /@media\(max-width:900px\)/);
 assert.match(bulkEditor, /Paste Excel range/);
@@ -414,6 +421,7 @@ console.log(
       "current-project-participant-enforcement",
       "engagement-specific-authoritative-contacts",
       "contract-lifecycle-and-parent-lineage",
+      "distinct-filterable-contract-reporting-identity",
     ],
   }),
 );

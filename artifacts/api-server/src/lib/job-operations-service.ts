@@ -373,7 +373,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
   ]);
   const documentConnections = connectionView.connections;
   if (!access.intakeId) return { available: false, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, capabilities, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta };
-  const [workItems, tasks, assignments, timeEntries, deliverables, packages, packageTasks, members, files, totals] = await Promise.all([
+  const [workItems, tasks, assignments, timeEntries, deliverables, packages, packageTasks, members, files, totals, intakeData] = await Promise.all([
     pool.query(`SELECT id,stable_scope_item_id "stableScopeItemId",name,description,unit,planned_hours "plannedHours",workflow_template "workflowTemplate",status,billing_hourly_rate "billingHourlyRate",planned_billable_value "plannedBillableValue",contract_id "contractId" FROM job_activation_work_items WHERE intake_id=$1 ORDER BY created_at,id`, [access.intakeId]),
     pool.query(`SELECT t.id,t.work_item_id "workItemId",t.task_key "taskKey",t.name_en "nameEn",t.name_es "nameEs",t.status,t.version,t.progress_percent "progressPercent",t.planned_hours "plannedHours",t.assignee_user_id "assigneeUserId",COALESCE(e.actual_hours,0)::text "actualHours",COALESCE(d.deliverable_count,0)::int "deliverableCount"
       FROM job_activation_tasks t
@@ -401,7 +401,23 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
       COALESCE((SELECT SUM(e.hours*r.internal_hourly_rate) FROM job_activation_time_entries e JOIN job_activation_resource_assignments r ON r.id=e.assignment_id WHERE e.intake_id=$1),0)::text "actualInternalCost",
       COALESCE((SELECT SUM(planned_billable_value) FROM job_activation_work_items WHERE intake_id=$1),0)::text "plannedBillableValue",
       COALESCE((SELECT SUM(e.hours*COALESCE(r.billing_hourly_rate,w.billing_hourly_rate)) FROM job_activation_time_entries e JOIN job_activation_work_items w ON w.id=e.work_item_id LEFT JOIN job_activation_resource_assignments r ON r.id=e.assignment_id WHERE e.intake_id=$1),0)::text "earnedBillableValue"`, [access.intakeId]),
+    pool.query(`SELECT data FROM job_intakes WHERE id=$1`, [access.intakeId]),
   ]);
+  const authoritativeIntake = intakeData.rows[0]?.data ?? {};
+  const reportingContracts = (authoritativeIntake.commercial?.contracts ?? []).map((contract: any) => ({
+    id: contract.id,
+    projectName: authoritativeIntake.identity?.jobName || access.projectName,
+    projectCode: authoritativeIntake.identity?.jobCode || access.projectCode,
+    clientCompanyId: authoritativeIntake.identity?.clientCompanyId ?? null,
+    clientCompany: authoritativeIntake.identity?.clientCompany || contract.counterpartyName || "",
+    contractName: contract.title || "",
+    contractType: contract.reportingType || "additional",
+    lifecycleStatus: contract.lifecycleStatus || "draft",
+    reportingStatus: contract.reportingStatus || "work_in_progress",
+    quotationNumber: contract.quotationNumber || "",
+    contractNumber: contract.contractNumber || "",
+    parentContractId: contract.parentContractId || "",
+  }));
   const showBudget = capabilities.budget === true;
   const showPlanner = capabilities.cost_value_planner === true;
   const safeWorkItems = workItems.rows.map((row) => ({
@@ -439,7 +455,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     approved: safePackages.filter((row) => row.status === "approved").length,
   };
   const [budgetGovernance, projectControls] = await Promise.all([budgetGovernanceView(pool, access, capabilities), projectControlsView(pool, access, capabilities)]);
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, budgetGovernance, projectControls, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, budgetGovernance, projectControls, reportingContracts, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
 }
 
 export async function createJobBudgetBaseline(input: { actorUserId: number; projectId: unknown; baselineId: unknown; revisionReason?: unknown }) {

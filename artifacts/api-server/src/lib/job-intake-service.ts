@@ -1260,6 +1260,12 @@ export async function activateJobIntake(input: {
               quotationNumber: contract.quotationNumber,
               reportingType: contract.reportingType,
               reportingStatus: contract.reportingStatus,
+              lifecycleStatus: contract.lifecycleStatus,
+              parentContractProfileId: contract.parentContractId,
+              jobName: data.identity.jobName,
+              jobCode: data.identity.jobCode,
+              clientCompanyId: data.identity.clientCompanyId,
+              clientCompany: data.identity.clientCompany,
               contractItems: contractItems.length,
               plannedHours: decimalFromScaled(
                 contractItems.reduce(
