@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { ClipboardPaste, Plus, Trash2 } from "lucide-react";
+import { connectContractItemsToApu } from "@/lib/job-intake-apu-connection";
 
 type Translate = (en: string, es: string) => string;
 
@@ -180,6 +181,29 @@ export function ContractItemBulkEditor(props: Props) {
       ),
     );
   };
+  const connectAllToSavedApu = () => {
+    if (props.defaultApuVersion == null || !props.defaultRate) {
+      props.onError(
+        props.tt(
+          "Save an APU plan before connecting Contract Items.",
+          "Guarde un plan APU antes de conectar las Partidas de Contrato.",
+        ),
+      );
+      return;
+    }
+    props.setItems((items) =>
+      connectContractItemsToApu(items, {
+        version: props.defaultApuVersion as number,
+        sellingPrice: props.defaultRate,
+      }),
+    );
+    props.onNotice(
+      props.tt(
+        `All listed Contract Items are connected to saved APU v${props.defaultApuVersion}.`,
+        `Todas las Partidas de Contrato listadas están conectadas al APU guardado v${props.defaultApuVersion}.`,
+      ),
+    );
+  };
 
   return (
     <div className="ji-bulk">
@@ -239,6 +263,18 @@ export function ContractItemBulkEditor(props: Props) {
         <button type="button" onClick={add}>
           <Plus size={14} /> {props.tt("Add row", "Agregar fila")}
         </button>
+        {props.capabilities.costValuePlanner && (
+          <button
+            type="button"
+            onClick={connectAllToSavedApu}
+            disabled={!props.items.length || props.defaultApuVersion == null}
+          >
+            {props.tt(
+              `Connect all to saved APU${props.defaultApuVersion ? ` v${props.defaultApuVersion}` : ""}`,
+              `Conectar todas al APU guardado${props.defaultApuVersion ? ` v${props.defaultApuVersion}` : ""}`,
+            )}
+          </button>
+        )}
       </div>
       {props.capabilities.budget && (
         <label className="ji-bulk-budget">
