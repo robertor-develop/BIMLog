@@ -888,3 +888,24 @@ Platform implementation `a22220b3c34982cc5c1db9f226312c0e9c35980d` replaces only
 Roberto challenged the September 7 smoke-repair count and requested comparison against his original Job Intake and multi-company/multi-pay requirements. Read-only Git and source inspection proved historical Intake APU 01–10 commits, including integration commit `1314006b4409a6d193f95b5c7c12cd4d5b319fbc`, are not ancestors of the current `v1.05.N12-P09` recovery worktree. Historical components for the simple Intake, company map, agreement lifecycle, multiple-APU builder, work-package builder, resource planner, command center, help, and release readiness are absent from the current tree.
 
 The current lineage independently contains later Smart Intake multi-contract activation and canonical Commercial/Generic APU/Operations foundations, so blindly merging the historical branch would risk duplicate authorities and regressions. Seven September 7 commits repaired specific visible gaps but did not reconstruct or accept the original hierarchy. The correction is a controlled selective reconciliation under the explicit denominator in `OPEN_LOOP.md`, not another sequence of disconnected UI patches. No product, database, schema, deployment, production, or customer state changed in this audit.
+
+## Job Intake recovery Build 1 — lineage and data-model reconciliation
+
+Build 1 compared the current `v1.05.N12-P09` lineage with historical Intake APU commits `c7695f38`, `8faec04d`, `6199c28a`, `b8e5e21c`, `701b62c1`, `b0b36038`, `0310a3dc`, and integration commit `1314006b4409a6d193f95b5c7c12cd4d5b319fbc`. The historical branch is not an ancestor of the current lineage and is not safe to merge wholesale.
+
+The component decisions are:
+
+- Simple bilingual Intake: **adapt** its progressive-disclosure experience to the current Smart Intake contract and current authorization/persistence paths.
+- Company/job map: **adapt** the visual relationship model, replacing historical display-name identity with existing `companies`, `project_directory`, `users`, and project-scope IDs.
+- Agreement lifecycle: **adapt** quote/base/change-order/additional/amendment/time-and-material concepts onto current multi-contract profiles, `financial_contracts`, immutable contract versions/amendments, and commercial metadata; do not create a parallel agreement authority.
+- Multiple APU builder: **adapt** its contract-owned workflow to the current Generic APU version authority and Contract Item references; reject its standalone APU authority.
+- Work-package builder: **adapt** its decomposition UX to existing activation work-item, task, and work-package tables.
+- Resource planner: **adapt** its assignment UX to authoritative project members/users, activation assignments/time entries, and operation events; expand redelegation evidence to preserve original assignee, completed and remaining hours, actor, timestamp, and reason.
+- Command center/readiness: **adapt** only truthful setup/work/financial progress derived from canonical records; reject duplicate readiness state.
+- Help and release-readiness components: **adapt** contextual bilingual help and the acceptance denominator; reject any claim that component or branch presence alone proves completion.
+
+Existing storage can represent the target without a database migration. `job_intakes.data` is the versioned draft envelope; `companies`, `users`, `project_members`, and `project_directory` provide authoritative participant/contact identities; `financial_contracts`, `financial_contract_versions`, amendments, history, and bounded `commercial_metadata` provide engagement/contract lineage; Generic APU owns immutable APU versions; activation work items, tasks, work packages, resource assignments, time entries, operation events, budget baselines/accounts, and Contract Item baselines provide execution and financial relationships. This is permission to extend the existing normalized JSON/API contract and validations, not permission to store unverified IDs or create new tables.
+
+The supplied 20-row smoke workbook was read without mutation. Its recorded overall result is `FAIL`: rows 12–15 and 18 are PASS; rows 3, 7, and 19 are FAIL; rows 1, 2, 4, 5, 6, 8, 9, 11, 16, and 20 are MEJORAR; rows 10 and 17 have no result. Therefore only 5/20 rows were explicitly PASS, and 15/20 still require proof or correction. The recovery denominator must close all 20, including the unscored rows, before release freeze.
+
+No product, Native, Platform, database, schema, deployment, production, or customer state changed in Build 1. The next build is the two-minute progressive-disclosure Intake simplification on the current lineage.

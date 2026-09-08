@@ -17214,6 +17214,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "477e1f3c53bdd336f0c52d595f93f28e48bcdb30d7a36aa43985d3118994b89d"
+    },
+    {
+      "taskId": "job-intake-recovery-build1-reconciliation-20260908",
+      "reviewedThroughCommit": "96c87ec8fedf872ad6b6306f6f26160375aa3f84",
+      "reviewedAt": "2026-09-08T00:14:00-04:00",
+      "status": "build1_reconciliation_pass_build2_pending",
+      "captureTiming": "same_task_after_schema_and_lineage_reconciliation_before_build2_product_mutation",
+      "summary": "Records Build 1 keep/adapt/reject decisions, existing-schema fitness, and the exact 20-row smoke-test denominator without product or schema mutation.",
+      "workstreams": [
+        "job-intake-multi-apu-complete-recovery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 1 preserves canonical authorities and rejects duplicate subsystems."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded reconciliation follows current execution and evidence rules."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The smoke denominator and persistence requirements apply existing evidence rules."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or approved product outcome changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, table, runtime, dependency, or generated inventory changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Navisworks behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claims change."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The active recovery authority already states the governing hierarchy and incomplete state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the Build 1 lineage and schema-fit denominator rows with exact evidence."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the component decisions, storage mapping, and smoke-test result counts."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6f0d78b6d85e130b5e54bef7fea6f3bad6588ff3f35a725e74316d151a20edeb"
     }
   ]
 }

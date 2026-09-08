@@ -2199,8 +2199,8 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 
 ## Required recovery denominator
 
-- [ ] Reconcile current lineage against historical Intake APU 01–10 and record keep/adapt/reject decisions per component.
-- [ ] Prove the existing schema can represent authoritative participants, engagements, contract lineage, multiple APUs, packages, assignments, rate layers, and redelegation; stop before any unapproved schema change.
+- [x] Reconcile current lineage against historical Intake APU 01–10 and record keep/adapt/reject decisions per component. Build 1 evidence is recorded in `AUDIT.md`; no historical branch is treated as a merge authority.
+- [x] Prove the existing schema can represent authoritative participants, engagements, contract lineage, multiple APUs, packages, assignments, rate layers, and redelegation; stop before any unapproved schema change. Build 1 found no migration prerequisite: draft relationship data fits the existing versioned Intake JSON contract, authoritative companies/users/contacts already exist, activated contracts expose bounded commercial metadata and immutable versions/history, Generic APU owns immutable APU versions, and existing activation tables/events own work packages, assignments, actual hours, budgets, and redelegation evidence. Server-side authoritative-ID validation remains mandatory when these fields are restored.
 - [ ] Restore the simple bilingual two-minute default Intake with optional advanced detail.
 - [ ] Make required fields and stage readiness unmistakable.
 - [ ] Restore authoritative multi-company participant roles and the visual company/job relationship map.
