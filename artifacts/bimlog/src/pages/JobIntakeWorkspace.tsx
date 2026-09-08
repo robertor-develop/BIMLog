@@ -15,6 +15,11 @@ import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/Pri
 import { ContractItemBulkEditor } from "@/components/job-intake/ContractItemBulkEditor";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
+import {
+  clientCompanyOptions as buildClientCompanyOptions,
+  contactBelongsToCompany,
+  primaryContactOptions as buildPrimaryContactOptions,
+} from "@/lib/job-intake-directory-options";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const recoveryKey = (projectId: number) =>
@@ -154,6 +159,7 @@ export function JobIntakeWorkspace() {
     [apu, setApu] = useState<any>(null),
     [workspace, setWorkspace] = useState<any>(null),
     [budgetLines, setBudgetLines] = useState<any[]>([]),
+    [directoryEntries, setDirectoryEntries] = useState<any[]>([]),
     [mappingDocument, setMappingDocument] = useState<any>(null),
     [mappingForm, setMappingForm] = useState({
       sheetName: "",
@@ -207,13 +213,14 @@ export function JobIntakeWorkspace() {
         found?.intake === null
           ? await api(`/projects/${projectId}/intake`, { method: "POST" })
           : found;
-      const [plan, budget] = await Promise.all([
+      const [plan, budget, directory] = await Promise.all([
         current.capabilities?.costValuePlanner
           ? api(`/projects/${projectId}/financial/apu`)
           : Promise.resolve(null),
         current.capabilities?.budget
           ? api(`/projects/${projectId}/financial/workspace`)
           : Promise.resolve(null),
+        api(`/projects/${projectId}/directory`),
       ]);
       const recovered = readRecovery(projectId);
       const canRecover =
@@ -239,6 +246,7 @@ export function JobIntakeWorkspace() {
         removeRecovery(projectId);
       setApu(plan?.data?.plan ?? null);
       setWorkspace(budget);
+      setDirectoryEntries(Array.isArray(directory) ? directory : []);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
@@ -374,6 +382,32 @@ export function JobIntakeWorkspace() {
       ...old,
       [section]: { ...old[section], [field]: value },
     }));
+  const clientCompanyOptions = useMemo(
+    () => buildClientCompanyOptions(directoryEntries),
+    [directoryEntries],
+  );
+  const primaryContactOptions = useMemo(
+    () => buildPrimaryContactOptions(directoryEntries, data.identity.clientCompany),
+    [data.identity.clientCompany, directoryEntries],
+  );
+  const changeClientCompany = (value: string) =>
+    setData((old: any) => {
+      const contactStillBelongs = contactBelongsToCompany(
+        directoryEntries,
+        value,
+        old.identity.primaryContact,
+      );
+      return {
+        ...old,
+        identity: {
+          ...old.identity,
+          clientCompany: value,
+          primaryContact: contactStillBelongs
+            ? old.identity.primaryContact
+            : "",
+        },
+      };
+    });
   const setScopeItems = (updater: (items: any[]) => any[]) =>
     setData((old: any) => ({
       ...old,
@@ -1361,12 +1395,7 @@ export function JobIntakeWorkspace() {
                     ["jobName", tt("Job name", "Nombre del trabajo")],
                     ["jobCode", tt("Job code", "Código del trabajo")],
                     ["clientName", tt("Client", "Cliente")],
-                    ["clientCompany", tt("Client company", "Empresa cliente")],
                     ["location", tt("Location", "Ubicación")],
-                    [
-                      "primaryContact",
-                      tt("Primary contact", "Contacto principal"),
-                    ],
                   ].map(([field, label]) => (
                     <label key={field}>
                       {label}
@@ -1378,6 +1407,60 @@ export function JobIntakeWorkspace() {
                       />
                     </label>
                   ))}
+                  <label>
+                    {tt("Client company", "Empresa cliente")}
+                    <select
+                      value={data.identity.clientCompany}
+                      onChange={(event) =>
+                        changeClientCompany(event.target.value)
+                      }
+                    >
+                      <option value="">
+                        {tt("Select a project company", "Seleccione una empresa del proyecto")}
+                      </option>
+                      {data.identity.clientCompany &&
+                        !clientCompanyOptions.includes(data.identity.clientCompany) && (
+                          <option value={data.identity.clientCompany}>
+                            {data.identity.clientCompany}
+                          </option>
+                        )}
+                      {clientCompanyOptions.map((company) => (
+                        <option key={company} value={company}>
+                          {company}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                  <label>
+                    {tt("Primary contact", "Contacto principal")}
+                    <select
+                      value={data.identity.primaryContact}
+                      disabled={!data.identity.clientCompany}
+                      onChange={(event) =>
+                        change("identity", "primaryContact", event.target.value)
+                      }
+                    >
+                      <option value="">
+                        {data.identity.clientCompany
+                          ? tt("Select a company contact", "Seleccione un contacto de la empresa")
+                          : tt("Select the client company first", "Seleccione primero la empresa cliente")}
+                      </option>
+                      {data.identity.primaryContact &&
+                        !primaryContactOptions.some(
+                          (entry) => entry.fullName === data.identity.primaryContact,
+                        ) && (
+                          <option value={data.identity.primaryContact}>
+                            {data.identity.primaryContact}
+                          </option>
+                        )}
+                      {primaryContactOptions.map((entry) => (
+                        <option key={entry.id} value={String(entry.fullName ?? "")}>
+                          {entry.fullName}
+                          {entry.email ? ` — ${entry.email}` : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
                   <label>
                     {tt("Currency", "Moneda")}
                     <select
