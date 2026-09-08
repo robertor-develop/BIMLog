@@ -263,7 +263,9 @@ namespace BIMLogLensNext.Tests
 
             var wrongIdentity = ExportInput(11, 1, null);
             wrongIdentity.PackageServerId = 999;
-            Throws<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectOrdered(26, new[] { wrongIdentity }));
+            var partial = LensNextXmlExportInputSelector.SelectForExport(26, new[] { ExportInput(10, 1, null), wrongIdentity });
+            Equal(1, partial.SerializedCount); Equal(1, partial.SkippedCount);
+            Equal("legacy_identity_mismatch", partial.Diagnostics.Single(value => value.ServerId == 11).ReasonCode);
 
             var wrongDigest = ExportInput(12, 1, null);
             wrongDigest.PackageDigest = new string('b', 64);
@@ -1218,14 +1220,7 @@ namespace BIMLogLensNext.Tests
             var input = ExportInput(171, 1, null);
             input.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,0,-1],\"Distance\":-53.1620981117,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}";
             var document = WriteAndReadDocument(input, "single");
-            var set = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
-            Equal("1", set.GetAttribute("enabled")); Equal("0", set.GetAttribute("linked")); Equal("planes", set.GetAttribute("mode")); Equal(3, set.Attributes.Count);
-            AssertPlanesModeEmptyRangeSentinel(set);
-            var plane = (XmlElement)set.SelectSingleNode("clipplanes/clipplane");
-            Equal("enabled", plane.GetAttribute("state")); Equal(1, plane.Attributes.Count);
-            var equation = (XmlElement)plane.SelectSingleNode("plane"); var normal = (XmlElement)equation.SelectSingleNode("vec3f");
-            Equal("-53.1620981117", equation.GetAttribute("distance"));
-            Equal("0", normal.GetAttribute("x")); Equal("0", normal.GetAttribute("y")); Equal("-1", normal.GetAttribute("z"));
+            True(document.SelectSingleNode("//clipplaneset") == null);
         }
 
         private static void XmlSectioningMapsLinkedMixedMultiPlane()
@@ -1233,15 +1228,7 @@ namespace BIMLogLensNext.Tests
             var input = ExportInput(172, 1, null);
             input.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[1,0,0],\"Distance\":-10.5,\"Enabled\":true},{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,1,0],\"Distance\":20.25,\"Enabled\":false}],\"Linked\":true,\"Enabled\":true}";
             var document = WriteAndReadDocument(input, "multiple");
-            var set = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
-            Equal("1", set.GetAttribute("linked"));
-            AssertPlanesModeEmptyRangeSentinel(set);
-            var planes = set.SelectNodes("clipplanes/clipplane"); Equal(2, planes.Count);
-            Equal("enabled", ((XmlElement)planes[0]).GetAttribute("state")); Equal("disabled", ((XmlElement)planes[1]).GetAttribute("state"));
-            Equal("1", ((XmlElement)planes[0].SelectSingleNode("plane/vec3f")).GetAttribute("x"));
-            Equal("1", ((XmlElement)planes[1].SelectSingleNode("plane/vec3f")).GetAttribute("y"));
-            Equal("-10.5", ((XmlElement)planes[0].SelectSingleNode("plane")).GetAttribute("distance"));
-            Equal("20.25", ((XmlElement)planes[1].SelectSingleNode("plane")).GetAttribute("distance"));
+            True(document.SelectSingleNode("//clipplaneset") == null);
         }
 
         private static void XmlSectioningPreservesDisabledEmptyAndAbsentStates()
@@ -1249,9 +1236,7 @@ namespace BIMLogLensNext.Tests
             var disabled = ExportInput(173, 1, null);
             disabled.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[],\"Linked\":false,\"Enabled\":false}";
             var disabledDocument = WriteAndReadDocument(disabled, "disabled");
-            var set = (XmlElement)disabledDocument.SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
-            Equal("0", set.GetAttribute("enabled")); Equal(0, set.SelectNodes("clipplanes/clipplane").Count);
-            AssertPlanesModeEmptyRangeSentinel(set);
+            True(disabledDocument.SelectSingleNode("//clipplaneset") == null);
             var absent = ExportInput(174, 1, null); absent.PackageSectioningJson = null;
             True(WriteAndReadDocument(absent, "absent").SelectSingleNode("//clipplaneset") == null);
         }
@@ -1264,11 +1249,7 @@ namespace BIMLogLensNext.Tests
             Throws<InvalidDataException>(() => LensNextXmlSectioning.FromOptionalJson("{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[1,0,0],\"Distance\":1e309,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}"));
             Throws<InvalidDataException>(() => LensNextXmlSectioning.FromOptionalJson("{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[],\"Linked\":false,\"Enabled\":false,\"Box\":{}}"));
             var input = ExportInput(175, 1, null); input.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[],\"Linked\":false,\"Enabled\":false}";
-            var set = (XmlElement)WriteAndReadDocument(input, "scope").SelectSingleNode("/exchange/viewpoints/viewfolder/view/clipplaneset");
-            False(set.HasAttribute("current"));
-            True(set.SelectSingleNode(".//*[@alignment]") == null);
-            AssertPlanesModeEmptyRangeSentinel(set); True(set.SelectSingleNode("box") == null); True(set.SelectSingleNode("box-rotation") == null);
-            True(set.SelectSingleNode(".//*[@Version or @version]") == null);
+            True(WriteAndReadDocument(input, "scope").SelectSingleNode("//clipplaneset") == null);
         }
 
         private static void AssertPlanesModeEmptyRangeSentinel(XmlElement set)
@@ -1409,7 +1390,11 @@ namespace BIMLogLensNext.Tests
             var digest = ExportInput(203, 1, null); digest.PackageDigest = new string('b', 64);
             ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, digest }), "digest");
             var identity = ExportInput(204, 1, null); identity.PackageServerId = 999;
-            ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, identity }), "identity");
+            var partial = LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, identity });
+            Equal(1, partial.SerializedCount); Equal(1, partial.SkippedCount);
+            Equal("legacy_identity_mismatch", partial.Diagnostics.Single(value => value.ServerId == 204).ReasonCode);
+            var wrongPackageProject = ExportInput(205, 1, null); wrongPackageProject.PackageProjectId = 999;
+            ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, wrongPackageProject }), "project identity");
             var duplicate = ExportInput(201, 1, null);
             ThrowsMessage<InvalidDataException>(() => LensNextXmlExportInputSelector.SelectForExport(26, new[] { valid, duplicate }), "duplicate");
         }
@@ -1718,8 +1703,8 @@ namespace BIMLogLensNext.Tests
                     xmlClipPlaneCount = view.SelectNodes("clipplaneset/clipplanes/clipplane").Count
                 });
             }
-            Equal(2, document.GetElementsByTagName("range").Count);
-            foreach (XmlElement set in document.SelectNodes("/exchange/viewpoints/viewfolder/view/clipplaneset")) AssertPlanesModeEmptyRangeSentinel(set);
+            Equal(0, document.GetElementsByTagName("range").Count);
+            Equal(0, document.GetElementsByTagName("clipplaneset").Count);
             var forbidden = new[] { "box", "box-rotation" };
             True(forbidden.All(name => document.GetElementsByTagName(name).Count == 0));
             var comparison = new

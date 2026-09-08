@@ -200,15 +200,17 @@ namespace BIMLogLensNext
             if (!IsSha256(record.VisualStateDigest) || !IsSha256(record.PackageDigest) ||
                 !string.Equals(record.VisualStateDigest, record.PackageDigest, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException("The active BIMLog viewpoint package digest is invalid or mismatched.");
-            if (record.PackageProjectId != record.ProjectId || record.PackageServerId != record.ServerId ||
-                !string.Equals(record.PackageViewpointId, record.ViewpointId, StringComparison.Ordinal) ||
-                !string.Equals(record.PackageLifecycleStatus, record.LifecycleStatus, StringComparison.Ordinal) ||
-                record.PackageRevisionNumber != record.RevisionNumber)
-                throw new InvalidDataException("The active BIMLog viewpoint package identity is mismatched.");
+            if (record.PackageProjectId != record.ProjectId)
+                throw new InvalidDataException("The active BIMLog viewpoint package project identity is mismatched.");
         }
 
         private static void ValidateExportableRecord(LensNextXmlExportInput record)
         {
+            if (record.PackageServerId != record.ServerId ||
+                !string.Equals(record.PackageViewpointId, record.ViewpointId, StringComparison.Ordinal) ||
+                !string.Equals(record.PackageLifecycleStatus, record.LifecycleStatus, StringComparison.Ordinal) ||
+                record.PackageRevisionNumber != record.RevisionNumber)
+                throw new InvalidDataException("The BIMLog viewpoint package identity is historical or mismatched and cannot be exported safely.");
             LensNextXmlPosition.FromValidatedCamera(record.PackageCamera);
             LensNextXmlRotation.FromValidatedCamera(record.PackageCamera);
             LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera);
@@ -219,6 +221,11 @@ namespace BIMLogLensNext
 
         private static string DiagnosticReasonCode(LensNextXmlExportInput record)
         {
+            if (record.PackageServerId != record.ServerId ||
+                !string.Equals(record.PackageViewpointId, record.ViewpointId, StringComparison.Ordinal) ||
+                !string.Equals(record.PackageLifecycleStatus, record.LifecycleStatus, StringComparison.Ordinal) ||
+                record.PackageRevisionNumber != record.RevisionNumber)
+                return "legacy_identity_mismatch";
             if (Fails(() => LensNextXmlPosition.FromValidatedCamera(record.PackageCamera)))
                 return record.PackageCamera == null ? "missing_camera" : "invalid_position";
             if (Fails(() => LensNextXmlRotation.FromValidatedCamera(record.PackageCamera))) return "invalid_rotation";
