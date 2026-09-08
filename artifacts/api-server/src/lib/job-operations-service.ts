@@ -3,6 +3,7 @@ import { pool } from "@workspace/db";
 import { FinancialControlError } from "./financial-control-contract";
 import { effectiveCommercialAccessForUser } from "./commercial-entitlement";
 import { waitForJobIntakeMigration } from "./job-intake-migration";
+import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contract";
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complete", "cancelled"]);
@@ -609,9 +610,10 @@ export async function updateJobOperationTask(input: { actorUserId: number; proje
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 
-export async function reassignJobOperationResource(input: { actorUserId: number; projectId: unknown; assignmentId: unknown; expectedVersion: unknown; userId: unknown }) {
+export async function reassignJobOperationResource(input: { actorUserId: number; projectId: unknown; assignmentId: unknown; expectedVersion: unknown; userId: unknown; reason: unknown }) {
   await waitForJobIntakeMigration();
   const projectId = positiveInt(input.projectId, "projectId"), assignmentId = id(input.assignmentId, "assignmentId"), expectedVersion = positiveInt(input.expectedVersion, "expectedVersion"), userId = positiveInt(input.userId, "userId");
+  const reason = requiredText(input.reason, 500, "reason");
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -619,10 +621,15 @@ export async function reassignJobOperationResource(input: { actorUserId: number;
     if (!access.canManage) throw new FinancialControlError(403, "JOB_OPERATIONS_REASSIGN_DENIED", "Only the project leader may reassign resources.");
     const member = (await client.query(`SELECT u.full_name,u.email FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 AND pm.user_id=$2 AND pm.status='active'`, [projectId, userId])).rows[0];
     if (!member) throw new FinancialControlError(400, "JOB_OPERATIONS_ASSIGNEE_INVALID", "The assignee must be an active project member.");
+    const before = (await client.query(`SELECT r.user_id "userId",r.person_name "personName",r.planned_hours::text "plannedHours" FROM job_activation_resource_assignments r JOIN job_activation_work_items w ON w.id=r.work_item_id WHERE r.id=$1 AND r.version=$2 AND w.project_id=$3 FOR UPDATE OF r`, [assignmentId, expectedVersion, projectId])).rows[0];
+    if (!before) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This assignment changed in another session. Reload before saving.");
+    before.completedHours = (await client.query(`SELECT COALESCE(SUM(hours),0)::text "completedHours" FROM job_activation_time_entries WHERE assignment_id=$1`, [assignmentId])).rows[0]?.completedHours ?? "0";
+    if (Number(before.userId) === userId) throw new FinancialControlError(400, "JOB_OPERATIONS_REASSIGN_SAME_USER", "Choose a different assignee.");
+    const remainingHours = decimalFromScaled(scaledSignedDecimal(before.plannedHours) > scaledSignedDecimal(before.completedHours) ? scaledSignedDecimal(before.plannedHours) - scaledSignedDecimal(before.completedHours) : 0n);
     const updated = (await client.query(`UPDATE job_activation_resource_assignments r SET user_id=$4,person_name=$5,version=version+1 FROM job_activation_work_items w WHERE r.id=$1 AND r.version=$2 AND r.work_item_id=w.id AND w.project_id=$3 RETURNING r.id,r.work_item_id,r.task_id,r.version`, [assignmentId, expectedVersion, projectId, userId, member.full_name || member.email])).rows[0];
     if (!updated) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This assignment changed in another session. Reload before saving.");
     await client.query(`UPDATE job_activation_tasks SET assignee_user_id=$2,version=version+1,updated_at=now() WHERE id=$1`, [updated.task_id, userId]);
-    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "resource_reassigned", workItemId: updated.work_item_id, taskId: updated.task_id, assignmentId, evidence: { userId, version: updated.version } });
+    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "resource_reassigned", workItemId: updated.work_item_id, taskId: updated.task_id, assignmentId, evidence: { originalUserId: before.userId, originalPersonName: before.personName, newUserId: userId, newPersonName: member.full_name || member.email, completedHours: before.completedHours, remainingTransferredHours: remainingHours, reason, version: updated.version } });
     await client.query("COMMIT"); return { id: assignmentId, userId, personName: member.full_name || member.email, version: Number(updated.version) };
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }

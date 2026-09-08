@@ -419,6 +419,11 @@ assert.match(service, /packageTaskById/);
 assert.match(service, /JOB_ACTIVATION_ASSIGNMENT_PACKAGE_INVALID/);
 assert.match(operationsService, /apuCount: apuPlanVersions\.length/);
 assert.match(operationsService, /job_activation_contract_item_baselines/);
+assert.match(operationsService, /originalUserId: before\.userId/);
+assert.match(operationsService, /completedHours: before\.completedHours/);
+assert.match(operationsService, /remainingTransferredHours: remainingHours/);
+assert.match(operationsService, /JOB_OPERATIONS_REASSIGN_SAME_USER/);
+assert.match(operationsUi, /Reason for reassignment \(required\)/);
 assert.match(operationsUi, /Immutable APU history/);
 assert.match(ui, /Activate operational job/);
 assert.match(ui, /@media\(max-width:900px\)/);
@@ -468,6 +473,7 @@ console.log(
       "eligible-project-users-with-exclusion-reasons",
       "assignment-full-authority-scope-chain",
       "separate-rate-hours-incentive-layers",
+      "immutable-redelegation-history",
     ],
   }),
 );
