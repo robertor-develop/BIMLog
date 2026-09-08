@@ -82,6 +82,30 @@ const stages = [
   "team",
   "review",
 ] as const;
+type IntakeStage = (typeof stages)[number];
+const activeStageKey = (projectId: number) =>
+  `bimlog:job-intake-active-stage:${projectId}`;
+
+function readActiveStage(projectId: number): IntakeStage {
+  if (!Number.isInteger(projectId) || projectId <= 0) return "documents";
+  try {
+    const saved = window.localStorage.getItem(activeStageKey(projectId));
+    return stages.includes(saved as IntakeStage)
+      ? (saved as IntakeStage)
+      : "documents";
+  } catch {
+    return "documents";
+  }
+}
+
+function preserveActiveStage(projectId: number, stage: IntakeStage) {
+  if (!Number.isInteger(projectId) || projectId <= 0) return;
+  try {
+    window.localStorage.setItem(activeStageKey(projectId), stage);
+  } catch {
+    // Section navigation remains usable when browser storage is unavailable.
+  }
+}
 const blank = {
   identity: {
     jobName: "",
@@ -159,7 +183,9 @@ export function JobIntakeWorkspace() {
     [notice, setNotice] = useState(""),
     [busy, setBusy] = useState(false),
     [guide, setGuide] = useState(true),
-    [active, setActive] = useState<string>("documents"),
+    [active, setActive] = useState<IntakeStage>(() =>
+      readActiveStage(projectId),
+    ),
     [apu, setApu] = useState<any>(null),
     [workspace, setWorkspace] = useState<any>(null),
     [budgetLines, setBudgetLines] = useState<any[]>([]),
@@ -260,6 +286,18 @@ export function JobIntakeWorkspace() {
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!intake) return;
+    const restored = readActiveStage(projectId);
+    setActive(restored);
+    const frame = window.requestAnimationFrame(() =>
+      document
+        .getElementById(`ji-${restored}`)
+        ?.scrollIntoView({ block: "start" }),
+    );
+    return () => window.cancelAnimationFrame(frame);
+  }, [intake?.id, projectId]);
 
   useEffect(() => {
     dataRef.current = data;
@@ -997,6 +1035,7 @@ export function JobIntakeWorkspace() {
                     className={active === key ? "on" : ""}
                     onClick={() => {
                       setActive(key);
+                      preserveActiveStage(projectId, key);
                       document
                         .getElementById(`ji-${key}`)
                         ?.scrollIntoView({ behavior: "smooth" });
