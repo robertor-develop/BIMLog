@@ -2234,6 +2234,13 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 - [ ] Push the exact reviewed integration commit, build and publish it once through the governed Replit Shell path, and verify the live version and Intake behavior in Chrome.
 - [ ] Ruben must field-test the exact Navisworks 2025 N14-P10 package, including XML export/import, before promotion is described as customer accepted.
 
+## v1.05.N14-P11 Job Intake client-company correction gates
+
+- [x] Reuse the authoritative current-project company registration endpoint in Quick and Advanced setup.
+- [x] Automatically select the created/reused company and preserve authoritative company ID in the Intake draft.
+- [x] Prove focused behavior, Job Intake service, combined multi-company scenario, frontend typecheck/build, and mojibake gates locally.
+- [ ] Push, publish, and live-verify the exact P11 candidate in Chrome under separate production authorization.
+
 ## Micro-build allocation
 
 Use Builds 1–12 for the original master sequence: discovery/reconciliation; simplification; clarity; client/contact; contract structure; Contract Item/APU linkage; rate authority; team/assignments; APU history; budget association; sensitive confirmation and navigation; integrated acceptance. Use Build 13 onward for isolated requirements that cannot be completed safely inside those builds or for defects proven by integrated testing. Continue for as many builds as necessary to close the denominator. Never consume a build merely to advance a number, and never stop because a numeric ceiling was reached.

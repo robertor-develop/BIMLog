@@ -918,3 +918,8 @@ Roberto subsequently clarified that 40 was illustrative, not a maximum. The reco
 - Confirmed the Build 19 integrated scenario: 3 companies, 2 engagements, 3 contracts, 3 APU versions, 3 work packages, 3 resources, 180 planned/assigned hours, 100% financial setup, and immutable baseline fingerprint `214c6451a335d8010483e2c2bc331bc52e6402747f82c67ab623c3b44ea5b3cc`.
 - Complete Generic APU/Job Intake regression and API/frontend typechecks passed. Database safety reconciles 190 tables, 259 indexes, and 145 startup tables without mutation. Mojibake and tracked-secret gates passed.
 - No database/schema, publication, deployment, production, or customer mutation occurred. This checkpoint closes internal recovery only and preserves all external gates.
+
+## 2026-09-08 — Job Intake empty-directory client-company correction
+
+- Ruben's field screenshots contradicted the Build 20 internal acceptance by proving that both Quick and Advanced setup dead-ended when no authoritative project company was available. The selectors were correct but the existing canonical company-registration route was not exposed in Job Intake.
+- The bounded Platform correction adds the same authoritative add-and-select workflow to both modes, retains current-project authorization and canonical company IDs, and leaves database/schema and Native unchanged. Focused behavior, complete Job Intake service coverage, the combined three-company scenario, frontend typecheck/build, and mojibake validation passed locally. Publication and customer verification are not claimed.

@@ -1191,3 +1191,9 @@ No release, publication, or overall completion claim is permitted until the reco
 - XML export now preserves authoritative legacy camera position, rotation, projection, up vector, and sectioning when the complete optional scale tuple is absent. Partial or malformed scale data remains explicitly non-exportable; no camera value is fabricated, clamped, or defaulted.
 - Database/schema and production data are unchanged. Push, Replit build/publication, live Chrome verification, and Navisworks 2025 field import remain separate gates until their exact evidence is recorded.
 - The integrated Help/visible-version regression is aligned to N14-P10, and the exact 2025 ZIP was delivered through the approved private Telegram boundary with provider acknowledgement; client visibility and Ruben field acceptance remain separate.
+
+## Job Intake client-company creation correction — 2026-09-08
+
+- Field evidence proved both Quick and Advanced setup could select only companies already connected to the project, leaving a new job with no usable client-company path when the directory was empty.
+- The Platform now reuses the existing authoritative `POST /projects/:projectId/directory/companies` contract directly inside both setup modes. The user can create or reuse one canonical company, optionally provide its primary contact, connect it to the current project, and immediately select it as the client company.
+- The correction does not accept free-text identity, create a parallel company authority, alter database/schema, or change Native behavior. The Platform candidate advances to `v1.05.N14-P11`; publication and live field verification remain separate gates.
