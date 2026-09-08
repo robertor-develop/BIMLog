@@ -115,6 +115,24 @@ const cascadeLaborAllocation = (plan: Plan, laborAmount: bigint) => {
   };
 };
 const csvCell = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+const normalizeLoadedPlan = (source: any): Plan => {
+  const loaded = { ...emptyPlan(), ...source, allocationPercentages: { ...emptyPlan().allocationPercentages, ...(source?.allocationPercentages ?? {}) } };
+  const selling = cents(loaded.sellingPrice), fixed = cents(loaded.fixedCompanyCost);
+  const net = selling != null && fixed != null ? selling - fixed : null;
+  const laborBase = cents(loaded.allocations.labor);
+  const productionBase = cents(loaded.laborSplit.production);
+  const administrativeBase = cents(loaded.laborSplit.administrative);
+  return {
+    ...loaded,
+    allocationPercentages: derivedTopPercentages(loaded.allocations.labor, loaded.allocations.bonus, net),
+    laborSplitPercentages: {
+      production: percentForAmount(loaded.laborSplit.production, laborBase),
+      administrative: percentForAmount(loaded.laborSplit.administrative, laborBase),
+    },
+    productionPhases: loaded.productionPhases.map((line: Line) => ({ ...line, percentage: line.percentage ?? percentForAmount(line.amount, productionBase) })),
+    administrativeLines: loaded.administrativeLines.map((line: Line) => ({ ...line, percentage: line.percentage ?? percentForAmount(line.amount, administrativeBase) })),
+  };
+};
 
 export function FinancialApuWorkspace() {
   const { token } = useAuthStore();
@@ -122,6 +140,8 @@ export function FinancialApuWorkspace() {
   const [, route] = useRoute("/projects/:id/financial/apu");
   const projectId = Number(route?.id);
   const [plan, setPlan] = useState<Plan>(emptyPlan);
+  const [planHistory, setPlanHistory] = useState<Plan[]>([]);
+  const [latestPlanVersion, setLatestPlanVersion] = useState<number | null>(null);
   const [projectName, setProjectName] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -147,24 +167,11 @@ export function FinancialApuWorkspace() {
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body?.error?.en || body?.error || "Cost & Value Planner could not be loaded.");
       setProjectName(String(body?.data?.project?.name ?? ""));
-      if (body?.data?.plan) {
-        const loaded = { ...emptyPlan(), ...body.data.plan, allocationPercentages: { ...emptyPlan().allocationPercentages, ...(body.data.plan.allocationPercentages ?? {}) } };
-        const selling = cents(loaded.sellingPrice), fixed = cents(loaded.fixedCompanyCost);
-        const net = selling != null && fixed != null ? selling - fixed : null;
-        const laborBase = cents(loaded.allocations.labor);
-        const productionBase = cents(loaded.laborSplit.production);
-        const administrativeBase = cents(loaded.laborSplit.administrative);
-        setPlan({
-          ...loaded,
-          allocationPercentages: derivedTopPercentages(loaded.allocations.labor, loaded.allocations.bonus, net),
-          laborSplitPercentages: {
-            production: percentForAmount(loaded.laborSplit.production, laborBase),
-            administrative: percentForAmount(loaded.laborSplit.administrative, laborBase),
-          },
-          productionPhases: loaded.productionPhases.map((line: Line) => ({ ...line, percentage: line.percentage ?? percentForAmount(line.amount, productionBase) })),
-          administrativeLines: loaded.administrativeLines.map((line: Line) => ({ ...line, percentage: line.percentage ?? percentForAmount(line.amount, administrativeBase) })),
-        });
-      } else setPlan(emptyPlan());
+      const history = Array.isArray(body?.data?.history) ? body.data.history.map(normalizeLoadedPlan) : [];
+      setPlanHistory(history);
+      setLatestPlanVersion(history[0]?.version ?? body?.data?.plan?.version ?? null);
+      if (body?.data?.plan) setPlan(normalizeLoadedPlan(body.data.plan));
+      else setPlan(emptyPlan());
     } catch (reason) { setError(reason instanceof Error ? reason.message : "Cost & Value Planner could not be loaded."); }
     finally { setLoading(false); }
   }, [projectId, token]);
@@ -228,7 +235,7 @@ export function FinancialApuWorkspace() {
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body?.error?.en || body?.error || "The plan could not be saved.");
-      setPlan(body.data.plan); setProjectName(String(body.data.project?.name ?? projectName));
+      setPlan(normalizeLoadedPlan(body.data.plan)); setPlanHistory((body.data.history ?? [body.data.plan]).map(normalizeLoadedPlan)); setLatestPlanVersion(body.data.plan.version ?? null); setProjectName(String(body.data.project?.name ?? projectName));
       setMessage(tt("Saved. Reloading this page will preserve these exact values.", "Guardado. Al recargar esta página se conservarán estos valores exactos."));
     } catch (reason) { setError(reason instanceof Error ? reason.message : "The plan could not be saved."); }
     finally { setSaving(false); }
@@ -449,6 +456,7 @@ export function FinancialApuWorkspace() {
       <header><div><button className="text-action" onClick={() => window.history.back()}><ArrowLeft size={15}/>{tt("Back", "Volver")}</button><p className="eyebrow">{tt("Commercial", "Comercial")}</p><h1>{tt("Cost & Value Planner", "Planificador de Costos y Valor")}</h1><p>{tt("Turn a selling price into a controlled labor, incentive, earnings, performance, and forecast plan.", "Convierta un precio de venta en un plan controlado de mano de obra, incentivos, ganancias, rendimiento y pronóstico.")}</p></div><div className="header-actions"><button onClick={() => setHelpVisible((visible) => !visible)}><HelpCircle size={15}/>{helpVisible ? tt("Hide help", "Ocultar ayuda") : tt("Show help", "Mostrar ayuda")}</button><button onClick={exportPlanCsv}><FileSpreadsheet size={15}/>{tt("Export CSV", "Exportar CSV")}</button><PrintPdfButton lang={language} selectionMode loading={exportingPdf} disabled={!token} disabledReason={selectedPdfSections === 0 ? tt("Select at least one PDF section.", "Seleccione al menos una sección del PDF.") : undefined} configurationInvalid={selectedPdfSections === 0} options={pdfOptions} currentViewSummary={[`${tt("Project", "Proyecto")}: ${projectName || projectId}`, `${tt("Version", "Versión")}: ${plan.version ?? tt("Draft", "Borrador")}`]} onClick={() => void exportPlanPdf()}/>{plan.version && <span className="version">v{plan.version}</span>}</div></header>
       {loading ? <section className="panel">{tt("Loading planner…", "Cargando planificador…")}</section> : error && !projectName ? <section className="panel error" role="alert">{error}<button onClick={() => void load()}>{tt("Retry", "Reintentar")}</button></section> : <>
         {error && <div className="notice error" role="alert">{error}</div>}{message && <div className="notice success">{message}</div>}
+        {planHistory.length > 0 && <section className="panel version-history" data-testid="apu-version-history"><div><p className="eyebrow">{tt("Saved history", "Historial guardado")}</p><h2>{tt("APU plan versions", "Versiones del plan APU")}</h2><p>{tt("Every saved revision remains available. Opening an older version does not overwrite history; saving it creates a new version.", "Cada revisión guardada permanece disponible. Abrir una versión anterior no sobrescribe el historial; guardarla crea una versión nueva.")}</p></div><label><span className="label">{tt("Version to inspect", "Versión para revisar")}</span><select aria-label={tt("APU plan version", "Versión del plan APU")} value={plan.version ?? ""} onChange={(event) => { const selected = planHistory.find((entry) => entry.version === Number(event.target.value)); if (!selected) return; setPlan(selected); setMessage(selected.version === latestPlanVersion ? tt(`Loaded latest version v${selected.version}.`, `Se cargó la versión más reciente v${selected.version}.`) : tt(`Loaded historical version v${selected.version}. Saving changes will create a new version.`, `Se cargó la versión histórica v${selected.version}. Guardar cambios creará una versión nueva.`)); }}>{planHistory.map((entry) => <option key={entry.version} value={entry.version}>v{entry.version} · {entry.savedAt ? new Date(entry.savedAt).toLocaleString() : tt("saved", "guardada")} · {entry.name}</option>)}</select></label></section>}
         {helpVisible && <section className="panel guide" data-testid="cost-value-guide"><div className="section-title"><div><p className="eyebrow">{tt("How this plan works", "Cómo funciona este plan")}</p><h2>{tt("Five steps—no calculator required", "Cinco pasos—sin calculadora")}</h2></div><button onClick={() => setHelpVisible(false)}>{tt("Hide help", "Ocultar ayuda")}</button></div><div className="guide-grid"><article><strong>1. {tt("Establish value", "Establecer valor")}</strong><span>{tt("Selling Price − Fixed Company Cost = money available for labor, incentives, and project earnings.", "Precio de Venta − Costo Fijo de Empresa = dinero disponible para mano de obra, incentivos y ganancias.")}</span></article><article><strong>2. {tt("Allocate net value", "Distribuir valor neto")}</strong><span>{tt("Enter Labor % and Incentive %. Project Earnings receives the remainder automatically.", "Ingrese % de Mano de Obra y % de Incentivo. Ganancias recibe el remanente automáticamente.")}</span></article><article><strong>3. {tt("Split labor", "Dividir mano de obra")}</strong><span>{tt("Direct Production pays the people producing contracted deliverables. Project Administration covers coordination, management, meetings, and control.", "Producción Directa paga a quienes producen los entregables contratados. Administración cubre coordinación, gestión, reuniones y control.")}</span></article><article><strong>4. {tt("Distribute each pool", "Distribuir cada fondo")}</strong><span>{tt("Allocate Direct Production by delivery phase and Administration by activity. Use the automatic buttons instead of calculating the last percentage.", "Distribuya Producción Directa por fase y Administración por actividad. Use los botones automáticos en lugar de calcular el último porcentaje.")}</span></article><article><strong>5. {tt("Save and report", "Guardar y reportar")}</strong><span>{tt("Save when every section equals its required pool. CSV and PDF can also be exported while the plan is still a draft.", "Guarde cuando cada sección iguale su fondo requerido. CSV y PDF también pueden exportarse mientras el plan sea borrador.")}</span></article></div><div className="worked-example"><strong>{tt("Example", "Ejemplo")}: 10,000 − 2,000 = 8,000</strong><span>{tt("70% Labor = 5,600 · 20% Incentive = 1,600 · 10% Project Earnings = 800. If Direct Production is 85%, it receives 4,760 and Administration receives 840.", "70% Mano de Obra = 5,600 · 20% Incentivo = 1,600 · 10% Ganancias = 800. Si Producción Directa es 85%, recibe 4,760 y Administración recibe 840.")}</span></div></section>}
         <section className="panel"><div className="section-title"><h2>1. {tt("Plan setup", "Configuración del plan")}</h2><button onClick={loadSampleTemplate}><Sparkles size={15}/>{tt("Use complete BIM sample", "Usar ejemplo BIM completo")}</button></div>{helpVisible && <SectionHelp>{tt("Name this reusable financial setup. The sample fills every allocation with Ruben's BIM-services percentages and can be edited afterward.", "Nombre esta configuración financiera reutilizable. El ejemplo completa cada distribución con los porcentajes BIM de Rubén y luego puede editarse.")}</SectionHelp>}<div className="fields three"><Field label={tt("Plan name", "Nombre del plan")} value={plan.name} onChange={(value) => setPlan({ ...plan, name: value })}/><Field label={tt("Currency", "Moneda")} value={plan.currency} onChange={(value) => setPlan({ ...plan, currency: value.toUpperCase().slice(0, 3) })}/><div><span className="label">{tt("Project", "Proyecto")}</span><strong>{projectName}</strong></div></div></section>
         <section className="panel"><h2>2. {tt("Value foundation", "Base de valor")}</h2>{helpVisible && <SectionHelp>{tt("Selling Price is what the client pays. Fixed Company Cost is the protected company cost removed first. The remaining Net Distributable Value funds everything below.", "El Precio de Venta es lo que paga el cliente. El Costo Fijo de Empresa es el costo protegido que se retira primero. El Valor Neto restante financia todo lo demás.")}</SectionHelp>}<div className="fields three"><Money label={tt("Selling Price", "Precio de venta")} value={plan.sellingPrice} onChange={(value) => setFoundation("sellingPrice", value)}/><Money label={tt("Fixed Company Cost", "Costo fijo de empresa")} value={plan.fixedCompanyCost} onChange={(value) => setFoundation("fixedCompanyCost", value)}/><Metric label={tt("Net Distributable Value", "Valor neto distribuible")} value={format(values.net)} currency={plan.currency}/></div></section>

@@ -64,6 +64,7 @@ rejects({ ...balanced, allocationMode: "percentage", allocationPercentages: { la
 const uiRoot = path.resolve("../bimlog/src");
 const financialShell = fs.readFileSync(path.join(uiRoot, "components/layout/FinancialProjectShell.tsx"), "utf8");
 const plannerWorkspace = fs.readFileSync(path.join(uiRoot, "pages/FinancialApuWorkspace.tsx"), "utf8");
+const plannerService = fs.readFileSync(path.resolve("src/lib/cost-value-plan-service.ts"), "utf8");
 assert.match(financialShell, /className="page-content financial-page-content"/);
 assert.match(plannerWorkspace, /.cvp\{max-width:1200px/);
 assert.match(plannerWorkspace, /\.savebar\{position:sticky;bottom:12px/);
@@ -83,5 +84,10 @@ assert.match(plannerWorkspace, /completeLineRemainder/);
 assert.match(plannerWorkspace, /balanceIssues/);
 assert.match(plannerWorkspace, /bimlog-cvp-help/);
 assert.match(plannerWorkspace, /AllocationRow/);
+assert.match(plannerService, /ORDER BY version DESC LIMIT 100/);
+assert.match(plannerService, /history: versions\.map\(serializeVersion\)/);
+assert.match(plannerWorkspace, /data-testid="apu-version-history"/);
+assert.match(plannerWorkspace, /APU plan versions/);
+assert.match(plannerWorkspace, /Saving changes will create a new version/);
 
 console.log("Cost & Value Planner validation: passed.");

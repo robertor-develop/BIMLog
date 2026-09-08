@@ -160,10 +160,18 @@ export async function getCostValuePlan(actorUserId: number, projectId: number) {
   await authorizeFinancialOperation({ actorUserId, projectId, featureKey: "cost.value_planner.view", operation: "read" });
   const project = (await pool.query(`SELECT id,name,code FROM projects WHERE id=$1`, [projectId])).rows[0];
   if (!project) throw new CostValuePlanError(404, "PROJECT_NOT_FOUND", "Project not found.");
-  const latest = (await pool.query(`SELECT version,content,evaluation,content_fingerprint,created_at FROM generic_cost_value_plan_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1`, [projectId])).rows[0] ?? null;
+  const versions = (await pool.query(`SELECT version,content,evaluation,content_fingerprint,created_at FROM generic_cost_value_plan_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 100`, [projectId])).rows;
+  const latest = versions[0] ?? null;
+  const serializeVersion = (row: any) => ({
+    ...row.content,
+    evaluation: row.evaluation,
+    version: Number(row.version),
+    fingerprint: row.content_fingerprint,
+    savedAt: new Date(row.created_at).toISOString(),
+  });
   return { data: { project: { id: Number(project.id), name: project.name, code: project.code }, plan: latest ? {
-    ...latest.content, evaluation: latest.evaluation, version: Number(latest.version), fingerprint: latest.content_fingerprint, savedAt: new Date(latest.created_at).toISOString(),
-  } : null, commercialAccess: true } };
+    ...serializeVersion(latest),
+  } : null, history: versions.map(serializeVersion), commercialAccess: true } };
 }
 
 export async function saveCostValuePlan(actorUserId: number, projectId: number, input: unknown) {
