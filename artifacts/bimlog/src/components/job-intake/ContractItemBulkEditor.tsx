@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { ClipboardPaste, Plus, Trash2 } from "lucide-react";
 import { connectContractItemsToApu } from "@/lib/job-intake-apu-connection";
+import {
+  profileForApuRate,
+  rateForApuProfile,
+} from "@/lib/job-intake-apu-rates";
 
 type Translate = (en: string, es: string) => string;
 
@@ -415,6 +419,34 @@ export function ContractItemBulkEditor(props: Props) {
               </label>
               {props.capabilities.costValuePlanner && (
                 <>
+                  <label>
+                    {props.tt("APU rate profile", "Perfil de tarifa APU")}
+                    <select
+                      value={profileForApuRate(item.billingHourlyRate)}
+                      aria-label={props.tt(
+                        `APU rate profile row ${index + 1}`,
+                        `Perfil de tarifa APU fila ${index + 1}`,
+                      )}
+                      onChange={(event) => {
+                        const rate = rateForApuProfile(event.target.value);
+                        if (rate != null)
+                          update(index, { billingHourlyRate: rate });
+                      }}
+                    >
+                      <option value="">
+                        {props.tt("Custom editable rate", "Tarifa editable personalizada")}
+                      </option>
+                      <option value="drafting">
+                        {props.tt("Drafting — 35.47", "Dibujo — 35.47")}
+                      </option>
+                      <option value="bim_coordinator">
+                        {props.tt(
+                          "BIM Coordinator — 37.99",
+                          "Coordinador BIM — 37.99",
+                        )}
+                      </option>
+                    </select>
+                  </label>
                   <label>
                     {props.tt(
                       "Inherited APU unit rate",
