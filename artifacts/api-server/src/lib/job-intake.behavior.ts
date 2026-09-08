@@ -186,6 +186,14 @@ assert.deepEqual(
   "legacy assignments derive their authoritative contract from the selected Contract Item",
 );
 assert.equal(multiContractCompletion.ready, true);
+const multiApuContract = normalizeJobIntakeData({
+  commercial: { contracts: [{ id: "BASE", title: "Base agreement" }] },
+  scopeItems: [
+    { id: "CI-A", name: "Drafting", contractId: "BASE", apuPlanVersion: 3 },
+    { id: "CI-B", name: "Coordination", contractId: "BASE", apuPlanVersion: 4 },
+  ],
+});
+assert.deepEqual(multiApuContract.scopeItems.map((item) => item.apuPlanVersion), [3, 4]);
 assert.throws(
   () =>
     normalizeJobIntakeData({
@@ -384,6 +392,8 @@ assert.match(service, /clientCompanyId: data\.identity\.clientCompanyId/);
 assert.match(operationsService, /reportingContracts/);
 assert.match(operationsService, /quotationNumber/);
 assert.match(operationsUi, /Contract reporting identity/);
+assert.match(service, /apuPlanVersions: \[\.\.\.new Set/);
+assert.match(operationsService, /apuCount: apuPlanVersions\.length/);
 assert.match(ui, /Activate operational job/);
 assert.match(ui, /@media\(max-width:900px\)/);
 assert.match(bulkEditor, /Paste Excel range/);
@@ -426,6 +436,7 @@ console.log(
       "contract-lifecycle-and-parent-lineage",
       "distinct-filterable-contract-reporting-identity",
       "contract-item-agreement-and-company-ownership",
+      "multiple-apus-per-agreement",
     ],
   }),
 );

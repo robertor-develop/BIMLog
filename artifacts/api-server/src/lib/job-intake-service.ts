@@ -1268,6 +1268,7 @@ export async function activateJobIntake(input: {
               clientCompanyId: data.identity.clientCompanyId,
               clientCompany: data.identity.clientCompany,
               contractItems: contractItems.length,
+              apuPlanVersions: [...new Set(contractItems.map((item) => item.apuPlanVersion).filter((version): version is number => Number.isSafeInteger(version)))],
               plannedHours: decimalFromScaled(
                 contractItems.reduce(
                   (sum, item) => sum + scaledSignedDecimal(item.plannedHours),

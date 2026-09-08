@@ -404,7 +404,10 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     pool.query(`SELECT data FROM job_intakes WHERE id=$1`, [access.intakeId]),
   ]);
   const authoritativeIntake = intakeData.rows[0]?.data ?? {};
-  const reportingContracts = (authoritativeIntake.commercial?.contracts ?? []).map((contract: any) => ({
+  const reportingContracts = (authoritativeIntake.commercial?.contracts ?? []).map((contract: any) => {
+    const contractItems = (authoritativeIntake.scopeItems ?? []).filter((item: any) => item.contractId === contract.id);
+    const apuPlanVersions = [...new Set(contractItems.map((item: any) => item.apuPlanVersion).filter((version: unknown) => Number.isSafeInteger(version)))];
+    return ({
     id: contract.id,
     projectName: authoritativeIntake.identity?.jobName || access.projectName,
     projectCode: authoritativeIntake.identity?.jobCode || access.projectCode,
@@ -417,7 +420,10 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     quotationNumber: contract.quotationNumber || "",
     contractNumber: contract.contractNumber || "",
     parentContractId: contract.parentContractId || "",
-  }));
+    contractItemCount: contractItems.length,
+    apuPlanVersions,
+    apuCount: apuPlanVersions.length,
+  }); });
   const showBudget = capabilities.budget === true;
   const showPlanner = capabilities.cost_value_planner === true;
   const safeWorkItems = workItems.rows.map((row) => ({
