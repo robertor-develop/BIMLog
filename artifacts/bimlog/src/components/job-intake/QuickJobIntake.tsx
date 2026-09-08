@@ -8,6 +8,7 @@ type Props = {
   contacts: Array<{ id: string | number; fullName?: string | null; email?: string | null }>;
   defaultRate: string;
   defaultApuVersion: number | null;
+  projectId: number;
   tt: (en: string, es: string) => string;
   onAdvanced: () => void;
 };
@@ -15,8 +16,22 @@ type Props = {
 const value = (input: unknown) => String(input ?? "").trim();
 
 export function QuickJobIntake(props: Props) {
-  const { data, setData, companies, contacts, defaultRate, defaultApuVersion, tt, onAdvanced } = props;
-  const [step, setStep] = useState(0);
+  const { data, setData, companies, contacts, defaultRate, defaultApuVersion, projectId, tt, onAdvanced } = props;
+  const stepKey = `bimlog:job-intake-quick-step:${projectId}`;
+  const [step, setStepState] = useState(() => {
+    try {
+      const saved = Number(window.localStorage.getItem(stepKey));
+      return Number.isInteger(saved) && saved >= 0 && saved <= 2 ? saved : 0;
+    } catch {
+      return 0;
+    }
+  });
+  const setStep = (next: number | ((current: number) => number)) =>
+    setStepState((current) => {
+      const resolved = typeof next === "function" ? next(current) : next;
+      try { window.localStorage.setItem(stepKey, String(resolved)); } catch { /* Navigation remains usable without browser storage. */ }
+      return resolved;
+    });
   const primary = data.commercial?.contracts?.[0] ?? {};
   const firstItem = data.scopeItems?.[0] ?? {};
   const ready = useMemo(
