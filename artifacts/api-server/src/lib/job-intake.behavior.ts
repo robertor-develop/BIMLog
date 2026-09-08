@@ -32,10 +32,13 @@ const data = normalizeJobIntakeData({
   ],
   commercial: {
     quotationNumber: "Q-100",
+    title: "River Avenue base contract",
     contractNumber: "C-100",
     counterpartyName: "Example Client LLC",
     perspective: "upstream",
     contractType: "owner_prime",
+    reportingType: "base_contract",
+    reportingStatus: "work_in_progress",
     budgetSnapshotId: "snapshot-1",
   },
   delivery: {
@@ -117,6 +120,7 @@ const multiContractData = normalizeJobIntakeData({
     contracts: [
       {
         id: "OWNER",
+        title: "Owner contract",
         contractNumber: "OWNER-100",
         counterpartyName: "Example Client LLC",
         perspective: "upstream",
@@ -124,10 +128,13 @@ const multiContractData = normalizeJobIntakeData({
       },
       {
         id: "SUPPLIER",
+        title: "Supplier contract",
         contractNumber: "PO-200",
         counterpartyName: "Example Supplier LLC",
         perspective: "downstream",
         contractType: "purchase_order",
+        reportingType: "additional",
+        reportingStatus: "closed",
       },
     ],
   },
@@ -149,6 +156,8 @@ const multiContractData = normalizeJobIntakeData({
 });
 const multiContractCompletion = jobIntakeCompletion(multiContractData, []);
 assert.equal(multiContractData.commercial.contracts.length, 2);
+assert.equal(multiContractData.commercial.contracts[0].reportingType, "base_contract");
+assert.equal(multiContractData.commercial.contracts[1].reportingStatus, "closed");
 assert.deepEqual(
   multiContractData.scopeItems.map((item) => item.contractId),
   ["OWNER", "SUPPLIER"],

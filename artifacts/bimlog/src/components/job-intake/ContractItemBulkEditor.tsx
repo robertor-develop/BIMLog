@@ -1,10 +1,10 @@
 import { useState } from "react";
 import { ClipboardPaste, Plus, Trash2 } from "lucide-react";
-import { connectContractItemsToApu } from "@/lib/job-intake-apu-connection";
+import { connectContractItemsToApu } from "../../lib/job-intake-apu-connection";
 import {
   profileForApuRate,
   rateForApuProfile,
-} from "@/lib/job-intake-apu-rates";
+} from "../../lib/job-intake-apu-rates";
 
 type Translate = (en: string, es: string) => string;
 

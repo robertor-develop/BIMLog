@@ -99,16 +99,20 @@ const blank = {
     contracts: [
       {
         id: "PRIMARY",
+        title: "",
         quotationNumber: "",
         contractNumber: "",
         counterpartyName: "",
         perspective: "downstream",
         contractType: "subcontract",
+        reportingType: "base_contract",
+        reportingStatus: "work_in_progress",
         paymentTerms: "",
         effectiveDate: "",
         completionDate: "",
       },
     ],
+    title: "",
     quotationNumber: "",
     contractNumber: "",
     counterpartyName: "",
@@ -457,11 +461,14 @@ export function JobIntakeWorkspace() {
       ...contracts,
       {
         id: `CONTRACT-${crypto.randomUUID()}`,
+        title: "",
         quotationNumber: "",
         contractNumber: "",
         counterpartyName: "",
         perspective: "downstream",
         contractType: "subcontract",
+        reportingType: "additional",
+        reportingStatus: "work_in_progress",
         paymentTerms: "",
         effectiveDate: "",
         completionDate: "",
@@ -1587,6 +1594,7 @@ export function JobIntakeWorkspace() {
                     </p>
                     <div className="ji-grid three">
                       {[
+                        ["title", tt("Contract / quote name", "Nombre del contrato / cotización")],
                         [
                           "quotationNumber",
                           tt("Quotation number", "Número de cotización"),
@@ -1606,14 +1614,46 @@ export function JobIntakeWorkspace() {
                       ].map(([field, label]) => (
                         <label key={field}>
                           {label}
-                          <input
-                            value={data.commercial[field]}
-                            onChange={(e) =>
-                              changeContract(0, field, e.target.value)
-                            }
-                          />
+                          {field === "counterpartyName" ? (
+                            <select
+                              value={data.commercial[field]}
+                              onChange={(e) => changeContract(0, field, e.target.value)}
+                            >
+                              <option value="">{tt("Select client company", "Seleccione empresa cliente")}</option>
+                              {data.commercial[field] && !clientCompanyOptions.includes(data.commercial[field]) && (
+                                <option value={data.commercial[field]}>{data.commercial[field]}</option>
+                              )}
+                              {clientCompanyOptions.map((company) => <option key={company} value={company}>{company}</option>)}
+                            </select>
+                          ) : (
+                            <input
+                              value={data.commercial[field]}
+                              onChange={(e) => changeContract(0, field, e.target.value)}
+                            />
+                          )}
                         </label>
                       ))}
+                      <label>
+                        {tt("Reporting category", "Categoría para reportes")}
+                        <select
+                          value={data.commercial.contracts?.[0]?.reportingType || "base_contract"}
+                          onChange={(e) => changeContract(0, "reportingType", e.target.value)}
+                        >
+                          <option value="base_contract">{tt("Base contract", "Contrato base")}</option>
+                          <option value="change_order">{tt("Change order", "Orden de cambio")}</option>
+                          <option value="additional">{tt("Additional", "Adicional")}</option>
+                        </select>
+                      </label>
+                      <label>
+                        {tt("Reporting status", "Estado para reportes")}
+                        <select
+                          value={data.commercial.contracts?.[0]?.reportingStatus || "work_in_progress"}
+                          onChange={(e) => changeContract(0, "reportingStatus", e.target.value)}
+                        >
+                          <option value="work_in_progress">{tt("Work in progress", "En progreso")}</option>
+                          <option value="closed">{tt("Closed", "Cerrado")}</option>
+                        </select>
+                      </label>
                       <label>
                         {tt("Perspective", "Perspectiva")}
                         <select
@@ -1691,6 +1731,7 @@ export function JobIntakeWorkspace() {
                             </div>
                             <div className="ji-grid three">
                               {[
+                                ["title", tt("Contract / quote name", "Nombre del contrato / cotización")],
                                 [
                                   "quotationNumber",
                                   tt(
@@ -1716,18 +1757,46 @@ export function JobIntakeWorkspace() {
                               ].map(([field, label]) => (
                                 <label key={field}>
                                   {label}
-                                  <input
-                                    value={contract[field] || ""}
-                                    onChange={(event) =>
-                                      changeContract(
-                                        index,
-                                        field,
-                                        event.target.value,
-                                      )
-                                    }
-                                  />
+                                  {field === "counterpartyName" ? (
+                                    <select
+                                      value={contract[field] || ""}
+                                      onChange={(event) => changeContract(index, field, event.target.value)}
+                                    >
+                                      <option value="">{tt("Select client company", "Seleccione empresa cliente")}</option>
+                                      {contract[field] && !clientCompanyOptions.includes(contract[field]) && (
+                                        <option value={contract[field]}>{contract[field]}</option>
+                                      )}
+                                      {clientCompanyOptions.map((company) => <option key={company} value={company}>{company}</option>)}
+                                    </select>
+                                  ) : (
+                                    <input
+                                      value={contract[field] || ""}
+                                      onChange={(event) => changeContract(index, field, event.target.value)}
+                                    />
+                                  )}
                                 </label>
                               ))}
+                              <label>
+                                {tt("Reporting category", "Categoría para reportes")}
+                                <select
+                                  value={contract.reportingType || "additional"}
+                                  onChange={(event) => changeContract(index, "reportingType", event.target.value)}
+                                >
+                                  <option value="base_contract">{tt("Base contract", "Contrato base")}</option>
+                                  <option value="change_order">{tt("Change order", "Orden de cambio")}</option>
+                                  <option value="additional">{tt("Additional", "Adicional")}</option>
+                                </select>
+                              </label>
+                              <label>
+                                {tt("Reporting status", "Estado para reportes")}
+                                <select
+                                  value={contract.reportingStatus || "work_in_progress"}
+                                  onChange={(event) => changeContract(index, "reportingStatus", event.target.value)}
+                                >
+                                  <option value="work_in_progress">{tt("Work in progress", "En progreso")}</option>
+                                  <option value="closed">{tt("Closed", "Cerrado")}</option>
+                                </select>
+                              </label>
                               <label>
                                 {tt("Perspective", "Perspectiva")}
                                 <select

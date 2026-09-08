@@ -1214,7 +1214,7 @@ export async function activateJobIntake(input: {
             perspective: contract.perspective,
             contractType: contract.contractType,
             counterpartyName: contract.counterpartyName,
-            title: `${data.identity.jobName} - ${contract.contractNumber}`,
+            title: contract.title,
             currency: data.identity.currency,
             originalValue: contractValue,
             budgetSnapshotId: data.commercial.budgetSnapshotId,
@@ -1225,6 +1225,8 @@ export async function activateJobIntake(input: {
               intakeId: intake.id,
               contractProfileId: contract.id,
               quotationNumber: contract.quotationNumber,
+              reportingType: contract.reportingType,
+              reportingStatus: contract.reportingStatus,
               contractItems: contractItems.length,
               plannedHours: decimalFromScaled(
                 contractItems.reduce(

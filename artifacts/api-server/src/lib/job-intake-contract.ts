@@ -281,6 +281,7 @@ export function normalizeJobIntakeData(raw: unknown) {
       : [
           {
             id: "PRIMARY",
+            title: commercial.title,
             quotationNumber: commercial.quotationNumber,
             contractNumber: commercial.contractNumber,
             counterpartyName: commercial.counterpartyName,
@@ -306,6 +307,11 @@ export function normalizeJobIntakeData(raw: unknown) {
     contractIds.add(id);
     return {
       id,
+      title: optionalText(
+        contract.title,
+        `commercial.contracts[${index}].title`,
+        300,
+      ),
       quotationNumber: optionalText(
         contract.quotationNumber,
         `commercial.contracts[${index}].quotationNumber`,
@@ -335,6 +341,18 @@ export function normalizeJobIntakeData(raw: unknown) {
       ].includes(String(contract.contractType))
         ? String(contract.contractType)
         : "subcontract",
+      reportingType: ["base_contract", "change_order", "additional"].includes(
+        String(contract.reportingType),
+      )
+        ? String(contract.reportingType)
+        : index === 0
+          ? "base_contract"
+          : "additional",
+      reportingStatus: ["work_in_progress", "closed"].includes(
+        String(contract.reportingStatus),
+      )
+        ? String(contract.reportingStatus)
+        : "work_in_progress",
       paymentTerms: optionalText(
         contract.paymentTerms,
         `commercial.contracts[${index}].paymentTerms`,
@@ -573,6 +591,7 @@ export function normalizeJobIntakeData(raw: unknown) {
     scopeItems: normalizedItems,
     commercial: {
       contracts: normalizedContracts,
+      title: optionalText(primaryContract.title, "commercial.title", 300),
       quotationNumber: optionalText(
         primaryContract.quotationNumber,
         "commercial.quotationNumber",
@@ -753,6 +772,7 @@ export function jobIntakeCompletion(
     data.commercial.contracts.length > 0 &&
     data.commercial.contracts.every(
       (contract: any) =>
+        contract.title &&
         contract.contractNumber &&
         contract.counterpartyName &&
         assignedContractIds.has(contract.id),
@@ -870,6 +890,12 @@ export function jobIntakeCompletion(
         code: "budget_mapping",
         en: "Map every scope item to an approved budget line.",
         es: "Vincule cada partida con una línea de presupuesto aprobada.",
+      },
+    capabilities.contracts &&
+      data.commercial.contracts.some((contract: any) => !contract.title) && {
+        code: "contract_title",
+        en: "Enter a name for every contract or quote.",
+        es: "Ingrese un nombre para cada contrato o cotización.",
       },
     capabilities.contracts &&
       data.commercial.contracts.some(
