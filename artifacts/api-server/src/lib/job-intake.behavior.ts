@@ -6,6 +6,7 @@ import {
   jobIntakeCompletion,
   normalizeJobIntakeData,
 } from "./job-intake-contract";
+import { buildActivatedCommercialBaseline } from "./job-activation-commercial-baseline";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const read = (relative: string) =>
@@ -194,6 +195,11 @@ const multiApuContract = normalizeJobIntakeData({
   ],
 });
 assert.deepEqual(multiApuContract.scopeItems.map((item) => item.apuPlanVersion), [3, 4]);
+const immutableBaselineInput = { intakeId: "INTAKE-1", projectId: 1, currency: "USD", workflowInstances: 2, workItems: 2, tasks: 2, resourceAssignments: 0, contracts: [{ profileId: "BASE", contractId: "CONTRACT-1", contractVersionId: "VERSION-1", contractNumber: "C-1", currency: "USD", items: [{ stableLineId: "CI-A", displayName: "Drafting", projectCostNodeId: "NODE-1", budgetSnapshotLineId: "", quantity: "10", unit: "Hours", unitRate: "35.47", contractValue: "354.7", apuPlanVersion: 3, workflowTemplate: "bim-submittal" }] }] };
+const immutableBaseline = buildActivatedCommercialBaseline(immutableBaselineInput);
+const changedApuBaseline = buildActivatedCommercialBaseline({ ...immutableBaselineInput, contracts: [{ ...immutableBaselineInput.contracts[0], items: [{ ...immutableBaselineInput.contracts[0].items[0], unitRate: "37.99", contractValue: "379.9", apuPlanVersion: 4 }] }] });
+assert.notEqual(immutableBaseline.contentFingerprint, changedApuBaseline.contentFingerprint);
+assert.equal(immutableBaseline.contractItems[0].pricingSnapshot.unitRate, "35.47");
 assert.throws(
   () =>
     normalizeJobIntakeData({
@@ -394,6 +400,8 @@ assert.match(operationsService, /quotationNumber/);
 assert.match(operationsUi, /Contract reporting identity/);
 assert.match(service, /apuPlanVersions: \[\.\.\.new Set/);
 assert.match(operationsService, /apuCount: apuPlanVersions\.length/);
+assert.match(operationsService, /job_activation_contract_item_baselines/);
+assert.match(operationsUi, /Immutable APU history/);
 assert.match(ui, /Activate operational job/);
 assert.match(ui, /@media\(max-width:900px\)/);
 assert.match(bulkEditor, /Paste Excel range/);
@@ -437,6 +445,7 @@ console.log(
       "distinct-filterable-contract-reporting-identity",
       "contract-item-agreement-and-company-ownership",
       "multiple-apus-per-agreement",
+      "immutable-apu-pricing-history",
     ],
   }),
 );
