@@ -185,7 +185,7 @@ namespace BIMLogLensNext.Tests
 
                 var xml = Encoding.UTF8.GetString(firstBytes);
                 True(xml.StartsWith("<?xml version=\"1.0\" encoding=\"utf-8\"?>", StringComparison.Ordinal));
-                foreach (var forbidden in new[] { "camera", "viewpoint ", "units=", "focal", "position", "rotation", "section" })
+                foreach (var forbidden in new[] { "camera", "viewpoint ", "focal", "position", "rotation", "section" })
                     False(xml.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
                 True(xml.IndexOf("xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\"", StringComparison.Ordinal) >= 0);
                 True(xml.IndexOf("xsi:noNamespaceSchemaLocation=\"http://download.autodesk.com/us/navisworks/schemas/nw-exchange-12.0.xsd\"", StringComparison.Ordinal) >= 0);
@@ -193,9 +193,10 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null };
                 document.Load(first);
                 Equal(LensNextXmlDocumentShellWriter.RootElementName, document.DocumentElement.Name);
-                Equal(4, document.DocumentElement.Attributes.Count);
+                Equal(5, document.DocumentElement.Attributes.Count);
                 Equal("BIMLog", document.DocumentElement.GetAttribute("filename"));
                 Equal("BIMLog", document.DocumentElement.GetAttribute("filepath"));
+                Equal("ft", document.DocumentElement.GetAttribute("units"));
                 Equal(LensNextXmlDocumentShellWriter.NavisworksExchangeSchemaLocation,
                     document.DocumentElement.GetAttribute("noNamespaceSchemaLocation", LensNextXmlDocumentShellWriter.XmlSchemaInstanceNamespace));
                 var viewpoints = document.DocumentElement.SelectNodes("viewpoints");
@@ -322,7 +323,7 @@ namespace BIMLogLensNext.Tests
                 True(raw.Contains("&amp;"));
                 True(raw.Contains("&lt;Conflict&gt;"));
                 True(raw.Contains("&quot;A&quot;"));
-                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
+                foreach (var forbidden in new[] { "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -382,15 +383,16 @@ namespace BIMLogLensNext.Tests
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { ExportInput(71, 1, null) });
                 var document = new XmlDocument { XmlResolver = null };
                 document.Load(path);
-                Equal(4, document.DocumentElement.Attributes.Count);
+                Equal(5, document.DocumentElement.Attributes.Count);
                 Equal("BIMLog", document.DocumentElement.GetAttribute("filename"));
                 Equal("BIMLog", document.DocumentElement.GetAttribute("filepath"));
+                Equal("ft", document.DocumentElement.GetAttribute("units"));
                 Equal(LensNextXmlDocumentShellWriter.NavisworksExchangeSchemaLocation,
                     document.DocumentElement.GetAttribute("noNamespaceSchemaLocation", LensNextXmlDocumentShellWriter.XmlSchemaInstanceNamespace));
-                foreach (var forbidden in new[] { "units", "schema", "generator", "version" })
+                foreach (var forbidden in new[] { "schema", "generator", "version" })
                     False(document.DocumentElement.HasAttribute(forbidden));
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "units=", "near=", "far=", "linear=", "angular=", "sectioning" })
+                foreach (var forbidden in new[] { "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
                 True(raw.IndexOf("xsi:noNamespaceSchemaLocation=\"" + LensNextXmlDocumentShellWriter.NavisworksExchangeSchemaLocation + "\"", StringComparison.Ordinal) >= 0);
             }
@@ -428,9 +430,9 @@ namespace BIMLogLensNext.Tests
                 var input = ExportInput(80, 1, null);
                 input.PackageCamera.Position = new LensNextPointState { X = values[0], Y = values[1], Z = values[2] };
                 var coordinates = WriteAndReadPosition(input);
-                Equal(values[0], coordinates[0]);
-                Equal(values[1], coordinates[1]);
-                Equal(values[2], coordinates[2]);
+                Equal(values[0] / 12d, coordinates[0]);
+                Equal(values[1] / 12d, coordinates[1]);
+                Equal(values[2] / 12d, coordinates[2]);
             }
         }
 
@@ -441,12 +443,12 @@ namespace BIMLogLensNext.Tests
             {
                 X = 0.1,
                 Y = -123456789.12345679,
-                Z = (double)float.Epsilon
+                Z = (double)float.Epsilon * 12d
             };
             var coordinates = WriteAndReadPosition(input);
-            Equal(input.PackageCamera.Position.X, coordinates[0]);
-            Equal(input.PackageCamera.Position.Y, coordinates[1]);
-            Equal(input.PackageCamera.Position.Z, coordinates[2]);
+            Equal(input.PackageCamera.Position.X / 12d, coordinates[0]);
+            Equal(input.PackageCamera.Position.Y / 12d, coordinates[1]);
+            Equal(input.PackageCamera.Position.Z / 12d, coordinates[2]);
         }
 
         private static void XmlCameraPositionRejectsMissingAndNonFiniteValues()
@@ -468,7 +470,7 @@ namespace BIMLogLensNext.Tests
 
         private static void XmlFloatRepresentabilityIsEnforcedAcrossEmittedFields()
         {
-            var tooLarge = (double)float.MaxValue * 2d;
+            var tooLarge = (double)float.MaxValue * 24d;
             var tooSmall = (double)float.Epsilon / 2d;
 
             foreach (var invalid in new[] { tooLarge, -tooLarge, tooSmall, -tooSmall })
@@ -493,7 +495,7 @@ namespace BIMLogLensNext.Tests
             var valid = ExportInput(192, 1, null);
             valid.PackageCamera.Position = new LensNextPointState { X = 1e30d, Y = -1e30d, Z = 0.125d };
             var coordinates = WriteAndReadPosition(valid);
-            Equal(1e30d, coordinates[0]); Equal(-1e30d, coordinates[1]); Equal(0.125d, coordinates[2]);
+            Equal(1e30d / 12d, coordinates[0]); Equal(-1e30d / 12d, coordinates[1]); Equal(0.125d / 12d, coordinates[2]);
         }
 
         private static void XmlCameraPositionEmitsNoOtherCameraSemantics()
@@ -508,7 +510,7 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/position/pos3f").Count);
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "up", "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
+                foreach (var forbidden in new[] { "up", "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -675,7 +677,7 @@ namespace BIMLogLensNext.Tests
                 Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/position/pos3f").Count);
                 Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/camera/rotation/quaternion").Count);
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "<up", "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
+                foreach (var forbidden in new[] { "<up", "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -794,7 +796,7 @@ namespace BIMLogLensNext.Tests
                 Equal(input.PackageCamera.Rotation.C.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("c"));
                 Equal(input.PackageCamera.Rotation.D.ToString("R", CultureInfo.InvariantCulture), quaternion.GetAttribute("d"));
                 var raw = File.ReadAllText(afterPath);
-                foreach (var forbidden in new[] { "<up", "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
+                foreach (var forbidden in new[] { "<up", "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -890,7 +892,7 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 Equal(1, document.SelectNodes("/exchange/viewpoints/viewfolder/view/viewpoint/up/vec3f").Count);
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
+                foreach (var forbidden in new[] { "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -937,7 +939,7 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(first);
                 var camera = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/camera");
                 Equal("ortho", camera.GetAttribute("projection"));
-                Equal("-12.5", ((XmlElement)camera.SelectSingleNode("position/pos3f")).GetAttribute("x"));
+                Equal((-12.5d / 12d).ToString("R", CultureInfo.InvariantCulture), ((XmlElement)camera.SelectSingleNode("position/pos3f")).GetAttribute("x"));
                 Equal("-0.1", ((XmlElement)camera.SelectSingleNode("rotation/quaternion")).GetAttribute("a"));
                 Equal("-0.25", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/up/vec3f")).GetAttribute("x"));
                 Equal("Feet", input.PackageCamera.SourceLinearUnit);
@@ -957,14 +959,16 @@ namespace BIMLogLensNext.Tests
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 var camera = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/camera");
-                Equal(3, camera.Attributes.Count);
+                Equal(5, camera.Attributes.Count);
                 Equal("persp", camera.GetAttribute("projection"));
                 True(camera.HasAttribute("aspect"));
                 True(camera.HasAttribute("height"));
+                True(camera.HasAttribute("near"));
+                True(camera.HasAttribute("far"));
                 Equal(1, camera.SelectNodes("position/pos3f").Count);
                 Equal(1, camera.SelectNodes("rotation/quaternion").Count);
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "units=" })
+                foreach (var forbidden in new[] { "linear=", "angular=", "sectioning" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -992,19 +996,14 @@ namespace BIMLogLensNext.Tests
             input.PackageCamera.HorizontalExtentAtFocalDistance = 8d;
             input.PackageCamera.VerticalExtentAtFocalDistance = 6d;
             var scale = WriteAndReadCameraScale(input);
-            var expectedFov = 2d * Math.Atan(6d / (2d * 10d));
-            Equal(10d, scale[0]);
-            Equal(expectedFov, scale[1]);
-            Equal(8d / 6d, scale[2]);
-            Equal(expectedFov, scale[3]);
+            Equal(1d, scale[0]); Equal(10d, scale[1]); Equal(1d, scale[2]); Equal(0.785398d, scale[3]);
 
             var large = ExportInput(168, 1, null);
             large.PackageCamera.FocalDistance = 1e30d;
             large.PackageCamera.HorizontalExtentAtFocalDistance = 1e30d;
             large.PackageCamera.VerticalExtentAtFocalDistance = 1e30d;
             var largeScale = WriteAndReadCameraScale(large);
-            Equal(2d * Math.Atan(0.5d), largeScale[1]);
-            Equal(1d, largeScale[2]);
+            Equal(1d, largeScale[0]); Equal(10d, largeScale[1]); Equal(1d, largeScale[2]); Equal(0.785398d, largeScale[3]);
         }
 
         private static void XmlCameraScaleMapsOrthographicSemantics()
@@ -1015,10 +1014,7 @@ namespace BIMLogLensNext.Tests
             input.PackageCamera.HorizontalExtentAtFocalDistance = 8d;
             input.PackageCamera.VerticalExtentAtFocalDistance = 6d;
             var scale = WriteAndReadCameraScale(input);
-            Equal(10d, scale[0]);
-            Equal(2d * Math.Atan(6d / (2d * 10d)), scale[1]);
-            Equal(8d / 6d, scale[2]);
-            Equal(6d, scale[3]);
+            Equal(1d, scale[0]); Equal(10d, scale[1]); Equal(1d, scale[2]); Equal(0.785398d, scale[3]);
         }
 
         private static void XmlCameraScaleMatchesNavisworksPerspectiveFovPresenceBoundary()
@@ -1065,12 +1061,9 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
                 var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
-                Equal(expectedPresence, viewpoint.HasAttribute("fov"));
-                if (expectedPresence)
-                    True(Math.Abs(expectedFov - double.Parse(viewpoint.GetAttribute("fov"), CultureInfo.InvariantCulture)) <= 2E-16d);
-                Equal(focal, double.Parse(viewpoint.GetAttribute("focal"), CultureInfo.InvariantCulture));
-                True(Math.Abs(horizontal / vertical - double.Parse(camera.GetAttribute("aspect"), CultureInfo.InvariantCulture)) <= 2E-16d);
-                Equal(vertical, double.Parse(camera.GetAttribute("height"), CultureInfo.InvariantCulture));
+                False(viewpoint.HasAttribute("fov")); False(viewpoint.HasAttribute("focal"));
+                Equal(1d, double.Parse(camera.GetAttribute("aspect"), CultureInfo.InvariantCulture));
+                Equal(0.785398d, double.Parse(camera.GetAttribute("height"), CultureInfo.InvariantCulture));
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -1092,10 +1085,9 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
                 var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
-                Equal(expectedPresence, viewpoint.HasAttribute("fov"));
-                True(Math.Abs(angle - double.Parse(camera.GetAttribute("height"), CultureInfo.InvariantCulture)) <= 2E-16d);
-                Equal(focal, double.Parse(viewpoint.GetAttribute("focal"), CultureInfo.InvariantCulture));
-                Equal(1.5d, double.Parse(camera.GetAttribute("aspect"), CultureInfo.InvariantCulture));
+                False(viewpoint.HasAttribute("fov")); False(viewpoint.HasAttribute("focal"));
+                Equal(0.785398d, double.Parse(camera.GetAttribute("height"), CultureInfo.InvariantCulture));
+                Equal(1d, double.Parse(camera.GetAttribute("aspect"), CultureInfo.InvariantCulture));
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -1159,8 +1151,8 @@ namespace BIMLogLensNext.Tests
                 var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
                 var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
                 False(viewpoint.HasAttribute("focal")); False(viewpoint.HasAttribute("fov"));
-                Equal(1, camera.Attributes.Count); Equal("persp", camera.GetAttribute("projection"));
-                False(camera.HasAttribute("aspect")); False(camera.HasAttribute("height"));
+                Equal(5, camera.Attributes.Count); Equal("persp", camera.GetAttribute("projection"));
+                True(camera.HasAttribute("aspect")); True(camera.HasAttribute("height")); True(camera.HasAttribute("near")); True(camera.HasAttribute("far"));
                 True(camera.SelectSingleNode("position/pos3f") != null);
                 True(camera.SelectSingleNode("rotation/quaternion") != null);
             }
@@ -1178,16 +1170,16 @@ namespace BIMLogLensNext.Tests
                 LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
-                Equal(2, viewpoint.Attributes.Count);
-                True(viewpoint.HasAttribute("focal"));
-                True(viewpoint.HasAttribute("fov"));
+                Equal(0, viewpoint.Attributes.Count);
+                False(viewpoint.HasAttribute("focal"));
+                False(viewpoint.HasAttribute("fov"));
                 var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
-                Equal(3, camera.Attributes.Count);
+                Equal(5, camera.Attributes.Count);
                 True(camera.HasAttribute("projection"));
                 True(camera.HasAttribute("aspect"));
                 True(camera.HasAttribute("height"));
                 var raw = File.ReadAllText(path);
-                foreach (var forbidden in new[] { "near=", "far=", "linear=", "angular=", "sectioning", "clipplane", "lighting=", "render=", "tool=", "units=" })
+                foreach (var forbidden in new[] { "linear=", "angular=", "sectioning", "clipplane", "lighting=", "render=", "tool=" })
                     False(raw.IndexOf(forbidden, StringComparison.OrdinalIgnoreCase) >= 0);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
@@ -1206,8 +1198,8 @@ namespace BIMLogLensNext.Tests
                 var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
                 return new[]
                 {
-                    double.Parse(viewpoint.GetAttribute("focal"), CultureInfo.InvariantCulture),
-                    double.Parse(viewpoint.GetAttribute("fov"), CultureInfo.InvariantCulture),
+                    double.Parse(camera.GetAttribute("near"), CultureInfo.InvariantCulture),
+                    double.Parse(camera.GetAttribute("far"), CultureInfo.InvariantCulture),
                     double.Parse(camera.GetAttribute("aspect"), CultureInfo.InvariantCulture),
                     double.Parse(camera.GetAttribute("height"), CultureInfo.InvariantCulture)
                 };
@@ -1220,7 +1212,11 @@ namespace BIMLogLensNext.Tests
             var input = ExportInput(171, 1, null);
             input.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,0,-1],\"Distance\":-53.1620981117,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}";
             var document = WriteAndReadDocument(input, "single");
-            True(document.SelectSingleNode("//clipplaneset") == null);
+            var set = (XmlElement)document.SelectSingleNode("//clipplaneset"); True(set != null);
+            Equal("0", set.GetAttribute("linked")); Equal("0", set.GetAttribute("current")); Equal("planes", set.GetAttribute("mode")); Equal("1", set.GetAttribute("enabled"));
+            var plane = (XmlElement)set.SelectSingleNode("clipplanes/clipplane"); Equal("enabled", plane.GetAttribute("state")); Equal("0.0000000000", plane.GetAttribute("distance")); Equal("view", plane.GetAttribute("alignment"));
+            Equal((-53.1620981117d / 12d).ToString("R", CultureInfo.InvariantCulture), ((XmlElement)plane.SelectSingleNode("plane")).GetAttribute("distance"));
+            AssertPlanesModeEmptyRangeSentinel(set);
         }
 
         private static void XmlSectioningMapsLinkedMixedMultiPlane()
@@ -1228,7 +1224,8 @@ namespace BIMLogLensNext.Tests
             var input = ExportInput(172, 1, null);
             input.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[1,0,0],\"Distance\":-10.5,\"Enabled\":true},{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,1,0],\"Distance\":20.25,\"Enabled\":false}],\"Linked\":true,\"Enabled\":true}";
             var document = WriteAndReadDocument(input, "multiple");
-            True(document.SelectSingleNode("//clipplaneset") == null);
+            var set = (XmlElement)document.SelectSingleNode("//clipplaneset"); True(set != null); Equal("0", set.GetAttribute("linked"));
+            Equal(2, set.SelectNodes("clipplanes/clipplane").Count);
         }
 
         private static void XmlSectioningPreservesDisabledEmptyAndAbsentStates()
@@ -1236,7 +1233,7 @@ namespace BIMLogLensNext.Tests
             var disabled = ExportInput(173, 1, null);
             disabled.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[],\"Linked\":false,\"Enabled\":false}";
             var disabledDocument = WriteAndReadDocument(disabled, "disabled");
-            True(disabledDocument.SelectSingleNode("//clipplaneset") == null);
+            Equal("0", ((XmlElement)disabledDocument.SelectSingleNode("//clipplaneset")).GetAttribute("enabled"));
             var absent = ExportInput(174, 1, null); absent.PackageSectioningJson = null;
             True(WriteAndReadDocument(absent, "absent").SelectSingleNode("//clipplaneset") == null);
         }
@@ -1249,7 +1246,7 @@ namespace BIMLogLensNext.Tests
             Throws<InvalidDataException>(() => LensNextXmlSectioning.FromOptionalJson("{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[1,0,0],\"Distance\":1e309,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}"));
             Throws<InvalidDataException>(() => LensNextXmlSectioning.FromOptionalJson("{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[],\"Linked\":false,\"Enabled\":false,\"Box\":{}}"));
             var input = ExportInput(175, 1, null); input.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[],\"Linked\":false,\"Enabled\":false}";
-            True(WriteAndReadDocument(input, "scope").SelectSingleNode("//clipplaneset") == null);
+            True(WriteAndReadDocument(input, "scope").SelectSingleNode("//clipplaneset") != null);
         }
 
         private static void AssertPlanesModeEmptyRangeSentinel(XmlElement set)
@@ -1259,9 +1256,9 @@ namespace BIMLogLensNext.Tests
             var minimum = (XmlElement)range.SelectSingleNode("min/pos3f");
             var maximum = (XmlElement)range.SelectSingleNode("max/pos3f");
             True(minimum != null); True(maximum != null);
-            Equal("1", minimum.GetAttribute("x")); Equal("1", minimum.GetAttribute("y")); Equal("1", minimum.GetAttribute("z"));
-            Equal("0", maximum.GetAttribute("x")); Equal("0", maximum.GetAttribute("y")); Equal("0", maximum.GetAttribute("z"));
-            Equal("range,clipplanes", string.Join(",", set.ChildNodes.Cast<XmlNode>().Where(node => node.NodeType == XmlNodeType.Element).Select(node => node.Name)));
+            Equal("1.0000000000", minimum.GetAttribute("x")); Equal("1.0000000000", minimum.GetAttribute("y")); Equal("1.0000000000", minimum.GetAttribute("z"));
+            Equal("0.0000000000", maximum.GetAttribute("x")); Equal("0.0000000000", maximum.GetAttribute("y")); Equal("0.0000000000", maximum.GetAttribute("z"));
+            Equal("range,clipplanes,box,box-rotation", string.Join(",", set.ChildNodes.Cast<XmlNode>().Where(node => node.NodeType == XmlNodeType.Element).Select(node => node.Name)));
         }
 
         private static XmlDocument WriteAndReadDocument(LensNextXmlExportInput input, string suffix)
@@ -1342,7 +1339,9 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(path);
                 True(document.SelectSingleNode("//up") == null); True(document.SelectSingleNode("//clipplaneset") == null);
                 var position = (XmlElement)document.SelectSingleNode("//position/pos3f");
-                Equal("41.25", position.GetAttribute("x")); Equal("-7.5", position.GetAttribute("y")); Equal("3.125", position.GetAttribute("z"));
+                Equal((41.25d / 12d).ToString("R", CultureInfo.InvariantCulture), position.GetAttribute("x"));
+                Equal((-7.5d / 12d).ToString("R", CultureInfo.InvariantCulture), position.GetAttribute("y"));
+                Equal((3.125d / 12d).ToString("R", CultureInfo.InvariantCulture), position.GetAttribute("z"));
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }
@@ -1676,9 +1675,9 @@ namespace BIMLogLensNext.Tests
                 var rotation = (XmlElement)view.SelectSingleNode("viewpoint/camera/rotation/quaternion");
                 Equal(LensNextXmlExportNamePolicy.BaseName(source), view.GetAttribute("name"));
                 Equal(LensNextXmlExportGuidPolicy.ForRecord(source).ToString("D"), view.GetAttribute("guid"));
-                Equal(source.PackageCamera.Position.X, double.Parse(position.GetAttribute("x"), CultureInfo.InvariantCulture));
-                Equal(source.PackageCamera.Position.Y, double.Parse(position.GetAttribute("y"), CultureInfo.InvariantCulture));
-                Equal(source.PackageCamera.Position.Z, double.Parse(position.GetAttribute("z"), CultureInfo.InvariantCulture));
+                Equal(source.PackageCamera.Position.X / 12d, double.Parse(position.GetAttribute("x"), CultureInfo.InvariantCulture));
+                Equal(source.PackageCamera.Position.Y / 12d, double.Parse(position.GetAttribute("y"), CultureInfo.InvariantCulture));
+                Equal(source.PackageCamera.Position.Z / 12d, double.Parse(position.GetAttribute("z"), CultureInfo.InvariantCulture));
                 Equal(source.PackageCamera.Rotation.A, double.Parse(rotation.GetAttribute("a"), CultureInfo.InvariantCulture));
                 Equal(source.PackageCamera.Rotation.B, double.Parse(rotation.GetAttribute("b"), CultureInfo.InvariantCulture));
                 Equal(source.PackageCamera.Rotation.C, double.Parse(rotation.GetAttribute("c"), CultureInfo.InvariantCulture));
@@ -1703,10 +1702,10 @@ namespace BIMLogLensNext.Tests
                     xmlClipPlaneCount = view.SelectNodes("clipplaneset/clipplanes/clipplane").Count
                 });
             }
-            Equal(0, document.GetElementsByTagName("range").Count);
-            Equal(0, document.GetElementsByTagName("clipplaneset").Count);
-            var forbidden = new[] { "box", "box-rotation" };
-            True(forbidden.All(name => document.GetElementsByTagName(name).Count == 0));
+            Equal(2, document.GetElementsByTagName("range").Count);
+            Equal(2, document.GetElementsByTagName("clipplaneset").Count);
+            Equal(2, document.GetElementsByTagName("box").Count);
+            Equal(2, document.GetElementsByTagName("box-rotation").Count);
             var comparison = new
             {
                 fixtureProvenance = "Existing controlled Build 12/14/16/18/20 test values; no customer data",

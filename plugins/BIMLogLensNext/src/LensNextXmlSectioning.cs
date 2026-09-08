@@ -17,12 +17,14 @@ namespace BIMLogLensNext
             YInvariant = LensNextXmlFloat.Format(y, "section plane normal Y");
             ZInvariant = LensNextXmlFloat.Format(z, "section plane normal Z");
             DistanceInvariant = LensNextXmlFloat.Format(distance, "section plane distance");
+            DistanceFeetInvariant = LensNextXmlFloat.Format(distance / 12d, "section plane distance");
         }
         public string State { get; }
         public string XInvariant { get; }
         public string YInvariant { get; }
         public string ZInvariant { get; }
         public string DistanceInvariant { get; }
+        public string DistanceFeetInvariant { get; }
     }
 
     public sealed class LensNextXmlSectioning

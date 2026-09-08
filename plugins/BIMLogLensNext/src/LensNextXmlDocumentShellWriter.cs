@@ -95,26 +95,8 @@ namespace BIMLogLensNext
             if (((XmlElement)folders[0]).SelectNodes("view").Count != expectedViewCount)
                 throw new InvalidDataException("The written BIMLog XML export viewpoint count does not match the serialized result.");
 
-            var prohibitedElements = new[] { "box", "box-rotation" };
-            if (prohibitedElements.Any(name => document.GetElementsByTagName(name).Count != 0))
-                throw new InvalidDataException("The written BIMLog XML export contains an unproven element.");
-            foreach (XmlElement element in document.SelectNodes("//*"))
-            {
-                foreach (XmlAttribute attribute in element.Attributes)
-                {
-                    var name = attribute.LocalName;
-                    if (string.Equals(name, "units", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(name, "schema", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(name, "schemaLocation", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(name, "current", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(name, "alignment", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(name, "near", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(name, "far", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(name, "linear", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(name, "angular", StringComparison.OrdinalIgnoreCase))
-                        throw new InvalidDataException("The written BIMLog XML export contains an unproven attribute.");
-                }
-            }
+            if (!string.Equals(document.DocumentElement.GetAttribute("units"), "ft", StringComparison.Ordinal))
+                throw new InvalidDataException("The written BIMLog XML export unit is invalid.");
         }
 
         private static void WriteDocument(string destinationPath, IReadOnlyList<LensNextXmlExportView> views)
@@ -153,6 +135,7 @@ namespace BIMLogLensNext
                     writer.WriteAttributeString("xsi", "noNamespaceSchemaLocation", XmlSchemaInstanceNamespace, NavisworksExchangeSchemaLocation);
                     writer.WriteAttributeString("filename", metadata.FileName);
                     writer.WriteAttributeString("filepath", metadata.FilePath);
+                    writer.WriteAttributeString("units", "ft");
                     writer.WriteStartElement(ViewpointsElementName);
                     writer.WriteStartElement(ViewFolderElementName);
                     writer.WriteAttributeString("name", ViewFolderName);
@@ -162,24 +145,17 @@ namespace BIMLogLensNext
                         writer.WriteAttributeString("name", view.Name);
                         writer.WriteAttributeString("guid", view.Guid.ToString("D"));
                         writer.WriteStartElement("viewpoint");
-                        if (view.CameraScale != null)
-                        {
-                            writer.WriteAttributeString("focal", view.CameraScale.FocalInvariant);
-                            if (view.CameraScale.EmitFieldOfViewAttribute)
-                                writer.WriteAttributeString("fov", view.CameraScale.FieldOfViewInvariant);
-                        }
                         writer.WriteStartElement("camera");
                         writer.WriteAttributeString("projection", view.Projection.Token);
-                        if (view.CameraScale != null)
-                        {
-                            writer.WriteAttributeString("aspect", view.CameraScale.AspectInvariant);
-                            writer.WriteAttributeString("height", view.CameraScale.HeightInvariant);
-                        }
+                        writer.WriteAttributeString("near", "1.0000000000");
+                        writer.WriteAttributeString("far", "10.0000000000");
+                        writer.WriteAttributeString("aspect", "1.0000000000");
+                        writer.WriteAttributeString("height", "0.7853980000");
                         writer.WriteStartElement("position");
                         writer.WriteStartElement("pos3f");
-                        writer.WriteAttributeString("x", view.Position.XInvariant);
-                        writer.WriteAttributeString("y", view.Position.YInvariant);
-                        writer.WriteAttributeString("z", view.Position.ZInvariant);
+                        writer.WriteAttributeString("x", view.Position.XFeetInvariant);
+                        writer.WriteAttributeString("y", view.Position.YFeetInvariant);
+                        writer.WriteAttributeString("z", view.Position.ZFeetInvariant);
                         writer.WriteEndElement();
                         writer.WriteEndElement();
                         writer.WriteStartElement("rotation");
@@ -202,10 +178,45 @@ namespace BIMLogLensNext
                             writer.WriteEndElement();
                         }
                         writer.WriteEndElement();
-                        // The authoritative BIMLog package currently contains clipping planes,
-                        // but not the Navisworks exchange range/box metadata required to emit a
-                        // truthful clipplaneset. Never synthesize that geometry: keep sectioning
-                        // in BIMLog for Working View restore and omit it from XML interoperability.
+                        if (view.Sectioning != null)
+                        {
+                            writer.WriteStartElement("clipplaneset");
+                            writer.WriteAttributeString("linked", "0");
+                            writer.WriteAttributeString("current", "0");
+                            writer.WriteAttributeString("mode", "planes");
+                            writer.WriteAttributeString("enabled", view.Sectioning.EnabledToken);
+                            WriteSentinelBox(writer, "range");
+                            writer.WriteStartElement("clipplanes");
+                            foreach (var plane in view.Sectioning.Planes)
+                            {
+                                writer.WriteStartElement("clipplane");
+                                writer.WriteAttributeString("state", plane.State);
+                                writer.WriteAttributeString("distance", "0.0000000000");
+                                writer.WriteAttributeString("alignment", "view");
+                                writer.WriteStartElement("plane");
+                                writer.WriteAttributeString("distance", plane.DistanceFeetInvariant);
+                                writer.WriteStartElement("vec3f");
+                                writer.WriteAttributeString("x", plane.XInvariant);
+                                writer.WriteAttributeString("y", plane.YInvariant);
+                                writer.WriteAttributeString("z", plane.ZInvariant);
+                                writer.WriteEndElement();
+                                writer.WriteEndElement();
+                                writer.WriteEndElement();
+                            }
+                            writer.WriteEndElement();
+                            WriteSentinelBox(writer, "box");
+                            writer.WriteStartElement("box-rotation");
+                            writer.WriteStartElement("rotation");
+                            writer.WriteStartElement("quaternion");
+                            writer.WriteAttributeString("a", "0.0000000000");
+                            writer.WriteAttributeString("b", "0.0000000000");
+                            writer.WriteAttributeString("c", "0.0000000000");
+                            writer.WriteAttributeString("d", "1.0000000000");
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                            writer.WriteEndElement();
+                        }
                         writer.WriteEndElement();
                     }
                     writer.WriteEndElement();
@@ -222,6 +233,29 @@ namespace BIMLogLensNext
                 try { if (File.Exists(temporaryPath)) File.Delete(temporaryPath); } catch { }
                 throw;
             }
+        }
+
+        private static void WriteSentinelBox(XmlWriter writer, string elementName)
+        {
+            writer.WriteStartElement(elementName);
+            writer.WriteStartElement("box3f");
+            writer.WriteStartElement("min");
+            WriteSentinelPosition(writer, "1.0000000000");
+            writer.WriteEndElement();
+            writer.WriteStartElement("max");
+            WriteSentinelPosition(writer, "0.0000000000");
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+            writer.WriteEndElement();
+        }
+
+        private static void WriteSentinelPosition(XmlWriter writer, string value)
+        {
+            writer.WriteStartElement("pos3f");
+            writer.WriteAttributeString("x", value);
+            writer.WriteAttributeString("y", value);
+            writer.WriteAttributeString("z", value);
+            writer.WriteEndElement();
         }
 
         private sealed class LensNextXmlExportView
