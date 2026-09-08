@@ -673,6 +673,7 @@ export async function applyJobIntakeDocumentMapping(input: {
           exclusions: "",
           workflowTemplate: data.delivery.workflowTemplate,
           contractId: data.commercial.contracts[0].id,
+          responsibleParticipantId: "",
         }),
         name: mapped.name,
         plannedHours: mapped.quantity,

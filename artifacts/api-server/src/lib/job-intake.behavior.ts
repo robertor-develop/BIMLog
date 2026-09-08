@@ -135,6 +135,7 @@ const multiContractData = normalizeJobIntakeData({
         perspective: "upstream",
         contractType: "owner_prime",
         lifecycleStatus: "executed",
+        engagementId: "ENGAGEMENT-1",
       },
       {
         id: "SUPPLIER",
@@ -147,12 +148,13 @@ const multiContractData = normalizeJobIntakeData({
         reportingStatus: "closed",
         lifecycleStatus: "completed",
         parentContractId: "OWNER",
+        engagementId: "ENGAGEMENT-1",
       },
     ],
   },
   scopeItems: [
-    { ...data.scopeItems[0], id: "OWNER-ITEM", contractId: "OWNER" },
-    { ...data.scopeItems[0], id: "SUPPLIER-ITEM", contractId: "SUPPLIER" },
+    { ...data.scopeItems[0], id: "OWNER-ITEM", contractId: "OWNER", responsibleParticipantId: "PROVIDER-7" },
+    { ...data.scopeItems[0], id: "SUPPLIER-ITEM", contractId: "SUPPLIER", responsibleParticipantId: "CUSTOMER-41" },
   ],
   team: {
     ...data.team,
@@ -172,6 +174,7 @@ assert.equal(multiContractData.commercial.contracts[0].reportingType, "base_cont
 assert.equal(multiContractData.commercial.contracts[1].reportingStatus, "closed");
 assert.equal(multiContractData.commercial.contracts[1].parentContractId, "OWNER");
 assert.equal(multiContractData.commercial.contracts[0].lifecycleStatus, "executed");
+assert.equal(multiContractData.scopeItems[0].responsibleParticipantId, "PROVIDER-7");
 assert.throws(() => normalizeJobIntakeData({ commercial: { contracts: [{ id: "CO-1", reportingType: "change_order" }] } }), /parent base agreement/);
 assert.deepEqual(
   multiContractData.scopeItems.map((item) => item.contractId),
@@ -422,6 +425,7 @@ console.log(
       "engagement-specific-authoritative-contacts",
       "contract-lifecycle-and-parent-lineage",
       "distinct-filterable-contract-reporting-identity",
+      "contract-item-agreement-and-company-ownership",
     ],
   }),
 );

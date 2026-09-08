@@ -359,6 +359,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         ? String(contract.lifecycleStatus)
         : "draft",
       parentContractId: optionalText(contract.parentContractId, `commercial.contracts[${index}].parentContractId`, 100),
+      engagementId: optionalText(contract.engagementId, `commercial.contracts[${index}].engagementId`, 100),
       paymentTerms: optionalText(
         contract.paymentTerms,
         `commercial.contracts[${index}].paymentTerms`,
@@ -471,6 +472,7 @@ export function normalizeJobIntakeData(raw: unknown) {
       contractId:
         optionalText(item.contractId, `scopeItems[${index}].contractId`, 100) ||
         primaryContract.id,
+      responsibleParticipantId: optionalText(item.responsibleParticipantId, `scopeItems[${index}].responsibleParticipantId`, 100),
       provenance:
         item.provenance &&
         typeof item.provenance === "object" &&
@@ -623,6 +625,18 @@ export function normalizeJobIntakeData(raw: unknown) {
     return { id, providerParticipantId, customerParticipantId, providerContactId: optionalId(entry?.providerContactId, `relationships.engagements[${index}].providerContactId`), customerContactId: optionalId(entry?.customerContactId, `relationships.engagements[${index}].customerContactId`), description: optionalText(entry?.description, `relationships.engagements[${index}].description`, 500) };
   });
   if (engagements.length > 100) throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENTS_LIMIT", "A job intake supports at most 100 company engagements.");
+  for (const contract of normalizedContracts) {
+    if (contract.engagementId && !engagementIds.has(contract.engagementId))
+      throw new FinancialControlError(400, "JOB_INTAKE_CONTRACT_ENGAGEMENT_INVALID", "Every agreement relationship must reference an engagement in this Intake.");
+  }
+  for (const item of normalizedItems) {
+    if (item.responsibleParticipantId && !participantIds.has(item.responsibleParticipantId))
+      throw new FinancialControlError(400, "JOB_INTAKE_SCOPE_OWNER_INVALID", "Every Contract Item owner must be a participating company in this Intake.");
+    const contract = normalizedContracts.find((candidate: any) => candidate.id === item.contractId);
+    const engagement = contract?.engagementId ? engagements.find((candidate: any) => candidate.id === contract.engagementId) : null;
+    if (item.responsibleParticipantId && engagement && ![engagement.providerParticipantId, engagement.customerParticipantId].includes(item.responsibleParticipantId))
+      throw new FinancialControlError(400, "JOB_INTAKE_SCOPE_OWNER_ENGAGEMENT_MISMATCH", "The Contract Item owner must participate in its agreement's company engagement.");
+  }
   return {
     identity: {
       jobName: optionalText(identity.jobName, "identity.jobName", 300),

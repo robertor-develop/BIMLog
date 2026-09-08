@@ -1646,6 +1646,7 @@ export function JobIntakeWorkspace() {
                   onError={setError}
                   onNotice={setNotice}
                 />
+                {(data.scopeItems || []).map((item:any, index:number)=><div className="ji-row" key={`owner-${item.id}`}><strong>{item.name || item.id}</strong><div className="ji-grid"><label>{tt("Responsible company", "Empresa responsable")}<select value={item.responsibleParticipantId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,responsibleParticipantId:event.target.value}:candidate))}><option value="">{tt("Unassigned", "Sin asignar")}</option>{(data.relationships?.participants || []).map((participant:any)=><option key={participant.id} value={participant.id}>{participant.companyName}</option>)}</select></label><label>{tt("Authoritative agreement", "Acuerdo autorizado")}<select value={item.contractId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,contractId:event.target.value}:candidate))}>{(data.commercial.contracts || []).map((contract:any)=><option key={contract.id} value={contract.id}>{contract.title || contract.contractNumber || contract.id}</option>)}</select></label></div></div>)}
               </section>
               <section className="ji-card" id="ji-contract">
                 <h2>
@@ -1743,6 +1744,7 @@ export function JobIntakeWorkspace() {
                           <option value="draft">{tt("Draft", "Borrador")}</option><option value="executed">{tt("Executed", "Ejecutado")}</option><option value="superseded">{tt("Superseded", "Reemplazado")}</option><option value="terminated">{tt("Terminated", "Terminado")}</option><option value="completed">{tt("Completed", "Completado")}</option>
                         </select>
                       </label>
+                      <label>{tt("Company engagement", "Relación entre empresas")}<select value={data.commercial.contracts?.[0]?.engagementId || ""} onChange={(e)=>changeContract(0,"engagementId",e.target.value)}><option value="">{tt("Not assigned", "Sin asignar")}</option>{(data.relationships?.engagements||[]).map((edge:any)=><option key={edge.id} value={edge.id}>{edge.id}</option>)}</select></label>
                       <label>
                         {tt("Perspective", "Perspectiva")}
                         <select
@@ -1899,6 +1901,7 @@ export function JobIntakeWorkspace() {
                                   {(data.commercial.contracts || []).filter((candidate:any)=>candidate.id!==contract.id).map((candidate:any)=><option key={candidate.id} value={candidate.id}>{candidate.title || candidate.contractNumber || candidate.id}</option>)}
                                 </select>
                               </label>
+                              <label>{tt("Company engagement", "Relación entre empresas")}<select value={contract.engagementId || ""} onChange={(event)=>changeContract(index,"engagementId",event.target.value)}><option value="">{tt("Not assigned", "Sin asignar")}</option>{(data.relationships?.engagements||[]).map((edge:any)=><option key={edge.id} value={edge.id}>{edge.id}</option>)}</select></label>
                               <label>
                                 {tt("Perspective", "Perspectiva")}
                                 <select
