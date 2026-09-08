@@ -1,12 +1,20 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+  "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
   "bundleSha256": "26053c8475235b0e8f573651a118f4f71209fccea60d4e323d7b1af5a48bc9e9",
   "impact": {
-    "baselineCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+    "baselineCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
     "changedPaths": [
-      "living-brief/impact-declarations.json"
+      "evidence/build20/BIMLog_Smoke_Test_Project_Intake_APUs_BUILD20_FINAL.png",
+      "evidence/build20/BIMLog_Smoke_Test_Project_Intake_APUs_BUILD20_FINAL.xlsx",
+      "evidence/build20/BUILD20_FINAL_ACCEPTANCE.md",
+      "living-brief/AUDIT.md",
+      "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
+      "living-brief/STATUS.md",
+      "living-brief/impact-declarations.json",
+      "scripts/build20-finalize-smoke-workbook.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -21,11 +29,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "claude",
@@ -33,11 +41,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "quality",
@@ -45,11 +53,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "vision",
@@ -57,23 +65,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "51af0b807d57fb89545cb66527e08a14a59815f2df36aeb020226d4b29224dd7",
-      "sourceChangedAt": "2026-09-08T12:52:04-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "sourceChangedAt": "2026-09-08T16:53:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "plugin",
@@ -81,11 +89,11 @@
       "sha256": "0444b83fa8411347a8cdb45735e556671c2ce31cc1d84aee9df382e323af94cd",
       "sourceChangedAt": "2026-09-07T19:43:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "report_design_system",
@@ -93,11 +101,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "standards_register",
@@ -105,47 +113,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
       "sha256": "43934e539fe2c392dc7646ba027c89e909c2c84b39cc2504726d36e8a54a1661",
-      "sourceChangedAt": "2026-09-08T12:52:04-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "sourceChangedAt": "2026-09-08T16:53:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
       "sha256": "75bde4f5ef9c56821bab5b2f0608ee62e58c486c9fcf17c9cd3f7fb93fe193d6",
-      "sourceChangedAt": "2026-09-08T12:52:04-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "sourceChangedAt": "2026-09-08T16:53:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
       "sha256": "ce9dc8e140f71644a1183681c6906c68ee7c35770b729a4e4aeed7e4bac48a28",
-      "sourceChangedAt": "2026-09-08T12:52:04-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
-      "semanticReviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "sourceChangedAt": "2026-09-08T16:53:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "semanticReviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
       "semanticReviewTask": "job-intake-multi-apu-build20-final-acceptance-20260908",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-08T13:02:00-04:00"
+      "semanticReviewedAt": "2026-09-08T12:53:00-04:00"
     }
   ]
 }
