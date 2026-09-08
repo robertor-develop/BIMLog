@@ -2201,30 +2201,30 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 
 - [x] Reconcile current lineage against historical Intake APU 01–10 and record keep/adapt/reject decisions per component. Build 1 evidence is recorded in `AUDIT.md`; no historical branch is treated as a merge authority.
 - [x] Prove the existing schema can represent authoritative participants, engagements, contract lineage, multiple APUs, packages, assignments, rate layers, and redelegation; stop before any unapproved schema change. Build 1 found no migration prerequisite: draft relationship data fits the existing versioned Intake JSON contract, authoritative companies/users/contacts already exist, activated contracts expose bounded commercial metadata and immutable versions/history, Generic APU owns immutable APU versions, and existing activation tables/events own work packages, assignments, actual hours, budgets, and redelegation evidence. Server-side authoritative-ID validation remains mandatory when these fields are restored.
-- [ ] Restore the simple bilingual two-minute default Intake with optional advanced detail.
-- [ ] Make required fields and stage readiness unmistakable.
-- [ ] Restore authoritative multi-company participant roles and the visual company/job relationship map.
-- [ ] Restore provider/customer engagements with engagement-specific contacts.
-- [ ] Complete quote, base-contract, change-order, additional-work, amendment, and time-and-material lifecycle and parent relationships.
-- [ ] Preserve independently reportable contract customer, name, number, type, state, dates, and payment terms.
-- [ ] Connect every Contract Item to its owning contract and selected APU/pricing authority.
-- [ ] Support multiple APUs per contract without duplicating the Generic APU authority.
-- [ ] Preserve immutable, current-identifiable, historically retrievable APU versions across reload.
-- [ ] Restore contract/APU-owned work-package decomposition by building, floor, zone, discipline, system, phase, deliverable, task, or milestone.
-- [ ] Use eligible authoritative BIMLog users and explain exclusions.
-- [ ] Scope assignments and hours to the correct project, engagement, contract, APU, Contract Item, and work package as applicable.
-- [ ] Separate internal cost, customer rate, APU calculation rate, budgeted hours, actual hours, and incentive/bonus values with provenance.
-- [ ] Preserve redelegation history: original assignee, completed hours, remaining transferred hours, actor, time, and reason.
-- [ ] Generate and associate canonical budget lines/accounts idempotently without parallel financial authority.
-- [ ] Confirm materially authoritative APU/contract/budget edits without obstructing ordinary navigation.
-- [ ] Preserve project, page/stage, and valid intended selections across refresh and return without cross-project leakage.
-- [ ] Restore truthful Setup readiness, Optional items remaining, Work progress, and Financial progress.
-- [ ] Provide complete contextual help, bilingual desktop/narrow behavior, keyboard access, and responsive layout.
-- [ ] Prove save, reload, edit, activation replay, stale revision refusal, authorization, and cross-project isolation.
-- [ ] Prove one combined scenario with multiple companies, multiple engagements/customers, multiple contracts, multiple APUs, multiple work packages, multiple resources, and the separate pay/rate layers.
-- [ ] Re-run and pass all 20 rows of `BIMLog_Smoke_Test_Project_Intake_APUs (2).xlsx` with retained evidence.
-- [ ] Run relevant API, frontend, database-safety, Generic APU, Job Intake, Operations, budget, contract, team, help, typecheck, build, mojibake, and Living Brief gates.
-- [ ] Freeze one coherent release candidate only after independent review; keep push, publication, deployment, production mutation, and customer acceptance separate.
+- [x] Restore the simple bilingual two-minute default Intake with optional advanced detail. Builds 2–3.
+- [x] Make required fields and stage readiness unmistakable. Builds 3 and 17.
+- [x] Restore authoritative multi-company participant roles and the visual company/job relationship map. Build 4.
+- [x] Restore provider/customer engagements with engagement-specific contacts. Build 5.
+- [x] Complete quote, base-contract, change-order, additional-work, amendment, and time-and-material lifecycle and parent relationships. Build 6.
+- [x] Preserve independently reportable contract customer, name, number, type, state, dates, and payment terms. Build 7.
+- [x] Connect every Contract Item to its owning contract and selected APU/pricing authority. Build 8.
+- [x] Support multiple APUs per contract without duplicating the Generic APU authority. Build 9.
+- [x] Preserve immutable, current-identifiable, historically retrievable APU versions across reload. Build 10.
+- [x] Restore contract/APU-owned work-package decomposition by building, floor, zone, discipline, system, phase, deliverable, task, or milestone. Builds 11 and 13.
+- [x] Use eligible authoritative BIMLog users and explain exclusions. Build 12.
+- [x] Scope assignments and hours to the correct project, engagement, contract, APU, Contract Item, and work package as applicable. Build 13.
+- [x] Separate internal cost, customer rate, APU calculation rate, budgeted hours, actual hours, and incentive/bonus values with provenance. Build 14.
+- [x] Preserve redelegation history: original assignee, completed hours, remaining transferred hours, actor, time, and reason. Build 15.
+- [x] Generate and associate canonical budget lines/accounts idempotently without parallel financial authority. Build 16.
+- [x] Confirm materially authoritative APU/contract/budget edits without obstructing ordinary navigation. Builds 10 and 16.
+- [x] Preserve project, page/stage, and valid intended selections across refresh and return without cross-project leakage. Build 18.
+- [x] Restore truthful Setup readiness, Optional items remaining, Work progress, and Financial progress. Build 17.
+- [x] Provide complete contextual help, bilingual desktop/narrow behavior, keyboard access, and responsive layout. Builds 2–3 and existing Help regression.
+- [x] Prove save, reload, edit, activation replay, stale revision refusal, authorization, and cross-project isolation. Builds 10, 16, and 18.
+- [x] Prove one combined scenario with multiple companies, multiple engagements/customers, multiple contracts, multiple APUs, multiple work packages, multiple resources, and the separate pay/rate layers. Build 19.
+- [x] Re-run and pass all 20 rows of `BIMLog_Smoke_Test_Project_Intake_APUs (2).xlsx` with retained evidence. Build 20 evidence workbook.
+- [x] Run relevant API, frontend, database-safety, Generic APU, Job Intake, Operations, budget, contract, team, help, typecheck, build, mojibake, and Living Brief gates. Build 20.
+- [x] Freeze one coherent release candidate only after independent review; keep push, publication, deployment, production mutation, and customer acceptance separate. Build 20 controlled evidence review; external gates remain unclaimed.
 
 ## Micro-build allocation
 

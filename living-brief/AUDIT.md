@@ -911,3 +911,10 @@ The supplied 20-row smoke workbook was read without mutation. Its recorded overa
 No product, Native, Platform, database, schema, deployment, production, or customer state changed in Build 1. The next build is the two-minute progressive-disclosure Intake simplification on the current lineage.
 
 Roberto subsequently clarified that 40 was illustrative, not a maximum. The recovery therefore has no numeric build ceiling: it continues through 30, 40, 50, 60, or more bounded micro-builds if required by evidence, and may finish sooner only when the complete denominator and acceptance gates actually pass. This clarification changes scheduling governance only and does not change product scope or behavior.
+
+## 2026-09-08 — Job Intake / Multi-APU Build 20 internal acceptance
+
+- Reviewed the preserved original 20-row smoke-test workbook against the coherent Build 2–19 current lineage. The final evidence workbook retains every original status and observation and adds a separate final result and verification-evidence column for each row.
+- Confirmed the Build 19 integrated scenario: 3 companies, 2 engagements, 3 contracts, 3 APU versions, 3 work packages, 3 resources, 180 planned/assigned hours, 100% financial setup, and immutable baseline fingerprint `214c6451a335d8010483e2c2bc331bc52e6402747f82c67ab623c3b44ea5b3cc`.
+- Complete Generic APU/Job Intake regression and API/frontend typechecks passed. Database safety reconciles 190 tables, 259 indexes, and 145 startup tables without mutation. Mojibake and tracked-secret gates passed.
+- No database/schema, publication, deployment, production, or customer mutation occurred. This checkpoint closes internal recovery only and preserves all external gates.

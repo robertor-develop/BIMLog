@@ -1177,3 +1177,10 @@ Required behavior includes multiple participating companies and provider/custome
 Seven September 7 repair commits are preserved as source work but do not equal seven completed master builds. They implement directory-backed client/contact selection, Contract Item/APU connection, editable Drafting and BIM Coordinator defaults, contract reporting identity, contract-scoped resource assignments, Intake section restoration, and visible Generic APU version history. Each remains implementation evidence pending reconciliation into the complete hierarchy and final integrated acceptance.
 
 No release, publication, or overall completion claim is permitted until the recovery denominator in `OPEN_LOOP.md` is closed and the full 20-row smoke-test workbook plus the original multi-company requirements pass against one coherent current lineage.
+
+## Job Intake / Multi-APU Build 20 internal acceptance — 2026-09-08
+
+- Builds 2–19 are consolidated in one current lineage and the controlled Build 19 scenario passes with three authoritative companies, two engagements, three contracts, three immutable APU versions, three work packages, three resources, 180 planned/assigned hours, and 100% financial setup.
+- The original 20-row workbook is preserved. Its Build 20 evidence copy maps every row to current implementation and focused proof; all 20 final results pass while the original observations remain visible.
+- The complete Generic APU/Job Intake regression passes, including contract, budget, operations, work-package, resource-planning, help, API typecheck, and frontend typecheck coverage.
+- Database/schema, production, deployment, and customer data remain unchanged. This is controlled internal acceptance only; publication, deployment, and customer acceptance remain separate explicit gates.

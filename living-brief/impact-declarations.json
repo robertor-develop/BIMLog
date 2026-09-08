@@ -17363,6 +17363,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0cbc5398dcfe8c364c19dfbe12d48024bcdcbe2ad0e61e15a7c895d9daf43199"
+    },
+    {
+      "taskId": "job-intake-multi-apu-build20-final-acceptance-20260908",
+      "reviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
+      "reviewedAt": "2026-09-08T12:45:29-04:00",
+      "status": "internal_acceptance_reconciled",
+      "captureTiming": "same_task_after_build19_and_full_smoke_workbook_reconciliation",
+      "summary": "Closes the controlled internal Job Intake and Multi-APU recovery denominator with row-level workbook evidence and complete regression while preserving all external release gates.",
+      "workstreams": [
+        "job-intake-multi-apu-complete-recovery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "One coherent authority hierarchy remains intact."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The internal acceptance follows the authorized recovery and stop conditions."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The complete focused and production-build gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product-purpose change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic source inventory now includes the Build 19 combined-scenario behavior file; no route, table, schema, or deployed runtime changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Navisworks behavior change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production report contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No compliance or standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Build 20 internal acceptance and external boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes each recovery denominator row with its exact build evidence."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the final workbook, combined scenario, regression, and mutation boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "778e87b29dd7bf5d891eb970ca1638eb7b8213371d0b366858ff91c19e3a7f7b"
     }
   ]
 }
