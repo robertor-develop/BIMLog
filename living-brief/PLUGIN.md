@@ -351,3 +351,9 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - Human/package identity is `v1.05.N12-P09`; Windows DLL and Autodesk package metadata use `1.5.12.9` for the Navisworks 2025 field package.
 - P09 is a shared release-identity alignment for the unchanged N12 Native implementation. It does not change camera capture/restore, XML, bridge port 8766, Saved Viewpoints, linking, attachments, or any other Native behavior.
 - The 2025 package is compiled against the exact Nw22 reference set and validated by the core 123/123 and Navisworks 2025 adapter 56/56 suites before package-only installer verification.
+
+## Lens Next v1.05.N14-P10 missing-scale export compatibility — 2026-09-08
+
+- A completely absent legacy camera scale tuple is optional for Navisworks XML export. The exporter omits focal/FOV/extent attributes while preserving the authoritative camera and sectioning fields.
+- A partial, non-finite, zero, or otherwise malformed present scale tuple remains rejected with exact diagnostics. No camera scale is fabricated, clamped, or defaulted.
+- The Navisworks 2025 package identity is `v1.05.N14-P10` / `1.5.14.10`; genuine field import remains an external Ruben acceptance gate.

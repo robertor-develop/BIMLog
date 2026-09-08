@@ -1184,3 +1184,9 @@ No release, publication, or overall completion claim is permitted until the reco
 - The original 20-row workbook is preserved. Its Build 20 evidence copy maps every row to current implementation and focused proof; all 20 final results pass while the original observations remain visible.
 - The complete Generic APU/Job Intake regression passes, including contract, budget, operations, work-package, resource-planning, help, API typecheck, and frontend typecheck coverage.
 - Database/schema, production, deployment, and customer data remain unchanged. This is controlled internal acceptance only; publication, deployment, and customer acceptance remain separate explicit gates.
+
+## BIMLog v1.05.N14-P10 integrated release candidate — 2026-09-08
+
+- The accepted Job Intake / Multi-APU Builds 1–20 and the Lens Next missing-scale XML correction are consolidated on one lineage. Platform advances from P09 to P10; Native retains the N14 behavior correction and aligns its combined release metadata to P10.
+- XML export now preserves authoritative legacy camera position, rotation, projection, up vector, and sectioning when the complete optional scale tuple is absent. Partial or malformed scale data remains explicitly non-exportable; no camera value is fabricated, clamped, or defaulted.
+- Database/schema and production data are unchanged. Push, Replit build/publication, live Chrome verification, and Navisworks 2025 field import remain separate gates until their exact evidence is recorded.

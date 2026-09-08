@@ -2226,6 +2226,13 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 - [x] Run relevant API, frontend, database-safety, Generic APU, Job Intake, Operations, budget, contract, team, help, typecheck, build, mojibake, and Living Brief gates. Build 20.
 - [x] Freeze one coherent release candidate only after independent review; keep push, publication, deployment, production mutation, and customer acceptance separate. Build 20 controlled evidence review; external gates remain unclaimed.
 
+## v1.05.N14-P10 integrated release gates
+
+- [x] Consolidate the accepted Job Intake / Multi-APU Builds 1–20 with the tested Lens Next missing-scale XML correction without losing either lineage.
+- [x] Align the combined visible Platform and Navisworks 2025 package identity to `v1.05.N14-P10` / `1.5.14.10`.
+- [ ] Push the exact reviewed integration commit, build and publish it once through the governed Replit Shell path, and verify the live version and Intake behavior in Chrome.
+- [ ] Ruben must field-test the exact Navisworks 2025 N14-P10 package, including XML export/import, before promotion is described as customer accepted.
+
 ## Micro-build allocation
 
 Use Builds 1–12 for the original master sequence: discovery/reconciliation; simplification; clarity; client/contact; contract structure; Contract Item/APU linkage; rate authority; team/assignments; APU history; budget association; sensitive confirmation and navigation; integrated acceptance. Use Build 13 onward for isolated requirements that cannot be completed safely inside those builds or for defects proven by integrated testing. Continue for as many builds as necessary to close the denominator. Never consume a build merely to advance a number, and never stop because a numeric ceiling was reached.

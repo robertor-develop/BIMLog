@@ -17443,6 +17443,82 @@
         "scripts/build20-finalize-smoke-workbook.mjs"
       ],
       "reviewedChangeSha256": "dbdde42ead68af1a2c97f7f4fa7ba6977e50404d5d86d359540aa8fc54e37652"
+    },
+    {
+      "taskId": "build40-apu-n14-publish-integration-20260908",
+      "reviewedThroughCommit": "e763cdcf3a5958c037e72dc95999c9688e5fa471",
+      "reviewedAt": "2026-09-08T13:30:00-04:00",
+      "status": "release_integration_reconciled",
+      "captureTiming": "same_task_after_lineage_consolidation_before_push_and_publication",
+      "summary": "Reconciles the accepted Job Intake and Multi-APU Builds 1-20 with the tested missing-scale XML export correction and the combined N14-P10 release identity.",
+      "workstreams": [
+        "job-intake-multi-apu-complete-recovery",
+        "lens-next-xml-missing-scale-compatibility"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or authority change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The integration follows the governed release and evidence gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing build, artifact, UI, and field gates remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product-purpose change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new structural source path beyond the already reconciled Build 20 inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the N14 missing-scale export contract and N14-P10 package identity."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report contract change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the integrated N14-P10 release candidate and remaining external gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks push, publication, live verification, and Ruben field acceptance separately."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Commit history and retained evidence already preserve the component build history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "386e2d548c938667967b3bb41e1ba2cf93783f7c55cdfce99ddde8079b145942"
     }
   ]
 }
