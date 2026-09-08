@@ -131,6 +131,17 @@ async function validateRelationshipAuthority(data: JobIntakeData, projectId: num
     if (!participant.companyId || !companyIds.has(participant.companyId))
       throw new FinancialControlError(400, "JOB_INTAKE_PARTICIPANT_OUT_OF_SCOPE", "Every participating company must be an authoritative company in the current project directory.");
   }
+  const participants = new Map<string, any>(data.relationships.participants.map((participant: any) => [participant.id, participant]));
+  for (const engagement of data.relationships.engagements) {
+    const provider = participants.get(engagement.providerParticipantId);
+    const customer = participants.get(engagement.customerParticipantId);
+    for (const [contactId, participant] of [[engagement.providerContactId, provider], [engagement.customerContactId, customer]] as const) {
+      if (!contactId) continue;
+      const contact = contacts.get(contactId);
+      if (!contact || !participant || Number(contact.companyId) !== participant.companyId)
+        throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENT_CONTACT_OUT_OF_SCOPE", "Each engagement contact must belong to its selected current-project company.");
+    }
+  }
 }
 
 async function activationDetails(intakeId: string, client: Queryable = pool) {

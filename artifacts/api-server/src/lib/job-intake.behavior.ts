@@ -24,7 +24,7 @@ const data = normalizeJobIntakeData({
   relationships: { participants: [
     { id: "CUSTOMER-41", companyId: 41, companyName: "Example Client LLC", role: "customer", primary: true },
     { id: "PROVIDER-7", companyId: 7, companyName: "BIMLog Delivery", role: "service_provider" },
-  ] },
+  ], engagements: [{ id: "ENGAGEMENT-1", providerParticipantId: "PROVIDER-7", customerParticipantId: "CUSTOMER-41", providerContactId: 701, customerContactId: 901, description: "BIM coordination" }] },
   scopeItems: [
     {
       id: "SHOP-DRAWINGS",
@@ -359,6 +359,7 @@ assert.equal(data.identity.clientCompanyId, 41);
 assert.equal(data.identity.primaryContactId, 901);
 assert.equal(data.relationships.participants.length, 2);
 assert.equal(data.relationships.participants[0]?.companyId, 41);
+assert.equal(data.relationships.engagements[0]?.customerContactId, 901);
 assert.throws(() => normalizeJobIntakeData({ relationships: { participants: [
   { id: "DUPLICATE", companyId: 1, companyName: "A", role: "customer" },
   { id: "DUPLICATE", companyId: 2, companyName: "B", role: "vendor" },
@@ -366,6 +367,7 @@ assert.throws(() => normalizeJobIntakeData({ relationships: { participants: [
 assert.match(service, /JOB_INTAKE_CLIENT_COMPANY_OUT_OF_SCOPE/);
 assert.match(service, /JOB_INTAKE_PRIMARY_CONTACT_OUT_OF_SCOPE/);
 assert.match(service, /JOB_INTAKE_PARTICIPANT_OUT_OF_SCOPE/);
+assert.match(service, /JOB_INTAKE_ENGAGEMENT_CONTACT_OUT_OF_SCOPE/);
 assert.match(ui, /Activate operational job/);
 assert.match(ui, /@media\(max-width:900px\)/);
 assert.match(bulkEditor, /Paste Excel range/);
@@ -404,6 +406,7 @@ console.log(
       "bilingual-entitlement-aware-ui",
       "authoritative-company-contact-identifiers",
       "current-project-participant-enforcement",
+      "engagement-specific-authoritative-contacts",
     ],
   }),
 );

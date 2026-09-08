@@ -1588,7 +1588,7 @@ export function JobIntakeWorkspace() {
                     />
                   </label>
                 </div>
-                <CompanyJobMap data={data} companies={authoritativeCompanies} setData={setData} tt={tt}/>
+                <CompanyJobMap data={data} companies={authoritativeCompanies} contacts={directoryEntries} setData={setData} tt={tt}/>
               </section>
               <section className="ji-card" id="ji-scope">
                 <h2>

@@ -603,6 +603,18 @@ export function normalizeJobIntakeData(raw: unknown) {
     return { id, companyId: optionalId(entry?.companyId, `relationships.participants[${index}].companyId`), companyName: optionalText(entry?.companyName, `relationships.participants[${index}].companyName`, 200), role, primary: bool(entry?.primary) };
   });
   if (participants.length > 50) throw new FinancialControlError(400, "JOB_INTAKE_PARTICIPANTS_LIMIT", "A job intake supports at most 50 participating companies.");
+  const engagementIds = new Set<string>();
+  const engagements = (Array.isArray(relationships.engagements) ? relationships.engagements : []).map((entry: any, index: number) => {
+    const id = optionalText(entry?.id, `relationships.engagements[${index}].id`, 100) || `ENGAGEMENT-${index + 1}`;
+    if (engagementIds.has(id)) throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENT_DUPLICATE", "Each company engagement must have a unique stable identifier.");
+    engagementIds.add(id);
+    const providerParticipantId = optionalText(entry?.providerParticipantId, `relationships.engagements[${index}].providerParticipantId`, 100);
+    const customerParticipantId = optionalText(entry?.customerParticipantId, `relationships.engagements[${index}].customerParticipantId`, 100);
+    if (!participantIds.has(providerParticipantId) || !participantIds.has(customerParticipantId) || providerParticipantId === customerParticipantId)
+      throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENT_PARTICIPANT_INVALID", "Every engagement must connect two different participating companies in this Intake.");
+    return { id, providerParticipantId, customerParticipantId, providerContactId: optionalId(entry?.providerContactId, `relationships.engagements[${index}].providerContactId`), customerContactId: optionalId(entry?.customerContactId, `relationships.engagements[${index}].customerContactId`), description: optionalText(entry?.description, `relationships.engagements[${index}].description`, 500) };
+  });
+  if (engagements.length > 100) throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENTS_LIMIT", "A job intake supports at most 100 company engagements.");
   return {
     identity: {
       jobName: optionalText(identity.jobName, "identity.jobName", 300),
@@ -629,7 +641,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         20,
       ),
     },
-    relationships: { participants },
+    relationships: { participants, engagements },
     scopeItems: normalizedItems,
     commercial: {
       contracts: normalizedContracts,
