@@ -2217,6 +2217,8 @@ export function JobIntakeWorkspace() {
                           }
                         />
                       </label>
+                      <label>{tt("Work Package", "Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>assignmentChange(index,"workPackageId",e.target.value)}><option value="">{tt("Whole Contract Item", "Partida de Contrato completa")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{workPackage.title||workPackage.packageCode}</option>)}</select></label>
+                      <div className="ji-lock">{tt("Authoritative scope", "Alcance autorizado")}: {assignment.engagementId || "—"} → {assignment.contractId || "—"} → APU {data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.apuPlanVersion || "—"}</div>
                       {capabilities.budget && (
                         <>
                           <label>

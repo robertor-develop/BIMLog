@@ -562,6 +562,10 @@ export function normalizeJobIntakeData(raw: unknown) {
       const scopeContractId = normalizedItems.find(
         (item) => item.id === scopeItemId,
       )?.contractId;
+      const selectedScopeItem = normalizedItems.find((item) => item.id === scopeItemId);
+      const workPackageId = optionalText(assignment.workPackageId, `assignments[${index}].workPackageId`, 100);
+      if (workPackageId && !selectedScopeItem?.workPackages.some((workPackage: any) => workPackage.id === workPackageId))
+        throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_PACKAGE_MISMATCH", "The selected Work Package must belong to the assignment's Contract Item.");
       const requestedContractId = optionalText(
         assignment.contractId,
         `assignments[${index}].contractId`,
@@ -602,6 +606,9 @@ export function normalizeJobIntakeData(raw: unknown) {
             50,
           ) || "employee",
         scopeItemId,
+        workPackageId,
+        apuPlanVersion: selectedScopeItem?.apuPlanVersion ?? null,
+        engagementId: "",
         plannedHours,
         internalHourlyRate,
         plannedLaborCost: decimalFromScaled(
@@ -647,6 +654,10 @@ export function normalizeJobIntakeData(raw: unknown) {
     const engagement = contract?.engagementId ? engagements.find((candidate: any) => candidate.id === contract.engagementId) : null;
     if (item.responsibleParticipantId && engagement && ![engagement.providerParticipantId, engagement.customerParticipantId].includes(item.responsibleParticipantId))
       throw new FinancialControlError(400, "JOB_INTAKE_SCOPE_OWNER_ENGAGEMENT_MISMATCH", "The Contract Item owner must participate in its agreement's company engagement.");
+  }
+  for (const assignment of normalizedAssignments) {
+    const contract = normalizedContracts.find((candidate: any) => candidate.id === assignment.contractId);
+    assignment.engagementId = contract?.engagementId || "";
   }
   return {
     identity: {

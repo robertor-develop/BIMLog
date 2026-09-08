@@ -154,13 +154,13 @@ const multiContractData = normalizeJobIntakeData({
     ],
   },
   scopeItems: [
-    { ...data.scopeItems[0], id: "OWNER-ITEM", contractId: "OWNER", responsibleParticipantId: "PROVIDER-7" },
+    { ...data.scopeItems[0], id: "OWNER-ITEM", contractId: "OWNER", responsibleParticipantId: "PROVIDER-7", workPackages: [{ id: "WP-OWNER", packageCode: "WP-OWNER", title: "Owner deliverable", dimensionType: "deliverable", dimensionValue: "Coordination set", packageType: "deliverable" }] },
     { ...data.scopeItems[0], id: "SUPPLIER-ITEM", contractId: "SUPPLIER", responsibleParticipantId: "CUSTOMER-41" },
   ],
   team: {
     ...data.team,
     assignments: [
-      { ...data.team.assignments[0], id: "OWNER-A", scopeItemId: "OWNER-ITEM" },
+      { ...data.team.assignments[0], id: "OWNER-A", scopeItemId: "OWNER-ITEM", workPackageId: "WP-OWNER" },
       {
         ...data.team.assignments[0],
         id: "SUPPLIER-A",
@@ -176,6 +176,9 @@ assert.equal(multiContractData.commercial.contracts[1].reportingStatus, "closed"
 assert.equal(multiContractData.commercial.contracts[1].parentContractId, "OWNER");
 assert.equal(multiContractData.commercial.contracts[0].lifecycleStatus, "executed");
 assert.equal(multiContractData.scopeItems[0].responsibleParticipantId, "PROVIDER-7");
+assert.equal(multiContractData.team.assignments[0].workPackageId, "WP-OWNER");
+assert.equal(multiContractData.team.assignments[0].apuPlanVersion, 3);
+assert.equal(multiContractData.team.assignments[0].engagementId, "ENGAGEMENT-1");
 assert.throws(() => normalizeJobIntakeData({ commercial: { contracts: [{ id: "CO-1", reportingType: "change_order" }] } }), /parent base agreement/);
 assert.deepEqual(
   multiContractData.scopeItems.map((item) => item.contractId),
@@ -406,6 +409,8 @@ assert.match(operationsUi, /Contract reporting identity/);
 assert.match(service, /apuPlanVersions: \[\.\.\.new Set/);
 assert.match(service, /INSERT INTO job_activation_work_packages/);
 assert.match(service, /INSERT INTO job_activation_work_package_tasks/);
+assert.match(service, /packageTaskById/);
+assert.match(service, /JOB_ACTIVATION_ASSIGNMENT_PACKAGE_INVALID/);
 assert.match(operationsService, /apuCount: apuPlanVersions\.length/);
 assert.match(operationsService, /job_activation_contract_item_baselines/);
 assert.match(operationsUi, /Immutable APU history/);
@@ -455,6 +460,7 @@ console.log(
       "immutable-apu-pricing-history",
       "contract-apu-owned-work-package-decomposition",
       "eligible-project-users-with-exclusion-reasons",
+      "assignment-full-authority-scope-chain",
     ],
   }),
 );
