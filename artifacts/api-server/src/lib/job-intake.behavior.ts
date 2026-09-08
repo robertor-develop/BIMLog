@@ -16,8 +16,15 @@ const data = normalizeJobIntakeData({
     jobCode: "1185R",
     clientName: "Example Client",
     clientCompany: "Example Client LLC",
+    clientCompanyId: 41,
+    primaryContact: "Client Contact",
+    primaryContactId: 901,
     currency: "USD",
   },
+  relationships: { participants: [
+    { id: "CUSTOMER-41", companyId: 41, companyName: "Example Client LLC", role: "customer", primary: true },
+    { id: "PROVIDER-7", companyId: 7, companyName: "BIMLog Delivery", role: "service_provider" },
+  ] },
   scopeItems: [
     {
       id: "SHOP-DRAWINGS",
@@ -348,6 +355,17 @@ assert.match(ui, /Inspect & map Contract Items/);
 assert.match(ui, /Confirm and append to draft/);
 assert.match(ui, /mappingFingerprint: mappingPreview\.mappingFingerprint/);
 assert.match(ui, /<ContractItemBulkEditor/);
+assert.equal(data.identity.clientCompanyId, 41);
+assert.equal(data.identity.primaryContactId, 901);
+assert.equal(data.relationships.participants.length, 2);
+assert.equal(data.relationships.participants[0]?.companyId, 41);
+assert.throws(() => normalizeJobIntakeData({ relationships: { participants: [
+  { id: "DUPLICATE", companyId: 1, companyName: "A", role: "customer" },
+  { id: "DUPLICATE", companyId: 2, companyName: "B", role: "vendor" },
+] } }), /unique stable identifier/);
+assert.match(service, /JOB_INTAKE_CLIENT_COMPANY_OUT_OF_SCOPE/);
+assert.match(service, /JOB_INTAKE_PRIMARY_CONTACT_OUT_OF_SCOPE/);
+assert.match(service, /JOB_INTAKE_PARTICIPANT_OUT_OF_SCOPE/);
 assert.match(ui, /Activate operational job/);
 assert.match(ui, /@media\(max-width:900px\)/);
 assert.match(bulkEditor, /Paste Excel range/);
@@ -384,6 +402,8 @@ console.log(
       "automatic-workflow-baseline",
       "startup",
       "bilingual-entitlement-aware-ui",
+      "authoritative-company-contact-identifiers",
+      "current-project-participant-enforcement",
     ],
   }),
 );

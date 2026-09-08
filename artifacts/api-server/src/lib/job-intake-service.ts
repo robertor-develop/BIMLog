@@ -112,6 +112,27 @@ async function documents(intakeId: string, client: Queryable = pool) {
   return result.rows;
 }
 
+async function validateRelationshipAuthority(data: JobIntakeData, projectId: number, client: Queryable) {
+  const rows = (await client.query(
+    `SELECT id,company_id "companyId" FROM project_directory WHERE project_id=$1`,
+    [projectId],
+  )).rows;
+  const companyIds = new Set<number>(rows.map((row: any) => Number(row.companyId)).filter((id: number) => Number.isSafeInteger(id) && id > 0));
+  const contacts = new Map<number, any>(rows.map((row: any) => [Number(row.id), row]));
+  const companyId = data.identity.clientCompanyId;
+  if (companyId && !companyIds.has(companyId))
+    throw new FinancialControlError(400, "JOB_INTAKE_CLIENT_COMPANY_OUT_OF_SCOPE", "The selected client company is not in the current project directory.");
+  if (data.identity.primaryContactId) {
+    const contact = contacts.get(data.identity.primaryContactId);
+    if (!contact || (companyId && Number(contact.companyId) !== companyId))
+      throw new FinancialControlError(400, "JOB_INTAKE_PRIMARY_CONTACT_OUT_OF_SCOPE", "The selected primary contact must belong to the selected current-project company.");
+  }
+  for (const participant of data.relationships.participants) {
+    if (!participant.companyId || !companyIds.has(participant.companyId))
+      throw new FinancialControlError(400, "JOB_INTAKE_PARTICIPANT_OUT_OF_SCOPE", "Every participating company must be an authoritative company in the current project directory.");
+  }
+}
+
 async function activationDetails(intakeId: string, client: Queryable = pool) {
   const workItems = (
     await client.query(
@@ -311,6 +332,7 @@ export async function saveJobIntake(input: {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await validateRelationshipAuthority(data, projectId, client);
     const row = (
       await client.query(
         `SELECT * FROM job_intakes WHERE project_id=$1 FOR UPDATE`,

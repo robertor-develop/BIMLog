@@ -4,8 +4,8 @@ import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 type Props = {
   data: any;
   setData: Dispatch<SetStateAction<any>>;
-  companies: string[];
-  contacts: Array<{ id: string | number; fullName?: string | null; email?: string | null }>;
+  companies: Array<{ id: number; name: string }>;
+  contacts: Array<{ id: string | number; companyId?: number | null; fullName?: string | null; email?: string | null }>;
   defaultRate: string;
   defaultApuVersion: number | null;
   projectId: number;
@@ -46,13 +46,15 @@ export function QuickJobIntake(props: Props) {
   const patchIdentity = (patch: Record<string, unknown>) =>
     setData((old: any) => ({ ...old, identity: { ...old.identity, ...patch } }));
 
-  const selectCustomer = (company: string) =>
+  const selectCustomer = (companyIdText: string) =>
     setData((old: any) => {
+      const selected = companies.find((company) => company.id === Number(companyIdText));
+      const company = selected?.name || "";
       const contracts = [...(old.commercial?.contracts ?? [])];
       contracts[0] = { ...contracts[0], counterpartyName: company };
       return {
         ...old,
-        identity: { ...old.identity, clientCompany: company, clientName: company, primaryContact: "" },
+        identity: { ...old.identity, clientCompanyId: selected?.id ?? null, clientCompany: company, clientName: company, primaryContactId: null, primaryContact: "" },
         commercial: { ...old.commercial, counterpartyName: company, contracts },
         review: { ...old.review, contractConfirmed: false },
       };
@@ -108,8 +110,8 @@ export function QuickJobIntake(props: Props) {
         {step === 1 && <>
           <h3>{tt("Who hired you, and what is the first item of work?", "¿Quién lo contrató y cuál es la primera partida?")}</h3>
           <div className="ji-grid">
-            <label>{tt("Customer company — required", "Empresa cliente — obligatoria")}<select autoFocus value={data.identity?.clientCompany || ""} onChange={(event) => selectCustomer(event.target.value)}><option value="">{tt("Select a project company", "Seleccione una empresa del proyecto")}</option>{companies.map((company) => <option key={company} value={company}>{company}</option>)}</select></label>
-            <label>{tt("Customer contact — optional now", "Contacto del cliente — opcional ahora")}<select disabled={!data.identity?.clientCompany} value={data.identity?.primaryContact || ""} onChange={(event) => patchIdentity({ primaryContact: event.target.value })}><option value="">{tt("Select later", "Seleccionar después")}</option>{contacts.map((contact) => <option key={contact.id} value={contact.fullName || ""}>{contact.fullName}{contact.email ? ` — ${contact.email}` : ""}</option>)}</select></label>
+            <label>{tt("Customer company — required", "Empresa cliente — obligatoria")}<select autoFocus value={data.identity?.clientCompanyId || ""} onChange={(event) => selectCustomer(event.target.value)}><option value="">{tt("Select a project company", "Seleccione una empresa del proyecto")}</option>{companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select></label>
+            <label>{tt("Customer contact — optional now", "Contacto del cliente — opcional ahora")}<select disabled={!data.identity?.clientCompanyId} value={data.identity?.primaryContactId || ""} onChange={(event) => { const contact=contacts.find((item)=>String(item.id)===event.target.value); patchIdentity({ primaryContactId: contact ? Number(contact.id) : null, primaryContact: contact?.fullName || "" }); }}><option value="">{tt("Select later", "Seleccionar después")}</option>{contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.fullName}{contact.email ? ` — ${contact.email}` : ""}</option>)}</select></label>
             <label>{tt("First Contract Item — required", "Primera Partida de Contrato — obligatoria")}<input value={firstItem.name || ""} onChange={(event) => patchFirstItem({ name: event.target.value, description: event.target.value })} /></label>
             <label>{tt("Quantity / planned hours — required", "Cantidad / horas planificadas — obligatoria")}<input inputMode="decimal" value={firstItem.plannedHours || ""} onChange={(event) => patchFirstItem({ plannedHours: event.target.value })} /></label>
           </div>

@@ -15,10 +15,12 @@ import { FinancialProjectShell } from "@/components/layout/FinancialProjectShell
 import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { ContractItemBulkEditor } from "@/components/job-intake/ContractItemBulkEditor";
 import { QuickJobIntake } from "@/components/job-intake/QuickJobIntake";
+import { CompanyJobMap } from "@/components/job-intake/CompanyJobMap";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import {
   clientCompanyOptions as buildClientCompanyOptions,
+  authoritativeCompanyOptions,
   contactBelongsToCompany,
   primaryContactOptions as buildPrimaryContactOptions,
 } from "@/lib/job-intake-directory-options";
@@ -192,6 +194,7 @@ const css = `
 .ji-mapper{margin:14px 0;padding:16px;border:1px solid #93c5fd;border-radius:12px;background:#f8fbff}.ji-mapper-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}.ji-mapper-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:12px}.ji-preview{overflow:auto;margin-top:12px}.ji-preview table{width:100%;border-collapse:collapse;font-size:12px}.ji-preview th,.ji-preview td{padding:7px;border:1px solid #dbe4f0;text-align:left}.ji-preview th{background:#eaf1ff}.ji-issues{color:#9f1239;font-weight:700}@media(max-width:900px){.ji-mapper-grid{grid-template-columns:1fr 1fr}}@media(max-width:600px){.ji-mapper-grid{grid-template-columns:1fr}.ji-mapper-head{display:block}}
 .ji-quick{background:#fff;border:1px solid #d9e1ec;border-radius:16px;padding:22px}.ji-quick-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.ji-quick-head h2{margin:5px 0}.ji-quick-head button,.ji-quick-question button,.ji-quick-nav button{display:inline-flex;gap:7px;align-items:center}.ji-quick-kicker{color:#1d4ed8;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.ji-quick-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}.ji-quick-steps button{display:flex;align-items:center;gap:8px;text-align:left}.ji-quick-steps button span{display:grid;place-items:center;width:23px;height:23px;border-radius:99px;background:#e2e8f0}.ji-quick-steps button.on{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:800}.ji-quick-steps button.done span{background:#dcfce7;color:#166534}.ji-quick-question{min-height:260px;border:1px solid #e2e8f0;border-radius:12px;padding:20px}.ji-quick-question h3{margin-top:0}.ji-quick-summary{display:grid;gap:9px;margin:14px 0}.ji-quick-summary div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px}.ji-quick-summary span{color:#64748b}.ji-quick-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.ji-advanced-return{margin-bottom:12px}.ji-advanced-return button{display:inline-flex;gap:7px;align-items:center}@media(max-width:700px){.ji-quick-head{display:block}.ji-quick-head>button{margin-top:10px}.ji-quick-steps{grid-template-columns:1fr}.ji-quick-question{min-height:0}.ji-quick-summary div{grid-template-columns:1fr}.ji-quick-nav span{display:none}}
 .ji-field-legend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid #d9e1ec;border-radius:10px;background:#f8fafc;font-size:12px}.ji-field-legend strong{color:#9f1239}.ji-nav-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}.ji-nav-status.complete{color:#15803d}.ji-nav-status.required{color:#b45309}.ji-nav-status.optional{color:#64748b}
+.ji-company-map{margin-top:16px;padding:16px;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff}.ji-company-map h3{display:flex;gap:7px;align-items:center}.ji-company-row{display:grid;grid-template-columns:1fr 220px auto;gap:8px;align-items:center;margin:8px 0;padding:8px;background:white;border-radius:8px}@media(max-width:700px){.ji-company-row{grid-template-columns:1fr}}
 `;
 
 export function JobIntakeWorkspace() {
@@ -453,12 +456,15 @@ export function JobIntakeWorkspace() {
     () => buildClientCompanyOptions(directoryEntries),
     [directoryEntries],
   );
+  const authoritativeCompanies = useMemo(() => authoritativeCompanyOptions(directoryEntries), [directoryEntries]);
   const primaryContactOptions = useMemo(
     () => buildPrimaryContactOptions(directoryEntries, data.identity.clientCompany),
     [data.identity.clientCompany, directoryEntries],
   );
-  const changeClientCompany = (value: string) =>
+  const changeClientCompany = (companyIdText: string) =>
     setData((old: any) => {
+      const selected = authoritativeCompanies.find((company) => company.id === Number(companyIdText));
+      const value = selected?.name || "";
       const contactStillBelongs = contactBelongsToCompany(
         directoryEntries,
         value,
@@ -469,9 +475,11 @@ export function JobIntakeWorkspace() {
         identity: {
           ...old.identity,
           clientCompany: value,
+          clientCompanyId: selected?.id ?? null,
           primaryContact: contactStillBelongs
             ? old.identity.primaryContact
             : "",
+          primaryContactId: contactStillBelongs ? old.identity.primaryContactId : null,
         },
       };
     });
@@ -1052,7 +1060,7 @@ export function JobIntakeWorkspace() {
             <QuickJobIntake
               data={data}
               setData={setData}
-              companies={clientCompanyOptions}
+              companies={authoritativeCompanies}
               contacts={primaryContactOptions}
               defaultRate={capabilities.costValuePlanner ? latestRate : "0"}
               defaultApuVersion={capabilities.costValuePlanner ? latestApuVersion : null}
@@ -1495,7 +1503,7 @@ export function JobIntakeWorkspace() {
                   <label>
                     {tt("Client company", "Empresa cliente")}
                     <select
-                      value={data.identity.clientCompany}
+                      value={data.identity.clientCompanyId || ""}
                       onChange={(event) =>
                         changeClientCompany(event.target.value)
                       }
@@ -1505,13 +1513,13 @@ export function JobIntakeWorkspace() {
                       </option>
                       {data.identity.clientCompany &&
                         !clientCompanyOptions.includes(data.identity.clientCompany) && (
-                          <option value={data.identity.clientCompany}>
+                          <option value={data.identity.clientCompanyId || ""}>
                             {data.identity.clientCompany}
                           </option>
                         )}
-                      {clientCompanyOptions.map((company) => (
-                        <option key={company} value={company}>
-                          {company}
+                      {authoritativeCompanies.map((company) => (
+                        <option key={company.id} value={company.id}>
+                          {company.name}
                         </option>
                       ))}
                     </select>
@@ -1519,11 +1527,9 @@ export function JobIntakeWorkspace() {
                   <label>
                     {tt("Primary contact", "Contacto principal")}
                     <select
-                      value={data.identity.primaryContact}
-                      disabled={!data.identity.clientCompany}
-                      onChange={(event) =>
-                        change("identity", "primaryContact", event.target.value)
-                      }
+                      value={data.identity.primaryContactId || ""}
+                      disabled={!data.identity.clientCompanyId}
+                      onChange={(event) => { const contact=primaryContactOptions.find((entry) => String(entry.id)===event.target.value); setData((old:any)=>({...old,identity:{...old.identity,primaryContactId:contact?Number(contact.id):null,primaryContact:contact?.fullName||""}})); }}
                     >
                       <option value="">
                         {data.identity.clientCompany
@@ -1531,15 +1537,13 @@ export function JobIntakeWorkspace() {
                           : tt("Select the client company first", "Seleccione primero la empresa cliente")}
                       </option>
                       {data.identity.primaryContact &&
-                        !primaryContactOptions.some(
-                          (entry) => entry.fullName === data.identity.primaryContact,
-                        ) && (
-                          <option value={data.identity.primaryContact}>
+                        !primaryContactOptions.some((entry) => Number(entry.id) === Number(data.identity.primaryContactId)) && (
+                          <option value={data.identity.primaryContactId || ""}>
                             {data.identity.primaryContact}
                           </option>
                         )}
                       {primaryContactOptions.map((entry) => (
-                        <option key={entry.id} value={String(entry.fullName ?? "")}>
+                        <option key={entry.id} value={entry.id}>
                           {entry.fullName}
                           {entry.email ? ` — ${entry.email}` : ""}
                         </option>
@@ -1584,6 +1588,7 @@ export function JobIntakeWorkspace() {
                     />
                   </label>
                 </div>
+                <CompanyJobMap data={data} companies={authoritativeCompanies} setData={setData} tt={tt}/>
               </section>
               <section className="ji-card" id="ji-scope">
                 <h2>

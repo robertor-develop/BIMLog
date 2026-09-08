@@ -46,6 +46,8 @@ const positive = (value: string) => scaledSignedDecimal(value) > 0n;
 
 export type JobIntakeData = ReturnType<typeof normalizeJobIntakeData>;
 
+const participantRoles = new Set(["owner", "general_contractor", "customer", "service_provider", "trade_contractor", "consultant", "vendor", "other"]);
+
 export type SmartIntakeMappingPreview = ReturnType<
   typeof previewSmartIntakeMapping
 >;
@@ -590,6 +592,17 @@ export function normalizeJobIntakeData(raw: unknown) {
       };
     },
   );
+  const relationships = input.relationships && typeof input.relationships === "object" ? input.relationships as any : {};
+  const participantIds = new Set<string>();
+  const participants = (Array.isArray(relationships.participants) ? relationships.participants : []).map((entry: any, index: number) => {
+    const id = optionalText(entry?.id, `relationships.participants[${index}].id`, 100) || `PARTICIPANT-${index + 1}`;
+    if (participantIds.has(id)) throw new FinancialControlError(400, "JOB_INTAKE_PARTICIPANT_DUPLICATE", "Each participating company must have a unique stable identifier.");
+    participantIds.add(id);
+    const role = optionalText(entry?.role, `relationships.participants[${index}].role`, 50) || "other";
+    if (!participantRoles.has(role)) throw new FinancialControlError(400, "JOB_INTAKE_PARTICIPANT_ROLE_INVALID", "Choose a supported participating-company role.");
+    return { id, companyId: optionalId(entry?.companyId, `relationships.participants[${index}].companyId`), companyName: optionalText(entry?.companyName, `relationships.participants[${index}].companyName`, 200), role, primary: bool(entry?.primary) };
+  });
+  if (participants.length > 50) throw new FinancialControlError(400, "JOB_INTAKE_PARTICIPANTS_LIMIT", "A job intake supports at most 50 participating companies.");
   return {
     identity: {
       jobName: optionalText(identity.jobName, "identity.jobName", 300),
@@ -600,6 +613,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         "identity.clientCompany",
         200,
       ),
+      clientCompanyId: optionalId(identity.clientCompanyId, "identity.clientCompanyId"),
       location: optionalText(identity.location, "identity.location", 500),
       currency: identity.currency ? contractCurrency(identity.currency) : "USD",
       primaryContact: optionalText(
@@ -607,6 +621,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         "identity.primaryContact",
         200,
       ),
+      primaryContactId: optionalId(identity.primaryContactId, "identity.primaryContactId"),
       startDate: optionalText(identity.startDate, "identity.startDate", 20),
       targetCompletionDate: optionalText(
         identity.targetCompletionDate,
@@ -614,6 +629,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         20,
       ),
     },
+    relationships: { participants },
     scopeItems: normalizedItems,
     commercial: {
       contracts: normalizedContracts,
