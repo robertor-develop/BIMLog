@@ -17594,6 +17594,109 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ca5fa264c25f10ea02ab2c3e85829ddead240f8246f7b76b727df8122be5d554"
+    },
+    {
+      "taskId": "job-intake-client-company-creation-correction-20260908",
+      "reviewedThroughCommit": "59fad714708f5062f6dde0bb0e25e15900861c44",
+      "reviewedAt": "2026-09-08T20:08:30Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "edit_isolated_worktree",
+          "run_local_validation",
+          "create_clean_commit"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "production_runtime_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Field evidence proved Job Intake had no usable client-company creation path when the project directory was empty."
+        }
+      ],
+      "summary": "Connects Quick and Advanced Job Intake to the existing authoritative project-company registration contract and advances Platform identity to N14-P11.",
+      "workstreams": [
+        "job-intake-multi-apu-complete-recovery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction reuses one canonical company authority and does not alter product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded correction follows the existing implementation and evidence workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing field, behavior, authorization, and build evidence requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction closes an existing workflow gap without changing roadmap scope."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API route, database table, or generated Platform structure changes; the UI reuses an existing endpoint."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Navisworks source, package, or behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, spreadsheet, document, or report presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim is introduced or changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the field defect, authoritative correction, version, and unclaimed external gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records completed local gates and keeps push, publication, and live verification open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserves the field contradiction, root cause, correction, and evidence boundary."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b2c44857f88eb0df909736eb7853249dd9d8fc20e21699f5aee3a4f4c17ef439"
     }
   ]
 }
