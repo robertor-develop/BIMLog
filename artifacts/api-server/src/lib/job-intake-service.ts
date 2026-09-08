@@ -674,6 +674,7 @@ export async function applyJobIntakeDocumentMapping(input: {
           workflowTemplate: data.delivery.workflowTemplate,
           contractId: data.commercial.contracts[0].id,
           responsibleParticipantId: "",
+          workPackages: [],
         }),
         name: mapped.name,
         plannedHours: mapped.quantity,
@@ -1067,6 +1068,10 @@ async function createCoreActivationWithClient(
       id: actualWorkItemId,
       taskId: actualTaskId,
     });
+    for (const workPackage of item.workPackages) {
+      await client.query(`INSERT INTO job_activation_work_packages(id,intake_id,project_id,work_item_id,package_code,title,description,package_type,status,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9) ON CONFLICT(project_id,package_code) DO NOTHING`, [workPackage.id,input.intakeId,input.projectId,actualWorkItemId,workPackage.packageCode,workPackage.title || workPackage.dimensionValue,`${workPackage.dimensionType}: ${workPackage.dimensionValue}`,workPackage.packageType,input.actorUserId]);
+      await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id) SELECT $1,$2,$3 WHERE EXISTS(SELECT 1 FROM job_activation_work_packages WHERE id=$1) ON CONFLICT(package_id,task_id) DO NOTHING`, [workPackage.id,actualTaskId,input.actorUserId]);
+    }
   }
   for (const assignment of input.data.team.assignments) {
     const linked = workItemByScope.get(assignment.scopeItemId);

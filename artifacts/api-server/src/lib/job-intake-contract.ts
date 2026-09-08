@@ -419,6 +419,16 @@ export function normalizeJobIntakeData(raw: unknown) {
         "Contract Item IDs must be unique within the Intake.",
       );
     scopeItemIds.add(id);
+    const packageIds = new Set<string>();
+    const workPackages = (Array.isArray(item.workPackages) ? item.workPackages : []).map((entry: any, packageIndex: number) => {
+      const packageId = optionalText(entry?.id, `scopeItems[${index}].workPackages[${packageIndex}].id`, 100) || `WP-${id}-${packageIndex + 1}`;
+      if (packageIds.has(packageId)) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGE_DUPLICATE", "Work Package IDs must be unique within a Contract Item.");
+      packageIds.add(packageId);
+      const dimensionType = ["building", "floor", "zone", "discipline", "system", "phase", "deliverable", "task", "milestone"].includes(String(entry?.dimensionType)) ? String(entry.dimensionType) : "deliverable";
+      const packageType = ["shop_drawing", "submittal", "mixed", "deliverable"].includes(String(entry?.packageType)) ? String(entry.packageType) : "deliverable";
+      return { id: packageId, packageCode: optionalText(entry?.packageCode, `scopeItems[${index}].workPackages[${packageIndex}].packageCode`, 50) || packageId, title: optionalText(entry?.title, `scopeItems[${index}].workPackages[${packageIndex}].title`, 160), dimensionType, dimensionValue: optionalText(entry?.dimensionValue, `scopeItems[${index}].workPackages[${packageIndex}].dimensionValue`, 160), packageType };
+    });
+    if (workPackages.length > 100) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGES_LIMIT", "A Contract Item supports at most 100 Work Packages.");
     return {
       id,
       name: optionalText(item.name, `scopeItems[${index}].name`, 300),
@@ -473,6 +483,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         optionalText(item.contractId, `scopeItems[${index}].contractId`, 100) ||
         primaryContract.id,
       responsibleParticipantId: optionalText(item.responsibleParticipantId, `scopeItems[${index}].responsibleParticipantId`, 100),
+      workPackages,
       provenance:
         item.provenance &&
         typeof item.provenance === "object" &&

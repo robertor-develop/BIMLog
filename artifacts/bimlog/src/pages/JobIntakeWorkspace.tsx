@@ -16,6 +16,7 @@ import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/Pri
 import { ContractItemBulkEditor } from "@/components/job-intake/ContractItemBulkEditor";
 import { QuickJobIntake } from "@/components/job-intake/QuickJobIntake";
 import { CompanyJobMap } from "@/components/job-intake/CompanyJobMap";
+import { WorkPackageBuilder } from "@/components/job-intake/WorkPackageBuilder";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -1647,6 +1648,7 @@ export function JobIntakeWorkspace() {
                   onNotice={setNotice}
                 />
                 {(data.scopeItems || []).map((item:any, index:number)=><div className="ji-row" key={`owner-${item.id}`}><strong>{item.name || item.id}</strong><div className="ji-grid"><label>{tt("Responsible company", "Empresa responsable")}<select value={item.responsibleParticipantId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,responsibleParticipantId:event.target.value}:candidate))}><option value="">{tt("Unassigned", "Sin asignar")}</option>{(data.relationships?.participants || []).map((participant:any)=><option key={participant.id} value={participant.id}>{participant.companyName}</option>)}</select></label><label>{tt("Authoritative agreement", "Acuerdo autorizado")}<select value={item.contractId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,contractId:event.target.value}:candidate))}>{(data.commercial.contracts || []).map((contract:any)=><option key={contract.id} value={contract.id}>{contract.title || contract.contractNumber || contract.id}</option>)}</select></label></div></div>)}
+                <WorkPackageBuilder items={data.scopeItems || []} setItems={setScopeItems} tt={tt}/>
               </section>
               <section className="ji-card" id="ji-contract">
                 <h2>

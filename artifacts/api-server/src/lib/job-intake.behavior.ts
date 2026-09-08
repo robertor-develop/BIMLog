@@ -190,11 +190,12 @@ assert.equal(multiContractCompletion.ready, true);
 const multiApuContract = normalizeJobIntakeData({
   commercial: { contracts: [{ id: "BASE", title: "Base agreement" }] },
   scopeItems: [
-    { id: "CI-A", name: "Drafting", contractId: "BASE", apuPlanVersion: 3 },
+    { id: "CI-A", name: "Drafting", contractId: "BASE", apuPlanVersion: 3, workPackages: [{ id: "WP-L10", packageCode: "WP-L10", title: "Level 10 drafting", dimensionType: "floor", dimensionValue: "Level 10", packageType: "shop_drawing" }] },
     { id: "CI-B", name: "Coordination", contractId: "BASE", apuPlanVersion: 4 },
   ],
 });
 assert.deepEqual(multiApuContract.scopeItems.map((item) => item.apuPlanVersion), [3, 4]);
+assert.equal(multiApuContract.scopeItems[0].workPackages[0]?.dimensionType, "floor");
 const immutableBaselineInput = { intakeId: "INTAKE-1", projectId: 1, currency: "USD", workflowInstances: 2, workItems: 2, tasks: 2, resourceAssignments: 0, contracts: [{ profileId: "BASE", contractId: "CONTRACT-1", contractVersionId: "VERSION-1", contractNumber: "C-1", currency: "USD", items: [{ stableLineId: "CI-A", displayName: "Drafting", projectCostNodeId: "NODE-1", budgetSnapshotLineId: "", quantity: "10", unit: "Hours", unitRate: "35.47", contractValue: "354.7", apuPlanVersion: 3, workflowTemplate: "bim-submittal" }] }] };
 const immutableBaseline = buildActivatedCommercialBaseline(immutableBaselineInput);
 const changedApuBaseline = buildActivatedCommercialBaseline({ ...immutableBaselineInput, contracts: [{ ...immutableBaselineInput.contracts[0], items: [{ ...immutableBaselineInput.contracts[0].items[0], unitRate: "37.99", contractValue: "379.9", apuPlanVersion: 4 }] }] });
@@ -399,6 +400,8 @@ assert.match(operationsService, /reportingContracts/);
 assert.match(operationsService, /quotationNumber/);
 assert.match(operationsUi, /Contract reporting identity/);
 assert.match(service, /apuPlanVersions: \[\.\.\.new Set/);
+assert.match(service, /INSERT INTO job_activation_work_packages/);
+assert.match(service, /INSERT INTO job_activation_work_package_tasks/);
 assert.match(operationsService, /apuCount: apuPlanVersions\.length/);
 assert.match(operationsService, /job_activation_contract_item_baselines/);
 assert.match(operationsUi, /Immutable APU history/);
@@ -446,6 +449,7 @@ console.log(
       "contract-item-agreement-and-company-ownership",
       "multiple-apus-per-agreement",
       "immutable-apu-pricing-history",
+      "contract-apu-owned-work-package-decomposition",
     ],
   }),
 );
