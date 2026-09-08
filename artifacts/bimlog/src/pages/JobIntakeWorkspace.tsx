@@ -235,6 +235,7 @@ export function JobIntakeWorkspace() {
   const [exportingPdf, setExportingPdf] = useState(false);
   const [pdfSections, setPdfSections] = useState({ identity: true, scope: true, contracts: true, delivery: true, team: true, review: true });
   const revisionRef = useRef(0),
+    projectIdRef = useRef(projectId),
     dataRef = useRef<any>(blank),
     intakeRef = useRef<any>(null),
     lastSavedRef = useRef(""),
@@ -242,6 +243,7 @@ export function JobIntakeWorkspace() {
     savePromiseRef = useRef<Promise<any> | null>(null),
     saveRetryRef = useRef(0),
     saveTimerRef = useRef<number | null>(null);
+  projectIdRef.current = projectId;
   const headers = useMemo(
     () => ({ Authorization: `Bearer ${token}` }),
     [token],
@@ -282,6 +284,7 @@ export function JobIntakeWorkspace() {
           : Promise.resolve(null),
         api(`/projects/${projectId}/directory`),
       ]);
+      if (projectIdRef.current !== projectId) return;
       const recovered = readRecovery(projectId);
       const canRecover =
         recovered?.revision === current.revision &&
@@ -308,11 +311,27 @@ export function JobIntakeWorkspace() {
       setWorkspace(budget);
       setDirectoryEntries(Array.isArray(directory) ? directory : []);
     } catch (cause) {
+      if (projectIdRef.current !== projectId) return;
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
-      setBusy(false);
+      if (projectIdRef.current === projectId) setBusy(false);
     }
   }, [api, projectId, tt]);
+  useEffect(() => {
+    setIntake(null);
+    setData(blank);
+    dataRef.current = blank;
+    intakeRef.current = null;
+    revisionRef.current = 0;
+    pendingSaveRef.current = null;
+    setActive(readActiveStage(projectId));
+    setQuickMode(readSetupMode(projectId) === "quick");
+    setMappingDocument(null);
+    setMappingPreview(null);
+    setMappingForm({ sheetName: "", headerRow: 1, nameColumn: 0, quantityColumn: 1 });
+    setError("");
+    setNotice("");
+  }, [projectId]);
   useEffect(() => {
     void load();
   }, [load]);
