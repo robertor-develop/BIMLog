@@ -2018,6 +2018,50 @@ export function JobIntakeWorkspace() {
                         />
                       </label>
                       <label>
+                        {tt("Contract", "Contrato")}
+                        <select
+                          value={
+                            assignment.contractId ||
+                            data.scopeItems.find(
+                              (item: any) => item.id === assignment.scopeItemId,
+                            )?.contractId ||
+                            data.commercial.contracts?.[0]?.id ||
+                            ""
+                          }
+                          onChange={(e) => {
+                            const contractId = e.target.value;
+                            const selectedScope = data.scopeItems.find(
+                              (item: any) => item.id === assignment.scopeItemId,
+                            );
+                            setData((old: any) => ({
+                              ...old,
+                              team: {
+                                ...old.team,
+                                assignments: old.team.assignments.map(
+                                  (item: any, i: number) =>
+                                    i === index
+                                      ? {
+                                          ...item,
+                                          contractId,
+                                          scopeItemId:
+                                            selectedScope?.contractId === contractId
+                                              ? item.scopeItemId
+                                              : "",
+                                        }
+                                      : item,
+                                ),
+                              },
+                            }));
+                          }}
+                        >
+                          {(data.commercial.contracts || []).map((contract: any) => (
+                            <option key={contract.id} value={contract.id}>
+                              {contract.title || contract.contractNumber || contract.id}
+                            </option>
+                          ))}
+                        </select>
+                      </label>
+                      <label>
                         {tt("Scope item", "Partida de alcance")}
                         <select
                           value={assignment.scopeItemId}
@@ -2032,11 +2076,21 @@ export function JobIntakeWorkspace() {
                           <option value="">
                             {tt("Select scope", "Seleccione el alcance")}
                           </option>
-                          {data.scopeItems.map((s: any) => (
+                          {data.scopeItems
+                            .filter(
+                              (s: any) =>
+                                s.contractId ===
+                                (assignment.contractId ||
+                                  data.scopeItems.find(
+                                    (item: any) => item.id === assignment.scopeItemId,
+                                  )?.contractId ||
+                                  data.commercial.contracts?.[0]?.id),
+                            )
+                            .map((s: any) => (
                             <option key={s.id} value={s.id}>
                               {s.name || s.id}
                             </option>
-                          ))}
+                            ))}
                         </select>
                       </label>
                       <label>
@@ -2132,6 +2186,8 @@ export function JobIntakeWorkspace() {
                               userId: null,
                               personName: "",
                               role: "",
+                              contractId:
+                                old.commercial.contracts?.[0]?.id || "PRIMARY",
                               employmentType: "employee",
                               scopeItemId: "",
                               plannedHours: "0.00",

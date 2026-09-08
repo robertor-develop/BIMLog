@@ -162,7 +162,29 @@ assert.deepEqual(
   multiContractData.scopeItems.map((item) => item.contractId),
   ["OWNER", "SUPPLIER"],
 );
+assert.deepEqual(
+  multiContractData.team.assignments.map((assignment: any) => assignment.contractId),
+  ["OWNER", "SUPPLIER"],
+  "legacy assignments derive their authoritative contract from the selected Contract Item",
+);
 assert.equal(multiContractCompletion.ready, true);
+assert.throws(
+  () =>
+    normalizeJobIntakeData({
+      ...multiContractData,
+      team: {
+        ...multiContractData.team,
+        assignments: [
+          {
+            ...multiContractData.team.assignments[0],
+            contractId: "SUPPLIER",
+            scopeItemId: "OWNER-ITEM",
+          },
+        ],
+      },
+    }),
+  /must belong to the assignment's contract profile/,
+);
 assert.throws(
   () =>
     normalizeJobIntakeData({

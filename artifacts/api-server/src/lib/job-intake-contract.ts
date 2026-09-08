@@ -531,6 +531,35 @@ export function normalizeJobIntakeData(raw: unknown) {
         assignment.internalHourlyRate,
         `assignments[${index}].internalHourlyRate`,
       );
+      const scopeItemId = optionalText(
+        assignment.scopeItemId,
+        `assignments[${index}].scopeItemId`,
+        100,
+      );
+      const scopeContractId = normalizedItems.find(
+        (item) => item.id === scopeItemId,
+      )?.contractId;
+      const requestedContractId = optionalText(
+        assignment.contractId,
+        `assignments[${index}].contractId`,
+        100,
+      );
+      const contractId =
+        (requestedContractId && contractIds.has(requestedContractId)
+          ? requestedContractId
+          : scopeContractId) || primaryContract.id;
+      if (!contractIds.has(contractId))
+        throw new FinancialControlError(
+          400,
+          "JOB_INTAKE_ASSIGNMENT_CONTRACT_INVALID",
+          "Every resource assignment must reference a contract profile in this Intake.",
+        );
+      if (scopeContractId && scopeContractId !== contractId)
+        throw new FinancialControlError(
+          400,
+          "JOB_INTAKE_ASSIGNMENT_SCOPE_CONTRACT_MISMATCH",
+          "The selected Contract Item must belong to the assignment's contract profile.",
+        );
       return {
         id:
           optionalText(assignment.id, `assignments[${index}].id`, 100) ||
@@ -542,17 +571,14 @@ export function normalizeJobIntakeData(raw: unknown) {
           200,
         ),
         role: optionalText(assignment.role, `assignments[${index}].role`, 100),
+        contractId,
         employmentType:
           optionalText(
             assignment.employmentType,
             `assignments[${index}].employmentType`,
             50,
           ) || "employee",
-        scopeItemId: optionalText(
-          assignment.scopeItemId,
-          `assignments[${index}].scopeItemId`,
-          100,
-        ),
+        scopeItemId,
         plannedHours,
         internalHourlyRate,
         plannedLaborCost: decimalFromScaled(
