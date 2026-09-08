@@ -17,6 +17,7 @@ import { ContractItemBulkEditor } from "@/components/job-intake/ContractItemBulk
 import { QuickJobIntake } from "@/components/job-intake/QuickJobIntake";
 import { CompanyJobMap } from "@/components/job-intake/CompanyJobMap";
 import { WorkPackageBuilder } from "@/components/job-intake/WorkPackageBuilder";
+import { ProjectCompanyCreator, type CreatedProjectCompany } from "@/components/job-intake/ProjectCompanyCreator";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -196,6 +197,7 @@ const css = `
 .ji-quick{background:#fff;border:1px solid #d9e1ec;border-radius:16px;padding:22px}.ji-quick-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.ji-quick-head h2{margin:5px 0}.ji-quick-head button,.ji-quick-question button,.ji-quick-nav button{display:inline-flex;gap:7px;align-items:center}.ji-quick-kicker{color:#1d4ed8;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.ji-quick-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}.ji-quick-steps button{display:flex;align-items:center;gap:8px;text-align:left}.ji-quick-steps button span{display:grid;place-items:center;width:23px;height:23px;border-radius:99px;background:#e2e8f0}.ji-quick-steps button.on{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:800}.ji-quick-steps button.done span{background:#dcfce7;color:#166534}.ji-quick-question{min-height:260px;border:1px solid #e2e8f0;border-radius:12px;padding:20px}.ji-quick-question h3{margin-top:0}.ji-quick-summary{display:grid;gap:9px;margin:14px 0}.ji-quick-summary div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px}.ji-quick-summary span{color:#64748b}.ji-quick-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.ji-advanced-return{margin-bottom:12px}.ji-advanced-return button{display:inline-flex;gap:7px;align-items:center}@media(max-width:700px){.ji-quick-head{display:block}.ji-quick-head>button{margin-top:10px}.ji-quick-steps{grid-template-columns:1fr}.ji-quick-question{min-height:0}.ji-quick-summary div{grid-template-columns:1fr}.ji-quick-nav span{display:none}}
 .ji-field-legend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid #d9e1ec;border-radius:10px;background:#f8fafc;font-size:12px}.ji-field-legend strong{color:#9f1239}.ji-nav-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}.ji-nav-status.complete{color:#15803d}.ji-nav-status.required{color:#b45309}.ji-nav-status.optional{color:#64748b}
 .ji-company-map{margin-top:16px;padding:16px;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff}.ji-company-map h3{display:flex;gap:7px;align-items:center}.ji-company-row{display:grid;grid-template-columns:1fr 220px auto;gap:8px;align-items:center;margin:8px 0;padding:8px;background:white;border-radius:8px}@media(max-width:700px){.ji-company-row{grid-template-columns:1fr}}
+.ji-company-create-button{display:inline-flex;align-items:center;gap:7px;margin-top:10px}.ji-company-create{grid-column:1/-1;margin-top:10px;padding:14px;border:1px solid #93c5fd;border-radius:10px;background:#f8fbff}.ji-company-create-head{display:flex;align-items:center;justify-content:space-between;gap:10px}.ji-company-create-head button{display:grid;place-items:center;padding:6px}.ji-company-create p{margin:6px 0 12px;font-size:12px}
 .ji-readiness{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}.ji-readiness-card{background:#fff;border:1px solid #d9e1ec;border-radius:12px;padding:14px;min-width:0}.ji-readiness-card h2{font-size:12px;margin:0 0 7px;color:#475569}.ji-readiness-card strong{font-size:20px;color:#0f172a}.ji-readiness-card p{font-size:11px;margin:6px 0 0}.ji-readiness-help{grid-column:1/-1;background:#eff6ff;border-left:4px solid #2563eb;padding:10px 12px;color:#334155;font-size:12px}.ji button:focus-visible,.ji a:focus-visible,.ji input:focus-visible,.ji select:focus-visible,.ji textarea:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}@media(max-width:900px){.ji-readiness{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.ji{padding-top:12px}.ji-readiness{grid-template-columns:1fr}.ji-footer{position:static;align-items:flex-start;flex-direction:column}.ji-footer button{width:100%}}
 `;
 
@@ -504,6 +506,28 @@ export function JobIntakeWorkspace() {
         },
       };
     });
+  const acceptCreatedCompany = (created: CreatedProjectCompany) => {
+    const entry = {
+      ...created.directoryEntry,
+      companyId: created.id,
+      companyName: created.name,
+    };
+    setDirectoryEntries((current) => {
+      const withoutSameEntry = current.filter((item) => String(item.id) !== String(entry.id));
+      return [...withoutSameEntry, entry];
+    });
+    setData((old: any) => {
+      const contracts = [...(old.commercial?.contracts ?? [])];
+      if (contracts.length) contracts[0] = { ...contracts[0], counterpartyName: created.name };
+      return {
+        ...old,
+        identity: { ...old.identity, clientCompanyId: created.id, clientCompany: created.name, clientName: created.name, primaryContactId: null, primaryContact: "" },
+        commercial: { ...old.commercial, counterpartyName: created.name, contracts },
+        review: { ...old.review, contractConfirmed: false },
+      };
+    });
+    setNotice(tt("Client company added to this project and selected.", "La empresa cliente se agregó a este proyecto y quedó seleccionada."));
+  };
   const setScopeItems = (updater: (items: any[]) => any[]) =>
     setData((old: any) => ({
       ...old,
@@ -1118,6 +1142,8 @@ export function JobIntakeWorkspace() {
               projectId={projectId}
               tt={tt}
               onAdvanced={showAdvancedMode}
+              request={api}
+              onCompanyCreated={acceptCreatedCompany}
             />
           ) : (
           <div className="ji-layout">
@@ -1575,6 +1601,7 @@ export function JobIntakeWorkspace() {
                       ))}
                     </select>
                   </label>
+                  <ProjectCompanyCreator request={api} projectId={projectId} onCreated={acceptCreatedCompany} tt={tt} />
                   <label>
                     {tt("Primary contact", "Contacto principal")}
                     <select

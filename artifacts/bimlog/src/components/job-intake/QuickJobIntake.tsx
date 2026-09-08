@@ -1,5 +1,6 @@
 import { Check, ChevronLeft, ChevronRight, Settings2 } from "lucide-react";
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
+import { ProjectCompanyCreator, type CreatedProjectCompany } from "./ProjectCompanyCreator";
 
 type Props = {
   data: any;
@@ -11,12 +12,14 @@ type Props = {
   projectId: number;
   tt: (en: string, es: string) => string;
   onAdvanced: () => void;
+  request: (path: string, init?: RequestInit) => Promise<any>;
+  onCompanyCreated: (company: CreatedProjectCompany) => void;
 };
 
 const value = (input: unknown) => String(input ?? "").trim();
 
 export function QuickJobIntake(props: Props) {
-  const { data, setData, companies, contacts, defaultRate, defaultApuVersion, projectId, tt, onAdvanced } = props;
+  const { data, setData, companies, contacts, defaultRate, defaultApuVersion, projectId, tt, onAdvanced, request, onCompanyCreated } = props;
   const stepKey = `bimlog:job-intake-quick-step:${projectId}`;
   const [step, setStepState] = useState(() => {
     try {
@@ -115,6 +118,7 @@ export function QuickJobIntake(props: Props) {
             <label>{tt("First Contract Item — required", "Primera Partida de Contrato — obligatoria")}<input value={firstItem.name || ""} onChange={(event) => patchFirstItem({ name: event.target.value, description: event.target.value })} /></label>
             <label>{tt("Quantity / planned hours — required", "Cantidad / horas planificadas — obligatoria")}<input inputMode="decimal" value={firstItem.plannedHours || ""} onChange={(event) => patchFirstItem({ plannedHours: event.target.value })} /></label>
           </div>
+          <ProjectCompanyCreator request={request} projectId={projectId} onCreated={onCompanyCreated} tt={tt} />
         </>}
         {step === 2 && <>
           <h3>{tt("Your Intake draft is ready to continue", "Su borrador está listo para continuar")}</h3>
