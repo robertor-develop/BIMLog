@@ -16,6 +16,7 @@ import { initializeContractItemWorkflowsWithClient } from "./contract-item-workf
 import { waitForContractItemWorkflowMigration } from "./contract-item-workflow-migration";
 import { waitForFinancialContractMigration } from "./financial-contract-migration";
 import {
+  assertAuthoritativeBudgetAssociations,
   jobIntakeCompletion,
   jobIntakeCoreFingerprint,
   normalizeJobIntakeData,
@@ -1218,6 +1219,17 @@ export async function activateJobIntake(input: {
         "JOB_INTAKE_NOT_READY",
         `Complete the intake before activation: ${completion.missing.join(" ")}`,
       );
+    if (capabilities.budget) {
+      const snapshot = (await client.query(
+        `SELECT id,project_id "projectId",currency FROM approved_budget_snapshots WHERE id=$1 AND project_id=$2`,
+        [data.commercial.budgetSnapshotId, projectId],
+      )).rows[0] ?? null;
+      const lines = snapshot ? (await client.query(
+        `SELECT id,project_cost_node_id "projectCostNodeId" FROM approved_budget_snapshot_lines WHERE snapshot_id=$1`,
+        [snapshot.id],
+      )).rows : [];
+      assertAuthoritativeBudgetAssociations(data, snapshot, lines, projectId);
+    }
     const core = await createCoreActivationWithClient(
       {
         actorUserId: input.actorUserId,

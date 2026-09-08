@@ -826,6 +826,26 @@ export function jobIntakeCoreFingerprint(data: JobIntakeData) {
     .digest("hex");
 }
 
+export function assertAuthoritativeBudgetAssociations(
+  data: JobIntakeData,
+  snapshot: { id: string; projectId: number; currency: string } | null,
+  lines: Array<{ id: string; projectCostNodeId: string }>,
+  projectId: number,
+) {
+  if (!snapshot || snapshot.id !== data.commercial.budgetSnapshotId || snapshot.projectId !== projectId)
+    throw new FinancialControlError(409, "JOB_INTAKE_BUDGET_SNAPSHOT_INVALID", "The selected approved budget snapshot does not belong to this project.");
+  if (snapshot.currency !== data.identity.currency)
+    throw new FinancialControlError(409, "JOB_INTAKE_BUDGET_CURRENCY_MISMATCH", "The approved budget snapshot currency must match the Job Intake currency.");
+  const authoritativeLines = new Map(lines.map((line) => [line.id, line.projectCostNodeId]));
+  for (const item of data.scopeItems) {
+    const authoritativeNode = authoritativeLines.get(item.budgetSnapshotLineId);
+    if (!authoritativeNode)
+      throw new FinancialControlError(409, "JOB_INTAKE_BUDGET_LINE_INVALID", "Every Contract Item must reference a line in the selected approved budget snapshot.");
+    if (authoritativeNode !== item.projectCostNodeId)
+      throw new FinancialControlError(409, "JOB_INTAKE_BUDGET_NODE_MISMATCH", "A Contract Item budget line and project cost node must match the approved budget snapshot.");
+  }
+}
+
 export function jobIntakeCompletion(
   data: JobIntakeData,
   documents: Array<{ category: string; removedAt?: unknown }>,

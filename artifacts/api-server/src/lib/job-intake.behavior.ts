@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
+  assertAuthoritativeBudgetAssociations,
   jobIntakeCompletion,
   normalizeJobIntakeData,
 } from "./job-intake-contract";
@@ -210,6 +211,10 @@ const immutableBaseline = buildActivatedCommercialBaseline(immutableBaselineInpu
 const changedApuBaseline = buildActivatedCommercialBaseline({ ...immutableBaselineInput, contracts: [{ ...immutableBaselineInput.contracts[0], items: [{ ...immutableBaselineInput.contracts[0].items[0], unitRate: "37.99", contractValue: "379.9", apuPlanVersion: 4 }] }] });
 assert.notEqual(immutableBaseline.contentFingerprint, changedApuBaseline.contentFingerprint);
 assert.equal(immutableBaseline.contractItems[0].pricingSnapshot.unitRate, "35.47");
+const budgetMapped = normalizeJobIntakeData({ ...data, commercial: { ...data.commercial, budgetSnapshotId: "SNAP-1" }, scopeItems: [{ ...data.scopeItems[0], budgetSnapshotLineId: "LINE-1", projectCostNodeId: "NODE-1" }] });
+assert.doesNotThrow(() => assertAuthoritativeBudgetAssociations(budgetMapped, { id: "SNAP-1", projectId: 91, currency: budgetMapped.identity.currency }, [{ id: "LINE-1", projectCostNodeId: "NODE-1" }], 91));
+assert.throws(() => assertAuthoritativeBudgetAssociations(budgetMapped, { id: "SNAP-1", projectId: 92, currency: budgetMapped.identity.currency }, [{ id: "LINE-1", projectCostNodeId: "NODE-1" }], 91), /does not belong to this project/);
+assert.throws(() => assertAuthoritativeBudgetAssociations(budgetMapped, { id: "SNAP-1", projectId: 91, currency: budgetMapped.identity.currency }, [{ id: "LINE-1", projectCostNodeId: "OTHER" }], 91), /must match the approved budget snapshot/);
 assert.throws(
   () =>
     normalizeJobIntakeData({
