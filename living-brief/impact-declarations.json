@@ -17366,8 +17366,8 @@
     },
     {
       "taskId": "job-intake-multi-apu-build20-final-acceptance-20260908",
-      "reviewedThroughCommit": "021862e66e6dcd5f7fbbc01703877d94cd4dc6ba",
-      "reviewedAt": "2026-09-08T12:45:29-04:00",
+      "reviewedThroughCommit": "fa83dc82defaec7c9257a8311d19273873acbc22",
+      "reviewedAt": "2026-09-08T13:02:00-04:00",
       "status": "internal_acceptance_reconciled",
       "captureTiming": "same_task_after_build19_and_full_smoke_workbook_reconciliation",
       "summary": "Closes the controlled internal Job Intake and Multi-APU recovery denominator with row-level workbook evidence and complete regression while preserving all external release gates.",
@@ -17432,13 +17432,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/AUDIT.md",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "778e87b29dd7bf5d891eb970ca1638eb7b8213371d0b366858ff91c19e3a7f7b"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
