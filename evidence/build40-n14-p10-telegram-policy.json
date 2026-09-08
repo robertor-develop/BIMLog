@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "approvedRoots": [
+    "H:\\BIMLogPlugin2025\\Build40-v1.05.N14-P10\\BIMLog-Lens-Next-Navisworks2025-v1.05.N14-P10.zip"
+  ],
+  "approvedExtensions": {
+    ".zip": "application/zip"
+  },
+  "maximumBytes": 612625,
+  "recipientKeys": [
+    "roberto-private"
+  ]
+}
