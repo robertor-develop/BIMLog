@@ -17139,6 +17139,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "760908f23dcaab0f15f87e9230993f5b6e39be0a7eb49bfd6cf99c34cd6a2299"
+    },
+    {
+      "taskId": "job-intake-multi-apu-recovery-contract-20260908",
+      "reviewedThroughCommit": "dc5127e924b602704a91b95eddd8445452ef6ed2",
+      "reviewedAt": "2026-09-08T00:06:06-04:00",
+      "status": "recovery_denominator_authorized_implementation_pending",
+      "captureTiming": "same_task_after_lineage_audit_before_recovery_implementation",
+      "summary": "Records the proven Intake APU lineage divergence and binds the complete original multi-company, multi-engagement, contract, APU-version, work-package, resource, rate, persistence, and smoke-acceptance denominator to the current recovery program without product or schema mutation.",
+      "workstreams": [
+        "job-intake-multi-apu-complete-recovery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The recovery enforces existing one-source-of-truth, consolidation, evidence, and human-authority doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The authorized continuous micro-build program follows existing execution and evidence rules."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The recovery denominator applies existing source, behavior, artifact, integration, and field evidence requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work restores an already-approved product outcome and does not expand the roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This documentation-only checkpoint changes no route, table, dependency, runtime, or generated Platform inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The recovery contract changes no Native or Navisworks behavior."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation contract changes in this checkpoint."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records current lineage truth, the missing historical integration, and the binding product hierarchy."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the complete authorized recovery denominator and non-divergence contract."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserves the lineage-divergence finding and correction strategy as append-only history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "477e1f3c53bdd336f0c52d595f93f28e48bcdb30d7a36aa43985d3118994b89d"
     }
   ]
 }

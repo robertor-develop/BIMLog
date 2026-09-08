@@ -1164,3 +1164,16 @@ Build 8 App Storage source `58b773b6c4a43c3f1c30a4ab47190fc13dc1953a` is pushed 
 - This alignment changes release, assembly, installer, and package identity only. Create, Open Working View, camera, XML, bridge/port 8766, refresh, RFI, Submittal, reference-attachment, database, schema, and Platform behavior are unchanged.
 - The genuine Navisworks 2025 build passes core contracts 123/123 and the 2025 adapter 56/56 under the governed H-root. Package-only installer and release-identity checks pass; installation and Ruben field acceptance remain separate gates.
 - Governance reconciliation is bound to metadata implementation commit `13e295becd38d378af13c89628efabb7d6e2e4c4`; the final state/evidence commit follows without further product mutation.
+# Job Intake / Multi-APU recovery authority — September 8, 2026
+
+Roberto authorized a controlled, continuous recovery of the complete original Job Intake and Multi-APU product contract, with up to 40 micro-builds available only when evidence requires them. The current `v1.05.N12-P09` lineage does not contain historical integrated Intake/APU commit `1314006b4409a6d193f95b5c7c12cd4d5b319fbc` or its Intake APU 01–10 ancestry. Current source therefore cannot be described as the completed original multi-company product even though it contains later Smart Intake, multi-contract, Generic APU, budget, and operations capabilities.
+
+The binding product hierarchy for this recovery is:
+
+`Job -> Participants -> Engagements -> Contracts -> APU versions -> Work packages -> Resource assignments`
+
+Required behavior includes multiple participating companies and provider/customer relationships in one job; engagement-owned contacts and contracts; separately reportable quotes, base contracts, change orders, additions, amendments, and time-and-material authorizations; parent-contract lineage; multiple immutable APU versions per contract; work-package decomposition; authoritative user assignments; separate internal cost, customer charge, APU calculation rate, budgeted hours, actual hours, and incentive authority; redelegation history; a two-minute progressive-disclosure Intake; visual relationship context; truthful readiness; persistence; and complete integrated acceptance.
+
+Seven September 7 repair commits are preserved as source work but do not equal seven completed master builds. They implement directory-backed client/contact selection, Contract Item/APU connection, editable Drafting and BIM Coordinator defaults, contract reporting identity, contract-scoped resource assignments, Intake section restoration, and visible Generic APU version history. Each remains implementation evidence pending reconciliation into the complete hierarchy and final integrated acceptance.
+
+No release, publication, or overall completion claim is permitted until the recovery denominator in `OPEN_LOOP.md` is closed and the full 20-row smoke-test workbook plus the original multi-company requirements pass against one coherent current lineage.

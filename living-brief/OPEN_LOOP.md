@@ -2180,3 +2180,52 @@ Production no longer depends on old bim-log-ignite.replit.app references in sear
 - Ruben's real Navisworks Manage 2025 field acceptance remains pending for Create, Open Working View, responsiveness, linking, reference attachment, XML export/import camera, Help, diagnostic cleanliness, and port 8766 stability.
 - The immutable production fallback remains `v1.05.N10-P05`. Any field failure must retain exact action, expected/actual behavior, and screenshot/error before a corrective build is authorized.
 - After the exact P09 artifact is frozen and handed off, only Ruben field evidence remains open; no rebuild or version change follows a complete PASS.
+# Active: complete Job Intake / Multi-APU recovery program — authorized September 8, 2026
+
+Roberto authorized continuous item-by-item repair with a planned evidence-driven sequence and an absolute ceiling of 40 micro-builds. The ceiling is contingency, not a target. Successful in-scope builds continue without repeated approval. Stop only for a real schema/database migration, destructive data action, security/authorization change, unresolved business-rule decision, external/customer action, publication, or a failed/blocked gate that cannot be corrected inside the current micro-build.
+
+## Non-divergence contract
+
+1. The sole target is one coherent current lineage implementing `Job -> Participants -> Engagements -> Contracts -> APU versions -> Work packages -> Resource assignments`.
+2. Historical Intake APU 01–10 source is evidence and a recovery source, not an automatically mergeable authority. Every recovered component must be compared with current canonical tables, APIs, permissions, and later Smart Intake behavior before selective integration.
+3. A requirement is not complete because a class, component, test fixture, commit, or historical branch exists. Completion requires current-lineage source, focused behavior proof, persistence/reload proof where applicable, regression, and explicit mapping to the requirement.
+4. Multiple companies must use authoritative company identities. Provider/customer engagements, contacts, contracts, APUs, packages, and assignments may not be inferred from display names when authoritative IDs exist.
+5. Financial concepts remain separate: internal hourly cost, customer charge rate, APU calculation rate, budgeted hours, actual hours, and incentive/bonus authority. No field may silently stand in for another.
+6. No parallel Intake, contract, APU, budget, work-package, resource, or payment authority may be introduced. Existing authoritative structures must be reused or a schema hard stop reported before mutation.
+7. Each micro-build has one primary objective, exact changed files, focused regression, prior-primitive preservation, and an honest source/UI/artifact/deployment state. Builder evidence is not field acceptance.
+8. No release candidate may be frozen until all rows below are closed, the complete 20-item smoke workbook passes, and one end-to-end scenario proves the combined product.
+9. Accepted work must be consolidated into the current target; a detached branch or unmerged accepted commit is not completion.
+10. `STATUS.md`, this open loop, and append-only `AUDIT.md` must be reconciled at material milestones so chat history is never the sole continuity authority.
+
+## Required recovery denominator
+
+- [ ] Reconcile current lineage against historical Intake APU 01–10 and record keep/adapt/reject decisions per component.
+- [ ] Prove the existing schema can represent authoritative participants, engagements, contract lineage, multiple APUs, packages, assignments, rate layers, and redelegation; stop before any unapproved schema change.
+- [ ] Restore the simple bilingual two-minute default Intake with optional advanced detail.
+- [ ] Make required fields and stage readiness unmistakable.
+- [ ] Restore authoritative multi-company participant roles and the visual company/job relationship map.
+- [ ] Restore provider/customer engagements with engagement-specific contacts.
+- [ ] Complete quote, base-contract, change-order, additional-work, amendment, and time-and-material lifecycle and parent relationships.
+- [ ] Preserve independently reportable contract customer, name, number, type, state, dates, and payment terms.
+- [ ] Connect every Contract Item to its owning contract and selected APU/pricing authority.
+- [ ] Support multiple APUs per contract without duplicating the Generic APU authority.
+- [ ] Preserve immutable, current-identifiable, historically retrievable APU versions across reload.
+- [ ] Restore contract/APU-owned work-package decomposition by building, floor, zone, discipline, system, phase, deliverable, task, or milestone.
+- [ ] Use eligible authoritative BIMLog users and explain exclusions.
+- [ ] Scope assignments and hours to the correct project, engagement, contract, APU, Contract Item, and work package as applicable.
+- [ ] Separate internal cost, customer rate, APU calculation rate, budgeted hours, actual hours, and incentive/bonus values with provenance.
+- [ ] Preserve redelegation history: original assignee, completed hours, remaining transferred hours, actor, time, and reason.
+- [ ] Generate and associate canonical budget lines/accounts idempotently without parallel financial authority.
+- [ ] Confirm materially authoritative APU/contract/budget edits without obstructing ordinary navigation.
+- [ ] Preserve project, page/stage, and valid intended selections across refresh and return without cross-project leakage.
+- [ ] Restore truthful Setup readiness, Optional items remaining, Work progress, and Financial progress.
+- [ ] Provide complete contextual help, bilingual desktop/narrow behavior, keyboard access, and responsive layout.
+- [ ] Prove save, reload, edit, activation replay, stale revision refusal, authorization, and cross-project isolation.
+- [ ] Prove one combined scenario with multiple companies, multiple engagements/customers, multiple contracts, multiple APUs, multiple work packages, multiple resources, and the separate pay/rate layers.
+- [ ] Re-run and pass all 20 rows of `BIMLog_Smoke_Test_Project_Intake_APUs (2).xlsx` with retained evidence.
+- [ ] Run relevant API, frontend, database-safety, Generic APU, Job Intake, Operations, budget, contract, team, help, typecheck, build, mojibake, and Living Brief gates.
+- [ ] Freeze one coherent release candidate only after independent review; keep push, publication, deployment, production mutation, and customer acceptance separate.
+
+## Micro-build allocation
+
+Use Builds 1–12 for the original master sequence: discovery/reconciliation; simplification; clarity; client/contact; contract structure; Contract Item/APU linkage; rate authority; team/assignments; APU history; budget association; sensitive confirmation and navigation; integrated acceptance. Use Builds 13–40 only for isolated requirements above that cannot be completed safely inside those builds or for defects proven by integrated testing. Never consume a build merely to advance a number.
