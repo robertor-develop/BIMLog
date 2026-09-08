@@ -117,6 +117,7 @@ async function validateRelationshipAuthority(data: JobIntakeData, projectId: num
     `SELECT id,company_id "companyId" FROM project_directory WHERE project_id=$1`,
     [projectId],
   )).rows;
+  const activeMemberIds = new Set<number>((await client.query(`SELECT user_id "userId" FROM project_members WHERE project_id=$1 AND status='active'`, [projectId])).rows.map((row: any) => Number(row.userId)));
   const companyIds = new Set<number>(rows.map((row: any) => Number(row.companyId)).filter((id: number) => Number.isSafeInteger(id) && id > 0));
   const contacts = new Map<number, any>(rows.map((row: any) => [Number(row.id), row]));
   const companyId = data.identity.clientCompanyId;
@@ -142,6 +143,12 @@ async function validateRelationshipAuthority(data: JobIntakeData, projectId: num
         throw new FinancialControlError(400, "JOB_INTAKE_ENGAGEMENT_CONTACT_OUT_OF_SCOPE", "Each engagement contact must belong to its selected current-project company.");
     }
   }
+  for (const assignment of data.team.assignments) {
+    if (assignment.userId && !activeMemberIds.has(assignment.userId))
+      throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_USER_INELIGIBLE", "Assigned resources must be active authoritative users in the current project.");
+  }
+  if (data.team.projectLeaderUserId && !activeMemberIds.has(data.team.projectLeaderUserId))
+    throw new FinancialControlError(400, "JOB_INTAKE_LEADER_INELIGIBLE", "The project leader must be an active authoritative user in the current project.");
 }
 
 async function activationDetails(intakeId: string, client: Queryable = pool) {
@@ -205,11 +212,12 @@ async function hydrate(
   const data = normalizeJobIntakeData(row.data);
   const capabilities = await capabilitiesFor(actorUserId);
   const completion = jobIntakeCompletion(data, docs, capabilities);
-  const [members, events, activation] = await Promise.all([
+  const [members, memberEligibility, events, activation] = await Promise.all([
     pool.query(
       `SELECT u.id,u.full_name "fullName",u.email,pm.role FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 AND pm.status='active' ORDER BY u.full_name,u.email`,
       [access.projectId],
     ),
+    pool.query(`SELECT u.id,u.full_name "fullName",u.email,pm.role,pm.status,(CASE WHEN pm.status='active' THEN NULL ELSE 'membership_not_active' END) "exclusionReason" FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 ORDER BY (pm.status='active') DESC,u.full_name,u.email`, [access.projectId]),
     pool.query(
       `SELECT event_type "eventType",before_revision "beforeRevision",after_revision "afterRevision",evidence,created_at "createdAt" FROM job_intake_events WHERE intake_id=$1 ORDER BY created_at DESC,id DESC LIMIT 30`,
       [row.id],
@@ -230,6 +238,7 @@ async function hydrate(
     capabilities,
     documents: docs,
     members: members.rows,
+    assignmentEligibility: { eligible: memberEligibility.rows.filter((member: any) => member.status === "active"), excluded: memberEligibility.rows.filter((member: any) => member.status !== "active") },
     events: events.rows,
     activation,
     activationMode: row.activation_mode ?? null,

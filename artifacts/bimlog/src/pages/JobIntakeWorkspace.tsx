@@ -2082,6 +2082,7 @@ export function JobIntakeWorkspace() {
                     ))}
                   </select>
                 </label>
+                {(intake.assignmentEligibility?.excluded?.length ?? 0) > 0 && <div className="ji-missing"><strong>{tt("Not eligible for assignment", "No elegibles para asignación")}</strong>{intake.assignmentEligibility.excluded.map((member:any)=><div key={member.id}>{member.fullName || member.email} — {tt("project membership is not active", "la membresía del proyecto no está activa")}</div>)}</div>}
                 {data.team.assignments.map((assignment: any, index: number) => (
                   <div className="ji-row" key={assignment.id}>
                     <div className="ji-grid three">

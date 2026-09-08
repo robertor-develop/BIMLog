@@ -394,6 +394,10 @@ assert.match(service, /JOB_INTAKE_CLIENT_COMPANY_OUT_OF_SCOPE/);
 assert.match(service, /JOB_INTAKE_PRIMARY_CONTACT_OUT_OF_SCOPE/);
 assert.match(service, /JOB_INTAKE_PARTICIPANT_OUT_OF_SCOPE/);
 assert.match(service, /JOB_INTAKE_ENGAGEMENT_CONTACT_OUT_OF_SCOPE/);
+assert.match(service, /JOB_INTAKE_ASSIGNMENT_USER_INELIGIBLE/);
+assert.match(service, /JOB_INTAKE_LEADER_INELIGIBLE/);
+assert.match(service, /assignmentEligibility/);
+assert.match(ui, /Not eligible for assignment/);
 assert.match(service, /parentContractProfileId: contract\.parentContractId/);
 assert.match(service, /clientCompanyId: data\.identity\.clientCompanyId/);
 assert.match(operationsService, /reportingContracts/);
@@ -450,6 +454,7 @@ console.log(
       "multiple-apus-per-agreement",
       "immutable-apu-pricing-history",
       "contract-apu-owned-work-package-decomposition",
+      "eligible-project-users-with-exclusion-reasons",
     ],
   }),
 );
