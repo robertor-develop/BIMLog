@@ -125,6 +125,7 @@ namespace BIMLogLensNext.Tests
                 Run("xml_camera_scale_maps_orthographic_semantics", XmlCameraScaleMapsOrthographicSemantics);
                 Run("xml_camera_scale_matches_build18_orthographic_cases", XmlCameraScaleMatchesBuild18OrthographicCases);
                 Run("xml_camera_scale_rejects_missing_invalid_and_impossible_geometry", XmlCameraScaleRejectsMissingInvalidAndImpossibleGeometry);
+                Run("xml_export_preserves_authoritative_camera_when_scale_tuple_is_absent", XmlExportPreservesAuthoritativeCameraWhenScaleTupleIsAbsent);
                 Run("xml_camera_scale_is_deterministic_and_non_mutating", XmlCameraScaleIsDeterministicAndNonMutating);
                 Run("xml_camera_scale_emits_only_proven_fields", XmlCameraScaleEmitsOnlyProvenFields);
                 Run("xml_sectioning_maps_enabled_single_plane", XmlSectioningMapsEnabledSinglePlane);
@@ -1134,6 +1135,32 @@ namespace BIMLogLensNext.Tests
                 True(before.SequenceEqual(new[] { input.PackageCamera.FocalDistance.Value, input.PackageCamera.HorizontalExtentAtFocalDistance.Value, input.PackageCamera.VerticalExtentAtFocalDistance.Value }));
                 Equal("Feet", input.PackageCamera.SourceLinearUnit);
                 Equal("Perspective", input.PackageCamera.Projection);
+            }
+            finally { try { Directory.Delete(directory, true); } catch { } }
+        }
+
+        private static void XmlExportPreservesAuthoritativeCameraWhenScaleTupleIsAbsent()
+        {
+            var input = ExportInput(703, 1, null);
+            input.DisplayId = "FI-002";
+            input.PackageCamera.FocalDistance = null;
+            input.PackageCamera.HorizontalExtentAtFocalDistance = null;
+            input.PackageCamera.VerticalExtentAtFocalDistance = null;
+            var directory = Path.Combine(Path.GetTempPath(), "bimlog-lens-next-build39-missing-scale-" + Guid.NewGuid().ToString("N"));
+            Directory.CreateDirectory(directory);
+            try
+            {
+                var path = Path.Combine(directory, "missing-scale.xml");
+                var result = LensNextXmlDocumentShellWriter.Write(path, 26, new[] { input });
+                Equal(1, result.RequestedCount); Equal(1, result.SerializedCount); Equal(0, result.SkippedCount);
+                var document = new XmlDocument { XmlResolver = null }; document.Load(path);
+                var viewpoint = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint");
+                var camera = (XmlElement)viewpoint.SelectSingleNode("camera");
+                False(viewpoint.HasAttribute("focal")); False(viewpoint.HasAttribute("fov"));
+                Equal(1, camera.Attributes.Count); Equal("persp", camera.GetAttribute("projection"));
+                False(camera.HasAttribute("aspect")); False(camera.HasAttribute("height"));
+                True(camera.SelectSingleNode("position/pos3f") != null);
+                True(camera.SelectSingleNode("rotation/quaternion") != null);
             }
             finally { try { Directory.Delete(directory, true); } catch { } }
         }

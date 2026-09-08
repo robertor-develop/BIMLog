@@ -213,7 +213,7 @@ namespace BIMLogLensNext
             LensNextXmlRotation.FromValidatedCamera(record.PackageCamera);
             LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera);
             LensNextXmlProjection.FromValidatedCamera(record.PackageCamera);
-            LensNextXmlCameraScale.FromValidatedCamera(record.PackageCamera);
+            LensNextXmlCameraScale.FromOptionalValidatedCamera(record.PackageCamera);
             LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson);
         }
 
@@ -224,7 +224,7 @@ namespace BIMLogLensNext
             if (Fails(() => LensNextXmlRotation.FromValidatedCamera(record.PackageCamera))) return "invalid_rotation";
             if (Fails(() => LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera))) return "invalid_up_vector";
             if (Fails(() => LensNextXmlProjection.FromValidatedCamera(record.PackageCamera))) return "invalid_projection";
-            if (Fails(() => LensNextXmlCameraScale.FromValidatedCamera(record.PackageCamera))) return "invalid_scale";
+            if (Fails(() => LensNextXmlCameraScale.FromOptionalValidatedCamera(record.PackageCamera))) return "invalid_scale";
             if (Fails(() => LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson))) return "invalid_sectioning";
             throw new InvalidOperationException("The rejected BIMLog XML export record has no reproducible diagnostic category.");
         }

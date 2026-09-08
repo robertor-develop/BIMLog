@@ -49,7 +49,7 @@ namespace BIMLogLensNext
                     LensNextXmlRotation.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlUpVector.FromOptionalValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlProjection.FromValidatedCamera(ordered[index].PackageCamera),
-                    LensNextXmlCameraScale.FromValidatedCamera(ordered[index].PackageCamera),
+                    LensNextXmlCameraScale.FromOptionalValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlSectioning.FromOptionalJson(ordered[index].PackageSectioningJson));
             WriteDocument(destinationPath, views);
             var outputPath = Path.GetFullPath(destinationPath);
@@ -162,13 +162,19 @@ namespace BIMLogLensNext
                         writer.WriteAttributeString("name", view.Name);
                         writer.WriteAttributeString("guid", view.Guid.ToString("D"));
                         writer.WriteStartElement("viewpoint");
-                        writer.WriteAttributeString("focal", view.CameraScale.FocalInvariant);
-                        if (view.CameraScale.EmitFieldOfViewAttribute)
-                            writer.WriteAttributeString("fov", view.CameraScale.FieldOfViewInvariant);
+                        if (view.CameraScale != null)
+                        {
+                            writer.WriteAttributeString("focal", view.CameraScale.FocalInvariant);
+                            if (view.CameraScale.EmitFieldOfViewAttribute)
+                                writer.WriteAttributeString("fov", view.CameraScale.FieldOfViewInvariant);
+                        }
                         writer.WriteStartElement("camera");
                         writer.WriteAttributeString("projection", view.Projection.Token);
-                        writer.WriteAttributeString("aspect", view.CameraScale.AspectInvariant);
-                        writer.WriteAttributeString("height", view.CameraScale.HeightInvariant);
+                        if (view.CameraScale != null)
+                        {
+                            writer.WriteAttributeString("aspect", view.CameraScale.AspectInvariant);
+                            writer.WriteAttributeString("height", view.CameraScale.HeightInvariant);
+                        }
                         writer.WriteStartElement("position");
                         writer.WriteStartElement("pos3f");
                         writer.WriteAttributeString("x", view.Position.XInvariant);

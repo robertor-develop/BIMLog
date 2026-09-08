@@ -48,6 +48,17 @@ namespace BIMLogLensNext
                 fieldOfView >= NavisworksFovAttributeMinimum);
         }
 
+        public static LensNextXmlCameraScale FromOptionalValidatedCamera(LensNextCameraState camera)
+        {
+            if (camera == null)
+                throw new InvalidDataException("The BIMLog camera required for XML scale is missing.");
+            if (!camera.FocalDistance.HasValue &&
+                !camera.HorizontalExtentAtFocalDistance.HasValue &&
+                !camera.VerticalExtentAtFocalDistance.HasValue)
+                return null;
+            return FromValidatedCamera(camera);
+        }
+
         private static double Positive(double? value, string field)
         {
             if (!value.HasValue || !FinitePositive(value.Value))
