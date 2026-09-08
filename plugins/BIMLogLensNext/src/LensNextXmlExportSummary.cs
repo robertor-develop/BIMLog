@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace BIMLogLensNext
@@ -67,6 +68,13 @@ namespace BIMLogLensNext
         {
             if (exception == null) throw new ArgumentNullException(nameof(exception));
             return exception.Data[SummaryDataKey] as LensNextXmlExportSummary;
+        }
+
+        public static IReadOnlyList<LensNextXmlExportDiagnostic> DiagnosticsFor(Exception exception)
+        {
+            if (exception == null) throw new ArgumentNullException(nameof(exception));
+            return exception.Data[LensNextXmlExportInputSelector.DiagnosticsDataKey] as IReadOnlyList<LensNextXmlExportDiagnostic>
+                ?? Array.Empty<LensNextXmlExportDiagnostic>();
         }
     }
 }

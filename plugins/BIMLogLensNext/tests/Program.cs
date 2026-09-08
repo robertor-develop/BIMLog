@@ -1508,6 +1508,12 @@ namespace BIMLogLensNext.Tests
                 Equal("FAIL", summary.ExportResult); Equal("FAIL", summary.ValidationResult);
                 Equal(2, summary.RequestedCount.Value); Equal(0, summary.SerializedCount.Value); Equal(2, summary.SkippedCount.Value);
                 Equal(Path.GetFullPath(path), summary.OutputPath); False(summary.OutputWritten); False(File.Exists(path));
+                var diagnostics = LensNextXmlExportFailure.DiagnosticsFor(exception);
+                Equal(2, diagnostics.Count);
+                Equal("missing_camera", diagnostics[0].ReasonCode);
+                Equal("invalid_rotation", diagnostics[1].ReasonCode);
+                True(exception.Message.Contains("ServerId=271"));
+                True(exception.Message.Contains("ReasonCode=invalid_rotation"));
             }
         }
 

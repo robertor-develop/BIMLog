@@ -61,7 +61,7 @@ namespace BIMLogLensNext.Native
                     return new LensNextXmlExportOperationResult
                     {
                         Summary = LensNextXmlExportFailure.SummaryFor(exception),
-                        Diagnostics = Array.Empty<LensNextXmlExportDiagnostic>()
+                        Diagnostics = LensNextXmlExportFailure.DiagnosticsFor(exception)
                     };
                 }
             }

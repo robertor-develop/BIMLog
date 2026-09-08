@@ -1,0 +1,11 @@
+RUBEN — ONE XML EXPORT RETEST
+
+1. Close Navisworks Manage 2025.
+2. Install BIMLog-Lens-Next-Navisworks2025-v1.05.N13-P09.zip.
+3. Open Navisworks Manage 2025 and the same model/project used for the failed export.
+4. Open Lens Next and confirm v1.05.N13-P09 is visible.
+5. Click Export Viewpoints XML once and choose a destination.
+6. If export fails, stop immediately and take a screenshot of the complete error. The error now lists every skipped viewpoint ID and its exact ReasonCode/ReasonDetail.
+7. Double-click RUN-BIMLog-Failure-Collector.bat and send Roberto the generated ZIP plus the screenshot.
+
+Do not change or recreate the eight viewpoints before this retest.

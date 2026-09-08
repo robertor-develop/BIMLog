@@ -117,6 +117,7 @@ namespace BIMLogLensNext
 
     public static class LensNextXmlExportInputSelector
     {
+        internal const string DiagnosticsDataKey = "BIMLog.XmlExportDiagnostics";
         public static IReadOnlyList<LensNextXmlExportInput> SelectOrdered(
             int authoritativeProjectId,
             IEnumerable<LensNextXmlExportInput> records)
@@ -174,10 +175,17 @@ namespace BIMLogLensNext
             }
             if (exportable.Count == 0)
             {
+                var detail = string.Join(" | ", diagnostics.Select(value =>
+                    "ServerId=" + value.ServerId +
+                    ", DisplayId=" + (value.DisplayId ?? "<none>") +
+                    ", ViewpointId=" + (value.ViewpointId ?? "<none>") +
+                    ", ReasonCode=" + value.ReasonCode +
+                    ", ReasonDetail=" + (value.ReasonDetail ?? "<none>")));
                 var exception = new InvalidDataException("The BIMLog XML export contains zero exportable active viewpoints (requested " +
-                    active.Count + ", skipped " + skipped.Count + ").");
+                    active.Count + ", skipped " + skipped.Count + "). " + detail);
                 exception.Data["BIMLog.RequestedCount"] = active.Count;
                 exception.Data["BIMLog.SkippedCount"] = skipped.Count;
+                exception.Data[DiagnosticsDataKey] = diagnostics.ToArray();
                 throw exception;
             }
             return new LensNextXmlExportResult(active.Count, exportable.ToArray(), skipped.ToArray(), diagnostics.ToArray());
