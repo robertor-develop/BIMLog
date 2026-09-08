@@ -354,7 +354,11 @@ export function normalizeJobIntakeData(raw: unknown) {
         String(contract.reportingStatus),
       )
         ? String(contract.reportingStatus)
-        : "work_in_progress",
+          : "work_in_progress",
+      lifecycleStatus: ["draft", "executed", "superseded", "terminated", "completed"].includes(String(contract.lifecycleStatus))
+        ? String(contract.lifecycleStatus)
+        : "draft",
+      parentContractId: optionalText(contract.parentContractId, `commercial.contracts[${index}].parentContractId`, 100),
       paymentTerms: optionalText(
         contract.paymentTerms,
         `commercial.contracts[${index}].paymentTerms`,
@@ -374,6 +378,10 @@ export function normalizeJobIntakeData(raw: unknown) {
   });
   const contractLegalKeys = new Set<string>();
   for (const contract of normalizedContracts) {
+    if (contract.parentContractId && (!contractIds.has(contract.parentContractId) || contract.parentContractId === contract.id))
+      throw new FinancialControlError(400, "JOB_INTAKE_CONTRACT_PARENT_INVALID", "A parent agreement must reference a different agreement in this Intake.");
+    if (contract.reportingType === "change_order" && !contract.parentContractId)
+      throw new FinancialControlError(400, "JOB_INTAKE_CHANGE_ORDER_PARENT_REQUIRED", "Every change order must identify its parent base agreement.");
     if (!contract.contractNumber) continue;
     const legalKey = `${contract.perspective}:${contract.contractNumber.toLowerCase()}`;
     if (contractLegalKeys.has(legalKey))

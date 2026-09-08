@@ -1738,6 +1738,12 @@ export function JobIntakeWorkspace() {
                         </select>
                       </label>
                       <label>
+                        {tt("Agreement lifecycle", "Ciclo de vida del acuerdo")}
+                        <select value={data.commercial.contracts?.[0]?.lifecycleStatus || "draft"} onChange={(e) => changeContract(0, "lifecycleStatus", e.target.value)}>
+                          <option value="draft">{tt("Draft", "Borrador")}</option><option value="executed">{tt("Executed", "Ejecutado")}</option><option value="superseded">{tt("Superseded", "Reemplazado")}</option><option value="terminated">{tt("Terminated", "Terminado")}</option><option value="completed">{tt("Completed", "Completado")}</option>
+                        </select>
+                      </label>
+                      <label>
                         {tt("Perspective", "Perspectiva")}
                         <select
                           value={data.commercial.perspective}
@@ -1878,6 +1884,19 @@ export function JobIntakeWorkspace() {
                                 >
                                   <option value="work_in_progress">{tt("Work in progress", "En progreso")}</option>
                                   <option value="closed">{tt("Closed", "Cerrado")}</option>
+                                </select>
+                              </label>
+                              <label>
+                                {tt("Agreement lifecycle", "Ciclo de vida del acuerdo")}
+                                <select value={contract.lifecycleStatus || "draft"} onChange={(event) => changeContract(index, "lifecycleStatus", event.target.value)}>
+                                  <option value="draft">{tt("Draft", "Borrador")}</option><option value="executed">{tt("Executed", "Ejecutado")}</option><option value="superseded">{tt("Superseded", "Reemplazado")}</option><option value="terminated">{tt("Terminated", "Terminado")}</option><option value="completed">{tt("Completed", "Completado")}</option>
+                                </select>
+                              </label>
+                              <label>
+                                {tt("Parent agreement", "Acuerdo principal")}
+                                <select value={contract.parentContractId || ""} onChange={(event) => changeContract(index, "parentContractId", event.target.value)}>
+                                  <option value="">{tt("No parent", "Sin principal")}</option>
+                                  {(data.commercial.contracts || []).filter((candidate:any)=>candidate.id!==contract.id).map((candidate:any)=><option key={candidate.id} value={candidate.id}>{candidate.title || candidate.contractNumber || candidate.id}</option>)}
                                 </select>
                               </label>
                               <label>
