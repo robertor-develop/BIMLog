@@ -196,6 +196,7 @@ const css = `
 .ji-quick{background:#fff;border:1px solid #d9e1ec;border-radius:16px;padding:22px}.ji-quick-head{display:flex;justify-content:space-between;gap:20px;align-items:flex-start}.ji-quick-head h2{margin:5px 0}.ji-quick-head button,.ji-quick-question button,.ji-quick-nav button{display:inline-flex;gap:7px;align-items:center}.ji-quick-kicker{color:#1d4ed8;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.06em}.ji-quick-steps{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin:22px 0}.ji-quick-steps button{display:flex;align-items:center;gap:8px;text-align:left}.ji-quick-steps button span{display:grid;place-items:center;width:23px;height:23px;border-radius:99px;background:#e2e8f0}.ji-quick-steps button.on{border-color:#2563eb;background:#eff6ff;color:#1d4ed8;font-weight:800}.ji-quick-steps button.done span{background:#dcfce7;color:#166534}.ji-quick-question{min-height:260px;border:1px solid #e2e8f0;border-radius:12px;padding:20px}.ji-quick-question h3{margin-top:0}.ji-quick-summary{display:grid;gap:9px;margin:14px 0}.ji-quick-summary div{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:10px;background:#f8fafc;border-radius:8px}.ji-quick-summary span{color:#64748b}.ji-quick-nav{display:flex;justify-content:space-between;align-items:center;margin-top:16px}.ji-advanced-return{margin-bottom:12px}.ji-advanced-return button{display:inline-flex;gap:7px;align-items:center}@media(max-width:700px){.ji-quick-head{display:block}.ji-quick-head>button{margin-top:10px}.ji-quick-steps{grid-template-columns:1fr}.ji-quick-question{min-height:0}.ji-quick-summary div{grid-template-columns:1fr}.ji-quick-nav span{display:none}}
 .ji-field-legend{display:flex;gap:14px;flex-wrap:wrap;margin:0 0 12px;padding:10px 12px;border:1px solid #d9e1ec;border-radius:10px;background:#f8fafc;font-size:12px}.ji-field-legend strong{color:#9f1239}.ji-nav-status{font-size:9px;font-weight:800;text-transform:uppercase;letter-spacing:.03em}.ji-nav-status.complete{color:#15803d}.ji-nav-status.required{color:#b45309}.ji-nav-status.optional{color:#64748b}
 .ji-company-map{margin-top:16px;padding:16px;border:1px solid #bfdbfe;border-radius:12px;background:#f8fbff}.ji-company-map h3{display:flex;gap:7px;align-items:center}.ji-company-row{display:grid;grid-template-columns:1fr 220px auto;gap:8px;align-items:center;margin:8px 0;padding:8px;background:white;border-radius:8px}@media(max-width:700px){.ji-company-row{grid-template-columns:1fr}}
+.ji-readiness{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin:0 0 18px}.ji-readiness-card{background:#fff;border:1px solid #d9e1ec;border-radius:12px;padding:14px;min-width:0}.ji-readiness-card h2{font-size:12px;margin:0 0 7px;color:#475569}.ji-readiness-card strong{font-size:20px;color:#0f172a}.ji-readiness-card p{font-size:11px;margin:6px 0 0}.ji-readiness-help{grid-column:1/-1;background:#eff6ff;border-left:4px solid #2563eb;padding:10px 12px;color:#334155;font-size:12px}.ji button:focus-visible,.ji a:focus-visible,.ji input:focus-visible,.ji select:focus-visible,.ji textarea:focus-visible{outline:3px solid #93c5fd;outline-offset:2px}@media(max-width:900px){.ji-readiness{grid-template-columns:repeat(2,minmax(0,1fr))}}@media(max-width:560px){.ji{padding-top:12px}.ji-readiness{grid-template-columns:1fr}.ji-footer{position:static;align-items:flex-start;flex-direction:column}.ji-footer button{width:100%}}
 `;
 
 export function JobIntakeWorkspace() {
@@ -779,6 +780,13 @@ export function JobIntakeWorkspace() {
     missing: [],
     totals: {},
   };
+  const readiness = completion.readinessSummary ?? {
+    setup: { percent: completion.percent ?? 0, ready: false, missingRequiredCount: completion.missingItems?.length ?? 0 },
+    optionalItems: [],
+    optionalItemsRemaining: 0,
+    work: { assignmentCoveragePercent: 0, plannedHours: "0", assignedHours: "0", activated: false },
+    financial: { applicable: false, setupPercent: null },
+  };
   const capabilities = intake.capabilities ?? {
     package: false,
     budget: false,
@@ -989,7 +997,7 @@ export function JobIntakeWorkspace() {
           </div>
           <div className="ji-progress">
             <strong>{completion.percent}%</strong> {tt("complete", "completo")}
-            <div className="ji-bar">
+            <div className="ji-bar" role="progressbar" aria-label={tt("Setup readiness", "Preparación de la configuración")} aria-valuemin={0} aria-valuemax={100} aria-valuenow={completion.percent}>
               <span style={{ width: `${completion.percent}%` }} />
             </div>
             <div className="ji-small">
@@ -997,6 +1005,29 @@ export function JobIntakeWorkspace() {
             </div>
           </div>
         </div>
+        <section className="ji-readiness" aria-label={tt("Job readiness overview", "Resumen de preparación del trabajo")}>
+          <div className="ji-readiness-card">
+            <h2>{tt("Setup readiness", "Preparación de configuración")}</h2>
+            <strong>{readiness.setup.percent}%</strong>
+            <p>{readiness.setup.ready ? tt("Ready to activate", "Listo para activar") : tt(`${readiness.setup.missingRequiredCount} required item(s) remaining`, `${readiness.setup.missingRequiredCount} elemento(s) obligatorio(s) pendiente(s)`)}</p>
+          </div>
+          <div className="ji-readiness-card">
+            <h2>{tt("Optional items remaining", "Elementos opcionales pendientes")}</h2>
+            <strong>{readiness.optionalItemsRemaining}</strong>
+            <p>{readiness.optionalItemsRemaining ? readiness.optionalItems.map((item: any) => tt(item.en, item.es)).join(" · ") : tt("No optional setup gaps", "No faltan datos opcionales")}</p>
+          </div>
+          <div className="ji-readiness-card">
+            <h2>{tt("Work progress", "Progreso del trabajo")}</h2>
+            <strong>{readiness.work.assignmentCoveragePercent}%</strong>
+            <p>{tt(`${readiness.work.assignedHours} of ${readiness.work.plannedHours} planned hours assigned`, `${readiness.work.assignedHours} de ${readiness.work.plannedHours} horas planificadas asignadas`)}</p>
+          </div>
+          <div className="ji-readiness-card">
+            <h2>{tt("Financial progress", "Progreso financiero")}</h2>
+            <strong>{readiness.financial.applicable ? `${readiness.financial.setupPercent}%` : tt("Not enabled", "No habilitado")}</strong>
+            <p>{readiness.financial.applicable ? tt("APU, rate, and budget setup coverage", "Cobertura de APU, tarifas y presupuesto") : tt("Commercial financial setup is optional for this project", "La configuración financiera comercial es opcional para este proyecto")}</p>
+          </div>
+          {guide && <div className="ji-readiness-help">{tt("These figures describe Intake configuration only. Work progress measures assigned planned hours, not completed field work. Financial progress measures configured APU, rate, and budget references, not earned or paid value.", "Estas cifras describen solamente la configuración de Ingreso. El progreso del trabajo mide horas planificadas asignadas, no trabajo de campo terminado. El progreso financiero mide referencias configuradas de APU, tarifas y presupuesto, no valor ganado ni pagado.")}</div>}
+        </section>
         {error && (
           <div className="ji-error" role="alert">
             {error}

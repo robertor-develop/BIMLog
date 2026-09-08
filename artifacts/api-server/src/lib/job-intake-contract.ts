@@ -1133,6 +1133,22 @@ export function jobIntakeCompletion(
         ? "ready"
         : "requires_input",
   };
+  const optionalItems = [
+    !activeDocuments.length && { code: "source_document", en: "Source document", es: "Documento fuente" },
+    !data.identity.location && { code: "location", en: "Job location", es: "Ubicación del trabajo" },
+    !data.identity.primaryContactId && !data.identity.primaryContact && { code: "primary_contact", en: "Primary contact", es: "Contacto principal" },
+    (!data.identity.startDate || !data.identity.targetCompletionDate) && { code: "schedule_dates", en: "Start and target completion dates", es: "Fechas de inicio y terminación prevista" },
+    !data.delivery.milestoneSummary && { code: "milestones", en: "Milestone summary", es: "Resumen de hitos" },
+    capabilities.contracts && data.commercial.contracts.some((contract: any) => !contract.paymentTerms) && { code: "payment_terms", en: "Contract payment terms", es: "Condiciones de pago contractuales" },
+  ].filter(Boolean) as Array<{ code: string; en: string; es: string }>;
+  const assignmentCoveragePercent = plannedHours > 0n
+    ? Math.min(100, Number((assignedHours * 10000n) / plannedHours) / 100)
+    : 0;
+  const financialChecks = data.scopeItems.flatMap((item) => [
+    ...(!capabilities.costValuePlanner ? [] : [positive(item.billingHourlyRate), item.apuPlanVersion != null]),
+    ...(!capabilities.budget ? [] : [!!item.budgetSnapshotLineId, !!item.projectCostNodeId]),
+  ]);
+  const financialSetupPercent = financialChecks.length ? Math.round(ratio(financialChecks) * 100) : null;
   return {
     percent,
     stages,
@@ -1142,6 +1158,20 @@ export function jobIntakeCompletion(
     totals,
     capabilities,
     overlayReadiness,
+    readinessSummary: {
+      setup: { percent, ready: percent === 100 && missing.length === 0, missingRequiredCount: missingItems.length },
+      optionalItems,
+      optionalItemsRemaining: optionalItems.length,
+      work: {
+        assignmentCoveragePercent,
+        plannedHours: decimalFromScaled(plannedHours),
+        assignedHours: decimalFromScaled(assignedHours),
+      },
+      financial: {
+        applicable: financialSetupPercent != null,
+        setupPercent: financialSetupPercent,
+      },
+    },
     coreFingerprint: jobIntakeCoreFingerprint(data),
     fingerprint: crypto
       .createHash("sha256")
