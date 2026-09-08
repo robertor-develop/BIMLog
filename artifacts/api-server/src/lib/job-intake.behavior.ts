@@ -160,7 +160,7 @@ const multiContractData = normalizeJobIntakeData({
   team: {
     ...data.team,
     assignments: [
-      { ...data.team.assignments[0], id: "OWNER-A", scopeItemId: "OWNER-ITEM", workPackageId: "WP-OWNER" },
+      { ...data.team.assignments[0], id: "OWNER-A", scopeItemId: "OWNER-ITEM", workPackageId: "WP-OWNER", incentiveAmount: "125" },
       {
         ...data.team.assignments[0],
         id: "SUPPLIER-A",
@@ -179,6 +179,12 @@ assert.equal(multiContractData.scopeItems[0].responsibleParticipantId, "PROVIDER
 assert.equal(multiContractData.team.assignments[0].workPackageId, "WP-OWNER");
 assert.equal(multiContractData.team.assignments[0].apuPlanVersion, 3);
 assert.equal(multiContractData.team.assignments[0].engagementId, "ENGAGEMENT-1");
+assert.equal(multiContractData.team.assignments[0].internalHourlyRate, "21.25");
+assert.equal(multiContractData.team.assignments[0].customerHourlyRate, "30.73");
+assert.equal(multiContractData.team.assignments[0].apuCalculationRate, "30.73");
+assert.equal(multiContractData.team.assignments[0].budgetedHours, "180");
+assert.equal(multiContractData.team.assignments[0].incentiveAmount, "125");
+assert.equal(multiContractData.team.assignments[0].rateProvenance.apu, "apu_version:3");
 assert.throws(() => normalizeJobIntakeData({ commercial: { contracts: [{ id: "CO-1", reportingType: "change_order" }] } }), /parent base agreement/);
 assert.deepEqual(
   multiContractData.scopeItems.map((item) => item.contractId),
@@ -461,6 +467,7 @@ console.log(
       "contract-apu-owned-work-package-decomposition",
       "eligible-project-users-with-exclusion-reasons",
       "assignment-full-authority-scope-chain",
+      "separate-rate-hours-incentive-layers",
     ],
   }),
 );

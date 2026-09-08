@@ -2240,6 +2240,8 @@ export function JobIntakeWorkspace() {
                               }
                             />
                           </label>
+                          <label>{tt("Incentive / bonus allocation", "Asignación de incentivo / bono")}<input type="number" min="0" step="0.01" value={assignment.incentiveAmount || "0"} onChange={(e)=>assignmentChange(index,"incentiveAmount",e.target.value)}/></label>
+                          <div className="ji-lock">{tt("Separate rate layers", "Capas de tarifa separadas")}: {tt("Internal", "Interna")} {assignment.internalHourlyRate || "0"} · {tt("Customer", "Cliente")} {data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.billingHourlyRate || "0"} · APU v{data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.apuPlanVersion || "—"} · {tt("Budgeted hours", "Horas presupuestadas")} {assignment.plannedHours || "0"}</div>
                           <label>
                             {tt(
                               "Planned labor cost",

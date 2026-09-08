@@ -554,6 +554,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         assignment.internalHourlyRate,
         `assignments[${index}].internalHourlyRate`,
       );
+      const incentiveAmount = exact(assignment.incentiveAmount, `assignments[${index}].incentiveAmount`);
       const scopeItemId = optionalText(
         assignment.scopeItemId,
         `assignments[${index}].scopeItemId`,
@@ -611,6 +612,11 @@ export function normalizeJobIntakeData(raw: unknown) {
         engagementId: "",
         plannedHours,
         internalHourlyRate,
+        customerHourlyRate: selectedScopeItem?.billingHourlyRate ?? "0",
+        apuCalculationRate: selectedScopeItem?.billingHourlyRate ?? "0",
+        budgetedHours: plannedHours,
+        incentiveAmount,
+        rateProvenance: { internal: "assignment", customer: "contract_item", apu: selectedScopeItem?.apuPlanVersion ? `apu_version:${selectedScopeItem.apuPlanVersion}` : "unlinked" },
         plannedLaborCost: decimalFromScaled(
           (scaledSignedDecimal(plannedHours) *
             scaledSignedDecimal(internalHourlyRate) +
