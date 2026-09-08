@@ -2230,6 +2230,7 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 
 - [x] Consolidate the accepted Job Intake / Multi-APU Builds 1–20 with the tested Lens Next missing-scale XML correction without losing either lineage.
 - [x] Align the combined visible Platform and Navisworks 2025 package identity to `v1.05.N14-P10` / `1.5.14.10`.
+- [x] Align the version regression expectation and deliver the exact integrity-verified 2025 ZIP through the approved private Telegram boundary.
 - [ ] Push the exact reviewed integration commit, build and publish it once through the governed Replit Shell path, and verify the live version and Intake behavior in Chrome.
 - [ ] Ruben must field-test the exact Navisworks 2025 N14-P10 package, including XML export/import, before promotion is described as customer accepted.
 

@@ -17519,6 +17519,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "386e2d548c938667967b3bb41e1ba2cf93783f7c55cdfce99ddde8079b145942"
+    },
+    {
+      "taskId": "build40-n14-p10-version-test-and-delivery-20260908",
+      "reviewedThroughCommit": "5bbebb8a5bbaaae48ec052c6609894b1caa95a1b",
+      "reviewedAt": "2026-09-08T13:45:00-04:00",
+      "status": "release_test_and_delivery_reconciled",
+      "captureTiming": "same_task_after_version-regression-correction-and-private-delivery",
+      "summary": "Aligns the release-version regression to N14-P10 and records the exact approved private delivery boundary without changing product behavior.",
+      "workstreams": [
+        "job-intake-multi-apu-complete-recovery",
+        "lens-next-xml-missing-scale-compatibility"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Version proof and delivery follow existing release rules."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The stale release expectation was corrected and must pass regression."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-purpose change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural runtime change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The N14-P10 plugin contract was already recorded."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design or artifact contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records version-test alignment and delivery acknowledgement."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the version expectation and private-delivery step."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Git and provider receipts preserve the evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ca5fa264c25f10ea02ab2c3e85829ddead240f8246f7b76b727df8122be5d554"
     }
   ]
 }
