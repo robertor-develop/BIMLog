@@ -93,6 +93,7 @@ namespace BIMLogLensNext.Tests
                 Run("xml_exchange_metadata_is_proven_and_minimal", XmlExchangeMetadataIsProvenAndMinimal);
                 Run("xml_exchange_metadata_output_is_deterministic", XmlExchangeMetadataOutputIsDeterministic);
                 Run("xml_camera_position_maps_raw_coordinates", XmlCameraPositionMapsRawCoordinates);
+                Run("xml_camera_and_section_units_follow_authoritative_source_unit", XmlCameraAndSectionUnitsFollowAuthoritativeSourceUnit);
                 Run("xml_camera_position_round_trips_representative_doubles", XmlCameraPositionRoundTripsRepresentativeDoubles);
                 Run("xml_camera_position_rejects_missing_and_non_finite_values", XmlCameraPositionRejectsMissingAndNonFiniteValues);
                 Run("xml_float_representability_is_enforced_across_emitted_fields", XmlFloatRepresentabilityIsEnforcedAcrossEmittedFields);
@@ -939,7 +940,7 @@ namespace BIMLogLensNext.Tests
                 var document = new XmlDocument { XmlResolver = null }; document.Load(first);
                 var camera = (XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/camera");
                 Equal("ortho", camera.GetAttribute("projection"));
-                Equal((-12.5d / 12d).ToString("R", CultureInfo.InvariantCulture), ((XmlElement)camera.SelectSingleNode("position/pos3f")).GetAttribute("x"));
+                Equal((-12.5d).ToString("R", CultureInfo.InvariantCulture), ((XmlElement)camera.SelectSingleNode("position/pos3f")).GetAttribute("x"));
                 Equal("-0.1", ((XmlElement)camera.SelectSingleNode("rotation/quaternion")).GetAttribute("a"));
                 Equal("-0.25", ((XmlElement)document.SelectSingleNode("/exchange/viewpoints/viewfolder/view/viewpoint/up/vec3f")).GetAttribute("x"));
                 Equal("Feet", input.PackageCamera.SourceLinearUnit);
@@ -1603,6 +1604,7 @@ namespace BIMLogLensNext.Tests
                 PackageRevisionNumber = 1, PackageDigest = digest,
                 PackageCamera = new LensNextCameraState
                 {
+                    SourceLinearUnit = "Inches",
                     Position = new LensNextPointState { X = 1, Y = 2, Z = 3 },
                     Rotation = new LensNextRotationState { A = 0, B = 0, C = 0, D = 1 },
                     Projection = "Perspective",
@@ -1611,6 +1613,34 @@ namespace BIMLogLensNext.Tests
                     VerticalExtentAtFocalDistance = 6d
                 }
             };
+        }
+
+        private static void XmlCameraAndSectionUnitsFollowAuthoritativeSourceUnit()
+        {
+            var tremont = ExportInput(218, 1, null);
+            tremont.PackageCamera.SourceLinearUnit = "Feet";
+            tremont.PackageCamera.Position = new LensNextPointState { X = 110.2660509886d, Y = 124.6755032443d, Z = 221.6405756628d };
+            tremont.PackageCamera.Rotation = new LensNextRotationState { A = 0.0653472718d, B = 0.0584202691d, C = 0.6639231820d, D = 0.7426458205d };
+            tremont.PackageSectioningJson = "{\"Type\":\"ClipPlaneSet\",\"Version\":1,\"Planes\":[{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,0,-1],\"Distance\":-211.7476008975,\"Enabled\":true},{\"Type\":\"ClipPlane\",\"Version\":1,\"Normal\":[0,0,1],\"Distance\":94.3390131942,\"Enabled\":true}],\"Linked\":false,\"Enabled\":true}";
+            var document = WriteAndReadDocument(tremont, "tremont-feet");
+            var position = (XmlElement)document.SelectSingleNode("//camera/position/pos3f");
+            Equal("110.2660509886", position.GetAttribute("x"));
+            Equal("124.6755032443", position.GetAttribute("y"));
+            Equal("221.6405756628", position.GetAttribute("z"));
+            var distances = document.SelectNodes("//clipplane/plane").Cast<XmlElement>().Select(value => value.GetAttribute("distance")).ToArray();
+            Equal("-211.7476008975,94.3390131942", string.Join(",", distances));
+
+            var revere = ExportInput(219, 1, null);
+            revere.PackageCamera.SourceLinearUnit = "Inches";
+            revere.PackageCamera.Position = new LensNextPointState { X = 120d, Y = 24d, Z = -36d };
+            var reverePosition = WriteAndReadPosition(revere);
+            Equal(10d, reverePosition[0]); Equal(2d, reverePosition[1]); Equal(-3d, reverePosition[2]);
+
+            var unresolved = ExportInput(220, 1, null);
+            unresolved.PackageCamera.SourceLinearUnit = null;
+            var result = LensNextXmlExportInputSelector.SelectForExport(26, new[] { unresolved, revere });
+            Equal(1, result.SkippedCount);
+            Equal("legacy_spatial_unit_unresolved", result.Diagnostics.Single(value => value.ServerId == 220).ReasonCode);
         }
 
         private static LensNextXmlExportInput[] Build24IntegratedFixtures()

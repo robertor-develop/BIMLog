@@ -50,7 +50,7 @@ namespace BIMLogLensNext
                     LensNextXmlUpVector.FromOptionalValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlProjection.FromValidatedCamera(ordered[index].PackageCamera),
                     LensNextXmlCameraScale.FromOptionalValidatedCamera(ordered[index].PackageCamera),
-                    LensNextXmlSectioning.FromOptionalJson(ordered[index].PackageSectioningJson));
+                    LensNextXmlSectioning.FromOptionalJson(ordered[index].PackageSectioningJson, LensNextXmlLinearUnit.FromCamera(ordered[index].PackageCamera)));
             WriteDocument(destinationPath, views);
             var outputPath = Path.GetFullPath(destinationPath);
             ValidateWrittenDocument(outputPath, result.SerializedCount);

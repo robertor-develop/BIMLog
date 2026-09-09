@@ -38,6 +38,10 @@ namespace BIMLogLensNext.Native
             if (wire == null || wire.Count == 0)
                 throw new InvalidDataException("At least one authoritative BIMLog viewpoint is required for XML export.");
             var records = wire.Select(ToExportInput).ToArray();
+            var activeDocumentUnit = _document.Units.ToString();
+            foreach (var record in records)
+                if (record.PackageCamera != null && string.IsNullOrWhiteSpace(record.PackageCamera.SourceLinearUnit))
+                    record.PackageCamera.SourceLinearUnit = activeDocumentUnit;
 
             using (var dialog = new SaveFileDialog
             {

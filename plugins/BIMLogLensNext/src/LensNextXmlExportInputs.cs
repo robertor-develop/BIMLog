@@ -216,7 +216,7 @@ namespace BIMLogLensNext
             LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera);
             LensNextXmlProjection.FromValidatedCamera(record.PackageCamera);
             LensNextXmlCameraScale.FromOptionalValidatedCamera(record.PackageCamera);
-            LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson);
+            LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson, LensNextXmlLinearUnit.FromCamera(record.PackageCamera));
         }
 
         private static string DiagnosticReasonCode(LensNextXmlExportInput record)
@@ -226,13 +226,15 @@ namespace BIMLogLensNext
                 !string.Equals(record.PackageLifecycleStatus, record.LifecycleStatus, StringComparison.Ordinal) ||
                 record.PackageRevisionNumber != record.RevisionNumber)
                 return "legacy_identity_mismatch";
+            if (record.PackageCamera != null && Fails(() => LensNextXmlLinearUnit.FromCamera(record.PackageCamera)))
+                return "legacy_spatial_unit_unresolved";
             if (Fails(() => LensNextXmlPosition.FromValidatedCamera(record.PackageCamera)))
                 return record.PackageCamera == null ? "missing_camera" : "invalid_position";
             if (Fails(() => LensNextXmlRotation.FromValidatedCamera(record.PackageCamera))) return "invalid_rotation";
             if (Fails(() => LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera))) return "invalid_up_vector";
             if (Fails(() => LensNextXmlProjection.FromValidatedCamera(record.PackageCamera))) return "invalid_projection";
             if (Fails(() => LensNextXmlCameraScale.FromOptionalValidatedCamera(record.PackageCamera))) return "invalid_scale";
-            if (Fails(() => LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson))) return "invalid_sectioning";
+            if (Fails(() => LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson, LensNextXmlLinearUnit.FromCamera(record.PackageCamera)))) return "invalid_sectioning";
             throw new InvalidOperationException("The rejected BIMLog XML export record has no reproducible diagnostic category.");
         }
 
