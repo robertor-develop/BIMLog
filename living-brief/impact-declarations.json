@@ -17874,6 +17874,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "53de0e1715155def2eb0639a6c967dc230c64cedf30c613a7bfbd3ff2e4eacbc"
+    },
+    {
+      "taskId": "ux-workspace-width-normalization-20260909",
+      "reviewedThroughCommit": "28b3fb3754d0336541dfed7b1a786eb451db0763",
+      "reviewedAt": "2026-09-09T16:45:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Normalizes routed workspace width and collapses abandoned grid columns while preserving all capabilities and deliberate dashboard and Help measures.",
+      "workstreams": [
+        "ux-less-is-more-controlled-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority, identity, persistence, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded local correction and separate publication gate follow the existing workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing responsive, accessibility, regression, and capability-preservation gates remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction improves presentation consistency without changing BIMLog product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, route, service, dependency, database, schema, or runtime structure changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, plugin, package, camera, or XML behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report, document, spreadsheet, or presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the scoped workspace-width candidate and its capability-preserving boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records completed implementation checks and keeps publication and live verification separate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The change introduces no new accepted audit lesson beyond the existing preservation rule."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/index.css",
+        "artifacts/bimlog/src/workspace-width.behavior.mjs",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ec1339cabdfff7a25eb460d4470f9923ae2e22df5dd70e1a6f78b7c3d39db5de"
     }
   ]
 }
