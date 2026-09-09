@@ -13,6 +13,7 @@ const configurationService = read("./coordination-hub-configuration-service.ts")
 const configurationStore = read("./coordination-hub-configuration-postgres-store.ts");
 const sharePointValidator = read("./sharepoint-credential-validator.ts");
 const protectedExecutor = read("./protected-provider-probe-executor.ts");
+const connectorEnvelope = read("./connector-credential-envelope.ts");
 
 assert.match(app, /queueDatabaseStartup\(async \(\) => \{[\s\S]*startEnterpriseIdentityMigration\(\)[\s\S]*waitForEnterpriseIdentityMigration\(\)[\s\S]*ensureConnectorFoundationSchema\(pool\)/);
 assert.match(routesIndex, /coordinationHubRouter/);
@@ -60,4 +61,13 @@ assert.match(protectedExecutor, /response\.body\.cancel\(\)/);
 assert.match(protectedExecutor, /token\.fill\(0\)/);
 assert.match(protectedExecutor, /request\.url !== GRAPH_PROBE_URL/);
 assert.doesNotMatch(protectedExecutor, /console\.(?:log|error|warn)/);
+assert.match(connectorEnvelope, /aes-256-gcm/);
+assert.match(connectorEnvelope, /BIMLOG_CONNECTOR_KEK_V/);
+assert.match(connectorEnvelope, /bimlog\.connector-credential-envelope\.v1/);
+assert.match(connectorEnvelope, /credentialId: context\.credentialId/);
+assert.match(connectorEnvelope, /companyId: context\.companyId/);
+assert.match(connectorEnvelope, /provider: context\.provider/);
+assert.match(connectorEnvelope, /keyVersion: context\.keyVersion/);
+assert.doesNotMatch(connectorEnvelope, /AI_PROVIDER_KEK/);
+assert.doesNotMatch(connectorEnvelope, /console\.(?:log|error|warn)/);
 console.log("coordination hub runtime behavior: PASS");
