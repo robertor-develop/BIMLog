@@ -1,5 +1,18 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Active: UX less-is-more controlled optimization — authorized September 9, 2026
+
+Roberto authorized a 12-build capability-preserving UX stream executed in three four-build release groups. Less is more means reducing simultaneous cognitive load, not removing capability. Business logic, permissions, database/schema, modules, reports, exports, and established workflows remain protected unless a separate defect is proven.
+
+- [x] Build 1: freeze live/source baseline and capability inventory.
+- [x] Build 2: simplify Headquarters hierarchy with an Operational details disclosure.
+- [x] Build 3: clarify global navigation hierarchy while preserving every route.
+- [x] Build 4: focus Job Intake Quick Setup while preserving complete Advanced Setup.
+- [ ] Builds 5–8: project UI, typography, tables, and exact-390 mobile behavior.
+- [ ] Builds 9–12: accessibility, route-splitting/performance, authentic public product proof, and consolidated acceptance.
+
+Release Group A remains a local candidate pending combined production build, real production-component desktop/390 and English/Spanish evidence, independent review, and separate push/publication/deployment authorization.
+
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity release gates - 2026-08-14
