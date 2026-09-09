@@ -346,7 +346,7 @@ export function rebindLegacyNavigationServerIdentity(
     lifecycleStatus: String(field(state, "LifecycleStatus", "lifecycleStatus")),
     revisionNumber: Number(field(state, "RevisionNumber", "revisionNumber")),
   };
-  if (capturedIdentity.serverId !== 1 || capturedIdentity.projectId !== expected.projectId || capturedIdentity.viewpointId !== expected.viewpointId || capturedIdentity.lifecycleStatus !== expected.lifecycleStatus || capturedIdentity.revisionNumber !== expected.revisionNumber)
+  if (!Number.isSafeInteger(capturedIdentity.serverId) || capturedIdentity.serverId <= 0 || capturedIdentity.projectId !== expected.projectId || capturedIdentity.viewpointId !== expected.viewpointId || capturedIdentity.lifecycleStatus !== expected.lifecycleStatus || capturedIdentity.revisionNumber !== expected.revisionNumber)
     throw new LensNextLocalUploadError("navigation_identity_mismatch", "BIMLog navigation identity does not match the issue record.", 409);
   validateNavigationView(state, visualStateDigest, capturedIdentity);
   const rebound = structuredClone(state);
@@ -393,7 +393,17 @@ export function validatePersistedLensNextVisualState(
     && evidence.canonical.length > 0
     && sha256(evidence.canonical) === embedded
     && legacyCanonicalMatchesState(serverTokens, evidence.tokens);
-  if (!/^[a-f0-9]{64}$/.test(supplied) || supplied !== embedded || (recomputed !== embedded && !verifiedLegacyCanonical)) {
+  // Packages captured before digest diagnostics were persisted cannot be
+  // recomputed byte-for-byte: their native canonical floating-point text was
+  // never stored.  For those packages only, the database digest and embedded
+  // digest remain an authoritative tamper-evident pair, while the complete
+  // persisted identity must still match the requested row exactly.  This does
+  // not apply to current/versioned packages and never relaxes identity checks.
+  const verifiedHistoricalUnversioned = isHistoricalUnversionedVisualState(state)
+    && identityMatches
+    && /^[a-f0-9]{64}$/.test(supplied)
+    && supplied === embedded;
+  if (!/^[a-f0-9]{64}$/.test(supplied) || supplied !== embedded || (recomputed !== embedded && !verifiedLegacyCanonical && !verifiedHistoricalUnversioned)) {
     const diagnostics = digestMismatchDiagnostics(state, embedded, recomputed);
     if (/^[a-f0-9]{64}$/.test(supplied) && supplied === embedded && identityMatches && isHistoricalUnversionedVisualState(state)) {
       throw new LensNextLocalUploadError(
