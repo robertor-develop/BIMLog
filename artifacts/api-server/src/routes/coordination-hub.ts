@@ -4,7 +4,7 @@ import { ZodError } from "zod/v4";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { CoordinationConflictError, CoordinationHubService } from "../lib/coordination-hub-service";
 import { postgresCoordinationHubStore } from "../lib/coordination-hub-postgres-store";
-import { CoordinationHubConfigurationService } from "../lib/coordination-hub-configuration-service";
+import { ConnectorValidationUnavailableError, CoordinationHubConfigurationService } from "../lib/coordination-hub-configuration-service";
 import { postgresCoordinationHubConfigurationStore } from "../lib/coordination-hub-configuration-postgres-store";
 
 const router: IRouter = Router();
@@ -31,6 +31,10 @@ function fail(res: Response, error: unknown): void {
     res.status(409).json({ error: error.code, message: error.message });
     return;
   }
+  if (error instanceof ConnectorValidationUnavailableError) {
+    res.status(503).json({ error: error.code });
+    return;
+  }
   const correlationId = randomUUID();
   console.error(JSON.stringify({ event: "coordination_hub_route_failure", correlationId, exception: error instanceof Error ? error.name : "UnknownError" }));
   res.status(500).json({ error: "COORDINATION_OPERATION_FAILED", correlationId });
@@ -51,6 +55,16 @@ router.post("/projects/:projectId/coordination-hub/credentials", authMiddleware,
   try {
     const result = await configurationService.registerCredential(trustedCommand(req));
     res.status(result.result === "created" ? 201 : 200).json(result);
+  } catch (error) { fail(res, error); }
+});
+
+router.post("/projects/:projectId/coordination-hub/credentials/:credentialId/validate", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+  try {
+    const result = await configurationService.validateCredential({
+      ...trustedCommand(req),
+      credentialId: req.params.credentialId,
+    });
+    res.status(result.result === "activated" ? 201 : 200).json(result);
   } catch (error) { fail(res, error); }
 });
 

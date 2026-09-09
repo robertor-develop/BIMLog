@@ -18,11 +18,11 @@ class PostgresConfigurationTransaction implements CoordinationHubConfigurationTr
     if (result.rowCount !== 1) throw new CoordinationConflictError("Project administrator authority is not current");
   }
 
-  async findCredential(id: string): Promise<ConnectorCredentialRecord | null> {
+  async findCredential(companyId: number, id: string): Promise<ConnectorCredentialRecord | null> {
     const result = await this.client.query(
       `SELECT id,company_id AS "companyId",provider,label,state,created_by_id AS "actorUserId",
        secret_ciphertext AS "secretCiphertext",secret_iv AS "secretIv",secret_tag AS "secretTag",wrapped_data_key AS "wrappedDataKey",wrap_iv AS "wrapIv",wrap_tag AS "wrapTag",key_version AS "keyVersion"
-       FROM connector_credentials WHERE id=$1`, [id],
+       FROM connector_credentials WHERE id=$1 AND company_id=$2`, [id, companyId],
     );
     const row = result.rows[0];
     if (!row) return null;
@@ -30,6 +30,38 @@ class PostgresConfigurationTransaction implements CoordinationHubConfigurationTr
       id: String(row.id), companyId: Number(row.companyId), actorUserId: Number(row.actorUserId), provider: row.provider as ConnectorCredentialRecord["provider"], label: String(row.label), state: row.state as ConnectorCredentialRecord["state"],
       envelope: { secretCiphertext: String(row.secretCiphertext), secretIv: String(row.secretIv), secretTag: String(row.secretTag), wrappedDataKey: String(row.wrappedDataKey), wrapIv: String(row.wrapIv), wrapTag: String(row.wrapTag), keyVersion: Number(row.keyVersion) },
     };
+  }
+
+  async finalizeCredentialValidation(input: {
+    scope: CoordinationScope;
+    credential: Pick<ConnectorCredentialRecord, "id" | "companyId" | "provider" | "label"> & { keyVersion: number };
+    valid: boolean;
+    evidenceCode: string;
+  }): Promise<"activated" | "rejected" | "stale"> {
+    const result = await this.client.query(
+      `WITH current_credential AS (
+         SELECT id FROM connector_credentials
+         WHERE id=$1 AND company_id=$2 AND provider=$3 AND label=$4 AND key_version=$5 AND state='pending_validation'
+       ), activated AS (
+         UPDATE connector_credentials SET state='active'
+         WHERE $6::boolean AND id IN (SELECT id FROM current_credential)
+         RETURNING id
+       ), audited AS (
+         INSERT INTO admin_actions_log(admin_user_id,admin_email,action,target_type,target_id,details)
+         SELECT u.id,u.email,
+           CASE WHEN $6::boolean THEN 'coordination_credential_activated' ELSE 'coordination_credential_validation_rejected' END,
+           'connector_credential',$1,
+           jsonb_build_object('provider',$3,'projectId',$7,'keyVersion',$5,'evidenceCode',$8)
+         FROM users u,current_credential c WHERE u.id=$9 AND u.company_id=$2
+         RETURNING target_id
+       )
+       SELECT EXISTS(SELECT 1 FROM current_credential) AS current, EXISTS(SELECT 1 FROM activated) AS activated, EXISTS(SELECT 1 FROM audited) AS audited`,
+      [input.credential.id, input.credential.companyId, input.credential.provider, input.credential.label, input.credential.keyVersion, input.valid, input.scope.projectId, input.evidenceCode, input.scope.actorUserId],
+    );
+    const row = result.rows[0];
+    if (!row || row.current !== true) return "stale";
+    if (row.audited !== true) throw new Error("Credential validation audit could not be persisted");
+    return row.activated === true ? "activated" : "rejected";
   }
 
   async insertPendingCredential(record: ConnectorCredentialRecord): Promise<void> {
