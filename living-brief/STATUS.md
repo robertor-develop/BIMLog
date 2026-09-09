@@ -1221,3 +1221,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - Split workspace grids collapse to one full-width column when a direct sibling is hidden or only one visible child remains. This prevents an inactive panel from leaving an abandoned column and making the active task look artificially cramped.
 - Dashboard composition and readable Help content retain their deliberate presentation widths. No capability, workflow, business logic, permission, database, schema, or version behavior changes in this candidate.
 - The existing desktop sidebar remains collapsible, expandable, width-adjustable from 196–420 pixels, and persistent across sessions. Its right-edge resize target is now visibly rendered instead of appearing as an almost invisible strip; collapse/expand behavior and stored preferences are unchanged.
+
+## UX optimization Builds 9–12 internal acceptance — 2026-09-09
+
+- Build 9 adds a bilingual skip-to-content path, consistent visible keyboard focus, reduced-motion support, and keyboard operation for the existing persistent sidebar width control. No navigation option or product capability is removed.
+- Build 10 changes routed page loading only: 30 workspaces now load on demand, reducing the initial JavaScript entry from approximately 3.20 MB to 435 KB while preserving every route and workflow.
+- Build 11 adds truthful bilingual public proof for the accepted Lens Next workflow: create, Open Working View, XML export, same-project RFI/Submittal links, bounded reference attachments, and identity isolation.
+- Build 12 consolidates the controlled UX stream with focused accessibility, route-loading, product-proof, workspace-width, sidebar, typecheck, production-build, and governed root regression evidence. Product business logic, permissions, Native behavior, database, schema, and version remain unchanged. Push/publication remain separate gates.

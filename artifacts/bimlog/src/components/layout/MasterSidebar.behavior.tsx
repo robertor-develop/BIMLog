@@ -4,7 +4,8 @@ import fs from "node:fs";
 const source = fs.readFileSync(new URL("./MasterSidebar.tsx", import.meta.url), "utf8");
 const checks: Array<[string, RegExp]> = [
   ["whole desktop navigation width is user controlled", /sidebarWidth.*Math\.min\(420.*Math\.max\(196/s],
-  ["desktop resize handle is visibly discoverable", /Drag left or right to resize navigation.*width: 16.*width: 12, height: 42/s],
+  ["desktop resize handle is visibly discoverable", /Drag or use arrow keys to resize navigation.*width: 16.*width: 12, height: 42/s],
+  ["desktop resize handle supports keyboard sizing", /aria-keyshortcuts="ArrowLeft ArrowRight Home End".*event\.key === "ArrowLeft".*event\.key === "ArrowRight".*event\.key === "Home".*event\.key === "End"/s],
   ["whole navigation width persists", /bimlog-master-sidebar-width/],
   ["whole navigation collapse persists", /bimlog-master-sidebar-collapsed/],
   ["whole navigation has its own resize handle", /Resize main navigation.*setSidebarResizing\(true\)/s],

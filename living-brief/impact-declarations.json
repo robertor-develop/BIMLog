@@ -18026,6 +18026,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0ac7053f6d98b5b066f9557e576852abff82e5a22cc88697db3ab6d5c418c031"
+    },
+    {
+      "taskId": "ux-optimization-builds-9-12-20260909",
+      "reviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
+      "reviewedAt": "2026-09-09T19:19:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Completes the controlled accessibility, performance, public product proof, and consolidated UX acceptance stream while preserving all existing capabilities and business contracts.",
+      "workstreams": [
+        "ux-less-is-more-controlled-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded UX stream and separate publication gate follow the accepted workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accessibility, performance, responsive behavior, and regression requirements are strengthened without changing their contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Truthful product proof and lower cognitive load preserve BIMLog product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, plugin, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 9–12 implementation and internal acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the internal UX gates while leaving push and publication explicitly open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing capability-preservation rule already governs this stream."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/layout/MasterSidebar.behavior.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4ee32f6e5f65b7d4d8ca5cda92874ec091c387727a2e945cc40838a324f46e75"
     }
   ]
 }
