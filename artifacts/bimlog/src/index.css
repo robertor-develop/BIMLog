@@ -548,6 +548,42 @@ iframe[aria-label*="Replit" i],
     width: 100%;
   }
 }
+
+@media (max-width: 390px) {
+  .project-context-bar {
+    gap: 8px;
+    padding: 8px 10px;
+  }
+  .project-context-actions {
+    width: 100%;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: stretch;
+  }
+  .project-context-actions > * {
+    width: 100%;
+    min-width: 0;
+  }
+  .context-chip,
+  .context-chip-wide {
+    width: 100%;
+    max-width: 100%;
+  }
+  .page-content {
+    padding: 12px 10px;
+  }
+  .table-card {
+    scrollbar-gutter: stable;
+    -webkit-overflow-scrolling: touch;
+  }
+  .btn,
+  button,
+  input,
+  select,
+  textarea {
+    max-width: 100%;
+  }
+}
 .nav-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
 .nav-badge-red { background: rgba(239,68,68,0.2); color: #F87171; }
 .nav-badge-blue { background: rgba(37,99,235,0.2); color: #60A5FA; }
