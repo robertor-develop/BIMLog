@@ -17800,6 +17800,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ee0de227fb6ff1081d776a10cc87333bc8caac6c0f3dbf2097c3f52f6180aebe"
+    },
+    {
+      "taskId": "ux-less-is-more-release-groups-a-b-publication-preflight-20260909",
+      "reviewedThroughCommit": "63ccfd565ce89cd1c24e53ff14a68833c7149ba5",
+      "reviewedAt": "2026-09-09T11:55:00-04:00",
+      "status": "publication_preflight_reconciled",
+      "captureTiming": "same_task_after_rebase_before_push_and_replit_publication",
+      "summary": "Reconciles capability-preserving UX Builds 1–8 onto the exact current production lineage without overwriting N17-P12 or accepted Intake behavior.",
+      "workstreams": [
+        "ux-less-is-more-controlled-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, persistence, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The clean rebase, push, publication, and live-verification gates remain separate and auditable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing desktop, exact-390, bilingual, production-build, and live browser gates apply."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Presentation hierarchy changes preserve the accepted product direction and every capability."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, route, database, dependency, structural inventory, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Navisworks source, package, or behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported-artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claims change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact integrated lineage and publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Builds 1–8 complete and the authorized push/publication/live gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Git history and evidence preserve the exact build and rebase record."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "53de0e1715155def2eb0639a6c967dc230c64cedf30c613a7bfbd3ff2e4eacbc"
     }
   ]
 }

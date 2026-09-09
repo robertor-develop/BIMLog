@@ -4,6 +4,8 @@
 
 Roberto authorized a 12-build capability-preserving UX stream executed in three four-build release groups. Less is more means reducing simultaneous cognitive load, not removing capability. Business logic, permissions, database/schema, modules, reports, exports, and established workflows remain protected unless a separate defect is proven.
 
+Release Groups A–B are integrated on the exact current `origin/main` lineage; push, Replit publication, and live desktop/exact-390 verification are the current authorized gates before Builds 9–12.
+
 - [x] Build 1: freeze live/source baseline and capability inventory.
 - [x] Build 2: simplify Headquarters hierarchy with an Operational details disclosure.
 - [x] Build 3: clarify global navigation hierarchy while preserving every route.

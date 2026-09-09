@@ -2,6 +2,7 @@
 
 ## UX less-is-more Release Groups A–B local candidate — 2026-09-09
 
+- The candidate is rebased onto authoritative `origin/main` commit `e6532fc37ec6ca3354fac7aeb4402269cb726edb`; the duplicate Intake client-company patch was correctly dropped because that accepted behavior is already upstream.
 - Builds 1–8 preserve the complete capability denominator while reducing simultaneous cognitive load in Headquarters, global navigation, Job Intake, project context, typography, tables, and exact-390 mobile presentation.
 - Headquarters keeps primary portfolio indicators and the project register visible; clash tracking, CVR health, pending-work panels, recent activity, and naming compliance remain available through one bilingual Operational details disclosure.
 - Headquarters navigation keeps primary and authorized administration routes visible while grouping the four Settings destinations behind one accessible disclosure in the expanded sidebar. The collapsed icon rail retains direct access.
