@@ -8,10 +8,13 @@ Roberto authorized a 12-build capability-preserving UX stream executed in three 
 - [x] Build 2: simplify Headquarters hierarchy with an Operational details disclosure.
 - [x] Build 3: clarify global navigation hierarchy while preserving every route.
 - [x] Build 4: focus Job Intake Quick Setup while preserving complete Advanced Setup.
-- [ ] Builds 5–8: project UI, typography, tables, and exact-390 mobile behavior.
+- [x] Build 5: simplify project context hierarchy without removing project identity or administrator access.
+- [x] Build 6: improve shared typography readability without changing content.
+- [x] Build 7: standardize shared table readability, actions, and bounded horizontal overflow.
+- [x] Build 8: harden exact-390 project actions, controls, and table scrolling without hiding capability.
 - [ ] Builds 9–12: accessibility, route-splitting/performance, authentic public product proof, and consolidated acceptance.
 
-Release Group A remains a local candidate pending combined production build, real production-component desktop/390 and English/Spanish evidence, independent review, and separate push/publication/deployment authorization.
+Release Groups A–B remain a local candidate pending combined production build, real production-component desktop/390 and English/Spanish evidence, independent review, and separate push/publication/deployment authorization.
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 

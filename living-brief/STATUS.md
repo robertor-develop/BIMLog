@@ -1,11 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
-## UX less-is-more Release Group A local candidate — 2026-09-09
+## UX less-is-more Release Groups A–B local candidate — 2026-09-09
 
-- Builds 1–4 preserve the complete capability denominator while reducing simultaneous cognitive load in Headquarters, global navigation, and Job Intake.
+- Builds 1–8 preserve the complete capability denominator while reducing simultaneous cognitive load in Headquarters, global navigation, Job Intake, project context, typography, tables, and exact-390 mobile presentation.
 - Headquarters keeps primary portfolio indicators and the project register visible; clash tracking, CVR health, pending-work panels, recent activity, and naming compliance remain available through one bilingual Operational details disclosure.
 - Headquarters navigation keeps primary and authorized administration routes visible while grouping the four Settings destinations behind one accessible disclosure in the expanded sidebar. The collapsed icon rail retains direct access.
 - Job Intake keeps the two-minute default and full Advanced Setup. Quick Setup leads with required readiness and discloses optional, work, and financial progress on demand; no Intake data, autosave, activation, contract, APU, assignment, permission, database, schema, report, or export behavior changes.
+- Project context keeps project identity and current role visible while placing administrator contact details behind a semantic disclosure. Shared typography is more readable, data tables retain every column/action with bounded horizontal scrolling, and exact-390 layouts stack project actions instead of hiding them.
 - This is a local committed candidate only. It is not pushed, published, deployed, production verified, or customer accepted.
 
 ## BIMLog v1.05.N10-P05 Lens Next create observability candidate — 2026-09-03
