@@ -54,6 +54,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/contact.ts
 - artifacts/api-server/src/routes/contract-item-workflows.ts
 - artifacts/api-server/src/routes/conventions.ts
+- artifacts/api-server/src/routes/coordination-hub.ts
 - artifacts/api-server/src/routes/coordination.ts
 - artifacts/api-server/src/routes/coordinator-actions.ts
 - artifacts/api-server/src/routes/dashboard_briefing.ts
@@ -139,6 +140,7 @@ It changes only when the code structure or curated architectural facts change.
 - contractItemWorkflowsRouter
 - jobOperationsRouter
 - teamPerformanceRouter
+- coordinationHubRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -177,6 +179,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/contract-item-workflow.behavior.ts
 - artifacts/api-server/src/lib/coordination-action-projection.behavior.ts
 - artifacts/api-server/src/lib/coordination-action-projection.ts
+- artifacts/api-server/src/lib/coordination-hub-postgres-store.ts
+- artifacts/api-server/src/lib/coordination-hub-runtime.behavior.ts
 - artifacts/api-server/src/lib/coordination-hub-service.behavior.ts
 - artifacts/api-server/src/lib/coordination-hub-service.ts
 - artifacts/api-server/src/lib/coordination-release-readiness.behavior.ts
