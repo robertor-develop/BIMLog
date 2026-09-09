@@ -19784,6 +19784,112 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5b885ae03fb8899a9dbc53b7902bf84c632a06446721d85c8d4e6c24580f4e30"
+    },
+    {
+      "taskId": "coordination-delivery-release-c-build-07-20260909",
+      "reviewedThroughCommit": "da7985d21631a86427401b80e272816416ff059e",
+      "reviewedAt": "2026-09-09T17:50:40Z",
+      "status": "internal_checkpoint",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "define_connector_envelope_cryptographic_protocol",
+          "implement_authenticated_context_and_key_rotation",
+          "verify_tamper_rejection_and_memory_clearing",
+          "record_local_release_evidence"
+        ],
+        "operatorOnly": [
+          "supply_runtime_connector_kek",
+          "real_credential_creation_or_resolution",
+          "real_provider_network_probe",
+          "frontend_ux_program",
+          "live_database_migration",
+          "publication",
+          "deployment"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Connector credentials require their own versioned AES-256-GCM authority with authenticated credential, company, provider, key-version and purpose context; unrelated AI-provider KEKs cannot be reused."
+        }
+      ],
+      "summary": "Records the canonical connector credential envelope protocol, rotation behavior, tamper rejection and memory-clearing proofs without enabling runtime credential resolution.",
+      "workstreams": [
+        "bimlog-coordination-delivery",
+        "release-c-connector-envelope-cryptography"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership or organizational authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The cryptographic build preserves MAIN04 frontend ownership and existing execution boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The protocol implements existing protected-secret, authenticated-context, canonical-encoding, key-rotation and fail-closed requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted Coordination Delivery product direction remains unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic Platform map now enumerates the connector credential envelope protocol and its focused behavior proof."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native Lens Next, Navisworks and bridge code remained untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design or presentation behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 07 remains a local checkpoint without credential, database, production, provider or field claims."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Runtime database resolution, real key provisioning, real provider requests, frontend UX and live release gates remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Round-trip, authenticated-context, tamper, rotation, encoding, memory-clearing and non-effect evidence are preserved in the committed record."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a1ecd85fba382525593bad8ae5096f35a842167ea01ecba294ab3430f4c95363"
     }
   ]
 }
