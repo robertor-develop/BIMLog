@@ -199,8 +199,9 @@ function App() {
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <LivingBriefHotkey />
             <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground font-sans">
+              <a className="skip-to-main" href="#main-content">Skip to main content / Ir al contenido principal</a>
               <Navbar />
-              <main className="flex-1">
+              <main id="main-content" tabIndex={-1} className="flex-1">
                 <Router />
               </main>
             </div>

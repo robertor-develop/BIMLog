@@ -125,6 +125,36 @@ iframe[aria-label*="Replit" i],
   margin-left: 0;
   margin-right: 0;
 }
+
+.skip-to-main {
+  position: fixed;
+  top: 8px;
+  left: 8px;
+  z-index: 10000;
+  transform: translateY(-160%);
+  padding: 9px 13px;
+  border: 2px solid hsl(var(--primary));
+  border-radius: 8px;
+  background: hsl(var(--card));
+  color: hsl(var(--foreground));
+  font-weight: 750;
+  text-decoration: none;
+}
+.skip-to-main:focus { transform: translateY(0); }
+
+:where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
 .page-content .fc-page > * {
   width: 100%;
   max-width: none;
