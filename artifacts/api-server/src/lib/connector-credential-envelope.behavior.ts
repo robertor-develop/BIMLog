@@ -12,6 +12,7 @@ const keyV1 = Buffer.alloc(32, 0x11);
 const keyV2 = Buffer.alloc(32, 0x22);
 const keys = new Map([[1, keyV1], [2, keyV2]]);
 let lastLease: Buffer | null = null;
+const isCleared = (value: Uint8Array | null): boolean => value !== null && Array.from(value).every((byte) => byte === 0);
 const keySource: ConnectorKekLeaseSource = {
   async withKey(version, operation) {
     const source = keys.get(version);
@@ -28,14 +29,14 @@ const token = Buffer.from(original, "utf8");
 const envelope = await encryptLeasedConnectorBearerToken({ context, token, keySource });
 
 assert.equal(token.every((byte) => byte === 0), true);
-assert.equal(lastLease?.every((byte) => byte === 0), true);
+assert.equal(isCleared(lastLease), true);
 assert.equal(JSON.stringify(envelope).includes(original), false);
 for (const [name, value] of Object.entries(envelope)) {
   if (name !== "keyVersion") assert.match(String(value), /^[A-Za-z0-9_-]+$/);
 }
 const restored = await decryptConnectorBearerToken({ context, envelope, keySource });
 assert.equal(restored.toString("utf8"), original);
-assert.equal(lastLease?.every((byte) => byte === 0), true);
+assert.equal(isCleared(lastLease), true);
 restored.fill(0);
 
 for (const changedContext of [
@@ -69,7 +70,7 @@ const envKey = Buffer.alloc(32, 0x33).toString("base64url");
 const environmentSource = new EnvironmentConnectorKekLeaseSource({ BIMLOG_CONNECTOR_KEK_V7: envKey });
 let environmentLease: Uint8Array | null = null;
 await environmentSource.withKey(7, async (lease) => { environmentLease = lease; assert.equal(lease.byteLength, 32); });
-assert.equal(environmentLease?.every((byte) => byte === 0), true);
+assert.equal(isCleared(environmentLease), true);
 await assert.rejects(() => new EnvironmentConnectorKekLeaseSource({ BIMLOG_CONNECTOR_KEK_V7: `${envKey}=` }).withKey(7, async () => undefined), ConnectorCredentialEnvelopeError);
 
 const shortToken = Buffer.from("short", "utf8");
