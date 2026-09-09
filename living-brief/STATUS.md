@@ -1214,3 +1214,9 @@ No release, publication, or overall completion claim is permitted until the reco
 - Historical unversioned visual packages whose database and embedded digests agree may pass only when project, authoritative server/viewpoint, lifecycle, and revision identities all match exactly. Current/versioned digest verification, stored/embedded mismatch rejection, and cross-project rejection remain strict; no digest is fabricated and no historical record is rewritten.
 - Lightweight navigation packages captured against an older positive authoritative server ID may be rebound only ephemerally when their own digest is valid and all other authoritative identity fields match. True identity conflicts remain rejected.
 - The already accepted N17 camera-unit implementation is merged unchanged. Platform advances to P12 and shared release metadata is reconciled to `v1.05.N17-P12` / `1.5.17.12`; database and schema remain unchanged.
+
+## UX workspace-width normalization candidate — 2026-09-09
+
+- Routed Job Intake, Job Operations, Team Performance, Financial APU, Financial Contract, and Administration workspaces now own the full content width provided by the application shell.
+- Split workspace grids collapse to one full-width column when a direct sibling is hidden or only one visible child remains. This prevents an inactive panel from leaving an abandoned column and making the active task look artificially cramped.
+- Dashboard composition and readable Help content retain their deliberate presentation widths. No capability, workflow, business logic, permission, database, schema, or version behavior changes in this candidate.

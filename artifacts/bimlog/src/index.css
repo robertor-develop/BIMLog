@@ -109,6 +109,38 @@ iframe[aria-label*="Replit" i],
 .sidebar { width: 220px; min-height: 0; flex-shrink: 0; background: hsl(var(--sidebar)); display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--sidebar-border); }
 .main-area { min-width: 0; min-height: 0; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .page-content { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 20px 24px; }
+
+/*
+ * Workspace width contract
+ *
+ * Routed product workspaces own the full width made available by the shell.
+ * Individual reading copy, forms, and previews may remain measure-limited, but
+ * the workspace itself must never preserve an empty column from an older
+ * split-panel layout.
+ */
+.page-content > :is(.ji, .jo, .tp, .cvp, .fc-page, .hq-admin-page) {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: none;
+  margin-left: 0;
+  margin-right: 0;
+}
+.page-content .fc-page > * {
+  width: 100%;
+  max-width: none;
+}
+.page-content .hq-admin-shell {
+  width: 100%;
+  max-width: none;
+}
+.page-content :is(.ji-layout, .jo-forms, .tp-two, .fc-form):has(> [hidden]) {
+  grid-template-columns: minmax(0, 1fr);
+}
+.page-content :is(.ji-layout, .jo-forms, .tp-two, .fc-form) > :not([hidden]):only-child {
+  grid-column: 1 / -1;
+  width: 100%;
+  max-width: none;
+}
 .topbar { height: 52px; background: hsl(var(--card)); border-bottom: 1px solid hsl(var(--border)); display: flex; align-items: center; padding: 0 20px; gap: 12px; flex-shrink: 0; }
 .app-topbar { position: relative; z-index: 30; }
 .project-context-bar { min-height: 48px; background: hsl(var(--background)); border-bottom: 1px solid hsl(var(--border)); display: flex; align-items: center; gap: 12px; padding: 8px 24px; flex-shrink: 0; }

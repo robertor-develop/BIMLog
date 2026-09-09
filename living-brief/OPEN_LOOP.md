@@ -2272,3 +2272,11 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 ## Micro-build allocation
 
 Use Builds 1–12 for the original master sequence: discovery/reconciliation; simplification; clarity; client/contact; contract structure; Contract Item/APU linkage; rate authority; team/assignments; APU history; budget association; sensitive confirmation and navigation; integrated acceptance. Use Build 13 onward for isolated requirements that cannot be completed safely inside those builds or for defects proven by integrated testing. Continue for as many builds as necessary to close the denominator. Never consume a build merely to advance a number, and never stop because a numeric ceiling was reached.
+
+## UX workspace-width normalization gates
+
+- [x] Establish one shared full-width contract for routed product workspaces without changing the accepted dashboard composition or readable Help measure.
+- [x] Collapse split grids when a sibling is hidden so the remaining task cannot be trapped in a stale half-width column.
+- [x] Preserve every existing capability and keep business logic, permissions, database, schema, and version behavior unchanged.
+- [ ] Pass focused behavior, frontend typecheck/build, and governed root regression from the reconciled source state.
+- [ ] Keep push, publication, and live Chrome verification as a separate explicitly authorized release gate.
