@@ -6,6 +6,7 @@
   "impact": {
     "baselineCommit": "9f7587b911dca4ef89b6a2e9184788da27220571",
     "changedPaths": [
+      "evidence/COORDINATION_DELIVERY_RELEASE_C_BUILD_09.md",
       "living-brief/PLATFORM.md",
       "living-brief/impact-declarations.json"
     ],

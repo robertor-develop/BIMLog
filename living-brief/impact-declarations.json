@@ -20097,10 +20097,11 @@
         }
       ],
       "reviewedChangedPaths": [
+        "evidence/COORDINATION_DELIVERY_RELEASE_C_BUILD_09.md",
         "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b4f7a46583b73cabe4f45512a6cda3e46637272f820702b6bdafc10fafc1f0e1"
+      "reviewedChangeSha256": "9369acbec37af3485e0d51eedfaa52b52b919064e25e067f6196cd2b048e0c2b"
     }
   ]
 }
