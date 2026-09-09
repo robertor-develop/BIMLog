@@ -2278,5 +2278,6 @@ Use Builds 1–12 for the original master sequence: discovery/reconciliation; si
 - [x] Establish one shared full-width contract for routed product workspaces without changing the accepted dashboard composition or readable Help measure.
 - [x] Collapse split grids when a sibling is hidden so the remaining task cannot be trapped in a stale half-width column.
 - [x] Preserve every existing capability and keep business logic, permissions, database, schema, and version behavior unchanged.
+- [x] Restore clear discoverability of the existing desktop sidebar collapse/expand and drag-to-resize controls without resetting saved user width.
 - [ ] Pass focused behavior, frontend typecheck/build, and governed root regression from the reconciled source state.
 - [ ] Keep push, publication, and live Chrome verification as a separate explicitly authorized release gate.
