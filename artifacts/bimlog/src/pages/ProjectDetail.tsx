@@ -195,23 +195,16 @@ export function ProjectDetail() {
             )}
 
             {adminMember && (
-              <span
-                className="context-chip context-chip-wide"
-                title={adminMember.userEmail ? `${lang === "es" ? "Administrador de Proyecto" : "Project Admin"}: ${adminMember.userEmail}` : (lang === "es" ? "Administrador de Proyecto" : "Project Admin")}
-              >
-                <span className="context-chip-strong">{adminMember.userFullName}</span>
-                {adminMember.userCompanyName && (
-                  <span className="context-chip-muted">- {adminMember.userCompanyName}</span>
-                )}
-                {adminMember.userEmail && (
-                  <a
-                    href={`mailto:${adminMember.userEmail}`}
-                    className="context-chip-link"
-                  >
-                    - {adminMember.userEmail}
-                  </a>
-                )}
-              </span>
+              <details className="context-chip context-chip-wide" style={{ position: "relative" }}>
+                <summary style={{ cursor: "pointer", fontWeight: 700 }}>
+                  {lang === "es" ? "Administrador del proyecto" : "Project administrator"}
+                </summary>
+                <div style={{ position: "absolute", top: "calc(100% + 7px)", right: 0, zIndex: 30, minWidth: 250, maxWidth: "min(360px, calc(100vw - 24px))", padding: 12, border: "1px solid hsl(var(--border))", borderRadius: 9, background: "hsl(var(--card))", boxShadow: "0 12px 32px rgba(15,23,42,.16)", display: "grid", gap: 4 }}>
+                  <span className="context-chip-strong">{adminMember.userFullName}</span>
+                  {adminMember.userCompanyName && <span className="context-chip-muted">{adminMember.userCompanyName}</span>}
+                  {adminMember.userEmail && <a href={`mailto:${adminMember.userEmail}`} className="context-chip-link">{adminMember.userEmail}</a>}
+                </div>
+              </details>
             )}
           </div>
         </div>
