@@ -141,6 +141,7 @@ iframe[aria-label*="Replit" i],
   text-decoration: none;
 }
 .skip-to-main:focus { transform: translateY(0); }
+.route-loading { padding: 32px; color: hsl(var(--muted-foreground)); font-weight: 650; }
 
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
   outline: 3px solid hsl(var(--ring));
