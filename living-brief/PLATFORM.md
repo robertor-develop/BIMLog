@@ -177,6 +177,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/connector-foundation-contract.ts
 - artifacts/api-server/src/lib/connector-foundation-migration.ts
 - artifacts/api-server/src/lib/connector-foundation.behavior.ts
+- artifacts/api-server/src/lib/connector-validation-operations-postgres-store.ts
+- artifacts/api-server/src/lib/connector-validation-operations.behavior.ts
+- artifacts/api-server/src/lib/connector-validation-operations.ts
 - artifacts/api-server/src/lib/contract-item-workflow-contract.ts
 - artifacts/api-server/src/lib/contract-item-workflow-migration.ts
 - artifacts/api-server/src/lib/contract-item-workflow-service.ts
