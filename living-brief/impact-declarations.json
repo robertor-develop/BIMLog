@@ -17950,6 +17950,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ec1339cabdfff7a25eb460d4470f9923ae2e22df5dd70e1a6f78b7c3d39db5de"
+    },
+    {
+      "taskId": "ux-sidebar-resize-discoverability-20260909",
+      "reviewedThroughCommit": "d493d38404350a14b06b62f989185764e02740cf",
+      "reviewedAt": "2026-09-09T16:55:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Restores visible discoverability of the existing persistent sidebar collapse, expand, and desktop width-resize controls without changing navigation behavior.",
+      "workstreams": [
+        "ux-less-is-more-controlled-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, persistence, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded correction and separate publication gate follow the existing workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing accessibility, responsive, persistence, and regression requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "A clearer existing control does not change BIMLog product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, dependency, database, schema, or runtime structure changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, plugin, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the preserved sidebar capability and corrected control discoverability."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the local sidebar gate while keeping publication and live verification separate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No additional durable audit rule is needed beyond capability preservation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/layout/MasterSidebar.behavior.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0ac7053f6d98b5b066f9557e576852abff82e5a22cc88697db3ab6d5c418c031"
     }
   ]
 }
