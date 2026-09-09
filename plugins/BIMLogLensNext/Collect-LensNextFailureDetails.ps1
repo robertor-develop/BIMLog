@@ -25,8 +25,10 @@ foreach ($path in @((Join-Path $bundle 'PackageContents.xml'), $nativeDll, (Join
 }
 Add-Section 'Navisworks process and loaded BIMLog modules'
 $processes = @(Get-Process -Name roamer -ErrorAction SilentlyContinue)
+$sessionStart = Get-Date
 if ($processes.Count -eq 0) { Add-Line 'NAVISWORKS_NOT_RUNNING' }
 foreach ($process in $processes) {
+  if ($process.StartTime -lt $sessionStart) { $sessionStart = $process.StartTime }
   Add-Line "ProcessId=$($process.Id) StartTime=$($process.StartTime.ToString('o'))"
   try {
     $process.Modules | Where-Object { $_.FileName -match 'BIMLog|Navisworks.Interop.ComApi' } | ForEach-Object {
@@ -34,11 +36,20 @@ foreach ($process in $processes) {
     }
   } catch { Add-Line "ModuleInventoryError=$($_.Exception.GetType().FullName): $($_.Exception.Message)" }
 }
-Add-Section 'Complete Lens Next native runtime log'
-if (Test-Path -LiteralPath $nativeLog) { Get-Content -LiteralPath $nativeLog | Out-File -LiteralPath $report -Append -Encoding utf8 }
+Add-Section 'Current Navisworks session Lens Next native runtime log'
+if (Test-Path -LiteralPath $nativeLog) {
+  $sessionLines = @(Get-Content -LiteralPath $nativeLog | Where-Object {
+    if ($_ -match '^\[(?<stamp>[^\]]+)\]') {
+      $parsed = [DateTimeOffset]::MinValue
+      [DateTimeOffset]::TryParse($Matches.stamp, [ref]$parsed) -and $parsed.LocalDateTime -ge $sessionStart
+    } else { $false }
+  })
+  if ($sessionLines.Count -gt 0) { $sessionLines | Out-File -LiteralPath $report -Append -Encoding utf8 }
+  else { Add-Line "NO_CURRENT_SESSION_LOG_LINES (SessionStart=$($sessionStart.ToString('o')))" }
+}
 else { Add-Line "MISSING=$nativeLog" }
 Add-Section 'Recent application and .NET failures'
-$since = (Get-Date).AddHours(-8)
+$since = $sessionStart
 Get-WinEvent -FilterHashtable @{LogName='Application'; StartTime=$since} -ErrorAction SilentlyContinue |
   Where-Object { $_.ProviderName -match 'Application Error|\.NET Runtime' -and $_.Message -match 'BIMLog|Navisworks|roamer' } |
   Select-Object TimeCreated,ProviderName,Id,LevelDisplayName,Message |

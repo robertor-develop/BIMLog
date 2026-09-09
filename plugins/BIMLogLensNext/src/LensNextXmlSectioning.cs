@@ -10,19 +10,21 @@ namespace BIMLogLensNext
 {
     public sealed class LensNextXmlClipPlane
     {
-        internal LensNextXmlClipPlane(bool enabled, double x, double y, double z, double distance)
+        internal LensNextXmlClipPlane(bool enabled, double x, double y, double z, double distance, LensNextXmlLinearUnit unit)
         {
             State = enabled ? "enabled" : "disabled";
             XInvariant = LensNextXmlFloat.Format(x, "section plane normal X");
             YInvariant = LensNextXmlFloat.Format(y, "section plane normal Y");
             ZInvariant = LensNextXmlFloat.Format(z, "section plane normal Z");
             DistanceInvariant = LensNextXmlFloat.Format(distance, "section plane distance");
+            DistanceFeetInvariant = LensNextXmlFloat.Format(unit.ToFeet(distance), "section plane distance");
         }
         public string State { get; }
         public string XInvariant { get; }
         public string YInvariant { get; }
         public string ZInvariant { get; }
         public string DistanceInvariant { get; }
+        public string DistanceFeetInvariant { get; }
     }
 
     public sealed class LensNextXmlSectioning
@@ -41,9 +43,10 @@ namespace BIMLogLensNext
         public string LinkedToken { get; }
         public IReadOnlyList<LensNextXmlClipPlane> Planes { get; }
 
-        public static LensNextXmlSectioning FromOptionalJson(string json)
+        public static LensNextXmlSectioning FromOptionalJson(string json, LensNextXmlLinearUnit unit)
         {
             if (string.IsNullOrWhiteSpace(json)) return null;
+            if (unit == null) throw new ArgumentNullException(nameof(unit));
             Dictionary<string, object> set;
             try { set = new JavaScriptSerializer().DeserializeObject(json) as Dictionary<string, object>; }
             catch (Exception exception) { throw new InvalidDataException("The BIMLog sectioning JSON is malformed and cannot be exported.", exception); }
@@ -71,9 +74,14 @@ namespace BIMLogLensNext
                 if (normal.All(component => component == 0d)) throw Invalid("plane Normal must be non-zero");
                 object distanceValue;
                 if (!plane.TryGetValue("Distance", out distanceValue)) throw Invalid("plane Distance is required");
-                planes.Add(new LensNextXmlClipPlane(planeEnabled, normal[0], normal[1], normal[2], RequireFiniteNumber(distanceValue, "plane Distance")));
+                planes.Add(new LensNextXmlClipPlane(planeEnabled, normal[0], normal[1], normal[2], RequireFiniteNumber(distanceValue, "plane Distance"), unit));
             }
             return new LensNextXmlSectioning(enabled, linked, planes);
+        }
+
+        public static LensNextXmlSectioning FromOptionalJson(string json)
+        {
+            return FromOptionalJson(json, LensNextXmlLinearUnit.FromCamera(new LensNextCameraState { SourceLinearUnit = "Inches" }));
         }
 
         private static void RequireOnly(Dictionary<string, object> value, ISet<string> allowed, string context)

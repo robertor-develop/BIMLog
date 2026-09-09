@@ -200,32 +200,41 @@ namespace BIMLogLensNext
             if (!IsSha256(record.VisualStateDigest) || !IsSha256(record.PackageDigest) ||
                 !string.Equals(record.VisualStateDigest, record.PackageDigest, StringComparison.OrdinalIgnoreCase))
                 throw new InvalidDataException("The active BIMLog viewpoint package digest is invalid or mismatched.");
-            if (record.PackageProjectId != record.ProjectId || record.PackageServerId != record.ServerId ||
-                !string.Equals(record.PackageViewpointId, record.ViewpointId, StringComparison.Ordinal) ||
-                !string.Equals(record.PackageLifecycleStatus, record.LifecycleStatus, StringComparison.Ordinal) ||
-                record.PackageRevisionNumber != record.RevisionNumber)
-                throw new InvalidDataException("The active BIMLog viewpoint package identity is mismatched.");
+            if (record.PackageProjectId != record.ProjectId)
+                throw new InvalidDataException("The active BIMLog viewpoint package project identity is mismatched.");
         }
 
         private static void ValidateExportableRecord(LensNextXmlExportInput record)
         {
+            if (record.PackageServerId != record.ServerId ||
+                !string.Equals(record.PackageViewpointId, record.ViewpointId, StringComparison.Ordinal) ||
+                !string.Equals(record.PackageLifecycleStatus, record.LifecycleStatus, StringComparison.Ordinal) ||
+                record.PackageRevisionNumber != record.RevisionNumber)
+                throw new InvalidDataException("The BIMLog viewpoint package identity is historical or mismatched and cannot be exported safely.");
             LensNextXmlPosition.FromValidatedCamera(record.PackageCamera);
             LensNextXmlRotation.FromValidatedCamera(record.PackageCamera);
             LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera);
             LensNextXmlProjection.FromValidatedCamera(record.PackageCamera);
             LensNextXmlCameraScale.FromOptionalValidatedCamera(record.PackageCamera);
-            LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson);
+            LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson, LensNextXmlLinearUnit.FromCamera(record.PackageCamera));
         }
 
         private static string DiagnosticReasonCode(LensNextXmlExportInput record)
         {
+            if (record.PackageServerId != record.ServerId ||
+                !string.Equals(record.PackageViewpointId, record.ViewpointId, StringComparison.Ordinal) ||
+                !string.Equals(record.PackageLifecycleStatus, record.LifecycleStatus, StringComparison.Ordinal) ||
+                record.PackageRevisionNumber != record.RevisionNumber)
+                return "legacy_identity_mismatch";
+            if (record.PackageCamera != null && Fails(() => LensNextXmlLinearUnit.FromCamera(record.PackageCamera)))
+                return "legacy_spatial_unit_unresolved";
             if (Fails(() => LensNextXmlPosition.FromValidatedCamera(record.PackageCamera)))
                 return record.PackageCamera == null ? "missing_camera" : "invalid_position";
             if (Fails(() => LensNextXmlRotation.FromValidatedCamera(record.PackageCamera))) return "invalid_rotation";
             if (Fails(() => LensNextXmlUpVector.FromOptionalValidatedCamera(record.PackageCamera))) return "invalid_up_vector";
             if (Fails(() => LensNextXmlProjection.FromValidatedCamera(record.PackageCamera))) return "invalid_projection";
             if (Fails(() => LensNextXmlCameraScale.FromOptionalValidatedCamera(record.PackageCamera))) return "invalid_scale";
-            if (Fails(() => LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson))) return "invalid_sectioning";
+            if (Fails(() => LensNextXmlSectioning.FromOptionalJson(record.PackageSectioningJson, LensNextXmlLinearUnit.FromCamera(record.PackageCamera)))) return "invalid_sectioning";
             throw new InvalidOperationException("The rejected BIMLog XML export record has no reproducible diagnostic category.");
         }
 

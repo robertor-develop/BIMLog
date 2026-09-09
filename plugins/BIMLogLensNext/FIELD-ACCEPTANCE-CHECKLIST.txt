@@ -1,4 +1,4 @@
-BIMLog Lens Next v1.05.N14-P10 - Navisworks Manage 2025 Field Diagnostic Acceptance
+BIMLog Lens Next v1.05.N17-P10 - Navisworks Manage 2025 Field Diagnostic Acceptance
 Tester: Ruben
 Date:
 Machine:
