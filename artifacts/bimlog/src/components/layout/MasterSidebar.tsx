@@ -59,6 +59,7 @@ export function MasterSidebar() {
   const [sidebarResizing, setSidebarResizing] = useState(false);
 
   const [showSearch, setShowSearch] = useState(false);
+  const [showSettingsNavigation, setShowSettingsNavigation] = useState(() => location === "/profile" || location.startsWith("/settings/"));
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -394,11 +395,25 @@ export function MasterSidebar() {
           </>
         )}
 
-        {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Settings", "Configuración")}</span>}
-        {navButton(t("Feature Visibility", "Visibilidad de funciones"), "/profile", Settings2)}
-        {navButton(t("Notification Settings", "Configuración de Notificaciones"), "/settings/notifications", Bell)}
-        {navButton(t("Company Profile", "Perfil de Empresa"), "/settings/company-profile", Building2)}
-        {navButton(t("Financial Controls", "Controles Financieros"), "/settings/financial-controls", CircleDollarSign)}
+        {(!sidebarCollapsed || isMobile) && (
+          <button
+            type="button"
+            aria-expanded={showSettingsNavigation}
+            aria-controls="headquarters-settings-navigation"
+            className="sidebar-section-label"
+            onClick={() => setShowSettingsNavigation(value => !value)}
+            style={{ width: "calc(100% - 20px)", margin: "8px 10px 3px", padding: "5px 4px", border: 0, background: "transparent", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}
+          >
+            <span>{t("Settings", "Configuración")}</span>
+            <ChevronRight aria-hidden style={{ width: 12, height: 12, transform: showSettingsNavigation ? "rotate(90deg)" : undefined, transition: "transform .16s ease" }} />
+          </button>
+        )}
+        <div id="headquarters-settings-navigation" hidden={!sidebarCollapsed && !isMobile && !showSettingsNavigation || isMobile && !showSettingsNavigation}>
+          {navButton(t("Feature Visibility", "Visibilidad de funciones"), "/profile", Settings2)}
+          {navButton(t("Notification Settings", "Configuración de Notificaciones"), "/settings/notifications", Bell)}
+          {navButton(t("Company Profile", "Perfil de Empresa"), "/settings/company-profile", Building2)}
+          {navButton(t("Financial Controls", "Controles Financieros"), "/settings/financial-controls", CircleDollarSign)}
+        </div>
       </nav>
 
       {user && (
