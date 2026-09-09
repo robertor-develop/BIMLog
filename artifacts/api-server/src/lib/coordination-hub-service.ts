@@ -54,6 +54,38 @@ export type CoordinationScope = z.infer<typeof coordinationScopeSchema>;
 export type RegisterCoordinationRevisionCommand = z.infer<typeof registerCoordinationRevisionCommandSchema>;
 export type EnqueueCoordinationJobCommand = z.infer<typeof enqueueCoordinationJobCommandSchema>;
 
+export type CoordinationHubSummary = {
+  projectId: number;
+  observedAt: string;
+  counts: {
+    files: number;
+    revisions: number;
+    currentFiles: number;
+    activeJobs: number;
+    attentionJobs: number;
+    activeCredentials: number;
+  };
+  latestFiles: Array<{
+    id: string;
+    stableKey: string;
+    category: string;
+    currentRevisionId: string | null;
+    currentRevisionNumber: number | null;
+    provider: string | null;
+    createdAt: string;
+  }>;
+  recentJobs: Array<{
+    id: string;
+    provider: string;
+    jobType: string;
+    state: string;
+    attempts: number;
+    maxAttempts: number;
+    createdAt: string;
+    updatedAt: string;
+  }>;
+};
+
 export type CoordinationFileRecord = RegisterCoordinationRevisionCommand["file"] & Pick<CoordinationScope, "projectId" | "companyId"> & { createdById: number };
 export type CoordinationRevisionRecord = RegisterCoordinationRevisionCommand["revision"] & { coordinationFileId: string; projectId: number; createdById: number };
 export type CoordinationJobRecord = EnqueueCoordinationJobCommand["job"] & Pick<CoordinationScope, "projectId" | "companyId"> & { createdById: number };
@@ -68,10 +100,12 @@ export interface CoordinationHubTransaction {
   designateCurrentRevision(input: { coordinationFileId: string; revisionId: string; expectedCurrentRevisionId: string | null; actorUserId: number }): Promise<void>;
   findJobByIdempotency(input: { companyId: number; projectId: number; provider: string; jobType: string; idempotencyKey: string }): Promise<CoordinationJobRecord | null>;
   insertJob(record: CoordinationJobRecord): Promise<void>;
+  readSummary(scope: CoordinationScope): Promise<CoordinationHubSummary>;
 }
 
 export interface CoordinationHubStore {
   transaction<T>(work: (transaction: CoordinationHubTransaction) => Promise<T>): Promise<T>;
+  readTransaction<T>(work: (transaction: CoordinationHubTransaction) => Promise<T>): Promise<T>;
 }
 
 export class CoordinationConflictError extends Error {
@@ -125,6 +159,14 @@ export class CoordinationHubService {
       }
       await transaction.insertJob({ ...command.job, companyId: command.scope.companyId, projectId: command.scope.projectId, createdById: command.scope.actorUserId });
       return { result: "queued", jobId: command.job.id };
+    });
+  }
+
+  async getSummary(input: unknown): Promise<CoordinationHubSummary> {
+    const scope = coordinationScopeSchema.parse(input);
+    return this.store.readTransaction(async (transaction) => {
+      await transaction.assertProjectCompanyAuthority(scope);
+      return transaction.readSummary(scope);
     });
   }
 }

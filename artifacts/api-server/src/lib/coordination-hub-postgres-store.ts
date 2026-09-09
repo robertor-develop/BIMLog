@@ -3,6 +3,7 @@ import {
   CoordinationConflictError,
   type CoordinationFileRecord,
   type CoordinationHubStore,
+  type CoordinationHubSummary,
   type CoordinationHubTransaction,
   type CoordinationJobRecord,
   type CoordinationRevisionRecord,
@@ -102,6 +103,63 @@ class PostgresCoordinationHubTransaction implements CoordinationHubTransaction {
     );
     if (result.rowCount !== 1) throw new CoordinationConflictError("Active connector credential is not authorized for this company/provider");
   }
+
+  async readSummary(scope: CoordinationScope): Promise<CoordinationHubSummary> {
+    const countsResult = await this.client.query(
+      `SELECT
+         (SELECT count(*) FROM coordination_files WHERE company_id=$1 AND project_id=$2) AS files,
+         (SELECT count(*) FROM coordination_file_revisions r JOIN coordination_files f ON f.id=r.coordination_file_id WHERE f.company_id=$1 AND f.project_id=$2) AS revisions,
+         (SELECT count(*) FROM coordination_file_current_revisions c JOIN coordination_files f ON f.id=c.coordination_file_id WHERE f.company_id=$1 AND f.project_id=$2) AS "currentFiles",
+         (SELECT count(*) FROM connector_jobs WHERE company_id=$1 AND project_id=$2 AND state IN ('queued','leased','retry')) AS "activeJobs",
+         (SELECT count(*) FROM connector_jobs WHERE company_id=$1 AND project_id=$2 AND state='dead_letter') AS "attentionJobs",
+         (SELECT count(*) FROM connector_credentials WHERE company_id=$1 AND state='active') AS "activeCredentials",
+         current_timestamp AS "observedAt"`,
+      [scope.companyId, scope.projectId],
+    );
+    const filesResult = await this.client.query(
+      `SELECT f.id,f.stable_key AS "stableKey",f.category,c.revision_id AS "currentRevisionId",r.revision_number AS "currentRevisionNumber",r.provider,f.created_at AS "createdAt"
+       FROM coordination_files f
+       LEFT JOIN coordination_file_current_revisions c ON c.coordination_file_id=f.id
+       LEFT JOIN coordination_file_revisions r ON r.id=c.revision_id AND r.coordination_file_id=f.id
+       WHERE f.company_id=$1 AND f.project_id=$2
+       ORDER BY f.created_at DESC,f.id ASC LIMIT 20`,
+      [scope.companyId, scope.projectId],
+    );
+    const jobsResult = await this.client.query(
+      `SELECT id,provider,job_type AS "jobType",state,attempts,max_attempts AS "maxAttempts",created_at AS "createdAt",updated_at AS "updatedAt"
+       FROM connector_jobs WHERE company_id=$1 AND project_id=$2
+       ORDER BY created_at DESC,id ASC LIMIT 20`,
+      [scope.companyId, scope.projectId],
+    );
+    const counts = countsResult.rows[0] ?? {};
+    const iso = (value: unknown): string => {
+      const date = value instanceof Date ? value : new Date(String(value));
+      if (Number.isNaN(date.valueOf())) throw new Error("Coordination summary timestamp is invalid");
+      return date.toISOString();
+    };
+    return {
+      projectId: scope.projectId,
+      observedAt: iso(counts.observedAt),
+      counts: {
+        files: Number(counts.files),
+        revisions: Number(counts.revisions),
+        currentFiles: Number(counts.currentFiles),
+        activeJobs: Number(counts.activeJobs),
+        attentionJobs: Number(counts.attentionJobs),
+        activeCredentials: Number(counts.activeCredentials),
+      },
+      latestFiles: filesResult.rows.map((row) => ({
+        id: String(row.id), stableKey: String(row.stableKey), category: String(row.category),
+        currentRevisionId: row.currentRevisionId == null ? null : String(row.currentRevisionId),
+        currentRevisionNumber: row.currentRevisionNumber == null ? null : Number(row.currentRevisionNumber),
+        provider: row.provider == null ? null : String(row.provider), createdAt: iso(row.createdAt),
+      })),
+      recentJobs: jobsResult.rows.map((row) => ({
+        id: String(row.id), provider: String(row.provider), jobType: String(row.jobType), state: String(row.state),
+        attempts: Number(row.attempts), maxAttempts: Number(row.maxAttempts), createdAt: iso(row.createdAt), updatedAt: iso(row.updatedAt),
+      })),
+    };
+  }
 }
 
 export const postgresCoordinationHubStore: CoordinationHubStore = {
@@ -109,6 +167,20 @@ export const postgresCoordinationHubStore: CoordinationHubStore = {
     const client = await pool.connect() as unknown as PoolClient;
     try {
       await client.query("BEGIN");
+      const result = await work(new PostgresCoordinationHubTransaction(client));
+      await client.query("COMMIT");
+      return result;
+    } catch (error) {
+      await client.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      client.release();
+    }
+  },
+  async readTransaction<T>(work: (transaction: CoordinationHubTransaction) => Promise<T>): Promise<T> {
+    const client = await pool.connect() as unknown as PoolClient;
+    try {
+      await client.query("BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY");
       const result = await work(new PostgresCoordinationHubTransaction(client));
       await client.query("COMMIT");
       return result;

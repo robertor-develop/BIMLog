@@ -7,6 +7,7 @@ const currents = new Map<string, string>();
 const jobs = new Map<string, CoordinationJobRecord>();
 let authorityChecks = 0;
 let transactions = 0;
+let readTransactions = 0;
 
 const transaction: CoordinationHubTransaction = {
   assertProjectCompanyAuthority: async (scope) => { authorityChecks += 1; if (scope.projectId !== 7 || scope.companyId !== 3) throw new Error("forbidden"); },
@@ -21,8 +22,18 @@ const transaction: CoordinationHubTransaction = {
   },
   findJobByIdempotency: async ({ companyId, projectId, provider, jobType, idempotencyKey }) => jobs.get(`${companyId}:${projectId}:${provider}:${jobType}:${idempotencyKey}`) ?? null,
   insertJob: async (record) => { jobs.set(`${record.companyId}:${record.projectId}:${record.provider}:${record.jobType}:${record.idempotencyKey}`, record); },
+  readSummary: async (requestedScope) => ({
+    projectId: requestedScope.projectId,
+    observedAt: "2026-09-09T15:00:00.000Z",
+    counts: { files: files.size, revisions: revisions.size, currentFiles: currents.size, activeJobs: jobs.size, attentionJobs: 0, activeCredentials: 1 },
+    latestFiles: [],
+    recentJobs: [],
+  }),
 };
-const store: CoordinationHubStore = { transaction: async (work) => { transactions += 1; return work(transaction); } };
+const store: CoordinationHubStore = {
+  transaction: async (work) => { transactions += 1; return work(transaction); },
+  readTransaction: async (work) => { readTransactions += 1; return work(transaction); },
+};
 const service = new CoordinationHubService(store);
 const scope = { projectId: 7, companyId: 3, actorUserId: 11 };
 const revisionCommand = {
@@ -42,9 +53,13 @@ const jobCommand = { scope, job: { id: "job-1", credentialId: "credential-1", pr
 assert.deepEqual(await service.enqueueJob(jobCommand), { result: "queued", jobId: "job-1" });
 assert.deepEqual(await service.enqueueJob(jobCommand), { result: "idempotent", jobId: "job-1" });
 await assert.rejects(() => service.enqueueJob({ ...jobCommand, job: { ...jobCommand.job, requestDigest: "d".repeat(64) } }), CoordinationConflictError);
+const summary = await service.getSummary(scope);
+assert.equal(summary.projectId, 7);
+assert.deepEqual(summary.counts, { files: 1, revisions: 1, currentFiles: 1, activeJobs: 1, attentionJobs: 0, activeCredentials: 1 });
 assert.equal(files.size, 1);
 assert.equal(revisions.size, 1);
 assert.equal(jobs.size, 1);
-assert.equal(authorityChecks, 7);
+assert.equal(authorityChecks, 8);
 assert.equal(transactions, 7);
+assert.equal(readTransactions, 1);
 console.log("coordination hub service behavior: PASS");

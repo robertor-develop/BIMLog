@@ -33,6 +33,17 @@ function fail(res: Response, error: unknown): void {
   res.status(500).json({ error: "COORDINATION_OPERATION_FAILED", correlationId });
 }
 
+router.get("/projects/:projectId/coordination-hub/summary", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const result = await service.getSummary({
+      projectId: Number(req.params.projectId),
+      companyId: req.user!.companyId,
+      actorUserId: req.user!.userId,
+    });
+    res.json(result);
+  } catch (error) { fail(res, error); }
+});
+
 router.post("/projects/:projectId/coordination-hub/revisions", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const result = await service.registerRevision(trustedCommand(req));
