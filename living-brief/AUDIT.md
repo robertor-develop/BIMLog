@@ -923,3 +923,9 @@ Roberto subsequently clarified that 40 was illustrative, not a maximum. The reco
 
 - Ruben's field screenshots contradicted the Build 20 internal acceptance by proving that both Quick and Advanced setup dead-ended when no authoritative project company was available. The selectors were correct but the existing canonical company-registration route was not exposed in Job Intake.
 - The bounded Platform correction adds the same authoritative add-and-select workflow to both modes, retains current-project authorization and canonical company IDs, and leaves database/schema and Native unchanged. Focused behavior, complete Job Intake service coverage, the combined three-company scenario, frontend typecheck/build, and mojibake validation passed locally. Publication and customer verification are not claimed.
+# 2026-09-08 — Build 47 legacy 409 closure and version reconciliation
+
+- Field evidence separated two historical failures: unversioned full visual packages lacked the canonical bytes needed for modern recomputation, while lightweight navigation packages could retain an earlier positive authoritative server ID.
+- The compatibility boundary requires database digest = embedded digest and exact project/server/viewpoint/lifecycle/revision identity for unversioned historical packages. Any stored/embedded mismatch or authoritative identity mismatch remains a 409. No database row or historical package is rewritten.
+- Navigation normalization is response-only, requires a valid navigation digest plus exact project/viewpoint/lifecycle/revision identity, and changes only the positive historical server ID to the requested authoritative server ID in the ephemeral payload.
+- P11 Intake source was verified before mutation. The accepted N17 camera-unit lineage was merged without behavioral edits, and release metadata was aligned to N17-P12. Publication, package delivery, and Ruben field acceptance remain separate recorded gates.

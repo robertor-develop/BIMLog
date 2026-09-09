@@ -2241,6 +2241,16 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 - [x] Prove focused behavior, Job Intake service, combined multi-company scenario, frontend typecheck/build, and mojibake gates locally.
 - [ ] Push, publish, and live-verify the exact P11 candidate in Chrome under separate production authorization.
 
+## v1.05.N17-P12 Build 47 release-closure gates
+
+- [x] Preserve the live P11 Intake fixes on the exact P11 baseline.
+- [x] Separate legacy missing canonical digest evidence from stored/embedded corruption and cross-project identity conflicts.
+- [x] Permit only bounded exact-identity legacy compatibility without database rewrite or fabricated digest.
+- [x] Permit exact, digest-valid historical navigation server-ID rebinding only in the response payload.
+- [x] Merge the accepted N17 camera-unit contract without Native behavior change and reconcile shared metadata to N17-P12.
+- [ ] Push the exact reviewed commit, publish once through the governed Replit Shell, and verify live N17-P12 plus P11 Intake behavior in Chrome.
+- [ ] Package both Navisworks targets, deliver the verified 2025 ZIP, and obtain Ruben's dual-project field retest.
+
 ## Micro-build allocation
 
 Use Builds 1–12 for the original master sequence: discovery/reconciliation; simplification; clarity; client/contact; contract structure; Contract Item/APU linkage; rate authority; team/assignments; APU history; budget association; sensitive confirmation and navigation; integrated acceptance. Use Build 13 onward for isolated requirements that cannot be completed safely inside those builds or for defects proven by integrated testing. Continue for as many builds as necessary to close the denominator. Never consume a build merely to advance a number, and never stop because a numeric ceiling was reached.

@@ -1197,3 +1197,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - Field evidence proved both Quick and Advanced setup could select only companies already connected to the project, leaving a new job with no usable client-company path when the directory was empty.
 - The Platform now reuses the existing authoritative `POST /projects/:projectId/directory/companies` contract directly inside both setup modes. The user can create or reuse one canonical company, optionally provide its primary contact, connect it to the current project, and immediately select it as the client company.
 - The correction does not accept free-text identity, create a parallel company authority, alter database/schema, or change Native behavior. The Platform candidate advances to `v1.05.N14-P11`; publication and live field verification remain separate gates.
+
+## Lens Next Build 47 legacy compatibility and N17-P12 reconciliation — 2026-09-08
+
+- Build 47 starts from the exact live P11 source and preserves both Quick and Advanced authoritative client-company creation and the dependent primary-contact selector.
+- Historical unversioned visual packages whose database and embedded digests agree may pass only when project, authoritative server/viewpoint, lifecycle, and revision identities all match exactly. Current/versioned digest verification, stored/embedded mismatch rejection, and cross-project rejection remain strict; no digest is fabricated and no historical record is rewritten.
+- Lightweight navigation packages captured against an older positive authoritative server ID may be rebound only ephemerally when their own digest is valid and all other authoritative identity fields match. True identity conflicts remain rejected.
+- The already accepted N17 camera-unit implementation is merged unchanged. Platform advances to P12 and shared release metadata is reconciled to `v1.05.N17-P12` / `1.5.17.12`; database and schema remain unchanged.

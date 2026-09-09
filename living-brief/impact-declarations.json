@@ -17697,6 +17697,109 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b2c44857f88eb0df909736eb7853249dd9d8fc20e21699f5aee3a4f4c17ef439"
+    },
+    {
+      "taskId": "build47-platform-legacy-409-closure-20260908",
+      "reviewedThroughCommit": "4f86ac3b93bfff7d44ac902ee67dd793f5d18421",
+      "reviewedAt": "2026-09-08T22:30:00Z",
+      "status": "release_candidate_reconciled",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "edit_isolated_worktree",
+          "run_local_validation",
+          "create_clean_commit"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "production_runtime_verification",
+          "telegram_delivery"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Historical Lens packages were rejected because pre-evidence digest absence and prior authoritative navigation server identity were treated as current corruption or identity conflict."
+        }
+      ],
+      "summary": "Closes bounded historical Lens digest and navigation 409 compatibility, preserves P11 Intake and N17 camera units, and reconciles the combined N17-P12 release identity.",
+      "workstreams": [
+        "lens-next-release-closure",
+        "job-intake-multi-apu-complete-recovery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains authoritative and no parallel identity or persistence authority is introduced."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The isolated implementation and external publication boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Legacy absence, actual mismatch, current validation, navigation identity, and cross-project cases now have explicit regression proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This repairs accepted Lens behavior without adding product scope or changing the roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform validation now has a narrowly bounded unversioned-history compatibility policy and ephemeral navigation normalization."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "The accepted N17 Native lineage is retained unchanged while package metadata is reconciled to P12."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, document, spreadsheet, or presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards, certification, or external compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the precise compatibility boundary and the combined N17-P12 candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Separates completed implementation gates from push, publication, delivery, and field acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserves the field contradiction, exact decision boundary, and no-rewrite integrity guarantees."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ee0de227fb6ff1081d776a10cc87333bc8caac6c0f3dbf2097c3f52f6180aebe"
     }
   ]
 }
