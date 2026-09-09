@@ -19889,6 +19889,113 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "coordination-delivery-release-c-build-08-20260909",
+      "reviewedThroughCommit": "e7ca13273959cef4a8c1ba11c51a976d4f15f0bf",
+      "reviewedAt": "2026-09-09T19:13:45Z",
+      "status": "internal_checkpoint",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "implement_exact_state_postgres_credential_selection",
+          "compose_protected_envelope_decryption_lease",
+          "verify_transaction_ordering_and_memory_clearing",
+          "record_local_release_evidence"
+        ],
+        "operatorOnly": [
+          "supply_runtime_connector_kek",
+          "create_or_rotate_real_credentials",
+          "enable_real_provider_validation",
+          "frontend_ux_program",
+          "live_database_application",
+          "publication",
+          "deployment"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Credential resolution must bind exact company, credential, provider and pending-validation state, close its read-only transaction before decryption, and clear all mutable selected and decrypted material."
+        }
+      ],
+      "summary": "Records the exact-state PostgreSQL SharePoint credential lease resolver, lazy runtime database binding, sanitized denial and memory-clearing proofs without activating a provider.",
+      "workstreams": [
+        "bimlog-coordination-delivery",
+        "release-c-credential-lease-resolution"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership or organizational authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The backend-only build preserves MAIN04 frontend ownership and all established execution boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The resolver implements existing tenancy, exact-state, secret-handling, transaction and fail-closed requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted Coordination Delivery product direction remains unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The Platform authority now records the PostgreSQL credential lease resolution and memory-clearing contract."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native Lens Next, Navisworks and bridge code remained untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design or presentation behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 08 remains a local backend checkpoint without database, credential, provider or production claims."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Real key provisioning, real credentials, provider activation, frontend UX and live release gates remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Exact SQL scope, transaction closure, decryption ordering, sanitized denial, memory clearing and non-effects are preserved in committed evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/COORDINATION_DELIVERY_RELEASE_C_BUILD_08.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b76c287402c81fc0590df2c6978e104977e25c8dded8590a43259c7f864a1190"
     }
   ]
 }

@@ -28,10 +28,11 @@ Build 08 implements the same-company, exact-state PostgreSQL credential lease re
 
 ## Verification
 
-- PostgreSQL credential lease resolver behavior: PENDING.
-- Connector credential envelope behavior: PENDING.
-- Protected SharePoint executor behavior: PENDING.
-- Coordination Hub runtime behavior: PENDING.
+- PostgreSQL credential lease resolver behavior: PASS.
+- Connector credential envelope behavior: PASS.
+- Protected SharePoint executor behavior: PASS.
+- Coordination Hub runtime behavior: PASS.
+- API TypeScript check: PASS.
 - Full production build: PENDING.
 - Frontend diff: ZERO.
 - Native/Lens Next diff: ZERO.
