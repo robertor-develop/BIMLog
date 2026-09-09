@@ -232,6 +232,7 @@ export function JobIntakeWorkspace() {
       "saved" | "unsaved" | "saving" | "error"
     >("saved");
   const [quickMode, setQuickMode] = useState(() => readSetupMode(projectId) === "quick");
+  const [showReadinessDetails, setShowReadinessDetails] = useState(false);
   const showQuickMode = () => { preserveSetupMode(projectId, "quick"); setQuickMode(true); };
   const showAdvancedMode = () => { preserveSetupMode(projectId, "advanced"); setQuickMode(false); };
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -1054,6 +1055,16 @@ export function JobIntakeWorkspace() {
             <strong>{readiness.setup.percent}%</strong>
             <p>{readiness.setup.ready ? tt("Ready to activate", "Listo para activar") : tt(`${readiness.setup.missingRequiredCount} required item(s) remaining`, `${readiness.setup.missingRequiredCount} elemento(s) obligatorio(s) pendiente(s)`)}</p>
           </div>
+          {quickMode && (
+            <div className="ji-readiness-card">
+              <h2>{tt("Setup details", "Detalles de configuración")}</h2>
+              <button type="button" aria-expanded={showReadinessDetails} aria-controls="job-intake-readiness-details" onClick={() => setShowReadinessDetails(value => !value)}>
+                {showReadinessDetails ? tt("Hide details", "Ocultar detalles") : tt("Show optional, work and financial progress", "Mostrar progreso opcional, laboral y financiero")}
+              </button>
+              <p>{tt("The two-minute setup stays focused on required information.", "La configuración de dos minutos se mantiene enfocada en la información obligatoria.")}</p>
+            </div>
+          )}
+          <div id="job-intake-readiness-details" hidden={quickMode && !showReadinessDetails} style={{ display: quickMode && !showReadinessDetails ? undefined : "contents" }}>
           <div className="ji-readiness-card">
             <h2>{tt("Optional items remaining", "Elementos opcionales pendientes")}</h2>
             <strong>{readiness.optionalItemsRemaining}</strong>
@@ -1068,6 +1079,7 @@ export function JobIntakeWorkspace() {
             <h2>{tt("Financial progress", "Progreso financiero")}</h2>
             <strong>{readiness.financial.applicable ? `${readiness.financial.setupPercent}%` : tt("Not enabled", "No habilitado")}</strong>
             <p>{readiness.financial.applicable ? tt("APU, rate, and budget setup coverage", "Cobertura de APU, tarifas y presupuesto") : tt("Commercial financial setup is optional for this project", "La configuración financiera comercial es opcional para este proyecto")}</p>
+          </div>
           </div>
           {guide && <div className="ji-readiness-help">{tt("These figures describe Intake configuration only. Work progress measures assigned planned hours, not completed field work. Financial progress measures configured APU, rate, and budget references, not earned or paid value.", "Estas cifras describen solamente la configuración de Ingreso. El progreso del trabajo mide horas planificadas asignadas, no trabajo de campo terminado. El progreso financiero mide referencias configuradas de APU, tarifas y presupuesto, no valor ganado ni pagado.")}</div>}
         </section>
