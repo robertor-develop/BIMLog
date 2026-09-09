@@ -4,9 +4,12 @@ import { ZodError } from "zod/v4";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { CoordinationConflictError, CoordinationHubService } from "../lib/coordination-hub-service";
 import { postgresCoordinationHubStore } from "../lib/coordination-hub-postgres-store";
+import { CoordinationHubConfigurationService } from "../lib/coordination-hub-configuration-service";
+import { postgresCoordinationHubConfigurationStore } from "../lib/coordination-hub-configuration-postgres-store";
 
 const router: IRouter = Router();
 const service = new CoordinationHubService(postgresCoordinationHubStore);
+const configurationService = new CoordinationHubConfigurationService(postgresCoordinationHubConfigurationStore);
 
 function trustedCommand(req: Request): Record<string, unknown> {
   return {
@@ -41,6 +44,20 @@ router.get("/projects/:projectId/coordination-hub/summary", authMiddleware, requ
       actorUserId: req.user!.userId,
     });
     res.json(result);
+  } catch (error) { fail(res, error); }
+});
+
+router.post("/projects/:projectId/coordination-hub/credentials", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+  try {
+    const result = await configurationService.registerCredential(trustedCommand(req));
+    res.status(result.result === "created" ? 201 : 200).json(result);
+  } catch (error) { fail(res, error); }
+});
+
+router.post("/projects/:projectId/coordination-hub/sharepoint-mapping", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+  try {
+    const result = await configurationService.configureSharePointProject(trustedCommand(req));
+    res.status(result.result === "created" ? 201 : 200).json(result);
   } catch (error) { fail(res, error); }
 });
 

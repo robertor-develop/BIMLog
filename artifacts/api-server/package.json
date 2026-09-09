@@ -56,6 +56,7 @@
     "test:connector-foundation": "tsx ./src/lib/connector-foundation.behavior.ts",
     "test:coordination-hub-service": "tsx ./src/lib/coordination-hub-service.behavior.ts",
     "test:coordination-hub-runtime": "tsx ./src/lib/coordination-hub-runtime.behavior.ts",
+    "test:coordination-hub-configuration": "tsx ./src/lib/coordination-hub-configuration-service.behavior.ts",
     "test:coordination-delivery-build2": "tsx ./src/lib/sharepoint-discovery-adapter.behavior.ts",
     "test:coordination-delivery-build3": "tsx ./src/lib/sharepoint-reconciliation.behavior.ts",
     "test:coordination-delivery-build4": "tsx ./src/lib/outlook-intake-envelope.behavior.ts",
