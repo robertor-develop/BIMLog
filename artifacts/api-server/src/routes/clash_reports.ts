@@ -3890,16 +3890,10 @@ router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, re
 });
 
 router.get("/projects/:projectId/clash-reports/:reportId/pdf",
+  authMiddleware,
+  requireProjectMember(),
   async (req, res) => {
-    const token = req.headers.authorization?.split(" ")[1] || (req.query.token as string);
-    if (!token) { res.status(401).json({ error: "Authentication required" }); return; }
-    let userId: number;
-    try {
-      const jwt = await import("jsonwebtoken");
-      const decoded = jwt.default.verify(token, process.env.JWT_SECRET!) as any;
-      userId = decoded.userId || decoded.id;
-    } catch { res.status(401).json({ error: "Invalid token" }); return; }
-
+    const userId = req.user!.userId;
     const projectId = Number(req.params.projectId);
     const reportId = Number(req.params.reportId);
     try {

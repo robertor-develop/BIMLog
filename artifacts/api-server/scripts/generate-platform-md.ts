@@ -242,6 +242,39 @@ ${appRoutes()}
   \`/api/v1/healthz\` stays HTTP 503 until the real Express application and startup barrier are complete.
 - Initialization failure changes all bootstrap responses to HTTP 503 and closes the listener. Workers
   still start exactly once and only after the ready transition. This changes no schema or persisted data.
+
+## Prework 06 connector and Coordination File foundation
+
+- Connector credentials are provider/company scoped and persist only a protected ciphertext envelope, wrapped data key, and positive key version. Plaintext secrets are outside the persistence contract.
+- Durable connector work uses one job authority with stable idempotency, payload digest, bounded attempts, scheduled retry, leased claims, fencing tokens, dead-letter state, explicit replay lineage and immutable attributable job events.
+- A Coordination File is a stable project-scoped logical identity. Every provider revision is immutable and retains provider item/version identity, content SHA-256 and byte size; the current designation is held separately so revision evidence is never rewritten.
+- SharePoint foundation maps each BIMLog project to an approved site/library and each category/optional trade to one folder. Delta cursor material uses the same protected-envelope model, while status, last sync and mismatch remain visible operational state.
+- The forward-only migration is an explicit transactional operator action and is not called by application startup. This checkpoint provides no SharePoint synchronization worker, Outlook add-in, route, UI, deployment or live-database change.
+
+## Coordination Delivery Release A — Build 1 service boundary
+
+- The first delivery layer is provider-neutral and operates only through an injected transaction/store boundary; it is not connected to application startup, routes, UI or a live provider.
+- Every revision or job command carries explicit project, company and attributable user scope. Persistence is unavailable until the store confirms that exact authority.
+- Stable Coordination File identity and immutable provider revision evidence replay only when every authoritative field matches. Provider identity reused with a different hash, byte size, scope or classification fails closed.
+- Current revision designation is explicit and compare-and-set guarded by the caller's observed revision. Job idempotency likewise accepts replay only when the request digest matches.
+- This build adds no schema and activates no connector. It preserves the complete Prework 02–06 and MAIN 04 Build 47 lineage.
+
+## Coordination Delivery Release A — Builds 2–11 contracts
+
+- Builds 2–3 add an authority-scoped, read-only SharePoint discovery port and deterministic reconciliation. Discovery is bounded and credential references remain opaque; reconciliation never silently changes the current BIMLog revision.
+- Builds 4–5 define a strict Microsoft Graph message envelope and deterministic project routing. Provider tokens are excluded, attachment identity is immutable, and zero or multiple project matches require review.
+- Builds 6–7 define trade-file collection requests and immutable submission review. Requests bind project, company, trade, accountable contact, required artifacts, deadline and allowed formats; acceptance requires a clean malware result and an attributable human decision.
+- Builds 8–9 separate accountability evaluation from outbound delivery. Overdue work proposes escalation, while external delivery remains an approval-gated, digest-bound, idempotent outbox intent; this checkpoint sends nothing.
+- Builds 10–11 define composite source authority and QC decisions. A composite is blocked when any discipline is not the observed current revision, and approval is prohibited when blocking checks fail or applicable checks lack immutable evidence.
+- All ten builds are provider-neutral or provider-bound contracts and pure services only. They add no routes, UI, startup hooks, schema, database application, provider activation, message sending, deployment or Native/Lens Next change.
+
+## Coordination Delivery Release A — Builds 12–18 completion
+
+- Builds 12–13 stage approved, digest-bound Procore return intent and preserve design comments against exact provider, project, Coordination File and revision evidence. No provider write is activated.
+- Builds 14–15 project design comments and meeting-report commitments into the existing unified action authority. Meeting-derived actions remain proposals and carry the report snapshot digest, attributable principals, scope and due date.
+- Builds 16–17 control For Record issuance and immutable delivery receipts. Issuance requires approved QC, the observed current revision, explicit recipients and human approval; provider outcomes replay only when immutable receipt evidence agrees.
+- Build 18 evaluates one complete 18-gate release-readiness record and fails closed on any missing, duplicated or failed gate. Its contract requires the local checkpoint to attest that database application, provider activation, outbound messaging, deployment and publication are all false.
+- The full 18-build Coordination Delivery roadmap is now implemented as locally tested contracts and service boundaries. Provider adapters, routes, UI, migrations, live activation and deployment remain separately reviewed delivery work rather than implied effects of this checkpoint.
 `;
 
   const outDir = path.join(REPO_ROOT, "living-brief");

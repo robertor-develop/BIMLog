@@ -46,7 +46,6 @@ import {
   authMiddleware,
   requireProjectMember,
   requirePermission,
-  verifyToken,
 } from "../middlewares/auth";
 import { createNotification } from "./notifications";
 import { sendEmail } from "../lib/email";
@@ -72,20 +71,6 @@ import {
 } from "../lib/pdf-kit";
 
 const router: Router = Router();
-
-const meetingPdfAuth: typeof authMiddleware = (req, res, next) => {
-  const token =
-    typeof req.query.token === "string" && req.query.token.trim()
-      ? req.query.token
-      : undefined;
-  if (!token) return authMiddleware(req, res, next);
-  try {
-    req.user = verifyToken(token);
-    next();
-  } catch {
-    res.status(401).json({ error: "Invalid or expired token" });
-  }
-};
 
 const safePdfText = (value: unknown, fallback = "—") => {
   if (value === null || value === undefined) return fallback;

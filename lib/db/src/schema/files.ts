@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer, json, boolean, type AnyPgColumn } from "drizzle-orm/pg-core";
+import { foreignKey, pgTable, serial, text, timestamp, integer, json, boolean, unique } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 import { rfisTable } from "./rfis";
@@ -10,7 +10,7 @@ export const filesTable = pgTable("files", {
   fileSize: integer("file_size").notNull(),
   fileType: text("file_type").notNull(),
   version: integer("version").notNull().default(1),
-  parentFileId: integer("parent_file_id").references((): AnyPgColumn => filesTable.id),
+  parentFileId: integer("parent_file_id"),
   status: text("status").notNull(),
   uploadedById: integer("uploaded_by_id").references(() => usersTable.id).notNull(),
   extractedText: text("extracted_text"),
@@ -37,7 +37,7 @@ export const filesTable = pgTable("files", {
   isSuperseded: boolean("is_superseded").default(false).notNull(),
   userConfirmedNonCompliant: boolean("user_confirmed_non_compliant").default(false).notNull(),
   isCompliant: boolean("is_compliant").default(false).notNull(),
-  supersededByFileId: integer("superseded_by_file_id").references((): AnyPgColumn => filesTable.id),
+  supersededByFileId: integer("superseded_by_file_id"),
   sourceLocation: text("source_location"),
   isHistoricalRecord: boolean("is_historical_record").default(false).notNull(),
   conventionVersion: text("convention_version"),
@@ -45,6 +45,10 @@ export const filesTable = pgTable("files", {
 
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
-});
+}, (t) => [
+  unique("files_id_project_uq").on(t.id, t.projectId),
+  foreignKey({ columns: [t.parentFileId, t.projectId], foreignColumns: [t.id, t.projectId], name: "files_parent_same_project_fk" }),
+  foreignKey({ columns: [t.supersededByFileId, t.projectId], foreignColumns: [t.id, t.projectId], name: "files_superseded_same_project_fk" }),
+]);
 
 export type ProjectFile = typeof filesTable.$inferSelect;

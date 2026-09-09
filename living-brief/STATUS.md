@@ -1204,3 +1204,48 @@ No release, publication, or overall completion claim is permitted until the reco
 - Historical unversioned visual packages whose database and embedded digests agree may pass only when project, authoritative server/viewpoint, lifecycle, and revision identities all match exactly. Current/versioned digest verification, stored/embedded mismatch rejection, and cross-project rejection remain strict; no digest is fabricated and no historical record is rewritten.
 - Lightweight navigation packages captured against an older positive authoritative server ID may be rebound only ephemerally when their own digest is valid and all other authoritative identity fields match. True identity conflicts remain rejected.
 - The already accepted N17 camera-unit implementation is merged unchanged. Platform advances to P12 and shared release metadata is reconciled to `v1.05.N17-P12` / `1.5.17.12`; database and schema remain unchanged.
+# Prework 02 project-scope security — 2026-09-08
+
+- Reconciled from final Build 47 baseline `e6532fc37ec6ca3354fac7aeb4402269cb726edb`.
+- Submittal and Clash Report PDF routes now require authenticated project
+  membership through existing middleware.
+- Project PDF routes no longer accept query-string JWTs; proof callers use the
+  Authorization header.
+- Focused authorization behavior and the full workspace typecheck pass.
+- Database, schema, deployment, Intake/APU and Lens Next remain unchanged.
+# Prework 03 audited project retirement — 2026-09-08
+
+- Mapped 190 schema tables and 137 complete project-dependent tables.
+- Disabled partial hard deletion and direct archive bypasses.
+- Added preview, authority, exact confirmation, stale-state protection,
+  transactional archive and immutable administrator audit evidence.
+- All dependent records remain preserved; no schema, database, deployment,
+  Intake/APU or Lens Next mutation occurred.
+
+# Prework 04 enterprise identity — 2026-09-08
+
+- The existing `companies` table remains the canonical company authority; `client` is a project-company role, not a duplicate enterprise entity.
+- Added normalized contact, project-company, project-contact, trade/company and contract-party schema authority with mechanical project/company identity chains.
+- Added forward-only same-project constraints for file parents/supersession, RFI parents/revisions and Submittal parents. Legacy rows are preserved while new writes fail closed on cross-project relationships.
+- The explicit transactional migration is locally verified but is not connected to startup and has not been applied to any database. Production, deployment, Intake/APU data and Lens Next remain unchanged.
+
+# Prework 05 unified action and audit contract — 2026-09-08
+
+- Added one strict, versioned projection contract for actionable work across existing modules: typed source/module, stable source identity, attributable owner/assignee, project and optional company/trade scope, due date, status, visibility and source digest.
+- Added a recursively immutable audit-event envelope with attributable actor, event/reason semantics, before/result digests and evidence references.
+- Existing module tables and histories remain authoritative and unchanged; the shared layer projects them without wholesale migration or rewriting.
+- Focused behavior and complete workspace typecheck pass. No database, schema, routes, UI, deployment, Intake/APU or Lens Next changed.
+
+# Prework 06 connector and Coordination File foundation — 2026-09-08
+
+- Added the local schema and strict contracts for protected connector credentials, durable leased/fenced/idempotent jobs, immutable job events, dead-letter replay and bounded retry.
+- Added stable Coordination File authority with immutable content-addressed revisions and a separate current-revision designation.
+- Added SharePoint project/site/library and category/trade/folder mappings plus protected delta-cursor, sync and mismatch state.
+- The forward-only migration is explicit and transactional but not wired to startup and has not been applied to any database. No connector activation, sync, route, UI, push, publication or deployment occurred.
+
+# Coordination Delivery Release A — Build 1 — 2026-09-09
+
+- Added the first provider-neutral Coordination Hub service boundary over the accepted Prework 06 contracts.
+- Revision registration, explicit current designation and connector-job enqueue now share strict project/company authority, transaction, immutable replay and digest-bound idempotency rules.
+- MAIN 04's accepted Build 47 source remains in the ancestry and Lens Next, Job Intake and Multi-APU behavior remain unchanged.
+- This is a local internal checkpoint. No schema/database, provider, route, UI, version, push, publication or deployment changed.

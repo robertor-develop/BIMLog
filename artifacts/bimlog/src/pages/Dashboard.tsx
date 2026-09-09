@@ -14,19 +14,9 @@ import { StatCard } from "@/components/dashboard/StatCard";
 import { OnboardingFlow, useOnboarding } from "@/components/OnboardingFlow";
 import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
+import { confirmAndRetireProject } from "@/lib/project-retirement";
 
 const API_BASE = import.meta.env.BASE_URL.replace(/\/$/, "");
-
-async function deleteProject(projectId: number, token: string): Promise<void> {
-  const res = await fetch(`${API_BASE}/api/v1/projects/${projectId}`, {
-    method: "DELETE",
-    headers: { Authorization: `Bearer ${token}` },
-  });
-  if (!res.ok) {
-    const body = await res.json().catch(() => ({}));
-    throw new Error(body.error || "Failed to delete project.");
-  }
-}
 
 // ── Cross-project aggregate types ─────────────────────────────────────────────
 interface XRfi {
@@ -298,17 +288,16 @@ export function Dashboard() {
   const visibleProjectFiles = projectRows.reduce((sum: number, p: any) => sum + (p.fileCount || 0), 0);
   const visibleProjectMembers = projectRows.reduce((sum: number, p: any) => sum + (p.memberCount || 0), 0);
 
-  async function handleDelete(projectId: number, projectName: string) {
-    const confirmed = window.confirm(
-      `Are you sure you want to delete this project?\n\n"${projectName}"\n\nThis cannot be undone.`
-    );
-    if (!confirmed) return;
+  async function handleRetire(projectId: number, _projectName: string) {
     try {
-      await deleteProject(projectId, token!);
+      const retired = await confirmAndRetireProject(projectId, (path, init) => fetch(`${API_BASE}/api/v1${path}`, {
+        ...init, headers: { Authorization: `Bearer ${token}`, ...(init?.headers || {}) },
+      }));
+      if (!retired) return;
       queryClient.invalidateQueries({ queryKey: ["/api/v1/projects"] });
-      toast({ title: "Project deleted." });
+      toast({ title: "Project retired. All project records were preserved." });
     } catch (err) {
-      toast({ title: err instanceof Error ? err.message : "Failed to delete project.", variant: "destructive" });
+      toast({ title: err instanceof Error ? err.message : "Failed to retire project.", variant: "destructive" });
     }
   }
 
@@ -851,7 +840,7 @@ export function Dashboard() {
                       <ProjectCard
                         key={project.id}
                         project={project}
-                        onDelete={handleDelete}
+                        onDelete={handleRetire}
                       />
                     ))}
                   </div>
@@ -1096,7 +1085,7 @@ function ProjectCard({ project, onDelete }: ProjectCardProps) {
       {isAdmin && (
         <button
           onClick={e => { e.preventDefault(); e.stopPropagation(); onDelete(project.id, project.name); }}
-          title="Delete project"
+          title="Retire project"
           style={{
             position: "absolute", bottom: 12, right: 48,
             width: 26, height: 26, borderRadius: 6,

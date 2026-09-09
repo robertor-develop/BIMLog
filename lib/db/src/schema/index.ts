@@ -57,3 +57,5 @@ export * from "./commercial-entitlements";
 export * from "./job-intakes";
 export * from "./contract-item-workflows";
 export * from "./team-resource-planning";
+export * from "./enterprise-identity";
+export * from "./connector-foundation";

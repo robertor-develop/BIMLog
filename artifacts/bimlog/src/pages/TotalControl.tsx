@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
+import { confirmAndRetireProject } from "@/lib/project-retirement";
 import { getMe } from "@workspace/api-client-react";
 import { User, Building2, Folder, Circle, FileText, Zap, MessageSquare, ClipboardList, TrendingUp, Brain, Loader2, Lock, AlertTriangle, Users, MapPin, Eye, EyeOff } from "lucide-react";
 
@@ -769,15 +770,14 @@ function TCProjectsTab({ token }: { token: string }) {
   };
   useEffect(() => { load(); }, [token]);
 
-  const doDelete = async (id: number, name: string) => {
-    if (!confirm(`Delete project "${name}"? This cannot be undone.`)) return;
-    await apiFetch(`/admin/projects/${id}`, token, { method: "DELETE" });
-    setMsg("Project deleted."); load();
-  };
   const doArchive = async (id: number, status: string) => {
-    const newStatus = status === "archived" ? "active" : "archived";
-    await apiFetch(`/admin/projects/${id}`, token, { method: "PATCH", body: JSON.stringify({ status: newStatus }) });
-    setMsg(`Project ${newStatus}.`); load();
+    if (status === "archived") {
+      await apiFetch(`/admin/projects/${id}`, token, { method: "PATCH", body: JSON.stringify({ status: "active" }) });
+      setMsg("Project restored."); load(); return;
+    }
+    if (await confirmAndRetireProject(id, (path, init) => apiFetch(path, token, init))) {
+      setMsg("Project retired; dependent records were preserved."); load();
+    }
   };
   const doTransfer = async () => {
     if (!transferModal || !newOwnerId) return;
@@ -820,7 +820,6 @@ function TCProjectsTab({ token }: { token: string }) {
                     <TCButton onClick={() => setLocation(`/projects/${p.id}/analytics`)}>View</TCButton>
                     <TCButton onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</TCButton>
                     <TCButton onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</TCButton>
-                    <TCButton variant="danger" onClick={() => doDelete(p.id as number, String(p.name))}>Delete</TCButton>
                   </div>
                 </TCTd>
               </tr>

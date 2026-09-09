@@ -42,6 +42,7 @@ export const financialContractsTable = pgTable(
   },
   (t) => [
     unique("financial_contracts_bimlog_id_key").on(t.bimlogId),
+    unique("financial_contracts_id_project_uq").on(t.id, t.projectId),
     unique("financial_contracts_project_id_perspective_legal_number_key").on(
       t.projectId,
       t.perspective,

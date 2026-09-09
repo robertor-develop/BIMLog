@@ -147,6 +147,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/middlewares/team-resource-planning-rate-limit.ts
 
 ## Backend libs (artifacts/api-server/src/lib)
+- artifacts/api-server/src/lib/accountability-outbox.behavior.ts
+- artifacts/api-server/src/lib/accountability-outbox.ts
 - artifacts/api-server/src/lib/ai-control-plane-migration.ts
 - artifacts/api-server/src/lib/ai-control-plane.behavior.ts
 - artifacts/api-server/src/lib/ai-control-plane.http-evidence.ts
@@ -162,10 +164,23 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
 - artifacts/api-server/src/lib/commercial-entitlement.ts
 - artifacts/api-server/src/lib/commercial-project-scope.ts
+- artifacts/api-server/src/lib/composite-qc.behavior.ts
+- artifacts/api-server/src/lib/composite-qc.ts
+- artifacts/api-server/src/lib/composite-source-control.behavior.ts
+- artifacts/api-server/src/lib/composite-source-control.ts
+- artifacts/api-server/src/lib/connector-foundation-contract.ts
+- artifacts/api-server/src/lib/connector-foundation-migration.ts
+- artifacts/api-server/src/lib/connector-foundation.behavior.ts
 - artifacts/api-server/src/lib/contract-item-workflow-contract.ts
 - artifacts/api-server/src/lib/contract-item-workflow-migration.ts
 - artifacts/api-server/src/lib/contract-item-workflow-service.ts
 - artifacts/api-server/src/lib/contract-item-workflow.behavior.ts
+- artifacts/api-server/src/lib/coordination-action-projection.behavior.ts
+- artifacts/api-server/src/lib/coordination-action-projection.ts
+- artifacts/api-server/src/lib/coordination-hub-service.behavior.ts
+- artifacts/api-server/src/lib/coordination-hub-service.ts
+- artifacts/api-server/src/lib/coordination-release-readiness.behavior.ts
+- artifacts/api-server/src/lib/coordination-release-readiness.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
 - artifacts/api-server/src/lib/coordinator-bulk-action-migration.ts
 - artifacts/api-server/src/lib/coordinator-bulk-actions.ts
@@ -178,7 +193,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/cost-value-plan-service.ts
 - artifacts/api-server/src/lib/cost-value-plan.behavior.ts
 - artifacts/api-server/src/lib/database-startup-serialization.behavior.ts
+- artifacts/api-server/src/lib/design-comment-control.behavior.ts
+- artifacts/api-server/src/lib/design-comment-control.ts
 - artifacts/api-server/src/lib/email.ts
+- artifacts/api-server/src/lib/enterprise-identity-migration.behavior.ts
+- artifacts/api-server/src/lib/enterprise-identity-migration.ts
 - artifacts/api-server/src/lib/entitlement-contract.ts
 - artifacts/api-server/src/lib/entitlement-resolver.behavior.ts
 - artifacts/api-server/src/lib/extract-file-text.ts
@@ -263,6 +282,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-control-migration.ts
 - artifacts/api-server/src/lib/financial-control-service.ts
 - artifacts/api-server/src/lib/financial-control.behavior.ts
+- artifacts/api-server/src/lib/follow-up-accountability.behavior.ts
+- artifacts/api-server/src/lib/follow-up-accountability.ts
+- artifacts/api-server/src/lib/for-record-issuance.behavior.ts
+- artifacts/api-server/src/lib/for-record-issuance.ts
+- artifacts/api-server/src/lib/for-record-receipt.behavior.ts
+- artifacts/api-server/src/lib/for-record-receipt.ts
 - artifacts/api-server/src/lib/generic-apu-budget-control.ts
 - artifacts/api-server/src/lib/generic-apu-contract.ts
 - artifacts/api-server/src/lib/generic-apu-engine-edge.behavior.ts
@@ -311,11 +336,20 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/living-brief-runtime.behavior.ts
 - artifacts/api-server/src/lib/living-brief-source.ts
 - artifacts/api-server/src/lib/meeting-canonical-links.ts
+- artifacts/api-server/src/lib/meeting-report-action-extraction.behavior.ts
+- artifacts/api-server/src/lib/meeting-report-action-extraction.ts
 - artifacts/api-server/src/lib/oauth.ts
 - artifacts/api-server/src/lib/operational-register-table.ts
+- artifacts/api-server/src/lib/outlook-intake-envelope.behavior.ts
+- artifacts/api-server/src/lib/outlook-intake-envelope.ts
+- artifacts/api-server/src/lib/outlook-project-routing.behavior.ts
+- artifacts/api-server/src/lib/outlook-project-routing.ts
 - artifacts/api-server/src/lib/overdue-notifier.ts
 - artifacts/api-server/src/lib/pdf-kit.ts
 - artifacts/api-server/src/lib/pdf-logo.ts
+- artifacts/api-server/src/lib/pdf-route-authorization.behavior.ts
+- artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
+- artifacts/api-server/src/lib/procore-coordination-return.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.ts
 - artifacts/api-server/src/lib/procore-rfi-import-commit.ts
@@ -331,6 +365,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-invitation-migration.ts
 - artifacts/api-server/src/lib/project-invitation-service.ts
 - artifacts/api-server/src/lib/project-invitation.behavior.ts
+- artifacts/api-server/src/lib/project-retirement.ts
 - artifacts/api-server/src/lib/provider-governance.ts
 - artifacts/api-server/src/lib/rfi-complete-package.behavior.ts
 - artifacts/api-server/src/lib/rfi-complete-package.ts
@@ -338,6 +373,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/rfi-standard-exports.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts
+- artifacts/api-server/src/lib/sharepoint-discovery-adapter.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-discovery-adapter.ts
+- artifacts/api-server/src/lib/sharepoint-reconciliation.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-reconciliation.ts
 - artifacts/api-server/src/lib/storage-adapter.behavior.ts
 - artifacts/api-server/src/lib/storage-adapter.ts
 - artifacts/api-server/src/lib/team-performance-service.ts
@@ -351,6 +390,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/telegram-product-provider-broker.ts
 - artifacts/api-server/src/lib/telegram-product.ts
 - artifacts/api-server/src/lib/telegram-rfi-notifications.ts
+- artifacts/api-server/src/lib/trade-file-collection.behavior.ts
+- artifacts/api-server/src/lib/trade-file-collection.ts
+- artifacts/api-server/src/lib/trade-file-submission-review.behavior.ts
+- artifacts/api-server/src/lib/trade-file-submission-review.ts
+- artifacts/api-server/src/lib/unified-action-contract.behavior.ts
+- artifacts/api-server/src/lib/unified-action-contract.ts
 
 ## Agents (artifacts/api-server/src/agents)
 - artifacts/api-server/src/agents/base-agent.ts
@@ -370,6 +415,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/commercial-entitlements.ts
 - lib/db/src/schema/company_profiles.ts
 - lib/db/src/schema/config.ts
+- lib/db/src/schema/connector-foundation.ts
 - lib/db/src/schema/contact-submissions.ts
 - lib/db/src/schema/contract-item-workflows.ts
 - lib/db/src/schema/conventions.ts
@@ -377,6 +423,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/coordinator-bulk-operations.ts
 - lib/db/src/schema/coordinator-saved-views.ts
 - lib/db/src/schema/email-log.ts
+- lib/db/src/schema/enterprise-identity.ts
 - lib/db/src/schema/feature-catalog.ts
 - lib/db/src/schema/feature-flags.ts
 - lib/db/src/schema/feature-policies.ts
@@ -650,3 +697,36 @@ It changes only when the code structure or curated architectural facts change.
   `/api/v1/healthz` stays HTTP 503 until the real Express application and startup barrier are complete.
 - Initialization failure changes all bootstrap responses to HTTP 503 and closes the listener. Workers
   still start exactly once and only after the ready transition. This changes no schema or persisted data.
+
+## Prework 06 connector and Coordination File foundation
+
+- Connector credentials are provider/company scoped and persist only a protected ciphertext envelope, wrapped data key, and positive key version. Plaintext secrets are outside the persistence contract.
+- Durable connector work uses one job authority with stable idempotency, payload digest, bounded attempts, scheduled retry, leased claims, fencing tokens, dead-letter state, explicit replay lineage and immutable attributable job events.
+- A Coordination File is a stable project-scoped logical identity. Every provider revision is immutable and retains provider item/version identity, content SHA-256 and byte size; the current designation is held separately so revision evidence is never rewritten.
+- SharePoint foundation maps each BIMLog project to an approved site/library and each category/optional trade to one folder. Delta cursor material uses the same protected-envelope model, while status, last sync and mismatch remain visible operational state.
+- The forward-only migration is an explicit transactional operator action and is not called by application startup. This checkpoint provides no SharePoint synchronization worker, Outlook add-in, route, UI, deployment or live-database change.
+
+## Coordination Delivery Release A — Build 1 service boundary
+
+- The first delivery layer is provider-neutral and operates only through an injected transaction/store boundary; it is not connected to application startup, routes, UI or a live provider.
+- Every revision or job command carries explicit project, company and attributable user scope. Persistence is unavailable until the store confirms that exact authority.
+- Stable Coordination File identity and immutable provider revision evidence replay only when every authoritative field matches. Provider identity reused with a different hash, byte size, scope or classification fails closed.
+- Current revision designation is explicit and compare-and-set guarded by the caller's observed revision. Job idempotency likewise accepts replay only when the request digest matches.
+- This build adds no schema and activates no connector. It preserves the complete Prework 02–06 and MAIN 04 Build 47 lineage.
+
+## Coordination Delivery Release A — Builds 2–11 contracts
+
+- Builds 2–3 add an authority-scoped, read-only SharePoint discovery port and deterministic reconciliation. Discovery is bounded and credential references remain opaque; reconciliation never silently changes the current BIMLog revision.
+- Builds 4–5 define a strict Microsoft Graph message envelope and deterministic project routing. Provider tokens are excluded, attachment identity is immutable, and zero or multiple project matches require review.
+- Builds 6–7 define trade-file collection requests and immutable submission review. Requests bind project, company, trade, accountable contact, required artifacts, deadline and allowed formats; acceptance requires a clean malware result and an attributable human decision.
+- Builds 8–9 separate accountability evaluation from outbound delivery. Overdue work proposes escalation, while external delivery remains an approval-gated, digest-bound, idempotent outbox intent; this checkpoint sends nothing.
+- Builds 10–11 define composite source authority and QC decisions. A composite is blocked when any discipline is not the observed current revision, and approval is prohibited when blocking checks fail or applicable checks lack immutable evidence.
+- All ten builds are provider-neutral or provider-bound contracts and pure services only. They add no routes, UI, startup hooks, schema, database application, provider activation, message sending, deployment or Native/Lens Next change.
+
+## Coordination Delivery Release A — Builds 12–18 completion
+
+- Builds 12–13 stage approved, digest-bound Procore return intent and preserve design comments against exact provider, project, Coordination File and revision evidence. No provider write is activated.
+- Builds 14–15 project design comments and meeting-report commitments into the existing unified action authority. Meeting-derived actions remain proposals and carry the report snapshot digest, attributable principals, scope and due date.
+- Builds 16–17 control For Record issuance and immutable delivery receipts. Issuance requires approved QC, the observed current revision, explicit recipients and human approval; provider outcomes replay only when immutable receipt evidence agrees.
+- Build 18 evaluates one complete 18-gate release-readiness record and fails closed on any missing, duplicated or failed gate. Its contract requires the local checkpoint to attest that database application, provider activation, outbound messaging, deployment and publication are all false.
+- The full 18-build Coordination Delivery roadmap is now implemented as locally tested contracts and service boundaries. Provider adapters, routes, UI, migrations, live activation and deployment remain separately reviewed delivery work rather than implied effects of this checkpoint.

@@ -170,7 +170,7 @@ importers:
     dependencies:
       '@anthropic-ai/sdk':
         specifier: ^0.79.0
-        version: 0.79.0(zod@4.3.6)
+        version: 0.79.0(zod@3.25.76)
       '@napi-rs/canvas':
         specifier: 0.1.80
         version: 0.1.80
@@ -239,7 +239,7 @@ importers:
         version: 2.2.0
       openai:
         specifier: ^6.38.0
-        version: 6.38.0(zod@4.3.6)
+        version: 6.38.0(zod@3.25.76)
       pdf-lib:
         specifier: ^1.17.1
         version: 1.17.1
@@ -261,6 +261,9 @@ importers:
       xml2js:
         specifier: ^0.6.2
         version: 0.6.2
+      zod:
+        specifier: 'catalog:'
+        version: 3.25.76
     devDependencies:
       '@types/adm-zip':
         specifier: 0.5.7
@@ -5267,11 +5270,11 @@ snapshots:
 
   7zip-bin@5.2.0: {}
 
-  '@anthropic-ai/sdk@0.79.0(zod@4.3.6)':
+  '@anthropic-ai/sdk@0.79.0(zod@3.25.76)':
     dependencies:
       json-schema-to-ts: 3.1.1
     optionalDependencies:
-      zod: 4.3.6
+      zod: 3.25.76
 
   '@babel/code-frame@7.29.0':
     dependencies:
@@ -8938,9 +8941,9 @@ snapshots:
     dependencies:
       mimic-fn: 2.1.0
 
-  openai@6.38.0(zod@4.3.6):
+  openai@6.38.0(zod@3.25.76):
     optionalDependencies:
-      zod: 4.3.6
+      zod: 3.25.76
 
   ora@5.4.1:
     dependencies:

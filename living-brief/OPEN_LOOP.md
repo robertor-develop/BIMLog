@@ -2254,3 +2254,61 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 ## Micro-build allocation
 
 Use Builds 1–12 for the original master sequence: discovery/reconciliation; simplification; clarity; client/contact; contract structure; Contract Item/APU linkage; rate authority; team/assignments; APU history; budget association; sensitive confirmation and navigation; integrated acceptance. Use Build 13 onward for isolated requirements that cannot be completed safely inside those builds or for defects proven by integrated testing. Continue for as many builds as necessary to close the denominator. Never consume a build merely to advance a number, and never stop because a numeric ceiling was reached.
+# Prework 02 project-scope security gates
+
+- [x] Require authenticated project membership for Submittal PDF download.
+- [x] Require authenticated project membership for Clash Report PDF download.
+- [x] Remove query-string bearer/JWT acceptance from project report downloads.
+- [x] Prove authorized membership and non-member/query-token rejection.
+- [x] Preserve report behavior, Intake/APU, Lens Next, database and schema.
+- [ ] Integrate only through a separately reviewed authoritative-lineage gate;
+  no deployment is part of this prework checkpoint.
+# Prework 03 audited project-retirement gates
+
+- [x] Map the complete project dependency graph.
+- [x] Replace partial deletion with non-destructive retirement.
+- [x] Require permission, preview, exact confirmation and current state.
+- [x] Update lifecycle and write audit evidence in one transaction.
+- [x] Fail closed on stale, unauthorized or concurrent requests.
+- [ ] Integrate/deploy only under a later separately reviewed release gate.
+
+# Prework 05 unified action/audit gates
+
+- [x] Define typed module and source-record identity.
+- [x] Require authoritative owner and support attributable internal, contact or external assignees.
+- [x] Carry project plus optional company/trade scope, due date, status and visibility.
+- [x] Define immutable attributable audit events with snapshot digests and evidence references.
+- [x] Preserve existing module tables and histories without forced migration.
+- [ ] Adopt the projection contract incrementally in future Coordination Delivery builds; no mass rewrite is authorized.
+
+# Prework 04 enterprise-identity gates
+
+- [x] Reuse `companies` as the single company authority.
+- [x] Represent clients as governed project-company relationships.
+- [x] Normalize contact, project contact, trade/company and contract-party relationships.
+- [x] Add fail-closed same-project constraints for files, RFIs and Submittals without rewriting legacy rows.
+- [x] Prove transactional rollback and schema/type compatibility locally.
+- [ ] Apply the explicit migration only under a later exact database authorization and verified backup/rollback gate.
+- [ ] Integrate/deploy only under a later separately reviewed release gate.
+
+# Prework 06 connector and Coordination File foundation gates
+
+- [x] Define protected, versioned connector credential persistence with no plaintext field.
+- [x] Define durable job claim, lease, fencing, retry, idempotency, dead-letter, replay and immutable event contracts.
+- [x] Define stable Coordination File identity, immutable revisions and a separate current-revision designation.
+- [x] Define SharePoint project/site/library and category/trade/folder mappings with protected cursor and observable sync/mismatch state.
+- [x] Prove explicit migration transaction/rollback and absence from application startup locally.
+- [ ] Review and integrate this checkpoint into the authoritative delivery lineage before any database application.
+- [ ] Apply the migration only under separate exact database authorization, backup, reconciliation and rollback gates.
+- [ ] Build SharePoint/Outlook connector behavior, routes, UI and live synchronization only in later bounded delivery builds.
+
+# Coordination Delivery Release A — Build 1 gates
+
+- [x] Reconcile the complete Prework 02–06 lineage with MAIN 04's accepted Build 47 ancestry.
+- [x] Require exact project/company/user authority before Coordination Hub persistence.
+- [x] Make stable file and immutable revision replay fail closed on conflicting evidence.
+- [x] Guard current-revision designation against stale observed state.
+- [x] Bind connector-job idempotency to the exact request digest.
+- [x] Keep all operations inside an injected transaction boundary and prove focused behavior locally.
+- [ ] Implement the first provider adapter only in the next bounded build; no provider activation is part of Build 1.
+- [ ] Apply Prework migrations only under separate exact database authorization and verified backup/rollback gates.

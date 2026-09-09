@@ -114,6 +114,9 @@ export const rfisTable = pgTable("rfis", {
   reopenedAt: timestamp("reopened_at"),
   reopenedById: integer("reopened_by_id").references(() => usersTable.id),
 }, (t) => ({
+  idProjectUnique: unique("rfis_id_project_uq").on(t.id, t.projectId),
+  parentSameProject: foreignKey({ columns: [t.parentRfiId, t.projectId], foreignColumns: [t.id, t.projectId], name: "rfis_parent_same_project_fk" }),
+  revisionSameProject: foreignKey({ columns: [t.revisionOf, t.projectId], foreignColumns: [t.id, t.projectId], name: "rfis_revision_same_project_fk" }),
   revisionFamilyNumberUnique: uniqueIndex("rfis_project_revision_family_number_uidx")
     .on(t.projectId, t.parentRfiId, t.revisionNumber)
     .where(sql`parent_rfi_id IS NOT NULL`),

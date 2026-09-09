@@ -128,7 +128,7 @@ try {
   const snapshotAfter = detail.json.linkedSubmittals.find((row: any) => row.submittalId === plumbing);
   assert.deepEqual(snapshotAfter, snapshotBefore); results.meetingTimeSnapshotPreserved = true;
 
-  const exportResponse = await fetch(`${baseUrl}/api/v1/projects/${projectA}/reports/meeting-minutes/pdf?token=${encodeURIComponent(token)}`);
+  const exportResponse = await fetch(`${baseUrl}/api/v1/projects/${projectA}/reports/meeting-minutes/pdf`, { headers: { Authorization: `Bearer ${token}` } });
   assert.equal(exportResponse.status, 200); assert.match(exportResponse.headers.get("content-type") || "", /application\/pdf/);
   const exportParser = new PDFParse({ data: new Uint8Array(await exportResponse.arrayBuffer()) });
   const exportText = await exportParser.getText(); await exportParser.destroy();

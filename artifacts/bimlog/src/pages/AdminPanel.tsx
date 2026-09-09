@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
+import { confirmAndRetireProject } from "@/lib/project-retirement";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -520,15 +521,14 @@ function ProjectsTab({ token }: { token: string }) {
   };
   useEffect(() => { load(); }, [token]);
 
-  const doDelete = async (id: number, name: string) => {
-    if (!confirm(`Delete project "${name}"? This cannot be undone.`)) return;
-    await apiFetch(`/admin/projects/${id}`, token, { method: "DELETE" });
-    setMsg("Project deleted."); load();
-  };
   const doArchive = async (id: number, status: string) => {
-    const newStatus = status === "archived" ? "active" : "archived";
-    await apiFetch(`/admin/projects/${id}`, token, { method: "PATCH", body: JSON.stringify({ status: newStatus }) });
-    setMsg(`Project ${newStatus}.`); load();
+    if (status === "archived") {
+      await apiFetch(`/admin/projects/${id}`, token, { method: "PATCH", body: JSON.stringify({ status: "active" }) });
+      setMsg("Project restored."); load(); return;
+    }
+    if (await confirmAndRetireProject(id, (path, init) => apiFetch(path, token, init))) {
+      setMsg("Project retired; dependent records were preserved."); load();
+    }
   };
   const doTransfer = async () => {
     if (!transferModal || !newOwnerId) return;
@@ -571,7 +571,6 @@ function ProjectsTab({ token }: { token: string }) {
                     <Button size="sm" variant="outline" onClick={() => setLocation(`/projects/${p.id}/analytics`)}>View</Button>
                     <Button size="sm" variant="outline" onClick={() => doArchive(p.id as number, String(p.status))}>{p.status === "archived" ? "Restore" : "Archive"}</Button>
                     <Button size="sm" variant="outline" onClick={() => { setTransferModal(p.id as number); setNewOwnerId(""); }}>Transfer</Button>
-                    <Button size="sm" variant="outline" style={{ color: "#ef4444", borderColor: "#ef444444" }} onClick={() => doDelete(p.id as number, String(p.name))}>Delete</Button>
                   </div>
                 </Td>
               </tr>

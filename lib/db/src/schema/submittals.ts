@@ -1,4 +1,4 @@
-import { pgTable, serial, text, timestamp, integer, boolean, json } from "drizzle-orm/pg-core";
+import { foreignKey, pgTable, serial, text, timestamp, integer, boolean, json, unique } from "drizzle-orm/pg-core";
 import { projectsTable } from "./projects";
 import { usersTable } from "./users";
 
@@ -69,6 +69,9 @@ export const submittalsTable = pgTable("submittals", {
   lastOverdueNotificationSent: timestamp("last_overdue_notification_sent"),
   deletedAt: timestamp("deleted_at"),
   deleteReason: text("delete_reason"),
-});
+}, (t) => [
+  unique("submittals_id_project_uq").on(t.id, t.projectId),
+  foreignKey({ columns: [t.parentSubmittalId, t.projectId], foreignColumns: [t.id, t.projectId], name: "submittals_parent_same_project_fk" }),
+]);
 
 export type Submittal = typeof submittalsTable.$inferSelect;

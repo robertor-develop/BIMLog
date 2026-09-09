@@ -690,6 +690,10 @@ router.patch("/admin/projects/:id", async (req, res) => {
     }
 
     const { status, name } = req.body as { status?: string; name?: string };
+    if (status === "archived") {
+      res.status(409).json({ error: "Project lifecycle changes require the previewed, explicitly confirmed retirement workflow.", code: "PROJECT_LIFECYCLE_WORKFLOW_REQUIRED" });
+      return;
+    }
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     if (status) updates.status = status;
     if (name) updates.name = name;
@@ -699,22 +703,8 @@ router.patch("/admin/projects/:id", async (req, res) => {
   } catch (err) { res.status(400).json({ error: err instanceof Error ? err.message : "Failed to update project" }); }
 });
 
-router.delete("/admin/projects/:id", async (req, res) => {
-  try {
-    const id = parseInt(req.params.id);
-
-    if ((req as any).isProjectAdminOnly) {
-      const myPids: number[] = (req as any).projectAdminProjectIds || [];
-      if (!myPids.includes(id)) { res.status(403).json({ error: "You are not admin of this project" }); return; }
-    }
-
-    const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, id)).limit(1);
-    if (!project) { res.status(404).json({ error: "Project not found" }); return; }
-    await logAdminAction({ adminUserId: req.user!.userId, adminEmail: req.user!.email, action: "delete_project", targetType: "project", targetId: String(id), details: { name: project.name, code: project.code } });
-    await db.delete(projectMembersTable).where(eq(projectMembersTable.projectId, id));
-    await db.delete(projectsTable).where(eq(projectsTable.id, id));
-    res.json({ success: true });
-  } catch (err) { res.status(400).json({ error: err instanceof Error ? err.message : "Failed to delete project" }); }
+router.delete("/admin/projects/:id", (_req, res) => {
+  res.status(405).json({ error: "Hard project deletion is disabled. Preview and confirm project retirement instead.", code: "PROJECT_HARD_DELETE_DISABLED" });
 });
 
 router.post("/admin/projects/:id/transfer", async (req, res) => {

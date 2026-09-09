@@ -10,7 +10,6 @@ import * as XLSX from "xlsx";
 import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions, normalizeSpreadsheetDateOnly } from "@workspace/api-zod";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { createPdfDocument, REPORT_THEMES, reportFileName } from "../lib/pdf-kit";
-import jwt from "jsonwebtoken";
 import { extractFileText } from "../lib/extract-file-text";
 
 const router: Router = Router();
@@ -381,15 +380,8 @@ router.delete("/projects/:projectId/submittal-reports/:reportId/items/:itemId", 
 });
 
 // GET PDF export
-router.get("/projects/:projectId/submittal-reports/:reportId/pdf", async (req, res) => {
-  const token = req.headers.authorization?.split(" ")[1] || (req.query.token as string);
-  if (!token) { res.status(401).json({ error: "Authentication required" }); return; }
-  let userId: number;
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    userId = decoded.userId || decoded.id;
-  } catch { res.status(401).json({ error: "Invalid token" }); return; }
-
+router.get("/projects/:projectId/submittal-reports/:reportId/pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  const userId = req.user!.userId;
   const projectId = Number(req.params.projectId);
   const reportId = Number(req.params.reportId);
   try {

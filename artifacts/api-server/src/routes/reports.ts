@@ -36,24 +36,6 @@ import {
   sectionBar,
   type ReportTheme,
 } from "../lib/pdf-kit";
-import jwt from "jsonwebtoken";
-
-async function verifyReportToken(req: any, res: any): Promise<number | null> {
-  const token =
-    req.headers.authorization?.split(" ")[1] || (req.query.token as string);
-  if (!token) {
-    res.status(401).json({ error: "Authentication required" });
-    return null;
-  }
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET!) as any;
-    return decoded.userId || decoded.id;
-  } catch {
-    res.status(401).json({ error: "Invalid token" });
-    return null;
-  }
-}
-
 const router: Router = Router();
 
 const currentViewTitles = {
@@ -286,9 +268,10 @@ router.post("/help/manual/pdf", authMiddleware, async (req, res) => {
 
 router.get(
   "/projects/:projectId/reports/project-health/pdf",
+  authMiddleware,
+  requireProjectMember(),
   async (req, res) => {
-    const userId = await verifyReportToken(req, res);
-    if (!userId) return;
+    const userId = req.user!.userId;
     const projectId = Number(req.params.projectId);
     try {
       const project = await getProject(projectId, userId);
@@ -365,9 +348,8 @@ router.get(
 );
 
 // ── COMPLIANCE ─────────────────────────────────────────────────────────────────
-router.get("/projects/:projectId/reports/compliance/pdf", async (req, res) => {
-  const userId = await verifyReportToken(req, res);
-  if (!userId) return;
+router.get("/projects/:projectId/reports/compliance/pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  const userId = req.user!.userId;
   const projectId = Number(req.params.projectId);
   try {
     const project = await getProject(projectId, userId);
@@ -426,9 +408,8 @@ router.get("/projects/:projectId/reports/compliance/pdf", async (req, res) => {
 });
 
 // ── RFI AGING ──────────────────────────────────────────────────────────────────
-router.get("/projects/:projectId/reports/rfi-aging/pdf", async (req, res) => {
-  const userId = await verifyReportToken(req, res);
-  if (!userId) return;
+router.get("/projects/:projectId/reports/rfi-aging/pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  const userId = req.user!.userId;
   const projectId = Number(req.params.projectId);
   try {
     const project = await getProject(projectId, userId);
@@ -495,9 +476,10 @@ router.get("/projects/:projectId/reports/rfi-aging/pdf", async (req, res) => {
 // ── SUBMITTAL STATUS ───────────────────────────────────────────────────────────
 router.get(
   "/projects/:projectId/reports/submittal-status/pdf",
+  authMiddleware,
+  requireProjectMember(),
   async (req, res) => {
-    const userId = await verifyReportToken(req, res);
-    if (!userId) return;
+    const userId = req.user!.userId;
     const projectId = Number(req.params.projectId);
     try {
       const project = await getProject(projectId, userId);
@@ -560,9 +542,8 @@ router.get(
 );
 
 // ── PERFORMANCE ────────────────────────────────────────────────────────────────
-router.get("/projects/:projectId/reports/performance/pdf", async (req, res) => {
-  const userId = await verifyReportToken(req, res);
-  if (!userId) return;
+router.get("/projects/:projectId/reports/performance/pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  const userId = req.user!.userId;
   const projectId = Number(req.params.projectId);
   try {
     const project = await getProject(projectId, userId);
@@ -644,11 +625,12 @@ router.get("/projects/:projectId/reports/performance/pdf", async (req, res) => {
 // ── DISPUTE REPORT ─────────────────────────────────────────────────────────────
 router.get(
   "/projects/:projectId/reports/dispute/:module/:itemId/pdf",
+  authMiddleware,
+  requireProjectMember(),
   async (req, res) => {
-    const userId = await verifyReportToken(req, res);
-    if (!userId) return;
+    const userId = req.user!.userId;
     const projectId = Number(req.params.projectId);
-    const module = req.params.module;
+    const module = String(req.params.module);
     const itemId = Number(req.params.itemId);
     try {
       const project = await getProject(projectId, userId);
@@ -709,9 +691,10 @@ router.get(
 // ── AUDIT CERTIFICATE ──────────────────────────────────────────────────────────
 router.get(
   "/projects/:projectId/reports/audit-certificate/pdf",
+  authMiddleware,
+  requireProjectMember(),
   async (req, res) => {
-    const userId = await verifyReportToken(req, res);
-    if (!userId) return;
+    const userId = req.user!.userId;
     const projectId = Number(req.params.projectId);
     try {
       const project = await getProject(projectId, userId);
@@ -793,9 +776,10 @@ router.get(
 // ── MEETING MINUTES ────────────────────────────────────────────────────────────
 router.get(
   "/projects/:projectId/reports/meeting-minutes/pdf",
+  authMiddleware,
+  requireProjectMember(),
   async (req, res) => {
-    const userId = await verifyReportToken(req, res);
-    if (!userId) return;
+    const userId = req.user!.userId;
     const projectId = Number(req.params.projectId);
     try {
       const project = await getProject(projectId, userId);
@@ -1111,9 +1095,10 @@ router.get(
 // ── CHANGE ORDER LOG ───────────────────────────────────────────────────────────
 router.get(
   "/projects/:projectId/reports/change-order-log/pdf",
+  authMiddleware,
+  requireProjectMember(),
   async (req, res) => {
-    const userId = await verifyReportToken(req, res);
-    if (!userId) return;
+    const userId = req.user!.userId;
     const projectId = Number(req.params.projectId);
     try {
       const project = await getProject(projectId, userId);
@@ -1191,9 +1176,10 @@ router.get(
 // ── TRANSMITTAL LOG ────────────────────────────────────────────────────────────
 router.get(
   "/projects/:projectId/reports/transmittal-log/pdf",
+  authMiddleware,
+  requireProjectMember(),
   async (req, res) => {
-    const userId = await verifyReportToken(req, res);
-    if (!userId) return;
+    const userId = req.user!.userId;
     const projectId = Number(req.params.projectId);
     try {
       const project = await getProject(projectId, userId);
@@ -1269,9 +1255,8 @@ router.get(
 );
 
 // ── CVR FULL REPORT ──────────────────────────────────────────────────────────
-router.get("/projects/:projectId/reports/cvr/pdf", async (req, res) => {
-  const userId = await verifyReportToken(req, res);
-  if (!userId) return;
+router.get("/projects/:projectId/reports/cvr/pdf", authMiddleware, requireProjectMember(), async (req, res) => {
+  const userId = req.user!.userId;
   const projectId = Number(req.params.projectId);
   try {
     const project = await getProject(projectId, userId);

@@ -1,6 +1,6 @@
 import { Router, type IRouter } from "express";
 import { db } from "@workspace/db";
-import { projectsTable, projectMembersTable, projectCompanyBindingVersionsTable, lensNextModelBindingsTable, filesTable, rfisTable, submittalsTable, activityLogTable, namingConventionsTable, namingFieldsTable, usersTable, companiesTable } from "@workspace/db/schema";
+import { projectsTable, projectMembersTable, projectCompanyBindingVersionsTable, lensNextModelBindingsTable, filesTable, usersTable, companiesTable } from "@workspace/db/schema";
 import { eq, ne, count, inArray, and, sql, ilike } from "drizzle-orm";
 import { CreateProjectBody, GetProjectParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
@@ -9,6 +9,7 @@ import bcrypt from "bcryptjs";
 import crypto from "node:crypto";
 import { waitForFeaturePolicyMigration } from "../lib/feature-policy-migration";
 import { normalizeLensNextModelKey, selectSingleAuthorizedLensNextBinding } from "../lib/lens-next-model-binding";
+import { previewProjectRetirement, ProjectRetirementError, retireProject } from "../lib/project-retirement";
 
 const router: IRouter = Router();
 
@@ -33,7 +34,7 @@ router.get("/projects", authMiddleware, async (req, res) => {
     const projects = await db
       .select()
       .from(projectsTable)
-      .where(inArray(projectsTable.id, projectIds));
+      .where(and(inArray(projectsTable.id, projectIds), ne(projectsTable.status, "archived")));
 
     const results = await Promise.all(
       projects.map(async (p) => {
@@ -93,7 +94,7 @@ router.get("/projects/list-for-plugin", authMiddleware, async (req, res) => {
     const projects = await db
       .select({ id: projectsTable.id, name: projectsTable.name, code: projectsTable.code })
       .from(projectsTable)
-      .where(inArray(projectsTable.id, projectIds));
+      .where(and(inArray(projectsTable.id, projectIds), ne(projectsTable.status, "archived")));
 
     res.json({ projects });
   } catch (error) {
@@ -230,56 +231,36 @@ router.get("/projects/:projectId", authMiddleware, requireProjectMember(), async
   }
 });
 
-router.delete("/projects/:projectId", authMiddleware, requireProjectMember(), async (req, res) => {
+router.get("/projects/:projectId/retirement-preview", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = GetProjectParams.parse({ projectId: req.params.projectId });
-    const userId = req.user!.userId;
-
-    const memberRow = await db
-      .select()
-      .from(projectMembersTable)
-      .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId)))
-      .limit(1);
-
-    if (memberRow.length === 0) {
-      res.status(403).json({ error: "Not a project member." });
-      return;
-    }
-
     const adminRoles = await getRolesByPermission("admin");
-    const isAdmin = adminRoles.includes(memberRow[0].role);
-
-    const project = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
-    const isCreator = project.length > 0 && project[0].createdById === userId;
-
-    if (!isAdmin && !isCreator) {
-      res.status(403).json({ error: "Only project admins or the project creator can delete a project." });
+    res.json(await previewProjectRetirement(req.user!, projectId, adminRoles));
+  } catch (error) {
+    if (error instanceof ProjectRetirementError) {
+      res.status(error.status).json({ error: error.message, code: error.code });
       return;
     }
-
-    const conventions = await db
-      .select({ id: namingConventionsTable.id })
-      .from(namingConventionsTable)
-      .where(eq(namingConventionsTable.projectId, projectId));
-
-    if (conventions.length > 0) {
-      const convIds = conventions.map(c => c.id);
-      await db.delete(namingFieldsTable).where(inArray(namingFieldsTable.conventionId, convIds));
-    }
-
-    await db.delete(namingConventionsTable).where(eq(namingConventionsTable.projectId, projectId));
-    await db.delete(filesTable).where(eq(filesTable.projectId, projectId));
-    await db.delete(rfisTable).where(eq(rfisTable.projectId, projectId));
-    await db.delete(submittalsTable).where(eq(submittalsTable.projectId, projectId));
-    await db.delete(activityLogTable).where(eq(activityLogTable.projectId, projectId));
-    await db.delete(projectMembersTable).where(eq(projectMembersTable.projectId, projectId));
-    await db.delete(projectsTable).where(eq(projectsTable.id, projectId));
-
-    res.json({ ok: true });
-  } catch (error) {
-    const message = error instanceof Error ? error.message : "Internal server error";
-    res.status(500).json({ error: message });
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
   }
+});
+
+router.post("/projects/:projectId/retire", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const { projectId } = GetProjectParams.parse({ projectId: req.params.projectId });
+    const adminRoles = await getRolesByPermission("admin");
+    res.json(await retireProject(req.user!, projectId, adminRoles, req.body || {}));
+  } catch (error) {
+    if (error instanceof ProjectRetirementError) {
+      res.status(error.status).json({ error: error.message, code: error.code });
+      return;
+    }
+    res.status(500).json({ error: error instanceof Error ? error.message : "Internal server error" });
+  }
+});
+
+router.delete("/projects/:projectId", authMiddleware, requireProjectMember(), (_req, res) => {
+  res.status(405).json({ error: "Hard project deletion is disabled. Preview and confirm project retirement instead.", code: "PROJECT_HARD_DELETE_DISABLED" });
 });
 
 router.post("/projects/:projectId/assign-company-user", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {

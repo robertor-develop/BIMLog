@@ -929,3 +929,69 @@ Roberto subsequently clarified that 40 was illustrative, not a maximum. The reco
 - The compatibility boundary requires database digest = embedded digest and exact project/server/viewpoint/lifecycle/revision identity for unversioned historical packages. Any stored/embedded mismatch or authoritative identity mismatch remains a 409. No database row or historical package is rewritten.
 - Navigation normalization is response-only, requires a valid navigation digest plus exact project/viewpoint/lifecycle/revision identity, and changes only the positive historical server ID to the requested authoritative server ID in the ephemeral payload.
 - P11 Intake source was verified before mutation. The accepted N17 camera-unit lineage was merged without behavioral edits, and release metadata was aligned to N17-P12. Publication, package delivery, and Ruben field acceptance remain separate recorded gates.
+# 2026-09-08 — Prework 02 project PDF authorization decision
+
+The Build 47 source still allowed Submittal, Clash and general project report
+PDF handlers to validate JWTs locally and accept them from URL query strings.
+That authenticated a token but did not mechanically establish current-project
+membership on the two proven routes, and query URLs could expose bearer
+material through history, logs or referrers. The bounded correction delegates
+authentication and project scope to the existing middleware, preserves the
+verified super-administrator behavior, and moves proof callers to the
+Authorization header. No authorization policy was broadened and no database,
+schema, data, report content, Intake/APU, Lens Next or deployment state changed.
+# 2026-09-08 — Prework 03 destructive-integrity decision
+
+The prior project deletion paths removed only a small subset of 137 identified
+project-dependent tables, permitting partial loss or foreign-key failure. The
+selected strategy is retirement: preserve all records, hide archived projects
+from ordinary project lists, require a fresh impact preview and exact project
+code, and atomically record lifecycle state plus an administrator audit event.
+Hard deletion and direct archive bypasses now fail closed. No schema or live
+data changed.
+
+# 2026-09-08 — Prework 04 enterprise-identity decision
+
+The accepted Job Intake data remains an immutable operational snapshot and is
+not converted into a second enterprise registry. The existing `companies`
+table is retained as canonical company authority. Client, owner, contractor,
+provider and other business meanings are explicit project-scoped roles.
+Contacts and trades are normalized once, then connected through the exact
+project-company relationship; contract parties use the same chain.
+
+Composite identity constraints prevent a file parent/successor, RFI
+parent/revision or Submittal parent from resolving across projects. They are
+introduced `NOT VALID` to avoid altering or rejecting preserved historical
+rows while still enforcing all new and changed relationships. The migration is
+explicit, advisory-locked and transactional. It is intentionally not wired to
+application startup and was not applied to a database.
+
+# 2026-09-08 — Prework 05 shared action/audit decision
+
+The shared authority is a projection contract, not a replacement database.
+Existing actions and histories remain owned by their current modules. Each
+projection identifies its module, record and optional revision, requires an
+attributable owner, carries exact project and optional company/trade context,
+and binds the representation to a source snapshot digest.
+
+Audit events are append-only semantic envelopes with attributable actors,
+reason codes, prior/result digests and evidence references. The construction
+helper recursively freezes the validated envelope so downstream code cannot
+silently mutate it in memory. No historical record migration or module rewrite
+was performed or authorized.
+
+# 2026-09-08 — Prework 06 connector-foundation decision
+
+- Credentials are persisted only as a complete protected envelope with key version; API-token plaintext is not part of the schema or validation contract.
+- Concurrent work is claimed with row locking and skip-locked selection, then guarded by lease identity and monotonic fencing. Retries are bounded and failed work remains inspectable through immutable events and dead-letter lineage.
+- Coordination File revisions are append-only evidence. Selecting a new current revision changes a separate designation and cannot rewrite provider/version/hash history.
+- SharePoint delta cursors are treated as protected credential-adjacent state. Mappings and mismatch state remain explicit and attributable.
+- The migration is forward-only, transactional and deliberately disconnected from startup. Local simulation proves commit and rollback paths; no database connection or production mutation was performed.
+
+# 2026-09-09 — Coordination Delivery Release A Build 1 decision
+
+- Provider-neutral orchestration precedes any SharePoint-specific implementation so provider behavior cannot become a parallel file, revision or job authority.
+- Project/company authorization is a mandatory store operation inside each transaction, not optional route decoration.
+- Immutable provider revisions and queued job requests replay only when their complete identity and digest evidence agree; conflicts fail closed without insertion.
+- Changing the current revision is a separate explicit compare-and-set operation. Revision evidence itself remains immutable.
+- No existing product module, schema, startup path or external system was modified or activated.
