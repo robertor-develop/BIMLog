@@ -4,6 +4,7 @@ import {
   type ConnectorCredentialValidationPort,
 } from "./coordination-hub-configuration-service";
 import { isSharePointValidationAllowed } from "./provider-governance";
+import { createRuntimeProtectedProviderProbeExecutor } from "./protected-provider-probe-executor";
 
 const GRAPH_ORIGIN = "https://graph.microsoft.com";
 const GRAPH_PROBE_PATH = "/v1.0/sites/root?$select=id";
@@ -28,12 +29,6 @@ export interface ProtectedProviderProbeExecutor {
     };
   }): Promise<unknown>;
 }
-
-export const unavailableProtectedProviderProbeExecutor: ProtectedProviderProbeExecutor = {
-  async execute(): Promise<never> {
-    throw new ConnectorValidationUnavailableError("A protected SharePoint request executor is not configured");
-  },
-};
 
 export interface SharePointCredentialValidatorConfiguration {
   enabled: boolean;
@@ -101,6 +96,6 @@ export function createRuntimeSharePointCredentialValidator(): ConnectorCredentia
     enabled: process.env.BIMLOG_SHAREPOINT_VALIDATION_ENABLED === "true",
     providerApprovals: process.env.BIMLOG_PROVIDER_APPROVALS ?? "",
     graphOrigin: process.env.BIMLOG_SHAREPOINT_GRAPH_ORIGIN ?? GRAPH_ORIGIN,
-    executor: unavailableProtectedProviderProbeExecutor,
+    executor: createRuntimeProtectedProviderProbeExecutor(),
   });
 }
