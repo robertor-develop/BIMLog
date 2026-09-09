@@ -380,6 +380,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/rfi-standard-exports.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts
+- artifacts/api-server/src/lib/sharepoint-credential-validator.behavior.ts
+- artifacts/api-server/src/lib/sharepoint-credential-validator.ts
 - artifacts/api-server/src/lib/sharepoint-discovery-adapter.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-discovery-adapter.ts
 - artifacts/api-server/src/lib/sharepoint-reconciliation.behavior.ts
