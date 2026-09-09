@@ -179,6 +179,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/contract-item-workflow.behavior.ts
 - artifacts/api-server/src/lib/coordination-action-projection.behavior.ts
 - artifacts/api-server/src/lib/coordination-action-projection.ts
+- artifacts/api-server/src/lib/coordination-hub-configuration-postgres-store.ts
+- artifacts/api-server/src/lib/coordination-hub-configuration-service.behavior.ts
+- artifacts/api-server/src/lib/coordination-hub-configuration-service.ts
 - artifacts/api-server/src/lib/coordination-hub-postgres-store.ts
 - artifacts/api-server/src/lib/coordination-hub-runtime.behavior.ts
 - artifacts/api-server/src/lib/coordination-hub-service.behavior.ts
