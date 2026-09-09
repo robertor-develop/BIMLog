@@ -4,6 +4,7 @@ import {
   customerProviderCatalog,
   isLegacyAutodeskAllowed,
   isProviderOperationAllowed,
+  isSharePointValidationAllowed,
 } from "../src/lib/provider-governance";
 
 const configured = () => true;
@@ -14,6 +15,9 @@ assert.equal(isProviderOperationAllowed("procore", 17, "authorize", ""), false);
 assert.equal(isProviderOperationAllowed("bim360", 17, "callback", ""), false);
 assert.equal(isProviderOperationAllowed("speckle", 17, "catalog", ""), false);
 assert.equal(isLegacyAutodeskAllowed(""), false);
+assert.equal(isSharePointValidationAllowed(17, ""), false);
+assert.equal(isSharePointValidationAllowed(17, "17:sharepoint:validate"), true);
+assert.equal(isSharePointValidationAllowed(18, "17:sharepoint:validate"), false);
 
 const approvals = "17:speckle:catalog,17:procore:*,*:legacy_autodesk:legacy";
 assert.equal(isProviderOperationAllowed("speckle", 17, "catalog", approvals), true);

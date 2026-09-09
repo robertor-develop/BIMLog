@@ -6,10 +6,11 @@ import { CoordinationConflictError, CoordinationHubService } from "../lib/coordi
 import { postgresCoordinationHubStore } from "../lib/coordination-hub-postgres-store";
 import { ConnectorValidationUnavailableError, CoordinationHubConfigurationService } from "../lib/coordination-hub-configuration-service";
 import { postgresCoordinationHubConfigurationStore } from "../lib/coordination-hub-configuration-postgres-store";
+import { createRuntimeSharePointCredentialValidator } from "../lib/sharepoint-credential-validator";
 
 const router: IRouter = Router();
 const service = new CoordinationHubService(postgresCoordinationHubStore);
-const configurationService = new CoordinationHubConfigurationService(postgresCoordinationHubConfigurationStore);
+const configurationService = new CoordinationHubConfigurationService(postgresCoordinationHubConfigurationStore, createRuntimeSharePointCredentialValidator());
 
 function trustedCommand(req: Request): Record<string, unknown> {
   return {

@@ -11,6 +11,7 @@ const route = read("../routes/coordination-hub.ts");
 const store = read("./coordination-hub-postgres-store.ts");
 const configurationService = read("./coordination-hub-configuration-service.ts");
 const configurationStore = read("./coordination-hub-configuration-postgres-store.ts");
+const sharePointValidator = read("./sharepoint-credential-validator.ts");
 
 assert.match(app, /queueDatabaseStartup\(async \(\) => \{[\s\S]*startEnterpriseIdentityMigration\(\)[\s\S]*waitForEnterpriseIdentityMigration\(\)[\s\S]*ensureConnectorFoundationSchema\(pool\)/);
 assert.match(routesIndex, /coordinationHubRouter/);
@@ -20,6 +21,7 @@ assert.match(route, /coordination-hub\/credentials", authMiddleware, requireProj
 assert.match(route, /coordination-hub\/credentials\/:credentialId\/validate", authMiddleware, requireProjectMember\("project_admin"\)/);
 assert.match(route, /coordination-hub\/sharepoint-mapping", authMiddleware, requireProjectMember\("project_admin"\)/);
 assert.match(route, /companyId: req\.user!\.companyId/);
+assert.match(route, /createRuntimeSharePointCredentialValidator/);
 assert.match(route, /actorUserId: req\.user!\.userId/);
 assert.doesNotMatch(route, /body\.scope/);
 assert.match(route, /COORDINATION_INPUT_INVALID/);
@@ -46,4 +48,10 @@ assert.match(configurationStore, /pm\.role='project_admin'/);
 assert.match(configurationStore, /BEGIN/);
 assert.match(configurationStore, /ROLLBACK/);
 assert.doesNotMatch(configurationStore, /SELECT \*/);
+assert.match(sharePointValidator, /https:\/\/graph\.microsoft\.com/);
+assert.match(sharePointValidator, /BIMLOG_SHAREPOINT_VALIDATION_ENABLED/);
+assert.match(sharePointValidator, /isSharePointValidationAllowed/);
+assert.match(sharePointValidator, /unavailableProtectedProviderProbeExecutor/);
+assert.doesNotMatch(sharePointValidator, /\bfetch\s*\(/);
+assert.doesNotMatch(sharePointValidator, /client_secret|access_token|Authorization/i);
 console.log("coordination hub runtime behavior: PASS");

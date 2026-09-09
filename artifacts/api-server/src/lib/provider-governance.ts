@@ -7,6 +7,7 @@ export type ProviderOperation =
   | "browse"
   | "import"
   | "disconnect"
+  | "validate"
   | "legacy";
 
 type ProviderVisibility = "public" | "governed" | "private";
@@ -91,7 +92,6 @@ const PROVIDERS: readonly ProviderPolicy[] = [
     ["microsoft_project", "Microsoft Project"],
     ["power_bi", "Power BI"],
     ["onedrive", "OneDrive"],
-    ["sharepoint", "SharePoint"],
     ["bluebeam", "Bluebeam"],
     ["smartsheet", "Smartsheet"],
     ["box", "Box"],
@@ -113,6 +113,17 @@ const PROVIDERS: readonly ProviderPolicy[] = [
     visibility: "governed" as const,
     operations: ["catalog"] as const,
   })),
+  {
+    key: "sharepoint",
+    label: { en: "SharePoint", es: "SharePoint" },
+    description: {
+      en: "Available only after provider and customer approval.",
+      es: "Disponible solo después de la aprobación del proveedor y del cliente.",
+    },
+    category: "governed",
+    visibility: "governed",
+    operations: ["catalog", "validate"],
+  },
   ...([
     ["procore", "Procore", "procore"],
     ["bim360", "Autodesk construction cloud", "bim360"],
@@ -192,4 +203,8 @@ export function customerProviderCatalog(
 
 export function isLegacyAutodeskAllowed(rawApprovals?: string): boolean {
   return isProviderOperationAllowed("legacy_autodesk", null, "legacy", rawApprovals);
+}
+
+export function isSharePointValidationAllowed(companyId: number, rawApprovals?: string): boolean {
+  return isProviderOperationAllowed("sharepoint", companyId, "validate", rawApprovals);
 }
