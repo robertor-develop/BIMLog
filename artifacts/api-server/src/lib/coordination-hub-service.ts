@@ -54,9 +54,9 @@ export type CoordinationScope = z.infer<typeof coordinationScopeSchema>;
 export type RegisterCoordinationRevisionCommand = z.infer<typeof registerCoordinationRevisionCommandSchema>;
 export type EnqueueCoordinationJobCommand = z.infer<typeof enqueueCoordinationJobCommandSchema>;
 
-export type CoordinationFileRecord = RegisterCoordinationRevisionCommand["file"] & Pick<CoordinationScope, "projectId" | "companyId">;
-export type CoordinationRevisionRecord = RegisterCoordinationRevisionCommand["revision"] & { coordinationFileId: string; projectId: number };
-export type CoordinationJobRecord = EnqueueCoordinationJobCommand["job"] & Pick<CoordinationScope, "projectId" | "companyId">;
+export type CoordinationFileRecord = RegisterCoordinationRevisionCommand["file"] & Pick<CoordinationScope, "projectId" | "companyId"> & { createdById: number };
+export type CoordinationRevisionRecord = RegisterCoordinationRevisionCommand["revision"] & { coordinationFileId: string; projectId: number; createdById: number };
+export type CoordinationJobRecord = EnqueueCoordinationJobCommand["job"] & Pick<CoordinationScope, "projectId" | "companyId"> & { createdById: number };
 
 export interface CoordinationHubTransaction {
   assertProjectCompanyAuthority(scope: CoordinationScope): Promise<void>;
@@ -79,11 +79,11 @@ export class CoordinationConflictError extends Error {
 }
 
 function sameFile(left: CoordinationFileRecord, right: CoordinationFileRecord): boolean {
-  return left.id === right.id && left.projectId === right.projectId && left.companyId === right.companyId && left.stableKey === right.stableKey && left.category === right.category && left.tradeId === right.tradeId;
+  return left.id === right.id && left.projectId === right.projectId && left.companyId === right.companyId && left.stableKey === right.stableKey && left.category === right.category && left.tradeId === right.tradeId && left.createdById === right.createdById;
 }
 
 function sameRevision(left: CoordinationRevisionRecord, right: CoordinationRevisionRecord): boolean {
-  return left.id === right.id && left.coordinationFileId === right.coordinationFileId && left.projectId === right.projectId && left.revisionNumber === right.revisionNumber && left.sourceFileId === right.sourceFileId && left.provider === right.provider && left.providerItemId === right.providerItemId && left.providerVersionId === right.providerVersionId && left.contentSha256 === right.contentSha256 && left.byteSize === right.byteSize;
+  return left.id === right.id && left.coordinationFileId === right.coordinationFileId && left.projectId === right.projectId && left.revisionNumber === right.revisionNumber && left.sourceFileId === right.sourceFileId && left.provider === right.provider && left.providerItemId === right.providerItemId && left.providerVersionId === right.providerVersionId && left.contentSha256 === right.contentSha256 && left.byteSize === right.byteSize && left.createdById === right.createdById;
 }
 
 export class CoordinationHubService {
@@ -93,12 +93,12 @@ export class CoordinationHubService {
     const command = registerCoordinationRevisionCommandSchema.parse(input);
     return this.store.transaction(async (transaction) => {
       await transaction.assertProjectCompanyAuthority(command.scope);
-      const fileRecord: CoordinationFileRecord = { ...command.file, projectId: command.scope.projectId, companyId: command.scope.companyId };
+      const fileRecord: CoordinationFileRecord = { ...command.file, projectId: command.scope.projectId, companyId: command.scope.companyId, createdById: command.scope.actorUserId };
       const existingFile = await transaction.findFileByStableKey(command.scope.projectId, command.file.stableKey);
       if (existingFile && !sameFile(existingFile, fileRecord)) throw new CoordinationConflictError("Stable Coordination File identity conflicts with the requested scope or classification");
       if (!existingFile) await transaction.insertFile(fileRecord);
 
-      const revisionRecord: CoordinationRevisionRecord = { ...command.revision, coordinationFileId: command.file.id, projectId: command.scope.projectId };
+      const revisionRecord: CoordinationRevisionRecord = { ...command.revision, coordinationFileId: command.file.id, projectId: command.scope.projectId, createdById: command.scope.actorUserId };
       const existingRevision = await transaction.findRevisionByProviderIdentity(command.revision.provider, command.revision.providerItemId, command.revision.providerVersionId);
       if (existingRevision && !sameRevision(existingRevision, revisionRecord)) throw new CoordinationConflictError("Provider revision identity conflicts with immutable revision evidence");
       if (!existingRevision) await transaction.insertRevision(revisionRecord);
@@ -123,7 +123,7 @@ export class CoordinationHubService {
         if (existing.requestDigest !== command.job.requestDigest) throw new CoordinationConflictError("Idempotency key was reused with a different request digest");
         return { result: "idempotent", jobId: existing.id };
       }
-      await transaction.insertJob({ ...command.job, companyId: command.scope.companyId, projectId: command.scope.projectId });
+      await transaction.insertJob({ ...command.job, companyId: command.scope.companyId, projectId: command.scope.projectId, createdById: command.scope.actorUserId });
       return { result: "queued", jobId: command.job.id };
     });
   }

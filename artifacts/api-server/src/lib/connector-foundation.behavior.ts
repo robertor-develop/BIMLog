@@ -28,5 +28,6 @@ await assert.rejects(()=>ensureConnectorFoundationSchema({connect:async()=>({que
 assert.equal(failed.at(-1),"ROLLBACK");assert.equal(failureReleased,true);
 
 const appSource=readFileSync(new URL("../app.ts",import.meta.url),"utf8");
-assert.doesNotMatch(appSource,/startConnectorFoundationMigration|ensureConnectorFoundationSchema/);
+assert.match(appSource,/queueDatabaseStartup\(async \(\) => \{[\s\S]*startEnterpriseIdentityMigration\(\)[\s\S]*waitForEnterpriseIdentityMigration\(\)[\s\S]*ensureConnectorFoundationSchema\(pool\)/);
+assert.doesNotMatch(appSource,/startSharePointWorker|startOutlookWorker|startProcoreWorker/);
 console.log("connector foundation behavior: PASS");

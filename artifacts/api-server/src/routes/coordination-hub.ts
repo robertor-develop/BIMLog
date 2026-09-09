@@ -1,0 +1,50 @@
+import { randomUUID } from "node:crypto";
+import { Router, type IRouter, type Request, type Response } from "express";
+import { ZodError } from "zod/v4";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { CoordinationConflictError, CoordinationHubService } from "../lib/coordination-hub-service";
+import { postgresCoordinationHubStore } from "../lib/coordination-hub-postgres-store";
+
+const router: IRouter = Router();
+const service = new CoordinationHubService(postgresCoordinationHubStore);
+
+function trustedCommand(req: Request): Record<string, unknown> {
+  return {
+    ...(req.body && typeof req.body === "object" ? req.body : {}),
+    scope: {
+      projectId: Number(req.params.projectId),
+      companyId: req.user!.companyId,
+      actorUserId: req.user!.userId,
+    },
+  };
+}
+
+function fail(res: Response, error: unknown): void {
+  if (error instanceof ZodError) {
+    res.status(400).json({ error: "COORDINATION_INPUT_INVALID", issues: error.issues.map(({ path, message }) => ({ path, message })) });
+    return;
+  }
+  if (error instanceof CoordinationConflictError) {
+    res.status(409).json({ error: error.code, message: error.message });
+    return;
+  }
+  const correlationId = randomUUID();
+  console.error(JSON.stringify({ event: "coordination_hub_route_failure", correlationId, exception: error instanceof Error ? error.name : "UnknownError" }));
+  res.status(500).json({ error: "COORDINATION_OPERATION_FAILED", correlationId });
+}
+
+router.post("/projects/:projectId/coordination-hub/revisions", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const result = await service.registerRevision(trustedCommand(req));
+    res.status(result.result === "created" ? 201 : 200).json(result);
+  } catch (error) { fail(res, error); }
+});
+
+router.post("/projects/:projectId/coordination-hub/jobs", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const result = await service.enqueueJob(trustedCommand(req));
+    res.status(result.result === "queued" ? 202 : 200).json(result);
+  } catch (error) { fail(res, error); }
+});
+
+export default router;

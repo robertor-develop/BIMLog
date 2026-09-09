@@ -1,0 +1,29 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+
+const here = path.dirname(fileURLToPath(import.meta.url));
+const read = (relative: string) => fs.readFileSync(path.resolve(here, relative), "utf8");
+const app = read("../app.ts");
+const routesIndex = read("../routes/index.ts");
+const route = read("../routes/coordination-hub.ts");
+const store = read("./coordination-hub-postgres-store.ts");
+
+assert.match(app, /queueDatabaseStartup\(async \(\) => \{[\s\S]*startEnterpriseIdentityMigration\(\)[\s\S]*waitForEnterpriseIdentityMigration\(\)[\s\S]*ensureConnectorFoundationSchema\(pool\)/);
+assert.match(routesIndex, /coordinationHubRouter/);
+assert.match(route, /authMiddleware, requireProjectMember\(\)/);
+assert.match(route, /companyId: req\.user!\.companyId/);
+assert.match(route, /actorUserId: req\.user!\.userId/);
+assert.doesNotMatch(route, /body\.scope/);
+assert.match(route, /COORDINATION_INPUT_INVALID/);
+assert.match(route, /COORDINATION_OPERATION_FAILED/);
+assert.doesNotMatch(route, /error instanceof Error \? error\.message/);
+assert.match(store, /BEGIN/);
+assert.match(store, /COMMIT/);
+assert.match(store, /ROLLBACK/);
+assert.match(store, /u\.is_super_admin OR EXISTS\([\s\S]*project_members/);
+assert.match(store, /c\.company_id=\$2 AND c\.provider=\$4 AND c\.state='active'/);
+assert.match(store, /EXISTS\(SELECT 1 FROM files WHERE id=\$5 AND project_id=\$3\)/);
+assert.doesNotMatch(store, /SELECT \*/);
+console.log("coordination hub runtime behavior: PASS");
