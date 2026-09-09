@@ -14,6 +14,7 @@ const configurationStore = read("./coordination-hub-configuration-postgres-store
 const sharePointValidator = read("./sharepoint-credential-validator.ts");
 const protectedExecutor = read("./protected-provider-probe-executor.ts");
 const connectorEnvelope = read("./connector-credential-envelope.ts");
+const credentialLeaseResolver = read("./connector-credential-lease-resolver.ts");
 
 assert.match(app, /queueDatabaseStartup\(async \(\) => \{[\s\S]*startEnterpriseIdentityMigration\(\)[\s\S]*waitForEnterpriseIdentityMigration\(\)[\s\S]*ensureConnectorFoundationSchema\(pool\)/);
 assert.match(routesIndex, /coordinationHubRouter/);
@@ -56,7 +57,7 @@ assert.match(sharePointValidator, /isSharePointValidationAllowed/);
 assert.match(sharePointValidator, /createRuntimeProtectedProviderProbeExecutor/);
 assert.doesNotMatch(sharePointValidator, /\bfetch\s*\(/);
 assert.doesNotMatch(sharePointValidator, /client_secret|access_token|Authorization/i);
-assert.match(protectedExecutor, /unavailableProtectedBearerLeaseResolver/);
+assert.match(protectedExecutor, /createRuntimeConnectorCredentialLeaseResolver/);
 assert.match(protectedExecutor, /response\.body\.cancel\(\)/);
 assert.match(protectedExecutor, /token\.fill\(0\)/);
 assert.match(protectedExecutor, /request\.url !== GRAPH_PROBE_URL/);
@@ -70,4 +71,11 @@ assert.match(connectorEnvelope, /provider: context\.provider/);
 assert.match(connectorEnvelope, /keyVersion: context\.keyVersion/);
 assert.doesNotMatch(connectorEnvelope, /AI_PROVIDER_KEK/);
 assert.doesNotMatch(connectorEnvelope, /console\.(?:log|error|warn)/);
+assert.match(credentialLeaseResolver, /BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY/);
+assert.match(credentialLeaseResolver, /id=\$1 AND company_id=\$2 AND provider=\$3 AND state='pending_validation'/);
+assert.match(credentialLeaseResolver, /decryptConnectorBearerToken/);
+assert.match(credentialLeaseResolver, /for \(const row of selectedRows\) clearRowBuffers\(row\)/);
+assert.match(credentialLeaseResolver, /token\.fill\(0\)/);
+assert.doesNotMatch(credentialLeaseResolver, /SELECT\s+\*/i);
+assert.doesNotMatch(credentialLeaseResolver, /console\.(?:log|error|warn)/);
 console.log("coordination hub runtime behavior: PASS");

@@ -1,5 +1,6 @@
 import { ConnectorValidationUnavailableError } from "./coordination-hub-configuration-service";
 import type { ProtectedProviderProbeExecutor } from "./sharepoint-credential-validator";
+import { createRuntimeConnectorCredentialLeaseResolver } from "./connector-credential-lease-resolver";
 
 const GRAPH_PROBE_URL = "https://graph.microsoft.com/v1.0/sites/root?$select=id";
 const requestIdPattern = /^[A-Za-z0-9._:-]{1,256}$/;
@@ -96,5 +97,5 @@ export class FixedGraphProtectedProviderProbeExecutor implements ProtectedProvid
 }
 
 export function createRuntimeProtectedProviderProbeExecutor(): ProtectedProviderProbeExecutor {
-  return new FixedGraphProtectedProviderProbeExecutor(unavailableProtectedBearerLeaseResolver);
+  return new FixedGraphProtectedProviderProbeExecutor(createRuntimeConnectorCredentialLeaseResolver());
 }
