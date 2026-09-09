@@ -7,6 +7,7 @@ import { postgresCoordinationHubStore } from "../lib/coordination-hub-postgres-s
 import { ConnectorValidationUnavailableError, CoordinationHubConfigurationService } from "../lib/coordination-hub-configuration-service";
 import { postgresCoordinationHubConfigurationStore } from "../lib/coordination-hub-configuration-postgres-store";
 import { createRuntimeSharePointCredentialValidator } from "../lib/sharepoint-credential-validator";
+import { runtimeConnectorValidationOperationsService } from "../lib/connector-validation-operations-postgres-store";
 
 const router: IRouter = Router();
 const service = new CoordinationHubService(postgresCoordinationHubStore);
@@ -47,6 +48,20 @@ router.get("/projects/:projectId/coordination-hub/summary", authMiddleware, requ
       projectId: Number(req.params.projectId),
       companyId: req.user!.companyId,
       actorUserId: req.user!.userId,
+    });
+    res.json(result);
+  } catch (error) { fail(res, error); }
+});
+
+router.get("/projects/:projectId/coordination-hub/credential-validation-operations", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+  try {
+    const result = await runtimeConnectorValidationOperationsService.list({
+      scope: {
+        projectId: Number(req.params.projectId),
+        companyId: req.user!.companyId,
+        actorUserId: req.user!.userId,
+      },
+      limit: req.query.limit === undefined ? 20 : Number(req.query.limit),
     });
     res.json(result);
   } catch (error) { fail(res, error); }

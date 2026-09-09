@@ -15,11 +15,14 @@ const sharePointValidator = read("./sharepoint-credential-validator.ts");
 const protectedExecutor = read("./protected-provider-probe-executor.ts");
 const connectorEnvelope = read("./connector-credential-envelope.ts");
 const credentialLeaseResolver = read("./connector-credential-lease-resolver.ts");
+const validationOperations = read("./connector-validation-operations.ts");
+const validationOperationsStore = read("./connector-validation-operations-postgres-store.ts");
 
 assert.match(app, /queueDatabaseStartup\(async \(\) => \{[\s\S]*startEnterpriseIdentityMigration\(\)[\s\S]*waitForEnterpriseIdentityMigration\(\)[\s\S]*ensureConnectorFoundationSchema\(pool\)/);
 assert.match(routesIndex, /coordinationHubRouter/);
 assert.match(route, /authMiddleware, requireProjectMember\(\)/);
 assert.match(route, /router\.get\("\/projects\/:projectId\/coordination-hub\/summary"/);
+assert.match(route, /router\.get\("\/projects\/:projectId\/coordination-hub\/credential-validation-operations", authMiddleware, requireProjectMember\("project_admin"\)/);
 assert.match(route, /coordination-hub\/credentials", authMiddleware, requireProjectMember\("project_admin"\)/);
 assert.match(route, /coordination-hub\/credentials\/:credentialId\/validate", authMiddleware, requireProjectMember\("project_admin"\)/);
 assert.match(route, /coordination-hub\/sharepoint-mapping", authMiddleware, requireProjectMember\("project_admin"\)/);
@@ -78,4 +81,9 @@ assert.match(credentialLeaseResolver, /for \(const row of selectedRows\) clearRo
 assert.match(credentialLeaseResolver, /token\.fill\(0\)/);
 assert.doesNotMatch(credentialLeaseResolver, /SELECT\s+\*/i);
 assert.doesNotMatch(credentialLeaseResolver, /console\.(?:log|error|warn)/);
+assert.match(validationOperations, /operations: ConnectorValidationOperation\[\]/);
+assert.match(validationOperationsStore, /BEGIN ISOLATION LEVEL REPEATABLE READ READ ONLY/);
+assert.match(validationOperationsStore, /c\.company_id=\$2 AND c\.provider='sharepoint'/);
+assert.match(validationOperationsStore, /a\.details->>'projectId'=\$3::text/);
+assert.doesNotMatch(validationOperationsStore, /secret_ciphertext|secret_iv|secret_tag|wrapped_data_key|wrap_iv|wrap_tag|SELECT\s+\*/i);
 console.log("coordination hub runtime behavior: PASS");

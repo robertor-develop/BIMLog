@@ -61,6 +61,7 @@
     "test:coordination-hub-protected-provider-executor": "tsx ./src/lib/protected-provider-probe-executor.behavior.ts",
     "test:coordination-hub-connector-envelope": "tsx ./src/lib/connector-credential-envelope.behavior.ts",
     "test:coordination-hub-credential-lease-resolver": "tsx ./src/lib/connector-credential-lease-resolver.behavior.ts",
+    "test:coordination-hub-validation-operations": "tsx ./src/lib/connector-validation-operations.behavior.ts",
     "test:coordination-delivery-build2": "tsx ./src/lib/sharepoint-discovery-adapter.behavior.ts",
     "test:coordination-delivery-build3": "tsx ./src/lib/sharepoint-reconciliation.behavior.ts",
     "test:coordination-delivery-build4": "tsx ./src/lib/outlook-intake-envelope.behavior.ts",
