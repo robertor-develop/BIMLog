@@ -1,0 +1,22 @@
+{
+  "program": "UX Less-Is-More",
+  "build": 1,
+  "sourceBase": "e54b0375d200e59275144a3a9c2fe633aa5043f4",
+  "liveVersionObserved": "v1.05.N17-P12",
+  "principle": "Reduce simultaneous cognitive load without removing capability.",
+  "protectedFamilies": [
+    "public-and-authentication",
+    "headquarters-dashboard",
+    "project-workspace",
+    "job-intake-and-activation",
+    "job-operations-and-commercial",
+    "administration-and-governance",
+    "lens-next"
+  ],
+  "plannedBuilds": 12,
+  "publishReviewAfterBuilds": [4, 8, 12],
+  "productCodeChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "deploymentChanged": false
+}
