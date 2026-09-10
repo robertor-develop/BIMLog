@@ -45,6 +45,17 @@ export const validateConnectorCredentialSchema = z.object({
   expectedState: z.literal("pending_validation"),
 }).strict();
 
+export const rotateConnectorCredentialSchema = z.object({
+  scope: coordinationScopeSchema,
+  credential: z.object({
+    id,
+    provider: z.literal("sharepoint"),
+    envelope: protectedSecretEnvelopeSchema,
+  }).strict(),
+  expectedState: z.literal("active"),
+  expectedKeyVersion: z.number().int().positive().max(2_147_483_647),
+}).strict();
+
 const credentialValidationResultSchema = z.object({
   valid: z.boolean(),
   evidenceCode: z.string().trim().min(1).max(128).regex(/^[A-Z0-9][A-Z0-9_.:-]*$/),
@@ -53,6 +64,7 @@ const credentialValidationResultSchema = z.object({
 export type RegisterConnectorCredential = z.infer<typeof registerConnectorCredentialSchema>;
 export type ConfigureSharePointProject = z.infer<typeof configureSharePointProjectSchema>;
 export type ValidateConnectorCredential = z.infer<typeof validateConnectorCredentialSchema>;
+export type RotateConnectorCredential = z.infer<typeof rotateConnectorCredentialSchema>;
 export type ConnectorCredentialRecord = RegisterConnectorCredential["credential"] & Pick<CoordinationScope, "companyId" | "actorUserId"> & { state: "pending_validation" | "active" | "disabled" | "revoked" };
 export type SharePointProjectMappingRecord = ConfigureSharePointProject["mapping"] & Pick<CoordinationScope, "companyId" | "projectId" | "actorUserId"> & { state: "active" };
 export type SharePointFolderMappingRecord = ConfigureSharePointProject["folders"][number] & Pick<CoordinationScope, "companyId" | "projectId" | "actorUserId"> & { projectMappingId: string; state: "active" };
@@ -61,6 +73,7 @@ export interface CoordinationHubConfigurationTransaction {
   assertProjectAdminAuthority(scope: CoordinationScope): Promise<void>;
   findCredential(companyId: number, id: string): Promise<ConnectorCredentialRecord | null>;
   insertPendingCredential(record: ConnectorCredentialRecord): Promise<void>;
+  rotateActiveCredential(input: RotateConnectorCredential): Promise<"rotated" | "stale">;
   finalizeCredentialValidation(input: {
     scope: CoordinationScope;
     credential: Pick<ConnectorCredentialRecord, "id" | "companyId" | "provider" | "label"> & { keyVersion: number };
@@ -187,6 +200,22 @@ export class CoordinationHubConfigurationService {
       state: finalized === "activated" ? "active" : "pending_validation",
       evidenceCode: validation.evidenceCode,
     };
+  }
+
+  async rotateCredential(input: unknown): Promise<{ result: "rotated"; credentialId: string; state: "pending_validation"; previousKeyVersion: number; keyVersion: number }> {
+    const command = rotateConnectorCredentialSchema.parse(input);
+    return this.store.transaction(async (transaction) => {
+      await transaction.assertProjectAdminAuthority(command.scope);
+      const result = await transaction.rotateActiveCredential(command);
+      if (result === "stale") throw new CoordinationConflictError("Connector credential is not at the expected active version");
+      return {
+        result,
+        credentialId: command.credential.id,
+        state: "pending_validation",
+        previousKeyVersion: command.expectedKeyVersion,
+        keyVersion: command.credential.envelope.keyVersion,
+      };
+    });
   }
 
   async configureSharePointProject(input: unknown): Promise<{ result: "created" | "idempotent"; mappingId: string; folderCount: number }> {

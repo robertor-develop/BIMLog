@@ -1,6 +1,6 @@
 import { pool } from "@workspace/db";
 import { CoordinationConflictError, type CoordinationScope } from "./coordination-hub-service";
-import type { ConnectorCredentialRecord, CoordinationHubConfigurationStore, CoordinationHubConfigurationTransaction, SharePointFolderMappingRecord, SharePointProjectMappingRecord } from "./coordination-hub-configuration-service";
+import type { ConnectorCredentialRecord, CoordinationHubConfigurationStore, CoordinationHubConfigurationTransaction, RotateConnectorCredential, SharePointFolderMappingRecord, SharePointProjectMappingRecord } from "./coordination-hub-configuration-service";
 
 type PoolClient = { query(sql: string, values?: unknown[]): Promise<{ rows: Array<Record<string, unknown>>; rowCount: number | null }>; release(): void };
 
@@ -70,6 +70,35 @@ class PostgresConfigurationTransaction implements CoordinationHubConfigurationTr
        VALUES($1,$2,$3,$4,'pending_validation',$5,$6,$7,$8,$9,$10,$11,$12)`,
       [record.id, record.companyId, record.provider, record.label, record.envelope.secretCiphertext, record.envelope.secretIv, record.envelope.secretTag, record.envelope.wrappedDataKey, record.envelope.wrapIv, record.envelope.wrapTag, record.envelope.keyVersion, record.actorUserId],
     );
+  }
+
+  async rotateActiveCredential(input: RotateConnectorCredential): Promise<"rotated" | "stale"> {
+    const result = await this.client.query(
+      `WITH rotated AS (
+         UPDATE connector_credentials
+         SET state='pending_validation',secret_ciphertext=$6,secret_iv=$7,secret_tag=$8,
+             wrapped_data_key=$9,wrap_iv=$10,wrap_tag=$11,key_version=$12
+         WHERE id=$1 AND company_id=$2 AND provider=$3 AND state=$4 AND key_version=$5
+         RETURNING id
+       ), audited AS (
+         INSERT INTO admin_actions_log(admin_user_id,admin_email,action,target_type,target_id,details)
+         SELECT u.id,u.email,'coordination_credential_rotated_pending_validation','connector_credential',$1,
+           jsonb_build_object('provider',$3,'projectId',$13,'previousKeyVersion',$5,'keyVersion',$12,'state','pending_validation')
+         FROM users u,rotated r WHERE u.id=$14 AND u.company_id=$2
+         RETURNING target_id
+       )
+       SELECT EXISTS(SELECT 1 FROM rotated) AS rotated, EXISTS(SELECT 1 FROM audited) AS audited`,
+      [
+        input.credential.id, input.scope.companyId, input.credential.provider, input.expectedState, input.expectedKeyVersion,
+        input.credential.envelope.secretCiphertext, input.credential.envelope.secretIv, input.credential.envelope.secretTag,
+        input.credential.envelope.wrappedDataKey, input.credential.envelope.wrapIv, input.credential.envelope.wrapTag,
+        input.credential.envelope.keyVersion, input.scope.projectId, input.scope.actorUserId,
+      ],
+    );
+    const row = result.rows[0];
+    if (!row || row.rotated !== true) return "stale";
+    if (row.audited !== true) throw new Error("Credential rotation audit could not be persisted");
+    return "rotated";
   }
 
   async assertActiveSharePointCredential(companyId: number, credentialId: string): Promise<void> {

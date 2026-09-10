@@ -9,11 +9,13 @@ import { postgresCoordinationHubConfigurationStore } from "../lib/coordination-h
 import { createRuntimeSharePointCredentialValidator } from "../lib/sharepoint-credential-validator";
 import { runtimeConnectorValidationOperationsService } from "../lib/connector-validation-operations-postgres-store";
 import { ConnectorCredentialEnrollmentInputError, createRuntimeConnectorCredentialEnrollmentService, decodeCanonicalConnectorEnrollmentToken } from "../lib/connector-credential-enrollment";
+import { createRuntimeConnectorCredentialRotationService } from "../lib/connector-credential-rotation";
 
 const router: IRouter = Router();
 const service = new CoordinationHubService(postgresCoordinationHubStore);
 const configurationService = new CoordinationHubConfigurationService(postgresCoordinationHubConfigurationStore, createRuntimeSharePointCredentialValidator());
 const enrollmentService = createRuntimeConnectorCredentialEnrollmentService(configurationService);
+const rotationService = createRuntimeConnectorCredentialRotationService(configurationService);
 
 function trustedCommand(req: Request): Record<string, unknown> {
   return {
@@ -90,6 +92,20 @@ router.post("/projects/:projectId/coordination-hub/credentials", authMiddleware,
   try {
     const result = await enrollmentService.enroll(trustedEnrollmentCommand(req));
     res.status(result.result === "created" ? 201 : 200).json(result);
+  } catch (error) { fail(res, error); }
+});
+
+router.post("/projects/:projectId/coordination-hub/credentials/:credentialId/rotate", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+  try {
+    const command = trustedEnrollmentCommand(req);
+    const credential = command["credential"] as Record<string, unknown>;
+    const result = await rotationService.rotate({
+      scope: command["scope"],
+      credential: { id: req.params.credentialId, provider: credential.provider, token: credential.token },
+      expectedState: command["expectedState"],
+      expectedKeyVersion: command["expectedKeyVersion"],
+    });
+    res.status(200).json(result);
   } catch (error) { fail(res, error); }
 });
 

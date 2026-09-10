@@ -18,6 +18,7 @@ const credentialLeaseResolver = read("./connector-credential-lease-resolver.ts")
 const validationOperations = read("./connector-validation-operations.ts");
 const validationOperationsStore = read("./connector-validation-operations-postgres-store.ts");
 const credentialEnrollment = read("./connector-credential-enrollment.ts");
+const credentialRotation = read("./connector-credential-rotation.ts");
 
 assert.match(app, /queueDatabaseStartup\(async \(\) => \{[\s\S]*startEnterpriseIdentityMigration\(\)[\s\S]*waitForEnterpriseIdentityMigration\(\)[\s\S]*ensureConnectorFoundationSchema\(pool\)/);
 assert.match(routesIndex, /coordinationHubRouter/);
@@ -26,6 +27,8 @@ assert.match(route, /router\.get\("\/projects\/:projectId\/coordination-hub\/sum
 assert.match(route, /router\.get\("\/projects\/:projectId\/coordination-hub\/credential-validation-operations", authMiddleware, requireProjectMember\("project_admin"\)/);
 assert.match(route, /coordination-hub\/credentials", authMiddleware, requireProjectMember\("project_admin"\)/);
 assert.match(route, /enrollmentService\.enroll\(trustedEnrollmentCommand\(req\)\)/);
+assert.match(route, /coordination-hub\/credentials\/:credentialId\/rotate", authMiddleware, requireProjectMember\("project_admin"\)/);
+assert.match(route, /rotationService\.rotate/);
 assert.match(route, /delete sourceCredential\.tokenBase64Url/);
 assert.doesNotMatch(route, /configurationService\.registerCredential\(trustedCommand\(req\)\)/);
 assert.match(route, /coordination-hub\/credentials\/:credentialId\/validate", authMiddleware, requireProjectMember\("project_admin"\)/);
@@ -53,6 +56,9 @@ assert.doesNotMatch(configurationService, /secret:\s*z\./);
 assert.match(configurationStore, /provider='sharepoint' AND state='active'/);
 assert.match(configurationStore, /coordination_credential_activated/);
 assert.match(configurationStore, /coordination_credential_validation_rejected/);
+assert.match(configurationStore, /coordination_credential_rotated_pending_validation/);
+assert.match(configurationStore, /state='pending_validation',secret_ciphertext=\$6/);
+assert.match(configurationStore, /state=\$4 AND key_version=\$5/);
 assert.match(configurationStore, /state='pending_validation'/);
 assert.match(configurationStore, /pm\.role='project_admin'/);
 assert.match(configurationStore, /BEGIN/);
@@ -95,4 +101,8 @@ assert.match(credentialEnrollment, /BIMLOG_CONNECTOR_ACTIVE_KEK_VERSION/);
 assert.match(credentialEnrollment, /possibleToken\.fill\(0\)/);
 assert.match(credentialEnrollment, /decodeCanonicalConnectorEnrollmentToken/);
 assert.doesNotMatch(credentialEnrollment, /AI_PROVIDER_KEK|console\.(?:log|error|warn)/);
+assert.match(credentialRotation, /encryptLeasedConnectorBearerToken/);
+assert.match(credentialRotation, /expectedState: z\.literal\("active"\)/);
+assert.match(credentialRotation, /possibleToken\.fill\(0\)/);
+assert.doesNotMatch(credentialRotation, /AI_PROVIDER_KEK|console\.(?:log|error|warn)/);
 console.log("coordination hub runtime behavior: PASS");

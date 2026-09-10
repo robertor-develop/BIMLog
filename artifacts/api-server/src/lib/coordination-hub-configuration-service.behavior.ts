@@ -9,10 +9,19 @@ const activeCredentialIds = new Set<string>();
 const mappings = new Map<number, SharePointProjectMappingRecord>();
 const folders = new Map<string, SharePointFolderMappingRecord[]>();
 const validationAudits: Array<{ credentialId: string; valid: boolean; evidenceCode: string }> = [];
+const rotationAudits: Array<{ credentialId: string; previousKeyVersion: number; keyVersion: number }> = [];
 const transaction: CoordinationHubConfigurationTransaction = {
   assertProjectAdminAuthority: async (scope) => { authorityChecks += 1; if (scope.projectId !== 7 || scope.companyId !== 3 || scope.actorUserId !== 11) throw new CoordinationConflictError("forbidden"); },
   findCredential: async (companyId, credentialId) => { const record = credentials.get(credentialId); return record?.companyId === companyId ? record : null; },
   insertPendingCredential: async (record) => { credentials.set(record.id, record); },
+  rotateActiveCredential: async (input) => {
+    const current = credentials.get(input.credential.id);
+    if (!current || current.companyId !== input.scope.companyId || current.provider !== input.credential.provider || current.state !== input.expectedState || current.envelope.keyVersion !== input.expectedKeyVersion) return "stale";
+    credentials.set(current.id, { ...current, envelope: input.credential.envelope, state: "pending_validation" });
+    activeCredentialIds.delete(current.id);
+    rotationAudits.push({ credentialId: current.id, previousKeyVersion: input.expectedKeyVersion, keyVersion: input.credential.envelope.keyVersion });
+    return "rotated";
+  },
   finalizeCredentialValidation: async ({ credential, valid, evidenceCode }) => {
     const current = credentials.get(credential.id);
     if (!current || current.companyId !== credential.companyId || current.provider !== credential.provider || current.label !== credential.label || current.envelope.keyVersion !== credential.keyVersion || current.state !== "pending_validation") return "stale";
@@ -85,9 +94,18 @@ await assert.rejects(() => service.configureSharePointProject({ ...mappingComman
 await assert.rejects(() => service.configureSharePointProject({ ...mappingCommand, scope: { ...scope, projectId: 8 } }), CoordinationConflictError);
 await assert.rejects(() => service.configureSharePointProject({ ...mappingCommand, folders: [{ ...mappingCommand.folders[0], folderPath: "/Shared Documents/../Private" }] }));
 
+const rotatedEnvelope = { ...envelope, secretCiphertext: "r".repeat(32), keyVersion: 2 };
+assert.deepEqual(await service.rotateCredential({ scope, credential: { id: "credential-1", provider: "sharepoint", envelope: rotatedEnvelope }, expectedState: "active", expectedKeyVersion: 1 }), {
+  result: "rotated", credentialId: "credential-1", state: "pending_validation", previousKeyVersion: 1, keyVersion: 2,
+});
+assert.equal(credentials.get("credential-1")?.state, "pending_validation");
+assert.deepEqual(rotationAudits, [{ credentialId: "credential-1", previousKeyVersion: 1, keyVersion: 2 }]);
+await assert.rejects(() => service.rotateCredential({ scope, credential: { id: "credential-1", provider: "sharepoint", envelope: rotatedEnvelope }, expectedState: "active", expectedKeyVersion: 1 }), CoordinationConflictError);
+await assert.rejects(() => service.rotateCredential({ scope, credential: { id: "credential-1", provider: "sharepoint", envelope: rotatedEnvelope }, expectedState: "pending_validation", expectedKeyVersion: 2 }));
+
 assert.equal(credentials.size, 3);
 assert.equal(mappings.size, 1);
 assert.equal(folders.get("mapping-1")?.length, 2);
-assert.equal(authorityChecks, 17);
-assert.equal(transactions, 17);
+assert.equal(authorityChecks, 19);
+assert.equal(transactions, 19);
 console.log("coordination hub configuration service behavior: PASS");
