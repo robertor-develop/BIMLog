@@ -2354,3 +2354,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Focused coordination/credential behavior 12/12 and UX contracts 90/90.
 - [ ] Remote integration, provider activation, migration authorization, version reconciliation, publication, and deployment remain separate explicit gates.
 - [x] Governed production build and exact mobile/desktop browser matrix completed from the clean reconciled evidence commit; local integration acceptance is complete.
+
+## v1.05.N17-P13 legacy Open Working View closure
+
+- [x] Preserve the current/new exact-identity navigation path unchanged.
+- [x] Add bounded response-only normalization for digest-valid historical navigation packages proven to share project, active model, and authoritative viewpoint lineage.
+- [x] Keep cross-project, model mismatch, digest corruption, unrelated lineage, cyclic lineage, and ambiguous identity fail-closed.
+- [x] Preserve database/schema and Native behavior unchanged; advance Platform only to P13.
+- [ ] Push, publish, live-verify, and obtain Ruben confirmation on one historical and one new viewpoint only after separate explicit authorization.

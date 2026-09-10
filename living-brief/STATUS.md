@@ -1330,3 +1330,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - Coordination/credential focused behavior passes 12/12 and UX focused contracts pass 90/90. Database safety reconciles 205 tables, 261 indexes, and 160 startup tables without mutation.
 - This is a local integration checkpoint only. No provider, credential, database/schema, Native/Lens Next, version, remote, push, publication, or deployment action is claimed.
 - Evidence commit `c346c8b98e9420974c9e781bebf089066f06243f` records the reconciled local candidate. The governed production build passes with deterministic API runtime closure, and the exact mobile/desktop browser matrix passes 24/24 without overflow, missing accessibility landmarks, or unlabeled buttons.
+
+## Lens Next final legacy Open Working View compatibility — 2026-09-10
+
+- Platform implementation `7e3c30b9` extends the existing navigation-only compatibility path from ServerId-only repair to bounded historical revision/lineage repair. The current exact-identity path remains first and unchanged.
+- Compatibility requires the original navigation digest to verify, exact project identity, exact active Navisworks model fingerprint, and either the same authoritative server row or a non-cyclic `supersedes_id` chain with the same root. Only ServerId, ViewpointId, LifecycleStatus, and RevisionNumber are rebound in the response copy and re-digested; no stored record is updated.
+- Cross-project, active-model, digest, unrelated-lineage, cyclic/ambiguous-lineage, and current-record conflicts remain rejected. Database, schema, Native camera/sectioning/XML, and stored historical evidence are unchanged.
+- The Platform release label advances only P12 to `v1.05.N17-P13`; Native source and Native N17 package metadata are unchanged. Focused Lens Next, Create, Working View, linking, attachment, typecheck, and release-candidate regressions pass locally. Push, publication, deployment, and Ruben field verification remain separate gates.

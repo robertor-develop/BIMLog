@@ -21176,6 +21176,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "fae2f1ec7c1ed6d5141331d19075029273e04d60ff9808bf25a5096fe959e57d"
+    },
+    {
+      "taskId": "lens-next-legacy-working-view-final-20260910",
+      "reviewedThroughCommit": "7e3c30b9d015a9d482b49f979e144a5ef3aedaa2",
+      "reviewedAt": "2026-09-10T14:04:00Z",
+      "status": "accepted_local_candidate",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Records the bounded Platform-only compatibility correction for digest-valid historical Lens Next navigation packages on proven project, model, and authoritative viewpoint lineage.",
+      "workstreams": [
+        "lens-next-platform-legacy-navigation"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves authoritative BIMLog identity, human control, and fail-closed integrity boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work follows the authorized narrow Platform scope and separates local verification from release actions."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused behavior, integrity rejection, typecheck, and production build evidence remain required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product capability, workflow, or commercial direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing visual-state read route gains bounded response-only historical lineage compatibility without schema change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native code, camera, sectioning, XML, bridge, and package behavior remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, PDF, spreadsheet, or exported artifact presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards, certification, regulation, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the P13 local candidate, exact classifier boundary, and non-release state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local implementation and retains push, publication, and field verification as pending."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records field evidence, root cause, correction, protected rejections, and evidence limitations."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c46b519a3cdb850a0a41460bcce4953993d5b18b378ab86288bf5289dbbfce79"
     }
   ]
 }

@@ -999,6 +999,13 @@ was performed or authorized.
 ## 2026-09-09 — UX residual Build 13 project-route payload isolation
 
 - Build 12 source `8c1bf307bfbee7c636b31eaf90ff7eaf69508c19` was pushed to `origin/main`, built through the visible Replit Shell with deterministic production runtime closure, published once, and live-verified at `v1.05.N17-P12`. Replit reported healthy production status; Chrome verified the bilingual skip link, full Job Intake capability set, sidebar collapse/expand, no horizontal overflow, public Lens Next proof, and absence of diagnostic UI.
+
+## 2026-09-10 — Legacy Open Working View 409 bounded compatibility correction
+
+- Ruben confirmed new viewpoints open successfully while historical viewpoints return `navigation_identity_mismatch`. Source review proved the previously deployed fallback normalized only ServerId and still required exact ViewpointId, lifecycle, and revision, so older revision semantics remained rejected.
+- The corrected Platform route first performs the unchanged exact validation. Only that exact `navigation_identity_mismatch` enters compatibility classification, and only a valid original digest, exact project, exact active model fingerprint, and same authoritative row or proven non-cyclic predecessor chain can pass.
+- The response-only package normalizes ServerId, ViewpointId, LifecycleStatus, and RevisionNumber and recomputes the navigation digest. No database update, historical rewrite, digest fabrication, Native change, or camera/sectioning/XML change occurs.
+- Focused tests explicitly reject cross-project, model mismatch, unrelated/cyclic lineage, and camera/digest tampering. Local implementation is not publication or Ruben field acceptance.
 - Build 13 implementation `c0e66b12dee4a25bbbda19f55ff07f74a906d5d2` identified the remaining 1.526 MB `ProjectDetail` chunk as an eager-import aggregation of 18 independently selected project workspaces. The correction adds one lazy boundary per existing workspace and a local accessible loading state inside the unchanged project shell.
 - Focused route-loading evidence passes 6/6 across the application and project-route contracts. Frontend typecheck and production build pass. The resulting `ProjectDetail` chunk is 14.9 KB; individual workspace chunks remain available on demand. A public-route Chrome trace measured 831 ms LCP and 0.00 CLS under unthrottled lab conditions. Authenticated post-publication route tracing remains a separate release gate.
 
