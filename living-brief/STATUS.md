@@ -1351,3 +1351,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] A newly created contact enters the current directory options and is immediately selected as Primary Contact.
 - [x] The server proves the company is already represented in the current project directory before contact creation or reuse.
 - [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+
+## Post-Build-20 corrective Build 2 — contract-first intake sequence
+
+- [x] Advanced Job Intake now presents Contract setup immediately after Job identity, before Contract Items and APU pricing.
+- [x] The left navigation and visible section numbers use the same sequence; Contract Items and APU pricing remain one combined stage rather than two competing navigation targets.
+- [x] Existing contract, scope, pricing, autosave, activation, permission, database, and schema behavior is unchanged.
+- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.

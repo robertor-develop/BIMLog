@@ -2375,4 +2375,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 - [x] Corrective Build 1: multiple authoritative contacts for the selected current-project client company in Quick and Advanced Job Intake, with immediate Primary Contact selection and server-side project/company scope enforcement.
 - [ ] Corrective Build 1 independent browser acceptance and integration/release gate.
-- [ ] Continue with the next unresolved smoke-test finding only after Build 1 evidence review; do not repeat existing required-field labels or P11 client-company creation.
+- [x] Corrective Build 2: place Contract setup immediately after Job identity in Advanced Intake, align navigation and numbering, and keep Contract Items/APU pricing together.
+- [ ] Corrective Builds 1–2 independent browser acceptance and integration/release gate.
+- [ ] Continue with the next unresolved smoke-test finding; do not repeat existing required-field labels or P11 client-company creation.

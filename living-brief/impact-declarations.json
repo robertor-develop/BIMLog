@@ -21403,6 +21403,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9ddd0e91f63e54fdb46a6e2d02d3840cefed0e3c0884d9428cdbce351ca9dcdd"
+    },
+    {
+      "taskId": "post-build20-corrective-02-contract-order-20260910",
+      "reviewedThroughCommit": "2ab7e161eaffbf869830238d6be8ad63e2e00bb9",
+      "reviewedAt": "2026-09-10T16:55:00Z",
+      "status": "implementation_verified_local_candidate",
+      "captureTiming": "same_task_after_implementation_before_acceptance",
+      "summary": "Moves Advanced Job Intake contract setup immediately after job identity and aligns navigation and numbering without changing persisted product contracts.",
+      "workstreams": [
+        "job-intake-post-build20-corrective"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, or capability change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded corrective build with separate acceptance and release gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused behavior and production build evidence remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, storage, permission, database, or schema change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the corrected contract-first workflow sequence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Build 2 and retains independent acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the smoke finding, correction, and protected behavior."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f26a6f698ecb20072f7997e8885744e1a5799779cf06cf5121d86c1885a8ff79"
     }
   ]
 }

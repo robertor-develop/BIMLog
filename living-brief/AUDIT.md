@@ -1061,3 +1061,9 @@ was performed or authorized.
 - Ruben's integrated smoke report showed that a client company could not be exercised with multiple selectable contacts from Job Intake. Source review confirmed the authoritative project-directory model and contact route already supported multiple contacts, but Intake exposed only company creation and contact selection.
 - Quick and Advanced Intake now reuse the existing contact route through one shared creator. The selected company is authoritative by numeric ID, the new contact is appended to the current-project directory projection, and it becomes Primary Contact without inventing identity.
 - The contact route now verifies the company is already connected to the current project before creation. No database/schema, contract, APU, rate/pay/cost, Native, Lens camera/XML, or unrelated workflow change was made.
+
+# 2026-09-10 — Post-Build-20 corrective Build 2 contract-stage decision
+
+- The integrated smoke report correctly identified that Contract setup appeared after Contract Items/APU pricing even though negotiated contract identity is required to govern downstream item assignment.
+- Advanced Intake now orders Source documents, Job identity, Contract setup, combined Contract Items/APU pricing, Delivery, Team, and Review consistently in its navigation and visible workflow.
+- The correction changes presentation sequence only. It does not alter saved draft shape, contract or item identity, pricing, autosave, activation, permissions, database/schema, Native, or Lens Next behavior.
