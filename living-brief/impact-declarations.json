@@ -21103,7 +21103,7 @@
     },
     {
       "taskId": "coordination-release-c-ux-build17-integration-20260910",
-      "reviewedThroughCommit": "c346c8b98e9420974c9e781bebf089066f06243f",
+      "reviewedThroughCommit": "95fd166f0141452abcb6007fb1d51b429a7278ac",
       "reviewedAt": "2026-09-10T04:12:00Z",
       "status": "accepted_local_integration_candidate",
       "captureTiming": "same_task_after_integration_before_release",
@@ -21170,11 +21170,12 @@
         }
       ],
       "reviewedChangedPaths": [
+        "evidence/COORDINATION_UX_BUILD17_INTEGRATION_ACCEPTANCE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "54aa3cf678e221b4798f60a49297dc896db27260eebd1547f4ee5b3019be8063"
+      "reviewedChangeSha256": "fae2f1ec7c1ed6d5141331d19075029273e04d60ff9808bf25a5096fe959e57d"
     }
   ]
 }

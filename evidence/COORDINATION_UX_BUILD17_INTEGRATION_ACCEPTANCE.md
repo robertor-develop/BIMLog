@@ -10,5 +10,6 @@ Date: 2026-09-10
 - UX focused contracts: 90/90 PASS.
 - Database source safety: PASS (205 tables, 261 indexes, 160 startup tables reconciled; no mutation).
 - Tracked-secret and mojibake gates: PASS.
-- Responsive browser matrix and governed production build are recorded after the reconciled candidate completes those gates.
+- Governed production build: PASS, including TypeScript, frontend production output, and deterministic API runtime closure (15 direct packages, 15 dependencies, 16,342 files).
+- Responsive browser matrix: PASS 24/24 across 12 public routes at 390x844 and 1440x900; every rendered destination has main content and a skip target, zero unlabeled buttons, and no horizontal overflow. The protected setup guide correctly redirects unauthenticated access to Login.
 - No provider access, credential access, database/schema mutation, Native/Lens Next change, version change, remote operation, push, publication, or deployment belongs to this checkpoint.
