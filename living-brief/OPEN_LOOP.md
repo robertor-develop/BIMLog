@@ -2377,5 +2377,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Corrective Build 1 independent browser acceptance and integration/release gate.
 - [x] Corrective Build 2: place Contract setup immediately after Job identity in Advanced Intake, align navigation and numbering, and keep Contract Items/APU pricing together.
 - [x] Corrective Build 3: make saved APU versions selectable per Contract Item and reload persisted budget-line options while preserving company/agreement bindings.
-- [ ] Corrective Builds 1–3 independent browser acceptance and integration/release gate.
+- [x] Corrective Build 4: add an existing connected-company BIMLog user to the current project from Team & Resources, then expose that authoritative member to the existing task/contract/scope assignment chain.
+- [ ] Corrective Builds 1–4 independent browser acceptance and integration/release gate.
 - [ ] Continue with the next unresolved smoke-test finding; do not repeat existing required-field labels or P11 client-company creation.

@@ -328,6 +328,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-document-connections.behavior.ts
 - artifacts/api-server/src/lib/job-intake-combined-scenario.behavior.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
+- artifacts/api-server/src/lib/job-intake-member-assignment.behavior.ts
 - artifacts/api-server/src/lib/job-intake-migration.ts
 - artifacts/api-server/src/lib/job-intake-service.ts
 - artifacts/api-server/src/lib/job-intake-spreadsheet.behavior.ts

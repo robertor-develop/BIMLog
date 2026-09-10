@@ -1073,3 +1073,9 @@ was performed or authorized.
 - Source inspection confirmed the smoke finding: APU version was rendered read-only even though the authoritative Cost & Value response already returns saved version history, and reload fetched the budget workspace but not the lines for the draft's persisted budget snapshot.
 - Contract Items now select from current-project saved APU versions and bind the chosen version with its saved selling rate. Reload also resolves the exact persisted budget snapshot before showing its line choices.
 - Existing participant/company and contract-profile identifiers remain authoritative draft fields. No duplicate store, database/schema change, Native change, or unrelated workflow change was introduced.
+
+# 2026-09-10 — Post-Build-20 corrective Build 4 existing-user assignment decision
+
+- The integrated smoke report correctly identified that people who already existed as BIMLog users could not be selected and added to a project from Intake; the Team assignment selector only contained users who were already active project members.
+- The new candidate projection is admin-only and derives its company boundary from the current project's authoritative directory and existing member companies. It excludes current members and never exposes a platform-wide user list.
+- Adding a selected user reuses the existing project-member mutation, saves the Intake draft first, reloads authoritative membership, and then uses the pre-existing contract, Contract Item, Work Package, planned-hours, cost, and incentive assignment controls. No database/schema or Native change was introduced.

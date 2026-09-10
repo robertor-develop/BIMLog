@@ -1365,3 +1365,11 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] A persisted budget snapshot is reopened with its authoritative lines, so the saved budget-line selection remains visible and editable after reload.
 - [x] Existing responsible-company participant and authoritative-agreement bindings remain in the same canonical Intake draft and continue through autosave/normalization.
 - [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+
+## Post-Build-20 corrective Build 4 — existing-user project assignment
+
+- [x] Authorized project administrators can select an existing BIMLog user from companies already connected to the current project and add that user as a project member directly in Team & Resources.
+- [x] Current project members are excluded from the candidate list; no platform-wide user directory is exposed.
+- [x] The Intake draft saves before membership mutation, reloads authoritative membership afterward, and makes the added member available to the existing contract, Contract Item, Work Package, hours, cost, and incentive assignment controls.
+- [x] Existing membership, assignment, company/project isolation, database, and schema contracts are reused unchanged.
+- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.

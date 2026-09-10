@@ -21553,6 +21553,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "389c32f199b792d0dd70b401bde70bca8de31c7f07459abdbf87e4ee50eed3e7"
+    },
+    {
+      "taskId": "post-build20-corrective-04-member-assignments-20260910",
+      "reviewedThroughCommit": "9334f5acf21017a4f936b5aa1cd86cc39ac6cf70",
+      "reviewedAt": "2026-09-10T17:38:31Z",
+      "status": "implementation_verified_local_candidate",
+      "captureTiming": "same_task_after_implementation_before_acceptance",
+      "summary": "Adds a current-project, connected-company existing-user picker to Intake and immediately enables the existing authoritative assignment chain without schema changes.",
+      "workstreams": [
+        "job-intake-post-build20-corrective"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reuses existing project membership and directory company authority without creating duplicate identity."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Remains a bounded corrective build with independent acceptance and release gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Requires focused authorization, assignment, typecheck, and governed build evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Completes the already-approved Intake staffing workflow without changing product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the new read-only project-scoped candidate projection and focused behavior contract in the generated Platform inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, sectioning, XML, or bridge behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, spreadsheet, or governed report artifact behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or external interoperability contract changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the corrected existing-user membership and assignment workflow."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Build 4 and retains independent browser and release gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the reproduced membership-list gap and bounded authority-preserving correction."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5aeb164631cc0f2d1ea2b435f0d5970c18b1704c7cb66d9e2fae093356815585"
     }
   ]
 }
