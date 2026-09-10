@@ -1067,3 +1067,9 @@ was performed or authorized.
 - The integrated smoke report correctly identified that Contract setup appeared after Contract Items/APU pricing even though negotiated contract identity is required to govern downstream item assignment.
 - Advanced Intake now orders Source documents, Job identity, Contract setup, combined Contract Items/APU pricing, Delivery, Team, and Review consistently in its navigation and visible workflow.
 - The correction changes presentation sequence only. It does not alter saved draft shape, contract or item identity, pricing, autosave, activation, permissions, database/schema, Native, or Lens Next behavior.
+
+# 2026-09-10 — Post-Build-20 corrective Build 3 Contract Item binding decision
+
+- Source inspection confirmed the smoke finding: APU version was rendered read-only even though the authoritative Cost & Value response already returns saved version history, and reload fetched the budget workspace but not the lines for the draft's persisted budget snapshot.
+- Contract Items now select from current-project saved APU versions and bind the chosen version with its saved selling rate. Reload also resolves the exact persisted budget snapshot before showing its line choices.
+- Existing participant/company and contract-profile identifiers remain authoritative draft fields. No duplicate store, database/schema change, Native change, or unrelated workflow change was introduced.

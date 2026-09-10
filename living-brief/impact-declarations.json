@@ -21478,6 +21478,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f26a6f698ecb20072f7997e8885744e1a5799779cf06cf5121d86c1885a8ff79"
+    },
+    {
+      "taskId": "post-build20-corrective-03-item-bindings-20260910",
+      "reviewedThroughCommit": "2792229f8e66b9770f2b775795f6fe5ed7d87d23",
+      "reviewedAt": "2026-09-10T17:05:00Z",
+      "status": "implementation_verified_local_candidate",
+      "captureTiming": "same_task_after_implementation_before_acceptance",
+      "summary": "Restores selectable authoritative APU versions and persisted budget-line choices for Contract Items without changing storage or schema.",
+      "workstreams": [
+        "job-intake-post-build20-corrective"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Uses existing authoritative project-scoped APU, budget, company, and agreement identities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded corrective build with separate acceptance and release gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused selection and reload behavior plus production build evidence are required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing API contracts and storage remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the corrected Contract Item selection and reload behavior."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Build 3 and retains independent acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the reproduced UI/reload gaps and bounded correction."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "389c32f199b792d0dd70b401bde70bca8de31c7f07459abdbf87e4ee50eed3e7"
     }
   ]
 }

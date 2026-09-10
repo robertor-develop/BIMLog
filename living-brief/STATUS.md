@@ -1358,3 +1358,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] The left navigation and visible section numbers use the same sequence; Contract Items and APU pricing remain one combined stage rather than two competing navigation targets.
 - [x] Existing contract, scope, pricing, autosave, activation, permission, database, and schema behavior is unchanged.
 - [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+
+## Post-Build-20 corrective Build 3 — Contract Item bindings
+
+- [x] Advanced Contract Items can select any authoritative saved APU plan version returned by the current-project Cost & Value service; selecting a version binds both its version number and saved selling rate.
+- [x] A persisted budget snapshot is reopened with its authoritative lines, so the saved budget-line selection remains visible and editable after reload.
+- [x] Existing responsible-company participant and authoritative-agreement bindings remain in the same canonical Intake draft and continue through autosave/normalization.
+- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
