@@ -20102,6 +20102,112 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9369acbec37af3485e0d51eedfaa52b52b919064e25e067f6196cd2b048e0c2b"
+    },
+    {
+      "taskId": "coordination-delivery-release-c-build-10-20260909",
+      "reviewedThroughCommit": "22ec52335ce6a7a4e203c2d101b7331b238ef4ae",
+      "reviewedAt": "2026-09-10T00:01:26Z",
+      "status": "internal_checkpoint",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "implement_server_side_credential_enrollment",
+          "enforce_server_owned_key_version",
+          "verify_envelope_only_registration_and_token_clearing",
+          "record_local_release_evidence"
+        ],
+        "operatorOnly": [
+          "supply_runtime_connector_kek",
+          "submit_real_connector_credential",
+          "enable_real_provider_validation",
+          "frontend_ux_program",
+          "live_database_application",
+          "publication",
+          "deployment"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Connector credential envelopes must be created server-side under the server-owned active connector key version; client-authored envelopes cannot be trusted as enrollment input."
+        }
+      ],
+      "summary": "Records canonical token decoding, server-side connector envelope creation, server-owned key-version selection, client-envelope rejection and token-clearing proofs without using a real credential.",
+      "workstreams": [
+        "bimlog-coordination-delivery",
+        "release-c-server-side-credential-enrollment"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership or organizational authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The backend-only build preserves MAIN04 frontend ownership and all established execution boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The enrollment boundary implements existing protected-secret, authenticated-context and fail-closed requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted Coordination Delivery product direction remains unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated Platform map now includes the server-side credential enrollment service and focused proof."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native Lens Next, Navisworks and bridge code remained untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design or presentation behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 10 remains a local backend checkpoint without real credential, provider, database or production claims."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Real key provisioning, real credential entry, provider activation, frontend UX and live release gates remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical input, server-owned key version, envelope-only registration, client-envelope rejection, memory clearing and non-effects are preserved in committed evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "2568db46c7edc7153d98167dc7c41cf25f82752a199e1706f35de84fa2278588"
     }
   ]
 }

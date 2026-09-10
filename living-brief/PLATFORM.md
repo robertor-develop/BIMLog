@@ -170,6 +170,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/composite-qc.ts
 - artifacts/api-server/src/lib/composite-source-control.behavior.ts
 - artifacts/api-server/src/lib/composite-source-control.ts
+- artifacts/api-server/src/lib/connector-credential-enrollment.behavior.ts
+- artifacts/api-server/src/lib/connector-credential-enrollment.ts
 - artifacts/api-server/src/lib/connector-credential-envelope.behavior.ts
 - artifacts/api-server/src/lib/connector-credential-envelope.ts
 - artifacts/api-server/src/lib/connector-credential-lease-resolver.behavior.ts
