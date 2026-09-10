@@ -27,6 +27,11 @@ import {
   contactBelongsToCompany,
   primaryContactOptions as buildPrimaryContactOptions,
 } from "@/lib/job-intake-directory-options";
+import {
+  applyAssignmentApuRate,
+  profileForApuRate,
+  rateForApuProfile,
+} from "@/lib/job-intake-apu-rates";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const recoveryKey = (projectId: number) =>
@@ -676,6 +681,11 @@ export function JobIntakeWorkspace() {
         ),
       },
     }));
+  const assignmentCustomerRateChange = (
+    index: number,
+    rate: string,
+    role?: string,
+  ) => setData((old: any) => applyAssignmentApuRate(old, index, rate, role));
   const latestRate = String(apu?.sellingPrice ?? "0.00"),
     latestApuVersion = apu?.version ?? null;
   const money = (quantity: unknown, rate: unknown) =>
@@ -2407,6 +2417,40 @@ export function JobIntakeWorkspace() {
                           }
                         />
                       </label>
+                      <label>
+                        {tt("Customer/APU rate profile", "Perfil de tarifa Cliente/APU")}
+                        <select
+                          disabled={!assignment.scopeItemId}
+                          value={profileForApuRate(data.scopeItems.find((item: any) => item.id === assignment.scopeItemId)?.billingHourlyRate)}
+                          onChange={(event) => {
+                            const profile = event.target.value;
+                            const rate = rateForApuProfile(profile);
+                            if (!rate) return;
+                            assignmentCustomerRateChange(index, rate, profile === "drafting" ? "Drafting" : "BIM Coordinator");
+                          }}
+                        >
+                          <option value="">{tt("Custom", "Personalizada")}</option>
+                          <option value="drafting">Drafting — 35.47</option>
+                          <option value="bim_coordinator">BIM Coordinator — 37.99</option>
+                        </select>
+                      </label>
+                      <label>
+                        {tt("Customer/APU unit rate (Contract Item)", "Tarifa unitaria Cliente/APU (Partida de Contrato)")}
+                        <input
+                          type="number"
+                          step="0.01"
+                          min="0"
+                          disabled={!assignment.scopeItemId}
+                          value={data.scopeItems.find((item: any) => item.id === assignment.scopeItemId)?.billingHourlyRate || ""}
+                          placeholder={assignment.scopeItemId ? "0.00" : tt("Select a Contract Item first", "Seleccione primero una Partida de Contrato")}
+                          onChange={(event) => assignmentCustomerRateChange(index, event.target.value)}
+                        />
+                      </label>
+                      <div className="ji-lock">
+                        {assignment.scopeItemId
+                          ? tt("This customer/APU rate belongs to the selected Contract Item and is shared by assignments using it. Internal hourly cost and incentive remain separate per assignment.", "Esta tarifa Cliente/APU pertenece a la Partida de Contrato seleccionada y se comparte entre las asignaciones que la usan. El costo horario interno y el incentivo permanecen separados por asignación.")
+                          : tt("Select a Contract Item to set its customer/APU rate. Internal hourly cost remains independently editable.", "Seleccione una Partida de Contrato para establecer su tarifa Cliente/APU. El costo horario interno sigue siendo editable de forma independiente.")}
+                      </div>
                       <label>{tt("Work Package", "Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>assignmentChange(index,"workPackageId",e.target.value)}><option value="">{tt("Whole Contract Item", "Partida de Contrato completa")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{workPackage.title||workPackage.packageCode}</option>)}</select></label>
                       <div className="ji-lock">{tt("Authoritative scope", "Alcance autorizado")}: {assignment.engagementId || "—"} → {assignment.contractId || "—"} → APU {data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.apuPlanVersion || "—"}</div>
                       {capabilities.budget && (
