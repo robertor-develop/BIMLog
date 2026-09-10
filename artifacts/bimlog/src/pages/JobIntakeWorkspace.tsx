@@ -216,6 +216,7 @@ export function JobIntakeWorkspace() {
       readActiveStage(projectId),
     ),
     [apu, setApu] = useState<any>(null),
+    [apuVersions, setApuVersions] = useState<any[]>([]),
     [workspace, setWorkspace] = useState<any>(null),
     [budgetLines, setBudgetLines] = useState<any[]>([]),
     [directoryEntries, setDirectoryEntries] = useState<any[]>([]),
@@ -293,6 +294,16 @@ export function JobIntakeWorkspace() {
         recovered?.revision === current.revision &&
         JSON.stringify(recovered.data) !== JSON.stringify(current.data);
       const loadedData = canRecover ? recovered.data : current.data;
+      const selectedBudgetSnapshotId = String(
+        loadedData?.commercial?.budgetSnapshotId ?? "",
+      );
+      const selectedBudget =
+        current.capabilities?.budget && selectedBudgetSnapshotId
+          ? await api(
+              `/projects/${projectId}/financial/snapshots/${selectedBudgetSnapshotId}`,
+            )
+          : null;
+      if (projectIdRef.current !== projectId) return;
       revisionRef.current = current.revision;
       dataRef.current = loadedData;
       lastSavedRef.current = JSON.stringify(current.data);
@@ -311,7 +322,9 @@ export function JobIntakeWorkspace() {
       else if (recovered && recovered.revision < current.revision)
         removeRecovery(projectId);
       setApu(plan?.data?.plan ?? null);
+      setApuVersions(Array.isArray(plan?.data?.history) ? plan.data.history : []);
       setWorkspace(budget);
+      setBudgetLines(selectedBudget?.snapshot?.lines ?? []);
       setDirectoryEntries(Array.isArray(directory) ? directory : []);
     } catch (cause) {
       if (projectIdRef.current !== projectId) return;
@@ -1728,6 +1741,7 @@ export function JobIntakeWorkspace() {
                   defaultApuVersion={
                     capabilities.costValuePlanner ? latestApuVersion : null
                   }
+                  apuVersions={capabilities.costValuePlanner ? apuVersions : []}
                   defaultWorkflow={data.delivery.workflowTemplate}
                   capabilities={capabilities}
                   contracts={data.commercial.contracts || []}

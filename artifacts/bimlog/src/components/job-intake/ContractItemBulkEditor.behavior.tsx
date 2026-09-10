@@ -1,5 +1,8 @@
 import assert from "node:assert/strict";
-import { parseContractItemPaste } from "./ContractItemBulkEditor";
+import {
+  parseContractItemPaste,
+  selectSavedApuVersion,
+} from "./ContractItemBulkEditor";
 
 const range = Array.from(
   { length: 125 },
@@ -21,5 +24,16 @@ assert.deepEqual(parseContractItemPaste("Door\t2\n\nFrame\t3.5\n"), [
   { sourceRow: 1, name: "Door", quantity: "2" },
   { sourceRow: 3, name: "Frame", quantity: "3.5" },
 ]);
+assert.deepEqual(
+  selectSavedApuVersion(
+    [
+      { version: 2, sellingPrice: "35.47" },
+      { version: 3, sellingPrice: "37.99" },
+    ],
+    "2",
+  ),
+  { apuPlanVersion: 2, billingHourlyRate: "35.47" },
+);
+assert.deepEqual(selectSavedApuVersion([], ""), { apuPlanVersion: null });
 
 console.log("ContractItemBulkEditor.behavior: PASS");

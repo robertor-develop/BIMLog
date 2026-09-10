@@ -14,6 +14,7 @@ type Props = {
   currency: string;
   defaultRate: string;
   defaultApuVersion: number | null;
+  apuVersions: Array<{ version: number; name: string; sellingPrice: string }>;
   defaultWorkflow: string;
   capabilities: { costValuePlanner: boolean; budget: boolean };
   contracts: any[];
@@ -28,6 +29,21 @@ type Props = {
 };
 
 const MAX_ITEMS = 500;
+
+export function selectSavedApuVersion(
+  versions: Array<{ version: number; sellingPrice: string }>,
+  selectedVersion: string,
+) {
+  const selected = versions.find(
+    (version) => version.version === Number(selectedVersion),
+  );
+  return selected
+    ? {
+        apuPlanVersion: selected.version,
+        billingHourlyRate: selected.sellingPrice,
+      }
+    : { apuPlanVersion: null };
+}
 
 function newItem(
   props: Pick<
@@ -477,16 +493,31 @@ export function ContractItemBulkEditor(props: Props) {
                   </label>
                   <label>
                     {props.tt("APU version", "Versión APU")}
-                    <input
-                      value={
-                        item.apuPlanVersion ? `v${item.apuPlanVersion}` : "—"
-                      }
-                      readOnly
+                    <select
+                      value={item.apuPlanVersion ?? ""}
                       aria-label={props.tt(
                         `APU version row ${index + 1}`,
                         `Versi\u00f3n APU fila ${index + 1}`,
                       )}
-                    />
+                      onChange={(event) => {
+                        update(
+                          index,
+                          selectSavedApuVersion(
+                            props.apuVersions,
+                            event.target.value,
+                          ),
+                        );
+                      }}
+                    >
+                      <option value="">
+                        {props.tt("Select saved APU version", "Seleccione una versión APU guardada")}
+                      </option>
+                      {props.apuVersions.map((version) => (
+                        <option key={version.version} value={version.version}>
+                          v{version.version} · {version.name} · {version.sellingPrice} {props.currency}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                 </>
               )}
