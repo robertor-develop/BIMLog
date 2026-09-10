@@ -16,12 +16,12 @@ Release Groups A–B are integrated on the exact current `origin/main` lineage; 
 - [x] Build 8: harden exact-390 project actions, controls, and table scrolling without hiding capability.
 - [x] Builds 9–12: accessibility, route-splitting/performance, authentic public product proof, and consolidated acceptance. Exact source `8c1bf307bfbee7c636b31eaf90ff7eaf69508c19` was pushed, built in Replit Shell, published once, and live-verified at `v1.05.N17-P12` on 2026-09-09.
 - [x] Build 13: implementation `c0e66b12dee4a25bbbda19f55ff07f74a906d5d2` isolates all 18 ProjectDetail workspaces behind selected-route lazy boundaries while retaining the project shell and every capability. Local focused/typecheck/build evidence passed; push and publication remain separate gates.
-- [ ] Build 14: complete route-by-route desktop/exact-390 accessibility and mobile acceptance.
+- [x] Build 14: implementation `29b78cc80f1ebefc6638982c8dac0c5a49aed776` closes the shared Admin modal, mobile zoom, sign-in contrast/touch/keyboard, and public-footer overflow defects. Local exact-390 and 1440 Chromium route matrices, mobile Lighthouse, focused accessibility, typecheck, and frontend production-build evidence pass; authenticated post-publication verification remains a release gate.
 - [ ] Build 15: strengthen homepage conversion and authentic product proof without invented testimonials or capability removal.
 - [ ] Build 16: improve service/product interaction and technical SEO without changing business workflows.
 - [ ] Build 17: run consolidated live accessibility, performance, capability-preservation, and responsive acceptance.
 
-Builds 1–12 are published and live-verified. Build 13 is a local candidate; Builds 14–17 remain the authorized residual program.
+Builds 1–12 are published and live-verified. Builds 13–14 are local candidates; Builds 15–17 remain the authorized residual program.
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 

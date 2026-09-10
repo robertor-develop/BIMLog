@@ -18176,6 +18176,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "34b1c8d4e66fe2a363d0b191ef30b6becaef31c134978ea0bbe20caa1d1c7606"
+    },
+    {
+      "taskId": "ux-residual-build14-responsive-accessibility-20260909",
+      "reviewedThroughCommit": "29b78cc80f1ebefc6638982c8dac0c5a49aed776",
+      "reviewedAt": "2026-09-10T00:45:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Closes proven shared mobile accessibility and overflow defects across authentication, public footer, and Admin dialog surfaces without removing capability.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, workflow, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded correction and separate publication gate follow the accepted workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing responsive, keyboard, contrast, touch, and real-browser evidence rules govern the change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accessibility and responsive corrections preserve product direction and content."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, dependency, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Build 14 defects, corrections, evidence, and release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local Build 14 and retains Builds 15–17."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the actual Lighthouse and exact-390 root-cause evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a09f986f4db12a747b862e3d8d75c050a98b7abb07c313333314cb8a186a3036"
     }
   ]
 }

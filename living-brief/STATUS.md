@@ -1234,3 +1234,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - Implementation commit `c0e66b12dee4a25bbbda19f55ff07f74a906d5d2` makes `ProjectDetail` stop eagerly importing all 18 project workspaces. The persistent project shell remains loaded while only the selected workspace is requested through its own accessible Suspense boundary.
 - The shared ProjectDetail chunk falls from approximately 1.526 MB to 14.9 KB. The initial application entry remains approximately 435 KB; large functional workspaces remain available as independent on-demand chunks rather than disappearing.
 - A Chrome performance trace of the already-published Build 12 public Features route records 831 ms LCP and 0.00 CLS under unthrottled lab conditions. It is a baseline, not field Core Web Vitals evidence and not a substitute for authenticated project-route verification after publication.
+
+## UX residual Build 14 responsive accessibility closure — 2026-09-09
+
+- Implementation `29b78cc80f1ebefc6638982c8dac0c5a49aed776` corrects four shared defects proven by rendered Chromium evidence: the Admin modal's forced 400-pixel width and missing dialog keyboard semantics, disabled mobile zoom, low-contrast muted text, and undersized/non-keyboard sign-in controls.
+- The shared public footer now collapses from its five-column desktop grid to two columns below 720 pixels and one column at 390 pixels. This removes the common horizontal overflow from public marketing and legal routes without removing any link or content.
+- Exact-390 Chromium verification passes on 12 public/auth routes with no page overflow, missing primary-main target, missing skip link, or unlabeled button. The repaired sign-in route scores 100 Accessibility, 100 Best Practices, and 100 SEO in the local mobile Lighthouse navigation audit. Desktop 1440-pixel verification passes the same 12-route matrix.
+- Product capability, business logic, permissions, Native behavior, database, schema, and version remain unchanged. Build 14 is a local candidate; push and publication remain separate gates.
