@@ -18404,11 +18404,11 @@
     },
     {
       "taskId": "ux-residual-build17-consolidated-acceptance-20260909",
-      "reviewedThroughCommit": "ca67966827289794d4dcf88353fb3b06d15ce029",
+      "reviewedThroughCommit": "8d1bbdd8ad9e462b86aa62afbe4f36ccd9128368",
       "reviewedAt": "2026-09-10T02:06:52Z",
-      "status": "acceptance_failed_evidence_recorded",
+      "status": "accepted_local_candidate",
       "captureTiming": "same_task_after_acceptance_before_release",
-      "summary": "Records passing capability, payload, responsive, metadata, and performance evidence plus the exact remaining homepage contrast blocker; no product correction is included.",
+      "summary": "Records the bounded homepage contrast correction and passing consolidated capability, payload, responsive, metadata, accessibility, and performance evidence.",
       "workstreams": [
         "ux-less-is-more-residual-optimization"
       ],
@@ -18426,7 +18426,7 @@
         {
           "key": "quality",
           "result": "reviewed_no_semantic_change",
-          "reason": "The failed contrast gate is retained rather than hidden or downgraded."
+          "reason": "The initially failed contrast gate is retained in evidence and closed only by the exact correction plus a full rerun."
         },
         {
           "key": "vision",
@@ -18456,25 +18456,27 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records Build 17 passing evidence and failed accessibility gate."
+          "reason": "Records Build 17 correction and passing consolidated acceptance."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Keeps Build 17 and the release group open until contrast acceptance passes."
+          "reason": "Closes Build 17 locally while retaining push and publication as separate gates."
         },
         {
           "key": "audit",
           "result": "updated",
-          "reason": "Records exact browser metrics, contrast failures, and evidence limitations."
+          "reason": "Records the initial failures, exact correction, passing rerun metrics, and evidence limitations."
         }
       ],
       "reviewedChangedPaths": [
+        "evidence/ux-less-is-more-build17-consolidated-acceptance-20260909.md",
+        "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "cb7886e49b586670588df82e1eab5c0e9be9b8da88e2625f07deb5b52ed0a60c"
+      "reviewedChangeSha256": "c10ac28493f13aa008e4df5d17c7950ea7f0fbee0deb6c892b39ab9c240e57ce"
     }
   ]
 }

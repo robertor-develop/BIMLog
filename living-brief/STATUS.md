@@ -1263,5 +1263,5 @@ No release, publication, or overall completion claim is permitted until the reco
 
 - Builds 13–16 are present on clean source `cfed1bc35a58f1af84f3da7155d8e81aae1eb152`. Focused contracts pass 85/85, frontend typecheck passes, and exact-390 plus desktop browser matrices pass 24/24 with no overflow, missing primary-main/skip target, or unlabeled buttons.
 - Local unthrottled Chrome performance is strong at 734 ms LCP and 0.00 CLS. Best Practices and SEO score 100; the Submittals route remains 164.16 KB with XLSX isolated on demand.
-- Consolidated acceptance does not pass: mobile Lighthouse Accessibility is 96 because homepage badge, step-number, and validation-example foreground/background pairs remain below 4.5:1. These exact failures are recorded in `evidence/ux-less-is-more-build17-consolidated-acceptance-20260909.md`.
-- Build 17 changes evidence only. Builds 13–16 remain local candidates; the residual group is not ready for integration, push, or publication until the contrast defects are corrected and the acceptance matrix is rerun.
+- Correction `8d1bbdd8ad9e462b86aa62afbe4f36ccd9128368` changes only the four proven homepage contrast treatments. The rerun passes 90/90 focused contracts, 24/24 exact-390/desktop route checks, and mobile Lighthouse at 100 Accessibility, 100 Best Practices, and 100 SEO.
+- Local unthrottled Chrome performance remains strong at 757 ms LCP and 0.00 CLS. Build 17 consolidated acceptance is PASS; Builds 13–17 are ready for MAIN-00 integration. Push and publication remain separate explicit gates.

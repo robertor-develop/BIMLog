@@ -20,12 +20,17 @@
 - Local Chrome performance trace, unthrottled: LCP 734 ms; CLS 0.00. Field Core Web Vitals are unavailable for localhost, so these are lab measurements only.
 - Lighthouse mobile: Best Practices 100; SEO 100.
 
-## Failed gate
+## Closed accessibility gate
 
-- Lighthouse mobile Accessibility: 96, therefore consolidated Build 17 acceptance is FAIL.
-- Contrast failures: two primary-on-tinted homepage badges measure 4.32:1; six decorative step numbers at 0.4 opacity measure 1.76:1; the red validation-example heading measures 3.63:1; two red field labels on tinted backgrounds measure 3.41:1.
+- Narrow correction commit: `8d1bbdd8ad9e462b86aa62afbe4f36ccd9128368`.
+- The correction changes only the four proven homepage foreground treatments: two blue badges, the shared six-step number style, the validation heading, and the two validation field labels. Layout, content, routes, behavior, payload boundaries, capabilities, and application contracts are unchanged.
+- Focused contracts: 90/90 PASS, including the new 5/5 exact contrast-source contract.
+- Lighthouse mobile after rebuilding the candidate: Accessibility 100; Best Practices 100; SEO 100.
+- Exact 390x844 and 1440x900 browser rerun: 24/24 routes PASS with a primary main target, skip link, zero unlabeled buttons, and no horizontal overflow.
+- Local Chrome performance rerun, unthrottled: LCP 757 ms; CLS 0.00. Field Core Web Vitals remain unavailable for localhost.
+- Agentic Browsing 67 remains separately reported and is not a Build 17 product acceptance criterion; its only failed audit is the optional `llms.txt` recommendation.
 - Agentic Browsing 67 is reported separately and is not a Build 17 product acceptance criterion; its only failed audit is the optional `llms.txt` recommendation.
 
 ## Boundary and next action
 
-No product source, business workflow, permission, Native behavior, database, schema, version, push, publication, deployment, or production state changed in Build 17. The narrow next action is a homepage contrast correction followed by the same Lighthouse and responsive matrix. Builds 13–16 remain local accepted candidates; the group is not ready for integration or publication until the accessibility gate passes.
+Build 17 consolidated acceptance is PASS. Product source changed only for the bounded homepage contrast correction; no business workflow, permission, Native behavior, database, schema, version, push, publication, deployment, or production state changed. Builds 13–17 are local accepted candidates ready for MAIN-00 integration; publication remains a separate explicit gate.
