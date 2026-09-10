@@ -357,3 +357,9 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - A completely absent legacy camera scale tuple is optional for Navisworks XML export. The exporter omits focal/FOV/extent attributes while preserving the authoritative camera and sectioning fields.
 - A partial, non-finite, zero, or otherwise malformed present scale tuple remains rejected with exact diagnostics. No camera scale is fabricated, clamped, or defaulted.
 - The Navisworks 2025 package identity is `v1.05.N14-P10` / `1.5.14.10`; genuine field import remains an external Ruben acceptance gate.
+
+## Lens Next v1.05.N17-P14 historical digest contract closure — 2026-09-10
+
+- Platform and Native agree that matching database and embedded digests are not, by themselves, cryptographic verification of an unversioned historical Visual Package. Acceptance requires independent recomputation or preserved canonical evidence that verifies the declared digest; otherwise the package remains quarantined with `historical_digest_evidence_unavailable`.
+- The P13 response-only authoritative-lineage normalization remains unchanged and cannot bypass digest integrity. Current/versioned packages, cross-project and model binding, unrelated or cyclic lineage, and genuine identity conflicts remain fail-closed.
+- Native source and the accepted N17-P12 packages remain byte-identical. P14 changes only Platform validation, its shared contract tests, visible Platform version metadata, and release governance.

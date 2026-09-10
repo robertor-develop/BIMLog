@@ -21252,6 +21252,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e064bac6b7b2e71314d4894064ac366b35df2d201a875d6cab4b2258971b07d9"
+    },
+    {
+      "taskId": "lens-next-p14-historical-digest-contract-closure-20260910",
+      "reviewedThroughCommit": "ee5a71374de0ea8a13d089df721818c44b849573",
+      "reviewedAt": "2026-09-10T15:45:00Z",
+      "status": "accepted_local_candidate",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Closes the Platform and Native historical-unversioned digest contradiction by requiring independent recomputation or preserved canonical proof while preserving P13 lineage compatibility.",
+      "workstreams": [
+        "lens-next-platform-historical-digest-integrity"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction strengthens authoritative evidence integrity without changing product ownership or workflow."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work remains within the authorized bounded Platform correction and preserves independent release gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction adds deterministic integrity classifications and retains the required regression matrix."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction, commercial scope, or workflow changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated Platform authority already specifies quarantine for historical recomputation mismatch and requires no structural update."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the final shared Platform and Native historical digest contract and unchanged Native artifact boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or artifact presentation behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records P14 behavior, version ownership, and remaining release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local contract work and retains push, publication, handoff, and field acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the prior false acceptance, bounded correction, and protected behavior."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "fddab6ff1c5eec9e253e5983b03e3d012c220a0822b0e6bd0b774d2307fa54da"
     }
   ]
 }

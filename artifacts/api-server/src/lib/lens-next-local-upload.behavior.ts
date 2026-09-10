@@ -212,9 +212,15 @@ const route = fs.readFileSync(new URL("../routes/clash_reports.ts", import.meta.
 const historicalVector = JSON.parse(fs.readFileSync(new URL("../../../../contracts/lens-next/n07-p02-historical-digest-vector.json", import.meta.url), "utf8"));
 assert.equal(lensNextVisualStateDigest(historicalVector.state), historicalVector.expectedCurrentDigest);
 assert.equal(Buffer.byteLength(lensNextVisualStateCanonicalInput(historicalVector.state), "utf8"), historicalVector.expectedCanonicalByteLength);
-const historicalValidated = validatePersistedLensNextVisualState(JSON.stringify(historicalVector.state), historicalVector.storedDigest, historicalVector.expectedIdentity);
-assert.equal(historicalValidated.digest, historicalVector.storedDigest);
+const historicalRecomputedValid = structuredClone(historicalVector.state);
+historicalRecomputedValid.DigestSha256 = historicalVector.expectedCurrentDigest;
+const historicalValidated = validatePersistedLensNextVisualState(JSON.stringify(historicalRecomputedValid), historicalVector.expectedCurrentDigest, historicalVector.expectedIdentity);
+assert.equal(historicalValidated.digest, historicalVector.expectedCurrentDigest);
 assert.equal(historicalValidated.state.ViewpointId, historicalVector.expectedIdentity.viewpointId);
+assert.throws(
+  () => validatePersistedLensNextVisualState(JSON.stringify(historicalVector.state), historicalVector.storedDigest, historicalVector.expectedIdentity),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "historical_digest_evidence_unavailable",
+);
 const historicalTampered = structuredClone(historicalVector.state);
 historicalTampered.DigestSha256 = "0".repeat(64);
 assert.throws(
@@ -241,4 +247,4 @@ assert.match(persistedReadBlock, /req\.query\.modelFingerprint/);
 assert.match(persistedReadBlock, /sameLensNextAuthoritativeLineage/);
 assert.match(persistedReadBlock, /sameAuthoritativeLineage/);
 assert.doesNotMatch(persistedReadBlock, /db\.update\(lensViewpointsTable\)/);
-console.log(JSON.stringify({ status: "PASS", tests: ["lightweight-navigation-cross-language-vector", "navigation-screenshot-digest-independence", "navigation-platform-rebind", "historical-server-navigation-ephemeral-rebind", "navigation-camera-tamper-denial", "exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "utf8-unicode-rebind-and-apply", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "historical-unversioned-v1-verification", "historical-unversioned-tamper-denial", "persisted-write-validation", "persisted-read-validation", "no-overwrite", "display-conflict-deny"] }));
+console.log(JSON.stringify({ status: "PASS", tests: ["lightweight-navigation-cross-language-vector", "navigation-screenshot-digest-independence", "navigation-platform-rebind", "historical-server-navigation-ephemeral-rebind", "navigation-camera-tamper-denial", "exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "utf8-unicode-rebind-and-apply", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "historical-unversioned-recompute-valid", "historical-unversioned-recompute-mismatch-quarantine", "historical-unversioned-tamper-denial", "persisted-write-validation", "persisted-read-validation", "no-overwrite", "display-conflict-deny"] }));
