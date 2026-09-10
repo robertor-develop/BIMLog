@@ -21704,6 +21704,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4b987169aaca4ae9688129b469c48b486e46587611461aa293c1c63c77c50c6b"
+    },
+    {
+      "taskId": "post-build20-corrective-block01-p15-release-20260910",
+      "reviewedThroughCommit": "bde9ed21c63532e5208845076880efeffcbb8291",
+      "reviewedAt": "2026-09-10T19:33:34Z",
+      "status": "release_candidate_verified",
+      "captureTiming": "same_task_after_implementation_before_acceptance",
+      "summary": "Reconciles the Chrome-accepted corrective Builds 1–5 block to Platform P15 without changing Native, database, or schema behavior.",
+      "workstreams": [
+        "job-intake-post-build20-corrective"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The version reconciliation does not alter authoritative identity or ownership boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Uses the approved exact-source push and Replit publication boundary without Replit Agents."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Records completed Chrome and governed build gates before publication."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or capability scope changes in release reconciliation."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only visible Platform release metadata advances after the already-reviewed behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native code, package, Navisworks, camera, sectioning, XML, and bridge remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, spreadsheet, or governed report artifact behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or interoperability contract changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the accepted block and correct P15 release identity."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records completed Chrome acceptance and the authorized publication gate."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the reason for the Platform-only P15 increment and release limits."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3660b943e045edabe166c6778f27fb81231e004b12c44cc564f99e280514156e"
     }
   ]
 }

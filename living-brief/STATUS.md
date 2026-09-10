@@ -1359,6 +1359,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Internal hourly cost and incentive remain separate per-assignment values. The UI identifies that customer/APU rate is shared by assignments using the same Contract Item.
 - No database, schema, activation, permission, Native, Lens Next, report, or export behavior changes. Browser acceptance, integration, push, and publication remain separate gates.
 
+## Post-Build-20 corrective Builds 1–5 release candidate — v1.05.N17-P15
+
+- Controlled Chrome acceptance passes the coherent Builds 1–5 production bundle for contacts, contract-first presentation, Contract Item bindings, existing-user assignment, and separated resource rates.
+- Because the accepted block changes Platform product behavior after P14, the Platform segment advances to P15. Native remains N17 with no Native product or package change.
+- Push and Replit publication are authorized for the exact reconciled P15 source only; database/schema changes remain prohibited.
+
 ## Post-Build-20 corrective Build 2 — contract-first intake sequence
 
 - [x] Advanced Job Intake now presents Contract setup immediately after Job identity, before Contract Items and APU pricing.

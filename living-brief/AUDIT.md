@@ -1086,3 +1086,9 @@ was performed or authorized.
 - Build 5 reuses those exact shared defaults. A resource-row profile selection updates the selected Contract Item's authoritative customer/APU rate and supplies the role default; manual rate editing targets that same value.
 - The correction intentionally does not add a second customer-rate authority to an assignment. Internal hourly cost and incentive remain separate assignment fields and are proven unchanged by the focused transformation test.
 - No database/schema, API, activation, permission, Native, Lens camera/XML, report, or export contract changed.
+
+# 2026-09-10 — Post-Build-20 corrective Builds 1–5 P15 release decision
+
+- The exact production frontend bundle passed isolated Chrome verification for every accepted Build 1–5 surface, with controlled current-project data and a machine-readable all-true marker.
+- Publishing the block under P14 would mislabel new Platform behavior. The shared product identity therefore advances only the Platform segment to `v1.05.N17-P15`; Native code and the N17 segment remain unchanged.
+- The release gate permits only exact-source push, Replit publication, and live Chrome verification. It does not authorize database/schema changes, Replit Agents, Native changes, or unrelated work.
