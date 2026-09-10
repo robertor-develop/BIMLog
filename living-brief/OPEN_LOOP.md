@@ -2382,5 +2382,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Corrective Build 5: expose Drafting 35.47 and BIM Coordinator 37.99 defaults in Team & Resources, update the selected authoritative Contract Item rate, and preserve separate internal cost and incentive values.
 - [ ] Corrective Builds 1–5 independent browser acceptance and integration/release gate.
 - [x] Corrective Builds 1–5 controlled Chrome acceptance and coherent Platform P15 version reconciliation.
-- [ ] Push exact P15 source, publish through approved Replit flow, and live-verify version, health, and representative Intake controls before starting Build 6.
-- [ ] Continue with the next unresolved smoke-test finding; do not repeat existing required-field labels, P11 client-company creation, or completed resource rate separation.
+- [x] Push exact P15 source, publish through approved Replit flow, and live-verify version, health, and representative Intake controls before starting Build 6. Published `v1.05.N17-P15` from exact commit `61d57db15b3ed15ce6ac13cc2f9420b7448ab745`; health and representative Intake controls passed live Chrome verification.
+- [x] Corrective Build 6: make task-level resource assignment explicit, clear stale package-task selection when the Contract Item changes, and preserve the existing operational task authority.
+- [x] Corrective Build 7: prove saved APU version, rate, and contract binding across normalization/reload and expose the exact saved binding.
+- [x] Corrective Build 8: expose immutable saved APU history and prove append-only version creation and ordered retrieval.
+- [x] Corrective Build 9: expose stable Work Package identity and owner and prove save/reload plus operational activation persistence.
+- [x] Corrective Build 10: expose canonical Job budget-account generation and prove source-line association and idempotent persistence.
+- [ ] Corrective Builds 6–10 require consolidated local regression and real component browser acceptance before any release decision.
+- [ ] Continue with the next unresolved smoke-test finding; do not repeat completed Builds 1–10 work.

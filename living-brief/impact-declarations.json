@@ -21779,6 +21779,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3660b943e045edabe166c6778f27fb81231e004b12c44cc564f99e280514156e"
+    },
+    {
+      "taskId": "post-build20-corrective-block02-builds06-10-20260910",
+      "reviewedThroughCommit": "e648b4d1230cbca8dc756dff75739cae4452151d",
+      "reviewedAt": "2026-09-10T21:00:00Z",
+      "status": "implementation_verified_local_candidate",
+      "captureTiming": "same_task_after_implementation_before_acceptance",
+      "summary": "Closes five integrated smoke findings through explicit task assignment, saved APU binding and immutable history, Work Package persistence, and canonical idempotent budget-account association without a parallel authority.",
+      "workstreams": [
+        "job-intake-post-build20-corrective"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reuses canonical task, Generic APU, Work Package, and budget authorities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Preserves the authorized bounded corrective-build and evidence workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Requires behavior, reload, typecheck, build, and real component browser evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Completes approved Intake behavior without changing product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic structural inventory now includes the five new focused behavior modules; no runtime module, route, database, or schema contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, sectioning, XML, or bridge change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or export presentation change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or interoperability claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Builds 6–10 local block and remaining consolidated gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 6–10 implementation and retains acceptance boundaries."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the exact smoke findings, reused authorities, and corrections."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1bfce35d36d9cc4d99878b752eaed757388fe38dffd28821d214f1b9301ae548"
     }
   ]
 }

@@ -1092,3 +1092,11 @@ was performed or authorized.
 - The exact production frontend bundle passed isolated Chrome verification for every accepted Build 1–5 surface, with controlled current-project data and a machine-readable all-true marker.
 - Publishing the block under P14 would mislabel new Platform behavior. The shared product identity therefore advances only the Platform segment to `v1.05.N17-P15`; Native code and the N17 segment remain unchanged.
 - The release gate permits only exact-source push, Replit publication, and live Chrome verification. It does not authorize database/schema changes, Replit Agents, Native changes, or unrelated work.
+
+# 2026-09-10 — Post-Build-20 corrective Builds 6–10 implementation record
+
+- The task-assignment concern was traced to presentation and stale selection: activation already stores assignments against real operational task IDs, but Intake called the selector only Work Package and did not clear a package when its Contract Item changed. Build 6 corrects both without changing task authority.
+- Builds 7–8 preserve the existing Generic APU contract: Intake stores exact version/rate/contract bindings; Generic APU appends immutable versions and returns ordered history. The UI now makes both states directly inspectable.
+- Build 9 proves Work Package identity, decomposition, ownership, reload, and operational task linking while leaving the existing activation tables authoritative.
+- Build 10 confirms the approved budget snapshot remains the source authority. Intake activation aggregates Contract Items into canonical Job budget accounts per project cost node, retains each approved source-line ID, and uses existing conflict-safe idempotent persistence.
+- These changes introduce no database/schema, Native, Lens, camera, XML, permission, or deployment mutation.
