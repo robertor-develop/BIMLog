@@ -1037,3 +1037,8 @@ was performed or authorized.
 - The local production bundle retains the measured payload gains: `ProjectDetail` 14.90 KB, `SubmittalsTab` 164.16 KB, and XLSX 499.55 KB on demand without a greater-than-500 KB build warning. An unthrottled Chrome trace reports 734 ms LCP and 0.00 CLS; no field data exists for localhost.
 - Mobile Lighthouse initially reported 96 Accessibility and bounded the defect to two blue tinted badges, the shared six-step number style, one red validation heading, and two red field labels. Correction `8d1bbdd8ad9e462b86aa62afbe4f36ccd9128368` changes only those foreground treatments.
 - After rebuilding, the same mobile audit reports 100 Accessibility, 100 Best Practices, and 100 SEO. The 24-route exact-390/desktop matrix passes, focused contracts pass 90/90, and local performance records 757 ms LCP with 0.00 CLS. Build 17 is accepted locally; no push, publication, or deployment is claimed.
+# 2026-09-10 — Coordination Release C + UX Build 17 integration decision
+
+- The dedicated Release B integration worktree merged accepted UX commit `a60640d174d86fba60940cefab0c9f2f3dfd9519` into sealed coordination checkpoint `5e61141da1ecfc7a50dde99ae4250be07e56b17c` using `--no-ff`, preserving both parents.
+- Product files merged automatically. Living Brief conflicts retained both Coordination Release C authority and UX Build 17 acceptance truth before derived-state regeneration.
+- Focused coordination/credential behavior passes 12/12 and focused UX behavior passes 90/90. No external provider, credential, database/schema, Native/Lens Next, version, push, publication, or deployment action occurred in this integration task.

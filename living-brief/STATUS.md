@@ -1324,3 +1324,8 @@ No release, publication, or overall completion claim is permitted until the reco
 - Local unthrottled Chrome performance is strong at 734 ms LCP and 0.00 CLS. Best Practices and SEO score 100; the Submittals route remains 164.16 KB with XLSX isolated on demand.
 - Correction `8d1bbdd8ad9e462b86aa62afbe4f36ccd9128368` changes only the four proven homepage contrast treatments. The rerun passes 90/90 focused contracts, 24/24 exact-390/desktop route checks, and mobile Lighthouse at 100 Accessibility, 100 Best Practices, and 100 SEO.
 - Local unthrottled Chrome performance remains strong at 757 ms LCP and 0.00 CLS. Build 17 consolidated acceptance is PASS; Builds 13–17 are ready for MAIN-00 integration. Push and publication remain separate explicit gates.
+# Coordination Release C + UX Build 17 local integration — 2026-09-10
+
+- Merge `08df6e4deb324819da987cfa2861047745373883` preserves the sealed Coordination Release C parent and accepted UX Build 17 parent through an explicit no-fast-forward integration.
+- Coordination/credential focused behavior passes 12/12 and UX focused contracts pass 90/90. Database safety reconciles 205 tables, 261 indexes, and 160 startup tables without mutation.
+- This is a local integration checkpoint only. No provider, credential, database/schema, Native/Lens Next, version, remote, push, publication, or deployment action is claimed.

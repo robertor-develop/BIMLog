@@ -21100,6 +21100,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c10ac28493f13aa008e4df5d17c7950ea7f0fbee0deb6c892b39ab9c240e57ce"
+    },
+    {
+      "taskId": "coordination-release-c-ux-build17-integration-20260910",
+      "reviewedThroughCommit": "08df6e4deb324819da987cfa2861047745373883",
+      "reviewedAt": "2026-09-10T04:12:00Z",
+      "status": "accepted_local_integration_candidate",
+      "captureTiming": "same_task_after_integration_before_release",
+      "summary": "Records the no-fast-forward integration of sealed Coordination Release C and accepted UX Build 17 with both product and governance histories preserved.",
+      "workstreams": [
+        "coordination-delivery",
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The integration preserves existing authority boundaries and introduces no new product authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The integration follows the existing source, evidence, and external-action separation contracts."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused backend and UX gates are retained and full governed acceptance remains mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction, module, workflow, or capability is added or removed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Platform contracts are combined without API, permission, database, schema, or runtime mutation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, Lens Next, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or exported artifact presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No certification, regulatory, or standards-conformance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the combined local integration source and verification boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local source integration while retaining all external and migration gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the merge method, preserved authorities, focused results, and prohibited actions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e588969696b184c95141f3e43fd49353042c11b3d8ce397714c7d995436488ae"
     }
   ]
 }

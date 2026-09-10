@@ -2348,3 +2348,8 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Restore clear discoverability of the existing desktop sidebar collapse/expand and drag-to-resize controls without resetting saved user width.
 - [x] Pass focused behavior, frontend typecheck/build, and governed root regression from the reconciled source state. Builds 9–12 add accessibility, route-level performance, truthful public product proof, and consolidated acceptance without removing capability.
 - [ ] Keep push, publication, and live Chrome verification as a separate explicitly authorized release gate.
+# Coordination Release C + UX Build 17 integration — 2026-09-10
+
+- [x] Merge sealed Coordination Release C with accepted UX Build 17 in the dedicated Release B integration worktree, preserving both parents and both authority histories.
+- [x] Focused coordination/credential behavior 12/12 and UX contracts 90/90.
+- [ ] Remote integration, provider activation, migration authorization, version reconciliation, publication, and deployment remain separate explicit gates.
