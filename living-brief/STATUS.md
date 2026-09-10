@@ -1343,3 +1343,11 @@ No release, publication, or overall completion claim is permitted until the reco
 - P14 removes the P12/P13 Platform exception that treated matching stored and embedded digests as sufficient verification for an unversioned historical Visual Package. Independent recomputation or preserved canonical evidence is now mandatory; a recomputation mismatch remains quarantined with the established historical evidence-unavailable result.
 - The P13 safe legacy-lineage classifier remains unchanged and response-only. It cannot bypass digest validation, and cross-project, model mismatch, unrelated or cyclic lineage, ambiguous identity, and genuine conflicts remain rejected.
 - Native source remains `38620db50599962a22d910f8c14bcb01803f6236`; the accepted N17-P12 Native packages and DLLs are unchanged. Platform advances only to `v1.05.N17-P14`. Database and schema remain unchanged. Push, publication, live verification, Telegram handoff, and Ruben field acceptance remain separate gates until completed.
+
+## Post-Build-20 corrective Build 1 — client-company contacts
+
+- [x] The existing project directory supports multiple contacts per authoritative project company; no database or schema change is required.
+- [x] Quick and Advanced Job Intake expose Add company contact only after selecting a current-project client company.
+- [x] A newly created contact enters the current directory options and is immediately selected as Primary Contact.
+- [x] The server proves the company is already represented in the current project directory before contact creation or reuse.
+- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.

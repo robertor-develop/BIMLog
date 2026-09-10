@@ -21328,6 +21328,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "fddab6ff1c5eec9e253e5983b03e3d012c220a0822b0e6bd0b774d2307fa54da"
+    },
+    {
+      "taskId": "post-build20-corrective-01-client-contacts-20260910",
+      "reviewedThroughCommit": "a396a2576ddabe5cdba3a9089d152be723ae762e",
+      "reviewedAt": "2026-09-10T16:30:00Z",
+      "status": "implementation_verification_pending",
+      "captureTiming": "same_task_after_implementation_before_acceptance",
+      "summary": "Adds multiple-contact authoring to Quick and Advanced Job Intake using the existing authoritative project directory and strengthens current-project company scope enforcement without schema change.",
+      "workstreams": [
+        "job-intake-post-build20-corrective"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reuses authoritative project-company and contact identities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Bounded corrective build with separate release gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Requires behavior and persistence evidence beyond compilation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or entitlement change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing directory storage and API remain authoritative."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens plugin change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records implemented behavior and remaining acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the corrective continuation point."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the gap, correction, and protected boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9ddd0e91f63e54fdb46a6e2d02d3840cefed0e3c0884d9428cdbce351ca9dcdd"
     }
   ]
 }

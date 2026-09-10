@@ -2370,3 +2370,9 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Align Platform behavior tests with Native's permanent historical-unversioned quarantine vector while retaining an explicit recomputation-valid historical acceptance case.
 - [ ] Push the exact accepted P14 commit, publish without database/schema migration, verify production version and health in Chrome, and send the unchanged accepted N17-P12 Navisworks 2025 ZIP to Roberto.
 - [ ] Ruben field acceptance must prove one new and one historical Open Working View path, camera/sectioning, and one XML export smoke before final freeze audit.
+
+## Post-Build-20 corrective acceptance stream
+
+- [x] Corrective Build 1: multiple authoritative contacts for the selected current-project client company in Quick and Advanced Job Intake, with immediate Primary Contact selection and server-side project/company scope enforcement.
+- [ ] Corrective Build 1 independent browser acceptance and integration/release gate.
+- [ ] Continue with the next unresolved smoke-test finding only after Build 1 evidence review; do not repeat existing required-field labels or P11 client-company creation.

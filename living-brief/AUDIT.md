@@ -1055,3 +1055,9 @@ was performed or authorized.
 - Independent review found that the Build 47 historical exception accepted an unversioned package when its database and embedded digests matched even though current canonical recomputation differed. That equality proved only agreement between two stored representations, not integrity of the package contents, and contradicted the permanent Native quarantine vector.
 - P14 removes only that Platform exception. An unversioned historical package now requires matching independent recomputation or verified preserved canonical evidence; otherwise it remains quarantined. The P13 response-only legacy lineage normalization is preserved and cannot bypass this digest boundary.
 - Platform tests prove both a recomputation-valid unversioned package and quarantine of the permanent mismatch vector. Native source/packages, camera, sectioning, XML/unit handling, Create, database, and schema are unchanged.
+
+# 2026-09-10 — Post-Build-20 corrective Build 1 client-contact decision
+
+- Ruben's integrated smoke report showed that a client company could not be exercised with multiple selectable contacts from Job Intake. Source review confirmed the authoritative project-directory model and contact route already supported multiple contacts, but Intake exposed only company creation and contact selection.
+- Quick and Advanced Intake now reuse the existing contact route through one shared creator. The selected company is authoritative by numeric ID, the new contact is appended to the current-project directory projection, and it becomes Primary Contact without inventing identity.
+- The contact route now verifies the company is already connected to the current project before creation. No database/schema, contract, APU, rate/pay/cost, Native, Lens camera/XML, or unrelated workflow change was made.
