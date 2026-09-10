@@ -297,27 +297,41 @@ export function ContractItemBulkEditor(props: Props) {
         )}
       </div>
       {props.capabilities.budget && (
-        <label className="ji-bulk-budget">
-          {props.tt(
-            "Inherited approved budget snapshot",
-            "Versión aprobada del presupuesto heredada",
-          )}
-          <select
-            value={props.budgetSnapshotId}
-            onChange={(event) =>
-              props.onBudgetSnapshotChange(event.target.value)
-            }
-          >
-            <option value="">
-              {props.tt("Select version", "Seleccione una versión")}
-            </option>
-            {props.snapshots.map((snapshot: any) => (
-              <option key={snapshot.id} value={snapshot.id}>
-                v{snapshot.budgetVersion || snapshot.version} · {snapshot.total}
+        <div className="ji-bulk-budget">
+          <label>
+            {props.tt(
+              "Inherited approved budget snapshot",
+              "Versión aprobada del presupuesto heredada",
+            )}
+            <select
+              value={props.budgetSnapshotId}
+              onChange={(event) =>
+                props.onBudgetSnapshotChange(event.target.value)
+              }
+            >
+              <option value="">
+                {props.tt("Select version", "Seleccione una versión")}
               </option>
-            ))}
-          </select>
-        </label>
+              {props.snapshots.map((snapshot: any) => (
+                <option key={snapshot.id} value={snapshot.id}>
+                  v{snapshot.budgetVersion || snapshot.version} · {snapshot.total}
+                </option>
+              ))}
+            </select>
+          </label>
+          <small>{props.tt("Select an approved line for each Contract Item. Activation generates one canonical Job budget account per project cost node and preserves the exact source line association.", "Seleccione una línea aprobada para cada Partida de Contrato. La activación genera una cuenta presupuestaria canónica del Trabajo por nodo de costo del proyecto y conserva la asociación exacta con la línea de origen.")}</small>
+        </div>
+      )}
+      {props.capabilities.costValuePlanner && (
+        <div className="ji-apu-history-note">
+          <strong>{props.tt("Saved APU version history", "Historial de versiones APU guardadas")}</strong>
+          <span>
+            {props.tt(
+              `${props.apuVersions.length} immutable version(s) available. Selecting one binds this Contract Item to that exact saved version; it does not overwrite APU history.`,
+              `${props.apuVersions.length} versión(es) inmutable(s) disponibles. Seleccionar una vincula esta Partida de Contrato con esa versión guardada exacta; no sobrescribe el historial APU.`,
+            )}
+          </span>
+        </div>
       )}
       <div className="ji-bulk-head" aria-hidden="true">
         <span>#</span>
@@ -519,6 +533,17 @@ export function ContractItemBulkEditor(props: Props) {
                       ))}
                     </select>
                   </label>
+                  <div className="ji-apu-binding-status" role="status">
+                    {item.apuPlanVersion != null
+                      ? props.tt(
+                          `Saved binding: APU v${item.apuPlanVersion} · ${item.billingHourlyRate} ${props.currency}`,
+                          `Vínculo guardado: APU v${item.apuPlanVersion} · ${item.billingHourlyRate} ${props.currency}`,
+                        )
+                      : props.tt(
+                          "No saved APU version selected.",
+                          "No se seleccionó una versión APU guardada.",
+                        )}
+                  </div>
                 </>
               )}
               <label>
@@ -641,4 +666,4 @@ export function ContractItemBulkEditor(props: Props) {
   );
 }
 
-const bulkCss = `.ji-bulk{margin-top:14px}.ji-bulk-tools{display:flex;justify-content:space-between;gap:12px;padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px}.ji-bulk-tools p{margin:4px 0 0;font-size:12px}.ji-bulk-tools>span{font-weight:800;color:#1d4ed8}.ji-bulk-actions{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin:12px 0}.ji-bulk-actions>label{min-width:180px}.ji-paste{position:relative;display:flex!important;grid-template-columns:20px 1fr!important;align-items:center;min-width:260px;padding:8px 10px;border:1px dashed #2563eb;border-radius:8px;color:#1d4ed8!important}.ji-paste:focus-within{outline:3px solid #93c5fd;outline-offset:2px}.ji-paste small{display:block;font-weight:400}.ji-paste textarea{position:absolute;inset:0;opacity:0;cursor:copy;resize:none}.ji-bulk-budget{max-width:420px;margin-bottom:12px}.ji-bulk-head,.ji-bulk-row{display:grid;grid-template-columns:42px minmax(240px,1fr) 150px 46px;gap:8px;align-items:center}.ji-bulk-head{padding:7px 10px;background:#e2e8f0;border-radius:8px 8px 0 0;font-size:11px;font-weight:800;color:#475569}.ji-bulk-row{padding:8px 10px;border:1px solid #e2e8f0;border-top:0;background:#fff}.ji-bulk-row label{min-width:0}.ji-bulk-number{font-variant-numeric:tabular-nums;color:#64748b}.ji-mobile-label{display:none}.ji-advanced{grid-column:2/-1}.ji-advanced summary{cursor:pointer;color:#1d4ed8;font-size:12px;font-weight:700;padding:5px 0}.ji-advanced .ji-grid{margin-top:8px}.ji-provenance{font-size:11px;margin:8px 0 0}.ji-bulk-empty{padding:24px;border:1px dashed #94a3b8;border-radius:8px;text-align:center;color:#64748b}@media(max-width:600px){.ji-bulk-tools{display:block}.ji-bulk-tools>span{display:block;margin-top:8px}.ji-bulk-actions>*{width:100%}.ji-bulk-head{display:none}.ji-bulk-row{grid-template-columns:32px minmax(0,1fr);padding:12px 8px;border-top:1px solid #e2e8f0;margin-top:8px;border-radius:8px}.ji-bulk-row>label,.ji-bulk-row>button{grid-column:2}.ji-mobile-label{display:block}.ji-advanced{grid-column:1/-1}.ji-paste{min-width:0}}`;
+const bulkCss = `.ji-bulk{margin-top:14px}.ji-bulk-tools{display:flex;justify-content:space-between;gap:12px;padding:12px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px}.ji-bulk-tools p{margin:4px 0 0;font-size:12px}.ji-bulk-tools>span{font-weight:800;color:#1d4ed8}.ji-bulk-actions{display:flex;align-items:end;gap:8px;flex-wrap:wrap;margin:12px 0}.ji-bulk-actions>label{min-width:180px}.ji-paste{position:relative;display:flex!important;grid-template-columns:20px 1fr!important;align-items:center;min-width:260px;padding:8px 10px;border:1px dashed #2563eb;border-radius:8px;color:#1d4ed8!important}.ji-paste:focus-within{outline:3px solid #93c5fd;outline-offset:2px}.ji-paste small{display:block;font-weight:400}.ji-paste textarea{position:absolute;inset:0;opacity:0;cursor:copy;resize:none}.ji-bulk-budget{max-width:420px;margin-bottom:12px}.ji-apu-history-note{display:flex;gap:8px;align-items:baseline;margin:0 0 12px;padding:9px 10px;border-left:3px solid #2563eb;background:#f8fafc;color:#334155;font-size:12px}.ji-apu-history-note span{min-width:0}.ji-bulk-head,.ji-bulk-row{display:grid;grid-template-columns:42px minmax(240px,1fr) 150px 46px;gap:8px;align-items:center}.ji-bulk-head{padding:7px 10px;background:#e2e8f0;border-radius:8px 8px 0 0;font-size:11px;font-weight:800;color:#475569}.ji-bulk-row{padding:8px 10px;border:1px solid #e2e8f0;border-top:0;background:#fff}.ji-bulk-row label{min-width:0}.ji-bulk-number{font-variant-numeric:tabular-nums;color:#64748b}.ji-mobile-label{display:none}.ji-advanced{grid-column:2/-1}.ji-advanced summary{cursor:pointer;color:#1d4ed8;font-size:12px;font-weight:700;padding:5px 0}.ji-advanced .ji-grid{margin-top:8px}.ji-apu-binding-status{align-self:end;padding:9px 10px;border:1px solid #bfdbfe;border-radius:8px;background:#eff6ff;color:#1e3a5f;font-size:12px;font-weight:700}.ji-provenance{font-size:11px;margin:8px 0 0}.ji-bulk-empty{padding:24px;border:1px dashed #94a3b8;border-radius:8px;text-align:center;color:#64748b}@media(max-width:600px){.ji-bulk-tools{display:block}.ji-bulk-tools>span{display:block;margin-top:8px}.ji-bulk-actions>*{width:100%}.ji-apu-history-note{align-items:flex-start;flex-direction:column}.ji-bulk-head{display:none}.ji-bulk-row{grid-template-columns:32px minmax(0,1fr);padding:12px 8px;border-top:1px solid #e2e8f0;margin-top:8px;border-radius:8px}.ji-bulk-row>label,.ji-bulk-row>button{grid-column:2}.ji-mobile-label{display:block}.ji-advanced{grid-column:1/-1}.ji-paste{min-width:0}}`;

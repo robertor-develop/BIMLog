@@ -1192,6 +1192,12 @@ export function JobIntakeWorkspace() {
                   {tt("Resource assignments", "Asignaciones de recursos")}
                 </div>
               </div>
+              {Array.isArray(intake.activationSummary?.budgetAccounts) && (
+                <div className="ji-stat">
+                  <strong>{intake.activationSummary.budgetAccounts.length}</strong>
+                  <div>{tt("Canonical budget accounts", "Cuentas presupuestarias canónicas")}</div>
+                </div>
+              )}
             </div>
             {intake.activatedContractId ? (
               <div className="ji-actions">
@@ -2374,11 +2380,22 @@ export function JobIntakeWorkspace() {
                         <select
                           value={assignment.scopeItemId}
                           onChange={(e) =>
-                            assignmentChange(
-                              index,
-                              "scopeItemId",
-                              e.target.value,
-                            )
+                            setData((old: any) => ({
+                              ...old,
+                              team: {
+                                ...old.team,
+                                assignments: old.team.assignments.map(
+                                  (item: any, i: number) =>
+                                    i === index
+                                      ? {
+                                          ...item,
+                                          scopeItemId: e.target.value,
+                                          workPackageId: "",
+                                        }
+                                      : item,
+                                ),
+                              },
+                            }))
                           }
                         >
                           <option value="">
@@ -2451,7 +2468,8 @@ export function JobIntakeWorkspace() {
                           ? tt("This customer/APU rate belongs to the selected Contract Item and is shared by assignments using it. Internal hourly cost and incentive remain separate per assignment.", "Esta tarifa Cliente/APU pertenece a la Partida de Contrato seleccionada y se comparte entre las asignaciones que la usan. El costo horario interno y el incentivo permanecen separados por asignación.")
                           : tt("Select a Contract Item to set its customer/APU rate. Internal hourly cost remains independently editable.", "Seleccione una Partida de Contrato para establecer su tarifa Cliente/APU. El costo horario interno sigue siendo editable de forma independiente.")}
                       </div>
-                      <label>{tt("Work Package", "Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>assignmentChange(index,"workPackageId",e.target.value)}><option value="">{tt("Whole Contract Item", "Partida de Contrato completa")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{workPackage.title||workPackage.packageCode}</option>)}</select></label>
+                      <label>{tt("Operational task / Work Package", "Tarea operativa / Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>assignmentChange(index,"workPackageId",e.target.value)}><option value="">{tt("Contract Item delivery task", "Tarea de entrega de la Partida de Contrato")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{tt("Task", "Tarea")}: {workPackage.title||workPackage.packageCode}{workPackage.dimensionValue ? ` — ${workPackage.dimensionValue}` : ""}</option>)}</select></label>
+                      <div className="ji-lock">{tt("The selected scope activates as a real Job Operations task. Choosing a Work Package assigns this resource directly to that package task; choosing the Contract Item uses its delivery task.", "El alcance seleccionado se activa como una tarea real de Operaciones del Trabajo. Elegir un Paquete de trabajo asigna este recurso directamente a la tarea del paquete; elegir la Partida de Contrato utiliza su tarea de entrega.")}</div>
                       <div className="ji-lock">{tt("Authoritative scope", "Alcance autorizado")}: {assignment.engagementId || "—"} → {assignment.contractId || "—"} → APU {data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.apuPlanVersion || "—"}</div>
                       {capabilities.budget && (
                         <>

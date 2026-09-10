@@ -1352,6 +1352,21 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] The server proves the company is already represented in the current project directory before contact creation or reuse.
 - [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
 
+## Post-Build-20 corrective Builds 6–10 local block — 2026-09-10
+
+- Build 6 makes the existing Work Package-to-operational-task assignment explicit and clears a stale package selection when its Contract Item changes.
+- Build 7 proves and visibly identifies the saved Contract Item APU version/rate/contract binding after reload.
+- Build 8 exposes immutable saved APU history while preserving Generic APU as the sole append-only authority.
+- Build 9 exposes stable Work Package codes and owning Contract Items and proves persistence into operational packages/tasks.
+- Build 10 exposes canonical Job budget accounts generated from approved source-line associations and preserves idempotent activation persistence.
+- Focused behavior and frontend typecheck pass for each build. Consolidated regression and real component browser acceptance remain the block gate; nothing is pushed or published by these builds.
+
+## Post-Build-20 corrective Builds 6–10 release candidate — v1.05.N17-P16
+
+- The complete governed production build and deterministic API runtime closure pass for the integrated Builds 6–10 source.
+- Because the block changes Platform presentation and verification behavior after P15, only the Platform segment advances to P16; Native remains N17.
+- Exact-source push, Replit Shell publication, and live Chrome acceptance are authorized. Native, database, and schema changes remain prohibited.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.

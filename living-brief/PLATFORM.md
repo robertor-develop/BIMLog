@@ -326,12 +326,17 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.ts
 - artifacts/api-server/src/lib/job-budget-governance.behavior.ts
 - artifacts/api-server/src/lib/job-document-connections.behavior.ts
+- artifacts/api-server/src/lib/job-intake-apu-history.behavior.ts
+- artifacts/api-server/src/lib/job-intake-apu-reload.behavior.ts
+- artifacts/api-server/src/lib/job-intake-budget-account.behavior.ts
 - artifacts/api-server/src/lib/job-intake-combined-scenario.behavior.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
 - artifacts/api-server/src/lib/job-intake-member-assignment.behavior.ts
 - artifacts/api-server/src/lib/job-intake-migration.ts
 - artifacts/api-server/src/lib/job-intake-service.ts
 - artifacts/api-server/src/lib/job-intake-spreadsheet.behavior.ts
+- artifacts/api-server/src/lib/job-intake-task-assignment.behavior.ts
+- artifacts/api-server/src/lib/job-intake-work-package-reload.behavior.ts
 - artifacts/api-server/src/lib/job-intake.behavior.ts
 - artifacts/api-server/src/lib/job-operations-service.ts
 - artifacts/api-server/src/lib/job-operations.behavior.ts
