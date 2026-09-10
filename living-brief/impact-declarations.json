@@ -21245,12 +21245,13 @@
         }
       ],
       "reviewedChangedPaths": [
+        "evidence/lens-next-legacy-working-view-final-20260910/ACCEPTANCE.md",
         "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "c46b519a3cdb850a0a41460bcce4953993d5b18b378ab86288bf5289dbbfce79"
+      "reviewedChangeSha256": "e064bac6b7b2e71314d4894064ac366b35df2d201a875d6cab4b2258971b07d9"
     }
   ]
 }

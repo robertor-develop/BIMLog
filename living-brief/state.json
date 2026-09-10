@@ -6,6 +6,7 @@
   "impact": {
     "baselineCommit": "7e3c30b9d015a9d482b49f979e144a5ef3aedaa2",
     "changedPaths": [
+      "evidence/lens-next-legacy-working-view-final-20260910/ACCEPTANCE.md",
       "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
