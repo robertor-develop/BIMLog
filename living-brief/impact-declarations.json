@@ -20418,10 +20418,11 @@
         }
       ],
       "reviewedChangedPaths": [
+        "evidence/COORDINATION_DELIVERY_RELEASE_C_BUILD_12.md",
         "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "5a5b3b538684d5f421bbdc651ae5cbda5497ac3942b535980ad7b310339291b9"
+      "reviewedChangeSha256": "7a9d507884869658fb1dd7a856bedb8e4c8ae5a0433536450f08108645464f3a"
     }
   ]
 }

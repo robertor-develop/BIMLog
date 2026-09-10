@@ -6,6 +6,7 @@
   "impact": {
     "baselineCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
     "changedPaths": [
+      "evidence/COORDINATION_DELIVERY_RELEASE_C_BUILD_12.md",
       "living-brief/PLATFORM.md",
       "living-brief/impact-declarations.json"
     ],
@@ -68,7 +69,7 @@
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "9555230cedd5552736b88b1a90ca54621fbd08225cc4b51eb796b51571cf4d38",
-      "sourceChangedAt": "2026-09-10T00:59:46.000Z",
+      "sourceChangedAt": "2026-09-10T01:09:54.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
       "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
