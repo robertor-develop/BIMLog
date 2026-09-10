@@ -18251,6 +18251,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a09f986f4db12a747b862e3d8d75c050a98b7abb07c313333314cb8a186a3036"
+    },
+    {
+      "taskId": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
+      "reviewedAt": "2026-09-10T01:18:54Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Strengthens the public homepage with truthful evidence of the accepted Lens Next workflow without invented social proof or capability removal.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, workflow, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded homepage change and separate publication gate follow the accepted workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Claims are tied to implemented behavior and verified in focused tests and browsers."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The clearer proposition preserves product direction and every existing capability."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 15 scope, evidence, and release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local Build 15 and retains Builds 16–17."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the homepage evidence gap, correction, and truthful-claims boundary."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "860f6266c8148710e5ea61da13e9b96dbcb6cafc00a917b22adce04cf494b5e9"
     }
   ]
 }

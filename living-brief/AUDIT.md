@@ -942,3 +942,10 @@ Roberto subsequently clarified that 40 was illustrative, not a maximum. The reco
 - An exact 390-pixel Chromium sweep then proved a shared five-column public footer produced 624 pixels of document width on the Features route. The defect affected the shared marketing/legal surface, not one isolated page.
 - Implementation `29b78cc80f1ebefc6638982c8dac0c5a49aed776` removes the zoom restriction, strengthens default light-theme muted contrast, restores keyboard and touch access to sign-in controls, makes the shared Admin modal fit 390 pixels with dialog/Escape/focus-return behavior, and collapses the public footer responsively without removing content.
 - After rebuilding the actual frontend candidate, local mobile Lighthouse reports 100 Accessibility, 100 Best Practices, and 100 SEO on sign-in. Twelve routes at exact 390 pixels and the same twelve at 1440 pixels report no horizontal overflow, missing main/skip target, or unlabeled buttons. Focused Build 14 checks pass 13/13 and the established accessibility checks pass 8/8.
+
+## 2026-09-09 — UX residual Build 15 authentic homepage product proof
+
+- The homepage audit found that broad marketing language preceded the strongest verified evidence, while the already-accepted Lens Next workflow was documented only on the Features route.
+- Implementation `d4cb585186aa782c21a16ed337a9a6ff6238a920` adds the exact implemented create, same-project linking/reference, Working View restore, and one-way XML interoperability sequence to the homepage decision path and links to the fuller capability boundary.
+- The page explicitly states that this is implemented behavior and not a concept screen or customer testimonial. No customer endorsement, user count, conversion metric, logo, or unsupported outcome was introduced.
+- Focused product-proof checks pass 8/8 and 7/7; the existing accessibility contract passes 13/13; frontend typecheck and production build pass. Browser inspection at 390x844 and 1440x900 confirms the proposition and all three steps are rendered with no horizontal overflow and zero unlabeled buttons.

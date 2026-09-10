@@ -1241,3 +1241,11 @@ No release, publication, or overall completion claim is permitted until the reco
 - The shared public footer now collapses from its five-column desktop grid to two columns below 720 pixels and one column at 390 pixels. This removes the common horizontal overflow from public marketing and legal routes without removing any link or content.
 - Exact-390 Chromium verification passes on 12 public/auth routes with no page overflow, missing primary-main target, missing skip link, or unlabeled button. The repaired sign-in route scores 100 Accessibility, 100 Best Practices, and 100 SEO in the local mobile Lighthouse navigation audit. Desktop 1440-pixel verification passes the same 12-route matrix.
 - Product capability, business logic, permissions, Native behavior, database, schema, and version remain unchanged. Build 14 is a local candidate; push and publication remain separate gates.
+
+## UX residual Build 15 authentic homepage product proof — 2026-09-09
+
+- Implementation `d4cb585186aa782c21a16ed337a9a6ff6238a920` replaces the vague homepage lead with a concrete accountable-project-record proposition and adds a direct path to the detailed Features boundary.
+- The homepage now presents the already-implemented Lens Next sequence: capture an authoritative viewpoint from the active Navisworks context, link same-project BIMLog records and bounded references without changing the camera, then restore the Working View or export one-way Navisworks XML.
+- The proof is explicitly labeled as implemented product behavior rather than a concept screen or customer testimonial. No testimonials, adoption metrics, customer logos, or unverified outcomes were invented.
+- Focused homepage proof passes 8/8, the established public capability proof passes 7/7, accessibility safeguards pass 13/13, and frontend typecheck/build pass. Local browser checks at exact 390x844 and 1440x900 show no horizontal overflow or unlabeled buttons.
+- Product capability, business logic, permissions, Native behavior, database, schema, and version remain unchanged. Build 15 is a local candidate; push and publication remain separate gates.
