@@ -1079,3 +1079,10 @@ was performed or authorized.
 - The integrated smoke report correctly identified that people who already existed as BIMLog users could not be selected and added to a project from Intake; the Team assignment selector only contained users who were already active project members.
 - The new candidate projection is admin-only and derives its company boundary from the current project's authoritative directory and existing member companies. It excludes current members and never exposes a platform-wide user list.
 - Adding a selected user reuses the existing project-member mutation, saves the Intake draft first, reloads authoritative membership, and then uses the pre-existing contract, Contract Item, Work Package, planned-hours, cost, and incentive assignment controls. No database/schema or Native change was introduced.
+
+# 2026-09-10 — Post-Build-20 corrective Build 5 resource rate decision
+
+- The integrated smoke report correctly found that the established Drafting 35.47 and BIM Coordinator 37.99 defaults were available in Contract Item/APU editing but not in Team & Resources, where staffing decisions are made.
+- Build 5 reuses those exact shared defaults. A resource-row profile selection updates the selected Contract Item's authoritative customer/APU rate and supplies the role default; manual rate editing targets that same value.
+- The correction intentionally does not add a second customer-rate authority to an assignment. Internal hourly cost and incentive remain separate assignment fields and are proven unchanged by the focused transformation test.
+- No database/schema, API, activation, permission, Native, Lens camera/XML, report, or export contract changed.

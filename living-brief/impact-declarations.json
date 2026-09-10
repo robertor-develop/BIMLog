@@ -21629,6 +21629,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5aeb164631cc0f2d1ea2b435f0d5970c18b1704c7cb66d9e2fae093356815585"
+    },
+    {
+      "taskId": "post-build20-corrective-05-resource-rates-20260910",
+      "reviewedThroughCommit": "c2153a8d9cb940fad6f956a390b9c38452c10d66",
+      "reviewedAt": "2026-09-10T18:05:00Z",
+      "status": "implementation_verified_local_candidate",
+      "captureTiming": "same_task_after_implementation_before_acceptance",
+      "summary": "Exposes established role-based customer/APU rate defaults in Team & Resources while preserving Contract Item authority and separate internal cost and incentive layers.",
+      "workstreams": [
+        "job-intake-post-build20-corrective"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Reuses the authoritative Contract Item rate instead of creating a duplicate resource-level billing authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Remains a bounded corrective build with independent browser and release gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Requires focused rate-layer behavior, typecheck, and governed build evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Completes the approved Intake staffing and pricing workflow without changing product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the focused rate transformation behavior in the generated Platform inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, sectioning, XML, or bridge behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, spreadsheet, or governed report artifact behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or external interoperability contract changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the resource-row role defaults and rate-layer separation."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Build 5 completion and retains independent acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the reproduced resource-section placement gap and bounded correction."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a69ef6d8c675d3db179c24d12d0e13ab36a26923729106bca64086fd581ea3a7"
     }
   ]
 }

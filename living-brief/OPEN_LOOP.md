@@ -2379,4 +2379,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Corrective Build 3: make saved APU versions selectable per Contract Item and reload persisted budget-line options while preserving company/agreement bindings.
 - [x] Corrective Build 4: add an existing connected-company BIMLog user to the current project from Team & Resources, then expose that authoritative member to the existing task/contract/scope assignment chain.
 - [ ] Corrective Builds 1–4 independent browser acceptance and integration/release gate.
-- [ ] Continue with the next unresolved smoke-test finding; do not repeat existing required-field labels or P11 client-company creation.
+- [x] Corrective Build 5: expose Drafting 35.47 and BIM Coordinator 37.99 defaults in Team & Resources, update the selected authoritative Contract Item rate, and preserve separate internal cost and incentive values.
+- [ ] Corrective Builds 1–5 independent browser acceptance and integration/release gate.
+- [ ] Continue with the next unresolved smoke-test finding; do not repeat existing required-field labels, P11 client-company creation, or completed resource rate separation.

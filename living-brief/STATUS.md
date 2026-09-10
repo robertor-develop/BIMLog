@@ -1352,6 +1352,13 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] The server proves the company is already represented in the current project directory before contact creation or reuse.
 - [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
 
+## Post-Build-20 corrective Build 5 — resource rate defaults and separation
+
+- Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.
+- Selecting a profile updates the selected authoritative Contract Item rate and supplies the matching role default. Manual customer/APU rate editing remains available.
+- Internal hourly cost and incentive remain separate per-assignment values. The UI identifies that customer/APU rate is shared by assignments using the same Contract Item.
+- No database, schema, activation, permission, Native, Lens Next, report, or export behavior changes. Browser acceptance, integration, push, and publication remain separate gates.
+
 ## Post-Build-20 corrective Build 2 — contract-first intake sequence
 
 - [x] Advanced Job Intake now presents Contract setup immediately after Job identity, before Contract Items and APU pricing.
