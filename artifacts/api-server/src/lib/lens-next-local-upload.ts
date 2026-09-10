@@ -450,17 +450,12 @@ export function validatePersistedLensNextVisualState(
     && evidence.canonical.length > 0
     && sha256(evidence.canonical) === embedded
     && legacyCanonicalMatchesState(serverTokens, evidence.tokens);
-  // Packages captured before digest diagnostics were persisted cannot be
-  // recomputed byte-for-byte: their native canonical floating-point text was
-  // never stored.  For those packages only, the database digest and embedded
-  // digest remain an authoritative tamper-evident pair, while the complete
-  // persisted identity must still match the requested row exactly.  This does
-  // not apply to current/versioned packages and never relaxes identity checks.
-  const verifiedHistoricalUnversioned = isHistoricalUnversionedVisualState(state)
-    && identityMatches
-    && /^[a-f0-9]{64}$/.test(supplied)
-    && supplied === embedded;
-  if (!/^[a-f0-9]{64}$/.test(supplied) || supplied !== embedded || (recomputed !== embedded && !verifiedLegacyCanonical && !verifiedHistoricalUnversioned)) {
+  // Matching stored and embedded digests do not independently prove an
+  // unversioned historical package. If its contents cannot be recomputed to
+  // that digest (and no preserved legacy canonical evidence verifies it), the
+  // package remains quarantined. Identity/lineage compatibility is evaluated
+  // separately and must never bypass this integrity boundary.
+  if (!/^[a-f0-9]{64}$/.test(supplied) || supplied !== embedded || (recomputed !== embedded && !verifiedLegacyCanonical)) {
     const diagnostics = digestMismatchDiagnostics(state, embedded, recomputed);
     if (/^[a-f0-9]{64}$/.test(supplied) && supplied === embedded && identityMatches && isHistoricalUnversionedVisualState(state)) {
       throw new LensNextLocalUploadError(
