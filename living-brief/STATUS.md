@@ -1231,6 +1231,6 @@ No release, publication, or overall completion claim is permitted until the reco
 
 ## UX residual Build 13 project-route payload isolation — 2026-09-09
 
-- `ProjectDetail` no longer eagerly imports all 18 project workspaces. The persistent project shell remains loaded while only the selected workspace is requested through its own accessible Suspense boundary.
+- Implementation commit `c0e66b12dee4a25bbbda19f55ff07f74a906d5d2` makes `ProjectDetail` stop eagerly importing all 18 project workspaces. The persistent project shell remains loaded while only the selected workspace is requested through its own accessible Suspense boundary.
 - The shared ProjectDetail chunk falls from approximately 1.526 MB to 14.9 KB. The initial application entry remains approximately 435 KB; large functional workspaces remain available as independent on-demand chunks rather than disappearing.
 - A Chrome performance trace of the already-published Build 12 public Features route records 831 ms LCP and 0.00 CLS under unthrottled lab conditions. It is a baseline, not field Core Web Vitals evidence and not a substitute for authenticated project-route verification after publication.

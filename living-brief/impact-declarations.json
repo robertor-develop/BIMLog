@@ -18104,7 +18104,7 @@
     },
     {
       "taskId": "ux-residual-build13-project-route-payload-20260909",
-      "reviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "reviewedThroughCommit": "c0e66b12dee4a25bbbda19f55ff07f74a906d5d2",
       "reviewedAt": "2026-09-10T00:04:03Z",
       "status": "local_candidate_reconciled",
       "captureTiming": "same_task_after_implementation_before_release",
@@ -18170,13 +18170,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/bimlog/src/pages/ProjectDetail.tsx",
         "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "21fe28e4dbd1d00d80e42c59c1aba5013fa9a6817d776d9cda64d7dc17f8f5be"
+      "reviewedChangeSha256": "34b1c8d4e66fe2a363d0b191ef30b6becaef31c134978ea0bbe20caa1d1c7606"
     }
   ]
 }

@@ -15,7 +15,7 @@ Release Groups A–B are integrated on the exact current `origin/main` lineage; 
 - [x] Build 7: standardize shared table readability, actions, and bounded horizontal overflow.
 - [x] Build 8: harden exact-390 project actions, controls, and table scrolling without hiding capability.
 - [x] Builds 9–12: accessibility, route-splitting/performance, authentic public product proof, and consolidated acceptance. Exact source `8c1bf307bfbee7c636b31eaf90ff7eaf69508c19` was pushed, built in Replit Shell, published once, and live-verified at `v1.05.N17-P12` on 2026-09-09.
-- [x] Build 13: isolate all 18 ProjectDetail workspaces behind selected-route lazy boundaries while retaining the project shell and every capability. Local focused/typecheck/build evidence passed; push and publication remain separate gates.
+- [x] Build 13: implementation `c0e66b12dee4a25bbbda19f55ff07f74a906d5d2` isolates all 18 ProjectDetail workspaces behind selected-route lazy boundaries while retaining the project shell and every capability. Local focused/typecheck/build evidence passed; push and publication remain separate gates.
 - [ ] Build 14: complete route-by-route desktop/exact-390 accessibility and mobile acceptance.
 - [ ] Build 15: strengthen homepage conversion and authentic product proof without invented testimonials or capability removal.
 - [ ] Build 16: improve service/product interaction and technical SEO without changing business workflows.
