@@ -329,29 +329,86 @@ export type LensNextPersistedVisualStateIdentity = {
   revisionNumber: number;
 };
 
+export type LensNextLegacyNavigationCompatibility = {
+  modelFingerprint: string;
+  sameAuthoritativeLineage: boolean;
+};
+
+export function sameLensNextAuthoritativeLineage(
+  rows: ReadonlyArray<{ id: number; supersedesId: number | null }>,
+  firstId: number,
+  secondId: number,
+): boolean {
+  const parents = new Map(rows.map(item => [item.id, item.supersedesId]));
+  const rootOf = (start: number): number | null => {
+    if (!Number.isSafeInteger(start) || start <= 0 || !parents.has(start)) return null;
+    const seen = new Set<number>();
+    let cursor = start;
+    while (parents.get(cursor) != null) {
+      if (seen.has(cursor)) return null;
+      seen.add(cursor);
+      cursor = parents.get(cursor)!;
+      if (!parents.has(cursor)) return null;
+    }
+    return cursor;
+  };
+  const firstRoot = rootOf(firstId);
+  const secondRoot = rootOf(secondId);
+  return firstRoot != null && firstRoot === secondRoot;
+}
+
+export function lensNextNavigationIdentity(visualStateJson: string): LensNextPersistedVisualStateIdentity & { modelFingerprint: string } {
+  let state: any;
+  try { state = JSON.parse(visualStateJson); }
+  catch { throw new LensNextLocalUploadError("visual_state_json_invalid", "BIMLog visual-state JSON is invalid.", 422); }
+  if (!isLensNextNavigationView(state))
+    throw new LensNextLocalUploadError("navigation_identity_mismatch", "BIMLog navigation identity does not match the issue record.", 409);
+  return {
+    projectId: Number(field(state, "ProjectId", "projectId")),
+    serverId: Number(field(state, "ServerId", "serverId")),
+    viewpointId: String(field(state, "ViewpointId", "viewpointId")),
+    lifecycleStatus: String(field(state, "LifecycleStatus", "lifecycleStatus")),
+    revisionNumber: Number(field(state, "RevisionNumber", "revisionNumber")),
+    modelFingerprint: String(field(state, "ModelFingerprint", "modelFingerprint")).trim().toLowerCase(),
+  };
+}
+
 export function rebindLegacyNavigationServerIdentity(
   visualStateJson: string,
   visualStateDigest: string,
   expected: LensNextPersistedVisualStateIdentity,
+  compatibility?: LensNextLegacyNavigationCompatibility,
 ): { json: string; digest: string } {
   let state: any;
   try { state = JSON.parse(visualStateJson); }
   catch { throw new LensNextLocalUploadError("visual_state_json_invalid", "BIMLog visual-state JSON is invalid.", 422); }
   if (!isLensNextNavigationView(state))
     throw new LensNextLocalUploadError("navigation_identity_mismatch", "BIMLog navigation identity does not match the issue record.", 409);
-  const capturedIdentity: LensNextPersistedVisualStateIdentity = {
-    projectId: Number(field(state, "ProjectId", "projectId")),
-    serverId: Number(field(state, "ServerId", "serverId")),
-    viewpointId: String(field(state, "ViewpointId", "viewpointId")),
-    lifecycleStatus: String(field(state, "LifecycleStatus", "lifecycleStatus")),
-    revisionNumber: Number(field(state, "RevisionNumber", "revisionNumber")),
-  };
-  if (!Number.isSafeInteger(capturedIdentity.serverId) || capturedIdentity.serverId <= 0 || capturedIdentity.projectId !== expected.projectId || capturedIdentity.viewpointId !== expected.viewpointId || capturedIdentity.lifecycleStatus !== expected.lifecycleStatus || capturedIdentity.revisionNumber !== expected.revisionNumber)
+  const captured = lensNextNavigationIdentity(visualStateJson);
+  const capturedIdentity: LensNextPersistedVisualStateIdentity = captured;
+  const exactLegacyServerOnly = capturedIdentity.viewpointId === expected.viewpointId
+    && capturedIdentity.lifecycleStatus === expected.lifecycleStatus
+    && capturedIdentity.revisionNumber === expected.revisionNumber;
+  const compatibilityModelMatches = compatibility == null || (
+    /^[a-f0-9]{64}$/.test(compatibility.modelFingerprint)
+    && captured.modelFingerprint === compatibility.modelFingerprint
+  );
+  const boundedHistoricalLineage = compatibility?.sameAuthoritativeLineage === true
+    && compatibilityModelMatches;
+  if (!Number.isSafeInteger(capturedIdentity.serverId) || capturedIdentity.serverId <= 0 || capturedIdentity.projectId !== expected.projectId || !compatibilityModelMatches || (!exactLegacyServerOnly && !boundedHistoricalLineage))
     throw new LensNextLocalUploadError("navigation_identity_mismatch", "BIMLog navigation identity does not match the issue record.", 409);
   validateNavigationView(state, visualStateDigest, capturedIdentity);
   const rebound = structuredClone(state);
   if (Object.prototype.hasOwnProperty.call(rebound, "ServerId")) rebound.ServerId = expected.serverId;
   else rebound.serverId = expected.serverId;
+  if (boundedHistoricalLineage) {
+    if (Object.prototype.hasOwnProperty.call(rebound, "ViewpointId")) rebound.ViewpointId = expected.viewpointId;
+    else rebound.viewpointId = expected.viewpointId;
+    if (Object.prototype.hasOwnProperty.call(rebound, "LifecycleStatus")) rebound.LifecycleStatus = expected.lifecycleStatus;
+    else rebound.lifecycleStatus = expected.lifecycleStatus;
+    if (Object.prototype.hasOwnProperty.call(rebound, "RevisionNumber")) rebound.RevisionNumber = expected.revisionNumber;
+    else rebound.revisionNumber = expected.revisionNumber;
+  }
   const digest = lensNextNavigationDigest(rebound);
   if (Object.prototype.hasOwnProperty.call(rebound, "DigestSha256")) rebound.DigestSha256 = digest;
   else rebound.digestSha256 = digest;

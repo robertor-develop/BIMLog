@@ -17,6 +17,7 @@ const context: LensNextBridgeProjectContext = {
 };
 
 const calls: string[] = [];
+const requestedModelFingerprints: Array<string | null | undefined> = [];
 const visualState = {
   DigestSha256: digest,
   ModelFingerprint: context.modelFingerprint,
@@ -30,7 +31,7 @@ const visualState = {
 let appliedVisualStateJson: string | null = null;
 const dependencies: any = {
   apiClient: {
-    loadVisualState: async () => { calls.push("load"); return { visualStateJson: JSON.stringify(visualState), visualStateDigest: digest }; },
+    loadVisualState: async (_issue: unknown, modelFingerprint?: string | null) => { calls.push("load"); requestedModelFingerprints.push(modelFingerprint); return { visualStateJson: JSON.stringify(visualState), visualStateDigest: digest }; },
     saveVisualState: async () => { calls.push("save"); },
   },
   bridgeClient: {
@@ -41,6 +42,7 @@ const dependencies: any = {
 
 await openBimlogWorkingView(dependencies, issue(true), context);
 assert.deepEqual(calls.splice(0), ["load", "apply-platform"]);
+assert.deepEqual(requestedModelFingerprints.splice(0), [context.modelFingerprint]);
 assert.deepEqual(JSON.parse(appliedVisualStateJson!), visualState);
 
 const legacyWithoutGuid = { ...issue(false), navisworksGuid: null };
@@ -53,6 +55,7 @@ assert.deepEqual(calls.splice(0), []);
 const repaired = await repairBimlogWorkingViewFromCurrent(dependencies, legacyWithoutGuid, context);
 assert.equal(repaired.visualStateDigest, digest);
 assert.deepEqual(calls.splice(0), ["capture", "save", "load", "apply-platform"]);
+assert.deepEqual(requestedModelFingerprints.splice(0), [context.modelFingerprint]);
 
 await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), { ...context, projectId: 99 }), /not bound/);
 assert.deepEqual(calls, []);

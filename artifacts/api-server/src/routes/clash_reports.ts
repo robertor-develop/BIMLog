@@ -20,7 +20,7 @@ import { LensImportValidationError, validateAndHashLensImportRequest } from "../
 import { getAppUrl } from "../lib/email";
 import AdmZip from "adm-zip";
 import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextAction } from "../lib/lens-next-publishing";
-import { LensNextLocalUploadError, rebindLegacyNavigationServerIdentity, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
+import { LensNextLocalUploadError, lensNextNavigationIdentity, rebindLegacyNavigationServerIdentity, sameLensNextAuthoritativeLineage, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
 import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-telemetry";
 import { storage } from "../lib/storage-adapter";
 import { LENS_REFERENCE_MAX_BYTES, validateLensReferenceFile } from "../lib/lens-next-reference-attachment";
@@ -1592,6 +1592,7 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visu
     const [row] = await db.select().from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId))).limit(1);
     if (!row) { res.status(404).json({ error: "lens_viewpoint_not_found" }); return; }
     if (!row.visualStateJson || !row.visualStateDigest) { res.status(404).json({ error: "visual_state_not_available" }); return; }
+    const activeModelFingerprint = String(req.query.modelFingerprint ?? "").trim().toLowerCase();
     let identityReboundFromCapturePlaceholder = false;
     let previousVisualStateDigest: string | null = null;
     try {
@@ -1603,10 +1604,17 @@ router.get("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visu
       if (error instanceof LensNextLocalUploadError) {
         if (error.code === "navigation_identity_mismatch") {
           try {
+            const captured = lensNextNavigationIdentity(row.visualStateJson);
+            let sameAuthoritativeLineage = captured.serverId === row.id;
+            if (!sameAuthoritativeLineage && Number.isSafeInteger(captured.serverId) && captured.serverId > 0) {
+              const lineageRows = await db.select({ id: lensViewpointsTable.id, supersedesId: lensViewpointsTable.supersedesId })
+                .from(lensViewpointsTable).where(eq(lensViewpointsTable.projectId, projectId));
+              sameAuthoritativeLineage = sameLensNextAuthoritativeLineage(lineageRows, captured.serverId, row.id);
+            }
             const rebound = rebindLegacyNavigationServerIdentity(row.visualStateJson, row.visualStateDigest, {
               projectId: row.projectId, serverId: row.id, viewpointId: row.viewpointId,
               lifecycleStatus: row.lifecycleStatus, revisionNumber: row.revisionNumber,
-            });
+            }, { modelFingerprint: activeModelFingerprint, sameAuthoritativeLineage });
             previousVisualStateDigest = row.visualStateDigest;
             row.visualStateJson = rebound.json;
             row.visualStateDigest = rebound.digest;

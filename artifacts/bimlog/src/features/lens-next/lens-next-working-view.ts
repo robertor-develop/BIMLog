@@ -40,7 +40,7 @@ export async function openBimlogWorkingView(
       "BIMLog is the source of truth, but this platform record has no stored visual package. Open is blocked; display the exact original view in Navisworks and use Repair from current Navisworks view.",
     );
 
-  const stored = await dependencies.apiClient.loadVisualState(issue, signal);
+  const stored = await dependencies.apiClient.loadVisualState(issue, context.modelFingerprint, signal);
   await dependencies.bridgeClient.applyPlatformWorkingView(issue, context, stored.visualStateJson, stored.visualStateDigest, signal);
   return Object.freeze({ migratedHistoricalIssue: false, visualStateDigest: stored.visualStateDigest });
 }
@@ -71,7 +71,7 @@ export async function repairBimlogWorkingViewFromCurrent(
     visualStateAvailable: true,
     visualStateDigest: captured.visualStateDigest,
   });
-  const stored = await dependencies.apiClient.loadVisualState(migratedIssue, signal);
+  const stored = await dependencies.apiClient.loadVisualState(migratedIssue, context.modelFingerprint, signal);
   await dependencies.bridgeClient.applyPlatformWorkingView(migratedIssue, context, stored.visualStateJson, stored.visualStateDigest, signal);
   return Object.freeze({ visualStateDigest: stored.visualStateDigest });
 }

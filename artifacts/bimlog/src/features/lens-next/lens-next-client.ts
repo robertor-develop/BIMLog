@@ -107,7 +107,7 @@ export interface LensNextApiClient {
   ): Promise<LensNextHistory>;
   publishAction(issue: LensNextIssue, action: LensNextPublishAction, reason: string, idempotencyKey: string, modelFingerprint?: string | null, signal?: AbortSignal): Promise<LensNextPublishResult>;
   saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, signal?: AbortSignal): Promise<void>;
-  loadVisualState(issue: LensNextIssue, signal?: AbortSignal): Promise<{ visualStateJson: string; visualStateDigest: string }>;
+  loadVisualState(issue: LensNextIssue, modelFingerprint?: string | null, signal?: AbortSignal): Promise<{ visualStateJson: string; visualStateDigest: string }>;
   uploadLocalViewpoint(localViewpoint: LensNextLocalViewpoint, modelFingerprint: string, visualState: Record<string, unknown>, confirmationReason: string, signal?: AbortSignal): Promise<LensNextLocalUploadReceipt>;
   createIssue(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal): Promise<LensNextCreateReceipt>;
   confirmCreatedLocalViewpoint(projectId: number, receipt: LensNextCreateReceipt, navisworksGuid: string, confirmationReason: string, signal?: AbortSignal): Promise<void>;
@@ -248,9 +248,11 @@ export function createLensNextApiClient(
       if (!raw || typeof raw !== "object" || (raw as Record<string, unknown>).success !== true)
         throw new Error("BIMLog did not confirm visual-state persistence");
     },
-    async loadVisualState(issue: LensNextIssue, signal?: AbortSignal) {
+    async loadVisualState(issue: LensNextIssue, modelFingerprint?: string | null, signal?: AbortSignal) {
       const identity = assertLensNextImmutableIdentity(issue.identity);
-      const raw = await get(`/projects/${identity.projectId}/clash-reports/lens-viewpoints/${identity.serverId}/visual-state`, signal);
+      const fingerprint = String(modelFingerprint ?? "").trim().toLowerCase();
+      const query = fingerprint ? `?modelFingerprint=${encodeURIComponent(fingerprint)}` : "";
+      const raw = await get(`/projects/${identity.projectId}/clash-reports/lens-viewpoints/${identity.serverId}/visual-state${query}`, signal);
       if (!raw || typeof raw !== "object" || Array.isArray(raw)) throw new Error("BIMLog visual-state response is invalid");
       const body = raw as Record<string, unknown>;
       const echoedIdentity = assertLensNextImmutableIdentity(body.identity);

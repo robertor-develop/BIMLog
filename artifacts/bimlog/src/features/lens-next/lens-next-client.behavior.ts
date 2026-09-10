@@ -98,19 +98,24 @@ assert.equal(JSON.parse(applyBodies[0]).fields.visualStateDigest, "d".repeat(64)
 
 const priorDigest = "c".repeat(64);
 const reboundDigest = "d".repeat(64);
+let legacyReadUrl = "";
 const apiClient = createLensNextApiClient({
   token: "test-token",
-  fetchImpl: async () => Response.json({
+  fetchImpl: async input => {
+    legacyReadUrl = String(input);
+    return Response.json({
     success: true,
     identity: { projectId: 29, serverId: 691, viewpointId: "legacy-navigation", lifecycleStatus: "active", revisionNumber: 1 },
     visualStateJson: JSON.stringify({ DigestSha256: reboundDigest }),
     visualStateDigest: reboundDigest,
     identityReboundFromCapturePlaceholder: true,
     previousVisualStateDigest: priorDigest,
-  }),
+    });
+  },
 });
-const reboundState = await apiClient.loadVisualState({ identity: { projectId: 29, serverId: 691, viewpointId: "legacy-navigation", lifecycleStatus: "active", revisionNumber: 1 }, visualStateDigest: priorDigest } as any);
+const reboundState = await apiClient.loadVisualState({ identity: { projectId: 29, serverId: 691, viewpointId: "legacy-navigation", lifecycleStatus: "active", revisionNumber: 1 }, visualStateDigest: priorDigest } as any, "a".repeat(64));
 assert.equal(reboundState.visualStateDigest, reboundDigest);
+assert.match(legacyReadUrl, /modelFingerprint=a{64}$/);
 await assert.rejects(() => createLensNextApiClient({
   token: "test-token",
   fetchImpl: async () => Response.json({

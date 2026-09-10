@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
-import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextNavigationDigest, lensNextVisualStateCanonicalInput, lensNextVisualStateDigest, rebindLegacyNavigationServerIdentity, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "./lens-next-local-upload";
+import { LENS_NEXT_LEGACY_DIGEST_CONTRACT_VERSION, LensNextLocalUploadError, lensNextNavigationDigest, lensNextVisualStateCanonicalInput, lensNextVisualStateDigest, rebindLegacyNavigationServerIdentity, sameLensNextAuthoritativeLineage, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "./lens-next-local-upload";
 
 const state: any = {
   SchemaVersion: 1, ProjectId: 7, ServerId: 1, ViewpointId: "LOCAL-7", LifecycleStatus: "active", RevisionNumber: 1,
@@ -78,6 +78,41 @@ historicalServerNavigation.DigestSha256 = lensNextNavigationDigest(historicalSer
 const historicalServerRebound = rebindLegacyNavigationServerIdentity(JSON.stringify(historicalServerNavigation), historicalServerNavigation.DigestSha256, { projectId: 29, serverId: 691, viewpointId: navigation.ViewpointId, lifecycleStatus: "active", revisionNumber: 1 });
 assert.equal(JSON.parse(historicalServerRebound.json).ServerId, 691);
 assert.equal(lensNextNavigationDigest(JSON.parse(historicalServerRebound.json)), historicalServerRebound.digest);
+const historicalRevisionNavigation = structuredClone(navigation);
+historicalRevisionNavigation.ServerId = 58;
+historicalRevisionNavigation.ViewpointId = "legacy-viewpoint-id";
+historicalRevisionNavigation.LifecycleStatus = "superseded";
+historicalRevisionNavigation.RevisionNumber = 1;
+historicalRevisionNavigation.DigestSha256 = lensNextNavigationDigest(historicalRevisionNavigation);
+const historicalRevisionRebound = rebindLegacyNavigationServerIdentity(
+  JSON.stringify(historicalRevisionNavigation),
+  historicalRevisionNavigation.DigestSha256,
+  { projectId: 29, serverId: 691, viewpointId: "current-viewpoint-id", lifecycleStatus: "active", revisionNumber: 3 },
+  { modelFingerprint: navigation.ModelFingerprint, sameAuthoritativeLineage: true },
+);
+const historicalRevisionParsed = JSON.parse(historicalRevisionRebound.json);
+assert.deepEqual(
+  { serverId: historicalRevisionParsed.ServerId, viewpointId: historicalRevisionParsed.ViewpointId, lifecycleStatus: historicalRevisionParsed.LifecycleStatus, revisionNumber: historicalRevisionParsed.RevisionNumber },
+  { serverId: 691, viewpointId: "current-viewpoint-id", lifecycleStatus: "active", revisionNumber: 3 },
+);
+validatePersistedLensNextVisualState(historicalRevisionRebound.json, historicalRevisionRebound.digest, { projectId: 29, serverId: 691, viewpointId: "current-viewpoint-id", lifecycleStatus: "active", revisionNumber: 3 });
+assert.equal(sameLensNextAuthoritativeLineage([{ id: 58, supersedesId: null }, { id: 400, supersedesId: 58 }, { id: 691, supersedesId: 400 }], 58, 691), true);
+assert.equal(sameLensNextAuthoritativeLineage([{ id: 58, supersedesId: null }, { id: 691, supersedesId: null }], 58, 691), false);
+assert.equal(sameLensNextAuthoritativeLineage([{ id: 58, supersedesId: 691 }, { id: 691, supersedesId: 58 }], 58, 691), false);
+assert.throws(
+  () => rebindLegacyNavigationServerIdentity(JSON.stringify(historicalRevisionNavigation), historicalRevisionNavigation.DigestSha256, { projectId: 29, serverId: 691, viewpointId: "current-viewpoint-id", lifecycleStatus: "active", revisionNumber: 3 }, { modelFingerprint: "f".repeat(64), sameAuthoritativeLineage: true }),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "navigation_identity_mismatch",
+);
+assert.throws(
+  () => rebindLegacyNavigationServerIdentity(JSON.stringify(historicalRevisionNavigation), historicalRevisionNavigation.DigestSha256, { projectId: 29, serverId: 691, viewpointId: "current-viewpoint-id", lifecycleStatus: "active", revisionNumber: 3 }, { modelFingerprint: navigation.ModelFingerprint, sameAuthoritativeLineage: false }),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "navigation_identity_mismatch",
+);
+const corruptedHistoricalRevision = structuredClone(historicalRevisionNavigation);
+corruptedHistoricalRevision.Camera.Position.X += 1;
+assert.throws(
+  () => rebindLegacyNavigationServerIdentity(JSON.stringify(corruptedHistoricalRevision), historicalRevisionNavigation.DigestSha256, { projectId: 29, serverId: 691, viewpointId: "current-viewpoint-id", lifecycleStatus: "active", revisionNumber: 3 }, { modelFingerprint: navigation.ModelFingerprint, sameAuthoritativeLineage: true }),
+  (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "navigation_digest_mismatch",
+);
 assert.throws(
   () => rebindLegacyNavigationServerIdentity(capturedNavigationJson, navigation.DigestSha256, { projectId: 30, serverId: 691, viewpointId: navigation.ViewpointId, lifecycleStatus: "active", revisionNumber: 1 }),
   (error: unknown) => error instanceof LensNextLocalUploadError && error.code === "navigation_identity_mismatch",
@@ -200,5 +235,10 @@ const persistedGetStart = route.indexOf('router.get("/projects/:projectId/clash-
 const persistedEnd = route.indexOf('router.get("/projects/:projectId/clash-reports/lens-viewpoints/export-excel"', persistedGetStart);
 assert.ok(persistedPostStart >= 0 && persistedGetStart > persistedPostStart && persistedEnd > persistedGetStart);
 assert.match(route.slice(persistedPostStart, persistedGetStart), /validatePersistedLensNextVisualState/);
-assert.match(route.slice(persistedGetStart, persistedEnd), /validatePersistedLensNextVisualState/);
+const persistedReadBlock = route.slice(persistedGetStart, persistedEnd);
+assert.match(persistedReadBlock, /validatePersistedLensNextVisualState/);
+assert.match(persistedReadBlock, /req\.query\.modelFingerprint/);
+assert.match(persistedReadBlock, /sameLensNextAuthoritativeLineage/);
+assert.match(persistedReadBlock, /sameAuthoritativeLineage/);
+assert.doesNotMatch(persistedReadBlock, /db\.update\(lensViewpointsTable\)/);
 console.log(JSON.stringify({ status: "PASS", tests: ["lightweight-navigation-cross-language-vector", "navigation-screenshot-digest-independence", "navigation-platform-rebind", "historical-server-navigation-ephemeral-rebind", "navigation-camera-tamper-denial", "exact-local-only", "explicit-confirmation", "atomic-record-and-package", "digest-rebind", "utf8-unicode-rebind-and-apply", "verified-thumbnail-retention", "invalid-thumbnail-nonfatal", "cross-language-null-vector", "cross-language-v2-float-vector", "first-token-mismatch-diagnostics", "legacy-dotnet-float-compatibility", "legacy-float-tamper-denial", "historical-unversioned-v1-verification", "historical-unversioned-tamper-denial", "persisted-write-validation", "persisted-read-validation", "no-overwrite", "display-conflict-deny"] }));

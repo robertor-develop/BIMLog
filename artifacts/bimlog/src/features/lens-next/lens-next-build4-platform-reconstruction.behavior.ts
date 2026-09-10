@@ -13,11 +13,11 @@ const openFunction = workingView.slice(
   workingView.indexOf("export async function repairBimlogWorkingViewFromCurrent"),
 );
 assert.doesNotMatch(openFunction, /bridgeClient\.openWorkingView|captureCurrentVisualState|saveVisualState/);
-assert.match(openFunction, /apiClient\.loadVisualState\(issue, signal\)/);
+assert.match(openFunction, /apiClient\.loadVisualState\(issue, context\.modelFingerprint, signal\)/);
 assert.match(openFunction, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, stored\.visualStateDigest, signal\)/);
 assert.match(workingView, /bridgeClient\.captureCurrentVisualState\(issue, context, signal\)/);
 assert.match(workingView, /apiClient\.saveVisualState\(issue, captured\.visualStateJson, captured\.visualStateDigest, signal\)/);
-assert.match(workingView, /apiClient\.loadVisualState\(migratedIssue, signal\)/);
+assert.match(workingView, /apiClient\.loadVisualState\(migratedIssue, context\.modelFingerprint, signal\)/);
 assert.match(workingView, /bridgeClient\.applyPlatformWorkingView\(migratedIssue, context, stored\.visualStateJson, stored\.visualStateDigest, signal\)/);
 assert.match(client, /visual-state digest changed after inventory refresh/);
 assert.match(client, /visual-state package digest is inconsistent/);
