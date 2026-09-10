@@ -21700,11 +21700,10 @@
       "reviewedChangedPaths": [
         "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "a69ef6d8c675d3db179c24d12d0e13ab36a26923729106bca64086fd581ea3a7"
+      "reviewedChangeSha256": "4b987169aaca4ae9688129b469c48b486e46587611461aa293c1c63c77c50c6b"
     }
   ]
 }

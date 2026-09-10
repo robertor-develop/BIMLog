@@ -2,13 +2,12 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "c2153a8d9cb940fad6f956a390b9c38452c10d66",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "a7267c0efa7670c064aee6c3e53628de51008b8c4d42f9019ae3e9dc65c85b4a",
+  "bundleSha256": "85fa58d3288928b73ff5814e636476fae2b35ded2e2bc8bc9bba4dca6e7df7cb",
   "impact": {
     "baselineCommit": "c2153a8d9cb940fad6f956a390b9c38452c10d66",
     "changedPaths": [
       "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -70,9 +69,9 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "c9182ed742f2d3ccf61d5fd1e45bb843cfe580b3c70211afff09f0c5afd7a38a",
-      "sourceChangedAt": "2026-09-10T18:05:00.000Z",
-      "changeState": "candidate",
+      "sha256": "a5e6591074692ab812a85062095f861c574d2b7dbc2e8ea210ea3a8d447b31f0",
+      "sourceChangedAt": "2026-09-10T13:44:46-04:00",
+      "changeState": "accepted",
       "reconciledThroughCommit": "c2153a8d9cb940fad6f956a390b9c38452c10d66",
       "semanticReviewedThroughCommit": "c2153a8d9cb940fad6f956a390b9c38452c10d66",
       "semanticReviewTask": "post-build20-corrective-05-resource-rates-20260910",

@@ -1,10 +1,5 @@
 # PLATFORM.md
 
-## Post-Build-20 corrective Build 5 — Intake resource rate presentation
-
-- Team & Resources reuses the existing Contract Item `billingHourlyRate` authority when applying the established Drafting 35.47 or BIM Coordinator 37.99 profile or a manual customer/APU rate.
-- Assignment `internalHourlyRate` and incentive remain independent resource-planning values. No new persistence field, API route, database column, schema, or activation contract is introduced.
-
 > AUTO-GENERATED at build time by artifacts/api-server/scripts/generate-platform-md.ts.
 > Do not hand-edit — changes are overwritten on every api-server build. Edit the generator.
 
