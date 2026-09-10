@@ -18101,6 +18101,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4ee32f6e5f65b7d4d8ca5cda92874ec091c387727a2e945cc40838a324f46e75"
+    },
+    {
+      "taskId": "ux-residual-build13-project-route-payload-20260909",
+      "reviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "reviewedAt": "2026-09-10T00:04:03Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Splits the ProjectDetail aggregate into 18 selected-workspace chunks while preserving the project shell and every existing capability.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, workflow, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded performance correction follows the existing capability-preserving workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing performance, accessibility, and real-behavior evidence requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "On-demand delivery of unchanged workspaces does not change product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, dependency, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, plugin, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 12 publication and Build 13 measured local payload result."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the published 12-build stream, records Build 13, and retains Builds 14–17."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the publication evidence, root cause, correction, measurements, and evidence limits."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/pages/ProjectDetail.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "21fe28e4dbd1d00d80e42c59c1aba5013fa9a6817d776d9cda64d7dc17f8f5be"
     }
   ]
 }

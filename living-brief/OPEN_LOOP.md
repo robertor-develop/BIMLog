@@ -14,9 +14,14 @@ Release Groups A–B are integrated on the exact current `origin/main` lineage; 
 - [x] Build 6: improve shared typography readability without changing content.
 - [x] Build 7: standardize shared table readability, actions, and bounded horizontal overflow.
 - [x] Build 8: harden exact-390 project actions, controls, and table scrolling without hiding capability.
-- [ ] Builds 9–12: accessibility, route-splitting/performance, authentic public product proof, and consolidated acceptance.
+- [x] Builds 9–12: accessibility, route-splitting/performance, authentic public product proof, and consolidated acceptance. Exact source `8c1bf307bfbee7c636b31eaf90ff7eaf69508c19` was pushed, built in Replit Shell, published once, and live-verified at `v1.05.N17-P12` on 2026-09-09.
+- [x] Build 13: isolate all 18 ProjectDetail workspaces behind selected-route lazy boundaries while retaining the project shell and every capability. Local focused/typecheck/build evidence passed; push and publication remain separate gates.
+- [ ] Build 14: complete route-by-route desktop/exact-390 accessibility and mobile acceptance.
+- [ ] Build 15: strengthen homepage conversion and authentic product proof without invented testimonials or capability removal.
+- [ ] Build 16: improve service/product interaction and technical SEO without changing business workflows.
+- [ ] Build 17: run consolidated live accessibility, performance, capability-preservation, and responsive acceptance.
 
-Release Groups A–B remain a local candidate pending combined production build, real production-component desktop/390 and English/Spanish evidence, independent review, and separate push/publication/deployment authorization.
+Builds 1–12 are published and live-verified. Build 13 is a local candidate; Builds 14–17 remain the authorized residual program.
 
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 

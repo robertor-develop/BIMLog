@@ -1,12 +1,13 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
+  "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "4594e55dc03ff9480d5217388a749f501d272dba9ac11124d13bb2f7d0828679",
+  "bundleSha256": "c2bcc87f30d88cc940f7a4d9f8ccde87f8dd719339e59f2addd04c6831008e55",
   "impact": {
-    "baselineCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
+    "baselineCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
     "changedPaths": [
-      "artifacts/bimlog/src/components/layout/MasterSidebar.behavior.tsx",
+      "artifacts/bimlog/src/pages/ProjectDetail.tsx",
+      "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -25,11 +26,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "claude",
@@ -37,11 +38,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "quality",
@@ -49,11 +50,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "vision",
@@ -61,11 +62,11 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "platform",
@@ -73,11 +74,11 @@
       "sha256": "51af0b807d57fb89545cb66527e08a14a59815f2df36aeb020226d4b29224dd7",
       "sourceChangedAt": "2026-09-08T12:52:04-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "plugin",
@@ -85,11 +86,11 @@
       "sha256": "dd9b221df31b953cacfdf6bc8ed317d9b5969a9504a74227b0e50f2dc39bc1c9",
       "sourceChangedAt": "2026-09-08T13:33:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "report_design_system",
@@ -97,11 +98,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "standards_register",
@@ -109,47 +110,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "947969bba9bf41e78228225de8eee91c0abe19d96b453b71528164b3365ba688",
-      "sourceChangedAt": "2026-09-09T19:19:00.000Z",
+      "sha256": "3cee9a06e8c05a9334f9ef50db265bf1c25d4d901c377b99bbd00e9c92420b64",
+      "sourceChangedAt": "2026-09-10T00:04:03.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "00867c3896e8beaeb14a04fa54a20765916f78bcab4d6dbe9177c7a5dc945f66",
-      "sourceChangedAt": "2026-09-09T19:19:00.000Z",
+      "sha256": "df3ef608c0e46d660585bf291abfe30a4e3c38e030f5d663fe7d252616f3090a",
+      "sourceChangedAt": "2026-09-10T00:04:03.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "6b849ecdc852ff684234c966e4e78c8730e7954b5814516b4c41028194f7c76f",
-      "sourceChangedAt": "2026-09-08T21:18:56-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
-      "semanticReviewTask": "ux-optimization-builds-9-12-20260909",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-09T19:19:00Z"
+      "sha256": "beaa35ed5aed33a7903a5be4d2b83cda0d843ec8f6ee682cbdae35721f302183",
+      "sourceChangedAt": "2026-09-10T00:04:03.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewedThroughCommit": "8c1bf307bfbee7c636b31eaf90ff7eaf69508c19",
+      "semanticReviewTask": "ux-residual-build13-project-route-payload-20260909",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-10T00:04:03Z"
     }
   ]
 }
