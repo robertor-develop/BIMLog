@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { downloadGovernedCurrentViewPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
 import { useAuthStore } from "@/store/auth";
-import * as XLSX from "xlsx";
 import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions, normalizeSpreadsheetDateOnly } from "@workspace/api-zod";
 import {
   FileCheck, Plus, X, ChevronDown, ChevronUp, AlertCircle, Download, FileText,
@@ -947,6 +946,7 @@ function RegisterView({ projectId, canWrite, lang }: { projectId: number; canWri
     reader.onload = async (evt) => {
       const data = evt.target?.result;
       if (!(data instanceof ArrayBuffer)) return;
+      const XLSX = await import("xlsx");
       const spreadsheet = canonicalSpreadsheetInput(data, file.name, "array", {});
       const wb = XLSX.read(spreadsheet.data, spreadsheet.options);
       const ws = wb.Sheets[wb.SheetNames[0]];

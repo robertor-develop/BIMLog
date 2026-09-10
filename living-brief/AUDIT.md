@@ -995,3 +995,45 @@ was performed or authorized.
 - Immutable provider revisions and queued job requests replay only when their complete identity and digest evidence agree; conflicts fail closed without insertion.
 - Changing the current revision is a separate explicit compare-and-set operation. Revision evidence itself remains immutable.
 - No existing product module, schema, startup path or external system was modified or activated.
+
+## 2026-09-09 — UX residual Build 13 project-route payload isolation
+
+- Build 12 source `8c1bf307bfbee7c636b31eaf90ff7eaf69508c19` was pushed to `origin/main`, built through the visible Replit Shell with deterministic production runtime closure, published once, and live-verified at `v1.05.N17-P12`. Replit reported healthy production status; Chrome verified the bilingual skip link, full Job Intake capability set, sidebar collapse/expand, no horizontal overflow, public Lens Next proof, and absence of diagnostic UI.
+- Build 13 implementation `c0e66b12dee4a25bbbda19f55ff07f74a906d5d2` identified the remaining 1.526 MB `ProjectDetail` chunk as an eager-import aggregation of 18 independently selected project workspaces. The correction adds one lazy boundary per existing workspace and a local accessible loading state inside the unchanged project shell.
+- Focused route-loading evidence passes 6/6 across the application and project-route contracts. Frontend typecheck and production build pass. The resulting `ProjectDetail` chunk is 14.9 KB; individual workspace chunks remain available on demand. A public-route Chrome trace measured 831 ms LCP and 0.00 CLS under unthrottled lab conditions. Authenticated post-publication route tracing remains a separate release gate.
+
+
+
+## 2026-09-09 — UX residual Build 14 responsive accessibility closure
+
+- A genuine mobile Lighthouse navigation audit of the then-live sign-in route scored 87 Accessibility and proved three concrete failures: disabled mobile zoom, 4.25:1 muted-text contrast, and an undersized password-recovery target. Source review also found the password-visibility control intentionally removed from keyboard order.
+- An exact 390-pixel Chromium sweep then proved a shared five-column public footer produced 624 pixels of document width on the Features route. The defect affected the shared marketing/legal surface, not one isolated page.
+- Implementation `29b78cc80f1ebefc6638982c8dac0c5a49aed776` removes the zoom restriction, strengthens default light-theme muted contrast, restores keyboard and touch access to sign-in controls, makes the shared Admin modal fit 390 pixels with dialog/Escape/focus-return behavior, and collapses the public footer responsively without removing content.
+- After rebuilding the actual frontend candidate, local mobile Lighthouse reports 100 Accessibility, 100 Best Practices, and 100 SEO on sign-in. Twelve routes at exact 390 pixels and the same twelve at 1440 pixels report no horizontal overflow, missing main/skip target, or unlabeled buttons. Focused Build 14 checks pass 13/13 and the established accessibility checks pass 8/8.
+
+
+
+## 2026-09-09 — UX residual Build 15 authentic homepage product proof
+
+- The homepage audit found that broad marketing language preceded the strongest verified evidence, while the already-accepted Lens Next workflow was documented only on the Features route.
+- Implementation `d4cb585186aa782c21a16ed337a9a6ff6238a920` adds the exact implemented create, same-project linking/reference, Working View restore, and one-way XML interoperability sequence to the homepage decision path and links to the fuller capability boundary.
+- The page explicitly states that this is implemented behavior and not a concept screen or customer testimonial. No customer endorsement, user count, conversion metric, logo, or unsupported outcome was introduced.
+- Focused product-proof checks pass 8/8 and 7/7; the existing accessibility contract passes 13/13; frontend typecheck and production build pass. Browser inspection at 390x844 and 1440x900 confirms the proposition and all three steps are rendered with no horizontal overflow and zero unlabeled buttons.
+
+
+
+## 2026-09-09 — UX residual Build 16 public metadata and interaction payload
+
+- Source inspection proved that public routes inherited one generic document title and description and had no route-specific canonical URL. The correction installs one router-scoped metadata owner for Home, Features, Pricing, About, and Contact; it uses only verified product language and does not introduce structured social proof.
+- Source and build-output inspection also proved that an eager `xlsx` import placed the entire spreadsheet parser in the Submittals route even when the user did not import a register. Replacing only that eager import with an event-bound dynamic import preserves the same parser and existing workflow.
+- The resulting Submittals route chunk falls from 530.93 KB / 161.39 KB gzip to 164.16 KB / 37.79 KB gzip. The 499.55 KB parser chunk is fetched only by the existing import path, and Vite no longer emits the greater-than-500 KB warning.
+- Focused Build 16 checks pass 12/12; prior homepage and public capability checks pass 8/8 and 7/7. Browser execution verified unique metadata and canonical URLs across five public routes and successfully followed the homepage workflow link to Features.
+
+
+
+## 2026-09-09 — UX residual Build 17 consolidated acceptance
+
+- The clean Build 16 evidence HEAD contains every Build 13–16 implementation. Nine focused suites pass 85/85, frontend typecheck passes, and twelve public/auth routes at both exact 390x844 and 1440x900 pass main-target, skip-link, unlabeled-button, and horizontal-overflow checks.
+- The local production bundle retains the measured payload gains: `ProjectDetail` 14.90 KB, `SubmittalsTab` 164.16 KB, and XLSX 499.55 KB on demand without a greater-than-500 KB build warning. An unthrottled Chrome trace reports 734 ms LCP and 0.00 CLS; no field data exists for localhost.
+- Mobile Lighthouse initially reported 96 Accessibility and bounded the defect to two blue tinted badges, the shared six-step number style, one red validation heading, and two red field labels. Correction `8d1bbdd8ad9e462b86aa62afbe4f36ccd9128368` changes only those foreground treatments.
+- After rebuilding, the same mobile audit reports 100 Accessibility, 100 Best Practices, and 100 SEO. The 24-route exact-390/desktop matrix passes, focused contracts pass 90/90, and local performance records 757 ms LCP with 0.00 CLS. Build 17 is accepted locally; no push, publication, or deployment is claimed.

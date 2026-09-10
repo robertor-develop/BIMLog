@@ -1,5 +1,5 @@
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -7,41 +7,45 @@ import { I18nProvider } from "@/lib/i18n";
 import { ConfigProvider } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
 
-// Pages
-import { Landing } from "@/pages/Landing";
-import { Login } from "@/pages/Login";
-import { Register } from "@/pages/Register";
-import { Dashboard } from "@/pages/Dashboard";
-import { PendingItems } from "@/pages/PendingItems";
-import { ProjectDetail } from "@/pages/ProjectDetail";
-import { HelpCenter } from "@/pages/HelpCenter";
-import { Profile } from "@/pages/Profile";
-import { CompanyProfile } from "@/pages/CompanyProfile";
-import { NotificationSettings } from "@/pages/NotificationSettings";
-import { FinancialControlsSettings } from "@/pages/FinancialControlsSettings";
-import { FinancialApuWorkspace } from "@/pages/FinancialApuWorkspace";
-import { FinancialBudgetWorkspace } from "@/pages/FinancialBudgetWorkspace";
-import { FinancialContractWorkspace } from "@/pages/FinancialContractWorkspace";
-import { JobIntakeWorkspace } from "@/pages/JobIntakeWorkspace";
-import { JobOperationsWorkspace } from "@/pages/JobOperationsWorkspace";
-import { TeamPerformanceWorkspace } from "@/pages/TeamPerformanceWorkspace";
-import { Privacy } from "@/pages/Privacy";
-import { Terms } from "@/pages/Terms";
-import { Disclaimer } from "@/pages/Disclaimer";
-import { DataRetention } from "@/pages/DataRetention";
-import { ResetPasswordPage } from "@/pages/ResetPassword";
-import { AdminPanel } from "@/pages/AdminPanel";
-import { TotalControl } from "@/pages/TotalControl";
-import { LivingBrief } from "@/pages/LivingBrief";
-import { Pricing } from "@/pages/Pricing";
-import { About } from "@/pages/About";
-import { Contact } from "@/pages/Contact";
-import { Features } from "@/pages/Features";
-import NotFound from "@/pages/not-found";
 import { Navbar } from "@/components/layout/Navbar";
 import { DebugBanner } from "@/components/DebugBanner";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
-import { LensNextWorkspace } from "@/features/lens-next/LensNextWorkspace";
+import { PublicRouteMetadata } from "@/components/PublicRouteMetadata";
+
+const namedPage = (loader: () => Promise<object>, name: string) =>
+  lazy(async () => ({ default: (await loader() as Record<string, React.ComponentType<any>>)[name] }));
+
+const Landing = namedPage(() => import("@/pages/Landing"), "Landing");
+const Login = namedPage(() => import("@/pages/Login"), "Login");
+const Register = namedPage(() => import("@/pages/Register"), "Register");
+const Dashboard = namedPage(() => import("@/pages/Dashboard"), "Dashboard");
+const PendingItems = namedPage(() => import("@/pages/PendingItems"), "PendingItems");
+const ProjectDetail = namedPage(() => import("@/pages/ProjectDetail"), "ProjectDetail");
+const HelpCenter = namedPage(() => import("@/pages/HelpCenter"), "HelpCenter");
+const Profile = namedPage(() => import("@/pages/Profile"), "Profile");
+const CompanyProfile = namedPage(() => import("@/pages/CompanyProfile"), "CompanyProfile");
+const NotificationSettings = namedPage(() => import("@/pages/NotificationSettings"), "NotificationSettings");
+const FinancialControlsSettings = namedPage(() => import("@/pages/FinancialControlsSettings"), "FinancialControlsSettings");
+const FinancialApuWorkspace = namedPage(() => import("@/pages/FinancialApuWorkspace"), "FinancialApuWorkspace");
+const FinancialBudgetWorkspace = namedPage(() => import("@/pages/FinancialBudgetWorkspace"), "FinancialBudgetWorkspace");
+const FinancialContractWorkspace = namedPage(() => import("@/pages/FinancialContractWorkspace"), "FinancialContractWorkspace");
+const JobIntakeWorkspace = namedPage(() => import("@/pages/JobIntakeWorkspace"), "JobIntakeWorkspace");
+const JobOperationsWorkspace = namedPage(() => import("@/pages/JobOperationsWorkspace"), "JobOperationsWorkspace");
+const TeamPerformanceWorkspace = namedPage(() => import("@/pages/TeamPerformanceWorkspace"), "TeamPerformanceWorkspace");
+const Privacy = namedPage(() => import("@/pages/Privacy"), "Privacy");
+const Terms = namedPage(() => import("@/pages/Terms"), "Terms");
+const Disclaimer = namedPage(() => import("@/pages/Disclaimer"), "Disclaimer");
+const DataRetention = namedPage(() => import("@/pages/DataRetention"), "DataRetention");
+const ResetPasswordPage = namedPage(() => import("@/pages/ResetPassword"), "ResetPasswordPage");
+const AdminPanel = namedPage(() => import("@/pages/AdminPanel"), "AdminPanel");
+const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
+const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
+const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
+const About = namedPage(() => import("@/pages/About"), "About");
+const Contact = namedPage(() => import("@/pages/Contact"), "Contact");
+const Features = namedPage(() => import("@/pages/Features"), "Features");
+const LensNextWorkspace = namedPage(() => import("@/features/lens-next/LensNextWorkspace"), "LensNextWorkspace");
+const NotFound = lazy(() => import("@/pages/not-found"));
 
 const queryClient = new QueryClient();
 
@@ -197,11 +201,15 @@ function App() {
         <ConfigProvider>
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <PublicRouteMetadata />
             <LivingBriefHotkey />
             <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground font-sans">
+              <a className="skip-to-main" href="#main-content">Skip to main content / Ir al contenido principal</a>
               <Navbar />
-              <main className="flex-1">
-                <Router />
+              <main id="main-content" tabIndex={-1} className="flex-1">
+                <Suspense fallback={<div className="route-loading" role="status" aria-live="polite">Loading workspace… / Cargando espacio de trabajo…</div>}>
+                  <Router />
+                </Suspense>
               </main>
             </div>
             <FeedbackWidget />

@@ -58,7 +58,12 @@ export function MasterSidebar() {
   const [sidebarCollapsed, setSidebarCollapsed] = useState(() => typeof window !== "undefined" && window.localStorage.getItem("bimlog-master-sidebar-collapsed") === "true");
   const [sidebarResizing, setSidebarResizing] = useState(false);
 
+  const adjustSidebarWidth = (nextWidth: number) => {
+    setSidebarWidth(Math.min(420, Math.max(196, nextWidth)));
+  };
+
   const [showSearch, setShowSearch] = useState(false);
+  const [showSettingsNavigation, setShowSettingsNavigation] = useState(() => location === "/profile" || location.startsWith("/settings/"));
   const [searchQ, setSearchQ] = useState("");
   const [searchResults, setSearchResults] = useState<SearchResults | null>(null);
   const [searchLoading, setSearchLoading] = useState(false);
@@ -322,7 +327,7 @@ export function MasterSidebar() {
       className={`sidebar${!isMobile && sidebarCollapsed ? " master-sidebar-collapsed" : ""}`}
       style={isMobile ? { position: "fixed", top: 0, bottom: 0, left: 0, zIndex: 1310, width: "min(340px, 88vw)", transform: mobileOpen ? "translateX(0)" : "translateX(-105%)", transition: "transform 0.18s ease", boxShadow: mobileOpen ? "20px 0 60px rgba(15,23,42,0.28)" : undefined } : { position: "relative", width: sidebarCollapsed ? 58 : sidebarWidth, transition: sidebarResizing ? undefined : "width .16s ease" }}
     >
-      {!isMobile && !sidebarCollapsed && <button type="button" aria-label={t("Resize main navigation", "Cambiar ancho de la navegación principal")} title={t("Drag to resize the whole navigation", "Arrastre para cambiar el ancho de toda la navegación")} onPointerDown={(event) => { event.preventDefault(); setSidebarResizing(true); }} style={{ position: "absolute", top: 0, right: 0, bottom: 0, zIndex: 20, width: 10, border: 0, borderLeft: "1px solid rgba(255,255,255,.12)", background: "transparent", color: "rgba(255,255,255,.55)", cursor: "col-resize", display: "grid", alignItems: "center" }}><GripVertical style={{ width: 10, height: 20 }} /></button>}
+      {!isMobile && !sidebarCollapsed && <button type="button" aria-label={t("Resize main navigation", "Cambiar ancho de la navegación principal")} aria-keyshortcuts="ArrowLeft ArrowRight Home End" title={t("Drag or use arrow keys to resize navigation", "Arrastre o use las flechas para cambiar el ancho")} onPointerDown={(event) => { event.preventDefault(); setSidebarResizing(true); }} onKeyDown={(event) => { if (event.key === "ArrowLeft") { event.preventDefault(); adjustSidebarWidth(sidebarWidth - 16); } else if (event.key === "ArrowRight") { event.preventDefault(); adjustSidebarWidth(sidebarWidth + 16); } else if (event.key === "Home") { event.preventDefault(); adjustSidebarWidth(196); } else if (event.key === "End") { event.preventDefault(); adjustSidebarWidth(420); } }} style={{ position: "absolute", top: 0, right: 0, bottom: 0, zIndex: 20, width: 16, padding: 0, border: 0, borderLeft: "1px solid rgba(255,255,255,.18)", background: "rgba(255,255,255,.035)", color: "rgba(255,255,255,.88)", cursor: "col-resize", display: "grid", alignItems: "center", justifyItems: "center" }}><span aria-hidden="true" style={{ display: "grid", placeItems: "center", width: 12, height: 42, border: "1px solid rgba(255,255,255,.22)", borderRadius: 999, background: "rgba(255,255,255,.08)", boxShadow: "0 2px 8px rgba(0,0,0,.18)" }}><GripVertical style={{ width: 11, height: 22 }} /></span></button>}
       {isMobile && (
         <button
           type="button"
@@ -394,11 +399,25 @@ export function MasterSidebar() {
           </>
         )}
 
-        {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Settings", "Configuración")}</span>}
-        {navButton(t("Feature Visibility", "Visibilidad de funciones"), "/profile", Settings2)}
-        {navButton(t("Notification Settings", "Configuración de Notificaciones"), "/settings/notifications", Bell)}
-        {navButton(t("Company Profile", "Perfil de Empresa"), "/settings/company-profile", Building2)}
-        {navButton(t("Financial Controls", "Controles Financieros"), "/settings/financial-controls", CircleDollarSign)}
+        {(!sidebarCollapsed || isMobile) && (
+          <button
+            type="button"
+            aria-expanded={showSettingsNavigation}
+            aria-controls="headquarters-settings-navigation"
+            className="sidebar-section-label"
+            onClick={() => setShowSettingsNavigation(value => !value)}
+            style={{ width: "calc(100% - 20px)", margin: "8px 10px 3px", padding: "5px 4px", border: 0, background: "transparent", color: "inherit", cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "space-between", textAlign: "left" }}
+          >
+            <span>{t("Settings", "Configuración")}</span>
+            <ChevronRight aria-hidden style={{ width: 12, height: 12, transform: showSettingsNavigation ? "rotate(90deg)" : undefined, transition: "transform .16s ease" }} />
+          </button>
+        )}
+        <div id="headquarters-settings-navigation" hidden={!sidebarCollapsed && !isMobile && !showSettingsNavigation || isMobile && !showSettingsNavigation}>
+          {navButton(t("Feature Visibility", "Visibilidad de funciones"), "/profile", Settings2)}
+          {navButton(t("Notification Settings", "Configuración de Notificaciones"), "/settings/notifications", Bell)}
+          {navButton(t("Company Profile", "Perfil de Empresa"), "/settings/company-profile", Building2)}
+          {navButton(t("Financial Controls", "Controles Financieros"), "/settings/financial-controls", CircleDollarSign)}
+        </div>
       </nav>
 
       {user && (

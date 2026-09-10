@@ -2312,3 +2312,39 @@ Use Builds 1–12 for the original master sequence: discovery/reconciliation; si
 - [x] Keep all operations inside an injected transaction boundary and prove focused behavior locally.
 - [ ] Implement the first provider adapter only in the next bounded build; no provider activation is part of Build 1.
 - [ ] Apply Prework migrations only under separate exact database authorization and verified backup/rollback gates.
+
+## Active: UX less-is-more controlled optimization — authorized September 9, 2026
+
+Roberto authorized a 12-build capability-preserving UX stream executed in three four-build release groups. Less is more means reducing simultaneous cognitive load, not removing capability. Business logic, permissions, database/schema, modules, reports, exports, and established workflows remain protected unless a separate defect is proven.
+
+Release Groups A–B are integrated on the exact current `origin/main` lineage; push, Replit publication, and live desktop/exact-390 verification are the current authorized gates before Builds 9–12.
+
+- [x] Build 1: freeze live/source baseline and capability inventory.
+- [x] Build 2: simplify Headquarters hierarchy with an Operational details disclosure.
+- [x] Build 3: clarify global navigation hierarchy while preserving every route.
+- [x] Build 4: focus Job Intake Quick Setup while preserving complete Advanced Setup.
+- [x] Build 5: simplify project context hierarchy without removing project identity or administrator access.
+- [x] Build 6: improve shared typography readability without changing content.
+- [x] Build 7: standardize shared table readability, actions, and bounded horizontal overflow.
+- [x] Build 8: harden exact-390 project actions, controls, and table scrolling without hiding capability.
+- [x] Builds 9–12: accessibility, route-splitting/performance, authentic public product proof, and consolidated acceptance. Exact source `8c1bf307bfbee7c636b31eaf90ff7eaf69508c19` was pushed, built in Replit Shell, published once, and live-verified at `v1.05.N17-P12` on 2026-09-09.
+- [x] Build 13: implementation `c0e66b12dee4a25bbbda19f55ff07f74a906d5d2` isolates all 18 ProjectDetail workspaces behind selected-route lazy boundaries while retaining the project shell and every capability. Local focused/typecheck/build evidence passed; push and publication remain separate gates.
+- [x] Build 14: implementation `29b78cc80f1ebefc6638982c8dac0c5a49aed776` closes the shared Admin modal, mobile zoom, sign-in contrast/touch/keyboard, and public-footer overflow defects. Local exact-390 and 1440 Chromium route matrices, mobile Lighthouse, focused accessibility, typecheck, and frontend production-build evidence pass; authenticated post-publication verification remains a release gate.
+- [x] Build 15: implementation `d4cb585186aa782c21a16ed337a9a6ff6238a920` strengthens the homepage proposition and exposes the verified Lens Next workflow with an explicit evidence boundary. Focused proof, accessibility, typecheck, production build, and exact-390/desktop browser checks pass locally; push and publication remain separate gates.
+- [x] Build 16: implementation `933f6e178cfb426b3f27d0e343bf673ef5b935f7` adds truthful route-specific public metadata/canonical contracts and defers the existing XLSX parser until the Submittal import action. Submittals falls from 530.93 KB to 164.16 KB; focused, typecheck, build, and browser interaction checks pass locally.
+- [x] Build 17: correction `8d1bbdd8ad9e462b86aa62afbe4f36ccd9128368` changes only the proven homepage contrast pairs. Focused contracts pass 90/90, mobile Lighthouse is 100 Accessibility / 100 Best Practices / 100 SEO, both exact-390 and desktop route matrices pass 24/24, and the local performance rerun records 757 ms LCP with 0.00 CLS.
+
+Builds 1–12 are published and live-verified. Builds 13–17 are local accepted candidates ready for MAIN-00 integration. Push and publication remain separate explicit gates.
+
+This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
+
+
+
+## UX workspace-width normalization gates
+
+- [x] Establish one shared full-width contract for routed product workspaces without changing the accepted dashboard composition or readable Help measure.
+- [x] Collapse split grids when a sibling is hidden so the remaining task cannot be trapped in a stale half-width column.
+- [x] Preserve every existing capability and keep business logic, permissions, database, schema, and version behavior unchanged.
+- [x] Restore clear discoverability of the existing desktop sidebar collapse/expand and drag-to-resize controls without resetting saved user width.
+- [x] Pass focused behavior, frontend typecheck/build, and governed root regression from the reconciled source state. Builds 9–12 add accessibility, route-level performance, truthful public product proof, and consolidated acceptance without removing capability.
+- [ ] Keep push, publication, and live Chrome verification as a separate explicitly authorized release gate.

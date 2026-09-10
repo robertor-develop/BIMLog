@@ -1249,3 +1249,78 @@ No release, publication, or overall completion claim is permitted until the reco
 - Revision registration, explicit current designation and connector-job enqueue now share strict project/company authority, transaction, immutable replay and digest-bound idempotency rules.
 - MAIN 04's accepted Build 47 source remains in the ancestry and Lens Next, Job Intake and Multi-APU behavior remain unchanged.
 - This is a local internal checkpoint. No schema/database, provider, route, UI, version, push, publication or deployment changed.
+
+## UX less-is-more Release Groups A–B local candidate — 2026-09-09
+
+- The candidate is rebased onto authoritative `origin/main` commit `e6532fc37ec6ca3354fac7aeb4402269cb726edb`; the duplicate Intake client-company patch was correctly dropped because that accepted behavior is already upstream.
+- Builds 1–8 preserve the complete capability denominator while reducing simultaneous cognitive load in Headquarters, global navigation, Job Intake, project context, typography, tables, and exact-390 mobile presentation.
+- Headquarters keeps primary portfolio indicators and the project register visible; clash tracking, CVR health, pending-work panels, recent activity, and naming compliance remain available through one bilingual Operational details disclosure.
+- Headquarters navigation keeps primary and authorized administration routes visible while grouping the four Settings destinations behind one accessible disclosure in the expanded sidebar. The collapsed icon rail retains direct access.
+- Job Intake keeps the two-minute default and full Advanced Setup. Quick Setup leads with required readiness and discloses optional, work, and financial progress on demand; no Intake data, autosave, activation, contract, APU, assignment, permission, database, schema, report, or export behavior changes.
+- Project context keeps project identity and current role visible while placing administrator contact details behind a semantic disclosure. Shared typography is more readable, data tables retain every column/action with bounded horizontal scrolling, and exact-390 layouts stack project actions instead of hiding them.
+- This is a local committed candidate only. It is not pushed, published, deployed, production verified, or customer accepted.
+
+
+
+## UX workspace-width normalization candidate — 2026-09-09
+
+- Routed Job Intake, Job Operations, Team Performance, Financial APU, Financial Contract, and Administration workspaces now own the full content width provided by the application shell.
+- Split workspace grids collapse to one full-width column when a direct sibling is hidden or only one visible child remains. This prevents an inactive panel from leaving an abandoned column and making the active task look artificially cramped.
+- Dashboard composition and readable Help content retain their deliberate presentation widths. No capability, workflow, business logic, permission, database, schema, or version behavior changes in this candidate.
+- The existing desktop sidebar remains collapsible, expandable, width-adjustable from 196–420 pixels, and persistent across sessions. Its right-edge resize target is now visibly rendered instead of appearing as an almost invisible strip; collapse/expand behavior and stored preferences are unchanged.
+
+
+
+## UX optimization Builds 9–12 internal acceptance — 2026-09-09
+
+- Build 9 adds a bilingual skip-to-content path, consistent visible keyboard focus, reduced-motion support, and keyboard operation for the existing persistent sidebar width control. No navigation option or product capability is removed.
+- Build 10 changes routed page loading only: 30 workspaces now load on demand, reducing the initial JavaScript entry from approximately 3.20 MB to 435 KB while preserving every route and workflow.
+- Build 11 adds truthful bilingual public proof for the accepted Lens Next workflow: create, Open Working View, XML export, same-project RFI/Submittal links, bounded reference attachments, and identity isolation.
+- Build 12 consolidates the controlled UX stream with focused accessibility, route-loading, product-proof, workspace-width, sidebar, typecheck, production-build, and governed root regression evidence. Product business logic, permissions, Native behavior, database, schema, and version remain unchanged. Exact source `8c1bf307bfbee7c636b31eaf90ff7eaf69508c19` was subsequently pushed, built in Replit Shell, published once, and live-verified at `v1.05.N17-P12` with healthy production status.
+
+
+
+## UX residual Build 13 project-route payload isolation — 2026-09-09
+
+- Implementation commit `c0e66b12dee4a25bbbda19f55ff07f74a906d5d2` makes `ProjectDetail` stop eagerly importing all 18 project workspaces. The persistent project shell remains loaded while only the selected workspace is requested through its own accessible Suspense boundary.
+- The shared ProjectDetail chunk falls from approximately 1.526 MB to 14.9 KB. The initial application entry remains approximately 435 KB; large functional workspaces remain available as independent on-demand chunks rather than disappearing.
+- A Chrome performance trace of the already-published Build 12 public Features route records 831 ms LCP and 0.00 CLS under unthrottled lab conditions. It is a baseline, not field Core Web Vitals evidence and not a substitute for authenticated project-route verification after publication.
+
+
+
+## UX residual Build 14 responsive accessibility closure — 2026-09-09
+
+- Implementation `29b78cc80f1ebefc6638982c8dac0c5a49aed776` corrects four shared defects proven by rendered Chromium evidence: the Admin modal's forced 400-pixel width and missing dialog keyboard semantics, disabled mobile zoom, low-contrast muted text, and undersized/non-keyboard sign-in controls.
+- The shared public footer now collapses from its five-column desktop grid to two columns below 720 pixels and one column at 390 pixels. This removes the common horizontal overflow from public marketing and legal routes without removing any link or content.
+- Exact-390 Chromium verification passes on 12 public/auth routes with no page overflow, missing primary-main target, missing skip link, or unlabeled button. The repaired sign-in route scores 100 Accessibility, 100 Best Practices, and 100 SEO in the local mobile Lighthouse navigation audit. Desktop 1440-pixel verification passes the same 12-route matrix.
+- Product capability, business logic, permissions, Native behavior, database, schema, and version remain unchanged. Build 14 is a local candidate; push and publication remain separate gates.
+
+
+
+## UX residual Build 15 authentic homepage product proof — 2026-09-09
+
+- Implementation `d4cb585186aa782c21a16ed337a9a6ff6238a920` replaces the vague homepage lead with a concrete accountable-project-record proposition and adds a direct path to the detailed Features boundary.
+- The homepage now presents the already-implemented Lens Next sequence: capture an authoritative viewpoint from the active Navisworks context, link same-project BIMLog records and bounded references without changing the camera, then restore the Working View or export one-way Navisworks XML.
+- The proof is explicitly labeled as implemented product behavior rather than a concept screen or customer testimonial. No testimonials, adoption metrics, customer logos, or unverified outcomes were invented.
+- Focused homepage proof passes 8/8, the established public capability proof passes 7/7, accessibility safeguards pass 13/13, and frontend typecheck/build pass. Local browser checks at exact 390x844 and 1440x900 show no horizontal overflow or unlabeled buttons.
+- Product capability, business logic, permissions, Native behavior, database, schema, and version remain unchanged. Build 15 is a local candidate; push and publication remain separate gates.
+
+
+
+## UX residual Build 16 public metadata and interaction payload — 2026-09-09
+
+- Implementation `933f6e178cfb426b3f27d0e343bf673ef5b935f7` gives Home, Features, Pricing, About, and Contact truthful route-specific titles, descriptions, canonical URLs, and Open Graph metadata without adding unsupported ratings, users, customers, or outcomes.
+- The existing Submittal register spreadsheet parser now loads only when the user invokes its existing import action. Submittals falls from 530.93 KB to 164.16 KB; the unchanged parser is isolated in a 499.55 KB on-demand chunk and the prior build-size warning is removed.
+- Focused Build 16 checks pass 12/12, homepage truth checks pass 8/8, public capability checks pass 7/7, and frontend typecheck/build pass. Browser verification proves all five public route metadata contracts and the homepage-to-Features interaction, with no overflow.
+- Product workflow, permissions, Native behavior, database, schema, and version remain unchanged. Build 16 is a local candidate; push and publication remain separate gates.
+
+
+
+## UX residual Build 17 consolidated acceptance — 2026-09-09
+
+- Evidence checkpoint `ca67966827289794d4dcf88353fb3b06d15ce029` records the exact acceptance result below.
+
+- Builds 13–16 are present on clean source `cfed1bc35a58f1af84f3da7155d8e81aae1eb152`. Focused contracts pass 85/85, frontend typecheck passes, and exact-390 plus desktop browser matrices pass 24/24 with no overflow, missing primary-main/skip target, or unlabeled buttons.
+- Local unthrottled Chrome performance is strong at 734 ms LCP and 0.00 CLS. Best Practices and SEO score 100; the Submittals route remains 164.16 KB with XLSX isolated on demand.
+- Correction `8d1bbdd8ad9e462b86aa62afbe4f36ccd9128368` changes only the four proven homepage contrast treatments. The rerun passes 90/90 focused contracts, 24/24 exact-390/desktop route checks, and mobile Lighthouse at 100 Accessibility, 100 Best Practices, and 100 SEO.
+- Local unthrottled Chrome performance remains strong at 757 ms LCP and 0.00 CLS. Build 17 consolidated acceptance is PASS; Builds 13–17 are ready for MAIN-00 integration. Push and publication remain separate explicit gates.

@@ -117,6 +117,18 @@ const SECTIONS = [
       "BIMLog Sync Agent — Windows desktop app for automatic folder watching and validation",
     ],
   },
+  {
+    heading: "Navisworks Lens Next",
+    description: "Keep BIMLog viewpoints authoritative while using Navisworks for coordinated model review.",
+    features: [
+      "Create BIMLog issues from the active Navisworks model context",
+      "Open Working View restores the BIMLog camera without creating a Saved Viewpoint",
+      "Export current-project BIMLog viewpoints to Navisworks XML",
+      "Link existing same-project RFIs and Submittals to a viewpoint",
+      "Attach PDF, JPG, JPEG, or PNG references up to 5 MB",
+      "Project and model identity checks prevent cross-project contamination",
+    ],
+  },
 ];
 
 const FEATURES_ES_COPY: Record<string, string> = {
@@ -201,6 +213,14 @@ const FEATURES_ES_COPY: Record<string, string> = {
   "Audit Certificate PDF export": "Exportación del PDF de Certificado de Auditoría",
   "Authenticated API access for supported BIMLog workflows": "Acceso autenticado a la API para flujos de trabajo compatibles de BIMLog",
   "BIMLog Sync Agent — Windows desktop app for automatic folder watching and validation": "BIMLog Sync Agent — aplicación de escritorio para Windows que supervisa y valida carpetas automáticamente",
+  "Navisworks Lens Next": "Navisworks Lens Next",
+  "Keep BIMLog viewpoints authoritative while using Navisworks for coordinated model review.": "Mantenga los puntos de vista de BIMLog como fuente autoritativa mientras usa Navisworks para la revisión coordinada del modelo.",
+  "Create BIMLog issues from the active Navisworks model context": "Cree incidencias de BIMLog desde el contexto activo del modelo de Navisworks",
+  "Open Working View restores the BIMLog camera without creating a Saved Viewpoint": "Abrir Vista de Trabajo restaura la cámara de BIMLog sin crear un Punto de Vista Guardado",
+  "Export current-project BIMLog viewpoints to Navisworks XML": "Exporte a XML de Navisworks los puntos de vista de BIMLog del proyecto actual",
+  "Link existing same-project RFIs and Submittals to a viewpoint": "Vincule RFI y Submittals existentes del mismo proyecto a un punto de vista",
+  "Attach PDF, JPG, JPEG, or PNG references up to 5 MB": "Adjunte referencias PDF, JPG, JPEG o PNG de hasta 5 MB",
+  "Project and model identity checks prevent cross-project contamination": "Las verificaciones de identidad del proyecto y modelo evitan la contaminación entre proyectos",
   "Back to home": "Volver al inicio",
   "Platform": "Plataforma",
   "BIMLog Features": "Funciones de BIMLog",

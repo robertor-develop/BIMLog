@@ -2,7 +2,7 @@ import { Link } from "wouter";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Footer } from "@/components/layout/Footer";
-import { FileCheck2, ShieldCheck, FileSpreadsheet, Users, ArrowRight, CheckCircle2, UserPlus, FolderPlus, Settings2, Upload, MessageSquare, BarChart2 } from "lucide-react";
+import { FileCheck2, ShieldCheck, FileSpreadsheet, Users, ArrowRight, CheckCircle2, UserPlus, FolderPlus, Settings2, Upload, MessageSquare, BarChart2, Camera, Link2, FileOutput } from "lucide-react";
 
 export function Landing() {
   const { t, tt } = useI18n();
@@ -13,17 +13,20 @@ export function Landing() {
       {/* Hero */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-20">
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-primary text-sm font-medium rounded-full px-4 py-1.5 mb-8">
+          <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-blue-700 text-sm font-medium rounded-full px-4 py-1.5 mb-8">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-            {t('landing.badge')}
+            {tt("Construction coordination with accountable project records", "Coordinación de construcción con registros de proyecto responsables")}
           </div>
 
           <h1 className="font-display text-5xl md:text-6xl font-bold text-foreground leading-[1.1] mb-6">
-            {t('landing.hero.title')}
+            {tt("Know what happened. Prove who decided. Protect the project.", "Sepa qué ocurrió. Demuestre quién decidió. Proteja el proyecto.")}
           </h1>
 
           <p className="text-xl text-muted-foreground leading-relaxed mb-10 max-w-2xl">
-            {t('landing.hero.subtitle')}
+            {tt(
+              "BIMLog connects coordination records, RFIs, Submittals, files, and Navisworks viewpoints so teams can act from one traceable project history.",
+              "BIMLog conecta registros de coordinación, RFIs, Submittals, archivos y puntos de vista de Navisworks para que los equipos trabajen desde un historial de proyecto trazable.",
+            )}
           </p>
 
           <div className="flex flex-wrap gap-3">
@@ -38,7 +41,65 @@ export function Landing() {
                 {t('auth.login')}
               </Button>
             </Link>
+            <Link href="/features">
+              <Button size="lg" variant="ghost" className="gap-2 text-base px-6">
+                {tt("See the product workflow", "Ver el flujo del producto")}
+                <ArrowRight className="w-4 h-4" />
+              </Button>
+            </Link>
           </div>
+        </div>
+      </section>
+
+      {/* Verified product proof */}
+      <section aria-labelledby="verified-workflow-title" className="max-w-7xl mx-auto px-6 lg:px-8 pb-20">
+        <div className="surface rounded-2xl p-6 md:p-8">
+          <div className="max-w-3xl mb-8">
+            <div className="text-xs font-bold uppercase tracking-widest text-primary mb-3">
+              {tt("Verified Lens Next workflow", "Flujo verificado de Lens Next")}
+            </div>
+            <h2 id="verified-workflow-title" className="font-display text-2xl md:text-3xl font-bold text-foreground mb-3">
+              {tt("From the model view to an accountable project record", "De la vista del modelo a un registro de proyecto responsable")}
+            </h2>
+            <p className="text-muted-foreground leading-relaxed">
+              {tt(
+                "The workflow below reflects implemented BIMLog product behavior—not a concept screen or customer testimonial.",
+                "El flujo siguiente refleja comportamiento implementado de BIMLog, no una pantalla conceptual ni un testimonio de cliente.",
+              )}
+            </p>
+          </div>
+          <ol className="grid grid-cols-1 md:grid-cols-3 gap-4" aria-label={tt("Lens Next product workflow", "Flujo del producto Lens Next")}>
+            {[
+              {
+                icon: <Camera className="w-5 h-5" />,
+                title: tt("Capture the issue", "Capture el asunto"),
+                text: tt("Create an authoritative BIMLog viewpoint from the active Navisworks model context.", "Cree un punto de vista BIMLog autoritativo desde el contexto activo del modelo de Navisworks."),
+              },
+              {
+                icon: <Link2 className="w-5 h-5" />,
+                title: tt("Connect the record", "Conecte el registro"),
+                text: tt("Link same-project RFIs, Submittals, and bounded reference attachments without changing the camera.", "Vincule RFIs, Submittals y referencias limitadas del mismo proyecto sin cambiar la cámara."),
+              },
+              {
+                icon: <FileOutput className="w-5 h-5" />,
+                title: tt("Restore or exchange", "Restaure o intercambie"),
+                text: tt("Open Working View restores the BIMLog camera, while XML export supports one-way Navisworks interoperability.", "Open Working View restaura la cámara BIMLog, mientras la exportación XML permite interoperabilidad unidireccional con Navisworks."),
+              },
+            ].map((step, index) => (
+              <li key={step.title} className="card p-5 list-none">
+                <div className="flex items-center gap-3 text-primary mb-3">
+                  <span className="inline-flex h-9 w-9 items-center justify-center rounded-lg bg-primary/10" aria-hidden="true">{step.icon}</span>
+                  <span className="font-mono text-xs font-bold">0{index + 1}</span>
+                </div>
+                <h3 className="font-display font-semibold text-foreground mb-2">{step.title}</h3>
+                <p className="text-sm text-muted-foreground leading-relaxed">{step.text}</p>
+              </li>
+            ))}
+          </ol>
+          <Link href="/features" className="inline-flex min-h-11 items-center gap-2 mt-6 font-semibold text-primary hover:underline underline-offset-4">
+            {tt("Review capabilities and boundaries", "Revisar capacidades y límites")}
+            <ArrowRight className="w-4 h-4" />
+          </Link>
         </div>
       </section>
 
@@ -106,7 +167,7 @@ export function Landing() {
       {/* User Guide — How It Works */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-primary text-sm font-medium rounded-full px-4 py-1.5 mb-6">
+          <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-blue-700 text-sm font-medium rounded-full px-4 py-1.5 mb-6">
             <span className="w-2 h-2 rounded-full bg-primary" />
             {tt("Getting Started", "Empezar")}
           </div>
@@ -212,7 +273,7 @@ export function Landing() {
               <div style={{
                 position: "absolute", top: 20, right: 20,
                 fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
-                color: "hsl(var(--muted-foreground))", opacity: 0.4,
+                color: "hsl(var(--muted-foreground))",
                 letterSpacing: "0.05em"
               }}>{item.step}</div>
 
@@ -285,13 +346,13 @@ export function Landing() {
             </div>
             <div className="surface p-6">
               <div className="font-mono text-xs text-muted-foreground space-y-2">
-                <div className="text-destructive font-semibold mb-3">HTTP 422 — {tt("Naming Violation", "Violación de Nomenclatura")}</div>
+                <div className="text-red-700 font-semibold mb-3">HTTP 422 — {tt("Naming Violation", "Violación de Nomenclatura")}</div>
                 {[
                   { field: "originator", received: "XYZ", expected: ["ABC", "DEF", "GHI"] },
                   { field: "discipline", received: "AR", expected: ["ARC", "STR", "MEP"] },
                 ].map(e => (
                   <div key={e.field} className="p-3 rounded-lg bg-destructive/5 border border-destructive/20">
-                    <span className="text-destructive">{e.field}</span>
+                    <span className="text-red-700">{e.field}</span>
                     <span className="text-muted-foreground"> {tt("received", "recibió")} </span>
                     <span className="text-foreground">"{e.received}"</span>
                     <div className="mt-1 text-muted-foreground">

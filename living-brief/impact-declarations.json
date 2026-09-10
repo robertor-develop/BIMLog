@@ -20423,6 +20423,683 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "7a9d507884869658fb1dd7a856bedb8e4c8ae5a0433536450f08108645464f3a"
+    },
+    {
+      "taskId": "ux-less-is-more-release-groups-a-b-publication-preflight-20260909",
+      "reviewedThroughCommit": "63ccfd565ce89cd1c24e53ff14a68833c7149ba5",
+      "reviewedAt": "2026-09-09T11:55:00-04:00",
+      "status": "publication_preflight_reconciled",
+      "captureTiming": "same_task_after_rebase_before_push_and_replit_publication",
+      "summary": "Reconciles capability-preserving UX Builds 1–8 onto the exact current production lineage without overwriting N17-P12 or accepted Intake behavior.",
+      "workstreams": [
+        "ux-less-is-more-controlled-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, persistence, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The clean rebase, push, publication, and live-verification gates remain separate and auditable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing desktop, exact-390, bilingual, production-build, and live browser gates apply."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Presentation hierarchy changes preserve the accepted product direction and every capability."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, route, database, dependency, structural inventory, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Navisworks source, package, or behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported-artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claims change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact integrated lineage and publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Builds 1–8 complete and the authorized push/publication/live gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Git history and evidence preserve the exact build and rebase record."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "53de0e1715155def2eb0639a6c967dc230c64cedf30c613a7bfbd3ff2e4eacbc"
+    },
+    {
+      "taskId": "ux-workspace-width-normalization-20260909",
+      "reviewedThroughCommit": "28b3fb3754d0336541dfed7b1a786eb451db0763",
+      "reviewedAt": "2026-09-09T16:45:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Normalizes routed workspace width and collapses abandoned grid columns while preserving all capabilities and deliberate dashboard and Help measures.",
+      "workstreams": [
+        "ux-less-is-more-controlled-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority, identity, persistence, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded local correction and separate publication gate follow the existing workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing responsive, accessibility, regression, and capability-preservation gates remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction improves presentation consistency without changing BIMLog product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, route, service, dependency, database, schema, or runtime structure changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, plugin, package, camera, or XML behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report, document, spreadsheet, or presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the scoped workspace-width candidate and its capability-preserving boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records completed implementation checks and keeps publication and live verification separate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The change introduces no new accepted audit lesson beyond the existing preservation rule."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/index.css",
+        "artifacts/bimlog/src/workspace-width.behavior.mjs",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ec1339cabdfff7a25eb460d4470f9923ae2e22df5dd70e1a6f78b7c3d39db5de"
+    },
+    {
+      "taskId": "ux-sidebar-resize-discoverability-20260909",
+      "reviewedThroughCommit": "d493d38404350a14b06b62f989185764e02740cf",
+      "reviewedAt": "2026-09-09T16:55:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Restores visible discoverability of the existing persistent sidebar collapse, expand, and desktop width-resize controls without changing navigation behavior.",
+      "workstreams": [
+        "ux-less-is-more-controlled-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, persistence, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded correction and separate publication gate follow the existing workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing accessibility, responsive, persistence, and regression requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "A clearer existing control does not change BIMLog product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, dependency, database, schema, or runtime structure changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, plugin, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the preserved sidebar capability and corrected control discoverability."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the local sidebar gate while keeping publication and live verification separate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No additional durable audit rule is needed beyond capability preservation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/layout/MasterSidebar.behavior.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0ac7053f6d98b5b066f9557e576852abff82e5a22cc88697db3ab6d5c418c031"
+    },
+    {
+      "taskId": "ux-optimization-builds-9-12-20260909",
+      "reviewedThroughCommit": "98faad9bbcd6e8f68bc34c6497aac2b92fb4bd0c",
+      "reviewedAt": "2026-09-09T19:19:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Completes the controlled accessibility, performance, public product proof, and consolidated UX acceptance stream while preserving all existing capabilities and business contracts.",
+      "workstreams": [
+        "ux-less-is-more-controlled-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded UX stream and separate publication gate follow the accepted workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accessibility, performance, responsive behavior, and regression requirements are strengthened without changing their contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Truthful product proof and lower cognitive load preserve BIMLog product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, plugin, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 9–12 implementation and internal acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the internal UX gates while leaving push and publication explicitly open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing capability-preservation rule already governs this stream."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/layout/MasterSidebar.behavior.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4ee32f6e5f65b7d4d8ca5cda92874ec091c387727a2e945cc40838a324f46e75"
+    },
+    {
+      "taskId": "ux-residual-build13-project-route-payload-20260909",
+      "reviewedThroughCommit": "c0e66b12dee4a25bbbda19f55ff07f74a906d5d2",
+      "reviewedAt": "2026-09-10T00:04:03Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Splits the ProjectDetail aggregate into 18 selected-workspace chunks while preserving the project shell and every existing capability.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, workflow, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded performance correction follows the existing capability-preserving workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing performance, accessibility, and real-behavior evidence requirements remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "On-demand delivery of unchanged workspaces does not change product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, dependency, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, plugin, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance interpretation changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 12 publication and Build 13 measured local payload result."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the published 12-build stream, records Build 13, and retains Builds 14–17."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the publication evidence, root cause, correction, measurements, and evidence limits."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "34b1c8d4e66fe2a363d0b191ef30b6becaef31c134978ea0bbe20caa1d1c7606"
+    },
+    {
+      "taskId": "ux-residual-build14-responsive-accessibility-20260909",
+      "reviewedThroughCommit": "29b78cc80f1ebefc6638982c8dac0c5a49aed776",
+      "reviewedAt": "2026-09-10T00:45:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Closes proven shared mobile accessibility and overflow defects across authentication, public footer, and Admin dialog surfaces without removing capability.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, workflow, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded correction and separate publication gate follow the accepted workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing responsive, keyboard, contrast, touch, and real-browser evidence rules govern the change."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Accessibility and responsive corrections preserve product direction and content."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, dependency, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Build 14 defects, corrections, evidence, and release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local Build 14 and retains Builds 15–17."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the actual Lighthouse and exact-390 root-cause evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a09f986f4db12a747b862e3d8d75c050a98b7abb07c313333314cb8a186a3036"
+    },
+    {
+      "taskId": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
+      "reviewedAt": "2026-09-10T01:18:54Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Strengthens the public homepage with truthful evidence of the accepted Lens Next workflow without invented social proof or capability removal.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, workflow, or capability denominator changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded homepage change and separate publication gate follow the accepted workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Claims are tied to implemented behavior and verified in focused tests and browsers."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The clearer proposition preserves product direction and every existing capability."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 15 scope, evidence, and release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local Build 15 and retains Builds 16–17."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the homepage evidence gap, correction, and truthful-claims boundary."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "860f6266c8148710e5ea61da13e9b96dbcb6cafc00a917b22adce04cf494b5e9"
+    },
+    {
+      "taskId": "ux-residual-build16-public-metadata-payload-20260909",
+      "reviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "reviewedAt": "2026-09-10T01:40:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Adds truthful per-route public metadata and isolates the existing Submittal spreadsheet parser behind its invoked interaction.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, workflow, or capability changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded frontend correction and separate publication gate follow the accepted workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Metadata claims are truthful and payload impact is measured from production output."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Public discoverability improves without changing product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No compliance or certification claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 16 behavior, measurements, and release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local Build 16 and retains Build 17."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the metadata and eager-payload root causes with measured correction evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "746e357ff61feda463b8f215560b2414a615b810f48d826ef29086486b08ea9f"
+    },
+    {
+      "taskId": "ux-residual-build17-consolidated-acceptance-20260909",
+      "reviewedThroughCommit": "8d1bbdd8ad9e462b86aa62afbe4f36ccd9128368",
+      "reviewedAt": "2026-09-10T02:06:52Z",
+      "status": "accepted_local_candidate",
+      "captureTiming": "same_task_after_acceptance_before_release",
+      "summary": "Records the bounded homepage contrast correction and passing consolidated capability, payload, responsive, metadata, accessibility, and performance evidence.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Acceptance evidence does not change authority, identity, workflow, or capability."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The result truthfully separates local evidence from integration and publication."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The initially failed contrast gate is retained in evidence and closed only by the exact correction plus a full rerun."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or capability changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No compliance or certification claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 17 correction and passing consolidated acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Build 17 locally while retaining push and publication as separate gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the initial failures, exact correction, passing rerun metrics, and evidence limitations."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/ux-less-is-more-build17-consolidated-acceptance-20260909.md",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c10ac28493f13aa008e4df5d17c7950ea7f0fbee0deb6c892b39ab9c240e57ce"
     }
   ]
 }

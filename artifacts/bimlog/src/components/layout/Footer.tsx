@@ -22,11 +22,12 @@ export function Footer() {
 
   return (
     <footer style={{ borderTop: "1px solid hsl(var(--border))", background: "hsl(var(--secondary)/0.4)", marginTop: "auto" }}>
-      <div style={{ maxWidth: 1152, margin: "0 auto", padding: "48px 32px 32px" }}>
-        <div style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: 40, marginBottom: 40 }}>
+      <style>{`@media(max-width:720px){.public-footer-inner{padding:32px 20px 24px!important}.public-footer-grid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:28px 20px!important}.public-footer-brand{grid-column:1/-1}.public-footer-meta{align-items:flex-start!important;flex-direction:column}}@media(max-width:390px){.public-footer-grid{grid-template-columns:minmax(0,1fr)!important}.public-footer-brand{grid-column:auto}}`}</style>
+      <div className="public-footer-inner" style={{ maxWidth: 1152, margin: "0 auto", padding: "48px 32px 32px" }}>
+        <div className="public-footer-grid" style={{ display: "grid", gridTemplateColumns: "2fr 1fr 1fr 1fr 1fr", gap: 40, marginBottom: 40 }}>
 
           {/* Column 1 — Brand */}
-          <div>
+          <div className="public-footer-brand">
             <div style={{ display: "flex", alignItems: "baseline", gap: 6, marginBottom: 12 }}>
               <span style={{ fontFamily: "var(--font-display)", fontWeight: 800, fontSize: 16, color: "hsl(var(--foreground))" }}>BIMLog</span>
               <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>by IgniteSmart</span>
@@ -73,7 +74,7 @@ export function Footer() {
           </div>
         </div>
 
-        <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 20, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
+        <div className="public-footer-meta" style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 20, display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: 8 }}>
           <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>ISO 19650 · openBIM · buildingSMART</span>
           <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>BIMCapital Partners INC · 7901 4th Street North, STE 300, St. Petersburg, FL 33702</span>
         </div>

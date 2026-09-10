@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2, CheckCircle2, Clock, Shield, Sparkles, Download } from "lucide-react";
+import { Building2, Plus, Users, FileText, ArrowRight, X, FolderOpen, BarChart2, AlertCircle, RefreshCw, LogOut, Trash2, CheckCircle2, Clock, Shield, Sparkles, Download, ChevronDown } from "lucide-react";
 import { useAuthStore } from "@/store/auth";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { StatCard } from "@/components/dashboard/StatCard";
@@ -227,6 +227,7 @@ export function Dashboard() {
   const [projectSearch, setProjectSearch] = useState("");
   const [projectStatus, setProjectStatus] = useState("all");
   const [projectSort, setProjectSort] = useState<"name_asc" | "name_desc" | "code_asc" | "status_asc">("name_asc");
+  const [showOperationalDetails, setShowOperationalDetails] = useState(false);
 
   useEffect(() => {
     if (!projects || !token || projects.length === 0) return;
@@ -584,6 +585,21 @@ export function Dashboard() {
             </div>
           )}
 
+          <button
+            type="button"
+            aria-expanded={showOperationalDetails}
+            aria-controls="headquarters-operational-details"
+            onClick={() => setShowOperationalDetails(value => !value)}
+            style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, margin: "0 0 20px", padding: "11px 14px", border: "1px solid hsl(var(--border))", borderRadius: 9, background: "hsl(var(--card))", color: "hsl(var(--foreground))", cursor: "pointer", fontSize: 12, fontWeight: 750 }}
+          >
+            <span>{tt("Operational details", "Detalles operativos")}</span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: 7, color: "hsl(var(--muted-foreground))", fontSize: 11, fontWeight: 600 }}>
+              {showOperationalDetails ? tt("Hide", "Ocultar") : tt("Show clashes, health, pending work and activity", "Mostrar interferencias, salud, pendientes y actividad")}
+              <ChevronDown aria-hidden style={{ width: 15, height: 15, transform: showOperationalDetails ? "rotate(180deg)" : undefined, transition: "transform .16s ease" }} />
+            </span>
+          </button>
+
+          <div id="headquarters-operational-details" hidden={!showOperationalDetails}>
           {/* Clash + submittal tracking stats */}
           {stats && (stats.totalClashes ?? 0) + (stats.submittalTrackers ?? 0) > 0 && (
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: 16, marginTop: 16 }}>
@@ -766,6 +782,7 @@ export function Dashboard() {
               </div>
             </div>
           )}
+          </div>
 
           {/* SECTION 4 — Your Projects */}
           <div style={{ marginBottom: 28 }}>
@@ -858,7 +875,7 @@ export function Dashboard() {
           </div>
 
           {/* SECTION 5 — Recent Activity + Top Naming Violators */}
-          {!isLoading && (projects?.length ?? 0) > 0 && (
+          {showOperationalDetails && !isLoading && (projects?.length ?? 0) > 0 && (
             <div className="headquarters-two-column" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16, marginBottom: 20 }}>
 
               {/* Recent Activity */}

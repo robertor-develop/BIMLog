@@ -5,27 +5,31 @@ import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
 import { ProjectSidebar } from "@/components/layout/ProjectSidebar";
-import { FilesTab } from "./project/FilesTab";
-import { RfisTab } from "./project/RfisTab";
-import { SubmittalsTab } from "./project/SubmittalsTab";
-import { ActivityTab } from "./project/ActivityTab";
-import { TeamTab } from "./project/TeamTab";
-import { ConventionBuilder } from "./project/ConventionBuilder";
-import { NameGenerator } from "./project/NameGenerator";
-import { AnalyticsTab } from "./project/AnalyticsTab";
-import { IntegrationsTab } from "./project/IntegrationsTab";
-import { ReportsTab } from "./project/ReportsTab";
-import { DirectoryTab } from "./project/DirectoryTab";
-import { TransmittalsTab } from "./project/TransmittalsTab";
-import { ChangeOrdersTab } from "./project/ChangeOrdersTab";
-import { MeetingsTab } from "./project/MeetingsTab";
-import { ScheduleTab } from "./project/ScheduleTab";
-import { ClashReportsTab } from "./project/ClashReportsTab";
-import { CoordinationHub } from "./project/CoordinationHub";
-import { CoordinatorCommandCenter } from "./project/CoordinatorCommandCenter";
 import { ChevronLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROLES, getRole, type RoleKey } from "@/lib/roles";
+
+const namedProjectTab = (loader: () => Promise<object>, name: string) =>
+  React.lazy(async () => ({ default: (await loader() as Record<string, React.ComponentType<any>>)[name] }));
+
+const FilesTab = namedProjectTab(() => import("./project/FilesTab"), "FilesTab");
+const RfisTab = namedProjectTab(() => import("./project/RfisTab"), "RfisTab");
+const SubmittalsTab = namedProjectTab(() => import("./project/SubmittalsTab"), "SubmittalsTab");
+const ActivityTab = namedProjectTab(() => import("./project/ActivityTab"), "ActivityTab");
+const TeamTab = namedProjectTab(() => import("./project/TeamTab"), "TeamTab");
+const ConventionBuilder = namedProjectTab(() => import("./project/ConventionBuilder"), "ConventionBuilder");
+const NameGenerator = namedProjectTab(() => import("./project/NameGenerator"), "NameGenerator");
+const AnalyticsTab = namedProjectTab(() => import("./project/AnalyticsTab"), "AnalyticsTab");
+const IntegrationsTab = namedProjectTab(() => import("./project/IntegrationsTab"), "IntegrationsTab");
+const ReportsTab = namedProjectTab(() => import("./project/ReportsTab"), "ReportsTab");
+const DirectoryTab = namedProjectTab(() => import("./project/DirectoryTab"), "DirectoryTab");
+const TransmittalsTab = namedProjectTab(() => import("./project/TransmittalsTab"), "TransmittalsTab");
+const ChangeOrdersTab = namedProjectTab(() => import("./project/ChangeOrdersTab"), "ChangeOrdersTab");
+const MeetingsTab = namedProjectTab(() => import("./project/MeetingsTab"), "MeetingsTab");
+const ScheduleTab = namedProjectTab(() => import("./project/ScheduleTab"), "ScheduleTab");
+const ClashReportsTab = namedProjectTab(() => import("./project/ClashReportsTab"), "ClashReportsTab");
+const CoordinationHub = namedProjectTab(() => import("./project/CoordinationHub"), "CoordinationHub");
+const CoordinatorCommandCenter = namedProjectTab(() => import("./project/CoordinatorCommandCenter"), "CoordinatorCommandCenter");
 
 const PROJECT_TABS = new Set([
   "command-center",
@@ -195,29 +199,29 @@ export function ProjectDetail() {
             )}
 
             {adminMember && (
-              <span
-                className="context-chip context-chip-wide"
-                title={adminMember.userEmail ? `${lang === "es" ? "Administrador de Proyecto" : "Project Admin"}: ${adminMember.userEmail}` : (lang === "es" ? "Administrador de Proyecto" : "Project Admin")}
-              >
-                <span className="context-chip-strong">{adminMember.userFullName}</span>
-                {adminMember.userCompanyName && (
-                  <span className="context-chip-muted">- {adminMember.userCompanyName}</span>
-                )}
-                {adminMember.userEmail && (
-                  <a
-                    href={`mailto:${adminMember.userEmail}`}
-                    className="context-chip-link"
-                  >
-                    - {adminMember.userEmail}
-                  </a>
-                )}
-              </span>
+              <details className="context-chip context-chip-wide" style={{ position: "relative" }}>
+                <summary style={{ cursor: "pointer", fontWeight: 700 }}>
+                  {lang === "es" ? "Administrador del proyecto" : "Project administrator"}
+                </summary>
+                <div style={{ position: "absolute", top: "calc(100% + 7px)", right: 0, zIndex: 30, minWidth: 250, maxWidth: "min(360px, calc(100vw - 24px))", padding: 12, border: "1px solid hsl(var(--border))", borderRadius: 9, background: "hsl(var(--card))", boxShadow: "0 12px 32px rgba(15,23,42,.16)", display: "grid", gap: 4 }}>
+                  <span className="context-chip-strong">{adminMember.userFullName}</span>
+                  {adminMember.userCompanyName && <span className="context-chip-muted">{adminMember.userCompanyName}</span>}
+                  {adminMember.userEmail && <a href={`mailto:${adminMember.userEmail}`} className="context-chip-link">{adminMember.userEmail}</a>}
+                </div>
+              </details>
             )}
           </div>
         </div>
 
         {/* Tab content */}
         <div className="page-content">
+          <React.Suspense
+            fallback={(
+              <div className="route-loading" role="status" aria-live="polite">
+                {lang === "es" ? "Cargando espacio de trabajo…" : "Loading workspace…"}
+              </div>
+            )}
+          >
           {!isKnownTab && (
             <section
               role="alert"
@@ -260,6 +264,7 @@ export function ProjectDetail() {
           {tab === "meetings"       && <MeetingsTab       projectId={projectId} canWrite={canWrite} />}
           {tab === "schedule"       && <ScheduleTab       projectId={projectId} canWrite={canWrite} />}
           {tab === "clash-reports"  && <ClashReportsTab    projectId={projectId} canWrite={canWrite} />}
+          </React.Suspense>
         </div>
       </div>
     </div>
