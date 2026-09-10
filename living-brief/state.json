@@ -1,12 +1,11 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
+  "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "f5c71d81c19e4a938d03ede4913eea600ef34ff308ba02834d691cc4e3d1d9ea",
+  "bundleSha256": "d499cfa1c7ef4dcbb20c53ccfe383d084ecfa38b884a772c3fb9ab0de77f950e",
   "impact": {
-    "baselineCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
+    "baselineCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
     "changedPaths": [
-      "evidence/COORDINATION_DELIVERY_RELEASE_C_BUILD_11.md",
       "living-brief/PLATFORM.md",
       "living-brief/impact-declarations.json"
     ],
@@ -23,11 +22,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "claude",
@@ -35,11 +34,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "quality",
@@ -47,11 +46,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "vision",
@@ -59,23 +58,23 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "69079970523bee2bccdf57f5f3506f256a674dfae36ae37300f81a9c6d466b3e",
-      "sourceChangedAt": "2026-09-10T00:39:02.000Z",
+      "sha256": "9555230cedd5552736b88b1a90ca54621fbd08225cc4b51eb796b51571cf4d38",
+      "sourceChangedAt": "2026-09-10T00:59:46.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "plugin",
@@ -83,11 +82,11 @@
       "sha256": "dd9b221df31b953cacfdf6bc8ed317d9b5969a9504a74227b0e50f2dc39bc1c9",
       "sourceChangedAt": "2026-09-08T13:33:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "report_design_system",
@@ -95,11 +94,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "standards_register",
@@ -107,11 +106,11 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "status",
@@ -119,11 +118,11 @@
       "sha256": "ed3e4d705fed8e49d45c5b2a4e42aa75fea5ec6221057490cff29aa1035298e6",
       "sourceChangedAt": "2026-09-09T09:43:48-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "open_loop",
@@ -131,11 +130,11 @@
       "sha256": "dcf7ec26791ced265dbeb9ee450e5225cb992ec8df17fecf14157a97f2a7e400",
       "sourceChangedAt": "2026-09-09T09:43:48-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     },
     {
       "key": "audit",
@@ -143,11 +142,11 @@
       "sha256": "2c3c13c2ca8999ae00edaf2144415e0c089285036d622dd10ae4b467ec16b5cd",
       "sourceChangedAt": "2026-09-09T09:43:48-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewedThroughCommit": "ab48b57cf1c6a2feea7f21b93273f44723bcbb97",
-      "semanticReviewTask": "coordination-delivery-release-c-build-11-20260909",
+      "reconciledThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "semanticReviewTask": "coordination-delivery-release-c-build-12-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T00:24:00Z"
+      "semanticReviewedAt": "2026-09-10T01:02:00Z"
     }
   ]
 }

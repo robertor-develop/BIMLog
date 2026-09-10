@@ -176,6 +176,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/connector-credential-envelope.ts
 - artifacts/api-server/src/lib/connector-credential-lease-resolver.behavior.ts
 - artifacts/api-server/src/lib/connector-credential-lease-resolver.ts
+- artifacts/api-server/src/lib/connector-credential-lifecycle-postgres-store.ts
+- artifacts/api-server/src/lib/connector-credential-lifecycle.behavior.ts
+- artifacts/api-server/src/lib/connector-credential-lifecycle.ts
 - artifacts/api-server/src/lib/connector-credential-rotation.behavior.ts
 - artifacts/api-server/src/lib/connector-credential-rotation.ts
 - artifacts/api-server/src/lib/connector-foundation-contract.ts

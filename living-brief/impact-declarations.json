@@ -20316,6 +20316,112 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "648ed24a0c681a5639f322c14be4050b330b626d4742b21bfc13af88bdc08564"
+    },
+    {
+      "taskId": "coordination-delivery-release-c-build-12-20260909",
+      "reviewedThroughCommit": "f673e1c4b5b0e9d066ad93fa505d97833e9ce8f4",
+      "reviewedAt": "2026-09-10T01:02:00Z",
+      "status": "internal_checkpoint",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "implement_read_only_credential_lifecycle_projection",
+          "enforce_project_company_and_admin_scope",
+          "verify_explicit_projection_and_protected_field_exclusion",
+          "record_local_release_evidence"
+        ],
+        "operatorOnly": [
+          "supply_runtime_connector_kek",
+          "submit_real_connector_credential",
+          "enable_real_provider_validation",
+          "frontend_ux_program",
+          "live_database_application",
+          "publication",
+          "deployment"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "platform",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "A project credential lifecycle view may expose only credentials whose relationship to that project is proven by a mapping or project-tagged audit, and must omit all protected credential material."
+        }
+      ],
+      "summary": "Records the project-admin read-only SharePoint credential lifecycle projection, explicit project relationship evidence, strict sanitized output and protected-field exclusion.",
+      "workstreams": [
+        "bimlog-coordination-delivery",
+        "release-c-credential-lifecycle-projection"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership or organizational authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The backend-only build preserves MAIN04 frontend ownership and all established execution boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The projection implements existing authorization, tenancy, explicit-output and fail-closed requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted Coordination Delivery product direction remains unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated Platform map now includes the credential lifecycle service, PostgreSQL store and focused proof."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native Lens Next, Navisworks and bridge code remained untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design or presentation behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 12 remains a local backend checkpoint without real credential, provider, database or production claims."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Branch integration, real credentials, provider activation, frontend UX and production release gates remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Project-admin authority, project relationship proof, read-only transaction, strict output and non-effects are preserved in committed evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5a5b3b538684d5f421bbdc651ae5cbda5497ac3942b535980ad7b310339291b9"
     }
   ]
 }
