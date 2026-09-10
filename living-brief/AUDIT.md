@@ -1100,3 +1100,9 @@ was performed or authorized.
 - Build 9 proves Work Package identity, decomposition, ownership, reload, and operational task linking while leaving the existing activation tables authoritative.
 - Build 10 confirms the approved budget snapshot remains the source authority. Intake activation aggregates Contract Items into canonical Job budget accounts per project cost node, retains each approved source-line ID, and uses existing conflict-safe idempotent persistence.
 - These changes introduce no database/schema, Native, Lens, camera, XML, permission, or deployment mutation.
+
+# 2026-09-10 — Post-Build-20 corrective Builds 6–10 P16 release gate
+
+- All five focused suites, established Intake/APU/Operations/budget suites, typechecks, governance checks, database safety, secret exposure checks, frontend production build, and deterministic API production assembly pass.
+- The block changes Platform behavior after live P15, so the release identity advances only the Platform segment to `v1.05.N17-P16`; Native remains N17 and no Native package changes.
+- The release gate is limited to exact-source branch advancement, Replit Shell publication, and live Chrome acceptance. It authorizes no database/schema mutation or unrelated product work.

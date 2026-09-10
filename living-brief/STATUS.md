@@ -1361,6 +1361,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Build 10 exposes canonical Job budget accounts generated from approved source-line associations and preserves idempotent activation persistence.
 - Focused behavior and frontend typecheck pass for each build. Consolidated regression and real component browser acceptance remain the block gate; nothing is pushed or published by these builds.
 
+## Post-Build-20 corrective Builds 6–10 release candidate — v1.05.N17-P16
+
+- The complete governed production build and deterministic API runtime closure pass for the integrated Builds 6–10 source.
+- Because the block changes Platform presentation and verification behavior after P15, only the Platform segment advances to P16; Native remains N17.
+- Exact-source push, Replit Shell publication, and live Chrome acceptance are authorized. Native, database, and schema changes remain prohibited.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.

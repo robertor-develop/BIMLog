@@ -21855,6 +21855,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1bfce35d36d9cc4d99878b752eaed757388fe38dffd28821d214f1b9301ae548"
+    },
+    {
+      "taskId": "post-build20-corrective-block02-p16-release-20260910",
+      "reviewedThroughCommit": "d894f9eece1a4f8f56f6b6a7294e5f43f1047d5c",
+      "reviewedAt": "2026-09-10T21:30:00Z",
+      "status": "release_candidate_verified",
+      "captureTiming": "same_task_after_implementation_before_publication",
+      "summary": "Reconciles the fully tested corrective Builds 6–10 block to Platform P16 while preserving Native N17 and all database/schema contracts.",
+      "workstreams": [
+        "job-intake-post-build20-corrective"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Intake, task, APU, Work Package, and budget ownership remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Uses the governed exact-source Replit Shell publication path without Replit Agents."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "All focused and consolidated local production gates pass before publication."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No capability scope or product direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only coherent Platform release metadata advances from P15 to P16."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native N17, Navisworks, bridge, camera, sectioning, and XML remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report presentation or export changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or interoperability claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact P16 release candidate and passed local gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local gates and records exact publication/live acceptance work."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records version rationale, validation, and release limits."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4fc68245bdec729c7737bd390def9974c0316476a95f792abb55928f7fd514ff"
     }
   ]
 }

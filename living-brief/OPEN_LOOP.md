@@ -2388,5 +2388,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Corrective Build 8: expose immutable saved APU history and prove append-only version creation and ordered retrieval.
 - [x] Corrective Build 9: expose stable Work Package identity and owner and prove save/reload plus operational activation persistence.
 - [x] Corrective Build 10: expose canonical Job budget-account generation and prove source-line association and idempotent persistence.
-- [ ] Corrective Builds 6–10 require consolidated local regression and real component browser acceptance before any release decision.
+- [x] Corrective Builds 6–10 consolidated focused, Intake, Generic APU, Job Operations, budget-governance, typecheck, full production-build, and deterministic runtime-closure gates pass.
+- [ ] Push exact P16 source, publish through the approved Replit Shell flow, and live-verify version, health, and representative Builds 6–10 Intake controls in Chrome.
 - [ ] Continue with the next unresolved smoke-test finding; do not repeat completed Builds 1–10 work.
