@@ -10,6 +10,7 @@ import { createRuntimeSharePointCredentialValidator } from "../lib/sharepoint-cr
 import { runtimeConnectorValidationOperationsService } from "../lib/connector-validation-operations-postgres-store";
 import { ConnectorCredentialEnrollmentInputError, createRuntimeConnectorCredentialEnrollmentService, decodeCanonicalConnectorEnrollmentToken } from "../lib/connector-credential-enrollment";
 import { createRuntimeConnectorCredentialRotationService } from "../lib/connector-credential-rotation";
+import { runtimeConnectorCredentialLifecycleService } from "../lib/connector-credential-lifecycle-postgres-store";
 
 const router: IRouter = Router();
 const service = new CoordinationHubService(postgresCoordinationHubStore);
@@ -83,6 +84,17 @@ router.get("/projects/:projectId/coordination-hub/credential-validation-operatio
         actorUserId: req.user!.userId,
       },
       limit: req.query.limit === undefined ? 20 : Number(req.query.limit),
+    });
+    res.json(result);
+  } catch (error) { fail(res, error); }
+});
+
+router.get("/projects/:projectId/coordination-hub/credential-lifecycle", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
+  try {
+    const result = await runtimeConnectorCredentialLifecycleService.read({
+      scope: { projectId: Number(req.params.projectId), companyId: req.user!.companyId, actorUserId: req.user!.userId },
+      credentialLimit: req.query.credentialLimit === undefined ? 20 : Number(req.query.credentialLimit),
+      eventLimit: req.query.eventLimit === undefined ? 50 : Number(req.query.eventLimit),
     });
     res.json(result);
   } catch (error) { fail(res, error); }
