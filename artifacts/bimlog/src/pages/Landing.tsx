@@ -13,7 +13,7 @@ export function Landing() {
       {/* Hero */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 pt-24 pb-20">
         <div className="max-w-3xl">
-          <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-primary text-sm font-medium rounded-full px-4 py-1.5 mb-8">
+          <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-blue-700 text-sm font-medium rounded-full px-4 py-1.5 mb-8">
             <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
             {tt("Construction coordination with accountable project records", "Coordinación de construcción con registros de proyecto responsables")}
           </div>
@@ -167,7 +167,7 @@ export function Landing() {
       {/* User Guide — How It Works */}
       <section className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
         <div className="text-center mb-16">
-          <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-primary text-sm font-medium rounded-full px-4 py-1.5 mb-6">
+          <div className="inline-flex items-center gap-2 bg-primary/8 border border-primary/20 text-blue-700 text-sm font-medium rounded-full px-4 py-1.5 mb-6">
             <span className="w-2 h-2 rounded-full bg-primary" />
             {tt("Getting Started", "Empezar")}
           </div>
@@ -273,7 +273,7 @@ export function Landing() {
               <div style={{
                 position: "absolute", top: 20, right: 20,
                 fontFamily: "var(--font-mono)", fontSize: 11, fontWeight: 700,
-                color: "hsl(var(--muted-foreground))", opacity: 0.4,
+                color: "hsl(var(--muted-foreground))",
                 letterSpacing: "0.05em"
               }}>{item.step}</div>
 
@@ -346,13 +346,13 @@ export function Landing() {
             </div>
             <div className="surface p-6">
               <div className="font-mono text-xs text-muted-foreground space-y-2">
-                <div className="text-destructive font-semibold mb-3">HTTP 422 — {tt("Naming Violation", "Violación de Nomenclatura")}</div>
+                <div className="text-red-700 font-semibold mb-3">HTTP 422 — {tt("Naming Violation", "Violación de Nomenclatura")}</div>
                 {[
                   { field: "originator", received: "XYZ", expected: ["ABC", "DEF", "GHI"] },
                   { field: "discipline", received: "AR", expected: ["ARC", "STR", "MEP"] },
                 ].map(e => (
                   <div key={e.field} className="p-3 rounded-lg bg-destructive/5 border border-destructive/20">
-                    <span className="text-destructive">{e.field}</span>
+                    <span className="text-red-700">{e.field}</span>
                     <span className="text-muted-foreground"> {tt("received", "recibió")} </span>
                     <span className="text-foreground">"{e.received}"</span>
                     <div className="mt-1 text-muted-foreground">
