@@ -1049,3 +1049,9 @@ was performed or authorized.
 - The dedicated Release B integration worktree merged accepted UX commit `a60640d174d86fba60940cefab0c9f2f3dfd9519` into sealed coordination checkpoint `5e61141da1ecfc7a50dde99ae4250be07e56b17c` using `--no-ff`, preserving both parents.
 - Product files merged automatically. Living Brief conflicts retained both Coordination Release C authority and UX Build 17 acceptance truth before derived-state regeneration.
 - Focused coordination/credential behavior passes 12/12 and focused UX behavior passes 90/90. No external provider, credential, database/schema, Native/Lens Next, version, push, publication, or deployment action occurred in this integration task.
+
+# 2026-09-10 — P14 historical digest contract correction
+
+- Independent review found that the Build 47 historical exception accepted an unversioned package when its database and embedded digests matched even though current canonical recomputation differed. That equality proved only agreement between two stored representations, not integrity of the package contents, and contradicted the permanent Native quarantine vector.
+- P14 removes only that Platform exception. An unversioned historical package now requires matching independent recomputation or verified preserved canonical evidence; otherwise it remains quarantined. The P13 response-only legacy lineage normalization is preserved and cannot bypass this digest boundary.
+- Platform tests prove both a recomputation-valid unversioned package and quarantine of the permanent mismatch vector. Native source/packages, camera, sectioning, XML/unit handling, Create, database, and schema are unchanged.

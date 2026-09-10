@@ -2362,3 +2362,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Keep cross-project, model mismatch, digest corruption, unrelated lineage, cyclic lineage, and ambiguous identity fail-closed.
 - [x] Preserve database/schema and Native behavior unchanged; advance Platform only to P13.
 - [ ] Push, publish, live-verify, and obtain Ruben confirmation on one historical and one new viewpoint only after separate explicit authorization.
+
+## v1.05.N17-P14 historical digest contract closure
+
+- [x] Require independent recomputation or preserved canonical evidence for unversioned historical Visual Packages; stored/embedded equality alone is not verification.
+- [x] Preserve the P13 response-only safe lineage classifier without allowing lineage compatibility to bypass digest integrity.
+- [x] Align Platform behavior tests with Native's permanent historical-unversioned quarantine vector while retaining an explicit recomputation-valid historical acceptance case.
+- [ ] Push the exact accepted P14 commit, publish without database/schema migration, verify production version and health in Chrome, and send the unchanged accepted N17-P12 Navisworks 2025 ZIP to Roberto.
+- [ ] Ruben field acceptance must prove one new and one historical Open Working View path, camera/sectioning, and one XML export smoke before final freeze audit.
