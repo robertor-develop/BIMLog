@@ -18,6 +18,7 @@ import { QuickJobIntake } from "@/components/job-intake/QuickJobIntake";
 import { CompanyJobMap } from "@/components/job-intake/CompanyJobMap";
 import { WorkPackageBuilder } from "@/components/job-intake/WorkPackageBuilder";
 import { ProjectCompanyCreator, type CreatedProjectCompany } from "@/components/job-intake/ProjectCompanyCreator";
+import { ProjectContactCreator, type CreatedProjectContact } from "@/components/job-intake/ProjectContactCreator";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import {
@@ -507,6 +508,10 @@ export function JobIntakeWorkspace() {
         },
       };
     });
+  const acceptCreatedContact = (created: CreatedProjectContact) => {
+    setDirectoryEntries((current) => current.some((entry: any) => Number(entry.id) === Number(created.id)) ? current : [...current, created]);
+    setData((old: any) => ({ ...old, identity: { ...old.identity, primaryContactId: Number(created.id), primaryContact: created.fullName } }));
+  };
   const acceptCreatedCompany = (created: CreatedProjectCompany) => {
     const entry = {
       ...created.directoryEntry,
@@ -1156,6 +1161,7 @@ export function JobIntakeWorkspace() {
               onAdvanced={showAdvancedMode}
               request={api}
               onCompanyCreated={acceptCreatedCompany}
+              onContactCreated={acceptCreatedContact}
             />
           ) : (
           <div className="ji-layout">
@@ -1640,6 +1646,7 @@ export function JobIntakeWorkspace() {
                       ))}
                     </select>
                   </label>
+                  <ProjectContactCreator request={api} projectId={projectId} companyId={data.identity.clientCompanyId} companyName={data.identity.clientCompany} onCreated={acceptCreatedContact} tt={tt} />
                   <label>
                     {tt("Currency", "Moneda")}
                     <select

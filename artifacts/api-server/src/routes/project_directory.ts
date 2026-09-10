@@ -978,6 +978,12 @@ router.post(
           .where(eq(companiesTable.id, companyId))
           .limit(1);
         if (!company) return null;
+        const [projectCompany] = await tx
+          .select({ id: projectDirectoryTable.id })
+          .from(projectDirectoryTable)
+          .where(and(eq(projectDirectoryTable.projectId, projectId), eq(projectDirectoryTable.companyId, companyId)))
+          .limit(1);
+        if (!projectCompany) return null;
         const normalizedCompanyName = companyName || company.name;
         await tx.execute(
           sql`SELECT pg_advisory_xact_lock(hashtextextended(${`project-directory-contact:${projectId}:${companyId}:${email || fullName.toLowerCase()}`}, 0))`,

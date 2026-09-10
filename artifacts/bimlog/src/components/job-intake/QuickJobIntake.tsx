@@ -1,6 +1,7 @@
 import { Check, ChevronLeft, ChevronRight, Settings2 } from "lucide-react";
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { ProjectCompanyCreator, type CreatedProjectCompany } from "./ProjectCompanyCreator";
+import { ProjectContactCreator, type CreatedProjectContact } from "./ProjectContactCreator";
 
 type Props = {
   data: any;
@@ -14,12 +15,13 @@ type Props = {
   onAdvanced: () => void;
   request: (path: string, init?: RequestInit) => Promise<any>;
   onCompanyCreated: (company: CreatedProjectCompany) => void;
+  onContactCreated: (contact: CreatedProjectContact) => void;
 };
 
 const value = (input: unknown) => String(input ?? "").trim();
 
 export function QuickJobIntake(props: Props) {
-  const { data, setData, companies, contacts, defaultRate, defaultApuVersion, projectId, tt, onAdvanced, request, onCompanyCreated } = props;
+  const { data, setData, companies, contacts, defaultRate, defaultApuVersion, projectId, tt, onAdvanced, request, onCompanyCreated, onContactCreated } = props;
   const stepKey = `bimlog:job-intake-quick-step:${projectId}`;
   const [step, setStepState] = useState(() => {
     try {
@@ -115,6 +117,7 @@ export function QuickJobIntake(props: Props) {
           <div className="ji-grid">
             <label>{tt("Customer company — required", "Empresa cliente — obligatoria")}<select autoFocus value={data.identity?.clientCompanyId || ""} onChange={(event) => selectCustomer(event.target.value)}><option value="">{tt("Select a project company", "Seleccione una empresa del proyecto")}</option>{companies.map((company) => <option key={company.id} value={company.id}>{company.name}</option>)}</select></label>
             <label>{tt("Customer contact — optional now", "Contacto del cliente — opcional ahora")}<select disabled={!data.identity?.clientCompanyId} value={data.identity?.primaryContactId || ""} onChange={(event) => { const contact=contacts.find((item)=>String(item.id)===event.target.value); patchIdentity({ primaryContactId: contact ? Number(contact.id) : null, primaryContact: contact?.fullName || "" }); }}><option value="">{tt("Select later", "Seleccionar después")}</option>{contacts.map((contact) => <option key={contact.id} value={contact.id}>{contact.fullName}{contact.email ? ` — ${contact.email}` : ""}</option>)}</select></label>
+            <ProjectContactCreator request={request} projectId={projectId} companyId={data.identity?.clientCompanyId} companyName={data.identity?.clientCompany} onCreated={onContactCreated} tt={tt} />
             <label>{tt("First Contract Item — required", "Primera Partida de Contrato — obligatoria")}<input value={firstItem.name || ""} onChange={(event) => patchFirstItem({ name: event.target.value, description: event.target.value })} /></label>
             <label>{tt("Quantity / planned hours — required", "Cantidad / horas planificadas — obligatoria")}<input inputMode="decimal" value={firstItem.plannedHours || ""} onChange={(event) => patchFirstItem({ plannedHours: event.target.value })} /></label>
           </div>
