@@ -8,10 +8,12 @@ import { ConnectorValidationUnavailableError, CoordinationHubConfigurationServic
 import { postgresCoordinationHubConfigurationStore } from "../lib/coordination-hub-configuration-postgres-store";
 import { createRuntimeSharePointCredentialValidator } from "../lib/sharepoint-credential-validator";
 import { runtimeConnectorValidationOperationsService } from "../lib/connector-validation-operations-postgres-store";
+import { ConnectorCredentialEnrollmentInputError, createRuntimeConnectorCredentialEnrollmentService, decodeCanonicalConnectorEnrollmentToken } from "../lib/connector-credential-enrollment";
 
 const router: IRouter = Router();
 const service = new CoordinationHubService(postgresCoordinationHubStore);
 const configurationService = new CoordinationHubConfigurationService(postgresCoordinationHubConfigurationStore, createRuntimeSharePointCredentialValidator());
+const enrollmentService = createRuntimeConnectorCredentialEnrollmentService(configurationService);
 
 function trustedCommand(req: Request): Record<string, unknown> {
   return {
@@ -21,6 +23,19 @@ function trustedCommand(req: Request): Record<string, unknown> {
       companyId: req.user!.companyId,
       actorUserId: req.user!.userId,
     },
+  };
+}
+
+function trustedEnrollmentCommand(req: Request): Record<string, unknown> {
+  const body = req.body && typeof req.body === "object" ? req.body as Record<string, unknown> : {};
+  const sourceCredential = body.credential && typeof body.credential === "object" ? body.credential as Record<string, unknown> : {};
+  const token = decodeCanonicalConnectorEnrollmentToken(sourceCredential.tokenBase64Url);
+  delete sourceCredential.tokenBase64Url;
+  const credential = { ...sourceCredential, token };
+  return {
+    ...body,
+    credential,
+    scope: { projectId: Number(req.params.projectId), companyId: req.user!.companyId, actorUserId: req.user!.userId },
   };
 }
 
@@ -35,6 +50,10 @@ function fail(res: Response, error: unknown): void {
   }
   if (error instanceof ConnectorValidationUnavailableError) {
     res.status(503).json({ error: error.code });
+    return;
+  }
+  if (error instanceof ConnectorCredentialEnrollmentInputError) {
+    res.status(400).json({ error: "COORDINATION_INPUT_INVALID" });
     return;
   }
   const correlationId = randomUUID();
@@ -69,7 +88,7 @@ router.get("/projects/:projectId/coordination-hub/credential-validation-operatio
 
 router.post("/projects/:projectId/coordination-hub/credentials", authMiddleware, requireProjectMember("project_admin"), async (req, res) => {
   try {
-    const result = await configurationService.registerCredential(trustedCommand(req));
+    const result = await enrollmentService.enroll(trustedEnrollmentCommand(req));
     res.status(result.result === "created" ? 201 : 200).json(result);
   } catch (error) { fail(res, error); }
 });
