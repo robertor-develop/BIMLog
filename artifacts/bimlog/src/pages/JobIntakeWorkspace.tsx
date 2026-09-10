@@ -1192,6 +1192,12 @@ export function JobIntakeWorkspace() {
                   {tt("Resource assignments", "Asignaciones de recursos")}
                 </div>
               </div>
+              {Array.isArray(intake.activationSummary?.budgetAccounts) && (
+                <div className="ji-stat">
+                  <strong>{intake.activationSummary.budgetAccounts.length}</strong>
+                  <div>{tt("Canonical budget accounts", "Cuentas presupuestarias canónicas")}</div>
+                </div>
+              )}
             </div>
             {intake.activatedContractId ? (
               <div className="ji-actions">

@@ -297,27 +297,30 @@ export function ContractItemBulkEditor(props: Props) {
         )}
       </div>
       {props.capabilities.budget && (
-        <label className="ji-bulk-budget">
-          {props.tt(
-            "Inherited approved budget snapshot",
-            "Versión aprobada del presupuesto heredada",
-          )}
-          <select
-            value={props.budgetSnapshotId}
-            onChange={(event) =>
-              props.onBudgetSnapshotChange(event.target.value)
-            }
-          >
-            <option value="">
-              {props.tt("Select version", "Seleccione una versión")}
-            </option>
-            {props.snapshots.map((snapshot: any) => (
-              <option key={snapshot.id} value={snapshot.id}>
-                v{snapshot.budgetVersion || snapshot.version} · {snapshot.total}
+        <div className="ji-bulk-budget">
+          <label>
+            {props.tt(
+              "Inherited approved budget snapshot",
+              "Versión aprobada del presupuesto heredada",
+            )}
+            <select
+              value={props.budgetSnapshotId}
+              onChange={(event) =>
+                props.onBudgetSnapshotChange(event.target.value)
+              }
+            >
+              <option value="">
+                {props.tt("Select version", "Seleccione una versión")}
               </option>
-            ))}
-          </select>
-        </label>
+              {props.snapshots.map((snapshot: any) => (
+                <option key={snapshot.id} value={snapshot.id}>
+                  v{snapshot.budgetVersion || snapshot.version} · {snapshot.total}
+                </option>
+              ))}
+            </select>
+          </label>
+          <small>{props.tt("Select an approved line for each Contract Item. Activation generates one canonical Job budget account per project cost node and preserves the exact source line association.", "Seleccione una línea aprobada para cada Partida de Contrato. La activación genera una cuenta presupuestaria canónica del Trabajo por nodo de costo del proyecto y conserva la asociación exacta con la línea de origen.")}</small>
+        </div>
       )}
       {props.capabilities.costValuePlanner && (
         <div className="ji-apu-history-note">
