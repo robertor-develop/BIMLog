@@ -18404,7 +18404,7 @@
     },
     {
       "taskId": "ux-residual-build17-consolidated-acceptance-20260909",
-      "reviewedThroughCommit": "cfed1bc35a58f1af84f3da7155d8e81aae1eb152",
+      "reviewedThroughCommit": "ca67966827289794d4dcf88353fb3b06d15ce029",
       "reviewedAt": "2026-09-10T02:06:52Z",
       "status": "acceptance_failed_evidence_recorded",
       "captureTiming": "same_task_after_acceptance_before_release",
@@ -18470,12 +18470,11 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "34d9c060412c7f9970a9ab5e448e2ae96fff82159483906cf316c0c9129e0c6f"
+      "reviewedChangeSha256": "cb7886e49b586670588df82e1eab5c0e9be9b8da88e2625f07deb5b52ed0a60c"
     }
   ]
 }

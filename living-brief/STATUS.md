@@ -1259,6 +1259,8 @@ No release, publication, or overall completion claim is permitted until the reco
 
 ## UX residual Build 17 consolidated acceptance — 2026-09-09
 
+- Evidence checkpoint `ca67966827289794d4dcf88353fb3b06d15ce029` records the exact acceptance result below.
+
 - Builds 13–16 are present on clean source `cfed1bc35a58f1af84f3da7155d8e81aae1eb152`. Focused contracts pass 85/85, frontend typecheck passes, and exact-390 plus desktop browser matrices pass 24/24 with no overflow, missing primary-main/skip target, or unlabeled buttons.
 - Local unthrottled Chrome performance is strong at 734 ms LCP and 0.00 CLS. Best Practices and SEO score 100; the Submittals route remains 164.16 KB with XLSX isolated on demand.
 - Consolidated acceptance does not pass: mobile Lighthouse Accessibility is 96 because homepage badge, step-number, and validation-example foreground/background pairs remain below 4.5:1. These exact failures are recorded in `evidence/ux-less-is-more-build17-consolidated-acceptance-20260909.md`.
