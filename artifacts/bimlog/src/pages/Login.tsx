@@ -68,9 +68,9 @@ export function Login() {
               style={{
                 position: "absolute", right: 10, top: "50%", transform: "translateY(-50%)",
                 background: "none", border: "none", cursor: "pointer",
-                color: "hsl(var(--muted-foreground))", padding: 2, display: "flex", alignItems: "center"
+                color: "hsl(var(--muted-foreground))", padding: 8, width: 32, height: 32,
+                display: "flex", alignItems: "center", justifyContent: "center"
               }}
-              tabIndex={-1}
               aria-label={showPassword ? "Hide password" : "Show password"}
             >
               {showPassword
@@ -85,7 +85,7 @@ export function Login() {
       <div className="flex justify-end mt-1 mb-0">
         <a
           href="/reset-password"
-          className="text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
+          className="inline-flex min-h-6 items-center text-xs text-muted-foreground hover:text-primary underline-offset-2 hover:underline"
           onClick={e => { e.preventDefault(); window.location.href = '/reset-password'; }}
         >
           {t('auth.forgotPassword')}
