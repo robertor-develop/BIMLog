@@ -220,6 +220,9 @@ export function JobIntakeWorkspace() {
     [workspace, setWorkspace] = useState<any>(null),
     [budgetLines, setBudgetLines] = useState<any[]>([]),
     [directoryEntries, setDirectoryEntries] = useState<any[]>([]),
+    [eligibleProjectUsers, setEligibleProjectUsers] = useState<any[] | null>(null),
+    [eligibleProjectUserId, setEligibleProjectUserId] = useState(""),
+    [addingProjectMember, setAddingProjectMember] = useState(false),
     [mappingDocument, setMappingDocument] = useState<any>(null),
     [mappingForm, setMappingForm] = useState({
       sheetName: "",
@@ -288,6 +291,17 @@ export function JobIntakeWorkspace() {
           : Promise.resolve(null),
         api(`/projects/${projectId}/directory`),
       ]);
+      const eligibleResponse = await fetch(
+        `${API_BASE}/api/v1/projects/${projectId}/members/eligible`,
+        { headers },
+      );
+      const eligibleUsers = eligibleResponse.ok
+        ? await eligibleResponse.json()
+        : eligibleResponse.status === 403
+          ? null
+          : await eligibleResponse.json().then((payload) => {
+              throw new Error(payload?.error || tt("Project member list failed to load.", "No se pudo cargar la lista de miembros del proyecto."));
+            });
       if (projectIdRef.current !== projectId) return;
       const recovered = readRecovery(projectId);
       const canRecover =
@@ -326,13 +340,15 @@ export function JobIntakeWorkspace() {
       setWorkspace(budget);
       setBudgetLines(selectedBudget?.snapshot?.lines ?? []);
       setDirectoryEntries(Array.isArray(directory) ? directory : []);
+      setEligibleProjectUsers(Array.isArray(eligibleUsers) ? eligibleUsers : null);
+      setEligibleProjectUserId("");
     } catch (cause) {
       if (projectIdRef.current !== projectId) return;
       setError(cause instanceof Error ? cause.message : String(cause));
     } finally {
       if (projectIdRef.current === projectId) setBusy(false);
     }
-  }, [api, projectId, tt]);
+  }, [api, headers, projectId, tt]);
   useEffect(() => {
     setIntake(null);
     setData(blank);
@@ -545,6 +561,33 @@ export function JobIntakeWorkspace() {
       };
     });
     setNotice(tt("Client company added to this project and selected.", "La empresa cliente se agregó a este proyecto y quedó seleccionada."));
+  };
+  const addExistingProjectMember = async () => {
+    const selected = eligibleProjectUsers?.find(
+      (candidate: any) => String(candidate.id) === eligibleProjectUserId,
+    );
+    if (!selected || addingProjectMember) return;
+    setAddingProjectMember(true);
+    setError("");
+    try {
+      await persist(dataRef.current);
+      await api(`/projects/${projectId}/members`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: selected.email, role: "member" }),
+      });
+      await load();
+      setNotice(
+        tt(
+          `${selected.fullName || selected.email} is now a project member and can be assigned below.`,
+          `${selected.fullName || selected.email} ahora es miembro del proyecto y puede asignarse abajo.`,
+        ),
+      );
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setAddingProjectMember(false);
+    }
   };
   const setScopeItems = (updater: (items: any[]) => any[]) =>
     setData((old: any) => ({
@@ -2169,6 +2212,44 @@ export function JobIntakeWorkspace() {
                         "Asigne miembros, roles, alcance y horas planificadas. Los costos horarios internos son una función opcional de Presupuesto.",
                       )}
                 </div>
+                {eligibleProjectUsers !== null && (
+                  <div className="ji-row">
+                    <strong>{tt("Add an existing BIMLog user to this project", "Agregar un usuario existente de BIMLog a este proyecto")}</strong>
+                    <p className="ji-small">
+                      {tt(
+                        "Only users from companies already connected to this project are listed. Adding a member does not assign work until you select them in an assignment below.",
+                        "Solo se muestran usuarios de empresas ya conectadas a este proyecto. Agregar un miembro no asigna trabajo hasta seleccionarlo en una asignación abajo.",
+                      )}
+                    </p>
+                    <div className="ji-company-row">
+                      <select
+                        aria-label={tt("Existing BIMLog user", "Usuario existente de BIMLog")}
+                        value={eligibleProjectUserId}
+                        onChange={(event) => setEligibleProjectUserId(event.target.value)}
+                      >
+                        <option value="">
+                          {eligibleProjectUsers.length
+                            ? tt("Select an existing user", "Seleccione un usuario existente")
+                            : tt("No additional connected users", "No hay usuarios conectados adicionales")}
+                        </option>
+                        {eligibleProjectUsers.map((candidate: any) => (
+                          <option key={candidate.id} value={candidate.id}>
+                            {candidate.fullName || candidate.email} — {candidate.companyName}
+                          </option>
+                        ))}
+                      </select>
+                      <button
+                        type="button"
+                        disabled={!eligibleProjectUserId || addingProjectMember}
+                        onClick={() => void addExistingProjectMember()}
+                      >
+                        <Plus size={14} /> {addingProjectMember
+                          ? tt("Adding…", "Agregando…")
+                          : tt("Add project member", "Agregar miembro al proyecto")}
+                      </button>
+                    </div>
+                  </div>
+                )}
                 <label>
                   {tt("Project leader", "Líder del proyecto")}
                   <select

@@ -7,6 +7,7 @@ import {
   activityLogTable,
   projectInvitations,
   projectsTable,
+  projectDirectoryTable,
 } from "@workspace/db/schema";
 import {
   sendEmail,
@@ -15,7 +16,7 @@ import {
   getUserLang,
   notifEnabled,
 } from "../lib/email";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and, sql, inArray } from "drizzle-orm";
 import {
   AddMemberBody,
   UpdateMemberBody,
@@ -47,6 +48,79 @@ import {
 import { inviteOrAddProjectMember } from "../lib/project-invitation-service";
 
 const router: IRouter = Router();
+
+router.get(
+  "/projects/:projectId/members/eligible",
+  authMiddleware,
+  requirePermission("admin"),
+  async (req, res) => {
+    try {
+      const { projectId } = ListMembersParams.parse({
+        projectId: req.params.projectId,
+      });
+      const [directoryCompanies, projectMembers] = await Promise.all([
+        db
+          .selectDistinct({ companyId: projectDirectoryTable.companyId })
+          .from(projectDirectoryTable)
+          .where(eq(projectDirectoryTable.projectId, projectId)),
+        db
+          .select({ userId: projectMembersTable.userId })
+          .from(projectMembersTable)
+          .where(eq(projectMembersTable.projectId, projectId)),
+      ]);
+      const currentMemberIds = new Set(projectMembers.map((row) => row.userId));
+      const memberCompanyRows = projectMembers.length
+        ? await db
+            .selectDistinct({ companyId: usersTable.companyId })
+            .from(usersTable)
+            .where(
+              inArray(
+                usersTable.id,
+                projectMembers.map((row) => row.userId),
+              ),
+            )
+        : [];
+      const connectedCompanyIds = [
+        ...new Set(
+          [...directoryCompanies, ...memberCompanyRows]
+            .map((row) => row.companyId)
+            .filter(
+              (id): id is number =>
+                typeof id === "number" && Number.isInteger(id) && id > 0,
+            ),
+        ),
+      ];
+      if (connectedCompanyIds.length === 0) {
+        res.json([]);
+        return;
+      }
+      const candidates = await db
+        .select({
+          id: usersTable.id,
+          fullName: usersTable.fullName,
+          email: usersTable.email,
+          companyId: usersTable.companyId,
+          companyName: companiesTable.name,
+        })
+        .from(usersTable)
+        .innerJoin(companiesTable, eq(companiesTable.id, usersTable.companyId))
+        .where(inArray(usersTable.companyId, connectedCompanyIds));
+      res.json(
+        candidates
+          .filter((candidate) => !currentMemberIds.has(candidate.id))
+          .sort(
+            (a, b) =>
+              a.companyName.localeCompare(b.companyName) ||
+              a.fullName.localeCompare(b.fullName) ||
+              a.email.localeCompare(b.email),
+          ),
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Bad request";
+      res.status(400).json({ error: message });
+    }
+  },
+);
 
 const boolQuery = (value: unknown, fallback = true): boolean | "invalid" => {
   if (value === undefined || value === null || value === "") return fallback;
