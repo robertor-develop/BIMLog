@@ -1249,3 +1249,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - The proof is explicitly labeled as implemented product behavior rather than a concept screen or customer testimonial. No testimonials, adoption metrics, customer logos, or unverified outcomes were invented.
 - Focused homepage proof passes 8/8, the established public capability proof passes 7/7, accessibility safeguards pass 13/13, and frontend typecheck/build pass. Local browser checks at exact 390x844 and 1440x900 show no horizontal overflow or unlabeled buttons.
 - Product capability, business logic, permissions, Native behavior, database, schema, and version remain unchanged. Build 15 is a local candidate; push and publication remain separate gates.
+
+## UX residual Build 16 public metadata and interaction payload — 2026-09-09
+
+- Implementation `933f6e178cfb426b3f27d0e343bf673ef5b935f7` gives Home, Features, Pricing, About, and Contact truthful route-specific titles, descriptions, canonical URLs, and Open Graph metadata without adding unsupported ratings, users, customers, or outcomes.
+- The existing Submittal register spreadsheet parser now loads only when the user invokes its existing import action. Submittals falls from 530.93 KB to 164.16 KB; the unchanged parser is isolated in a 499.55 KB on-demand chunk and the prior build-size warning is removed.
+- Focused Build 16 checks pass 12/12, homepage truth checks pass 8/8, public capability checks pass 7/7, and frontend typecheck/build pass. Browser verification proves all five public route metadata contracts and the homepage-to-Features interaction, with no overflow.
+- Product workflow, permissions, Native behavior, database, schema, and version remain unchanged. Build 16 is a local candidate; push and publication remain separate gates.

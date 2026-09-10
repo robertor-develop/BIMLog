@@ -949,3 +949,10 @@ Roberto subsequently clarified that 40 was illustrative, not a maximum. The reco
 - Implementation `d4cb585186aa782c21a16ed337a9a6ff6238a920` adds the exact implemented create, same-project linking/reference, Working View restore, and one-way XML interoperability sequence to the homepage decision path and links to the fuller capability boundary.
 - The page explicitly states that this is implemented behavior and not a concept screen or customer testimonial. No customer endorsement, user count, conversion metric, logo, or unsupported outcome was introduced.
 - Focused product-proof checks pass 8/8 and 7/7; the existing accessibility contract passes 13/13; frontend typecheck and production build pass. Browser inspection at 390x844 and 1440x900 confirms the proposition and all three steps are rendered with no horizontal overflow and zero unlabeled buttons.
+
+## 2026-09-09 — UX residual Build 16 public metadata and interaction payload
+
+- Source inspection proved that public routes inherited one generic document title and description and had no route-specific canonical URL. The correction installs one router-scoped metadata owner for Home, Features, Pricing, About, and Contact; it uses only verified product language and does not introduce structured social proof.
+- Source and build-output inspection also proved that an eager `xlsx` import placed the entire spreadsheet parser in the Submittals route even when the user did not import a register. Replacing only that eager import with an event-bound dynamic import preserves the same parser and existing workflow.
+- The resulting Submittals route chunk falls from 530.93 KB / 161.39 KB gzip to 164.16 KB / 37.79 KB gzip. The 499.55 KB parser chunk is fetched only by the existing import path, and Vite no longer emits the greater-than-500 KB warning.
+- Focused Build 16 checks pass 12/12; prior homepage and public capability checks pass 8/8 and 7/7. Browser execution verified unique metadata and canonical URLs across five public routes and successfully followed the homepage workflow link to Features.

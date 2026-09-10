@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
+  "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "30fb899c767bde27c9641cb788be7b5d54bb88385a08cc6b1584c8e427d91426",
+  "bundleSha256": "60313341f941bc9e7666d1b7bfb5d79656963b89f449fb72eb5b6ec77730a379",
   "impact": {
-    "baselineCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
+    "baselineCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
     "changedPaths": [
       "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
@@ -24,11 +24,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "claude",
@@ -36,11 +36,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "quality",
@@ -48,11 +48,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "vision",
@@ -60,11 +60,11 @@
       "sha256": "8a100d5b9d5b6d08f35c6fe71b69926a16a15c3f64c22d7b2b1cee408efcef4d",
       "sourceChangedAt": "2026-07-22T14:39:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "platform",
@@ -72,11 +72,11 @@
       "sha256": "51af0b807d57fb89545cb66527e08a14a59815f2df36aeb020226d4b29224dd7",
       "sourceChangedAt": "2026-09-08T12:52:04-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "plugin",
@@ -84,11 +84,11 @@
       "sha256": "dd9b221df31b953cacfdf6bc8ed317d9b5969a9504a74227b0e50f2dc39bc1c9",
       "sourceChangedAt": "2026-09-08T13:33:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "report_design_system",
@@ -96,11 +96,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "standards_register",
@@ -108,47 +108,47 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "fc2a2cc9327061d138cbb927c3ab2e3586ba8c8ca076e0afb6c4fb1c52353bf8",
-      "sourceChangedAt": "2026-09-10T01:18:54.000Z",
+      "sha256": "f31c6f15a68d013b05fb15df32e5eadb9965b9485cb128115adadfe70439a9b3",
+      "sourceChangedAt": "2026-09-10T01:40:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "3427e2ec6b98e5969be4efe6fd5f3b4f297b64134e17e970a176c661a942ee5d",
-      "sourceChangedAt": "2026-09-10T01:18:54.000Z",
+      "sha256": "003877047cca810142f709e15ec6ef4a105ab74628e7e76ae9a949d2189e5c72",
+      "sourceChangedAt": "2026-09-10T01:40:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     },
     {
       "key": "audit",
       "file": "AUDIT.md",
-      "sha256": "f1b7c1f6c9782ba95f7eba0e9013b7b4404fe6d48e3a157e0694cf5f13a4dcfc",
-      "sourceChangedAt": "2026-09-10T01:18:54.000Z",
+      "sha256": "abaaa71b10a400dce8bcc8cf0b705efe4b3fa3e357f45599c5f31d34aeb29d03",
+      "sourceChangedAt": "2026-09-10T01:40:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewedThroughCommit": "d4cb585186aa782c21a16ed337a9a6ff6238a920",
-      "semanticReviewTask": "ux-residual-build15-authentic-homepage-proof-20260909",
+      "reconciledThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "semanticReviewTask": "ux-residual-build16-public-metadata-payload-20260909",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-10T01:18:54Z"
+      "semanticReviewedAt": "2026-09-10T01:40:00Z"
     }
   ]
 }

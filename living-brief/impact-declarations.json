@@ -18326,6 +18326,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "860f6266c8148710e5ea61da13e9b96dbcb6cafc00a917b22adce04cf494b5e9"
+    },
+    {
+      "taskId": "ux-residual-build16-public-metadata-payload-20260909",
+      "reviewedThroughCommit": "933f6e178cfb426b3f27d0e343bf673ef5b935f7",
+      "reviewedAt": "2026-09-10T01:40:00Z",
+      "status": "local_candidate_reconciled",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Adds truthful per-route public metadata and isolates the existing Submittal spreadsheet parser behind its invoked interaction.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, identity, workflow, or capability changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded frontend correction and separate publication gate follow the accepted workflow."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Metadata claims are truthful and payload impact is measured from production output."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Public discoverability improves without changing product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No compliance or certification claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 16 behavior, measurements, and release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local Build 16 and retains Build 17."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the metadata and eager-payload root causes with measured correction evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "746e357ff61feda463b8f215560b2414a615b810f48d826ef29086486b08ea9f"
     }
   ]
 }
