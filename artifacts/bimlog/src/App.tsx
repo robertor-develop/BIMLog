@@ -10,6 +10,7 @@ import { useAuthStore } from "@/store/auth";
 import { Navbar } from "@/components/layout/Navbar";
 import { DebugBanner } from "@/components/DebugBanner";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
+import { PublicRouteMetadata } from "@/components/PublicRouteMetadata";
 
 const namedPage = (loader: () => Promise<object>, name: string) =>
   lazy(async () => ({ default: (await loader() as Record<string, React.ComponentType<any>>)[name] }));
@@ -200,6 +201,7 @@ function App() {
         <ConfigProvider>
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+            <PublicRouteMetadata />
             <LivingBriefHotkey />
             <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground font-sans">
               <a className="skip-to-main" href="#main-content">Skip to main content / Ir al contenido principal</a>
