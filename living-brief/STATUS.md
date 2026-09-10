@@ -1256,3 +1256,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - The existing Submittal register spreadsheet parser now loads only when the user invokes its existing import action. Submittals falls from 530.93 KB to 164.16 KB; the unchanged parser is isolated in a 499.55 KB on-demand chunk and the prior build-size warning is removed.
 - Focused Build 16 checks pass 12/12, homepage truth checks pass 8/8, public capability checks pass 7/7, and frontend typecheck/build pass. Browser verification proves all five public route metadata contracts and the homepage-to-Features interaction, with no overflow.
 - Product workflow, permissions, Native behavior, database, schema, and version remain unchanged. Build 16 is a local candidate; push and publication remain separate gates.
+
+## UX residual Build 17 consolidated acceptance — 2026-09-09
+
+- Builds 13–16 are present on clean source `cfed1bc35a58f1af84f3da7155d8e81aae1eb152`. Focused contracts pass 85/85, frontend typecheck passes, and exact-390 plus desktop browser matrices pass 24/24 with no overflow, missing primary-main/skip target, or unlabeled buttons.
+- Local unthrottled Chrome performance is strong at 734 ms LCP and 0.00 CLS. Best Practices and SEO score 100; the Submittals route remains 164.16 KB with XLSX isolated on demand.
+- Consolidated acceptance does not pass: mobile Lighthouse Accessibility is 96 because homepage badge, step-number, and validation-example foreground/background pairs remain below 4.5:1. These exact failures are recorded in `evidence/ux-less-is-more-build17-consolidated-acceptance-20260909.md`.
+- Build 17 changes evidence only. Builds 13–16 remain local candidates; the residual group is not ready for integration, push, or publication until the contrast defects are corrected and the acceptance matrix is rerun.

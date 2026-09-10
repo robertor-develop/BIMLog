@@ -18401,6 +18401,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "746e357ff61feda463b8f215560b2414a615b810f48d826ef29086486b08ea9f"
+    },
+    {
+      "taskId": "ux-residual-build17-consolidated-acceptance-20260909",
+      "reviewedThroughCommit": "cfed1bc35a58f1af84f3da7155d8e81aae1eb152",
+      "reviewedAt": "2026-09-10T02:06:52Z",
+      "status": "acceptance_failed_evidence_recorded",
+      "captureTiming": "same_task_after_acceptance_before_release",
+      "summary": "Records passing capability, payload, responsive, metadata, and performance evidence plus the exact remaining homepage contrast blocker; no product correction is included.",
+      "workstreams": [
+        "ux-less-is-more-residual-optimization"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Acceptance evidence does not change authority, identity, workflow, or capability."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The result truthfully separates local evidence from integration and publication."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The failed contrast gate is retained rather than hidden or downgraded."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or capability changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, service, permission, database, schema, or runtime contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No compliance or certification claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 17 passing evidence and failed accessibility gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps Build 17 and the release group open until contrast acceptance passes."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact browser metrics, contrast failures, and evidence limitations."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "34d9c060412c7f9970a9ab5e448e2ae96fff82159483906cf316c0c9129e0c6f"
     }
   ]
 }

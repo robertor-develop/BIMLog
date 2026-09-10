@@ -956,3 +956,10 @@ Roberto subsequently clarified that 40 was illustrative, not a maximum. The reco
 - Source and build-output inspection also proved that an eager `xlsx` import placed the entire spreadsheet parser in the Submittals route even when the user did not import a register. Replacing only that eager import with an event-bound dynamic import preserves the same parser and existing workflow.
 - The resulting Submittals route chunk falls from 530.93 KB / 161.39 KB gzip to 164.16 KB / 37.79 KB gzip. The 499.55 KB parser chunk is fetched only by the existing import path, and Vite no longer emits the greater-than-500 KB warning.
 - Focused Build 16 checks pass 12/12; prior homepage and public capability checks pass 8/8 and 7/7. Browser execution verified unique metadata and canonical URLs across five public routes and successfully followed the homepage workflow link to Features.
+
+## 2026-09-09 — UX residual Build 17 consolidated acceptance
+
+- The clean Build 16 evidence HEAD contains every Build 13–16 implementation. Nine focused suites pass 85/85, frontend typecheck passes, and twelve public/auth routes at both exact 390x844 and 1440x900 pass main-target, skip-link, unlabeled-button, and horizontal-overflow checks.
+- The local production bundle retains the measured payload gains: `ProjectDetail` 14.90 KB, `SubmittalsTab` 164.16 KB, and XLSX 499.55 KB on demand without a greater-than-500 KB build warning. An unthrottled Chrome trace reports 734 ms LCP and 0.00 CLS; no field data exists for localhost.
+- Mobile Lighthouse reports 100 Best Practices, 100 SEO, and 96 Accessibility. The accessibility failure is real and bounded: two blue tinted badges at 4.32:1, six step numbers at 1.76:1, one red validation heading at 3.63:1, and two red field labels at 3.41:1.
+- Build 17 makes no product correction under its consolidation-only scope and therefore does not pass. The release group remains local and unpublished until a narrow contrast correction and rerun close the gate.
