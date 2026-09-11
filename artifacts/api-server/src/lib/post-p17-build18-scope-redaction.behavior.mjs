@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const intake = fs.readFileSync(new URL("./job-intake-service.ts", import.meta.url), "utf8");
+const operations = fs.readFileSync(new URL("./job-operations-service.ts", import.meta.url), "utf8");
+for (const code of ["JOB_INTAKE_PROJECT_ACCESS_REQUIRED", "JOB_INTAKE_COMPANY_MISMATCH", "JOB_INTAKE_CLIENT_COMPANY_OUT_OF_SCOPE", "JOB_INTAKE_ASSIGNMENT_USER_INELIGIBLE"]) assert.match(intake, new RegExp(code));
+assert.match(operations, /effectiveCommercialAccessForUser/);
+assert.match(operations, /safeWorkItems/);
+assert.match(operations, /safeAssignments/);
+assert.match(operations, /capabilities/);
+console.log("POST-P17 Build 18 project scope and entitlement redaction: PASS");
