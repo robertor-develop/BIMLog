@@ -1136,3 +1136,12 @@ was performed or authorized.
 - Build 09 adds a source-bound executable contract proving that activation saves first, requires readiness, and submits the authoritative revision and completion fingerprint.
 - Build 10 reruns the new gates with the complete established Generic APU/Job Intake regression. The incomplete live draft was not activated and no customer data was used.
 - Impact declaration: evidence/test/governance only; no product behavior, release version, Native, database, schema, deployment, or persistent test marker changed.
+
+# 2026-09-11 — POST-P17 assurance Builds 11–15
+
+- Build 11 binds UI selection to the current-project directory and locks server refusal of out-of-scope companies and contacts.
+- Build 12 locks the full authoritative commercial/operational binding chain rather than relying on display names.
+- Build 13 locks active-project user eligibility and the distinct hours, internal cost, customer/APU rate, and incentive layers.
+- Build 14 locks activation output identity, task/package linkage, immutable commercial baselines, and conflict-safe idempotent replay.
+- Build 15 reruns the four new gates and the established Generic APU/Job Intake regression, including Operations, budget, team planning, Help, API, and frontend typechecks.
+- Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, or customer data changed.

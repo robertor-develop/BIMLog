@@ -1396,6 +1396,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Executable gates lock local recovery, visible autosave failure, bounded retry, unload protection, and the governed fingerprint/revision activation boundary.
 - The consolidated gate and established Generic APU/Intake regression pass. No product behavior, version, Native, database/schema, deployment, or customer data remains changed by this block.
 
+## POST-P17 assurance Builds 11–15 — 2026-09-11
+
+- Four executable gates now lock project-company/contact authority, the contract/APU/budget/Work Package chain, eligible-user/resource assignment and rate separation, and idempotent activation outputs.
+- Build 15 reruns all four gates with the complete established Generic APU, Intake, Operations, budget, team, help, API, and frontend typecheck regression; every gate passes.
+- This block is test/evidence only. Product behavior, version `v1.05.N17-P17`, Native, database/schema, deployment, and customer data are unchanged.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.

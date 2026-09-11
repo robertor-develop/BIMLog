@@ -22264,6 +22264,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "7d4f972a1ae096ada27cd4a5635a725abeda01fb2bb28a079307ef3ab72aad57"
+    },
+    {
+      "taskId": "post-p17-assurance-builds11-15-20260911",
+      "reviewedThroughCommit": "f16cf02b36ff2db9c3b34da9006be33cb22af266",
+      "reviewedAt": "2026-09-11T00:45:00-04:00",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_after_internal_acceptance",
+      "summary": "Adds executable authority-chain and activation-output assurance plus consolidated Intake/APU regression evidence without product or release changes.",
+      "workstreams": [
+        "post-p17-apu-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority, identity, ownership, or capability semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The isolated test-only evidence workflow follows existing governance and acceptance separation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality requirements remain unchanged while executable regression coverage increases."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction, customer promise, or roadmap semantics change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production route, service, component behavior, deployment, database, or schema changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, camera, XML exporter, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report implementation, rendering, export, or presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, interoperability, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records completion and PASS results for assurance Builds 11 through 15."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the internal block while retaining external user field acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records executable authority coverage, regression results, and non-mutation boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5a087f76c5f5ecd80aa307d41ffcf3f0e72b7c887b9fb12d59aa656cc46a0c5a"
     }
   ]
 }
