@@ -1184,4 +1184,5 @@ was performed or authorized.
 - Build 33 asserts bounded multipart upload, project/uploader-bound file metadata, storage compensation, authenticated project-bound download, authoritative attachment persistence, and separation from linked-RFI identity.
 - Build 34 combines source-bound workflow assertions with authenticated Chrome observation of the New Submittal form, Required Register, Shop Drawing Control, filters, exports, related RFI, and attachment controls.
 - Build 35 requires all four gates plus protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
+- The clean-source consolidated execution passed all eight gates and froze `evidence/post-p17-builds31-35-acceptance/results.json` at commit `21eda7ee5ec11d45123716c6428ab51f3fb66425`, SHA-256 `09F7DC19709BCAB1AAC74C6C59ED4435A93F910E697FBEE7B0C47B400063322B`.
 - Impact declaration: tests/evidence/governance only; no Submittal product behavior, protected APU or Lens Next behavior, version, Native, database/schema, deployment, external send, file upload, or customer data changed.

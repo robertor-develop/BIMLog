@@ -1431,7 +1431,8 @@ No release, publication, or overall completion claim is permitted until the reco
 - Builds 31–34 lock Submittal authoritative identity/project scope, lifecycle/revision/audit history, attachment authorization/storage integrity, and the live user-facing workflow in authenticated Chrome.
 - Build 35 consolidates those gates with the protected Generic APU/Job Intake and Lens Next regression suites and the governed production build/runtime closure.
 - The Chrome check used controlled project 27 read-only, opened and cancelled the New Submittal form, inspected Register and Shop Drawing Control, and performed no record, file, email, link, or customer-data mutation.
-- This block is a candidate test/evidence-only assurance at `v1.05.N17-P17`; Submittal product behavior, protected APU and Lens Next behavior, Native, database/schema, deployment, and customer data remain unchanged.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `21eda7ee5ec11d45123716c6428ab51f3fb66425` with SHA-256 `09F7DC19709BCAB1AAC74C6C59ED4435A93F910E697FBEE7B0C47B400063322B`.
+- This block is test/evidence-only assurance at `v1.05.N17-P17`; Submittal product behavior, protected APU and Lens Next behavior, Native, database/schema, deployment, and customer data remain unchanged.
 
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 

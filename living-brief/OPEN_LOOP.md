@@ -2467,5 +2467,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Lock revision lineage, lifecycle/status transitions, responsibility history, audit records, and soft deletion.
 - [x] Lock attachment write authorization, project-bound storage/download, compensation, and relationship isolation.
 - [x] Verify Submittal packages, required register, shop-drawing control, filters, exports, related-RFI and attachment controls in authenticated Chrome without persistent mutation.
-- [ ] Run the consolidated Build 35 gate with protected APU/Job Intake, protected Lens Next, and governed production-build regressions and freeze its exact evidence.
+- [x] Run the consolidated Build 35 gate with protected APU/Job Intake, protected Lens Next, and governed production-build regressions; evidence is frozen at `21eda7ee5ec11d45123716c6428ab51f3fb66425` with SHA-256 `09F7DC19709BCAB1AAC74C6C59ED4435A93F910E697FBEE7B0C47B400063322B`.
 - [ ] External user field acceptance remains separate from this internal assurance block.
