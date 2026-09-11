@@ -1164,4 +1164,5 @@ was performed or authorized.
 - Build 25 requires all four focused gates, the complete established Generic APU/Intake regression, governance checks, typechecks, frontend production build, and deterministic API runtime closure.
 - The initial consolidated runner invocation stopped before product testing because Node could not directly spawn a Windows `.CMD` shim; the runner now calls that same repository-local shim through `cmd.exe` and its focused gate passes.
 - The next run exposed an implicit-any annotation only in the new Build 21 test; explicit accumulator types now pass both the focused runtime assertion and the complete API typecheck without changing product code.
+- The final clean-source run passes all four focused gates, the complete established Generic APU/Intake suite, governance checks, database safety, secret exposure, mojibake, all typechecks, frontend production build, and deterministic API runtime closure; evidence SHA-256 is `3E1C760AE1F334DA7CC1D6C0A9AF0AC264FF477351E49D86210F19FE17F7BD65`.
 - Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, or customer data changed.

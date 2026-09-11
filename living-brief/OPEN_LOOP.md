@@ -2449,4 +2449,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Lock responsive layouts, overflow handling, accessible status/error announcements, and bounded report dialogs.
 - [x] Verify the repository-local TypeScript gate launches correctly in the controlled Windows runner.
 - [x] Verify Build 21's focused assertions and complete API TypeScript project both pass.
-- [ ] Run the consolidated Build 25 gate and freeze machine-readable evidence; external user field acceptance remains separate.
+- [x] Run the consolidated Build 25 gate and freeze machine-readable PASS evidence at commit `c520e15cb33567eb946e3499ad00651dc6237da7`.
+- [ ] External user field acceptance remains separate from this internal assurance block.
