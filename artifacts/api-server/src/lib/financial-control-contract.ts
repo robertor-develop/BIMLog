@@ -179,6 +179,7 @@ export type FinancialDecision = {
   matchedGrantIds: string[];
   policyId?: string;
   requiresHigherReview?: boolean;
+  selfApprovalOverride?: boolean;
 };
 export type FinancialSuspensionEvent = {
   projectId: number | null;
@@ -206,6 +207,12 @@ export type FinancialEvaluation = {
     amount: Money;
     createdAt: Date;
   }>;
+  selfApprovalOverride?: {
+    requested: boolean;
+    eligible: boolean;
+    reason: string;
+    confirmation: string;
+  };
 };
 const need: Record<FinancialOperation, FinancialAuthority[]> = {
   read: [
@@ -290,12 +297,40 @@ export function evaluateFinancialAuthorization(
       input.operation === "approve" ||
       input.operation === "execute") &&
     input.makerUserId === input.userId
-  )
+  ) {
+    const override = input.selfApprovalOverride;
+    const administrator = grants.some(
+      (grant) => grant.authority === "financial_administrator",
+    );
+    const validReason =
+      typeof override?.reason === "string" &&
+      override.reason.trim().length >= 10 &&
+      override.reason.trim().length <= 1000 &&
+      !/[\u0000-\u001f\u007f]/.test(override.reason);
+    if (
+      input.operation === "approve" &&
+      override?.requested === true &&
+      override.eligible === true &&
+      administrator &&
+      validReason &&
+      override.confirmation === "SOLE_OWNER_OVERRIDE"
+    ) {
+      // Continue through the normal approval-limit policy checks below. This
+      // exception changes only separation-of-duties identity, never scope,
+      // entitlement, suspension, currency, amount, or policy enforcement.
+    } else if (override?.requested) {
+      return deny(
+        "FIN_SELF_APPROVAL_OVERRIDE_DENIED",
+        "The sole-owner override requires verified sole-member eligibility, Financial Administrator authority, an explicit confirmation, and a written reason.",
+        "La excepción del propietario único requiere elegibilidad verificada como único miembro, autoridad de Administrador Financiero, confirmación explícita y motivo escrito.",
+      );
+    } else
     return deny(
       "FIN_MAKER_CHECKER_REQUIRED",
       "The maker cannot review, approve, or execute the same request.",
       "El creador no puede revisar, aprobar ni ejecutar la misma solicitud.",
     );
+  }
   if (input.operation === "approve" || input.operation === "execute") {
     if (!input.amount || !input.category)
       return deny(
@@ -358,7 +393,9 @@ export function evaluateFinancialAuthorization(
     return {
       decision: "allow",
       code:
-        aggregate > scaledDecimal(policy.money.amount)
+        input.selfApprovalOverride?.requested === true
+          ? "FIN_SOLE_OWNER_OVERRIDE_ALLOWED"
+          : aggregate > scaledDecimal(policy.money.amount)
           ? "FIN_HIGHER_REVIEW_SIGNAL"
           : "FIN_ALLOWED",
       explanation:
@@ -374,6 +411,7 @@ export function evaluateFinancialAuthorization(
       matchedGrantIds: matched.map((g) => g.id),
       policyId: policy.id,
       requiresHigherReview: aggregate > scaledDecimal(policy.money.amount),
+      selfApprovalOverride: input.selfApprovalOverride?.requested === true,
     };
   }
   return {

@@ -109,6 +109,68 @@ assert.equal(
   "deny",
 );
 check("preparer cannot self-approve", "maker checker denial");
+const validOwnerOverride = {
+  requested: true,
+  eligible: true,
+  reason: "Sole company owner must approve this controlled budget.",
+  confirmation: "SOLE_OWNER_OVERRIDE",
+};
+assert.equal(
+  decide(
+    "approve",
+    [grant("cost_preparer"), grant("cost_approver"), grant("financial_administrator")],
+    {
+      makerUserId: 10,
+      category: "original_budget",
+      amount: { amount: "10", currency: "USD" },
+      selfApprovalOverride: validOwnerOverride,
+    },
+  ).code,
+  "FIN_SOLE_OWNER_OVERRIDE_ALLOWED",
+);
+check("sole owner self-approval override", "explicit audited exception allowed");
+for (const selfApprovalOverride of [
+  { ...validOwnerOverride, eligible: false },
+  { ...validOwnerOverride, reason: "short" },
+  { ...validOwnerOverride, confirmation: "WRONG" },
+]) {
+  assert.equal(
+    decide(
+      "approve",
+      [grant("cost_preparer"), grant("cost_approver"), grant("financial_administrator")],
+      {
+        makerUserId: 10,
+        category: "original_budget",
+        amount: { amount: "10", currency: "USD" },
+        selfApprovalOverride,
+      },
+    ).code,
+    "FIN_SELF_APPROVAL_OVERRIDE_DENIED",
+  );
+}
+check("invalid owner overrides rejected", "eligibility reason and confirmation required");
+assert.equal(
+  decide("review", [grant("cost_reviewer"), grant("financial_administrator")], {
+    makerUserId: 10,
+    selfApprovalOverride: validOwnerOverride,
+  }).code,
+  "FIN_SELF_APPROVAL_OVERRIDE_DENIED",
+);
+check("owner override cannot bypass review separation", "approval-only exception");
+assert.equal(
+  decide(
+    "approve",
+    [grant("cost_approver"), grant("financial_administrator")],
+    {
+      makerUserId: 10,
+      category: "original_budget",
+      amount: { amount: "1000.000001", currency: "USD" },
+      selfApprovalOverride: validOwnerOverride,
+    },
+  ).code,
+  "FIN_APPROVAL_LIMIT_EXCEEDED",
+);
+check("owner override preserves approval limit", "policy remains mandatory");
 assert.equal(
   decide("approve", [grant("cost_reviewer")], {
     makerUserId: 9,
@@ -536,6 +598,13 @@ check(
 );
 assert.match(browser, /Confirm exact approval/);
 check("exact approval confirmation visible", "complete controlled action");
+assert.match(browser, /Sole-owner approval override/);
+assert.match(browser, /SOLE_OWNER_OVERRIDE/);
+assert.match(browser, /Approve with owner override/);
+assert.match(service, /budget_self_approval_override_used/);
+assert.match(service, /self_approval_override/);
+assert.match(service, /selfApprovalOverride/);
+check("sole-owner override UI and immutable audit", "explicit reason and confirmation path");
 assert.match(browser, /Retry/);
 check("load failure retry", "controlled error state");
 assert.match(service, /No accounting actuals/);
@@ -560,7 +629,7 @@ assert.match(service, /ROLLBACK/);
 check("failed snapshot or audit rolls back", "single transaction helper");
 assert.match(service, /financial_authority_journal/);
 check("accepted append-only audit reused", "no second audit system");
-assert.equal(checks.length, 67);
+assert.equal(checks.length, 72);
 console.log(
   JSON.stringify(
     { suite: "cost-financial-control-build-2-pure", status: "passed", checks },

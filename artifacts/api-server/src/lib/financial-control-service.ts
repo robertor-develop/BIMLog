@@ -201,6 +201,11 @@ export async function authorizeFinancialOperation(input: {
   category?: string;
   amount?: { amount: string; currency: string };
   trustedConfirmations?: string[];
+  selfApprovalOverride?: {
+    requested: boolean;
+    reason: string;
+    confirmation: string;
+  };
   relatedRequests?: Array<{
     makerUserId: number;
     category: string;
@@ -241,6 +246,19 @@ export async function authorizeFinancialOperation(input: {
     state: r.state,
     version: Number(r.version),
   }));
+  const authorityGrants = commercialAccess
+    ? FINANCIAL_AUTHORITIES.map((authority) => ({ id: `commercial-entitlement:${actor.userId}:${authority}`, authority, scopeType: "company" as const, companyId: scope.companyId, projectId: null, effectiveFrom: new Date(0), effectiveTo: null, revoked: false }))
+    : await grantsFor(actor.userId, scope, client);
+  let soleOwnerOverrideEligible = false;
+  if (input.selfApprovalOverride?.requested === true && scope.projectId !== null) {
+    const members = await client.query(
+      `SELECT COUNT(DISTINCT pm.user_id)::integer AS active_members FROM project_members pm JOIN users u ON u.id=pm.user_id WHERE pm.project_id=$1 AND pm.status='active' AND u.company_id=$2`,
+      [scope.projectId, scope.companyId],
+    );
+    soleOwnerOverrideEligible =
+      Number(members.rows[0]?.active_members) === 1 &&
+      authorityGrants.some((grant) => grant.authority === "financial_administrator");
+  }
   const decision = evaluateFinancialAuthorization({
     operation: input.operation,
     userId: actor.userId,
@@ -253,12 +271,18 @@ export async function authorizeFinancialOperation(input: {
     companyCurrent: true,
     membershipActive: actor.isSuperAdmin || await membershipActive(actor.userId, scope, client),
     suspended: await suspended(scope, client),
-    grants: commercialAccess ? FINANCIAL_AUTHORITIES.map((authority, index) => ({ id: `commercial-entitlement:${actor.userId}:${authority}`, authority, scopeType: "company" as const, companyId: scope.companyId, projectId: null, effectiveFrom: new Date(0), effectiveTo: null, revoked: false })) : await grantsFor(actor.userId, scope, client),
+    grants: authorityGrants,
     policies,
     relatedRequests: input.relatedRequests?.map((request) => ({
       ...request,
       amount: parseMoney(request.amount),
     })),
+    selfApprovalOverride: input.selfApprovalOverride
+      ? {
+          ...input.selfApprovalOverride,
+          eligible: soleOwnerOverrideEligible,
+        }
+      : undefined,
   });
   if (decision.decision !== "allow")
     throw new FinancialControlError(

@@ -1367,6 +1367,13 @@ No release, publication, or overall completion claim is permitted until the reco
 - Because the block changes Platform presentation and verification behavior after P15, only the Platform segment advances to P16; Native remains N17.
 - Exact-source push, Replit Shell publication, and live Chrome acceptance are authorized. Native, database, and schema changes remain prohibited.
 
+## Build 21 sole-owner budget approval override — v1.05.N17-P17
+
+- Project Budget preserves independent maker-checker approval as the default and adds one explicit approval-only exception for a genuine sole active company member on the project.
+- The exception requires Cost Approver and Financial Administrator authority, an approval-limit policy, exact budget fingerprint confirmation, a 10–1000 character reason, and the exact `SOLE_OWNER_OVERRIDE` confirmation.
+- Successful use records both the approved immutable snapshot and a dedicated append-only `budget_self_approval_override_used` journal event. Cross-project, suspended, over-limit, ambiguous multi-member, review, execution, and ordinary same-maker requests remain denied.
+- Platform advances to P17. Native, database, and schema are unchanged; push, publication, production verification, and final live budget acceptance remain separate gates.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.
