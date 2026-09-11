@@ -375,6 +375,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/pdf-kit.ts
 - artifacts/api-server/src/lib/pdf-logo.ts
 - artifacts/api-server/src/lib/pdf-route-authorization.behavior.ts
+- artifacts/api-server/src/lib/post-p17-apu-workbook-acceptance.behavior.ts
+- artifacts/api-server/src/lib/post-p17-intake-file-inspection.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts
