@@ -1,0 +1,28 @@
+{
+  "build": 34,
+  "checkedAt": "2026-09-11T11:14:26-04:00",
+  "url": "https://bimlog.app/projects/27/submittals",
+  "mode": "read-only Chrome verification",
+  "project": {
+    "id": 27,
+    "code": "ROB-T1",
+    "name": "Robertor Test for Convention Builder Testing"
+  },
+  "observed": {
+    "liveVersion": "v1.05.N17-P17",
+    "workspaceLoaded": true,
+    "newSubmittalAction": true,
+    "newSubmittalForm": true,
+    "requiredRegister": true,
+    "shopDrawingControl": true,
+    "statusFilter": true,
+    "typeFilter": true,
+    "excelExport": true,
+    "pdfExport": true,
+    "attachmentUploadControl": true,
+    "relatedRfiControl": true,
+    "diagnosticControlsVisible": false
+  },
+  "mutationsPerformed": false,
+  "note": "The controlled project contained zero Submittals, so detail-only controls were verified against source contracts and no record was created solely for testing."
+}
