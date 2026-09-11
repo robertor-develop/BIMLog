@@ -2447,4 +2447,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Lock optimistic revision, row locking, immutable fingerprint, and conflict-safe activation replay behavior.
 - [x] Lock project-scoped governed report/PDF exports, selected filters/sections, privacy redaction, and fingerprints.
 - [x] Lock responsive layouts, overflow handling, accessible status/error announcements, and bounded report dialogs.
+- [x] Verify the repository-local TypeScript gate launches correctly in the controlled Windows runner.
 - [ ] Run the consolidated Build 25 gate and freeze machine-readable evidence; external user field acceptance remains separate.

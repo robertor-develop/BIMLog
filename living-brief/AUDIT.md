@@ -1162,4 +1162,5 @@ was performed or authorized.
 - Build 23 binds project-scoped governed report requests, current-view filters and sections, privacy-safe values, and SHA-256 evidence.
 - Build 24 binds production Intake, Operations, and Reports accessibility announcements, mobile breakpoints, overflow handling, and bounded dialogs.
 - Build 25 requires all four focused gates, the complete established Generic APU/Intake regression, governance checks, typechecks, frontend production build, and deterministic API runtime closure.
+- The initial consolidated runner invocation stopped before product testing because Node could not directly spawn a Windows `.CMD` shim; the runner now calls that same repository-local shim through `cmd.exe` and its focused gate passes.
 - Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, or customer data changed.
