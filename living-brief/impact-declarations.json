@@ -22492,26 +22492,77 @@
     {
       "taskId": "post-p17-assurance-builds26-30-20260911",
       "reviewedThroughCommit": "229c17ec31c3e7749686fa4e8f11e38f79ff9f62",
-      "reviewedAt": "2026-09-11T15:00:00-04:00",
+      "reviewedAt": "2026-09-11T10:45:00-04:00",
       "status": "candidate_verified",
       "captureTiming": "same_task_before_governed_build",
       "summary": "Adds test-only RFI identity, lifecycle, attachment, live workflow, and consolidated protected-baseline evidence without product or release changes.",
-      "workstreams": ["post-p17-rfi-assurance"],
-      "authorities": [
-        { "key": "ecosystem_doctrine", "result": "reviewed_no_semantic_change", "reason": "No product authority, ownership, capability, or commercial semantics change." },
-        { "key": "claude", "result": "reviewed_no_semantic_change", "reason": "The sequential evidence-only workflow follows existing execution and acceptance boundaries." },
-        { "key": "quality", "result": "reviewed_no_semantic_change", "reason": "Executable assurance coverage increases without changing quality requirements." },
-        { "key": "vision", "result": "reviewed_no_semantic_change", "reason": "No customer promise, product direction, or roadmap semantics change." },
-        { "key": "platform", "result": "reviewed_no_semantic_change", "reason": "Only test and evidence files are added; runtime architecture is unchanged." },
-        { "key": "plugin", "result": "reviewed_no_semantic_change", "reason": "No Native, Navisworks, bridge, camera, XML, or package change." },
-        { "key": "report_design_system", "result": "reviewed_no_semantic_change", "reason": "Existing RFI workflow presentation is verified without changing report design." },
-        { "key": "standards_register", "result": "reviewed_no_semantic_change", "reason": "No external-standard or interoperability claim changes." },
-        { "key": "status", "result": "updated", "reason": "Records Builds 26 through 30 assurance scope and candidate state." },
-        { "key": "open_loop", "result": "updated", "reason": "Records the consolidated Build 30 gate and preserves external acceptance." },
-        { "key": "audit", "result": "updated", "reason": "Records exact RFI and protected-baseline coverage and non-mutation boundaries." }
+      "workstreams": [
+        "post-p17-rfi-assurance"
       ],
-      "reviewedChangedPaths": ["living-brief/AUDIT.md", "living-brief/OPEN_LOOP.md", "living-brief/STATUS.md", "living-brief/impact-declarations.json"],
-      "reviewedChangeSha256": "pending-state-reconciliation"
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority, ownership, capability, or commercial semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The sequential evidence-only workflow follows existing execution and acceptance boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Executable assurance coverage increases without changing quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer promise, product direction, or roadmap semantics change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only test and evidence files are added; runtime architecture is unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, camera, XML, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing RFI workflow presentation is verified without changing report design."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external-standard or interoperability claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 26 through 30 assurance scope and candidate state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the consolidated Build 30 gate and preserves external acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact RFI and protected-baseline coverage and non-mutation boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5a8b31aba5c3b74efd50d7ba2bdc710f7ecfb91a998fe199c72c3732dbe90545"
     }
   ]
 }
