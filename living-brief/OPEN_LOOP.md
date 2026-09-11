@@ -2403,3 +2403,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Document the exact bilingual workflow in Help & Guide and expose it through progressive disclosure on Under Review budgets.
 - [x] Complete the governed production build, exact-source push/publication, production health/version verification, controlled Chrome Intake verification, and focused financial regressions for P17.
 - [ ] Complete the external 20-row APU/Job Intake smoke-test return and, when controlled prerequisites exist, field-confirm the live sole-owner budget override with an effective approval policy. Do not invent customer financial policy or users to force this gate.
+
+## POST-P17 assurance Builds 01–05
+
+- [x] Bind the exact immutable 20-row workbook and SHA256 to executable row-level acceptance.
+- [x] Exercise the real Quick Job Intake production component in controlled Chromium.
+- [x] Prove save, refresh, return, saved-section restoration, and project-switch isolation.
+- [x] Automate PDF, DOCX, XLSX, CSV, and XML intake-source inspection contracts.
+- [x] Run the consolidated assurance runner and freeze its manifest with every internal gate PASS.
+- [ ] External user smoke-test return remains a separate field-acceptance gate; this internal block does not replace it.

@@ -1120,3 +1120,10 @@ was performed or authorized.
 - Historical OPEN_LOOP publication checkboxes for P10-P17 and the corrective blocks were stale. They were reconciled to the later production evidence instead of being treated as new implementation work.
 - External acceptance remains deliberately separate: the returning 20-row APU/Job Intake user smoke test and Ruben's final historical/new Lens field confirmation are still open.
 - Provider activation and enterprise/connector database migrations remain intentionally deferred. This reconciliation did not authorize or perform product, Native, database, schema, provider, push, publication, deployment, or customer-data changes.
+
+# 2026-09-11 — POST-P17 assurance Builds 01–05
+
+- The earlier Build 20 workbook was human-readable evidence but its exact hash, 20-row denominator, PASS column, and zero-blocker result were not bound to a single executable gate. Build 01 closes that evidence gap without modifying the workbook.
+- Builds 02–03 use real Chromium and the production `QuickJobIntake` component with isolated fixture data. They prove required-field entry, customer and first-scope capture, review readiness, local draft reload, saved-section restoration, return after a project switch, and project-key isolation.
+- Build 04 verifies the existing format-specific contract: PDF bytes are preserved for document handling, DOCX remains readable OOXML and requires manual intake confirmation, XLSX/CSV receive structured previews, and XML receives bounded text preview.
+- Build 05 runs all new gates with workspace-library typecheck and the established Generic APU suite and writes a hash-bearing manifest. This is internal evidence only; it changes no product behavior, version, Native code, database/schema, deployment, or customer data and does not replace external field acceptance.

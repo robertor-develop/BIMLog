@@ -22114,6 +22114,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "add728b17c518f92f1cce0bd49a8f76700d80d1e83ff3b0a70180b04a9f29350"
+    },
+    {
+      "taskId": "post-p17-assurance-builds01-05-20260911",
+      "reviewedThroughCommit": "fdce33df22ff893b461b8264e6bb80659402d318",
+      "reviewedAt": "2026-09-11T00:01:00-04:00",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_after_internal_acceptance",
+      "summary": "Adds test-only workbook, production-component browser, persistence/isolation, multi-format inspection, and consolidated regression evidence without changing product behavior or release identity.",
+      "workstreams": [
+        "post-p17-apu-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority, identity, or capability semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The isolated test-only worktree and evidence workflow follows existing governance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing internal and field-acceptance separation remains unchanged; this block adds executable coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or roadmap semantics change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime route, service, component behavior, deployment, database, or schema changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, camera, XML exporter, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The immutable workbook is inspected but not edited; no report design contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the five completed test-only micro-builds and exact PASS boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes internal assurance Builds 01–05 while retaining external field acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records executable evidence coverage, results, and non-mutation limits."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "31ff66a4538f4e3e50f86ecadbf864c59e6ec4a1a1d3a1b30b3ba6150d407e5a"
     }
   ]
 }

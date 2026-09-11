@@ -1383,6 +1383,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Successful use records both the approved immutable snapshot and a dedicated append-only `budget_self_approval_override_used` journal event. Cross-project, suspended, over-limit, ambiguous multi-member, review, execution, and ordinary same-maker requests remain denied.
 - Platform advanced to P17. Native, database, and schema are unchanged. The governed build, exact-source push/publication, production health/version verification, and controlled Chrome Intake verification subsequently passed; external APU acceptance and a prerequisite-backed live sole-owner approval remain open.
 
+## POST-P17 assurance Builds 01–05 — 2026-09-11
+
+- Five test-only micro-builds now bind the immutable 20-row Build 20 workbook to executable acceptance, exercise the production Quick Job Intake component in Chromium, prove saved section/data restoration across refresh/return/project switching, inspect PDF/DOCX/XLSX/CSV/XML intake sources, and run one consolidated evidence manifest.
+- The exact workbook hash is `10F1918DBD947B84FD04405B162C8388F60A255239C091468864AFDBCE981E58`; all 20 rows remain PASS with zero blockers in the internal acceptance authority.
+- The consolidated gate passes the four new suites, workspace-library typecheck, and the established Generic APU regression. Product behavior, release version `v1.05.N17-P17`, Native, database, schema, deployment, and customer data are unchanged.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.
