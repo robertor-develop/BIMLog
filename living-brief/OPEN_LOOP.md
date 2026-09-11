@@ -2479,3 +2479,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Isolate the static document-connection gate with a non-routable test-only database URL; no database connection, mutation, or production safety relaxation occurs.
 - [x] Run and freeze the consolidated Build 40 protected-baseline gate at `da1cb8da0b03dacc4117f7585a8eba603a2bc272`, SHA-256 `9E0FFC774B559FF7545AC8C5E222CC44E8BEF71DC077BF80A25D3CE2A1C7E44C`.
 - [ ] External user field acceptance remains separate from this internal assurance block.
+
+## POST-P17 assurance Builds 41–45
+
+- [x] Lock Change Order authoritative identity and current-project scope.
+- [x] Lock draft, pending, approved, rejected, audit, financial-impact, schedule-impact, and soft-delete contracts.
+- [x] Lock RFI promotion, Submittal/link cleanup, import identity, and authoritative-record isolation.
+- [x] Verify create, import, filters, governed current-view PDF, and individual PDF controls in authenticated Chrome without mutation.
+- [ ] Run and freeze the consolidated Build 45 protected-baseline gate.
+- [ ] External user field acceptance remains separate from this internal assurance block.

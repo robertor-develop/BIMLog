@@ -1197,3 +1197,12 @@ was performed or authorized.
 - The runner's static document-connection gate receives a non-routable test-only database URL solely to satisfy import-time fail-closed configuration; the behavior test makes no database or network call and production configuration enforcement is unchanged.
 - The final clean-source run passes all focused Transmittal gates, document connections, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity/freshness, secret exposure, database safety, mojibake, all typechecks, frontend production build, and deterministic API runtime closure. Evidence is frozen at `da1cb8da0b03dacc4117f7585a8eba603a2bc272`, SHA-256 `9E0FFC774B559FF7545AC8C5E222CC44E8BEF71DC077BF80A25D3CE2A1C7E44C`.
 - Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, external send, import, or customer data changed.
+
+# 2026-09-11 — POST-P17 assurance Builds 41–45
+
+- Build 41 asserts membership/write authority and project-bound Change Order list, detail, update, action, and delete identity.
+- Build 42 asserts deterministic draft/submission/approval/rejection states, approval actor/time, immutable activity, separate financial/schedule impacts, and reason-bearing soft deletion.
+- Build 43 asserts current-project RFI promotion, stored RFI/Submittal identity, relationship-only cleanup, bounded authorized import, and deterministic duplicate identities.
+- Build 44 combines production-source assertions with authenticated Chrome observation of the live create/import/filter/search/sort/current-view PDF surface and no diagnostic controls.
+- Build 45 requires the focused gates plus protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
+- Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, AI call, import, transition, report download, or customer data changed.

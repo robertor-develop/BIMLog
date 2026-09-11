@@ -22713,6 +22713,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "468ca8ed2e0bd02a08abd05a89c13420614678c5b9e0e31954793e645f28d2a8"
+    },
+    {
+      "taskId": "post-p17-assurance-builds41-45-20260911",
+      "reviewedThroughCommit": "3d206c36334819164e830cdd83357fa24adc194c",
+      "reviewedAt": "2026-09-11T12:55:00-04:00",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Adds test-only Change Order identity, lifecycle, links/import, live workflow, and consolidated protected-baseline evidence without product or release changes.",
+      "workstreams": [
+        "post-p17-change-order-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority or ownership semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sequential evidence-only execution follows existing boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Coverage increases without changing quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or customer promise changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Runtime architecture is unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, camera, XML, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed Change Order reports are verified unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 41 through 45 candidate state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Build 45 and preserves external acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact coverage and non-mutation boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f49b78352cbae6a2a1550f596088a8df68d0b104c4734a1c3612df12b6e3b57f"
     }
   ]
 }

@@ -1443,6 +1443,13 @@ No release, publication, or overall completion claim is permitted until the reco
 - The consolidated gate is PASS and its machine-readable evidence is frozen at commit `da1cb8da0b03dacc4117f7585a8eba603a2bc272` with SHA-256 `9E0FFC774B559FF7545AC8C5E222CC44E8BEF71DC077BF80A25D3CE2A1C7E44C`.
 - This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
 
+## POST-P17 assurance Builds 41–45 — 2026-09-11
+
+- Builds 41–44 lock Change Order authoritative project identity, lifecycle and financial/schedule separation, RFI/Submittal/link/import isolation, and the live governed workflow/report surface.
+- Build 45 consolidates those gates with the protected Generic APU/Job Intake and Lens Next regressions and governed production build/runtime closure.
+- The Chrome check used controlled project 27 read-only and performed no create, import, transition, delete, AI request, report download, or customer-data mutation.
+- This block is candidate test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.
