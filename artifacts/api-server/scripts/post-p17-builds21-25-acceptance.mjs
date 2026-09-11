@@ -5,7 +5,7 @@ import path from "node:path";
 
 const root = path.resolve(import.meta.dirname, "../../..");
 const focused = [
-  { file: "post-p17-build21-financial-invariants.behavior.ts", executable: path.join(root, "artifacts/api-server/node_modules/.bin/tsx.CMD") },
+  { file: "post-p17-build21-financial-invariants.behavior.ts", executable: "cmd.exe", prefixArgs: ["/d", "/s", "/c", "artifacts\\api-server\\node_modules\\.bin\\tsx.CMD"] },
   { file: "post-p17-build22-activation-replay-safety.behavior.mjs", executable: process.execPath },
   { file: "post-p17-build23-report-export-scope.behavior.mjs", executable: process.execPath },
   { file: "post-p17-build24-responsive-accessibility.behavior.mjs", executable: process.execPath },
@@ -20,7 +20,7 @@ const run = (name, executable, args) => {
 };
 for (const item of focused) {
   const relative = `artifacts/api-server/src/lib/${item.file}`;
-  run(item.file, item.executable, [relative]);
+  run(item.file, item.executable, [...(item.prefixArgs ?? []), relative]);
   results.at(-1).sha256 = crypto.createHash("sha256").update(fs.readFileSync(path.join(root, relative))).digest("hex");
 }
 run("generic-apu", "cmd.exe", ["/d", "/s", "/c", "pnpm", "--filter", "@workspace/api-server", "run", "test:generic-apu"]);
