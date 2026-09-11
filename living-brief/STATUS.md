@@ -1402,6 +1402,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Build 15 reruns all four gates with the complete established Generic APU, Intake, Operations, budget, team, help, API, and frontend typecheck regression; every gate passes.
 - This block is test/evidence only. Product behavior, version `v1.05.N17-P17`, Native, database/schema, deployment, and customer data are unchanged.
 
+## POST-P17 assurance Builds 16–20 — 2026-09-11
+
+- Builds 16–19 lock reporting identity, immutable APU pricing provenance, project/entitlement isolation, and bilingual Help/audit discoverability.
+- Build 20 consolidates those gates with the established Generic APU/Intake suite and the governed production build/runtime closure.
+- This is test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, deployment, or customer-data change is introduced.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.

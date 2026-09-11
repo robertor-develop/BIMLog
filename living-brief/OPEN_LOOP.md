@@ -2430,3 +2430,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Lock activation work items/tasks/packages/assignments, immutable commercial baseline, and idempotent replay behavior.
 - [x] Run the consolidated established Generic APU/Intake/Operations regression and record machine-readable evidence.
 - [ ] External user smoke-test return remains required for field acceptance.
+
+## POST-P17 assurance Builds 16–20
+
+- [x] Lock job, client, contract/quote, type, state, reference, and APU reporting identity.
+- [x] Lock immutable APU snapshot fingerprint and quantity/rate/value provenance.
+- [x] Lock project/company scope denial and entitlement-aware Operations projections.
+- [x] Lock bilingual Help, validation, audit, boundary, troubleshooting, and release discoverability.
+- [x] Reconcile governance before the final governed build and run the consolidated production gate.
+- [ ] External user smoke-test return remains the separate field-acceptance authority.

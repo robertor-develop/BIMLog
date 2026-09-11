@@ -22223,8 +22223,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No production route, service, component behavior, deployment, database, or schema changes."
+          "result": "updated",
+          "reason": "Deterministic PLATFORM inventory now includes the two accepted POST-P17 test-only behavior files; no runtime architecture or product behavior changes."
         },
         {
           "key": "plugin",
@@ -22339,6 +22339,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "5a087f76c5f5ecd80aa307d41ffcf3f0e72b7c887b9fb12d59aa656cc46a0c5a"
+    },
+    {
+      "taskId": "post-p17-assurance-builds16-20-20260911",
+      "reviewedThroughCommit": "90fb5b91756e09c09a62d1f457ba19aad904cbe2",
+      "reviewedAt": "2026-09-11T05:45:00-04:00",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Adds test-only reporting, APU provenance, authorization, Help, and consolidated governed-build evidence without product or release changes.",
+      "workstreams": [
+        "post-p17-apu-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority, identity, ownership, or capability semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The sequential test-only evidence workflow follows existing governance and build boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality requirements remain unchanged while regression evidence coverage increases."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction, customer promise, or roadmap semantics change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production route, service, component behavior, deployment, database, or schema changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, camera, XML exporter, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report implementation, rendering, export, or presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, interoperability, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the completed focused gates and governed Build 20 boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the internal assurance block while preserving external field acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the exact regression coverage and explicit non-mutation boundary."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a2c8f792bb68c1ef4ab7b5bd863c3d822dcf654f154ce9583c73b0b3df624ca0"
     }
   ]
 }

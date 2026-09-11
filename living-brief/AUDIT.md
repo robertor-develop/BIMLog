@@ -1145,3 +1145,12 @@ was performed or authorized.
 - Build 14 locks activation output identity, task/package linkage, immutable commercial baselines, and conflict-safe idempotent replay.
 - Build 15 reruns the four new gates and the established Generic APU/Job Intake regression, including Operations, budget, team planning, Help, API, and frontend typechecks.
 - Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, or customer data changed.
+
+# 2026-09-11 — POST-P17 assurance Builds 16–20
+
+- Build 16 locks distinct reporting fields instead of conflating job, client, contract/quote, type, lifecycle, and reference.
+- Build 17 locks the immutable APU fingerprint and exact pricing inputs/outputs exposed in Operations.
+- Build 18 locks current-project/company refusal and entitlement-safe Operations projections.
+- Build 19 locks bilingual Help, permissions, validation, audit trail, boundaries, troubleshooting, and the P17 release identity.
+- Build 20 requires the focused gates, full Generic APU/Intake regression, governance integrity, typechecks, frontend build, and deterministic API runtime closure.
+- Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, or customer data changed.
