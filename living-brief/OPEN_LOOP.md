@@ -2460,3 +2460,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Verify the existing RFI detail, email-copy, linked-document, deep-create, and response-attachment controls in authenticated Chrome without external send or record mutation.
 - [x] Run the consolidated Build 30 gate with RFI, protected APU/Job Intake, protected Lens Next, and governed production-build regressions; evidence is frozen at `468e0e1379d217ed8ba89bfd355be594867b45a6` with SHA-256 `DAC5C420974961A29AC01AAC4DDD9C7C0C6FD9391B07B00523CF0A194B3EBFAA`.
 - [ ] External user field acceptance remains separate from this internal assurance block.
+
+## POST-P17 assurance Builds 31–35
+
+- [x] Lock Submittal authoritative identity and current-project scope.
+- [x] Lock revision lineage, lifecycle/status transitions, responsibility history, audit records, and soft deletion.
+- [x] Lock attachment write authorization, project-bound storage/download, compensation, and relationship isolation.
+- [x] Verify Submittal packages, required register, shop-drawing control, filters, exports, related-RFI and attachment controls in authenticated Chrome without persistent mutation.
+- [ ] Run the consolidated Build 35 gate with protected APU/Job Intake, protected Lens Next, and governed production-build regressions and freeze its exact evidence.
+- [ ] External user field acceptance remains separate from this internal assurance block.

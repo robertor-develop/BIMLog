@@ -22563,6 +22563,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b7a3c4e81a443704d5e7b6a46625190742a2bdab663d1d458eee60b5bda61e4f"
+    },
+    {
+      "taskId": "post-p17-assurance-builds31-35-20260911",
+      "reviewedThroughCommit": "0252ad0ec32ed4199185f1b3c79405b8be823ffa",
+      "reviewedAt": "2026-09-11T11:14:26-04:00",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Adds test-only Submittal identity, lifecycle, attachment, live workflow, and consolidated protected-baseline evidence without product or release changes.",
+      "workstreams": [
+        "post-p17-submittal-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority, ownership, capability, or commercial semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The sequential evidence-only workflow follows existing execution and acceptance boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Executable assurance coverage increases without changing quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer promise, product direction, or roadmap semantics change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only test and evidence files are added; runtime architecture is unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, camera, XML, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Submittal workflow presentation is verified without changing report design."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external-standard or interoperability claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 31 through 35 assurance scope and candidate state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the consolidated Build 35 gate and preserves external acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact Submittal and protected-baseline coverage and non-mutation boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e5ebbeda3d7b0230af7944a99b5370bcda18e57bd5975cc500edcfaa22909558"
     }
   ]
 }

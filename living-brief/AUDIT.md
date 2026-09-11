@@ -1176,3 +1176,12 @@ was performed or authorized.
 - Build 30 requires all four gates plus established RFI import, protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
 - The clean-source consolidated execution passed all nine gates and froze `evidence/post-p17-builds26-30-acceptance/results.json` at commit `468e0e1379d217ed8ba89bfd355be594867b45a6`, SHA-256 `DAC5C420974961A29AC01AAC4DDD9C7C0C6FD9391B07B00523CF0A194B3EBFAA`.
 - Impact declaration: tests/evidence/governance only; no RFI product behavior, protected APU or Lens Next behavior, version, Native, database/schema, deployment, external send, or customer data changed.
+
+# 2026-09-11 — POST-P17 assurance Builds 31–35
+
+- Build 31 asserts membership/write authorization, schema-parsed project identity, project-scoped authoritative queries and UI mutations, and project/item-bound linked controls.
+- Build 32 asserts parent/revision lineage, visible version history, scoped lifecycle updates, responsibility history, review/update/delete audit events, and reason-bearing soft deletion.
+- Build 33 asserts bounded multipart upload, project/uploader-bound file metadata, storage compensation, authenticated project-bound download, authoritative attachment persistence, and separation from linked-RFI identity.
+- Build 34 combines source-bound workflow assertions with authenticated Chrome observation of the New Submittal form, Required Register, Shop Drawing Control, filters, exports, related RFI, and attachment controls.
+- Build 35 requires all four gates plus protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
+- Impact declaration: tests/evidence/governance only; no Submittal product behavior, protected APU or Lens Next behavior, version, Native, database/schema, deployment, external send, file upload, or customer data changed.
