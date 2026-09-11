@@ -1406,6 +1406,7 @@ No release, publication, or overall completion claim is permitted until the reco
 
 - Builds 16–19 lock reporting identity, immutable APU pricing provenance, project/entitlement isolation, and bilingual Help/audit discoverability.
 - Build 20 consolidates those gates with the established Generic APU/Intake suite and the governed production build/runtime closure.
+- The final machine-readable PASS evidence is frozen at source commit `4d881f695b41bbc7c4138746559049ac0f0ef3d5` with SHA-256 `E06A7116D1A60D9F8EBE6C885C3928A37E02F665EA8C561638DB0FF4B5823DAE`.
 - This is test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, deployment, or customer-data change is introduced.
 
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation

@@ -22342,7 +22342,7 @@
     },
     {
       "taskId": "post-p17-assurance-builds16-20-20260911",
-      "reviewedThroughCommit": "90fb5b91756e09c09a62d1f457ba19aad904cbe2",
+      "reviewedThroughCommit": "4d881f695b41bbc7c4138746559049ac0f0ef3d5",
       "reviewedAt": "2026-09-11T05:45:00-04:00",
       "status": "candidate_verified",
       "captureTiming": "same_task_before_governed_build",
@@ -22373,8 +22373,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No production route, service, component behavior, deployment, database, or schema changes."
+          "result": "updated",
+          "reason": "The deterministic architecture inventory includes the accepted POST-P17 test files; runtime architecture and product behavior remain unchanged."
         },
         {
           "key": "plugin",
@@ -22408,12 +22408,11 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "a2c8f792bb68c1ef4ab7b5bd863c3d822dcf654f154ce9583c73b0b3df624ca0"
+      "reviewedChangeSha256": "4eccf3526e87af8afa7492885eaea9677ce11d61c5990fc25c395d9e4b127997"
     }
   ]
 }

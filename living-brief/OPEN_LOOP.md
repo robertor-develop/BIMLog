@@ -2438,4 +2438,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Lock project/company scope denial and entitlement-aware Operations projections.
 - [x] Lock bilingual Help, validation, audit, boundary, troubleshooting, and release discoverability.
 - [x] Reconcile governance before the final governed build and run the consolidated production gate.
+- [x] Freeze the final PASS evidence at commit `4d881f695b41bbc7c4138746559049ac0f0ef3d5` with its exact evidence hash.
 - [ ] External user smoke-test return remains the separate field-acceptance authority.
