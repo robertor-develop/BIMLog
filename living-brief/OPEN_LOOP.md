@@ -2440,3 +2440,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Reconcile governance before the final governed build and run the consolidated production gate.
 - [x] Freeze the final PASS evidence at commit `4d881f695b41bbc7c4138746559049ac0f0ef3d5` with its exact evidence hash.
 - [ ] External user smoke-test return remains the separate field-acceptance authority.
+
+## POST-P17 assurance Builds 21–25
+
+- [x] Lock exact customer/APU rate, internal labor cost, incentive, hours, and commercial-value calculations.
+- [x] Lock optimistic revision, row locking, immutable fingerprint, and conflict-safe activation replay behavior.
+- [x] Lock project-scoped governed report/PDF exports, selected filters/sections, privacy redaction, and fingerprints.
+- [x] Lock responsive layouts, overflow handling, accessible status/error announcements, and bounded report dialogs.
+- [ ] Run the consolidated Build 25 gate and freeze machine-readable evidence; external user field acceptance remains separate.

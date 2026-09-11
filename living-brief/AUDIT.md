@@ -1154,3 +1154,12 @@ was performed or authorized.
 - Build 19 locks bilingual Help, permissions, validation, audit trail, boundaries, troubleshooting, and the P17 release identity.
 - Build 20 requires the focused gates, full Generic APU/Intake regression, governance integrity, typechecks, frontend build, and deterministic API runtime closure.
 - Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, or customer data changed.
+
+# 2026-09-11 — POST-P17 assurance Builds 21–25
+
+- Build 21 executes exact multi-scope commercial value, internal labor cost, rate-layer separation, incentive, and total-hour assertions.
+- Build 22 binds the existing row-lock, optimistic-revision, immutable fingerprint, and idempotent activation insertion contracts.
+- Build 23 binds project-scoped governed report requests, current-view filters and sections, privacy-safe values, and SHA-256 evidence.
+- Build 24 binds production Intake, Operations, and Reports accessibility announcements, mobile breakpoints, overflow handling, and bounded dialogs.
+- Build 25 requires all four focused gates, the complete established Generic APU/Intake regression, governance checks, typechecks, frontend production build, and deterministic API runtime closure.
+- Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, or customer data changed.

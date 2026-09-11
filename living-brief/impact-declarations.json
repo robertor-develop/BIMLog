@@ -22413,6 +22413,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4eccf3526e87af8afa7492885eaea9677ce11d61c5990fc25c395d9e4b127997"
+    },
+    {
+      "taskId": "post-p17-assurance-builds21-25-20260911",
+      "reviewedThroughCommit": "e34277ee8dc24f8ee96ee8495599448ce3508e75",
+      "reviewedAt": "2026-09-11T06:19:35-04:00",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Adds test-only financial, replay-safety, governed-export, responsive-accessibility, and consolidated build evidence without product or release changes.",
+      "workstreams": [
+        "post-p17-apu-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority, ownership, capability, or commercial semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The sequential evidence-only workflow follows the existing execution and acceptance boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Quality requirements remain unchanged while executable assurance coverage increases."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer promise, product direction, or roadmap semantics change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic architecture inventory includes the four new test-only behavior files; runtime architecture is unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, camera, XML, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed export and report requirements are tested without changing their presentation contract."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No interoperability, external-standard, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Build 21 through 25 internal assurance scope and candidate state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the consolidated Build 25 gate and preserves external field acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact focused coverage and explicit non-mutation boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "67a46f25b1e6e81c7d346b40d65951ff043f502ad8fe96a0b49d1ed336c25e1d"
     }
   ]
 }

@@ -1409,6 +1409,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - The final machine-readable PASS evidence is frozen at source commit `4d881f695b41bbc7c4138746559049ac0f0ef3d5` with SHA-256 `E06A7116D1A60D9F8EBE6C885C3928A37E02F665EA8C561638DB0FF4B5823DAE`.
 - This is test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, deployment, or customer-data change is introduced.
 
+## POST-P17 assurance Builds 21–25 — 2026-09-11
+
+- Builds 21–24 lock exact multi-rate financial calculations, activation concurrency/idempotent replay, governed report/export scope, and responsive accessibility contracts.
+- Build 25 consolidates those gates with the complete Generic APU/Job Intake regression and governed production build/runtime closure.
+- This block is test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.
