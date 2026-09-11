@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "checkedAt": "2026-09-11T12:45:00-04:00",
+  "url": "https://bimlog.app/projects/27/change-orders",
+  "projectId": 27,
+  "projectCode": "ROB-T1",
+  "version": "v1.05.N17-P17",
+  "observed": [
+    "Change Orders module",
+    "governed current-view Print PDF",
+    "Import",
+    "New Change Order",
+    "Draft, Pending, Approved, and Rejected filters",
+    "search and sort controls",
+    "financial, schedule, company, and date current-view scope"
+  ],
+  "diagnosticControlsVisible": false,
+  "customerDataMutated": false,
+  "externalActionPerformed": false
+}
