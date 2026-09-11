@@ -1440,7 +1440,8 @@ No release, publication, or overall completion claim is permitted until the reco
 - Build 40 consolidates those gates with document-connection, protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
 - The Chrome check used controlled project 27 read-only and performed no create, import, send, acknowledge, delete, email, file, link, or customer-data mutation.
 - The consolidated runner supplies a non-routable test-only database URL to the static document-connection behavior module; it performs no connection or mutation and leaves the production fail-closed database bootloader unchanged.
-- This block is candidate test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `da1cb8da0b03dacc4117f7585a8eba603a2bc272` with SHA-256 `9E0FFC774B559FF7545AC8C5E222CC44E8BEF71DC077BF80A25D3CE2A1C7E44C`.
+- This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
 
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
