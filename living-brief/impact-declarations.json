@@ -22491,7 +22491,7 @@
     },
     {
       "taskId": "post-p17-assurance-builds26-30-20260911",
-      "reviewedThroughCommit": "229c17ec31c3e7749686fa4e8f11e38f79ff9f62",
+      "reviewedThroughCommit": "468e0e1379d217ed8ba89bfd355be594867b45a6",
       "reviewedAt": "2026-09-11T10:45:00-04:00",
       "status": "candidate_verified",
       "captureTiming": "same_task_before_governed_build",
@@ -22562,7 +22562,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "5a8b31aba5c3b74efd50d7ba2bdc710f7ecfb91a998fe199c72c3732dbe90545"
+      "reviewedChangeSha256": "b7a3c4e81a443704d5e7b6a46625190742a2bdab663d1d458eee60b5bda61e4f"
     }
   ]
 }

@@ -1423,6 +1423,7 @@ No release, publication, or overall completion claim is permitted until the reco
 - Builds 26–29 lock RFI authoritative project identity, lifecycle/revision history, attachment authorization and storage lifecycle, and the live user-facing workflow in authenticated Chrome.
 - Build 30 consolidates those gates with the established RFI import suite and the protected Generic APU/Job Intake and Lens Next regression suites.
 - The Chrome check used an existing RFI in project 27 read-only, verified Copy Email locally, and performed no send, record mutation, link mutation, deletion, or customer-data change.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `468e0e1379d217ed8ba89bfd355be594867b45a6` with SHA-256 `DAC5C420974961A29AC01AAC4DDD9C7C0C6FD9391B07B00523CF0A194B3EBFAA`.
 - This block is test/evidence-only assurance at `v1.05.N17-P17`; RFI product behavior, protected APU and Lens Next behavior, Native, database/schema, deployment, and customer data remain unchanged.
 
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
