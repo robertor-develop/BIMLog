@@ -1,0 +1,25 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P17",
+  "results": [
+    {
+      "name": "build08-autosave",
+      "exitCode": 0
+    },
+    {
+      "name": "build09-activation",
+      "exitCode": 0
+    },
+    {
+      "name": "intake-regression",
+      "exitCode": 0
+    }
+  ],
+  "declarations": {
+    "productCodeChanged": false,
+    "databaseChanged": false,
+    "schemaChanged": false,
+    "nativeChanged": false,
+    "deploymentChanged": false
+  }
+}
