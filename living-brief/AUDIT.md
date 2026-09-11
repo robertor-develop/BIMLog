@@ -1113,3 +1113,10 @@ was performed or authorized.
 - The shared financial authorization contract now keeps maker-checker as the default and permits an approval-only exception when the server proves exactly one active same-company project member, Cost Approver and Financial Administrator authority, active scope and entitlement, no suspension, exact amount/currency/category, and an effective approval-limit policy. Review and execution remain non-overridable.
 - The request must carry a bounded written reason and exact `SOLE_OWNER_OVERRIDE` confirmation. The approved snapshot audit records the override, and a separate append-only journal event preserves maker, approver, reason, fingerprint, policy, and exposure evidence.
 - This is a Platform-only financial-governance correction advancing the release identity to `v1.05.N17-P17`. It introduces no database/schema, Native, Lens, camera, XML, provider, deployment, or production-data change.
+
+# 2026-09-10 — Build-history governance truth reconciliation
+
+- A read-only ancestry and source-content audit confirmed that the accepted Intake/APU Builds 1–20, corrective Builds 1–10, Build 21, P11-P14 Platform corrections, UX Build 17, Coordination Release C, and Prework 02-06 source contracts are present in the current P17 production lineage.
+- Historical OPEN_LOOP publication checkboxes for P10-P17 and the corrective blocks were stale. They were reconciled to the later production evidence instead of being treated as new implementation work.
+- External acceptance remains deliberately separate: the returning 20-row APU/Job Intake user smoke test and Ruben's final historical/new Lens field confirmation are still open.
+- Provider activation and enterprise/connector database migrations remain intentionally deferred. This reconciliation did not authorize or perform product, Native, database, schema, provider, push, publication, deployment, or customer-data changes.

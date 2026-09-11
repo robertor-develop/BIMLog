@@ -22027,6 +22027,93 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "35c138cbab5086743b131c0363830fa3d0b6a4d5b8246fa8d9f9becad32b690f"
+    },
+    {
+      "taskId": "build-history-governance-truth-reconciliation-20260910",
+      "reviewedThroughCommit": "a7f23d2f77bcc1a0717a060b27ad00bbba6661d5",
+      "reviewedAt": "2026-09-10T23:03:50-04:00",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_after_history_audit_before_release",
+      "summary": "Reconciles stale P10-P17 and post-Build-20 release checkboxes to verified production ancestry while preserving external field acceptance and deferred provider/database gates as open.",
+      "workstreams": [
+        "governance-truth-reconciliation"
+      ],
+      "immediateFindings": [
+        {
+          "category": "release_governance",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Later P17 production evidence had superseded multiple unchecked publication gates, while external APU and Lens field acceptance remained genuinely open."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product identity, authority, ownership, or capability semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The reconciliation preserves distinct source, release, and field-acceptance gates."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product, UI, artifact, report, or acceptance requirement changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Platform source, runtime, route, service, deployment, database, or schema changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, camera, sectioning, XML, or package changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report implementation or presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or interoperability claims change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records current P17 production ancestry and separates internal evidence from remaining external acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes stale publication gates and retains only genuine field, provider, and migration work."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the evidence-based reconciliation and explicit non-mutation boundary."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "add728b17c518f92f1cce0bd49a8f76700d80d1e83ff3b0a70180b04a9f29350"
     }
   ]
 }

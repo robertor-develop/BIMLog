@@ -1350,7 +1350,16 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] Quick and Advanced Job Intake expose Add company contact only after selecting a current-project client company.
 - [x] A newly created contact enters the current directory options and is immediately selected as Primary Contact.
 - [x] The server proves the company is already represented in the current project directory before contact creation or reuse.
-- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+- [x] Independent browser acceptance, integration, push, and publication were completed in the consolidated P15 release and remain present in the live P17 descendant.
+
+## Production lineage and open-gate reconciliation — 2026-09-10
+
+- Production is live at `v1.05.N17-P17`. The exact P17 source is contained in the production `master` lineage, and `origin/main` is an older ancestor rather than a competing newer product state.
+- The accepted Job Intake / Multi-APU Builds 1–20, corrective Builds 1–10, sole-owner Build 21, P11 client-company corrections, P13 legacy navigation compatibility, P14 digest integrity correction, UX Build 17, and Coordination Release C source are all present in the current production lineage.
+- Controlled Chrome and focused regression evidence pass for the P17 Intake/APU behavior. The external 20-row user smoke-test return remains open and is not replaced by internal evidence.
+- Ruben's final field confirmation of one historical and one new Lens viewpoint, camera/sectioning, and XML export/import remains open. Package creation or Telegram delivery is not customer acceptance.
+- Enterprise identity/connector migrations and provider activation remain intentionally deferred behind their separate database, credential, backup, rollback, and deployment gates.
+- No product, Native, database, schema, provider, or deployment mutation occurred in this documentation-only reconciliation.
 
 ## Post-Build-20 corrective Builds 6–10 local block — 2026-09-10
 
@@ -1372,7 +1381,7 @@ No release, publication, or overall completion claim is permitted until the reco
 - Project Budget preserves independent maker-checker approval as the default and adds one explicit approval-only exception for a genuine sole active company member on the project.
 - The exception requires Cost Approver and Financial Administrator authority, an approval-limit policy, exact budget fingerprint confirmation, a 10–1000 character reason, and the exact `SOLE_OWNER_OVERRIDE` confirmation.
 - Successful use records both the approved immutable snapshot and a dedicated append-only `budget_self_approval_override_used` journal event. Cross-project, suspended, over-limit, ambiguous multi-member, review, execution, and ordinary same-maker requests remain denied.
-- Platform advances to P17. Native, database, and schema are unchanged; push, publication, production verification, and final live budget acceptance remain separate gates.
+- Platform advanced to P17. Native, database, and schema are unchanged. The governed build, exact-source push/publication, production health/version verification, and controlled Chrome Intake verification subsequently passed; external APU acceptance and a prerequisite-backed live sole-owner approval remain open.
 
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
@@ -1392,14 +1401,14 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] Advanced Job Intake now presents Contract setup immediately after Job identity, before Contract Items and APU pricing.
 - [x] The left navigation and visible section numbers use the same sequence; Contract Items and APU pricing remain one combined stage rather than two competing navigation targets.
 - [x] Existing contract, scope, pricing, autosave, activation, permission, database, and schema behavior is unchanged.
-- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+- [x] Independent browser acceptance, integration, push, and publication were completed in the consolidated P15 release and remain present in the live P17 descendant.
 
 ## Post-Build-20 corrective Build 3 — Contract Item bindings
 
 - [x] Advanced Contract Items can select any authoritative saved APU plan version returned by the current-project Cost & Value service; selecting a version binds both its version number and saved selling rate.
 - [x] A persisted budget snapshot is reopened with its authoritative lines, so the saved budget-line selection remains visible and editable after reload.
 - [x] Existing responsible-company participant and authoritative-agreement bindings remain in the same canonical Intake draft and continue through autosave/normalization.
-- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+- [x] Independent browser acceptance, integration, push, and publication were completed in the consolidated P15 release and remain present in the live P17 descendant.
 
 ## Post-Build-20 corrective Build 4 — existing-user project assignment
 
@@ -1407,4 +1416,4 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] Current project members are excluded from the candidate list; no platform-wide user directory is exposed.
 - [x] The Intake draft saves before membership mutation, reloads authoritative membership afterward, and makes the added member available to the existing contract, Contract Item, Work Package, hours, cost, and incentive assignment controls.
 - [x] Existing membership, assignment, company/project isolation, database, and schema contracts are reused unchanged.
-- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+- [x] Independent browser acceptance, integration, push, and publication were completed in the consolidated P15 release and remain present in the live P17 descendant.

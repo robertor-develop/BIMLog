@@ -2231,15 +2231,15 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 - [x] Consolidate the accepted Job Intake / Multi-APU Builds 1–20 with the tested Lens Next missing-scale XML correction without losing either lineage.
 - [x] Align the combined visible Platform and Navisworks 2025 package identity to `v1.05.N14-P10` / `1.5.14.10`.
 - [x] Align the version regression expectation and deliver the exact integrity-verified 2025 ZIP through the approved private Telegram boundary.
-- [ ] Push the exact reviewed integration commit, build and publish it once through the governed Replit Shell path, and verify the live version and Intake behavior in Chrome.
-- [ ] Ruben must field-test the exact Navisworks 2025 N14-P10 package, including XML export/import, before promotion is described as customer accepted.
+- [x] The N14-P10 source lineage was pushed, published, and live-verified before the subsequent P11-P17 Platform releases; the currently deployed descendant is `v1.05.N17-P17`.
+- [ ] The superseded N14-P10 package is not a current field-acceptance object. Final Navisworks field acceptance remains against the latest accepted N17 package and Platform descendant.
 
 ## v1.05.N14-P11 Job Intake client-company correction gates
 
 - [x] Reuse the authoritative current-project company registration endpoint in Quick and Advanced setup.
 - [x] Automatically select the created/reused company and preserve authoritative company ID in the Intake draft.
 - [x] Prove focused behavior, Job Intake service, combined multi-company scenario, frontend typecheck/build, and mojibake gates locally.
-- [ ] Push, publish, and live-verify the exact P11 candidate in Chrome under separate production authorization.
+- [x] P11 was pushed, published, and live-verified; its Quick/Advanced client-company and Primary Contact corrections remain present in the current P17 production lineage.
 
 ## v1.05.N17-P12 Build 47 release-closure gates
 
@@ -2248,8 +2248,9 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 - [x] Permit only bounded exact-identity legacy compatibility without database rewrite or fabricated digest.
 - [x] Permit exact, digest-valid historical navigation server-ID rebinding only in the response payload.
 - [x] Merge the accepted N17 camera-unit contract without Native behavior change and reconcile shared metadata to N17-P12.
-- [ ] Push the exact reviewed commit, publish once through the governed Replit Shell, and verify live N17-P12 plus P11 Intake behavior in Chrome.
-- [ ] Package both Navisworks targets, deliver the verified 2025 ZIP, and obtain Ruben's dual-project field retest.
+- [x] N17-P12 was pushed and published, and its Platform behavior plus preserved P11 Intake behavior remain in the live P17 descendant.
+- [x] Both Navisworks targets were packaged and the verified 2025 ZIP was delivered to Roberto.
+- [ ] Obtain Ruben's final dual-project field confirmation against the latest accepted N17 package and current Platform descendant; do not infer customer acceptance from packaging or delivery.
 
 ## Micro-build allocation
 
@@ -2347,12 +2348,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Preserve every existing capability and keep business logic, permissions, database, schema, and version behavior unchanged.
 - [x] Restore clear discoverability of the existing desktop sidebar collapse/expand and drag-to-resize controls without resetting saved user width.
 - [x] Pass focused behavior, frontend typecheck/build, and governed root regression from the reconciled source state. Builds 9–12 add accessibility, route-level performance, truthful public product proof, and consolidated acceptance without removing capability.
-- [ ] Keep push, publication, and live Chrome verification as a separate explicitly authorized release gate.
+- [x] The workspace-width and sidebar-control corrections were integrated into the authoritative lineage and subsequently published in the live P17 descendant; production Chrome evidence confirms the resulting UI lineage.
 # Coordination Release C + UX Build 17 integration — 2026-09-10
 
 - [x] Merge sealed Coordination Release C with accepted UX Build 17 in the dedicated Release B integration worktree, preserving both parents and both authority histories.
 - [x] Focused coordination/credential behavior 12/12 and UX contracts 90/90.
-- [ ] Remote integration, provider activation, migration authorization, version reconciliation, publication, and deployment remain separate explicit gates.
+- [x] Coordination Release C and UX Build 17 were integrated into the authoritative production lineage and version-reconciled through P17.
+- [ ] Provider activation and the explicitly deferred enterprise/connector migrations still require separate exact authorization, backup, rollback, and production verification.
 - [x] Governed production build and exact mobile/desktop browser matrix completed from the clean reconciled evidence commit; local integration acceptance is complete.
 
 ## v1.05.N17-P13 legacy Open Working View closure
@@ -2361,26 +2363,27 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Add bounded response-only normalization for digest-valid historical navigation packages proven to share project, active model, and authoritative viewpoint lineage.
 - [x] Keep cross-project, model mismatch, digest corruption, unrelated lineage, cyclic lineage, and ambiguous identity fail-closed.
 - [x] Preserve database/schema and Native behavior unchanged; advance Platform only to P13.
-- [ ] Push, publish, live-verify, and obtain Ruben confirmation on one historical and one new viewpoint only after separate explicit authorization.
+- [x] P13 was pushed and published and its bounded compatibility path remains present in the live P17 Platform descendant.
+- [ ] Obtain Ruben confirmation on one historical and one new viewpoint against the current accepted release; publication alone is not field acceptance.
 
 ## v1.05.N17-P14 historical digest contract closure
 
 - [x] Require independent recomputation or preserved canonical evidence for unversioned historical Visual Packages; stored/embedded equality alone is not verification.
 - [x] Preserve the P13 response-only safe lineage classifier without allowing lineage compatibility to bypass digest integrity.
 - [x] Align Platform behavior tests with Native's permanent historical-unversioned quarantine vector while retaining an explicit recomputation-valid historical acceptance case.
-- [ ] Push the exact accepted P14 commit, publish without database/schema migration, verify production version and health in Chrome, and send the unchanged accepted N17-P12 Navisworks 2025 ZIP to Roberto.
+- [x] P14 was pushed and published without database/schema migration, production was verified, and the accepted N17 Navisworks 2025 package was delivered to Roberto; later Platform-only releases preserve this contract.
 - [ ] Ruben field acceptance must prove one new and one historical Open Working View path, camera/sectioning, and one XML export smoke before final freeze audit.
 
 ## Post-Build-20 corrective acceptance stream
 
 - [x] Corrective Build 1: multiple authoritative contacts for the selected current-project client company in Quick and Advanced Job Intake, with immediate Primary Contact selection and server-side project/company scope enforcement.
-- [ ] Corrective Build 1 independent browser acceptance and integration/release gate.
+- [x] Corrective Build 1 passed controlled Chrome acceptance and was integrated, published, and retained through P15-P17.
 - [x] Corrective Build 2: place Contract setup immediately after Job identity in Advanced Intake, align navigation and numbering, and keep Contract Items/APU pricing together.
 - [x] Corrective Build 3: make saved APU versions selectable per Contract Item and reload persisted budget-line options while preserving company/agreement bindings.
 - [x] Corrective Build 4: add an existing connected-company BIMLog user to the current project from Team & Resources, then expose that authoritative member to the existing task/contract/scope assignment chain.
-- [ ] Corrective Builds 1–4 independent browser acceptance and integration/release gate.
+- [x] Corrective Builds 1–4 passed controlled Chrome acceptance and were integrated, published, and retained through P15-P17.
 - [x] Corrective Build 5: expose Drafting 35.47 and BIM Coordinator 37.99 defaults in Team & Resources, update the selected authoritative Contract Item rate, and preserve separate internal cost and incentive values.
-- [ ] Corrective Builds 1–5 independent browser acceptance and integration/release gate.
+- [x] Corrective Builds 1–5 passed controlled Chrome acceptance and were integrated, published, and retained through P15-P17.
 - [x] Corrective Builds 1–5 controlled Chrome acceptance and coherent Platform P15 version reconciliation.
 - [x] Push exact P15 source, publish through approved Replit flow, and live-verify version, health, and representative Intake controls before starting Build 6. Published `v1.05.N17-P15` from exact commit `61d57db15b3ed15ce6ac13cc2f9420b7448ab745`; health and representative Intake controls passed live Chrome verification.
 - [x] Corrective Build 6: make task-level resource assignment explicit, clear stale package-task selection when the Contract Item changes, and preserve the existing operational task authority.
@@ -2389,8 +2392,8 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Corrective Build 9: expose stable Work Package identity and owner and prove save/reload plus operational activation persistence.
 - [x] Corrective Build 10: expose canonical Job budget-account generation and prove source-line association and idempotent persistence.
 - [x] Corrective Builds 6–10 consolidated focused, Intake, Generic APU, Job Operations, budget-governance, typecheck, full production-build, and deterministic runtime-closure gates pass.
-- [ ] Push exact P16 source, publish through the approved Replit Shell flow, and live-verify version, health, and representative Builds 6–10 Intake controls in Chrome.
-- [ ] Continue with the next unresolved smoke-test finding; do not repeat completed Builds 1–10 work.
+- [x] P16 was pushed and published through the approved Replit Shell flow; version, health, and representative Builds 6–10 Intake controls were verified in Chrome and remain present in P17.
+- [x] The next unresolved smoke-test finding was handled as Build 21 without repeating completed Builds 1–10 work.
 
 ## Build 21 sole-owner budget approval override
 
@@ -2398,4 +2401,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Require Cost Approver plus Financial Administrator authority, exact fingerprint confirmation, an effective approval-limit policy, a bounded written reason, and explicit exception confirmation.
 - [x] Record immutable override evidence without rewriting the budget, weakening other financial operations, or changing database/schema.
 - [x] Document the exact bilingual workflow in Help & Guide and expose it through progressive disclosure on Under Review budgets.
-- [ ] Complete governed production build, independent browser acceptance, exact-source push/publication, and live P17 budget workflow verification under separate release authority.
+- [x] Complete the governed production build, exact-source push/publication, production health/version verification, controlled Chrome Intake verification, and focused financial regressions for P17.
+- [ ] Complete the external 20-row APU/Job Intake smoke-test return and, when controlled prerequisites exist, field-confirm the live sole-owner budget override with an effective approval policy. Do not invent customer financial policy or users to force this gate.
