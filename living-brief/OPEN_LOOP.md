@@ -2476,5 +2476,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Lock draft, send, acknowledgement, soft-delete, timestamp, and audit contracts.
 - [x] Lock item persistence and project-scoped typed-link cleanup without deleting authoritative connected records.
 - [x] Verify search, status, sort, import, create, and governed current-view PDF controls in authenticated Chrome without mutation.
+- [x] Isolate the static document-connection gate with a non-routable test-only database URL; no database connection, mutation, or production safety relaxation occurs.
 - [ ] Run and freeze the consolidated Build 40 protected-baseline gate.
 - [ ] External user field acceptance remains separate from this internal assurance block.

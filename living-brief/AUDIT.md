@@ -1194,4 +1194,5 @@ was performed or authorized.
 - Build 38 asserts explicit item/file references, authoritative detail items, item-only cleanup, project-scoped bidirectional link cleanup, and typed Operations junction isolation.
 - Build 39 combines source assertions with authenticated Chrome observation of the live create/import/search/filter/sort/current-view PDF surfaces and no diagnostic controls.
 - Build 40 requires the focused gates plus document connections, protected APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
+- The runner's static document-connection gate receives a non-routable test-only database URL solely to satisfy import-time fail-closed configuration; the behavior test makes no database or network call and production configuration enforcement is unchanged.
 - Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, external send, import, or customer data changed.

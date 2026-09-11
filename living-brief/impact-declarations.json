@@ -22641,8 +22641,8 @@
     },
     {
       "taskId": "post-p17-assurance-builds36-40-20260911",
-      "reviewedThroughCommit": "8ae5f3801aab0d10b54d69d8d8aba57084440a3b",
-      "reviewedAt": "2026-09-11T11:35:00-04:00",
+      "reviewedThroughCommit": "8784bd7cc24a7c7a8788be3368bfee7beb3213f3",
+      "reviewedAt": "2026-09-11T12:00:00-04:00",
       "status": "candidate_verified",
       "captureTiming": "same_task_before_governed_build",
       "summary": "Adds test-only Transmittal identity, lifecycle, item/link, live workflow, and consolidated protected-baseline evidence without product or release changes.",
@@ -22712,7 +22712,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "90256a738204163451d6dd444828655e93baf13a5cad6fa2bfec9ae741b03903"
+      "reviewedChangeSha256": "e0a2d2f80e0d173c9a630efe59558b3c21c9de9654eb89a390ec8d90a09451a9"
     }
   ]
 }

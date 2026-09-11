@@ -1439,6 +1439,7 @@ No release, publication, or overall completion claim is permitted until the reco
 - Builds 36–39 lock Transmittal authoritative identity/project scope, draft/send/acknowledgement/delete lifecycle, item and typed-link isolation, governed exports, exact deep links, and live Chrome workflow visibility.
 - Build 40 consolidates those gates with document-connection, protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
 - The Chrome check used controlled project 27 read-only and performed no create, import, send, acknowledge, delete, email, file, link, or customer-data mutation.
+- The consolidated runner supplies a non-routable test-only database URL to the static document-connection behavior module; it performs no connection or mutation and leaves the production fail-closed database bootloader unchanged.
 - This block is candidate test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
 
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
