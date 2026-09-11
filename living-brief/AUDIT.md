@@ -1163,4 +1163,5 @@ was performed or authorized.
 - Build 24 binds production Intake, Operations, and Reports accessibility announcements, mobile breakpoints, overflow handling, and bounded dialogs.
 - Build 25 requires all four focused gates, the complete established Generic APU/Intake regression, governance checks, typechecks, frontend production build, and deterministic API runtime closure.
 - The initial consolidated runner invocation stopped before product testing because Node could not directly spawn a Windows `.CMD` shim; the runner now calls that same repository-local shim through `cmd.exe` and its focused gate passes.
+- The next run exposed an implicit-any annotation only in the new Build 21 test; explicit accumulator types now pass both the focused runtime assertion and the complete API typecheck without changing product code.
 - Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, or customer data changed.
