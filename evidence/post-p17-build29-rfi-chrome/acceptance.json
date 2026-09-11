@@ -1,0 +1,15 @@
+{
+  "build": 29,
+  "scope": "RFI workflow, email copy, linked-item deep links, and attachment controls",
+  "liveVersionObserved": "v1.05.N17-P17",
+  "browser": "Chrome",
+  "controlledReadOnlyProject": 27,
+  "observations": {
+    "rfiListAndDetail": "PASS",
+    "copyEmail": "PASS — control changed from Copiar Email to Email Copiado and displayed Copiado al portapapeles",
+    "linkedDocuments": "PASS — type selector, Attach, Create Submittal, and Refresh items controls visible",
+    "responseAttachments": "PASS — Add Reference, Upload Response File, and Select Project File controls visible",
+    "externalSend": "NOT PERFORMED",
+    "customerDataMutation": "NONE"
+  }
+}
