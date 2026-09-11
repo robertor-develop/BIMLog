@@ -1418,6 +1418,13 @@ No release, publication, or overall completion claim is permitted until the reco
 - The consolidated gate is PASS and its evidence is frozen at commit `c520e15cb33567eb946e3499ad00651dc6237da7` with SHA-256 `3E1C760AE1F334DA7CC1D6C0A9AF0AC264FF477351E49D86210F19FE17F7BD65`.
 - This block is test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
 
+## POST-P17 assurance Builds 26–30 — 2026-09-11
+
+- Builds 26–29 lock RFI authoritative project identity, lifecycle/revision history, attachment authorization and storage lifecycle, and the live user-facing workflow in authenticated Chrome.
+- Build 30 consolidates those gates with the established RFI import suite and the protected Generic APU/Job Intake and Lens Next regression suites.
+- The Chrome check used an existing RFI in project 27 read-only, verified Copy Email locally, and performed no send, record mutation, link mutation, deletion, or customer-data change.
+- This block is test/evidence-only assurance at `v1.05.N17-P17`; RFI product behavior, protected APU and Lens Next behavior, Native, database/schema, deployment, and customer data remain unchanged.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.

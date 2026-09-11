@@ -2451,3 +2451,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Verify Build 21's focused assertions and complete API TypeScript project both pass.
 - [x] Run the consolidated Build 25 gate and freeze machine-readable PASS evidence at commit `c520e15cb33567eb946e3499ad00651dc6237da7`.
 - [ ] External user field acceptance remains separate from this internal assurance block.
+
+## POST-P17 assurance Builds 26–30
+
+- [x] Lock RFI authoritative identity and current-project scope.
+- [x] Lock revision lineage, immutable history, and soft-delete lifecycle.
+- [x] Lock bounded attachment upload, project authorization, canonical download, and safe staged cleanup.
+- [x] Verify the existing RFI detail, email-copy, linked-document, deep-create, and response-attachment controls in authenticated Chrome without external send or record mutation.
+- [ ] Run the consolidated Build 30 gate with RFI, protected APU/Job Intake, protected Lens Next, and governed production-build regressions; freeze exact evidence after PASS.
+- [ ] External user field acceptance remains separate from this internal assurance block.

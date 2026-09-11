@@ -1166,3 +1166,12 @@ was performed or authorized.
 - The next run exposed an implicit-any annotation only in the new Build 21 test; explicit accumulator types now pass both the focused runtime assertion and the complete API typecheck without changing product code.
 - The final clean-source run passes all four focused gates, the complete established Generic APU/Intake suite, governance checks, database safety, secret exposure, mojibake, all typechecks, frontend production build, and deterministic API runtime closure; evidence SHA-256 is `3E1C760AE1F334DA7CC1D6C0A9AF0AC264FF477351E49D86210F19FE17F7BD65`.
 - Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, or customer data changed.
+
+# 2026-09-11 — POST-P17 assurance Builds 26–30
+
+- Build 26 asserts project-bound RFI parsing, querying, authorization, attachment target selection, activity, and UI locators.
+- Build 27 asserts revision numbering and lineage, row locking, soft deletion, immutable activity, and responsibility history.
+- Build 28 asserts bounded multipart upload, same-project live-RFI/file targets, safe filename/reference handling, uploader-only staged cleanup, compensation, and authenticated project-bound download.
+- Build 29 combines source-bound workflow assertions with authenticated Chrome observation of list/detail, Linked Documents, Create Submittal, response attachments, and successful local Copy Email feedback.
+- Build 30 requires all four gates plus established RFI import, protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
+- Impact declaration: tests/evidence/governance only; no RFI product behavior, protected APU or Lens Next behavior, version, Native, database/schema, deployment, external send, or customer data changed.
