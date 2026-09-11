@@ -22189,6 +22189,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "31ff66a4538f4e3e50f86ecadbf864c59e6ec4a1a1d3a1b30b3ba6150d407e5a"
+    },
+    {
+      "taskId": "post-p17-assurance-builds06-10-20260911",
+      "reviewedThroughCommit": "c5bbcfb3bc3ffbe918fcbbe68dbff803495f922e",
+      "reviewedAt": "2026-09-11T00:20:00-04:00",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_after_internal_acceptance",
+      "summary": "Records Chrome production acceptance and test-only autosave, activation, and consolidated Intake/APU evidence without changing product behavior or release identity.",
+      "workstreams": [
+        "post-p17-apu-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority, identity, ownership, or capability semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The controlled Chrome and executable evidence workflow follows existing governance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing internal and field-acceptance separation remains unchanged while executable coverage increases."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction, customer promise, or roadmap semantics change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production route, service, component behavior, deployment, database, or schema changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, camera, XML exporter, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report implementation, rendering, export, or presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, interoperability, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records completion and results for assurance Builds 06 through 10."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the internal block while retaining external user field acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records Chrome observations, executable contracts, results, and non-mutation boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7d4f972a1ae096ada27cd4a5635a725abeda01fb2bb28a079307ef3ab72aad57"
     }
   ]
 }

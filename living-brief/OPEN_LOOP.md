@@ -2412,3 +2412,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Automate PDF, DOCX, XLSX, CSV, and XML intake-source inspection contracts.
 - [x] Run the consolidated assurance runner and freeze its manifest with every internal gate PASS.
 - [ ] External user smoke-test return remains a separate field-acceptance gate; this internal block does not replace it.
+
+## POST-P17 assurance Builds 06–10
+
+- [x] Verify the complete production Advanced Job Intake workspace in authenticated Chrome on the controlled test project.
+- [x] Prove Quick/Advanced mode switching preserves one saved draft and restore the temporary test value afterward.
+- [x] Lock autosave failure, local recovery, bounded retry, and unload-warning behavior with an executable regression.
+- [x] Lock governed activation ordering, readiness, fingerprint, and optimistic revision boundaries without activating an incomplete live draft.
+- [x] Run consolidated Intake/APU regression and record machine-readable PASS evidence.
+- [ ] External user smoke-test return remains the field-acceptance authority and is not replaced by this internal block.

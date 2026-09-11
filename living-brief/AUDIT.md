@@ -1127,3 +1127,12 @@ was performed or authorized.
 - Builds 02–03 use real Chromium and the production `QuickJobIntake` component with isolated fixture data. They prove required-field entry, customer and first-scope capture, review readiness, local draft reload, saved-section restoration, return after a project switch, and project-key isolation.
 - Build 04 verifies the existing format-specific contract: PDF bytes are preserved for document handling, DOCX remains readable OOXML and requires manual intake confirmation, XLSX/CSV receive structured previews, and XML receives bounded text preview.
 - Build 05 runs all new gates with workspace-library typecheck and the established Generic APU suite and writes a hash-bearing manifest. This is internal evidence only; it changes no product behavior, version, Native code, database/schema, deployment, or customer data and does not replace external field acceptance.
+
+# 2026-09-11 — POST-P17 assurance Builds 06–10
+
+- Build 06 exercised the actual production `JobIntakeWorkspace` in authenticated Chrome on the explicitly controlled 521 E Tremont test project and observed every Advanced stage and authority surface.
+- Build 07 saved one temporary optional location marker, proved exact continuity through Advanced → Quick → Advanced, then cleared and saved it so the test project was restored.
+- Build 08 adds a source-bound executable contract for browser recovery, visible failure state, two bounded retries, and unload protection.
+- Build 09 adds a source-bound executable contract proving that activation saves first, requires readiness, and submits the authoritative revision and completion fingerprint.
+- Build 10 reruns the new gates with the complete established Generic APU/Job Intake regression. The incomplete live draft was not activated and no customer data was used.
+- Impact declaration: evidence/test/governance only; no product behavior, release version, Native, database, schema, deployment, or persistent test marker changed.

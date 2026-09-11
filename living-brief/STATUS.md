@@ -1389,6 +1389,13 @@ No release, publication, or overall completion claim is permitted until the reco
 - The exact workbook hash is `10F1918DBD947B84FD04405B162C8388F60A255239C091468864AFDBCE981E58`; all 20 rows remain PASS with zero blockers in the internal acceptance authority.
 - The consolidated gate passes the four new suites, workspace-library typecheck, and the established Generic APU regression. Product behavior, release version `v1.05.N17-P17`, Native, database, schema, deployment, and customer data are unchanged.
 
+## POST-P17 assurance Builds 06–10 — 2026-09-11
+
+- Live authenticated Chrome acceptance on controlled project `PRO-521-TEST` proves the complete Advanced Job Intake surface and Quick/Advanced draft continuity at `v1.05.N17-P17`.
+- The temporary mode-switch marker was removed and saved, leaving the controlled project at its prior value.
+- Executable gates lock local recovery, visible autosave failure, bounded retry, unload protection, and the governed fingerprint/revision activation boundary.
+- The consolidated gate and established Generic APU/Intake regression pass. No product behavior, version, Native, database/schema, deployment, or customer data remains changed by this block.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.
