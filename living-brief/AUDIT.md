@@ -1186,3 +1186,12 @@ was performed or authorized.
 - Build 35 requires all four gates plus protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
 - The clean-source consolidated execution passed all eight gates and froze `evidence/post-p17-builds31-35-acceptance/results.json` at commit `21eda7ee5ec11d45123716c6428ab51f3fb66425`, SHA-256 `09F7DC19709BCAB1AAC74C6C59ED4435A93F910E697FBEE7B0C47B400063322B`.
 - Impact declaration: tests/evidence/governance only; no Submittal product behavior, protected APU or Lens Next behavior, version, Native, database/schema, deployment, external send, file upload, or customer data changed.
+
+# 2026-09-11 — POST-P17 assurance Builds 36–40
+
+- Build 36 asserts authenticated membership/write authority and project-bound active-list/detail/update identity.
+- Build 37 asserts draft creation, write-authorized project-bound send, sent/acknowledged timestamps, send audit, and reason-bearing audited soft deletion.
+- Build 38 asserts explicit item/file references, authoritative detail items, item-only cleanup, project-scoped bidirectional link cleanup, and typed Operations junction isolation.
+- Build 39 combines source assertions with authenticated Chrome observation of the live create/import/search/filter/sort/current-view PDF surfaces and no diagnostic controls.
+- Build 40 requires the focused gates plus document connections, protected APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
+- Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, external send, import, or customer data changed.
