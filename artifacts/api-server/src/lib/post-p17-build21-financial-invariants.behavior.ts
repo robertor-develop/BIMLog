@@ -24,6 +24,6 @@ assert.equal(intake.team.assignments[1]?.customerHourlyRate, "37.99");
 assert.equal(completion.totals.contractValue, "544.65");
 assert.equal(completion.totals.plannedLaborCost, "92");
 assert.equal(completion.totals.plannedHours, "15");
-assert.equal(intake.team.assignments.reduce((sum, item) => sum + Number(item.incentiveAmount), 0), 8);
+assert.equal(intake.team.assignments.reduce((sum: number, item: { incentiveAmount: string }) => sum + Number(item.incentiveAmount), 0), 8);
 
 console.log("POST-P17 Build 21 financial calculation and rate-separation invariants: PASS");
