@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P17",
+  "results": [
+    {
+      "file": "post-p17-build11-company-contact-authority.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "a2f6f3cc5ff620be1f2c84d8172606ea4a4b95bd9515df49f54efebcb4843890"
+    },
+    {
+      "file": "post-p17-build12-binding-chain.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "705038e1eb12f935972e9211c3aae833b088aa89c25700867be50c9ab9350630"
+    },
+    {
+      "file": "post-p17-build13-resource-authority.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "7b69eea065ebf947c59a74e08487b96ae55e7ed2b80fec72891612f306ece89e"
+    },
+    {
+      "file": "post-p17-build14-activation-outputs.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "90ef9448278ff7ede2584608eddc86efc61b11d154fdce3b2caaec7ddfc91447"
+    },
+    {
+      "file": "test:generic-apu",
+      "exitCode": 0
+    }
+  ],
+  "productCodeChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "deploymentChanged": false
+}
