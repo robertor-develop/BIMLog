@@ -21930,6 +21930,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4fc68245bdec729c7737bd390def9974c0316476a95f792abb55928f7fd514ff"
+    },
+    {
+      "taskId": "build21-sole-owner-budget-approval-override-20260910",
+      "reviewedThroughCommit": "7c07d65e41d1fabc7472eef0e8eafea708a9c088",
+      "reviewedAt": "2026-09-10T20:20:00-04:00",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_after_implementation_before_release",
+      "summary": "Adds a narrow, explicit and audited sole-owner budget self-approval exception while preserving normal maker-checker, scope, suspension, approval-limit, database, schema, and Native contracts.",
+      "workstreams": [
+        "financial-budget-governance"
+      ],
+      "immediateFindings": [
+        {
+          "category": "financial_control",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "A genuine one-person company could prepare but could not complete its controlled budget because separation of duties had no explicit audited owner exception."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical project, company, budget, snapshot, and audit ownership remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded correction follows financial-control, evidence, release, and no-schema rules."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The workflow stays explicit, bilingual, auditable, fail-closed, and progressively disclosed."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product domain, payment movement, accounting claim, or module scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial routes, services, journal, and budget snapshot structures are reused without schema change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, bridge, camera, XML, or sectioning change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export presentation change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or interoperability claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the P17 owner-override behavior and remaining release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records completed implementation and outstanding build, browser, and release acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the financial-control finding, narrow decision, evidence requirements, and exclusions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/financial-budget-service.ts",
+        "artifacts/api-server/src/lib/financial-budget.behavior.ts",
+        "artifacts/api-server/src/lib/financial-control-contract.ts",
+        "artifacts/api-server/src/lib/financial-control-service.ts",
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/api-server/src/routes/financial-budgets.ts",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "35c138cbab5086743b131c0363830fa3d0b6a4d5b8246fa8d9f9becad32b690f"
     }
   ]
 }

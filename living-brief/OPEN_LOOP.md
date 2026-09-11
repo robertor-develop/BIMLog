@@ -2391,3 +2391,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Corrective Builds 6–10 consolidated focused, Intake, Generic APU, Job Operations, budget-governance, typecheck, full production-build, and deterministic runtime-closure gates pass.
 - [ ] Push exact P16 source, publish through the approved Replit Shell flow, and live-verify version, health, and representative Builds 6–10 Intake controls in Chrome.
 - [ ] Continue with the next unresolved smoke-test finding; do not repeat completed Builds 1–10 work.
+
+## Build 21 sole-owner budget approval override
+
+- [x] Preserve ordinary maker-checker denial and add a narrow explicit approval-only exception for the sole active company member on a project.
+- [x] Require Cost Approver plus Financial Administrator authority, exact fingerprint confirmation, an effective approval-limit policy, a bounded written reason, and explicit exception confirmation.
+- [x] Record immutable override evidence without rewriting the budget, weakening other financial operations, or changing database/schema.
+- [x] Document the exact bilingual workflow in Help & Guide and expose it through progressive disclosure on Under Review budgets.
+- [ ] Complete governed production build, independent browser acceptance, exact-source push/publication, and live P17 budget workflow verification under separate release authority.

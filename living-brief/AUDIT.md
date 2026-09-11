@@ -1106,3 +1106,10 @@ was performed or authorized.
 - All five focused suites, established Intake/APU/Operations/budget suites, typechecks, governance checks, database safety, secret exposure checks, frontend production build, and deterministic API production assembly pass.
 - The block changes Platform behavior after live P15, so the release identity advances only the Platform segment to `v1.05.N17-P16`; Native remains N17 and no Native package changes.
 - The release gate is limited to exact-source branch advancement, Replit Shell publication, and live Chrome acceptance. It authorizes no database/schema mutation or unrelated product work.
+
+# 2026-09-10 — Build 21 sole-owner budget approval override decision
+
+- Roberto established that a one-person company must be able to complete a governed budget approval without fabricating a second person. The prior unconditional same-maker rejection made the valid solo-company workflow impossible.
+- The shared financial authorization contract now keeps maker-checker as the default and permits an approval-only exception when the server proves exactly one active same-company project member, Cost Approver and Financial Administrator authority, active scope and entitlement, no suspension, exact amount/currency/category, and an effective approval-limit policy. Review and execution remain non-overridable.
+- The request must carry a bounded written reason and exact `SOLE_OWNER_OVERRIDE` confirmation. The approved snapshot audit records the override, and a separate append-only journal event preserves maker, approver, reason, fingerprint, policy, and exposure evidence.
+- This is a Platform-only financial-governance correction advancing the release identity to `v1.05.N17-P17`. It introduces no database/schema, Native, Lens, camera, XML, provider, deployment, or production-data change.

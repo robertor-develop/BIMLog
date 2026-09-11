@@ -709,6 +709,9 @@ export async function approveBudget(input: {
   budgetVersionId: unknown;
   expectedRevision: unknown;
   confirmationFingerprint: unknown;
+  ownerOverride?: unknown;
+  overrideReason?: unknown;
+  overrideConfirmation?: unknown;
 }) {
   const projectId = positiveId(input.projectId, "projectId"),
     budgetVersionId = boundedText(
@@ -791,6 +794,14 @@ export async function approveBudget(input: {
         currency: String(row.currency),
       },
       trustedConfirmations: ["confirm_exact_budget"],
+      selfApprovalOverride:
+        input.ownerOverride === true
+          ? {
+              requested: true,
+              reason: boundedText(input.overrideReason, "overrideReason", 10, 1000),
+              confirmation: String(input.overrideConfirmation ?? ""),
+            }
+          : undefined,
       client,
     });
     if (isApprovedRetry) {
@@ -945,8 +956,34 @@ export async function approveBudget(input: {
         approvalExposure,
         matchedGrantIds: auth.decision.matchedGrantIds,
         previousSnapshotId: previous?.approved_snapshot_id ?? null,
+        selfApprovalOverride: auth.decision.selfApprovalOverride === true,
+        overrideReason:
+          auth.decision.selfApprovalOverride === true
+            ? String(input.overrideReason).trim()
+            : null,
       },
     });
+    if (auth.decision.selfApprovalOverride === true) {
+      await audit(client, {
+        eventType: "budget_self_approval_override_used",
+        companyId: auth.scope.companyId,
+        projectId,
+        actorUserId: auth.actor.userId,
+        entityType: "project_budget_version",
+        entityId: budgetVersionId,
+        version: Number(row.version),
+        code: "FIN_SOLE_OWNER_OVERRIDE_ALLOWED",
+        evidence: {
+          preparedById: Number(row.prepared_by_id),
+          approvedById: auth.actor.userId,
+          reason: String(input.overrideReason).trim(),
+          confirmation: "SOLE_OWNER_OVERRIDE",
+          contentFingerprint: row.content_fingerprint,
+          approvalPolicyId: auth.decision.policyId,
+          approvalExposure,
+        },
+      });
+    }
     await client.query(
       `UPDATE project_budget_versions SET status='approved',approved_by_id=$2,approved_at=now(),approved_snapshot_id=$3,previous_approved_id=$4,revision=revision+1,updated_at=now() WHERE id=$1`,
       [budgetVersionId, auth.actor.userId, snapshotId, previous?.id ?? null],
@@ -1024,7 +1061,9 @@ export async function getFinancialBudgetWorkspace(input: {
     : [];
   const budgets = (
     await pool.query(
-      `SELECT id,budget_id,version,structure_version_id,currency,status,purpose,calculated_total,content_fingerprint,revision,prepared_by_id,submitted_at,reviewed_at,approved_at,approved_snapshot_id,created_at FROM project_budget_versions WHERE project_id=$1 ORDER BY created_at DESC`,
+      `SELECT b.id,b.budget_id,b.version,b.structure_version_id,b.currency,b.status,b.purpose,b.calculated_total,b.content_fingerprint,b.revision,b.prepared_by_id,b.submitted_at,b.reviewed_at,b.approved_at,b.approved_snapshot_id,b.created_at,
+        EXISTS(SELECT 1 FROM financial_authority_journal j WHERE j.project_id=b.project_id AND j.event_type='budget_self_approval_override_used' AND j.entity_type='project_budget_version' AND j.entity_id=b.id) self_approval_override
+       FROM project_budget_versions b WHERE b.project_id=$1 ORDER BY b.created_at DESC`,
       [projectId],
     )
   ).rows;

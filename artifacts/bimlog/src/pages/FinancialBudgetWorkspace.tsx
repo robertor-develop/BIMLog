@@ -496,6 +496,8 @@ function Budget({
 }) {
   const [busy, setBusy] = useState(""),
     [message, setMessage] = useState(""),
+    [overrideReason, setOverrideReason] = useState(""),
+    [overrideConfirmed, setOverrideConfirmed] = useState(false),
     [importFile, setImportFile] = useState<File | null>(null),
     [sourceFileId, setSourceFileId] = useState(""),
     [currency, setCurrency] = useState("USD"),
@@ -574,14 +576,21 @@ function Budget({
     setBusy(row.id);
     setMessage("");
     const url =
-      action === "approve"
+      action === "approve" || action === "approve_override"
         ? `/projects/${projectId}/financial/budgets/${row.id}/approve`
         : `/projects/${projectId}/financial/budgets/${row.id}/actions`;
     const body =
-      action === "approve"
+      action === "approve" || action === "approve_override"
         ? {
             expectedRevision: row.revision,
             confirmationFingerprint: row.content_fingerprint,
+            ...(action === "approve_override"
+              ? {
+                  ownerOverride: true,
+                  overrideReason,
+                  overrideConfirmation: "SOLE_OWNER_OVERRIDE",
+                }
+              : {}),
           }
         : {
             action,
@@ -604,6 +613,10 @@ function Budget({
         }),
         b = await r.json();
       if (!r.ok) throw new Error(b?.error?.en || "Request denied");
+      if (action === "approve_override") {
+        setOverrideReason("");
+        setOverrideConfirmed(false);
+      }
       setMessage(
         tt("Controlled action recorded.", "Acción controlada registrada."),
       );
@@ -739,6 +752,11 @@ function Budget({
                   {tt("Version", "Versión")} {b.version}
                 </b>
                 <span className="fb-status">{b.status}</span>
+                {b.self_approval_override === true && (
+                  <span className="fb-status">
+                    {tt("Approved with owner override", "Aprobado con excepción del propietario")}
+                  </span>
+                )}
               </div>
               <strong>
                 {String(b.calculated_total)} {b.currency}
@@ -783,6 +801,47 @@ function Budget({
                         "Confirmar aprobación exacta",
                       )}
                     </button>
+                    <details className="fb-owner-override">
+                      <summary>
+                        {tt(
+                          "Sole-owner approval override",
+                          "Excepción de aprobación para propietario único",
+                        )}
+                      </summary>
+                      <p>
+                        {tt(
+                          "Use only when you are the sole active company member on this project. BIMLog records the reason and approval as immutable override evidence.",
+                          "Use solo cuando sea el único miembro activo de la empresa en este proyecto. BIMLog registra el motivo y la aprobación como evidencia inmutable de excepción.",
+                        )}
+                      </p>
+                      <label>
+                        {tt("Required override reason", "Motivo obligatorio de la excepción")}
+                        <textarea
+                          value={overrideReason}
+                          onChange={(event) => setOverrideReason(event.target.value)}
+                        />
+                      </label>
+                      <label>
+                        <input
+                          type="checkbox"
+                          checked={overrideConfirmed}
+                          onChange={(event) => setOverrideConfirmed(event.target.checked)}
+                        />
+                        {tt(
+                          "I confirm this is an exceptional self-approval and must be recorded in the immutable audit trail.",
+                          "Confirmo que esta es una autoaprobación excepcional y debe registrarse en el historial inmutable.",
+                        )}
+                      </label>
+                      <button
+                        disabled={busy === b.id || overrideReason.trim().length < 10 || !overrideConfirmed}
+                        onClick={() => act(b, "approve_override")}
+                      >
+                        {tt(
+                          "Approve with owner override",
+                          "Aprobar con excepción del propietario",
+                        )}
+                      </button>
+                    </details>
                     <button
                       disabled={busy === b.id}
                       onClick={() => act(b, "return")}
