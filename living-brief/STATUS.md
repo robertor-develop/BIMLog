@@ -1448,7 +1448,8 @@ No release, publication, or overall completion claim is permitted until the reco
 - Builds 41–44 lock Change Order authoritative project identity, lifecycle and financial/schedule separation, RFI/Submittal/link/import isolation, and the live governed workflow/report surface.
 - Build 45 consolidates those gates with the protected Generic APU/Job Intake and Lens Next regressions and governed production build/runtime closure.
 - The Chrome check used controlled project 27 read-only and performed no create, import, transition, delete, AI request, report download, or customer-data mutation.
-- This block is candidate test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `46aa99eb2df658d1bd6165116328b6e8331c0564` with SHA-256 `B8BA55844CB03484BA13551655EEB23290A07A75F3A49E69319DE24F9886082A`.
+- This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
 
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
