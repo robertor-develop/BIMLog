@@ -7,6 +7,7 @@ import {
   activityLogTable,
   projectsTable,
   projectMembersTable,
+  meetingAttendeesTable,
 } from "@workspace/db/schema";
 import { eq, and, sql, asc } from "drizzle-orm";
 import {
@@ -1123,6 +1124,29 @@ router.delete(
     const projectId = Number(req.params.projectId);
     const entryId = Number(req.params.entryId);
     try {
+      const [entry] = await db
+        .select({ id: projectDirectoryTable.id })
+        .from(projectDirectoryTable)
+        .where(
+          and(
+            eq(projectDirectoryTable.id, entryId),
+            eq(projectDirectoryTable.projectId, projectId),
+          ),
+        )
+        .limit(1);
+      if (!entry) {
+        res.status(404).json({ error: "Entry not found" });
+        return;
+      }
+      const [meetingReference] = await db
+        .select({ id: meetingAttendeesTable.id })
+        .from(meetingAttendeesTable)
+        .where(eq(meetingAttendeesTable.directoryEntryId, entryId))
+        .limit(1);
+      if (meetingReference) {
+        res.status(409).json({ error: "directory_entry_in_use" });
+        return;
+      }
       await db
         .delete(projectDirectoryTable)
         .where(
