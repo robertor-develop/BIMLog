@@ -1,0 +1,47 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P18",
+  "results": [
+    {
+      "name": "post-p17-build61-files-identity-scope.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "c009cd2c8e7c6021e3ac7a7d5da053a9c0e057a54e93d4caaddfe838c110d931"
+    },
+    {
+      "name": "post-p17-build62-files-upload-storage.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "d02001f687025b60d4c06d168f30a94ea9a73e34bb3b0e820c6f3698257a3249"
+    },
+    {
+      "name": "post-p17-build63-files-cvr-versioning.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "2a4ad31c7872e021fd704ec0cc871406aa89de8ac80088ac45c5feebcb84c02a"
+    },
+    {
+      "name": "post-p17-build64-files-workflow-ui-links.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "fbd2b98ddbaf75b3861ff14071af5ad3363dafd449c9f6c116c4b981dfba6fac"
+    },
+    {
+      "name": "protected-apu",
+      "exitCode": 0
+    },
+    {
+      "name": "protected-lens",
+      "exitCode": 0
+    },
+    {
+      "name": "production-build",
+      "exitCode": 0
+    }
+  ],
+  "browserEvidence": "evidence/post-p17-build64-files-cvr-chrome/acceptance.json",
+  "productCodeChanged": true,
+  "platformChanged": true,
+  "apuProductChanged": false,
+  "lensNextProductChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "deploymentChanged": false
+}
