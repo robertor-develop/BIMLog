@@ -1547,6 +1547,13 @@ No release, publication, or overall completion claim is permitted until the reco
 - The live workspace shows the Directory heading, one project member, one additional contact, all five view filters, PDF/import/add/invite/remove controls, contextual Help, and zero browser warnings/errors.
 - Production remains `v1.05.N17-P17`; P18 remains unpublished, so this proof covers the established live workflow surface without claiming Builds 71–73 are deployed. No browser mutation or customer-data change occurred.
 
+## POST-P18 assurance Builds 71–75 — accepted — 2026-09-12
+
+- The consolidated Project Directory gate is PASS at `v1.05.N17-P18`.
+- Focused Builds 71–74, complete Generic APU/Job Intake, protected Lens Next, Living Brief integrity, all typechecks, frontend production build, and deterministic API runtime closure across 16,342 files passed.
+- Machine-readable evidence is frozen at commit `a8cb92d3a461d8c1f364caae1aa9081ee0045924` with SHA-256 `73E6304E86228572C526F3EB05139521046984C15BA2A229B6731583B0A20C7F`.
+- P18 remains an internally accepted source candidate only; push, publication, deployment, and external field acceptance remain separate.
+
 ## POST-P18 assurance Build 66 — candidate — 2026-09-12
 
 - Coordination Hub mutation authorization now matches the existing UI `canWrite` contract and established Platform write policy.

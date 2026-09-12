@@ -2540,5 +2540,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Build 72: lock company/contact lifecycle, deduplication, and membership invitation boundaries.
 - [x] Build 73: lock Directory consumer isolation across Meetings, Intake, assignments, RFI, and Submittal workflows.
 - [x] Build 74: verify the authenticated live Project Directory workflow read-only in Chrome.
-- [ ] Build 75: run protected APU, Lens Next, governance, typecheck, and production-assembly acceptance and freeze evidence.
+- [x] Build 75: protected APU, Lens Next, governance, typecheck, and deterministic production-assembly acceptance passed; evidence is frozen at `a8cb92d3a461d8c1f364caae1aa9081ee0045924`, SHA-256 `73E6304E86228572C526F3EB05139521046984C15BA2A229B6731583B0A20C7F`.
 - [ ] External user field acceptance and any P18 push/publication/deployment remain separate.

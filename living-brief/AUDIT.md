@@ -1284,6 +1284,14 @@ was performed or authorized.
 - The generator template now emits the exact reconciled Coordination authorization, lifecycle, and linked-record isolation sections. A clean rerun remains required before Build 70 acceptance.
 - Impact: deterministic governance/build repair only; no product runtime, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
 
+# 2026-09-12 — POST-P18 assurance Builds 71–75 accepted
+
+- Project Directory authorization, route-project identity, invite-status scoping, company/contact reuse lifecycle, and referenced-contact deletion refusal are locked by focused regression coverage.
+- Authenticated Chrome read-only evidence confirms the established live Directory workflow in controlled project 27 with zero browser warnings/errors and no customer-data mutation.
+- The final acceptance run passed focused Builds 71–74, complete Generic APU/Job Intake, protected Lens Next, governance integrity, secret exposure, database safety, mojibake, all TypeScript gates, frontend production build, and deterministic API assembly across 16,342 files.
+- Evidence: commit `a8cb92d3a461d8c1f364caae1aa9081ee0045924`, SHA-256 `73E6304E86228572C526F3EB05139521046984C15BA2A229B6731583B0A20C7F`.
+- Impact: narrow Platform Project Directory hardening only; no APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data change.
+
 # 2026-09-12 — POST-P18 assurance Builds 66–70 accepted
 
 - The final clean run passed 62 focused Build 66–69 assertions, connector foundation, Coordination Hub service, all Delivery contracts 2–18, 32 protected Files/CVR assertions, complete Generic APU/Job Intake, protected Lens Next Build 10, Living Brief integrity, tracked-secret exposure, database safety, mojibake, all TypeScript gates, frontend production build, and deterministic API assembly across 16,342 files.
