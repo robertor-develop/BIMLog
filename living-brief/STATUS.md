@@ -1462,7 +1462,8 @@ No release, publication, or overall completion claim is permitted until the reco
 
 - Builds 51–54 lock Schedule project identity/scope, authoritative connected sources and lifecycle, board/calendar/list and rollover/report isolation, and the live governed workflow surface.
 - Build 55 consolidates those gates with protected Generic APU/Job Intake, protected Lens Next, and governed production assembly.
-- This is candidate test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, deployment, or customer-data change.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `4c65cd7e715a2a8ccce68ce3fd31e0f251b8e967` with SHA-256 `2C963BC9D86292C6957397127D8903C865D7BC2B1C6BCE2AB7CF98866368D9B2`.
+- This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, deployment, or customer-data change.
 
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 

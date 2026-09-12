@@ -22866,9 +22866,9 @@
     },
     {
       "taskId": "post-p17-assurance-builds51-55-20260912",
-      "reviewedThroughCommit": "f6d7eb5d60efe547ddd067722552cce526a10d87",
+      "reviewedThroughCommit": "4c65cd7e715a2a8ccce68ce3fd31e0f251b8e967",
       "reviewedAt": "2026-09-12T13:03:00Z",
-      "status": "candidate_verified",
+      "status": "accepted",
       "captureTiming": "same_task_before_governed_build",
       "summary": "Test-only Schedule assurance with protected APU and Lens Next baselines.",
       "workstreams": [
@@ -22937,7 +22937,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "a5121c9d5ea24dc333d45ec682c5d42d6f7dfe1f73f5464277e2fe81794576fa"
+      "reviewedChangeSha256": "235bf59651ad3d54a38e111e521f514e69cef31d0dbfea813207ce80e58a6c05"
     }
   ]
 }

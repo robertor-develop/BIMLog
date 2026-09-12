@@ -2502,5 +2502,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Lock milestone, RFI, Submittal, and Meeting source ownership and lifecycle isolation.
 - [x] Lock Calendar/Board/List filters, project-bound rollovers/history, and governed PDF scope.
 - [x] Verify the live Schedule workflow and controls read-only in authenticated Chrome.
-- [ ] Run and freeze the consolidated Build 55 protected-baseline gate.
+- [x] Run and freeze the consolidated Build 55 protected-baseline gate at `4c65cd7e715a2a8ccce68ce3fd31e0f251b8e967`, SHA-256 `2C963BC9D86292C6957397127D8903C865D7BC2B1C6BCE2AB7CF98866368D9B2`.
 - [ ] External user field acceptance remains separate.
