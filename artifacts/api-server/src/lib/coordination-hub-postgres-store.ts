@@ -102,6 +102,18 @@ class PostgresCoordinationHubTransaction implements CoordinationHubTransaction {
       [record.id, record.companyId, record.projectId, record.provider, record.jobType, record.idempotencyKey, record.requestDigest, JSON.stringify(record.payload), record.maxAttempts, record.createdById, record.credentialId],
     );
     if (result.rowCount !== 1) throw new CoordinationConflictError("Active connector credential is not authorized for this company/provider");
+    await this.client.query(
+      `INSERT INTO connector_job_events(id,job_id,company_id,project_id,sequence,event_type,from_state,to_state,fencing_token,actor_type,actor_id,reason_code,evidence)
+       VALUES($1,$2,$3,$4,1,'queued','none','queued',0,'user',$5,'job_enqueued',$6::jsonb)`,
+      [
+        `${record.id}:event:1`,
+        record.id,
+        record.companyId,
+        record.projectId,
+        String(record.createdById),
+        JSON.stringify({ provider: record.provider, jobType: record.jobType, requestDigest: record.requestDigest }),
+      ],
+    );
   }
 
   async readSummary(scope: CoordinationScope): Promise<CoordinationHubSummary> {
