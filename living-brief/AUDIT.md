@@ -1260,3 +1260,11 @@ was performed or authorized.
 - Focused coverage verifies allowed and denied state transitions, exponential retry ceiling, attempt exhaustion, lease reclaim, `SKIP LOCKED`, fencing increments, database state constraints, immutable event enforcement, idempotency digest conflict, and dead-letter attention visibility.
 - Focused Build 67, connector-foundation, Coordination Hub service, and API TypeScript gates pass.
 - Impact: narrow Platform lifecycle audit completion; no worker activation, provider call, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-12 — POST-P18 assurance Build 68 candidate
+
+- Source review proved a generic linked-items gap: server write authorization existed, but relationship creation did not independently establish that both authoritative endpoints belonged to the route project.
+- The correction adds a closed entity-type contract, positive authoritative ID validation, and same-project existence checks for both endpoints before insert. Duplicate detection and deletion remain project-scoped.
+- Coordination intake is verified to write only its intake event, activity evidence, and accepted File record; action projection remains a pure proposal without persistence access.
+- Focused Build 68 passed 20 checks; Coordination Hub service behavior, action projection behavior, and API TypeScript also pass.
+- Impact: narrow Platform relationship-integrity hardening; no connected authoritative record mutation, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.

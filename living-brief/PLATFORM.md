@@ -763,6 +763,13 @@ It changes only when the code structure or curated architectural facts change.
 - Exact idempotent replay remains accepted only for the same request digest. Digest conflict fails closed, and terminal dead-letter jobs remain visible as attention items.
 - This checkpoint activates no connector worker, provider call, migration, outbound action, or deployment.
 
+## POST-P18 Coordination linked-record isolation — Build 68
+
+- Generic linked-item creation accepts only the established authoritative entity types and positive numeric record identities.
+- Before relationship persistence, both source and target records must independently exist in the exact requested project. Missing, malformed, unsupported, and cross-project endpoints fail closed.
+- Relationship creation and removal affect only the project-scoped relationship and its activity evidence; connected authoritative RFI, Submittal, Transmittal, Change Order, Meeting, File, Clash, and Lens Next records are not mutated.
+- Coordination File source revisions retain their independent same-project source-file proof, and action projections remain persistence-free proposals.
+
 ## Coordination Delivery Release A — Builds 2–11 contracts
 
 - Builds 2–3 add an authority-scoped, read-only SharePoint discovery port and deterministic reconciliation. Discovery is bounded and credential references remain opaque; reconciliation never silently changes the current BIMLog revision.

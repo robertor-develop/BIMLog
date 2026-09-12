@@ -1534,3 +1534,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - Newly queued connector jobs now receive their first immutable, scoped, attributable audit event inside the existing enqueue transaction.
 - Existing bounded retry, lease reclaim, fencing, attempt limits, terminal state, idempotency conflict, and attention-summary contracts are locked by 22 focused checks.
 - Connector foundation, Coordination Hub service, and API TypeScript gates pass; no connector worker or provider is activated.
+
+## POST-P18 assurance Build 68 — candidate — 2026-09-12
+
+- Review found that the generic linked-items mutation route checked project write permission but did not prove that both referenced authoritative records belonged to that project.
+- The route now accepts only the established entity types and positive authoritative IDs, verifies both endpoints against the requested project before persistence, and keeps duplicate lookup and removal project-scoped.
+- Coordination intake and action projection remain isolated: they do not update or delete authoritative RFI, Submittal, Transmittal, Change Order, Meeting, File, Clash, or Lens Next records.
+- Twenty focused isolation checks, Coordination Hub service behavior, action-projection behavior, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.

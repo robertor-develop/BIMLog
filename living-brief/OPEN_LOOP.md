@@ -2528,6 +2528,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 - [x] Build 66: enforce authoritative current-project membership for reads and server-side `admin`/`write` permission for Coordination mutations.
 - [x] Build 67: lock synchronization lifecycle, bounded retry, idempotency conflicts, terminal attention, and attributable audit evidence.
-- [ ] Build 68: lock cross-module linked-record integrity without mutating authoritative connected records.
+- [x] Build 68: lock cross-module linked-record integrity without mutating authoritative connected records.
 - [ ] Build 69: verify the authenticated live Coordination workflow read-only in Chrome.
 - [ ] Build 70: run protected APU, Lens Next, Files/CVR, governance, typecheck, and production-assembly acceptance.

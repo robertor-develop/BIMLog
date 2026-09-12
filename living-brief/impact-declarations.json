@@ -23091,11 +23091,11 @@
     },
     {
       "taskId": "post-p18-assurance-builds66-70-20260912",
-      "reviewedThroughCommit": "46552126594ab508dd47124bbdb3a2d0cdc4c7c1",
-      "reviewedAt": "2026-09-12T15:08:00Z",
+      "reviewedThroughCommit": "d622b142e6ddabb37053910e3d1217fe6a93c0c3",
+      "reviewedAt": "2026-09-12T15:26:00Z",
       "status": "candidate",
       "captureTiming": "same_task_before_governed_build",
-      "summary": "Coordination Hub authorization and immutable connector-job enqueue lifecycle evidence are aligned with the established Platform contracts.",
+      "summary": "Coordination Hub authorization, synchronization lifecycle, and cross-module linked-record isolation are aligned with the established Platform contracts.",
       "workstreams": [
         "post-p18-coordination-hub-assurance"
       ],
@@ -23113,7 +23113,7 @@
         {
           "key": "quality",
           "result": "reviewed_no_semantic_change",
-          "reason": "Focused authorization regression coverage closes a proven server boundary gap."
+          "reason": "Focused authorization, lifecycle, and relationship-isolation coverage closes proven server boundary gaps."
         },
         {
           "key": "vision",
@@ -23123,7 +23123,7 @@
         {
           "key": "platform",
           "result": "updated",
-          "reason": "Four Coordination mutations now require established server-side admin or write permission."
+          "reason": "Coordination mutations require write permission, enqueue is auditable, and generic relationships prove both endpoints belong to the route project."
         },
         {
           "key": "plugin",
@@ -23143,17 +23143,17 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records Build 66 candidate result, exact authorization correction, and protected boundaries."
+          "reason": "Records Builds 66 through 68 candidate results, exact corrections, and protected boundaries."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Records Build 66 completion and the remaining Builds 67 through 70 gates."
+          "reason": "Records Builds 66 through 68 completion and the remaining Builds 69 through 70 gates."
         },
         {
           "key": "audit",
           "result": "updated",
-          "reason": "Records the discovered membership-only mutation gap and its focused proof."
+          "reason": "Records the discovered authorization, enqueue-audit, and relationship-isolation gaps with focused proof."
         }
       ],
       "reviewedChangedPaths": [
@@ -23163,7 +23163,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d2bad56b1b1d971f0752dd45f8c0ce0ee021305925a0c93ab4e36472b8eb0350"
+      "reviewedChangeSha256": "bb591bc923aecb0f84e5cdc4056bed3a40e89a8910ff94fc0637ff760719df31"
     }
   ]
 }
