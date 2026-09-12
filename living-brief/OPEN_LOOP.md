@@ -2533,3 +2533,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Build 70: run protected APU, Lens Next, Files/CVR, governance, typecheck, and production-assembly acceptance.
 - Build 70 first production invocation stopped on deterministic `PLATFORM.md` generation drift; the generator source was corrected and the clean full rerun passed.
 - [ ] External user field acceptance and any P18 push/publication/deployment remain separate.
+
+## POST-P18 assurance Builds 71–75
+
+- [x] Build 71: lock Project Directory current-project identity, member reads, server-side write authorization, and project-scoped invite status updates.
+- [ ] Build 72: lock company/contact lifecycle, deduplication, and membership invitation boundaries.
+- [ ] Build 73: lock Directory consumer isolation across Meetings, Intake, assignments, RFI, and Submittal workflows.
+- [ ] Build 74: verify the authenticated live Project Directory workflow read-only in Chrome.
+- [ ] Build 75: run protected APU, Lens Next, governance, typecheck, and production-assembly acceptance and freeze evidence.
+- [ ] External user field acceptance and any P18 push/publication/deployment remain separate.

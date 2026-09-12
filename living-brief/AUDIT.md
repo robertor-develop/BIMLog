@@ -1291,3 +1291,11 @@ was performed or authorized.
 - Evidence is frozen at `e6d4074e97b5bdf339bde28e48272fe745b104d8`, SHA-256 `5138F3D0CFB06C4255DFDF966A248BC3E8A74E56B9538A37B0FE2794DED4C8EF`.
 - The supplemental standalone artifact harness was not an acceptance gate and correctly refused the managed sandbox's inherited broad ACL; no security control was weakened. The governed production build's deterministic runtime closure passed.
 - Impact: accepted narrow Platform authorization, enqueue-audit, relationship-isolation, and deterministic-build corrections at P18; no APU, Lens Next, Native, database/schema, connector activation, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-12 — POST-P18 assurance Build 71 candidate
+
+- Source review confirmed Directory list/PDF reads require current-project membership and all Directory mutations use the established server-side `admin`/`write` permission boundary.
+- The invite flow's initial lookup was correctly scoped by entry and project, but its post-invite status update used entry identity alone. The update now repeats the exact project predicate, preventing a stale or raced route context from writing outside its authoritative project.
+- The focused Build 71 contract checks both read routes, six mutation route families, project scope on the invite read and update, exact-project frontend requests, and `canWrite` UI boundaries.
+- Focused Build 71, protected Job Intake company/contact authority, and API TypeScript pass.
+- Impact: one narrow Platform project-scope hardening plus regression evidence; no APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.

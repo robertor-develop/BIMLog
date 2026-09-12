@@ -23163,6 +23163,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "889dfe53cbb8aace28a0398921baf6c9478c9e36d2be644fcfaa94d8d3060b42"
+    },
+    {
+      "taskId": "post-p18-assurance-builds71-75-20260912",
+      "reviewedThroughCommit": "9fdb82d19a0ea60e99c7966a5bb86193748866da",
+      "reviewedAt": "2026-09-12T16:02:47Z",
+      "status": "candidate",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Build 71 locks Project Directory current-project identity, read membership, write authorization, and invite status update scope at P18.",
+      "workstreams": [
+        "post-p18-project-directory-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Directory records remain authoritative to the exact current project and established BIMLog identity boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sequential micro-build execution and protected APU, Lens Next, Native, database, and schema boundaries remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused identity, authorization, and regression coverage increases without changing established quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, or customer-facing capability changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The post-invite Directory status write now repeats the authoritative route-project predicate already used by its read."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native plugin, bridge, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report content, scope, layout, or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, applicability, evidence, or claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 71 candidate scope, correction, tests, and protected boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Defines the sequential Project Directory assurance roadmap for Builds 71 through 75."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the exact scope gap, correction, focused coverage, and non-mutation boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0821c144fd7eb8bb2db308bc48f96ee5e6c60dce29aef1f46e51096af8be60aa"
     }
   ]
 }

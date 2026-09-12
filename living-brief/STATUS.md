@@ -1523,6 +1523,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Machine-readable evidence is frozen at commit `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08` with SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
 - P18 is an internally accepted source candidate only; push, publication, deployment, and external field acceptance remain separate.
 
+## POST-P18 assurance Build 71 — candidate — 2026-09-12
+
+- Project Directory member reads remain bound to the route project, while every create, update, delete, invite, company/contact, and import mutation requires established server-side `admin` or `write` permission.
+- Review found and corrected one post-invite status update that initially selected the exact project entry but then updated by entry ID alone; both operations now require the same entry and project identity.
+- Focused Project Directory identity/scope, protected Job Intake company/contact authority, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
+
 ## POST-P18 assurance Build 66 — candidate — 2026-09-12
 
 - Coordination Hub mutation authorization now matches the existing UI `canWrite` contract and established Platform write policy.
