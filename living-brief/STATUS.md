@@ -1541,3 +1541,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - The route now accepts only the established entity types and positive authoritative IDs, verifies both endpoints against the requested project before persistence, and keeps duplicate lookup and removal project-scoped.
 - Coordination intake and action projection remain isolated: they do not update or delete authoritative RFI, Submittal, Transmittal, Change Order, Meeting, File, Clash, or Lens Next records.
 - Twenty focused isolation checks, Coordination Hub service behavior, action-projection behavior, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
+
+## POST-P18 assurance Build 69 — candidate — 2026-09-12
+
+- Authenticated Chrome verified the live Coordination Hub for controlled project 27 (`ROB-T1`) and the exact project-admin context.
+- The live surface displayed Coordination Hub, the smart-intake description, an honest inactive-convention boundary, the Convention Builder path, Recent Intake, and its empty state with zero browser warnings/errors.
+- Production remains `v1.05.N17-P17`; the unpublished candidate remains `v1.05.N17-P18`. The live observation therefore proves the established workflow surface without claiming Builds 66–68 are deployed.
+- No upload, download, confirmation, synchronization, convention edit, external action, or customer-data mutation occurred. The focused ten-check UI contract and frontend TypeScript pass.

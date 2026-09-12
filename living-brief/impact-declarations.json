@@ -23091,11 +23091,11 @@
     },
     {
       "taskId": "post-p18-assurance-builds66-70-20260912",
-      "reviewedThroughCommit": "d622b142e6ddabb37053910e3d1217fe6a93c0c3",
-      "reviewedAt": "2026-09-12T15:26:00Z",
+      "reviewedThroughCommit": "a6697294e878f99eb1c4209f3225c8ba2a829d4a",
+      "reviewedAt": "2026-09-12T15:31:00Z",
       "status": "candidate",
       "captureTiming": "same_task_before_governed_build",
-      "summary": "Coordination Hub authorization, synchronization lifecycle, and cross-module linked-record isolation are aligned with the established Platform contracts.",
+      "summary": "Coordination Hub authorization, synchronization lifecycle, linked-record isolation, and authenticated live workflow evidence are aligned with established Platform contracts.",
       "workstreams": [
         "post-p18-coordination-hub-assurance"
       ],
@@ -23143,27 +23143,26 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records Builds 66 through 68 candidate results, exact corrections, and protected boundaries."
+          "reason": "Records Builds 66 through 69 candidate results, exact corrections, live proof, and protected boundaries."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Records Builds 66 through 68 completion and the remaining Builds 69 through 70 gates."
+          "reason": "Records Builds 66 through 69 completion and the remaining Build 70 acceptance gate."
         },
         {
           "key": "audit",
           "result": "updated",
-          "reason": "Records the discovered authorization, enqueue-audit, and relationship-isolation gaps with focused proof."
+          "reason": "Records the discovered gaps plus authenticated read-only Chrome evidence and non-mutation proof."
         }
       ],
       "reviewedChangedPaths": [
         "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "bb591bc923aecb0f84e5cdc4056bed3a40e89a8910ff94fc0637ff760719df31"
+      "reviewedChangeSha256": "972d6b47dd6f0a8783030729b35f5c37f72c5611f3a3c6c8603d675febb4143c"
     }
   ]
 }

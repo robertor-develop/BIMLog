@@ -1268,3 +1268,11 @@ was performed or authorized.
 - Coordination intake is verified to write only its intake event, activity evidence, and accepted File record; action projection remains a pure proposal without persistence access.
 - Focused Build 68 passed 20 checks; Coordination Hub service behavior, action projection behavior, and API TypeScript also pass.
 - Impact: narrow Platform relationship-integrity hardening; no connected authoritative record mutation, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-12 — POST-P18 assurance Build 69 candidate
+
+- Authenticated Chrome observed `https://bimlog.app/projects/27/coordination` for project 27 (`ROB-T1`), project `Robertor Test for Convention Builder`, and the visible project-admin context.
+- Visible proof includes the Coordination Hub heading, smart-intake purpose, inactive-convention fail-closed message, Open Convention Builder control, Recent Intake heading, and honest no-files state.
+- Browser warning/error log count was zero. The exact read-only evidence is recorded in `evidence/post-p18-build69-coordination-live-readonly.json`.
+- The live header remains `v1.05.N17-P17`; P18 remains an unpublished internal candidate, so this gate does not misrepresent candidate server changes as deployed.
+- Impact: test/evidence/governance only; no upload, download, confirmation, synchronization, convention edit, product behavior, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
