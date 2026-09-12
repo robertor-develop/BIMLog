@@ -2523,3 +2523,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Correct legacy confirm-violation and supersede write authorization and enforce same-project replacement-file identity.
 - [x] Run and freeze the consolidated Build 65 protected-baseline gate at `v1.05.N17-P18`; evidence commit `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08`, SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
 - [ ] External user field acceptance and any P18 publication remain separate.
+
+## POST-P18 assurance Builds 66–70
+
+- [x] Build 66: enforce authoritative current-project membership for reads and server-side `admin`/`write` permission for Coordination mutations.
+- [ ] Build 67: lock synchronization lifecycle, bounded retry, idempotency conflicts, terminal attention, and attributable audit evidence.
+- [ ] Build 68: lock cross-module linked-record integrity without mutating authoritative connected records.
+- [ ] Build 69: verify the authenticated live Coordination workflow read-only in Chrome.
+- [ ] Build 70: run protected APU, Lens Next, Files/CVR, governance, typecheck, and production-assembly acceptance.

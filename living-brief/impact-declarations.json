@@ -23088,6 +23088,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3dac56bbb1bf18991b16aad89887368e27b9e36755f1a3cc6021ff80b2e4d439"
+    },
+    {
+      "taskId": "post-p18-assurance-builds66-70-20260912",
+      "reviewedThroughCommit": "3e6bf8a363a6edd5fbf88d7a7587b61c8ca7771d",
+      "reviewedAt": "2026-09-12T15:08:00Z",
+      "status": "candidate",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Coordination Hub mutation authorization is aligned with the established server-side project write contract.",
+      "workstreams": [
+        "post-p18-coordination-hub-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains authoritative and Coordination commands remain bound to exact project, actor, and company scope."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sequential micro-build execution and all protected-scope boundaries remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused authorization regression coverage closes a proven server boundary gap."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, or customer-facing capability changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Four Coordination mutations now require established server-side admin or write permission."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native plugin, bridge, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report content, scope, layout, or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, applicability, evidence, or claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Build 66 candidate result, exact authorization correction, and protected boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Build 66 completion and the remaining Builds 67 through 70 gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the discovered membership-only mutation gap and its focused proof."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7239bc053fdde2d4170199af06928a59695f224544f8c0c0049d11edc7c2994a"
     }
   ]
 }

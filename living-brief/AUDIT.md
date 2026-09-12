@@ -1245,3 +1245,11 @@ was performed or authorized.
 - The clean candidate run passed every focused Files/CVR gate, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity, tracked-secret exposure, database safety, mojibake, all TypeScript gates, frontend production build, and deterministic API runtime closure.
 - Evidence is frozen at `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08`, SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
 - Product impact remains the narrow Files mutation authorization and same-project supersession correction; Platform identity is `v1.05.N17-P18`. APU, Lens Next, Native, database/schema, publication, deployment, external action, and customer data remain unchanged.
+
+# 2026-09-12 — POST-P18 assurance Build 66 candidate
+
+- Source review identified four Coordination mutation routes using membership-only middleware while the UI already exposes a distinct `canWrite` boundary.
+- Intake upload, intake confirmation, revision registration, and synchronization-job enqueue now use the established server-side `admin`/`write` permission middleware.
+- Summary/history reads remain member-authorized, while connector credential and SharePoint configuration surfaces remain project-admin-only.
+- The focused Build 66 gate passes 10 authorization, trusted-scope, project/company-authority, and summary-isolation assertions; API TypeScript passes.
+- Impact: narrow Platform authorization hardening within existing P18; no APU, Lens Next, Native, database/schema, connector activation, publication, deployment, or customer-data mutation.

@@ -1522,3 +1522,9 @@ No release, publication, or overall completion claim is permitted until the reco
 - Focused Builds 61–64, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity, all typechecks, frontend production build, and deterministic API runtime closure passed.
 - Machine-readable evidence is frozen at commit `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08` with SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
 - P18 is an internally accepted source candidate only; push, publication, deployment, and external field acceptance remain separate.
+
+## POST-P18 assurance Build 66 — candidate — 2026-09-12
+
+- Coordination Hub mutation authorization now matches the existing UI `canWrite` contract and established Platform write policy.
+- Intake, confirmation, revision registration, and synchronization-job enqueue require server-side `admin` or `write` permission; read-only membership and project-admin credential boundaries remain unchanged.
+- Focused identity/scope coverage and API typecheck pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data change occurred.

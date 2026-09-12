@@ -748,6 +748,14 @@ It changes only when the code structure or curated architectural facts change.
 - Current revision designation is explicit and compare-and-set guarded by the caller's observed revision. Job idempotency likewise accepts replay only when the request digest matches.
 - This build adds no schema and activates no connector. It preserves the complete Prework 02–06 and MAIN 04 Build 47 lineage.
 
+## POST-P18 Coordination Hub authorization hardening — Build 66
+
+- Coordination summary and intake history remain readable by authenticated current-project members.
+- Coordination intake analysis, intake confirmation, immutable revision registration, and connector-job enqueue are mutations and therefore require the established project `admin` or `write` permission on the server.
+- Credential enrollment, rotation, validation, lifecycle visibility, and SharePoint mapping retain their stricter project-administrator boundary.
+- Every command continues to replace caller-supplied scope with the authenticated route project, actor, and company context; provider revision identity and summary queries remain project-scoped.
+- This correction changes no schema, stored record, connector activation, Native/Lens Next behavior, or deployment state.
+
 ## Coordination Delivery Release A — Builds 2–11 contracts
 
 - Builds 2–3 add an authority-scoped, read-only SharePoint discovery port and deterministic reconciliation. Discovery is bounded and credential references remain opaque; reconciliation never silently changes the current BIMLog revision.
