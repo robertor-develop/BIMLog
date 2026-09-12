@@ -1299,3 +1299,11 @@ was performed or authorized.
 - The focused Build 71 contract checks both read routes, six mutation route families, project scope on the invite read and update, exact-project frontend requests, and `canWrite` UI boundaries.
 - Focused Build 71, protected Job Intake company/contact authority, and API TypeScript pass.
 - Impact: one narrow Platform project-scope hardening plus regression evidence; no APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-12 — POST-P18 assurance Build 72 candidate
+
+- Company registration normalizes authoritative names, serializes canonical-name creation with a transaction advisory lock, reuses canonical company identity, and separately proves the company is connected to the current project.
+- Contact creation requires a positive company ID, proves that company is already connected to the current project, serializes its project/company/email-or-name identity, and reuses the existing exact contact where present.
+- The API previously returned company-global reuse as though it described project-directory relationship creation and returned `201` for reused contacts. It now reports global company reuse and project-directory reuse independently and returns truthful `200` reuse versus `201` creation status without removing existing response fields.
+- Invitation reuse remains project/email scoped, existing membership remains project/user scoped, and duplicate normalized user identities continue to fail closed.
+- Focused Builds 71–72, protected Job Intake company/contact authority, and API TypeScript pass. Impact is narrow Platform lifecycle response correction; no APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.

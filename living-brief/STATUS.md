@@ -1529,6 +1529,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Review found and corrected one post-invite status update that initially selected the exact project entry but then updated by entry ID alone; both operations now require the same entry and project identity.
 - Focused Project Directory identity/scope, protected Job Intake company/contact authority, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
 
+## POST-P18 assurance Build 72 — candidate — 2026-09-12
+
+- Company and contact creation retains the existing normalized-name/email deduplication, advisory locks, project-company membership proof, and invitation-service identity boundaries.
+- Responses now distinguish a reused project-directory relationship/contact (`200`) from a newly created relationship/contact (`201`); global company reuse remains separately reported and backward compatible.
+- Focused Builds 71–72, protected Job Intake company/contact authority, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
+
 ## POST-P18 assurance Build 66 — candidate — 2026-09-12
 
 - Coordination Hub mutation authorization now matches the existing UI `canWrite` contract and established Platform write policy.

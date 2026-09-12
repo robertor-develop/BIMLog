@@ -2537,7 +2537,7 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 ## POST-P18 assurance Builds 71–75
 
 - [x] Build 71: lock Project Directory current-project identity, member reads, server-side write authorization, and project-scoped invite status updates.
-- [ ] Build 72: lock company/contact lifecycle, deduplication, and membership invitation boundaries.
+- [x] Build 72: lock company/contact lifecycle, deduplication, and membership invitation boundaries.
 - [ ] Build 73: lock Directory consumer isolation across Meetings, Intake, assignments, RFI, and Submittal workflows.
 - [ ] Build 74: verify the authenticated live Project Directory workflow read-only in Chrome.
 - [ ] Build 75: run protected APU, Lens Next, governance, typecheck, and production-assembly acceptance and freeze evidence.

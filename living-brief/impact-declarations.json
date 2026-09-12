@@ -23166,11 +23166,11 @@
     },
     {
       "taskId": "post-p18-assurance-builds71-75-20260912",
-      "reviewedThroughCommit": "9fdb82d19a0ea60e99c7966a5bb86193748866da",
-      "reviewedAt": "2026-09-12T16:02:47Z",
+      "reviewedThroughCommit": "71b6a5261d04e65ae6e75c5642dfa68005d4323c",
+      "reviewedAt": "2026-09-12T16:11:34Z",
       "status": "candidate",
       "captureTiming": "same_task_before_governed_build",
-      "summary": "Build 71 locks Project Directory current-project identity, read membership, write authorization, and invite status update scope at P18.",
+      "summary": "Builds 71 and 72 lock Project Directory current-project identity, authorization, company/contact deduplication, lifecycle response semantics, and invitation boundaries at P18.",
       "workstreams": [
         "post-p18-project-directory-assurance"
       ],
@@ -23198,7 +23198,7 @@
         {
           "key": "platform",
           "result": "updated",
-          "reason": "The post-invite Directory status write now repeats the authoritative route-project predicate already used by its read."
+          "reason": "Directory invite writes repeat route-project scope, while company/contact endpoints now distinguish reuse from new project-directory lifecycle creation."
         },
         {
           "key": "plugin",
@@ -23218,7 +23218,7 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records Build 71 candidate scope, correction, tests, and protected boundaries."
+          "reason": "Records Builds 71 and 72 candidate scope, corrections, tests, and protected boundaries."
         },
         {
           "key": "open_loop",
@@ -23228,7 +23228,7 @@
         {
           "key": "audit",
           "result": "updated",
-          "reason": "Records the exact scope gap, correction, focused coverage, and non-mutation boundaries."
+          "reason": "Records the exact scope and lifecycle gaps, corrections, focused coverage, and non-mutation boundaries."
         }
       ],
       "reviewedChangedPaths": [
@@ -23237,7 +23237,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "0821c144fd7eb8bb2db308bc48f96ee5e6c60dce29aef1f46e51096af8be60aa"
+      "reviewedChangeSha256": "56878dae60f150e1302087f3729716203a4bd22a64d09d2faefb7d16a0f1c03f"
     }
   ]
 }
