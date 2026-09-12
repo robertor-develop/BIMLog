@@ -1,0 +1,35 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P18",
+  "sourceCommitBeforeEvidence": "6deffeb00dd861ef8f8a88c8f8518416bfbd8ddb",
+  "results": [
+    { "name": "post-p18-build71-project-directory-identity-scope.behavior.mjs", "exitCode": 0 },
+    { "name": "post-p18-build72-project-directory-lifecycle.behavior.mjs", "exitCode": 0 },
+    { "name": "post-p18-build73-project-directory-consumer-isolation.behavior.mjs", "exitCode": 0 },
+    { "name": "post-p18-build74-project-directory-live-readonly.behavior.mjs", "exitCode": 0 },
+    { "name": "protected-generic-apu-job-intake", "exitCode": 0 },
+    { "name": "protected-lens-next-build10", "exitCode": 0 },
+    { "name": "governed-production-build", "exitCode": 0, "deterministicApiAssemblyFiles": 16342 }
+  ],
+  "browserEvidence": "evidence/post-p18-build74-project-directory-live-readonly.json",
+  "productionBuildNotes": [
+    "The governed production build passed tracked-secret, database-safety, mojibake, Living Brief, TypeScript, frontend, API bundle, and deterministic runtime-closure gates.",
+    "Two established source-map resolution warnings remained non-fatal and did not affect the build result."
+  ],
+  "supplementalStandaloneArtifactHarness": {
+    "acceptanceGate": false,
+    "result": "ENVIRONMENT_PREREQUISITE_NOT_PROVIDED",
+    "reason": "The optional standalone harness requires an explicit disposable F-rooted BIMLOG_ARTIFACT_PROOF_ROOT; the governed production build independently completed deterministic runtime closure.",
+    "securityControlWeakened": false
+  },
+  "productCodeChanged": true,
+  "platformChanged": true,
+  "apuProductChanged": false,
+  "lensNextProductChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "publicationChanged": false,
+  "deploymentChanged": false,
+  "customerDataChanged": false
+}
