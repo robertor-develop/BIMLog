@@ -1,0 +1,27 @@
+{
+  "status": "PASS",
+  "capturedAt": "2026-09-12T14:00:00Z",
+  "url": "https://bimlog.app/projects/27/files",
+  "controlledProject": {
+    "id": 27,
+    "code": "ROB-T1",
+    "name": "Robertor Test for Convention Builder"
+  },
+  "liveVersionObserved": "v1.05.N17-P17",
+  "observed": {
+    "filesWorkspace": true,
+    "projectIdentity": true,
+    "searchControl": true,
+    "typeFilter": true,
+    "statusFilter": true,
+    "declarationFilter": true,
+    "uploaderFilter": true,
+    "dateFilters": true,
+    "declarationControls": ["Created", "Modified", "Reference", "Supporting"],
+    "uploadSurface": true,
+    "coordinationLink": true,
+    "emptyState": true
+  },
+  "mutationPerformed": false,
+  "note": "Read-only Chrome proof against the authenticated controlled project. The live site remains P17 because this block is not authorized for publication."
+}
