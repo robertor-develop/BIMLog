@@ -1541,6 +1541,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Meetings validate Directory entry/project/company identity; Job Intake and assignments consume exact current-project Directory/member identity; RFIs and Submittals remain independent and none of these consumers update or delete authoritative Directory records.
 - Focused Builds 71–73, protected Meeting attendance/actions, protected Job Intake company/contact authority, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
 
+## POST-P18 assurance Build 74 — candidate — 2026-09-12
+
+- Authenticated Chrome verified the live Project Directory for controlled project 27 (`ROB-T1`) in its exact project-admin context.
+- The live workspace shows the Directory heading, one project member, one additional contact, all five view filters, PDF/import/add/invite/remove controls, contextual Help, and zero browser warnings/errors.
+- Production remains `v1.05.N17-P17`; P18 remains unpublished, so this proof covers the established live workflow surface without claiming Builds 71–73 are deployed. No browser mutation or customer-data change occurred.
+
 ## POST-P18 assurance Build 66 — candidate — 2026-09-12
 
 - Coordination Hub mutation authorization now matches the existing UI `canWrite` contract and established Platform write policy.

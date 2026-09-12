@@ -1315,3 +1315,11 @@ was performed or authorized.
 - Meetings prove attendee company and Directory entry against the same current project and reject company mismatch. Job Intake proves client company, primary contact, participants, engagement contacts, and assigned active members against its exact project.
 - RFIs and Submittals do not consume or mutate `projectDirectoryTable`; their established authoritative identity remains isolated.
 - Focused Builds 71–73, protected Meeting attendance/actions, protected Job Intake company/contact authority, and API TypeScript pass. Impact is narrow Platform lifecycle refusal and isolation evidence; no APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-12 — POST-P18 assurance Build 74 candidate
+
+- Authenticated Chrome observed `https://bimlog.app/projects/27/directory` for project 27 (`ROB-T1`), project `Robertor Test for Convention Builder`, and the visible project-admin context.
+- Visible proof includes the Project Directory heading, one auto-completed project member, one additional external contact, search/scope/role/status/sort filters, current-view summary, PDF/import/add/invite/remove controls, and contextual Directory Help.
+- Chrome warning/error count was zero. Exact machine-readable evidence is recorded in `evidence/post-p18-build74-project-directory-live-readonly.json`.
+- The live header remains `v1.05.N17-P17`; P18 is an unpublished internal candidate, so the observation does not misrepresent Builds 71–73 as deployed.
+- Impact: test/evidence/governance only; no import, contact creation, invitation, deletion, PDF download, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
