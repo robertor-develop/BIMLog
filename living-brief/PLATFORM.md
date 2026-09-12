@@ -375,6 +375,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/pdf-kit.ts
 - artifacts/api-server/src/lib/pdf-logo.ts
 - artifacts/api-server/src/lib/pdf-route-authorization.behavior.ts
+- artifacts/api-server/src/lib/post-p17-apu-workbook-acceptance.behavior.ts
+- artifacts/api-server/src/lib/post-p17-build21-financial-invariants.behavior.ts
+- artifacts/api-server/src/lib/post-p17-intake-file-inspection.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts
@@ -744,6 +747,28 @@ It changes only when the code structure or curated architectural facts change.
 - Stable Coordination File identity and immutable provider revision evidence replay only when every authoritative field matches. Provider identity reused with a different hash, byte size, scope or classification fails closed.
 - Current revision designation is explicit and compare-and-set guarded by the caller's observed revision. Job idempotency likewise accepts replay only when the request digest matches.
 - This build adds no schema and activates no connector. It preserves the complete Prework 02–06 and MAIN 04 Build 47 lineage.
+
+## POST-P18 Coordination Hub authorization hardening — Build 66
+
+- Coordination summary and intake history remain readable by authenticated current-project members.
+- Coordination intake analysis, intake confirmation, immutable revision registration, and connector-job enqueue are mutations and therefore require the established project `admin` or `write` permission on the server.
+- Credential enrollment, rotation, validation, lifecycle visibility, and SharePoint mapping retain their stricter project-administrator boundary.
+- Every command continues to replace caller-supplied scope with the authenticated route project, actor, and company context; provider revision identity and summary queries remain project-scoped.
+- This correction changes no schema, stored record, connector activation, Native/Lens Next behavior, or deployment state.
+
+## POST-P18 Coordination synchronization lifecycle — Build 67
+
+- Connector-job enqueue and its first immutable lifecycle event are committed in one transaction. The sequence-1 event is bound to exact job, company, project, actor, provider, job type, and request digest evidence.
+- Existing job states remain `queued`, `leased`, `retry`, `completed`, `dead_letter`, and `cancelled`; claims remain attempt-bounded, lease-aware, `SKIP LOCKED`, and fencing-token protected.
+- Exact idempotent replay remains accepted only for the same request digest. Digest conflict fails closed, and terminal dead-letter jobs remain visible as attention items.
+- This checkpoint activates no connector worker, provider call, migration, outbound action, or deployment.
+
+## POST-P18 Coordination linked-record isolation — Build 68
+
+- Generic linked-item creation accepts only the established authoritative entity types and positive numeric record identities.
+- Before relationship persistence, both source and target records must independently exist in the exact requested project. Missing, malformed, unsupported, and cross-project endpoints fail closed.
+- Relationship creation and removal affect only the project-scoped relationship and its activity evidence; connected authoritative RFI, Submittal, Transmittal, Change Order, Meeting, File, Clash, and Lens Next records are not mutated.
+- Coordination File source revisions retain their independent same-project source-file proof, and action projections remain persistence-free proposals.
 
 ## Coordination Delivery Release A — Builds 2–11 contracts
 

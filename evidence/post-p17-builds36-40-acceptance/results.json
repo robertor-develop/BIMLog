@@ -1,0 +1,50 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P17",
+  "results": [
+    {
+      "name": "post-p17-build36-transmittal-identity-scope.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "81dce977ec29187841510e0787c2b5f16126ef02fc5058951038d645b3af76bd"
+    },
+    {
+      "name": "post-p17-build37-transmittal-lifecycle.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "b5818a59d643c62b6e4fa22078f7615d666e4408673d52f3d699ce888c8406c1"
+    },
+    {
+      "name": "post-p17-build38-transmittal-items-links.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "10530bfc54984f1f8f50c54176035acd2673fdbdef0de7948cc6d85761285335"
+    },
+    {
+      "name": "post-p17-build39-transmittal-workflow-ui.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "f07903615c466d4d4444ff0d32bd16861526eb7a3351bc1f8610bd5f30bb258c"
+    },
+    {
+      "name": "document-connections-regression",
+      "exitCode": 0
+    },
+    {
+      "name": "protected-apu-regression",
+      "exitCode": 0
+    },
+    {
+      "name": "protected-lens-next-regression",
+      "exitCode": 0
+    },
+    {
+      "name": "governed-production-build",
+      "exitCode": 0
+    }
+  ],
+  "browserEvidence": "evidence/post-p17-build39-transmittal-chrome/acceptance.json",
+  "productCodeChanged": false,
+  "apuProductChanged": false,
+  "lensNextProductChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "deploymentChanged": false
+}

@@ -1,0 +1,44 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P17",
+  "results": [
+    {
+      "name": "post-p17-build46-meeting-identity-scope.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "2906a95dcd7bee74ef63b01bf298ce999af4fd2ce26a4caaea377075920deabd"
+    },
+    {
+      "name": "post-p17-build47-meeting-attendance-actions.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "1e671e29e137daef007f13d4e86d27f6b4c9e3c7461edf6f1b01dfb5ea9839e5"
+    },
+    {
+      "name": "post-p17-build48-meeting-links-isolation.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "84942f688eedcd38e15ea1342ad6ba0359858b23d438166ddffae10485d649f9"
+    },
+    {
+      "name": "post-p17-build49-meeting-workflow-ui.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "a000e460a0e2eecd31ab8f5d9b9b8c26bc32cdd90bf27ab22c08b8ea3570e8d0"
+    },
+    {
+      "name": "protected-apu",
+      "exitCode": 0
+    },
+    {
+      "name": "protected-lens",
+      "exitCode": 0
+    },
+    {
+      "name": "production-build",
+      "exitCode": 0
+    }
+  ],
+  "browserEvidence": "evidence/post-p17-build49-meeting-chrome/acceptance.json",
+  "productCodeChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "deploymentChanged": false
+}

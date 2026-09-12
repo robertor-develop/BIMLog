@@ -1,0 +1,35 @@
+{
+  "build": 69,
+  "observedAt": "2026-09-12T15:30:00Z",
+  "mode": "authenticated Chrome read-only",
+  "productionUrl": "https://bimlog.app/projects/27/coordination",
+  "liveVersion": "v1.05.N17-P17",
+  "candidateVersion": "v1.05.N17-P18",
+  "project": {
+    "id": 27,
+    "code": "ROB-T1",
+    "name": "Robertor Test for Convention Builder",
+    "role": "project_admin"
+  },
+  "observed": {
+    "coordinationHubHeading": true,
+    "smartIntakeDescription": true,
+    "inactiveConventionState": true,
+    "openConventionBuilderControl": true,
+    "recentIntakeHeading": true,
+    "honestEmptyState": true,
+    "projectNavigation": true,
+    "helpControl": true,
+    "browserWarningsOrErrors": 0
+  },
+  "mutations": {
+    "upload": false,
+    "download": false,
+    "confirmation": false,
+    "queueSync": false,
+    "conventionChange": false,
+    "customerDataChange": false
+  },
+  "result": "PASS",
+  "publicationNote": "Production remains P17; P18 is an unpublished internal candidate. Build 69 verifies the existing live workflow surface and makes no claim that unpublished Build 66-68 server corrections are live."
+}

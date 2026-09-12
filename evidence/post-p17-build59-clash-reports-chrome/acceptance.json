@@ -1,0 +1,13 @@
+{
+  "status": "PASS",
+  "observedAtUtc": "2026-09-12T13:40:00Z",
+  "url": "https://bimlog.app/projects/27/clash-reports",
+  "projectId": 27,
+  "projectCode": "ROB-T1",
+  "liveVersion": "v1.05.N17-P17",
+  "authenticated": true,
+  "readOnlyVerification": true,
+  "observedControls": ["Reportes de Choques", "Choques", "Vistas Lens", "Imprimir PDF", "+ New Report", "Subir Registro de Choques", "View Clashes", "Re-rank AI", "Delete"],
+  "observedReport": {"reportNumber":"ROB-T1-CR-001","clashes":32,"p1":7,"p2":17,"p3":8},
+  "mutationPerformed": false
+}

@@ -15,8 +15,8 @@ const styles = read("../../../../artifacts/bimlog/src/index.css");
 const app = read("../../../../artifacts/bimlog/src/App.tsx");
 const legacy = read("../../../../artifacts/bimlog/src/pages/SetupGuide.tsx");
 
-assert.match(navbar, /BIMLOG_RELEASE_VERSION = "v1\.05\.N17-P17"/, "Navbar must expose the current Platform release");
-assert.match(page, /HELP_RELEASE_VERSION = "v1\.05\.N17-P17"/, "Help Center must expose the current Platform release");
+assert.match(navbar, /BIMLOG_RELEASE_VERSION = "v1\.05\.N17-P18"/, "Navbar must expose the current Platform release");
+assert.match(page, /HELP_RELEASE_VERSION = "v1\.05\.N17-P18"/, "Help Center must expose the current Platform release");
 assert.match(content, /v1\.60\.32\.05: Build 5 Document Connections/);
 assert.match(content, /v1\.60\.32\.05: Build 5 Conexiones de documentos/);
 assert.match(content, /v1\.60\.31\.04: Build 4 Contract and Budget Activation/, "Build 4 release history must remain visible");

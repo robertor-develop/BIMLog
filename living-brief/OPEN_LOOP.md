@@ -2231,15 +2231,15 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 - [x] Consolidate the accepted Job Intake / Multi-APU Builds 1–20 with the tested Lens Next missing-scale XML correction without losing either lineage.
 - [x] Align the combined visible Platform and Navisworks 2025 package identity to `v1.05.N14-P10` / `1.5.14.10`.
 - [x] Align the version regression expectation and deliver the exact integrity-verified 2025 ZIP through the approved private Telegram boundary.
-- [ ] Push the exact reviewed integration commit, build and publish it once through the governed Replit Shell path, and verify the live version and Intake behavior in Chrome.
-- [ ] Ruben must field-test the exact Navisworks 2025 N14-P10 package, including XML export/import, before promotion is described as customer accepted.
+- [x] The N14-P10 source lineage was pushed, published, and live-verified before the subsequent P11-P17 Platform releases; the currently deployed descendant is `v1.05.N17-P17`.
+- [ ] The superseded N14-P10 package is not a current field-acceptance object. Final Navisworks field acceptance remains against the latest accepted N17 package and Platform descendant.
 
 ## v1.05.N14-P11 Job Intake client-company correction gates
 
 - [x] Reuse the authoritative current-project company registration endpoint in Quick and Advanced setup.
 - [x] Automatically select the created/reused company and preserve authoritative company ID in the Intake draft.
 - [x] Prove focused behavior, Job Intake service, combined multi-company scenario, frontend typecheck/build, and mojibake gates locally.
-- [ ] Push, publish, and live-verify the exact P11 candidate in Chrome under separate production authorization.
+- [x] P11 was pushed, published, and live-verified; its Quick/Advanced client-company and Primary Contact corrections remain present in the current P17 production lineage.
 
 ## v1.05.N17-P12 Build 47 release-closure gates
 
@@ -2248,8 +2248,9 @@ Roberto authorized continuous item-by-item repair with a planned evidence-driven
 - [x] Permit only bounded exact-identity legacy compatibility without database rewrite or fabricated digest.
 - [x] Permit exact, digest-valid historical navigation server-ID rebinding only in the response payload.
 - [x] Merge the accepted N17 camera-unit contract without Native behavior change and reconcile shared metadata to N17-P12.
-- [ ] Push the exact reviewed commit, publish once through the governed Replit Shell, and verify live N17-P12 plus P11 Intake behavior in Chrome.
-- [ ] Package both Navisworks targets, deliver the verified 2025 ZIP, and obtain Ruben's dual-project field retest.
+- [x] N17-P12 was pushed and published, and its Platform behavior plus preserved P11 Intake behavior remain in the live P17 descendant.
+- [x] Both Navisworks targets were packaged and the verified 2025 ZIP was delivered to Roberto.
+- [ ] Obtain Ruben's final dual-project field confirmation against the latest accepted N17 package and current Platform descendant; do not infer customer acceptance from packaging or delivery.
 
 ## Micro-build allocation
 
@@ -2347,12 +2348,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Preserve every existing capability and keep business logic, permissions, database, schema, and version behavior unchanged.
 - [x] Restore clear discoverability of the existing desktop sidebar collapse/expand and drag-to-resize controls without resetting saved user width.
 - [x] Pass focused behavior, frontend typecheck/build, and governed root regression from the reconciled source state. Builds 9–12 add accessibility, route-level performance, truthful public product proof, and consolidated acceptance without removing capability.
-- [ ] Keep push, publication, and live Chrome verification as a separate explicitly authorized release gate.
+- [x] The workspace-width and sidebar-control corrections were integrated into the authoritative lineage and subsequently published in the live P17 descendant; production Chrome evidence confirms the resulting UI lineage.
 # Coordination Release C + UX Build 17 integration — 2026-09-10
 
 - [x] Merge sealed Coordination Release C with accepted UX Build 17 in the dedicated Release B integration worktree, preserving both parents and both authority histories.
 - [x] Focused coordination/credential behavior 12/12 and UX contracts 90/90.
-- [ ] Remote integration, provider activation, migration authorization, version reconciliation, publication, and deployment remain separate explicit gates.
+- [x] Coordination Release C and UX Build 17 were integrated into the authoritative production lineage and version-reconciled through P17.
+- [ ] Provider activation and the explicitly deferred enterprise/connector migrations still require separate exact authorization, backup, rollback, and production verification.
 - [x] Governed production build and exact mobile/desktop browser matrix completed from the clean reconciled evidence commit; local integration acceptance is complete.
 
 ## v1.05.N17-P13 legacy Open Working View closure
@@ -2361,26 +2363,27 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Add bounded response-only normalization for digest-valid historical navigation packages proven to share project, active model, and authoritative viewpoint lineage.
 - [x] Keep cross-project, model mismatch, digest corruption, unrelated lineage, cyclic lineage, and ambiguous identity fail-closed.
 - [x] Preserve database/schema and Native behavior unchanged; advance Platform only to P13.
-- [ ] Push, publish, live-verify, and obtain Ruben confirmation on one historical and one new viewpoint only after separate explicit authorization.
+- [x] P13 was pushed and published and its bounded compatibility path remains present in the live P17 Platform descendant.
+- [ ] Obtain Ruben confirmation on one historical and one new viewpoint against the current accepted release; publication alone is not field acceptance.
 
 ## v1.05.N17-P14 historical digest contract closure
 
 - [x] Require independent recomputation or preserved canonical evidence for unversioned historical Visual Packages; stored/embedded equality alone is not verification.
 - [x] Preserve the P13 response-only safe lineage classifier without allowing lineage compatibility to bypass digest integrity.
 - [x] Align Platform behavior tests with Native's permanent historical-unversioned quarantine vector while retaining an explicit recomputation-valid historical acceptance case.
-- [ ] Push the exact accepted P14 commit, publish without database/schema migration, verify production version and health in Chrome, and send the unchanged accepted N17-P12 Navisworks 2025 ZIP to Roberto.
+- [x] P14 was pushed and published without database/schema migration, production was verified, and the accepted N17 Navisworks 2025 package was delivered to Roberto; later Platform-only releases preserve this contract.
 - [ ] Ruben field acceptance must prove one new and one historical Open Working View path, camera/sectioning, and one XML export smoke before final freeze audit.
 
 ## Post-Build-20 corrective acceptance stream
 
 - [x] Corrective Build 1: multiple authoritative contacts for the selected current-project client company in Quick and Advanced Job Intake, with immediate Primary Contact selection and server-side project/company scope enforcement.
-- [ ] Corrective Build 1 independent browser acceptance and integration/release gate.
+- [x] Corrective Build 1 passed controlled Chrome acceptance and was integrated, published, and retained through P15-P17.
 - [x] Corrective Build 2: place Contract setup immediately after Job identity in Advanced Intake, align navigation and numbering, and keep Contract Items/APU pricing together.
 - [x] Corrective Build 3: make saved APU versions selectable per Contract Item and reload persisted budget-line options while preserving company/agreement bindings.
 - [x] Corrective Build 4: add an existing connected-company BIMLog user to the current project from Team & Resources, then expose that authoritative member to the existing task/contract/scope assignment chain.
-- [ ] Corrective Builds 1–4 independent browser acceptance and integration/release gate.
+- [x] Corrective Builds 1–4 passed controlled Chrome acceptance and were integrated, published, and retained through P15-P17.
 - [x] Corrective Build 5: expose Drafting 35.47 and BIM Coordinator 37.99 defaults in Team & Resources, update the selected authoritative Contract Item rate, and preserve separate internal cost and incentive values.
-- [ ] Corrective Builds 1–5 independent browser acceptance and integration/release gate.
+- [x] Corrective Builds 1–5 passed controlled Chrome acceptance and were integrated, published, and retained through P15-P17.
 - [x] Corrective Builds 1–5 controlled Chrome acceptance and coherent Platform P15 version reconciliation.
 - [x] Push exact P15 source, publish through approved Replit flow, and live-verify version, health, and representative Intake controls before starting Build 6. Published `v1.05.N17-P15` from exact commit `61d57db15b3ed15ce6ac13cc2f9420b7448ab745`; health and representative Intake controls passed live Chrome verification.
 - [x] Corrective Build 6: make task-level resource assignment explicit, clear stale package-task selection when the Contract Item changes, and preserve the existing operational task authority.
@@ -2389,8 +2392,8 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Corrective Build 9: expose stable Work Package identity and owner and prove save/reload plus operational activation persistence.
 - [x] Corrective Build 10: expose canonical Job budget-account generation and prove source-line association and idempotent persistence.
 - [x] Corrective Builds 6–10 consolidated focused, Intake, Generic APU, Job Operations, budget-governance, typecheck, full production-build, and deterministic runtime-closure gates pass.
-- [ ] Push exact P16 source, publish through the approved Replit Shell flow, and live-verify version, health, and representative Builds 6–10 Intake controls in Chrome.
-- [ ] Continue with the next unresolved smoke-test finding; do not repeat completed Builds 1–10 work.
+- [x] P16 was pushed and published through the approved Replit Shell flow; version, health, and representative Builds 6–10 Intake controls were verified in Chrome and remain present in P17.
+- [x] The next unresolved smoke-test finding was handled as Build 21 without repeating completed Builds 1–10 work.
 
 ## Build 21 sole-owner budget approval override
 
@@ -2398,4 +2401,144 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Require Cost Approver plus Financial Administrator authority, exact fingerprint confirmation, an effective approval-limit policy, a bounded written reason, and explicit exception confirmation.
 - [x] Record immutable override evidence without rewriting the budget, weakening other financial operations, or changing database/schema.
 - [x] Document the exact bilingual workflow in Help & Guide and expose it through progressive disclosure on Under Review budgets.
-- [ ] Complete governed production build, independent browser acceptance, exact-source push/publication, and live P17 budget workflow verification under separate release authority.
+- [x] Complete the governed production build, exact-source push/publication, production health/version verification, controlled Chrome Intake verification, and focused financial regressions for P17.
+- [ ] Complete the external 20-row APU/Job Intake smoke-test return and, when controlled prerequisites exist, field-confirm the live sole-owner budget override with an effective approval policy. Do not invent customer financial policy or users to force this gate.
+
+## POST-P17 assurance Builds 01–05
+
+- [x] Bind the exact immutable 20-row workbook and SHA256 to executable row-level acceptance.
+- [x] Exercise the real Quick Job Intake production component in controlled Chromium.
+- [x] Prove save, refresh, return, saved-section restoration, and project-switch isolation.
+- [x] Automate PDF, DOCX, XLSX, CSV, and XML intake-source inspection contracts.
+- [x] Run the consolidated assurance runner and freeze its manifest with every internal gate PASS.
+- [ ] External user smoke-test return remains a separate field-acceptance gate; this internal block does not replace it.
+
+## POST-P17 assurance Builds 06–10
+
+- [x] Verify the complete production Advanced Job Intake workspace in authenticated Chrome on the controlled test project.
+- [x] Prove Quick/Advanced mode switching preserves one saved draft and restore the temporary test value afterward.
+- [x] Lock autosave failure, local recovery, bounded retry, and unload-warning behavior with an executable regression.
+- [x] Lock governed activation ordering, readiness, fingerprint, and optimistic revision boundaries without activating an incomplete live draft.
+- [x] Run consolidated Intake/APU regression and record machine-readable PASS evidence.
+- [ ] External user smoke-test return remains the field-acceptance authority and is not replaced by this internal block.
+
+## POST-P17 assurance Builds 11–15
+
+- [x] Lock current-project company and dependent-contact authority in UI and service enforcement.
+- [x] Lock the contract, APU version/rate, approved budget line, Contract Item, and Work Package identity chain.
+- [x] Lock eligible-user membership, assignment scope, planned hours, internal cost, customer/APU rate, and incentive separation.
+- [x] Lock activation work items/tasks/packages/assignments, immutable commercial baseline, and idempotent replay behavior.
+- [x] Run the consolidated established Generic APU/Intake/Operations regression and record machine-readable evidence.
+- [ ] External user smoke-test return remains required for field acceptance.
+
+## POST-P17 assurance Builds 16–20
+
+- [x] Lock job, client, contract/quote, type, state, reference, and APU reporting identity.
+- [x] Lock immutable APU snapshot fingerprint and quantity/rate/value provenance.
+- [x] Lock project/company scope denial and entitlement-aware Operations projections.
+- [x] Lock bilingual Help, validation, audit, boundary, troubleshooting, and release discoverability.
+- [x] Reconcile governance before the final governed build and run the consolidated production gate.
+- [x] Freeze the final PASS evidence at commit `4d881f695b41bbc7c4138746559049ac0f0ef3d5` with its exact evidence hash.
+- [ ] External user smoke-test return remains the separate field-acceptance authority.
+
+## POST-P17 assurance Builds 21–25
+
+- [x] Lock exact customer/APU rate, internal labor cost, incentive, hours, and commercial-value calculations.
+- [x] Lock optimistic revision, row locking, immutable fingerprint, and conflict-safe activation replay behavior.
+- [x] Lock project-scoped governed report/PDF exports, selected filters/sections, privacy redaction, and fingerprints.
+- [x] Lock responsive layouts, overflow handling, accessible status/error announcements, and bounded report dialogs.
+- [x] Verify the repository-local TypeScript gate launches correctly in the controlled Windows runner.
+- [x] Verify Build 21's focused assertions and complete API TypeScript project both pass.
+- [x] Run the consolidated Build 25 gate and freeze machine-readable PASS evidence at commit `c520e15cb33567eb946e3499ad00651dc6237da7`.
+- [ ] External user field acceptance remains separate from this internal assurance block.
+
+## POST-P17 assurance Builds 26–30
+
+- [x] Lock RFI authoritative identity and current-project scope.
+- [x] Lock revision lineage, immutable history, and soft-delete lifecycle.
+- [x] Lock bounded attachment upload, project authorization, canonical download, and safe staged cleanup.
+- [x] Verify the existing RFI detail, email-copy, linked-document, deep-create, and response-attachment controls in authenticated Chrome without external send or record mutation.
+- [x] Run the consolidated Build 30 gate with RFI, protected APU/Job Intake, protected Lens Next, and governed production-build regressions; evidence is frozen at `468e0e1379d217ed8ba89bfd355be594867b45a6` with SHA-256 `DAC5C420974961A29AC01AAC4DDD9C7C0C6FD9391B07B00523CF0A194B3EBFAA`.
+- [ ] External user field acceptance remains separate from this internal assurance block.
+
+## POST-P17 assurance Builds 31–35
+
+- [x] Lock Submittal authoritative identity and current-project scope.
+- [x] Lock revision lineage, lifecycle/status transitions, responsibility history, audit records, and soft deletion.
+- [x] Lock attachment write authorization, project-bound storage/download, compensation, and relationship isolation.
+- [x] Verify Submittal packages, required register, shop-drawing control, filters, exports, related-RFI and attachment controls in authenticated Chrome without persistent mutation.
+- [x] Run the consolidated Build 35 gate with protected APU/Job Intake, protected Lens Next, and governed production-build regressions; evidence is frozen at `21eda7ee5ec11d45123716c6428ab51f3fb66425` with SHA-256 `09F7DC19709BCAB1AAC74C6C59ED4435A93F910E697FBEE7B0C47B400063322B`.
+- [ ] External user field acceptance remains separate from this internal assurance block.
+
+## POST-P17 assurance Builds 36–40
+
+- [x] Lock Transmittal authoritative identity and current-project scope.
+- [x] Lock draft, send, acknowledgement, soft-delete, timestamp, and audit contracts.
+- [x] Lock item persistence and project-scoped typed-link cleanup without deleting authoritative connected records.
+- [x] Verify search, status, sort, import, create, and governed current-view PDF controls in authenticated Chrome without mutation.
+- [x] Isolate the static document-connection gate with a non-routable test-only database URL; no database connection, mutation, or production safety relaxation occurs.
+- [x] Run and freeze the consolidated Build 40 protected-baseline gate at `da1cb8da0b03dacc4117f7585a8eba603a2bc272`, SHA-256 `9E0FFC774B559FF7545AC8C5E222CC44E8BEF71DC077BF80A25D3CE2A1C7E44C`.
+- [ ] External user field acceptance remains separate from this internal assurance block.
+
+## POST-P17 assurance Builds 41–45
+
+- [x] Lock Change Order authoritative identity and current-project scope.
+- [x] Lock draft, pending, approved, rejected, audit, financial-impact, schedule-impact, and soft-delete contracts.
+- [x] Lock RFI promotion, Submittal/link cleanup, import identity, and authoritative-record isolation.
+- [x] Verify create, import, filters, governed current-view PDF, and individual PDF controls in authenticated Chrome without mutation.
+- [x] Run and freeze the consolidated Build 45 protected-baseline gate at `46aa99eb2df658d1bd6165116328b6e8331c0564`, SHA-256 `B8BA55844CB03484BA13551655EEB23290A07A75F3A49E69319DE24F9886082A`.
+- [ ] External user field acceptance remains separate from this internal assurance block.
+
+## POST-P17 assurance Builds 46–50
+
+- [x] Lock Meetings identity, attendance, actions, and linked-record isolation.
+- [x] Verify the live Meetings, Actions, Import Minutes, New Meeting, and governed PDF controls read-only in Chrome.
+- [x] Run and freeze the consolidated Build 50 protected-baseline gate at `780592d378ba5e18b1da5966548037f0b5522dfb`, SHA-256 `238E153AA88413F1FEB3D36B398F456895F4CF59EAF2C46255AE63C8D6E8585C`.
+- [ ] External user field acceptance remains separate.
+
+## POST-P17 assurance Builds 56–60
+
+- [x] Lock Clash Reports authoritative identity and current-project membership/write boundaries.
+- [x] Lock active/deleted lifecycle, delete evidence, and project-bound plugin synchronization behavior.
+- [x] Lock typed link cleanup, Meeting original-Clash navigation, and governed report isolation.
+- [x] Verify the live Clash Reports workflow and controls read-only in authenticated Chrome.
+- [x] Run and freeze the consolidated Build 60 protected-baseline gate at `a2430aee5a082a80e40af15a9fdd10bca6c1a3cb`, SHA-256 `FB216473AE74717DF76C9C1A42D6457DAEB221FE07F4321291B9DA41432E1789`.
+- [ ] External user field acceptance remains separate.
+
+## POST-P17 assurance Builds 51–55
+
+- [x] Lock Schedule current-project identity and membership/write authority.
+- [x] Lock milestone, RFI, Submittal, and Meeting source ownership and lifecycle isolation.
+- [x] Lock Calendar/Board/List filters, project-bound rollovers/history, and governed PDF scope.
+- [x] Verify the live Schedule workflow and controls read-only in authenticated Chrome.
+- [x] Run and freeze the consolidated Build 55 protected-baseline gate at `4c65cd7e715a2a8ccce68ce3fd31e0f251b8e967`, SHA-256 `2C963BC9D86292C6957397127D8903C865D7BC2B1C6BCE2AB7CF98866368D9B2`.
+- [ ] External user field acceptance remains separate.
+
+## POST-P17 assurance Builds 61–65
+
+- [x] Lock Files/CVR authoritative current-project identity and member/write authorization.
+- [x] Lock bounded upload, byte-derived SHA-256 evidence, compensation, safe storage disposition, and authenticated project-bound download.
+- [x] Lock CVR version lineage, supersession, review state, approval/rejection evidence, and governed report behavior.
+- [x] Verify the live Files workspace, filters, declaration controls, upload surface, and Coordination entry point read-only in authenticated Chrome.
+- [x] Correct legacy confirm-violation and supersede write authorization and enforce same-project replacement-file identity.
+- [x] Run and freeze the consolidated Build 65 protected-baseline gate at `v1.05.N17-P18`; evidence commit `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08`, SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
+- [ ] External user field acceptance and any P18 publication remain separate.
+
+## POST-P18 assurance Builds 66–70
+
+- [x] Build 66: enforce authoritative current-project membership for reads and server-side `admin`/`write` permission for Coordination mutations.
+- [x] Build 67: lock synchronization lifecycle, bounded retry, idempotency conflicts, terminal attention, and attributable audit evidence.
+- [x] Build 68: lock cross-module linked-record integrity without mutating authoritative connected records.
+- [x] Build 69: verify the authenticated live Coordination workflow read-only in Chrome.
+- [x] Build 70: run protected APU, Lens Next, Files/CVR, governance, typecheck, and production-assembly acceptance.
+- Build 70 first production invocation stopped on deterministic `PLATFORM.md` generation drift; the generator source was corrected and the clean full rerun passed.
+- [ ] External user field acceptance and any P18 push/publication/deployment remain separate.
+
+## POST-P18 assurance Builds 71–75
+
+- [x] Build 71: lock Project Directory current-project identity, member reads, server-side write authorization, and project-scoped invite status updates.
+- [x] Build 72: lock company/contact lifecycle, deduplication, and membership invitation boundaries.
+- [x] Build 73: lock Directory consumer isolation across Meetings, Intake, assignments, RFI, and Submittal workflows.
+- [x] Build 74: verify the authenticated live Project Directory workflow read-only in Chrome.
+- [x] Build 75: protected APU, Lens Next, governance, typecheck, and deterministic production-assembly acceptance passed; evidence is frozen at `a8cb92d3a461d8c1f364caae1aa9081ee0045924`, SHA-256 `73E6304E86228572C526F3EB05139521046984C15BA2A229B6731583B0A20C7F`.
+- [ ] External user field acceptance and any P18 push/publication/deployment remain separate.

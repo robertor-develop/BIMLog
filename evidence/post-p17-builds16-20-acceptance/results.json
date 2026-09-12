@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P17",
+  "results": [
+    {
+      "name": "post-p17-build16-reporting-identity.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "64b5c080babccd76a7e0fc732a637a2ca9183c4350a6c1879da99e9e49cea8e1"
+    },
+    {
+      "name": "post-p17-build17-apu-history-provenance.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "7a38c95ca963e4ae62e92b36075e1ca45b1f2b0227de02c27b637666523e1dc7"
+    },
+    {
+      "name": "post-p17-build18-scope-redaction.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "ca4f4bf8bc6cb9335905c074037aff0784904e384a3982fe91b626123d04a503"
+    },
+    {
+      "name": "post-p17-build19-help-audit.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "5bd039623e9110c741e6af58fd05fb2d65bbb8d10023635d37d19e58fc317d60"
+    },
+    {
+      "name": "generic-apu",
+      "exitCode": 0
+    },
+    {
+      "name": "governed-production-build",
+      "exitCode": 0
+    }
+  ],
+  "productCodeChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "deploymentChanged": false
+}

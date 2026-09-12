@@ -1,0 +1,12 @@
+{
+  "suite": "post-p17-build03-save-refresh-return-project-switch",
+  "status": "PASS",
+  "assertions": 8,
+  "coverage": [
+    "save",
+    "refresh",
+    "return",
+    "project-switch-isolation",
+    "section-restoration"
+  ]
+}

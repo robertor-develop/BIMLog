@@ -1350,7 +1350,16 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] Quick and Advanced Job Intake expose Add company contact only after selecting a current-project client company.
 - [x] A newly created contact enters the current directory options and is immediately selected as Primary Contact.
 - [x] The server proves the company is already represented in the current project directory before contact creation or reuse.
-- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+- [x] Independent browser acceptance, integration, push, and publication were completed in the consolidated P15 release and remain present in the live P17 descendant.
+
+## Production lineage and open-gate reconciliation — 2026-09-10
+
+- Production is live at `v1.05.N17-P17`. The exact P17 source is contained in the production `master` lineage, and `origin/main` is an older ancestor rather than a competing newer product state.
+- The accepted Job Intake / Multi-APU Builds 1–20, corrective Builds 1–10, sole-owner Build 21, P11 client-company corrections, P13 legacy navigation compatibility, P14 digest integrity correction, UX Build 17, and Coordination Release C source are all present in the current production lineage.
+- Controlled Chrome and focused regression evidence pass for the P17 Intake/APU behavior. The external 20-row user smoke-test return remains open and is not replaced by internal evidence.
+- Ruben's final field confirmation of one historical and one new Lens viewpoint, camera/sectioning, and XML export/import remains open. Package creation or Telegram delivery is not customer acceptance.
+- Enterprise identity/connector migrations and provider activation remain intentionally deferred behind their separate database, credential, backup, rollback, and deployment gates.
+- No product, Native, database, schema, provider, or deployment mutation occurred in this documentation-only reconciliation.
 
 ## Post-Build-20 corrective Builds 6–10 local block — 2026-09-10
 
@@ -1372,7 +1381,97 @@ No release, publication, or overall completion claim is permitted until the reco
 - Project Budget preserves independent maker-checker approval as the default and adds one explicit approval-only exception for a genuine sole active company member on the project.
 - The exception requires Cost Approver and Financial Administrator authority, an approval-limit policy, exact budget fingerprint confirmation, a 10–1000 character reason, and the exact `SOLE_OWNER_OVERRIDE` confirmation.
 - Successful use records both the approved immutable snapshot and a dedicated append-only `budget_self_approval_override_used` journal event. Cross-project, suspended, over-limit, ambiguous multi-member, review, execution, and ordinary same-maker requests remain denied.
-- Platform advances to P17. Native, database, and schema are unchanged; push, publication, production verification, and final live budget acceptance remain separate gates.
+- Platform advanced to P17. Native, database, and schema are unchanged. The governed build, exact-source push/publication, production health/version verification, and controlled Chrome Intake verification subsequently passed; external APU acceptance and a prerequisite-backed live sole-owner approval remain open.
+
+## POST-P17 assurance Builds 01–05 — 2026-09-11
+
+- Five test-only micro-builds now bind the immutable 20-row Build 20 workbook to executable acceptance, exercise the production Quick Job Intake component in Chromium, prove saved section/data restoration across refresh/return/project switching, inspect PDF/DOCX/XLSX/CSV/XML intake sources, and run one consolidated evidence manifest.
+- The exact workbook hash is `10F1918DBD947B84FD04405B162C8388F60A255239C091468864AFDBCE981E58`; all 20 rows remain PASS with zero blockers in the internal acceptance authority.
+- The consolidated gate passes the four new suites, workspace-library typecheck, and the established Generic APU regression. Product behavior, release version `v1.05.N17-P17`, Native, database, schema, deployment, and customer data are unchanged.
+
+## POST-P17 assurance Builds 06–10 — 2026-09-11
+
+- Live authenticated Chrome acceptance on controlled project `PRO-521-TEST` proves the complete Advanced Job Intake surface and Quick/Advanced draft continuity at `v1.05.N17-P17`.
+- The temporary mode-switch marker was removed and saved, leaving the controlled project at its prior value.
+- Executable gates lock local recovery, visible autosave failure, bounded retry, unload protection, and the governed fingerprint/revision activation boundary.
+- The consolidated gate and established Generic APU/Intake regression pass. No product behavior, version, Native, database/schema, deployment, or customer data remains changed by this block.
+
+## POST-P17 assurance Builds 11–15 — 2026-09-11
+
+- Four executable gates now lock project-company/contact authority, the contract/APU/budget/Work Package chain, eligible-user/resource assignment and rate separation, and idempotent activation outputs.
+- Build 15 reruns all four gates with the complete established Generic APU, Intake, Operations, budget, team, help, API, and frontend typecheck regression; every gate passes.
+- This block is test/evidence only. Product behavior, version `v1.05.N17-P17`, Native, database/schema, deployment, and customer data are unchanged.
+
+## POST-P17 assurance Builds 16–20 — 2026-09-11
+
+- Builds 16–19 lock reporting identity, immutable APU pricing provenance, project/entitlement isolation, and bilingual Help/audit discoverability.
+- Build 20 consolidates those gates with the established Generic APU/Intake suite and the governed production build/runtime closure.
+- The final machine-readable PASS evidence is frozen at source commit `4d881f695b41bbc7c4138746559049ac0f0ef3d5` with SHA-256 `E06A7116D1A60D9F8EBE6C885C3928A37E02F665EA8C561638DB0FF4B5823DAE`.
+- This is test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, deployment, or customer-data change is introduced.
+
+## POST-P17 assurance Builds 21–25 — 2026-09-11
+
+- Builds 21–24 lock exact multi-rate financial calculations, activation concurrency/idempotent replay, governed report/export scope, and responsive accessibility contracts.
+- Build 25 consolidates those gates with the complete Generic APU/Job Intake regression and governed production build/runtime closure.
+- The Windows acceptance runner invokes its TypeScript gate through the repository-local command shim; this changes test execution only.
+- Build 21's accumulator is explicitly typed so the same passing financial assertions also satisfy the complete TypeScript gate.
+- The consolidated gate is PASS and its evidence is frozen at commit `c520e15cb33567eb946e3499ad00651dc6237da7` with SHA-256 `3E1C760AE1F334DA7CC1D6C0A9AF0AC264FF477351E49D86210F19FE17F7BD65`.
+- This block is test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
+
+## POST-P17 assurance Builds 26–30 — 2026-09-11
+
+- Builds 26–29 lock RFI authoritative project identity, lifecycle/revision history, attachment authorization and storage lifecycle, and the live user-facing workflow in authenticated Chrome.
+- Build 30 consolidates those gates with the established RFI import suite and the protected Generic APU/Job Intake and Lens Next regression suites.
+- The Chrome check used an existing RFI in project 27 read-only, verified Copy Email locally, and performed no send, record mutation, link mutation, deletion, or customer-data change.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `468e0e1379d217ed8ba89bfd355be594867b45a6` with SHA-256 `DAC5C420974961A29AC01AAC4DDD9C7C0C6FD9391B07B00523CF0A194B3EBFAA`.
+- This block is test/evidence-only assurance at `v1.05.N17-P17`; RFI product behavior, protected APU and Lens Next behavior, Native, database/schema, deployment, and customer data remain unchanged.
+
+## POST-P17 assurance Builds 31–35 — 2026-09-11
+
+- Builds 31–34 lock Submittal authoritative identity/project scope, lifecycle/revision/audit history, attachment authorization/storage integrity, and the live user-facing workflow in authenticated Chrome.
+- Build 35 consolidates those gates with the protected Generic APU/Job Intake and Lens Next regression suites and the governed production build/runtime closure.
+- The Chrome check used controlled project 27 read-only, opened and cancelled the New Submittal form, inspected Register and Shop Drawing Control, and performed no record, file, email, link, or customer-data mutation.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `21eda7ee5ec11d45123716c6428ab51f3fb66425` with SHA-256 `09F7DC19709BCAB1AAC74C6C59ED4435A93F910E697FBEE7B0C47B400063322B`.
+- This block is test/evidence-only assurance at `v1.05.N17-P17`; Submittal product behavior, protected APU and Lens Next behavior, Native, database/schema, deployment, and customer data remain unchanged.
+
+## POST-P17 assurance Builds 36–40 — 2026-09-11
+
+- Builds 36–39 lock Transmittal authoritative identity/project scope, draft/send/acknowledgement/delete lifecycle, item and typed-link isolation, governed exports, exact deep links, and live Chrome workflow visibility.
+- Build 40 consolidates those gates with document-connection, protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
+- The Chrome check used controlled project 27 read-only and performed no create, import, send, acknowledge, delete, email, file, link, or customer-data mutation.
+- The consolidated runner supplies a non-routable test-only database URL to the static document-connection behavior module; it performs no connection or mutation and leaves the production fail-closed database bootloader unchanged.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `da1cb8da0b03dacc4117f7585a8eba603a2bc272` with SHA-256 `9E0FFC774B559FF7545AC8C5E222CC44E8BEF71DC077BF80A25D3CE2A1C7E44C`.
+- This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
+
+## POST-P17 assurance Builds 41–45 — 2026-09-11
+
+- Builds 41–44 lock Change Order authoritative project identity, lifecycle and financial/schedule separation, RFI/Submittal/link/import isolation, and the live governed workflow/report surface.
+- Build 45 consolidates those gates with the protected Generic APU/Job Intake and Lens Next regressions and governed production build/runtime closure.
+- The Chrome check used controlled project 27 read-only and performed no create, import, transition, delete, AI request, report download, or customer-data mutation.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `46aa99eb2df658d1bd6165116328b6e8331c0564` with SHA-256 `B8BA55844CB03484BA13551655EEB23290A07A75F3A49E69319DE24F9886082A`.
+- This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
+
+## POST-P17 assurance Builds 46–50 — 2026-09-12
+
+- Builds 46–49 lock Meetings identity/scope, attendance/actions, linked-record isolation, and the live governed workflow/report surface.
+- Build 50 consolidates those gates with protected Generic APU/Job Intake, protected Lens Next, and governed production assembly.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `780592d378ba5e18b1da5966548037f0b5522dfb` with SHA-256 `238E153AA88413F1FEB3D36B398F456895F4CF59EAF2C46255AE63C8D6E8585C`.
+- This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, deployment, or customer-data change.
+
+## POST-P17 assurance Builds 56–60 — 2026-09-12
+
+- Builds 56–59 lock Clash Reports current-project identity, lifecycle/plugin synchronization, linked-record/report isolation, and the authenticated live workflow surface.
+- Build 60 consolidates those gates with protected Generic APU/Job Intake, protected Lens Next, and governed production assembly.
+- Chrome verification used controlled project 27 read-only; no report, clash, link, AI, upload, download, delete, or customer-data mutation occurred.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `a2430aee5a082a80e40af15a9fdd10bca6c1a3cb` with SHA-256 `FB216473AE74717DF76C9C1A42D6457DAEB221FE07F4321291B9DA41432E1789`.
+- This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, publication, or deployment change.
+
+## POST-P17 assurance Builds 51–55 — 2026-09-12
+
+- Builds 51–54 lock Schedule project identity/scope, authoritative connected sources and lifecycle, board/calendar/list and rollover/report isolation, and the live governed workflow surface.
+- Build 55 consolidates those gates with protected Generic APU/Job Intake, protected Lens Next, and governed production assembly.
+- The consolidated gate is PASS and its machine-readable evidence is frozen at commit `4c65cd7e715a2a8ccce68ce3fd31e0f251b8e967` with SHA-256 `2C963BC9D86292C6957397127D8903C865D7BC2B1C6BCE2AB7CF98866368D9B2`.
+- This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, deployment, or customer-data change.
 
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
@@ -1392,14 +1491,14 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] Advanced Job Intake now presents Contract setup immediately after Job identity, before Contract Items and APU pricing.
 - [x] The left navigation and visible section numbers use the same sequence; Contract Items and APU pricing remain one combined stage rather than two competing navigation targets.
 - [x] Existing contract, scope, pricing, autosave, activation, permission, database, and schema behavior is unchanged.
-- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+- [x] Independent browser acceptance, integration, push, and publication were completed in the consolidated P15 release and remain present in the live P17 descendant.
 
 ## Post-Build-20 corrective Build 3 — Contract Item bindings
 
 - [x] Advanced Contract Items can select any authoritative saved APU plan version returned by the current-project Cost & Value service; selecting a version binds both its version number and saved selling rate.
 - [x] A persisted budget snapshot is reopened with its authoritative lines, so the saved budget-line selection remains visible and editable after reload.
 - [x] Existing responsible-company participant and authoritative-agreement bindings remain in the same canonical Intake draft and continue through autosave/normalization.
-- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+- [x] Independent browser acceptance, integration, push, and publication were completed in the consolidated P15 release and remain present in the live P17 descendant.
 
 ## Post-Build-20 corrective Build 4 — existing-user project assignment
 
@@ -1407,4 +1506,88 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] Current project members are excluded from the candidate list; no platform-wide user directory is exposed.
 - [x] The Intake draft saves before membership mutation, reloads authoritative membership afterward, and makes the added member available to the existing contract, Contract Item, Work Package, hours, cost, and incentive assignment controls.
 - [x] Existing membership, assignment, company/project isolation, database, and schema contracts are reused unchanged.
-- [ ] Independent browser acceptance, integration, push, and publication remain separate gates.
+- [x] Independent browser acceptance, integration, push, and publication were completed in the consolidated P15 release and remain present in the live P17 descendant.
+
+## POST-P17 assurance Builds 61–65 — candidate — 2026-09-12
+
+- Builds 61–64 lock Files/CVR current-project identity, write authorization, upload/storage/download lifecycle, version and supersession history, linked-record isolation, and the authenticated live workflow surface.
+- Review found and corrected two legacy Files mutation routes that required authentication but not project write permission; manual supersession now also proves the replacement file belongs to the same project.
+- Build 65 aligns the Platform release identity to `v1.05.N17-P18` and requires the focused Files/CVR gates, protected Generic APU/Job Intake, protected Lens Next, and governed production assembly.
+- Chrome verification used controlled project 27 (`ROB-T1`) read-only and performed no upload, download, supersession, approval, deletion, link, or customer-data mutation.
+- Candidate boundaries: Platform-only authorization/project-scope correction; no APU, Lens Next, Native, database/schema, publication, or deployment change.
+
+## POST-P17 assurance Builds 61–65 — accepted — 2026-09-12
+
+- The consolidated Files/CVR gate is PASS at `v1.05.N17-P18`.
+- Focused Builds 61–64, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity, all typechecks, frontend production build, and deterministic API runtime closure passed.
+- Machine-readable evidence is frozen at commit `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08` with SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
+- P18 is an internally accepted source candidate only; push, publication, deployment, and external field acceptance remain separate.
+
+## POST-P18 assurance Build 71 — candidate — 2026-09-12
+
+- Project Directory member reads remain bound to the route project, while every create, update, delete, invite, company/contact, and import mutation requires established server-side `admin` or `write` permission.
+- Review found and corrected one post-invite status update that initially selected the exact project entry but then updated by entry ID alone; both operations now require the same entry and project identity.
+- Focused Project Directory identity/scope, protected Job Intake company/contact authority, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
+
+## POST-P18 assurance Build 72 — candidate — 2026-09-12
+
+- Company and contact creation retains the existing normalized-name/email deduplication, advisory locks, project-company membership proof, and invitation-service identity boundaries.
+- Responses now distinguish a reused project-directory relationship/contact (`200`) from a newly created relationship/contact (`201`); global company reuse remains separately reported and backward compatible.
+- Focused Builds 71–72, protected Job Intake company/contact authority, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
+
+## POST-P18 assurance Build 73 — candidate — 2026-09-12
+
+- Directory removal now proves the entry belongs to the route project before checking consumers and refuses with `409 directory_entry_in_use` when a Meeting attendee references it.
+- Meetings validate Directory entry/project/company identity; Job Intake and assignments consume exact current-project Directory/member identity; RFIs and Submittals remain independent and none of these consumers update or delete authoritative Directory records.
+- Focused Builds 71–73, protected Meeting attendance/actions, protected Job Intake company/contact authority, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
+
+## POST-P18 assurance Build 74 — candidate — 2026-09-12
+
+- Authenticated Chrome verified the live Project Directory for controlled project 27 (`ROB-T1`) in its exact project-admin context.
+- The live workspace shows the Directory heading, one project member, one additional contact, all five view filters, PDF/import/add/invite/remove controls, contextual Help, and zero browser warnings/errors.
+- Production remains `v1.05.N17-P17`; P18 remains unpublished, so this proof covers the established live workflow surface without claiming Builds 71–73 are deployed. No browser mutation or customer-data change occurred.
+
+## POST-P18 assurance Builds 71–75 — accepted — 2026-09-12
+
+- The consolidated Project Directory gate is PASS at `v1.05.N17-P18`.
+- Focused Builds 71–74, complete Generic APU/Job Intake, protected Lens Next, Living Brief integrity, all typechecks, frontend production build, and deterministic API runtime closure across 16,342 files passed.
+- Machine-readable evidence is frozen at commit `a8cb92d3a461d8c1f364caae1aa9081ee0045924` with SHA-256 `73E6304E86228572C526F3EB05139521046984C15BA2A229B6731583B0A20C7F`.
+- P18 remains an internally accepted source candidate only; push, publication, deployment, and external field acceptance remain separate.
+
+## POST-P18 assurance Build 66 — candidate — 2026-09-12
+
+- Coordination Hub mutation authorization now matches the existing UI `canWrite` contract and established Platform write policy.
+- Intake, confirmation, revision registration, and synchronization-job enqueue require server-side `admin` or `write` permission; read-only membership and project-admin credential boundaries remain unchanged.
+- Focused identity/scope coverage and API typecheck pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data change occurred.
+
+## POST-P18 assurance Build 67 — candidate — 2026-09-12
+
+- Newly queued connector jobs now receive their first immutable, scoped, attributable audit event inside the existing enqueue transaction.
+- Existing bounded retry, lease reclaim, fencing, attempt limits, terminal state, idempotency conflict, and attention-summary contracts are locked by 22 focused checks.
+- Connector foundation, Coordination Hub service, and API TypeScript gates pass; no connector worker or provider is activated.
+
+## POST-P18 assurance Build 68 — candidate — 2026-09-12
+
+- Review found that the generic linked-items mutation route checked project write permission but did not prove that both referenced authoritative records belonged to that project.
+- The route now accepts only the established entity types and positive authoritative IDs, verifies both endpoints against the requested project before persistence, and keeps duplicate lookup and removal project-scoped.
+- Coordination intake and action projection remain isolated: they do not update or delete authoritative RFI, Submittal, Transmittal, Change Order, Meeting, File, Clash, or Lens Next records.
+- Twenty focused isolation checks, Coordination Hub service behavior, action-projection behavior, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
+
+## POST-P18 assurance Build 69 — candidate — 2026-09-12
+
+- Authenticated Chrome verified the live Coordination Hub for controlled project 27 (`ROB-T1`) and the exact project-admin context.
+- The live surface displayed Coordination Hub, the smart-intake description, an honest inactive-convention boundary, the Convention Builder path, Recent Intake, and its empty state with zero browser warnings/errors.
+- Production remains `v1.05.N17-P17`; the unpublished candidate remains `v1.05.N17-P18`. The live observation therefore proves the established workflow surface without claiming Builds 66–68 are deployed.
+- No upload, download, confirmation, synchronization, convention edit, external action, or customer-data mutation occurred. The focused ten-check UI contract and frontend TypeScript pass.
+
+## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
+
+- The first consolidated production build correctly stopped when deterministic Platform generation removed the manually reconciled Builds 66–68 authority text and invalidated its Living Brief hash.
+- The generator template now owns that same Coordination authority text, so generated `PLATFORM.md` remains deterministic and byte-stable instead of relying on post-generation manual additions.
+- This is build/governance closure only; it changes no runtime product behavior, APU, Lens Next, Native, database/schema, publication, deployment, or customer data.
+
+## POST-P18 assurance Builds 66–70 — accepted — 2026-09-12
+
+- The clean consolidated gate passes all four focused Coordination checks, connector foundation, Coordination Hub service, all Coordination Delivery contracts, protected Files/CVR, complete Generic APU/Job Intake, protected Lens Next, governance, secret exposure, database safety, mojibake, all typechecks, frontend build, and deterministic API production assembly.
+- Machine-readable evidence is frozen at commit `e6d4074e97b5bdf339bde28e48272fe745b104d8`, SHA-256 `5138F3D0CFB06C4255DFDF966A248BC3E8A74E56B9538A37B0FE2794DED4C8EF`.
+- The block is internally accepted at `v1.05.N17-P18`. Push, publication, deployment, connector activation, outbound action, and external field acceptance remain separate.

@@ -1,0 +1,55 @@
+{
+  "schema": "bimlog.post-p17-assurance.v1",
+  "release": "v1.05.N17-P17",
+  "sourceCommit": "e977b7bbc9605f7280c6d8c1d8837112c01a85df",
+  "generatedAt": "2026-09-11T04:00:02.678Z",
+  "productBehaviorChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "deploymentChanged": false,
+  "results": [
+    {
+      "name": "BUILD01_EXACT_WORKBOOK",
+      "status": "PASS"
+    },
+    {
+      "name": "BUILD02_PRODUCTION_COMPONENT_BROWSER",
+      "status": "PASS"
+    },
+    {
+      "name": "BUILD03_PERSISTENCE_BROWSER",
+      "status": "PASS"
+    },
+    {
+      "name": "BUILD04_FILE_INSPECTION",
+      "status": "PASS"
+    },
+    {
+      "name": "WORKSPACE_LIBRARY_TYPECHECK",
+      "status": "PASS"
+    },
+    {
+      "name": "GENERIC_APU_REGRESSION",
+      "status": "PASS"
+    }
+  ],
+  "evidenceFiles": [
+    {
+      "path": "evidence/build20/BIMLog_Smoke_Test_Project_Intake_APUs_BUILD20_FINAL.xlsx",
+      "bytes": 91919,
+      "sha256": "10F1918DBD947B84FD04405B162C8388F60A255239C091468864AFDBCE981E58"
+    },
+    {
+      "path": "artifacts/api-server/evidence/post-p17-build02-job-intake-browser/results.json",
+      "bytes": 134,
+      "sha256": "053DEC3443A5D903A3E32E5A59D2743D44B1FDDA56BE50DA7F2AF18049C49A50"
+    },
+    {
+      "path": "artifacts/api-server/evidence/post-p17-build03-job-intake-persistence/results.json",
+      "bytes": 227,
+      "sha256": "01C6F372CF38AB68BA7C35A10584CFB4A522255256F052E2D8A151387B4BB284"
+    }
+  ],
+  "overall": "PASS"
+}

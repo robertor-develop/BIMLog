@@ -1,0 +1,39 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P17",
+  "results": [
+    {
+      "name": "post-p17-build21-financial-invariants.behavior.ts",
+      "exitCode": 0,
+      "sha256": "d4c489b717800fdf98cead121354ba31d8e1517a059a4c1a398e1c338173f451"
+    },
+    {
+      "name": "post-p17-build22-activation-replay-safety.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "0dee78ec12b1a9d74acd749c1eb890fe0dc5bec691718a793712f57758886d61"
+    },
+    {
+      "name": "post-p17-build23-report-export-scope.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "0617a3701643a14bbbe99eca6f6769d23d9a8b1098fb6f8bc4f455c18bb442e1"
+    },
+    {
+      "name": "post-p17-build24-responsive-accessibility.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "491faaf161612623f6cdbf2f19e7d3dbebe096346cc24e121685195ff2e82261"
+    },
+    {
+      "name": "generic-apu",
+      "exitCode": 0
+    },
+    {
+      "name": "governed-production-build",
+      "exitCode": 0
+    }
+  ],
+  "productCodeChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "deploymentChanged": false
+}

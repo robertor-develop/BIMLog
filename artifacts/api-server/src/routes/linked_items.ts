@@ -1,10 +1,43 @@
 import { Router } from "express";
 import { db } from "@workspace/db";
-import { linkedItemsTable, activityLogTable } from "@workspace/db/schema";
+import {
+  linkedItemsTable,
+  activityLogTable,
+  rfisTable,
+  submittalsTable,
+  transmittalsTable,
+  changeOrdersTable,
+  meetingMinutesTable,
+  filesTable,
+  clashesTable,
+  lensViewpointsTable,
+} from "@workspace/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 
 const router: Router = Router();
+
+const linkEntityTypes = ["rfi", "submittal", "transmittal", "change_order", "meeting", "file", "clash", "lens_viewpoint"] as const;
+type LinkEntityType = typeof linkEntityTypes[number];
+
+function isLinkEntityType(value: unknown): value is LinkEntityType {
+  return typeof value === "string" && linkEntityTypes.includes(value as LinkEntityType);
+}
+
+async function entityBelongsToProject(entityType: LinkEntityType, entityId: number, projectId: number): Promise<boolean> {
+  let rows: { id: number }[];
+  switch (entityType) {
+    case "rfi": rows = await db.select({ id: rfisTable.id }).from(rfisTable).where(and(eq(rfisTable.id, entityId), eq(rfisTable.projectId, projectId))).limit(1); break;
+    case "submittal": rows = await db.select({ id: submittalsTable.id }).from(submittalsTable).where(and(eq(submittalsTable.id, entityId), eq(submittalsTable.projectId, projectId))).limit(1); break;
+    case "transmittal": rows = await db.select({ id: transmittalsTable.id }).from(transmittalsTable).where(and(eq(transmittalsTable.id, entityId), eq(transmittalsTable.projectId, projectId))).limit(1); break;
+    case "change_order": rows = await db.select({ id: changeOrdersTable.id }).from(changeOrdersTable).where(and(eq(changeOrdersTable.id, entityId), eq(changeOrdersTable.projectId, projectId))).limit(1); break;
+    case "meeting": rows = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable).where(and(eq(meetingMinutesTable.id, entityId), eq(meetingMinutesTable.projectId, projectId))).limit(1); break;
+    case "file": rows = await db.select({ id: filesTable.id }).from(filesTable).where(and(eq(filesTable.id, entityId), eq(filesTable.projectId, projectId))).limit(1); break;
+    case "clash": rows = await db.select({ id: clashesTable.id }).from(clashesTable).where(and(eq(clashesTable.id, entityId), eq(clashesTable.projectId, projectId))).limit(1); break;
+    case "lens_viewpoint": rows = await db.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, entityId), eq(lensViewpointsTable.projectId, projectId))).limit(1); break;
+  }
+  return rows.length === 1;
+}
 
 // GET all links for a specific entity
 router.get("/projects/:projectId/links/:entityType/:entityId", authMiddleware, requireProjectMember(), async (req, res) => {
@@ -31,6 +64,19 @@ router.post("/projects/:projectId/links", authMiddleware, requirePermission("adm
   const projectId = Number(req.params.projectId);
   const { fromType, fromId, toType, toId, linkType, notes } = req.body ?? {};
   try {
+    if (!Number.isInteger(projectId) || projectId <= 0 || !isLinkEntityType(fromType) || !isLinkEntityType(toType)
+      || !Number.isInteger(fromId) || fromId <= 0 || !Number.isInteger(toId) || toId <= 0) {
+      res.status(400).json({ error: "A supported source and target with authoritative numeric IDs are required" });
+      return;
+    }
+    const [sourceInProject, targetInProject] = await Promise.all([
+      entityBelongsToProject(fromType, fromId, projectId),
+      entityBelongsToProject(toType, toId, projectId),
+    ]);
+    if (!sourceInProject || !targetInProject) {
+      res.status(404).json({ error: "Both linked items must exist in the requested project" });
+      return;
+    }
     // Check if link already exists
     const existing = await db.select().from(linkedItemsTable)
       .where(and(

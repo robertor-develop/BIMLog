@@ -1692,7 +1692,7 @@ router.get("/projects/:projectId/cvr-report", authMiddleware, requireProjectMemb
 // ─── PATCH /:projectId/files/:fileId/confirm-violation ───────────────────────
 // Called when user clicks "Continue Anyway" on the naming warning modal.
 // Sets user_confirmed_non_compliant = true so the file counts as a real violation.
-router.patch("/:projectId/files/:fileId/confirm-violation", authMiddleware, async (req, res) => {
+router.patch("/:projectId/files/:fileId/confirm-violation", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const fileId    = Number(req.params.fileId);
   if (isNaN(projectId) || isNaN(fileId)) { res.status(400).json({ error: "Invalid id" }); return; }
@@ -1741,7 +1741,7 @@ router.get("/cvr-health", authMiddleware, async (req, res) => {
 });
 
 // ─── POST /:projectId/files/:fileId/supersede ─────────────────────────────────
-router.post("/:projectId/files/:fileId/supersede", authMiddleware, async (req, res) => {
+router.post("/:projectId/files/:fileId/supersede", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   const projectId = Number(req.params.projectId);
   const fileId    = Number(req.params.fileId);
   const { new_file_id } = req.body as { new_file_id: number };
@@ -1749,6 +1749,10 @@ router.post("/:projectId/files/:fileId/supersede", authMiddleware, async (req, r
     res.status(400).json({ error: "projectId, fileId, and new_file_id required" }); return;
   }
   try {
+    const [replacement] = await db.select({ id: filesTable.id }).from(filesTable)
+      .where(and(eq(filesTable.id, new_file_id), eq(filesTable.projectId, projectId)))
+      .limit(1);
+    if (!replacement) { res.status(404).json({ error: "Replacement file not found in this project" }); return; }
     const [updated] = await db.update(filesTable)
       .set({ isSuperseded: true, supersededByFileId: new_file_id, updatedAt: new Date() })
       .where(and(eq(filesTable.id, fileId), eq(filesTable.projectId, projectId)))

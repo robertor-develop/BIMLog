@@ -7,6 +7,7 @@ import {
   activityLogTable,
   projectsTable,
   projectMembersTable,
+  meetingAttendeesTable,
 } from "@workspace/db/schema";
 import { eq, and, sql, asc } from "drizzle-orm";
 import {
@@ -886,7 +887,12 @@ router.post(
           .orderBy(projectDirectoryTable.id)
           .limit(1);
         if (existingEntry)
-          return { company, directoryEntry: existingEntry, reused };
+          return {
+            company,
+            directoryEntry: existingEntry,
+            reused,
+            directoryEntryReused: true,
+          };
 
         const [createdEntry] = await tx
           .insert(projectDirectoryTable)
@@ -924,9 +930,14 @@ router.post(
           fileNameAfter: null,
           details: `Registered project directory company: ${companyName}`,
         });
-        return { company, directoryEntry: createdEntry, reused };
+        return {
+          company,
+          directoryEntry: createdEntry,
+          reused,
+          directoryEntryReused: false,
+        };
       });
-      res.status(result.reused ? 200 : 201).json({
+      res.status(result.directoryEntryReused ? 200 : 201).json({
         id: result.company.id,
         name: result.company.name,
         website: result.company.website,
@@ -937,6 +948,7 @@ router.post(
         profileDescription: result.company.profileDescription,
         directoryEntry: result.directoryEntry,
         reused: result.reused,
+        directoryEntryReused: result.directoryEntryReused,
       });
     } catch (err) {
       res.status(500).json({ error: "directory_company_create_failed" });
@@ -1001,7 +1013,7 @@ router.post(
             ),
           )
           .limit(1);
-        if (existing) return existing;
+        if (existing) return { entry: existing, reused: true };
         const [created] = await tx
           .insert(projectDirectoryTable)
           .values({
@@ -1041,13 +1053,15 @@ router.post(
           fileNameAfter: null,
           details: `Added meeting attendee contact: ${fullName}`,
         });
-        return created;
+        return { entry: created, reused: false };
       });
       if (!entry) {
         res.status(404).json({ error: "company_not_found" });
         return;
       }
-      res.status(201).json(entry);
+      res
+        .status(entry.reused ? 200 : 201)
+        .json({ ...entry.entry, reused: entry.reused });
     } catch {
       res.status(500).json({ error: "directory_contact_create_failed" });
     }
@@ -1110,6 +1124,29 @@ router.delete(
     const projectId = Number(req.params.projectId);
     const entryId = Number(req.params.entryId);
     try {
+      const [entry] = await db
+        .select({ id: projectDirectoryTable.id })
+        .from(projectDirectoryTable)
+        .where(
+          and(
+            eq(projectDirectoryTable.id, entryId),
+            eq(projectDirectoryTable.projectId, projectId),
+          ),
+        )
+        .limit(1);
+      if (!entry) {
+        res.status(404).json({ error: "Entry not found" });
+        return;
+      }
+      const [meetingReference] = await db
+        .select({ id: meetingAttendeesTable.id })
+        .from(meetingAttendeesTable)
+        .where(eq(meetingAttendeesTable.directoryEntryId, entryId))
+        .limit(1);
+      if (meetingReference) {
+        res.status(409).json({ error: "directory_entry_in_use" });
+        return;
+      }
       await db
         .delete(projectDirectoryTable)
         .where(
@@ -1174,7 +1211,12 @@ router.post(
           linkedUserId: result.kind === "existing" ? result.user.id : null,
           updatedAt: new Date(),
         })
-        .where(eq(projectDirectoryTable.id, entryId));
+        .where(
+          and(
+            eq(projectDirectoryTable.id, entryId),
+            eq(projectDirectoryTable.projectId, projectId),
+          ),
+        );
 
       const project = await db
         .select()

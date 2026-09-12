@@ -1,0 +1,54 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P17",
+  "results": [
+    {
+      "name": "post-p17-build26-rfi-identity-scope.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "92b0a6d9c2f2a75b1a55e3d5a0c07f979e77460baff0d1c3eb471d6c14145d2f"
+    },
+    {
+      "name": "post-p17-build27-rfi-lifecycle-history.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "82e6e2c1cf37358dabfbebebf39e2dbf774c83981a5d46fdc059f732f91c2ed0"
+    },
+    {
+      "name": "post-p17-build28-rfi-attachment-integrity.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "4c7719890ed5837c61394ca82b4e8aec8784b9139a4c49964c6c687b810364b0"
+    },
+    {
+      "name": "post-p17-build29-rfi-workflow-ui.behavior.mjs",
+      "exitCode": 0,
+      "sha256": "5da72f41ddd441b486b6d413c8ec0bbc98de8a3fd671133c55bab21ae70c1a92"
+    },
+    {
+      "name": "rfi-import-regression",
+      "exitCode": 0
+    },
+    {
+      "name": "protected-apu-regression",
+      "exitCode": 0
+    },
+    {
+      "name": "protected-lens-next-regression",
+      "exitCode": 0
+    },
+    {
+      "name": "protected-lens-next-current-regression",
+      "exitCode": 0
+    },
+    {
+      "name": "governed-production-build",
+      "exitCode": 0
+    }
+  ],
+  "browserEvidence": "evidence/post-p17-build29-rfi-chrome/acceptance.json",
+  "productCodeChanged": false,
+  "apuProductChanged": false,
+  "lensNextProductChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "deploymentChanged": false
+}

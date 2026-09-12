@@ -1,0 +1,6 @@
+{
+  "suite": "post-p17-build02-production-component-browser",
+  "status": "PASS",
+  "component": "QuickJobIntake",
+  "assertions": 9
+}

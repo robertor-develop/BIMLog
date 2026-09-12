@@ -1,0 +1,40 @@
+{
+  "status": "PASS",
+  "version": "v1.05.N17-P18",
+  "sourceCommitBeforeEvidence": "ec24c3e2fbcadc8e609f99581de89bc72cc2b37e",
+  "results": [
+    { "name": "post-p18-build66-coordination-identity-scope.behavior.mjs", "exitCode": 0, "checks": 10 },
+    { "name": "post-p18-build67-coordination-sync-lifecycle.behavior.mjs", "exitCode": 0, "checks": 22 },
+    { "name": "post-p18-build68-coordination-link-isolation.behavior.mjs", "exitCode": 0, "checks": 20 },
+    { "name": "post-p18-build69-coordination-live-workflow.behavior.mjs", "exitCode": 0, "checks": 10 },
+    { "name": "connector-foundation", "exitCode": 0 },
+    { "name": "coordination-hub-service", "exitCode": 0 },
+    { "name": "coordination-delivery-builds2-18", "exitCode": 0 },
+    { "name": "protected-files-cvr-builds61-64", "exitCode": 0, "checks": 32 },
+    { "name": "protected-generic-apu-job-intake", "exitCode": 0 },
+    { "name": "protected-lens-next-build10", "exitCode": 0 },
+    { "name": "governed-production-build", "exitCode": 0, "deterministicApiAssemblyFiles": 16342 }
+  ],
+  "browserEvidence": "evidence/post-p18-build69-coordination-live-readonly.json",
+  "initialProductionBuildStop": {
+    "result": "CORRECTED_AND_CLEAN_RERUN_PASS",
+    "cause": "Coordination authority text was absent from the deterministic PLATFORM.md generator template.",
+    "correctionCommit": "eaf3bda8493b2e1efa96aeba2a533da178c504da"
+  },
+  "supplementalStandaloneArtifactHarness": {
+    "acceptanceGate": false,
+    "result": "ENVIRONMENT_NOT_EXECUTABLE",
+    "reason": "The managed Codex Windows sandbox cannot remove inherited broad principals from its disposable proof directory; the harness correctly failed its private-ACL prerequisite.",
+    "securityControlWeakened": false
+  },
+  "productCodeChanged": true,
+  "platformChanged": true,
+  "apuProductChanged": false,
+  "lensNextProductChanged": false,
+  "databaseChanged": false,
+  "schemaChanged": false,
+  "nativeChanged": false,
+  "publicationChanged": false,
+  "deploymentChanged": false,
+  "customerDataChanged": false
+}
