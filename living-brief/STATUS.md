@@ -1535,6 +1535,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Responses now distinguish a reused project-directory relationship/contact (`200`) from a newly created relationship/contact (`201`); global company reuse remains separately reported and backward compatible.
 - Focused Builds 71–72, protected Job Intake company/contact authority, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
 
+## POST-P18 assurance Build 73 — candidate — 2026-09-12
+
+- Directory removal now proves the entry belongs to the route project before checking consumers and refuses with `409 directory_entry_in_use` when a Meeting attendee references it.
+- Meetings validate Directory entry/project/company identity; Job Intake and assignments consume exact current-project Directory/member identity; RFIs and Submittals remain independent and none of these consumers update or delete authoritative Directory records.
+- Focused Builds 71–73, protected Meeting attendance/actions, protected Job Intake company/contact authority, and API TypeScript pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data mutation occurred.
+
 ## POST-P18 assurance Build 66 — candidate — 2026-09-12
 
 - Coordination Hub mutation authorization now matches the existing UI `canWrite` contract and established Platform write policy.

@@ -1307,3 +1307,11 @@ was performed or authorized.
 - The API previously returned company-global reuse as though it described project-directory relationship creation and returned `201` for reused contacts. It now reports global company reuse and project-directory reuse independently and returns truthful `200` reuse versus `201` creation status without removing existing response fields.
 - Invitation reuse remains project/email scoped, existing membership remains project/user scoped, and duplicate normalized user identities continue to fail closed.
 - Focused Builds 71–72, protected Job Intake company/contact authority, and API TypeScript pass. Impact is narrow Platform lifecycle response correction; no APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-12 — POST-P18 assurance Build 73 candidate
+
+- Directory deletion now resolves the target by both entry and route-project identity before revealing consumer state, returning `404` for out-of-scope identity and `409 directory_entry_in_use` when Meeting attendance retains the contact.
+- The existing non-cascading Meeting attendee foreign key remains unchanged; no Meeting, attendee, RFI, Submittal, Intake, assignment, or Directory record is rewritten to force deletion.
+- Meetings prove attendee company and Directory entry against the same current project and reject company mismatch. Job Intake proves client company, primary contact, participants, engagement contacts, and assigned active members against its exact project.
+- RFIs and Submittals do not consume or mutate `projectDirectoryTable`; their established authoritative identity remains isolated.
+- Focused Builds 71–73, protected Meeting attendance/actions, protected Job Intake company/contact authority, and API TypeScript pass. Impact is narrow Platform lifecycle refusal and isolation evidence; no APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.

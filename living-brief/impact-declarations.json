@@ -23166,11 +23166,11 @@
     },
     {
       "taskId": "post-p18-assurance-builds71-75-20260912",
-      "reviewedThroughCommit": "71b6a5261d04e65ae6e75c5642dfa68005d4323c",
-      "reviewedAt": "2026-09-12T16:11:34Z",
+      "reviewedThroughCommit": "eddadbcf0a1604c81eeb377e489424db9f206850",
+      "reviewedAt": "2026-09-12T16:18:29Z",
       "status": "candidate",
       "captureTiming": "same_task_before_governed_build",
-      "summary": "Builds 71 and 72 lock Project Directory current-project identity, authorization, company/contact deduplication, lifecycle response semantics, and invitation boundaries at P18.",
+      "summary": "Builds 71 through 73 lock Project Directory identity, authorization, lifecycle semantics, consumer isolation, and safe refusal for referenced contacts at P18.",
       "workstreams": [
         "post-p18-project-directory-assurance"
       ],
@@ -23198,7 +23198,7 @@
         {
           "key": "platform",
           "result": "updated",
-          "reason": "Directory invite writes repeat route-project scope, while company/contact endpoints now distinguish reuse from new project-directory lifecycle creation."
+          "reason": "Directory scope and lifecycle are explicit, and referenced contacts fail closed without cascading changes into Meetings or other authoritative modules."
         },
         {
           "key": "plugin",
@@ -23218,7 +23218,7 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records Builds 71 and 72 candidate scope, corrections, tests, and protected boundaries."
+          "reason": "Records Builds 71 through 73 candidate scope, corrections, tests, and protected boundaries."
         },
         {
           "key": "open_loop",
@@ -23228,7 +23228,7 @@
         {
           "key": "audit",
           "result": "updated",
-          "reason": "Records the exact scope and lifecycle gaps, corrections, focused coverage, and non-mutation boundaries."
+          "reason": "Records scope, lifecycle, consumer isolation, safe refusal, focused coverage, and non-mutation boundaries."
         }
       ],
       "reviewedChangedPaths": [
@@ -23237,7 +23237,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "56878dae60f150e1302087f3729716203a4bd22a64d09d2faefb7d16a0f1c03f"
+      "reviewedChangeSha256": "4f745cfba9565d34da052b837cda1216dbb2715a441723ca3a986a474771800c"
     }
   ]
 }
