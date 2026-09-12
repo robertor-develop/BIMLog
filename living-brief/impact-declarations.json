@@ -22938,6 +22938,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "235bf59651ad3d54a38e111e521f514e69cef31d0dbfea813207ce80e58a6c05"
+    },
+    {
+      "taskId": "post-p17-assurance-builds56-60-20260912",
+      "reviewedThroughCommit": "a1a315ab53f6d2ca5dea1465fc13cf8a770d590e",
+      "reviewedAt": "2026-09-12T13:40:00Z",
+      "status": "candidate",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Test-only Clash Reports assurance with protected APU and Lens Next baselines.",
+      "workstreams": [
+        "post-p17-clash-reports-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority, or permanent product-law semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sequential evidence-only execution follows all existing development boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused Clash Reports coverage increases without changing established quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, or customer-facing capability changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Platform runtime behavior, route contract, or persistence behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native plugin, bridge, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed Clash Reports behavior is verified without presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, applicability, evidence, or claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Builds 56 through 60 candidate acceptance state and boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the consolidated Build 60 acceptance gate and external acceptance boundary."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact Clash Reports coverage, protected regressions, and non-mutation evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/post-p17-build59-clash-reports-chrome/acceptance.json",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b3758cba56ba2b73c1e2aa13e8b87944b0b0cfb8adb96996c897638bb030021f"
     }
   ]
 }
