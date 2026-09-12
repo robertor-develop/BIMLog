@@ -2495,3 +2495,12 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Verify the live Meetings, Actions, Import Minutes, New Meeting, and governed PDF controls read-only in Chrome.
 - [x] Run and freeze the consolidated Build 50 protected-baseline gate at `780592d378ba5e18b1da5966548037f0b5522dfb`, SHA-256 `238E153AA88413F1FEB3D36B398F456895F4CF59EAF2C46255AE63C8D6E8585C`.
 - [ ] External user field acceptance remains separate.
+
+## POST-P17 assurance Builds 51–55
+
+- [x] Lock Schedule current-project identity and membership/write authority.
+- [x] Lock milestone, RFI, Submittal, and Meeting source ownership and lifecycle isolation.
+- [x] Lock Calendar/Board/List filters, project-bound rollovers/history, and governed PDF scope.
+- [x] Verify the live Schedule workflow and controls read-only in authenticated Chrome.
+- [ ] Run and freeze the consolidated Build 55 protected-baseline gate.
+- [ ] External user field acceptance remains separate.

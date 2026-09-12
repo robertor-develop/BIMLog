@@ -22863,6 +22863,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "876e27291f44618c16b2e58efae6086929283e25c18a14f83b76d4e42f591493"
+    },
+    {
+      "taskId": "post-p17-assurance-builds51-55-20260912",
+      "reviewedThroughCommit": "f6d7eb5d60efe547ddd067722552cce526a10d87",
+      "reviewedAt": "2026-09-12T13:03:00Z",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Test-only Schedule assurance with protected APU and Lens Next baselines.",
+      "workstreams": [
+        "post-p17-schedule-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority, or permanent product-law semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sequential evidence-only execution follows all existing development boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused Schedule coverage increases without changing established quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, or customer-facing capability changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Platform runtime behavior, route contract, or persistence behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native plugin, bridge, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed Schedule report behavior is verified without presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, applicability, evidence, or claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Builds 51 through 55 candidate acceptance state and boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the consolidated Build 55 acceptance gate and external acceptance boundary."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact Schedule coverage, protected regressions, and non-mutation evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a5121c9d5ea24dc333d45ec682c5d42d6f7dfe1f73f5464277e2fe81794576fa"
     }
   ]
 }
