@@ -1174,7 +1174,12 @@ router.post(
           linkedUserId: result.kind === "existing" ? result.user.id : null,
           updatedAt: new Date(),
         })
-        .where(eq(projectDirectoryTable.id, entryId));
+        .where(
+          and(
+            eq(projectDirectoryTable.id, entryId),
+            eq(projectDirectoryTable.projectId, projectId),
+          ),
+        );
 
       const project = await db
         .select()
