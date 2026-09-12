@@ -23016,11 +23016,11 @@
     },
     {
       "taskId": "post-p17-assurance-builds61-65-20260912",
-      "reviewedThroughCommit": "c0fedd05da5af101d13d9fb63c451d97c64241d3",
-      "reviewedAt": "2026-09-12T14:10:00Z",
-      "status": "candidate",
+      "reviewedThroughCommit": "2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08",
+      "reviewedAt": "2026-09-12T14:45:00Z",
+      "status": "accepted",
       "captureTiming": "same_task_before_governed_build",
-      "summary": "Files/CVR assurance plus a narrow Platform authorization and same-project supersession correction.",
+      "summary": "Accepted Files/CVR assurance with narrow Platform write-authorization and same-project supersession correction; all protected and production gates pass.",
       "workstreams": [
         "post-p17-files-cvr-assurance"
       ],
@@ -23087,7 +23087,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "ef661cc1d87983f08eaf299c53c6187dab7e47d9d674c4a69dfd61bb10f90f1e"
+      "reviewedChangeSha256": "3dac56bbb1bf18991b16aad89887368e27b9e36755f1a3cc6021ff80b2e4d439"
     }
   ]
 }

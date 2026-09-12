@@ -1239,3 +1239,9 @@ was performed or authorized.
 - Product review corrected only two legacy Files mutation authorization gaps and the missing same-project replacement-file proof. Platform identity advances from P17 to P18; Native remains N17.
 - Build 65 requires the focused gates plus protected Generic APU/Job Intake, protected Lens Next, and the governed production build before acceptance.
 - Impact: narrow Platform Files authorization/scope behavior and visible Platform version only; no APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-12 — POST-P17 assurance Builds 61–65 accepted
+
+- The clean candidate run passed every focused Files/CVR gate, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity, tracked-secret exposure, database safety, mojibake, all TypeScript gates, frontend production build, and deterministic API runtime closure.
+- Evidence is frozen at `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08`, SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
+- Product impact remains the narrow Files mutation authorization and same-project supersession correction; Platform identity is `v1.05.N17-P18`. APU, Lens Next, Native, database/schema, publication, deployment, external action, and customer data remain unchanged.

@@ -1515,3 +1515,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - Build 65 aligns the Platform release identity to `v1.05.N17-P18` and requires the focused Files/CVR gates, protected Generic APU/Job Intake, protected Lens Next, and governed production assembly.
 - Chrome verification used controlled project 27 (`ROB-T1`) read-only and performed no upload, download, supersession, approval, deletion, link, or customer-data mutation.
 - Candidate boundaries: Platform-only authorization/project-scope correction; no APU, Lens Next, Native, database/schema, publication, or deployment change.
+
+## POST-P17 assurance Builds 61–65 — accepted — 2026-09-12
+
+- The consolidated Files/CVR gate is PASS at `v1.05.N17-P18`.
+- Focused Builds 61–64, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity, all typechecks, frontend production build, and deterministic API runtime closure passed.
+- Machine-readable evidence is frozen at commit `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08` with SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
+- P18 is an internally accepted source candidate only; push, publication, deployment, and external field acceptance remain separate.

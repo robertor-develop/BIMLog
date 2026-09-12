@@ -2521,5 +2521,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Lock CVR version lineage, supersession, review state, approval/rejection evidence, and governed report behavior.
 - [x] Verify the live Files workspace, filters, declaration controls, upload surface, and Coordination entry point read-only in authenticated Chrome.
 - [x] Correct legacy confirm-violation and supersede write authorization and enforce same-project replacement-file identity.
-- [ ] Run and freeze the consolidated Build 65 protected-baseline gate at `v1.05.N17-P18`.
+- [x] Run and freeze the consolidated Build 65 protected-baseline gate at `v1.05.N17-P18`; evidence commit `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08`, SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
 - [ ] External user field acceptance and any P18 publication remain separate.
