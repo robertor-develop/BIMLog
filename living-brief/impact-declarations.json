@@ -22791,9 +22791,9 @@
     },
     {
       "taskId": "post-p17-assurance-builds46-50-20260912",
-      "reviewedThroughCommit": "016cbe23d639ee4144118c354d44fd901e58627d",
+      "reviewedThroughCommit": "780592d378ba5e18b1da5966548037f0b5522dfb",
       "reviewedAt": "2026-09-12T12:43:00Z",
-      "status": "candidate_verified",
+      "status": "accepted",
       "captureTiming": "same_task_before_governed_build",
       "summary": "Test-only Meetings assurance with protected baselines.",
       "workstreams": [
@@ -22862,7 +22862,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "c0559120a0f247711f54b4304a8198c1c038c2cffdaf125f12db099c9ac64db9"
+      "reviewedChangeSha256": "876e27291f44618c16b2e58efae6086929283e25c18a14f83b76d4e42f591493"
     }
   ]
 }

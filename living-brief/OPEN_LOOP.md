@@ -2493,5 +2493,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 - [x] Lock Meetings identity, attendance, actions, and linked-record isolation.
 - [x] Verify the live Meetings, Actions, Import Minutes, New Meeting, and governed PDF controls read-only in Chrome.
-- [ ] Run and freeze the consolidated Build 50 protected-baseline gate.
+- [x] Run and freeze the consolidated Build 50 protected-baseline gate at `780592d378ba5e18b1da5966548037f0b5522dfb`, SHA-256 `238E153AA88413F1FEB3D36B398F456895F4CF59EAF2C46255AE63C8D6E8585C`.
 - [ ] External user field acceptance remains separate.
