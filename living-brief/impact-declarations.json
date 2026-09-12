@@ -23091,11 +23091,11 @@
     },
     {
       "taskId": "post-p18-assurance-builds66-70-20260912",
-      "reviewedThroughCommit": "a6697294e878f99eb1c4209f3225c8ba2a829d4a",
-      "reviewedAt": "2026-09-12T15:31:00Z",
+      "reviewedThroughCommit": "eaf3bda8493b2e1efa96aeba2a533da178c504da",
+      "reviewedAt": "2026-09-12T15:43:00Z",
       "status": "candidate",
       "captureTiming": "same_task_before_governed_build",
-      "summary": "Coordination Hub authorization, synchronization lifecycle, linked-record isolation, and authenticated live workflow evidence are aligned with established Platform contracts.",
+      "summary": "Coordination Hub authorization, lifecycle, isolation, live evidence, and deterministic Platform authority generation are aligned before consolidated acceptance.",
       "workstreams": [
         "post-p18-coordination-hub-assurance"
       ],
@@ -23113,7 +23113,7 @@
         {
           "key": "quality",
           "result": "reviewed_no_semantic_change",
-          "reason": "Focused authorization, lifecycle, and relationship-isolation coverage closes proven server boundary gaps."
+          "reason": "Focused authorization, lifecycle, relationship-isolation, live-workflow, and deterministic-build coverage closes proven gaps."
         },
         {
           "key": "vision",
@@ -23123,7 +23123,7 @@
         {
           "key": "platform",
           "result": "updated",
-          "reason": "Coordination mutations require write permission, enqueue is auditable, and generic relationships prove both endpoints belong to the route project."
+          "reason": "Coordination authority now includes write permission, enqueue audit, relationship scope, and its deterministic generated Platform source."
         },
         {
           "key": "plugin",
@@ -23143,17 +23143,17 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records Builds 66 through 69 candidate results, exact corrections, live proof, and protected boundaries."
+          "reason": "Records Builds 66 through 69 results and the Build 70 deterministic generator correction pending clean rerun."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Records Builds 66 through 69 completion and the remaining Build 70 acceptance gate."
+          "reason": "Records Builds 66 through 69 completion and the remaining clean Build 70 rerun."
         },
         {
           "key": "audit",
           "result": "updated",
-          "reason": "Records the discovered gaps plus authenticated read-only Chrome evidence and non-mutation proof."
+          "reason": "Records discovered gaps, Chrome evidence, the initial Build 70 stop, root cause, and deterministic correction."
         }
       ],
       "reviewedChangedPaths": [
@@ -23162,7 +23162,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "972d6b47dd6f0a8783030729b35f5c37f72c5611f3a3c6c8603d675febb4143c"
+      "reviewedChangeSha256": "d3d18bc734c809f128f8cf09d355c8a771d386dcb9eed6424f69f6c3d24945e0"
     }
   ]
 }

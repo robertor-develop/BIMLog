@@ -1276,3 +1276,10 @@ was performed or authorized.
 - Browser warning/error log count was zero. The exact read-only evidence is recorded in `evidence/post-p18-build69-coordination-live-readonly.json`.
 - The live header remains `v1.05.N17-P17`; P18 remains an unpublished internal candidate, so this gate does not misrepresent candidate server changes as deployed.
 - Impact: test/evidence/governance only; no upload, download, confirmation, synchronization, convention edit, product behavior, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-12 — POST-P18 assurance Build 70 production-gate correction
+
+- The initial governed build passed secret exposure, database safety, mojibake, Living Brief integrity, and typechecks before the API build regenerated `PLATFORM.md` and detected a hash mismatch.
+- Root cause: Builds 66–68 authority text had been added to generated output but not to its deterministic template. No runtime or protected-module test failed.
+- The generator template now emits the exact reconciled Coordination authorization, lifecycle, and linked-record isolation sections. A clean rerun remains required before Build 70 acceptance.
+- Impact: deterministic governance/build repair only; no product runtime, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.

@@ -1548,3 +1548,9 @@ No release, publication, or overall completion claim is permitted until the reco
 - The live surface displayed Coordination Hub, the smart-intake description, an honest inactive-convention boundary, the Convention Builder path, Recent Intake, and its empty state with zero browser warnings/errors.
 - Production remains `v1.05.N17-P17`; the unpublished candidate remains `v1.05.N17-P18`. The live observation therefore proves the established workflow surface without claiming Builds 66–68 are deployed.
 - No upload, download, confirmation, synchronization, convention edit, external action, or customer-data mutation occurred. The focused ten-check UI contract and frontend TypeScript pass.
+
+## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
+
+- The first consolidated production build correctly stopped when deterministic Platform generation removed the manually reconciled Builds 66–68 authority text and invalidated its Living Brief hash.
+- The generator template now owns that same Coordination authority text, so generated `PLATFORM.md` remains deterministic and byte-stable instead of relying on post-generation manual additions.
+- This is build/governance closure only; it changes no runtime product behavior, APU, Lens Next, Native, database/schema, publication, deployment, or customer data.
