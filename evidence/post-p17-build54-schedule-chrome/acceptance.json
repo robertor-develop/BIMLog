@@ -1,0 +1,20 @@
+{
+  "status": "PASS",
+  "observedAt": "2026-09-12T12:49:00Z",
+  "url": "https://bimlog.app/projects/27/schedule",
+  "version": "v1.05.N17-P17",
+  "projectId": 27,
+  "projectCode": "ROB-T1",
+  "observed": [
+    "Schedule - Coordination Planner",
+    "Print PDF",
+    "Add Date",
+    "current-view search, bucket, assignee, date, type, and row-state filters",
+    "Board, Calendar, and List views",
+    "system buckets and empty states",
+    "RFI, Submittal, Change Order, Meeting, and 3D Model type choices",
+    "no BUILD25E, BUILD26A, Diagnostics, probe, capture, or test controls"
+  ],
+  "mutationPerformed": false,
+  "customerDataChanged": false
+}
