@@ -23091,11 +23091,11 @@
     },
     {
       "taskId": "post-p18-assurance-builds66-70-20260912",
-      "reviewedThroughCommit": "3e6bf8a363a6edd5fbf88d7a7587b61c8ca7771d",
+      "reviewedThroughCommit": "46552126594ab508dd47124bbdb3a2d0cdc4c7c1",
       "reviewedAt": "2026-09-12T15:08:00Z",
       "status": "candidate",
       "captureTiming": "same_task_before_governed_build",
-      "summary": "Coordination Hub mutation authorization is aligned with the established server-side project write contract.",
+      "summary": "Coordination Hub authorization and immutable connector-job enqueue lifecycle evidence are aligned with the established Platform contracts.",
       "workstreams": [
         "post-p18-coordination-hub-assurance"
       ],
@@ -23163,7 +23163,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "7239bc053fdde2d4170199af06928a59695f224544f8c0c0049d11edc7c2994a"
+      "reviewedChangeSha256": "d2bad56b1b1d971f0752dd45f8c0ce0ee021305925a0c93ab4e36472b8eb0350"
     }
   ]
 }

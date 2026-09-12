@@ -1253,3 +1253,10 @@ was performed or authorized.
 - Summary/history reads remain member-authorized, while connector credential and SharePoint configuration surfaces remain project-admin-only.
 - The focused Build 66 gate passes 10 authorization, trusted-scope, project/company-authority, and summary-isolation assertions; API TypeScript passes.
 - Impact: narrow Platform authorization hardening within existing P18; no APU, Lens Next, Native, database/schema, connector activation, publication, deployment, or customer-data mutation.
+
+# 2026-09-12 — POST-P18 assurance Build 67 candidate
+
+- Enqueue now writes `connector_job_events` sequence 1 in the same transaction, with queued state, actor identity, exact company/project scope, and provider/job-type/request-digest evidence.
+- Focused coverage verifies allowed and denied state transitions, exponential retry ceiling, attempt exhaustion, lease reclaim, `SKIP LOCKED`, fencing increments, database state constraints, immutable event enforcement, idempotency digest conflict, and dead-letter attention visibility.
+- Focused Build 67, connector-foundation, Coordination Hub service, and API TypeScript gates pass.
+- Impact: narrow Platform lifecycle audit completion; no worker activation, provider call, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.

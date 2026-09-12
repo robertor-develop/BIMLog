@@ -756,6 +756,13 @@ It changes only when the code structure or curated architectural facts change.
 - Every command continues to replace caller-supplied scope with the authenticated route project, actor, and company context; provider revision identity and summary queries remain project-scoped.
 - This correction changes no schema, stored record, connector activation, Native/Lens Next behavior, or deployment state.
 
+## POST-P18 Coordination synchronization lifecycle — Build 67
+
+- Connector-job enqueue and its first immutable lifecycle event are committed in one transaction. The sequence-1 event is bound to exact job, company, project, actor, provider, job type, and request digest evidence.
+- Existing job states remain `queued`, `leased`, `retry`, `completed`, `dead_letter`, and `cancelled`; claims remain attempt-bounded, lease-aware, `SKIP LOCKED`, and fencing-token protected.
+- Exact idempotent replay remains accepted only for the same request digest. Digest conflict fails closed, and terminal dead-letter jobs remain visible as attention items.
+- This checkpoint activates no connector worker, provider call, migration, outbound action, or deployment.
+
 ## Coordination Delivery Release A — Builds 2–11 contracts
 
 - Builds 2–3 add an authority-scoped, read-only SharePoint discovery port and deterministic reconciliation. Discovery is bounded and credential references remain opaque; reconciliation never silently changes the current BIMLog revision.

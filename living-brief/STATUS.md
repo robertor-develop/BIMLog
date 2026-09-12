@@ -1528,3 +1528,9 @@ No release, publication, or overall completion claim is permitted until the reco
 - Coordination Hub mutation authorization now matches the existing UI `canWrite` contract and established Platform write policy.
 - Intake, confirmation, revision registration, and synchronization-job enqueue require server-side `admin` or `write` permission; read-only membership and project-admin credential boundaries remain unchanged.
 - Focused identity/scope coverage and API typecheck pass. No APU, Lens Next, Native, database/schema, publication, deployment, or customer-data change occurred.
+
+## POST-P18 assurance Build 67 — candidate — 2026-09-12
+
+- Newly queued connector jobs now receive their first immutable, scoped, attributable audit event inside the existing enqueue transaction.
+- Existing bounded retry, lease reclaim, fencing, attempt limits, terminal state, idempotency conflict, and attention-summary contracts are locked by 22 focused checks.
+- Connector foundation, Coordination Hub service, and API TypeScript gates pass; no connector worker or provider is activated.
