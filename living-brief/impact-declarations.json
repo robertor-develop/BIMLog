@@ -22788,6 +22788,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "14bca59fba03fbebcbc8e874c252f0034a86fcccf05fd247369fa619bedacfd1"
+    },
+    {
+      "taskId": "post-p17-assurance-builds46-50-20260912",
+      "reviewedThroughCommit": "016cbe23d639ee4144118c354d44fd901e58627d",
+      "reviewedAt": "2026-09-12T12:43:00Z",
+      "status": "candidate_verified",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Test-only Meetings assurance with protected baselines.",
+      "workstreams": [
+        "post-p17-meetings-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing boundaries followed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused meeting coverage increases without changing established quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, or customer-facing capability changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Platform runtime behavior, route contract, or persistence behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native plugin, bridge, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing reports verified."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Builds 46 through 50 candidate acceptance state and boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the consolidated Build 50 acceptance gate and external acceptance boundary."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact meeting coverage, protected regressions, and non-mutation evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c0559120a0f247711f54b4304a8198c1c038c2cffdaf125f12db099c9ac64db9"
     }
   ]
 }

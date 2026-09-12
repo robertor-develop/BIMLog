@@ -1207,3 +1207,9 @@ was performed or authorized.
 - Build 45 requires the focused gates plus protected Generic APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
 - The final clean-source run passes every focused Change Order gate, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity, secret exposure, database safety, mojibake, all typechecks, frontend production build, and deterministic API runtime closure. Evidence is frozen at `46aa99eb2df658d1bd6165116328b6e8331c0564`, SHA-256 `B8BA55844CB03484BA13551655EEB23290A07A75F3A49E69319DE24F9886082A`.
 - Impact declaration: tests/evidence/governance only; no product behavior, version, Native, database/schema, deployment, AI call, import, transition, report download, or customer data changed.
+
+# 2026-09-12 — POST-P17 assurance Builds 46–50
+
+- Builds 46–49 assert Meetings project identity, attendance/action ownership, RFI/Submittal/Lens/Clash isolation, governed reports, and the authenticated live workflow without mutation.
+- Build 50 requires those gates plus protected APU/Job Intake, protected Lens Next, and the governed production build.
+- Impact: tests/evidence/governance only; no product, Native, database/schema, deployment, external action, or customer-data change.

@@ -1451,6 +1451,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - The consolidated gate is PASS and its machine-readable evidence is frozen at commit `46aa99eb2df658d1bd6165116328b6e8331c0564` with SHA-256 `B8BA55844CB03484BA13551655EEB23290A07A75F3A49E69319DE24F9886082A`.
 - This block is accepted test/evidence-only assurance at `v1.05.N17-P17`; product behavior, Native, database/schema, deployment, and customer data remain unchanged.
 
+## POST-P17 assurance Builds 46–50 — 2026-09-12
+
+- Builds 46–49 lock Meetings identity/scope, attendance/actions, linked-record isolation, and the live governed workflow/report surface.
+- Build 50 consolidates those gates with protected Generic APU/Job Intake, protected Lens Next, and governed production assembly.
+- This is candidate test/evidence-only assurance at `v1.05.N17-P17`; no product, Native, database/schema, deployment, or customer-data change.
+
 ## Post-Build-20 corrective Build 5 — resource rate defaults and separation
 
 - Team & Resources now exposes the established Drafting 35.47 and BIM Coordinator 37.99 customer/APU rate profiles beside each assignment.

@@ -2488,3 +2488,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Verify create, import, filters, governed current-view PDF, and individual PDF controls in authenticated Chrome without mutation.
 - [x] Run and freeze the consolidated Build 45 protected-baseline gate at `46aa99eb2df658d1bd6165116328b6e8331c0564`, SHA-256 `B8BA55844CB03484BA13551655EEB23290A07A75F3A49E69319DE24F9886082A`.
 - [ ] External user field acceptance remains separate from this internal assurance block.
+
+## POST-P17 assurance Builds 46–50
+
+- [x] Lock Meetings identity, attendance, actions, and linked-record isolation.
+- [x] Verify the live Meetings, Actions, Import Minutes, New Meeting, and governed PDF controls read-only in Chrome.
+- [ ] Run and freeze the consolidated Build 50 protected-baseline gate.
+- [ ] External user field acceptance remains separate.
