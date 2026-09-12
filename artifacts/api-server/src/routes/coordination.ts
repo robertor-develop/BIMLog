@@ -12,7 +12,7 @@ import {
 } from "@workspace/db/schema";
 import { createHash } from "crypto";
 import { eq, desc } from "drizzle-orm";
-import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { authMiddleware, requirePermission, requireProjectMember } from "../middlewares/auth";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { singleFileUpload } from "../middlewares/multipart";
 import { PDFParse } from "pdf-parse";
@@ -121,7 +121,7 @@ router.get(
 router.post(
   "/projects/:projectId/coordination/intake",
   authMiddleware,
-  requireProjectMember(),
+  requirePermission("admin", "write"),
   uploadMiddleware,
   async (req, res) => {
     try {
@@ -267,7 +267,7 @@ Return ONLY this JSON shape (no markdown, no code block):
 router.post(
   "/projects/:projectId/coordination/confirm",
   authMiddleware,
-  requireProjectMember(),
+  requirePermission("admin", "write"),
   async (req, res) => {
     try {
       pruneCache();

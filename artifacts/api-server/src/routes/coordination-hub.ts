@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { Router, type IRouter, type Request, type Response } from "express";
 import { ZodError } from "zod/v4";
-import { authMiddleware, requireProjectMember } from "../middlewares/auth";
+import { authMiddleware, requirePermission, requireProjectMember } from "../middlewares/auth";
 import { CoordinationConflictError, CoordinationHubService } from "../lib/coordination-hub-service";
 import { postgresCoordinationHubStore } from "../lib/coordination-hub-postgres-store";
 import { ConnectorValidationUnavailableError, CoordinationHubConfigurationService } from "../lib/coordination-hub-configuration-service";
@@ -138,14 +138,14 @@ router.post("/projects/:projectId/coordination-hub/sharepoint-mapping", authMidd
   } catch (error) { fail(res, error); }
 });
 
-router.post("/projects/:projectId/coordination-hub/revisions", authMiddleware, requireProjectMember(), async (req, res) => {
+router.post("/projects/:projectId/coordination-hub/revisions", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const result = await service.registerRevision(trustedCommand(req));
     res.status(result.result === "created" ? 201 : 200).json(result);
   } catch (error) { fail(res, error); }
 });
 
-router.post("/projects/:projectId/coordination-hub/jobs", authMiddleware, requireProjectMember(), async (req, res) => {
+router.post("/projects/:projectId/coordination-hub/jobs", authMiddleware, requirePermission("admin", "write"), async (req, res) => {
   try {
     const result = await service.enqueueJob(trustedCommand(req));
     res.status(result.result === "queued" ? 202 : 200).json(result);
