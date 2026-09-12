@@ -22941,9 +22941,9 @@
     },
     {
       "taskId": "post-p17-assurance-builds56-60-20260912",
-      "reviewedThroughCommit": "a1a315ab53f6d2ca5dea1465fc13cf8a770d590e",
+      "reviewedThroughCommit": "a2430aee5a082a80e40af15a9fdd10bca6c1a3cb",
       "reviewedAt": "2026-09-12T13:40:00Z",
-      "status": "candidate",
+      "status": "accepted",
       "captureTiming": "same_task_before_governed_build",
       "summary": "Test-only Clash Reports assurance with protected APU and Lens Next baselines.",
       "workstreams": [
@@ -23007,13 +23007,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "evidence/post-p17-build59-clash-reports-chrome/acceptance.json",
         "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b3758cba56ba2b73c1e2aa13e8b87944b0b0cfb8adb96996c897638bb030021f"
+      "reviewedChangeSha256": "6ec61de330e95732ce76d386f5da9571b161ea1e7577a63abec0f27d02b0d6b9"
     }
   ]
 }

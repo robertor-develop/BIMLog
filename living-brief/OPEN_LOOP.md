@@ -2502,7 +2502,7 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Lock active/deleted lifecycle, delete evidence, and project-bound plugin synchronization behavior.
 - [x] Lock typed link cleanup, Meeting original-Clash navigation, and governed report isolation.
 - [x] Verify the live Clash Reports workflow and controls read-only in authenticated Chrome.
-- [ ] Run and freeze the consolidated Build 60 protected-baseline gate.
+- [x] Run and freeze the consolidated Build 60 protected-baseline gate at `a2430aee5a082a80e40af15a9fdd10bca6c1a3cb`, SHA-256 `FB216473AE74717DF76C9C1A42D6457DAEB221FE07F4321291B9DA41432E1789`.
 - [ ] External user field acceptance remains separate.
 
 ## POST-P17 assurance Builds 51–55

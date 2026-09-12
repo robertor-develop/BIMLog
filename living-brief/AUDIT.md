@@ -1215,10 +1215,11 @@ was performed or authorized.
 - The final clean-source run passed all focused Meetings gates, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity, secret exposure, database safety, mojibake, all typechecks, frontend production build, and deterministic API runtime closure. Evidence is frozen at `780592d378ba5e18b1da5966548037f0b5522dfb`, SHA-256 `238E153AA88413F1FEB3D36B398F456895F4CF59EAF2C46255AE63C8D6E8585C`.
 - Impact: tests/evidence/governance only; no product, Native, database/schema, deployment, external action, or customer-data change.
 
-# 2026-09-12 — POST-P17 assurance Builds 56–60 candidate
+# 2026-09-12 — POST-P17 assurance Builds 56–60
 
 - Builds 56–59 assert Clash Reports project identity, member/write boundaries, soft-delete evidence, plugin synchronization, typed-link cleanup, Meeting deep-link identity, governed PDF scope, and the authenticated live workflow without mutation.
 - Build 60 requires those focused gates plus protected APU/Job Intake, protected Lens Next, and governed production build/runtime closure.
+- The final clean-source run passed every focused Clash Reports gate, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity, secret exposure, database safety, mojibake, all typechecks, frontend production build, and deterministic API runtime closure. Evidence is frozen at `a2430aee5a082a80e40af15a9fdd10bca6c1a3cb`, SHA-256 `FB216473AE74717DF76C9C1A42D6457DAEB221FE07F4321291B9DA41432E1789`.
 - Chrome observed project `27` (`ROB-T1`), live version `v1.05.N17-P17`, the Clash/Lens tabs, report `ROB-T1-CR-001`, and its create/upload/view/rerank/delete/report controls; no control was invoked.
 - Impact: tests/evidence/governance only; no product, Native, database/schema, deployment, AI request, upload, download, delete, external action, or customer-data change.
 
