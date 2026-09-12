@@ -1554,3 +1554,9 @@ No release, publication, or overall completion claim is permitted until the reco
 - The first consolidated production build correctly stopped when deterministic Platform generation removed the manually reconciled Builds 66–68 authority text and invalidated its Living Brief hash.
 - The generator template now owns that same Coordination authority text, so generated `PLATFORM.md` remains deterministic and byte-stable instead of relying on post-generation manual additions.
 - This is build/governance closure only; it changes no runtime product behavior, APU, Lens Next, Native, database/schema, publication, deployment, or customer data.
+
+## POST-P18 assurance Builds 66–70 — accepted — 2026-09-12
+
+- The clean consolidated gate passes all four focused Coordination checks, connector foundation, Coordination Hub service, all Coordination Delivery contracts, protected Files/CVR, complete Generic APU/Job Intake, protected Lens Next, governance, secret exposure, database safety, mojibake, all typechecks, frontend build, and deterministic API production assembly.
+- Machine-readable evidence is frozen at commit `e6d4074e97b5bdf339bde28e48272fe745b104d8`, SHA-256 `5138F3D0CFB06C4255DFDF966A248BC3E8A74E56B9538A37B0FE2794DED4C8EF`.
+- The block is internally accepted at `v1.05.N17-P18`. Push, publication, deployment, connector activation, outbound action, and external field acceptance remain separate.

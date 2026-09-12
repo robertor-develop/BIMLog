@@ -1283,3 +1283,11 @@ was performed or authorized.
 - Root cause: Builds 66–68 authority text had been added to generated output but not to its deterministic template. No runtime or protected-module test failed.
 - The generator template now emits the exact reconciled Coordination authorization, lifecycle, and linked-record isolation sections. A clean rerun remains required before Build 70 acceptance.
 - Impact: deterministic governance/build repair only; no product runtime, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-12 — POST-P18 assurance Builds 66–70 accepted
+
+- The final clean run passed 62 focused Build 66–69 assertions, connector foundation, Coordination Hub service, all Delivery contracts 2–18, 32 protected Files/CVR assertions, complete Generic APU/Job Intake, protected Lens Next Build 10, Living Brief integrity, tracked-secret exposure, database safety, mojibake, all TypeScript gates, frontend production build, and deterministic API assembly across 16,342 files.
+- Generated `PLATFORM.md` was byte-stable on the accepted run. The two sourcemap-location messages for existing tooltip/label sources were warnings; compilation and verified frontend output passed.
+- Evidence is frozen at `e6d4074e97b5bdf339bde28e48272fe745b104d8`, SHA-256 `5138F3D0CFB06C4255DFDF966A248BC3E8A74E56B9538A37B0FE2794DED4C8EF`.
+- The supplemental standalone artifact harness was not an acceptance gate and correctly refused the managed sandbox's inherited broad ACL; no security control was weakened. The governed production build's deterministic runtime closure passed.
+- Impact: accepted narrow Platform authorization, enqueue-audit, relationship-isolation, and deterministic-build corrections at P18; no APU, Lens Next, Native, database/schema, connector activation, publication, deployment, external action, or customer-data mutation.

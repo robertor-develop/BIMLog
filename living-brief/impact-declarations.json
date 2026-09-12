@@ -23091,11 +23091,11 @@
     },
     {
       "taskId": "post-p18-assurance-builds66-70-20260912",
-      "reviewedThroughCommit": "eaf3bda8493b2e1efa96aeba2a533da178c504da",
-      "reviewedAt": "2026-09-12T15:43:00Z",
-      "status": "candidate",
+      "reviewedThroughCommit": "e6d4074e97b5bdf339bde28e48272fe745b104d8",
+      "reviewedAt": "2026-09-12T15:52:00Z",
+      "status": "accepted",
       "captureTiming": "same_task_before_governed_build",
-      "summary": "Coordination Hub authorization, lifecycle, isolation, live evidence, and deterministic Platform authority generation are aligned before consolidated acceptance.",
+      "summary": "Accepted Coordination Hub authorization, lifecycle, isolation, live evidence, deterministic authority generation, protected regressions, and production assembly at P18.",
       "workstreams": [
         "post-p18-coordination-hub-assurance"
       ],
@@ -23143,17 +23143,17 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records Builds 66 through 69 results and the Build 70 deterministic generator correction pending clean rerun."
+          "reason": "Records accepted Builds 66 through 70, clean consolidated results, exact evidence, and protected boundaries."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Records Builds 66 through 69 completion and the remaining clean Build 70 rerun."
+          "reason": "Records all Builds 66 through 70 complete and keeps field acceptance and publication separate."
         },
         {
           "key": "audit",
           "result": "updated",
-          "reason": "Records discovered gaps, Chrome evidence, the initial Build 70 stop, root cause, and deterministic correction."
+          "reason": "Records the initial stop, deterministic correction, clean rerun, complete regression matrix, and frozen evidence."
         }
       ],
       "reviewedChangedPaths": [
@@ -23162,7 +23162,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d3d18bc734c809f128f8cf09d355c8a771d386dcb9eed6424f69f6c3d24945e0"
+      "reviewedChangeSha256": "889dfe53cbb8aace28a0398921baf6c9478c9e36d2be644fcfaa94d8d3060b42"
     }
   ]
 }

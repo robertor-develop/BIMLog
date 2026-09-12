@@ -2530,5 +2530,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Build 67: lock synchronization lifecycle, bounded retry, idempotency conflicts, terminal attention, and attributable audit evidence.
 - [x] Build 68: lock cross-module linked-record integrity without mutating authoritative connected records.
 - [x] Build 69: verify the authenticated live Coordination workflow read-only in Chrome.
-- [ ] Build 70: run protected APU, Lens Next, Files/CVR, governance, typecheck, and production-assembly acceptance.
-- Build 70 first production invocation stopped on deterministic `PLATFORM.md` generation drift; the generator source is corrected and a clean full rerun remains required before acceptance.
+- [x] Build 70: run protected APU, Lens Next, Files/CVR, governance, typecheck, and production-assembly acceptance.
+- Build 70 first production invocation stopped on deterministic `PLATFORM.md` generation drift; the generator source was corrected and the clean full rerun passed.
+- [ ] External user field acceptance and any P18 push/publication/deployment remain separate.
