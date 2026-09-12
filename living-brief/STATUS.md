@@ -1507,3 +1507,11 @@ No release, publication, or overall completion claim is permitted until the reco
 - [x] The Intake draft saves before membership mutation, reloads authoritative membership afterward, and makes the added member available to the existing contract, Contract Item, Work Package, hours, cost, and incentive assignment controls.
 - [x] Existing membership, assignment, company/project isolation, database, and schema contracts are reused unchanged.
 - [x] Independent browser acceptance, integration, push, and publication were completed in the consolidated P15 release and remain present in the live P17 descendant.
+
+## POST-P17 assurance Builds 61–65 — candidate — 2026-09-12
+
+- Builds 61–64 lock Files/CVR current-project identity, write authorization, upload/storage/download lifecycle, version and supersession history, linked-record isolation, and the authenticated live workflow surface.
+- Review found and corrected two legacy Files mutation routes that required authentication but not project write permission; manual supersession now also proves the replacement file belongs to the same project.
+- Build 65 aligns the Platform release identity to `v1.05.N17-P18` and requires the focused Files/CVR gates, protected Generic APU/Job Intake, protected Lens Next, and governed production assembly.
+- Chrome verification used controlled project 27 (`ROB-T1`) read-only and performed no upload, download, supersession, approval, deletion, link, or customer-data mutation.
+- Candidate boundaries: Platform-only authorization/project-scope correction; no APU, Lens Next, Native, database/schema, publication, or deployment change.

@@ -1229,3 +1229,13 @@ was performed or authorized.
 - Build 55 requires those gates plus protected APU/Job Intake, protected Lens Next, and the governed production build.
 - The final clean-source run passed all focused Schedule gates, protected Generic APU/Job Intake, protected Lens Next, Living Brief integrity, secret exposure, database safety, mojibake, all typechecks, frontend production build, and deterministic API runtime closure. Evidence is frozen at `4c65cd7e715a2a8ccce68ce3fd31e0f251b8e967`, SHA-256 `2C963BC9D86292C6957397127D8903C865D7BC2B1C6BCE2AB7CF98866368D9B2`.
 - Impact: tests/evidence/governance only; no product, Native, database/schema, deployment, external action, or customer-data change.
+
+# 2026-09-12 — POST-P17 assurance Builds 61–65 candidate
+
+- Build 61 asserts member/read and write/mutation authorization, schema-parsed IDs, project-scoped Files queries, and same-project supersession replacement identity.
+- Build 62 asserts the existing bounded multipart contract, authoritative relationship requirement, byte-derived SHA-256, duplicate handling, compensation, safe disposition, authenticated download, and project-bound metadata.
+- Build 63 asserts version increment/root lineage, scoped supersession, pending-review and approval/rejection evidence, governed CVR reporting, visible version history, and attribution.
+- Build 64 combines source assertions with authenticated Chrome observation of project 27 (`ROB-T1`), Files search and filters, four declaration controls, upload surface, empty state, and Coordination link without mutation.
+- Product review corrected only two legacy Files mutation authorization gaps and the missing same-project replacement-file proof. Platform identity advances from P17 to P18; Native remains N17.
+- Build 65 requires the focused gates plus protected Generic APU/Job Intake, protected Lens Next, and the governed production build before acceptance.
+- Impact: narrow Platform Files authorization/scope behavior and visible Platform version only; no APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.

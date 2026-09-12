@@ -186,7 +186,7 @@
     {
       "taskId": "coordinator-command-center-build-1-lens-first",
       "reviewedThroughCommit": "7fb3a1b54dc378bba38cf79a2747766b62baa741",
-      "reviewedAt": "2026-07-21T20:52:00.000Z",
+      "reviewedAt": "2026-07-21T20:52:00Z",
       "status": "accepted_source",
       "captureTiming": "normal_acceptance_review",
       "workstreams": [
@@ -266,7 +266,7 @@
     {
       "taskId": "living-brief-credential-persistence",
       "reviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "reviewedAt": "2026-07-21T19:00:00.000Z",
+      "reviewedAt": "2026-07-21T19:00:00Z",
       "status": "local_candidate",
       "captureTiming": "immediate_same_task_chain",
       "capabilityPreflight": {
@@ -405,7 +405,7 @@
     {
       "taskId": "living-brief-credential-persistence-audit-integrity-correction",
       "reviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "reviewedAt": "2026-07-21T19:30:00.000Z",
+      "reviewedAt": "2026-07-21T19:30:00Z",
       "status": "local_candidate",
       "captureTiming": "normal_acceptance_boundary",
       "authorities": [
@@ -494,7 +494,7 @@
     {
       "taskId": "living-brief-terminal-turn-notification-governance",
       "reviewedThroughCommit": "81007cafddd1d59880259af2255863986715ed56",
-      "reviewedAt": "2026-07-21T21:17:00.000Z",
+      "reviewedAt": "2026-07-21T21:17:00Z",
       "status": "local_candidate",
       "captureTiming": "immediate_same_task_chain",
       "capabilityPreflight": {
@@ -621,7 +621,7 @@
     {
       "taskId": "living-brief-credential-persistence-source-acceptance",
       "reviewedThroughCommit": "c3a7c809643022abb04b8fe58db043ccd5d828ff",
-      "reviewedAt": "2026-07-21T21:20:00.000Z",
+      "reviewedAt": "2026-07-21T21:20:00Z",
       "status": "accepted_source_pending_push_verification",
       "captureTiming": "normal_acceptance_boundary",
       "authorities": [
@@ -691,7 +691,7 @@
     {
       "taskId": "security-dependency-remediation-batch-a-integration",
       "reviewedThroughCommit": "b67ae0118b4f8eb85f9de2aaf55c5aad399a7ea6",
-      "reviewedAt": "2026-07-21T21:44:08.350Z",
+      "reviewedAt": "2026-07-21T21:44:08.35Z",
       "status": "integration_candidate",
       "captureTiming": "normal_acceptance_boundary",
       "authorities": [
@@ -921,7 +921,7 @@
     {
       "taskId": "telegram-product-build-6-clean-integration",
       "reviewedThroughCommit": "fdfbdd490ba58ad5070b94c580d374d31007d808",
-      "reviewedAt": "2026-07-22T00:04:00.000Z",
+      "reviewedAt": "2026-07-22T00:04:00Z",
       "status": "clean_integration_accepted_pending_push_verification",
       "captureTiming": "normal_acceptance_boundary",
       "authorities": [
@@ -994,7 +994,7 @@
     {
       "taskId": "living-brief-lockout-recovery-hotfix",
       "reviewedThroughCommit": "e67ca65be7ff633aa888241c941c557818c446d9",
-      "reviewedAt": "2026-07-22T00:12:00.000Z",
+      "reviewedAt": "2026-07-22T00:12:00Z",
       "status": "local_candidate_rebased_on_telegram_build_6_master",
       "captureTiming": "immediate_same_task_chain",
       "capabilityPreflight": {
@@ -1128,7 +1128,7 @@
     {
       "taskId": "living-brief-lockout-recovery-hotfix-source-acceptance",
       "reviewedThroughCommit": "3da420d9068e26d80169aa74aefca67eba860b47",
-      "reviewedAt": "2026-07-22T00:24:00.000Z",
+      "reviewedAt": "2026-07-22T00:24:00Z",
       "status": "source_accepted_pending_deployment_verification",
       "captureTiming": "normal_acceptance_review",
       "authorities": [
@@ -1295,7 +1295,7 @@
     {
       "taskId": "built-asset-lifecycle-operating-network-roadmap",
       "reviewedThroughCommit": "93f02ef135706084dba8fe78ec5c3f518eb00a0a",
-      "reviewedAt": "2026-07-22T18:38:38.000Z",
+      "reviewedAt": "2026-07-22T18:38:38Z",
       "status": "integrated_source_candidate_with_adoption_model",
       "captureTiming": "normal_acceptance_boundary",
       "capabilityPreflight": {
@@ -1400,7 +1400,7 @@
     {
       "taskId": "cost-financial-control-build-3-final-integration",
       "reviewedThroughCommit": "8f914ef3f862e13b67714b8bfcd2cd48102b180f",
-      "reviewedAt": "2026-07-22T18:57:00.000Z",
+      "reviewedAt": "2026-07-22T18:57:00Z",
       "status": "accepted_source",
       "captureTiming": "normal_acceptance_boundary",
       "capabilityPreflight": {
@@ -1726,7 +1726,7 @@
     {
       "taskId": "coordinator-command-center-build-3-bulk-actions-integration",
       "reviewedThroughCommit": "18154f359ea45783eda54fe3a52111d9f45fb41a",
-      "reviewedAt": "2026-07-23T15:53:34.000Z",
+      "reviewedAt": "2026-07-23T15:53:34Z",
       "status": "accepted_source",
       "captureTiming": "normal_acceptance_review",
       "capabilityPreflight": {
@@ -11105,7 +11105,7 @@
     {
       "taskId": "bimlog-feedback-replit-schema-preservation-20260820",
       "reviewedThroughCommit": "0e1758b3a082bbb241aece44e32f8c68d3378e5b",
-      "reviewedAt": "2026-08-20T20:08:00.000Z",
+      "reviewedAt": "2026-08-20T20:08:00Z",
       "status": "accepted_candidate",
       "captureTiming": "post_fix_pre_publish_reconciliation",
       "summary": "Declares four already-governed Feedback retention and deletion-failure columns in Drizzle so Replit publish previews preserve them instead of proposing destructive column drops.",
@@ -11179,7 +11179,7 @@
     {
       "taskId": "bimlog-lens-production-startup-reconciliation-20260820",
       "reviewedThroughCommit": "f8bb456c987afb83cf0fb94004a44be9592a12c4",
-      "reviewedAt": "2026-08-20T20:40:00.000Z",
+      "reviewedAt": "2026-08-20T20:40:00Z",
       "status": "accepted_candidate",
       "captureTiming": "post_fix_pre_publish_reconciliation",
       "summary": "Preserves historical Lens viewpoint rows while deterministically superseding older duplicate active identities before lifecycle-aware unique indexes are installed at production startup.",
@@ -11253,7 +11253,7 @@
     {
       "taskId": "bimlog-feedback-operational-intake-reconciliation-20260820",
       "reviewedThroughCommit": "f13c38f4e7090ed0e57e708f86a4f104fb42e1fc",
-      "reviewedAt": "2026-08-20T21:55:00.000Z",
+      "reviewedAt": "2026-08-20T21:55:00Z",
       "status": "local_source_implemented_external_activation_and_acceptance_pending",
       "captureTiming": "post_fix_pre_publish_reconciliation",
       "summary": "Reconciles the Feedback operational-intake source delta: valid customer and reviewer deep links, an immediate super-admin review queue, post-commit notification reconciliation, customer DTO privacy, and governed ClamAV scanner/worker source without claiming external scanner, receiver, provider, publication, deployment, or customer activation.",
@@ -11330,7 +11330,7 @@
     {
       "taskId": "bimlog-feedback-reviewer-authorization-reseal-20260820",
       "reviewedThroughCommit": "a42b23e2db920ddb9cd417464ef7ff9a1bb6de83",
-      "reviewedAt": "2026-08-20T22:20:00.000Z",
+      "reviewedAt": "2026-08-20T22:20:00Z",
       "status": "local_authorization_source_and_browser_harness_implemented_exact_execution_pending",
       "captureTiming": "post_fix_pre_publish_reconciliation",
       "summary": "Reseals Feedback operational intake after gating the reviewer tab and panel to the authenticated store super-admin and expanding the controlled browser writer across the full reviewer workflow and non-super-admin denial, without claiming a new executed browser receipt or any scanner, receiver, provider, publication, deployment, or customer activation.",
@@ -11406,7 +11406,7 @@
     {
       "taskId": "bimlog-feedback-terminal-browser-reseal-20260820",
       "reviewedThroughCommit": "78374d8bfeb4b41c722a55bd7a3d01cc00fcebdd",
-      "reviewedAt": "2026-08-20T22:34:00.000Z",
+      "reviewedAt": "2026-08-20T22:34:00Z",
       "status": "exact_head_controlled_browser_68_of_68_pass_external_gates_pending",
       "captureTiming": "post_acceptance_terminal_reconciliation",
       "summary": "Records the exact-head 68/68 controlled Chromium receipt for the bilingual customer widget, super-admin reviewer queue and workflow, and non-super-admin denial after harness-only selector, settlement, and authorization-fixture corrections, without claiming full-stack, scanner, receiver, provider, publication, deployment, or customer activation.",
@@ -11482,7 +11482,7 @@
     {
       "taskId": "bimlog-feedback-entry-default-hotfix-20260820",
       "reviewedThroughCommit": "7fbcb3ec0978b3529ec67c27fa8063b62d108caa",
-      "reviewedAt": "2026-08-21T00:13:00.000Z",
+      "reviewedAt": "2026-08-21T00:13:00Z",
       "status": "entry_default_corrected_local_build_pending",
       "captureTiming": "post_implementation_pre_release",
       "summary": "Separates new-feedback entry from customer follow-up history so the floating button and plain route create feedback while explicit notification links open the existing-feedback view.",
@@ -11557,7 +11557,7 @@
     {
       "taskId": "bimlog-feedback-history-query-hotfix-20260821",
       "reviewedThroughCommit": "e9fcee4604669cb2f3b313c038d9b386a943660c",
-      "reviewedAt": "2026-08-21T00:46:00.000Z",
+      "reviewedAt": "2026-08-21T00:46:00Z",
       "status": "reactive_history_query_corrected_release_pending",
       "captureTiming": "post_implementation_pre_release",
       "summary": "Uses Wouter's reactive search authority so explicit feedback notification links open customer history while the plain feedback route and floating button continue to open a new submission.",
@@ -11785,7 +11785,7 @@
     {
       "taskId": "bimlog-feedback-replit-constraint-name-preservation-20260821",
       "reviewedThroughCommit": "e5458c4c14ff10cfada8df2ec10672127666e336",
-      "reviewedAt": "2026-08-20T22:20:00.000-04:00",
+      "reviewedAt": "2026-08-20T22:20:00-04:00",
       "status": "local_source_corrected_exact_constraint_preview_pending",
       "captureTiming": "post_second_cancel_pre_release",
       "summary": "Binds governed Feedback foreign keys and expiry outcome checks to their exact production names so Replit cannot propose destructive name-churn, and strengthens development parity to refuse their absence or definition drift.",
@@ -11861,7 +11861,7 @@
     {
       "taskId": "bimlog-feedback-replit-expiry-definition-proof-20260821",
       "reviewedThroughCommit": "d2baedb3a26686f6533d0d116add4dd048325670",
-      "reviewedAt": "2026-08-20T22:29:00.000-04:00",
+      "reviewedAt": "2026-08-20T22:29:00-04:00",
       "status": "local_exact_constraint_definition_proven_preview_pending",
       "captureTiming": "post_development_parity_observation_pre_release",
       "summary": "Binds the expiry-outcome parity expectation to PostgreSQL's exact normalized constraint definition so the strengthened gate proves the governed constraint rather than falsely rejecting equivalent source SQL.",
@@ -11936,7 +11936,7 @@
     {
       "taskId": "bimlog-feedback-replit-legacy-constraint-compatibility-20260821",
       "reviewedThroughCommit": "f3425d2f3bdd9dcff2b1faef40c37104c7b00ca2",
-      "reviewedAt": "2026-08-20T22:39:00.000-04:00",
+      "reviewedAt": "2026-08-20T22:39:00-04:00",
       "status": "local_constraint_compatibility_closed_preview_pending",
       "captureTiming": "post_third_cancel_pre_release",
       "summary": "Declares both governed exact Feedback constraints and already-installed legacy auto-named duplicate foreign keys so Replit publication cannot delete either authority set.",
@@ -12088,7 +12088,7 @@
     {
       "taskId": "bimlog-feedback-complete-operations-browser-reconciliation-20260821",
       "reviewedThroughCommit": "5a7dc2f55921bcc7d7651fe396134ebb35df0537",
-      "reviewedAt": "2026-08-21T06:40:00.000-04:00",
+      "reviewedAt": "2026-08-21T06:40:00-04:00",
       "status": "controlled_browser_accepted_external_release_pending",
       "captureTiming": "post_browser_pre_push",
       "summary": "Records the exact clean integrated Chromium seal for the complete Feedback reviewer, package, notification-panel, customer capture, and authorization workflows.",
@@ -12163,7 +12163,7 @@
     {
       "taskId": "bimlog-feedback-replit-scanner-binding-reconciliation-20260821",
       "reviewedThroughCommit": "2e114c90ae2366e269fd78bd5952bb1b48154e38",
-      "reviewedAt": "2026-08-21T06:57:30.000-04:00",
+      "reviewedAt": "2026-08-21T06:57:30-04:00",
       "status": "scanner_configuration_bound_publication_pending",
       "captureTiming": "post_configuration_pre_publish",
       "summary": "Binds the exact visible-Replit-Shell ClamAV executable path, SHA-256, and version into tracked non-secret deployment configuration without claiming deployment startup, scan backfill, provider delivery, or permanent receiver activation.",
@@ -12238,7 +12238,7 @@
     {
       "taskId": "bimlog-feedback-replit-scanner-launcher-reconciliation-20260821",
       "reviewedThroughCommit": "d0d8d7bb9ba5939ede74edd2e5f84c1ea8104aae",
-      "reviewedAt": "2026-08-21T07:38:30.000-04:00",
+      "reviewedAt": "2026-08-21T07:38:30-04:00",
       "status": "scanner_launcher_replit_verified_publication_pending",
       "captureTiming": "post_replit_shell_proof_pre_publish",
       "summary": "Corrects the Replit scanner authority for Nix process isolation by binding a direct committed launcher, the exact content-addressed ClamAV path and version, and a minimal runtime PATH; exact Replit Shell startup verification passes without weakening fail-closed identity checks.",
@@ -15859,7 +15859,7 @@
     {
       "taskId": "bimlog-lens-next-n02-working-view-systemic-recovery-20260831",
       "reviewedThroughCommit": "ca6862d6086f9b91964e6fd0de69b6bc1664f41a",
-      "reviewedAt": "2026-08-31T21:55:46.5651550-04:00",
+      "reviewedAt": "2026-08-31T21:55:46.565155-04:00",
       "status": "source_verified_local_runtime_acceptance_pending",
       "captureTiming": "post_implementation_commit_post_automated_validation_pre_n03_package_pre_install_pre_push_pre_publish_pre_field_acceptance",
       "summary": "Reconciles the systemic Working View repair: actual-completion command lifetime, strict authoritative digest flow, correlated idempotent execution, one-pass reference resolution, full-fidelity rollback, duplicate-click protection, and the remaining real-model field gate.",
@@ -16014,7 +16014,7 @@
     {
       "taskId": "bimlog-lens-next-digest-v3-platform-contract-20260901",
       "reviewedThroughCommit": "33b9e015ce4a69704b49af6e8288d48c4cc237ae",
-      "reviewedAt": "2026-09-01T16:27:07.8904130-04:00",
+      "reviewedAt": "2026-09-01T16:27:07.890413-04:00",
       "status": "platform_v3_clean_build_verified_deployment_pending",
       "captureTiming": "post_platform_implementation_post_local_regression_post_clean_production_build_pre_push_pre_replit_publish_pre_native_v3",
       "summary": "Records the backward-compatible Platform digest-v3 canonicalizer, shared cross-language A-L vectors, fail-closed persistence validation, no-schema decision, P-only version plan, successful clean production artifact proof, and deployment-before-native-emission gate.",
@@ -16170,7 +16170,7 @@
     {
       "taskId": "bimlog-lens-next-n07-platform-map-successor-20260901",
       "reviewedThroughCommit": "b45c5ac3ade23b7a67c26423cb96d56b4dcb85b7",
-      "reviewedAt": "2026-09-01T19:46:00.0000000-04:00",
+      "reviewedAt": "2026-09-01T19:46:00-04:00",
       "status": "deterministic_platform_map_reconciled_publication_pending",
       "captureTiming": "post_generator_fix_post_github_push_pre_replit_green_build_pre_publish_pre_connected_acceptance_pre_delivery",
       "summary": "Reconciles the deterministic platform-map generator successor without changing the reviewed N07 runtime, schema, packages, or native behavior.",
@@ -16351,7 +16351,7 @@
     {
       "taskId": "bimlog-platform-storage-authority-preflight-p03-20260901",
       "reviewedThroughCommit": "a9fabd537c6c5fba70d3dae392c8501c73143992",
-      "reviewedAt": "2026-09-01T20:00:00.000Z",
+      "reviewedAt": "2026-09-01T20:00:00Z",
       "status": "accepted_source",
       "captureTiming": "immediate_same_task_chain",
       "capabilityPreflight": {
@@ -16467,7 +16467,7 @@
     {
       "taskId": "bimlog-replit-promotion-liveness-p04-20260902",
       "reviewedThroughCommit": "b2a9df745ba39e2d99c362468086e898850bf212",
-      "reviewedAt": "2026-09-02T10:03:55.000-04:00",
+      "reviewedAt": "2026-09-02T10:03:55-04:00",
       "status": "accepted_source_build_and_publication_pending",
       "captureTiming": "immediate_same_task_chain",
       "capabilityPreflight": {
@@ -23013,6 +23013,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6ec61de330e95732ce76d386f5da9571b161ea1e7577a63abec0f27d02b0d6b9"
+    },
+    {
+      "taskId": "post-p17-assurance-builds61-65-20260912",
+      "reviewedThroughCommit": "c0fedd05da5af101d13d9fb63c451d97c64241d3",
+      "reviewedAt": "2026-09-12T14:10:00Z",
+      "status": "candidate",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Files/CVR assurance plus a narrow Platform authorization and same-project supersession correction.",
+      "workstreams": [
+        "post-p17-files-cvr-assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, authority, or permanent product-law semantics change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Sequential evidence-only execution follows all existing development boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused Clash Reports coverage increases without changing established quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, product promise, or customer-facing capability changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Two legacy Files mutations now require write permission and supersession proves same-project replacement identity; Platform advances to P18."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native plugin, bridge, camera, XML, or package behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed Clash Reports behavior is verified without presentation changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, applicability, evidence, or claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 61 through 65 candidate state, P18 identity, and boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining consolidated acceptance, evidence freeze, and external acceptance boundary."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact Files/CVR coverage, protected regressions, Chrome proof, and non-mutation evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ef661cc1d87983f08eaf299c53c6187dab7e47d9d674c4a69dfd61bb10f90f1e"
     }
   ]
 }

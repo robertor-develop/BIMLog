@@ -2513,3 +2513,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Verify the live Schedule workflow and controls read-only in authenticated Chrome.
 - [x] Run and freeze the consolidated Build 55 protected-baseline gate at `4c65cd7e715a2a8ccce68ce3fd31e0f251b8e967`, SHA-256 `2C963BC9D86292C6957397127D8903C865D7BC2B1C6BCE2AB7CF98866368D9B2`.
 - [ ] External user field acceptance remains separate.
+
+## POST-P17 assurance Builds 61–65
+
+- [x] Lock Files/CVR authoritative current-project identity and member/write authorization.
+- [x] Lock bounded upload, byte-derived SHA-256 evidence, compensation, safe storage disposition, and authenticated project-bound download.
+- [x] Lock CVR version lineage, supersession, review state, approval/rejection evidence, and governed report behavior.
+- [x] Verify the live Files workspace, filters, declaration controls, upload surface, and Coordination entry point read-only in authenticated Chrome.
+- [x] Correct legacy confirm-violation and supersede write authorization and enforce same-project replacement-file identity.
+- [ ] Run and freeze the consolidated Build 65 protected-baseline gate at `v1.05.N17-P18`.
+- [ ] External user field acceptance and any P18 publication remain separate.
