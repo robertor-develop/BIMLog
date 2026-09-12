@@ -886,7 +886,12 @@ router.post(
           .orderBy(projectDirectoryTable.id)
           .limit(1);
         if (existingEntry)
-          return { company, directoryEntry: existingEntry, reused };
+          return {
+            company,
+            directoryEntry: existingEntry,
+            reused,
+            directoryEntryReused: true,
+          };
 
         const [createdEntry] = await tx
           .insert(projectDirectoryTable)
@@ -924,9 +929,14 @@ router.post(
           fileNameAfter: null,
           details: `Registered project directory company: ${companyName}`,
         });
-        return { company, directoryEntry: createdEntry, reused };
+        return {
+          company,
+          directoryEntry: createdEntry,
+          reused,
+          directoryEntryReused: false,
+        };
       });
-      res.status(result.reused ? 200 : 201).json({
+      res.status(result.directoryEntryReused ? 200 : 201).json({
         id: result.company.id,
         name: result.company.name,
         website: result.company.website,
@@ -937,6 +947,7 @@ router.post(
         profileDescription: result.company.profileDescription,
         directoryEntry: result.directoryEntry,
         reused: result.reused,
+        directoryEntryReused: result.directoryEntryReused,
       });
     } catch (err) {
       res.status(500).json({ error: "directory_company_create_failed" });
@@ -1001,7 +1012,7 @@ router.post(
             ),
           )
           .limit(1);
-        if (existing) return existing;
+        if (existing) return { entry: existing, reused: true };
         const [created] = await tx
           .insert(projectDirectoryTable)
           .values({
@@ -1041,13 +1052,15 @@ router.post(
           fileNameAfter: null,
           details: `Added meeting attendee contact: ${fullName}`,
         });
-        return created;
+        return { entry: created, reused: false };
       });
       if (!entry) {
         res.status(404).json({ error: "company_not_found" });
         return;
       }
-      res.status(201).json(entry);
+      res
+        .status(entry.reused ? 200 : 201)
+        .json({ ...entry.entry, reused: entry.reused });
     } catch {
       res.status(500).json({ error: "directory_contact_create_failed" });
     }
