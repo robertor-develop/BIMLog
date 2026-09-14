@@ -1634,6 +1634,11 @@ No release, publication, or overall completion claim is permitted until the reco
 - The repository-wide non-blocking platform scanner reports zero P0 findings and 64 pre-existing P1 candidates outside this bounded flow. Those candidates remain separate stabilization work and are not represented as failures of the audited Intake/APU/Operations path.
 - This assurance correction changes test evidence and governance only. It changes no product behavior, database/schema, Native, Lens Next, version, publication, deployment, or customer data.
 
+## Master catalogs and classified Operations release identity — candidate — 2026-09-14
+
+- Because `v1.05.N17-P18` is already live and this candidate adds Platform behavior plus additive Service/Phase catalog tables, its release identity is reconciled to `v1.05.N17-P19` before publication.
+- Native remains N17. The P19 publication includes no destructive migration, no historical-record rewrite, and no Lens Next product change.
+
 ## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
 
 - The first consolidated production build correctly stopped when deterministic Platform generation removed the manually reconciled Builds 66–68 authority text and invalidated its Living Brief hash.

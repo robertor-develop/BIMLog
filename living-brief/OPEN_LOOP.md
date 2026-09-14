@@ -2588,3 +2588,4 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Push, Replit synchronization, production migration/publication, live Chrome verification, and Lorena/Ruben field acceptance require separate authorization and evidence.
 - [x] Expanded assurance audit reran 57 Intake/APU/downstream behaviors and corrected four stale wording/format-only assertions; the complete set passes with no product-code change.
 - [ ] Repository-wide platform-audit P1 candidates remain a separate stabilization stream; zero P0 findings were reported and none of the printed findings targeted the audited Intake/APU/Operations files.
+- [x] Reconcile the publishable combined identity to `v1.05.N17-P19` because P18 is already live and this block changes Platform behavior and adds governed catalog tables.
