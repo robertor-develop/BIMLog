@@ -13,6 +13,10 @@ import {
   evaluateParity,
   requiredConstraints,
 } from "../lib/db/scripts/check-schema-parity.mjs";
+import {
+  reconciliationPlan,
+  validateTargets as validateReconciliationTargets,
+} from "../lib/db/scripts/reconcile-development-schema-names.mjs";
 
 assert.deepEqual(
   analyzeSql(`
@@ -21,6 +25,24 @@ assert.deepEqual(
     CREATE INDEX IF NOT EXISTS safe_table_name_idx ON safe_table(name);
   `),
   [],
+);
+
+assert.throws(() => validateReconciliationTargets({ BIMLOG_SCHEMA_TARGET: "production", DATABASE_URL: "postgres://x.helium/y", PROD_DATABASE_URL: "postgres://prod/z" }));
+assert.deepEqual(
+  reconciliationPlan(
+    {
+      constraints: [{ table_name: "sample", name: "sample_owner_users_id_fk", definition: "FOREIGN KEY (owner_id) REFERENCES users(id)" }],
+      indexes: [{ table_name: "sample", name: "sample_owner_idx", definition: "CREATE INDEX sample_owner_idx ON public.sample USING btree (owner_id)" }],
+    },
+    {
+      constraints: [{ table_name: "sample", name: "sample_owner_id_fkey", definition: "FOREIGN KEY (owner_id) REFERENCES public.users(id)" }],
+      indexes: [{ table_name: "sample", name: "sample_owner_id_idx", definition: "CREATE INDEX sample_owner_id_idx ON public.sample USING btree (owner_id)" }],
+    },
+  ),
+  [
+    { kind: "constraint", tableName: "sample", from: "sample_owner_users_id_fk", to: "sample_owner_id_fkey" },
+    { kind: "index", tableName: "sample", from: "sample_owner_idx", to: "sample_owner_id_idx" },
+  ],
 );
 
 const genericApuMethodConstraintDrop =

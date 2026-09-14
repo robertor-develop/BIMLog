@@ -4,6 +4,7 @@ import { FinancialControlError } from "./financial-control-contract";
 import { effectiveCommercialAccessForUser } from "./commercial-entitlement";
 import { waitForJobIntakeMigration } from "./job-intake-migration";
 import { decimalFromScaled, scaledSignedDecimal } from "./financial-budget-contract";
+import { canonicalJobOperationId } from "./job-operations-id";
 
 type Queryable = { query: (text: string, values?: unknown[]) => Promise<{ rows: any[]; rowCount?: number | null }> };
 const TASK_STATUSES = new Set(["not_started", "in_progress", "blocked", "complete", "cancelled"]);
@@ -26,11 +27,7 @@ const PACKAGE_TRANSITIONS: Record<string, Set<string>> = {
 };
 const MANAGER_ROLES = new Set(["owner", "admin", "project_admin", "project_manager", "bim_manager", "manager"]);
 
-function id(value: unknown, field: string) {
-  const parsed = String(value ?? "").trim();
-  if (!/^[0-9a-f-]{8,64}$/i.test(parsed)) throw new FinancialControlError(400, "JOB_OPERATIONS_ID_INVALID", `${field} is invalid.`);
-  return parsed;
-}
+const id = canonicalJobOperationId;
 const RFC4122_UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 export function canonicalDocumentConnectionId(value: unknown) {
   const parsed = String(value ?? "");

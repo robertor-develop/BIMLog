@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { canonicalJobOperationId } from "./job-operations-id";
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const read = (relative: string) => fs.readFileSync(path.resolve(here, relative), "utf8");
@@ -31,6 +32,10 @@ assert.match(service, /canControl: access\.canManage/);
 assert.match(service, /canRemove: access\.canManage/);
 assert.match(service, /version=version\+1/);
 assert.match(service, /JOB_OPERATIONS_STALE/);
+assert.equal(canonicalJobOperationId("WP-365a6edb", "packageId"), "WP-365a6edb");
+assert.equal(canonicalJobOperationId("TASK-8761cb21", "taskId"), "TASK-8761cb21");
+assert.throws(() => canonicalJobOperationId("../package", "packageId"));
+assert.throws(() => canonicalJobOperationId("package/child", "packageId"));
 assert.match(service, /workHours/);
 assert.match(service, /ON CONFLICT\(task_id,file_id,deliverable_type\)/);
 assert.match(service, /FROM files WHERE id=\$1 AND project_id=\$2/);
