@@ -230,13 +230,25 @@ export function FinancialApuWorkspace() {
   const save = async () => {
     setSaving(true); setMessage(""); setError("");
     try {
+      const versionBeforeSave = latestPlanVersion;
       const response = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/apu`, {
         method: "PUT", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" }, body: JSON.stringify(plan),
       });
       const body = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(body?.error?.en || body?.error || "The plan could not be saved.");
-      setPlan(normalizeLoadedPlan(body.data.plan)); setPlanHistory((body.data.history ?? [body.data.plan]).map(normalizeLoadedPlan)); setLatestPlanVersion(body.data.plan.version ?? null); setProjectName(String(body.data.project?.name ?? projectName));
-      setMessage(tt("Saved. Reloading this page will preserve these exact values.", "Guardado. Al recargar esta página se conservarán estos valores exactos."));
+      const verificationResponse = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/apu`, { headers: { Authorization: `Bearer ${token}` } });
+      const verified = await verificationResponse.json().catch(() => ({}));
+      if (!verificationResponse.ok) throw new Error(verified?.error?.en || verified?.error || "The saved plan could not be verified.");
+      const verifiedHistory = Array.isArray(verified?.data?.history) ? verified.data.history.map(normalizeLoadedPlan) : [];
+      const verifiedPlan = verified?.data?.plan ? normalizeLoadedPlan(verified.data.plan) : null;
+      const savedVersion = Number(body?.data?.plan?.version);
+      if (!verifiedPlan || !Number.isSafeInteger(savedVersion) || !verifiedHistory.some((entry) => entry.version === savedVersion)) {
+        throw new Error(tt("The server accepted the save but the version did not appear in saved history. Reload before continuing.", "El servidor aceptó el guardado, pero la versión no apareció en el historial guardado. Recargue antes de continuar."));
+      }
+      setPlan(verifiedPlan); setPlanHistory(verifiedHistory); setLatestPlanVersion(verifiedPlan.version ?? null); setProjectName(String(verified.data.project?.name ?? projectName));
+      setMessage(savedVersion === versionBeforeSave
+        ? tt(`Verified saved version v${savedVersion}. The content matched the latest version, so BIMLog did not create a duplicate.`, `Versión guardada v${savedVersion} verificada. El contenido coincidía con la última versión, por eso BIMLog no creó un duplicado.`)
+        : tt(`Saved and verified immutable version v${savedVersion}. It now appears in version history.`, `Versión inmutable v${savedVersion} guardada y verificada. Ya aparece en el historial de versiones.`));
     } catch (reason) { setError(reason instanceof Error ? reason.message : "The plan could not be saved."); }
     finally { setSaving(false); }
   };
