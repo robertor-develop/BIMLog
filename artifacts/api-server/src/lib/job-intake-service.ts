@@ -123,6 +123,16 @@ async function validateRelationshipAuthority(data: JobIntakeData, projectId: num
   const companyIds = new Set<number>(rows.map((row: any) => Number(row.companyId)).filter((id: number) => Number.isSafeInteger(id) && id > 0));
   const contacts = new Map<number, any>(rows.map((row: any) => [Number(row.id), row]));
   const companyId = data.identity.clientCompanyId;
+  const classifications = [
+    ["discipline", data.classification.disciplineId, "enterprise_trades"],
+    ["service", data.classification.serviceId, "enterprise_services"],
+    ["phase", data.classification.phaseId, "enterprise_phases"],
+  ] as const;
+  for (const [kind, id, table] of classifications) {
+    if (!id) continue;
+    const found = (await client.query(`SELECT id FROM ${table} WHERE id::text=$1`, [id])).rows[0];
+    if (!found) throw new FinancialControlError(400, "JOB_INTAKE_CLASSIFICATION_INVALID", `The selected ${kind} is not an authoritative master-catalog entry.`);
+  }
   if (companyId && !companyIds.has(companyId))
     throw new FinancialControlError(400, "JOB_INTAKE_CLIENT_COMPANY_OUT_OF_SCOPE", "The selected client company is not in the current project directory.");
   if (data.identity.primaryContactId) {

@@ -248,6 +248,7 @@ export function normalizeJobIntakeData(raw: unknown) {
     input.commercial && typeof input.commercial === "object"
       ? input.commercial
       : {};
+  const classification = input.classification && typeof input.classification === "object" && !Array.isArray(input.classification) ? input.classification : {};
   const delivery =
     input.delivery && typeof input.delivery === "object" ? input.delivery : {};
   const team = input.team && typeof input.team === "object" ? input.team : {};
@@ -696,6 +697,17 @@ export function normalizeJobIntakeData(raw: unknown) {
     assignment.engagementId = contract?.engagementId || "";
   }
   return {
+    classification: {
+      disciplineId: optionalText(classification.disciplineId, "classification.disciplineId", 100),
+      disciplineCode: optionalText(classification.disciplineCode, "classification.disciplineCode", 64),
+      disciplineName: optionalText(classification.disciplineName, "classification.disciplineName", 200),
+      serviceId: optionalText(classification.serviceId, "classification.serviceId", 100),
+      serviceCode: optionalText(classification.serviceCode, "classification.serviceCode", 64),
+      serviceName: optionalText(classification.serviceName, "classification.serviceName", 200),
+      phaseId: optionalText(classification.phaseId, "classification.phaseId", 100),
+      phaseCode: optionalText(classification.phaseCode, "classification.phaseCode", 64),
+      phaseName: optionalText(classification.phaseName, "classification.phaseName", 200),
+    },
     identity: {
       jobName: optionalText(identity.jobName, "identity.jobName", 300),
       jobCode: optionalText(identity.jobCode, "identity.jobCode", 60),
