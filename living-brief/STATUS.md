@@ -1599,6 +1599,15 @@ No release, publication, or overall completion claim is permitted until the reco
 - Production remains `v1.05.N17-P17`; the unpublished candidate remains `v1.05.N17-P18`. The live observation therefore proves the established workflow surface without claiming Builds 66–68 are deployed.
 - No upload, download, confirmation, synchronization, convention edit, external action, or customer-data mutation occurred. The focused ten-check UI contract and frontend TypeScript pass.
 
+## APU/Job Intake assignment-to-Operations closure — candidate — 2026-09-14
+
+- Lorena's question about whether a code such as `CELLAR_PB_SH_PRE_R0V0` is a package or an assignment exposed an incomplete workflow contract, not user error.
+- Assignments now explicitly target either the entire Contract Item delivery task or a specific Work Package. A package target cannot save without an exact package, and a multi-task package requires the exact operational task.
+- A missing package can be created from the assignment context without losing the draft; BIMLog saves it through the authoritative Intake endpoint, verifies the returned package and assignment binding, auto-selects it, and returns focus to the assignment.
+- Work Packages may define multiple named operational tasks with stable IDs/codes and planned hours. Historical packages without task definitions preserve the established single generated package task.
+- Activation verifies authoritative work-item, task, and assignment counts before navigating to Job Operations. Any mismatch remains a visible Intake error.
+- This four-micro-build Platform candidate is locally accepted at unchanged `v1.05.N17-P18`: focused assignment/package/task behavior, API and frontend typechecks, existing Chrome production-component Intake acceptance, frontend assembly, Living Brief integrity, and visual inspection of the updated 12-slide user presentation pass. No Native, database/schema, push, publication, deployment, or customer-data mutation is included.
+
 ## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
 
 - The first consolidated production build correctly stopped when deterministic Platform generation removed the manually reconciled Builds 66–68 authority text and invalidated its Living Brief hash.

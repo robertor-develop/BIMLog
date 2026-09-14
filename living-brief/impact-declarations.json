@@ -23682,6 +23682,89 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "apu-intake-assignment-operations-closure-builds1-4-20260914",
+      "reviewedThroughCommit": "8e9d78cf51fd2823ba9ea1637c707207e778cb53",
+      "reviewedAt": "2026-09-14T18:55:00Z",
+      "status": "accepted",
+      "captureTiming": "candidate_evidence_reconciliation",
+      "summary": "Reviews Lorena's Work Package and assignment question and the four-build Platform correction for explicit assignment targets, verified package creation, activation verification, and multiple named tasks per package.",
+      "workstreams": [
+        "generic-apu-job-intake"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction fulfills existing one-source-of-truth and guided-workflow doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No execution, authority, or publication rule changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing workflow clarity, persistence, and truthful-evidence requirements already govern this correction."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product identity changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated inventory already owns Job Intake and Operations structure; the correction changes behavior within those existing modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next, Native, Navisworks, camera, XML, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report generation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or requirement changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact four-build candidate behavior and unchanged release status."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the four builds and the remaining browser, publication, and field gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records Lorena's finding, source diagnosis, and corrective contract."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-intake-task-assignment.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "artifacts/bimlog/src/components/job-intake/WorkPackageBuilder.guidance.behavior.ts",
+        "artifacts/bimlog/src/components/job-intake/WorkPackageBuilder.tsx",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f6b3e9d78b3f637ce08923a9700394f7a5cc0e4612b4f53f2bf9da7c52885f62"
     }
   ]
 }

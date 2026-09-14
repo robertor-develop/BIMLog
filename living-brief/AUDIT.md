@@ -1346,6 +1346,12 @@ was performed or authorized.
 - The API server emitted a complete bundle and then spent up to 170 seconds materializing and hashing 16,144 runtime files. The entry point now exits explicitly only after that awaited closure succeeds; the focused process regression proves successful bounded termination.
 - The Vite warnings were caused by inapplicable `use client` directives in the shared tooltip and label primitives. Removing only those directives preserves runtime semantics and produces a warning-free verified frontend build.
 - Impact: tooling/governance and two no-op bundler-directive removals only; no Generic APU/Job Intake, Lens Next, Native, database/schema, publication, external action, or customer-data mutation.
+
+# 2026-09-14 — Lorena assignment and Work Package workflow finding
+
+- Lorena asked whether each item such as `CELLAR_PB_SH_PRE_R0V0` must be created in Work-package decomposition or elsewhere. Source review proved that the prior UI generated one task per Work Package and allowed resource assignment to the Contract Item or package, but did not support multiple named tasks inside a package or a verified create-and-return dependency path.
+- The corrective decision is explicit: packages remain optional grouping/control boundaries; assignments target the whole Contract Item or an existing specific package; missing packages are created, saved, verified, and selected in context; packages may contain multiple named tasks; activation verifies all operational outputs before navigation.
+- Historical package behavior remains compatible and strict project/contract/package identity checks remain in force. No database/schema or Native change is required.
 # 2026-09-14 — APU/Job Intake empty-prerequisite Builds 1–4 semantic review
 
 - Reviewed implementation through `c9adbd1cdbfc257c32e269a48a75738d4495694b` against the reported state where a project has no saved APU plan version and no approved budget snapshot.

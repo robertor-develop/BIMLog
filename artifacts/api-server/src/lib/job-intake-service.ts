@@ -1082,10 +1082,17 @@ async function createCoreActivationWithClient(
     });
     for (const workPackage of item.workPackages) {
       await client.query(`INSERT INTO job_activation_work_packages(id,intake_id,project_id,work_item_id,package_code,title,description,package_type,status,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9) ON CONFLICT(project_id,package_code) DO NOTHING`, [workPackage.id,input.intakeId,input.projectId,actualWorkItemId,workPackage.packageCode,workPackage.title || workPackage.dimensionValue,`${workPackage.dimensionType}: ${workPackage.dimensionValue}`,workPackage.packageType,input.actorUserId]);
-      const packageTaskId = uuid();
-      const packageTask = (await client.query(`INSERT INTO job_activation_tasks(id,work_item_id,task_key,name_en,name_es,sequence,status,planned_hours,created_by_id) VALUES($1,$2,$3,$4,$4,$5,'not_started',0,$6) ON CONFLICT(work_item_id,task_key) DO UPDATE SET name_en=EXCLUDED.name_en RETURNING id`, [packageTaskId,actualWorkItemId,`package:${workPackage.id}`,workPackage.title || workPackage.dimensionValue,item.workPackages.indexOf(workPackage)+2,input.actorUserId])).rows[0];
-      packageTaskById.set(workPackage.id, packageTask.id);
-      await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id) SELECT $1,$2,$3 WHERE EXISTS(SELECT 1 FROM job_activation_work_packages WHERE id=$1) ON CONFLICT(package_id,task_id) DO NOTHING`, [workPackage.id,packageTask.id,input.actorUserId]);
+      const taskDefinitions = workPackage.tasks.length ? workPackage.tasks : [{ id: "", taskCode: "", name: workPackage.title || workPackage.dimensionValue, plannedHours: "0" }];
+      for (const [taskIndex, taskDefinition] of taskDefinitions.entries()) {
+        const packageTaskId = uuid();
+        const taskKey = taskDefinition.id ? `package:${workPackage.id}:task:${taskDefinition.id}` : `package:${workPackage.id}`;
+        const packageTask = (await client.query(`INSERT INTO job_activation_tasks(id,work_item_id,task_key,name_en,name_es,sequence,status,planned_hours,created_by_id) VALUES($1,$2,$3,$4,$4,$5,'not_started',$6,$7) ON CONFLICT(work_item_id,task_key) DO UPDATE SET name_en=EXCLUDED.name_en,name_es=EXCLUDED.name_es,planned_hours=EXCLUDED.planned_hours RETURNING id`, [packageTaskId,actualWorkItemId,taskKey,taskDefinition.name,item.workPackages.indexOf(workPackage)+2+taskIndex,taskDefinition.plannedHours,input.actorUserId])).rows[0];
+        packageTaskById.set(`${workPackage.id}:${taskDefinition.id}`, packageTask.id);
+        if (!taskDefinition.id) packageTaskById.set(workPackage.id, packageTask.id);
+        if (taskDefinitions.length === 1) packageTaskById.set(workPackage.id, packageTask.id);
+        await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id) SELECT $1,$2,$3 WHERE EXISTS(SELECT 1 FROM job_activation_work_packages WHERE id=$1) ON CONFLICT(package_id,task_id) DO NOTHING`, [workPackage.id,packageTask.id,input.actorUserId]);
+        tasksCreated += 1;
+      }
     }
   }
   for (const assignment of input.data.team.assignments) {
@@ -1099,7 +1106,7 @@ async function createCoreActivationWithClient(
     const item = input.data.scopeItems.find(
       (candidate) => candidate.id === assignment.scopeItemId,
     )!;
-    const scopedTaskId = assignment.workPackageId ? packageTaskById.get(assignment.workPackageId) : linked.taskId;
+    const scopedTaskId = assignment.workPackageId ? packageTaskById.get(assignment.workPackageTaskId ? `${assignment.workPackageId}:${assignment.workPackageTaskId}` : assignment.workPackageId) : linked.taskId;
     if (!scopedTaskId) throw new FinancialControlError(400, "JOB_ACTIVATION_ASSIGNMENT_PACKAGE_INVALID", "The assignment Work Package was not activated for its Contract Item.");
     const inserted = (
       await client.query(
@@ -1400,7 +1407,7 @@ export async function activateJobIntake(input: {
       }),
       workflowInstances: workflowBaseline.created,
       workItems: data.scopeItems.length,
-      tasks: data.scopeItems.reduce((total, item) => total + 1 + item.workPackages.length, 0),
+      tasks: data.scopeItems.reduce((total, item) => total + 1 + item.workPackages.reduce((packageTotal: number, workPackage: any) => packageTotal + Math.max(1, workPackage.tasks.length), 0), 0),
       resourceAssignments: data.team.assignments.length,
     }) : null;
     if (commercialBaseline) await persistActivatedCommercialBaselineWithClient(client, commercialBaseline, input.actorUserId);
@@ -1408,7 +1415,7 @@ export async function activateJobIntake(input: {
       activationMode,
       capabilities,
       workItems: data.scopeItems.length,
-      tasks: data.scopeItems.reduce((total, item) => total + 1 + item.workPackages.length, 0),
+      tasks: data.scopeItems.reduce((total, item) => total + 1 + item.workPackages.reduce((packageTotal: number, workPackage: any) => packageTotal + Math.max(1, workPackage.tasks.length), 0), 0),
       resourceAssignments: data.team.assignments.length,
       contractCreated: Boolean(draft),
       contractId: draft?.contractId ?? null,

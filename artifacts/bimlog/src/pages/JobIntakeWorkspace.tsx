@@ -717,7 +717,7 @@ export function JobIntakeWorkspace() {
       scopeItems: dataRef.current.scopeItems.map((item: any) => item.id === assignment.scopeItemId ? { ...item, workPackages: [...(item.workPackages || []), workPackage] } : item),
       team: {
         ...dataRef.current.team,
-        assignments: dataRef.current.team.assignments.map((item: any, index: number) => index === packageCreation.assignmentIndex ? { ...item, assignmentTargetType: "work_package", workPackageId: packageId } : item),
+        assignments: dataRef.current.team.assignments.map((item: any, index: number) => index === packageCreation.assignmentIndex ? { ...item, assignmentTargetType: "work_package", workPackageId: packageId, workPackageTaskId: "" } : item),
       },
       review: { ...dataRef.current.review, scopeConfirmed: false, teamConfirmed: false },
     };
@@ -923,7 +923,7 @@ export function JobIntakeWorkspace() {
       );
       const activated = await load();
       const expectedWorkItems = dataRef.current.scopeItems.length;
-      const expectedTasks = dataRef.current.scopeItems.reduce((total: number, item: any) => total + 1 + (item.workPackages?.length || 0), 0);
+      const expectedTasks = dataRef.current.scopeItems.reduce((total: number, item: any) => total + 1 + (item.workPackages || []).reduce((packageTotal: number, workPackage: any) => packageTotal + Math.max(1, workPackage.tasks?.length || 0), 0), 0);
       const expectedAssignments = dataRef.current.team.assignments.length;
       const actualWorkItems = activated?.activation?.workItems?.length ?? 0;
       const actualTasks = activated?.activation?.tasks?.length ?? 0;
@@ -933,7 +933,7 @@ export function JobIntakeWorkspace() {
           `Activation verification failed: expected ${expectedWorkItems} work items, ${expectedTasks} tasks, and ${expectedAssignments} assignments; received ${actualWorkItems}, ${actualTasks}, and ${actualAssignments}.`,
           `Falló la verificación de activación: se esperaban ${expectedWorkItems} partidas, ${expectedTasks} tareas y ${expectedAssignments} asignaciones; se recibieron ${actualWorkItems}, ${actualTasks} y ${actualAssignments}.`,
         ));
-      const firstTaskId = activated.activation.tasks?.[0]?.id;
+      const firstTaskId = activated.activation.assignments?.[0]?.taskId ?? activated.activation.tasks?.[0]?.id;
       setLocation(`/projects/${projectId}/operations${firstTaskId ? `?taskId=${encodeURIComponent(firstTaskId)}` : ""}`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -2498,6 +2498,7 @@ export function JobIntakeWorkspace() {
                                           scopeItemId: e.target.value,
                                           assignmentTargetType: "contract_item",
                                           workPackageId: "",
+                                          workPackageTaskId: "",
                                         }
                                       : item,
                                 ),
@@ -2575,8 +2576,9 @@ export function JobIntakeWorkspace() {
                           ? tt("This customer/APU rate belongs to the selected Contract Item and is shared by assignments using it. Internal hourly cost and incentive remain separate per assignment.", "Esta tarifa Cliente/APU pertenece a la Partida de Contrato seleccionada y se comparte entre las asignaciones que la usan. El costo horario interno y el incentivo permanecen separados por asignación.")
                           : tt("Select a Contract Item to set its customer/APU rate. Internal hourly cost remains independently editable.", "Seleccione una Partida de Contrato para establecer su tarifa Cliente/APU. El costo horario interno sigue siendo editable de forma independiente.")}
                       </div>
-                      <label>{tt("Assignment target", "Destino de la asignación")}<select value={assignment.assignmentTargetType || (assignment.workPackageId ? "work_package" : "contract_item")} disabled={!assignment.scopeItemId} onChange={(e)=>setData((old:any)=>({...old,team:{...old.team,assignments:old.team.assignments.map((item:any,i:number)=>i===index?{...item,assignmentTargetType:e.target.value,workPackageId:e.target.value==="contract_item"?"":item.workPackageId}:item)}}))}><option value="contract_item">{tt("Entire Contract Item", "Partida de Contrato completa")}</option><option value="work_package">{tt("Specific Work Package", "Paquete de trabajo específico")}</option></select></label>
-                      {(assignment.assignmentTargetType === "work_package" || assignment.workPackageId) && <label>{tt("Work Package", "Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>assignmentChange(index,"workPackageId",e.target.value)}><option value="">{tt("Select or create a Work Package", "Seleccione o cree un Paquete de trabajo")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{workPackage.title||workPackage.packageCode}{workPackage.dimensionValue ? ` — ${workPackage.dimensionValue}` : ""}</option>)}</select></label>}
+                      <label>{tt("Assignment target", "Destino de la asignación")}<select value={assignment.assignmentTargetType || (assignment.workPackageId ? "work_package" : "contract_item")} disabled={!assignment.scopeItemId} onChange={(e)=>setData((old:any)=>({...old,team:{...old.team,assignments:old.team.assignments.map((item:any,i:number)=>i===index?{...item,assignmentTargetType:e.target.value,workPackageId:e.target.value==="contract_item"?"":item.workPackageId,workPackageTaskId:e.target.value==="contract_item"?"":item.workPackageTaskId}:item)}}))}><option value="contract_item">{tt("Entire Contract Item", "Partida de Contrato completa")}</option><option value="work_package">{tt("Specific Work Package", "Paquete de trabajo específico")}</option></select></label>
+                      {(assignment.assignmentTargetType === "work_package" || assignment.workPackageId) && <label>{tt("Work Package", "Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>setData((old:any)=>({...old,team:{...old.team,assignments:old.team.assignments.map((item:any,i:number)=>i===index?{...item,workPackageId:e.target.value,workPackageTaskId:""}:item)}}))}><option value="">{tt("Select or create a Work Package", "Seleccione o cree un Paquete de trabajo")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{workPackage.title||workPackage.packageCode}{workPackage.dimensionValue ? ` — ${workPackage.dimensionValue}` : ""}</option>)}</select></label>}
+                      {assignment.workPackageId && ((data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).find((workPackage:any)=>workPackage.id===assignment.workPackageId)?.tasks?.length || 0) > 0 && <label>{tt("Exact operational task", "Tarea operativa exacta")}<select value={assignment.workPackageTaskId || ""} onChange={(event)=>assignmentChange(index,"workPackageTaskId",event.target.value)}><option value="">{tt("Select task", "Seleccione una tarea")}</option>{((data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).find((workPackage:any)=>workPackage.id===assignment.workPackageId)?.tasks||[]).map((task:any)=><option key={task.id} value={task.id}>{task.name || task.taskCode}</option>)}</select></label>}
                       {(assignment.assignmentTargetType === "work_package" || assignment.workPackageId) && !assignment.workPackageId && <div className="ji-lock"><strong>{tt("Work Package required", "Paquete de trabajo requerido")}</strong><p>{tt("Create it here. BIMLog preserves this assignment, saves the package, verifies it, and returns with it selected.", "Créelo aquí. BIMLog conserva esta asignación, guarda y verifica el paquete, y regresa con el paquete seleccionado.")}</p><button type="button" onClick={()=>setPackageCreation({assignmentIndex:index,title:"",dimensionType:"deliverable",dimensionValue:""})}><Plus size={14}/> {tt("Create required Work Package", "Crear Paquete de trabajo requerido")}</button></div>}
                       {packageCreation?.assignmentIndex === index && <div className="ji-row"><strong>{tt("Create and verify Work Package", "Crear y verificar Paquete de trabajo")}</strong><div className="ji-grid three"><label>{tt("Package name", "Nombre del paquete")}<input autoFocus value={packageCreation.title} onChange={(event)=>setPackageCreation({...packageCreation,title:event.target.value})}/></label><label>{tt("Control dimension", "Dimensión de control")}<select value={packageCreation.dimensionType} onChange={(event)=>setPackageCreation({...packageCreation,dimensionType:event.target.value})}><option value="building">{tt("Building","Edificio")}</option><option value="floor">{tt("Floor","Piso")}</option><option value="zone">{tt("Zone","Zona")}</option><option value="deliverable">{tt("Deliverable","Entregable")}</option><option value="task">{tt("Task","Tarea")}</option></select></label><label>{tt("Control value", "Valor de control")}<input value={packageCreation.dimensionValue} onChange={(event)=>setPackageCreation({...packageCreation,dimensionValue:event.target.value})}/></label></div><div className="ji-actions"><button type="button" className="primary" disabled={busy} onClick={()=>void createAndSelectWorkPackage()}>{tt("Save package and return", "Guardar paquete y regresar")}</button><button type="button" onClick={()=>setPackageCreation(null)}>{tt("Cancel", "Cancelar")}</button></div></div>}
                       <div className="ji-lock">{tt("The selected scope activates as a real Job Operations task. Choosing a Work Package assigns this resource directly to that package task; choosing the Contract Item uses its delivery task.", "El alcance seleccionado se activa como una tarea real de Operaciones del Trabajo. Elegir un Paquete de trabajo asigna este recurso directamente a la tarea del paquete; elegir la Partida de Contrato utiliza su tarea de entrega.")}</div>
@@ -2666,6 +2668,7 @@ export function JobIntakeWorkspace() {
                               scopeItemId: "",
                               assignmentTargetType: "contract_item",
                               workPackageId: "",
+                              workPackageTaskId: "",
                               plannedHours: "0.00",
                               internalHourlyRate: "0.00",
                             },

@@ -165,7 +165,7 @@ const multiContractData = normalizeJobIntakeData({
   team: {
     ...data.team,
     assignments: [
-      { ...data.team.assignments[0], id: "OWNER-A", scopeItemId: "OWNER-ITEM", workPackageId: "WP-OWNER", incentiveAmount: "125" },
+      { ...data.team.assignments[0], id: "OWNER-A", scopeItemId: "OWNER-ITEM", assignmentTargetType: "work_package", workPackageId: "WP-OWNER", incentiveAmount: "125" },
       {
         ...data.team.assignments[0],
         id: "SUPPLIER-A",
@@ -213,13 +213,25 @@ assert.equal(multiApuContract.scopeItems[0].workPackages[0]?.dimensionType, "flo
 const legacyPackageAssignment = normalizeJobIntakeData({
   ...data,
   scopeItems: [{ ...data.scopeItems[0], workPackages: multiApuContract.scopeItems[0].workPackages }],
-  team: { ...data.team, assignments: [{ ...data.team.assignments[0], workPackageId: "WP-L10" }] },
+  team: { ...data.team, assignments: [{ ...data.team.assignments[0], assignmentTargetType: undefined, workPackageId: "WP-L10" }] },
 });
 assert.equal(legacyPackageAssignment.team.assignments[0].assignmentTargetType, "work_package");
 assert.throws(
   () => normalizeJobIntakeData({ ...data, team: { ...data.team, assignments: [{ ...data.team.assignments[0], assignmentTargetType: "work_package" }] } }),
   /Select or create a Work Package/,
 );
+const multiTaskPackage = normalizeJobIntakeData({
+  ...data,
+  scopeItems: [{ ...data.scopeItems[0], workPackages: [{ id: "WP-CELLAR", packageCode: "WP-CELLAR", title: "Cellar", dimensionType: "floor", dimensionValue: "CELLAR", tasks: [{ id: "TASK-PRE", taskCode: "CELLAR_PB_SH_PRE_R0V0", name: "CELLAR_PB_SH_PRE_R0V0", plannedHours: "40" }, { id: "TASK-REV", taskCode: "CELLAR_PB_SH_REV_R0V0", name: "CELLAR_PB_SH_REV_R0V0", plannedHours: "20" }] }] }],
+  team: { ...data.team, assignments: [{ ...data.team.assignments[0], assignmentTargetType: "work_package", workPackageId: "WP-CELLAR", workPackageTaskId: "TASK-PRE" }] },
+});
+assert.equal(multiTaskPackage.scopeItems[0].workPackages[0]?.tasks.length, 2);
+assert.equal(multiTaskPackage.team.assignments[0].workPackageTaskId, "TASK-PRE");
+assert.throws(
+  () => normalizeJobIntakeData({ ...multiTaskPackage, team: { ...multiTaskPackage.team, assignments: [{ ...multiTaskPackage.team.assignments[0], workPackageTaskId: "" }] } }),
+  /Select the exact task/,
+);
+assert.match(read("./job-intake-service.ts"), /package:\$\{workPackage\.id\}:task:\$\{taskDefinition\.id\}/);
 const immutableBaselineInput = { intakeId: "INTAKE-1", projectId: 1, currency: "USD", workflowInstances: 2, workItems: 2, tasks: 2, resourceAssignments: 0, contracts: [{ profileId: "BASE", contractId: "CONTRACT-1", contractVersionId: "VERSION-1", contractNumber: "C-1", currency: "USD", items: [{ stableLineId: "CI-A", displayName: "Drafting", projectCostNodeId: "NODE-1", budgetSnapshotLineId: "", quantity: "10", unit: "Hours", unitRate: "35.47", contractValue: "354.7", apuPlanVersion: 3, workflowTemplate: "bim-submittal" }] }] };
 const immutableBaseline = buildActivatedCommercialBaseline(immutableBaselineInput);
 const changedApuBaseline = buildActivatedCommercialBaseline({ ...immutableBaselineInput, contracts: [{ ...immutableBaselineInput.contracts[0], items: [{ ...immutableBaselineInput.contracts[0].items[0], unitRate: "37.99", contractValue: "379.9", apuPlanVersion: 4 }] }] });

@@ -2452,6 +2452,15 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Run the consolidated Build 25 gate and freeze machine-readable PASS evidence at commit `c520e15cb33567eb946e3499ad00651dc6237da7`.
 - [ ] External user field acceptance remains separate from this internal assurance block.
 
+## APU/Job Intake assignment-to-Operations closure — 4 micro-builds
+
+- [x] Build 1: require an explicit entire-Contract-Item or specific-Work-Package assignment target while deriving the correct target for historical saved assignments.
+- [x] Build 2: preserve the assignment draft, create a missing Work Package in context, persist and verify it authoritatively, then return with it selected.
+- [x] Build 3: verify activation output counts and navigate to Job Operations only after authoritative operational records are present.
+- [x] Build 4: support multiple named task definitions within one Work Package and require an exact task for multi-task package assignments.
+- [x] Complete consolidated Chrome production-component acceptance and inspect the updated 12-slide user presentation before declaring the candidate locally accepted.
+- [ ] Push, Replit publication, live Chrome verification, and Lorena/Ruben field acceptance remain separate explicit gates.
+
 ## POST-P17 assurance Builds 26–30
 
 - [x] Lock RFI authoritative identity and current-project scope.

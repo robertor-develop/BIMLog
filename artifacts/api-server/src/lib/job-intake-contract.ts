@@ -426,7 +426,17 @@ export function normalizeJobIntakeData(raw: unknown) {
       packageIds.add(packageId);
       const dimensionType = ["building", "floor", "zone", "discipline", "system", "phase", "deliverable", "task", "milestone"].includes(String(entry?.dimensionType)) ? String(entry.dimensionType) : "deliverable";
       const packageType = ["shop_drawing", "submittal", "mixed", "deliverable"].includes(String(entry?.packageType)) ? String(entry.packageType) : "deliverable";
-      return { id: packageId, packageCode: optionalText(entry?.packageCode, `scopeItems[${index}].workPackages[${packageIndex}].packageCode`, 50) || packageId, title: optionalText(entry?.title, `scopeItems[${index}].workPackages[${packageIndex}].title`, 160), dimensionType, dimensionValue: optionalText(entry?.dimensionValue, `scopeItems[${index}].workPackages[${packageIndex}].dimensionValue`, 160), packageType };
+      const taskIds = new Set<string>();
+      const tasks = (Array.isArray(entry?.tasks) ? entry.tasks : []).map((rawTask: any, taskIndex: number) => {
+        const taskId = optionalText(rawTask?.id, `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].id`, 100) || `TASK-${packageId}-${taskIndex + 1}`;
+        if (taskIds.has(taskId)) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGE_TASK_DUPLICATE", "Task IDs must be unique within a Work Package.");
+        taskIds.add(taskId);
+        const name = optionalText(rawTask?.name, `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].name`, 160);
+        if (!name) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGE_TASK_NAME_REQUIRED", "Every Work Package task requires a name.");
+        return { id: taskId, taskCode: optionalText(rawTask?.taskCode, `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].taskCode`, 80) || taskId, name, plannedHours: exact(rawTask?.plannedHours ?? "0", `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].plannedHours`) };
+      });
+      if (tasks.length > 100) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGE_TASKS_LIMIT", "A Work Package supports at most 100 task definitions.");
+      return { id: packageId, packageCode: optionalText(entry?.packageCode, `scopeItems[${index}].workPackages[${packageIndex}].packageCode`, 50) || packageId, title: optionalText(entry?.title, `scopeItems[${index}].workPackages[${packageIndex}].title`, 160), dimensionType, dimensionValue: optionalText(entry?.dimensionValue, `scopeItems[${index}].workPackages[${packageIndex}].dimensionValue`, 160), packageType, tasks };
     });
     if (workPackages.length > 100) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGES_LIMIT", "A Contract Item supports at most 100 Work Packages.");
     return {
@@ -565,6 +575,7 @@ export function normalizeJobIntakeData(raw: unknown) {
       )?.contractId;
       const selectedScopeItem = normalizedItems.find((item) => item.id === scopeItemId);
       const workPackageId = optionalText(assignment.workPackageId, `assignments[${index}].workPackageId`, 100);
+      const workPackageTaskId = optionalText(assignment.workPackageTaskId, `assignments[${index}].workPackageTaskId`, 100);
       const assignmentTargetType =
         optionalText(
           assignment.assignmentTargetType,
@@ -579,6 +590,11 @@ export function normalizeJobIntakeData(raw: unknown) {
         throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_TARGET_CONFLICT", "A Contract Item assignment cannot also reference a Work Package.");
       if (workPackageId && !selectedScopeItem?.workPackages.some((workPackage: any) => workPackage.id === workPackageId))
         throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_PACKAGE_MISMATCH", "The selected Work Package must belong to the assignment's Contract Item.");
+      const selectedWorkPackage = selectedScopeItem?.workPackages.find((workPackage: any) => workPackage.id === workPackageId);
+      if (workPackageTaskId && !selectedWorkPackage?.tasks.some((task: any) => task.id === workPackageTaskId))
+        throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_PACKAGE_TASK_MISMATCH", "The selected task must belong to the assignment's Work Package.");
+      if ((selectedWorkPackage?.tasks.length || 0) > 1 && !workPackageTaskId)
+        throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_PACKAGE_TASK_REQUIRED", "Select the exact task for a Work Package with multiple tasks.");
       const requestedContractId = optionalText(
         assignment.contractId,
         `assignments[${index}].contractId`,
@@ -621,6 +637,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         scopeItemId,
         assignmentTargetType,
         workPackageId,
+        workPackageTaskId,
         apuPlanVersion: selectedScopeItem?.apuPlanVersion ?? null,
         engagementId: "",
         plannedHours,
