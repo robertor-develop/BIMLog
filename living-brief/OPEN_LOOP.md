@@ -2349,6 +2349,8 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Restore clear discoverability of the existing desktop sidebar collapse/expand and drag-to-resize controls without resetting saved user width.
 - [x] Pass focused behavior, frontend typecheck/build, and governed root regression from the reconciled source state. Builds 9–12 add accessibility, route-level performance, truthful public product proof, and consolidated acceptance without removing capability.
 - [x] The workspace-width and sidebar-control corrections were integrated into the authoritative lineage and subsequently published in the live P17 descendant; production Chrome evidence confirms the resulting UI lineage.
+- [x] Replace the visually duplicated persistent resize grip in both Project and Headquarters navigation with the exact IgniteSmart Operations boundary-resizer contract while preserving the single native navigation scrollbar, collapse, pointer/keyboard resize, and saved width.
+- [ ] Push/publication and post-publication Chrome comparison against IgniteSmart Operations remain separate release gates.
 # Coordination Release C + UX Build 17 integration — 2026-09-10
 
 - [x] Merge sealed Coordination Release C with accepted UX Build 17 in the dedicated Release B integration worktree, preserving both parents and both authority histories.

@@ -23765,6 +23765,91 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f6b3e9d78b3f637ce08923a9700394f7a5cc0e4612b4f53f2bf9da7c52885f62"
+    },
+    {
+      "taskId": "operations-matched-sidebar-boundary-control-20260914",
+      "reviewedThroughCommit": "d7b8fb30fe7acfd668df80908ba3c4bf9701d963",
+      "reviewedAt": "2026-09-14T19:25:00Z",
+      "status": "accepted",
+      "captureTiming": "candidate_evidence_reconciliation",
+      "summary": "Reviews the Operations-source comparison and the bounded removal of BIMLog's visually duplicated persistent sidebar resize grip while preserving one scrollbar, collapse, pointer and keyboard resize, and persisted width.",
+      "workstreams": [
+        "platform-ux"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction restores the one-source-of-truth UI contract and removes a duplicate control."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No execution, authority, or publication rule changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing consistency, accessibility, and real-behavior evidence rules govern the correction."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product identity changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No module, route, or structural inventory change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next or Native change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-generation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or requirement changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local Operations-matched sidebar candidate and release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Makes the preserved sidebar contract and remaining publication verification explicit."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Appends the screenshot-backed root cause and bounded correction."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/scripts/project-sidebar-browser-evidence.mjs",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.behavior.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/components/layout/ProjectSidebar.resize-scroll.behavior.ts",
+        "artifacts/bimlog/src/components/layout/ProjectSidebar.tsx",
+        "artifacts/bimlog/src/index.css",
+        "evidence/project-sidebar-browser-assurance/desktop-expanded.png",
+        "evidence/project-sidebar-browser-assurance/mobile-390-scrolled.png",
+        "evidence/project-sidebar-browser-assurance/mobile-drawer.png",
+        "evidence/project-sidebar-browser-assurance/results.json",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9067ca8100c4462aaa2e01ed2b26eba394103142d0871f06bfbca473bb8754a3"
     }
   ]
 }

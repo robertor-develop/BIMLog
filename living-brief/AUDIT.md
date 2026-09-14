@@ -1366,3 +1366,9 @@ was performed or authorized.
 - The actual production Contract Item editor passed empty and populated rendering; controlled Chrome confirmed the two optional-state messages and both direct prerequisite actions.
 - The governed build passed tracked-secret exposure, database-source safety, mojibake, 11-document Living Brief integrity, all TypeScript projects, frontend production assembly, and deterministic API production-runtime closure from the clean Build 5 commit.
 - The complete five-build correction is accepted locally at unchanged version `v1.05.N17-P18`. Push, Replit synchronization/publication, live verification, and external user acceptance remain separate and are not claimed.
+## 2026-09-14 — Sidebar resize control visually duplicated the navigation scrollbar
+
+- Roberto's production screenshot proved that BIMLog rendered its real navigation scrollbar beside a second persistent full-height resize rail/pill.
+- Source comparison against `F:\IgniteSmart\Repositories\operations-dashboard` identified the divergence: Operations uses one scroll-owning `primary-nav` plus a transparent 9-pixel resize boundary at `right: -4px`; BIMLog had added a visible grip inside the sidebar edge.
+- The correction applies the Operations boundary contract to both BIMLog sidebar implementations and adds executable protection for single-scroll ownership, collapse, saved width, pointer resize, keyboard resize, and absence of the duplicate Project-sidebar grip.
+- No navigation capability, route, business behavior, permission, database/schema, APU, Job Intake, or Lens Next behavior is removed or changed.

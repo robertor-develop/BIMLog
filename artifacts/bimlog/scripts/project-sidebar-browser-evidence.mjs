@@ -42,17 +42,17 @@ await resizer.press("Home");
 await page.waitForTimeout(250);
 assert.equal(Math.round((await sidebar.boundingBox()).width), 248);
 
-const grip = resizer.locator("svg");
-assert.equal(await grip.evaluate(element => getComputedStyle(element).opacity), "1");
+assert.equal(await resizer.locator("svg").count(), 0);
+assert.equal(await resizer.evaluate(element => getComputedStyle(element, "::after").backgroundColor), "rgb(147, 197, 253)");
 await page.getByRole("navigation", { name: "Scrollable project navigation" }).focus();
 await page.waitForTimeout(150);
-assert.equal(await grip.evaluate(element => getComputedStyle(element).opacity), "0");
+assert.equal(await resizer.evaluate(element => getComputedStyle(element, "::after").backgroundColor), "rgba(0, 0, 0, 0)");
 
 const handle = await resizer.boundingBox();
 assert.ok(handle);
 await resizer.hover({ position: { x: handle.width / 2, y: 120 } });
 await page.waitForTimeout(150);
-assert.equal(await grip.evaluate(element => getComputedStyle(element).opacity), "1");
+assert.equal(await resizer.evaluate(element => getComputedStyle(element, "::after").backgroundColor), "rgb(147, 197, 253)");
 await page.mouse.move(handle.x + handle.width / 2, handle.y + 120);
 await page.mouse.down();
 await page.waitForTimeout(50);

@@ -370,40 +370,42 @@ iframe[aria-label*="Replit" i],
 .phasea-project-sidebar-resizer {
   position: absolute;
   top: 0;
-  right: 0;
+  right: -4px;
   bottom: 0;
-  z-index: 20;
-  display: grid;
-  width: 8px;
+  z-index: 2;
+  width: 9px;
   padding: 0;
-  align-items: center;
-  justify-items: center;
   border: 0;
   background: transparent;
-  color: rgba(255,255,255,0.88);
   cursor: col-resize;
+  touch-action: none;
 }
-.phasea-project-sidebar-resizer svg {
-  width: 8px;
-  height: 22px;
-  padding: 6px 0;
-  border: 1px solid rgba(255,255,255,0.18);
-  border-radius: 999px;
-  background: #0F172A;
-  box-sizing: content-box;
-  opacity: 0;
-  transition: opacity 0.12s ease, border-color 0.12s ease, background 0.12s ease;
+.phasea-project-sidebar-resizer::after,
+.master-sidebar-resizer::after {
+  content: "";
+  position: absolute;
+  inset: 0 3px;
+  background: transparent;
+  transition: background-color 120ms ease;
 }
-.phasea-project-sidebar-resizer:hover,
-.phasea-project-sidebar-resizer:focus-visible {
-  background: rgba(96,165,250,0.18);
-  outline: 0;
+.phasea-project-sidebar-resizer:hover::after,
+.phasea-project-sidebar-resizer:focus-visible::after,
+.master-sidebar-resizer:hover::after,
+.master-sidebar-resizer:focus-visible::after {
+  background: #93C5FD;
 }
-.phasea-project-sidebar-resizer:hover svg,
-.phasea-project-sidebar-resizer:focus-visible svg {
-  opacity: 1;
-  border-color: rgba(147,197,253,0.9);
-  background: #1E3A5F;
+.master-sidebar-resizer {
+  position: absolute;
+  z-index: 2;
+  top: 0;
+  right: -4px;
+  bottom: 0;
+  width: 9px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: col-resize;
+  touch-action: none;
 }
 .phasea-nav-group {
   margin: 2px 0 6px;

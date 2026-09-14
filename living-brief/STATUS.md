@@ -1608,6 +1608,12 @@ No release, publication, or overall completion claim is permitted until the reco
 - Activation verifies authoritative work-item, task, and assignment counts before navigating to Job Operations. Any mismatch remains a visible Intake error.
 - This four-micro-build Platform candidate is locally accepted at unchanged `v1.05.N17-P18`: focused assignment/package/task behavior, API and frontend typechecks, existing Chrome production-component Intake acceptance, frontend assembly, Living Brief integrity, and visual inspection of the updated 12-slide user presentation pass. No Native, database/schema, push, publication, deployment, or customer-data mutation is included.
 
+## Operations-matched sidebar boundary control — candidate — 2026-09-14
+
+- BIMLog's Project and Headquarters sidebars retain one native navigation scrollbar, persisted collapse/expand, pointer resize, keyboard resize, and saved width.
+- The persistent full-height pill/grip that visually duplicated the scrollbar is removed. The resize hit target now matches IgniteSmart Operations: a transparent 9-pixel boundary target at `right: -4px`, with a narrow indication only on hover or keyboard focus.
+- Executable assertions protect the single-scroll/transparent-resizer contract so future work cannot restore the duplicate rail or remove collapse/resize behavior. The actual production `ProjectSidebar` component passes 45 controlled Chrome assertions at desktop, tablet, and exact-390 widths, including width persistence, keyboard/pointer resize, collapse/reload/expand, real navigation scrolling, and every preserved route/action. The rendered desktop artifact was visually inspected and shows no second persistent rail. This is a local Platform candidate only; it is not pushed, published, deployed, or live verified.
+
 ## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
 
 - The first consolidated production build correctly stopped when deterministic Platform generation removed the manually reconciled Builds 66–68 authority text and invalidated its Living Brief hash.

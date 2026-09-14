@@ -7,7 +7,7 @@ import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
   BookOpen, Send, RefreshCw, CalendarDays, GitMerge, Gauge,
-  ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness, GripVertical, PanelLeftOpen, UsersRound
+  ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness, PanelLeftOpen, UsersRound
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -458,9 +458,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
               else if (event.key === "Home") { event.preventDefault(); adjustSidebarWidth(248); }
               else if (event.key === "End") { event.preventDefault(); adjustSidebarWidth(420); }
             }}
-          >
-            <GripVertical aria-hidden="true" />
-          </button>
+          />
         )}
         <SidebarUtilities
           activeTab={activeTab}

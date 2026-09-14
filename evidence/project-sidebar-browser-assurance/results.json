@@ -1,0 +1,42 @@
+{
+  "suite": "project-sidebar-production-component-browser-assurance",
+  "status": "PASS",
+  "assertions": 45,
+  "persistedWidth": 340,
+  "collapsedWidth": 78,
+  "capabilityHrefs": [
+    "/projects/91/command-center",
+    "/projects/91/coordination",
+    "/projects/91/activity",
+    "/projects/91/intake",
+    "/projects/91/operations",
+    "/projects/91/files",
+    "/projects/91/rfis",
+    "/projects/91/submittals",
+    "/projects/91/transmittals",
+    "/projects/91/change-orders",
+    "/projects/91/meetings",
+    "/projects/91/schedule",
+    "/projects/91/clash-reports",
+    "/projects/91/financial/apu",
+    "/projects/91/commercial/team-performance",
+    "/projects/91/analytics",
+    "/projects/91/reports",
+    "/projects/91/directory",
+    "/projects/91/team",
+    "/projects/91/generator",
+    "/projects/91/convention",
+    "/projects/91/integrations"
+  ],
+  "capabilityActions": [
+    "Project Budget",
+    "Contracts & Commitments",
+    "BIMLog Sync Agent"
+  ],
+  "viewports": [
+    "1440x720",
+    "700x720",
+    "390x640"
+  ],
+  "errors": []
+}
