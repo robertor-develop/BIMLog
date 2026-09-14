@@ -23610,6 +23610,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "project-sidebar-resize-scroll-build11-20260914",
+      "reviewedThroughCommit": "dbea934a113985709493c1b81cf00221ed4cdb71",
+      "reviewedAt": "2026-09-14T16:30:00Z",
+      "status": "accepted",
+      "captureTiming": "post_commit_evidence_reconciliation",
+      "summary": "Reviews the bounded project-navigation parity correction that adds persistent horizontal resize, persistent collapse, keyboard resize, and explicit independent vertical scrolling to the shared ProjectSidebar.",
+      "workstreams": [
+        "ux-less-is-more"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The navigation control correction preserves every product capability and product boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No authority, execution, publication, or delegation rule changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation fulfills the existing responsive, accessible, capability-preserving UI quality contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product promise changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated Platform inventory already identifies the shared ProjectSidebar; this change adjusts presentation behavior without changing platform structure."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens Next behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or requirement changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The P18 candidate and unpublished state remain unchanged."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing workspace-width normalization gate already requires discoverable collapse and drag resize controls."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The focused commit and executable behavior test provide the implementation evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
