@@ -24174,11 +24174,11 @@
     },
     {
       "taskId": "p21-operations-identity-safe-publish-closure-20260914",
-      "reviewedThroughCommit": "ae288310cc072956d70cbe86a2f0bc4b688a3649",
+      "reviewedThroughCommit": "a811c435a4361bdc1e9d6895200a1b90c940e613",
       "reviewedAt": "2026-09-14T23:40:00Z",
       "status": "candidate",
       "captureTiming": "post_live_smoke_correction",
-      "summary": "Corrects activated Work Package identity validation and prevents equivalent development schema object names from generating unsafe Replit publication churn.",
+      "summary": "Corrects activated Work Package identity validation and orders equivalent development schema object-name reconciliation before and after the guarded Replit schema push.",
       "workstreams": [
         "job-intake",
         "job-operations",
@@ -24242,12 +24242,12 @@
         }
       ],
       "reviewedChangedPaths": [
+        "lib/db/scripts/sync-development-schema.mjs",
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "dbdaee9a2a7cb141ccf40111222b7a4b7ec35465c0f349ea5e7a42a44f09a0a4"
+      "reviewedChangeSha256": "892d1dfdb8bb2d5bf47df540e1c8cd8440da4d2d12740010b3774664b4bc481c"
     }
   ]
 }

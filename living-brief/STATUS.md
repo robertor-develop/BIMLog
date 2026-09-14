@@ -1651,6 +1651,7 @@ No release, publication, or overall completion claim is permitted until the reco
 - Operations now accepts the established bounded Intake identifier alphabet for packages and tasks while continuing to reject paths, slashes, control characters, and overlong values. Focused package/task behavior and the complete protected Generic APU/Job Intake suite pass.
 - The Replit publication preview also exposed equivalent production constraints and indexes with different development names. The guarded development-schema synchronization now reconciles only structurally identical object names against a read-only production inventory; it can mutate only the Helium development schema and refuses an identical or non-Helium target.
 - Platform identity advances to `v1.05.N17-P21`. Native and Lens Next remain unchanged. Production database data/schema changes are not part of this correction; push, corrected Replit synchronization, safe preview, publication, and live Chrome acceptance remain separate gates.
+- Replit execution proved name reconciliation must precede the Drizzle push as well as follow it. The guarded sync now normalizes only structurally identical development object names before the push, preventing duplicate-name failure while preserving its Helium-only target and production-read-only inventory.
 
 ## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
 
