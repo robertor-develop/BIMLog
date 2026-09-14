@@ -961,6 +961,22 @@ export function JobIntakeWorkspace() {
         key: item,
         label: item,
       }));
+  const stageMissingCodes: Record<string, string[]> = {
+    contract: ["contract_title", "contract_number", "counterparty", "contract_assignment", "budget_mapping", "budget_snapshot"],
+    delivery: ["delivery"],
+    team: ["leader", "team", "internal_rates", "hours"],
+  };
+  const missingForStage = (stage: "contract" | "delivery" | "team") =>
+    missingItems.filter((item: { key: string; label: string }) =>
+      stageMissingCodes[stage].includes(item.key),
+    );
+  const stageConfirmationPending = (field: "contractConfirmed" | "deliveryConfirmed" | "teamConfirmed") =>
+    !data.review[field];
+  const openFinalReview = () => {
+    setActive("review");
+    preserveActiveStage(projectId, "review");
+    window.requestAnimationFrame(() => document.getElementById("ji-review")?.scrollIntoView({ block: "start" }));
+  };
   const reviewItems = [
     [
       "sourceConfirmed",
@@ -1845,6 +1861,14 @@ export function JobIntakeWorkspace() {
                 </h2>
                 {capabilities.contracts ? (
                   <>
+                    <div className="ji-guide" role="status">
+                      <strong>{tt("What remains for this section", "Qué falta en esta sección")}</strong>
+                      {missingForStage("contract").length ? (
+                        <ul>{missingForStage("contract").map((item: any) => <li key={item.key}>{item.label}</li>)}</ul>
+                      ) : stageConfirmationPending("contractConfirmed") ? (
+                        <><p>{tt("The contract fields are complete. Confirm them in Review & Activate to mark this section complete.", "Los campos contractuales están completos. Confírmelos en Revisar y activar para marcar esta sección como completa.")}</p><button type="button" onClick={openFinalReview}>{tt("Open final confirmations", "Abrir confirmaciones finales")}</button></>
+                      ) : <p>{tt("Contract setup is complete.", "La configuración contractual está completa.")}</p>}
+                    </div>
                     {guide && (
                       <div className="ji-guide">
                         {tt(
@@ -2171,6 +2195,14 @@ export function JobIntakeWorkspace() {
               </section>
               <section className="ji-card" id="ji-delivery">
                 <h2>6. {stageLabel("delivery")}</h2>
+                <div className="ji-guide" role="status">
+                  <strong>{tt("What remains for this section", "Qué falta en esta sección")}</strong>
+                  {missingForStage("delivery").length ? (
+                    <ul>{missingForStage("delivery").map((item: any) => <li key={item.key}>{item.label}</li>)}</ul>
+                  ) : stageConfirmationPending("deliveryConfirmed") ? (
+                    <><p>{tt("The delivery fields are complete. Confirm the delivery workflow in Review & Activate to mark this section complete.", "Los campos de entrega están completos. Confirme el flujo en Revisar y activar para marcar esta sección como completa.")}</p><button type="button" onClick={openFinalReview}>{tt("Open final confirmations", "Abrir confirmaciones finales")}</button></>
+                  ) : <p>{tt("Delivery workflow is complete.", "El flujo de entrega está completo.")}</p>}
+                </div>
                 {guide && (
                   <div className="ji-guide">
                     {tt(
