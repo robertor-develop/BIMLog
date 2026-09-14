@@ -249,6 +249,17 @@ export function normalizeJobIntakeData(raw: unknown) {
       ? input.commercial
       : {};
   const classification = input.classification && typeof input.classification === "object" && !Array.isArray(input.classification) ? input.classification : {};
+  const classificationSnapshot = (source: any = {}) => ({
+    disciplineId: optionalText(source.disciplineId ?? classification.disciplineId, "classification.disciplineId", 100),
+    disciplineCode: optionalText(source.disciplineCode ?? classification.disciplineCode, "classification.disciplineCode", 64),
+    disciplineName: optionalText(source.disciplineName ?? classification.disciplineName, "classification.disciplineName", 200),
+    serviceId: optionalText(source.serviceId ?? classification.serviceId, "classification.serviceId", 100),
+    serviceCode: optionalText(source.serviceCode ?? classification.serviceCode, "classification.serviceCode", 64),
+    serviceName: optionalText(source.serviceName ?? classification.serviceName, "classification.serviceName", 200),
+    phaseId: optionalText(source.phaseId ?? classification.phaseId, "classification.phaseId", 100),
+    phaseCode: optionalText(source.phaseCode ?? classification.phaseCode, "classification.phaseCode", 64),
+    phaseName: optionalText(source.phaseName ?? classification.phaseName, "classification.phaseName", 200),
+  });
   const delivery =
     input.delivery && typeof input.delivery === "object" ? input.delivery : {};
   const team = input.team && typeof input.team === "object" ? input.team : {};
@@ -434,10 +445,10 @@ export function normalizeJobIntakeData(raw: unknown) {
         taskIds.add(taskId);
         const name = optionalText(rawTask?.name, `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].name`, 160);
         if (!name) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGE_TASK_NAME_REQUIRED", "Every Work Package task requires a name.");
-        return { id: taskId, taskCode: optionalText(rawTask?.taskCode, `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].taskCode`, 80) || taskId, name, plannedHours: exact(rawTask?.plannedHours ?? "0", `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].plannedHours`) };
+        return { id: taskId, taskCode: optionalText(rawTask?.taskCode, `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].taskCode`, 80) || taskId, name, plannedHours: exact(rawTask?.plannedHours ?? "0", `scopeItems[${index}].workPackages[${packageIndex}].tasks[${taskIndex}].plannedHours`), classification: classificationSnapshot(rawTask?.classification ?? entry?.classification) };
       });
       if (tasks.length > 100) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGE_TASKS_LIMIT", "A Work Package supports at most 100 task definitions.");
-      return { id: packageId, packageCode: optionalText(entry?.packageCode, `scopeItems[${index}].workPackages[${packageIndex}].packageCode`, 50) || packageId, title: optionalText(entry?.title, `scopeItems[${index}].workPackages[${packageIndex}].title`, 160), dimensionType, dimensionValue: optionalText(entry?.dimensionValue, `scopeItems[${index}].workPackages[${packageIndex}].dimensionValue`, 160), packageType, tasks };
+      return { id: packageId, packageCode: optionalText(entry?.packageCode, `scopeItems[${index}].workPackages[${packageIndex}].packageCode`, 50) || packageId, title: optionalText(entry?.title, `scopeItems[${index}].workPackages[${packageIndex}].title`, 160), dimensionType, dimensionValue: optionalText(entry?.dimensionValue, `scopeItems[${index}].workPackages[${packageIndex}].dimensionValue`, 160), packageType, classification: classificationSnapshot(entry?.classification), tasks };
     });
     if (workPackages.length > 100) throw new FinancialControlError(400, "JOB_INTAKE_WORK_PACKAGES_LIMIT", "A Contract Item supports at most 100 Work Packages.");
     return {

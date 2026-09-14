@@ -127,6 +127,15 @@ CREATE TABLE IF NOT EXISTS job_activation_resource_assignments(
 );
 ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1;
 ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS progress_percent integer NOT NULL DEFAULT 0;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS discipline_id text;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS discipline_code text;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS discipline_name text;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS service_id text;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS service_code text;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS service_name text;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS phase_id text;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS phase_code text;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS phase_name text;
 ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_version_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_version_chk CHECK(version>0); END IF; END $$;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_progress_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_progress_chk CHECK(progress_percent>=0 AND progress_percent<=100); END IF; END $$;
@@ -187,6 +196,15 @@ CREATE TABLE IF NOT EXISTS job_activation_work_package_tasks(
   linked_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT job_activation_work_package_task_uidx UNIQUE(package_id,task_id)
 );
+ALTER TABLE job_activation_work_packages ADD COLUMN IF NOT EXISTS discipline_id text;
+ALTER TABLE job_activation_work_packages ADD COLUMN IF NOT EXISTS discipline_code text;
+ALTER TABLE job_activation_work_packages ADD COLUMN IF NOT EXISTS discipline_name text;
+ALTER TABLE job_activation_work_packages ADD COLUMN IF NOT EXISTS service_id text;
+ALTER TABLE job_activation_work_packages ADD COLUMN IF NOT EXISTS service_code text;
+ALTER TABLE job_activation_work_packages ADD COLUMN IF NOT EXISTS service_name text;
+ALTER TABLE job_activation_work_packages ADD COLUMN IF NOT EXISTS phase_id text;
+ALTER TABLE job_activation_work_packages ADD COLUMN IF NOT EXISTS phase_code text;
+ALTER TABLE job_activation_work_packages ADD COLUMN IF NOT EXISTS phase_name text;
 CREATE TABLE IF NOT EXISTS job_activation_work_package_counters(
   project_id integer PRIMARY KEY REFERENCES projects(id),
   next_value integer NOT NULL DEFAULT 1,
