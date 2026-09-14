@@ -565,6 +565,18 @@ export function normalizeJobIntakeData(raw: unknown) {
       )?.contractId;
       const selectedScopeItem = normalizedItems.find((item) => item.id === scopeItemId);
       const workPackageId = optionalText(assignment.workPackageId, `assignments[${index}].workPackageId`, 100);
+      const assignmentTargetType =
+        optionalText(
+          assignment.assignmentTargetType,
+          `assignments[${index}].assignmentTargetType`,
+          30,
+        ) || (workPackageId ? "work_package" : "contract_item");
+      if (!new Set(["contract_item", "work_package"]).has(assignmentTargetType))
+        throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_TARGET_INVALID", "Choose either the Contract Item delivery task or a Work Package.");
+      if (assignmentTargetType === "work_package" && !workPackageId)
+        throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_PACKAGE_REQUIRED", "Select or create a Work Package for this assignment.");
+      if (assignmentTargetType === "contract_item" && workPackageId)
+        throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_TARGET_CONFLICT", "A Contract Item assignment cannot also reference a Work Package.");
       if (workPackageId && !selectedScopeItem?.workPackages.some((workPackage: any) => workPackage.id === workPackageId))
         throw new FinancialControlError(400, "JOB_INTAKE_ASSIGNMENT_PACKAGE_MISMATCH", "The selected Work Package must belong to the assignment's Contract Item.");
       const requestedContractId = optionalText(
@@ -607,6 +619,7 @@ export function normalizeJobIntakeData(raw: unknown) {
             50,
           ) || "employee",
         scopeItemId,
+        assignmentTargetType,
         workPackageId,
         apuPlanVersion: selectedScopeItem?.apuPlanVersion ?? null,
         engagementId: "",

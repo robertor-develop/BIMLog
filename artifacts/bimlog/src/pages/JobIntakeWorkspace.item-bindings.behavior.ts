@@ -13,6 +13,10 @@ assert.match(source, /financial\/snapshots\/\$\{selectedBudgetSnapshotId\}/);
 assert.match(source, /setBudgetLines\(selectedBudget\?\.snapshot\?\.lines \?\? \[\]\)/);
 assert.match(source, /responsibleParticipantId/);
 assert.match(source, /Authoritative agreement/);
+assert.match(source, /Assignment target/);
+assert.match(source, /Entire Contract Item/);
+assert.match(source, /Specific Work Package/);
+assert.match(source, /assignmentTargetType: "contract_item"/);
 
 console.log(
   "PASS Intake reloads authoritative APU versions and persisted budget-line options while retaining company and agreement bindings",

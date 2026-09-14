@@ -2435,6 +2435,7 @@ export function JobIntakeWorkspace() {
                                       ? {
                                           ...item,
                                           scopeItemId: e.target.value,
+                                          assignmentTargetType: "contract_item",
                                           workPackageId: "",
                                         }
                                       : item,
@@ -2513,7 +2514,8 @@ export function JobIntakeWorkspace() {
                           ? tt("This customer/APU rate belongs to the selected Contract Item and is shared by assignments using it. Internal hourly cost and incentive remain separate per assignment.", "Esta tarifa Cliente/APU pertenece a la Partida de Contrato seleccionada y se comparte entre las asignaciones que la usan. El costo horario interno y el incentivo permanecen separados por asignación.")
                           : tt("Select a Contract Item to set its customer/APU rate. Internal hourly cost remains independently editable.", "Seleccione una Partida de Contrato para establecer su tarifa Cliente/APU. El costo horario interno sigue siendo editable de forma independiente.")}
                       </div>
-                      <label>{tt("Operational task / Work Package", "Tarea operativa / Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>assignmentChange(index,"workPackageId",e.target.value)}><option value="">{tt("Contract Item delivery task", "Tarea de entrega de la Partida de Contrato")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{tt("Task", "Tarea")}: {workPackage.title||workPackage.packageCode}{workPackage.dimensionValue ? ` — ${workPackage.dimensionValue}` : ""}</option>)}</select></label>
+                      <label>{tt("Assignment target", "Destino de la asignación")}<select value={assignment.assignmentTargetType || (assignment.workPackageId ? "work_package" : "contract_item")} disabled={!assignment.scopeItemId} onChange={(e)=>setData((old:any)=>({...old,team:{...old.team,assignments:old.team.assignments.map((item:any,i:number)=>i===index?{...item,assignmentTargetType:e.target.value,workPackageId:e.target.value==="contract_item"?"":item.workPackageId}:item)}}))}><option value="contract_item">{tt("Entire Contract Item", "Partida de Contrato completa")}</option><option value="work_package">{tt("Specific Work Package", "Paquete de trabajo específico")}</option></select></label>
+                      {(assignment.assignmentTargetType === "work_package" || assignment.workPackageId) && <label>{tt("Work Package", "Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>assignmentChange(index,"workPackageId",e.target.value)}><option value="">{tt("Select or create a Work Package", "Seleccione o cree un Paquete de trabajo")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{workPackage.title||workPackage.packageCode}{workPackage.dimensionValue ? ` — ${workPackage.dimensionValue}` : ""}</option>)}</select></label>}
                       <div className="ji-lock">{tt("The selected scope activates as a real Job Operations task. Choosing a Work Package assigns this resource directly to that package task; choosing the Contract Item uses its delivery task.", "El alcance seleccionado se activa como una tarea real de Operaciones del Trabajo. Elegir un Paquete de trabajo asigna este recurso directamente a la tarea del paquete; elegir la Partida de Contrato utiliza su tarea de entrega.")}</div>
                       <div className="ji-lock">{tt("Authoritative scope", "Alcance autorizado")}: {assignment.engagementId || "—"} → {assignment.contractId || "—"} → APU {data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.apuPlanVersion || "—"}</div>
                       {capabilities.budget && (
@@ -2599,6 +2601,8 @@ export function JobIntakeWorkspace() {
                                 old.commercial.contracts?.[0]?.id || "PRIMARY",
                               employmentType: "employee",
                               scopeItemId: "",
+                              assignmentTargetType: "contract_item",
+                              workPackageId: "",
                               plannedHours: "0.00",
                               internalHourlyRate: "0.00",
                             },

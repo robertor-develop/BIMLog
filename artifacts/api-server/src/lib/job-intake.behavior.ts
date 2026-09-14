@@ -14,6 +14,10 @@ const read = (relative: string) =>
   fs.readFileSync(path.resolve(here, relative), "utf8");
 const operationsService = read("./job-operations-service.ts");
 const operationsUi = read("../../../bimlog/src/pages/JobOperationsWorkspace.tsx");
+const intakeUi = read("../../../bimlog/src/pages/JobIntakeWorkspace.tsx");
+assert.match(intakeUi, /Assignment target/);
+assert.match(intakeUi, /Specific Work Package/);
+assert.match(read(".\/job-intake-contract.ts"), /JOB_INTAKE_ASSIGNMENT_PACKAGE_REQUIRED/);
 const data = normalizeJobIntakeData({
   identity: {
     jobName: "River Avenue",
@@ -206,6 +210,16 @@ const multiApuContract = normalizeJobIntakeData({
 });
 assert.deepEqual(multiApuContract.scopeItems.map((item) => item.apuPlanVersion), [3, 4]);
 assert.equal(multiApuContract.scopeItems[0].workPackages[0]?.dimensionType, "floor");
+const legacyPackageAssignment = normalizeJobIntakeData({
+  ...data,
+  scopeItems: [{ ...data.scopeItems[0], workPackages: multiApuContract.scopeItems[0].workPackages }],
+  team: { ...data.team, assignments: [{ ...data.team.assignments[0], workPackageId: "WP-L10" }] },
+});
+assert.equal(legacyPackageAssignment.team.assignments[0].assignmentTargetType, "work_package");
+assert.throws(
+  () => normalizeJobIntakeData({ ...data, team: { ...data.team, assignments: [{ ...data.team.assignments[0], assignmentTargetType: "work_package" }] } }),
+  /Select or create a Work Package/,
+);
 const immutableBaselineInput = { intakeId: "INTAKE-1", projectId: 1, currency: "USD", workflowInstances: 2, workItems: 2, tasks: 2, resourceAssignments: 0, contracts: [{ profileId: "BASE", contractId: "CONTRACT-1", contractVersionId: "VERSION-1", contractNumber: "C-1", currency: "USD", items: [{ stableLineId: "CI-A", displayName: "Drafting", projectCostNodeId: "NODE-1", budgetSnapshotLineId: "", quantity: "10", unit: "Hours", unitRate: "35.47", contractValue: "354.7", apuPlanVersion: 3, workflowTemplate: "bim-submittal" }] }] };
 const immutableBaseline = buildActivatedCommercialBaseline(immutableBaselineInput);
 const changedApuBaseline = buildActivatedCommercialBaseline({ ...immutableBaselineInput, contracts: [{ ...immutableBaselineInput.contracts[0], items: [{ ...immutableBaselineInput.contracts[0].items[0], unitRate: "37.99", contractValue: "379.9", apuPlanVersion: 4 }] }] });
