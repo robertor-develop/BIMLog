@@ -1645,6 +1645,13 @@ No release, publication, or overall completion claim is permitted until the reco
 - P20 adds the missing central Master Catalogs administration tab. It creates Service and Phase values through the governed PMO endpoints, lists inactive values, and supports only reversible activate/deactivate lifecycle changes; Clients and Disciplines remain in their existing Companies and enterprise-trade authorities.
 - This is the smallest UI closure needed to make the new-project governed selectors operable from an empty production state. No new schema, Native, Lens Next, destructive action, or historical-record rewrite is introduced.
 
+## P21 Operations identity and safe publication closure — candidate — 2026-09-14
+
+- The authenticated P19 end-to-end production smoke completed Job Intake activation, Operations task progress, actual-hour entry, reload persistence, and return-to-Intake verification. It exposed one exact defect: an activated Work Package such as `WP-365a6edb` could be read but could not save its responsible user because the Operations update route incorrectly restricted IDs to hexadecimal characters.
+- Operations now accepts the established bounded Intake identifier alphabet for packages and tasks while continuing to reject paths, slashes, control characters, and overlong values. Focused package/task behavior and the complete protected Generic APU/Job Intake suite pass.
+- The Replit publication preview also exposed equivalent production constraints and indexes with different development names. The guarded development-schema synchronization now reconciles only structurally identical object names against a read-only production inventory; it can mutate only the Helium development schema and refuses an identical or non-Helium target.
+- Platform identity advances to `v1.05.N17-P21`. Native and Lens Next remain unchanged. Production database data/schema changes are not part of this correction; push, corrected Replit synchronization, safe preview, publication, and live Chrome acceptance remain separate gates.
+
 ## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
 
 - The first consolidated production build correctly stopped when deterministic Platform generation removed the manually reconciled Builds 66–68 authority text and invalidated its Living Brief hash.

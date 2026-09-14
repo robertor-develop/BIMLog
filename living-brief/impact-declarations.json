@@ -24171,6 +24171,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9610ad9bcd7aba1783a9789dd2bf0fbb02e694da9f5b346bae3f931bb6bb4602"
+    },
+    {
+      "taskId": "p21-operations-identity-safe-publish-closure-20260914",
+      "reviewedThroughCommit": "ae288310cc072956d70cbe86a2f0bc4b688a3649",
+      "reviewedAt": "2026-09-14T23:40:00Z",
+      "status": "candidate",
+      "captureTiming": "post_live_smoke_correction",
+      "summary": "Corrects activated Work Package identity validation and prevents equivalent development schema object names from generating unsafe Replit publication churn.",
+      "workstreams": [
+        "job-intake",
+        "job-operations",
+        "release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction applies existing one-source-of-truth and truthful evidence doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution, database safety, and publication controls remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing end-to-end behavior, persistence, and release verification requirements govern this correction."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap, market positioning, or product direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing Job Operations route and guarded development synchronization are corrected without changing architecture."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next, Native, Navisworks, camera, XML, or package artifact changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation or generated artifact contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the live defect, root cause, correction, release identity, and remaining deployment gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records completed correction work and preserves push, publication, live verification, and field acceptance as separate gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only audit history remains accurate and unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dbdaee9a2a7cb141ccf40111222b7a4b7ec35465c0f349ea5e7a42a44f09a0a4"
     }
   ]
 }

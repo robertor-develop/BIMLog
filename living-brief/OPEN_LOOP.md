@@ -2545,6 +2545,15 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - Build 70 first production invocation stopped on deterministic `PLATFORM.md` generation drift; the generator source was corrected and the clean full rerun passed.
 - [x] The accepted block is present in the pushed and published P18 production tree. External user field acceptance remains separate.
 
+## P21 Operations identity and safe Replit publication closure
+
+- [x] Reproduce the live package-responsible save failure on controlled project 41 and isolate the incompatible `WP-*` identifier validation.
+- [x] Accept the established bounded Intake package/task identity contract while preserving unsafe-character and path rejection.
+- [x] Add guarded Helium-only reconciliation for structurally equivalent development/production constraint and index names; production inventory remains read-only.
+- [x] Advance Platform identity to `v1.05.N17-P21` without Native or Lens Next changes.
+- [ ] Push the exact accepted P21 lineage, synchronize through Replit Shell, confirm a non-destructive publication preview, publish once, and live-verify through Chrome.
+- [ ] Lorena/Ruben field acceptance remains separate.
+
 ## POST-P18 assurance Builds 71–75
 
 - [x] Build 71: lock Project Directory current-project identity, member reads, server-side write authorization, and project-scoped invite status updates.

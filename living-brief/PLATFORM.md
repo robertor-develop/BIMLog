@@ -343,6 +343,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-task-assignment.behavior.ts
 - artifacts/api-server/src/lib/job-intake-work-package-reload.behavior.ts
 - artifacts/api-server/src/lib/job-intake.behavior.ts
+- artifacts/api-server/src/lib/job-operations-id.ts
 - artifacts/api-server/src/lib/job-operations-service.ts
 - artifacts/api-server/src/lib/job-operations.behavior.ts
 - artifacts/api-server/src/lib/job-work-packages.behavior.ts
