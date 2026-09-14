@@ -331,6 +331,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-budget-account.behavior.ts
 - artifacts/api-server/src/lib/job-intake-combined-scenario.behavior.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
+- artifacts/api-server/src/lib/job-intake-empty-commercial-prerequisites.behavior.ts
 - artifacts/api-server/src/lib/job-intake-member-assignment.behavior.ts
 - artifacts/api-server/src/lib/job-intake-migration.ts
 - artifacts/api-server/src/lib/job-intake-service.ts

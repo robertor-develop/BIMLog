@@ -2552,3 +2552,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Remove the two proven Vite source-map-location warnings and rerun protected acceptance.
 - [ ] Synchronize the stale GitHub `main` ref only after Roberto separately authorizes the exact push.
 - [ ] External Generic APU/Job Intake and Lens Next field acceptance remain separate.
+
+## APU/Job Intake empty-prerequisite correction Builds 1–5
+
+- [x] Reproduce the zero-saved-APU-version and zero-approved-budget-snapshot states with exact executable contracts.
+- [x] Permit a positive editable customer/APU rate without inventing or requiring a saved APU version.
+- [x] Keep budget integration optional until deliberately started, while rejecting every partial or contradictory selected binding.
+- [x] Replace empty selectors with explicit optional-state guidance and direct prerequisite navigation that preserves the current project-specific Intake draft and stage.
+- [x] Prove empty and populated production-component states in Chrome and run the complete Generic APU/Job Intake integration suite.
+- [x] Complete the final governed Build 5 whole-product assembly and freeze its exact local evidence commit.
+- [ ] Push, Replit synchronization/publication, live production verification, and external user smoke-test acceptance require separate authorization and evidence.

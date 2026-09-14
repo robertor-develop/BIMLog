@@ -1,5 +1,15 @@
 # STATUS.md - Current Accepted Platform State
 
+## APU/Job Intake empty-prerequisite correction Builds 1–5 — local acceptance candidate — 2026-09-14
+
+- Build 1 reproduces and locks the reported zero-saved-version dead end without changing product behavior.
+- Build 2 makes a saved APU version optional when a positive editable customer/APU rate exists; a selected saved version still binds its exact immutable version and selling rate.
+- Build 3 makes approved-budget binding optional until a user deliberately selects any budget evidence; partial or selected bindings remain strict and fail closed unless the exact snapshot, line, and project cost node are complete.
+- Build 4 replaces empty, unusable selectors with explicit bilingual optional-state guidance and direct Cost & Value Planner and Project Budget paths. Before navigation, the current Intake revision, scope stage, Advanced mode, and draft receive project-specific browser recovery evidence.
+- Existing saved-version, approved-budget, activation, APU calculation, project/company isolation, entitlement, database/schema, and Lens Next contracts remain unchanged.
+- Production-component Chrome checks, complete Generic APU/Job Intake regression, API/frontend typechecks, frontend production assembly, governance gates, and the final governed whole-product closure pass. Build 5 freezes the complete local acceptance record.
+- This is local candidate truth only. Push, Replit publication/deployment, live production verification, and external user smoke-test acceptance remain separate and are not claimed.
+
 ## BIMLog v1.05.N10-P05 Lens Next create observability candidate — 2026-09-03
 
 - Platform commit `a22220b3c34982cc5c1db9f226312c0e9c35980d` changes only the Lens Next create outer-catch failure telemetry and the visible Platform version labels.

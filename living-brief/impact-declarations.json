@@ -23390,6 +23390,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1325f3b538649ec7e346f7395af37d00bc6ca11ccffcbfe9ac7604ac7eaefe4d"
+    },
+    {
+      "taskId": "apu-intake-empty-prerequisite-builds01-05-20260914",
+      "reviewedThroughCommit": "c9adbd1cdbfc257c32e269a48a75738d4495694b",
+      "reviewedAt": "2026-09-14T15:20:00Z",
+      "status": "accepted",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Closes the empty saved-APU-version and approved-budget prerequisite dead ends while preserving strict selected bindings and all established product boundaries.",
+      "workstreams": [
+        "apu-job-intake-empty-prerequisite-compatibility"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem or product doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing reconciliation, authority, and release gates remain enforced."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Actual production components, Chrome interaction, complete regression, and governed assembly remain required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product promise changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic source inventory now includes the focused empty-commercial-prerequisites behavior proof; existing Job Intake and Commercial authorities remain preserved."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens Next change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report content, layout, or export behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact Builds 1–4 candidate behavior and protected boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records internal completion gates and retains push, publication, live, and external acceptance as separate work."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the semantic review through the exact Build 4 implementation commit."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1d4880231203fd764f9d7b794f46514bf8c16fe3ba3f00b28f1bf67c3c495fbb"
     }
   ]
 }

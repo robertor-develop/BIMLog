@@ -1346,3 +1346,17 @@ was performed or authorized.
 - The API server emitted a complete bundle and then spent up to 170 seconds materializing and hashing 16,144 runtime files. The entry point now exits explicitly only after that awaited closure succeeds; the focused process regression proves successful bounded termination.
 - The Vite warnings were caused by inapplicable `use client` directives in the shared tooltip and label primitives. Removing only those directives preserves runtime semantics and produces a warning-free verified frontend build.
 - Impact: tooling/governance and two no-op bundler-directive removals only; no Generic APU/Job Intake, Lens Next, Native, database/schema, publication, external action, or customer-data mutation.
+# 2026-09-14 — APU/Job Intake empty-prerequisite Builds 1–4 semantic review
+
+- Reviewed implementation through `c9adbd1cdbfc257c32e269a48a75738d4495694b` against the reported state where a project has no saved APU plan version and no approved budget snapshot.
+- A positive editable customer/APU rate is sufficient without a fabricated saved-version identity. Budget association remains absent until deliberately started; any partial or selected association still requires exact authoritative snapshot, line, and project-cost-node identity.
+- The production UI now labels both relationships optional, removes selectors that contain no real choices, and links to their authoritative workspaces while preserving the project-specific Intake draft, revision, Advanced mode, and scope stage before navigation.
+- Populated APU-version and budget selectors remain present and exact. No APU calculation, activation, entitlement, database/schema, Native, Lens Next, publication, deployment, or customer-data behavior changed.
+- Production-component rendering and Chrome interaction, complete Generic APU/Job Intake regression, API/frontend typechecks, and frontend production assembly passed. Final governed whole-product closure remains Build 5 and is not claimed by this review.
+
+# 2026-09-14 — APU/Job Intake empty-prerequisite Build 5 consolidated acceptance
+
+- The complete Generic APU/Job Intake suite passed across calculation, persistence, HTTP/authorization, project/company isolation, activation, Operations, budgets, controls, staffing, and Help.
+- The actual production Contract Item editor passed empty and populated rendering; controlled Chrome confirmed the two optional-state messages and both direct prerequisite actions.
+- The governed build passed tracked-secret exposure, database-source safety, mojibake, 11-document Living Brief integrity, all TypeScript projects, frontend production assembly, and deterministic API production-runtime closure from the clean Build 5 commit.
+- The complete five-build correction is accepted locally at unchanged version `v1.05.N17-P18`. Push, Replit synchronization/publication, live verification, and external user acceptance remain separate and are not claimed.
