@@ -7,7 +7,7 @@ import {
   FolderOpen, MessageSquare, FileCheck, Activity,
   Users, Settings2, Wand2, BarChart2, Puzzle, X, Download, Mail, FileBarChart2,
   BookOpen, Send, RefreshCw, CalendarDays, GitMerge, Gauge,
-  ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness, PanelLeftOpen, UsersRound
+  ChevronDown, ChevronRight, Menu, Calculator, ClipboardList, BriefcaseBusiness, GripVertical, PanelLeftOpen, UsersRound
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 
@@ -140,8 +140,20 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
   const canUseCommercial = entitledUser?.commercialAccess === true || canUseBudget || canUseContracts || canUsePlanner || canUseTeamPerformance;
   const [, navigate] = useLocation();
   const [showSyncAgent, setShowSyncAgent] = useState(false);
-  const [collapsed, setCollapsed] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(() => {
+    if (typeof window === "undefined") return 248;
+    const saved = Number(window.localStorage.getItem("bimlog-project-sidebar-width"));
+    return Number.isFinite(saved) ? Math.min(420, Math.max(220, saved)) : 248;
+  });
+  const [collapsed, setCollapsed] = useState(() =>
+    typeof window !== "undefined" && window.localStorage.getItem("bimlog-project-sidebar-collapsed") === "true"
+  );
+  const [sidebarResizing, setSidebarResizing] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const adjustSidebarWidth = (nextWidth: number) => {
+    setSidebarWidth(Math.min(420, Math.max(220, nextWidth)));
+  };
 
   useEffect(() => {
     const handler = (event: KeyboardEvent) => {
@@ -150,6 +162,32 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, []);
+
+  useEffect(() => {
+    if (!sidebarResizing) return;
+    const resize = (event: PointerEvent) => adjustSidebarWidth(event.clientX);
+    const finish = () => setSidebarResizing(false);
+    window.addEventListener("pointermove", resize);
+    window.addEventListener("pointerup", finish, { once: true });
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+    return () => {
+      window.removeEventListener("pointermove", resize);
+      window.removeEventListener("pointerup", finish);
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+  }, [sidebarResizing]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("bimlog-project-sidebar-width", String(Math.round(sidebarWidth)));
+  }, [sidebarWidth]);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    window.localStorage.setItem("bimlog-project-sidebar-collapsed", String(collapsed));
+  }, [collapsed]);
 
   const getLabel = (label: string) => {
     try { return t(label as Parameters<typeof t>[0]); } catch { return label; }
@@ -400,7 +438,28 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
         </div>
       )}
 
-      <div className={`sidebar phasea-project-sidebar${collapsed ? " collapsed" : ""}`}>
+      <div
+        className={`sidebar phasea-project-sidebar${collapsed ? " collapsed" : ""}`}
+        style={{ width: collapsed ? 78 : sidebarWidth, transition: sidebarResizing ? undefined : "width 0.18s ease" }}
+      >
+        {!collapsed && (
+          <button
+            type="button"
+            className="phasea-project-sidebar-resizer"
+            aria-label={tr("Resize project navigation", "Cambiar ancho de la navegación del proyecto")}
+            aria-keyshortcuts="ArrowLeft ArrowRight Home End"
+            title={tr("Drag or use arrow keys to resize navigation", "Arrastre o use las flechas para cambiar el ancho")}
+            onPointerDown={(event) => { event.preventDefault(); setSidebarResizing(true); }}
+            onKeyDown={(event) => {
+              if (event.key === "ArrowLeft") { event.preventDefault(); adjustSidebarWidth(sidebarWidth - 16); }
+              else if (event.key === "ArrowRight") { event.preventDefault(); adjustSidebarWidth(sidebarWidth + 16); }
+              else if (event.key === "Home") { event.preventDefault(); adjustSidebarWidth(220); }
+              else if (event.key === "End") { event.preventDefault(); adjustSidebarWidth(420); }
+            }}
+          >
+            <GripVertical aria-hidden="true" />
+          </button>
+        )}
         <SidebarUtilities
           activeTab={activeTab}
           collapsed={collapsed}
@@ -434,7 +493,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
           )}
         </div>
 
-        <div className="sidebar-nav phasea-nav-list">
+        <div className="sidebar-nav phasea-nav-list" tabIndex={0} aria-label={tr("Scrollable project navigation", "Navegación desplazable del proyecto")}>
           {navGroups.map(group => renderNavGroup(group))}
         </div>
 

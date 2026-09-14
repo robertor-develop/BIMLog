@@ -306,6 +306,9 @@ iframe[aria-label*="Replit" i],
    Neutral application UX only: no final module/report color identity is selected here. */
 .phasea-project-sidebar {
   width: 248px;
+  min-width: 78px;
+  max-width: 420px;
+  position: relative;
   transition: width 0.18s ease;
 }
 .phasea-project-sidebar.collapsed {
@@ -356,6 +359,44 @@ iframe[aria-label*="Replit" i],
 }
 .phasea-nav-list {
   padding-top: 8px;
+  scrollbar-width: thin;
+  scrollbar-color: rgba(148,163,184,0.65) transparent;
+}
+.phasea-nav-list::-webkit-scrollbar { width: 8px; }
+.phasea-nav-list::-webkit-scrollbar-track { background: transparent; }
+.phasea-nav-list::-webkit-scrollbar-thumb { background: rgba(148,163,184,0.55); border-radius: 999px; }
+.phasea-nav-list:focus-visible { outline: 2px solid rgba(147,197,253,0.95); outline-offset: -2px; }
+.phasea-project-sidebar-resizer {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 20;
+  display: grid;
+  width: 16px;
+  padding: 0;
+  align-items: center;
+  justify-items: center;
+  border: 0;
+  border-left: 1px solid rgba(255,255,255,0.18);
+  background: rgba(255,255,255,0.035);
+  color: rgba(255,255,255,0.88);
+  cursor: col-resize;
+}
+.phasea-project-sidebar-resizer svg {
+  width: 11px;
+  height: 28px;
+  padding: 8px 0;
+  border: 1px solid rgba(255,255,255,0.24);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.08);
+  box-sizing: content-box;
+}
+.phasea-project-sidebar-resizer:hover,
+.phasea-project-sidebar-resizer:focus-visible {
+  background: rgba(37,99,235,0.28);
+  outline: 2px solid rgba(147,197,253,0.95);
+  outline-offset: -2px;
 }
 .phasea-nav-group {
   margin: 2px 0 6px;
