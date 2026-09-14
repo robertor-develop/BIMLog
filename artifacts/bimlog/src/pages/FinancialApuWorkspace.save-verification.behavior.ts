@@ -8,7 +8,7 @@ const service = fs.readFileSync(path.resolve(import.meta.dirname, "../../../api-
 assert.match(service, /prior\?\.content_fingerprint === fingerprint/);
 assert.match(service, /INSERT INTO generic_cost_value_plan_versions/);
 assert.match(page, /verificationResponse = await fetch/);
-assert.match(page, /verifiedHistory\.some\(\(entry\) => entry\.version === savedVersion\)/);
+assert.match(page, /verifiedHistory\.some\(\(entry(?:: Plan)?\) => entry\.version === savedVersion\)/);
 assert.match(page, /content matched the latest version, so BIMLog did not create a duplicate/);
 assert.match(page, /Saved and verified immutable version/);
 

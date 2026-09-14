@@ -242,7 +242,7 @@ export function FinancialApuWorkspace() {
       const verifiedHistory = Array.isArray(verified?.data?.history) ? verified.data.history.map(normalizeLoadedPlan) : [];
       const verifiedPlan = verified?.data?.plan ? normalizeLoadedPlan(verified.data.plan) : null;
       const savedVersion = Number(body?.data?.plan?.version);
-      if (!verifiedPlan || !Number.isSafeInteger(savedVersion) || !verifiedHistory.some((entry) => entry.version === savedVersion)) {
+      if (!verifiedPlan || !Number.isSafeInteger(savedVersion) || !verifiedHistory.some((entry: Plan) => entry.version === savedVersion)) {
         throw new Error(tt("The server accepted the save but the version did not appear in saved history. Reload before continuing.", "El servidor aceptó el guardado, pero la versión no apareció en el historial guardado. Recargue antes de continuar."));
       }
       setPlan(verifiedPlan); setPlanHistory(verifiedHistory); setLatestPlanVersion(verifiedPlan.version ?? null); setProjectName(String(verified.data.project?.name ?? projectName));
