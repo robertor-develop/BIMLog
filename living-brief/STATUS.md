@@ -1554,6 +1554,15 @@ No release, publication, or overall completion claim is permitted until the reco
 - Machine-readable evidence is frozen at commit `a8cb92d3a461d8c1f364caae1aa9081ee0045924` with SHA-256 `73E6304E86228572C526F3EB05139521046984C15BA2A229B6731583B0A20C7F`.
 - P18 was pushed, synchronized through Replit Shell, published, and live-verified at `v1.05.N17-P18`; production health returned HTTP 200. External field acceptance remains separate.
 
+## POST-P18 release hygiene Builds 76–80 — candidate — 2026-09-14
+
+- Build 76 adds a deterministic source-tree parity gate for the GitHub `main` and `master` production refs; the gate fails closed until the stale `main` ref is synchronized through a separately authorized push.
+- Build 77 adds a clean, named-branch, exact-authority-tree checkout gate so future production work cannot silently originate from a stale or dirty canonical checkout.
+- Build 78 reconciles the canonical Living Brief with the already completed P18 publication and health proof.
+- Build 79 makes successful API production assembly terminate explicitly and locks the complete deterministic runtime-closure path with a bounded process-level regression.
+- Build 80 removes two inapplicable Next.js client directives from Vite UI primitives; the production frontend build passes without the prior source-map-location warnings.
+- Candidate boundaries: release hygiene, build reliability, and warning cleanup only. Generic APU/Job Intake, Lens Next, Native, database/schema, production publication, external action, and customer data remain unchanged.
+
 ## POST-P18 assurance Build 66 — candidate — 2026-09-12
 
 - Coordination Hub mutation authorization now matches the existing UI `canWrite` contract and established Platform write policy.

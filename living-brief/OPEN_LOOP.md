@@ -2542,3 +2542,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Build 74: verify the authenticated live Project Directory workflow read-only in Chrome.
 - [x] Build 75: protected APU, Lens Next, governance, typecheck, and deterministic production-assembly acceptance passed; evidence is frozen at `a8cb92d3a461d8c1f364caae1aa9081ee0045924`, SHA-256 `73E6304E86228572C526F3EB05139521046984C15BA2A229B6731583B0A20C7F`.
 - [x] The accepted block is present in the pushed and published P18 production tree. External user field acceptance remains separate.
+
+## POST-P18 release hygiene Builds 76–80
+
+- [x] Add deterministic GitHub production-ref tree-parity verification.
+- [x] Add a fail-closed clean checkout and exact authority-tree gate.
+- [x] Reconcile P18 publication truth in the canonical Living Brief.
+- [x] Prove bounded API production-runtime assembly and clean process termination.
+- [x] Remove the two proven Vite source-map-location warnings and rerun protected acceptance.
+- [ ] Synchronize the stale GitHub `main` ref only after Roberto separately authorizes the exact push.
+- [ ] External Generic APU/Job Intake and Lens Next field acceptance remain separate.

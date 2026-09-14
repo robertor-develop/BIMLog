@@ -23313,6 +23313,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "6bb010c7713c1af7d5de704377bc09905a70124f5ceb54c62e3f54ae90c6f1ea"
+    },
+    {
+      "taskId": "post-p18-builds76-80-release-hygiene-20260914",
+      "reviewedThroughCommit": "1f1ea341e8955d8ea46a21fbd7cbf8ba8be52050",
+      "reviewedAt": "2026-09-14T13:00:00Z",
+      "status": "accepted",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Adds release-ref parity and checkout readiness gates, reconciles P18 publication truth, proves bounded API assembly termination, and removes two inapplicable Vite directives.",
+      "workstreams": [
+        "post-p18-release-hygiene"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem or product doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release and evidence rules remain enforced."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Adds deterministic release-quality gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product promise changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime product behavior or topology changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens Next change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report content, layout, or export changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Builds 76–80 candidate state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the separately authorized main-ref synchronization gate."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records root cause, corrections, and protected boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/ui/label.tsx",
+        "artifacts/bimlog/src/components/ui/tooltip.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1325f3b538649ec7e346f7395af37d00bc6ca11ccffcbfe9ac7604ac7eaefe4d"
     }
   ]
 }

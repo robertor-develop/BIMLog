@@ -1338,3 +1338,11 @@ was performed or authorized.
 - The accepted source tree and deployed production tree are identical. Replit publication completed and Chrome displayed `v1.05.N17-P18`; `/api/v1/healthz` returned HTTP 200 with `{"status":"ok"}`.
 - This entry corrects stale candidate-only language. External APU/Job Intake and Lens Next field acceptance remain open and are not inferred from publication.
 - Impact: governance truth only; no product, Native, database/schema, deployment, external action, or customer-data mutation.
+
+# 2026-09-14 — POST-P18 release hygiene Builds 76–80 candidate
+
+- GitHub inspection proved `main` is an ancestor of `master` and its source tree is stale; a repository-local parity checker now compares the two remote trees and fails closed on divergence.
+- A separate checkout-readiness gate requires a named branch, zero tracked/untracked changes, and exact tree identity with the selected authority ref.
+- The API server emitted a complete bundle and then spent up to 170 seconds materializing and hashing 16,144 runtime files. The entry point now exits explicitly only after that awaited closure succeeds; the focused process regression proves successful bounded termination.
+- The Vite warnings were caused by inapplicable `use client` directives in the shared tooltip and label primitives. Removing only those directives preserves runtime semantics and produces a warning-free verified frontend build.
+- Impact: tooling/governance and two no-op bundler-directive removals only; no Generic APU/Job Intake, Lens Next, Native, database/schema, publication, external action, or customer-data mutation.
