@@ -76,6 +76,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/job-operations.ts
 - artifacts/api-server/src/routes/linked_items.ts
 - artifacts/api-server/src/routes/living_brief.ts
+- artifacts/api-server/src/routes/master-catalogs.ts
 - artifacts/api-server/src/routes/meeting_minutes.ts
 - artifacts/api-server/src/routes/members.ts
 - artifacts/api-server/src/routes/notifications.ts
@@ -141,6 +142,7 @@ It changes only when the code structure or curated architectural facts change.
 - jobOperationsRouter
 - teamPerformanceRouter
 - coordinationHubRouter
+- masterCatalogsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -325,6 +327,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.behavior.ts
 - artifacts/api-server/src/lib/job-activation-commercial-baseline.ts
 - artifacts/api-server/src/lib/job-budget-governance.behavior.ts
+- artifacts/api-server/src/lib/job-classification-activation.behavior.ts
+- artifacts/api-server/src/lib/job-classification-propagation.behavior.ts
 - artifacts/api-server/src/lib/job-document-connections.behavior.ts
 - artifacts/api-server/src/lib/job-intake-apu-history.behavior.ts
 - artifacts/api-server/src/lib/job-intake-apu-reload.behavior.ts
@@ -363,6 +367,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/living-brief-mirror.ts
 - artifacts/api-server/src/lib/living-brief-runtime.behavior.ts
 - artifacts/api-server/src/lib/living-brief-source.ts
+- artifacts/api-server/src/lib/master-catalog-authority.behavior.ts
+- artifacts/api-server/src/lib/master-catalog-authority.ts
+- artifacts/api-server/src/lib/master-catalog-intake-persistence.behavior.ts
+- artifacts/api-server/src/lib/master-catalog-pmo.behavior.ts
 - artifacts/api-server/src/lib/meeting-canonical-links.ts
 - artifacts/api-server/src/lib/meeting-report-action-extraction.behavior.ts
 - artifacts/api-server/src/lib/meeting-report-action-extraction.ts

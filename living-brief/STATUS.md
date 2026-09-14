@@ -1614,6 +1614,19 @@ No release, publication, or overall completion claim is permitted until the reco
 - The persistent full-height pill/grip that visually duplicated the scrollbar is removed. The resize hit target now matches IgniteSmart Operations: a transparent 9-pixel boundary target at `right: -4px`, with a narrow indication only on hover or keyboard focus.
 - Executable assertions protect the single-scroll/transparent-resizer contract so future work cannot restore the duplicate rail or remove collapse/resize behavior. The actual production `ProjectSidebar` component passes 45 controlled Chrome assertions at desktop, tablet, and exact-390 widths, including width persistence, keyboard/pointer resize, collapse/reload/expand, real navigation scrolling, and every preserved route/action. The rendered desktop artifact was visually inspected and shows no second persistent rail. This is a local Platform candidate only; it is not pushed, published, deployed, or live verified.
 
+## Master catalogs and classified Operations Builds 1–10 — candidate — 2026-09-14
+
+- Central catalog authority is explicit: clients remain canonical Companies connected through project relationships, disciplines remain canonical enterprise trades, and additive enterprise Service and Phase catalogs use stable IDs, codes, lifecycle state, optimistic versions, and historical snapshots.
+- Authenticated users may read active catalog choices. Central catalog creation and lifecycle administration remain restricted to the existing Super Administrator authority used for PMO governance. Catalog entries deactivate instead of being deleted.
+- Quick and Advanced Job Intake select governed discipline, service, and phase identities. The normalized draft preserves each selected ID, code, and name across save and refresh, and activation rejects any selected ID that no longer belongs to its authoritative catalog.
+- Work Packages receive server-generated project-scoped codes. Existing codes remain unchanged, idempotent retries reuse the existing package, and no project-name rule or user-entered package code exists.
+- Project classification flows into packages and tasks by default. A package or task may use an explicit governed override. Activation validates the project, package, and task selections, then stores their exact classification snapshots on operational packages and tasks.
+- Job Operations displays the activated discipline, service, and phase on packages and tasks, filters by stable catalog ID, and carries the visible classifications and filter context into its governed PDF data.
+- Focused catalog, Intake persistence, package-code, classification propagation, activation-boundary, Operations filtering, full Job Intake, and workspace TypeScript gates pass locally through commit `1dfe7d80cfc2108cfd1add8bcd7ad05b195fd0a4`.
+- The final consolidated gate exposed and corrected a schema-attestation gap: the shared Drizzle table factory hid the two literal table names from the database-safety scanner. Both exported Drizzle tables now retain shared columns while declaring literal `pgTable` identities and typed table-specific constraints; database safety reconciles all 163 startup tables.
+- The production build then regenerated generator-owned `PLATFORM.md` for the new catalog, classification, and Operations files. The candidate Living Brief state was refreshed from that deterministic output before the clean rerun.
+- The updated 14-slide user guide covers the complete Intake, APU, Work Package, classification, activation, Operations, refresh, and acceptance path. External user acceptance, push, publication, deployment, and production migration remain separate gates.
+
 ## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
 
 - The first consolidated production build correctly stopped when deterministic Platform generation removed the manually reconciled Builds 66–68 authority text and invalidated its Living Brief hash.

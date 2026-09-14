@@ -2573,3 +2573,16 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Prove empty and populated production-component states in Chrome and run the complete Generic APU/Job Intake integration suite.
 - [x] Complete the final governed Build 5 whole-product assembly and freeze its exact local evidence commit.
 - [ ] Push, Replit synchronization/publication, live production verification, and external user smoke-test acceptance require separate authorization and evidence.
+
+## Master catalogs and classified Operations Builds 1–10
+
+- [x] Reconcile Client and Discipline with existing authoritative Companies/project relationships and enterprise trades rather than creating duplicate concepts.
+- [x] Add stable, lifecycle-controlled enterprise Service and Phase catalog authorities without destructive schema operations.
+- [x] Restrict catalog mutation to central PMO/Super Administrator authority while allowing authenticated active-choice reads.
+- [x] Replace project-level free text for governed discipline, service, and phase with authoritative selectors that persist exact IDs, codes, and names.
+- [x] Generate Work Package codes transactionally on the server and preserve existing and idempotently retried package identities.
+- [x] Carry governed classification defaults and overrides through Intake packages, Intake tasks, verified activation, operational packages, and operational tasks.
+- [x] Display and filter activated Operations work by discipline, service, and phase and include the same classification evidence in governed PDF data.
+- [x] Update the complete user presentation and run consolidated local source, behavior, TypeScript, Living Brief, and artifact validation.
+- [ ] Independent review must inspect the Build 10 evidence and presentation before release acceptance.
+- [ ] Push, Replit synchronization, production migration/publication, live Chrome verification, and Lorena/Ruben field acceptance require separate authorization and evidence.

@@ -23850,6 +23850,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9067ca8100c4462aaa2e01ed2b26eba394103142d0871f06bfbca473bb8754a3"
+    },
+    {
+      "taskId": "master-catalogs-classified-operations-builds1-10-20260914",
+      "reviewedThroughCommit": "1dfe7d80cfc2108cfd1add8bcd7ad05b195fd0a4",
+      "reviewedAt": "2026-09-14T21:15:48Z",
+      "status": "candidate",
+      "captureTiming": "candidate_evidence_reconciliation",
+      "summary": "Reviews the ten-build response to Lorena and Ruben: centralized catalog authority, governed project choices, automatic Work Package codes, classified activation snapshots, Operations filtering, and the updated user guide.",
+      "workstreams": [
+        "generic-apu-job-intake",
+        "job-operations"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work applies existing one-source-of-truth and capability-preservation doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution, evidence, migration, and release rules remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing structured-data, bilingual guidance, persistence, and artifact rules govern the implementation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The catalog and Operations improvements advance the existing structured-data direction without changing product identity."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic generator updated PLATFORM with the added catalog, classification, and Operations source inventory."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next, Native, Navisworks, camera, XML, or package behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing governed current-view PDF contract remains unchanged; Operations adds classification content only."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, applicability, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact locally verified ten-build candidate and its unreleased boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records completed local work and preserves independent review, publication, migration, and field acceptance as open gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing field-finding history remains intact; current candidate truth belongs in Status and Open Loop."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "lib/db/src/schema/enterprise-identity.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "01a8386633adc1c2a087b3d1d3eff494c691c22ec359cbd30e8a6318ad855f12"
     }
   ]
 }
