@@ -1331,3 +1331,10 @@ was performed or authorized.
 - Chrome warning/error count was zero. Exact machine-readable evidence is recorded in `evidence/post-p18-build74-project-directory-live-readonly.json`.
 - The live header remains `v1.05.N17-P17`; P18 is an unpublished internal candidate, so the observation does not misrepresent Builds 71–73 as deployed.
 - Impact: test/evidence/governance only; no import, contact creation, invitation, deletion, PDF download, APU, Lens Next, Native, database/schema, publication, deployment, external action, or customer-data mutation.
+
+# 2026-09-14 — P18 publication truth reconciliation
+
+- The accepted P18 source commit `f03b4d6e998df2aba0e9161dfa445e3990101749` is an ancestor of production merge commit `064abd56765ec5b415ea5d8ce3e6f43262df70e6`.
+- The accepted source tree and deployed production tree are identical. Replit publication completed and Chrome displayed `v1.05.N17-P18`; `/api/v1/healthz` returned HTTP 200 with `{"status":"ok"}`.
+- This entry corrects stale candidate-only language. External APU/Job Intake and Lens Next field acceptance remain open and are not inferred from publication.
+- Impact: governance truth only; no product, Native, database/schema, deployment, external action, or customer-data mutation.

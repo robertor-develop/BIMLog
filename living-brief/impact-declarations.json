@@ -23238,6 +23238,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4351bf93e4737cd69dd2a495fdeba3b2f0d9e491637f899ab6c8fe343da6c651"
+    },
+    {
+      "taskId": "post-p18-build78-publication-truth-20260914",
+      "reviewedThroughCommit": "f461589e0db773142713fe2f541142d76a19d124",
+      "reviewedAt": "2026-09-14T12:00:00Z",
+      "status": "accepted",
+      "captureTiming": "same_task_before_governed_build",
+      "summary": "Reconciles the already completed P18 push, Replit Shell synchronization, publication, Chrome version proof, and production health without changing product behavior.",
+      "workstreams": [
+        "post-p18-release-hygiene"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release and evidence rules are followed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No quality contract changes."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product promise changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime structure or Platform behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, camera, or XML changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report content, layout, export, or evidence changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records P18 as pushed, published, live, and healthy."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes stale P18 publication gates while retaining external acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact P18 source, production commit, tree identity, version, and health evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6bb010c7713c1af7d5de704377bc09905a70124f5ceb54c62e3f54ae90c6f1ea"
     }
   ]
 }

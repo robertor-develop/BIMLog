@@ -2522,7 +2522,7 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Verify the live Files workspace, filters, declaration controls, upload surface, and Coordination entry point read-only in authenticated Chrome.
 - [x] Correct legacy confirm-violation and supersede write authorization and enforce same-project replacement-file identity.
 - [x] Run and freeze the consolidated Build 65 protected-baseline gate at `v1.05.N17-P18`; evidence commit `2e1b625d6b2f2fdf4c5f3242759edcd0ed6eec08`, SHA-256 `63AF7962F0426666D580BC5068B30C0E6FF92607721C421B7A5C7B19166F1993`.
-- [ ] External user field acceptance and any P18 publication remain separate.
+- [x] P18 was pushed to the governed GitHub production lineage, synchronized through Replit Shell, published once, and live-verified at `v1.05.N17-P18` with `/api/v1/healthz` returning HTTP 200. External user field acceptance remains separate.
 
 ## POST-P18 assurance Builds 66–70
 
@@ -2532,7 +2532,7 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Build 69: verify the authenticated live Coordination workflow read-only in Chrome.
 - [x] Build 70: run protected APU, Lens Next, Files/CVR, governance, typecheck, and production-assembly acceptance.
 - Build 70 first production invocation stopped on deterministic `PLATFORM.md` generation drift; the generator source was corrected and the clean full rerun passed.
-- [ ] External user field acceptance and any P18 push/publication/deployment remain separate.
+- [x] The accepted block is present in the pushed and published P18 production tree. External user field acceptance remains separate.
 
 ## POST-P18 assurance Builds 71–75
 
@@ -2541,4 +2541,4 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Build 73: lock Directory consumer isolation across Meetings, Intake, assignments, RFI, and Submittal workflows.
 - [x] Build 74: verify the authenticated live Project Directory workflow read-only in Chrome.
 - [x] Build 75: protected APU, Lens Next, governance, typecheck, and deterministic production-assembly acceptance passed; evidence is frozen at `a8cb92d3a461d8c1f364caae1aa9081ee0045924`, SHA-256 `73E6304E86228572C526F3EB05139521046984C15BA2A229B6731583B0A20C7F`.
-- [ ] External user field acceptance and any P18 push/publication/deployment remain separate.
+- [x] The accepted block is present in the pushed and published P18 production tree. External user field acceptance remains separate.
