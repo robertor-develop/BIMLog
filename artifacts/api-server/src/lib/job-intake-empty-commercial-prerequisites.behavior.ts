@@ -115,9 +115,28 @@ const emptyBudget = jobIntakeCompletion(
   [],
   capabilities({ budget: true, anyCommercial: true }),
 );
-assert.equal(emptyBudget.ready, false);
-assert.equal(stage(emptyBudget, "contract")?.status, "not_started");
-assert.deepEqual(missingCodes(emptyBudget), ["budget_mapping", "budget_snapshot"]);
+assert.equal(emptyBudget.ready, true);
+assert.equal(stage(emptyBudget, "contract")?.status, "optional");
+assert.deepEqual(missingCodes(emptyBudget), []);
+
+const partialBudgetLink = jobIntakeCompletion(
+  fixture({ budgetSnapshotLineId: "LINE-1" }),
+  [],
+  capabilities({ budget: true, anyCommercial: true }),
+);
+assert.equal(partialBudgetLink.ready, false);
+assert.deepEqual(missingCodes(partialBudgetLink), [
+  "budget_mapping",
+  "budget_snapshot",
+]);
+
+const selectedBudgetWithoutLines = jobIntakeCompletion(
+  fixture({ budgetSnapshotId: "SNAPSHOT-1" }),
+  [],
+  capabilities({ budget: true, anyCommercial: true }),
+);
+assert.equal(selectedBudgetWithoutLines.ready, false);
+assert.deepEqual(missingCodes(selectedBudgetWithoutLines), ["budget_mapping"]);
 
 const budgetOnly = jobIntakeCompletion(
   fixture({
@@ -136,12 +155,10 @@ const emptyFullCommercial = jobIntakeCompletion(
   [],
   capabilities({ budget: true, costValuePlanner: true, anyCommercial: true }),
 );
-assert.equal(emptyFullCommercial.ready, false);
-assert.deepEqual(missingCodes(emptyFullCommercial), [
-  "budget_mapping",
-  "budget_snapshot",
-]);
+assert.equal(emptyFullCommercial.ready, true);
+assert.deepEqual(missingCodes(emptyFullCommercial), []);
 assert.equal(stage(emptyFullCommercial, "pricing")?.status, "complete");
+assert.equal(stage(emptyFullCommercial, "contract")?.status, "optional");
 
 const configuredFullCommercial = jobIntakeCompletion(
   fixture({
@@ -158,7 +175,7 @@ assert.equal(configuredFullCommercial.ready, true);
 console.log(
   JSON.stringify({
     status: "PASS",
-    scenario: "BUILD2_OPTIONAL_APU_VERSION_WITH_REQUIRED_MANUAL_RATE",
+    scenario: "BUILD3_OPTIONAL_COMMERCIAL_LINKS_WITH_STRICT_SELECTED_BINDINGS",
     zeroVersionApuDeadEndClosed: true,
     manualRatePreserved: noVersions.scopeItems[0].billingHourlyRate,
     cases: [
@@ -167,6 +184,8 @@ console.log(
       "apu_zero_manual_rate_rejected",
       "apu_with_version",
       "budget_enabled_without_snapshot",
+      "partial_budget_link_rejected",
+      "selected_budget_requires_exact_lines",
       "budget_with_snapshot",
       "full_commercial_without_versions",
       "full_commercial_configured",

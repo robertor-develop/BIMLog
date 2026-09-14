@@ -17,6 +17,7 @@ import { waitForContractItemWorkflowMigration } from "./contract-item-workflow-m
 import { waitForFinancialContractMigration } from "./financial-contract-migration";
 import {
   assertAuthoritativeBudgetAssociations,
+  jobIntakeBudgetLinkRequested,
   jobIntakeCompletion,
   jobIntakeCoreFingerprint,
   normalizeJobIntakeData,
@@ -1219,7 +1220,9 @@ export async function activateJobIntake(input: {
         "JOB_INTAKE_NOT_READY",
         `Complete the intake before activation: ${completion.missing.join(" ")}`,
       );
-    if (capabilities.budget) {
+    const budgetLinkRequested =
+      capabilities.budget && jobIntakeBudgetLinkRequested(data);
+    if (budgetLinkRequested) {
       const snapshot = (await client.query(
         `SELECT id,project_id "projectId",currency FROM approved_budget_snapshots WHERE id=$1 AND project_id=$2`,
         [data.commercial.budgetSnapshotId, projectId],
@@ -1248,7 +1251,7 @@ export async function activateJobIntake(input: {
       contractValue: string;
     }> = [];
     let workflowBaseline = { requested: data.scopeItems.length, created: 0 };
-    if (capabilities.fullCommercialActivation) {
+    if (capabilities.fullCommercialActivation && budgetLinkRequested) {
       const grants: Array<{ userId: number; permission: string }> =
         data.team.assignments
           .filter((assignment: any) => assignment.userId != null)

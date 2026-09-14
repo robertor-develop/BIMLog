@@ -790,6 +790,15 @@ export const FULL_JOB_INTAKE_CAPABILITIES: JobIntakeCapabilities = {
   fullCommercialActivation: true,
 };
 
+export function jobIntakeBudgetLinkRequested(data: JobIntakeData) {
+  return Boolean(
+    data.commercial.budgetSnapshotId ||
+      data.scopeItems.some(
+        (item) => item.budgetSnapshotLineId || item.projectCostNodeId,
+      ),
+  );
+}
+
 export function jobIntakeCoreFingerprint(data: JobIntakeData) {
   return crypto
     .createHash("sha256")
@@ -899,7 +908,10 @@ export function jobIntakeCompletion(
         contract.counterpartyName &&
         assignedContractIds.has(contract.id),
     );
-  const budgetReady = !!data.commercial.budgetSnapshotId && contractItemsReady;
+  const budgetLinkRequested = jobIntakeBudgetLinkRequested(data);
+  const budgetReady =
+    !budgetLinkRequested ||
+    (!!data.commercial.budgetSnapshotId && contractItemsReady);
   const stageChecks: Record<JobIntakeStage, boolean[]> = {
     documents: activeDocuments.length ? [data.review.sourceConfirmed] : [],
     identity: [
@@ -916,7 +928,7 @@ export function jobIntakeCompletion(
       ...(capabilities.contracts
         ? [contractTermsReady, data.review.contractConfirmed]
         : []),
-      ...(capabilities.budget ? [budgetReady] : []),
+      ...(capabilities.budget && budgetLinkRequested ? [budgetReady] : []),
     ],
     delivery: [
       !!data.delivery.workflowTemplate,
@@ -1008,6 +1020,7 @@ export function jobIntakeCompletion(
         es: "Ingrese una tarifa facturable positiva para cada partida.",
       },
     capabilities.budget &&
+      budgetLinkRequested &&
       !contractItemsReady && {
         code: "budget_mapping",
         en: "Map every scope item to an approved budget line.",
@@ -1044,6 +1057,7 @@ export function jobIntakeCompletion(
         es: "Asigne al menos una Partida de Contrato a cada perfil de contrato.",
       },
     capabilities.budget &&
+      budgetLinkRequested &&
       !data.commercial.budgetSnapshotId && {
         code: "budget_snapshot",
         en: "Select the approved budget snapshot.",
@@ -1127,7 +1141,7 @@ export function jobIntakeCompletion(
         : "requires_input",
     automaticCommercialActivation: !capabilities.fullCommercialActivation
       ? "not_entitled"
-      : pricingReady && budgetReady && contractTermsReady
+      : budgetLinkRequested && pricingReady && budgetReady && contractTermsReady
         ? "ready"
         : "requires_input",
   };
@@ -1144,7 +1158,7 @@ export function jobIntakeCompletion(
     : 0;
   const financialChecks = data.scopeItems.flatMap((item) => [
     ...(!capabilities.costValuePlanner ? [] : [positive(item.billingHourlyRate)]),
-    ...(!capabilities.budget ? [] : [!!item.budgetSnapshotLineId, !!item.projectCostNodeId]),
+    ...(!capabilities.budget || !budgetLinkRequested ? [] : [!!item.budgetSnapshotLineId, !!item.projectCostNodeId]),
   ]);
   const financialSetupPercent = financialChecks.length ? Math.round(ratio(financialChecks) * 100) : null;
   return {
