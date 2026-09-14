@@ -24089,6 +24089,87 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3036e609ff64ac69d26aae5d05115bcb2839b254f9f881a67ff4a127dc0caa01"
+    },
+    {
+      "taskId": "p20-master-catalog-admin-live-smoke-closure-20260914",
+      "reviewedThroughCommit": "2e45d10cb92592443e5c817df10c7d93d08eed90",
+      "reviewedAt": "2026-09-14T22:45:00Z",
+      "status": "candidate",
+      "captureTiming": "post_deploy_smoke_correction",
+      "summary": "Closes the live-smoke gap by wiring the existing governed Service and Phase endpoints into central Super Administrator UI.",
+      "workstreams": [
+        "master-catalogs",
+        "job-intake",
+        "release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction follows existing central authority and truthful live-smoke doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No execution authority changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused behavior, typecheck, build, and live workflow acceptance remain required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product roadmap, positioning, or long-term operating direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing master-catalog routes and schema remain unchanged; this adds their missing administration UI."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and Lens Next remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the P19 live finding and bounded P20 correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the administration closure before corrected publication."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing audit history remains intact."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/api-server/src/lib/post-p17-build19-help-audit.behavior.mjs",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.tsx",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "35c179a1ffb3feab42fbf897a2b6f532e2a5e8ca32f388f55319149a2b7048b3"
     }
   ]
 }

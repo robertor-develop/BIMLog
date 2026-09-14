@@ -17,7 +17,7 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
   });
 }
 
-const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback"];
+const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback", "Master Catalogs"];
 
 const ADMIN_PANEL_SHELL_CSS = `
   .hq-admin-page {
@@ -238,6 +238,77 @@ function StatCard({ label, value }: { label: string; value: number | string }) {
       <div style={{ fontSize: 26, fontWeight: 800, color: "hsl(var(--foreground))", lineHeight: 1 }}>{value}</div>
     </div>
   );
+}
+
+type MasterCatalogEntry = { id: string; code: string; name: string; state: "active" | "inactive" | "retired"; version: number };
+
+function MasterCatalogsTab({ token }: { token: string }) {
+  const es = isSpanishUi();
+  const [entries, setEntries] = useState<Record<"services" | "phases", MasterCatalogEntry[]>>({ services: [], phases: [] });
+  const [drafts, setDrafts] = useState<Record<"services" | "phases", { code: string; name: string }>>({ services: { code: "", name: "" }, phases: { code: "", name: "" } });
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+
+  const load = useCallback(async () => {
+    const pairs = await Promise.all((["services", "phases"] as const).map(async kind => {
+      const response = await apiFetch(`/master-catalogs/${kind}?includeInactive=true`, token);
+      if (!response.ok) throw new Error(`${kind} ${response.status}`);
+      const body = await response.json() as { entries?: MasterCatalogEntry[] };
+      return [kind, Array.isArray(body.entries) ? body.entries : []] as const;
+    }));
+    setEntries(Object.fromEntries(pairs) as typeof entries);
+  }, [token]);
+
+  useEffect(() => { load().catch(error => { logClientError("master catalog admin load", error); setMessage(es ? "No se pudieron cargar los catálogos maestros." : "Master catalogs could not be loaded."); }); }, [load, es]);
+
+  async function create(kind: "services" | "phases") {
+    setBusy(true); setMessage("");
+    try {
+      const response = await apiFetch(`/admin/master-catalogs/${kind}`, token, { method: "POST", body: JSON.stringify(drafts[kind]) });
+      const body = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(body.error || `${kind} ${response.status}`);
+      setDrafts(current => ({ ...current, [kind]: { code: "", name: "" } }));
+      await load();
+      setMessage(es ? "Valor maestro creado y disponible para Ingreso." : "Master value created and available in Intake.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); }
+    finally { setBusy(false); }
+  }
+
+  async function changeState(kind: "services" | "phases", entry: MasterCatalogEntry) {
+    setBusy(true); setMessage("");
+    try {
+      const state = entry.state === "active" ? "inactive" : "active";
+      const response = await apiFetch(`/admin/master-catalogs/${kind}/${entry.id}`, token, { method: "PATCH", body: JSON.stringify({ state }) });
+      const body = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(body.error || `${kind} ${response.status}`);
+      await load();
+      setMessage(es ? "Estado actualizado sin modificar registros históricos." : "State updated without changing historical records.");
+    } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); }
+    finally { setBusy(false); }
+  }
+
+  return <section aria-labelledby="master-catalogs-title">
+    <h2 id="master-catalogs-title" style={{ marginTop: 0 }}>{es ? "Catálogos maestros" : "Master Catalogs"}</h2>
+    <p style={{ color: "hsl(var(--muted-foreground))" }}>{es ? "Clientes se administran en Compañías y disciplinas en la autoridad empresarial existente. Servicios y fases se crean aquí una sola vez para todos los proyectos. Desactivar conserva la historia." : "Clients are managed in Companies and disciplines in the existing enterprise authority. Services and phases are created here once for every project. Deactivation preserves history."}</p>
+    {message && <p role="status" style={{ padding: 10, borderRadius: 8, background: "hsl(var(--muted))" }}>{message}</p>}
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(300px,1fr))", gap: 18 }}>
+      {(["services", "phases"] as const).map(kind => <section key={kind} style={{ border: "1px solid hsl(var(--border))", borderRadius: 12, padding: 16 }}>
+        <h3 style={{ marginTop: 0 }}>{kind === "services" ? (es ? "Servicios" : "Services") : (es ? "Fases" : "Phases")}</h3>
+        <div style={{ display: "grid", gridTemplateColumns: "minmax(90px,.45fr) minmax(150px,1fr) auto", gap: 8, marginBottom: 14 }}>
+          <Input aria-label={es ? "Código" : "Code"} placeholder={es ? "Código" : "Code"} value={drafts[kind].code} onChange={event => setDrafts(current => ({ ...current, [kind]: { ...current[kind], code: event.target.value.toUpperCase() } }))} />
+          <Input aria-label={es ? "Nombre" : "Name"} placeholder={es ? "Nombre" : "Name"} value={drafts[kind].name} onChange={event => setDrafts(current => ({ ...current, [kind]: { ...current[kind], name: event.target.value } }))} />
+          <Button disabled={busy || !drafts[kind].code.trim() || !drafts[kind].name.trim()} onClick={() => void create(kind)}>{es ? "Crear" : "Create"}</Button>
+        </div>
+        <div style={{ display: "grid", gap: 8 }}>
+          {entries[kind].length === 0 && <p>{es ? "Todavía no hay valores." : "No values yet."}</p>}
+          {entries[kind].map(entry => <div key={entry.id} style={{ display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", gap: 10, alignItems: "center", padding: 10, border: "1px solid hsl(var(--border))", borderRadius: 8 }}>
+            <div><strong>{entry.code} — {entry.name}</strong><div style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{entry.state} · v{entry.version}</div></div>
+            {entry.state !== "retired" && <Button variant="outline" size="sm" disabled={busy} onClick={() => void changeState(kind, entry)}>{entry.state === "active" ? (es ? "Desactivar" : "Deactivate") : (es ? "Activar" : "Activate")}</Button>}
+          </div>)}
+        </div>
+      </section>)}
+    </div>
+  </section>;
 }
 
 function Th({ children }: { children: React.ReactNode }) {
@@ -1503,6 +1574,7 @@ export function AdminPanel() {
         "Admin Log": "Registro Admin",
         "AI Usage": "Uso de IA",
         Feedback: "Comentarios",
+        "Master Catalogs": "Catálogos Maestros",
       } as Record<string, string>,
     }
     : {
@@ -1551,7 +1623,7 @@ export function AdminPanel() {
         </section>
 
         <nav className="hq-admin-tabs" aria-label="Project Administration sections">
-          {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => tab !== "Feedback" || isSuperAdmin).map(({ tab, i }) => (
+          {TABS.map((tab, i) => ({ tab, i })).filter(({ tab }) => (tab !== "Feedback" && tab !== "Master Catalogs") || isSuperAdmin).map(({ tab, i }) => (
             <button key={tab} className="hq-admin-tab" data-active={activeTab === i} onClick={() => { setActiveTab(i); if (typeof window !== "undefined") { const url = new URL(window.location.href); if (i === 9) url.searchParams.set("tab", "feedback"); else url.searchParams.delete("tab"); window.history.replaceState(null, "", `${url.pathname}${url.search}${url.hash}`); } }}>
               {copy.tabs[tab] || tab}
             </button>
@@ -1569,6 +1641,7 @@ export function AdminPanel() {
           {activeTab === 7 && <AdminActionsLogTab token={token} />}
           {activeTab === 8 && <AiUsageTab token={token} />}
           {activeTab === 9 && isSuperAdmin && <FeedbackTab token={token} />}
+          {activeTab === 10 && isSuperAdmin && <MasterCatalogsTab token={token} />}
         </main>
       </div>
     </div>
