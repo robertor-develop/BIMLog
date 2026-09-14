@@ -9,6 +9,7 @@
       "artifacts/api-server/src/lib/help-center.behavior.ts",
       "artifacts/api-server/src/lib/post-p17-build19-help-audit.behavior.mjs",
       "artifacts/bimlog/src/components/layout/Navbar.tsx",
+      "artifacts/bimlog/src/pages/AdminPanel.master-catalogs.behavior.mjs",
       "artifacts/bimlog/src/pages/AdminPanel.tsx",
       "artifacts/bimlog/src/pages/HelpCenter.tsx",
       "living-brief/OPEN_LOOP.md",
