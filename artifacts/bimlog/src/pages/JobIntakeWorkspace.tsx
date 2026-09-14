@@ -246,6 +246,7 @@ export function JobIntakeWorkspace() {
   const showQuickMode = () => { preserveSetupMode(projectId, "quick"); setQuickMode(true); };
   const showAdvancedMode = () => { preserveSetupMode(projectId, "advanced"); setQuickMode(false); };
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [packageCreation, setPackageCreation] = useState<{ assignmentIndex: number; title: string; dimensionType: string; dimensionValue: string } | null>(null);
   const [pdfSections, setPdfSections] = useState({ identity: true, scope: true, contracts: true, delivery: true, team: true, review: true });
   const revisionRef = useRef(0),
     projectIdRef = useRef(projectId),
@@ -693,6 +694,51 @@ export function JobIntakeWorkspace() {
     rate: string,
     role?: string,
   ) => setData((old: any) => applyAssignmentApuRate(old, index, rate, role));
+  const createAndSelectWorkPackage = async () => {
+    if (!packageCreation) return;
+    const assignment = dataRef.current.team.assignments[packageCreation.assignmentIndex];
+    if (!assignment?.scopeItemId || !packageCreation.title.trim() || !packageCreation.dimensionValue.trim()) {
+      setError(tt("Name the Work Package and enter its control value before saving.", "Asigne un nombre al Paquete de trabajo e ingrese su valor de control antes de guardar."));
+      return;
+    }
+    const packageId = `WP-${crypto.randomUUID()}`;
+    const workPackage = {
+      id: packageId,
+      packageCode: packageId.slice(0, 11),
+      title: packageCreation.title.trim(),
+      dimensionType: packageCreation.dimensionType,
+      dimensionValue: packageCreation.dimensionValue.trim(),
+      packageType: "deliverable",
+      tasks: [],
+    };
+    const next = {
+      ...dataRef.current,
+      scopeItems: dataRef.current.scopeItems.map((item: any) => item.id === assignment.scopeItemId ? { ...item, workPackages: [...(item.workPackages || []), workPackage] } : item),
+      team: {
+        ...dataRef.current.team,
+        assignments: dataRef.current.team.assignments.map((item: any, index: number) => index === packageCreation.assignmentIndex ? { ...item, assignmentTargetType: "work_package", workPackageId: packageId } : item),
+      },
+      review: { ...dataRef.current.review, scopeConfirmed: false, teamConfirmed: false },
+    };
+    setBusy(true);
+    setError("");
+    try {
+      dataRef.current = next;
+      setData(next);
+      const saved = await persist(next, true);
+      const verifiedPackage = saved?.data?.scopeItems?.find((item: any) => item.id === assignment.scopeItemId)?.workPackages?.find((item: any) => item.id === packageId);
+      const verifiedAssignment = saved?.data?.team?.assignments?.[packageCreation.assignmentIndex];
+      if (!verifiedPackage || verifiedAssignment?.workPackageId !== packageId)
+        throw new Error(tt("BIMLog could not verify the saved Work Package assignment.", "BIMLog no pudo verificar la asignación guardada del Paquete de trabajo."));
+      setPackageCreation(null);
+      setNotice(tt(`Work Package ${verifiedPackage.title} was saved and selected.`, `El Paquete de trabajo ${verifiedPackage.title} se guardó y seleccionó.`));
+      window.requestAnimationFrame(() => document.getElementById(`ji-assignment-${packageCreation.assignmentIndex}`)?.scrollIntoView({ block: "center" }));
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
+      setBusy(false);
+    }
+  };
   const latestRate = String(apu?.sellingPrice ?? "0.00"),
     latestApuVersion = apu?.version ?? null;
   const money = (quantity: unknown, rate: unknown) =>
@@ -2335,7 +2381,7 @@ export function JobIntakeWorkspace() {
                 </label>
                 {(intake.assignmentEligibility?.excluded?.length ?? 0) > 0 && <div className="ji-missing"><strong>{tt("Not eligible for assignment", "No elegibles para asignación")}</strong>{intake.assignmentEligibility.excluded.map((member:any)=><div key={member.id}>{member.fullName || member.email} — {tt("project membership is not active", "la membresía del proyecto no está activa")}</div>)}</div>}
                 {data.team.assignments.map((assignment: any, index: number) => (
-                  <div className="ji-row" key={assignment.id}>
+                  <div className="ji-row" id={`ji-assignment-${index}`} key={assignment.id}>
                     <div className="ji-grid three">
                       <label>
                         {tt("Team member", "Miembro del equipo")}
@@ -2516,6 +2562,8 @@ export function JobIntakeWorkspace() {
                       </div>
                       <label>{tt("Assignment target", "Destino de la asignación")}<select value={assignment.assignmentTargetType || (assignment.workPackageId ? "work_package" : "contract_item")} disabled={!assignment.scopeItemId} onChange={(e)=>setData((old:any)=>({...old,team:{...old.team,assignments:old.team.assignments.map((item:any,i:number)=>i===index?{...item,assignmentTargetType:e.target.value,workPackageId:e.target.value==="contract_item"?"":item.workPackageId}:item)}}))}><option value="contract_item">{tt("Entire Contract Item", "Partida de Contrato completa")}</option><option value="work_package">{tt("Specific Work Package", "Paquete de trabajo específico")}</option></select></label>
                       {(assignment.assignmentTargetType === "work_package" || assignment.workPackageId) && <label>{tt("Work Package", "Paquete de trabajo")}<select value={assignment.workPackageId || ""} disabled={!assignment.scopeItemId} onChange={(e)=>assignmentChange(index,"workPackageId",e.target.value)}><option value="">{tt("Select or create a Work Package", "Seleccione o cree un Paquete de trabajo")}</option>{(data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.workPackages||[]).map((workPackage:any)=><option key={workPackage.id} value={workPackage.id}>{workPackage.title||workPackage.packageCode}{workPackage.dimensionValue ? ` — ${workPackage.dimensionValue}` : ""}</option>)}</select></label>}
+                      {(assignment.assignmentTargetType === "work_package" || assignment.workPackageId) && !assignment.workPackageId && <div className="ji-lock"><strong>{tt("Work Package required", "Paquete de trabajo requerido")}</strong><p>{tt("Create it here. BIMLog preserves this assignment, saves the package, verifies it, and returns with it selected.", "Créelo aquí. BIMLog conserva esta asignación, guarda y verifica el paquete, y regresa con el paquete seleccionado.")}</p><button type="button" onClick={()=>setPackageCreation({assignmentIndex:index,title:"",dimensionType:"deliverable",dimensionValue:""})}><Plus size={14}/> {tt("Create required Work Package", "Crear Paquete de trabajo requerido")}</button></div>}
+                      {packageCreation?.assignmentIndex === index && <div className="ji-row"><strong>{tt("Create and verify Work Package", "Crear y verificar Paquete de trabajo")}</strong><div className="ji-grid three"><label>{tt("Package name", "Nombre del paquete")}<input autoFocus value={packageCreation.title} onChange={(event)=>setPackageCreation({...packageCreation,title:event.target.value})}/></label><label>{tt("Control dimension", "Dimensión de control")}<select value={packageCreation.dimensionType} onChange={(event)=>setPackageCreation({...packageCreation,dimensionType:event.target.value})}><option value="building">{tt("Building","Edificio")}</option><option value="floor">{tt("Floor","Piso")}</option><option value="zone">{tt("Zone","Zona")}</option><option value="deliverable">{tt("Deliverable","Entregable")}</option><option value="task">{tt("Task","Tarea")}</option></select></label><label>{tt("Control value", "Valor de control")}<input value={packageCreation.dimensionValue} onChange={(event)=>setPackageCreation({...packageCreation,dimensionValue:event.target.value})}/></label></div><div className="ji-actions"><button type="button" className="primary" disabled={busy} onClick={()=>void createAndSelectWorkPackage()}>{tt("Save package and return", "Guardar paquete y regresar")}</button><button type="button" onClick={()=>setPackageCreation(null)}>{tt("Cancel", "Cancelar")}</button></div></div>}
                       <div className="ji-lock">{tt("The selected scope activates as a real Job Operations task. Choosing a Work Package assigns this resource directly to that package task; choosing the Contract Item uses its delivery task.", "El alcance seleccionado se activa como una tarea real de Operaciones del Trabajo. Elegir un Paquete de trabajo asigna este recurso directamente a la tarea del paquete; elegir la Partida de Contrato utiliza su tarea de entrega.")}</div>
                       <div className="ji-lock">{tt("Authoritative scope", "Alcance autorizado")}: {assignment.engagementId || "—"} → {assignment.contractId || "—"} → APU {data.scopeItems.find((item:any)=>item.id===assignment.scopeItemId)?.apuPlanVersion || "—"}</div>
                       {capabilities.budget && (

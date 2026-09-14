@@ -17,6 +17,9 @@ assert.match(source, /Assignment target/);
 assert.match(source, /Entire Contract Item/);
 assert.match(source, /Specific Work Package/);
 assert.match(source, /assignmentTargetType: "contract_item"/);
+assert.match(source, /Create required Work Package/);
+assert.match(source, /Save package and return/);
+assert.match(source, /could not verify the saved Work Package assignment/);
 
 console.log(
   "PASS Intake reloads authoritative APU versions and persisted budget-line options while retaining company and agreement bindings",
