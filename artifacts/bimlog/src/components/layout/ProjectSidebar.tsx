@@ -142,7 +142,9 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
   const [showSyncAgent, setShowSyncAgent] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(() => {
     if (typeof window === "undefined") return 248;
-    const saved = Number(window.localStorage.getItem("bimlog-project-sidebar-width"));
+    const storedWidth = window.localStorage.getItem("bimlog-project-sidebar-width");
+    if (storedWidth === null) return 248;
+    const saved = Number(storedWidth);
     return Number.isFinite(saved) ? Math.min(420, Math.max(220, saved)) : 248;
   });
   const [collapsed, setCollapsed] = useState(() =>
@@ -440,7 +442,7 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
 
       <div
         className={`sidebar phasea-project-sidebar${collapsed ? " collapsed" : ""}`}
-        style={{ width: collapsed ? 78 : sidebarWidth, transition: sidebarResizing ? undefined : "width 0.18s ease" }}
+        style={{ width: collapsed ? 78 : sidebarWidth, transition: sidebarResizing ? "none" : "width 0.18s ease" }}
       >
         {!collapsed && (
           <button
@@ -493,9 +495,9 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
           )}
         </div>
 
-        <div className="sidebar-nav phasea-nav-list" tabIndex={0} aria-label={tr("Scrollable project navigation", "Navegación desplazable del proyecto")}>
+        <nav className="sidebar-nav phasea-nav-list" tabIndex={0} aria-label={tr("Scrollable project navigation", "Navegación desplazable del proyecto")}>
           {navGroups.map(group => renderNavGroup(group))}
-        </div>
+        </nav>
 
         {user && (
           <a href={`${import.meta.env.BASE_URL.replace(/\/$/, "")}/profile`} className="sidebar-footer" style={{ textDecoration: "none", cursor: "pointer" }} title="My Profile">

@@ -308,6 +308,7 @@ iframe[aria-label*="Replit" i],
   width: 248px;
   min-width: 78px;
   max-width: 420px;
+  flex: 0 0 auto;
   position: relative;
   transition: width 0.18s ease;
 }
