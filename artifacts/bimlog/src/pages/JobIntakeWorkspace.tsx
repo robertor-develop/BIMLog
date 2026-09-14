@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Link, useRoute } from "wouter";
+import { Link, useLocation, useRoute } from "wouter";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -210,6 +210,7 @@ export function JobIntakeWorkspace() {
   const { token } = useAuthStore();
   const { language, tt } = useI18n();
   const [, route] = useRoute("/projects/:id/intake");
+  const [, setLocation] = useLocation();
   const projectId = Number(route?.id);
   const [intake, setIntake] = useState<any>(null),
     [data, setData] = useState<any>(blank),
@@ -255,6 +256,12 @@ export function JobIntakeWorkspace() {
     savePromiseRef = useRef<Promise<any> | null>(null),
     saveRetryRef = useRef(0),
     saveTimerRef = useRef<number | null>(null);
+  const openCommercialPrerequisite = (destination: string) => {
+    preserveActiveStage(projectId, "scope");
+    preserveSetupMode(projectId, "advanced");
+    preserveRecovery(projectId, revisionRef.current, dataRef.current);
+    setLocation(destination);
+  };
   projectIdRef.current = projectId;
   const headers = useMemo(
     () => ({ Authorization: `Bearer ${token}` }),
@@ -1811,6 +1818,12 @@ export function JobIntakeWorkspace() {
                   budgetLines={budgetLines}
                   onBudgetSnapshotChange={(id) => void selectSnapshot(id)}
                   snapshots={workspace?.snapshots ?? []}
+                  onOpenCostValuePlanner={() =>
+                    openCommercialPrerequisite(`/projects/${projectId}/financial/apu`)
+                  }
+                  onOpenProjectBudget={() =>
+                    openCommercialPrerequisite(`/projects/${projectId}/financial/budget`)
+                  }
                   tt={tt}
                   onError={setError}
                   onNotice={setNotice}
