@@ -1372,3 +1372,10 @@ was performed or authorized.
 - Source comparison against `F:\IgniteSmart\Repositories\operations-dashboard` identified the divergence: Operations uses one scroll-owning `primary-nav` plus a transparent 9-pixel resize boundary at `right: -4px`; BIMLog had added a visible grip inside the sidebar edge.
 - The correction applies the Operations boundary contract to both BIMLog sidebar implementations and adds executable protection for single-scroll ownership, collapse, saved width, pointer resize, keyboard resize, and absence of the duplicate Project-sidebar grip.
 - No navigation capability, route, business behavior, permission, database/schema, APU, Job Intake, or Lens Next behavior is removed or changed.
+
+## 2026-09-14 — Master catalog / Job Intake / APU expanded assurance audit
+
+- A deliberately broader run executed 57 historical and current behavior files spanning Intake/APU persistence, Work Packages, assignments, activation, reporting, accessibility, RFI, Submittal, Transmittal, Change Order, Meeting, Schedule, Clash Reports, and Files/CVR interconnections.
+- Four assertions failed on obsolete literal wording or formatting-sensitive regular expressions. Direct source inspection proved the corresponding production behavior still present. The assurance checks were corrected to assert the current immutable-version guidance and to permit whitespace-only formatting without weakening field or function identity checks.
+- The corrected 57-test set passes, as do the complete Generic APU suite, catalog authority, PMO mutation boundary, classifications, document connections, sidebar behavior, protected Lens Next suites, TypeScript, secret exposure, database safety, and mojibake gates.
+- The non-blocking repository-wide scanner separately reports P0=0 and P1=64. These legacy code-quality candidates are not silently accepted as clean and remain outside this bounded test-evidence correction.

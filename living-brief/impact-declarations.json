@@ -23927,6 +23927,87 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "01a8386633adc1c2a087b3d1d3eff494c691c22ec359cbd30e8a6318ad855f12"
+    },
+    {
+      "taskId": "master-catalogs-intake-apu-expanded-assurance-20260914",
+      "reviewedThroughCommit": "d09a5fad880738106f7f34e4c66eabddf7e6aaae",
+      "reviewedAt": "2026-09-14T22:04:00Z",
+      "status": "candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "summary": "Expanded assurance audit corrected four stale semantic/format assertions after proving the underlying production behaviors remained intact.",
+      "workstreams": [
+        "generic-apu-job-intake",
+        "job-operations",
+        "assurance"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The audit applies existing truthful-evidence and closed-loop-quality doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No execution or release rule changes."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing behavioral, persistence, interconnection, and artifact gates govern the audit."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, schema, module, or runtime structure changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next, Native, Navisworks, camera, XML, or package changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The governed PDF production contract is unchanged; its existing call is re-attested."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or requirement changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact audit coverage, corrected test debt, and unchanged candidate boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Separates completed bounded assurance from repository-wide P1 stabilization debt and external acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Appends the four stale-test findings, proof, correction, and complete rerun result."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/job-intake-apu-history.behavior.ts",
+        "artifacts/api-server/src/lib/post-p17-build16-reporting-identity.behavior.mjs",
+        "artifacts/api-server/src/lib/post-p17-build17-apu-history-provenance.behavior.mjs",
+        "artifacts/api-server/src/lib/post-p17-build23-report-export-scope.behavior.mjs",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "643af8cf3a6cccf5d59fc4573c6199343dfac731b382cb9bdd991beb9488f7a7"
     }
   ]
 }

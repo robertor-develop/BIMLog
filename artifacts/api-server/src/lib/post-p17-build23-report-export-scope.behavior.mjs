@@ -7,8 +7,8 @@ const contracts = fs.readFileSync(new URL("./financial-contract-export.ts", impo
 const budgets = fs.readFileSync(new URL("./financial-budget-export.ts", import.meta.url), "utf8");
 
 assert.match(reports, /\/api\/v1\/projects\/\$\{projectId\}\/reports\/\$\{selectedReport\.key\}\/pdf/);
-assert.match(reports, /downloadGovernedCurrentViewPdf\(projectId, token/);
-assert.match(operations, /downloadGovernedCurrentViewPdf\(projectId, token/);
+assert.match(reports, /downloadGovernedCurrentViewPdf\(\s*projectId,\s*token/);
+assert.match(operations, /downloadGovernedCurrentViewPdf\(\s*projectId,\s*token/);
 assert.match(operations, /Included sections/);
 assert.match(contracts, /Contracts & Commitments — Current View/);
 assert.match(contracts, /data\.selectedSections\.includes\("filters"\)/);

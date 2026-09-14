@@ -1627,6 +1627,13 @@ No release, publication, or overall completion claim is permitted until the reco
 - The production build then regenerated generator-owned `PLATFORM.md` for the new catalog, classification, and Operations files. The candidate Living Brief state was refreshed from that deterministic output before the clean rerun.
 - The updated 14-slide user guide covers the complete Intake, APU, Work Package, classification, activation, Operations, refresh, and acceptance path. External user acceptance, push, publication, deployment, and production migration remain separate gates.
 
+## Master catalogs / Job Intake / APU detailed assurance audit — candidate — 2026-09-14
+
+- The expanded audit executed the complete Generic APU/Job Intake suite, 57 historical and current Intake/APU/downstream interconnection behaviors, catalog authority and PMO permissions, classification propagation/activation/filtering, document connections, Meeting attendance, sidebar behavior, protected Lens Next suites, TypeScript, secret exposure, database safety, mojibake, and Living Brief integrity.
+- Four historical source assertions initially failed because they required obsolete UI wording or same-line formatting. Production behavior remained present: immutable APU versions and selectors, contract/quotation fallback identity, immutable APU fingerprint provenance, and governed current-view PDF scope. The assertions now bind the current semantic behavior and tolerate formatting-only line breaks; all four and the complete 57-test set pass.
+- The repository-wide non-blocking platform scanner reports zero P0 findings and 64 pre-existing P1 candidates outside this bounded flow. Those candidates remain separate stabilization work and are not represented as failures of the audited Intake/APU/Operations path.
+- This assurance correction changes test evidence and governance only. It changes no product behavior, database/schema, Native, Lens Next, version, publication, deployment, or customer data.
+
 ## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
 
 - The first consolidated production build correctly stopped when deterministic Platform generation removed the manually reconciled Builds 66–68 authority text and invalidated its Living Brief hash.

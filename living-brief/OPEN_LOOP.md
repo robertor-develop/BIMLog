@@ -2586,3 +2586,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Update the complete user presentation and run consolidated local source, behavior, TypeScript, Living Brief, and artifact validation.
 - [ ] Independent review must inspect the Build 10 evidence and presentation before release acceptance.
 - [ ] Push, Replit synchronization, production migration/publication, live Chrome verification, and Lorena/Ruben field acceptance require separate authorization and evidence.
+- [x] Expanded assurance audit reran 57 Intake/APU/downstream behaviors and corrected four stale wording/format-only assertions; the complete set passes with no product-code change.
+- [ ] Repository-wide platform-audit P1 candidates remain a separate stabilization stream; zero P0 findings were reported and none of the printed findings targeted the audited Intake/APU/Operations files.
