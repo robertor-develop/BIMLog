@@ -1008,8 +1008,11 @@ async function buildAll() {
 }
 
 if (path.resolve(process.argv[1] ?? "") === __filename) {
-  buildAll().catch((err) => {
-    console.error(err);
-    process.exit(1);
-  });
+  buildAll().then(
+    () => process.exit(0),
+    (err) => {
+      console.error(err);
+      process.exit(1);
+    },
+  );
 }

@@ -9,6 +9,7 @@
     "test:release-lineage": "node scripts/test-release-lineage.mjs",
     "check:checkout-readiness": "node scripts/check-checkout-readiness.mjs",
     "test:checkout-readiness": "node scripts/test-checkout-readiness.mjs",
+    "test:api-build-termination": "node scripts/test-api-build-termination.mjs",
     "check:living-brief": "node scripts/check-living-brief.mjs",
     "living-brief:state": "node scripts/update-living-brief-state.mjs",
     "test:living-brief": "node scripts/test-living-brief-gate.mjs",
