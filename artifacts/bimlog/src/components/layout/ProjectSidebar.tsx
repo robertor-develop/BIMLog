@@ -450,12 +450,12 @@ export function ProjectSidebar({ projectId, projectCode, projectName, projectDes
             className="phasea-project-sidebar-resizer"
             aria-label={tr("Resize project navigation", "Cambiar ancho de la navegación del proyecto")}
             aria-keyshortcuts="ArrowLeft ArrowRight Home End"
-            title={tr("Drag or use arrow keys to resize navigation", "Arrastre o use las flechas para cambiar el ancho")}
+            title={tr("Drag or use arrow keys; Home resets width", "Arrastre o use las flechas; Inicio restablece el ancho")}
             onPointerDown={(event) => { event.preventDefault(); setSidebarResizing(true); }}
             onKeyDown={(event) => {
               if (event.key === "ArrowLeft") { event.preventDefault(); adjustSidebarWidth(sidebarWidth - 16); }
               else if (event.key === "ArrowRight") { event.preventDefault(); adjustSidebarWidth(sidebarWidth + 16); }
-              else if (event.key === "Home") { event.preventDefault(); adjustSidebarWidth(220); }
+              else if (event.key === "Home") { event.preventDefault(); adjustSidebarWidth(248); }
               else if (event.key === "End") { event.preventDefault(); adjustSidebarWidth(420); }
             }}
           >

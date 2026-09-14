@@ -1,7 +1,7 @@
 {
   "suite": "project-sidebar-production-component-browser-assurance",
   "status": "PASS",
-  "assertions": 42,
+  "assertions": 45,
   "persistedWidth": 340,
   "collapsedWidth": 78,
   "capabilityHrefs": [

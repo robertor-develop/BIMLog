@@ -374,30 +374,36 @@ iframe[aria-label*="Replit" i],
   bottom: 0;
   z-index: 20;
   display: grid;
-  width: 16px;
+  width: 8px;
   padding: 0;
   align-items: center;
   justify-items: center;
   border: 0;
-  border-left: 1px solid rgba(255,255,255,0.18);
-  background: rgba(255,255,255,0.035);
+  background: transparent;
   color: rgba(255,255,255,0.88);
   cursor: col-resize;
 }
 .phasea-project-sidebar-resizer svg {
-  width: 11px;
-  height: 28px;
-  padding: 8px 0;
-  border: 1px solid rgba(255,255,255,0.24);
+  width: 8px;
+  height: 22px;
+  padding: 6px 0;
+  border: 1px solid rgba(255,255,255,0.18);
   border-radius: 999px;
-  background: rgba(255,255,255,0.08);
+  background: #0F172A;
   box-sizing: content-box;
+  opacity: 0;
+  transition: opacity 0.12s ease, border-color 0.12s ease, background 0.12s ease;
 }
 .phasea-project-sidebar-resizer:hover,
 .phasea-project-sidebar-resizer:focus-visible {
-  background: rgba(37,99,235,0.28);
-  outline: 2px solid rgba(147,197,253,0.95);
-  outline-offset: -2px;
+  background: rgba(96,165,250,0.18);
+  outline: 0;
+}
+.phasea-project-sidebar-resizer:hover svg,
+.phasea-project-sidebar-resizer:focus-visible svg {
+  opacity: 1;
+  border-color: rgba(147,197,253,0.9);
+  background: #1E3A5F;
 }
 .phasea-nav-group {
   margin: 2px 0 6px;

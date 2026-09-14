@@ -16,6 +16,11 @@ assert.match(source, /sidebarResizing \? "none"/);
 assert.match(source, /className="sidebar-nav phasea-nav-list" tabIndex=\{0\}/);
 assert.match(css, /\.phasea-nav-list[\s\S]*scrollbar-width: thin/);
 assert.match(css, /\.phasea-project-sidebar-resizer[\s\S]*cursor: col-resize/);
+assert.match(css, /\.phasea-project-sidebar-resizer \{[\s\S]*right: 0;[\s\S]*width: 8px;[\s\S]*background: transparent;/);
+assert.match(css, /\.phasea-project-sidebar-resizer svg \{[\s\S]*opacity: 0;/);
+assert.match(css, /\.phasea-project-sidebar-resizer:hover svg,[\s\S]*opacity: 1;/);
+assert.match(source, /Home resets width/);
+assert.match(source, /adjustSidebarWidth\(248\)/);
 assert.match(css, /\.phasea-project-sidebar\s*\{[\s\S]*flex:\s*0 0 auto/);
 assert.match(css, /\.sidebar-nav \{[^}]*overflow-y: auto/);
 

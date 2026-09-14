@@ -40,12 +40,22 @@ await page.waitForTimeout(250);
 assert.equal(Math.round((await sidebar.boundingBox()).width), 420);
 await resizer.press("Home");
 await page.waitForTimeout(250);
-assert.equal(Math.round((await sidebar.boundingBox()).width), 220);
+assert.equal(Math.round((await sidebar.boundingBox()).width), 248);
+
+const grip = resizer.locator("svg");
+assert.equal(await grip.evaluate(element => getComputedStyle(element).opacity), "1");
+await page.getByRole("navigation", { name: "Scrollable project navigation" }).focus();
+await page.waitForTimeout(150);
+assert.equal(await grip.evaluate(element => getComputedStyle(element).opacity), "0");
 
 const handle = await resizer.boundingBox();
 assert.ok(handle);
+await resizer.hover({ position: { x: handle.width / 2, y: 120 } });
+await page.waitForTimeout(150);
+assert.equal(await grip.evaluate(element => getComputedStyle(element).opacity), "1");
 await page.mouse.move(handle.x + handle.width / 2, handle.y + 120);
 await page.mouse.down();
+await page.waitForTimeout(50);
 await page.mouse.move(340, handle.y + 120, { steps: 5 });
 await page.mouse.up();
 await page.waitForTimeout(250);
@@ -108,7 +118,7 @@ assert.deepEqual(errors, []);
 const result = {
   suite: "project-sidebar-production-component-browser-assurance",
   status: "PASS",
-  assertions: 42,
+  assertions: 45,
   persistedWidth: 340,
   collapsedWidth: 78,
   capabilityHrefs: expectedHrefs,
