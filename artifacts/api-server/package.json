@@ -63,6 +63,7 @@
     "test:master-catalog-intake-persistence": "tsx ./src/lib/master-catalog-intake-persistence.behavior.ts",
     "test:job-classification-propagation": "tsx ./src/lib/job-classification-propagation.behavior.ts",
     "test:job-classification-activation": "tsx ./src/lib/job-classification-activation.behavior.ts",
+    "test:job-operations-classification": "tsx ../bimlog/src/lib/job-operations-classification.behavior.ts",
     "test:unified-action-contract": "tsx ./src/lib/unified-action-contract.behavior.ts",
     "test:connector-foundation": "tsx ./src/lib/connector-foundation.behavior.ts",
     "test:coordination-hub-service": "tsx ./src/lib/coordination-hub-service.behavior.ts",

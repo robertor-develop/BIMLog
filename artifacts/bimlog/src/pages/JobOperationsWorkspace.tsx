@@ -24,6 +24,13 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { BudgetGovernancePanel } from "@/components/job-operations/BudgetGovernancePanel";
 import { ProjectControlsDashboard } from "@/components/job-operations/ProjectControlsDashboard";
+import {
+  emptyOperationsClassificationFilters,
+  matchesOperationsClassification,
+  operationsClassificationOptions,
+  type OperationsClassificationFilters,
+  type OperationsClassificationKind,
+} from "@/lib/job-operations-classification";
 
 const API_BASE =
   (import.meta as ImportMeta & { env?: { VITE_API_URL?: string } }).env
@@ -31,6 +38,7 @@ const API_BASE =
 const css = `
 .jo{max-width:1240px;margin:0 auto;padding:24px 0 80px}.jo *{box-sizing:border-box}.jo-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start;margin-bottom:18px}.jo-head-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.jo h1{font-size:30px;margin:4px 0}.jo h2{font-size:20px;margin:0}.jo h3{font-size:16px;margin:0}.jo p{color:#536174}.jo button,.jo select,.jo input,.jo textarea{border:1px solid #cbd5e1;border-radius:8px;padding:9px;background:#fff;color:#0f172a}.jo button{cursor:pointer}.jo button.primary{background:#1d4ed8;border-color:#1d4ed8;color:#fff;font-weight:700}.jo button.danger{color:#b42318}.jo button:disabled{opacity:.5;cursor:not-allowed}.jo-summary{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:10px;margin-bottom:18px}.jo-stat,.jo-card{background:#fff;border:1px solid #d9e1ec;border-radius:14px}.jo-stat{padding:14px}.jo-stat strong{display:block;font-size:22px}.jo-stat span{font-size:12px;color:#64748b}.jo-card{padding:18px;margin-bottom:16px}.jo-item-head{display:flex;justify-content:space-between;gap:12px;align-items:start;margin-bottom:12px}.jo-chip{display:inline-flex;padding:3px 8px;border-radius:999px;background:#eff6ff;color:#1d4ed8;font-size:11px;font-weight:800;margin-right:5px}.jo-chip.warn{background:#fff7ed;color:#c2410c}.jo-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}.jo-task{border:1px solid #e2e8f0;border-radius:12px;padding:14px;margin-top:12px}.jo-task-head{display:flex;justify-content:space-between;gap:10px}.jo label{display:grid;gap:5px;font-size:12px;font-weight:700;color:#475569}.jo-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}.jo-progress{height:8px;background:#e8edf5;border-radius:99px;overflow:hidden;margin-top:8px}.jo-progress span{display:block;height:100%;background:#2563eb}.jo-sub{margin-top:12px;padding-top:12px;border-top:1px solid #e2e8f0}.jo-sub h4{margin:0 0 8px}.jo-table{width:100%;border-collapse:collapse;font-size:13px}.jo-table th,.jo-table td{text-align:left;padding:8px;border-bottom:1px solid #e2e8f0}.jo-empty,.jo-error,.jo-ok{padding:16px;border-radius:12px;margin-bottom:14px}.jo-empty{background:#eff6ff}.jo-error{background:#fff1f2;color:#9f1239}.jo-ok{background:#ecfdf5;color:#166534}.jo-muted{font-size:12px;color:#64748b}.jo-financial{background:#f0fdf4}.jo-forms{display:grid;grid-template-columns:1fr 1fr;gap:12px}.jo-form{border:1px solid #dbe4f0;border-radius:12px;padding:12px}.jo-form .jo-grid{grid-template-columns:2fr 1fr 1fr}.jo-file{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px solid #e2e8f0}.jo textarea{min-height:40px;resize:vertical}.jo input[type=range]{padding:0}.jo-refresh{display:flex;align-items:center;gap:6px}.jo-package-create{background:#f8fafc;border:1px dashed #94a3b8;border-radius:12px;padding:12px;margin:10px 0}.jo-package-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(310px,1fr));gap:10px}.jo-package{border:1px solid #cbd5e1;border-radius:12px;padding:12px;background:#fff}.jo-package.overdue{border-color:#f97316;background:#fff7ed}.jo-package-head{display:flex;justify-content:space-between;gap:10px}.jo-package-meta{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0;font-size:12px;color:#64748b}.jo-checks{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:5px;margin:8px 0}.jo-check{display:flex!important;grid-template-columns:none!important;align-items:center;gap:7px!important;font-weight:500!important}.jo-check input{padding:0}.jo-package-edit{display:grid;grid-template-columns:1.2fr 1fr 1fr auto;gap:8px;align-items:end;margin-top:9px}.jo-connections{border-color:#bfdbfe;background:#f8fbff}.jo-connections-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.jo-connection-form{display:grid;grid-template-columns:1fr 1fr 1.4fr;gap:10px;align-items:end;padding:14px;border:1px solid #bfdbfe;border-radius:12px;background:#fff;margin:14px 0}.jo-connection-form .jo-note{grid-column:1/-1}.jo-connection-form .jo-actions{grid-column:1/-1;margin-top:0}.jo-connection-list{display:grid;gap:10px}.jo-connection{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;padding:13px;border:1px solid #dbe4f0;border-radius:12px;background:#fff;min-width:0}.jo-connection-main{min-width:0}.jo-connection-title{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.jo-connection-title strong,.jo-connection p{overflow-wrap:anywhere}.jo-connection-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:7px;font-size:12px;color:#64748b}.jo-connection-actions{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap}.jo-inline-confirm{display:flex;align-items:center;gap:8px;flex-wrap:wrap;grid-column:1/-1;padding-top:10px;border-top:1px solid #e2e8f0}.jo-inline-confirm p{margin:0;flex:1 1 240px}.jo-permission{padding:12px;border:1px solid #fde68a;background:#fffbeb;border-radius:10px;color:#854d0e}.jo-loading{display:flex;align-items:center;gap:8px;color:#475569}@media(max-width:900px){.jo-grid,.jo-form .jo-grid{grid-template-columns:1fr 1fr}.jo-forms{grid-template-columns:1fr}.jo-head,.jo-item-head,.jo-connections-head{display:block}.jo-table{display:block;overflow:auto}.jo-package-edit{grid-template-columns:1fr 1fr}.jo-connection-form{grid-template-columns:1fr 1fr}.jo-connection-form .jo-note{grid-column:1/-1}}@media(max-width:560px){.jo-grid,.jo-form .jo-grid,.jo-package-edit,.jo-connection-form,.jo-connection{grid-template-columns:1fr}.jo-connection-form .jo-note,.jo-connection-form .jo-actions{grid-column:1}.jo-connection-actions{justify-content:flex-start}.jo-connections{padding:14px}.jo select,.jo input,.jo textarea,.jo button{max-width:100%}}
 .jo-limit{grid-column:1/-1;padding:10px;border:1px solid #fde68a;background:#fffbeb;border-radius:8px;color:#854d0e;font-size:12px}@media(max-width:390px){.jo-connections{padding:12px;border-radius:10px}.jo-connection-meta{display:grid;grid-template-columns:1fr}.jo-connection-actions{display:grid;grid-template-columns:1fr;align-items:stretch}.jo-connection-actions a,.jo-connection-actions button{width:100%}}
+.jo-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr)) auto;gap:10px;align-items:end}.jo-classification{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.jo-classification .jo-chip{margin:0}@media(max-width:900px){.jo-filters{grid-template-columns:1fr 1fr}}@media(max-width:560px){.jo-filters{grid-template-columns:1fr}}
 `;
 
 const n = (value: unknown) => Number(value ?? 0);
@@ -835,6 +843,10 @@ export function JobOperationsWorkspace() {
   const [error, setError] = useState("");
   const [notice, setNotice] = useState("");
   const [busy, setBusy] = useState(false);
+  const [classificationFilters, setClassificationFilters] =
+    useState<OperationsClassificationFilters>(
+      emptyOperationsClassificationFilters,
+    );
   const [exportingPdf, setExportingPdf] = useState(false);
   const [pdfSections, setPdfSections] = useState({
     summary: true,
@@ -937,6 +949,14 @@ export function JobOperationsWorkspace() {
     data?.deliverables?.filter((item: any) => item.taskId === id) ?? [];
   const packagesFor = (id: string) =>
     data?.packages?.filter((item: any) => item.workItemId === id) ?? [];
+  const filteredTasksFor = (id: string) =>
+    tasksFor(id).filter((task: any) =>
+      matchesOperationsClassification(task, classificationFilters),
+    );
+  const filteredPackagesFor = (id: string) =>
+    packagesFor(id).filter((item: any) =>
+      matchesOperationsClassification(item, classificationFilters),
+    );
   const packageTaskIdsFor = (id: string) =>
     data?.packageTasks
       ?.filter((item: any) => item.packageId === id)
@@ -999,6 +1019,50 @@ export function JobOperationsWorkspace() {
     )[value] ?? [value];
 
   const selectedPdfSections = Object.values(pdfSections).filter(Boolean).length;
+  const classificationRecords = [
+    ...(data?.packages ?? []),
+    ...(data?.tasks ?? []),
+  ];
+  const classificationOptions = (kind: OperationsClassificationKind) =>
+    operationsClassificationOptions(classificationRecords, kind);
+  const classificationFilterActive = Object.values(classificationFilters).some(
+    Boolean,
+  );
+  const visibleWorkItems = (data?.workItems ?? []).filter(
+    (item: any) =>
+      !classificationFilterActive ||
+      filteredTasksFor(item.id).length > 0 ||
+      filteredPackagesFor(item.id).length > 0,
+  );
+  const classificationChips = (record: any) =>
+    (
+      [
+        ["discipline", tt("Discipline", "Disciplina")],
+        ["service", tt("Service", "Servicio")],
+        ["phase", tt("Phase", "Fase")],
+      ] as const
+    ).map(([kind, label]) => {
+      const value = record[`${kind}Name`] || record[`${kind}Code`];
+      return value ? (
+        <span className="jo-chip" key={kind}>
+          {label}: {value}
+        </span>
+      ) : null;
+    });
+  const classificationSummary = (record: any) =>
+    (
+      [
+        ["discipline", tt("Discipline", "Disciplina")],
+        ["service", tt("Service", "Servicio")],
+        ["phase", tt("Phase", "Fase")],
+      ] as const
+    )
+      .map(([kind, label]) => {
+        const value = record[`${kind}Name`] || record[`${kind}Code`];
+        return value ? `${label}: ${value}` : "";
+      })
+      .filter(Boolean)
+      .join(" · ");
   const pdfOptions = (
     <div style={{ display: "grid", gap: 8 }}>
       {(
@@ -1102,19 +1166,23 @@ export function JobOperationsWorkspace() {
             `${money(item.plannedHours)}h`,
             item.description || "—",
           ]);
-          for (const task of tasksFor(item.id))
+          for (const task of filteredTasksFor(item.id))
             rows.push([
               tt("Task", "Tarea"),
               language === "es" ? task.nameEs : task.nameEn,
               `${task.progressPercent}%`,
-              statusLabel(task.status),
+              [statusLabel(task.status), classificationSummary(task)]
+                .filter(Boolean)
+                .join(" · "),
             ]);
-          for (const pkg of packagesFor(item.id))
+          for (const pkg of filteredPackagesFor(item.id))
             rows.push([
               tt("Package", "Paquete"),
               `${pkg.packageCode} · ${pkg.title}`,
               `${pkg.progressPercent}%`,
-              packageStatusLabel(pkg.status),
+              [packageStatusLabel(pkg.status), classificationSummary(pkg)]
+                .filter(Boolean)
+                .join(" · "),
             ]);
         }
       }
@@ -1132,6 +1200,14 @@ export function JobOperationsWorkspace() {
               .filter(([, value]) => value)
               .map(([key]) => key)
               .join(", ")}`,
+            classificationFilterActive
+              ? `${tt("Classification filters", "Filtros de clasificación")}: ${Object.entries(
+                  classificationFilters,
+                )
+                  .filter(([, value]) => value)
+                  .map(([kind, value]) => `${kind}=${value}`)
+                  .join(", ")}`
+              : `${tt("Classification filters", "Filtros de clasificación")}: ${tt("All", "Todos")}`,
           ],
           columns: [
             tt("Section", "Sección"),
@@ -1504,7 +1580,90 @@ export function JobOperationsWorkspace() {
               busy={busy}
               mutate={mutate}
             />
-            {data.workItems.map((item: any) => (
+            <section
+              className="jo-card"
+              aria-label={tt(
+                "Classification filters",
+                "Filtros de clasificación",
+              )}
+            >
+              <div className="jo-item-head">
+                <div>
+                  <h2>
+                    {tt("Filter operational work", "Filtrar trabajo operativo")}
+                  </h2>
+                  <p>
+                    {tt(
+                      "Use the governed discipline, service, and phase saved at activation.",
+                      "Use la disciplina, el servicio y la fase gobernados guardados durante la activación.",
+                    )}
+                  </p>
+                </div>
+                <span className="jo-chip">
+                  {visibleWorkItems.length}/{data.workItems.length}{" "}
+                  {tt("scope items", "partidas")}
+                </span>
+              </div>
+              <div className="jo-filters">
+                {(["discipline", "service", "phase"] as const).map((kind) => (
+                  <label key={kind}>
+                    {kind === "discipline"
+                      ? tt("Discipline", "Disciplina")
+                      : kind === "service"
+                        ? tt("Service", "Servicio")
+                        : tt("Phase", "Fase")}
+                    <select
+                      value={classificationFilters[kind]}
+                      onChange={(event) =>
+                        setClassificationFilters((current) => ({
+                          ...current,
+                          [kind]: event.target.value,
+                        }))
+                      }
+                    >
+                      <option value="">
+                        {tt(
+                          `All ${kind}s`,
+                          kind === "discipline"
+                            ? "Todas las disciplinas"
+                            : kind === "service"
+                              ? "Todos los servicios"
+                              : "Todas las fases",
+                        )}
+                      </option>
+                      {classificationOptions(kind).map((option) => (
+                        <option key={option.id} value={option.id}>
+                          {option.name || option.code || option.id}
+                          {option.code && option.name
+                            ? ` (${option.code})`
+                            : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </label>
+                ))}
+                <button
+                  type="button"
+                  disabled={!classificationFilterActive}
+                  onClick={() =>
+                    setClassificationFilters(
+                      emptyOperationsClassificationFilters(),
+                    )
+                  }
+                >
+                  {tt("Clear filters", "Limpiar filtros")}
+                </button>
+              </div>
+            </section>
+            {classificationFilterActive && visibleWorkItems.length === 0 && (
+              <div className="jo-empty">
+                {tt(
+                  "No activated work matches these classifications.",
+                  "Ningún trabajo activado coincide con estas clasificaciones.",
+                )}
+              </div>
+            )}
+            {visibleWorkItems.map((item: any) => (
               <section className="jo-card" key={item.id}>
                 <div className="jo-item-head">
                   <div>
@@ -1716,16 +1875,20 @@ export function JobOperationsWorkspace() {
                       </button>
                     </form>
                   )}
-                  {packagesFor(item.id).length === 0 && (
+                  {filteredPackagesFor(item.id).length === 0 && (
                     <div className="jo-empty">
                       {tt(
-                        "No work packages yet.",
-                        "Todavía no hay paquetes de trabajo.",
+                        classificationFilterActive
+                          ? "No work packages match these classifications."
+                          : "No work packages yet.",
+                        classificationFilterActive
+                          ? "Ningún paquete coincide con estas clasificaciones."
+                          : "Todavía no hay paquetes de trabajo.",
                       )}
                     </div>
                   )}
                   <div className="jo-package-list">
-                    {packagesFor(item.id).map((pkg: any) => {
+                    {filteredPackagesFor(item.id).map((pkg: any) => {
                       const draft = packageDrafts[pkg.id] ?? pkg;
                       const linked = packageTaskIdsFor(pkg.id);
                       return (
@@ -1746,6 +1909,9 @@ export function JobOperationsWorkspace() {
                                 </span>
                               )}
                               <h3>{pkg.title}</h3>
+                              <div className="jo-classification">
+                                {classificationChips(pkg)}
+                              </div>
                             </div>
                             <strong>{pkg.progressPercent}%</strong>
                           </div>
@@ -1908,7 +2074,7 @@ export function JobOperationsWorkspace() {
                     })}
                   </div>
                 </div>
-                {tasksFor(item.id).map((task: any) => {
+                {filteredTasksFor(item.id).map((task: any) => {
                   const draft = drafts[task.id] ?? task;
                   return (
                     <article className="jo-task" key={task.id}>
@@ -1923,6 +2089,9 @@ export function JobOperationsWorkspace() {
                             {money(task.plannedHours)}h ·{" "}
                             {task.deliverableCount} {tt("files", "archivos")}
                           </span>
+                          <div className="jo-classification">
+                            {classificationChips(task)}
+                          </div>
                         </div>
                         <strong>{task.progressPercent}%</strong>
                       </div>
