@@ -23613,11 +23613,11 @@
     },
     {
       "taskId": "project-sidebar-resize-scroll-build11-20260914",
-      "reviewedThroughCommit": "dbea934a113985709493c1b81cf00221ed4cdb71",
-      "reviewedAt": "2026-09-14T16:30:00Z",
+      "reviewedThroughCommit": "0ec9c73721639f48c016ada926f442105899e968",
+      "reviewedAt": "2026-09-14T17:00:00Z",
       "status": "accepted",
       "captureTiming": "post_commit_evidence_reconciliation",
-      "summary": "Reviews the bounded project-navigation parity correction that adds persistent horizontal resize, persistent collapse, keyboard resize, and explicit independent vertical scrolling to the shared ProjectSidebar.",
+      "summary": "Reviews the bounded project-navigation parity correction and production-component Chromium acceptance that add persistent horizontal resize, persistent collapse, keyboard resize, independent vertical scrolling, a navigation landmark, stable first-use width, and non-lagging drag behavior to the shared ProjectSidebar.",
       "workstreams": [
         "ux-less-is-more"
       ],
