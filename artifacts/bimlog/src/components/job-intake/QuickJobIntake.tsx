@@ -2,6 +2,7 @@ import { Check, ChevronLeft, ChevronRight, Settings2 } from "lucide-react";
 import { useMemo, useState, type Dispatch, type SetStateAction } from "react";
 import { ProjectCompanyCreator, type CreatedProjectCompany } from "./ProjectCompanyCreator";
 import { ProjectContactCreator, type CreatedProjectContact } from "./ProjectContactCreator";
+import { MasterClassificationSelectors } from "./MasterClassificationSelectors";
 
 type Props = {
   data: any;
@@ -111,6 +112,7 @@ export function QuickJobIntake(props: Props) {
             <label>{tt("Job code — required", "Código del trabajo — obligatorio")}<input value={data.identity?.jobCode || ""} onChange={(event) => patchIdentity({ jobCode: event.target.value })} /></label>
             <label>{tt("Location — optional", "Ubicación — opcional")}<input value={data.identity?.location || ""} onChange={(event) => patchIdentity({ location: event.target.value })} /></label>
           </div>
+          <MasterClassificationSelectors data={data} setData={setData} request={request} tt={tt} />
         </>}
         {step === 1 && <>
           <h3>{tt("Who hired you, and what is the first item of work?", "¿Quién lo contrató y cuál es la primera partida?")}</h3>

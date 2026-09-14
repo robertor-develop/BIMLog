@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { Router } from "express";
 import { and, asc, eq } from "drizzle-orm";
 import { db } from "@workspace/db";
-import { enterprisePhasesTable, enterpriseServicesTable } from "@workspace/db/schema";
+import { enterprisePhasesTable, enterpriseServicesTable, enterpriseTradesTable } from "@workspace/db/schema";
 import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
 
 const router = Router();
@@ -23,6 +23,11 @@ function normalizedCode(value: unknown) {
 
 router.get("/master-catalogs/:catalog", authMiddleware, async (req, res): Promise<void> => {
   const catalogName = param(req.params.catalog);
+  if (catalogName === "disciplines") {
+    const includeInactive = req.query.includeInactive === "true" && req.user?.isSuperAdmin === true;
+    const entries = await db.select().from(enterpriseTradesTable).where(includeInactive ? undefined : eq(enterpriseTradesTable.state, "active")).orderBy(asc(enterpriseTradesTable.name));
+    res.json({ catalog: catalogName, entries }); return;
+  }
   const table = catalog(catalogName);
   if (!table) { res.status(404).json({ code: "MASTER_CATALOG_NOT_FOUND" }); return; }
   const includeInactive = req.query.includeInactive === "true" && req.user?.isSuperAdmin === true;
