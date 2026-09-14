@@ -107,6 +107,35 @@ export const enterpriseTradesTable = pgTable(
   ],
 );
 
+function enterpriseClassificationTable(tableName: "enterprise_services" | "enterprise_phases") {
+  return pgTable(
+    tableName,
+    {
+      id: text("id").primaryKey(),
+      code: text("code").notNull().unique(),
+      name: text("name").notNull(),
+      state: text("state").default("active").notNull(),
+      version: integer("version").default(1).notNull(),
+      createdById: integer("created_by_id").notNull(),
+      updatedById: integer("updated_by_id").notNull(),
+      createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+      updatedAt: timestamp("updated_at", { withTimezone: true }).defaultNow().notNull(),
+      retiredAt: timestamp("retired_at", { withTimezone: true }),
+    },
+    (t) => [
+      foreignKey({ columns: [t.createdById], foreignColumns: [usersTable.id], name: `${tableName}_creator_fk` }),
+      foreignKey({ columns: [t.updatedById], foreignColumns: [usersTable.id], name: `${tableName}_updater_fk` }),
+      check(`${tableName}_code_chk`, sql`${t.code} ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$'`),
+      check(`${tableName}_state_chk`, sql`${t.state} IN ('active','inactive','retired')`),
+      check(`${tableName}_version_chk`, sql`${t.version} > 0`),
+      check(`${tableName}_lifecycle_chk`, sql`(${t.state} = 'retired') = (${t.retiredAt} IS NOT NULL)`),
+    ],
+  );
+}
+
+export const enterpriseServicesTable = enterpriseClassificationTable("enterprise_services");
+export const enterprisePhasesTable = enterpriseClassificationTable("enterprise_phases");
+
 export const companyTradeRelationshipsTable = pgTable(
   "company_trade_relationships",
   {

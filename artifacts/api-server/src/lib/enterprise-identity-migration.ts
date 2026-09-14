@@ -104,6 +104,40 @@ CREATE TABLE IF NOT EXISTS enterprise_trades(
   CONSTRAINT enterprise_trades_state_chk CHECK(state IN ('active','inactive','retired'))
 );
 
+CREATE TABLE IF NOT EXISTS enterprise_services(
+  id text PRIMARY KEY,
+  code text NOT NULL UNIQUE,
+  name text NOT NULL,
+  state text NOT NULL DEFAULT 'active',
+  version integer NOT NULL DEFAULT 1,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  updated_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  retired_at timestamptz,
+  CONSTRAINT enterprise_services_code_chk CHECK(code ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$'),
+  CONSTRAINT enterprise_services_state_chk CHECK(state IN ('active','inactive','retired')),
+  CONSTRAINT enterprise_services_version_chk CHECK(version>0),
+  CONSTRAINT enterprise_services_lifecycle_chk CHECK((state='retired')=(retired_at IS NOT NULL))
+);
+
+CREATE TABLE IF NOT EXISTS enterprise_phases(
+  id text PRIMARY KEY,
+  code text NOT NULL UNIQUE,
+  name text NOT NULL,
+  state text NOT NULL DEFAULT 'active',
+  version integer NOT NULL DEFAULT 1,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  updated_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  retired_at timestamptz,
+  CONSTRAINT enterprise_phases_code_chk CHECK(code ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$'),
+  CONSTRAINT enterprise_phases_state_chk CHECK(state IN ('active','inactive','retired')),
+  CONSTRAINT enterprise_phases_version_chk CHECK(version>0),
+  CONSTRAINT enterprise_phases_lifecycle_chk CHECK((state='retired')=(retired_at IS NOT NULL))
+);
+
 CREATE TABLE IF NOT EXISTS company_trade_relationships(
   id serial PRIMARY KEY,
   project_id integer NOT NULL,

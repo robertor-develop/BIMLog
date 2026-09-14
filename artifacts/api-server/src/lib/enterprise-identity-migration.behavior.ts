@@ -12,6 +12,8 @@ for (const table of [
   "project_company_relationships",
   "project_contact_relationships",
   "enterprise_trades",
+  "enterprise_services",
+  "enterprise_phases",
   "company_trade_relationships",
   "contract_party_relationships",
 ]) {
