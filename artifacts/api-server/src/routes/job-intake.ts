@@ -68,6 +68,8 @@ const errorEs: Record<string, string> = {
   JOB_ACTIVATION_ASSIGNMENT_SCOPE_INVALID:
     "Cada asignación debe corresponder a una partida activada.",
   JOB_INTAKE_ID_INVALID: "El identificador proporcionado no es válido.",
+  JOB_INTAKE_CLASSIFICATION_INVALID:
+    "La disciplina, el servicio o la fase seleccionada ya no pertenece al catálogo maestro autorizado.",
 };
 
 const run =

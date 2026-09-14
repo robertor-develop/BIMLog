@@ -123,15 +123,23 @@ async function validateRelationshipAuthority(data: JobIntakeData, projectId: num
   const companyIds = new Set<number>(rows.map((row: any) => Number(row.companyId)).filter((id: number) => Number.isSafeInteger(id) && id > 0));
   const contacts = new Map<number, any>(rows.map((row: any) => [Number(row.id), row]));
   const companyId = data.identity.clientCompanyId;
-  const classifications = [
-    ["discipline", data.classification.disciplineId, "enterprise_trades"],
-    ["service", data.classification.serviceId, "enterprise_services"],
-    ["phase", data.classification.phaseId, "enterprise_phases"],
+  const classificationScopes = [
+    ["project", data.classification],
+    ...data.scopeItems.flatMap((item) => item.workPackages.flatMap((workPackage: JobIntakeData["scopeItems"][number]["workPackages"][number]) => [
+      [`package:${workPackage.id}`, workPackage.classification] as const,
+      ...workPackage.tasks.map((task: JobIntakeData["scopeItems"][number]["workPackages"][number]["tasks"][number]) => [`task:${task.id}`, task.classification] as const),
+    ])),
   ] as const;
-  for (const [kind, id, table] of classifications) {
-    if (!id) continue;
-    const found = (await client.query(`SELECT id FROM ${table} WHERE id::text=$1`, [id])).rows[0];
-    if (!found) throw new FinancialControlError(400, "JOB_INTAKE_CLASSIFICATION_INVALID", `The selected ${kind} is not an authoritative master-catalog entry.`);
+  for (const [scopeName, classification] of classificationScopes) {
+    for (const [kind, id, table] of [
+      ["discipline", classification.disciplineId, "enterprise_trades"],
+      ["service", classification.serviceId, "enterprise_services"],
+      ["phase", classification.phaseId, "enterprise_phases"],
+    ] as const) {
+      if (!id) continue;
+      const found = (await client.query(`SELECT id FROM ${table} WHERE id::text=$1`, [id])).rows[0];
+      if (!found) throw new FinancialControlError(400, "JOB_INTAKE_CLASSIFICATION_INVALID", `The selected ${kind} on ${scopeName} is not an authoritative master-catalog entry.`);
+    }
   }
   if (companyId && !companyIds.has(companyId))
     throw new FinancialControlError(400, "JOB_INTAKE_CLIENT_COMPANY_OUT_OF_SCOPE", "The selected client company is not in the current project directory.");
@@ -1059,8 +1067,8 @@ async function createCoreActivationWithClient(
     const taskId = uuid();
     const taskInserted = (
       await client.query(
-        `INSERT INTO job_activation_tasks(id,work_item_id,task_key,name_en,name_es,sequence,status,planned_hours,assignee_user_id,created_by_id)
-      VALUES($1,$2,'scope-delivery','Deliver scope item','Entregar partida de alcance',1,'not_started',$3,$4,$5)
+        `INSERT INTO job_activation_tasks(id,work_item_id,task_key,name_en,name_es,sequence,status,planned_hours,assignee_user_id,created_by_id,discipline_id,discipline_code,discipline_name,service_id,service_code,service_name,phase_id,phase_code,phase_name)
+      VALUES($1,$2,'scope-delivery','Deliver scope item','Entregar partida de alcance',1,'not_started',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
       ON CONFLICT(work_item_id,task_key) DO NOTHING RETURNING id`,
         [
           taskId,
@@ -1068,6 +1076,15 @@ async function createCoreActivationWithClient(
           item.plannedHours,
           input.data.team.projectLeaderUserId,
           input.actorUserId,
+          input.data.classification.disciplineId || null,
+          input.data.classification.disciplineCode || null,
+          input.data.classification.disciplineName || null,
+          input.data.classification.serviceId || null,
+          input.data.classification.serviceCode || null,
+          input.data.classification.serviceName || null,
+          input.data.classification.phaseId || null,
+          input.data.classification.phaseCode || null,
+          input.data.classification.phaseName || null,
         ],
       )
     ).rows[0];
