@@ -83,11 +83,23 @@ const emptyApu = jobIntakeCompletion(
   [],
   capabilities({ costValuePlanner: true, anyCommercial: true }),
 );
-assert.equal(emptyApu.ready, false);
-assert.equal(stage(emptyApu, "pricing")?.status, "in_progress");
-assert.deepEqual(missingCodes(emptyApu), ["pricing"]);
+assert.equal(emptyApu.ready, true);
+assert.equal(stage(emptyApu, "pricing")?.status, "complete");
+assert.deepEqual(missingCodes(emptyApu), []);
 assert.equal(noVersions.scopeItems[0].billingHourlyRate, "35.47");
 assert.equal(noVersions.scopeItems[0].apuPlanVersion, null);
+assert.equal(emptyApu.readinessSummary.financial.setupPercent, 100);
+
+const zeroManualRate = jobIntakeCompletion(
+  normalizeJobIntakeData({
+    ...noVersions,
+    scopeItems: [{ ...noVersions.scopeItems[0], billingHourlyRate: "0" }],
+  }),
+  [],
+  capabilities({ costValuePlanner: true, anyCommercial: true }),
+);
+assert.equal(zeroManualRate.ready, false);
+assert.deepEqual(missingCodes(zeroManualRate), ["pricing"]);
 
 const apuOnly = jobIntakeCompletion(
   fixture({ apuPlanVersion: 7 }),
@@ -96,6 +108,7 @@ const apuOnly = jobIntakeCompletion(
 );
 assert.equal(apuOnly.ready, true);
 assert.equal(stage(apuOnly, "pricing")?.status, "complete");
+assert.equal(fixture({ apuPlanVersion: 7 }).scopeItems[0].apuPlanVersion, 7);
 
 const emptyBudget = jobIntakeCompletion(
   noVersions,
@@ -125,10 +138,10 @@ const emptyFullCommercial = jobIntakeCompletion(
 );
 assert.equal(emptyFullCommercial.ready, false);
 assert.deepEqual(missingCodes(emptyFullCommercial), [
-  "pricing",
   "budget_mapping",
   "budget_snapshot",
 ]);
+assert.equal(stage(emptyFullCommercial, "pricing")?.status, "complete");
 
 const configuredFullCommercial = jobIntakeCompletion(
   fixture({
@@ -145,12 +158,13 @@ assert.equal(configuredFullCommercial.ready, true);
 console.log(
   JSON.stringify({
     status: "PASS",
-    scenario: "BUILD1_EMPTY_COMMERCIAL_PREREQUISITE_REPRODUCTION",
-    zeroVersionFieldDeadEndReproduced: true,
+    scenario: "BUILD2_OPTIONAL_APU_VERSION_WITH_REQUIRED_MANUAL_RATE",
+    zeroVersionApuDeadEndClosed: true,
     manualRatePreserved: noVersions.scopeItems[0].billingHourlyRate,
     cases: [
       "core_without_versions",
       "apu_enabled_without_version",
+      "apu_zero_manual_rate_rejected",
       "apu_with_version",
       "budget_enabled_without_snapshot",
       "budget_with_snapshot",

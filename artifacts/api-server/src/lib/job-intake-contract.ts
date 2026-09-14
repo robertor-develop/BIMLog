@@ -857,9 +857,7 @@ export function jobIntakeCompletion(
     data.scopeItems.every((item) => item.name && positive(item.plannedHours));
   const pricingReady =
     data.scopeItems.length > 0 &&
-    data.scopeItems.every(
-      (item) => positive(item.billingHourlyRate) && item.apuPlanVersion != null,
-    );
+    data.scopeItems.every((item) => positive(item.billingHourlyRate));
   const contractItemsReady =
     data.scopeItems.length > 0 &&
     data.scopeItems.every(
@@ -1006,8 +1004,8 @@ export function jobIntakeCompletion(
     capabilities.costValuePlanner &&
       !pricingReady && {
         code: "pricing",
-        en: "Select an APU and billing hourly rate for every scope item.",
-        es: "Seleccione un APU y una tarifa facturable para cada partida.",
+        en: "Enter a positive billing hourly rate for every scope item.",
+        es: "Ingrese una tarifa facturable positiva para cada partida.",
       },
     capabilities.budget &&
       !contractItemsReady && {
@@ -1145,7 +1143,7 @@ export function jobIntakeCompletion(
     ? Math.min(100, Number((assignedHours * 10000n) / plannedHours) / 100)
     : 0;
   const financialChecks = data.scopeItems.flatMap((item) => [
-    ...(!capabilities.costValuePlanner ? [] : [positive(item.billingHourlyRate), item.apuPlanVersion != null]),
+    ...(!capabilities.costValuePlanner ? [] : [positive(item.billingHourlyRate)]),
     ...(!capabilities.budget ? [] : [!!item.budgetSnapshotLineId, !!item.projectCostNodeId]),
   ]);
   const financialSetupPercent = financialChecks.length ? Math.round(ratio(financialChecks) * 100) : null;
