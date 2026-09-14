@@ -23538,6 +23538,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "apu-intake-field-closure-builds06-10-20260914",
+      "reviewedThroughCommit": "533eadfefefabc0c49a399bff6e468a2d9c19204",
+      "reviewedAt": "2026-09-14T16:00:00Z",
+      "status": "accepted",
+      "captureTiming": "post_commit_evidence_reconciliation",
+      "summary": "Reviews the bounded field-closure changes for explicit Intake completion guidance, inactive Operations assignment routing, optional work-package decomposition, verified APU version persistence, and bilingual help content.",
+      "workstreams": [
+        "apu-job-intake-field-closure"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded usability corrections do not change ecosystem doctrine or product boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating agreement, delegation, publication, or authority rule changes."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds focused regression evidence for completion guidance, activation routing, package guidance, and version verification."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The fixes fulfill existing Job Intake and Operations behavior without expanding the roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform UI now explains exact incomplete-state causes, exposes the activation path, and verifies saved APU history after save."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Navisworks, Lens Next, camera, XML, or plugin package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report layout, report data source, or export contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or registered compliance requirement changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Candidate version and external publication status remain unchanged and unclaimed."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Push, publication, production verification, and field acceptance remain separate future gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records semantic review through the exact Builds 6 through 10 implementation commit."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
