@@ -525,10 +525,10 @@ export async function updateJobBudgetVarianceReview(input: { actorUserId: number
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 
-export async function createJobOperationPackage(input: { actorUserId: number; projectId: unknown; packageId: unknown; workItemId: unknown; packageCode: unknown; title: unknown; description?: unknown; packageType: unknown; responsibleUserId?: unknown; dueDate?: unknown; taskIds: unknown }) {
+export async function createJobOperationPackage(input: { actorUserId: number; projectId: unknown; packageId: unknown; workItemId: unknown; packageCode?: unknown; title: unknown; description?: unknown; packageType: unknown; responsibleUserId?: unknown; dueDate?: unknown; taskIds: unknown }) {
   await waitForJobIntakeMigration();
   const projectId = positiveInt(input.projectId, "projectId"), packageId = id(input.packageId, "packageId"), workItemId = id(input.workItemId, "workItemId");
-  const packageCode = requiredText(input.packageCode, 50, "packageCode"), title = requiredText(input.title, 160, "title"), description = text(input.description, 2000, "description");
+  const title = requiredText(input.title, 160, "title"), description = text(input.description, 2000, "description");
   const packageType = String(input.packageType ?? ""), responsibleUserId = input.responsibleUserId == null || input.responsibleUserId === "" ? null : positiveInt(input.responsibleUserId, "responsibleUserId"), dueDate = optionalDate(input.dueDate, "dueDate"), taskIds = packageTaskIds(input.taskIds);
   if (!PACKAGE_TYPES.has(packageType)) throw new FinancialControlError(400, "JOB_OPERATIONS_PACKAGE_TYPE_INVALID", "Work package type is invalid.");
   const client = await pool.connect();
@@ -538,17 +538,20 @@ export async function createJobOperationPackage(input: { actorUserId: number; pr
     if (!access.canManage) throw new FinancialControlError(403, "JOB_OPERATIONS_PACKAGE_MANAGE_DENIED", "Only the project leader may create work packages.");
     const workItem = (await client.query(`SELECT id,intake_id FROM job_activation_work_items WHERE id=$1 AND project_id=$2 AND status='active'`, [workItemId, projectId])).rows[0];
     if (!workItem) throw new FinancialControlError(404, "JOB_OPERATIONS_WORK_ITEM_NOT_FOUND", "Activated work item not found.");
-    if ((await client.query(`SELECT 1 FROM job_activation_work_packages WHERE project_id=$1 AND package_code=$2 AND id<>$3`, [projectId, packageCode, packageId])).rows[0]) throw new FinancialControlError(409, "JOB_OPERATIONS_PACKAGE_CODE_CONFLICT", "Work package code already exists in this project.");
+    const existing = (await client.query(`SELECT id,package_code "packageCode",version,status FROM job_activation_work_packages WHERE id=$1 AND project_id=$2`, [packageId, projectId])).rows[0];
+    if (existing) {
+      await client.query("COMMIT");
+      return { id: packageId, packageCode: existing.packageCode, version: Number(existing.version), status: existing.status, idempotent: true };
+    }
+    const counter = (await client.query(`INSERT INTO job_activation_work_package_counters(project_id,next_value) VALUES($1,2) ON CONFLICT(project_id) DO UPDATE SET next_value=job_activation_work_package_counters.next_value+1 RETURNING next_value-1 "sequence"`, [projectId])).rows[0];
+    const packageCode = `WP-${projectId}-${String(counter.sequence).padStart(3, "0")}`;
     if (responsibleUserId && !(await client.query(`SELECT 1 FROM project_members WHERE project_id=$1 AND user_id=$2 AND status='active'`, [projectId, responsibleUserId])).rows[0]) throw new FinancialControlError(400, "JOB_OPERATIONS_ASSIGNEE_INVALID", "The responsible person must be an active project member.");
     await validatePackageTasks(client, workItemId, taskIds);
-    const existing = (await client.query(`SELECT id FROM job_activation_work_packages WHERE id=$1 AND project_id=$2`, [packageId, projectId])).rows[0];
-    if (!existing) {
-      await client.query(`INSERT INTO job_activation_work_packages(id,intake_id,project_id,work_item_id,package_code,title,description,package_type,status,responsible_user_id,due_date,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10,$11)`, [packageId, workItem.intake_id, projectId, workItemId, packageCode, title, description, packageType, responsibleUserId, dueDate, input.actorUserId]);
-      await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id) SELECT $1,task_id,$3 FROM unnest($2::text[]) task_id`, [packageId, taskIds, input.actorUserId]);
-      await event(client, { projectId, actorUserId: input.actorUserId, eventType: "work_package_created", workItemId, packageId, evidence: { packageCode, packageType, responsibleUserId, dueDate, taskIds } });
-    }
+    await client.query(`INSERT INTO job_activation_work_packages(id,intake_id,project_id,work_item_id,package_code,title,description,package_type,status,responsible_user_id,due_date,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,'draft',$9,$10,$11)`, [packageId, workItem.intake_id, projectId, workItemId, packageCode, title, description, packageType, responsibleUserId, dueDate, input.actorUserId]);
+    await client.query(`INSERT INTO job_activation_work_package_tasks(package_id,task_id,linked_by_id) SELECT $1,task_id,$3 FROM unnest($2::text[]) task_id`, [packageId, taskIds, input.actorUserId]);
+    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "work_package_created", workItemId, packageId, evidence: { packageCode, packageType, responsibleUserId, dueDate, taskIds } });
     await client.query("COMMIT");
-    return { id: packageId, version: 1, status: "draft", idempotent: Boolean(existing) };
+    return { id: packageId, packageCode, version: 1, status: "draft", idempotent: false };
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 

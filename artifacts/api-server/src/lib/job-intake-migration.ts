@@ -187,6 +187,11 @@ CREATE TABLE IF NOT EXISTS job_activation_work_package_tasks(
   linked_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT job_activation_work_package_task_uidx UNIQUE(package_id,task_id)
 );
+CREATE TABLE IF NOT EXISTS job_activation_work_package_counters(
+  project_id integer PRIMARY KEY REFERENCES projects(id),
+  next_value integer NOT NULL DEFAULT 1,
+  CONSTRAINT job_activation_work_package_counter_positive_chk CHECK(next_value>0)
+);
 CREATE TABLE IF NOT EXISTS job_activation_document_connections(
   id text PRIMARY KEY,
   project_id integer NOT NULL,

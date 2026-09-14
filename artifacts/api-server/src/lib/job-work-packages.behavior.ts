@@ -29,7 +29,8 @@ assert.match(service, /Only the project leader may create work packages/);
 assert.match(service, /responsible_user_id\) === actorUserId/);
 assert.match(service, /pm\.status='active'/);
 assert.match(service, /Every package task must belong to the selected activated work item/);
-assert.match(service, /package_code=\$2 AND id<>\$3/);
+assert.match(service, /job_activation_work_package_counters/);
+assert.match(service, /`WP-\$\{projectId\}-\$\{String\(counter\.sequence\)\.padStart\(3, "0"\)\}`/);
 assert.match(service, /work_item_id=\$1 AND id=ANY\(\$2::text\[\]\)/);
 assert.match(service, /version=version\+1/);
 assert.match(service, /JOB_OPERATIONS_STALE/);
@@ -46,6 +47,8 @@ assert.match(routes, /error: \{ en: error\.message, es:/);
 
 for (const phrase of ["Work packages", "Paquetes de trabajo", "Create package", "Crear paquete", "Internal review", "Revisión interna", "Overdue packages", "Paquetes vencidos"]) assert.match(ui, new RegExp(phrase));
 assert.match(ui, /form\.getAll\("taskIds"\)/);
+assert.doesNotMatch(ui, /name="packageCode"/);
+assert.match(ui, /The package code is generated automatically when you save/);
 assert.match(ui, /packageStatusLabel/);
 assert.match(ui, /packageTypeLabel/);
 assert.match(ui, /data\.packageSummary/);

@@ -61,6 +61,11 @@ export const jobActivationWorkPackageTasksTable = pgTable("job_activation_work_p
   packageId: text("package_id").notNull().references(() => jobActivationWorkPackagesTable.id), taskId: text("task_id").notNull().references(() => jobActivationTasksTable.id), linkedById: integer("linked_by_id").notNull().references(() => usersTable.id), linkedAt: timestamp("linked_at", { withTimezone: true }).notNull().defaultNow(),
 }, (table) => [uniqueIndex("job_activation_work_package_task_uidx").on(table.packageId, table.taskId), index("job_activation_work_package_task_idx").on(table.taskId, table.packageId)]);
 
+export const jobActivationWorkPackageCountersTable = pgTable("job_activation_work_package_counters", {
+  projectId: integer("project_id").primaryKey().references(() => projectsTable.id),
+  nextValue: integer("next_value").notNull().default(1),
+}, (table) => [check("job_activation_work_package_counter_positive_chk", sql`${table.nextValue} > 0`)]);
+
 export const jobActivationDocumentConnectionsTable = pgTable("job_activation_document_connections", {
   id: text("id").primaryKey(),
   projectId: integer("project_id").notNull(),
