@@ -355,6 +355,7 @@ export function JobIntakeWorkspace() {
       setDirectoryEntries(Array.isArray(directory) ? directory : []);
       setEligibleProjectUsers(Array.isArray(eligibleUsers) ? eligibleUsers : null);
       setEligibleProjectUserId("");
+      return current;
     } catch (cause) {
       if (projectIdRef.current !== projectId) return;
       setError(cause instanceof Error ? cause.message : String(cause));
@@ -920,9 +921,23 @@ export function JobIntakeWorkspace() {
               "Trabajo operativo activado con partidas, tareas y asignaciones de recursos.",
             ),
       );
-      await load();
+      const activated = await load();
+      const expectedWorkItems = dataRef.current.scopeItems.length;
+      const expectedTasks = dataRef.current.scopeItems.reduce((total: number, item: any) => total + 1 + (item.workPackages?.length || 0), 0);
+      const expectedAssignments = dataRef.current.team.assignments.length;
+      const actualWorkItems = activated?.activation?.workItems?.length ?? 0;
+      const actualTasks = activated?.activation?.tasks?.length ?? 0;
+      const actualAssignments = activated?.activation?.assignments?.length ?? 0;
+      if (actualWorkItems !== expectedWorkItems || actualTasks !== expectedTasks || actualAssignments !== expectedAssignments)
+        throw new Error(tt(
+          `Activation verification failed: expected ${expectedWorkItems} work items, ${expectedTasks} tasks, and ${expectedAssignments} assignments; received ${actualWorkItems}, ${actualTasks}, and ${actualAssignments}.`,
+          `Falló la verificación de activación: se esperaban ${expectedWorkItems} partidas, ${expectedTasks} tareas y ${expectedAssignments} asignaciones; se recibieron ${actualWorkItems}, ${actualTasks} y ${actualAssignments}.`,
+        ));
+      const firstTaskId = activated.activation.tasks?.[0]?.id;
+      setLocation(`/projects/${projectId}/operations${firstTaskId ? `?taskId=${encodeURIComponent(firstTaskId)}` : ""}`);
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : String(cause));
+    } finally {
       setBusy(false);
     }
   };

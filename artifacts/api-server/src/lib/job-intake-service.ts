@@ -1400,7 +1400,7 @@ export async function activateJobIntake(input: {
       }),
       workflowInstances: workflowBaseline.created,
       workItems: data.scopeItems.length,
-      tasks: data.scopeItems.length,
+      tasks: data.scopeItems.reduce((total, item) => total + 1 + item.workPackages.length, 0),
       resourceAssignments: data.team.assignments.length,
     }) : null;
     if (commercialBaseline) await persistActivatedCommercialBaselineWithClient(client, commercialBaseline, input.actorUserId);
@@ -1408,7 +1408,7 @@ export async function activateJobIntake(input: {
       activationMode,
       capabilities,
       workItems: data.scopeItems.length,
-      tasks: data.scopeItems.length,
+      tasks: data.scopeItems.reduce((total, item) => total + 1 + item.workPackages.length, 0),
       resourceAssignments: data.team.assignments.length,
       contractCreated: Boolean(draft),
       contractId: draft?.contractId ?? null,
