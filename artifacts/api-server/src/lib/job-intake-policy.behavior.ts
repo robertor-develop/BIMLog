@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import { applyIntakePolicyDefaults, normalizeIntakePolicy } from "./job-intake-policy";
+const policy = normalizeIntakePolicy({ delivery_method: "coordination-delivery", budget_governance_policy: "pmo-controlled", enforcement_mode: "enforced" });
+assert.deepEqual(policy, { deliveryMethod: "coordination-delivery", budgetGovernancePolicy: "pmo-controlled", enforcementMode: "enforced", configured: true });
+assert.equal(normalizeIntakePolicy({ delivery_method: "evil" }).deliveryMethod, "bim-submittal");
+const applied = applyIntakePolicyDefaults({ delivery: { workflowTemplate: "" }, governance: { budgetPolicy: "" } }, policy);
+assert.equal(applied.delivery.workflowTemplate, "coordination-delivery");
+assert.equal(applied.governance.budgetPolicy, "pmo-controlled");
+const preserved = applyIntakePolicyDefaults({ delivery: { workflowTemplate: "document-control" }, governance: { budgetPolicy: "advisory" } }, policy);
+assert.equal(preserved.delivery.workflowTemplate, "document-control");
+assert.equal(preserved.governance.budgetPolicy, "advisory");
+console.log("job-intake-policy: PASS");
