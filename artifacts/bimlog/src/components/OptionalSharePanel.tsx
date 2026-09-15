@@ -78,6 +78,19 @@ export function OptionalSharePanel({ language, artifactLabel, defaultRecipients 
     }
   }
 
+  async function closeWithoutSending() {
+    if (telegramDeliveryId && token && telegramReady) {
+      await fetch(`/api/v1/integrations/telegram/deliveries/${encodeURIComponent(telegramDeliveryId)}/cancel`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: "{}",
+      }).catch(() => undefined);
+    }
+    setTelegramReady(false);
+    setTelegramDeliveryId("");
+    setOpen(false);
+  }
+
   async function copyLink() {
     if (!secureLink) return;
     await navigator.clipboard.writeText(secureLink);
@@ -93,7 +106,7 @@ export function OptionalSharePanel({ language, artifactLabel, defaultRecipients 
       <section style={{ width: "min(620px, 100%)", maxHeight: "90vh", overflowY: "auto", borderRadius: 12, background: "hsl(var(--background))", border: "1px solid hsl(var(--border))", padding: 20, boxShadow: "0 24px 70px rgba(15,23,42,.25)" }}>
         <header style={{ display: "flex", justifyContent: "space-between", gap: 16, alignItems: "flex-start" }}>
           <div><h2 style={{ margin: 0, fontSize: 20 }}>{es ? "Compartir archivo" : "Share file"}</h2><p style={{ margin: "6px 0 0", color: "hsl(var(--muted-foreground))" }}>{artifactLabel}</p></div>
-          <Button type="button" size="icon" variant="ghost" aria-label={es ? "Cerrar" : "Close"} onClick={() => setOpen(false)}><X style={{ width: 17, height: 17 }} /></Button>
+          <Button type="button" size="icon" variant="ghost" aria-label={es ? "Cerrar sin enviar" : "Close without sending"} onClick={() => void closeWithoutSending()}><X style={{ width: 17, height: 17 }} /></Button>
         </header>
         <p style={{ margin: "16px 0", padding: 12, borderRadius: 8, background: "hsl(var(--muted))" }}>
           {es ? "Compartir es opcional. Guardar o completar el registro no envía nada automáticamente." : "Sharing is optional. Saving or completing the record never sends anything automatically."}
@@ -113,7 +126,7 @@ export function OptionalSharePanel({ language, artifactLabel, defaultRecipients 
           {telegramReady && <div style={{ display: "grid", gap: 8, padding: 10, border: "1px solid hsl(var(--border))", borderRadius: 8 }}><p role="status" style={{ margin: 0 }}>{es ? "Nada se ha enviado. Revise el archivo y confirme solamente si desea enviarlo a su chat privado conectado." : "Nothing has been sent. Review the file and confirm only if you want to send it to your connected private chat."}</p><Button type="button" disabled={working} onClick={() => void confirmTelegram()}>{es ? "Confirmar y enviar por Telegram" : "Confirm and send by Telegram"}</Button></div>}
         </div>
         {notice && <p role="status" style={{ margin: "14px 0 0", color: "hsl(var(--muted-foreground))" }}>{notice}</p>}
-        <footer style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}><Button type="button" variant="ghost" onClick={() => setOpen(false)}>{es ? "No enviar ahora" : "Do not send now"}</Button></footer>
+        <footer style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}><Button type="button" variant="ghost" onClick={() => void closeWithoutSending()}>{es ? "No enviar ahora" : "Do not send now"}</Button></footer>
       </section>
     </div>}
   </>;
