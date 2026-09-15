@@ -512,7 +512,7 @@ export function LensNextPanelView({
         </section>
       )}
 
-      <details className="lens-next__create" open>
+      <details className="lens-next__create">
         <summary>Create BIMLog Issue</summary>
         <div className="lens-next__filters">
           <label className="lens-next__field"><span>Trade</span><select value={createDraft.trade} onChange={e => { setCreateDraft({ ...createDraft, trade: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select trade</option>{createTrades.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
@@ -698,6 +698,7 @@ export function LensNextPanelView({
 
       {selectedIssue ? (
         <section
+          key={selectedIssue.identity.serverId}
           className="lens-next__details"
           aria-label="Selected issue details"
         >

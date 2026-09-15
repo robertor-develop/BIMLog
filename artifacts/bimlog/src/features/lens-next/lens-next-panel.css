@@ -668,9 +668,22 @@
 }
 
 .lens-next-workspace--embedded .lens-next__body > .lens-next__details {
+  display: flex;
+  flex-direction: column;
   overflow-x: hidden;
   overflow-y: auto;
 }
+
+.lens-next-workspace--embedded .lens-next__details > header { order: 1; }
+.lens-next-workspace--embedded .lens-next__details > dl { order: 2; }
+.lens-next-workspace--embedded .lens-next__details > p { order: 3; }
+.lens-next-workspace--embedded .lens-next__details > .lens-next__actions { order: 4; }
+.lens-next-workspace--embedded .lens-next__details > .lens-next__visual-repair { order: 5; }
+.lens-next-workspace--embedded .lens-next__details > [aria-label="Controlled issue publishing"] { order: 6; }
+.lens-next-workspace--embedded .lens-next__details > [aria-label="Linked BIMLog items"] { order: 7; }
+.lens-next-workspace--embedded .lens-next__details > [aria-label="Reference attachments"] { order: 8; }
+.lens-next-workspace--embedded .lens-next__details > .lens-next__inline-error { order: 9; }
+.lens-next-workspace--embedded .lens-next__details > .lens-next__history { order: 10; }
 
 .lens-next-workspace--embedded .lens-next__issue-card {
   grid-template-columns: 56px minmax(0, 1fr);
