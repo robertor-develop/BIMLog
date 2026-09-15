@@ -25008,6 +25008,93 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b7288f6865defa9d49bd4ecbf7b97fe8986a14d606cf1b7a3e20e027aa9d72c9"
+    },
+    {
+      "taskId": "product-default-configuration-builds06-10-20260915",
+      "reviewedThroughCommit": "a62685cfdd05358d7bc19eb0bc227c6ce66a336c",
+      "reviewedAt": "2026-09-15T23:25:00Z",
+      "trigger": "authorized_product_configuration_block",
+      "immediateFindings": [
+        {
+          "category": "canonical_per_contract_apu_default",
+          "disposition": "implemented_without_overwrite",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Intake applies the only valid saved Commercial APU to unbound draft Contract Items, requires explicit choice when several exist, preserves prior bindings, and reports coverage per contract."
+        }
+      ],
+      "capabilityPreflight": null,
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Commercial authority and general-product behavior are preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation, evidence, and release rules remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deterministic no-overwrite, bilingual, typecheck, and protected-module gates govern the block."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Audited not applicable: the deterministic generator confirms no structural Platform inventory change; the resolver and tests stay inside the existing Job Intake frontend module, with no route, schema, service, or module-boundary change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and Lens Next are unchanged and protected by regression."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated-report contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 6–10 APU behavior and boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the per-contract sole-compatible APU default gap."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/bimlog/src/lib/job-intake-apu-autobind.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-guidance.behavior.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "fd1f593b0a86020a619c813101d2f03c40a32b7033ccc10ac9bb02a82e430c94"
     }
   ]
 }

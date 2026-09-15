@@ -8,7 +8,7 @@
 - [x] Record and test the single-source configuration authority inventory without introducing a competing store or schema.
 - [ ] Expose organization defaults and optional enforcement only where the current permission model can prove the governing company and authorized administrator.
 - [x] Add project-level Budget Governance selection as a reference to the existing operational authority; do not create a parallel financial engine.
-- [ ] Preserve per-contract APU selection from canonical Commercial versions and automatically apply the only compatible option when exactly one exists.
+- [x] Preserve per-contract APU selection from canonical Commercial versions and automatically apply the only compatible option when exactly one exists; multiple versions remain an explicit choice and saved bindings are never overwritten.
 - [x] Preserve the selected delivery method and Budget Governance reference in the existing Intake JSON, activation evidence, and read-only Operations projection without a schema change.
 - [ ] Complete real-browser desktop, exact-390px, English, Spanish, and production persistence acceptance before recommending release; source-level activation, APU, Operations, and protected Lens regressions are part of Build 5.
 - [ ] Reconcile Lorena's forthcoming EDT/task-management detail separately; the current screenshot is a reporting outcome, not sufficient authority for allocation formulas or task-state rules.

@@ -7,6 +7,7 @@
 - Companies remain the client authority, enterprise identity remains the discipline authority, services/phases remain master catalogs, Commercial remains the Generic APU authority, and Job Operations remains the Budget Governance execution authority. No competing store or schema is introduced.
 - Builds 1–5 establish the default-first product contract and tested single-source authority inventory, add one project-level Budget Governance reference with three bounded choices, persist it in the existing Intake JSON, capture the delivery/governance reference in immutable activation evidence, and expose that evidence read-only in Job Operations. Commercial remains the APU authority and Job Operations remains the budget execution authority.
 - No database/schema, Native, Lens identity/navigation/XML/digest, customer-data, APU-calculation, contract-authority, or financial-engine change is introduced. Real production browser acceptance remains a release gate and is not claimed by this local block.
+- Builds 6–10 close the canonical per-contract APU-default gap. Intake applies a saved APU only when exactly one valid Commercial version exists, only to unbound draft Contract Items, and never after activation. Multiple versions require explicit selection. Bilingual per-contract coverage shows linked item counts and exact version references without duplicating Commercial authority.
 
 ## P30 Lens Next Platform-route independent panes — local candidate — 2026-09-15
 
