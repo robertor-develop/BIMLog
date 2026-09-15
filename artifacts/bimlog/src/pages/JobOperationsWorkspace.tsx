@@ -1580,6 +1580,18 @@ export function JobOperationsWorkspace() {
               busy={busy}
               mutate={mutate}
             />
+            {data.configurationSnapshot && (
+              <section className="jo-card" aria-label={tt("Activated project configuration", "Configuración activada del proyecto")}>
+                <div className="jo-item-head"><div>
+                  <h2>{tt("Activated project configuration", "Configuración activada del proyecto")}</h2>
+                  <p>{tt("Read-only evidence captured by Job Intake; operational authorities remain unchanged.", "Evidencia de solo lectura capturada por el Ingreso del Trabajo; las autoridades operativas no cambian.")}</p>
+                </div></div>
+                <div className="jo-chips">
+                  <span className="jo-chip">{tt("Delivery", "Entrega")}: {data.configurationSnapshot.deliveryMethod}</span>
+                  <span className="jo-chip">{tt("Budget governance", "Gobernanza del presupuesto")}: {data.configurationSnapshot.budgetGovernancePolicy}</span>
+                </div>
+              </section>
+            )}
             <section
               className="jo-card"
               aria-label={tt(

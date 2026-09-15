@@ -68,7 +68,7 @@ function workHours(value: unknown) {
 }
 
 async function scope(actorUserId: number, projectId: number, client: Queryable = pool) {
-  const row = (await client.query(`SELECT p.id,p.name,p.code,u.is_super_admin,u.company_id actor_company,pm.role,ji.id intake_id,ji.data,
+  const row = (await client.query(`SELECT p.id,p.name,p.code,u.is_super_admin,u.company_id actor_company,pm.role,ji.id intake_id,ji.data,ji.activation_summary,
     COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id) project_company
     FROM projects p JOIN users u ON u.id=$2 JOIN users creator ON creator.id=p.created_by_id
     LEFT JOIN project_members pm ON pm.project_id=p.id AND pm.user_id=u.id AND pm.status='active'
@@ -78,7 +78,7 @@ async function scope(actorUserId: number, projectId: number, client: Queryable =
   if (!row.is_super_admin && !row.role) throw new FinancialControlError(403, "JOB_OPERATIONS_MEMBERSHIP_REQUIRED", "Active project membership is required.");
   if (!row.is_super_admin && Number(row.actor_company) !== Number(row.project_company)) throw new FinancialControlError(403, "JOB_OPERATIONS_COMPANY_MISMATCH", "The project belongs to another company.");
   const leaderId = Number(row.data?.team?.projectLeaderUserId ?? 0) || null;
-  return { projectId, projectName: row.name, projectCode: row.code, companyId: Number(row.project_company), intakeId: row.intake_id ?? null, leaderId, canManage: row.is_super_admin === true || leaderId === actorUserId || MANAGER_ROLES.has(String(row.role ?? "").toLowerCase()) };
+  return { projectId, projectName: row.name, projectCode: row.code, companyId: Number(row.project_company), intakeId: row.intake_id ?? null, leaderId, configurationSnapshot: row.activation_summary?.configurationSnapshot ?? null, canManage: row.is_super_admin === true || leaderId === actorUserId || MANAGER_ROLES.has(String(row.role ?? "").toLowerCase()) };
 }
 
 async function event(client: Queryable, input: { projectId: number; actorUserId: number; eventType: string; workItemId?: string | null; taskId?: string | null; assignmentId?: string | null; packageId?: string | null; evidence?: Record<string, unknown> }) {
@@ -460,7 +460,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     approved: safePackages.filter((row) => row.status === "approved").length,
   };
   const [budgetGovernance, projectControls] = await Promise.all([budgetGovernanceView(pool, access, capabilities), projectControlsView(pool, access, capabilities)]);
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, capabilities, budgetGovernance, projectControls, reportingContracts, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
 }
 
 export async function createJobBudgetBaseline(input: { actorUserId: number; projectId: unknown; baselineId: unknown; revisionReason?: unknown }) {

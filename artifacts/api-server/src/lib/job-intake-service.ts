@@ -1451,6 +1451,11 @@ export async function activateJobIntake(input: {
     if (commercialBaseline) await persistActivatedCommercialBaselineWithClient(client, commercialBaseline, input.actorUserId);
     const activationSummary = {
       activationMode,
+      configurationSnapshot: {
+        deliveryMethod: data.delivery.workflowTemplate,
+        budgetGovernancePolicy: data.governance.budgetPolicy,
+        capturedFrom: "job_intake",
+      },
       capabilities,
       workItems: data.scopeItems.length,
       tasks: data.scopeItems.reduce((total, item) => total + 1 + item.workPackages.reduce((packageTotal: number, workPackage: any) => packageTotal + Math.max(1, workPackage.tasks.length), 0), 0),
