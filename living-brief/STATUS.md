@@ -2,7 +2,7 @@
 
 ## P24 optional sharing release reconciliation — candidate — 2026-09-14
 
-- The completed financial setup and end-to-end budget closure block advances the Platform identity to `v1.05.N17-P25` while preserving Native N17. The live financial workspace now exposes the existing governed APIs for initial company cost-library creation, project structure pinning, multi-line Intake/APU estimate draft creation, and controlled approval-policy category selection; no schema or parallel financial authority was added.
+- The completed financial setup and end-to-end budget closure block advances the Platform identity to `v1.05.N17-P25` while preserving Native N17. The live financial workspace now exposes the existing governed APIs for initial company cost-library creation, project structure pinning, multi-line Intake/APU estimate draft creation, and controlled approval-policy category selection; no schema or parallel financial authority was added. The protected Generic APU/Job Intake regression must assert the same P25 release identity before this candidate can be frozen.
 - Native remains N17. No Native, Lens Next, database, schema, historical-record, or automatic-send behavior changes.
 - Push, Replit Shell synchronization, zero-drop publication preview, one publication, live Chrome end-to-end acceptance, and explicitly confirmed private Telegram QA delivery are the remaining release gates.
 

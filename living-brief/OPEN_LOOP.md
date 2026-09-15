@@ -3,7 +3,7 @@
 ## P24 optional sharing publication and live acceptance — 2026-09-14
 
 - [x] Reconcile the optional-sharing release identity to `v1.05.N17-P24`; preserve Native N17 and P23 activation behavior.
-- [x] Financial setup closure Builds 1-5: expose governed company cost-library creation, project structure pinning, multi-line initial Intake/APU estimate drafting, controlled original/revision budget policy categories, and the existing review/sole-owner approval/snapshot/contract linkage without schema change or parallel authority. Candidate identity is `v1.05.N17-P25`.
+- [x] Financial setup closure Builds 1-5: expose governed company cost-library creation, project structure pinning, multi-line initial Intake/APU estimate drafting, controlled original/revision budget policy categories, and the existing review/sole-owner approval/snapshot/contract linkage without schema change or parallel authority. Candidate identity is `v1.05.N17-P25`, and its Help Center plus protected Generic APU/Job Intake release assertions are reconciled to that identity.
 - [ ] Push, Replit publication, and a fresh live Chrome financial cycle for P25 remain separate release gates.
 - [ ] Push the exact clean P24 commit to the governed GitHub production lineage.
 - [ ] Synchronize that exact commit through Replit Shell and require a zero-drop production database preview.
