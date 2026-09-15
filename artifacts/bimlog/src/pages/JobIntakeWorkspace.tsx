@@ -32,6 +32,7 @@ import {
   profileForApuRate,
   rateForApuProfile,
 } from "@/lib/job-intake-apu-rates";
+import { applySoleApuToUnboundItems, soleCompatibleApuVersion } from "@/lib/job-intake-apu-default";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const recoveryKey = (projectId: number) =>
@@ -321,7 +322,16 @@ export function JobIntakeWorkspace() {
       const canRecover =
         recovered?.revision === current.revision &&
         JSON.stringify(recovered.data) !== JSON.stringify(current.data);
-      const loadedData = canRecover ? recovered.data : current.data;
+      let loadedData = canRecover ? recovered.data : current.data;
+      const availableApuVersions = Array.isArray(plan?.data?.history) ? plan.data.history : [];
+      const soleApu = current.capabilities?.costValuePlanner && current.status !== "activated"
+        ? soleCompatibleApuVersion(availableApuVersions)
+        : null;
+      if (soleApu && Array.isArray(loadedData?.scopeItems)) {
+        const scopeItems = applySoleApuToUnboundItems(loadedData.scopeItems, availableApuVersions);
+        if (scopeItems.some((item, index) => item !== loadedData.scopeItems[index]))
+          loadedData = { ...loadedData, scopeItems };
+      }
       const selectedBudgetSnapshotId = String(
         loadedData?.commercial?.budgetSnapshotId ?? "",
       );
@@ -350,12 +360,17 @@ export function JobIntakeWorkspace() {
       else if (recovered && recovered.revision < current.revision)
         removeRecovery(projectId);
       setApu(plan?.data?.plan ?? null);
-      setApuVersions(Array.isArray(plan?.data?.history) ? plan.data.history : []);
+      setApuVersions(availableApuVersions);
       setWorkspace(budget);
       setBudgetLines(selectedBudget?.snapshot?.lines ?? []);
       setDirectoryEntries(Array.isArray(directory) ? directory : []);
       setEligibleProjectUsers(Array.isArray(eligibleUsers) ? eligibleUsers : null);
       setEligibleProjectUserId("");
+      if (soleApu && JSON.stringify(loadedData) !== JSON.stringify(current.data))
+        setNotice(tt(
+          `The only compatible saved APU version (v${soleApu.version}) was applied to unbound Contract Items.`,
+          `La única versión APU guardada compatible (v${soleApu.version}) se aplicó a las Partidas de Contrato sin vínculo.`,
+        ));
       return current;
     } catch (cause) {
       if (projectIdRef.current !== projectId) return;
