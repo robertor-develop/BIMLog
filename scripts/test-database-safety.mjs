@@ -61,6 +61,20 @@ assert.deepEqual(
   [{ kind: "drop_redundant_constraint", tableName: "sample", name: "sample_owner_users_id_fk" }],
   "only a structurally identical development duplicate may be dropped when the production-named equivalent already exists",
 );
+assert.deepEqual(
+  reconciliationPlan(
+    {
+      constraints: [{ table_name: "sample", name: "sample_revision_unique", definition: "UNIQUE (revision_id)" }],
+      indexes: [{ table_name: "sample", name: "sample_revision_unique", definition: "CREATE UNIQUE INDEX sample_revision_unique ON public.sample USING btree (revision_id)" }],
+    },
+    {
+      constraints: [{ table_name: "sample", name: "sample_revision_key", definition: "UNIQUE (revision_id)" }],
+      indexes: [{ table_name: "sample", name: "sample_revision_key", definition: "CREATE UNIQUE INDEX sample_revision_key ON public.sample USING btree (revision_id)" }],
+    },
+  ),
+  [{ kind: "constraint", tableName: "sample", from: "sample_revision_unique", to: "sample_revision_key" }],
+  "a unique constraint rename must own its backing-index rename exactly once",
+);
 
 const genericApuMethodConstraintDrop =
   "ALTER TABLE generic_project_apu_lines DROP CONSTRAINT IF EXISTS generic_project_apu_line_method_chk";

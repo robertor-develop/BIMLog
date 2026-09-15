@@ -1655,6 +1655,7 @@ No release, publication, or overall completion claim is permitted until the reco
 - A second Replit proof found Helium held both the canonical and a legacy name for one structurally identical foreign key. Reconciliation may now drop only that redundant development duplicate when the canonical production-named equivalent already exists; it cannot drop production objects or non-equivalent constraints.
 - Constraint reconciliation is grouped one-to-one by table and normalized definition, so no development object can be scheduled twice when historical production aliases share a definition.
 - Pre-push reconciliation is intentionally limited to redundant duplicate removal so Drizzle still sees its source-generated development names; complete production-name normalization runs only after the push.
+- Constraint-backed indexes are excluded from the standalone index phase because PostgreSQL renames the backing index atomically with its unique constraint; this prevents a second rename of an object that no longer exists.
 
 ## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
 

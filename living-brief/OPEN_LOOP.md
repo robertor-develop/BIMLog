@@ -2603,4 +2603,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Constrain Helium cleanup to provably redundant development-only constraints when an identical canonical production-named equivalent is already present.
 - [x] Make equivalent-constraint matching one-to-one so historical aliases cannot schedule a development constraint more than once.
 - [x] Separate pre-push duplicate cleanup from post-push production-name normalization so Drizzle receives the development naming contract it expects.
+- [x] Exclude constraint-backed indexes from the standalone rename phase so each PostgreSQL object is reconciled exactly once.
 - [ ] Complete the corrected Replit sync, inspect a non-destructive publish preview, publish P21, and verify the package-responsible save/reload path in live Chrome.
