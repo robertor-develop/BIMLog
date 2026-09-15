@@ -24174,7 +24174,7 @@
     },
     {
       "taskId": "p21-operations-identity-safe-publish-closure-20260914",
-      "reviewedThroughCommit": "4d5e05c57fde145a552be11f3368b8801a9fc852",
+      "reviewedThroughCommit": "fe6508641f771735ae52ad6a04c25e00df13bb5d",
       "reviewedAt": "2026-09-14T23:40:00Z",
       "status": "candidate",
       "captureTiming": "post_live_smoke_correction",
@@ -24243,11 +24243,12 @@
       ],
       "reviewedChangedPaths": [
         "lib/db/scripts/reconcile-development-schema-names.mjs",
+        "lib/db/scripts/sync-development-schema.mjs",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "7e26a06166ad973d69addf0fcd44e6ca4fc9466284db9bf45531e111e38734dc"
+      "reviewedChangeSha256": "dd8ff80e46b59f241a14c14b5a8b96142f476711e696505e7a251aed761026f7"
     }
   ]
 }
