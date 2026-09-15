@@ -1207,7 +1207,7 @@ export async function activateJobIntake(input: {
 }) {
   await waitForJobIntakeMigration();
   const projectId = positiveId(input.projectId, "projectId");
-  await scope(input.actorUserId, projectId);
+  const projectAccess = await scope(input.actorUserId, projectId);
   const capabilities = await capabilitiesFor(input.actorUserId);
   if (capabilities.fullCommercialActivation)
     await Promise.all([
@@ -1464,6 +1464,8 @@ export async function activateJobIntake(input: {
       configurationSnapshot: {
         deliveryMethod: data.delivery.workflowTemplate,
         budgetGovernancePolicy: data.governance.budgetPolicy,
+        policySource: (await intakePolicy(input.actorUserId, projectAccess)).source,
+        enforcementMode: (await intakePolicy(input.actorUserId, projectAccess)).enforcementMode,
         capturedFrom: "job_intake",
       },
       capabilities,

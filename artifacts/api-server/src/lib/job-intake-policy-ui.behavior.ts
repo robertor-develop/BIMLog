@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const ui = fs.readFileSync(new URL("../../../bimlog/src/pages/JobIntakeWorkspace.tsx", import.meta.url), "utf8");
+const service = fs.readFileSync(new URL("./job-intake-service.ts", import.meta.url), "utf8");
+assert.match(ui, /Source: governed organization\/project policy/);
+assert.match(ui, /Fuente: política gobernada de empresa\/proyecto/);
+assert.match(ui, /Source: BIMLog default/);
+assert.match(ui, /disabled=\{configurationPolicy\.enforcementMode === "enforced"\}/);
+assert.match(service, /policySource:/);
+assert.match(service, /enforcementMode:/);
+console.log("job-intake-policy-ui: PASS");

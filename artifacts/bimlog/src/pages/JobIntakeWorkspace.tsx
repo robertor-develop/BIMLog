@@ -994,6 +994,7 @@ export function JobIntakeWorkspace() {
     missing: [],
     totals: {},
   };
+  const configurationPolicy = intake.configurationPolicy ?? { source: "bimlog_default", enforcementMode: "optional" };
   const readiness = completion.readinessSummary ?? {
     setup: { percent: completion.percent ?? 0, ready: false, missingRequiredCount: completion.missingItems?.length ?? 0 },
     optionalItems: [],
@@ -2324,6 +2325,7 @@ export function JobIntakeWorkspace() {
                     {tt("Budget governance", "Gobernanza del presupuesto")}
                     <select
                       value={data.governance?.budgetPolicy || "standard"}
+                      disabled={configurationPolicy.enforcementMode === "enforced"}
                       onChange={(e) => change("governance", "budgetPolicy", e.target.value)}
                     >
                       <option value="standard">{tt("BIMLog standard controls", "Controles estándar de BIMLog")}</option>
@@ -2336,11 +2338,13 @@ export function JobIntakeWorkspace() {
                         "Esta referencia del proyecto se conserva al activar. La ejecución, las líneas base y el control de variaciones permanecen en Operaciones del Trabajo.",
                       )}
                     </span>
+                    <span className="ji-small">{configurationPolicy.source === "governed_policy" ? tt("Source: governed organization/project policy", "Fuente: política gobernada de empresa/proyecto") : tt("Source: BIMLog default", "Fuente: valor predeterminado de BIMLog")}</span>
                   </label>
                   <label>
                     {tt("Delivery method", "Método de entrega")}
                     <select
                       value={data.delivery.workflowTemplate}
+                      disabled={configurationPolicy.enforcementMode === "enforced"}
                       onChange={(e) =>
                         change("delivery", "workflowTemplate", e.target.value)
                       }
