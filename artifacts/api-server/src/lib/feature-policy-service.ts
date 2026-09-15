@@ -5,6 +5,7 @@ import { FEATURE_KEY_PATTERN } from "./entitlement-contract";
 import { getEffectiveFeature, listEffectiveCatalog } from "./feature-catalog-service";
 import { waitForFeaturePolicyMigration } from "./feature-policy-migration";
 import { hasScopedAuthority, mapCurrentProjectRole } from "./scoped-authority";
+import { policyConfigurationDefinition } from "./feature-policy-configuration";
 
 export type PolicyDecision = "enabled" | "disabled" | "inherit";
 export type PolicyScope = "company" | "project" | "user";
@@ -144,7 +145,7 @@ export async function listEffectivePolicies(input:{scope:"company"|"project";use
   if(input.scope==="project")await projectAuthority(actor,Number(input.projectId),false);
   const administrative=input.scope==="company"?await hasCompanyGrant(actor):(await projectAuthority(actor,Number(input.projectId),false),await projectAuthority(actor,Number(input.projectId),true).then(()=>true).catch(()=>false));
   const catalog=await listEffectiveCatalog(); const rows=[] as Record<string,unknown>[];
-  for(const feature of catalog){if(!policySupport(feature,input.scope))continue;const policy=await effectivePolicy(input.scope,feature.featureKey,actor.companyId,input.projectId);const base={featureKey:feature.featureKey,name:feature.name,availability:feature.capabilityStatus,effectiveDecision:policy?.decision??"inherit",readOnly:true};rows.push(administrative?{...base,decision:policy?.decision??"inherit",version:policy?.version??0,explanation:policy?.explanation??feature.previewUpgradeExplanation,configuration:policy?.configuration??{}}:{...base,explanation:{en:"This is the effective advisory state. Administrative configuration and audit details require current policy authority.",es:"Este es el estado consultivo efectivo. La configuración y auditoría administrativas requieren autoridad de política vigente."}});}
+  for(const feature of catalog){if(!policySupport(feature,input.scope))continue;const policy=await effectivePolicy(input.scope,feature.featureKey,actor.companyId,input.projectId);const base={featureKey:feature.featureKey,name:feature.name,availability:feature.capabilityStatus,effectiveDecision:policy?.decision??"inherit",readOnly:true,configurationDefinition:policyConfigurationDefinition(feature.featureKey)};rows.push(administrative?{...base,decision:policy?.decision??"inherit",version:policy?.version??0,explanation:policy?.explanation??feature.previewUpgradeExplanation,configuration:policy?.configuration??{}}:{...base,explanation:{en:"This is the effective advisory state. Administrative configuration and audit details require current policy authority.",es:"Este es el estado consultivo efectivo. La configuración y auditoría administrativas requieren autoridad de política vigente."}});}
   return{policies:rows,administrative};
 }
 
