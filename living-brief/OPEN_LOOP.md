@@ -2645,3 +2645,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Exclude constraint-backed indexes from the standalone rename phase so each PostgreSQL object is reconciled exactly once.
 - [x] Preserve the two established single-column file-lineage foreign keys and the active-primary-contact partial index in declarative schema so the P21 publication preview is zero-drop.
 - [ ] Complete the corrected Replit sync, inspect a non-destructive publish preview, publish P21, and verify the package-responsible save/reload path in live Chrome.
+
+## P28 Lens Next ELARA regression closure
+
+- [x] Prove the production P27 commit contains no Lens Next source delta.
+- [x] Isolate invalid historical Visual Packages per record so valid records remain XML-exportable.
+- [x] Keep superseded and void revisions out of active operational actions while preserving immutable View History.
+- [x] Compact the issue list and prioritize selected-view actions with independent list/detail scrolling.
+- [ ] Push and publish the exact accepted P28 commit only after explicit authorization.
+- [ ] Verify ELARA XML export and current-record actions in live production after publication.
+- [ ] Keep historical pre-digest packages quarantined unless separately recreated or repaired from an authoritative exact view.

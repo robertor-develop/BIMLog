@@ -1379,3 +1379,10 @@ was performed or authorized.
 - Four assertions failed on obsolete literal wording or formatting-sensitive regular expressions. Direct source inspection proved the corresponding production behavior still present. The assurance checks were corrected to assert the current immutable-version guidance and to permit whitespace-only formatting without weakening field or function identity checks.
 - The corrected 57-test set passes, as do the complete Generic APU suite, catalog authority, PMO mutation boundary, classifications, document connections, sidebar behavior, protected Lens Next suites, TypeScript, secret exposure, database safety, and mojibake gates.
 - The non-blocking repository-wide scanner separately reports P0=0 and P1=64. These legacy code-quality candidates are not silently accepted as clean and remain outside this bounded test-evidence correction.
+
+## 2026-09-15 — Lens Next ELARA post-deployment regression forensics
+
+- Replit Shell showed live P27 at commit `292983a4aa35eae834894797f188b1ab068ebe1c`; its delta contained no Lens Next source changes.
+- Failure evidence showed historical digest-contract 409, inactive-record 404, and route/immutable-identity 409 responses. The collector contained no current Platform/WebView response lines, so it cannot by itself diagnose these Platform errors.
+- Source tracing proved XML export used an all-or-nothing package load and the UI mixed historical revisions into active operational actions. The repair is bounded to per-record XML isolation, active-only operational projection, and compact presentation.
+- No digest was fabricated, no historical identity or customer record was rewritten, and strict cross-project, model, active-record, and digest protections remain in force.

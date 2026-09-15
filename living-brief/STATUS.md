@@ -1702,3 +1702,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - The clean consolidated gate passes all four focused Coordination checks, connector foundation, Coordination Hub service, all Coordination Delivery contracts, protected Files/CVR, complete Generic APU/Job Intake, protected Lens Next, governance, secret exposure, database safety, mojibake, all typechecks, frontend build, and deterministic API production assembly.
 - Machine-readable evidence is frozen at commit `e6d4074e97b5bdf339bde28e48272fe745b104d8`, SHA-256 `5138F3D0CFB06C4255DFDF966A248BC3E8A74E56B9538A37B0FE2794DED4C8EF`.
 - The block is included in the pushed, published, and live-verified `v1.05.N17-P18` production tree. Connector activation, outbound action, and external field acceptance remain separate.
+
+## P28 Lens Next ELARA regression closure — candidate — 2026-09-15
+
+- Production forensics proved the P27 publish commit changed no Lens Next source. ELARA exposed two pre-existing collection-boundary defects: one unverified historical Visual Package aborted the whole XML export, and historical revisions were presented in the active operational list even though active-only routes correctly reject them.
+- XML export now validates every candidate independently, exports every verified package, and reports each skipped historical package with its exact Platform reason. Digest validation, project/model identity, and corruption rejection remain unchanged.
+- The operational list now contains active/current records only; full immutable revision history remains available through View History. Lens Next also uses compact independent list/detail scrolling and action-first selected details without removing capability.
+- Candidate identity is `v1.05.N17-P28`. Native, database/schema, customer data, Job Intake, and APU are unchanged. Push, publication, live ELARA verification, and external acceptance remain separate gates.

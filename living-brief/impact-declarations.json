@@ -24581,6 +24581,92 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "abc0cdb5bdababfb456385231b63dca8b67bc50caebd05b0e9f9e5609174f948"
+    },
+    {
+      "taskId": "p28-lens-elara-regression-closure-20260915",
+      "reviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reviewedAt": "2026-09-15T20:20:00Z",
+      "trigger": "acceptance",
+      "immediateFindings": [
+        {
+          "category": "deployment_or_release_claim",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "The P28 Lens Next correction is a local candidate only; push, publication, live ELARA verification, and external acceptance remain explicitly open."
+        }
+      ],
+      "capabilityPreflight": null,
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, connector, or cross-product authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established Lens Next integrity and release governance remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing strict identity, digest, and acceptance quality gates remain in force."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction restores established Lens Next behavior without changing product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural Platform inventory, route, database, or schema contract changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native product code, camera, quaternion, sectioning, and packaging are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report-generation or document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, compliance claim, or evidence authority changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the bounded P28 Lens Next candidate, root causes, repair, and exclusions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the remaining push, publication, live ELARA, and field-acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records production forensics, collector limitation, and preserved integrity controls."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-build27-xml-integration.behavior.ts",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3496875255b4656f675061b6b246d5c5809dc73006869d4b96744daa60b02e95"
     }
   ]
 }
