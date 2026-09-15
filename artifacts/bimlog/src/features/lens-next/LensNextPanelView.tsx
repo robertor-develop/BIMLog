@@ -451,8 +451,15 @@ export function LensNextPanelView({
       </label>
 
       {(bridgeDisplayName || bridgeModelFingerprint) && (
-        <section className="lens-next__active-model" aria-label="Active Navisworks model">
-          <strong>{bridgeDisplayName ?? "Active Navisworks model"}</strong>
+        <details className="lens-next__active-model" aria-label="Active Navisworks model and synchronization tools">
+          <summary>
+            <span>
+              <strong>{bridgeDisplayName ?? "Active Navisworks model"}</strong>
+              <small>{inventorySummary.matched} matched · {synchronizationPlan.manualConflict + synchronizationPlan.blocked} need review</small>
+            </span>
+            <span>Model tools</span>
+          </summary>
+          <div className="lens-next__active-model-content">
           <small>Binding authority: {bridgeBindingSource === "managed-marker" ? "verified BIMLog managed marker" : bridgeBindingSource === "platform-binding" ? "authorized platform binding" : bridgeBindingSource === "explicit-user-selection" ? "explicit authorized selection" : "unbound"}</small>
           <div className="lens-next__inventory-summary" aria-label="Read-only reconciliation preview">
             <span><strong>{inventorySummary.matched}</strong> matched</span>
@@ -509,7 +516,8 @@ export function LensNextPanelView({
             </section>
           )}
           {bridgeModelFingerprint && <small>Model {bridgeModelFingerprint.slice(0, 12)}…</small>}
-        </section>
+          </div>
+        </details>
       )}
 
       <details className="lens-next__create">

@@ -15,5 +15,8 @@ assert.match(css, /\[aria-label="Reference attachments"\]\s*\{\s*order:\s*8;/);
 assert.match(view, /key=\{selectedIssue\.identity\.serverId\}[\s\S]*?className="lens-next__details"/);
 assert.match(view, /<details className="lens-next__create">/);
 assert.doesNotMatch(view, /<details className="lens-next__create" open>/);
+assert.match(view, /<details className="lens-next__active-model" aria-label="Active Navisworks model and synchronization tools">/);
+assert.doesNotMatch(view, /<details className="lens-next__active-model"[^>]*\sopen(?:=|>)/);
+assert.match(css, /\.lens-next__active-model > summary[\s\S]*?padding:\s*0\.55rem 0\.8rem;/);
 
-console.log("Lens Next compact independent-pane workspace: PASS");
+console.log("Lens Next compact independent-pane workspace with visible issue list: PASS");

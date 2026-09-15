@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## P29 Lens Next working-viewport correction
+
+- [x] Collapse the reconciliation inventory so it cannot displace the working viewpoint list below the visible Navisworks panel.
+- [x] Preserve a stable left-side viewpoint browser and adjacent right-side selected-viewpoint detail surface with independent vertical scrolling.
+- [x] Lock the collapsed-by-default utility section and two-pane ownership with focused executable regressions.
+- [ ] Push, publish, and verify the corrected embedded layout in the real Navisworks 2025 panel only after explicit authorization.
+
 ## P24 optional sharing publication and live acceptance — 2026-09-14
 
 - [x] Reconcile the optional-sharing release identity to `v1.05.N17-P24`; preserve Native N17 and P23 activation behavior.

@@ -24663,6 +24663,90 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f0eba7a35028e4acadfca35a6e64b248844550688f9096779855cba562deba17"
+    },
+    {
+      "taskId": "p29-lens-working-viewport-20260915",
+      "reviewedThroughCommit": "8d37db87310bdd183155407b5b1380dd58f57a9e",
+      "reviewedAt": "2026-09-15T21:50:00Z",
+      "trigger": "customer_feedback",
+      "immediateFindings": [
+        {
+          "category": "embedded_workspace_usability",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The expanded reconciliation inventory displaced the viewpoint list below the working viewport; the inventory must be optional while list and selected detail remain adjacent."
+        }
+      ],
+      "capabilityPreflight": null,
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves canonical viewpoint identity and human-controlled actions."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation and release gates remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction applies existing compact, accessible, production-component UI requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, runtime, schema, or module inventory change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native code, camera, sectioning, XML, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated-report change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local P29 embedded working-viewport correction and exclusions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the remaining publication and real Navisworks verification gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-compact-workspace.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d4f0aa3e03355347ec987a3d7ce5edd7ea1c5d8e21e01d7064fc397dd860d1ad"
     }
   ]
 }

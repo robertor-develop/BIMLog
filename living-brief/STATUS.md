@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## P29 Lens Next working-viewport correction — local candidate — 2026-09-15
+
+- The embedded Navisworks workspace keeps the viewpoint list continuously visible in the left pane by collapsing the model reconciliation inventory into a compact, optional Model Tools section.
+- Selecting a viewpoint renders its authoritative details and actions directly beside the list in the independently scrollable right pane; list scrolling never moves the selected detail surface away from the working row.
+- This is a presentation-only correction. It does not change viewpoint identity, navigation, XML serialization, digest validation, publication, Native camera behavior, database/schema, or customer records.
+
 ## P24 optional sharing release reconciliation — candidate — 2026-09-14
 
 - P25 was pushed, synchronized through Replit Shell, built, and published at exact source `496c55e8fea7f2f45549fe2e706cd32817be4c40`. Its fresh production smoke passed project creation, complete Job Intake activation, Operations progress/hours/package creation, baseline freezing, company cost-library creation, and project cost-structure pinning. The first initial-budget submission then exposed one exact UI/API contract defect: the API requires bounded notes on every budget line while the new manual estimate form did not expose that required field.

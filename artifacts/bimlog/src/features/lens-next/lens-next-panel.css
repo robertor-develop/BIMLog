@@ -521,15 +521,35 @@
 }
 
 .lens-next__active-model {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-  gap: 0.75rem;
-  align-items: stretch;
   min-width: 0;
-  padding: 0.65rem 0.8rem;
   border: 1px solid #dbe4ee;
   background: #f8fafc;
+}
+
+.lens-next__active-model > summary {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  padding: 0.55rem 0.8rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.lens-next__active-model > summary::-webkit-details-marker { display: none; }
+.lens-next__active-model > summary > span:first-child { display: grid; min-width: 0; gap: 1px; }
+.lens-next__active-model > summary strong { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.lens-next__active-model > summary > span:last-child { flex: 0 0 auto; color: #17653f; font-size: 0.72rem; font-weight: 700; }
+.lens-next__active-model > summary > span:last-child::after { content: " +"; }
+.lens-next__active-model[open] > summary > span:last-child::after { content: " −"; }
+
+.lens-next__active-model-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 0 0.8rem 0.75rem;
+  border-top: 1px solid #e5ebe7;
 }
 
 .lens-next__active-model small {
