@@ -3603,6 +3603,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           artifactLabel={`${rfi.number}-Complete-RFI-Package.pdf`}
           defaultRecipients={[rfi.submittedToEmail, ...((rfi.distributionList as string[] | null) || [])].filter((value): value is string => Boolean(value))}
           downloadUrl={`/api/v1/projects/${projectId}/rfis/${rfi.id}/export-complete`}
+          telegramDelivery={{ projectId, artifactType: "rfi_complete_pdf", entityId: rfi.id }}
         />
         <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Optional sharing never changes the RFI lifecycle.", "Compartir opcionalmente nunca cambia el ciclo de vida del RFI.", lang)}</span>
       </div>

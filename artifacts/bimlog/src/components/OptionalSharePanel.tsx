@@ -3,6 +3,7 @@ import { Copy, Download, Mail, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { buildEmailComposeUrl, emailAttachmentGuidance, type EmailComposeProvider } from "@/lib/optional-sharing";
+import { useAuthStore } from "@/store/auth";
 
 type Props = {
   language: "en" | "es";
@@ -10,19 +11,21 @@ type Props = {
   defaultRecipients?: string[];
   downloadUrl: string;
   secureLink?: string;
-  onTelegramPreview?: (recipients: string[]) => Promise<void> | void;
+  telegramDelivery?: { projectId: number; artifactType: string; entityId: number };
 };
 
 const splitRecipients = (value: string) => value.split(/[;,]/).map(item => item.trim()).filter(Boolean);
 
-export function OptionalSharePanel({ language, artifactLabel, defaultRecipients = [], downloadUrl, secureLink, onTelegramPreview }: Props) {
+export function OptionalSharePanel({ language, artifactLabel, defaultRecipients = [], downloadUrl, secureLink, telegramDelivery }: Props) {
   const es = language === "es";
   const [open, setOpen] = useState(false);
   const [recipients, setRecipients] = useState(defaultRecipients.join(", "));
   const [provider, setProvider] = useState<EmailComposeProvider>("default");
   const [telegramReady, setTelegramReady] = useState(false);
+  const [telegramDeliveryId, setTelegramDeliveryId] = useState("");
   const [working, setWorking] = useState(false);
   const [notice, setNotice] = useState("");
+  const token = useAuthStore(state => state.token);
   const recipientList = useMemo(() => splitRecipients(recipients), [recipients]);
   const subject = es ? `Entrega BIMLog: ${artifactLabel}` : `BIMLog delivery: ${artifactLabel}`;
   const body = es
@@ -35,12 +38,41 @@ export function OptionalSharePanel({ language, artifactLabel, defaultRecipients 
   }
 
   async function prepareTelegram() {
-    if (!onTelegramPreview) return;
+    if (!telegramDelivery || !token) return;
     setWorking(true);
     try {
-      await onTelegramPreview(recipientList);
+      const response = await fetch("/api/v1/integrations/telegram/deliveries/preview", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ ...telegramDelivery, channel: "telegram", recipients: "me", language, confirmationKey: `browser:${crypto.randomUUID()}` }),
+      });
+      const data = await response.json() as { id?: string; error?: string };
+      if (!response.ok || !data.id) throw new Error(data.error || (es ? "No se pudo preparar Telegram." : "Telegram preview could not be prepared."));
+      setTelegramDeliveryId(data.id);
       setTelegramReady(true);
       setNotice(es ? "Vista previa preparada. Nada se envió todavía." : "Preview prepared. Nothing has been sent yet.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : (es ? "No se pudo preparar Telegram." : "Telegram preview could not be prepared."));
+    } finally {
+      setWorking(false);
+    }
+  }
+
+  async function confirmTelegram() {
+    if (!telegramDeliveryId || !token) return;
+    setWorking(true);
+    try {
+      const response = await fetch(`/api/v1/integrations/telegram/deliveries/${encodeURIComponent(telegramDeliveryId)}/confirm`, {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: "{}",
+      });
+      const data = await response.json() as { status?: string; error?: string };
+      if (!response.ok || data.status !== "delivered") throw new Error(data.error || `${es ? "Estado" : "Status"}: ${data.status || response.status}`);
+      setTelegramReady(false);
+      setNotice(es ? "Telegram confirmó la entrega." : "Telegram acknowledged delivery.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : (es ? "Falló la entrega por Telegram." : "Telegram delivery failed."));
     } finally {
       setWorking(false);
     }
@@ -77,8 +109,8 @@ export function OptionalSharePanel({ language, artifactLabel, defaultRecipients 
         <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 14, display: "grid", gap: 10 }}>
           <label style={{ display: "grid", gap: 6 }}><span>{es ? "Aplicación de correo" : "Email application"}</span><select value={provider} onChange={event => setProvider(event.target.value as EmailComposeProvider)}><option value="default">{es ? "Aplicación predeterminada" : "Default application"}</option><option value="gmail">Gmail</option><option value="outlook">Outlook</option><option value="yahoo">Yahoo Mail</option></select></label>
           <Button type="button" variant="outline" onClick={prepareEmail}><Mail style={{ width: 15, height: 15 }} />{es ? "Preparar correo" : "Prepare email"}</Button>
-          {onTelegramPreview && <Button type="button" variant="outline" disabled={working} onClick={() => void prepareTelegram()}><Send style={{ width: 15, height: 15 }} />{working ? (es ? "Preparando…" : "Preparing…") : (es ? "Preparar vista previa de Telegram" : "Prepare Telegram preview")}</Button>}
-          {telegramReady && <p role="status" style={{ margin: 0 }}>{es ? "Use la confirmación separada que aparece en la vista previa para enviar." : "Use the separate confirmation shown in the preview to send."}</p>}
+          {telegramDelivery && <Button type="button" variant="outline" disabled={working || !token} onClick={() => void prepareTelegram()}><Send style={{ width: 15, height: 15 }} />{working ? (es ? "Preparando…" : "Preparing…") : (es ? "Preparar vista previa de Telegram" : "Prepare Telegram preview")}</Button>}
+          {telegramReady && <div style={{ display: "grid", gap: 8, padding: 10, border: "1px solid hsl(var(--border))", borderRadius: 8 }}><p role="status" style={{ margin: 0 }}>{es ? "Nada se ha enviado. Revise el archivo y confirme solamente si desea enviarlo a su chat privado conectado." : "Nothing has been sent. Review the file and confirm only if you want to send it to your connected private chat."}</p><Button type="button" disabled={working} onClick={() => void confirmTelegram()}>{es ? "Confirmar y enviar por Telegram" : "Confirm and send by Telegram"}</Button></div>}
         </div>
         {notice && <p role="status" style={{ margin: "14px 0 0", color: "hsl(var(--muted-foreground))" }}>{notice}</p>}
         <footer style={{ display: "flex", justifyContent: "flex-end", marginTop: 18 }}><Button type="button" variant="ghost" onClick={() => setOpen(false)}>{es ? "No enviar ahora" : "Do not send now"}</Button></footer>
