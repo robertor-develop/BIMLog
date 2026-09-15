@@ -9,6 +9,7 @@ export type FeaturePolicySupportReview = {
 // Reviewed canonical support declarations. A scope is true only when the
 // corresponding policy is consumed by the entitlement resolver today.
 export const FEATURE_POLICY_SUPPORT_MATRIX = {
+  "project.intake.configuration": { company: true, project: true, user: false, configurationKeys: ["delivery_method", "budget_governance_policy", "enforcement_mode"], reason: "Verified company and project administrators may define bounded Intake defaults; BIMLog defaults remain usable when no policy exists." },
   "rfi.core": { company: true, project: true, user: false, configurationKeys: [], reason: "Organizations and projects may restrict RFI access; the security-critical core is not an ordinary user preference." },
   "rfi.export.pdf": { company: true, project: true, user: true, configurationKeys: ["include_audit_metadata"], reason: "PDF export availability and its audit-metadata option have canonical resolver effects." },
   "rfi.export.excel": { company: true, project: true, user: true, configurationKeys: ["include_closed_items"], reason: "Excel export availability and closed-item inclusion have canonical resolver effects." },

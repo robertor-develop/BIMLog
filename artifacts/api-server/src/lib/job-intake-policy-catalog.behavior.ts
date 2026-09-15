@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { initialFeature } from "./initial-feature-catalog";
+import { FEATURE_POLICY_SUPPORT_MATRIX } from "./feature-policy-support-matrix";
+const feature = initialFeature("project.intake.configuration");
+assert.equal(feature?.supportsCompanyPolicy, true);
+assert.equal(feature?.supportsProjectPolicy, true);
+assert.equal(feature?.supportsUserPreference, false);
+assert.deepEqual(feature?.policyConfigurationKeys, ["delivery_method", "budget_governance_policy", "enforcement_mode"]);
+assert.deepEqual(FEATURE_POLICY_SUPPORT_MATRIX["project.intake.configuration"].configurationKeys, feature?.policyConfigurationKeys);
+console.log("job-intake-policy-catalog: PASS");
