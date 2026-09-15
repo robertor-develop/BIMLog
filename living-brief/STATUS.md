@@ -1653,6 +1653,7 @@ No release, publication, or overall completion claim is permitted until the reco
 - Platform identity advances to `v1.05.N17-P21`. Native and Lens Next remain unchanged. Production database data/schema changes are not part of this correction; push, corrected Replit synchronization, safe preview, publication, and live Chrome acceptance remain separate gates.
 - Replit execution proved name reconciliation must precede the Drizzle push as well as follow it. The guarded sync now normalizes only structurally identical development object names before the push, preventing duplicate-name failure while preserving its Helium-only target and production-read-only inventory.
 - A second Replit proof found Helium held both the canonical and a legacy name for one structurally identical foreign key. Reconciliation may now drop only that redundant development duplicate when the canonical production-named equivalent already exists; it cannot drop production objects or non-equivalent constraints.
+- Constraint reconciliation is grouped one-to-one by table and normalized definition, so no development object can be scheduled twice when historical production aliases share a definition.
 
 ## POST-P18 assurance Build 70 — production-gate correction — 2026-09-12
 
