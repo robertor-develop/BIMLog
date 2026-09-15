@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
+import { OptionalSharePanel } from "@/components/OptionalSharePanel";
 import { format, differenceInDays, isValid } from "date-fns";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
@@ -2506,6 +2507,13 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
           {auditLoading ? <Loader2 style={{ width: 12, height: 12, animation: "spin 1s linear infinite" }} /> : <Shield style={{ width: 12, height: 12 }} />}
           {w("Audit Certificate", "Certificado de Auditoría", lang)}
         </Button>
+        <OptionalSharePanel
+          language={lang === "es" ? "es" : "en"}
+          artifactLabel={`${submittal.number}-Submittal.pdf`}
+          defaultRecipients={[submittal.submittedToEmail || ""].filter(Boolean)}
+          downloadUrl={`/api/v1/projects/${projectId}/submittals/${submittal.id}/export`}
+          telegramDelivery={{ projectId, artifactType: "submittal_pdf", entityId: submittal.id }}
+        />
         <button
           onClick={handleAiCheck}
           disabled={aiCheckLoading}
