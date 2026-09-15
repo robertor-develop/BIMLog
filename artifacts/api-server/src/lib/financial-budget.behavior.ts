@@ -514,6 +514,10 @@ const browser = fs.readFileSync(
     path.resolve(process.cwd(), "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx"),
     "utf8",
   ),
+  controlsBrowser = fs.readFileSync(
+    path.resolve(process.cwd(), "artifacts/bimlog/src/pages/FinancialControlsSettings.tsx"),
+    "utf8",
+  ),
   service = fs.readFileSync(
     path.resolve(process.cwd(), "artifacts/api-server/src/lib/financial-budget-service.ts"),
     "utf8",
@@ -607,6 +611,17 @@ assert.match(service, /selfApprovalOverride/);
 check("sole-owner override UI and immutable audit", "explicit reason and confirmation path");
 assert.match(browser, /Retry/);
 check("load failure retry", "controlled error state");
+assert.match(browser, /Create approved cost library/);
+assert.match(service, /company_cost_library_versions/);
+check("empty company cost library can be created", "governed manage endpoint exposed in the production workspace");
+assert.match(browser, /Pin library version/);
+check("approved library can be pinned", "project cost structure setup is no longer a dead end");
+assert.match(browser, /Create initial estimate/);
+assert.match(browser, /manual_intake_apu_estimate/);
+check("initial Intake and APU estimate draft", "one or more exact lines remain bound to the pinned structure");
+assert.match(controlsBrowser, /original_budget/);
+assert.match(controlsBrowser, /budget_revision/);
+check("approval policy category is controlled", "free-text category mismatch is prevented in Settings");
 assert.match(service, /No accounting actuals/);
 check("financial product boundary visible", "no accounting claim");
 assert.doesNotMatch(
@@ -629,7 +644,7 @@ assert.match(service, /ROLLBACK/);
 check("failed snapshot or audit rolls back", "single transaction helper");
 assert.match(service, /financial_authority_journal/);
 check("accepted append-only audit reused", "no second audit system");
-assert.equal(checks.length, 72);
+assert.equal(checks.length, 76);
 console.log(
   JSON.stringify(
     { suite: "cost-financial-control-build-2-pure", status: "passed", checks },

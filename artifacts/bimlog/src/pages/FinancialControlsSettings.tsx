@@ -876,12 +876,8 @@ export function FinancialControlsSettings() {
                           gap: 8,
                         }}
                       >
-                        <input
+                        <select
                           style={inputStyle}
-                          placeholder={tt(
-                            "Transaction category",
-                            "Categoría de transacción",
-                          )}
                           value={policy.transactionCategory}
                           onChange={(e) =>
                             setPolicy({
@@ -889,7 +885,11 @@ export function FinancialControlsSettings() {
                               transactionCategory: e.target.value,
                             })
                           }
-                        />
+                        >
+                          <option value="">{tt("Select transaction category", "Seleccione la categoría")}</option>
+                          <option value="original_budget">{tt("Original budget", "Presupuesto original")}</option>
+                          <option value="budget_revision">{tt("Budget revision", "Revisión presupuestaria")}</option>
+                        </select>
                         <input
                           style={inputStyle}
                           value={policy.currency}

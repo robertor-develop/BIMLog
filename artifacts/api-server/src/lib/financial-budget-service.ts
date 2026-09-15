@@ -1051,6 +1051,15 @@ export async function getFinancialBudgetWorkspace(input: {
       [projectId],
     )
   ).rows;
+  const libraries = (
+    await pool.query(
+      `SELECT id,library_id,version,effective_date,status,reason,content_fingerprint
+       FROM company_cost_library_versions
+       WHERE company_id=$1 AND status='approved'
+       ORDER BY version DESC,approved_at DESC`,
+      [project.company_id],
+    )
+  ).rows;
   const nodes = structures[0]
     ? (
         await pool.query(
@@ -1108,6 +1117,7 @@ export async function getFinancialBudgetWorkspace(input: {
       companyName: project.company_name,
     },
     structures,
+    libraries,
     nodes,
     budgets,
     snapshots: snapshots.map((row: any) => snapshotResponse(row)),

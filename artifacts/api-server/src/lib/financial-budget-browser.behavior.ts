@@ -59,6 +59,9 @@ const user = {
     structures: [
       { id: "structure-1", version: 1, library_version: 3, status: "approved" },
     ],
+    libraries: [
+      { id: "library-version-3", library_id: "library-1", version: 3, status: "approved" },
+    ],
     nodes: [
       {
         id: "node-1",

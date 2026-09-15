@@ -9,6 +9,7 @@ const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type Mode = "structure" | "budget" | "history" | "snapshot";
 type Workspace = {
   project: { id: number; name: string; code: string; companyName: string };
+  libraries: any[];
   structures: any[];
   nodes: any[];
   budgets: any[];
@@ -375,7 +376,9 @@ export function FinancialBudgetWorkspace({ mode }: { mode: Mode }) {
               />
             </section>
           )}
-          {mode === "structure" && <CostStructure data={data} tt={tt} nodes={visibleNodes} />}{" "}
+          {mode === "structure" && (
+            <CostStructure data={data} tt={tt} nodes={visibleNodes} projectId={projectId} token={token ?? ""} reload={load} />
+          )}{" "}
           {mode === "budget" && (
             <Budget
               data={data}
@@ -413,24 +416,70 @@ function CostStructure({
   data,
   tt,
   nodes,
+  projectId,
+  token,
+  reload,
 }: {
   data: Workspace;
   tt: (a: string, b: string) => string;
   nodes: any[];
+  projectId: number;
+  token: string;
+  reload: () => void;
 }) {
   const structure = data.structures[0];
+  const library = data.libraries?.[0];
+  const [code, setCode] = useState("01");
+  const [name, setName] = useState("");
+  const [reason, setReason] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const createLibrary = async () => {
+    setBusy(true); setMessage("");
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/cost-libraries`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ reason, nodes: [{ stableNodeId: `COST-${code.trim()}`, code: code.trim(), name: name.trim(), active: true, sortOrder: 0 }] }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body?.error?.en || "Cost library creation denied");
+      setMessage(tt("Approved cost library created.", "Se creó la biblioteca de costos aprobada.")); reload();
+    } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); }
+    finally { setBusy(false); }
+  };
+  const pinLibrary = async () => {
+    if (!library) return;
+    setBusy(true); setMessage("");
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/cost-structures`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ libraryVersionId: library.id, reason }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body?.error?.en || "Cost structure creation denied");
+      setMessage(tt("Project cost structure pinned.", "Se fijó la estructura de costos del proyecto.")); reload();
+    } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); }
+    finally { setBusy(false); }
+  };
   return (
     <section className="fb-panel">
       <h2>
         {tt("Pinned project cost structure", "Estructura de costos fijada")}
       </h2>
       {!structure ? (
-        <Empty>
-          {tt(
-            "No approved project cost structure is pinned yet.",
-            "Aún no hay una estructura de costos aprobada fijada.",
-          )}
-        </Empty>
+        <div className="fb-import">
+          <p>{tt("Create the first approved company cost library, then pin it to this project. Existing libraries can be pinned directly.", "Cree la primera biblioteca de costos aprobada y luego fíjela a este proyecto. Las bibliotecas existentes pueden fijarse directamente.")}</p>
+          {message && <div className="fb-message" role="status">{message}</div>}
+          {!library && <div className="fb-import-fields">
+            <label>{tt("Cost code", "Código de costo")}<input value={code} onChange={(event) => setCode(event.target.value)} /></label>
+            <label>{tt("Cost node name", "Nombre del nodo de costo")}<input value={name} onChange={(event) => setName(event.target.value)} /></label>
+          </div>}
+          <label>{tt("Required reason", "Motivo obligatorio")}<textarea value={reason} onChange={(event) => setReason(event.target.value)} /></label>
+          <div className="fb-actions">
+            {!library ? <button disabled={busy || !code.trim() || !name.trim() || reason.trim().length < 3} onClick={createLibrary}>{tt("Create approved cost library", "Crear biblioteca de costos aprobada")}</button>
+              : <button disabled={busy || reason.trim().length < 3} onClick={pinLibrary}>{tt(`Pin library version ${library.version}`, `Fijar versión ${library.version} de la biblioteca`)}</button>}
+          </div>
+        </div>
       ) : (
         <>
           <div className="fb-meta">
@@ -502,7 +551,23 @@ function Budget({
     [sourceFileId, setSourceFileId] = useState(""),
     [currency, setCurrency] = useState("USD"),
     [purpose, setPurpose] = useState("Initial controlled budget import"),
+    [manualLines, setManualLines] = useState([{ stableLineId: "BUDGET-001", projectCostNodeId: "", description: "", amount: "0.00", quantity: "1", unit: "Hours", unitRate: "0.00", notes: "" }]),
     [preview, setPreview] = useState<any | null>(null);
+  const createManualDraft = async () => {
+    const structureVersionId = data.structures[0]?.id;
+    if (!structureVersionId) return;
+    setBusy("manual-create"); setMessage("");
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/projects/${projectId}/financial/budgets`, {
+        method: "POST", headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+        body: JSON.stringify({ structureVersionId, currency: currency.trim().toUpperCase(), purpose, lines: manualLines.map((line, sortOrder) => ({ ...line, sortOrder, provenance: "manual_intake_apu_estimate" })) }),
+      });
+      const body = await response.json();
+      if (!response.ok) throw new Error(body?.error?.en || "Budget draft creation denied");
+      setMessage(tt("Budget draft created.", "Borrador de presupuesto creado.")); reload();
+    } catch (error) { setMessage(error instanceof Error ? error.message : String(error)); }
+    finally { setBusy(""); }
+  };
   const previewImport = async () => {
     if (!importFile || !sourceFileId) return;
     setBusy("import-preview");
@@ -732,6 +797,26 @@ function Budget({
           </div>
         )}
       </div>
+      {!data.budgets.length && data.structures[0] && data.nodes.length > 0 && (
+        <div className="fb-import">
+          <h3>{tt("Create initial estimate", "Crear estimación inicial")}</h3>
+          <p>{tt("Enter the approved Job Intake/APU estimate. Every line remains bound to the pinned project cost structure.", "Ingrese la estimación aprobada de Ingreso/APU. Cada línea permanece vinculada a la estructura de costos fijada del proyecto.")}</p>
+          {manualLines.map((line, index) => <div className="fb-import-fields" key={index}>
+            <label>{tt("Stable line ID", "ID estable de línea")}<input value={line.stableLineId} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, stableLineId: event.target.value } : item))} /></label>
+            <label>{tt("Cost node", "Nodo de costo")}<select value={line.projectCostNodeId} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, projectCostNodeId: event.target.value } : item))}><option value="">{tt("Select a cost node", "Seleccione un nodo de costo")}</option>{data.nodes.filter((node: any) => node.active).map((node: any) => <option key={node.id} value={node.id}>{node.project_code} — {node.project_name}</option>)}</select></label>
+            <label>{tt("Description", "Descripción")}<input value={line.description} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, description: event.target.value } : item))} /></label>
+            <label>{tt("Amount", "Monto")}<input inputMode="decimal" value={line.amount} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, amount: event.target.value } : item))} /></label>
+            <label>{tt("Quantity", "Cantidad")}<input inputMode="decimal" value={line.quantity} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, quantity: event.target.value } : item))} /></label>
+            <label>{tt("Unit", "Unidad")}<input value={line.unit} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, unit: event.target.value } : item))} /></label>
+            <label>{tt("Unit rate", "Tarifa unitaria")}<input inputMode="decimal" value={line.unitRate} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, unitRate: event.target.value } : item))} /></label>
+            <button type="button" disabled={manualLines.length === 1} onClick={() => setManualLines(manualLines.filter((_, i) => i !== index))}>{tt("Remove line", "Quitar línea")}</button>
+          </div>)}
+          <div className="fb-actions">
+            <button type="button" onClick={() => setManualLines([...manualLines, { stableLineId: `BUDGET-${String(manualLines.length + 1).padStart(3, "0")}`, projectCostNodeId: "", description: "", amount: "0.00", quantity: "1", unit: "Hours", unitRate: "0.00", notes: "" }])}>{tt("Add estimate line", "Agregar línea de estimación")}</button>
+            <button type="button" disabled={busy !== "" || purpose.trim().length < 3 || manualLines.some((line) => !line.projectCostNodeId || line.description.trim().length < 1)} onClick={createManualDraft}>{tt("Create controlled budget draft", "Crear borrador presupuestario controlado")}</button>
+          </div>
+        </div>
+      )}
       {!budgets.length ? (
         <Empty>
           {tt(
