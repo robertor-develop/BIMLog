@@ -429,6 +429,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/team-resource-planning-migration.ts
 - artifacts/api-server/src/lib/team-resource-planning-service.ts
 - artifacts/api-server/src/lib/team-resource-planning.behavior.ts
+- artifacts/api-server/src/lib/telegram-delivery-artifacts.ts
+- artifacts/api-server/src/lib/telegram-product-delivery-artifacts.behavior.ts
 - artifacts/api-server/src/lib/telegram-product-delivery.ts
 - artifacts/api-server/src/lib/telegram-product-notifications.ts
 - artifacts/api-server/src/lib/telegram-product-provider-broker.ts

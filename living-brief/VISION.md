@@ -219,6 +219,13 @@ AI use, notification preferences, channels, quiet hours, and each consequential 
 Builds 1-5 provide secure linking, controlled AI foundations, bilingual support, delivery preparation, and
 the Notification Center/outbox foundation; module adapters marked coming later are not shipped.
 
+Optional record sharing follows one explicit human-control contract. Saving, completing, approving, or
+changing an RFI, Submittal, Change Order, or related record never sends it. BIMLog may prepare a canonical
+download, secure link, provider-neutral email draft, or governed Telegram preview, but the user chooses the
+channel and confirms the consequential send. Closing or choosing **Do not send now** must leave the record
+complete without transmission. Email providers retain final recipient, attachment, and Send control; BIMLog
+must not claim that a browser attached a local file when the provider does not support that action.
+
 Tiered plans, add-ons, and user-controlled AI/channel preferences are approved product direction. Accepted
 Entitlements Steps 1-2 provide the advisory catalog, resolver, policies, preferences, and support matrix;
 they do not prove billing enforcement, Step 3, or every planned entitlement. Future dimensions must keep

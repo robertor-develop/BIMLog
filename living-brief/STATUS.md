@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## Optional email/Telegram sharing Builds 1-10 — local candidate — 2026-09-15
+
+- RFI, Submittal, and Change Order detail surfaces expose one optional sharing panel without changing save, completion, approval, lifecycle, or audit semantics.
+- Users may download the authenticated canonical package, copy an available secure link, or prepare a provider-neutral Gmail, Outlook, Yahoo, or default email draft. BIMLog validates entered email addresses and states honestly that the user must attach the downloaded file in the provider before sending.
+- Telegram reuses the existing governed Product/Delivery Concierge. It creates a preview first, requires a separate explicit confirmation to send, and records cancellation when the user closes or chooses **Do not send now**. There is no automatic send path.
+- Canonical Telegram artifact coverage now includes RFI complete PDF, Submittal PDF/DOCX/audit PDF, Change Order PDF, and existing project-file delivery. Project membership, artifact authorization, connected-account authority, and server-side package generation remain enforced by the existing route.
+- The source capability is local only. No production account, permission, recipient, external message, push, publication, deployment, or customer data was changed by this block.
+
 ## P23 activation-verifier reconciliation — candidate — 2026-09-14
 
 - The fresh P22 production smoke proved that package-only activation correctly creates one exact package task, but the browser verifier still counted the removed generic fallback and displayed a false failure after a successful activation.

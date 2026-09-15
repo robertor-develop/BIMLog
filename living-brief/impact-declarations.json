@@ -24414,6 +24414,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a84b21d3c2d461caecc9d8272b622e398240907f2a2b5c21aa14f75912eac1ce"
+    },
+    {
+      "taskId": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
+      "reviewedAt": "2026-09-15T02:30:00Z",
+      "status": "candidate",
+      "captureTiming": "same_task_pre_release_reconciliation",
+      "summary": "Adds user-optional authenticated package download, provider-neutral email preparation, and explicit-preview/explicit-confirm Telegram delivery to RFI, Submittal, and Change Order surfaces without automatic sends or lifecycle mutation.",
+      "workstreams": [
+        "rfi",
+        "submittals",
+        "change-orders",
+        "telegram-product",
+        "controlled-delivery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical records and one-source-of-truth module ownership remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing external-action, credential, publication, and acceptance gates remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing evidence, authorization, integrity, and no-false-claim controls apply without amendment."
+        },
+        {
+          "key": "vision",
+          "result": "updated",
+          "reason": "Defines the permanent optional-sharing and explicit human-send-control product contract."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated Platform authority inventories the new optional-sharing component, contracts, and governed Telegram artifact coverage without changing canonical record ownership."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next, Native, Navisworks, camera, XML, or plugin behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical report generation and visual contracts remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local Builds 1-10 capability and its unexecuted external gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records production-account, external-send, push, publication, live verification, and acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only audit authority remains unchanged; delivery attempts continue through the governed Telegram evidence path."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/VISION.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4ce8d1fc896b9b1242ec5c42a6b86429c69d3612cc6c9f39610e0d48625fd320"
     }
   ]
 }

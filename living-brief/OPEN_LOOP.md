@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Optional email/Telegram sharing release gates — 2026-09-15
+
+- [x] Add an optional, capability-preserving sharing surface for RFI, Submittal, and Change Order canonical packages.
+- [x] Add provider-neutral email drafts, authenticated downloads, secure-link copying, and invalid-recipient rejection without claiming automatic browser attachment.
+- [x] Extend the existing governed Telegram artifact allowlist and preserve preview, explicit-confirm, cancellation, authorization, and immutable delivery evidence.
+- [x] Prove that save/complete paths do not automatically transmit and that **Do not send now** remains a complete valid outcome.
+- [ ] Create or grant any production QA account/permission only after Roberto separately authorizes that exact production mutation.
+- [ ] Execute an actual Telegram delivery only after action-time confirmation for the exact artifact and Roberto private test destination.
+- [ ] Push, Replit synchronization, publication, deployment, live Chrome verification, and external acceptance remain separate authorization/evidence gates.
+
 ## P23 full live Job Intake smoke closure — 2026-09-14
 
 - [x] Repeat the complete Intake on fresh production project 43 and verify 100% persistence after reload.
