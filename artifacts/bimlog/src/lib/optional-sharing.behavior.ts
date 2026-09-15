@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { buildEmailComposeUrl, emailAttachmentGuidance, optionalSharingChoices } from "./optional-sharing";
+import { buildEmailComposeUrl, emailAttachmentGuidance, normalizeEmailRecipients, optionalSharingChoices } from "./optional-sharing";
 
 const draft = {
   recipients: ["REVIEWER@example.com", "reviewer@example.com", "pm@example.com"],
@@ -26,5 +26,6 @@ assert.deepEqual(optionalSharingChoices("en"), [
   "Copy secure link",
   "Do not send now",
 ]);
+assert.deepEqual(normalizeEmailRecipients(["valid@example.com", "not an email", "VALID@example.com", ""]), ["valid@example.com"]);
 
 console.log("PASS optional sharing contract");

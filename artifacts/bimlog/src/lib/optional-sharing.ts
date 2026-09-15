@@ -7,12 +7,16 @@ export type OptionalShareDraft = {
   downloadUrl?: string;
 };
 
-const normalizeRecipients = (recipients: string[]): string[] => (
-  [...new Set(recipients.map(value => value.trim().toLowerCase()).filter(Boolean))].sort()
+export const isValidEmailRecipient = (value: string): boolean => (
+  /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value.trim())
+);
+
+export const normalizeEmailRecipients = (recipients: string[]): string[] => (
+  [...new Set(recipients.map(value => value.trim().toLowerCase()).filter(isValidEmailRecipient))].sort()
 );
 
 export function buildEmailComposeUrl(provider: EmailComposeProvider, draft: OptionalShareDraft): string {
-  const recipients = normalizeRecipients(draft.recipients).join(",");
+  const recipients = normalizeEmailRecipients(draft.recipients).join(",");
   const body = draft.downloadUrl
     ? `${draft.body.trim()}\n\nBIMLog package: ${draft.downloadUrl}`
     : draft.body.trim();

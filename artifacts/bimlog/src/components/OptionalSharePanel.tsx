@@ -2,7 +2,7 @@ import { useMemo, useState } from "react";
 import { Copy, Download, Mail, Send, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { buildEmailComposeUrl, emailAttachmentGuidance, type EmailComposeProvider } from "@/lib/optional-sharing";
+import { buildEmailComposeUrl, emailAttachmentGuidance, isValidEmailRecipient, normalizeEmailRecipients, type EmailComposeProvider } from "@/lib/optional-sharing";
 import { useAuthStore } from "@/store/auth";
 
 type Props = {
@@ -14,7 +14,13 @@ type Props = {
   telegramDelivery?: { projectId: number; artifactType: string; entityId: number };
 };
 
-const splitRecipients = (value: string) => value.split(/[;,]/).map(item => item.trim()).filter(Boolean);
+const splitRecipients = (value: string) => normalizeEmailRecipients(value.split(/[;,]/));
+
+const downloadFilename = (header: string | null, fallback: string) => {
+  const encoded = header?.match(/filename\*=UTF-8''([^;]+)/i)?.[1];
+  if (encoded) return decodeURIComponent(encoded);
+  return header?.match(/filename="?([^";]+)"?/i)?.[1] || fallback;
+};
 
 export function OptionalSharePanel({ language, artifactLabel, defaultRecipients = [], downloadUrl, secureLink, telegramDelivery }: Props) {
   const es = language === "es";
@@ -24,15 +30,46 @@ export function OptionalSharePanel({ language, artifactLabel, defaultRecipients 
   const [telegramReady, setTelegramReady] = useState(false);
   const [telegramDeliveryId, setTelegramDeliveryId] = useState("");
   const [working, setWorking] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const [notice, setNotice] = useState("");
   const token = useAuthStore(state => state.token);
   const recipientList = useMemo(() => splitRecipients(recipients), [recipients]);
+  const invalidRecipients = useMemo(() => recipients.split(/[;,]/).map(item => item.trim()).filter(item => item && !isValidEmailRecipient(item)), [recipients]);
   const subject = es ? `Entrega BIMLog: ${artifactLabel}` : `BIMLog delivery: ${artifactLabel}`;
   const body = es
     ? `Se preparó el archivo controlado ${artifactLabel} en BIMLog. Revise el contenido antes de enviarlo.`
     : `The controlled file ${artifactLabel} was prepared in BIMLog. Review the contents before sending it.`;
 
+  async function downloadPackage() {
+    if (!token) {
+      setNotice(es ? "Inicie sesión para descargar el archivo controlado." : "Sign in to download the controlled file.");
+      return;
+    }
+    setDownloading(true);
+    try {
+      const response = await fetch(downloadUrl, { headers: { Authorization: `Bearer ${token}` } });
+      if (!response.ok) throw new Error(es ? "No se pudo descargar el archivo." : "The file could not be downloaded.");
+      const blobUrl = URL.createObjectURL(await response.blob());
+      const anchor = document.createElement("a");
+      anchor.href = blobUrl;
+      anchor.download = downloadFilename(response.headers.get("content-disposition"), artifactLabel);
+      document.body.appendChild(anchor);
+      anchor.click();
+      anchor.remove();
+      URL.revokeObjectURL(blobUrl);
+      setNotice(es ? "Archivo descargado. Nada se envió." : "File downloaded. Nothing was sent.");
+    } catch (error) {
+      setNotice(error instanceof Error ? error.message : (es ? "No se pudo descargar el archivo." : "The file could not be downloaded."));
+    } finally {
+      setDownloading(false);
+    }
+  }
+
   function prepareEmail() {
+    if (invalidRecipients.length) {
+      setNotice(es ? `Corrija los destinatarios no válidos: ${invalidRecipients.join(", ")}` : `Correct the invalid recipients: ${invalidRecipients.join(", ")}`);
+      return;
+    }
     window.open(buildEmailComposeUrl(provider, { recipients: recipientList, subject, body, downloadUrl: secureLink }), "_blank", "noopener,noreferrer");
     setNotice(emailAttachmentGuidance(language));
   }
@@ -116,7 +153,7 @@ export function OptionalSharePanel({ language, artifactLabel, defaultRecipients 
           <Input value={recipients} onChange={event => setRecipients(event.target.value)} placeholder="name@example.com" />
         </label>
         <div style={{ display: "flex", flexWrap: "wrap", gap: 8, marginBottom: 14 }}>
-          <a className="btn btn-outline" href={downloadUrl} download><Download style={{ width: 15, height: 15 }} />{es ? "Descargar paquete" : "Download package"}</a>
+          <Button type="button" variant="outline" disabled={downloading || !token} onClick={() => void downloadPackage()}><Download style={{ width: 15, height: 15 }} />{downloading ? (es ? "Descargando…" : "Downloading…") : (es ? "Descargar paquete" : "Download package")}</Button>
           {secureLink && <Button type="button" variant="outline" onClick={() => void copyLink()}><Copy style={{ width: 15, height: 15 }} />{es ? "Copiar enlace seguro" : "Copy secure link"}</Button>}
         </div>
         <div style={{ borderTop: "1px solid hsl(var(--border))", paddingTop: 14, display: "grid", gap: 10 }}>
