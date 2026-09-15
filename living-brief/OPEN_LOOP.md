@@ -6,6 +6,7 @@
 - [x] Give the normal desktop Platform route the same bounded workspace and independent list/detail scroll ownership as the embedded workspace.
 - [x] Preserve responsive stacking, embedded behavior, identity, navigation, XML, digest, Native, database/schema, and customer records.
 - [x] Lock both embedded and Platform-route scrollbar ownership with focused executable regressions.
+- [x] Bind the deterministic Living Brief state to implementation commit `c0735dc6915d9a7897940aa31dc920af6832150d`.
 - [ ] Complete real browser interaction acceptance against the P30 candidate, then push and publish only after explicit authorization.
 
 ## P29 Lens Next working-viewport correction

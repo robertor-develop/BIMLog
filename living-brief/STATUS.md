@@ -5,6 +5,7 @@
 - Live P29 verification proved the embedded Navisworks pane contract but exposed that the normal Platform route still opted back into shared-page scrolling. Selecting a lower ELARA EAST viewpoint left its detail surface above the visible viewport.
 - P30 applies the same bounded desktop viewport and independent list/detail scroll ownership to the normal Platform route. A lower viewpoint stays visible in the left list while its selected details remain visible beside it in the right pane.
 - The combined release identity is `v1.05.N17-P30`: Native remains N17 and only the Platform segment advances.
+- Governance reconciliation is bound to implementation commit `c0735dc6915d9a7897940aa31dc920af6832150d`; this marker changes no runtime behavior.
 - This is a presentation-only correction. It does not change viewpoint identity, navigation, XML serialization, digest validation, publication, Native camera behavior, database/schema, or customer records.
 
 ## P29 Lens Next working-viewport correction — published, live Platform-route acceptance failed — 2026-09-15

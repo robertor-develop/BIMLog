@@ -24750,6 +24750,87 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "dbe020c742211f29a4b7a5f061614ba65c53c0b3f48c6877710e648e6d15ce76"
+    },
+    {
+      "taskId": "p30-lens-platform-independent-panes-20260915",
+      "reviewedThroughCommit": "c0735dc6915d9a7897940aa31dc920af6832150d",
+      "reviewedAt": "2026-09-15T22:26:31Z",
+      "trigger": "live_acceptance_failure",
+      "immediateFindings": [
+        {
+          "category": "platform_workspace_scroll_ownership",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Live Chrome acceptance proved that the normal Platform route retained shared-page scrolling, so selecting a lower viewpoint displaced its detail pane instead of keeping both panes adjacent."
+        }
+      ],
+      "capabilityPreflight": null,
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction changes layout scroll ownership only and preserves canonical viewpoint identity and human-controlled actions."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation and release gates remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction enforces the existing adjacent-list-and-detail workspace requirement on the normal Platform route."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, API, runtime, schema, or module inventory change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native code, camera, sectioning, XML, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated-report change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the P30 Platform-route correction and the P29 live acceptance failure."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks publication and live acceptance of independent list/detail scrolling."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "11dd9002ea137ba67aced404c7475d5712d64a271d4e69106a2af8b1e1c55a52"
     }
   ]
 }
