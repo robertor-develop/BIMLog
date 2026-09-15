@@ -5,7 +5,8 @@
 - BIMLog's configuration contract is default-first: a sole operator or small company can begin Intake without creating configuration libraries. Company-managed configurations remain optional; a governed organization may later select or enforce its approved values through existing authority.
 - The existing built-in delivery methods remain available and `bim-submittal` remains the deterministic default. Intake now labels this choice as a Delivery Method and explicitly explains that company administration is not a prerequisite.
 - Companies remain the client authority, enterprise identity remains the discipline authority, services/phases remain master catalogs, Commercial remains the Generic APU authority, and Job Operations remains the Budget Governance execution authority. No competing store or schema is introduced.
-- Builds 1–2 establish the default-first product contract and a tested, single-source authority inventory. Native, Lens Next, database/schema, customer data, APU calculations, activation, contracts, permissions, and downstream behavior remain unchanged.
+- Builds 1–5 establish the default-first product contract and tested single-source authority inventory, add one project-level Budget Governance reference with three bounded choices, persist it in the existing Intake JSON, capture the delivery/governance reference in immutable activation evidence, and expose that evidence read-only in Job Operations. Commercial remains the APU authority and Job Operations remains the budget execution authority.
+- No database/schema, Native, Lens identity/navigation/XML/digest, customer-data, APU-calculation, contract-authority, or financial-engine change is introduced. Real production browser acceptance remains a release gate and is not claimed by this local block.
 
 ## P30 Lens Next Platform-route independent panes — local candidate — 2026-09-15
 

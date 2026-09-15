@@ -162,6 +162,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-service.ts
+- artifacts/api-server/src/lib/bimlog-configuration-authorities.behavior.ts
+- artifacts/api-server/src/lib/bimlog-configuration-authorities.ts
 - artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
@@ -335,6 +337,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-apu-reload.behavior.ts
 - artifacts/api-server/src/lib/job-intake-budget-account.behavior.ts
 - artifacts/api-server/src/lib/job-intake-combined-scenario.behavior.ts
+- artifacts/api-server/src/lib/job-intake-configuration-snapshot.behavior.ts
+- artifacts/api-server/src/lib/job-intake-configuration.behavior.ts
+- artifacts/api-server/src/lib/job-intake-configuration.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
 - artifacts/api-server/src/lib/job-intake-empty-commercial-prerequisites.behavior.ts
 - artifacts/api-server/src/lib/job-intake-member-assignment.behavior.ts

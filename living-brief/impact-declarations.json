@@ -24841,23 +24841,70 @@
         {
           "category": "customer_workflow_correction",
           "disposition": "captured_immediately",
-          "authorities": ["status", "open_loop"],
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
           "summary": "BIMLog is default-first: company-managed configurations may be offered or governed but are not a universal prerequisite for Project Intake."
         }
       ],
       "capabilityPreflight": null,
       "authorities": [
-        {"key":"ecosystem_doctrine","result":"reviewed_no_semantic_change","reason":"The correction applies the existing one-source-of-truth and general-product doctrine without changing ecosystem identity."},
-        {"key":"claude","result":"reviewed_no_semantic_change","reason":"Existing implementation, evidence, and release rules remain unchanged."},
-        {"key":"quality","result":"reviewed_no_semantic_change","reason":"The correction reduces onboarding burden while retaining current quality and acceptance controls."},
-        {"key":"vision","result":"reviewed_no_semantic_change","reason":"BIMLog remains a general construction coordination product rather than a customer-specific implementation."},
-        {"key":"platform","result":"updated","reason":"The deterministic inventory records the additional Job Intake behavior gate; no route, schema, database, or runtime behavior changes."},
-        {"key":"plugin","result":"reviewed_no_semantic_change","reason":"Native and Lens Next are unchanged."},
-        {"key":"report_design_system","result":"reviewed_no_semantic_change","reason":"No generated report contract changes."},
-        {"key":"standards_register","result":"reviewed_no_semantic_change","reason":"No standards or compliance claims change."},
-        {"key":"status","result":"updated","reason":"Records the local default-first Intake correction and preserved canonical authorities."},
-        {"key":"open_loop","result":"updated","reason":"Tracks the remaining configuration, governance, per-contract APU, and EDT reconciliation work."},
-        {"key":"audit","result":"reviewed_no_semantic_change","reason":"No accepted historical evidence is rewritten by this bounded candidate."}
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction applies the existing one-source-of-truth and general-product doctrine without changing ecosystem identity."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation, evidence, and release rules remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction reduces onboarding burden while retaining current quality and acceptance controls."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains a general construction coordination product rather than a customer-specific implementation."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic inventory records the additional Job Intake behavior gate; no route, schema, database, or runtime behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and Lens Next are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated report contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claims change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local default-first Intake correction and preserved canonical authorities."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the remaining configuration, governance, per-contract APU, and EDT reconciliation work."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical evidence is rewritten by this bounded candidate."
+        }
       ],
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
@@ -24869,6 +24916,98 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "858b8b8dee97025423297a3cae49860d4bf76a9fafd113c3ca21a567a3e25843"
+    },
+    {
+      "taskId": "product-default-configuration-builds03-05-20260915",
+      "reviewedThroughCommit": "d7290af11a13a13e47748921a72264ec548edcb6",
+      "reviewedAt": "2026-09-15T23:10:00Z",
+      "trigger": "approved_product_configuration_block",
+      "immediateFindings": [
+        {
+          "category": "default_first_project_configuration",
+          "disposition": "implemented_without_parallel_authority",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Intake now carries a bounded project Budget Governance reference, preserves the existing delivery default, snapshots both at activation, and displays the evidence read-only in Operations without a schema or parallel financial engine."
+        }
+      ],
+      "capabilityPreflight": null,
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing one-source-of-truth and default-first product doctrine is applied without changing ecosystem identity."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation, evidence, and release rules remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused bilingual, persistence, activation, downstream, and protected Lens regressions govern this block."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog remains a general configurable product, not a BIMTech-specific implementation."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new route, database table, schema, runtime service, or parallel authority is introduced."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and Lens Next behavior are untouched; P30 protected regression passes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated-report contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 1–5 behavior, boundaries, and pending production acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes local selection/snapshot work and preserves the real-browser release gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-configuration-snapshot.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-configuration.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-configuration.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-operations-service.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b7288f6865defa9d49bd4ecbf7b97fe8986a14d606cf1b7a3e20e027aa9d72c9"
     }
   ]
 }
