@@ -2655,3 +2655,4 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Push and publish the exact accepted P28 commit only after explicit authorization.
 - [ ] Verify ELARA XML export and current-record actions in live production after publication.
 - [ ] Keep historical pre-digest packages quarantined unless separately recreated or repaired from an authoritative exact view.
+- [x] Bind the deterministic Living Brief state to implementation commit `d1c45f209696f27bfe7e4aef3ea14ed984cf86e6` before the clean production build.

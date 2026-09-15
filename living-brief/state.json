@@ -1,15 +1,11 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+  "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "b1ae2c0ebff0b8ddd553845c7d8ed5df93aae570082072bae5c75c5a1290352d",
+  "bundleSha256": "6512a38d3c82f26af1f293f90cec5036fc2e525e8162c696cbaaeda8d97ac2c8",
   "impact": {
-    "baselineCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+    "baselineCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
     "changedPaths": [
-      "artifacts/bimlog/src/components/layout/Navbar.tsx",
-      "artifacts/bimlog/src/features/lens-next/lens-next-build27-xml-integration.behavior.ts",
-      "artifacts/bimlog/src/pages/HelpCenter.tsx",
-      "living-brief/AUDIT.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -17,7 +13,6 @@
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -28,8 +23,8 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -40,8 +35,8 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -52,8 +47,8 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -64,8 +59,8 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -76,8 +71,8 @@
       "sha256": "c7ff4e6cdf9ce62cc9d4a98bd8f8db4ecbfb9dd23e8090682c29791b73f0509f",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -88,8 +83,8 @@
       "sha256": "d2639c652872b5a0592d4a4aaca054616b4192090efd71c6cf4a156a81566541",
       "sourceChangedAt": "2026-09-10T11:55:53-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -100,8 +95,8 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -112,8 +107,8 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "reviewed_no_semantic_change",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -121,11 +116,11 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "1cbd0f3b97b5da198baee37be3268f12b544eb183afc01fc72d5dc821ff5089d",
+      "sha256": "7de511206c6964f4f41e607168791e02ba5a52af33bdcd5ee50e8dd5e222ea91",
       "sourceChangedAt": "2026-09-15T20:20:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "updated",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -133,11 +128,11 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "f9c042053c6e4500eaf8e476826d7ddbc824a38faeaf3507bb68211e2d09ad0a",
+      "sha256": "cc3d98bff2a85b81822245ad265cd6a6850c895799ed19e2746618a35efb7593",
       "sourceChangedAt": "2026-09-15T20:20:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "updated",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"
@@ -146,10 +141,10 @@
       "key": "audit",
       "file": "AUDIT.md",
       "sha256": "0eaca5046facd3f8d4eb7cf7a5626e66b99c493d5fde75993e0061ae498ad691",
-      "sourceChangedAt": "2026-09-15T20:20:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
-      "semanticReviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "sourceChangedAt": "2026-09-15T16:28:53-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
+      "semanticReviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "semanticReviewTask": "p28-lens-elara-regression-closure-20260915",
       "semanticReviewResult": "updated",
       "semanticReviewedAt": "2026-09-15T20:20:00Z"

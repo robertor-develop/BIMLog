@@ -24584,7 +24584,7 @@
     },
     {
       "taskId": "p28-lens-elara-regression-closure-20260915",
-      "reviewedThroughCommit": "57d297a5eb3c959f9b123a4deae7ac86a2ac20c1",
+      "reviewedThroughCommit": "d1c45f209696f27bfe7e4aef3ea14ed984cf86e6",
       "reviewedAt": "2026-09-15T20:20:00Z",
       "trigger": "acceptance",
       "immediateFindings": [
@@ -24658,15 +24658,11 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/bimlog/src/components/layout/Navbar.tsx",
-        "artifacts/bimlog/src/features/lens-next/lens-next-build27-xml-integration.behavior.ts",
-        "artifacts/bimlog/src/pages/HelpCenter.tsx",
-        "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "3496875255b4656f675061b6b246d5c5809dc73006869d4b96744daa60b02e95"
+      "reviewedChangeSha256": "f0eba7a35028e4acadfca35a6e64b248844550688f9096779855cba562deba17"
     }
   ]
 }

@@ -1709,3 +1709,4 @@ No release, publication, or overall completion claim is permitted until the reco
 - XML export now validates every candidate independently, exports every verified package, and reports each skipped historical package with its exact Platform reason. Digest validation, project/model identity, and corruption rejection remain unchanged.
 - The operational list now contains active/current records only; full immutable revision history remains available through View History. Lens Next also uses compact independent list/detail scrolling and action-first selected details without removing capability.
 - Candidate identity is `v1.05.N17-P28`. Native, database/schema, customer data, Job Intake, and APU are unchanged. Push, publication, live ELARA verification, and external acceptance remain separate gates.
+- Governance freeze is reconciled through implementation commit `d1c45f209696f27bfe7e4aef3ea14ed984cf86e6`; this marker changes no runtime behavior.
