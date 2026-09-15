@@ -2,7 +2,8 @@
 
 ## P24 optional sharing release reconciliation — candidate — 2026-09-14
 
-- The completed financial setup and end-to-end budget closure block advances the Platform identity to `v1.05.N17-P25` while preserving Native N17. The live financial workspace now exposes the existing governed APIs for initial company cost-library creation, project structure pinning, multi-line Intake/APU estimate draft creation, and controlled approval-policy category selection; no schema or parallel financial authority was added. The protected Generic APU/Job Intake regression must assert the same P25 release identity before this candidate can be frozen.
+- P25 was pushed, synchronized through Replit Shell, built, and published at exact source `496c55e8fea7f2f45549fe2e706cd32817be4c40`. Its fresh production smoke passed project creation, complete Job Intake activation, Operations progress/hours/package creation, baseline freezing, company cost-library creation, and project cost-structure pinning. The first initial-budget submission then exposed one exact UI/API contract defect: the API requires bounded notes on every budget line while the new manual estimate form did not expose that required field.
+- P26 adds the missing bilingual line-notes control, bounds it to 1000 characters, and prevents submission until every line contains notes. Native remains N17; no schema, database, existing record, or unrelated workflow changes are introduced. The same production project 46 remains the controlled resume point after the corrected release is published.
 - Native remains N17. No Native, Lens Next, database, schema, historical-record, or automatic-send behavior changes.
 - Push, Replit Shell synchronization, zero-drop publication preview, one publication, live Chrome end-to-end acceptance, and explicitly confirmed private Telegram QA delivery are the remaining release gates.
 

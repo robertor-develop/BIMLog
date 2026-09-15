@@ -809,11 +809,12 @@ function Budget({
             <label>{tt("Quantity", "Cantidad")}<input inputMode="decimal" value={line.quantity} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, quantity: event.target.value } : item))} /></label>
             <label>{tt("Unit", "Unidad")}<input value={line.unit} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, unit: event.target.value } : item))} /></label>
             <label>{tt("Unit rate", "Tarifa unitaria")}<input inputMode="decimal" value={line.unitRate} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, unitRate: event.target.value } : item))} /></label>
+            <label>{tt("Line notes", "Notas de la línea")}<textarea maxLength={1000} value={line.notes} onChange={(event) => setManualLines(manualLines.map((item, i) => i === index ? { ...item, notes: event.target.value } : item))} /></label>
             <button type="button" disabled={manualLines.length === 1} onClick={() => setManualLines(manualLines.filter((_, i) => i !== index))}>{tt("Remove line", "Quitar línea")}</button>
           </div>)}
           <div className="fb-actions">
             <button type="button" onClick={() => setManualLines([...manualLines, { stableLineId: `BUDGET-${String(manualLines.length + 1).padStart(3, "0")}`, projectCostNodeId: "", description: "", amount: "0.00", quantity: "1", unit: "Hours", unitRate: "0.00", notes: "" }])}>{tt("Add estimate line", "Agregar línea de estimación")}</button>
-            <button type="button" disabled={busy !== "" || purpose.trim().length < 3 || manualLines.some((line) => !line.projectCostNodeId || line.description.trim().length < 1)} onClick={createManualDraft}>{tt("Create controlled budget draft", "Crear borrador presupuestario controlado")}</button>
+            <button type="button" disabled={busy !== "" || purpose.trim().length < 3 || manualLines.some((line) => !line.projectCostNodeId || line.description.trim().length < 1 || line.notes.trim().length < 1)} onClick={createManualDraft}>{tt("Create controlled budget draft", "Crear borrador presupuestario controlado")}</button>
           </div>
         </div>
       )}
