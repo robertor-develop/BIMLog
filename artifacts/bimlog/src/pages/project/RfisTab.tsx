@@ -10,6 +10,7 @@ import { useI18n } from "@/lib/i18n";
 import { useConfig } from "@/lib/config-context";
 import { useAuthStore } from "@/store/auth";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
+import { OptionalSharePanel } from "@/components/OptionalSharePanel";
 import { Button } from "@/components/ui/button";
 import { PrintPdfButton } from "@/components/PrintPdfButton";
 import { Input } from "@/components/ui/input";
@@ -3596,6 +3597,15 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
   const responseContent = (
     <div style={{ marginTop: 14, display: "grid", gap: 12 }}>
       <div style={{ padding: "10px 12px", border: "1px solid hsl(var(--border))", borderRadius: 8 }}><div style={{ display: "flex", gap: 6, alignItems: "center", flexWrap: "wrap" }}><strong style={{ fontSize: 12 }}>{w("Issue and email actions", "Acciones de envio y email", lang)}</strong>{canWrite && rfi.status !== "closed" && sgConnected === true && <Button type="button" size="sm" onClick={handleSendReal} disabled={sending || !rfi.submittedToEmail} title={!rfi.submittedToEmail ? w("Set the Submitted To email first", "Defina el correo del destinatario primero", lang) : undefined}>{sending ? w("Sending...", "Enviando...", lang) : w("Send via SendGrid", "Enviar por SendGrid", lang)}</Button>}{canWrite && rfi.status !== "closed" && rfi.sendStatus !== "sent" && <Button type="button" size="sm" variant="outline" onClick={handleMarkSent} disabled={marking}>{marking ? w("Saving...", "Guardando...", lang) : w("Mark as Sent", "Marcar como Enviado", lang)}</Button>}{sgConnected === false && <Button type="button" size="sm" variant="outline" onClick={() => setPage("/profile")}>{w("Set Up Email Sending", "Configurar Envio de Email", lang)}</Button>}</div>{sgConnected === false && !hideSgNudge && <div style={{ display: "flex", gap: 8, alignItems: "center", marginTop: 8, padding: "8px 10px", background: "#EFF6FF", border: "1px solid #BFDBFE", borderRadius: 6, fontSize: 11 }}><span style={{ flex: 1 }}>{w("Connect your own SendGrid account to send RFIs directly. Mark as Sent remains available for delivery outside BIMLog.", "Conecte su propia cuenta SendGrid para enviar RFIs directamente. Marcar como Enviado sigue disponible para envios fuera de BIMLog.", lang)}</span><button type="button" title={w("Don't remind me", "No recordarme", lang)} onClick={() => { localStorage.setItem("bimlog-hide-sendgrid-nudge", "1"); setHideSgNudge(true); }} style={{ border: "none", background: "transparent", cursor: "pointer" }}><X style={{ width: 14, height: 14 }} /></button></div>}{previewFailed && <p style={{ fontSize: 11, color: "#DC2626", marginTop: 6 }}>{w("AI email draft was unavailable. The standard editable draft remains available.", "El borrador IA no estuvo disponible. El borrador estandar editable sigue disponible.", lang)}</p>}</div>
+      <div style={{ display: "flex", alignItems: "center", gap: 8, flexWrap: "wrap" }}>
+        <OptionalSharePanel
+          language={lang === "es" ? "es" : "en"}
+          artifactLabel={`${rfi.number}-Complete-RFI-Package.pdf`}
+          defaultRecipients={[rfi.submittedToEmail, ...((rfi.distributionList as string[] | null) || [])].filter((value): value is string => Boolean(value))}
+          downloadUrl={`/api/v1/projects/${projectId}/rfis/${rfi.id}/export-complete`}
+        />
+        <span style={{ fontSize: 11, color: "hsl(var(--muted-foreground))" }}>{w("Optional sharing never changes the RFI lifecycle.", "Compartir opcionalmente nunca cambia el ciclo de vida del RFI.", lang)}</span>
+      </div>
       {responsesLoading && <div style={{ fontSize: 12, color: "hsl(var(--muted-foreground))" }}>{w("Loading responses...", "Cargando respuestas...", lang)}</div>}
       {!responsesLoading && rfiResponses.length === 0 && (rfi.answer || rfi.response) && <div style={{ padding: "10px 12px", border: "1px solid #BBF7D0", borderRadius: 8, fontSize: 12 }}><strong>{w("Existing official response", "Respuesta oficial existente", lang)}</strong><p style={{ whiteSpace: "pre-wrap", marginTop: 5 }}>{rfi.answer || rfi.response}</p>{rfi.answeredBy && <div>{w("Answered By", "Respondido Por", lang)}: {rfi.answeredBy}</div>}</div>}
       {canWrite && rfi.status !== "closed" && !responseFormOpen && <Button type="button" variant="outline" onClick={openNewResponse} style={{ justifySelf: "start", gap: 5 }}><Plus style={{ width: 13, height: 13 }} />{w("Add Response", "Agregar Respuesta", lang)}</Button>}
