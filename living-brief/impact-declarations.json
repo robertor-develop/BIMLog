@@ -24739,14 +24739,17 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
         "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
         "artifacts/bimlog/src/features/lens-next/lens-next-compact-workspace.behavior.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d4f0aa3e03355347ec987a3d7ce5edd7ea1c5d8e21e01d7064fc397dd860d1ad"
+      "reviewedChangeSha256": "dbe020c742211f29a4b7a5f061614ba65c53c0b3f48c6877710e648e6d15ce76"
     }
   ]
 }

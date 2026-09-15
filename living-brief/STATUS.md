@@ -2,6 +2,7 @@
 
 ## P29 Lens Next working-viewport correction — local candidate — 2026-09-15
 
+- The combined release identity is `v1.05.N17-P29`: Native remains N17 and only the Platform segment advances.
 - The embedded Navisworks workspace keeps the viewpoint list continuously visible in the left pane by collapsing the model reconciliation inventory into a compact, optional Model Tools section.
 - Selecting a viewpoint renders its authoritative details and actions directly beside the list in the independently scrollable right pane; list scrolling never moves the selected detail surface away from the working row.
 - This is a presentation-only correction. It does not change viewpoint identity, navigation, XML serialization, digest validation, publication, Native camera behavior, database/schema, or customer records.

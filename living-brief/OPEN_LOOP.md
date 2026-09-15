@@ -2,6 +2,7 @@
 
 ## P29 Lens Next working-viewport correction
 
+- [x] Reconcile the release identity to `v1.05.N17-P29`; Native remains N17 and only Platform advances.
 - [x] Collapse the reconciliation inventory so it cannot displace the working viewpoint list below the visible Navisworks panel.
 - [x] Preserve a stable left-side viewpoint browser and adjacent right-side selected-viewpoint detail surface with independent vertical scrolling.
 - [x] Lock the collapsed-by-default utility section and two-pane ownership with focused executable regressions.
