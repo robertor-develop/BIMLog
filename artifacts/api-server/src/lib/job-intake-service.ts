@@ -27,6 +27,8 @@ import {
 } from "./job-intake-contract";
 import { waitForJobIntakeMigration } from "./job-intake-migration";
 import { buildActivatedCommercialBaseline, persistActivatedCommercialBaselineWithClient } from "./job-activation-commercial-baseline";
+import { resolveEffectiveEntitlement } from "./feature-catalog-service";
+import { applyIntakePolicyDefaults, normalizeIntakePolicy } from "./job-intake-policy";
 
 const uuid = () => crypto.randomUUID();
 const categories = new Set([
@@ -41,6 +43,11 @@ const extensions = new Set([".pdf", ".docx", ".xlsx", ".xlsm", ".xls", ".csv"]);
 type Queryable = {
   query: (text: string, values?: unknown[]) => Promise<{ rows: any[] }>;
 };
+async function intakePolicy(actorUserId: number, access: Awaited<ReturnType<typeof scope>>) {
+  const resolved = await resolveEffectiveEntitlement({ featureKey: "project.intake.configuration", userId: actorUserId, companyId: access.companyId, projectId: access.projectId });
+  const policy = normalizeIntakePolicy(resolved.decision === "allow" ? resolved.policy?.configuration ?? {} : {});
+  return { ...policy, source: policy.configured ? "governed_policy" : "bimlog_default", inheritancePath: resolved.policy?.inheritancePath ?? [] };
+}
 
 async function capabilitiesFor(
   actorUserId: number,
@@ -231,6 +238,7 @@ async function hydrate(
   const docs = await documents(row.id);
   const data = normalizeJobIntakeData(row.data);
   const capabilities = await capabilitiesFor(actorUserId);
+  const configurationPolicy = await intakePolicy(actorUserId, access);
   const completion = jobIntakeCompletion(data, docs, capabilities);
   const [members, memberEligibility, events, activation] = await Promise.all([
     pool.query(
@@ -256,6 +264,7 @@ async function hydrate(
     data,
     completion,
     capabilities,
+    configurationPolicy,
     documents: docs,
     members: members.rows,
     assignmentEligibility: { eligible: memberEligibility.rows.filter((member: any) => member.status === "active"), excluded: memberEligibility.rows.filter((member: any) => member.status !== "active") },
@@ -300,7 +309,8 @@ export async function initializeJobIntake(input: {
   const projectId = positiveId(input.projectId, "projectId"),
     access = await scope(input.actorUserId, projectId),
     id = uuid();
-  const data = normalizeJobIntakeData({
+  const configurationPolicy = await intakePolicy(input.actorUserId, access);
+  const data = normalizeJobIntakeData(applyIntakePolicyDefaults({
     identity: {
       jobName: access.projectName,
       jobCode: access.projectCode,
@@ -310,7 +320,7 @@ export async function initializeJobIntake(input: {
       startDate: access.startDate,
       targetCompletionDate: access.targetCompletionDate,
     },
-  });
+  }, configurationPolicy));
   const capabilities = await capabilitiesFor(input.actorUserId);
   const completion = jobIntakeCompletion(data, [], capabilities);
   const client = await pool.connect();
