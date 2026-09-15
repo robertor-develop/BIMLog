@@ -3,9 +3,10 @@ import { pool } from "@workspace/db";
 import { storage } from "./storage-adapter";
 import { signToken } from "../middlewares/auth";
 import { decryptEvidence, getTelegramProductConfig, hmacValue, TelegramProductError, type TelegramLanguage } from "./telegram-product";
+import { TELEGRAM_DELIVERY_ARTIFACTS, type DeliveryArtifactType } from "./telegram-delivery-artifacts";
 
 export type DeliveryChannel = "telegram" | "email";
-export type DeliveryArtifactType = "project_file" | "rfi_pdf" | "rfi_complete_pdf" | "rfi_docx" | "rfi_audit_pdf";
+export type { DeliveryArtifactType } from "./telegram-delivery-artifacts";
 export type DeliveryStatus = "draft" | "awaiting_confirmation" | "confirmed" | "preparing" | "ready" | "delivering" | "delivered" | "failed" | "cancelled" | "expired";
 
 type DeliveryRow = {
@@ -25,12 +26,7 @@ const DELIVERY_TTL_MS = 30 * 60 * 1000;
 const LINK_TTL_MS = 10 * 60 * 1000;
 const DEFAULT_PREPARATION_TIMEOUT_MS = 15_000;
 const EMAIL_RE = /^[A-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?(?:\.[A-Z0-9](?:[A-Z0-9-]{0,61}[A-Z0-9])?)+$/i;
-const ARTIFACTS: Record<Exclude<DeliveryArtifactType, "project_file">, { route: string; suffix: string; contentType: string }> = {
-  rfi_pdf: { route: "/projects/{projectId}/rfis/{entityId}/export", suffix: "-Request-for-Information.pdf", contentType: "application/pdf" },
-  rfi_complete_pdf: { route: "/projects/{projectId}/rfis/{entityId}/export-complete", suffix: "-Complete-RFI-Package.pdf", contentType: "application/pdf" },
-  rfi_docx: { route: "/projects/{projectId}/rfis/{entityId}/export-word", suffix: "-Request-for-Information.docx", contentType: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" },
-  rfi_audit_pdf: { route: "/projects/{projectId}/rfis/{entityId}/audit-certificate", suffix: "-RFI-Audit.pdf", contentType: "application/pdf" },
-};
+const ARTIFACTS = TELEGRAM_DELIVERY_ARTIFACTS;
 
 function safeText(value: unknown, max = 240): string {
   return String(value ?? "").replace(/[\u0000-\u001f\u007f]/g, " ").replace(/\s+/g, " ").trim().slice(0, max);
@@ -209,8 +205,9 @@ async function artifactLabel(type: DeliveryArtifactType, projectId: number, enti
     if (!result.rows[0]) throw new TelegramProductError(404, "ARTIFACT_NOT_FOUND", "Project file not found.");
     return safeText(result.rows[0].file_name, 300);
   }
-  const result = await pool.query(`SELECT number FROM rfis WHERE id=$1 AND project_id=$2`, [entityId, projectId]);
-  if (!result.rows[0]) throw new TelegramProductError(404, "ARTIFACT_NOT_FOUND", "RFI not found.");
+  const table = type.startsWith("rfi_") ? "rfis" : type.startsWith("submittal_") ? "submittals" : "change_orders";
+  const result = await pool.query(`SELECT number FROM ${table} WHERE id=$1 AND project_id=$2`, [entityId, projectId]);
+  if (!result.rows[0]) throw new TelegramProductError(404, "ARTIFACT_NOT_FOUND", "Canonical delivery record not found.");
   return `${safeText(result.rows[0].number, 120)}${ARTIFACTS[type].suffix}`;
 }
 
