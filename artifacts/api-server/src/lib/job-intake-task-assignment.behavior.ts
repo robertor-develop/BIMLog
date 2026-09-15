@@ -13,6 +13,10 @@ assert.match(page, /workPackageId: ""/);
 assert.match(page, /assigns this resource directly to that package task/);
 assert.match(service, /taskDefinition\.id \? `package:/);
 assert.match(service, /assignment\.workPackageTaskId/);
+assert.match(service, /const needsScopeDeliveryTask =/);
+assert.match(service, /item\.workPackages\.length === 0/);
+assert.match(service, /assignment\.scopeItemId === item\.id && !assignment\.workPackageId/);
+assert.match(service, /if \(needsScopeDeliveryTask\)/);
 assert.match(service, /INSERT INTO job_activation_resource_assignments\(id,intake_id,work_item_id,task_id/);
 
-console.log(JSON.stringify({ status: "PASS", build: 6, checks: ["explicit-task-selector", "stale-package-cleared", "package-task-activation", "assignment-task-persistence"] }));
+console.log(JSON.stringify({ status: "PASS", build: 6, checks: ["explicit-task-selector", "stale-package-cleared", "package-task-activation", "assignment-task-persistence", "no-duplicate-scope-task-for-package-only-assignment"] }));

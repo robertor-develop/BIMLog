@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## P22 full live Job Intake smoke closure — 2026-09-14
+
+- [x] Create a clearly labeled QA project and complete Advanced Job Intake through save and full reload persistence.
+- [x] Reproduce the activation-only duplicate fallback task and its incorrect 12.5% aggregate progress from one configured task at 25%.
+- [x] Restrict generic scope-delivery creation to no-package or deliberate whole-scope assignments.
+- [ ] Pass governed regressions, publish with zero-drop database preview, and repeat the complete live activation on a fresh QA project.
+
 This is the operating register for unfinished BIMLog work. It exists so customer feedback, half-built features, cleanup tasks, quality issues, plugin tasks, and Replit/Codex handoffs do not disappear across compacted chats or focused tasks.
 
 ## BIMLog v1.60.33.06 Build 6 Team Capacity release gates - 2026-08-14

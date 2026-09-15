@@ -1020,7 +1020,7 @@ async function createCoreActivationWithClient(
   let workItemsCreated = 0,
     tasksCreated = 0,
     assignmentsCreated = 0;
-  const workItemByScope = new Map<string, { id: string; taskId: string }>();
+  const workItemByScope = new Map<string, { id: string; taskId: string | null }>();
   const packageTaskById = new Map<string, string>();
   for (const item of input.data.scopeItems) {
     const workItemId = uuid();
@@ -1064,9 +1064,17 @@ async function createCoreActivationWithClient(
         "The operational work item could not be created.",
       );
     if (inserted) workItemsCreated += 1;
-    const taskId = uuid();
-    const taskInserted = (
-      await client.query(
+    const needsScopeDeliveryTask =
+      item.workPackages.length === 0 ||
+      input.data.team.assignments.some(
+        (assignment: JobIntakeData["team"]["assignments"][number]) =>
+          assignment.scopeItemId === item.id && !assignment.workPackageId,
+      );
+    let actualTaskId: string | null = null;
+    if (needsScopeDeliveryTask) {
+      const taskId = uuid();
+      const taskInserted = (
+        await client.query(
         `INSERT INTO job_activation_tasks(id,work_item_id,task_key,name_en,name_es,sequence,status,planned_hours,assignee_user_id,created_by_id,discipline_id,discipline_code,discipline_name,service_id,service_code,service_name,phase_id,phase_code,phase_name)
       VALUES($1,$2,'scope-delivery','Deliver scope item','Entregar partida de alcance',1,'not_started',$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
       ON CONFLICT(work_item_id,task_key) DO NOTHING RETURNING id`,
@@ -1086,23 +1094,24 @@ async function createCoreActivationWithClient(
           input.data.classification.phaseCode || null,
           input.data.classification.phaseName || null,
         ],
-      )
-    ).rows[0];
-    const actualTaskId =
-      taskInserted?.id ??
-      (
-        await client.query(
-          `SELECT id FROM job_activation_tasks WHERE work_item_id=$1 AND task_key='scope-delivery'`,
-          [actualWorkItemId],
         )
-      ).rows[0]?.id;
-    if (!actualTaskId)
-      throw new FinancialControlError(
-        500,
-        "JOB_ACTIVATION_TASK_FAILED",
-        "The operational delivery task could not be created.",
-      );
-    if (taskInserted) tasksCreated += 1;
+      ).rows[0];
+      actualTaskId =
+        taskInserted?.id ??
+        (
+          await client.query(
+            `SELECT id FROM job_activation_tasks WHERE work_item_id=$1 AND task_key='scope-delivery'`,
+            [actualWorkItemId],
+          )
+        ).rows[0]?.id;
+      if (!actualTaskId)
+        throw new FinancialControlError(
+          500,
+          "JOB_ACTIVATION_TASK_FAILED",
+          "The operational delivery task could not be created.",
+        );
+      if (taskInserted) tasksCreated += 1;
+    }
     workItemByScope.set(item.id, {
       id: actualWorkItemId,
       taskId: actualTaskId,

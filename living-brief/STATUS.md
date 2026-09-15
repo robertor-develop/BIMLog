@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## P22 package-task activation correction — candidate — 2026-09-14
+
+- A full live Chrome smoke from a new project through Intake activation exposed a duplicate-task defect: activation created the configured package task and an additional generic scope-delivery fallback, causing a 25% package-task update to report 12.5% aggregate progress.
+- Activation now creates the generic scope-delivery task only when the Contract Item has no Work Package or when at least one resource assignment deliberately targets the whole Contract Item. Package-only assignments activate only their configured package tasks.
+- Existing Intake data, stable package/task identifiers, exact assignment targeting, pricing, contracts, classifications, Native, Lens Next, database, and schema contracts remain unchanged.
+
 ## P21 zero-drop publication declaration closure — 2026-09-14
 
 - Replit's P21 publication preview correctly remained blocked when it proposed dropping two established `files` lineage foreign keys and the partial primary-contact index.

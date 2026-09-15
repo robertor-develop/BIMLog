@@ -24250,6 +24250,88 @@
         "scripts/test-database-safety.mjs"
       ],
       "reviewedChangeSha256": "0c96dc251f110c07ed2afe132f183056c0860b80d618e9fcfdf1aa18b8a3a868"
+    },
+    {
+      "taskId": "p22-package-task-activation-live-smoke-closure-20260914",
+      "reviewedThroughCommit": "d03c7c02bc7d84ee1ff2e19b03e809b0c2ba7f3d",
+      "reviewedAt": "2026-09-15T00:50:00Z",
+      "status": "candidate",
+      "captureTiming": "post_live_end_to_end_smoke",
+      "summary": "Corrects the duplicate generic activation task exposed by a full live Job Intake smoke while preserving deliberate whole-scope assignments and all package-task identity contracts.",
+      "workstreams": [
+        "job-intake",
+        "job-operations",
+        "release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction enforces existing one-source-of-truth execution semantics."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution and publication controls remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live end-to-end smoke and regression gates apply without amendment."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing Intake activation path receives a narrow correctness repair."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next, Native, Navisworks, camera, or XML change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation contract change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the live duplicate-task finding and bounded P22 correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the remaining regression, publication, and repeated live-smoke gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only audit history remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-intake-task-assignment.behavior.ts",
+        "artifacts/api-server/src/lib/post-p17-build19-help-audit.behavior.mjs",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "37608986e9a8fd40ac93f267fdf34a69edd7cff4f4cee26727fc4381806008ea"
     }
   ]
 }
