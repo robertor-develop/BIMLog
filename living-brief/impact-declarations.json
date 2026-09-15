@@ -24665,6 +24665,174 @@
       "reviewedChangeSha256": "f0eba7a35028e4acadfca35a6e64b248844550688f9096779855cba562deba17"
     },
     {
+      "taskId": "p29-lens-working-viewport-20260915",
+      "reviewedThroughCommit": "8d37db87310bdd183155407b5b1380dd58f57a9e",
+      "reviewedAt": "2026-09-15T21:50:00Z",
+      "trigger": "customer_feedback",
+      "immediateFindings": [
+        {
+          "category": "embedded_workspace_usability",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The expanded reconciliation inventory displaced the viewpoint list below the working viewport; the inventory must be optional while list and selected detail remain adjacent."
+        }
+      ],
+      "capabilityPreflight": null,
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction preserves canonical viewpoint identity and human-controlled actions."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation and release gates remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction applies existing compact, accessible, production-component UI requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, runtime, schema, or module inventory change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native code, camera, sectioning, XML, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated-report change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local P29 embedded working-viewport correction and exclusions."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the remaining publication and real Navisworks verification gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-compact-workspace.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dbe020c742211f29a4b7a5f061614ba65c53c0b3f48c6877710e648e6d15ce76"
+    },
+    {
+      "taskId": "p30-lens-platform-independent-panes-20260915",
+      "reviewedThroughCommit": "c0735dc6915d9a7897940aa31dc920af6832150d",
+      "reviewedAt": "2026-09-15T22:26:31Z",
+      "trigger": "live_acceptance_failure",
+      "immediateFindings": [
+        {
+          "category": "platform_workspace_scroll_ownership",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Live Chrome acceptance proved that the normal Platform route retained shared-page scrolling, so selecting a lower viewpoint displaced its detail pane instead of keeping both panes adjacent."
+        }
+      ],
+      "capabilityPreflight": null,
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction changes layout scroll ownership only and preserves canonical viewpoint identity and human-controlled actions."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation and release gates remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction enforces the existing adjacent-list-and-detail workspace requirement on the normal Platform route."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, API, runtime, schema, or module inventory change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native code, camera, sectioning, XML, or package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated-report change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the P30 Platform-route correction and the P29 live acceptance failure."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks publication and live acceptance of independent list/detail scrolling."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical evidence is changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "11dd9002ea137ba67aced404c7475d5712d64a271d4e69106a2af8b1e1c55a52"
+    },
+    {
       "taskId": "product-default-configuration-block01-20260915",
       "reviewedThroughCommit": "8d37db87310bdd183155407b5b1380dd58f57a9e",
       "reviewedAt": "2026-09-15T21:25:00Z",
@@ -24673,70 +24841,23 @@
         {
           "category": "customer_workflow_correction",
           "disposition": "captured_immediately",
-          "authorities": [
-            "status",
-            "open_loop"
-          ],
+          "authorities": ["status", "open_loop"],
           "summary": "BIMLog is default-first: company-managed configurations may be offered or governed but are not a universal prerequisite for Project Intake."
         }
       ],
       "capabilityPreflight": null,
       "authorities": [
-        {
-          "key": "ecosystem_doctrine",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The correction applies the existing one-source-of-truth and general-product doctrine without changing ecosystem identity."
-        },
-        {
-          "key": "claude",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Existing implementation, evidence, and release rules remain unchanged."
-        },
-        {
-          "key": "quality",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The correction reduces onboarding burden while retaining current quality and acceptance controls."
-        },
-        {
-          "key": "vision",
-          "result": "reviewed_no_semantic_change",
-          "reason": "BIMLog remains a general construction coordination product rather than a customer-specific implementation."
-        },
-        {
-          "key": "platform",
-          "result": "updated",
-          "reason": "The deterministic inventory records the additional Job Intake behavior gate; no route, schema, database, or runtime behavior changes."
-        },
-        {
-          "key": "plugin",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Native and Lens Next are unchanged."
-        },
-        {
-          "key": "report_design_system",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No generated report contract changes."
-        },
-        {
-          "key": "standards_register",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No standards or compliance claims change."
-        },
-        {
-          "key": "status",
-          "result": "updated",
-          "reason": "Records the local default-first Intake correction and preserved canonical authorities."
-        },
-        {
-          "key": "open_loop",
-          "result": "updated",
-          "reason": "Tracks the remaining configuration, governance, per-contract APU, and EDT reconciliation work."
-        },
-        {
-          "key": "audit",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No accepted historical evidence is rewritten by this bounded candidate."
-        }
+        {"key":"ecosystem_doctrine","result":"reviewed_no_semantic_change","reason":"The correction applies the existing one-source-of-truth and general-product doctrine without changing ecosystem identity."},
+        {"key":"claude","result":"reviewed_no_semantic_change","reason":"Existing implementation, evidence, and release rules remain unchanged."},
+        {"key":"quality","result":"reviewed_no_semantic_change","reason":"The correction reduces onboarding burden while retaining current quality and acceptance controls."},
+        {"key":"vision","result":"reviewed_no_semantic_change","reason":"BIMLog remains a general construction coordination product rather than a customer-specific implementation."},
+        {"key":"platform","result":"updated","reason":"The deterministic inventory records the additional Job Intake behavior gate; no route, schema, database, or runtime behavior changes."},
+        {"key":"plugin","result":"reviewed_no_semantic_change","reason":"Native and Lens Next are unchanged."},
+        {"key":"report_design_system","result":"reviewed_no_semantic_change","reason":"No generated report contract changes."},
+        {"key":"standards_register","result":"reviewed_no_semantic_change","reason":"No standards or compliance claims change."},
+        {"key":"status","result":"updated","reason":"Records the local default-first Intake correction and preserved canonical authorities."},
+        {"key":"open_loop","result":"updated","reason":"Tracks the remaining configuration, governance, per-contract APU, and EDT reconciliation work."},
+        {"key":"audit","result":"reviewed_no_semantic_change","reason":"No accepted historical evidence is rewritten by this bounded candidate."}
       ],
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",

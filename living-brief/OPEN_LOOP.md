@@ -5,12 +5,31 @@
 - [x] Reject a customer-specific mandatory-template interpretation. BIMLog must remain usable by a sole operator or small company without first administering configuration libraries.
 - [x] Preserve the existing canonical authorities: Companies for clients, enterprise disciplines, master services/phases, Commercial Generic APU versions, Intake contracts/items, and Job Operations budget governance.
 - [x] Clarify the first built-in delivery method as the automatic Intake default and state that company-managed configurations are optional.
-- [ ] Reconcile company-level configuration administration and PMO authority without introducing a second client, discipline, service, phase, APU, workflow, or governance authority.
+- [x] Record and test the single-source configuration authority inventory without introducing a competing store or schema.
 - [ ] Expose organization defaults and optional enforcement only where the current permission model can prove the governing company and authorized administrator.
 - [ ] Add project-level Budget Governance selection as a reference to the existing operational authority; do not create a parallel financial engine.
 - [ ] Preserve per-contract APU selection from canonical Commercial versions and automatically apply the only compatible option when exactly one exists.
 - [ ] Complete production-component desktop, exact-390px, English, Spanish, persistence, activation, APU, Operations, and downstream RFI/Submittal/Change Order regression before recommending release.
 - [ ] Reconcile Lorena's forthcoming EDT/task-management detail separately; the current screenshot is a reporting outcome, not sufficient authority for allocation formulas or task-state rules.
+
+## P30 Lens Next Platform-route independent-pane correction
+
+- [x] Record the live P29 acceptance failure: lower-list selection left details above the visible Platform-route viewport.
+- [x] Give the normal desktop Platform route the same bounded workspace and independent list/detail scroll ownership as the embedded workspace.
+- [x] Preserve responsive stacking, embedded behavior, identity, navigation, XML, digest, Native, database/schema, and customer records.
+- [x] Lock both embedded and Platform-route scrollbar ownership with focused executable regressions.
+- [x] Bind the deterministic Living Brief state to implementation commit `c0735dc6915d9a7897940aa31dc920af6832150d`.
+- [ ] Complete real browser interaction acceptance against the P30 candidate, then push and publish only after explicit authorization.
+
+## P29 Lens Next working-viewport correction
+
+- [x] Reconcile the release identity to `v1.05.N17-P29`; Native remains N17 and only Platform advances.
+- [x] Collapse the reconciliation inventory so it cannot displace the working viewpoint list below the visible Navisworks panel.
+- [x] Preserve a stable left-side viewpoint browser and adjacent right-side selected-viewpoint detail surface with independent vertical scrolling.
+- [x] Lock the collapsed-by-default utility section and two-pane ownership with focused executable regressions.
+- [x] Push and publish P29; verify version, health, ELARA issue loading, and initial two-pane selection.
+- [ ] Embedded Navisworks 2025 field verification remains unavailable because the browser bridge reported disconnected despite Navisworks being open.
+- [x] Record the failed lower-list Platform-route acceptance and carry its narrow correction into P30.
 
 ## P24 optional sharing publication and live acceptance — 2026-09-14
 

@@ -5,7 +5,22 @@
 - BIMLog's configuration contract is default-first: a sole operator or small company can begin Intake without creating configuration libraries. Company-managed configurations remain optional; a governed organization may later select or enforce its approved values through existing authority.
 - The existing built-in delivery methods remain available and `bim-submittal` remains the deterministic default. Intake now labels this choice as a Delivery Method and explicitly explains that company administration is not a prerequisite.
 - Companies remain the client authority, enterprise identity remains the discipline authority, services/phases remain master catalogs, Commercial remains the Generic APU authority, and Job Operations remains the Budget Governance execution authority. No competing store or schema is introduced.
-- This candidate changes only Intake wording and executable contract coverage. It does not change Native, Lens Next, database/schema, customer data, APU calculations, activation, contracts, permissions, or downstream module behavior.
+- Builds 1–2 establish the default-first product contract and a tested, single-source authority inventory. Native, Lens Next, database/schema, customer data, APU calculations, activation, contracts, permissions, and downstream behavior remain unchanged.
+
+## P30 Lens Next Platform-route independent panes — local candidate — 2026-09-15
+
+- Live P29 verification proved the embedded Navisworks pane contract but exposed that the normal Platform route still opted back into shared-page scrolling. Selecting a lower ELARA EAST viewpoint left its detail surface above the visible viewport.
+- P30 applies the same bounded desktop viewport and independent list/detail scroll ownership to the normal Platform route. A lower viewpoint stays visible in the left list while its selected details remain visible beside it in the right pane.
+- The combined release identity is `v1.05.N17-P30`: Native remains N17 and only the Platform segment advances.
+- Governance reconciliation is bound to implementation commit `c0735dc6915d9a7897940aa31dc920af6832150d`; this marker changes no runtime behavior.
+- This is a presentation-only correction. It does not change viewpoint identity, navigation, XML serialization, digest validation, publication, Native camera behavior, database/schema, or customer records.
+
+## P29 Lens Next working-viewport correction — published, live Platform-route acceptance failed — 2026-09-15
+
+- The combined release identity is `v1.05.N17-P29`: Native remains N17 and only the Platform segment advances.
+- The embedded Navisworks workspace keeps the viewpoint list continuously visible in the left pane by collapsing the model reconciliation inventory into a compact, optional Model Tools section.
+- P29 was pushed and published. Live Chrome verification passed version, health, issue loading, and initial side-by-side selection, but failed lower-list selection because the normal Platform route retained shared-page scrolling. The independent-pane claim therefore applies only to the embedded workspace until P30 is published and live-verified.
+- This is a presentation-only correction. It does not change viewpoint identity, navigation, XML serialization, digest validation, publication, Native camera behavior, database/schema, or customer records.
 
 ## P24 optional sharing release reconciliation — candidate — 2026-09-14
 
