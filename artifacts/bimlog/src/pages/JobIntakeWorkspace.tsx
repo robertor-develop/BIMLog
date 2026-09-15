@@ -2286,7 +2286,7 @@ export function JobIntakeWorkspace() {
                 )}
                 <div className="ji-grid">
                   <label>
-                    {tt("Workflow template", "Plantilla del flujo")}
+                    {tt("Delivery method", "Método de entrega")}
                     <select
                       value={data.delivery.workflowTemplate}
                       onChange={(e) =>
@@ -2306,6 +2306,12 @@ export function JobIntakeWorkspace() {
                         {tt("Document control", "Control de documentos")}
                       </option>
                     </select>
+                    <span className="ji-small">
+                      {tt(
+                        "BIMLog includes ready-to-use delivery methods. Company-managed configurations are optional and never required to start Intake.",
+                        "BIMLog incluye métodos de entrega listos para usar. Las configuraciones administradas por la empresa son opcionales y nunca son necesarias para iniciar el Ingreso.",
+                      )}
+                    </span>
                   </label>
                   <label>
                     {tt("Submittal strategy", "Estrategia de submittals")}

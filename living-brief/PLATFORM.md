@@ -162,6 +162,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/apu-budget-authority-http.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-real-boundary.behavior.ts
 - artifacts/api-server/src/lib/apu-budget-authority-service.ts
+- artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts

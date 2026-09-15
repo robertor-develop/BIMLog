@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Product-default configuration correction — local candidate — 2026-09-15
+
+- BIMLog's configuration contract is default-first: a sole operator or small company can begin Intake without creating configuration libraries. Company-managed configurations remain optional; a governed organization may later select or enforce its approved values through existing authority.
+- The existing built-in delivery methods remain available and `bim-submittal` remains the deterministic default. Intake now labels this choice as a Delivery Method and explicitly explains that company administration is not a prerequisite.
+- Companies remain the client authority, enterprise identity remains the discipline authority, services/phases remain master catalogs, Commercial remains the Generic APU authority, and Job Operations remains the Budget Governance execution authority. No competing store or schema is introduced.
+- This candidate changes only Intake wording and executable contract coverage. It does not change Native, Lens Next, database/schema, customer data, APU calculations, activation, contracts, permissions, or downstream module behavior.
+
 ## P24 optional sharing release reconciliation — candidate — 2026-09-14
 
 - P25 was pushed, synchronized through Replit Shell, built, and published at exact source `496c55e8fea7f2f45549fe2e706cd32817be4c40`. Its fresh production smoke passed project creation, complete Job Intake activation, Operations progress/hours/package creation, baseline freezing, company cost-library creation, and project cost-structure pinning. The first initial-budget submission then exposed one exact UI/API contract defect: the API requires bounded notes on every budget line while the new manual estimate form did not expose that required field.

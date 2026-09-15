@@ -1,5 +1,17 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Product-default configuration and Intake reconciliation — authorized 2026-09-15
+
+- [x] Reject a customer-specific mandatory-template interpretation. BIMLog must remain usable by a sole operator or small company without first administering configuration libraries.
+- [x] Preserve the existing canonical authorities: Companies for clients, enterprise disciplines, master services/phases, Commercial Generic APU versions, Intake contracts/items, and Job Operations budget governance.
+- [x] Clarify the first built-in delivery method as the automatic Intake default and state that company-managed configurations are optional.
+- [ ] Reconcile company-level configuration administration and PMO authority without introducing a second client, discipline, service, phase, APU, workflow, or governance authority.
+- [ ] Expose organization defaults and optional enforcement only where the current permission model can prove the governing company and authorized administrator.
+- [ ] Add project-level Budget Governance selection as a reference to the existing operational authority; do not create a parallel financial engine.
+- [ ] Preserve per-contract APU selection from canonical Commercial versions and automatically apply the only compatible option when exactly one exists.
+- [ ] Complete production-component desktop, exact-390px, English, Spanish, persistence, activation, APU, Operations, and downstream RFI/Submittal/Change Order regression before recommending release.
+- [ ] Reconcile Lorena's forthcoming EDT/task-management detail separately; the current screenshot is a reporting outcome, not sufficient authority for allocation formulas or task-state rules.
+
 ## P24 optional sharing publication and live acceptance — 2026-09-14
 
 - [x] Reconcile the optional-sharing release identity to `v1.05.N17-P24`; preserve Native N17 and P23 activation behavior.
