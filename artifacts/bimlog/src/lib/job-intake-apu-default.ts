@@ -15,3 +15,19 @@ export function applySoleApuToUnboundItems(items: any[], versions: IntakeApuVers
     ? { ...item, apuPlanVersion: sole.version, billingHourlyRate: sole.sellingPrice }
     : item);
 }
+
+export function contractApuCoverage(contracts: any[], items: any[]) {
+  return contracts.map((contract) => {
+    const owned = items.filter((item) => item.contractId === contract.id);
+    const bound = owned.filter((item) => item.apuPlanVersion != null);
+    const versions = [...new Set(bound.map((item) => Number(item.apuPlanVersion)))].sort((a, b) => a - b);
+    return {
+      contractId: contract.id,
+      label: contract.title || contract.contractNumber || contract.id,
+      itemCount: owned.length,
+      boundCount: bound.length,
+      versions,
+      status: owned.length === 0 ? "empty" : bound.length === owned.length ? "complete" : "incomplete",
+    };
+  });
+}
