@@ -43,6 +43,7 @@ import {
 } from "./lens-next-view-settings";
 import "./lens-next-panel.css";
 import { openBimlogWorkingView, repairBimlogWorkingViewFromCurrent } from "./lens-next-working-view";
+import { loadExportableLensNextPackages, lensNextXmlSkippedSummary } from "./lens-next-xml-export-selection";
 
 const LENS_NEXT_TRADE_OPTIONS = [
   "Fire Protection", "Plumbing", "HVAC", "Electrical", "Structural",
@@ -683,17 +684,25 @@ export function LensNextPanel({
     if (!candidates.length) { setXmlExportState("error"); setXmlExportMessage("No active BIMLog viewpoints with authoritative Visual Packages are available to export."); return; }
     setXmlExportState("loading"); setXmlExportMessage(`Loading ${candidates.length} authoritative BIMLog Visual Package(s)…`);
     try {
-      const loaded = await Promise.all(candidates.map(async issue => [issue.identity.serverId, await apiClient.loadVisualState(issue)] as const));
+      const loaded = await loadExportableLensNextPackages(candidates, issue => apiClient.loadVisualState(issue));
+      if (!loaded.exportable.length) {
+        setXmlExportState("error");
+        setXmlExportMessage(`No verified Visual Packages could be exported. ${lensNextXmlSkippedSummary(loaded.skipped)}`);
+        return;
+      }
       setXmlExportState("exporting"); setXmlExportMessage("Choose the Navisworks XML destination.");
-      const result = await bridgeClient.exportViewpointsXml(candidates, new Map(loaded), bridgeContext);
+      const result = await bridgeClient.exportViewpointsXml(loaded.exportable, loaded.packages, bridgeContext);
       if (result.cancelled) { setXmlExportState("idle"); setXmlExportMessage("XML export cancelled. No destination file was written."); return; }
       const summary = result.summary;
       if (!summary || summary.exportResult === "FAIL") {
         setXmlExportState("error"); setXmlExportMessage(summary?.failureDetail ?? "XML export failed before a valid destination was written."); return;
       }
       setXmlExportState("success");
-      const skipped = result.diagnostics.filter(item => item.result === "SKIPPED").map(item => `${item.displayId ?? item.viewpointId}: ${item.reasonCode}`).join("; ");
-      setXmlExportMessage(`${summary.exportResult === "PARTIAL_SUCCESS" ? "Partial export" : "Export complete"}: ${summary.serializedCount} serialized, ${summary.skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} ${summary.outputPath}`);
+      const nativeSkipped = result.diagnostics.filter(item => item.result === "SKIPPED").map(item => `${item.displayId ?? item.viewpointId}: ${item.reasonCode}`).join("; ");
+      const serverSkipped = lensNextXmlSkippedSummary(loaded.skipped);
+      const skipped = [serverSkipped, nativeSkipped].filter(Boolean).join("; ");
+      const skippedCount = loaded.skipped.length + (summary.skippedCount ?? 0);
+      setXmlExportMessage(`${skippedCount ? "Partial export" : "Export complete"}: ${summary.serializedCount} serialized, ${skippedCount} skipped.${skipped ? ` ${skipped}.` : ""} ${summary.outputPath}`);
     } catch (error) {
       setXmlExportState("error"); setXmlExportMessage(error instanceof Error ? error.message : "XML export failed");
     }
