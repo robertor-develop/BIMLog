@@ -1,12 +1,22 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## P30 Lens Next Platform-route independent-pane correction
+
+- [x] Record the live P29 acceptance failure: lower-list selection left details above the visible Platform-route viewport.
+- [x] Give the normal desktop Platform route the same bounded workspace and independent list/detail scroll ownership as the embedded workspace.
+- [x] Preserve responsive stacking, embedded behavior, identity, navigation, XML, digest, Native, database/schema, and customer records.
+- [x] Lock both embedded and Platform-route scrollbar ownership with focused executable regressions.
+- [ ] Complete real browser interaction acceptance against the P30 candidate, then push and publish only after explicit authorization.
+
 ## P29 Lens Next working-viewport correction
 
 - [x] Reconcile the release identity to `v1.05.N17-P29`; Native remains N17 and only Platform advances.
 - [x] Collapse the reconciliation inventory so it cannot displace the working viewpoint list below the visible Navisworks panel.
 - [x] Preserve a stable left-side viewpoint browser and adjacent right-side selected-viewpoint detail surface with independent vertical scrolling.
 - [x] Lock the collapsed-by-default utility section and two-pane ownership with focused executable regressions.
-- [ ] Push, publish, and verify the corrected embedded layout in the real Navisworks 2025 panel only after explicit authorization.
+- [x] Push and publish P29; verify version, health, ELARA issue loading, and initial two-pane selection.
+- [ ] Embedded Navisworks 2025 field verification remains unavailable because the browser bridge reported disconnected despite Navisworks being open.
+- [x] Record the failed lower-list Platform-route acceptance and carry its narrow correction into P30.
 
 ## P24 optional sharing publication and live acceptance — 2026-09-14
 

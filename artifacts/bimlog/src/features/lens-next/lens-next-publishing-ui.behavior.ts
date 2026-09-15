@@ -26,6 +26,7 @@ check(model.includes("mutationVersion"), "pull adapter retains concurrency versi
 check(styles.includes(".lens-next-workspace--embedded {") && styles.includes("overflow: hidden"), "embedded viewport stays fixed beneath native window chrome");
 check(styles.includes("Header chrome stays visible") && styles.includes("scroll independently"), "two-pane scrollbar ownership is explicit");
 check(styles.includes(".lens-next-workspace--embedded .lens-next__browser,") && styles.includes("overflow-y: auto"), "issue browser and selected details scroll independently");
+check(styles.includes('.lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__browser .lens-next__issue-list') && styles.includes('.lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__body > .lens-next__details'), "Platform route owns independent issue-list and selected-detail scrolling");
 check(styles.includes("grid-template-columns: clamp(380px, 42vw, 520px) minmax(360px, 1fr)"), "embedded workspace keeps stable readable list and detail columns");
 check(styles.includes("@media (max-width: 760px)") && styles.includes("grid-template-columns: minmax(0, 1fr)"), "narrow embedded windows stack without compressed controls");
 check(styles.includes(".lens-next h2 small") && styles.includes("font-size: 0.6em"), "customer-facing version is visually subordinate");

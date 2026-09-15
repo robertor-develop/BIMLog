@@ -18,5 +18,9 @@ assert.doesNotMatch(view, /<details className="lens-next__create" open>/);
 assert.match(view, /<details className="lens-next__active-model" aria-label="Active Navisworks model and synchronization tools">/);
 assert.doesNotMatch(view, /<details className="lens-next__active-model"[^>]*\sopen(?:=|>)/);
 assert.match(css, /\.lens-next__active-model > summary[\s\S]*?padding:\s*0\.55rem 0\.8rem;/);
+assert.match(css, /\.lens-next-workspace:not\(\.lens-next-workspace--embedded\)\s*\{[\s\S]*?height:\s*calc\(100dvh - 64px\);[\s\S]*?overflow:\s*hidden;/);
+assert.match(css, /\.lens-next-workspace:not\(\.lens-next-workspace--embedded\) \.lens-next__browser \.lens-next__issue-list\s*\{[\s\S]*?flex:\s*1 1 240px;[\s\S]*?overflow-y:\s*auto;/);
+assert.match(css, /\.lens-next-workspace:not\(\.lens-next-workspace--embedded\) \.lens-next__body > \.lens-next__details\s*\{[\s\S]*?overflow-y:\s*auto;/);
+assert.doesNotMatch(css, /\.lens-next-workspace:not\(\.lens-next-workspace--embedded\)[\s\S]{0,220}?overflow:\s*visible;/);
 
-console.log("Lens Next compact independent-pane workspace with visible issue list: PASS");
+console.log("Lens Next compact independent-pane embedded and Platform workspaces with visible issue list: PASS");

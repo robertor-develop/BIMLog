@@ -1,10 +1,17 @@
 # STATUS.md - Current Accepted Platform State
 
-## P29 Lens Next working-viewport correction — local candidate — 2026-09-15
+## P30 Lens Next Platform-route independent panes — local candidate — 2026-09-15
+
+- Live P29 verification proved the embedded Navisworks pane contract but exposed that the normal Platform route still opted back into shared-page scrolling. Selecting a lower ELARA EAST viewpoint left its detail surface above the visible viewport.
+- P30 applies the same bounded desktop viewport and independent list/detail scroll ownership to the normal Platform route. A lower viewpoint stays visible in the left list while its selected details remain visible beside it in the right pane.
+- The combined release identity is `v1.05.N17-P30`: Native remains N17 and only the Platform segment advances.
+- This is a presentation-only correction. It does not change viewpoint identity, navigation, XML serialization, digest validation, publication, Native camera behavior, database/schema, or customer records.
+
+## P29 Lens Next working-viewport correction — published, live Platform-route acceptance failed — 2026-09-15
 
 - The combined release identity is `v1.05.N17-P29`: Native remains N17 and only the Platform segment advances.
 - The embedded Navisworks workspace keeps the viewpoint list continuously visible in the left pane by collapsing the model reconciliation inventory into a compact, optional Model Tools section.
-- Selecting a viewpoint renders its authoritative details and actions directly beside the list in the independently scrollable right pane; list scrolling never moves the selected detail surface away from the working row.
+- P29 was pushed and published. Live Chrome verification passed version, health, issue loading, and initial side-by-side selection, but failed lower-list selection because the normal Platform route retained shared-page scrolling. The independent-pane claim therefore applies only to the embedded workspace until P30 is published and live-verified.
 - This is a presentation-only correction. It does not change viewpoint identity, navigation, XML serialization, digest validation, publication, Native camera behavior, database/schema, or customer records.
 
 ## P24 optional sharing release reconciliation — candidate — 2026-09-14
