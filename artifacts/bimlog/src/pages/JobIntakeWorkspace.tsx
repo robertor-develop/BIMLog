@@ -32,7 +32,7 @@ import {
   profileForApuRate,
   rateForApuProfile,
 } from "@/lib/job-intake-apu-rates";
-import { applySoleApuToUnboundItems, soleCompatibleApuVersion } from "@/lib/job-intake-apu-default";
+import { applySoleApuToUnboundItems, contractApuCoverage, soleCompatibleApuVersion } from "@/lib/job-intake-apu-default";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const recoveryKey = (projectId: number) =>
@@ -758,6 +758,10 @@ export function JobIntakeWorkspace() {
   };
   const latestRate = String(apu?.sellingPrice ?? "0.00"),
     latestApuVersion = apu?.version ?? null;
+  const apuCoverage = contractApuCoverage(
+    data.commercial?.contracts || [],
+    data.scopeItems || [],
+  );
   const money = (quantity: unknown, rate: unknown) =>
     (Number(quantity || 0) * Number(rate || 0)).toFixed(2);
   const save = async () => {
@@ -1902,6 +1906,21 @@ export function JobIntakeWorkspace() {
                           "Add one Contract Item per deliverable or work package. Activation creates operational work items even without paid Commercial features.",
                           "Agregue una Partida de Contrato por cada entregable o paquete de trabajo. La activación crea partidas operativas aun sin funciones comerciales pagadas.",
                         )}
+                  </div>
+                )}
+                {capabilities.costValuePlanner && (
+                  <div className="ji-row" aria-label={tt("APU coverage by contract", "Cobertura APU por contrato")}>
+                    <strong>{tt("APU coverage by contract", "Cobertura APU por contrato")}</strong>
+                    <p className="ji-small">{tt(
+                      "BIMLog automatically uses a saved APU only when exactly one compatible version exists. Multiple versions always require an explicit selection; existing selections are never overwritten.",
+                      "BIMLog usa automáticamente un APU guardado solo cuando existe exactamente una versión compatible. Varias versiones siempre requieren una selección explícita; las selecciones existentes nunca se sobrescriben.",
+                    )}</p>
+                    {apuCoverage.map((entry) => (
+                      <div key={entry.contractId} className={entry.status === "incomplete" ? "ji-missing" : "ji-lock"}>
+                        <b>{entry.label}</b> — {entry.boundCount}/{entry.itemCount} {tt("Contract Items linked", "Partidas de Contrato vinculadas")}
+                        {entry.versions.length ? ` · APU ${entry.versions.map((version) => `v${version}`).join(", ")}` : ""}
+                      </div>
+                    ))}
                   </div>
                 )}
                 <ContractItemBulkEditor
