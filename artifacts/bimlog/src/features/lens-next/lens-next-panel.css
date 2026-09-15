@@ -656,15 +656,32 @@
 .lens-next-workspace--embedded .lens-next__browser,
 .lens-next-workspace--embedded .lens-next__body > .lens-next__details {
   min-height: 0;
-  overflow-x: hidden;
-  overflow-y: auto;
+  overflow: hidden;
   scrollbar-gutter: stable;
 }
 
 .lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list {
-  flex: 0 0 auto;
-  min-height: 240px;
-  overflow: visible;
+  flex: 1 1 240px;
+  min-height: 160px;
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.lens-next-workspace--embedded .lens-next__body > .lens-next__details {
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.lens-next-workspace--embedded .lens-next__issue-card {
+  grid-template-columns: 56px minmax(0, 1fr);
+  gap: 8px;
+  margin-bottom: 4px;
+  padding: 5px;
+}
+
+.lens-next-workspace--embedded .lens-next__thumbnail {
+  width: 56px;
+  height: 50px;
 }
 
 .lens-next-workspace--embedded::-webkit-scrollbar {

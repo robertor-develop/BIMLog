@@ -1,4 +1,4 @@
-import type { LensNextIssue } from "./lens-next-model";
+import type { LensNextIssue } from "./lens-next-types";
 
 export type LensNextXmlPackage = {
   visualStateJson: string;
