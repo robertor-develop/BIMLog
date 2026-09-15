@@ -24494,6 +24494,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4ce8d1fc896b9b1242ec5c42a6b86429c69d3612cc6c9f39610e0d48625fd320"
+    },
+    {
+      "taskId": "p24-optional-sharing-release-reconciliation-20260914",
+      "reviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "reviewedAt": "2026-09-15T02:40:00Z",
+      "status": "candidate",
+      "captureTiming": "same_task_pre_release_reconciliation",
+      "summary": "Advances only the Platform segment to P24 for the completed optional-sharing behavior while preserving Native N17, P23 activation behavior, and all database/schema contracts.",
+      "workstreams": [
+        "release",
+        "optional-sharing",
+        "controlled-delivery"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership or canonical-record direction changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release, Replit, database, external-action, and acceptance gates remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing full-build, live-browser, artifact, and external-delivery evidence requirements apply."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The optional-sharing doctrine was reconciled in the immediately preceding accepted local block."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic Platform inventory is unchanged because release labels and optional-sharing UI behavior do not alter its structural inventory contract."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native remains N17 and Lens Next is unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-generation or presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the P24 candidate identity and remaining release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks push, Replit, zero-drop preview, publication, live smoke, and explicit Telegram-send confirmation."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only audit history remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/api-server/src/lib/post-p17-build19-help-audit.behavior.mjs",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "68f6db2e0ae86a328d9cae6fefe241b9666eb393406aa7b53a91bd2c75399ddd"
     }
   ]
 }

@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## P24 optional sharing release reconciliation — candidate — 2026-09-14
+
+- The completed optional email/Telegram sharing Builds 1-10 change Platform behavior above the P23 activation-verifier baseline, so the combined release identity advances to `v1.05.N17-P24`.
+- Native remains N17. No Native, Lens Next, database, schema, historical-record, or automatic-send behavior changes.
+- Push, Replit Shell synchronization, zero-drop publication preview, one publication, live Chrome end-to-end acceptance, and explicitly confirmed private Telegram QA delivery are the remaining release gates.
+
 ## Optional email/Telegram sharing Builds 1-10 — local candidate — 2026-09-15
 
 - RFI, Submittal, and Change Order detail surfaces expose one optional sharing panel without changing save, completion, approval, lifecycle, or audit semantics.

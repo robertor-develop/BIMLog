@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## P24 optional sharing publication and live acceptance — 2026-09-14
+
+- [x] Reconcile the Platform release identity to `v1.05.N17-P24`; preserve Native N17 and P23 activation behavior.
+- [ ] Push the exact clean P24 commit to the governed GitHub production lineage.
+- [ ] Synchronize that exact commit through Replit Shell and require a zero-drop production database preview.
+- [ ] Publish once and verify the exact live version and health in Chrome.
+- [ ] Complete a fresh sample Job Intake/APU/Operations cycle, including persistence, assignments, budget, Submittal, file, and controlled optional-sharing checks.
+- [ ] Obtain action-time confirmation before the final external Telegram send to Roberto's private test destination and record provider acknowledgement.
+
 ## Optional email/Telegram sharing release gates — 2026-09-15
 
 - [x] Add an optional, capability-preserving sharing surface for RFI, Submittal, and Change Order canonical packages.

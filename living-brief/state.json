@@ -1,20 +1,23 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
+  "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "bcd64fd705ca78a5f26023cdadbbe2cb3c41ca59bf0b749c0d6a513c48087a3a",
+  "bundleSha256": "a711363f790b79add261656050e4cb75fe99bfe6c21fb785d348a8e7ca6eda2b",
   "impact": {
-    "baselineCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
+    "baselineCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
     "changedPaths": [
+      "artifacts/api-server/src/lib/help-center.behavior.ts",
+      "artifacts/api-server/src/lib/post-p17-build19-help-audit.behavior.mjs",
+      "artifacts/bimlog/src/components/layout/Navbar.tsx",
+      "artifacts/bimlog/src/pages/HelpCenter.tsx",
       "living-brief/OPEN_LOOP.md",
-      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
-      "living-brief/VISION.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -25,11 +28,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "claude",
@@ -37,11 +40,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "quality",
@@ -49,35 +52,35 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "vision",
       "file": "VISION.md",
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
-      "sourceChangedAt": "2026-09-15T02:30:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "sourceChangedAt": "2026-09-14T22:42:41-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "c7ff4e6cdf9ce62cc9d4a98bd8f8db4ecbfb9dd23e8090682c29791b73f0509f",
-      "sourceChangedAt": "2026-09-15T02:30:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "sourceChangedAt": "2026-09-14T22:42:41-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "plugin",
@@ -85,11 +88,11 @@
       "sha256": "d2639c652872b5a0592d4a4aaca054616b4192090efd71c6cf4a156a81566541",
       "sourceChangedAt": "2026-09-10T11:55:53-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "report_design_system",
@@ -97,11 +100,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "standards_register",
@@ -109,35 +112,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "157b676128f72ae0f2f333cd9f6372e4a883014f7aca594357dedde73460a63f",
-      "sourceChangedAt": "2026-09-15T02:30:00.000Z",
+      "sha256": "9e3fea8e2199bd17b52ec3d5d810df4d776eb7b753b6b2fb9127e823821d55f4",
+      "sourceChangedAt": "2026-09-15T02:40:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "2f7b6785b5aea3f01d44902dfa5afa60fa079b1cbe63e43eb7d68898d9cf3ea5",
-      "sourceChangedAt": "2026-09-15T02:30:00.000Z",
+      "sha256": "86e176390f91fb5f91d05366864b35012848bddf81c752fa9543ef1151eb9d25",
+      "sourceChangedAt": "2026-09-15T02:40:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     },
     {
       "key": "audit",
@@ -145,11 +148,11 @@
       "sha256": "3c90b07a2ed9d7271ac3e21dc4b98a5e7ff3b6db1b398b562ebe1af447cb69f6",
       "sourceChangedAt": "2026-09-14T18:08:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewedThroughCommit": "21aa87f93654ddfb5bf7d79ec162cf6311dc27c2",
-      "semanticReviewTask": "optional-email-telegram-sharing-builds01-10-20260915",
+      "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
+      "semanticReviewTask": "p24-optional-sharing-release-reconciliation-20260914",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-15T02:30:00Z"
+      "semanticReviewedAt": "2026-09-15T02:40:00Z"
     }
   ]
 }
