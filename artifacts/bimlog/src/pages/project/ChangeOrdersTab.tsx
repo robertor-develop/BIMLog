@@ -5,6 +5,7 @@ import { Download, Search, Trash2 } from "lucide-react";
 import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfButton";
 import { ClipboardList, DollarSign, Calendar, Sparkles } from "lucide-react";
+import { OptionalSharePanel } from "@/components/OptionalSharePanel";
 
 interface ChangeOrder {
   id: number; number: string; title: string; description?: string;
@@ -477,6 +478,12 @@ export function ChangeOrdersTab({ projectId, canWrite }: { projectId: number; ca
                     </>
                   )}
                   <button className="btn btn-sm btn-outline" title={t("Download this change order report as PDF", "Descargar este reporte de orden de cambio en PDF")} onClick={() => exportPdf(co.id)}>{t("Change Order PDF", "PDF de orden de cambio")}</button>
+                  <OptionalSharePanel
+                    language={lang === "es" ? "es" : "en"}
+                    artifactLabel={`${co.number}-Change-Order.pdf`}
+                    downloadUrl={`/api/v1/projects/${projectId}/change-orders/${co.id}/export`}
+                    telegramDelivery={{ projectId, artifactType: "change_order_pdf", entityId: co.id }}
+                  />
                   {canWrite && (
                     <button
                       title={t("Delete", "Eliminar")}
