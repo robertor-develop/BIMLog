@@ -6,7 +6,7 @@
 - [x] Preserve the existing canonical authorities: Companies for clients, enterprise disciplines, master services/phases, Commercial Generic APU versions, Intake contracts/items, and Job Operations budget governance.
 - [x] Clarify the first built-in delivery method as the automatic Intake default and state that company-managed configurations are optional.
 - [x] Record and test the single-source configuration authority inventory without introducing a competing store or schema.
-- [ ] Expose organization defaults and optional enforcement only where the current permission model can prove the governing company and authorized administrator.
+- [x] Expose organization and project Intake defaults through the existing governed feature-policy catalog only; company/project authority, audited bindings, bounded keys, optional fallback, and explicit enforcement are preserved without a parallel store.
 - [x] Add project-level Budget Governance selection as a reference to the existing operational authority; do not create a parallel financial engine.
 - [x] Preserve per-contract APU selection from canonical Commercial versions and automatically apply the only compatible option when exactly one exists; multiple versions remain an explicit choice and saved bindings are never overwritten.
 - [x] Preserve the selected delivery method and Budget Governance reference in the existing Intake JSON, activation evidence, and read-only Operations projection without a schema change.

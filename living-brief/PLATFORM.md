@@ -344,6 +344,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-empty-commercial-prerequisites.behavior.ts
 - artifacts/api-server/src/lib/job-intake-member-assignment.behavior.ts
 - artifacts/api-server/src/lib/job-intake-migration.ts
+- artifacts/api-server/src/lib/job-intake-policy-catalog.behavior.ts
+- artifacts/api-server/src/lib/job-intake-policy-integration.behavior.ts
+- artifacts/api-server/src/lib/job-intake-policy-ui.behavior.ts
+- artifacts/api-server/src/lib/job-intake-policy.behavior.ts
+- artifacts/api-server/src/lib/job-intake-policy.ts
 - artifacts/api-server/src/lib/job-intake-service.ts
 - artifacts/api-server/src/lib/job-intake-spreadsheet.behavior.ts
 - artifacts/api-server/src/lib/job-intake-task-assignment.behavior.ts

@@ -25095,6 +25095,100 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "fd1f593b0a86020a619c813101d2f03c40a32b7033ccc10ac9bb02a82e430c94"
+    },
+    {
+      "taskId": "product-default-configuration-builds11-15-20260915",
+      "reviewedThroughCommit": "eda38edb08d7cec50e76834117266ce41bbcb659",
+      "reviewedAt": "2026-09-15T23:43:51Z",
+      "trigger": "authorized_product_configuration_block",
+      "immediateFindings": [
+        {
+          "category": "governed_intake_configuration_policy",
+          "disposition": "implemented_in_existing_feature_catalog",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Company and project policy may provide bounded Delivery and Budget Governance defaults through the existing feature-policy catalog; BIMLog defaults remain available, enforced choices are read-only, and activation records provenance without creating a parallel configuration store."
+        }
+      ],
+      "capabilityPreflight": null,
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Company governance remains optional and bounded while BIMLog remains usable by smaller organizations without prerequisite template administration."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing implementation, evidence, release, and no-overwrite rules remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Deterministic fallback, bounded configuration, provenance, typecheck, and protected-module regressions govern the block."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation realizes the already accepted default-first product direction without changing it."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Registers project.intake.configuration in the canonical feature catalog and documents its company/project policy resolution within the existing Platform structure."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and Lens Next code are unchanged and remain protected by regression."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated-report contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 11–15 policy behavior, provenance, enforcement, and boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the governed organization/project Intake defaults gap."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer records or accepted historical evidence are rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/feature-policy-support-matrix.ts",
+        "artifacts/api-server/src/lib/feature-policy.behavior.ts",
+        "artifacts/api-server/src/lib/initial-feature-catalog.ts",
+        "artifacts/api-server/src/lib/job-intake-policy-catalog.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-policy-integration.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-policy-ui.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-policy.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-policy.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "5590f341e8eb2cdfae8c90542cc6c5eb79ea807fd6195f60b8457bfe51321fa7"
     }
   ]
 }
