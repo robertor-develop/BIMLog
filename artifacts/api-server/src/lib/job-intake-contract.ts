@@ -1,4 +1,5 @@
 import crypto from "node:crypto";
+import { DEFAULT_DELIVERY_METHOD, normalizeBudgetGovernancePolicy } from "./job-intake-configuration";
 import { FinancialControlError } from "./financial-control-contract";
 import {
   boundedText,
@@ -262,6 +263,8 @@ export function normalizeJobIntakeData(raw: unknown) {
   });
   const delivery =
     input.delivery && typeof input.delivery === "object" ? input.delivery : {};
+  const governance =
+    input.governance && typeof input.governance === "object" ? input.governance : {};
   const team = input.team && typeof input.team === "object" ? input.team : {};
   const review =
     input.review && typeof input.review === "object" ? input.review : {};
@@ -793,7 +796,7 @@ export function normalizeJobIntakeData(raw: unknown) {
           delivery.workflowTemplate,
           "delivery.workflowTemplate",
           100,
-        ) || "bim-submittal",
+        ) || DEFAULT_DELIVERY_METHOD,
       submittalStrategy: optionalText(
         delivery.submittalStrategy,
         "delivery.submittalStrategy",
@@ -804,6 +807,9 @@ export function normalizeJobIntakeData(raw: unknown) {
         "delivery.milestoneSummary",
         2000,
       ),
+    },
+    governance: {
+      budgetPolicy: normalizeBudgetGovernancePolicy(governance.budgetPolicy),
     },
     team: {
       projectLeaderUserId: optionalId(

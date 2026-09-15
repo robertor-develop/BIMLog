@@ -26,7 +26,7 @@ assert.match(intakeUi, /value="bim-submittal"/);
 assert.match(intakeUi, /value="coordination-delivery"/);
 assert.match(intakeUi, /value="document-control"/);
 
-assert.match(contract, /\|\| "bim-submittal"/);
+assert.match(contract, /\|\| DEFAULT_DELIVERY_METHOD/);
 assert.doesNotMatch(contract, /template library.*required/i);
 assert.doesNotMatch(intakeUi, /configure.*before.*intake/i);
 

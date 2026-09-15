@@ -181,6 +181,7 @@ const blank = {
     submittalStrategy: "",
     milestoneSummary: "",
   },
+  governance: { budgetPolicy: "standard" },
   team: {
     projectLeaderUserId: null as number | null,
     assignments: [] as any[],
@@ -2285,6 +2286,23 @@ export function JobIntakeWorkspace() {
                   </div>
                 )}
                 <div className="ji-grid">
+                  <label>
+                    {tt("Budget governance", "Gobernanza del presupuesto")}
+                    <select
+                      value={data.governance?.budgetPolicy || "standard"}
+                      onChange={(e) => change("governance", "budgetPolicy", e.target.value)}
+                    >
+                      <option value="standard">{tt("BIMLog standard controls", "Controles estándar de BIMLog")}</option>
+                      <option value="pmo-controlled">{tt("PMO controlled", "Controlado por PMO")}</option>
+                      <option value="advisory">{tt("Advisory visibility", "Visibilidad consultiva")}</option>
+                    </select>
+                    <span className="ji-small">
+                      {tt(
+                        "This project-level reference is preserved at activation. Budget execution, baselines, and variance control remain in Job Operations.",
+                        "Esta referencia del proyecto se conserva al activar. La ejecución, las líneas base y el control de variaciones permanecen en Operaciones del Trabajo.",
+                      )}
+                    </span>
+                  </label>
                   <label>
                     {tt("Delivery method", "Método de entrega")}
                     <select
