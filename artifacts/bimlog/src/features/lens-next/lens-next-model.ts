@@ -363,6 +363,10 @@ function normalized(value: string | null | undefined): string {
   return (value ?? "").trim().toLocaleLowerCase("en-US");
 }
 
+export function activeLensNextIssues(value: readonly LensNextIssue[]): LensNextIssue[] {
+  return value.filter(issue => issue.identity.lifecycleStatus === "active");
+}
+
 export function filterLensNextIssues(
   value: readonly LensNextIssue[],
   filters: Readonly<LensNextFilters>,

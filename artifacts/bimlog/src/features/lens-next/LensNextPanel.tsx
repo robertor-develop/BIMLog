@@ -7,6 +7,7 @@ import {
   type LensNextBridgeClient,
 } from "./lens-next-client";
 import {
+  activeLensNextIssues,
   assertAuthorizedLensNextProject,
   filterLensNextIssues,
   normalizeLensNextProjects,
@@ -161,13 +162,14 @@ export function LensNextPanel({
 
   const selectedIssue = useMemo(
     () =>
-      issues.find((issue) => issue.identity.serverId === selectedServerId) ??
+      issues.find((issue) => issue.identity.serverId === selectedServerId && issue.identity.lifecycleStatus === "active") ??
       null,
     [issues, selectedServerId],
   );
+  const activeIssues = useMemo(() => activeLensNextIssues(issues), [issues]);
   const filteredIssues = useMemo(
-    () => filterLensNextIssues(issues, filters),
-    [filters, issues],
+    () => filterLensNextIssues(activeIssues, filters),
+    [activeIssues, filters],
   );
   const inventorySummary = useMemo(
     () => reconcileLensNextInventories(issues, localInventory),
@@ -680,7 +682,7 @@ export function LensNextPanel({
 
   const exportViewpointsXml = useCallback(async () => {
     if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId) return;
-    const candidates = issues.filter(issue => issue.identity.projectId === authorizedProjectId && issue.identity.lifecycleStatus === "active" && issue.visualStateAvailable && Boolean(issue.visualStateDigest));
+    const candidates = activeIssues.filter(issue => issue.identity.projectId === authorizedProjectId && issue.visualStateAvailable && Boolean(issue.visualStateDigest));
     if (!candidates.length) { setXmlExportState("error"); setXmlExportMessage("No active BIMLog viewpoints with authoritative Visual Packages are available to export."); return; }
     setXmlExportState("loading"); setXmlExportMessage(`Loading ${candidates.length} authoritative BIMLog Visual Package(s)…`);
     try {
@@ -706,7 +708,7 @@ export function LensNextPanel({
     } catch (error) {
       setXmlExportState("error"); setXmlExportMessage(error instanceof Error ? error.message : "XML export failed");
     }
-  }, [apiClient, authorizedProjectId, bridgeClient, bridgeContext, issues]);
+  }, [activeIssues, apiClient, authorizedProjectId, bridgeClient, bridgeContext]);
 
   return (
     <LensNextPanelView
