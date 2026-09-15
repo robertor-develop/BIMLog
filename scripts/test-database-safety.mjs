@@ -44,6 +44,23 @@ assert.deepEqual(
     { kind: "index", tableName: "sample", from: "sample_owner_idx", to: "sample_owner_id_idx" },
   ],
 );
+assert.deepEqual(
+  reconciliationPlan(
+    {
+      constraints: [
+        { table_name: "sample", name: "sample_owner_id_fkey", definition: "FOREIGN KEY (owner_id) REFERENCES users(id)" },
+        { table_name: "sample", name: "sample_owner_users_id_fk", definition: "FOREIGN KEY (owner_id) REFERENCES users(id)" },
+      ],
+      indexes: [],
+    },
+    {
+      constraints: [{ table_name: "sample", name: "sample_owner_id_fkey", definition: "FOREIGN KEY (owner_id) REFERENCES public.users(id)" }],
+      indexes: [],
+    },
+  ),
+  [{ kind: "drop_redundant_constraint", tableName: "sample", name: "sample_owner_users_id_fk" }],
+  "only a structurally identical development duplicate may be dropped when the production-named equivalent already exists",
+);
 
 const genericApuMethodConstraintDrop =
   "ALTER TABLE generic_project_apu_lines DROP CONSTRAINT IF EXISTS generic_project_apu_line_method_chk";

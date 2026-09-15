@@ -2600,4 +2600,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Reconcile the publishable combined identity to `v1.05.N17-P19` because P18 is already live and this block changes Platform behavior and adds governed catalog tables.
 - [x] Close the P19 live-smoke gap by adding central Super Administrator Service/Phase catalog administration and reconcile the corrected release to `v1.05.N17-P20`.
 - [x] Correct the P21 guarded publication order so structurally identical development object names reconcile before Drizzle push; production remains read-only and no product schema change is introduced.
+- [x] Constrain Helium cleanup to provably redundant development-only constraints when an identical canonical production-named equivalent is already present.
 - [ ] Complete the corrected Replit sync, inspect a non-destructive publish preview, publish P21, and verify the package-responsible save/reload path in live Chrome.
