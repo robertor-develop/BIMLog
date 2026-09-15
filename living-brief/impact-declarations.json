@@ -24332,6 +24332,88 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "37608986e9a8fd40ac93f267fdf34a69edd7cff4f4cee26727fc4381806008ea"
+    },
+    {
+      "taskId": "p23-activation-verifier-live-smoke-closure-20260914",
+      "reviewedThroughCommit": "d7b1ab32b688468aa1f2daf292c62bef02e4d076",
+      "reviewedAt": "2026-09-15T01:20:00Z",
+      "status": "candidate",
+      "captureTiming": "post_live_activation_verification",
+      "summary": "Reconciles the browser activation verifier with the proven package-only activation contract after the fresh P22 production smoke created one correct exact task but displayed a stale two-task expectation.",
+      "workstreams": [
+        "job-intake",
+        "job-operations",
+        "release"
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The verifier now reports the authoritative activation result without changing execution semantics."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution and publication controls remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live end-to-end and regression gates apply without amendment."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "A stale browser verification count is reconciled with the already accepted activation contract."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next, Native, Navisworks, camera, or XML change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation contract change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the live false-failure finding and bounded P23 correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records completed live proof and remaining P23 publication and Operations persistence gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only audit history remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-task-assignment.behavior.ts",
+        "artifacts/api-server/src/lib/post-p17-build19-help-audit.behavior.mjs",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a84b21d3c2d461caecc9d8272b622e398240907f2a2b5c21aa14f75912eac1ce"
     }
   ]
 }

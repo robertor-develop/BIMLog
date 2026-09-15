@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## P23 full live Job Intake smoke closure — 2026-09-14
+
+- [x] Repeat the complete Intake on fresh production project 43 and verify 100% persistence after reload.
+- [x] Prove corrected activation creates 1 Contract Item, 1 exact package task, and 1 assignment.
+- [x] Reconcile the browser activation verifier with the corrected task-creation contract.
+- [ ] Pass governed regressions, publish P23 with zero-drop preview, and verify Operations progress and reload persistence.
+
 ## P22 full live Job Intake smoke closure — 2026-09-14
 
 - [x] Create a clearly labeled QA project and complete Advanced Job Intake through save and full reload persistence.

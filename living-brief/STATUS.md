@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## P23 activation-verifier reconciliation — candidate — 2026-09-14
+
+- The fresh P22 production smoke proved that package-only activation correctly creates one exact package task, but the browser verifier still counted the removed generic fallback and displayed a false failure after a successful activation.
+- The verifier now uses the same narrow task-count contract as activation: one generic task only for a no-package scope or an explicit whole-scope assignment, plus the configured package tasks.
+- Activation behavior, current persisted Intake data, Native, Lens Next, database, and schema remain unchanged.
+
 ## P22 package-task activation correction — candidate — 2026-09-14
 
 - A full live Chrome smoke from a new project through Intake activation exposed a duplicate-task defect: activation created the configured package task and an additional generic scope-delivery fallback, causing a 25% package-task update to report 12.5% aggregate progress.

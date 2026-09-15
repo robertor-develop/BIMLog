@@ -17,6 +17,8 @@ assert.match(service, /const needsScopeDeliveryTask =/);
 assert.match(service, /item\.workPackages\.length === 0/);
 assert.match(service, /assignment\.scopeItemId === item\.id && !assignment\.workPackageId/);
 assert.match(service, /if \(needsScopeDeliveryTask\)/);
+assert.match(page, /const hasScopeAssignment = dataRef\.current\.team\.assignments\.some/);
+assert.match(page, /const scopeDeliveryTaskCount = workPackages\.length === 0 \|\| hasScopeAssignment \? 1 : 0/);
 assert.match(service, /INSERT INTO job_activation_resource_assignments\(id,intake_id,work_item_id,task_id/);
 
-console.log(JSON.stringify({ status: "PASS", build: 6, checks: ["explicit-task-selector", "stale-package-cleared", "package-task-activation", "assignment-task-persistence", "no-duplicate-scope-task-for-package-only-assignment"] }));
+console.log(JSON.stringify({ status: "PASS", build: 6, checks: ["explicit-task-selector", "stale-package-cleared", "package-task-activation", "assignment-task-persistence", "no-duplicate-scope-task-for-package-only-assignment", "activation-verifier-matches-task-contract"] }));

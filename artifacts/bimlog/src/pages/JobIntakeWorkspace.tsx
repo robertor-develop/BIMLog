@@ -923,7 +923,19 @@ export function JobIntakeWorkspace() {
       );
       const activated = await load();
       const expectedWorkItems = dataRef.current.scopeItems.length;
-      const expectedTasks = dataRef.current.scopeItems.reduce((total: number, item: any) => total + 1 + (item.workPackages || []).reduce((packageTotal: number, workPackage: any) => packageTotal + Math.max(1, workPackage.tasks?.length || 0), 0), 0);
+      const expectedTasks = dataRef.current.scopeItems.reduce((total: number, item: any) => {
+        const workPackages = item.workPackages || [];
+        const hasScopeAssignment = dataRef.current.team.assignments.some(
+          (assignment: any) => assignment.scopeItemId === item.id && !assignment.workPackageId,
+        );
+        const scopeDeliveryTaskCount = workPackages.length === 0 || hasScopeAssignment ? 1 : 0;
+        const packageTaskCount = workPackages.reduce(
+          (packageTotal: number, workPackage: any) =>
+            packageTotal + Math.max(1, workPackage.tasks?.length || 0),
+          0,
+        );
+        return total + scopeDeliveryTaskCount + packageTaskCount;
+      }, 0);
       const expectedAssignments = dataRef.current.team.assignments.length;
       const actualWorkItems = activated?.activation?.workItems?.length ?? 0;
       const actualTasks = activated?.activation?.tasks?.length ?? 0;
