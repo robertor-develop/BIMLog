@@ -24569,16 +24569,18 @@
         "artifacts/api-server/src/lib/financial-budget-service.ts",
         "artifacts/api-server/src/lib/financial-budget.behavior.ts",
         "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/api-server/src/lib/job-document-connections.behavior.ts",
         "artifacts/api-server/src/lib/post-p17-build19-help-audit.behavior.mjs",
         "artifacts/bimlog/src/components/layout/Navbar.tsx",
         "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
         "artifacts/bimlog/src/pages/FinancialControlsSettings.tsx",
         "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "artifacts/bimlog/src/pages/project/RfisTab.tsx",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d681b04909b605ad7735ad72e23e136d3e0a59bd6cd12b869e5505134f50e299"
+      "reviewedChangeSha256": "abc0cdb5bdababfb456385231b63dca8b67bc50caebd05b0e9f9e5609174f948"
     }
   ]
 }

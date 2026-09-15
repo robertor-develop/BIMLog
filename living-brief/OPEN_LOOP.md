@@ -6,6 +6,9 @@
 - [x] Financial setup closure Builds 1-5: expose governed company cost-library creation, project structure pinning, multi-line initial Intake/APU estimate drafting, controlled original/revision budget policy categories, and the existing review/sole-owner approval/snapshot/contract linkage without schema change or parallel authority. P25 was pushed and published, and its live Chrome cycle passed through structure pinning before exposing the missing required line-notes control.
 - [x] P26 adds the exact missing bilingual, bounded, mandatory line-notes control and regression so UI submission matches the established API contract.
 - [ ] Push and publish P26, resume controlled project 46 at initial budget creation, and complete the remaining review/approval/snapshot/contract/document/sharing live cycle.
+- [x] Push and publish P26; verify the corrected initial budget draft and submission in controlled project 46.
+- [x] Capture the live RFI date-only timezone defect and implement the bounded P27 calendar-date rendering correction.
+- [ ] Push and publish P27, verify RFI-0001 retains September 22, and finish the remaining controlled record and persistence gates.
 - [ ] Push the exact clean P24 commit to the governed GitHub production lineage.
 - [ ] Synchronize that exact commit through Replit Shell and require a zero-drop production database preview.
 - [ ] Publish once and verify the exact live version and health in Chrome.

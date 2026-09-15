@@ -35,9 +35,14 @@ import { format, differenceInDays, isValid, parseISO } from "date-fns";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
+function parseRfiCalendarDate(value: string | Date) {
+  if (value instanceof Date) return value;
+  const calendarDate = value.match(/^(\d{4}-\d{2}-\d{2})/)?.[1];
+  return parseISO(calendarDate ?? value);
+}
 function fmt(d: string | Date | null | undefined) {
   if (!d) return "—";
-  const dt = typeof d === "string" ? parseISO(d) : d;
+  const dt = parseRfiCalendarDate(d);
   return isValid(dt) ? format(dt, "MMM d, yyyy") : "—";
 }
 
@@ -1434,7 +1439,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
     rfis?.filter(r => {
       if (r.status === "closed") return false;
       const due = r.dateRequired || r.dueDate;
-      if (due) return new Date(due) < new Date();
+      if (due) return parseRfiCalendarDate(due) < new Date();
       return differenceInDays(new Date(), new Date(r.createdAt)) > 14;
     }).length ?? 0
   , [rfis]);
@@ -1786,7 +1791,7 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
             <tbody>
               {filtered.map(rfi => {
                 const due = rfi.dateRequired || rfi.dueDate;
-                const isOverdue = rfi.status !== "closed" && due ? new Date(due) < new Date() : false;
+                const isOverdue = rfi.status !== "closed" && due ? parseRfiCalendarDate(due) < new Date() : false;
                 const days = differenceInDays(new Date(), new Date(rfi.createdAt));
                 const bic = getBallInCourt(rfi);
                 return (
@@ -2725,7 +2730,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
     setInfoNoteNumber(rfi.noteNumber || "");
     setInfoLocationDescription(rfi.locationDescription || "");
     setInfoVpLabel((rfi as { sourceViewpointLabel?: string | null }).sourceViewpointLabel || "");
-    setInfoDateRequired(rfi.dateRequired ? format(parseISO(String(rfi.dateRequired)), "yyyy-MM-dd") : "");
+    setInfoDateRequired(rfi.dateRequired ? format(parseRfiCalendarDate(String(rfi.dateRequired)), "yyyy-MM-dd") : "");
     setInfoProjectAddress(rfi.projectAddress || "");
     setInfoDist((rfi.distributionList as string[] | null) || []);
     setInfoQuestion(rfi.question || rfi.description || "");
@@ -3638,7 +3643,7 @@ function RfiDetailPanel({ projectId, rfi, canWrite, lang, members, user, onClose
           priority: infoEdit ? infoPriority : (rfi.priority || "medium"),
           rfiType: infoEdit ? infoType : (rfi.rfiType || ""),
           dateRequested: rfi.dateRequested ? format(parseISO(String(rfi.dateRequested)), "yyyy-MM-dd") : (rfi.createdAt ? format(parseISO(String(rfi.createdAt)), "yyyy-MM-dd") : ""),
-          dateRequired: infoEdit ? infoDateRequired : (rfi.dateRequired ? format(parseISO(String(rfi.dateRequired)), "yyyy-MM-dd") : (rfi.dueDate ? format(parseISO(String(rfi.dueDate)), "yyyy-MM-dd") : "")),
+          dateRequired: infoEdit ? infoDateRequired : (rfi.dateRequired ? format(parseRfiCalendarDate(String(rfi.dateRequired)), "yyyy-MM-dd") : (rfi.dueDate ? format(parseRfiCalendarDate(String(rfi.dueDate)), "yyyy-MM-dd") : "")),
           projectAddress: infoEdit ? infoProjectAddress : (rfi.projectAddress || ""),
           daysOutstanding: `${days}d`,
           dateAnswered: fmt(rfi.dateAnswered || rfi.respondedAt),

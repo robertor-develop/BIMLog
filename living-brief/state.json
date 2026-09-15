@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "af204078679c45359186de9b77928a2924f02743d919bac9446a8b3b3e12acf0",
+  "bundleSha256": "e58c7368ef56b308e35e9c1d1105d84a92f522b1dcfa5d44d3a42646f173bedf",
   "impact": {
     "baselineCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
     "changedPaths": [
@@ -10,11 +10,13 @@
       "artifacts/api-server/src/lib/financial-budget-service.ts",
       "artifacts/api-server/src/lib/financial-budget.behavior.ts",
       "artifacts/api-server/src/lib/help-center.behavior.ts",
+      "artifacts/api-server/src/lib/job-document-connections.behavior.ts",
       "artifacts/api-server/src/lib/post-p17-build19-help-audit.behavior.mjs",
       "artifacts/bimlog/src/components/layout/Navbar.tsx",
       "artifacts/bimlog/src/pages/FinancialBudgetWorkspace.tsx",
       "artifacts/bimlog/src/pages/FinancialControlsSettings.tsx",
       "artifacts/bimlog/src/pages/HelpCenter.tsx",
+      "artifacts/bimlog/src/pages/project/RfisTab.tsx",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -126,8 +128,8 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "f79993c1b1d9287a3addba6b7013ff30877783c03c24cef10a96b0df3fa9346d",
-      "sourceChangedAt": "2026-09-15T05:05:00.000Z",
+      "sha256": "db21a4cf4209227d168ecffa41469a5a0ae115ac717d7c167bc20fcdde733863",
+      "sourceChangedAt": "2026-09-15T05:31:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
       "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
@@ -138,8 +140,8 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "b8b64afa4742f7a99defdfa6772b8a6b4f6f9755f9965d53c4ae6625fb08ae47",
-      "sourceChangedAt": "2026-09-15T05:05:00.000Z",
+      "sha256": "6bc662636551a124edc29bcefc3c52ba278eaad475ede8192ebcf12a58847b98",
+      "sourceChangedAt": "2026-09-15T05:31:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
       "semanticReviewedThroughCommit": "ba5edccb9ed7c728f69debf98f34cc70c5d9654c",
