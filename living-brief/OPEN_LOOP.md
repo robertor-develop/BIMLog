@@ -2604,4 +2604,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Make equivalent-constraint matching one-to-one so historical aliases cannot schedule a development constraint more than once.
 - [x] Separate pre-push duplicate cleanup from post-push production-name normalization so Drizzle receives the development naming contract it expects.
 - [x] Exclude constraint-backed indexes from the standalone rename phase so each PostgreSQL object is reconciled exactly once.
+- [x] Preserve the two established single-column file-lineage foreign keys and the active-primary-contact partial index in declarative schema so the P21 publication preview is zero-drop.
 - [ ] Complete the corrected Replit sync, inspect a non-destructive publish preview, publish P21, and verify the package-responsible save/reload path in live Chrome.

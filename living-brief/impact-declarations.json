@@ -24174,11 +24174,11 @@
     },
     {
       "taskId": "p21-operations-identity-safe-publish-closure-20260914",
-      "reviewedThroughCommit": "e96faceae9be7188dde1252d49998b008d2e03d2",
-      "reviewedAt": "2026-09-14T23:40:00Z",
+      "reviewedThroughCommit": "8eba8648e045d7c8d921e6287d796286300f5471",
+      "reviewedAt": "2026-09-15T00:10:00Z",
       "status": "candidate",
       "captureTiming": "post_live_smoke_correction",
-      "summary": "Corrects activated Work Package identity validation and safely reconciles equivalent or redundant development-only schema object names before and after the guarded Replit schema push.",
+      "summary": "Corrects activated Work Package identity validation, safely reconciles equivalent development-only schema object names, and preserves established production constraints and indexes in declarative schema so publication remains zero-drop.",
       "workstreams": [
         "job-intake",
         "job-operations",
@@ -24242,13 +24242,14 @@
         }
       ],
       "reviewedChangedPaths": [
-        "lib/db/scripts/reconcile-development-schema-names.mjs",
+        "lib/db/src/schema/enterprise-identity.ts",
+        "lib/db/src/schema/files.ts",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
         "scripts/test-database-safety.mjs"
       ],
-      "reviewedChangeSha256": "f0fe4444c7b40a878d5d34711e8c335c5db2dc3b208c3880aed5f99d1f5f265c"
+      "reviewedChangeSha256": "0c96dc251f110c07ed2afe132f183056c0860b80d618e9fcfdf1aa18b8a3a868"
     }
   ]
 }

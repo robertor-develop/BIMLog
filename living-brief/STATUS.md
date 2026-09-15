@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## P21 zero-drop publication declaration closure — 2026-09-14
+
+- Replit's P21 publication preview correctly remained blocked when it proposed dropping two established `files` lineage foreign keys and the partial primary-contact index.
+- The established production objects are now explicit in the declarative Drizzle schema, alongside the stricter same-project file-lineage constraints. This is declaration parity only: no production database object is removed and no customer data is mutated.
+- Database safety fixtures pin all three object names so a future source edit cannot silently reintroduce the destructive publication preview.
+
 ## APU/Job Intake empty-prerequisite correction Builds 1–5 — local acceptance candidate — 2026-09-14
 
 - Build 1 reproduces and locks the reported zero-saved-version dead end without changing product behavior.

@@ -215,6 +215,16 @@ const declarativeSchema = fs
     fs.readFileSync(path.resolve("lib/db/src/schema", name), "utf8"),
   )
   .join("\n");
+for (const productionObjectName of [
+  "files_parent_file_id_files_id_fk",
+  "files_superseded_by_file_id_files_id_fk",
+  "project_contact_one_primary_role_uq",
+]) {
+  assert.ok(
+    declarativeSchema.includes(productionObjectName),
+    `established production object ${productionObjectName} must remain declared so publication is zero-drop`,
+  );
+}
 for (const name of previewDropNames) {
   assert.ok(
     declarativeSchema.includes(name),

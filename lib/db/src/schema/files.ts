@@ -47,6 +47,11 @@ export const filesTable = pgTable("files", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 }, (t) => [
   unique("files_id_project_uq").on(t.id, t.projectId),
+  // Preserve the established single-column lineage constraints alongside the
+  // stricter same-project constraints. Production already carries both; making
+  // them explicit here keeps Replit publication zero-drop.
+  foreignKey({ columns: [t.parentFileId], foreignColumns: [t.id], name: "files_parent_file_id_files_id_fk" }),
+  foreignKey({ columns: [t.supersededByFileId], foreignColumns: [t.id], name: "files_superseded_by_file_id_files_id_fk" }),
   foreignKey({ columns: [t.parentFileId, t.projectId], foreignColumns: [t.id, t.projectId], name: "files_parent_same_project_fk" }),
   foreignKey({ columns: [t.supersededByFileId, t.projectId], foreignColumns: [t.id, t.projectId], name: "files_superseded_same_project_fk" }),
 ]);

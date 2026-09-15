@@ -9,6 +9,7 @@ import {
   text,
   timestamp,
   unique,
+  uniqueIndex,
 } from "drizzle-orm/pg-core";
 import { financialContractsTable } from "./financial-contracts";
 import { projectsTable } from "./projects";
@@ -142,6 +143,9 @@ export const projectContactRelationshipsTable = pgTable(
       t.contactId,
       t.contactRole,
     ),
+    uniqueIndex("project_contact_one_primary_role_uq")
+      .on(t.projectId, t.projectCompanyRelationshipId, t.contactRole)
+      .where(sql`${t.isPrimary} = true AND ${t.state} = 'active'`),
     foreignKey({
       columns: [t.projectCompanyRelationshipId, t.projectId, t.companyId],
       foreignColumns: [
