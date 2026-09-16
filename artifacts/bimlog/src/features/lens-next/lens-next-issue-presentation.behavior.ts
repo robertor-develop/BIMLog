@@ -36,6 +36,11 @@ assert.match(view, /History and activity/);
 assert.match(view, /lens-next__detail-section--publishing/);
 assert.match(view, /Review publication/);
 assert.match(view, /Confirm publish/);
+assert.match(view, /Create issue/);
+assert.match(view, /Link BIMLog item/);
+assert.match(view, /Ready for confirmation/);
+assert.match(view, /Synchronization operation progress/);
+assert.match(view, /Review record/);
 assert.doesNotMatch(view, /placeholder\.com|placehold\.co|dummyimage/i);
 
 console.log("Lens Next issue presentation: PASS");
