@@ -1,0 +1,19 @@
+{
+  "build": 32,
+  "date": "2026-09-16",
+  "surface": "lens-next-acceptance-harness.html importing LensNextPanelView",
+  "browser": "Chrome",
+  "viewport": { "width": 1366, "height": 607 },
+  "checks": {
+    "productionComponentRendered": true,
+    "issueCount": 100,
+    "pagingFromPage1ToPage2": "PASS",
+    "selectedIssueChangedFrom": "CL-001",
+    "selectedIssueChangedTo": "CL-024",
+    "browserPaneWidth": 640,
+    "detailsPaneWidth": 711,
+    "detailsAdjacentToBrowserPane": true,
+    "horizontalOverflow": false
+  },
+  "boundary": "Test-only fixture. No API, customer data, native bridge, publication, or production route was used."
+}
