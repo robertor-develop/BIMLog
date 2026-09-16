@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lorena company catalog correction — 2026-09-16
+
+- [x] Build a company-owned catalog and explicit company PMO grant/revoke path for the existing user account; do not grant global Super Administrator.
+- [x] Expose Clients, Disciplines, Services, and Phases in one company administration screen and connect project-scoped classification choices and approved client-company selection to those authorities.
+- [x] Preserve global BIMLog defaults, canonical Companies, project-company isolation, exact IDs, optimistic versions, historical snapshots, and the default-first path for companies without PMO governance.
+- [x] Pass isolated local PostgreSQL/HTTP tenant, grant, duplicate, version, client, project scope, and revocation checks; pass source/TypeScript and browser build checks.
+- [ ] Reconcile the local API production build's generated PLATFORM.md and Living Brief integrity manifest, then complete independent UI/UX and migration-preview review.
+- [ ] Production database migration and Lorena's actual company PMO grant require separate explicit authorization; then push, Replit publication, live Chrome verification, and Lorena field acceptance remain separate gates. The Operations financial-filter acceptance issue is not closed by this catalog correction.
+
 ## Lens Next modernization — authorized 2026-09-15
 
 - [x] Builds 1–5: establish the responsive three-pane workspace, independent overflow ownership, bounded filter/list sizing, collapse/restore controls, browser-local preference persistence, and selected-card visibility without changing Lens authorities.

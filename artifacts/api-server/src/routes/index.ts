@@ -49,6 +49,7 @@ import jobOperationsRouter from "./job-operations";
 import teamPerformanceRouter from "./team-performance";
 import coordinationHubRouter from "./coordination-hub";
 import masterCatalogsRouter from "./master-catalogs";
+import companyMasterCatalogsRouter from "./company-master-catalogs";
 
 const router: IRouter = Router();
 
@@ -102,6 +103,7 @@ router.use(jobOperationsRouter);
 router.use(teamPerformanceRouter);
 router.use(coordinationHubRouter);
 router.use(masterCatalogsRouter);
+router.use(companyMasterCatalogsRouter);
 
 // Soft-delete routes are appended inside their existing route files:
 //   clash_reports.ts → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId

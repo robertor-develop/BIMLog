@@ -244,6 +244,8 @@ export function JobIntakeWorkspace() {
       "saved" | "unsaved" | "saving" | "error"
     >("saved");
   const [quickMode, setQuickMode] = useState(() => readSetupMode(projectId) === "quick");
+  const [approvedClientIds, setApprovedClientIds] = useState<number[] | null | undefined>(undefined);
+  const [clientCatalogError, setClientCatalogError] = useState(false);
   const [showReadinessDetails, setShowReadinessDetails] = useState(false);
   const showQuickMode = () => { preserveSetupMode(projectId, "quick"); setQuickMode(true); };
   const showAdvancedMode = () => { preserveSetupMode(projectId, "advanced"); setQuickMode(false); };
@@ -287,6 +289,16 @@ export function JobIntakeWorkspace() {
     },
     [headers, language, tt],
   );
+  useEffect(() => {
+    if (!projectId) return;
+    let active = true;
+    setApprovedClientIds(undefined);
+    setClientCatalogError(false);
+    api(`/master-catalogs/clients?projectId=${projectId}`).then(body => {
+      if (active) setApprovedClientIds(body.governed === true ? (Array.isArray(body.entries) ? body.entries.map((entry: any) => Number(entry.id)) : []) : null);
+    }).catch(() => { if (active) setClientCatalogError(true); });
+    return () => { active = false; };
+  }, [api, projectId]);
   const load = useCallback(async () => {
     if (!projectId) return;
     setBusy(true);
@@ -540,13 +552,14 @@ export function JobIntakeWorkspace() {
     [directoryEntries],
   );
   const authoritativeCompanies = useMemo(() => authoritativeCompanyOptions(directoryEntries), [directoryEntries]);
+  const selectableClientCompanies = useMemo(() => approvedClientIds === null ? authoritativeCompanies : approvedClientIds === undefined ? [] : authoritativeCompanies.filter(company => approvedClientIds.includes(company.id)), [approvedClientIds, authoritativeCompanies]);
   const primaryContactOptions = useMemo(
     () => buildPrimaryContactOptions(directoryEntries, data.identity.clientCompany),
     [data.identity.clientCompany, directoryEntries],
   );
   const changeClientCompany = (companyIdText: string) =>
     setData((old: any) => {
-      const selected = authoritativeCompanies.find((company) => company.id === Number(companyIdText));
+      const selected = selectableClientCompanies.find((company) => company.id === Number(companyIdText));
       const value = selected?.name || "";
       const contactStillBelongs = contactBelongsToCompany(
         directoryEntries,
@@ -559,6 +572,7 @@ export function JobIntakeWorkspace() {
           ...old.identity,
           clientCompany: value,
           clientCompanyId: selected?.id ?? null,
+          clientName: value,
           primaryContact: contactStillBelongs
             ? old.identity.primaryContact
             : "",
@@ -571,6 +585,7 @@ export function JobIntakeWorkspace() {
     setData((old: any) => ({ ...old, identity: { ...old.identity, primaryContactId: Number(created.id), primaryContact: created.fullName } }));
   };
   const acceptCreatedCompany = (created: CreatedProjectCompany) => {
+    setApprovedClientIds(current => Array.isArray(current) && !current.includes(created.id) ? [...current, created.id] : current);
     const entry = {
       ...created.directoryEntry,
       companyId: created.id,
@@ -1340,7 +1355,7 @@ export function JobIntakeWorkspace() {
             <QuickJobIntake
               data={data}
               setData={setData}
-              companies={authoritativeCompanies}
+              companies={selectableClientCompanies}
               contacts={primaryContactOptions}
               defaultRate={capabilities.costValuePlanner ? latestRate : "0"}
               defaultApuVersion={capabilities.costValuePlanner ? latestApuVersion : null}
@@ -1770,7 +1785,6 @@ export function JobIntakeWorkspace() {
                   {[
                     ["jobName", tt("Job name", "Nombre del trabajo")],
                     ["jobCode", tt("Job code", "Código del trabajo")],
-                    ["clientName", tt("Client", "Cliente")],
                     ["location", tt("Location", "Ubicación")],
                   ].map(([field, label]) => (
                     <label key={field}>
@@ -1783,6 +1797,8 @@ export function JobIntakeWorkspace() {
                       />
                     </label>
                   ))}
+                  <label>{tt("Client", "Cliente")}<input value={data.identity.clientCompany || data.identity.clientName || ""} readOnly aria-readonly="true" /></label>
+                  {clientCatalogError && <p role="alert">{tt("Client catalog could not be loaded; client selection is paused.", "No se pudo cargar el catálogo de clientes; la selección de cliente está en pausa.")}</p>}
                   <label>
                     {tt("Client company", "Empresa cliente")}
                     <select
@@ -1800,7 +1816,7 @@ export function JobIntakeWorkspace() {
                             {data.identity.clientCompany}
                           </option>
                         )}
-                      {authoritativeCompanies.map((company) => (
+                      {selectableClientCompanies.map((company) => (
                         <option key={company.id} value={company.id}>
                           {company.name}
                         </option>
@@ -1954,7 +1970,7 @@ export function JobIntakeWorkspace() {
                   onNotice={setNotice}
                 />
                 {(data.scopeItems || []).map((item:any, index:number)=><div className="ji-row" key={`owner-${item.id}`}><strong>{item.name || item.id}</strong><div className="ji-grid"><label>{tt("Responsible company", "Empresa responsable")}<select value={item.responsibleParticipantId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,responsibleParticipantId:event.target.value}:candidate))}><option value="">{tt("Unassigned", "Sin asignar")}</option>{(data.relationships?.participants || []).map((participant:any)=><option key={participant.id} value={participant.id}>{participant.companyName}</option>)}</select></label><label>{tt("Authoritative agreement", "Acuerdo autorizado")}<select value={item.contractId || ""} onChange={(event)=>setScopeItems((items)=>items.map((candidate,itemIndex)=>itemIndex===index?{...candidate,contractId:event.target.value}:candidate))}>{(data.commercial.contracts || []).map((contract:any)=><option key={contract.id} value={contract.id}>{contract.title || contract.contractNumber || contract.id}</option>)}</select></label></div></div>)}
-                <WorkPackageBuilder items={data.scopeItems || []} setItems={setScopeItems} tt={tt} request={api} defaultClassification={data.classification}/>
+                <WorkPackageBuilder items={data.scopeItems || []} setItems={setScopeItems} tt={tt} request={api} projectId={projectId} defaultClassification={data.classification}/>
               </section>
               <section className="ji-card" id="ji-contract">
                 <h2>

@@ -7,6 +7,7 @@ import { Input } from "@/components/ui/input";
 import { logClientError } from "@/lib/client-log";
 import { activityDetailsClampStyle, presentActivityDetails } from "@/lib/activity-presentation";
 import { confirmAndRetireProject } from "@/lib/project-retirement";
+import { CompanyMasterCatalogsTab } from "@/components/admin/CompanyMasterCatalogsTab";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -17,7 +18,7 @@ function apiFetch(path: string, token: string, opts?: RequestInit) {
   });
 }
 
-const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback", "Master Catalogs"];
+const TABS = ["Overview", "Users", "Companies", "Projects", "Email Log", "Activity Feed", "Feature Flags", "Admin Log", "AI Usage", "Feedback", "Master Catalogs", "Company Catalogs"];
 
 const ADMIN_PANEL_SHELL_CSS = `
   .hq-admin-page {
@@ -1575,6 +1576,7 @@ export function AdminPanel() {
         "AI Usage": "Uso de IA",
         Feedback: "Comentarios",
         "Master Catalogs": "Catálogos Maestros",
+        "Company Catalogs": "Catálogos de Empresa",
       } as Record<string, string>,
     }
     : {
@@ -1642,6 +1644,7 @@ export function AdminPanel() {
           {activeTab === 8 && <AiUsageTab token={token} />}
           {activeTab === 9 && isSuperAdmin && <FeedbackTab token={token} />}
           {activeTab === 10 && isSuperAdmin && <MasterCatalogsTab token={token} />}
+          {activeTab === 11 && <CompanyMasterCatalogsTab token={token} spanish={isSpanishUi()} />}
         </main>
       </div>
     </div>

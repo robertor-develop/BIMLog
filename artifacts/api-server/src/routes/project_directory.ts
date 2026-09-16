@@ -1,5 +1,6 @@
 import { Router } from "express";
-import { db } from "@workspace/db";
+import { db, pool } from "@workspace/db";
+import { ensureCompanyMasterCatalogSchema } from "../lib/company-master-catalog-migration";
 import {
   companiesTable,
   projectDirectoryTable,
@@ -821,21 +822,33 @@ router.post(
       res.status(400).json({ error: "company_name_too_long" });
       return;
     }
+    const selectedCanonicalId = req.body?.canonical_company_id == null ? null : Number(req.body.canonical_company_id);
+    await ensureCompanyMasterCatalogSchema();
+    const governance = await pool.query(`SELECT 1 FROM company_master_catalog_administrators a JOIN projects p ON p.id=$1 JOIN users creator ON creator.id=p.created_by_id
+      WHERE a.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id)
+      AND a.state='active' LIMIT 1`, [projectId]);
+    if (governance.rows[0] && selectedCanonicalId === null) { res.status(403).json({ error: "approved_client_catalog_selection_required" }); return; }
+    if (selectedCanonicalId !== null) {
+      if (!Number.isSafeInteger(selectedCanonicalId) || selectedCanonicalId <= 0) { res.status(400).json({ error: "client_catalog_selection_invalid" }); return; }
+      const allowed = await pool.query(`SELECT 1 FROM company_master_catalog_entries e JOIN companies c ON c.id=e.canonical_company_id
+        JOIN projects p ON p.id=$1 JOIN users creator ON creator.id=p.created_by_id
+        WHERE e.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id)
+        AND e.kind='client' AND e.state='active' AND e.canonical_company_id=$2 AND lower(trim(c.name))=lower(trim($3)) LIMIT 1`, [projectId,selectedCanonicalId,companyName]);
+      if (!allowed.rows[0]) { res.status(403).json({ error: "client_not_in_company_catalog" }); return; }
+    }
     try {
       const result = await db.transaction(async (tx) => {
         await tx.execute(
           sql`SELECT pg_advisory_xact_lock(hashtextextended(${`canonical-company:${companyName.toLowerCase()}`}, 0))`,
         );
-        let [company] = await tx
-          .select()
-          .from(companiesTable)
-          .where(
-            sql`lower(regexp_replace(trim(${companiesTable.name}), '\\s+', ' ', 'g')) = ${companyName.toLowerCase()}`,
-          )
-          .orderBy(companiesTable.id)
-          .limit(1);
+        let [company] = await tx.select().from(companiesTable)
+          .where(selectedCanonicalId === null
+            ? sql`lower(regexp_replace(trim(${companiesTable.name}), '\\s+', ' ', 'g')) = ${companyName.toLowerCase()}`
+            : eq(companiesTable.id, selectedCanonicalId))
+          .orderBy(companiesTable.id).limit(1);
         let reused = true;
         if (!company) {
+          if (selectedCanonicalId !== null) throw new Error("selected_client_missing");
           reused = false;
           [company] = await tx
             .insert(companiesTable)
@@ -951,6 +964,7 @@ router.post(
         directoryEntryReused: result.directoryEntryReused,
       });
     } catch (err) {
+      if (err instanceof Error && err.message === "selected_client_missing") { res.status(409).json({ error: "selected_client_missing" }); return; }
       res.status(500).json({ error: "directory_company_create_failed" });
     }
   },

@@ -3,6 +3,7 @@ import {
   boolean,
   check,
   foreignKey,
+  index,
   integer,
   pgTable,
   serial,
@@ -281,6 +282,47 @@ export const enterprisePhasesTable = pgTable(
     ),
   ],
 );
+
+export const companyMasterCatalogAdministratorsTable = pgTable("company_master_catalog_administrators", {
+  id: text("id").primaryKey(),
+  companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  userId: integer("user_id").notNull().references(() => usersTable.id),
+  state: text("state").notNull().default("active"),
+  grantedById: integer("granted_by_id").notNull().references(() => usersTable.id),
+  grantedAt: timestamp("granted_at", { withTimezone: true }).notNull().defaultNow(),
+  revokedById: integer("revoked_by_id").references(() => usersTable.id),
+  revokedAt: timestamp("revoked_at", { withTimezone: true }),
+}, t => [
+  uniqueIndex("company_master_catalog_admin_active_uq").on(t.companyId,t.userId).where(sql`${t.state}='active'`),
+  check("company_master_catalog_administrators_state_check", sql`${t.state} IN ('active','revoked')`),
+  check("company_master_catalog_admin_revoke_chk", sql`(${t.state}='revoked')=(${t.revokedAt} IS NOT NULL)`),
+]);
+
+export const companyMasterCatalogEntriesTable = pgTable("company_master_catalog_entries", {
+  id: text("id").primaryKey(),
+  companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  kind: text("kind").notNull(),
+  code: text("code").notNull(),
+  name: text("name").notNull(),
+  canonicalCompanyId: integer("canonical_company_id").references(() => companiesTable.id),
+  state: text("state").notNull().default("active"),
+  version: integer("version").notNull().default(1),
+  createdById: integer("created_by_id").notNull().references(() => usersTable.id),
+  updatedById: integer("updated_by_id").notNull().references(() => usersTable.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  retiredAt: timestamp("retired_at", { withTimezone: true }),
+}, t => [
+  unique("company_master_catalog_scope_code_uq").on(t.companyId,t.kind,t.code),
+  uniqueIndex("company_master_catalog_client_uq").on(t.companyId,t.canonicalCompanyId).where(sql`${t.kind}='client'`),
+  index("company_master_catalog_active_idx").on(t.companyId,t.kind,t.state),
+  check("company_master_catalog_entries_kind_check", sql`${t.kind} IN ('client','discipline','service','phase')`),
+  check("company_master_catalog_entries_code_check", sql`${t.code} ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$'`),
+  check("company_master_catalog_entries_state_check", sql`${t.state} IN ('active','inactive','retired')`),
+  check("company_master_catalog_entries_version_check", sql`${t.version}>0`),
+  check("company_master_catalog_client_chk", sql`(${t.kind}='client')=(${t.canonicalCompanyId} IS NOT NULL)`),
+  check("company_master_catalog_retired_chk", sql`(${t.state}='retired')=(${t.retiredAt} IS NOT NULL)`),
+]);
 
 export const companyTradeRelationshipsTable = pgTable(
   "company_trade_relationships",

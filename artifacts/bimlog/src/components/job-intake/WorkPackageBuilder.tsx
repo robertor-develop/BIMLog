@@ -6,17 +6,19 @@ export function WorkPackageBuilder({
   setItems,
   tt,
   request,
+  projectId,
   defaultClassification,
 }: {
   items: any[];
   setItems: (updater: (items: any[]) => any[]) => void;
   tt: (en: string, es: string) => string;
   request: (path: string, init?: RequestInit) => Promise<any>;
+  projectId: number;
   defaultClassification?: Record<string, unknown>;
 }) {
   const [catalogs, setCatalogs] = useState<Record<string, any[]>>({ disciplines: [], services: [], phases: [] });
   const projectDiscipline = { disciplineId: defaultClassification?.disciplineId ?? "", disciplineCode: defaultClassification?.disciplineCode ?? "", disciplineName: defaultClassification?.disciplineName ?? "" };
-  useEffect(() => { let active = true; Promise.all(["disciplines", "services", "phases"].map(async kind => [kind, (await request(`/master-catalogs/${kind}`)).entries ?? []] as const)).then(rows => { if (active) setCatalogs(Object.fromEntries(rows)); }); return () => { active = false; }; }, [request]);
+  useEffect(() => { let active = true; Promise.all(["disciplines", "services", "phases"].map(async kind => [kind, (await request(`/master-catalogs/${kind}?projectId=${projectId}`)).entries ?? []] as const)).then(rows => { if (active) setCatalogs(Object.fromEntries(rows)); }); return () => { active = false; }; }, [projectId, request]);
   const classificationFields = (value: any, change: (classification: any) => void) => (
     (["discipline", "service", "phase"] as const).map(kind => <label key={kind}>{tt(kind[0]!.toUpperCase()+kind.slice(1), ({ discipline:"Disciplina", service:"Servicio", phase:"Fase" } as const)[kind])}<select value={value?.[`${kind}Id`] ?? ""} onChange={event => { const entry = catalogs[`${kind}s`].find(candidate => String(candidate.id) === event.target.value); change({ ...projectDiscipline, ...(value ?? {}), [`${kind}Id`]: entry?.id ?? "", [`${kind}Code`]: entry?.code ?? "", [`${kind}Name`]: entry?.name ?? "" }); }}><option value="">{kind === "discipline" ? tt("Use project discipline", "Usar disciplina del proyecto") : tt("Select for this package or task", "Seleccionar para este paquete o tarea")}</option>{catalogs[`${kind}s`].map(entry => <option key={entry.id} value={entry.id}>{entry.code} — {entry.name}</option>)}</select></label>)
   );

@@ -1,12 +1,12 @@
 import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 
 type Entry = { id: string | number; code: string; name: string };
-type Props = { data: any; setData: Dispatch<SetStateAction<any>>; request: (path: string, init?: RequestInit) => Promise<any>; tt: (en: string, es: string) => string };
+type Props = { data: any; setData: Dispatch<SetStateAction<any>>; projectId: number; request: (path: string, init?: RequestInit) => Promise<any>; tt: (en: string, es: string) => string };
 
-export function MasterClassificationSelectors({ data, setData, request, tt }: Props) {
+export function MasterClassificationSelectors({ data, setData, projectId, request, tt }: Props) {
   const [catalogs, setCatalogs] = useState<Record<string, Entry[]>>({ disciplines: [] });
   const [error, setError] = useState("");
-  useEffect(() => { let active = true; request("/master-catalogs/disciplines").then(response => { if (active) setCatalogs({ disciplines: response.entries ?? [] }); }).catch(() => { if (active) setError(tt("Master classifications could not be loaded.", "No se pudieron cargar las clasificaciones maestras.")); }); return () => { active = false; }; }, [request, tt]);
+  useEffect(() => { let active = true; request(`/master-catalogs/disciplines?projectId=${projectId}`).then(response => { if (active) setCatalogs({ disciplines: response.entries ?? [] }); }).catch(() => { if (active) setError(tt("Master classifications could not be loaded.", "No se pudieron cargar las clasificaciones maestras.")); }); return () => { active = false; }; }, [projectId, request, tt]);
   const selected = data.classification ?? {};
   const choose = (kind: "discipline", id: string) => {
     const entry = catalogs[`${kind}s`]?.find(item => String(item.id) === id);

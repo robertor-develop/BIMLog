@@ -26045,6 +26045,119 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "67d9684cd2845d953084e581b0218626afffc445353797d4ea807b31c6bc1f08"
+    },
+    {
+      "taskId": "lorena-company-master-catalog-local-candidate-20260916",
+      "reviewedThroughCommit": "be33019464942390e449d43e1b487408865bf7fa",
+      "reviewedAt": "2026-09-16T15:53:07Z",
+      "trigger": "company_scoped_pmo_catalog_implementation",
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The local company catalog candidate adds database tables and an explicit grant model; production migration, account grant, push, and publication remain separately gated."
+        }
+      ],
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "implement_local_schema_and_routes",
+          "run_isolated_database_evidence",
+          "run_typechecks_and_bundle_build"
+        ],
+        "operatorOnly": [
+          "authorize_production_database_migration",
+          "authorize_actual_user_grant",
+          "authorize_push_and_publication"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical company identity and project scope are preserved; the product authority doctrine itself is unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The local build is authorized but production migration, actual account grant, and release actions remain separate approvals."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Isolated database evidence does not replace zero-drop production preview, clean build, browser verification, or field acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Company-scoped PMO customization retains BIMLog defaults and does not change the general product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated authority lists the new company catalog migration, routes, administration surface, and project-scoped Intake choices."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next native bridge, viewpoint, digest, camera, sectioning, or XML behavior is changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering, exported presentation, or governed document design contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, applicability claim, or standards evidence changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local candidate, isolated test evidence, and explicitly uncompleted production gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the remaining API build, migration preview, actual grant, release, and Lorena acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The new catalog has explicit lifecycle and grant audit fields, but the accepted audit authority document is unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/company-master-catalog-migration.ts",
+        "artifacts/api-server/src/lib/company-master-catalog.behavior.ts",
+        "artifacts/api-server/src/lib/company-master-catalog.http-evidence.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/routes/company-master-catalogs.ts",
+        "artifacts/api-server/src/routes/index.ts",
+        "artifacts/api-server/src/routes/master-catalogs.ts",
+        "artifacts/api-server/src/routes/project_directory.ts",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/components/job-intake/MasterClassificationSelectors.tsx",
+        "artifacts/bimlog/src/components/job-intake/ProjectCompanyCreator.tsx",
+        "artifacts/bimlog/src/components/job-intake/QuickJobIntake.tsx",
+        "artifacts/bimlog/src/components/job-intake/WorkPackageBuilder.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "lib/db/src/schema/enterprise-identity.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f475e18b833c3b4b69b6710c5bf57c57f7aef3b2889208e5bd7c538a19ded24b"
     }
   ]
 }

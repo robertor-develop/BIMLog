@@ -26,6 +26,7 @@ import {
   type JobIntakeData,
 } from "./job-intake-contract";
 import { waitForJobIntakeMigration } from "./job-intake-migration";
+import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migration";
 import { buildActivatedCommercialBaseline, persistActivatedCommercialBaselineWithClient } from "./job-activation-commercial-baseline";
 import { resolveEffectiveEntitlement } from "./feature-catalog-service";
 import { applyIntakePolicyDefaults, normalizeIntakePolicy } from "./job-intake-policy";
@@ -121,7 +122,7 @@ async function documents(intakeId: string, client: Queryable = pool) {
   return result.rows;
 }
 
-async function validateRelationshipAuthority(data: JobIntakeData, projectId: number, client: Queryable) {
+async function validateRelationshipAuthority(data: JobIntakeData, projectId: number, projectCompanyId: number, previousClientCompanyId: number | null, client: Queryable) {
   const rows = (await client.query(
     `SELECT id,company_id "companyId" FROM project_directory WHERE project_id=$1`,
     [projectId],
@@ -144,12 +145,20 @@ async function validateRelationshipAuthority(data: JobIntakeData, projectId: num
       ["phase", classification.phaseId, "enterprise_phases"],
     ] as const) {
       if (!id) continue;
-      const found = (await client.query(`SELECT id FROM ${table} WHERE id::text=$1`, [id])).rows[0];
+      const found = (await client.query(`SELECT id FROM ${table} WHERE id::text=$1
+        UNION ALL SELECT id FROM company_master_catalog_entries WHERE id=$1 AND company_id=$2 AND kind=$3 LIMIT 1`, [id, projectCompanyId, kind])).rows[0];
       if (!found) throw new FinancialControlError(400, "JOB_INTAKE_CLASSIFICATION_INVALID", `The selected ${kind} on ${scopeName} is not an authoritative master-catalog entry.`);
     }
   }
   if (companyId && !companyIds.has(companyId))
     throw new FinancialControlError(400, "JOB_INTAKE_CLIENT_COMPANY_OUT_OF_SCOPE", "The selected client company is not in the current project directory.");
+  if (companyId && companyId !== previousClientCompanyId) {
+    const governed = (await client.query(`SELECT 1 FROM company_master_catalog_administrators WHERE company_id=$1 AND state='active' LIMIT 1`, [projectCompanyId])).rows[0];
+    if (governed) {
+      const approved = (await client.query(`SELECT 1 FROM company_master_catalog_entries WHERE company_id=$1 AND kind='client' AND canonical_company_id=$2 AND state='active' LIMIT 1`, [projectCompanyId,companyId])).rows[0];
+      if (!approved) throw new FinancialControlError(400, "JOB_INTAKE_CLIENT_CATALOG_REQUIRED", "Select an approved client from the company master catalog.");
+    }
+  }
   if (data.identity.primaryContactId) {
     const contact = contacts.get(data.identity.primaryContactId);
     if (!contact || (companyId && Number(contact.companyId) !== companyId))
@@ -369,6 +378,7 @@ export async function saveJobIntake(input: {
   data: unknown;
 }) {
   await waitForJobIntakeMigration();
+  await ensureCompanyMasterCatalogSchema();
   const projectId = positiveId(input.projectId, "projectId"),
     access = await scope(input.actorUserId, projectId),
     expectedRevision = Number(input.expectedRevision);
@@ -382,7 +392,6 @@ export async function saveJobIntake(input: {
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
-    await validateRelationshipAuthority(data, projectId, client);
     const row = (
       await client.query(
         `SELECT * FROM job_intakes WHERE project_id=$1 FOR UPDATE`,
@@ -401,6 +410,7 @@ export async function saveJobIntake(input: {
         "JOB_INTAKE_STALE",
         "This intake changed in another session. Reload before saving.",
       );
+    await validateRelationshipAuthority(data, projectId, access.companyId, normalizeJobIntakeData(row.data).identity.clientCompanyId, client);
     const capabilities = await capabilitiesFor(input.actorUserId, client);
     if (row.status === "activated" && row.activated_contract_id)
       throw new FinancialControlError(

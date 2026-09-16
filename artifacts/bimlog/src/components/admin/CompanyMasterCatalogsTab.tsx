@@ -1,0 +1,74 @@
+import { useCallback, useEffect, useState } from "react";
+
+const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+type Kind = "client" | "discipline" | "service" | "phase";
+type Entry = { id: string; code: string; name: string; state: "active" | "inactive" | "retired"; version: number; canonicalCompanyId?: number | null };
+type Capability = { companyId: number; canManage: boolean; isSuperAdmin: boolean };
+const kinds: Kind[] = ["client", "discipline", "service", "phase"];
+const labels: Record<Kind, [string, string]> = {
+  client: ["Clients", "Clientes"], discipline: ["Disciplines", "Disciplinas"], service: ["Services", "Servicios"], phase: ["Phases", "Fases"],
+};
+
+export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; spanish: boolean }) {
+  const [capability, setCapability] = useState<Capability | null>(null);
+  const [entries, setEntries] = useState<Record<Kind, Entry[]>>({ client: [], discipline: [], service: [], phase: [] });
+  const [drafts, setDrafts] = useState<Record<Kind, { code: string; name: string }>>({ client: { code: "", name: "" }, discipline: { code: "", name: "" }, service: { code: "", name: "" }, phase: { code: "", name: "" } });
+  const [grantEmail, setGrantEmail] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [message, setMessage] = useState("");
+  const t = (en: string, es: string) => spanish ? es : en;
+  const request = useCallback(async (path: string, init?: RequestInit) => {
+    const response = await fetch(`${base}/api/v1${path}`, { ...init, headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` } });
+    const body = await response.json().catch(() => ({}));
+    if (!response.ok) throw new Error(body.error || body.code || `${response.status}`);
+    return body;
+  }, [token]);
+  const load = useCallback(async () => {
+    const cap = await request("/company/master-catalogs/capabilities") as Capability;
+    const rows = await Promise.all(kinds.map(async kind => [kind, (await request(`/company/master-catalogs/${kind}?includeInactive=true`)).entries ?? []] as const));
+    setCapability(cap);
+    setEntries(Object.fromEntries(rows) as Record<Kind, Entry[]>);
+  }, [request]);
+  useEffect(() => { void load().catch(error => setMessage(String(error))); }, [load]);
+
+  async function create(kind: Kind) {
+    setBusy(true); setMessage("");
+    try {
+      await request(`/company/master-catalogs/${kind}`, { method: "POST", body: JSON.stringify(drafts[kind]) });
+      setDrafts(current => ({ ...current, [kind]: { code: "", name: "" } }));
+      await load();
+      setMessage(t("Company value created.", "Valor de la empresa creado."));
+    } catch (error) { setMessage(String(error)); } finally { setBusy(false); }
+  }
+
+  async function toggle(kind: Kind, entry: Entry) {
+    setBusy(true); setMessage("");
+    try {
+      await request(`/company/master-catalogs/${kind}/${entry.id}`, { method: "PATCH", body: JSON.stringify({ state: entry.state === "active" ? "inactive" : "active", expectedVersion: entry.version }) });
+      await load();
+      setMessage(t("State saved; historical selections are preserved.", "Estado guardado; las selecciones históricas se conservan."));
+    } catch (error) { setMessage(String(error)); } finally { setBusy(false); }
+  }
+
+  async function grant(action: "grant" | "revoke") {
+    setBusy(true); setMessage("");
+    try {
+      await request(action === "grant" ? "/admin/company-master-catalog-grants" : "/admin/company-master-catalog-grants/revoke-by-email", { method: "POST", body: JSON.stringify({ email: grantEmail.trim() }) });
+      setGrantEmail("");
+      await load();
+      setMessage(action === "grant" ? t("Company PMO access granted to the existing user account.", "Acceso PMO de empresa otorgado a la cuenta existente.") : t("Company PMO access revoked.", "Acceso PMO de empresa revocado."));
+    } catch (error) { setMessage(String(error)); } finally { setBusy(false); }
+  }
+
+  return <section aria-labelledby="company-master-title" style={{ display: "grid", gap: 16 }}>
+    <div><h2 id="company-master-title">{t("Company Master Catalogs", "Catálogos maestros de la empresa")}</h2><p>{t("Clients, disciplines, services, and phases are configured once for this company and reused across its projects. Changes do not rename historical project snapshots.", "Clientes, disciplinas, servicios y fases se configuran una vez para esta empresa y se reutilizan en sus proyectos. Los cambios no renombran registros históricos.")}</p></div>
+    {capability && <p style={{ background: "#eff6ff", padding: 12, borderRadius: 8 }}>{capability.canManage ? t("Company PMO administration enabled.", "Administración PMO de la empresa habilitada.") : t("Read-only: a Super Administrator must grant Company PMO access to this existing account.", "Solo lectura: un Super Administrador debe otorgar acceso PMO de empresa a esta cuenta existente.")}</p>}
+    {message && <p role="status" style={{ padding: 10, background: "#fef3c7", borderRadius: 8 }}>{message}</p>}
+    {capability?.isSuperAdmin && <section style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14 }}><h3>{t("Grant or revoke Company PMO access", "Otorgar o revocar acceso PMO de empresa")}</h3><p>{t("Enter the existing user's email. The server binds the grant to that user's own company; it does not grant global Super Admin.", "Ingrese el correo de la cuenta existente. El servidor vincula el permiso a la empresa de esa cuenta; no otorga Super Administrador global.")}</p><label>{t("User email", "Correo del usuario")} <input type="email" value={grantEmail} onChange={event => setGrantEmail(event.target.value)} /></label><div style={{ display: "flex", gap: 8, marginTop: 9 }}><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("grant")}>{t("Grant PMO", "Otorgar PMO")}</button><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("revoke")}>{t("Revoke PMO", "Revocar PMO")}</button></div></section>}
+    <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(280px,1fr))", gap: 14 }}>{kinds.map(kind => <section key={kind} style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14 }}><h3>{spanish ? labels[kind][1] : labels[kind][0]}</h3>
+      {capability?.canManage && <div style={{ display: "grid", gap: 7, marginBottom: 12 }}><label>{t("Code", "Código")} <input value={drafts[kind].code} maxLength={64} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], code: event.target.value.toUpperCase() } }))} /></label><label>{t("Name", "Nombre")} <input value={drafts[kind].name} maxLength={200} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], name: event.target.value } }))} /></label><button type="button" disabled={busy || !drafts[kind].code.trim() || !drafts[kind].name.trim()} onClick={() => void create(kind)}>{t("Add to company catalog", "Agregar al catálogo de empresa")}</button></div>}
+      {entries[kind].length === 0 && <p>{t("No company values yet; BIMLog defaults remain available in project choices.", "Aún no hay valores de empresa; los valores predeterminados de BIMLog siguen disponibles en las opciones del proyecto.")}</p>}
+      <div style={{ display: "grid", gap: 7 }}>{entries[kind].map(entry => <div key={entry.id} style={{ borderTop: "1px solid #e2e8f0", paddingTop: 7, display: "flex", justifyContent: "space-between", gap: 8 }}><span><strong>{entry.code} — {entry.name}</strong><small style={{ display: "block" }}>{entry.state} · v{entry.version}</small></span>{capability?.canManage && entry.state !== "retired" && <button type="button" disabled={busy} onClick={() => void toggle(kind, entry)}>{entry.state === "active" ? t("Deactivate", "Desactivar") : t("Activate", "Activar")}</button>}</div>)}</div>
+    </section>)}</div>
+  </section>;
+}

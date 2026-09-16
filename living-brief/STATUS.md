@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Company-scoped master catalogs — local candidate — 2026-09-16
+
+- Lorena's P31 findings are not production-fixed. The local candidate adds separate company-owned Client, Discipline, Service, and Phase catalogs with an explicit, revocable company PMO grant for an existing user account; it does not grant global Super Administrator authority.
+- Client catalog entries link to canonical Companies; company Discipline/Service/Phase IDs are project-company scoped, with BIMLog global defaults still available and historical classification snapshots preserved. Quick/Advanced Intake and Work Package selectors request the project company's catalog. Advanced Intake's Client display is derived from the canonical selected company instead of free text.
+- A project can connect an approved company client by exact canonical company ID. A PMO-governed company with no active client entries must add one centrally before connecting it; an ungoverned small company retains the default-first creation path.
+- Isolated local PostgreSQL/HTTP evidence passed grant, read/write denial, tenant isolation, duplicate and version conflict, client identity, project-scoped selection, and revocation. Typechecks and browser bundle build passed. Production database migration, Lorena's actual grant, push, publication, live Chrome, and field acceptance have not occurred.
+
 ## Lens Next modernization Builds 1–5 — local candidate — 2026-09-15
 
 - Lens Next now presents a responsive three-pane desktop workspace: filters, the authoritative issue list, and the selected issue details remain adjacent with independent overflow ownership.

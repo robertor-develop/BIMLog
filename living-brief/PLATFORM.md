@@ -48,6 +48,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/autodesk.ts
 - artifacts/api-server/src/routes/change_orders.ts
 - artifacts/api-server/src/routes/clash_reports.ts
+- artifacts/api-server/src/routes/company-master-catalogs.ts
 - artifacts/api-server/src/routes/company-profile.ts
 - artifacts/api-server/src/routes/config.ts
 - artifacts/api-server/src/routes/connections.ts
@@ -143,6 +144,7 @@ It changes only when the code structure or curated architectural facts change.
 - teamPerformanceRouter
 - coordinationHubRouter
 - masterCatalogsRouter
+- companyMasterCatalogsRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -171,6 +173,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
 - artifacts/api-server/src/lib/commercial-entitlement.ts
 - artifacts/api-server/src/lib/commercial-project-scope.ts
+- artifacts/api-server/src/lib/company-master-catalog-migration.ts
+- artifacts/api-server/src/lib/company-master-catalog.behavior.ts
+- artifacts/api-server/src/lib/company-master-catalog.http-evidence.ts
 - artifacts/api-server/src/lib/composite-qc.behavior.ts
 - artifacts/api-server/src/lib/composite-qc.ts
 - artifacts/api-server/src/lib/composite-source-control.behavior.ts

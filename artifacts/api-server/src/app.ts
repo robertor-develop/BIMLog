@@ -73,6 +73,7 @@ import { startFeedbackTelegramDeliveryWorker } from "./lib/feedback-telegram-wor
 import { storage as feedbackStorage } from "./lib/storage-adapter";
 import { ensureLensNextPublishingSchema } from "./lib/lens-next-publishing";
 import { startEnterpriseIdentityMigration, waitForEnterpriseIdentityMigration } from "./lib/enterprise-identity-migration";
+import { ensureCompanyMasterCatalogSchema } from "./lib/company-master-catalog-migration";
 import { ensureConnectorFoundationSchema } from "./lib/connector-foundation-migration";
 
 const ENV_MODE =
@@ -306,6 +307,7 @@ queueDatabaseStartup(async () => {
   try {
     startEnterpriseIdentityMigration();
     await waitForEnterpriseIdentityMigration();
+    await ensureCompanyMasterCatalogSchema();
     await ensureConnectorFoundationSchema(pool);
     console.log("[migration] enterprise identity and connector foundation ensured");
   } catch (error) {
