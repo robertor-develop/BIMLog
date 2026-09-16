@@ -1,0 +1,16 @@
+{
+  "build": 34,
+  "date": "2026-09-16",
+  "browser": "Chrome",
+  "checks": {
+    "spanishSkipLinksExposed": true,
+    "issueCardsExposeIdentityPriorityStatusTradeFloor": true,
+    "selectedIssueUsesPressedState": true,
+    "focusOutline": "3px solid rgb(29, 111, 232)",
+    "languageControlKeyboardActivation": "PASS",
+    "helpDialogLabel": "Lens Next Help & Guide",
+    "helpDialogCloseLabel": "Close Help and Guide",
+    "helpDialogEscapeDismissal": "PASS",
+    "helpDialogFocusRestoration": "PASS"
+  }
+}

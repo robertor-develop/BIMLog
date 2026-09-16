@@ -455,6 +455,8 @@ export function LensNextPanelView({
   const createSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const linkSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const selectedIssueRef = React.useRef<HTMLElement | null>(null);
+  const helpButtonRef = React.useRef<HTMLButtonElement | null>(null);
+  const helpCloseRef = React.useRef<HTMLButtonElement | null>(null);
   const [workspaceLayout,setWorkspaceLayout]=React.useState(()=>readLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage));
   React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
@@ -464,6 +466,17 @@ export function LensNextPanelView({
     if (!selectedIssue || typeof window === "undefined" || !window.matchMedia("(max-width: 760px)").matches) return;
     selectedIssueRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
   }, [selectedIssue?.identity.serverId]);
+  React.useEffect(() => {
+    if (!guideOpen) return;
+    helpCloseRef.current?.focus();
+    const closeOnEscape = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      setGuideOpen(false);
+      window.setTimeout(() => helpButtonRef.current?.focus(), 0);
+    };
+    window.addEventListener("keydown", closeOnEscape);
+    return () => window.removeEventListener("keydown", closeOnEscape);
+  }, [guideOpen]);
   const revealSection = React.useCallback((section: HTMLDetailsElement | null) => {
     if (!section) return;
     section.open = true;
@@ -482,7 +495,7 @@ export function LensNextPanelView({
           <p className="lens-next__eyebrow">BIMLog · Controlled publishing</p>
         </div>
         <div className="lens-next__header-actions">
-          <button type="button" className="lens-next__help" onClick={() => setGuideOpen(true)}><HelpCircle aria-hidden="true" size={16} /> Help &amp; Guide</button>
+          <button ref={helpButtonRef} type="button" className="lens-next__help" onClick={() => setGuideOpen(true)}><HelpCircle aria-hidden="true" size={16} /> Help &amp; Guide</button>
           <button type="button" className="lens-next__refresh" onClick={onRefresh} disabled={refreshState === "refreshing"}>{refreshState === "refreshing" ? "Refreshing…" : "Refresh"}</button>
         </div>
       </header>
@@ -490,7 +503,7 @@ export function LensNextPanelView({
       {guideOpen && (
         <div className="lens-next__guide-backdrop" role="presentation" onMouseDown={() => setGuideOpen(false)}>
           <section className="lens-next__guide" role="dialog" aria-modal="true" aria-labelledby="lens-next-guide-title" onMouseDown={event => event.stopPropagation()}>
-            <header><h2 id="lens-next-guide-title">Lens Next Help &amp; Guide</h2><button type="button" aria-label="Close Help and Guide" onClick={() => setGuideOpen(false)}><X aria-hidden="true" size={18} /></button></header>
+            <header><h2 id="lens-next-guide-title">Lens Next Help &amp; Guide</h2><button ref={helpCloseRef} type="button" aria-label="Close Help and Guide" onClick={() => { setGuideOpen(false); window.setTimeout(() => helpButtonRef.current?.focus(), 0); }}><X aria-hidden="true" size={18} /></button></header>
             <ol>
               <li><strong>Create Issue:</strong> open <em>Create BIMLog Issue</em>, enter the issue details, choose <em>Review Issue Creation</em>, then <em>Confirm and Create BIMLog Issue</em>.</li>
               <li><strong>Open Working View:</strong> select an issue in the issue list, then choose <em>Open Working View</em> in its details.</li>
