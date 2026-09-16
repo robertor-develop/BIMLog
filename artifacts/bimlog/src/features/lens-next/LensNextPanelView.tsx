@@ -98,6 +98,19 @@ function Thumbnail({ issue }: { issue: LensNextIssue }) {
   );
 }
 
+function OperationStatus({ label, state }: { label: string; state: "idle" | "capturing" | "creating" | "running" | "uploading" | "publishing" | "success" | "published" | "error" }) {
+  if (state === "idle") return null;
+  const active = state === "capturing" || state === "creating" || state === "running" || state === "uploading" || state === "publishing";
+  const completed = state === "success" || state === "published";
+  return (
+    <span className={`lens-next__operation lens-next__operation--${state}`} role={state === "error" ? "alert" : "status"}>
+      <span aria-hidden="true" className="lens-next__operation-dot" />
+      <strong>{label}</strong>
+      <span>{active ? "In progress" : completed ? "Complete" : "Stopped"}</span>
+    </span>
+  );
+}
+
 function IssueCard({
   issue,
   selected,
@@ -556,6 +569,11 @@ export function LensNextPanelView({
             <strong>{synchronizationPlan.executable ? "Ready for confirmation" : "Review required"}</strong>
             <span>{lensNextSyncPlanSummary(synchronizationPlan)}</span>
           </p>
+          <div className="lens-next__operation-status" aria-label="Synchronization operation progress" aria-live="polite">
+            <OperationStatus label="Platform pull" state={platformPullState} />
+            <OperationStatus label="Reconciliation" state={reconciliationState} />
+            <OperationStatus label="Local upload" state={localUploadState} />
+          </div>
           <small>Current BIMLog view plus exact local-only managed items. A confirmed run pulls complete BIMLog packages first, then uploads exact local-only managed viewpoints. It never overwrites or saves the model.</small>
           <button type="button" disabled={synchronizationPlan.pullFromBimlog === 0 || platformPullState === "running"} onClick={onPullPlatformViewpoints}>
             {platformPullState === "running" ? "Creating Navisworks viewpoints…" : `Pull BIMLog viewpoints into Navisworks (${synchronizationPlan.pullFromBimlog})`}
@@ -619,7 +637,10 @@ export function LensNextPanelView({
         ) : (
           <div className="lens-next__create-review"><p>Create one BIMLog Issue with its Visual Package and screenshot. No local Navisworks Saved Viewpoint is created and the model file is not modified.</p><button className="lens-next__create-button" type="button" disabled={createState !== "idle" && createState !== "success" && createState !== "error"} onClick={() => { onCreateIssue(createDraft, createReason.trim()); setCreateReviewReady(false); }}>Confirm and Create BIMLog Issue</button></div>
         )}
-        {createMessage && <p role="status">{createMessage}</p>}
+        <div className="lens-next__operation-status" aria-label="Issue creation progress" aria-live="polite">
+          <OperationStatus label="Issue creation" state={createState} />
+        </div>
+        {createMessage && <p role={createState === "error" ? "alert" : "status"}>{createMessage}</p>}
       </details>
 
       <section className="lens-next__view-settings" aria-label="Personal issue view">
