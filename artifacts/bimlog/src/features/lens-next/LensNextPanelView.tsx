@@ -822,7 +822,9 @@ export function LensNextPanelView({
               {history === "loading" ? "Loading history…" : "View history"}
             </button>
           </div>
-          <dl className="lens-next__detail-properties" aria-label="Issue identity summary">
+          <details className="lens-next__detail-section" open>
+            <summary>Properties and model evidence</summary>
+          <dl className="lens-next__detail-properties" aria-label="Issue identity and model evidence">
             <div>
               <dt>Server ID</dt>
               <dd>{selectedIssue.identity.serverId}</dd>
@@ -847,7 +849,32 @@ export function LensNextPanelView({
               <dt>Responsible</dt>
               <dd>{selectedIssue.responsibleCompany ?? "Unassigned"}</dd>
             </div>
+            <div>
+              <dt>BIMLog physical ID</dt>
+              <dd>{selectedIssue.bimlogPhysicalId ?? "Not recorded"}</dd>
+            </div>
+            <div>
+              <dt>Navisworks GUID</dt>
+              <dd>{selectedIssue.navisworksGuid ?? "Not recorded"}</dd>
+            </div>
+            <div>
+              <dt>Visual package</dt>
+              <dd>{selectedIssue.visualStateAvailable ? "Available" : "Unavailable"}</dd>
+            </div>
+            <div>
+              <dt>Digest evidence</dt>
+              <dd>{selectedIssue.visualStateDigest ? "Recorded" : "Not recorded"}</dd>
+            </div>
+            <div>
+              <dt>Captured</dt>
+              <dd>{formatTimestamp(selectedIssue.capturedAt)}</dd>
+            </div>
+            <div>
+              <dt>Last synchronized</dt>
+              <dd>{formatTimestamp(selectedIssue.syncedAt)}</dd>
+            </div>
           </dl>
+          </details>
           <section className="lens-next__publisher" aria-label="Linked BIMLog items">
             <h4>Linked BIMLog Items</h4>
             <p className="lens-next__section-help">Connect this viewpoint to an existing item in the current BIMLog project.</p>

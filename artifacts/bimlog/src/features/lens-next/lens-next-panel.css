@@ -716,6 +716,20 @@
   overflow: hidden;
 }
 .lens-next__detail-properties { margin-bottom: 8px !important; }
+.lens-next__detail-section {
+  margin-top: 10px;
+  border: 1px solid var(--lens-next-line);
+  border-radius: 10px;
+  background: #fbfdfc;
+}
+.lens-next__detail-section > summary {
+  padding: 8px 10px;
+  color: #34483e;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+.lens-next__detail-section > .lens-next__detail-properties { margin: 0 8px 8px !important; }
 
 .lens-next__workspace-controls { display: inline-flex; align-items: center; gap: 0.4rem; margin-left: auto; }
 .lens-next__workspace-controls button { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.35rem 0.55rem; }
