@@ -1,5 +1,5 @@
 import React from "react";
-import { Columns3, HelpCircle, ImageOff, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
+import { Columns3, HelpCircle, ImageOff, List, PanelLeftClose, PanelLeftOpen, Table2, X } from "lucide-react";
 import { LENS_NEXT_DEFAULT_FILTERS, LENS_NEXT_STATUSES } from "./lens-next-types";
 import {
   LENS_NEXT_VIEW_DIMENSIONS,
@@ -181,6 +181,38 @@ function IssueGroups({
   );
 }
 
+function IssueTable({
+  issues,
+  selectedServerId,
+  onSelectIssue,
+}: {
+  issues: readonly LensNextIssue[];
+  selectedServerId: number | null;
+  onSelectIssue(serverId: number): void;
+}) {
+  return (
+    <div className="lens-next__issue-table-scroll">
+      <table className="lens-next__issue-table">
+        <thead><tr><th>Issue</th><th>Priority</th><th>Status</th><th>Trade</th><th>Floor</th></tr></thead>
+        <tbody>
+          {issues.map(issue => {
+            const selected = issue.identity.serverId === selectedServerId;
+            return (
+              <tr key={issue.identity.serverId} className={selected ? "lens-next__issue-row--selected" : undefined}>
+                <td><button type="button" aria-pressed={selected} aria-label={lensNextIssueAccessibleLabel(issue)} onClick={() => onSelectIssue(issue.identity.serverId)}>{displayCode(issue)}<small>{lensNextIssueDescription(issue)}</small></button></td>
+                <td>{lensNextPriorityLabel(issue.priority)}</td>
+                <td><span className={`lens-next__status lens-next__status--${issue.status}`}>{STATUS_LABELS[issue.status]}</span></td>
+                <td>{issue.trade ?? "Not recorded"}</td>
+                <td>{issue.floor ?? "Not recorded"}</td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function HistoryView({ history }: { history: LensNextHistory }) {
   return (
     <section
@@ -258,6 +290,7 @@ export interface LensNextPanelViewProps {
   xmlExportMessage: string | null;
   onExportViewpointsXml(): void;
   filteredIssues: readonly LensNextIssue[];
+  visibleIssues: readonly LensNextIssue[];
   activeIssueCount:number;
   issueSort:LensNextIssueSort;onIssueSortChange(next:LensNextIssueSort):void;issuePage:number;issuePageCount:number;issuePageSize:number;onIssuePageChange(next:number):void;onIssuePageSizeChange(next:number):void;
   issueGroups: readonly LensNextIssueGroupNode[];
@@ -341,6 +374,7 @@ export function LensNextPanelView({
   xmlExportMessage,
   onExportViewpointsXml,
   filteredIssues,
+  visibleIssues,
   activeIssueCount,
   issueSort,onIssueSortChange,issuePage,issuePageCount,issuePageSize,onIssuePageChange,onIssuePageSizeChange,
   issueGroups,
@@ -401,6 +435,7 @@ export function LensNextPanelView({
   const [linkType, setLinkType] = React.useState<LensNextLinkedItemType>("rfi");
   const [linkTargetId, setLinkTargetId] = React.useState("");
   const [guideOpen, setGuideOpen] = React.useState(false);
+  const [issuePresentation, setIssuePresentation] = React.useState<"cards" | "table">("cards");
   const [workspaceLayout,setWorkspaceLayout]=React.useState(()=>readLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage));
   React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
@@ -711,6 +746,10 @@ export function LensNextPanelView({
 
       <div className="lens-next__list-heading">
         <strong>{filteredIssues.length} of {activeIssueCount} {activeIssueCount === 1 ? "issue" : "issues"}</strong>
+        <div className="lens-next__presentation-toggle" role="group" aria-label="Issue presentation">
+          <button type="button" aria-pressed={issuePresentation === "cards"} onClick={() => setIssuePresentation("cards")}><List aria-hidden="true" size={14} /> Cards</button>
+          <button type="button" aria-pressed={issuePresentation === "table"} onClick={() => setIssuePresentation("table")}><Table2 aria-hidden="true" size={14} /> Table</button>
+        </div>
         <label>Sort <select aria-label="Sort issues" value={issueSort} onChange={event=>onIssueSortChange(event.target.value as LensNextIssueSort)}><option value="priority">Priority</option><option value="newest">Newest</option><option value="code">Issue code</option></select></label>
         <small>
           {lastRefreshedAt
@@ -729,12 +768,14 @@ export function LensNextPanelView({
               ? "Loading live BIMLog issues…"
               : "No issues match these filters."}
           </div>
-        ) : (
+        ) : issuePresentation === "cards" ? (
           <IssueGroups
             groups={issueGroups}
             selectedServerId={selectedServerId}
             onSelectIssue={onSelectIssue}
           />
+        ) : (
+          <IssueTable issues={visibleIssues} selectedServerId={selectedServerId} onSelectIssue={onSelectIssue} />
         )}
           </section>
           <nav className="lens-next__pagination" aria-label="Issue list pages"><button type="button" disabled={issuePage<=1} onClick={()=>onIssuePageChange(issuePage-1)}>Previous</button><span>{filteredIssues.length===0?"0":`${(issuePage-1)*issuePageSize+1}–${Math.min(issuePage*issuePageSize,filteredIssues.length)}`} of {filteredIssues.length} · Page {issuePage} of {issuePageCount}</span><button type="button" disabled={issuePage>=issuePageCount} onClick={()=>onIssuePageChange(issuePage+1)}>Next</button><label>Show <select aria-label="Issues per page" value={issuePageSize} onChange={event=>onIssuePageSizeChange(Number(event.target.value))}>{[20,50,100].map(size=><option key={size} value={size}>{size}</option>)}</select></label></nav>

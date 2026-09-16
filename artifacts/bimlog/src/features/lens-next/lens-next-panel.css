@@ -230,6 +230,30 @@
   color: var(--lens-next-muted);
   font-size: 10px;
 }
+.lens-next__presentation-toggle {
+  display: inline-flex;
+  gap: 2px;
+  padding: 2px;
+  border-radius: 8px;
+  background: #e9eeeb;
+}
+.lens-next__presentation-toggle button {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  padding: 3px 6px;
+  border: 0;
+  border-radius: 6px;
+  color: #526077;
+  background: transparent;
+  font-size: 10px;
+  cursor: pointer;
+}
+.lens-next__presentation-toggle button[aria-pressed="true"] {
+  color: #10251c;
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(16, 37, 28, 0.12);
+}
 
 .lens-next__issue-list {
   flex: 1;
@@ -387,6 +411,15 @@
   color: #1e4f7a;
   background: #e8f2fc;
 }
+.lens-next__issue-table-scroll { min-width: 100%; overflow-x: auto; }
+.lens-next__issue-table { width: 100%; min-width: 620px; border-collapse: collapse; font-size: 11px; }
+.lens-next__issue-table th,
+.lens-next__issue-table td { padding: 7px 8px; border-bottom: 1px solid var(--lens-next-line); text-align: left; vertical-align: middle; }
+.lens-next__issue-table th { position: sticky; top: 0; z-index: 1; color: #526077; background: #f3f7f4; font-size: 9px; letter-spacing: 0.04em; text-transform: uppercase; }
+.lens-next__issue-table td:first-child { min-width: 190px; }
+.lens-next__issue-table td button { display: grid; width: 100%; gap: 2px; padding: 0; border: 0; color: #10251c; background: transparent; text-align: left; cursor: pointer; }
+.lens-next__issue-table td button small { max-width: 260px; overflow: hidden; color: #526077; text-overflow: ellipsis; white-space: nowrap; }
+.lens-next__issue-row--selected { background: #eaf7f0; box-shadow: inset 3px 0 0 var(--lens-next-accent); }
 
 .lens-next__details {
   max-height: 62%;
