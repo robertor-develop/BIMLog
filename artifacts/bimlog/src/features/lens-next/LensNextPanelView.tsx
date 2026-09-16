@@ -789,10 +789,16 @@ export function LensNextPanelView({
           className="lens-next__details"
           aria-label="Selected issue details"
         >
-          <header>
-            <div>
-              <p className="lens-next__eyebrow">Exact BIMLog identity</p>
+          <header className="lens-next__detail-header">
+            <Thumbnail issue={selectedIssue} />
+            <div className="lens-next__detail-heading">
+              <p className="lens-next__eyebrow">Selected BIMLog issue</p>
               <h3>{displayCode(selectedIssue)}</h3>
+              <p>{lensNextIssueDescription(selectedIssue)}</p>
+              <div className="lens-next__detail-badges">
+                <span className={`lens-next__priority lens-next__priority--${selectedIssue.priority ?? "none"}`}>{lensNextPriorityLabel(selectedIssue.priority)}</span>
+                <span className={`lens-next__status lens-next__status--${selectedIssue.status}`}>{STATUS_LABELS[selectedIssue.status]}</span>
+              </div>
             </div>
             <button
               type="button"
@@ -803,7 +809,7 @@ export function LensNextPanelView({
               <X aria-hidden="true" size={18} />
             </button>
           </header>
-          <dl>
+          <dl className="lens-next__detail-properties" aria-label="Issue identity summary">
             <div>
               <dt>Server ID</dt>
               <dd>{selectedIssue.identity.serverId}</dd>
@@ -829,11 +835,6 @@ export function LensNextPanelView({
               <dd>{selectedIssue.responsibleCompany ?? "Unassigned"}</dd>
             </div>
           </dl>
-          <p>
-            {selectedIssue.note ??
-              selectedIssue.openItems ??
-              "No issue description recorded."}
-          </p>
           <section className="lens-next__publisher" aria-label="Linked BIMLog items">
             <h4>Linked BIMLog Items</h4>
             <p className="lens-next__section-help">Connect this viewpoint to an existing item in the current BIMLog project.</p>
