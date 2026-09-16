@@ -10,7 +10,7 @@ const checks: string[] = [];
 const check = (condition: unknown, label: string) => { assert.ok(condition, label); checks.push(label); };
 
 check(view.includes("BIMLog · Controlled publishing"), "truthful M8 workspace label");
-check(view.includes('{filteredIssues.length === 1 ? "issue" : "issues"}') && view.includes('{synchronizationPlan.items.length === 1 ? "item" : "items"}'), "issue and synchronization-plan counts use correct singular grammar");
+check(view.includes('{activeIssueCount === 1 ? "issue" : "issues"}') && view.includes('{synchronizationPlan.items.length === 1 ? "item" : "items"}'), "issue and synchronization-plan counts use correct singular grammar");
 check(!view.includes("<h2>Lens Next"), "redundant Lens Next version heading is absent from the embedded workspace");
 check(!view.includes("v1.0.08-Pro · M8"), "obsolete internal milestone is absent from the customer-facing workspace");
 check(view.includes("Your current project role is read-only"), "read-only role has fail-closed explanation");
@@ -27,7 +27,7 @@ check(styles.includes(".lens-next-workspace--embedded {") && styles.includes("ov
 check(styles.includes("Header chrome stays visible") && styles.includes("scroll independently"), "two-pane scrollbar ownership is explicit");
 check(styles.includes(".lens-next-workspace--embedded .lens-next__browser,") && styles.includes("overflow-y: auto"), "issue browser and selected details scroll independently");
 check(styles.includes('.lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__browser .lens-next__issue-list') && styles.includes('.lens-next-workspace:not(.lens-next-workspace--embedded) .lens-next__body > .lens-next__details'), "Platform route owns independent issue-list and selected-detail scrolling");
-check(styles.includes("grid-template-columns: clamp(380px, 42vw, 520px) minmax(360px, 1fr)"), "embedded workspace keeps stable readable list and detail columns");
+check(styles.includes("grid-template-columns: minmax(500px, calc(var(--lens-next-filter-width, 220px) + var(--lens-next-list-width, 420px))) minmax(360px, 1fr)"), "embedded workspace keeps stable readable list and detail columns");
 check(styles.includes("@media (max-width: 760px)") && styles.includes("grid-template-columns: minmax(0, 1fr)"), "narrow embedded windows stack without compressed controls");
 check(styles.includes(".lens-next h2 small") && styles.includes("font-size: 0.6em"), "customer-facing version is visually subordinate");
 console.log(JSON.stringify({ status: "PASS", checks: checks.length, details: checks }));

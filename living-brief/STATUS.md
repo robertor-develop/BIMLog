@@ -7,6 +7,7 @@
 - Existing Lens actions and authorities are unchanged: working view, XML, synchronization, creation, publishing, attachments, history, digest, camera, sectioning, lifecycle, model binding, authorization, and project isolation retain their established implementations.
 - This is a local source candidate. No Native, database/schema, customer-data, push, publication, deployment, or field acceptance is claimed.
 - Builds 6–10 add accent/punctuation-tolerant multi-term search, deterministic priority/newest/code sorting, explicit reset, filtered-versus-active counts, and bounded 20/50/100-page navigation. Paging changes presentation only; synchronization continues to use the complete filtered authoritative set, and the selected server identity is automatically kept on its containing page.
+- Builds 11–15 add compact issue hierarchy, complete P1 Critical through P5 Monitor terminology, distinct text-backed workflow states, and truthful thumbnail capture states. A Cards/Table toggle renders the same current page and preserves selection by immutable server ID; it introduces no secondary record store or synchronization scope.
 
 ## Product-default configuration correction — local candidate — 2026-09-15
 

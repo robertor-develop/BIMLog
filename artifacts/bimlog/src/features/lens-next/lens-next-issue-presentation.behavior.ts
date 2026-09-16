@@ -1,0 +1,33 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
+import type { LensNextIssue } from "./lens-next-types";
+
+const issue = {
+  identity: { projectId: 4, serverId: 91, viewpointId: "VIEW-91", lifecycleStatus: "active", revisionNumber: 2 },
+  displayId: "CL-091",
+  note: "Duct conflicts with beam",
+  openItems: "Fallback detail",
+  priority: 1,
+  status: "waiting_design",
+  trade: "HVAC",
+  floor: "Level 02",
+} as LensNextIssue;
+
+assert.equal(lensNextPriorityLabel(1), "P1 Critical");
+assert.equal(lensNextPriorityLabel(5), "P5 Monitor");
+assert.equal(lensNextPriorityLabel(null), "Priority not recorded");
+assert.equal(lensNextIssueDescription(issue), "Duct conflicts with beam");
+assert.equal(LENS_NEXT_STATUS_LABELS.waiting_design, "Waiting Design");
+assert.equal(lensNextIssueAccessibleLabel(issue), "View issue CL-091, P1 Critical, Waiting Design, HVAC, Level 02");
+
+const view = readFileSync(new URL("./LensNextPanelView.tsx", import.meta.url), "utf8");
+assert.match(view, /aria-label="Issue presentation"/);
+assert.match(view, /issuePresentation === "cards"/);
+assert.match(view, /<IssueTable issues=\{visibleIssues\}/);
+assert.match(view, /Verified capture/);
+assert.match(view, /No captured thumbnail/);
+assert.match(view, /Thumbnail unavailable/);
+assert.doesNotMatch(view, /placeholder\.com|placehold\.co|dummyimage/i);
+
+console.log("Lens Next issue presentation: PASS");

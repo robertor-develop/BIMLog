@@ -147,6 +147,7 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - Filter and list widths are bounded browser-local preferences. Filters or the issue list may be collapsed and restored; these presentation preferences never enter BIMLog records, Navisworks metadata, synchronization payloads, or audit history.
 - Selecting an issue keeps its existing list card visible beside the unchanged detail surface. Identity, digest, XML, navigation, camera, sectioning, lifecycle, model binding, creation, publishing, attachments, and synchronization contracts remain protected.
 - Builds 6–10 improve discovery over the same authoritative issue array: normalized multi-term search, deterministic sorting, reset, truthful active/filtered/range counts, and bounded paging. Pagination never narrows synchronization scope, and selected server identity determines the visible page after view changes.
+- Builds 11–15 modernize the same paged issue objects with Quality-standard P1–P5 labels, explicit workflow-state labels, descriptive accessible selection names, and truthful captured/missing/load-failed thumbnail states. Cards and table rows are alternate presentations of the same immutable server identities; switching presentation never fetches, clones, mutates, or duplicates an issue.
 
 ## Open items / known limitations
 - **Protected v1.60.7 physical-mutation baseline.** Later identity, lineage, import/rebind,
