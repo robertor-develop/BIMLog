@@ -25,6 +25,7 @@ import type {
 import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./lens-next-workspace-layout";
 import type { LensNextIssueSort } from "./lens-next-model";
 import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
+import { LENS_NEXT_SYNC_LABELS, lensNextSyncPlanSummary } from "./lens-next-sync-presentation";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 
@@ -551,6 +552,10 @@ export function LensNextPanelView({
             <span><strong>{synchronizationPlan.manualConflict}</strong> manual review</span>
             <span><strong>{synchronizationPlan.blocked}</strong> blocked</span>
           </div>
+          <p className={`lens-next__sync-readiness${synchronizationPlan.executable ? " lens-next__sync-readiness--ready" : ""}`} role="status">
+            <strong>{synchronizationPlan.executable ? "Ready for confirmation" : "Review required"}</strong>
+            <span>{lensNextSyncPlanSummary(synchronizationPlan)}</span>
+          </p>
           <small>Current BIMLog view plus exact local-only managed items. A confirmed run pulls complete BIMLog packages first, then uploads exact local-only managed viewpoints. It never overwrites or saves the model.</small>
           <button type="button" disabled={synchronizationPlan.pullFromBimlog === 0 || platformPullState === "running"} onClick={onPullPlatformViewpoints}>
             {platformPullState === "running" ? "Creating Navisworks viewpoints…" : `Pull BIMLog viewpoints into Navisworks (${synchronizationPlan.pullFromBimlog})`}
@@ -570,7 +575,8 @@ export function LensNextPanelView({
             <ol>
               {synchronizationPlan.items.map((item, index) => (
                 <li key={`${item.platformServerId ?? "local"}:${item.localNavisworksGuid ?? "platform"}:${index}`}>
-                  <strong>{item.displayId}</strong> · {item.disposition.replaceAll("_", " ")}
+                  <strong>{item.displayId}</strong>
+                  <span className={`lens-next__sync-disposition lens-next__sync-disposition--${item.disposition}`}>{LENS_NEXT_SYNC_LABELS[item.disposition]}</span>
                   <small>{item.reason}</small>
                 </li>
               ))}
