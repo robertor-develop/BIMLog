@@ -26920,6 +26920,90 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a7e1edbb51e932a8ce8266936174ab9aecde7ff9c1bd2ed59139a8f8cacec88e"
+    },
+    {
+      "taskId": "lorena-release-artifact-proof-windows-budget-20260916",
+      "reviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "reviewedAt": "2026-09-16T18:44:39Z",
+      "trigger": "prepush_artifact_proof_host_variance",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "run_disposable_local_proof",
+          "correct_test_budget",
+          "reconcile_living_brief"
+        ],
+        "operatorOnly": [
+          "production_database_migration",
+          "actual_company_pmo_grant",
+          "replit_publish",
+          "customer_field_acceptance"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release and production gates remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing eight-second Windows startup budget and all denial assertions remain; the test implementation is aligned to that authority."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime frontend or API behavior changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or XML behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or document output changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local proof limitation without claiming publication."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the bounded test correction while retaining the pre-push and live gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer data or audit evidence changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9644a01f91bad0ed0b473d793d82df35f850a1c7bf3c21f9ca83c3fb9fbcf494"
     }
   ]
 }

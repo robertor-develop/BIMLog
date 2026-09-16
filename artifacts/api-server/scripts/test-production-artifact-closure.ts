@@ -415,7 +415,8 @@ const invalidStorageExit = new Promise<{
   invalidStorageChild.once("exit", (code, signal) => resolve({ code, signal }));
 });
 try {
-  const deadline = performance.now() + 6_000;
+  const denialBudgetMs = process.platform === "win32" ? 8_000 : 6_000;
+  const deadline = performance.now() + denialBudgetMs;
   while (
     invalidStorageChild.exitCode === null &&
     performance.now() < deadline
@@ -445,6 +446,15 @@ const invalidStorageElapsedMs = Number(
   (performance.now() - invalidStorageStartedAt).toFixed(1),
 );
 const invalidStorageOutput = `${invalidStorageStdout}\n${invalidStorageStderr}`;
+if (invalidStorageTimedOut) {
+  console.error("Invalid authority timeout diagnostics", {
+    elapsedMs: invalidStorageElapsedMs,
+    markerSeen: invalidStorageOutput.includes("FEEDBACK_STORAGE_AUTHORITY_INVALID"),
+    stderrBytes: invalidStorageStderr.length,
+    stdoutBytes: invalidStorageStdout.length,
+    tcpReached: invalidStorageTcpReached,
+  });
+}
 assert.equal(
   invalidStorageTimedOut,
   false,

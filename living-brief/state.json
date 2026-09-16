@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
+  "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "c2ad6c5c35a8971f897ef50fd5e91ee8fa38db7525a2d65f1ba14a097fdc001f",
+  "bundleSha256": "d360e4234c6015b9fe109f1e7fcef3f2d82a6bdf7efcec7231c988aa7dd3fd0e",
   "impact": {
-    "baselineCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
+    "baselineCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
     "changedPaths": [
-      "artifacts/bimlog/src/features/lens-next/lens-next-compact-workspace.behavior.ts",
+      "artifacts/api-server/scripts/test-production-artifact-closure.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -25,11 +25,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "claude",
@@ -37,11 +37,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "quality",
@@ -49,11 +49,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "vision",
@@ -61,11 +61,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "platform",
@@ -73,11 +73,11 @@
       "sha256": "94110efd6a01b8480586a416fb1ca99d4efbc1a5954163f74c936a0a452c1586",
       "sourceChangedAt": "2026-09-16T13:53:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "plugin",
@@ -85,11 +85,11 @@
       "sha256": "257a37f8e55a4518634e1adbfdffff1da19c7ea3a7cad9116690d9f8451a8c98",
       "sourceChangedAt": "2026-09-16T01:13:05-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "report_design_system",
@@ -97,11 +97,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "standards_register",
@@ -109,35 +109,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "79cf37dd1bfc7605ca3bb40109f8de717859ccc0e8bd1abc99530e9614a0ac2f",
-      "sourceChangedAt": "2026-09-16T18:18:43.000Z",
+      "sha256": "5ac6ced2aad1653a07e2cc49c9a8523c2600ebb70407670dbe7b52634b0ffe40",
+      "sourceChangedAt": "2026-09-16T18:44:39.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "25a8478a3626831c07d631401eb07d4161a2011830a9a6b84d0343dcbb83cd1b",
-      "sourceChangedAt": "2026-09-16T18:18:43.000Z",
+      "sha256": "73d2f213b0abe62c21bc4cbb303c06888d926ae26eb97ff3e862872965467c44",
+      "sourceChangedAt": "2026-09-16T18:44:39.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     },
     {
       "key": "audit",
@@ -145,11 +145,11 @@
       "sha256": "0eaca5046facd3f8d4eb7cf7a5626e66b99c493d5fde75993e0061ae498ad691",
       "sourceChangedAt": "2026-09-15T16:28:53-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewedThroughCommit": "f5d669e46ca9ca071fffc65a5381470aba6e6297",
-      "semanticReviewTask": "lorena-catalog-p31-lineage-integration-20260916",
+      "reconciledThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewedThroughCommit": "f8fbcef35d5bbfee2553582d87037bb5f3eda086",
+      "semanticReviewTask": "lorena-release-artifact-proof-windows-budget-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T18:18:43Z"
+      "semanticReviewedAt": "2026-09-16T18:44:39Z"
     }
   ]
 }

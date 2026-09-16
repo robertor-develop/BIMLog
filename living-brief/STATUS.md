@@ -3,6 +3,7 @@
 ## Lorena catalog release preparation — local candidate — 2026-09-16
 
 - The first full workspace build passed tracked-secret, database-source safety, mojibake, Living Brief, and TypeScript prechecks, then correctly stopped when the deterministic API generator discovered the new `CompanyMasterCatalogs` page and `/company-catalogs` route and rewrote `PLATFORM.md`. The generated diff is limited to those two structural entries; it is reconciled here before the full build is repeated. No production source, Replit state, database, or customer record is changed by this generator output.
+- The combined P31 lineage includes the prior live Lens Next publication receipt without treating the local company-catalog work as published. Local full builds and an isolated packaged-API proof have passed. The pre-push artifact proof exposed intermittent Windows test-host startup latency; the negative-denial check now uses the established eight-second Windows budget and emits bounded diagnostics if it times out. The final combined pre-push gate, Replit database preview, publication, and authenticated catalog/Operations acceptance remain open.
 
 ## Lorena Intake–catalog–Operations cross-module QA — local candidate — 2026-09-16
 

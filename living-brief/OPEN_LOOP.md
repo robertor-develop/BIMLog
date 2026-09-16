@@ -13,6 +13,7 @@
 - [x] Inspect the production catalog component in a local browser fixture at exact 390px in both languages and PMO, read-only, denied/retry, empty, and loading states; correct horizontal clipping. This is not authenticated production acceptance.
 - [ ] Exercise the actual production catalog UI in an authenticated browser at desktop and 390px in English and Spanish, including PMO edit, ordinary read-only, denial/retry, and Intake return/save/refresh; do not describe source assertions or typecheck as this acceptance.
 - [ ] Reconcile the local API production build's deterministic `PLATFORM.md` additions for the Company Catalogs page and route; rerun the full build and Living Brief integrity gate.
+- [x] Align the packaged API negative-denial proof with the established eight-second Windows startup budget and add bounded timeout diagnostics; retain the six-second Linux budget and all denial assertions.
 - [ ] Complete independent UI/UX and production migration-preview review before publication.
 - [ ] Production database migration and Lorena's actual company PMO grant require separate explicit authorization; then push, Replit publication, live Chrome verification, and Lorena field acceptance remain separate gates. The Operations financial-filter acceptance issue is not closed by this catalog correction.
 
