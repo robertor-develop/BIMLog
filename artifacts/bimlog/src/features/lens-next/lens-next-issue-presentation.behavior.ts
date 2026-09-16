@@ -28,6 +28,14 @@ assert.match(view, /<IssueTable issues=\{visibleIssues\}/);
 assert.match(view, /Verified capture/);
 assert.match(view, /No captured thumbnail/);
 assert.match(view, /Thumbnail unavailable/);
+assert.match(view, /className="lens-next__detail-header"/);
+assert.match(view, /aria-label="Selected issue actions"/);
+assert.match(view, /Properties and model evidence/);
+assert.match(view, /Reference attachments/);
+assert.match(view, /History and activity/);
+assert.match(view, /lens-next__detail-section--publishing/);
+assert.match(view, /Review publication/);
+assert.match(view, /Confirm publish/);
 assert.doesNotMatch(view, /placeholder\.com|placehold\.co|dummyimage/i);
 
 console.log("Lens Next issue presentation: PASS");

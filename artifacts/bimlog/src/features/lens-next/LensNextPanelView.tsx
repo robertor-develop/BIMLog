@@ -914,8 +914,9 @@ export function LensNextPanelView({
               {visualRepairMessage && <p role="status" className={visualRepairState === "error" ? "lens-next__inline-error" : "lens-next__publish-success"}>{visualRepairMessage}</p>}
             </section>
           )}
-          <section className="lens-next__publisher" aria-label="Controlled issue publishing">
-            <h4>Publish an issue update</h4>
+          <details className="lens-next__publisher lens-next__detail-section lens-next__detail-section--publishing" aria-label="Controlled issue publishing">
+            <summary>Publish an issue update</summary>
+            <div className="lens-next__detail-section-content">
             {!selectedIssue.publishingAllowed ? (
               <p className="lens-next__inline-error">Your current project role is read-only. No change will be sent.</p>
             ) : (
@@ -944,7 +945,8 @@ export function LensNextPanelView({
               </>
             )}
             {publishMessage && <p className={publishState === "error" ? "lens-next__inline-error" : "lens-next__publish-success"} role="status">{publishMessage}</p>}
-          </section>
+            </div>
+          </details>
           {(historyError || (history && history !== "loading")) && (
             <details className="lens-next__detail-section lens-next__detail-section--records" open>
               <summary>History and activity</summary>

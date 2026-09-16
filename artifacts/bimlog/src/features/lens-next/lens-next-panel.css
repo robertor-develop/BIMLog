@@ -733,6 +733,8 @@
 .lens-next__detail-section--records { background: #ffffff; }
 .lens-next__detail-section-content { display: grid; gap: 8px; padding: 0 10px 10px; }
 .lens-next__detail-section-content .lens-next__history { margin-top: 0; }
+.lens-next__detail-section--publishing { border-color: #b8cce6; background: #f7fbff; }
+.lens-next__detail-section--publishing > summary { color: #1e4f7a; }
 
 .lens-next__workspace-controls { display: inline-flex; align-items: center; gap: 0.4rem; margin-left: auto; }
 .lens-next__workspace-controls button { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.35rem 0.55rem; }
