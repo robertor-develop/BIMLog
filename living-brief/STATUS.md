@@ -1758,3 +1758,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - The acceptance pass corrected two presentation defects: unbounded mobile list-before-detail scrolling and an incomplete flex-order contract that placed properties before the selected viewpoint identity. It also adds Help-dialog focus entry, Escape dismissal, and focus restoration.
 - Builds 31–35 change no Lens identity, digest, XML, camera, sectioning, persistence, API route, Native code, database/schema, customer data, version, publication, or deployment state. Push/publication and deployed Navisworks acceptance remain separate explicit gates.
 - Living Brief integrity is frozen through exact Build 35 implementation commit `02193266a8182cadb247f5acfbe175fa0cd4defc`; the freeze is governance-only.
+
+## P31 publication and regression-contract closure — live — 2026-09-16
+
+- Platform `v1.05.N17-P31` was pushed, built in Replit Shell, published, and verified live in Chrome. Native remains N17; database/schema and customer data are unchanged.
+- Live acceptance verified the adjacent three-pane workspace, collapsible and adjustable filter/list panes, search/reset, cards/table presentation, selection, previous/next navigation, evidence, linked items, references, controlled-publication review, create disclosure, and Help-dialog keyboard behavior without mutating records.
+- The production health endpoint returned HTTP 200 with `{"status":"ok"}`. The native bridge was disconnected during browser acceptance, so Native-only Working View and XML actions remain field-acceptance gates rather than fabricated browser passes.
+- The audit found one stale compact-workspace assertion that still described the pre-modernization section order and create markup. The assertion now binds the current intentional order and ref-backed create disclosure; the focused 11-contract Lens acceptance set passes through implementation commit `3ff1b01a21e9a80b0882e3d59425180bb9cafe98`.

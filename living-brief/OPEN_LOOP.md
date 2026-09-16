@@ -2703,3 +2703,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Verify ELARA XML export and current-record actions in live production after publication.
 - [ ] Keep historical pre-digest packages quarantined unless separately recreated or repaired from an authoritative exact view.
 - [x] Bind the deterministic Living Brief state to implementation commit `d1c45f209696f27bfe7e4aef3ea14ed984cf86e6` before the clean production build.
+
+## P31 Lens Next modernization publication
+
+- [x] Push Platform `v1.05.N17-P31`, synchronize the exact source through Replit Shell, and publish without database/schema change.
+- [x] Verify the live Platform identity, health endpoint, three-pane workspace, adjustable/collapsible panes, presentation modes, navigation, and non-mutating detail disclosures in Chrome.
+- [x] Correct the stale compact-workspace regression contract and pass the focused 11-contract Lens acceptance set.
+- [ ] Complete Native-connected Working View, XML export, and Navisworks field acceptance with the bridge connected; browser-only verification must not substitute for this gate.

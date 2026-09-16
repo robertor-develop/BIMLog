@@ -1,14 +1,11 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
+  "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
   "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "5a22278ff55acc74db52f79ce0349ab770211dfc2d193b9f71cc4e42d06618a1",
+  "bundleSha256": "a7f1af3123f3af7abb8c9b0e0d9c321e0984670354e1d705c0b145429c7413d5",
   "impact": {
-    "baselineCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
+    "baselineCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
     "changedPaths": [
-      "artifacts/api-server/src/lib/help-center.behavior.ts",
-      "artifacts/bimlog/src/components/layout/Navbar.tsx",
-      "artifacts/bimlog/src/pages/HelpCenter.tsx",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -16,7 +13,6 @@
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -27,11 +23,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "claude",
@@ -39,11 +35,11 @@
       "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
       "sourceChangedAt": "2026-08-20T14:09:55-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "quality",
@@ -51,11 +47,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "vision",
@@ -63,11 +59,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "platform",
@@ -75,11 +71,11 @@
       "sha256": "59e87a95ee82edfde8fc1e20525cd8b90a68272182098e88c51f97dd6af73276",
       "sourceChangedAt": "2026-09-15T20:07:08-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "plugin",
@@ -87,11 +83,11 @@
       "sha256": "257a37f8e55a4518634e1adbfdffff1da19c7ea3a7cad9116690d9f8451a8c98",
       "sourceChangedAt": "2026-09-16T01:13:05-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "report_design_system",
@@ -99,11 +95,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "standards_register",
@@ -111,35 +107,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "ac158223af134d14914ba2b174f316770fa84c0c085b1235d3af94ca026252af",
-      "sourceChangedAt": "2026-09-16T05:18:00.000Z",
+      "sha256": "7bcf5b2d4acd730e6fb5ddd6a594e8326993072772e3aedf7b159a60146b889e",
+      "sourceChangedAt": "2026-09-16T05:50:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "0bfc20cd960a785d0bee6d5d67a5d2c1b94d14a09849ab4a2d05445a236068f4",
-      "sourceChangedAt": "2026-09-16T05:18:00.000Z",
+      "sha256": "68bff3a1544f59792e16d40b1d3d05b85950c467e73e44f6a7f1b25a3f13f532",
+      "sourceChangedAt": "2026-09-16T05:50:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     },
     {
       "key": "audit",
@@ -147,11 +143,11 @@
       "sha256": "0eaca5046facd3f8d4eb7cf7a5626e66b99c493d5fde75993e0061ae498ad691",
       "sourceChangedAt": "2026-09-15T16:28:53-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
-      "semanticReviewTask": "lens-next-p31-release-reconciliation-20260916",
+      "reconciledThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewedThroughCommit": "3ff1b01a21e9a80b0882e3d59425180bb9cafe98",
+      "semanticReviewTask": "lens-next-p31-live-audit-contract-closure-20260916",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-16T05:18:00Z"
+      "semanticReviewedAt": "2026-09-16T05:50:00Z"
     }
   ]
 }
