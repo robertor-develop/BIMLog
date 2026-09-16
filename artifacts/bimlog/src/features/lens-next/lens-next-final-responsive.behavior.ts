@@ -14,4 +14,8 @@ assert.match(css, /prefers-reduced-motion:reduce/);
 assert.match(view, /Skip to issues/);
 assert.match(view, /aria-describedby="lens-next-sync-readiness"/);
 assert.match(view, /aria-atomic="true"/);
+assert.match(view, /const IssueCard = React\.memo/);
+assert.match(view, /const IssueTable = React\.memo/);
+assert.match(css, /content-visibility:auto/);
+assert.match(css, /contain-intrinsic-block-size:72px/);
 console.log("Lens Next exact-390 responsive contract: PASS");

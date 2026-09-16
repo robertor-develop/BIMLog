@@ -112,7 +112,7 @@ function OperationStatus({ label, state }: { label: string; state: "idle" | "cap
   );
 }
 
-function IssueCard({
+const IssueCard = React.memo(function IssueCard({
   issue,
   selected,
   onSelect,
@@ -153,7 +153,7 @@ function IssueCard({
       </span>
     </button>
   );
-}
+});
 
 function IssueGroups({
   groups,
@@ -196,7 +196,7 @@ function IssueGroups({
   );
 }
 
-function IssueTable({
+const IssueTable = React.memo(function IssueTable({
   issues,
   selectedServerId,
   onSelectIssue,
@@ -226,7 +226,7 @@ function IssueTable({
       </table>
     </div>
   );
-}
+});
 
 function HistoryView({ history }: { history: LensNextHistory }) {
   return (
