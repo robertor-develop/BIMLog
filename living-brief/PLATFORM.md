@@ -233,6 +233,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feature-catalog-migration.ts
 - artifacts/api-server/src/lib/feature-catalog-service.ts
 - artifacts/api-server/src/lib/feature-policy-browser.behavior.ts
+- artifacts/api-server/src/lib/feature-policy-configuration.behavior.ts
+- artifacts/api-server/src/lib/feature-policy-configuration.ts
 - artifacts/api-server/src/lib/feature-policy-migration.ts
 - artifacts/api-server/src/lib/feature-policy-service.ts
 - artifacts/api-server/src/lib/feature-policy-support-matrix.ts
