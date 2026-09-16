@@ -25,7 +25,7 @@ import type {
 import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./lens-next-workspace-layout";
 import type { LensNextIssueSort } from "./lens-next-model";
 import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
-import { LENS_NEXT_SYNC_LABELS, lensNextSyncPlanSummary } from "./lens-next-sync-presentation";
+import { LENS_NEXT_SYNC_LABELS, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance } from "./lens-next-sync-presentation";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 
@@ -596,6 +596,12 @@ export function LensNextPanelView({
                   <strong>{item.displayId}</strong>
                   <span className={`lens-next__sync-disposition lens-next__sync-disposition--${item.disposition}`}>{LENS_NEXT_SYNC_LABELS[item.disposition]}</span>
                   <small>{item.reason}</small>
+                  {lensNextSyncRecoveryGuidance(item.disposition, item.platformServerId !== null) && (
+                    <div className="lens-next__sync-recovery">
+                      <span>{lensNextSyncRecoveryGuidance(item.disposition, item.platformServerId !== null)}</span>
+                      {item.platformServerId !== null && <button type="button" onClick={() => onSelectIssue(item.platformServerId!)}>Review record</button>}
+                    </div>
+                  )}
                 </li>
               ))}
             </ol>
