@@ -892,15 +892,17 @@ export function LensNextPanelView({
             )}
             {linkedItemsError && <p className="lens-next__inline-error" role="status">{linkedItemsError}</p>}
           </section>
-          <section className="lens-next__publisher" aria-label="Reference attachments">
-            <h4>Reference Attachments</h4>
+          <details className="lens-next__detail-section lens-next__detail-section--records" aria-label="Reference attachments">
+            <summary>Reference attachments{referenceAttachments && referenceAttachments !== "loading" ? ` (${referenceAttachments.attachments.length})` : ""}</summary>
+            <div className="lens-next__detail-section-content">
             <p className="lens-next__section-help">Add a small supporting file without changing the viewpoint or its camera.</p>
             {referenceAttachments === "loading" ? <p role="status">Loading references…</p> : referenceAttachments && referenceAttachments.attachments.length ? (
               <ul>{referenceAttachments.attachments.map(attachment => <li key={attachment.linkId}>{attachment.fileName} ({Math.ceil(attachment.fileSize / 1024)} KB) <button type="button" onClick={() => onOpenReferenceAttachment(attachment)}>Open/Download</button> {selectedIssue.publishingAllowed && <button type="button" onClick={() => onRemoveReferenceAttachment(attachment.linkId)}>Remove</button>}</li>)}</ul>
             ) : <p>No reference attachments.</p>}
             {selectedIssue.publishingAllowed && <label className="lens-next__field lens-next__field--wide"><span>Add Reference Attachment (PDF, JPG, PNG; max 5 MB)</span><input aria-label="Add Reference Attachment" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={event => { const file = event.target.files?.[0]; event.currentTarget.value = ""; if (!file) return; if (file.size > 5 * 1024 * 1024) { window.alert("Reference files must be no larger than 5 MB."); return; } onUploadReferenceAttachment(file); }} /></label>}
             {referenceAttachmentsError && <p className="lens-next__inline-error" role="status">{referenceAttachmentsError}</p>}
-          </section>
+            </div>
+          </details>
           {workingViewUnavailable && (
             <section className="lens-next__visual-repair" aria-label="Repair missing platform visual package">
               <p className="lens-next__inline-notice">
@@ -943,13 +945,14 @@ export function LensNextPanelView({
             )}
             {publishMessage && <p className={publishState === "error" ? "lens-next__inline-error" : "lens-next__publish-success"} role="status">{publishMessage}</p>}
           </section>
-          {historyError && (
-            <p className="lens-next__inline-error" role="status">
-              {historyError}
-            </p>
-          )}
-          {history && history !== "loading" && (
-            <HistoryView history={history} />
+          {(historyError || (history && history !== "loading")) && (
+            <details className="lens-next__detail-section lens-next__detail-section--records" open>
+              <summary>History and activity</summary>
+              <div className="lens-next__detail-section-content">
+                {historyError && <p className="lens-next__inline-error" role="status">{historyError}</p>}
+                {history && history !== "loading" && <HistoryView history={history} />}
+              </div>
+            </details>
           )}
         </section>
       ) : (

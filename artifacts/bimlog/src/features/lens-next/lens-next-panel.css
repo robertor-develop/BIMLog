@@ -730,6 +730,9 @@
   cursor: pointer;
 }
 .lens-next__detail-section > .lens-next__detail-properties { margin: 0 8px 8px !important; }
+.lens-next__detail-section--records { background: #ffffff; }
+.lens-next__detail-section-content { display: grid; gap: 8px; padding: 0 10px 10px; }
+.lens-next__detail-section-content .lens-next__history { margin-top: 0; }
 
 .lens-next__workspace-controls { display: inline-flex; align-items: center; gap: 0.4rem; margin-left: auto; }
 .lens-next__workspace-controls button { display: inline-flex; align-items: center; gap: 0.3rem; padding: 0.35rem 0.55rem; }
