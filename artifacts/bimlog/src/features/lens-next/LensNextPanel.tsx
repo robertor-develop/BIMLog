@@ -10,6 +10,8 @@ import {
   activeLensNextIssues,
   assertAuthorizedLensNextProject,
   filterLensNextIssues,
+  sortLensNextIssuesBy,
+  type LensNextIssueSort,
   normalizeLensNextProjects,
   reconcileLensNextRefresh,
   reconcileLensNextInventories,
@@ -102,6 +104,8 @@ export function LensNextPanel({
   const [filters, setFilters] = useState<LensNextFilters>({
     ...LENS_NEXT_DEFAULT_FILTERS,
   });
+  const [issueSort,setIssueSort]=useState<LensNextIssueSort>("priority");
+  const [issuePage,setIssuePage]=useState(1);const [issuePageSize,setIssuePageSize]=useState(20);
   const [viewPreset, setViewPreset] = useState<LensNextViewPresetId>("status_only");
   const [customGroupBy, setCustomGroupBy] = useState<readonly LensNextViewDimension[]>([
     "status",
@@ -168,9 +172,13 @@ export function LensNextPanel({
   );
   const activeIssues = useMemo(() => activeLensNextIssues(issues), [issues]);
   const filteredIssues = useMemo(
-    () => filterLensNextIssues(activeIssues, filters),
-    [activeIssues, filters],
+    () => sortLensNextIssuesBy(filterLensNextIssues(activeIssues, filters),issueSort),
+    [activeIssues, filters,issueSort],
   );
+  const pageCount=Math.max(1,Math.ceil(filteredIssues.length/issuePageSize));
+  const currentPage=Math.min(issuePage,pageCount);
+  const visibleIssues=useMemo(()=>filteredIssues.slice((currentPage-1)*issuePageSize,currentPage*issuePageSize),[currentPage,filteredIssues,issuePageSize]);
+  useEffect(()=>setIssuePage(1),[filters,issueSort,issuePageSize,authorizedProjectId]);
   const inventorySummary = useMemo(
     () => reconcileLensNextInventories(issues, localInventory),
     [issues, localInventory],
@@ -230,8 +238,8 @@ export function LensNextPanel({
   }, [authorizedProjectId, customGroupBy, viewPreset]);
 
   const issueGroups = useMemo(
-    () => (viewSettings ? buildLensNextIssueGroups(filteredIssues, viewSettings) : []),
-    [filteredIssues, viewSettings],
+    () => (viewSettings ? buildLensNextIssueGroups(visibleIssues, viewSettings) : []),
+    [visibleIssues, viewSettings],
   );
   const trades = useMemo(
     () =>
@@ -744,6 +752,13 @@ export function LensNextPanel({
       xmlExportMessage={xmlExportMessage}
       onExportViewpointsXml={() => void exportViewpointsXml()}
       filteredIssues={filteredIssues}
+      issueSort={issueSort}
+      onIssueSortChange={setIssueSort}
+      issuePage={currentPage}
+      issuePageCount={pageCount}
+      issuePageSize={issuePageSize}
+      onIssuePageChange={setIssuePage}
+      onIssuePageSizeChange={setIssuePageSize}
       issueGroups={issueGroups}
       viewPreset={viewPreset}
       customGroupBy={customGroupBy}

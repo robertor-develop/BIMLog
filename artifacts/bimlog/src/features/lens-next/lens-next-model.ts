@@ -359,6 +359,9 @@ export function sortLensNextIssues(
   });
 }
 
+export type LensNextIssueSort="priority"|"newest"|"code";
+export function sortLensNextIssuesBy(value:readonly LensNextIssue[],mode:LensNextIssueSort):LensNextIssue[]{return [...value].sort((a,b)=>{if(mode==="code")return (a.displayId??a.identity.viewpointId).localeCompare(b.displayId??b.identity.viewpointId,"en-US",{numeric:true});if(mode==="newest")return (Date.parse(b.capturedAt??"")||0)-(Date.parse(a.capturedAt??"")||0)||a.identity.serverId-b.identity.serverId;return (a.priority??99)-(b.priority??99)||((Date.parse(b.capturedAt??"")||0)-(Date.parse(a.capturedAt??"")||0))||a.identity.serverId-b.identity.serverId;});}
+
 function normalized(value: string | null | undefined): string {
   return (value ?? "").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g," ").trim().toLocaleLowerCase("en-US");
 }

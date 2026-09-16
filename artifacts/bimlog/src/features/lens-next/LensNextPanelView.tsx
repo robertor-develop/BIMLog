@@ -23,6 +23,7 @@ import type {
   LensNextRefreshState,
 } from "./lens-next-types";
 import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./lens-next-workspace-layout";
+import type { LensNextIssueSort } from "./lens-next-model";
 
 const STATUS_LABELS: Record<string, string> = {
   open: "Open",
@@ -242,6 +243,7 @@ export interface LensNextPanelViewProps {
   xmlExportMessage: string | null;
   onExportViewpointsXml(): void;
   filteredIssues: readonly LensNextIssue[];
+  issueSort:LensNextIssueSort;onIssueSortChange(next:LensNextIssueSort):void;issuePage:number;issuePageCount:number;issuePageSize:number;onIssuePageChange(next:number):void;onIssuePageSizeChange(next:number):void;
   issueGroups: readonly LensNextIssueGroupNode[];
   viewPreset: LensNextViewPresetId;
   customGroupBy: readonly LensNextViewDimension[];
@@ -323,6 +325,7 @@ export function LensNextPanelView({
   xmlExportMessage,
   onExportViewpointsXml,
   filteredIssues,
+  issueSort,onIssueSortChange,issuePage,issuePageCount,issuePageSize,onIssuePageChange,onIssuePageSizeChange,
   issueGroups,
   viewPreset,
   customGroupBy,
@@ -690,6 +693,7 @@ export function LensNextPanelView({
 
       <div className="lens-next__list-heading">
         <strong>{filteredIssues.length} {filteredIssues.length === 1 ? "issue" : "issues"}</strong>
+        <label>Sort <select aria-label="Sort issues" value={issueSort} onChange={event=>onIssueSortChange(event.target.value as LensNextIssueSort)}><option value="priority">Priority</option><option value="newest">Newest</option><option value="code">Issue code</option></select></label>
         <small>
           {lastRefreshedAt
             ? `Updated ${formatTimestamp(lastRefreshedAt)}`
@@ -715,6 +719,7 @@ export function LensNextPanelView({
           />
         )}
           </section>
+          <nav className="lens-next__pagination" aria-label="Issue list pages"><button type="button" disabled={issuePage<=1} onClick={()=>onIssuePageChange(issuePage-1)}>Previous</button><span>Page {issuePage} of {issuePageCount}</span><button type="button" disabled={issuePage>=issuePageCount} onClick={()=>onIssuePageChange(issuePage+1)}>Next</button><label>Show <select aria-label="Issues per page" value={issuePageSize} onChange={event=>onIssuePageSizeChange(Number(event.target.value))}>{[20,50,100].map(size=><option key={size} value={size}>{size}</option>)}</select></label></nav>
           <div className="lens-next__pane-size lens-next__pane-size--list"><label>Issue list width <input aria-label="Issue list width" type="range" min="320" max="640" value={workspaceLayout.listWidth} onChange={event=>setWorkspaceLayout(current=>({...current,listWidth:Number(event.target.value)}))}/></label></div>
         </div>
         </section>
