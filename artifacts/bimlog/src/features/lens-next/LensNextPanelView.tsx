@@ -25,7 +25,8 @@ import type {
 import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./lens-next-workspace-layout";
 import type { LensNextIssueSort } from "./lens-next-model";
 import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
-import { LENS_NEXT_SYNC_LABELS, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance } from "./lens-next-sync-presentation";
+import { lensNextSyncLabel, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance } from "./lens-next-sync-presentation";
+import { useI18n } from "../../lib/i18n";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 
@@ -438,6 +439,7 @@ export function LensNextPanelView({
   publishMessage,
   onPublishAction,
 }: LensNextPanelViewProps) {
+  const { language, tt } = useI18n();
   const [publishKind, setPublishKind] = React.useState<LensNextPublishAction["type"]>("status");
   const [publishStatus, setPublishStatus] = React.useState<LensNextStatus>("follow_up");
   const [publishText, setPublishText] = React.useState("");
@@ -467,8 +469,8 @@ export function LensNextPanelView({
   return (
     <aside className="lens-next" aria-label="BIMLog Lens Next controlled issue workspace" aria-busy={refreshState === "refreshing" || reconciliationState === "running"}>
       <nav className="lens-next__skip-links" aria-label="Skip within Lens Next">
-        <a href="#lens-next-issue-list">Skip to issues</a>
-        {selectedIssue && <a href="#lens-next-selected-issue">Skip to selected issue</a>}
+        <a href="#lens-next-issue-list">{tt("Skip to issues", "Saltar a incidencias")}</a>
+        {selectedIssue && <a href="#lens-next-selected-issue">{tt("Skip to selected issue", "Saltar a la incidencia seleccionada")}</a>}
       </nav>
       <header className="lens-next__header">
         <div>
@@ -506,7 +508,7 @@ export function LensNextPanelView({
         <ConnectionBadge label="BIMLog" state={apiState} />
         <ConnectionBadge label="Navisworks" state={bridgeState} />
         <div className="lens-next__workspace-controls" aria-label="Workspace layout controls">
-          <button type="button" className="lens-next__primary" disabled={!createEnabled} onClick={() => revealSection(createSectionRef.current)}>Create issue</button>
+          <button type="button" className="lens-next__primary" disabled={!createEnabled} onClick={() => revealSection(createSectionRef.current)}>{tt("Create issue", "Crear incidencia")}</button>
           <Columns3 aria-hidden="true" size={15}/>
           <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,filtersCollapsed:!current.filtersCollapsed}))}>{workspaceLayout.filtersCollapsed?<><PanelLeftOpen aria-hidden="true" size={14}/> Show filters</>:<><PanelLeftClose aria-hidden="true" size={14}/> Hide filters</>}</button>
           <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,listCollapsed:!current.listCollapsed}))}>{workspaceLayout.listCollapsed?"Show issue list":"Hide issue list"}</button>
@@ -570,8 +572,8 @@ export function LensNextPanelView({
             <span><strong>{synchronizationPlan.blocked}</strong> blocked</span>
           </div>
           <p id="lens-next-sync-readiness" className={`lens-next__sync-readiness${synchronizationPlan.executable ? " lens-next__sync-readiness--ready" : ""}`} role="status" aria-atomic="true">
-            <strong>{synchronizationPlan.executable ? "Ready for confirmation" : "Review required"}</strong>
-            <span>{lensNextSyncPlanSummary(synchronizationPlan)}</span>
+            <strong>{synchronizationPlan.executable ? tt("Ready for confirmation", "Listo para confirmar") : tt("Review required", "Revisión requerida")}</strong>
+            <span>{lensNextSyncPlanSummary(synchronizationPlan, language)}</span>
           </p>
           <div className="lens-next__operation-status" aria-label="Synchronization operation progress" aria-live="polite">
             <OperationStatus label="Platform pull" state={platformPullState} />
@@ -598,12 +600,12 @@ export function LensNextPanelView({
               {synchronizationPlan.items.map((item, index) => (
                 <li key={`${item.platformServerId ?? "local"}:${item.localNavisworksGuid ?? "platform"}:${index}`}>
                   <strong>{item.displayId}</strong>
-                  <span className={`lens-next__sync-disposition lens-next__sync-disposition--${item.disposition}`}>{LENS_NEXT_SYNC_LABELS[item.disposition]}</span>
+                  <span className={`lens-next__sync-disposition lens-next__sync-disposition--${item.disposition}`}>{lensNextSyncLabel(item.disposition, language)}</span>
                   <small>{item.reason}</small>
-                  {lensNextSyncRecoveryGuidance(item.disposition, item.platformServerId !== null) && (
+                  {lensNextSyncRecoveryGuidance(item.disposition, item.platformServerId !== null, language) && (
                     <div className="lens-next__sync-recovery">
-                      <span>{lensNextSyncRecoveryGuidance(item.disposition, item.platformServerId !== null)}</span>
-                      {item.platformServerId !== null && <button type="button" onClick={() => onSelectIssue(item.platformServerId!)}>Review record</button>}
+                      <span>{lensNextSyncRecoveryGuidance(item.disposition, item.platformServerId !== null, language)}</span>
+                      {item.platformServerId !== null && <button type="button" onClick={() => onSelectIssue(item.platformServerId!)}>{tt("Review record", "Revisar registro")}</button>}
                     </div>
                   )}
                 </li>
@@ -866,13 +868,13 @@ export function LensNextPanelView({
               disabled={!bridgeOpenEnabled || workingViewState === "opening"}
               onClick={onOpenWorkingView}
             >
-              {workingViewState === "opening" ? "Opening Working View…" : "Open Working View"}
+              {workingViewState === "opening" ? tt("Opening Working View…", "Abriendo vista de trabajo…") : tt("Open Working View", "Abrir vista de trabajo")}
             </button>
             <button type="button" onClick={onLoadHistory} disabled={history === "loading"}>
-              {history === "loading" ? "Loading history…" : "View history"}
+              {history === "loading" ? tt("Loading history…", "Cargando historial…") : tt("View history", "Ver historial")}
             </button>
             <button type="button" disabled={!selectedIssue.publishingAllowed} onClick={() => revealSection(linkSectionRef.current)}>
-              Link BIMLog item
+              {tt("Link BIMLog item", "Vincular elemento BIMLog")}
             </button>
           </div>
           <details className="lens-next__detail-section" open>
