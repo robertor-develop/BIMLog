@@ -847,15 +847,14 @@
 }
 
 .lens-next-workspace--embedded .lens-next__details > header { order: 1; }
-.lens-next-workspace--embedded .lens-next__details > dl { order: 2; }
-.lens-next-workspace--embedded .lens-next__details > p { order: 3; }
-.lens-next-workspace--embedded .lens-next__details > .lens-next__actions { order: 4; }
-.lens-next-workspace--embedded .lens-next__details > .lens-next__visual-repair { order: 5; }
-.lens-next-workspace--embedded .lens-next__details > [aria-label="Controlled issue publishing"] { order: 6; }
-.lens-next-workspace--embedded .lens-next__details > [aria-label="Linked BIMLog items"] { order: 7; }
-.lens-next-workspace--embedded .lens-next__details > [aria-label="Reference attachments"] { order: 8; }
-.lens-next-workspace--embedded .lens-next__details > .lens-next__inline-error { order: 9; }
-.lens-next-workspace--embedded .lens-next__details > .lens-next__history { order: 10; }
+.lens-next-workspace--embedded .lens-next__details > .lens-next__actions { order: 2; }
+.lens-next-workspace--embedded .lens-next__details > .lens-next__detail-section { order: 3; }
+.lens-next-workspace--embedded .lens-next__details > .lens-next__visual-repair { order: 4; }
+.lens-next-workspace--embedded .lens-next__details > [aria-label="Controlled issue publishing"] { order: 5; }
+.lens-next-workspace--embedded .lens-next__details > [aria-label="Linked BIMLog items"] { order: 6; }
+.lens-next-workspace--embedded .lens-next__details > [aria-label="Reference attachments"] { order: 7; }
+.lens-next-workspace--embedded .lens-next__details > .lens-next__inline-error { order: 8; }
+.lens-next-workspace--embedded .lens-next__details > .lens-next__detail-section--records:last-child { order: 9; }
 
 .lens-next-workspace--embedded .lens-next__issue-card {
   grid-template-columns: 56px minmax(0, 1fr);
@@ -946,6 +945,7 @@
 
   .lens-next__browser,
   .lens-next__body > .lens-next__details {
+    max-height: none;
     min-height: 320px;
     overflow-y: visible;
   }
@@ -969,6 +969,17 @@
   .lens-next-workspace--embedded .lens-next__browser,
   .lens-next-workspace--embedded .lens-next__body > .lens-next__details {
     overflow: visible;
+  }
+
+  /* At narrow widths, selection is a deliberate list -> detail transition.
+     This keeps the active viewpoint's controls immediately available instead
+     of forcing users through the complete issue list before reaching them. */
+  .lens-next__body:has(> .lens-next__details:not(.lens-next__details--empty)) > .lens-next__browser {
+    display: none;
+  }
+
+  .lens-next__body > .lens-next__details:not(.lens-next__details--empty) {
+    min-height: 0;
   }
 }
 @media (max-width: 420px) {

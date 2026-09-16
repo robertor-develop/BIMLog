@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { LensNextPanelView, type LensNextPanelViewProps } from "./features/lens-next/LensNextPanelView";
 import { LENS_NEXT_DEFAULT_FILTERS, type LensNextIssue } from "./features/lens-next/lens-next-types";
@@ -53,6 +53,24 @@ function Harness() {
     () => buildLensNextIssueGroups(visibleIssues, { id: "fixture:26:acceptance", name: "Acceptance", scope: "published", preset: presentation, groupBy: [], hideResolved: false, statuses: [], priorityMaximum: null, ownerUserId: null, projectId: 26, updatedAt: "2026-09-16T14:10:00.000Z" }),
     [presentation, visibleIssues],
   );
+  useEffect(() => {
+    if (new URLSearchParams(location.search).get("acceptanceMobile") !== "390") return;
+    const timer = window.setTimeout(() => {
+      const browser = document.querySelector<HTMLElement>(".lens-next__browser");
+      const details = document.querySelector<HTMLElement>(".lens-next__details:not(.lens-next__details--empty)");
+      const header = details?.querySelector<HTMLElement>(".lens-next__detail-header");
+      window.parent.postMessage({ type: "lens-next-mobile-acceptance", metrics: {
+        viewportWidth: window.innerWidth,
+        horizontalOverflow: document.documentElement.scrollWidth > document.documentElement.clientWidth,
+        browserDisplay: browser ? getComputedStyle(browser).display : null,
+        detailsTop: details?.getBoundingClientRect().top ?? null,
+        detailHeaderTop: header?.getBoundingClientRect().top ?? null,
+        selectedCode: selectedIssue?.displayId ?? null,
+        language,
+      } }, location.origin);
+    }, 350);
+    return () => window.clearTimeout(timer);
+  }, [language, selectedIssue?.identity.serverId]);
   const props: LensNextPanelViewProps = {
     authorizedProjects: [{ id: 26, name: "Elara East", code: "ELA01" }], selectedProjectId: 26, onProjectChange: noop, projectLocked: true,
     bridgeDisplayName: "35-45 41ST_COORD_MODEL.nwf", bridgeModelFingerprint: "acceptance-model-fingerprint", bridgeBindingSource: "verified BIMLog marker",

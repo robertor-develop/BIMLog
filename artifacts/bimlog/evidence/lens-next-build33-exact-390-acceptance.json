@@ -1,0 +1,22 @@
+{
+  "build": 33,
+  "date": "2026-09-16",
+  "surface": "390x844 iframe viewport loading the real LensNextPanelView acceptance harness",
+  "browser": "Chrome",
+  "checks": {
+    "viewportWidth": 390,
+    "horizontalOverflow": false,
+    "issueBrowserHiddenWhileDetailSelected": true,
+    "selectedIssue": "CL-001",
+    "detailsTop": 210,
+    "detailHeaderTop": 224,
+    "selectedIdentityBeforeProperties": true,
+    "englishActions": ["Open Working View", "View history", "Link BIMLog item"],
+    "spanishActions": ["Abrir vista de trabajo", "Ver historial", "Vincular elemento BIMLog"]
+  },
+  "corrections": [
+    "Narrow layouts now use an explicit list-to-detail transition.",
+    "Selecting an issue scrolls its detail surface into view.",
+    "The selected identity header and primary actions now precede properties and secondary records."
+  ]
+}

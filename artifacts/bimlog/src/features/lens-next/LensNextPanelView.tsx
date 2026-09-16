@@ -454,11 +454,16 @@ export function LensNextPanelView({
   const [issuePresentation, setIssuePresentation] = React.useState<"cards" | "table">("cards");
   const createSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const linkSectionRef = React.useRef<HTMLDetailsElement | null>(null);
+  const selectedIssueRef = React.useRef<HTMLElement | null>(null);
   const [workspaceLayout,setWorkspaceLayout]=React.useState(()=>readLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage));
   React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => { setLinkType("rfi"); setLinkTargetId(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
+  React.useEffect(() => {
+    if (!selectedIssue || typeof window === "undefined" || !window.matchMedia("(max-width: 760px)").matches) return;
+    selectedIssueRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
+  }, [selectedIssue?.identity.serverId]);
   const revealSection = React.useCallback((section: HTMLDetailsElement | null) => {
     if (!section) return;
     section.open = true;
@@ -835,6 +840,7 @@ export function LensNextPanelView({
 
       {selectedIssue ? (
         <section
+          ref={selectedIssueRef}
           key={selectedIssue.identity.serverId}
           id="lens-next-selected-issue"
           tabIndex={-1}
