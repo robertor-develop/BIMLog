@@ -26264,6 +26264,106 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "aa53b3ee49e3dfbe7d61663a8b14582f093303814906360f39133ee4f29cab69"
+    },
+    {
+      "taskId": "lorena-company-catalog-ui-access-20260916",
+      "reviewedThroughCommit": "7bfad6be4551ff85b928378d9a8a867996dcb3b1",
+      "reviewedAt": "2026-09-16T16:48:20Z",
+      "trigger": "pmo_catalog_route_inaccessible_without_project_administration",
+      "immediateFindings": [
+        {
+          "category": "ui_accessibility_and_authorization",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The company PMO API grant did not make the catalog UI reachable for a user without separate project-admin access. A dedicated capability-scoped route and navigation entry are added locally; real-browser account acceptance remains open."
+        }
+      ],
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "correct_local_ui_route",
+          "run_focused_tests",
+          "run_local_build"
+        ],
+        "operatorOnly": [
+          "authorize_production_database_migration",
+          "authorize_push_and_publication",
+          "grant_existing_account_in_production"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The route exposes the existing company-scoped catalog authority without changing product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local UI work remains separate from production release and field acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authenticated browser acceptance remains open; typecheck and source tests are not substituted for it."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural platform metadata change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens source change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated document or report change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or metadata change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local PMO-only access correction and open browser acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the specific browser and release gates still unfinished."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only history is preserved."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.master-catalogs.behavior.mjs",
+        "artifacts/bimlog/src/pages/CompanyMasterCatalogs.tsx",
+        "bimlog_src.tar.gz",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "41355e5e701610e1767e8ca8c6fbac4cc7b945413f9b7c2028af01e49a63b677"
     }
   ]
 }

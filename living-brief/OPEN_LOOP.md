@@ -8,6 +8,8 @@
 - [x] Pass isolated local PostgreSQL/HTTP tenant, grant, duplicate, version, client, project scope, and revocation checks; pass source/TypeScript and browser build checks.
 - [x] Correct review findings: persist approved-only/defaults-allowed company policy separately from PMO grants; keep approved-only mode after the last grant is revoked; exclude global classification defaults in approved-only mode; reject newly selected unapproved Intake classifications while preserving unchanged historical selections.
 - [x] Pass isolated local PostgreSQL/HTTP policy-mode and revoke-persistence checks plus focused catalog/classification regressions. This is local evidence, not the actual Replit production preview or live user acceptance.
+- [x] Remove the PMO-only navigation trap: provide a dedicated company-catalog route and headquarters link controlled by the actual company PMO capability, without granting Project Administration or global Super Administrator authority.
+- [ ] Exercise the actual production catalog UI in an authenticated browser at desktop and 390px in English and Spanish, including PMO edit, ordinary read-only, denial/retry, and Intake return/save/refresh; do not describe source assertions or typecheck as this acceptance.
 - [ ] Reconcile the local API production build's generated PLATFORM.md and Living Brief integrity manifest, then complete independent UI/UX and migration-preview review.
 - [ ] Production database migration and Lorena's actual company PMO grant require separate explicit authorization; then push, Replit publication, live Chrome verification, and Lorena field acceptance remain separate gates. The Operations financial-filter acceptance issue is not closed by this catalog correction.
 

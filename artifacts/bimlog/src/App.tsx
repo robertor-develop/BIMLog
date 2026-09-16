@@ -38,6 +38,7 @@ const Disclaimer = namedPage(() => import("@/pages/Disclaimer"), "Disclaimer");
 const DataRetention = namedPage(() => import("@/pages/DataRetention"), "DataRetention");
 const ResetPasswordPage = namedPage(() => import("@/pages/ResetPassword"), "ResetPasswordPage");
 const AdminPanel = namedPage(() => import("@/pages/AdminPanel"), "AdminPanel");
+const CompanyMasterCatalogs = namedPage(() => import("@/pages/CompanyMasterCatalogs"), "CompanyMasterCatalogs");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
@@ -170,6 +171,9 @@ function Router() {
       </Route>
       <Route path="/admin/feedback">
         {() => <ProtectedRoute component={AdminPanel} />}
+      </Route>
+      <Route path="/company-catalogs">
+        {() => <ProtectedRoute component={CompanyMasterCatalogs} />}
       </Route>
       <Route path="/admin">
         {() => <ProtectedRoute component={AdminPanel} />}

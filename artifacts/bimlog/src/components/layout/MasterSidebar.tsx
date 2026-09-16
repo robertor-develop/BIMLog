@@ -32,6 +32,7 @@ export function MasterSidebar() {
   const t = (en: string, es: string) => lang === "es" ? es : en;
 
   const [showAdminPanel, setShowAdminPanel] = useState(false);
+  const [showCompanyCatalogs, setShowCompanyCatalogs] = useState(false);
   const [showTotalControl, setShowTotalControl] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyName, setCompanyName] = useState<string>("");
@@ -77,6 +78,8 @@ export function MasterSidebar() {
   const headers = { Authorization: `Bearer ${token}` };
 
   useEffect(() => {
+    let active = true;
+    setShowCompanyCatalogs(false);
     if (!token) return;
     getMe()
       .then((data) => {
@@ -101,7 +104,15 @@ export function MasterSidebar() {
         }
       })
       .catch((error) => logClientError("master sidebar projects load", error));
+    fetch(`${API_BASE}/api/v1/company/master-catalogs/capabilities`, { headers })
+      .then(async response => {
+        if (!response.ok) throw new Error(`Catalog capability request failed (${response.status})`);
+        return response.json() as Promise<{ canManage?: boolean }>;
+      })
+      .then(capability => { if (active) setShowCompanyCatalogs(capability.canManage === true); })
+      .catch((error) => logClientError("master sidebar company catalog capability load", error));
     loadNotifications();
+    return () => { active = false; };
   }, [user?.id, token]);
 
   useEffect(() => {
@@ -391,10 +402,11 @@ export function MasterSidebar() {
         {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Headquarters", "Sede")}</span>}
         {navButton(t("BIMLog Headquarters", "Sede BIMLog"), "/dashboard", LayoutDashboard)}
 
-        {(showAdminPanel || showTotalControl) && (
+        {(showAdminPanel || showCompanyCatalogs || showTotalControl) && (
           <>
             {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Administration", "Administración")}</span>}
             {showAdminPanel && navButton(t("Project Administration", "Administración de Proyectos"), "/admin", ShieldCheck)}
+            {showCompanyCatalogs && navButton(t("Company Catalogs", "Catálogos de Empresa"), "/company-catalogs", Building2)}
             {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
           </>
         )}
