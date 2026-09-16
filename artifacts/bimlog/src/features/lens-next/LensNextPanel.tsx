@@ -752,6 +752,7 @@ export function LensNextPanel({
       xmlExportMessage={xmlExportMessage}
       onExportViewpointsXml={() => void exportViewpointsXml()}
       filteredIssues={filteredIssues}
+      activeIssueCount={activeIssues.length}
       issueSort={issueSort}
       onIssueSortChange={setIssueSort}
       issuePage={currentPage}
