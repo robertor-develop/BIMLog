@@ -809,6 +809,19 @@ export function LensNextPanelView({
               <X aria-hidden="true" size={18} />
             </button>
           </header>
+          <div className="lens-next__actions lens-next__actions--primary" aria-label="Selected issue actions">
+            <button
+              type="button"
+              className="lens-next__primary"
+              disabled={!bridgeOpenEnabled || workingViewState === "opening"}
+              onClick={onOpenWorkingView}
+            >
+              {workingViewState === "opening" ? "Opening Working View…" : "Open Working View"}
+            </button>
+            <button type="button" onClick={onLoadHistory} disabled={history === "loading"}>
+              {history === "loading" ? "Loading history…" : "View history"}
+            </button>
+          </div>
           <dl className="lens-next__detail-properties" aria-label="Issue identity summary">
             <div>
               <dt>Server ID</dt>
@@ -861,23 +874,6 @@ export function LensNextPanelView({
             {selectedIssue.publishingAllowed && <label className="lens-next__field lens-next__field--wide"><span>Add Reference Attachment (PDF, JPG, PNG; max 5 MB)</span><input aria-label="Add Reference Attachment" type="file" accept=".pdf,.jpg,.jpeg,.png,application/pdf,image/jpeg,image/png" onChange={event => { const file = event.target.files?.[0]; event.currentTarget.value = ""; if (!file) return; if (file.size > 5 * 1024 * 1024) { window.alert("Reference files must be no larger than 5 MB."); return; } onUploadReferenceAttachment(file); }} /></label>}
             {referenceAttachmentsError && <p className="lens-next__inline-error" role="status">{referenceAttachmentsError}</p>}
           </section>
-          <div className="lens-next__actions">
-            <button
-              type="button"
-              className="lens-next__primary"
-              disabled={!bridgeOpenEnabled || workingViewState === "opening"}
-              onClick={onOpenWorkingView}
-            >
-              {workingViewState === "opening" ? "Opening Working View…" : "Open Working View"}
-            </button>
-            <button
-              type="button"
-              onClick={onLoadHistory}
-              disabled={history === "loading"}
-            >
-              {history === "loading" ? "Loading history…" : "View history"}
-            </button>
-          </div>
           {workingViewUnavailable && (
             <section className="lens-next__visual-repair" aria-label="Repair missing platform visual package">
               <p className="lens-next__inline-notice">
