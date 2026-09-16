@@ -27004,6 +27004,93 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9644a01f91bad0ed0b473d793d82df35f850a1c7bf3c21f9ca83c3fb9fbcf494"
+    },
+    {
+      "taskId": "lorena-intake-publication-preservation-20260916",
+      "reviewedThroughCommit": "754d10bdd43b019a666eb7d0f9a85975efd44650",
+      "reviewedAt": "2026-09-16T22:45:00Z",
+      "trigger": "production_object_preservation_before_replit_publication",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "local_schema_declaration",
+          "regression_tests",
+          "read_only_catalog_comparison",
+          "development_schema_alignment"
+        ],
+        "operatorOnly": [
+          "production_database_migration",
+          "replit_publish",
+          "customer_field_acceptance"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production history and human authority are preserved."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source, preview, and publication boundaries remain."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The new catalog check makes existing preservation evidence executable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-roadmap direction or scope changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime UI or API behavior changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report output changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact schema comparisons, development-only repair, and unpublished status."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains provider-preview, backup, publish, live-smoke, and field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production records were changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/connector-foundation.behavior.ts",
+        "lib/db/scripts/check-schema-parity.mjs",
+        "lib/db/src/schema/connector-foundation.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/test-database-safety.mjs"
+      ],
+      "reviewedChangeSha256": "f4ef5a76cf9b75752c47db81396c752e6eadfe74933ae7bfe4033584c39c1bed"
     }
   ]
 }

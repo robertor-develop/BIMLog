@@ -10,6 +10,9 @@ assert.match(CLAIM_CONNECTOR_JOB_SQL, /FOR UPDATE SKIP LOCKED/);
 assert.match(CLAIM_CONNECTOR_JOB_SQL, /fencing_token=fencing_token\+1/);
 assert.match(CLAIM_CONNECTOR_JOB_SQL, /attempts<max_attempts/);
 assert.doesNotMatch(ddl, /TRUNCATE|DELETE\s+FROM|DROP\s+(TABLE|COLUMN|CONSTRAINT)/i);
+assert.match(ddl, /sharepoint_folder_mappings_category_trade_uq UNIQUE NULLS NOT DISTINCT\(project_mapping_id,category,trade_id\)/);
+const connectorSchema = readFileSync(new URL("../../../../lib/db/src/schema/connector-foundation.ts", import.meta.url), "utf8");
+assert.match(connectorSchema, /unique\("sharepoint_folder_mappings_category_trade_uq"\)\.on\(t\.projectMappingId, t\.category, t\.tradeId\)\.nullsNotDistinct\(\)/);
 
 const secret = { secretCiphertext:"c".repeat(32),secretIv:"i".repeat(16),secretTag:"t".repeat(16),wrappedDataKey:"k".repeat(32),wrapIv:"w".repeat(16),wrapTag:"g".repeat(16),keyVersion:2 };
 assert.equal(protectedSecretEnvelopeSchema.parse(secret).keyVersion, 2);

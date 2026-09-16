@@ -2737,3 +2737,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Verify the live Platform identity, health endpoint, three-pane workspace, adjustable/collapsible panes, presentation modes, navigation, and non-mutating detail disclosures in Chrome.
 - [x] Correct the stale compact-workspace regression contract and pass the focused 11-contract Lens acceptance set.
 - [ ] Complete Native-connected Working View, XML export, and Navisworks field acceptance with the bridge connected; browser-only verification must not substitute for this gate.
+
+## Lorena intake-controls publication preservation
+
+- [x] Compare all existing production columns, indexes, and constraints with Helium development using read-only catalogs; reconcile the six exact differences only in development.
+- [x] Bind SharePoint folder `NULLS NOT DISTINCT` uniqueness to the declarative schema and make full production-object preservation an executable pre-preview regression.
+- [ ] Pass the complete governed pre-push gate, record the corrected source commit, push it, and synchronize exact GitHub `master` in Replit Shell.
+- [ ] Capture Replit's complete provider deployment preview and prove zero destructive statements with the governed backup, inventory, and count evidence before Publish. A standalone Drizzle preview against production does not substitute for provider proof.
+- [ ] Publish once if the provider preview is safe; verify exact live identity, health, authenticated Lorena/Intake/Operations paths, persistence, and unaffected baseline workflows in Chrome. External Lorena/Ruben field acceptance remains separate.
