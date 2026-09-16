@@ -465,7 +465,11 @@ export function LensNextPanelView({
   }, []);
   const preparedAction: LensNextPublishAction = publishKind === "status" ? { type: "status", status: publishStatus } : publishKind === "comment" ? { type: "comment", comment: publishText.trim() } : { type: "assignment", responsibleCompany: publishText.trim() };
   return (
-    <aside className="lens-next" aria-label="BIMLog Lens Next controlled issue workspace">
+    <aside className="lens-next" aria-label="BIMLog Lens Next controlled issue workspace" aria-busy={refreshState === "refreshing" || reconciliationState === "running"}>
+      <nav className="lens-next__skip-links" aria-label="Skip within Lens Next">
+        <a href="#lens-next-issue-list">Skip to issues</a>
+        {selectedIssue && <a href="#lens-next-selected-issue">Skip to selected issue</a>}
+      </nav>
       <header className="lens-next__header">
         <div>
           <p className="lens-next__eyebrow">BIMLog · Controlled publishing</p>
@@ -565,7 +569,7 @@ export function LensNextPanelView({
             <span><strong>{synchronizationPlan.manualConflict}</strong> manual review</span>
             <span><strong>{synchronizationPlan.blocked}</strong> blocked</span>
           </div>
-          <p className={`lens-next__sync-readiness${synchronizationPlan.executable ? " lens-next__sync-readiness--ready" : ""}`} role="status">
+          <p id="lens-next-sync-readiness" className={`lens-next__sync-readiness${synchronizationPlan.executable ? " lens-next__sync-readiness--ready" : ""}`} role="status" aria-atomic="true">
             <strong>{synchronizationPlan.executable ? "Ready for confirmation" : "Review required"}</strong>
             <span>{lensNextSyncPlanSummary(synchronizationPlan)}</span>
           </p>
@@ -583,7 +587,7 @@ export function LensNextPanelView({
             {xmlExportState === "loading" ? "Loading BIMLog viewpoints…" : xmlExportState === "exporting" ? "Exporting XML…" : "Export Viewpoints XML"}
           </button>
           {xmlExportMessage && <small role={xmlExportState === "error" ? "alert" : "status"}>{xmlExportMessage}</small>}
-          <button type="button" disabled={!synchronizationPlan.executable || reconciliationState === "running"} onClick={onRunReconciliation}>
+          <button type="button" aria-describedby="lens-next-sync-readiness" disabled={!synchronizationPlan.executable || reconciliationState === "running"} onClick={onRunReconciliation}>
             {reconciliationState === "running" ? "Reconciling…" : "Run confirmed reconciliation"}
           </button>
           {!synchronizationPlan.executable && synchronizationPlan.manualConflict + synchronizationPlan.blocked > 0 && <small role="alert">Resolve every manual-review and blocked item before reconciliation can change either system.</small>}
@@ -800,6 +804,8 @@ export function LensNextPanelView({
         </small>
       </div>
       <section
+        id="lens-next-issue-list"
+        tabIndex={-1}
         className="lens-next__issue-list"
         aria-label="BIMLog issues"
         aria-busy={refreshState === "refreshing"}
@@ -828,6 +834,8 @@ export function LensNextPanelView({
       {selectedIssue ? (
         <section
           key={selectedIssue.identity.serverId}
+          id="lens-next-selected-issue"
+          tabIndex={-1}
           className="lens-next__details"
           aria-label="Selected issue details"
         >
