@@ -179,6 +179,7 @@ export function LensNextPanel({
   const currentPage=Math.min(issuePage,pageCount);
   const visibleIssues=useMemo(()=>filteredIssues.slice((currentPage-1)*issuePageSize,currentPage*issuePageSize),[currentPage,filteredIssues,issuePageSize]);
   useEffect(()=>setIssuePage(1),[filters,issueSort,issuePageSize,authorizedProjectId]);
+  useEffect(()=>{if(selectedServerId===null)return;const index=filteredIssues.findIndex(issue=>issue.identity.serverId===selectedServerId);if(index>=0)setIssuePage(Math.floor(index/issuePageSize)+1);},[filteredIssues,issuePageSize,selectedServerId]);
   const inventorySummary = useMemo(
     () => reconcileLensNextInventories(issues, localInventory),
     [issues, localInventory],
