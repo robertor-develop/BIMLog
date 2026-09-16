@@ -25946,6 +25946,105 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a08473187be125f7044987b5578e224d8c60b9aa3252a64185d5f32d06c439f5"
+    },
+    {
+      "taskId": "lens-next-p31-release-reconciliation-20260916",
+      "reviewedThroughCommit": "35d1d135f7009fc553a002c3e72cbd12e85c10fd",
+      "reviewedAt": "2026-09-16T05:18:00Z",
+      "trigger": "authorized_push_publish_preflight",
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The completed Platform candidate still displayed P30 and required a Platform-only P31 identity reconciliation before publication."
+        }
+      ],
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "verify_clean_candidate",
+          "run_protected_gates",
+          "push_exact_fast_forward",
+          "replit_shell_sync",
+          "chrome_live_acceptance"
+        ],
+        "operatorOnly": [
+          "production_database_destructive_override",
+          "manual_field_acceptance_if_native_bridge_is_unavailable"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical product authority and evidence-preservation doctrine remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The explicit push and publish authorization is bounded to the verified release candidate."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Clean build, zero-drop preview, live version, and browser acceptance remain mandatory gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction, module scope, workflow authority, or customer promise changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only displayed release identity advances; routes, modules, schema, and runtime structure are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native remains N17 and no plugin source, camera, sectioning, XML, or bridge behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, document, or exported-artifact presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards applicability, external evidence, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the P31 Platform candidate identity and unchanged Native/database/schema boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records Roberto's separate push and publication authorization and remaining live gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer data, stored identity, audit history, or historical evidence is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "67d9684cd2845d953084e581b0218626afffc445353797d4ea807b31c6bc1f08"
     }
   ]
 }

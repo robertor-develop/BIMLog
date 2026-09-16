@@ -11,7 +11,8 @@
 - [x] Builds 31–35: test-only production-component harness; Chrome desktop acceptance; exact-390 English/Spanish acceptance and immediate mobile list-to-detail flow; keyboard/dialog accessibility; consolidated protected local regression.
 - [x] Freeze Living Brief integrity through exact Build 35 implementation commit `02193266a8182cadb247f5acfbe175fa0cd4defc`; the freeze changes no runtime behavior.
 - [x] Builds 36–39: fail-closed previous/next selection contract, adjacent detail navigation across filtered-page boundaries, real rendered desktop/exact-390 acceptance, and consolidated protected-baseline closure.
-- [ ] Push and publish only after Roberto explicitly authorizes that separate release operation; then repeat acceptance against the deployed production surface and Navisworks host.
+- [x] Reconcile the completed Platform modernization candidate to `v1.05.N17-P31`; Native remains N17.
+- [ ] Push and publish the exact P31 candidate under Roberto's 2026-09-16 authorization, then repeat acceptance against the deployed production surface and Navisworks host.
 
 ## Product-default configuration and Intake reconciliation — authorized 2026-09-15
 
