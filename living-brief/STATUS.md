@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Lens Next modernization Builds 1–5 — local candidate — 2026-09-15
+
+- Lens Next now presents a responsive three-pane desktop workspace: filters, the authoritative issue list, and the selected issue details remain adjacent with independent overflow ownership.
+- Filter and issue-list widths are bounded and adjustable. Either navigation pane can be collapsed and restored, and the layout preference is stored only in the current browser. Selecting an issue scrolls its existing card into the nearest visible list position without changing identity or server selection.
+- Existing Lens actions and authorities are unchanged: working view, XML, synchronization, creation, publishing, attachments, history, digest, camera, sectioning, lifecycle, model binding, authorization, and project isolation retain their established implementations.
+- This is a local source candidate. No Native, database/schema, customer-data, push, publication, deployment, or field acceptance is claimed.
+
 ## Product-default configuration correction — local candidate — 2026-09-15
 
 - BIMLog's configuration contract is default-first: a sole operator or small company can begin Intake without creating configuration libraries. Company-managed configurations remain optional; a governed organization may later select or enforce its approved values through existing authority.

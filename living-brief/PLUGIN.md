@@ -141,6 +141,12 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - An exact Original Lens-managed local-only viewpoint may be uploaded only from the synchronization plan and only after a separate reason plus explicit confirmation. The native bridge opens the exact GUID after rechecking current project/model context and managed local-only identity, then captures the visual contract without changing Saved Viewpoint structure.
 - The platform uses a dedicated single-item API, not legacy bulk sync. It refuses any existing GUID/viewpoint/display identity and commits the new BIMLog record, rebound verified visual package, and sequence together. Working View open never invokes this path.
 
+## Lens Next workspace modernization — Builds 1–5
+
+- The Platform and embedded workspaces use the same responsive three-pane presentation: filters, authoritative issue list, and selected-record details. Each data pane owns its overflow on desktop; narrow layouts stack without changing record or action semantics.
+- Filter and list widths are bounded browser-local preferences. Filters or the issue list may be collapsed and restored; these presentation preferences never enter BIMLog records, Navisworks metadata, synchronization payloads, or audit history.
+- Selecting an issue keeps its existing list card visible beside the unchanged detail surface. Identity, digest, XML, navigation, camera, sectioning, lifecycle, model binding, creation, publishing, attachments, and synchronization contracts remain protected.
+
 ## Open items / known limitations
 - **Protected v1.60.7 physical-mutation baseline.** Later identity, lineage, import/rebind,
   `Guid.Empty`, ambiguity, and preserve-first protections must surround rather than replace the physical

@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lens Next modernization — authorized 2026-09-15
+
+- [x] Builds 1–5: establish the responsive three-pane workspace, independent overflow ownership, bounded filter/list sizing, collapse/restore controls, browser-local preference persistence, and selected-card visibility without changing Lens authorities.
+- [ ] Builds 6–10: improve search, filters, sorting, counts, and large-collection navigation against the same authoritative issue set.
+- [ ] Builds 11–15: modernize issue cards, verified thumbnail states, severity/status presentation, and list/table presentation without duplicating records.
+- [ ] Builds 16–20: compact selected-record overview, working-view actions, properties, model evidence, attachments, history, and controlled publishing.
+- [ ] Builds 21–25: issue creation/linking and synchronization preview, progress, per-record conflict, and recovery presentation.
+- [ ] Builds 26–30: responsive, accessibility, bilingual, performance, protected regression, and consolidated real-environment acceptance.
+- [ ] Complete production-component desktop and exact-390px visual interaction review before release recommendation.
+
 ## Product-default configuration and Intake reconciliation — authorized 2026-09-15
 
 - [x] Reject a customer-specific mandatory-template interpretation. BIMLog must remain usable by a sole operator or small company without first administering configuration libraries.
