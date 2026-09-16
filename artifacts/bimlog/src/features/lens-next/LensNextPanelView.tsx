@@ -91,8 +91,11 @@ function IssueCard({
   selected: boolean;
   onSelect(): void;
 }) {
+  const cardRef=React.useRef<HTMLButtonElement|null>(null);
+  React.useEffect(()=>{if(selected)cardRef.current?.scrollIntoView({block:"nearest",inline:"nearest"});},[selected]);
   return (
     <button
+      ref={cardRef}
       type="button"
       className={`lens-next__issue-card${selected ? " lens-next__issue-card--selected" : ""}`}
       onClick={onSelect}
