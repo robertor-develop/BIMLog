@@ -24,7 +24,7 @@ import type {
 } from "./lens-next-types";
 import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./lens-next-workspace-layout";
 import type { LensNextIssueSort } from "./lens-next-model";
-import { LENS_NEXT_STATUS_LABELS, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
+import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 
@@ -115,7 +115,9 @@ function IssueCard({
       className={`lens-next__issue-card${selected ? " lens-next__issue-card--selected" : ""}`}
       onClick={onSelect}
       aria-pressed={selected}
-      aria-label={`View issue ${displayCode(issue)}`}
+      aria-label={lensNextIssueAccessibleLabel(issue)}
+      data-priority={issue.priority ?? "none"}
+      data-status={issue.status}
     >
       <Thumbnail issue={issue} />
       <span className="lens-next__issue-summary">

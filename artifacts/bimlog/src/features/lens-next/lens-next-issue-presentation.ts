@@ -23,3 +23,14 @@ export function lensNextPriorityLabel(priority: number | null): string {
 export function lensNextIssueDescription(issue: LensNextIssue): string {
   return issue.note?.trim() || issue.openItems?.trim() || "No issue description recorded";
 }
+
+export function lensNextIssueAccessibleLabel(issue: LensNextIssue): string {
+  const code = issue.displayId ?? issue.identity.viewpointId;
+  return [
+    `View issue ${code}`,
+    lensNextPriorityLabel(issue.priority),
+    LENS_NEXT_STATUS_LABELS[issue.status],
+    issue.trade?.trim() || "Trade not recorded",
+    issue.floor?.trim() || "Floor not recorded",
+  ].join(", ");
+}

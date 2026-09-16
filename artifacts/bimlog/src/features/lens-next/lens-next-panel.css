@@ -357,6 +357,10 @@
 }
 .lens-next__priority--1 { border-color: #e7b8b5; color: #8d302b; background: #fff1f0; }
 .lens-next__priority--2 { border-color: #efd4a0; color: #75491a; background: #fff7e6; }
+.lens-next__priority--3 { border-color: #b8cce6; color: #1e4f7a; background: #eef6ff; }
+.lens-next__priority--4 { border-color: #bfd8c9; color: #17653f; background: #eef9f3; }
+.lens-next__priority--5,
+.lens-next__priority--none { border-color: #d5dce0; color: #526077; background: #f6f8f9; }
 .lens-next__status {
   flex: none;
   padding: 2px 6px;
@@ -374,6 +378,14 @@
 .lens-next__status--open {
   color: #9a2f29;
   background: #fbe7e5;
+}
+.lens-next__status--follow_up {
+  color: #75491a;
+  background: #fff1d6;
+}
+.lens-next__status--waiting_design {
+  color: #1e4f7a;
+  background: #e8f2fc;
 }
 
 .lens-next__details {
