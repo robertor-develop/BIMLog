@@ -57,24 +57,43 @@ function ConnectionBadge({
 }
 
 function Thumbnail({ issue }: { issue: LensNextIssue }) {
+  const [loadFailed, setLoadFailed] = React.useState(false);
+  React.useEffect(() => setLoadFailed(false), [issue.screenshotUrl]);
   if (!issue.screenshotUrl) {
     return (
       <div
         className="lens-next__thumbnail lens-next__thumbnail--empty"
         role="img"
-        aria-label="No thumbnail available"
+        aria-label="No captured thumbnail"
       >
         <ImageOff aria-hidden="true" size={20} strokeWidth={1.75} />
-        <small>No thumbnail available</small>
+        <small>No captured thumbnail</small>
+      </div>
+    );
+  }
+  if (loadFailed) {
+    return (
+      <div
+        className="lens-next__thumbnail lens-next__thumbnail--error"
+        role="img"
+        aria-label={`Thumbnail unavailable for issue ${displayCode(issue)}`}
+      >
+        <ImageOff aria-hidden="true" size={20} strokeWidth={1.75} />
+        <small>Thumbnail unavailable</small>
       </div>
     );
   }
   return (
-    <img
-      className="lens-next__thumbnail"
-      src={issue.screenshotUrl}
-      alt={`Issue ${displayCode(issue)}`}
-    />
+    <span className="lens-next__thumbnail-frame">
+      <img
+        className="lens-next__thumbnail"
+        src={issue.screenshotUrl}
+        alt={`Verified capture for issue ${displayCode(issue)}`}
+        loading="lazy"
+        onError={() => setLoadFailed(true)}
+      />
+      <small className="lens-next__thumbnail-state">Verified capture</small>
+    </span>
   );
 }
 
