@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const view=fs.readFileSync(new URL("./LensNextPanelView.tsx",import.meta.url),"utf8");
+const css=fs.readFileSync(new URL("./lens-next-panel.css",import.meta.url),"utf8");
+assert.match(view,/lens-next__browser-grid/);
+assert.match(view,/lens-next__filter-pane/);
+assert.match(view,/Filter pane width/);
+assert.match(view,/Issue list width/);
+assert.match(view,/filtersCollapsed/);
+assert.match(view,/listCollapsed/);
+assert.match(view,/scrollIntoView\(\{block:"nearest",inline:"nearest"\}\)/);
+assert.match(css,/grid-template-columns:\s*var\(--lens-next-filter-width/);
+assert.match(css,/lens-next__filter-pane--collapsed/);
+assert.match(css,/lens-next__body--list-collapsed/);
+assert.match(css,/@media \(max-width: 760px\)[\s\S]*lens-next__browser-grid[\s\S]*flex-direction:\s*column/);
+assert.doesNotMatch(view,/applyPlatformWorkingView[\s\S]{0,500}workspaceLayout/);
+console.log("Lens Next modern three-pane workspace: PASS");
