@@ -7,7 +7,7 @@
 - [x] Builds 11–15: modernize issue cards, verified thumbnail states, severity/status presentation, and list/table presentation without duplicating records.
 - [x] Builds 16–20: compact selected-record overview, working-view actions, properties, model evidence, attachments, history, and controlled publishing.
 - [x] Builds 21–25: issue creation/linking and synchronization preview, progress, per-record conflict, and recovery presentation.
-- [ ] Builds 26–30: responsive, accessibility, bilingual, performance, protected regression, and consolidated real-environment acceptance.
+- [x] Builds 26–30: responsive exact-390 rules, accessibility, bilingual modernization controls, large-list performance safeguards, and consolidated protected local regression.
 - [ ] Complete production-component desktop and exact-390px visual interaction review before release recommendation.
 
 ## Product-default configuration and Intake reconciliation — authorized 2026-09-15
