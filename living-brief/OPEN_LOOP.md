@@ -10,6 +10,7 @@
 - [x] Pass isolated local PostgreSQL/HTTP policy-mode and revoke-persistence checks plus focused catalog/classification regressions. This is local evidence, not the actual Replit production preview or live user acceptance.
 - [x] Remove the PMO-only navigation trap: provide a dedicated company-catalog route and headquarters link controlled by the actual company PMO capability, without granting Project Administration or global Super Administrator authority.
 - [x] Run the combined local PMO/Intake/classification/Operations regressions and inspect the production catalog component in English and Spanish with fixture data; correct the Spanish lifecycle status label.
+- [x] Inspect the production catalog component in a local browser fixture at exact 390px in both languages and PMO, read-only, denied/retry, empty, and loading states; correct horizontal clipping. This is not authenticated production acceptance.
 - [ ] Exercise the actual production catalog UI in an authenticated browser at desktop and 390px in English and Spanish, including PMO edit, ordinary read-only, denial/retry, and Intake return/save/refresh; do not describe source assertions or typecheck as this acceptance.
 - [ ] Reconcile the local API production build's generated PLATFORM.md and Living Brief integrity manifest, then complete independent UI/UX and migration-preview review.
 - [ ] Production database migration and Lorena's actual company PMO grant require separate explicit authorization; then push, Replit publication, live Chrome verification, and Lorena field acceptance remain separate gates. The Operations financial-filter acceptance issue is not closed by this catalog correction.
@@ -20,6 +21,7 @@
 - [x] Use the attributed rows for cards, alerts, table, CSV, and PDF while retaining the existing authoritative full-scope projection and financial-entitlement redaction.
 - [x] Pass deterministic two-package/two-member attribution and privacy regression plus API/Frontend typechecks.
 - [x] Inspect the production Project Controls component in a local browser fixture: WP-01 changes the financial totals and its intersection with a non-assigned member is empty, with Spanish labels visible.
+- [x] Inspect exact-390 local fixture views with populated, empty, and financial-redacted rows; correct narrow filter layout and the empty-data message, and disable empty exports. The wide table scrolls internally without causing page overflow.
 - [ ] Inspect the production component at desktop and exact 390px in English and Spanish with populated, empty, loading/error, and permission-limited states, and compare against real project assignment totals after live publication. Source assertions and fixtures are not field acceptance.
 
 ## Lens Next modernization — authorized 2026-09-15

@@ -12,13 +12,17 @@ const catalogEntries = {
   service: [{ id: "service-1", code: "SHOP", name: "Shop Drawings", state: "active", version: 1 }],
   phase: [{ id: "phase-1", code: "PRE", name: "Preliminary", state: "active", version: 1 }],
 };
+type CatalogState = "pmo" | "read-only" | "denied" | "empty" | "loading";
+let catalogState: CatalogState = "pmo";
 const baseFetch = window.fetch.bind(window);
 window.fetch = async (input, init) => {
   const path = String(input);
   if (!path.includes("/api/v1/company/master-catalogs/")) return baseFetch(input, init);
+  if (catalogState === "loading") return new Promise<Response>(() => undefined);
   const kind = path.split("/").pop()?.split("?")[0];
-  if (kind === "capabilities") return Response.json({ companyId: 1, canManage: true, isSuperAdmin: false, mode: "approved_only", policyVersion: 1 });
-  if (kind && kind in catalogEntries && (!init?.method || init.method === "GET")) return Response.json({ entries: catalogEntries[kind as keyof typeof catalogEntries] });
+  if (catalogState === "denied") return Response.json({ code: "FORBIDDEN" }, { status: 403 });
+  if (kind === "capabilities") return Response.json({ companyId: 1, canManage: catalogState !== "read-only", isSuperAdmin: false, mode: "approved_only", policyVersion: 1 });
+  if (kind && kind in catalogEntries && (!init?.method || init.method === "GET")) return Response.json({ entries: catalogState === "empty" ? [] : catalogEntries[kind as keyof typeof catalogEntries] });
   return Response.json({ error: "Fixture is read-only" }, { status: 403 });
 };
 
@@ -46,6 +50,9 @@ const packageTasks = [{ packageId: "wp-1", taskId: "task-1" }, { packageId: "wp-
 function Harness() {
   const { language, setLanguage } = useI18n();
   const [view, setView] = useState<"catalogs" | "controls">("catalogs");
+  const [mode, setMode] = useState<CatalogState>("pmo");
+  const [controlMode, setControlMode] = useState<"full" | "redacted" | "empty">("full");
+  const chooseCatalogState = (next: CatalogState) => { catalogState = next; setMode(next); setView("catalogs"); };
   return <main style={{ maxWidth: 1300, margin: "0 auto", padding: 16 }}>
     <h1>Production-component acceptance fixture</h1>
     <nav style={{ display: "flex", gap: 12, flexWrap: "wrap", marginBottom: 16 }}>
@@ -53,7 +60,13 @@ function Harness() {
       <button onClick={() => setView("controls")}>Project Controls</button>
       <button onClick={() => setLanguage(language === "en" ? "es" : "en")}>Language: {language}</button>
     </nav>
-    {view === "catalogs" ? <CompanyMasterCatalogsTab token="fixture" spanish={language === "es"} /> : <ProjectControlsDashboard controls={controls} members={[{ id: 7, fullName: "Lorena" }, { id: 8, fullName: "Ruben" }]} packages={packages} tasks={tasks} assignments={assignments} workItems={[{ id: "scope-1", billingHourlyRate: 20 }, { id: "scope-2", billingHourlyRate: 20 }]} packageTasks={packageTasks} projectId={1} token={null} />}
+    {view === "catalogs" ? <>
+      <nav aria-label="Catalog test states" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>{(["pmo", "read-only", "denied", "empty", "loading"] as const).map(next => <button key={next} aria-pressed={mode === next} onClick={() => chooseCatalogState(next)}>{next}</button>)}</nav>
+      <CompanyMasterCatalogsTab key={mode} token="fixture" spanish={language === "es"} />
+    </> : <>
+      <nav aria-label="Controls test states" style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: 16 }}>{(["full", "redacted", "empty"] as const).map(next => <button key={next} aria-pressed={controlMode === next} onClick={() => setControlMode(next)}>{next}</button>)}</nav>
+      <ProjectControlsDashboard key={controlMode} controls={{ ...controls, rows: controlMode === "empty" ? [] : controls.rows, budgetVisible: controlMode !== "redacted", valueVisible: controlMode !== "redacted" }} members={[{ id: 7, fullName: "Lorena" }, { id: 8, fullName: "Ruben" }]} packages={packages} tasks={tasks} assignments={assignments} workItems={[{ id: "scope-1", billingHourlyRate: 20 }, { id: "scope-2", billingHourlyRate: 20 }]} packageTasks={packageTasks} projectId={1} token={null} />
+    </>}
   </main>;
 }
 createRoot(document.getElementById("root")!).render(<I18nProvider><Harness /></I18nProvider>);
