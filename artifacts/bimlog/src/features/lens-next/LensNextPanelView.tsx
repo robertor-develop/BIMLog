@@ -26,6 +26,7 @@ import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./len
 import type { LensNextIssueSort } from "./lens-next-model";
 import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
 import { lensNextSyncLabel, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance } from "./lens-next-sync-presentation";
+import { lensNextSelectionTarget, type LensNextSelectionDirection } from "./lens-next-selection-navigation";
 import { useI18n } from "../../lib/i18n";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
@@ -483,6 +484,18 @@ export function LensNextPanelView({
     section.scrollIntoView({ block: "nearest", behavior: "smooth" });
     window.setTimeout(() => section.querySelector<HTMLElement>("select, input, textarea, button")?.focus(), 250);
   }, []);
+  const previousIssue = selectedIssue
+    ? lensNextSelectionTarget(filteredIssues, selectedIssue.identity.serverId, "previous", issuePageSize)
+    : null;
+  const nextIssue = selectedIssue
+    ? lensNextSelectionTarget(filteredIssues, selectedIssue.identity.serverId, "next", issuePageSize)
+    : null;
+  const navigateSelectedIssue = (direction: LensNextSelectionDirection) => {
+    const target = direction === "previous" ? previousIssue : nextIssue;
+    if (!target) return;
+    if (target.page !== issuePage) onIssuePageChange(target.page);
+    onSelectIssue(target.issue.identity.serverId);
+  };
   const preparedAction: LensNextPublishAction = publishKind === "status" ? { type: "status", status: publishStatus } : publishKind === "comment" ? { type: "comment", comment: publishText.trim() } : { type: "assignment", responsibleCompany: publishText.trim() };
   return (
     <aside className="lens-next" aria-label="BIMLog Lens Next controlled issue workspace" aria-busy={refreshState === "refreshing" || reconciliationState === "running"}>
@@ -871,14 +884,23 @@ export function LensNextPanelView({
                 <span className={`lens-next__status lens-next__status--${selectedIssue.status}`}>{STATUS_LABELS[selectedIssue.status]}</span>
               </div>
             </div>
-            <button
-              type="button"
-              className="lens-next__close"
-              aria-label="Close issue details"
-              onClick={onCloseIssue}
-            >
-              <X aria-hidden="true" size={18} />
-            </button>
+            <div className="lens-next__detail-navigation" aria-label={tt("Selected issue navigation", "Navegación de incidencia seleccionada")}>
+              <span aria-live="polite">{filteredIssues.findIndex(issue => issue.identity.serverId === selectedIssue.identity.serverId) + 1} / {filteredIssues.length}</span>
+              <button type="button" disabled={!previousIssue} aria-label={tt("Previous issue", "Incidencia anterior")} onClick={() => navigateSelectedIssue("previous")}>
+                {tt("Previous", "Anterior")}
+              </button>
+              <button type="button" disabled={!nextIssue} aria-label={tt("Next issue", "Incidencia siguiente")} onClick={() => navigateSelectedIssue("next")}>
+                {tt("Next", "Siguiente")}
+              </button>
+              <button
+                type="button"
+                className="lens-next__close"
+                aria-label={tt("Close issue details", "Cerrar detalles de la incidencia")}
+                onClick={onCloseIssue}
+              >
+                <X aria-hidden="true" size={18} />
+              </button>
+            </div>
           </header>
           <div className="lens-next__actions lens-next__actions--primary" aria-label="Selected issue actions">
             <button

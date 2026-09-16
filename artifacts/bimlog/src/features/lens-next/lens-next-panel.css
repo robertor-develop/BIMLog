@@ -438,6 +438,9 @@
 .lens-next__detail-heading h3 { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lens-next__detail-heading > p:not(.lens-next__eyebrow) { overflow: hidden; color: #526077; font-size: 12px; text-overflow: ellipsis; white-space: nowrap; }
 .lens-next__detail-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 3px; }
+.lens-next__detail-navigation { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 5px; }
+.lens-next__detail-navigation span { align-self: center; min-width: 48px; color: var(--lens-next-muted); font-size: 11px; text-align: center; }
+.lens-next__detail-navigation button { width: auto; min-height: 30px; padding: 0 9px; font-size: 12px; }
 .lens-next__close {
   width: auto;
   height: 30px;
@@ -990,6 +993,9 @@
   .lens-next__filters, .lens-next__detail-properties, .lens-next__inventory-summary { grid-template-columns: minmax(0, 1fr); }
   .lens-next__issue-table-scroll { max-width: 100%; overflow-x: auto; overscroll-behavior-inline: contain; }
   .lens-next__detail-header { grid-template-columns: 64px minmax(0, 1fr) auto; }
+  .lens-next__detail-navigation { grid-column: 1 / -1; justify-content: stretch; margin-top: 8px; }
+  .lens-next__detail-navigation span { flex: 1 1 100%; }
+  .lens-next__detail-navigation button { flex: 1 1 0; }
   .lens-next__detail-header .lens-next__thumbnail, .lens-next__detail-header .lens-next__thumbnail-frame { width: 64px; height: 56px; }
   .lens-next__publisher, .lens-next__detail-section-content { min-width: 0; padding-inline: 10px; }
   .lens-next__publish-confirm button + button { margin: 6px 0 0; }
