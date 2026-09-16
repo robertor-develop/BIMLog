@@ -1,0 +1,7 @@
+export type LensNextWorkspaceLayout={filtersWidth:number;listWidth:number;filtersCollapsed:boolean;listCollapsed:boolean};
+export const LENS_NEXT_WORKSPACE_LAYOUT_KEY="bimlog.lens-next.workspace-layout.v1";
+export const DEFAULT_LENS_NEXT_WORKSPACE_LAYOUT:LensNextWorkspaceLayout={filtersWidth:220,listWidth:420,filtersCollapsed:false,listCollapsed:false};
+const bounded=(value:unknown,min:number,max:number,fallback:number)=>typeof value==="number"&&Number.isFinite(value)?Math.min(max,Math.max(min,Math.round(value))):fallback;
+export function normalizeLensNextWorkspaceLayout(value:unknown):LensNextWorkspaceLayout{const row=value&&typeof value==="object"?value as Record<string,unknown>:{};return{filtersWidth:bounded(row.filtersWidth,180,360,220),listWidth:bounded(row.listWidth,320,640,420),filtersCollapsed:row.filtersCollapsed===true,listCollapsed:row.listCollapsed===true};}
+export function readLensNextWorkspaceLayout(storage:Pick<Storage,"getItem">|null):LensNextWorkspaceLayout{if(!storage)return DEFAULT_LENS_NEXT_WORKSPACE_LAYOUT;try{return normalizeLensNextWorkspaceLayout(JSON.parse(storage.getItem(LENS_NEXT_WORKSPACE_LAYOUT_KEY)??"null"));}catch{return DEFAULT_LENS_NEXT_WORKSPACE_LAYOUT;}}
+export function writeLensNextWorkspaceLayout(storage:Pick<Storage,"setItem">|null,value:LensNextWorkspaceLayout){if(storage)storage.setItem(LENS_NEXT_WORKSPACE_LAYOUT_KEY,JSON.stringify(normalizeLensNextWorkspaceLayout(value)));}
