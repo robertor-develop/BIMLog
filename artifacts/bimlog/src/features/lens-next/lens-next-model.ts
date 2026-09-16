@@ -360,7 +360,7 @@ export function sortLensNextIssues(
 }
 
 function normalized(value: string | null | undefined): string {
-  return (value ?? "").trim().toLocaleLowerCase("en-US");
+  return (value ?? "").normalize("NFKD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-zA-Z0-9]+/g," ").trim().toLocaleLowerCase("en-US");
 }
 
 export function activeLensNextIssues(value: readonly LensNextIssue[]): LensNextIssue[] {
@@ -372,6 +372,7 @@ export function filterLensNextIssues(
   filters: Readonly<LensNextFilters>,
 ): LensNextIssue[] {
   const query = normalized(filters.search);
+  const queryTerms=query.split(" ").filter(Boolean);
   return value.filter((issue) => {
     if (filters.status !== "all" && issue.status !== filters.status)
       return false;
@@ -387,8 +388,8 @@ export function filterLensNextIssues(
       return false;
     if (filters.priority !== "all" && issue.priority !== filters.priority)
       return false;
-    if (!query) return true;
-    return [
+    if (queryTerms.length===0) return true;
+    const haystack=normalized([
       issue.identity.viewpointId,
       issue.displayId,
       issue.note,
@@ -398,7 +399,8 @@ export function filterLensNextIssues(
       issue.responsibleCompany,
       issue.reportType,
       issue.status,
-    ].some((candidate) => normalized(candidate).includes(query));
+    ].join(" "));
+    return queryTerms.every(term=>haystack.includes(term));
   });
 }
 
