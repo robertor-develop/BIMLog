@@ -436,11 +436,19 @@ export function LensNextPanelView({
   const [linkTargetId, setLinkTargetId] = React.useState("");
   const [guideOpen, setGuideOpen] = React.useState(false);
   const [issuePresentation, setIssuePresentation] = React.useState<"cards" | "table">("cards");
+  const createSectionRef = React.useRef<HTMLDetailsElement | null>(null);
+  const linkSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const [workspaceLayout,setWorkspaceLayout]=React.useState(()=>readLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage));
   React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => { setLinkType("rfi"); setLinkTargetId(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
+  const revealSection = React.useCallback((section: HTMLDetailsElement | null) => {
+    if (!section) return;
+    section.open = true;
+    section.scrollIntoView({ block: "nearest", behavior: "smooth" });
+    window.setTimeout(() => section.querySelector<HTMLElement>("select, input, textarea, button")?.focus(), 250);
+  }, []);
   const preparedAction: LensNextPublishAction = publishKind === "status" ? { type: "status", status: publishStatus } : publishKind === "comment" ? { type: "comment", comment: publishText.trim() } : { type: "assignment", responsibleCompany: publishText.trim() };
   return (
     <aside className="lens-next" aria-label="BIMLog Lens Next controlled issue workspace">
@@ -480,6 +488,7 @@ export function LensNextPanelView({
         <ConnectionBadge label="BIMLog" state={apiState} />
         <ConnectionBadge label="Navisworks" state={bridgeState} />
         <div className="lens-next__workspace-controls" aria-label="Workspace layout controls">
+          <button type="button" className="lens-next__primary" disabled={!createEnabled} onClick={() => revealSection(createSectionRef.current)}>Create issue</button>
           <Columns3 aria-hidden="true" size={15}/>
           <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,filtersCollapsed:!current.filtersCollapsed}))}>{workspaceLayout.filtersCollapsed?<><PanelLeftOpen aria-hidden="true" size={14}/> Show filters</>:<><PanelLeftClose aria-hidden="true" size={14}/> Hide filters</>}</button>
           <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,listCollapsed:!current.listCollapsed}))}>{workspaceLayout.listCollapsed?"Show issue list":"Hide issue list"}</button>
@@ -586,7 +595,7 @@ export function LensNextPanelView({
         </details>
       )}
 
-      <details className="lens-next__create">
+      <details ref={createSectionRef} className="lens-next__create">
         <summary>Create BIMLog Issue</summary>
         <div className="lens-next__filters">
           <label className="lens-next__field"><span>Trade</span><select value={createDraft.trade} onChange={e => { setCreateDraft({ ...createDraft, trade: e.target.value }); setCreateReviewReady(false); }}><option value="" disabled>Select trade</option>{createTrades.map(value => <option key={value} value={value}>{value}</option>)}</select></label>
@@ -821,6 +830,9 @@ export function LensNextPanelView({
             <button type="button" onClick={onLoadHistory} disabled={history === "loading"}>
               {history === "loading" ? "Loading history…" : "View history"}
             </button>
+            <button type="button" disabled={!selectedIssue.publishingAllowed} onClick={() => revealSection(linkSectionRef.current)}>
+              Link BIMLog item
+            </button>
           </div>
           <details className="lens-next__detail-section" open>
             <summary>Properties and model evidence</summary>
@@ -875,8 +887,9 @@ export function LensNextPanelView({
             </div>
           </dl>
           </details>
-          <section className="lens-next__publisher" aria-label="Linked BIMLog items">
-            <h4>Linked BIMLog Items</h4>
+          <details ref={linkSectionRef} className="lens-next__publisher lens-next__detail-section" aria-label="Linked BIMLog items">
+            <summary>Linked BIMLog items{linkedItems && linkedItems !== "loading" ? ` (${linkedItems.links.length})` : ""}</summary>
+            <div className="lens-next__detail-section-content">
             <p className="lens-next__section-help">Connect this viewpoint to an existing item in the current BIMLog project.</p>
             {linkedItems === "loading" ? <p role="status">Loading links…</p> : linkedItems && linkedItems.links.length ? (
               <ul>
@@ -891,7 +904,8 @@ export function LensNextPanelView({
               </div>
             )}
             {linkedItemsError && <p className="lens-next__inline-error" role="status">{linkedItemsError}</p>}
-          </section>
+            </div>
+          </details>
           <details className="lens-next__detail-section lens-next__detail-section--records" aria-label="Reference attachments">
             <summary>Reference attachments{referenceAttachments && referenceAttachments !== "loading" ? ` (${referenceAttachments.attachments.length})` : ""}</summary>
             <div className="lens-next__detail-section-content">
