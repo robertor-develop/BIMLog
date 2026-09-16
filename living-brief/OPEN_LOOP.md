@@ -13,6 +13,13 @@
 - [ ] Reconcile the local API production build's generated PLATFORM.md and Living Brief integrity manifest, then complete independent UI/UX and migration-preview review.
 - [ ] Production database migration and Lorena's actual company PMO grant require separate explicit authorization; then push, Replit publication, live Chrome verification, and Lorena field acceptance remain separate gates. The Operations financial-filter acceptance issue is not closed by this catalog correction.
 
+## Operations Project Controls filter attribution — local candidate — 2026-09-16
+
+- [x] Replace whole-scope financial reuse for Package and Team Member selections with exact task-linked assignment attribution, including their intersection; do not allocate unlinked assignments by assumption.
+- [x] Use the attributed rows for cards, alerts, table, CSV, and PDF while retaining the existing authoritative full-scope projection and financial-entitlement redaction.
+- [x] Pass deterministic two-package/two-member attribution and privacy regression plus API/Frontend typechecks.
+- [ ] Inspect the production component at desktop and exact 390px in English and Spanish with populated, empty, loading/error, and permission-limited states, and compare against real project assignment totals after live publication. Source assertions and fixtures are not field acceptance.
+
 ## Lens Next modernization — authorized 2026-09-15
 
 - [x] Builds 1–5: establish the responsive three-pane workspace, independent overflow ownership, bounded filter/list sizing, collapse/restore controls, browser-local preference persistence, and selected-card visibility without changing Lens authorities.

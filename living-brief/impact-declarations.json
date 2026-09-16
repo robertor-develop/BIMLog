@@ -26364,6 +26364,104 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "41355e5e701610e1767e8ca8c6fbac4cc7b945413f9b7c2028af01e49a63b677"
+    },
+    {
+      "taskId": "lorena-operations-filter-attribution-20260916",
+      "reviewedThroughCommit": "99a92d471b3d4e0379630d677cd17052b11e162a",
+      "reviewedAt": "2026-09-16T17:06:49Z",
+      "trigger": "project_controls_member_and_package_filters_reused_whole_scope_financials",
+      "immediateFindings": [
+        {
+          "category": "financial_attribution_and_ui_truth",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Package and member filters included whole scope-item financial values. The local correction uses only task-linked operational assignments and discloses excluded unlinked records; live field comparison remains open."
+        }
+      ],
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "correct_local_filter_projection",
+          "run_focused_tests",
+          "run_local_build"
+        ],
+        "operatorOnly": [
+          "authorize_push_and_publication",
+          "verify_lorena_real_project_in_production"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The view derives from existing canonical operational records and does not create a competing financial authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Source and local verification remain distinct from release and field acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Financial attribution is exact for task-linked assignments; browser and real-project evidence remain required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The filter correction does not change the product roadmap or future direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural platform metadata change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens source change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing governed current-view PDF contract is reused without report design changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or applicability claim."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local filter attribution behavior and unreleased state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks remaining browser, real-project, and release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical audit remains intact."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/bimlog/src/components/job-operations/ProjectControlsDashboard.tsx",
+        "artifacts/bimlog/src/components/job-operations/project-controls-filters.behavior.ts",
+        "artifacts/bimlog/src/components/job-operations/project-controls-filters.ts",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a0bdf03980f07a2bae547e5c5d12d000ca5504ec8bbcad0f1644ab1e932609d1"
     }
   ]
 }

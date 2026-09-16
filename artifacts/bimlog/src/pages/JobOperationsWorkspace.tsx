@@ -1570,6 +1570,10 @@ export function JobOperationsWorkspace() {
               controls={data.projectControls}
               members={data.members ?? []}
               packages={data.packages ?? []}
+              tasks={data.tasks ?? []}
+              assignments={data.assignments ?? []}
+              workItems={data.workItems ?? []}
+              packageTasks={data.packageTasks ?? []}
               projectId={projectId}
               token={token}
             />
