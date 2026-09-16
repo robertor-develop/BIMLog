@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Lorena Intake–catalog–Operations cross-module QA — local candidate — 2026-09-16
+
+- Focused PMO authority, selector, Intake stable-ID persistence, task/package classification propagation, activation boundary, and Project Controls attribution regressions pass together. Frontend TypeScript, production bundle, and mojibake checks pass locally.
+- A test-only page imports the actual company catalog and Project Controls components with isolated fixture data. In the local in-app browser, English and Spanish catalog values rendered, WP-01 selected only its attributable financial totals, and the WP-01/Ruben intersection correctly showed no matching scope. The Spanish catalog lifecycle label was corrected from raw English `active` to `Activo`.
+- This is not Lorena's authenticated production acceptance: the fixture uses test records, does not exercise a real Intake save/refresh or production database, and exact-390, loading/error, permission, publication, migration preview, actual PMO grant, and real-project financial reconciliation remain open.
+
 ## Company-scoped master catalogs — local candidate — 2026-09-16
 
 - Lorena's P31 findings are not production-fixed. The local candidate adds separate company-owned Client, Discipline, Service, and Phase catalogs with an explicit, revocable company PMO grant for an existing user account; it does not grant global Super Administrator authority.

@@ -26462,6 +26462,104 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a0bdf03980f07a2bae547e5c5d12d000ca5504ec8bbcad0f1644ab1e932609d1"
+    },
+    {
+      "taskId": "lorena-intake-catalog-operations-combined-local-qa-20260916",
+      "reviewedThroughCommit": "31a8dd5883bafb591fd2596ef15c96987e893581",
+      "reviewedAt": "2026-09-16T17:22:04Z",
+      "trigger": "combined_local_regression_and_browser_component_acceptance",
+      "immediateFindings": [
+        {
+          "category": "bilingual_ui_quality",
+          "disposition": "corrected_locally",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The company catalog rendered raw English lifecycle status in Spanish. The production component now localizes the status; live project acceptance remains open."
+        }
+      ],
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "run_combined_regressions",
+          "inspect_local_production_component",
+          "correct_local_ui",
+          "run_local_build"
+        ],
+        "operatorOnly": [
+          "authorize_push_and_publication",
+          "grant_lorena_actual_company_pmo",
+          "verify_real_project_financial_totals"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Fixture testing and catalog label correction create no competing authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local fixture evidence is explicitly distinguished from release acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Browser inspection and combined regression evidence improve assurance without overstating coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or scope change occurs in this QA build."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural platform metadata or production route change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next or Native source is changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report output or PDF design contract is changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards applicability or registry change occurs."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the combined local QA results and exact remaining gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Separates fulfilled fixture checks from production and 390-pixel acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical audit remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/company-controls-harness.html",
+        "artifacts/bimlog/src/company-controls-harness.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "bcfaa6a88a32e4cd08df035b15c16ede088d370ff071e99d70614b1a927f1042"
     }
   ]
 }
