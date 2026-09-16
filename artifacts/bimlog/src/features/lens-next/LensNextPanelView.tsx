@@ -24,14 +24,9 @@ import type {
 } from "./lens-next-types";
 import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./lens-next-workspace-layout";
 import type { LensNextIssueSort } from "./lens-next-model";
+import { LENS_NEXT_STATUS_LABELS, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
 
-const STATUS_LABELS: Record<string, string> = {
-  open: "Open",
-  follow_up: "Follow up",
-  waiting_design: "Waiting design",
-  approved: "Approved",
-  resolved: "Resolved",
-};
+const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
 
 function formatTimestamp(value: string | null): string {
   if (!value) return "Not recorded";
@@ -107,18 +102,17 @@ function IssueCard({
       <span className="lens-next__issue-summary">
         <span className="lens-next__issue-title">
           <strong>{displayCode(issue)}</strong>
-          <span
-            className={`lens-next__status lens-next__status--${issue.status}`}
-          >
-            {STATUS_LABELS[issue.status]}
+          <span className={`lens-next__priority lens-next__priority--${issue.priority ?? "none"}`}>
+            {lensNextPriorityLabel(issue.priority)}
           </span>
         </span>
-        <span className="lens-next__issue-note">
-          {issue.note ?? issue.openItems ?? "No issue description recorded"}
-        </span>
+        <span className="lens-next__issue-note">{lensNextIssueDescription(issue)}</span>
         <span className="lens-next__issue-meta">
-          {issue.priority ? `P${issue.priority}` : "No priority"} ·{" "}
-          {issue.trade ?? "No trade"} · {issue.floor ?? "No floor"}
+          <span className={`lens-next__status lens-next__status--${issue.status}`}>
+            {STATUS_LABELS[issue.status]}
+          </span>
+          <span>{issue.trade ?? "Trade not recorded"}</span>
+          <span>{issue.floor ?? "Floor not recorded"}</span>
         </span>
       </span>
     </button>
