@@ -1,5 +1,5 @@
 import React from "react";
-import { HelpCircle, ImageOff, X } from "lucide-react";
+import { Columns3, HelpCircle, ImageOff, PanelLeftClose, PanelLeftOpen, X } from "lucide-react";
 import { LENS_NEXT_STATUSES } from "./lens-next-types";
 import {
   LENS_NEXT_VIEW_DIMENSIONS,
@@ -22,6 +22,7 @@ import type {
   LensNextStatus,
   LensNextRefreshState,
 } from "./lens-next-types";
+import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./lens-next-workspace-layout";
 
 const STATUS_LABELS: Record<string, string> = {
   open: "Open",
@@ -377,6 +378,8 @@ export function LensNextPanelView({
   const [linkType, setLinkType] = React.useState<LensNextLinkedItemType>("rfi");
   const [linkTargetId, setLinkTargetId] = React.useState("");
   const [guideOpen, setGuideOpen] = React.useState(false);
+  const [workspaceLayout,setWorkspaceLayout]=React.useState(()=>readLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage));
+  React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => { setLinkType("rfi"); setLinkTargetId(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
@@ -418,9 +421,14 @@ export function LensNextPanelView({
       >
         <ConnectionBadge label="BIMLog" state={apiState} />
         <ConnectionBadge label="Navisworks" state={bridgeState} />
+        <div className="lens-next__workspace-controls" aria-label="Workspace layout controls">
+          <Columns3 aria-hidden="true" size={15}/>
+          <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,filtersCollapsed:!current.filtersCollapsed}))}>{workspaceLayout.filtersCollapsed?<><PanelLeftOpen aria-hidden="true" size={14}/> Show filters</>:<><PanelLeftClose aria-hidden="true" size={14}/> Hide filters</>}</button>
+          <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,listCollapsed:!current.listCollapsed}))}>{workspaceLayout.listCollapsed?"Show issue list":"Hide issue list"}</button>
+        </div>
       </div>
 
-      <div className="lens-next__body">
+      <div className={`lens-next__body${workspaceLayout.listCollapsed?" lens-next__body--list-collapsed":""}`} style={{"--lens-next-filter-width":`${workspaceLayout.filtersWidth}px`,"--lens-next-list-width":`${workspaceLayout.listWidth}px`} as React.CSSProperties}>
         <section className="lens-next__browser" aria-label="Issue browser and filters">
           <label className="lens-next__field">
         <span>Project</span>
@@ -581,7 +589,9 @@ export function LensNextPanelView({
         {layoutMessage && <small role="status">{layoutMessage}</small>}
       </section>
 
-      <section className="lens-next__filters" aria-label="Issue filters">
+      <div className="lens-next__browser-grid">
+      <section className={`lens-next__filters lens-next__filter-pane${workspaceLayout.filtersCollapsed?" lens-next__filter-pane--collapsed":""}`} aria-label="Issue filters">
+        <div className="lens-next__pane-size"><label>Filter width <input aria-label="Filter pane width" type="range" min="180" max="360" value={workspaceLayout.filtersWidth} onChange={event=>setWorkspaceLayout(current=>({...current,filtersWidth:Number(event.target.value)}))}/></label></div>
         <label className="lens-next__field lens-next__field--wide">
           <span>Search</span>
           <input
@@ -702,6 +712,8 @@ export function LensNextPanelView({
           />
         )}
           </section>
+          <div className="lens-next__pane-size lens-next__pane-size--list"><label>Issue list width <input aria-label="Issue list width" type="range" min="320" max="640" value={workspaceLayout.listWidth} onChange={event=>setWorkspaceLayout(current=>({...current,listWidth:Number(event.target.value)}))}/></label></div>
+        </div>
         </section>
 
       {selectedIssue ? (
