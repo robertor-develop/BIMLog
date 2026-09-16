@@ -298,6 +298,18 @@ export const companyMasterCatalogAdministratorsTable = pgTable("company_master_c
   check("company_master_catalog_admin_revoke_chk", sql`(${t.state}='revoked')=(${t.revokedAt} IS NOT NULL)`),
 ]);
 
+export const companyMasterCatalogPoliciesTable = pgTable("company_master_catalog_policies", {
+  companyId: integer("company_id").primaryKey().references(() => companiesTable.id),
+  mode: text("mode").notNull().default("defaults_allowed"),
+  version: integer("version").notNull().default(1),
+  updatedById: integer("updated_by_id").notNull().references(() => usersTable.id),
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+}, t => [
+  check("company_master_catalog_policies_mode_check", sql`${t.mode} IN ('approved_only','defaults_allowed')`),
+  check("company_master_catalog_policies_version_check", sql`${t.version}>0`),
+]);
+
 export const companyMasterCatalogEntriesTable = pgTable("company_master_catalog_entries", {
   id: text("id").primaryKey(),
   companyId: integer("company_id").notNull().references(() => companiesTable.id),

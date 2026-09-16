@@ -26158,6 +26158,112 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f475e18b833c3b4b69b6710c5bf57c57f7aef3b2889208e5bd7c538a19ded24b"
+    },
+    {
+      "taskId": "lorena-company-catalog-policy-correction-20260916",
+      "reviewedThroughCommit": "795e157d0e2ddc1fcc321b599bd7406dde0dee06",
+      "reviewedAt": "2026-09-16T16:24:59Z",
+      "trigger": "review_found_governance_permission_coupling_and_unapproved_global_choices",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Company governance had been coupled to active PMO grants and approved-only project choices still included global defaults; both paths are corrected locally and remain unpublished."
+        }
+      ],
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "correct_local_policy_and_selectors",
+          "run_isolated_local_database_tests",
+          "run_typechecks_and_local_builds"
+        ],
+        "operatorOnly": [
+          "authorize_production_database_migration",
+          "authorize_push_and_publication",
+          "grant_existing_account_in_production"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction restores one durable company policy authority and preserves the default-first product law without changing doctrine text."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local correction and tests remain separate from production migration, Git push, Replit preview, publication, and field acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Permission revocation, tenant scope, historical selection, and additive schema evidence are tested locally but actual production preview remains required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Company PMO choice enforcement and BIMLog defaults use the existing product direction without expanding the roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deterministic generator does not include this policy table or endpoint inventory detail, and its structural output remains unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Lens, viewpoint, model, camera, sectioning, digest, or XML source changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated report or document presentation contract changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or applicability claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local policy correction and exact unpushed, unpublished, non-field-accepted state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the corrected review findings and remaining production preview, release, account-grant, and live-acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only history is not rewritten by the local correction; production policy events remain a separate release concern."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/company-master-catalog-migration.ts",
+        "artifacts/api-server/src/lib/company-master-catalog.behavior.ts",
+        "artifacts/api-server/src/lib/company-master-catalog.http-evidence.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/routes/company-master-catalogs.ts",
+        "artifacts/api-server/src/routes/master-catalogs.ts",
+        "artifacts/api-server/src/routes/project_directory.ts",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/components/job-intake/ProjectCompanyCreator.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.tsx",
+        "lib/db/src/schema/enterprise-identity.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "aa53b3ee49e3dfbe7d61663a8b14582f093303814906360f39133ee4f29cab69"
     }
   ]
 }

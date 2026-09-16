@@ -824,9 +824,9 @@ router.post(
     }
     const selectedCanonicalId = req.body?.canonical_company_id == null ? null : Number(req.body.canonical_company_id);
     await ensureCompanyMasterCatalogSchema();
-    const governance = await pool.query(`SELECT 1 FROM company_master_catalog_administrators a JOIN projects p ON p.id=$1 JOIN users creator ON creator.id=p.created_by_id
-      WHERE a.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id)
-      AND a.state='active' LIMIT 1`, [projectId]);
+    const governance = await pool.query(`SELECT 1 FROM company_master_catalog_policies policy JOIN projects p ON p.id=$1 JOIN users creator ON creator.id=p.created_by_id
+      WHERE policy.company_id=COALESCE((SELECT company_id FROM project_company_binding_versions WHERE project_id=p.id ORDER BY version DESC LIMIT 1),creator.company_id)
+      AND policy.mode='approved_only' LIMIT 1`, [projectId]);
     if (governance.rows[0] && selectedCanonicalId === null) { res.status(403).json({ error: "approved_client_catalog_selection_required" }); return; }
     if (selectedCanonicalId !== null) {
       if (!Number.isSafeInteger(selectedCanonicalId) || selectedCanonicalId <= 0) { res.status(400).json({ error: "client_catalog_selection_invalid" }); return; }

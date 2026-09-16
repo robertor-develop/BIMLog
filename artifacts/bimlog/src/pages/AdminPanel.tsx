@@ -252,7 +252,7 @@ function MasterCatalogsTab({ token }: { token: string }) {
 
   const load = useCallback(async () => {
     const pairs = await Promise.all((["services", "phases"] as const).map(async kind => {
-      const response = await apiFetch(`/master-catalogs/${kind}?includeInactive=true`, token);
+      const response = await apiFetch(`/master-catalogs/${kind}?scope=global&includeInactive=true`, token);
       if (!response.ok) throw new Error(`${kind} ${response.status}`);
       const body = await response.json() as { entries?: MasterCatalogEntry[] };
       return [kind, Array.isArray(body.entries) ? body.entries : []] as const;

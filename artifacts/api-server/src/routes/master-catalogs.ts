@@ -25,7 +25,7 @@ function normalizedCode(value: unknown) {
 router.get("/master-catalogs/:catalog", authMiddleware, async (req, res): Promise<void> => {
   const catalogName = param(req.params.catalog);
   await ensureCompanyMasterCatalogSchema();
-  const actor = (await pool.query(`SELECT company_id FROM users WHERE id=$1 LIMIT 1`, [req.user!.userId])).rows[0];
+  const actor = (await pool.query(`SELECT company_id,is_super_admin FROM users WHERE id=$1 LIMIT 1`, [req.user!.userId])).rows[0];
   if (!actor) { res.status(401).json({ code: "AUTHORITY_INVALID" }); return; }
   let companyId = Number(actor.company_id);
   if (req.query.projectId !== undefined) {
@@ -39,27 +39,40 @@ router.get("/master-catalogs/:catalog", authMiddleware, async (req, res): Promis
   }
   const kind = ({ clients: "client", disciplines: "discipline", services: "service", phases: "phase" } as Record<string,string>)[catalogName];
   if (!kind) { res.status(404).json({ code: "MASTER_CATALOG_NOT_FOUND" }); return; }
+  if (req.query.scope === "global") {
+    if (!actor.is_super_admin || catalogName === "clients" || req.query.projectId !== undefined) { res.status(403).json({ code: "GLOBAL_CATALOG_ADMIN_REQUIRED" }); return; }
+    if (catalogName === "disciplines") {
+      const entries = await db.select().from(enterpriseTradesTable).orderBy(asc(enterpriseTradesTable.name));
+      res.json({ catalog: catalogName, scope: "global", entries }); return;
+    }
+    const table = catalog(catalogName);
+    if (!table) { res.status(404).json({ code: "MASTER_CATALOG_NOT_FOUND" }); return; }
+    const entries = await db.select().from(table).orderBy(asc(table.name));
+    res.json({ catalog: catalogName, scope: "global", entries }); return;
+  }
+  const governed = (await pool.query(`SELECT mode FROM company_master_catalog_policies WHERE company_id=$1`, [companyId])).rows[0]?.mode === "approved_only";
   const companyRows = (await pool.query(`SELECT id,code,name,state,version,canonical_company_id "canonicalCompanyId"
     FROM company_master_catalog_entries WHERE company_id=$1 AND kind=$2 AND state='active' ORDER BY name,id`, [companyId,kind])).rows;
   if (catalogName === "clients") {
-    const governed = Boolean((await pool.query(`SELECT 1 FROM company_master_catalog_administrators WHERE company_id=$1 AND state='active' LIMIT 1`, [companyId])).rows[0]);
     const clients = (await pool.query(`SELECT e.id "catalogEntryId",e.code,c.name,c.id,e.state,e.version
       FROM company_master_catalog_entries e JOIN companies c ON c.id=e.canonical_company_id
       WHERE e.company_id=$1 AND e.kind='client' AND e.state='active' ORDER BY c.name,c.id`, [companyId])).rows;
     res.json({ catalog: catalogName, governed, entries: clients.map(row => ({ ...row, source: "company" })) }); return;
   }
   if (catalogName === "disciplines") {
+    if (governed) { res.json({ catalog: catalogName, governed, entries: companyRows.map(row => ({ ...row, source: "company" })) }); return; }
     const includeInactive = req.query.includeInactive === "true" && req.user?.isSuperAdmin === true;
     const entries = await db.select().from(enterpriseTradesTable).where(includeInactive ? undefined : eq(enterpriseTradesTable.state, "active")).orderBy(asc(enterpriseTradesTable.name));
     const localCodes = new Set(companyRows.map(row => row.code));
-    res.json({ catalog: catalogName, entries: [...companyRows.map(row => ({ ...row, source: "company" })), ...entries.filter(row => !localCodes.has(row.code)).map(row => ({ ...row, source: "bimlog" }))] }); return;
+    res.json({ catalog: catalogName, governed, entries: [...companyRows.map(row => ({ ...row, source: "company" })), ...entries.filter(row => !localCodes.has(row.code)).map(row => ({ ...row, source: "bimlog" }))] }); return;
   }
   const table = catalog(catalogName);
   if (!table) { res.status(404).json({ code: "MASTER_CATALOG_NOT_FOUND" }); return; }
+  if (governed) { res.json({ catalog: catalogName, governed, entries: companyRows.map(row => ({ ...row, source: "company" })) }); return; }
   const includeInactive = req.query.includeInactive === "true" && req.user?.isSuperAdmin === true;
   const entries = await db.select().from(table).where(includeInactive ? undefined : eq(table.state, "active")).orderBy(asc(table.name));
   const localCodes = new Set(companyRows.map(row => row.code));
-  res.json({ catalog: catalogName, entries: [...companyRows.map(row => ({ ...row, source: "company" })), ...entries.filter(row => !localCodes.has(row.code)).map(row => ({ ...row, source: "bimlog" }))] });
+  res.json({ catalog: catalogName, governed, entries: [...companyRows.map(row => ({ ...row, source: "company" })), ...entries.filter(row => !localCodes.has(row.code)).map(row => ({ ...row, source: "bimlog" }))] });
 });
 
 router.post("/admin/master-catalogs/:catalog", authMiddleware, isSuperAdminMiddleware, async (req, res): Promise<void> => {

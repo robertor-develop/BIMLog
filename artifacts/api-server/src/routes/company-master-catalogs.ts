@@ -31,7 +31,24 @@ router.get("/company/master-catalogs/capabilities", authMiddleware, async (req, 
   await ensureCompanyMasterCatalogSchema();
   const current = await actor(req);
   if (!current) { res.status(401).json({ code: "AUTHORITY_INVALID" }); return; }
-  res.json({ companyId: current.companyId, canManage: current.isPmo || current.isSuperAdmin, isSuperAdmin: current.isSuperAdmin });
+  const policy = (await pool.query(`SELECT mode,version FROM company_master_catalog_policies WHERE company_id=$1`, [current.companyId])).rows[0];
+  res.json({ companyId: current.companyId, canManage: current.isPmo || current.isSuperAdmin, isSuperAdmin: current.isSuperAdmin,
+    mode: policy?.mode ?? "defaults_allowed", policyVersion: policy?.version ?? null });
+});
+
+router.patch("/company/master-catalogs/policy", authMiddleware, async (req, res): Promise<void> => {
+  await ensureCompanyMasterCatalogSchema();
+  const current = await actor(req);
+  if (!current || (!current.isPmo && !current.isSuperAdmin)) { res.status(403).json({ code: "COMPANY_CATALOG_PMO_REQUIRED" }); return; }
+  const mode = req.body?.mode;
+  const expectedVersion = Number(req.body?.expectedVersion);
+  if (!["approved_only", "defaults_allowed"].includes(mode) || !Number.isSafeInteger(expectedVersion) || expectedVersion <= 0) {
+    res.status(400).json({ code: "COMPANY_CATALOG_POLICY_INVALID" }); return;
+  }
+  const result = await pool.query(`UPDATE company_master_catalog_policies SET mode=$2,version=version+1,updated_by_id=$3,updated_at=now()
+    WHERE company_id=$1 AND version=$4 RETURNING mode,version`, [current.companyId,mode,current.userId,expectedVersion]);
+  if (!result.rows[0]) { res.status(409).json({ code: "COMPANY_CATALOG_POLICY_STALE" }); return; }
+  res.json({ policy: result.rows[0] });
 });
 
 router.get("/company/master-catalogs/:kind", authMiddleware, async (req, res): Promise<void> => {
@@ -116,14 +133,22 @@ router.post("/admin/company-master-catalog-grants", authMiddleware, isSuperAdmin
   if (!target.rows[0]) { res.status(404).json({ code: "COMPANY_CATALOG_GRANT_USER_NOT_FOUND" }); return; }
   const targetUserId = Number(target.rows[0].id);
   const targetCompanyId = Number(target.rows[0].company_id);
+  const connection = await pool.connect();
   try {
-    const result = await pool.query(`INSERT INTO company_master_catalog_administrators(id,company_id,user_id,granted_by_id)
+    await connection.query("BEGIN");
+    const result = await connection.query(`INSERT INTO company_master_catalog_administrators(id,company_id,user_id,granted_by_id)
       VALUES($1,$2,$3,$4) RETURNING id,company_id "companyId",user_id "userId",state`,
       [randomUUID(),targetCompanyId,targetUserId,req.user!.userId]);
+    await connection.query(`INSERT INTO company_master_catalog_policies(company_id,mode,updated_by_id)
+      VALUES($1,'defaults_allowed',$2) ON CONFLICT (company_id) DO NOTHING`, [targetCompanyId,req.user!.userId]);
+    await connection.query("COMMIT");
     res.status(201).json({ grant: { ...result.rows[0], email: target.rows[0].email, fullName: target.rows[0].full_name } });
   } catch (error: any) {
+    await connection.query("ROLLBACK");
     if (error?.code === "23505") { res.status(409).json({ code: "COMPANY_CATALOG_GRANT_EXISTS" }); return; }
     throw error;
+  } finally {
+    connection.release();
   }
 });
 

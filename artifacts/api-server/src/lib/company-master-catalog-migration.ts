@@ -14,6 +14,14 @@ CREATE TABLE IF NOT EXISTS company_master_catalog_administrators (
 );
 CREATE UNIQUE INDEX IF NOT EXISTS company_master_catalog_admin_active_uq
   ON company_master_catalog_administrators(company_id,user_id) WHERE state='active';
+CREATE TABLE IF NOT EXISTS company_master_catalog_policies (
+  company_id integer PRIMARY KEY REFERENCES companies(id),
+  mode text NOT NULL DEFAULT 'defaults_allowed' CHECK (mode IN ('approved_only','defaults_allowed')),
+  version integer NOT NULL DEFAULT 1 CHECK (version>0),
+  updated_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now()
+);
 CREATE TABLE IF NOT EXISTS company_master_catalog_entries (
   id text PRIMARY KEY,
   company_id integer NOT NULL REFERENCES companies(id),
