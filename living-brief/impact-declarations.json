@@ -26657,6 +26657,104 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2b69ceb48bd8f577f9eb1202643bcf473c4723170577f4e5c8cf75a28f4fc0d1"
+    },
+    {
+      "taskId": "lorena-catalog-release-preparation-20260916",
+      "reviewedThroughCommit": "f4810bb4c79b7dcbf83a0aa326f868e514cdcf9f",
+      "reviewedAt": "2026-09-16T17:50:20Z",
+      "trigger": "deterministic_platform_generation_requires_release_reconciliation",
+      "immediateFindings": [
+        {
+          "category": "release_authority_hash_mismatch",
+          "disposition": "reconciled_locally",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop",
+            "quality"
+          ],
+          "summary": "The first full build generated the Company Catalogs page and route in PLATFORM.md and stopped on the expected Living Brief hash mismatch. Only those two structural entries are accepted into the source authority; a clean full build is required before release."
+        }
+      ],
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "verify_generated_platform_diff",
+          "reconcile_living_brief",
+          "rerun_local_full_build",
+          "audit_release_candidate"
+        ],
+        "operatorOnly": [
+          "authorize_exact_commit_push",
+          "approve_production_database_migration",
+          "publish_replit",
+          "grant_actual_company_pmo"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Generated route metadata does not create a new product authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The full build remains a local gate distinct from publication and field acceptance."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Hash mismatch correctly blocked the first full release build until reconciliation."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or product direction change is introduced."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Deterministic generator added the Company Catalogs page and route."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next or Native source was changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or PDF contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards applicability or metadata change occurred."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact first-build stop and local reconciliation state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains full-build, migration, publication, and live acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit remains append-only and unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "56b5a63beda3a2ad4602cc02e9364eef77ac7192b3bd0c3fc3b97e4c05efe874"
     }
   ]
 }

@@ -12,7 +12,8 @@
 - [x] Run the combined local PMO/Intake/classification/Operations regressions and inspect the production catalog component in English and Spanish with fixture data; correct the Spanish lifecycle status label.
 - [x] Inspect the production catalog component in a local browser fixture at exact 390px in both languages and PMO, read-only, denied/retry, empty, and loading states; correct horizontal clipping. This is not authenticated production acceptance.
 - [ ] Exercise the actual production catalog UI in an authenticated browser at desktop and 390px in English and Spanish, including PMO edit, ordinary read-only, denial/retry, and Intake return/save/refresh; do not describe source assertions or typecheck as this acceptance.
-- [ ] Reconcile the local API production build's generated PLATFORM.md and Living Brief integrity manifest, then complete independent UI/UX and migration-preview review.
+- [ ] Reconcile the local API production build's deterministic `PLATFORM.md` additions for the Company Catalogs page and route; rerun the full build and Living Brief integrity gate.
+- [ ] Complete independent UI/UX and production migration-preview review before publication.
 - [ ] Production database migration and Lorena's actual company PMO grant require separate explicit authorization; then push, Replit publication, live Chrome verification, and Lorena field acceptance remain separate gates. The Operations financial-filter acceptance issue is not closed by this catalog correction.
 
 ## Operations Project Controls filter attribution — local candidate — 2026-09-16

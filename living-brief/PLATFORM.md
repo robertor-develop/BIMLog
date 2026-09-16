@@ -534,6 +534,7 @@ It changes only when the code structure or curated architectural facts change.
 ## Frontend pages (artifacts/bimlog/src/pages)
 - artifacts/bimlog/src/pages/About.tsx
 - artifacts/bimlog/src/pages/AdminPanel.tsx
+- artifacts/bimlog/src/pages/CompanyMasterCatalogs.tsx
 - artifacts/bimlog/src/pages/CompanyProfile.tsx
 - artifacts/bimlog/src/pages/Contact.tsx
 - artifacts/bimlog/src/pages/Dashboard.tsx
@@ -618,6 +619,7 @@ It changes only when the code structure or curated architectural facts change.
 - /settings/notifications
 - /settings/financial-controls
 - /admin/feedback
+- /company-catalogs
 - /admin
 - /feedback
 - /total-control
