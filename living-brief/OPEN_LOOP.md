@@ -16,6 +16,7 @@
 
 ## Product-default configuration and Intake reconciliation — authorized 2026-09-15
 
+- [ ] Lorena's 2026-09-16 P31 acceptance findings remain open for release: remove Service/Phase from project setup while retaining task/package classification; provide a unified Client/Discipline/Service/Phase administration experience with explicit company/PMO authority; and verify Project Controls filters against real project rows, including whether package/member selections require attributable (rather than whole-scope) financial data. Local code correction and compilation are not production acceptance.
 - [x] Reject a customer-specific mandatory-template interpretation. BIMLog must remain usable by a sole operator or small company without first administering configuration libraries.
 - [x] Preserve the existing canonical authorities: Companies for clients, enterprise disciplines, master services/phases, Commercial Generic APU versions, Intake contracts/items, and Job Operations budget governance.
 - [x] Clarify the first built-in delivery method as the automatic Intake default and state that company-managed configurations are optional.

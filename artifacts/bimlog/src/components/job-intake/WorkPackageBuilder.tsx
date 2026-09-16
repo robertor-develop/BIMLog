@@ -15,9 +15,10 @@ export function WorkPackageBuilder({
   defaultClassification?: Record<string, unknown>;
 }) {
   const [catalogs, setCatalogs] = useState<Record<string, any[]>>({ disciplines: [], services: [], phases: [] });
+  const projectDiscipline = { disciplineId: defaultClassification?.disciplineId ?? "", disciplineCode: defaultClassification?.disciplineCode ?? "", disciplineName: defaultClassification?.disciplineName ?? "" };
   useEffect(() => { let active = true; Promise.all(["disciplines", "services", "phases"].map(async kind => [kind, (await request(`/master-catalogs/${kind}`)).entries ?? []] as const)).then(rows => { if (active) setCatalogs(Object.fromEntries(rows)); }); return () => { active = false; }; }, [request]);
   const classificationFields = (value: any, change: (classification: any) => void) => (
-    (["discipline", "service", "phase"] as const).map(kind => <label key={kind}>{tt(kind[0]!.toUpperCase()+kind.slice(1), ({ discipline:"Disciplina", service:"Servicio", phase:"Fase" } as const)[kind])}<select value={value?.[`${kind}Id`] ?? ""} onChange={event => { const entry = catalogs[`${kind}s`].find(candidate => String(candidate.id) === event.target.value); change({ ...(value ?? defaultClassification ?? {}), [`${kind}Id`]: entry?.id ?? "", [`${kind}Code`]: entry?.code ?? "", [`${kind}Name`]: entry?.name ?? "" }); }}><option value="">{tt("Use project default", "Usar valor predeterminado del proyecto")}</option>{catalogs[`${kind}s`].map(entry => <option key={entry.id} value={entry.id}>{entry.code} — {entry.name}</option>)}</select></label>)
+    (["discipline", "service", "phase"] as const).map(kind => <label key={kind}>{tt(kind[0]!.toUpperCase()+kind.slice(1), ({ discipline:"Disciplina", service:"Servicio", phase:"Fase" } as const)[kind])}<select value={value?.[`${kind}Id`] ?? ""} onChange={event => { const entry = catalogs[`${kind}s`].find(candidate => String(candidate.id) === event.target.value); change({ ...projectDiscipline, ...(value ?? {}), [`${kind}Id`]: entry?.id ?? "", [`${kind}Code`]: entry?.code ?? "", [`${kind}Name`]: entry?.name ?? "" }); }}><option value="">{kind === "discipline" ? tt("Use project discipline", "Usar disciplina del proyecto") : tt("Select for this package or task", "Seleccionar para este paquete o tarea")}</option>{catalogs[`${kind}s`].map(entry => <option key={entry.id} value={entry.id}>{entry.code} — {entry.name}</option>)}</select></label>)
   );
   const dimensions = [
     "building",
@@ -101,7 +102,7 @@ export function WorkPackageBuilder({
               dimensionType: "deliverable",
               dimensionValue: "",
               packageType: "deliverable",
-              classification: defaultClassification ?? {},
+              classification: projectDiscipline,
               tasks: [],
             },
           ],
@@ -113,7 +114,7 @@ export function WorkPackageBuilder({
     update(itemIndex, packageIndex, {
       tasks: [
         ...(items[itemIndex].workPackages?.[packageIndex]?.tasks || []),
-        { id, taskCode: id.slice(0, 13), name: "", plannedHours: "0.00", classification: items[itemIndex].workPackages?.[packageIndex]?.classification ?? defaultClassification ?? {} },
+        { id, taskCode: id.slice(0, 13), name: "", plannedHours: "0.00", classification: items[itemIndex].workPackages?.[packageIndex]?.classification ?? projectDiscipline },
       ],
     });
   };

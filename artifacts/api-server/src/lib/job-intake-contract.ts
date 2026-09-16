@@ -254,12 +254,12 @@ export function normalizeJobIntakeData(raw: unknown) {
     disciplineId: optionalText(source.disciplineId ?? classification.disciplineId, "classification.disciplineId", 100),
     disciplineCode: optionalText(source.disciplineCode ?? classification.disciplineCode, "classification.disciplineCode", 64),
     disciplineName: optionalText(source.disciplineName ?? classification.disciplineName, "classification.disciplineName", 200),
-    serviceId: optionalText(source.serviceId ?? classification.serviceId, "classification.serviceId", 100),
-    serviceCode: optionalText(source.serviceCode ?? classification.serviceCode, "classification.serviceCode", 64),
-    serviceName: optionalText(source.serviceName ?? classification.serviceName, "classification.serviceName", 200),
-    phaseId: optionalText(source.phaseId ?? classification.phaseId, "classification.phaseId", 100),
-    phaseCode: optionalText(source.phaseCode ?? classification.phaseCode, "classification.phaseCode", 64),
-    phaseName: optionalText(source.phaseName ?? classification.phaseName, "classification.phaseName", 200),
+    serviceId: optionalText(source.serviceId, "classification.serviceId", 100),
+    serviceCode: optionalText(source.serviceCode, "classification.serviceCode", 64),
+    serviceName: optionalText(source.serviceName, "classification.serviceName", 200),
+    phaseId: optionalText(source.phaseId, "classification.phaseId", 100),
+    phaseCode: optionalText(source.phaseCode, "classification.phaseCode", 64),
+    phaseName: optionalText(source.phaseName, "classification.phaseName", 200),
   });
   const delivery =
     input.delivery && typeof input.delivery === "object" ? input.delivery : {};

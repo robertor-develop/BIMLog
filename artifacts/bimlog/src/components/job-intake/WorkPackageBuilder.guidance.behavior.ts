@@ -8,7 +8,7 @@ assert.match(source, /Work packages are optional/);
 assert.match(source, /package may contain several operational tasks/);
 assert.match(source, /paquete puede contener varias tareas operativas/);
 assert.match(source, /dimensionLabel/);
-assert.match(source, /value=\{value\}>\{dimensionLabel\(value\)\}/);
+assert.match(source, /value=\{value\}>\s*\{dimensionLabel\(value\)\}/);
 assert.match(source, /Remove work package/);
 assert.match(source, /Add operational task/);
 assert.match(source, /CELLAR_PB_SH_PRE_R0V0/);
