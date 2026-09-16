@@ -146,6 +146,7 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - The Platform and embedded workspaces use the same responsive three-pane presentation: filters, authoritative issue list, and selected-record details. Each data pane owns its overflow on desktop; narrow layouts stack without changing record or action semantics.
 - Filter and list widths are bounded browser-local preferences. Filters or the issue list may be collapsed and restored; these presentation preferences never enter BIMLog records, Navisworks metadata, synchronization payloads, or audit history.
 - Selecting an issue keeps its existing list card visible beside the unchanged detail surface. Identity, digest, XML, navigation, camera, sectioning, lifecycle, model binding, creation, publishing, attachments, and synchronization contracts remain protected.
+- Builds 6–10 improve discovery over the same authoritative issue array: normalized multi-term search, deterministic sorting, reset, truthful active/filtered/range counts, and bounded paging. Pagination never narrows synchronization scope, and selected server identity determines the visible page after view changes.
 
 ## Open items / known limitations
 - **Protected v1.60.7 physical-mutation baseline.** Later identity, lineage, import/rebind,

@@ -3,7 +3,7 @@
 ## Lens Next modernization — authorized 2026-09-15
 
 - [x] Builds 1–5: establish the responsive three-pane workspace, independent overflow ownership, bounded filter/list sizing, collapse/restore controls, browser-local preference persistence, and selected-card visibility without changing Lens authorities.
-- [ ] Builds 6–10: improve search, filters, sorting, counts, and large-collection navigation against the same authoritative issue set.
+- [x] Builds 6–10: improve search, filters, sorting, counts, and large-collection navigation against the same authoritative issue set.
 - [ ] Builds 11–15: modernize issue cards, verified thumbnail states, severity/status presentation, and list/table presentation without duplicating records.
 - [ ] Builds 16–20: compact selected-record overview, working-view actions, properties, model evidence, attachments, history, and controlled publishing.
 - [ ] Builds 21–25: issue creation/linking and synchronization preview, progress, per-record conflict, and recovery presentation.
