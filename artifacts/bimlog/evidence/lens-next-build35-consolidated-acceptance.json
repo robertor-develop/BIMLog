@@ -1,0 +1,31 @@
+{
+  "build": 35,
+  "date": "2026-09-16",
+  "implementationCommits": {
+    "build31": "0b98cf286699dd9fae80eeb96b95580d273a665b",
+    "build32": "5c13db193d6ef6a9005f1b107285658c436e71fc",
+    "build33": "bc146de1081ad3f0e77c2f895e68bb56aa85f6e6",
+    "build34": "d8491c306ce471dd618148dd915e9a16a1fb1bf9"
+  },
+  "gates": {
+    "lensNextBuilds31To34": "PASS",
+    "protectedLensNextBuild30": "PASS",
+    "protectedLensNextBuild10": "PASS",
+    "genericApuJobIntakeOperations": "PASS",
+    "livingBriefIntegrity": "PASS",
+    "trackedSecretExposure": "PASS",
+    "databaseSafety": "PASS",
+    "mojibake": "PASS",
+    "typescript": "PASS",
+    "productionBuild": "REQUIRES_CLEAN_COMMITTED_BUILD35_SOURCE"
+  },
+  "impact": {
+    "nativeChanged": false,
+    "databaseChanged": false,
+    "schemaChanged": false,
+    "customerDataChanged": false,
+    "versionChanged": false,
+    "pushed": false,
+    "published": false
+  }
+}

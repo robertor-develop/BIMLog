@@ -374,3 +374,10 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - Platform and Native agree that matching database and embedded digests are not, by themselves, cryptographic verification of an unversioned historical Visual Package. Acceptance requires independent recomputation or preserved canonical evidence that verifies the declared digest; otherwise the package remains quarantined with `historical_digest_evidence_unavailable`.
 - The P13 response-only authoritative-lineage normalization remains unchanged and cannot bypass digest integrity. Current/versioned packages, cross-project and model binding, unrelated or cyclic lineage, and genuine identity conflicts remain fail-closed.
 - Native source and the accepted N17-P12 packages remain byte-identical. P14 changes only Platform validation, its shared contract tests, visible Platform version metadata, and release governance.
+
+## Lens Next production-component acceptance — 2026-09-16
+
+- The modernization acceptance harness imports the production `LensNextPanelView`; its 100 synthetic records, desktop shell, and exact-390 shell are test-only and excluded from the production entry point.
+- Desktop selection preserves adjacent issue/detail panes. At widths up to 760px, a selected issue replaces the list until the user closes the detail, preventing long-list scrolling from separating the active viewpoint from its actions.
+- The selected issue identity and primary actions precede properties, linked records, attachments, and controlled publishing. Help-dialog focus entry, Escape dismissal, restoration, visible focus, reduced-motion handling, bilingual actions, pagination, and large-list containment are regression-owned.
+- These presentation and test changes do not alter Native or Platform identity contracts, camera/sectioning, XML serialization, digest enforcement, current/historical navigation rules, API behavior, database/schema, or stored evidence.

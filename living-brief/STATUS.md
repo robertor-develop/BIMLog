@@ -1748,3 +1748,10 @@ No release, publication, or overall completion claim is permitted until the reco
 - The operational list now contains active/current records only; full immutable revision history remains available through View History. Lens Next also uses compact independent list/detail scrolling and action-first selected details without removing capability.
 - Candidate identity is `v1.05.N17-P28`. Native, database/schema, customer data, Job Intake, and APU are unchanged. Push, publication, live ELARA verification, and external acceptance remain separate gates.
 - Governance freeze is reconciled through implementation commit `d1c45f209696f27bfe7e4aef3ea14ed984cf86e6`; this marker changes no runtime behavior.
+
+## Lens Next modernization Builds 31–35 — local acceptance — 2026-09-16
+
+- A test-only route imports the real `LensNextPanelView` with synthetic fixtures and remains absent from the production entry point. Chrome acceptance covers the 100-record desktop workspace and a true 390x844 iframe viewport without API calls or customer data.
+- Desktop keeps the issue browser and selected record adjacent with independent pane ownership and no horizontal overflow. At narrow widths, selection intentionally transitions from the list to the selected record so the active viewpoint header and actions are immediately available; Close returns to the list.
+- The acceptance pass corrected two presentation defects: unbounded mobile list-before-detail scrolling and an incomplete flex-order contract that placed properties before the selected viewpoint identity. It also adds Help-dialog focus entry, Escape dismissal, and focus restoration.
+- Builds 31–35 change no Lens identity, digest, XML, camera, sectioning, persistence, API route, Native code, database/schema, customer data, version, publication, or deployment state. Push/publication and deployed Navisworks acceptance remain separate explicit gates.

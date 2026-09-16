@@ -8,7 +8,8 @@
 - [x] Builds 16–20: compact selected-record overview, working-view actions, properties, model evidence, attachments, history, and controlled publishing.
 - [x] Builds 21–25: issue creation/linking and synchronization preview, progress, per-record conflict, and recovery presentation.
 - [x] Builds 26–30: responsive exact-390 rules, accessibility, bilingual modernization controls, large-list performance safeguards, and consolidated protected local regression.
-- [ ] Complete production-component desktop and exact-390px visual interaction review before release recommendation.
+- [x] Builds 31–35: test-only production-component harness; Chrome desktop acceptance; exact-390 English/Spanish acceptance and immediate mobile list-to-detail flow; keyboard/dialog accessibility; consolidated protected local regression.
+- [ ] Push and publish only after Roberto explicitly authorizes that separate release operation; then repeat acceptance against the deployed production surface and Navisworks host.
 
 ## Product-default configuration and Intake reconciliation — authorized 2026-09-15
 
