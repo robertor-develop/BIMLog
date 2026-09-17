@@ -28229,6 +28229,82 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a1f3591c9ab02c7a456304ef9641768656b044b2b4e2e5f227a473555fa29802"
+    },
+    {
+      "taskId": "lens-next-mockup-independent-block07-summary-table-20260917",
+      "reviewedThroughCommit": "3b5af9d14fa6089387776b3fafdef04cee616f4a",
+      "reviewedAt": "2026-09-17T13:58:34.000Z",
+      "status": "candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog issue records remain distinct from Native clash inventory and Saved Viewpoints."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing production component and excluded fixture retain their source and acceptance boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The separate visual, live-data, Native and release gates remain open."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved mockup-parity direction is unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, route, schema, persistence or Native bridge contract changed."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents issue-summary and table parity, provenance and image-reference limits."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated report or export is changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, edition, applicability or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local candidate and unclosed field gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Marks local Builds 31 to 35 and retains Blocks 8 to 10 and geometry proof."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records focused tests and actual component-fixture browser interactions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-issue-summary.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-issue-summary.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9277f6e65824b388dae5b593f29389dea574c64098061b8e1eb7d78a1ce6cdcf"
     }
   ]
 }

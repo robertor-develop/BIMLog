@@ -27,9 +27,13 @@ import type { LensNextIssueSort } from "./lens-next-model";
 import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
 import { lensNextSyncLabel, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance } from "./lens-next-sync-presentation";
 import { lensNextSelectionTarget, type LensNextSelectionDirection } from "./lens-next-selection-navigation";
+import { summarizeLensNextIssues } from "./lens-next-issue-summary";
 import { useI18n } from "../../lib/i18n";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
+const STATUS_LABELS_ES: Record<LensNextStatus, string> = {
+  open: "Abierta", follow_up: "Seguimiento", waiting_design: "En espera de diseño", approved: "Aprobada", resolved: "Resuelta",
+};
 
 function formatTimestamp(value: string | null): string {
   if (!value) return "Not recorded";
@@ -91,11 +95,11 @@ function Thumbnail({ issue }: { issue: LensNextIssue }) {
       <img
         className="lens-next__thumbnail"
         src={issue.screenshotUrl}
-        alt={`Verified capture for issue ${displayCode(issue)}`}
+        alt={`Captured image for issue ${displayCode(issue)}`}
         loading="lazy"
         onError={() => setLoadFailed(true)}
       />
-      <small className="lens-next__thumbnail-state">Verified capture</small>
+      <small className="lens-next__thumbnail-state">Captured image</small>
     </span>
   );
 }
@@ -225,10 +229,11 @@ const IssueTable = React.memo(function IssueTable({
   selectedServerId: number | null;
   onSelectIssue(serverId: number): void;
 }) {
+  const { tt } = useI18n();
   return (
     <div className="lens-next__issue-table-scroll">
       <table className="lens-next__issue-table">
-        <thead><tr><th>Issue</th><th>Priority</th><th>Status</th><th>Trade</th><th>Floor</th></tr></thead>
+        <thead><tr><th>{tt("Issue", "Incidencia")}</th><th>{tt("Priority", "Prioridad")}</th><th>{tt("Status", "Estado")}</th><th>{tt("Trade", "Disciplina")}</th><th>{tt("Floor", "Piso")}</th><th>{tt("Company", "Empresa")}</th><th>{tt("Report type", "Tipo de informe")}</th><th>{tt("Image", "Imagen")}</th></tr></thead>
         <tbody>
           {issues.map(issue => {
             const selected = issue.identity.serverId === selectedServerId;
@@ -239,6 +244,9 @@ const IssueTable = React.memo(function IssueTable({
                 <td><span className={`lens-next__status lens-next__status--${issue.status}`}>{STATUS_LABELS[issue.status]}</span></td>
                 <td>{issue.trade ?? "Not recorded"}</td>
                 <td>{issue.floor ?? "Not recorded"}</td>
+                <td>{issue.responsibleCompany ?? tt("Unassigned", "Sin asignar")}</td>
+                <td>{issue.reportType ?? tt("Not recorded", "Sin registrar")}</td>
+                <td>{issue.screenshotUrl ? tt("Image recorded", "Imagen registrada") : tt("Not recorded", "Sin registrar")}</td>
               </tr>
             );
           })}
@@ -518,6 +526,7 @@ export function LensNextPanelView({
   const selectedFilteredIndex = selectedIssue
     ? filteredIssues.findIndex(issue => issue.identity.serverId === selectedIssue.identity.serverId)
     : -1;
+  const issueSummary = React.useMemo(() => summarizeLensNextIssues(filteredIssues), [filteredIssues]);
   const navigateSelectedIssue = (direction: LensNextSelectionDirection) => {
     const target = direction === "previous" ? previousIssue : nextIssue;
     if (!target) return;
@@ -573,6 +582,20 @@ export function LensNextPanelView({
           <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,listCollapsed:!current.listCollapsed}))}>{workspaceLayout.listCollapsed?"Show issue list":"Hide issue list"}</button>
         </div>
       </div>
+
+      <section className="lens-next__record-summary" aria-label={tt("BIMLog issue record summary", "Resumen de incidencias BIMLog")}>
+        <strong>{activeIssueCount} {tt("active BIMLog issues", "incidencias BIMLog activas")}</strong>
+        <span>{issueSummary.total} {tt("match filters", "coinciden con filtros")}</span>
+        <span>{issueSummary.withImageReference} {tt("with image reference", "con referencia de imagen")}</span>
+        <details>
+          <summary>{tt("Status and evidence", "Estado y evidencia")}</summary>
+          <div className="lens-next__record-summary-detail">
+            {LENS_NEXT_STATUSES.map(status => <span key={status}>{tt(STATUS_LABELS[status], STATUS_LABELS_ES[status])}: {issueSummary.byStatus[status]}</span>)}
+            <span>{tt("Visual package available", "Paquete visual disponible")}: {issueSummary.withVisualPackage}</span>
+          </div>
+          <small>{tt("Counts describe filtered BIMLog issue records, not the Navisworks clash inventory or current page. An image reference does not guarantee the image can load.", "Los conteos describen incidencias BIMLog filtradas, no el inventario de interferencias de Navisworks ni la página actual. Una referencia de imagen no garantiza que pueda cargarse.")}</small>
+        </details>
+      </section>
 
       <div className={`lens-next__body${workspaceLayout.listCollapsed?" lens-next__body--list-collapsed":""}`} style={{"--lens-next-filter-width":`${workspaceLayout.filtersWidth}px`,"--lens-next-list-width":`${workspaceLayout.listWidth}px`} as React.CSSProperties}>
         <section className="lens-next__browser" aria-label="Issue browser and filters">

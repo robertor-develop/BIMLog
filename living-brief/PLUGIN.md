@@ -476,3 +476,15 @@ The exact-clash geometry gate for Blocks 3–4 remains open. This block changes 
 - Build 30: show only actual trade, floor, report type and responsible-company fields in the overview; explicitly state that clash pair, surrounding geometry, grid and distance require verified exact linkage. New overview and navigation language is English/Spanish; exact-390 wrapping avoids horizontal overflow.
 
 Local Chrome exercised the actual production `LensNextPanelView` through the excluded synthetic harness: missing image, a loaded test image asset, BIMLog Issue/Properties/Activity switching, next-issue reset, Spanish labels and exact-390 overflow report. The test asset is not a clash capture or a production record. Chrome screenshot capture timed out, so visual pixel acceptance remains open. No authenticated live project, Native connected behavior, 2021/2025 ZIP, release or publication is claimed.
+
+### Independent Block 7 Builds 31–35 — issue summary and table candidate — 2026-09-17
+
+This slice presents only authorized active BIMLog issue records already loaded by the existing Lens Next query. It does not merge Native Clash Detective results, imported clash reports or Saved Viewpoints by title, position or image similarity.
+
+- Build 31: calculate one deterministic status breakdown over the complete **filtered** issue collection, not the current 20/50/100-item page. Empty filters have zero counts.
+- Build 32: report image-reference and Visual Package availability separately. A stored screenshot URL is not proof that the image loaded; the visual package flag is not itself a cryptographic digest verdict.
+- Build 33: distinguish total active BIMLog issue count from filtered count, and label the expanded status/evidence breakdown as BIMLog issue records, not Navisworks clashes.
+- Build 34: make Table mode show responsible company, report type and whether an image reference is recorded, using only fields on each authorized issue. Card and Table continue to select the same immutable server ID.
+- Build 35: provide English/Spanish new labels, keep the summary compact by default, and constrain table overflow to its own horizontal surface at exact 390px while the page remains non-overflowing. Focused pure-summary tests cover total/status/evidence, filter recomputation and empty data.
+
+Local Chrome on the excluded fixture harness confirmed 100 active / 100 matching / 1 image reference; expanding status showed 25 Open, 25 Follow Up, 25 Waiting Design, 0 Approved and 25 Resolved. Filtering to Open changed the summary to 25 matching, 0 image references and 25 Visual Packages while preserving the 100 active denominator. Spanish Table mode exposed the new columns; the exact-390 shell reported no page horizontal overflow after opening the table. These are component-fixture interactions only. A saved image reference can still fail on actual download; Block 6 provides the explicit image-load error. Clash totals, geometry, grid and distance remain unavailable without exact provenance.
