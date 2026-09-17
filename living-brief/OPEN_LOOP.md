@@ -4,7 +4,8 @@
 
 - [x] Preserve the dirty responsible-company/schema work in its original worktree and prepare a separate clean committed-UI candidate; no production database migration is silently bundled.
 - [x] Verify the feasibility-only WebGL component has no production browser import and no new Native bridge command.
-- [ ] Re-test the corrected deterministic runtime assembler, full pre-push gate, production artifact, and protected Lens Next behaviors; independently review the exact diff and commit.
+- [x] Re-test the corrected runtime assembler: the exact package graph, hashes and closure validated in 496595 ms, below the unchanged 600-second bound.
+- [ ] Resolve the repeatable exact-artifact Windows startup miss (11.0/11.2 seconds against 8.0 seconds), then rerun the full pre-push gate and protected Lens Next behaviors; independently review the exact diff and commit. Do not simply increase or bypass the readiness budget.
 - [ ] Push the reviewed code-only candidate, align exact Replit source, check two-way development/production schema correspondence and no destructive changes, publish through Replit Shell/UI, and run authenticated Chrome smoke. An unavailable provider SQL preview is not by itself a blocker.
 - [ ] Separately finish and govern the responsible-company database/API change; complete real-clash 2021/2025 proof and Blocks 3–4 before claiming full mockup parity.
 
