@@ -28817,6 +28817,101 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "39b8587a431c2b76b669634ad03440e092af5d0d828fd356459405785412e440"
+    },
+    {
+      "taskId": "lens-next-p32-startup-timing-release-gate-20260917",
+      "reviewedThroughCommit": "e0cff43e7269ae03cd828ec6750cb9d1fab0f3c0",
+      "reviewedAt": "2026-09-17T18:37:49.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "run_local_validation",
+          "record_exact_gate_evidence"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "native_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "One warmed isolated exact-artifact run passed in 7555.4 ms under the unchanged 8000 ms Windows gate, but the full clean gate and live publication remain pending."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem product doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing clean release gates remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local artifact proof does not substitute for live acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Opt-in timing and test output do not change schema, API routes, or platform structure."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and 3D gates remain open without plugin work."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact or export changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact bounded P32 startup proof and limitations."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps full gate, publication, and field acceptance open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserves opt-in timing and no-DROP review evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "788adafbf17db5b020418b205b8e0434087564da54e3507a18cdd28762233cad"
     }
   ]
 }

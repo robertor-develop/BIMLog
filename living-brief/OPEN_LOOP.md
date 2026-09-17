@@ -2809,3 +2809,8 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Build 9 local contract gate: in-memory package identity/provenance and size guards exist; production authorization, transport and persistence are not implemented.
 - [ ] Build 10 interactive gate: an unmounted WebGL2 candidate and synthetic validator/navigation tests now exist; render the **real** bounded package on desktop/mobile, visually test orbit/focus/expansion, measure payload and latency, and compare against Navisworks. No synthetic-only pass may close this gate. The component is not wired to production and no browser visual acceptance is claimed.
 - [ ] Do not start production bridge/UI integration Blocks 3–4 or publish a Native ZIP until Builds 8 and 10 provide the approved real-clash feasibility result.
+
+## P32 bounded release gates — 2026-09-17
+
+- [ ] Repeat the exact clean pre-push gate after reconciliation; a single warmed standalone Windows artifact result of 7555.4 ms is below the unchanged 8000 ms gate but has narrow margin. Do not represent it as production readiness by itself.
+- [ ] Complete independent source/schema/no-DROP review, exact-commit push, MAIN-only Replit Shell synchronization and publication, then live Chrome smoke. Keep Native 3D and responsible-company/schema fixes outside P32; they need their own verified releases.
