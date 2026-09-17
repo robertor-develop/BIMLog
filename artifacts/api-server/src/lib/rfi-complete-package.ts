@@ -6,7 +6,6 @@ import { spawn, type ChildProcess } from "child_process";
 import { pathToFileURL } from "url";
 import AdmZip from "adm-zip";
 import { Document, Packer, Paragraph, TextRun } from "docx";
-import { createCanvas, loadImage } from "@napi-rs/canvas";
 import { PDFArray, PDFDocument, PDFName } from "pdf-lib";
 import sharp from "sharp";
 import * as XLSX from "xlsx";
@@ -566,6 +565,7 @@ async function normalizeImagePage(fileName: string, buffer: Buffer, crop: Comple
     const warnings: string[] = [];
     let decodedBuffer = buffer;
     if (extension(fileName) === "bmp") {
+      const { createCanvas, loadImage } = await import("@napi-rs/canvas");
       const bitmap = await loadImage(buffer);
       if (!bitmap.width || !bitmap.height || bitmap.width * bitmap.height > MAX_IMAGE_PIXELS) throw new Error("invalid BMP dimensions");
       const canvas = createCanvas(bitmap.width, bitmap.height);

@@ -7,7 +7,6 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { getDefaultValue } from "../middlewares/config-validator";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { boundedMultipart, createMemoryUpload } from "../middlewares/multipart";
-import { PDFParse } from "pdf-parse";
 import * as XLSX from "xlsx";
 
 const router: IRouter = Router();
@@ -609,6 +608,7 @@ router.post(
       const pdfTexts: string[] = [];
       for (const f of files.pdf || []) {
         try {
+          const { PDFParse } = await import("pdf-parse");
           const parser = new PDFParse({ data: new Uint8Array(f.buffer) });
           const result = await parser.getText();
           const txt = ((result as { text?: string }).text ?? "").trim();
@@ -974,6 +974,7 @@ router.post(
       const pdfTexts: string[] = [];
       for (const f of files.pdf || []) {
         try {
+          const { PDFParse } = await import("pdf-parse");
           const parser = new PDFParse({ data: new Uint8Array(f.buffer) });
           const result = await parser.getText();
           const txt = ((result as { text?: string }).text ?? "").trim();

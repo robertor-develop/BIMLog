@@ -15,7 +15,6 @@ import { eq, desc } from "drizzle-orm";
 import { authMiddleware, requirePermission, requireProjectMember } from "../middlewares/auth";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { singleFileUpload } from "../middlewares/multipart";
-import { PDFParse } from "pdf-parse";
 import * as XLSX from "xlsx";
 import { canonicalSpreadsheetReadOptions } from "@workspace/api-zod";
 import { randomUUID } from "crypto";
@@ -55,6 +54,7 @@ function detectFileType(filename: string): string {
 async function extractText(buffer: Buffer, fileType: string): Promise<string> {
   if (fileType === "pdf") {
     try {
+      const { PDFParse } = await import("pdf-parse");
       const parser = new PDFParse({ data: new Uint8Array(buffer) });
       const result = await parser.getText();
       return ((result as { text?: string }).text ?? "").trim();

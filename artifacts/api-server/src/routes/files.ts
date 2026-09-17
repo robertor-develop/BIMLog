@@ -9,7 +9,6 @@ import { ListFilesParams, UpdateFileParams, UpdateFileBody, DeleteFileParams } f
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
 import { getDefaultValue, validateConfigValue } from "../middlewares/config-validator";
 import { storage } from "../lib/storage-adapter";
-import { PDFParse as PDFParseClass } from "pdf-parse";
 import {
   PALETTE,
   REPORT_THEMES,
@@ -24,6 +23,7 @@ import {
 import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 
 async function pdfParse(buffer: Buffer) {
+  const { PDFParse: PDFParseClass } = await import("pdf-parse");
   const parser = new PDFParseClass({ data: buffer, verbosity: 0 });
   const result = await parser.getText();
   await parser.destroy();

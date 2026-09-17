@@ -3,7 +3,7 @@ import AdmZip from "adm-zip";
 import PDFDocument from "pdfkit";
 import sharp from "sharp";
 import { AlignmentType, Document, ExternalHyperlink, Footer, HeadingLevel, ImageRun, PageNumber, Packer, Paragraph, Table, TableCell, TableRow, TextRun, WidthType } from "docx";
-import ExcelJS from "exceljs";
+import type ExcelJS from "exceljs";
 import { FEEDBACK_MAX_FILE_BYTES, FEEDBACK_RELEASE } from "./feedback-evidence-contract";
 import { FEEDBACK_CUSTOMER_EVENT_TYPES } from "./feedback-follow-up";
 
@@ -199,6 +199,7 @@ async function createHumanDocx(manifest: Record<string, any>, evidence: Array<Fe
 }
 
 async function createFeedbackWorkbook(manifest: Record<string, any>, evidence: Array<FeedbackPackageAsset & { downloadUrl: string | null; reviewUrl: string }>, manifestSha256: string): Promise<Buffer> {
+  const { default: ExcelJS } = await import("exceljs");
   const workbook = new ExcelJS.Workbook();
   workbook.creator = "BIMLog by IgniteSmart"; workbook.title = `${manifest.feedback.stableId} Feedback Follow-up`; workbook.subject = `Feedback ${manifest.feedback.stableId} · ${manifest.release}`;
   const brand = "1F4E78", accent = "DDEBF7", grid = "B8C4D2";
