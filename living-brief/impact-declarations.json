@@ -27466,6 +27466,112 @@
         "scripts/test-database-safety.mjs"
       ],
       "reviewedChangeSha256": "3b66cd8de2506c4d35a98706c58b9950e62b1169c64b86ddc0b5d6e66daba4aa"
+    },
+    {
+      "taskId": "bimlog-orval-critical-publication-correction-20260917",
+      "reviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
+      "reviewedAt": "2026-09-17T05:21:04Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "local_dependency_correction",
+          "frozen_install",
+          "read_only_replit_diagnostics",
+          "local_build_validation"
+        ],
+        "operatorOnly": [
+          "independent_release_acceptance",
+          "authorized_replit_publish",
+          "customer_field_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The Replit publish preflight found eleven critical advisories in the pinned development-only Orval generator; the local patched dependency candidate is not yet published."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The security fix requires a reviewed source commit, clean Replit synchronization, renewed security and schema gates, and a separately verified publication."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded dependency update changes no permanent product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing publish supply-chain gates already govern this corrective dependency update."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing security quality and release evidence rules already cover this correction."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The product vision and roadmap are unaffected by the build-time generator version."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No deployed runtime component or structural architecture changes in this candidate."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks source, package, installation, or field behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout, artifact format, or document identity changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, applicability rule, or compliance claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact critical dependency finding, local patched candidate, and unpublished state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks remaining independent review, source release, Replit publication, and live-smoke gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The candidate remains unaccepted and no append-only historical audit event is asserted."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "lib/api-spec/package.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "pnpm-lock.yaml"
+      ],
+      "reviewedChangeSha256": "82091f60fec7fa2dc074da3997cdf9ef43ae5a669e1739058894f8577b5a0a68"
     }
   ]
 }

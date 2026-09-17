@@ -2759,3 +2759,11 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Verify the local autosave error-banner recovery in a fresh published Chrome run; the local candidate clears only the prior matching autosave error after a successful retry.
 - [x] Run a read-only verified-production suspect inventory without exporting customer rows: two frozen work items across two projects match the total-equals-unit-rate filter, including QA project #50. The matches are not classified as billing errors.
 - [ ] Have the appropriate owner review each suspect record and its original pricing intent before any remediation claim or financial action. Preserve immutable baselines; do not repair by overwriting history.
+
+## Publication dependency-security gate — 2026-09-17
+
+- [x] Reproduce the critical Replit finding with the frozen lockfile and identify `orval` 8.5.3 as the affected development-only OpenAPI generator; confirm the maintainer-patched version and preserve the complete unrelated override set.
+- [x] Pin `orval` 8.22.0, regenerate only its dependency closure, complete a frozen local install, and confirm zero critical findings in a fresh advisory audit. This is a local candidate, not release approval.
+- [ ] Inspect the exact package/lockfile semantic delta, run the complete local gate and affected generator check, obtain independent acceptance, commit and push the reviewed source, then synchronize exact clean source through Replit Shell without Replit Agents.
+- [ ] Repeat the Replit build, schema-correspondence/no-drop check, security scan, and guarded publication; do not disable or bypass Replit's security protections or copy development data over production.
+- [ ] After a verified publication, run the full authenticated Chrome Job Intake/APU/Operations smoke with a fresh sample job and record every unexercised permission, finance, multi-user, artifact, and Lorena field gate honestly.
