@@ -2743,14 +2743,15 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Compare all existing production columns, indexes, and constraints with Helium development using read-only catalogs; reconcile the six exact differences only in development.
 - [x] Bind SharePoint folder `NULLS NOT DISTINCT` uniqueness to the declarative schema and make full production-object preservation an executable pre-preview regression.
 - [ ] Pass the complete governed pre-push gate, record the corrected source commit, push it, and synchronize exact GitHub `master` in Replit Shell.
-- [ ] Capture Replit's complete provider deployment preview and prove zero destructive statements with the governed backup, inventory, and count evidence before Publish. A standalone Drizzle preview against production does not substitute for provider proof.
-- [ ] Publish once if the provider preview is safe; verify exact live identity, health, authenticated Lorena/Intake/Operations paths, persistence, and unaffected baseline workflows in Chrome. External Lorena/Ruben field acceptance remains separate.
+- [x] Correct the five production `NOT VALID` foreign keys through zero-violation `VALIDATE CONSTRAINT` only; Replit Shell exact schema correspondence now passes with 211 tables, 1,161 constraints, 542 indexes, and 2,927 columns. No DROP or customer-row change occurred.
+- [ ] From exact pushed source, rerun two-way development/production schema correspondence and the no-new-DROP source gate. Inspect any actual Replit migration warning; an unavailable SQL preview is not a gate.
+- [ ] Publish once after the correspondence and no-drop checks pass; verify exact live identity, health, authenticated Lorena/Intake/Operations paths, persistence, and unaffected baseline workflows in Chrome. External Lorena/Ruben field acceptance remains separate.
 
 ## Roberto live Job Intake / APU regression — 2026-09-16
 
 - [x] Reproduce the total-sale-as-unit-rate defect in a named live QA project: $6,000 APU sale × 80 hours produced $480,000 Operations value.
 - [x] Correct all known local APU binding paths to preserve the Contract Item's independently entered unit rate and keep the saved APU version reference.
-- [ ] Complete whole-product build and independent review of the local correction, then MAIN-only governed push/Replit Shell synchronization, zero-drop preview, and publish.
+- [ ] Complete whole-product build and independent review of the local correction, then MAIN-only governed push/Replit Shell synchronization, exact schema/no-drop verification, and publish.
 - [ ] Re-run a fresh named live job after publication; verify $75 × 80 = $6,000 across Intake, contract, Operations, reporting, refresh, and exports. Preserve project 50 as failed QA evidence; do not freeze its erroneous baseline.
 - [ ] Diagnose missing catalog options using read-only production API/database evidence, then populate/govern the correct authority without blind production seeding; verify Lorena's company-scoped PMO access with her existing account.
 - [ ] Fix and retest intermittent Intake error toast, classification filters, approved-budget path under a genuinely authorized finance user, and multi-user assignment/redelegation under eligible existing users. Do not invent people or financial approvals.

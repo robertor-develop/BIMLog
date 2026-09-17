@@ -359,7 +359,7 @@ function validateCatalogAndFreshness() {
   }
   const toolBoundary = catalog.toolResponsibilityBoundary;
   if (!toolBoundary || Object.values(toolBoundary).length !== 4 || Object.values(toolBoundary).some((value) => value !== true)) {
-    report("living-brief/catalog.json", "tool responsibility boundary must keep source/Git work local and Replit limited to verified pull, preview, approved publish, and runtime verification");
+    report("living-brief/catalog.json", "tool responsibility boundary must keep source/Git work local and Replit limited to verified pull, schema correspondence, approved publish, and runtime verification");
   }
   const defensiveSecurityPolicy = catalog.defensiveSecurityExecutionPolicy;
   const defensiveSecurityControls = [

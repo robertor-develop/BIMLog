@@ -2,8 +2,9 @@
 
 ## Safety decision
 
-**Status: human-gated; Replit-managed database migration authority is not proven
-removable.**
+**Status: Roberto's September 17 rule is exact development/production schema
+correspondence and no destructive database changes. A provider SQL preview is not
+a mandatory prerequisite when Replit does not offer one.**
 
 Replit's current documentation says that every Replit App has development and
 production databases and that structural development changes, including deleted
@@ -19,11 +20,10 @@ cannot be safely inferred or changed from repository configuration. Removing eit
 entry is therefore unsupported and prohibited without separate Replit confirmation
 and a disposable proof.
 
-The preferred architecture remains compute-only Replit publishing with schema
-authority exclusively in governed BIMLog migrations. That architecture is not
-currently proven available. Until it is, every Publish is a human-gated database
-operation. Replit may apply schema before the repository build runs, so a passing
-root build cannot stop a Publish that has already begun.
+Replit may apply schema before the repository build runs, so a passing root build
+cannot stop a Publish that has already begun. Require exact source identity,
+read-only schema correspondence, and the existing destructive-SQL source gate
+before each Publish. Keep development-data copying off.
 
 ## Source-authority incident
 
@@ -128,61 +128,28 @@ It then synchronizes Helium and performs a read-only table/index parity check. I
 never synchronizes production. The current review did not run this command and did
 not access either database.
 
-## Complete preview and additive inventory
+## Exact schema correspondence and no-drop release check
 
-After guarded Helium parity, regenerate the Replit deployment preview. It may be
-empty or contain only explicitly inventoried additive statements required by the
-accepted master. It must contain:
+From the exact clean source in Replit Shell, run the read-only
+`BIMLOG_SCHEMA_TARGET=development pnpm --filter @workspace/db run check:parity`.
+It must compare both directions for all public tables, columns, indexes, and
+constraints, including constraint validation state. Counts alone do not pass.
+Run the existing database-safety source check and verify the release introduces
+no `DROP`, `CASCADE`, `TRUNCATE`, RLS disable, or unexplained object removal in
+production migration paths. Do not copy development data to production.
 
-- zero `DROP`;
-- zero `CASCADE`;
-- zero `TRUNCATE`;
-- zero RLS disable;
-- zero unexplained constraint, policy, column, table, or index removal.
-
-Copy the complete SQL to a file. Create an external JSON inventory with:
-
-- `completePreview: true`;
-- exact `acceptedCommit`;
-- `sourceContractSha256`;
-- `previewSha256`;
-- ordered `additiveStatementSha256` values;
-- `backupRestorePointVerified: true`;
-- SHA-256 of the exact pre-publication affected-table record-count manifest;
-- `postRecordCountVerificationRequired: true`.
-
-Then run:
-
-```bash
-node scripts/check-database-safety.mjs \
-  --preview generated-migration.sql \
-  --complete-preview \
-  --additive-inventory generated-migration.inventory.json
-```
-
-An empty complete preview needs no additive inventory. A missing, partial, truncated,
-or unhashable preview or deployment log blocks Publish. Every non-empty statement
-must be additive and match the inventory byte-for-byte. There is no
-approval-by-warning.
+If Replit actually presents migration SQL or a destructive-operation warning,
+inspect it and stop on any DROP or unexplained change. Do not invent a preview
+artifact or block an otherwise passing code-only release because Replit did not
+offer one. A proposed standalone Drizzle plan is diagnostic evidence, not an
+assertion about the provider's action.
 
 ## Mandatory production controls
 
-Before a schema Publish, the owner must explicitly approve the exact accepted
-commit and:
-
-1. verify a restorable backup/restore point;
-2. create a read-only exact pre-publication record-count manifest for every affected
-   production table;
-3. archive the commit-bound source, Helium parity, complete-preview, and additive
-   inventory evidence;
-4. use a deployment preview for bounded product validation;
-5. approve Publish only after zero destructive or unexplained statements are proven.
-
-After Publish, archive the complete deployment log, attest the deployed commit, and
-create the exact post-publication record-count manifest for the same tables. Any
-count change must be explained by an approved additive migration or the release is
-an incident. If the complete generated SQL or complete deployment log cannot be
-obtained, do not Publish.
+After Publish, verify exact live source identity, health, representative
+authenticated behavior, and read-only production schema correspondence again.
+If the provider reports an unexpected schema change, stop further releases and
+investigate it without approving destructive repair.
 
 ## September 16, 2026 publication incident and verified lessons
 
@@ -200,9 +167,10 @@ and eight `DROP INDEX` statements. That output was **not** Replit's provider
 Publish plan and could neither prove a destructive provider migration nor approve
 publication. A Publish action in the Replit UI was not preview-only: the first
 click prepared, built, and promoted the release automatically. A complete provider
-migration SQL preview was not obtained before that click. This was an exception to
-the pre-publication gate above, not evidence that the gate may be skipped. Do not
-assume that click is a harmless way to obtain a migration preview. Keep Replit's
+migration SQL preview was not obtained before that click. The historical preview
+requirement was superseded by Roberto's September 17 instruction: exact database
+schema correspondence and no drops, without an invented preview prerequisite.
+Do not assume that click is a harmless way to obtain a migration preview. Keep Replit's
 "Copy your development database to production database" option off unless
 Roberto expressly authorizes replacing production data.
 
@@ -227,6 +195,6 @@ alone. Use Replit Shell for read-only inspection and build/source verification,
 not as a workaround for a denied safety action. After publication, verify the
 deployment identity, live health, authenticated representative workflows, and
 production data/schema preservation. No Replit Agent was used in this incident.
-Before the next release, establish a supported non-destructive provider publish
-mechanism with a complete actual migration plan, or obtain exact data-preservation
-evidence sufficient for the existing gate; do not infer either from this incident.
+Before the next release, rerun exact source, schema-correspondence, and no-drop
+checks on the current candidate. Do not treat an unavailable provider preview as
+a separate stop condition.

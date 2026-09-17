@@ -282,15 +282,17 @@ remains human-gated: never claim the root build can stop schema work that Replit
 
 Before Helium synchronization or Publish, freshly read remote `refs/heads/master`, `origin/master`, clean local
 `master`, and `HEAD` must match exactly. The older remote default `main`, a cached deployment snapshot, detached stale
-source, dirty workspace, truncated log, or incomplete SQL preview blocks the operation. Inventory and preserve
+source, or dirty workspace blocks the operation. Inventory and preserve
 workspace-only files before any source repair; use only reviewed fast-forward operations and never overwrite or reset
 unreviewed work.
 
 Development sync is limited to an explicitly identified Replit Helium database that differs from the governed runtime
-production identity. A non-empty regenerated preview may contain only hash-inventoried additive statements required by
-the accepted master, with zero DROP, CASCADE, TRUNCATE, RLS disable, or unexplained removal. Every future schema
-publication requires a verified restore point, exact pre-publication affected-table counts, explicit owner approval,
-the complete deployment log, exact deployed-commit attestation, and matching post-publication counts.
+production identity. Before Publish, run the read-only exact two-way schema correspondence check for development
+and production tables, columns, indexes, and constraints, including validation state, and require no new DROP,
+CASCADE, TRUNCATE, RLS disable, or unexplained removal in production migration sources. If Replit actually displays
+migration SQL or a destructive warning, inspect it and stop on any drop. Roberto's September 17 instruction removed
+the invented requirement to obtain a complete provider SQL preview when Replit does not offer one. After Publish,
+verify the exact deployed commit, live health, and production schema correspondence.
 
 This monorepo's sole pnpm override authority is `pnpm-workspace.yaml`. Never add a competing root
 `package.json` `pnpm.overrides` block. A targeted security fix preserves the complete existing override/exclusion set
@@ -312,7 +314,7 @@ commit instead of appending a cleanup commit.
 Codex/controlled local clean worktrees own source investigation/edits, dependency and lockfile changes,
 tests/evidence, clean commits, independent review/integration/normal GitHub push, Living Brief semantics, and
 package/plugin builds and reviewed artifacts. Replit owns only pulling an already verified/pushed `origin/master`,
-showing the actual publish migration preview, publishing after explicit approval, runtime health/log verification,
+running the read-only exact schema check, inspecting any migration warning actually presented, publishing after explicit approval, runtime health/log verification,
 explicitly authorized read-only production diagnostics, and the complete terminal deployment summary.
 
 By default Replit performs no source fix, dependency edit, lockfile regeneration, Git surgery/rebase/ref movement,
@@ -413,7 +415,7 @@ independent rollout verification.
 - Every genuine terminal outcome requires the explicitly requested sanitized Telegram notification and an
   exact summary of commit, evidence, delivery/publish state, remaining gates, and failures. Ready is not Completed.
 - Replit instructions inspect current workspace and schema state, forbid destructive publish SQL, avoid
-  interrupted-history guesses, and separate build, schema preview, publish, and live verification. Production
+  interrupted-history guesses, and separate build, schema correspondence, publish, and live verification. Production
   or customer access, mutation, publish, deployment, and external contact require explicit authority.
 
 ## Explicit authorization boundaries

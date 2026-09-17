@@ -27355,6 +27355,117 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "f5e7f07b90eb7a780cca2f0117cc9ff065bb186e267f9cc3dfd5250d876e811f"
+    },
+    {
+      "taskId": "bimlog-owner-publication-rule-correction-20260917",
+      "reviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "reviewedAt": "2026-09-17T04:26:25Z",
+      "trigger": "roberto_explicit_no_preview_rule_and_schema_correspondence",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "source_review",
+          "read_only_replit_schema_comparison",
+          "living_brief_reconciliation"
+        ],
+        "operatorOnly": [
+          "production_schema_validation",
+          "replit_publish",
+          "live_customer_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The mandatory provider SQL preview was not available in the current Replit publish flow and contradicted Roberto's schema-correspondence and no-drop release instruction."
+        },
+        {
+          "category": "repeated_permanent_instruction",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "claude",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Remove the unsupported preview prerequisite so future code-only BIMLog releases rely on exact schema correspondence and no-drop verification instead of repeated approval loops."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing no-unrequested-gates doctrine already places Roberto's explicit instruction first."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Replaced the mandatory preview wording with exact schema correspondence and no-drop release behavior."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-quality acceptance or evidence standard was altered by this release-rule correction."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The product roadmap and market direction are not changed by database gate repair."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The parity script compares catalog objects more completely but does not change runtime architecture."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Navisworks source, package, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated report format or document identity changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata, applicability, or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the five constraint validations, renewed schema correspondence, and unpublished release status."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Replaces the unsupported preview hold with current parity, no-drop, publish, and live checks."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only history remains intact and the current correction is recorded in status."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "docs/deployment/DATABASE_MIGRATION_SAFETY.md",
+        "lib/db/scripts/check-schema-parity.mjs",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/catalog.json",
+        "living-brief/impact-declarations.json",
+        "scripts/check-living-brief.mjs",
+        "scripts/test-database-safety.mjs"
+      ],
+      "reviewedChangeSha256": "3b66cd8de2506c4d35a98706c58b9950e62b1169c64b86ddc0b5d6e66daba4aa"
     }
   ]
 }

@@ -29,7 +29,7 @@
   },
   "toolResponsibilityBoundary": {
     "controlledLocalOwnsSourceDependencyEvidenceCommitReviewAndPush": true,
-    "replitOwnsVerifiedPullPreviewApprovedPublishAndRuntimeVerification": true,
+    "replitOwnsVerifiedPullSchemaCorrespondenceApprovedPublishAndRuntimeVerification": true,
     "replitDiagnoseThenStopOnSourceCorrection": true,
     "exceptionRequiresRobertoScopedApprovalAfterPreflight": true
   },

@@ -29,6 +29,7 @@ assert.deepEqual(
 );
 
 const productionCatalog = {
+  tables: [{ name: "records" }],
   constraints: [{ table_name: "records", name: "records_owner_fk", definition: "FOREIGN KEY (owner_id) REFERENCES users(id) NOT VALID" }],
   indexes: [{ table_name: "records", name: "records_owner_idx", definition: "CREATE INDEX records_owner_idx ON public.records USING btree (owner_id)" }],
   columns: [{ table_name: "records", column_name: "owner_id", data_type: "integer", is_nullable: "NO", column_default: null }],
@@ -37,6 +38,7 @@ assert.deepEqual(evaluateProductionPreservation(productionCatalog, productionCat
 assert.deepEqual(
   evaluateProductionPreservation(
     {
+      tables: [{ name: "records" }],
       constraints: [{ ...productionCatalog.constraints[0], definition: "FOREIGN KEY (owner_id) REFERENCES users(id)" }],
       indexes: [],
       columns: [{ ...productionCatalog.columns[0], is_nullable: "YES" }],
@@ -48,6 +50,13 @@ assert.deepEqual(
     "missing production index records.records_owner_idx in development",
     "changed production column records.owner_id in development",
   ],
+);
+assert.deepEqual(
+  evaluateProductionPreservation(
+    { ...productionCatalog, tables: [...productionCatalog.tables, { name: "extra" }] },
+    productionCatalog,
+  ),
+  ["development-only table extra"],
 );
 
 assert.throws(() => validateReconciliationTargets({ BIMLOG_SCHEMA_TARGET: "production", DATABASE_URL: "postgres://x.helium/y", PROD_DATABASE_URL: "postgres://prod/z" }));

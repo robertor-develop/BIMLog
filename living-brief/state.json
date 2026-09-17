@@ -1,18 +1,25 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-  "catalogSha256": "7091c358891897fcc3d0bc56e844888d63efdf3f0c521e55350e2b559bed57cb",
-  "bundleSha256": "0e6190c60a3c55b839de7309ec43a589ce8eacea9f848523da38544d3d9f40cd",
+  "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+  "catalogSha256": "dd06dabab219a2560cc1e9d7af545733b75668669d2b85ee14c4e6342ccc5275",
+  "bundleSha256": "73dbc95edc32268f38bdb14d3a6b4eaf4f8662142b4edcb9cc113685f7425feb",
   "impact": {
-    "baselineCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
+    "baselineCommit": "347ca27f534e6e6619679534b44b15471faacada",
     "changedPaths": [
+      "docs/deployment/DATABASE_MIGRATION_SAFETY.md",
+      "lib/db/scripts/check-schema-parity.mjs",
+      "living-brief/CLAUDE.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json"
+      "living-brief/catalog.json",
+      "living-brief/impact-declarations.json",
+      "scripts/check-living-brief.mjs",
+      "scripts/test-database-safety.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -23,23 +30,23 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "e45f5a10815e7edd4af5607c553a4f67ce4a7f9beec532f2e45b44dcf8500aab",
-      "sourceChangedAt": "2026-08-20T14:09:55-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "sha256": "d8f74e7678b4ffcc53a29c17c13a806213887cf7989bc80c985d9903e70e0074",
+      "sourceChangedAt": "2026-09-17T04:26:25.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "quality",
@@ -47,11 +54,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "vision",
@@ -59,11 +66,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "platform",
@@ -71,11 +78,11 @@
       "sha256": "6bc2d1fbbbd4be0cb626f3cb3a4644505c4693fe7cfb80106a27830cb3b6548d",
       "sourceChangedAt": "2026-09-16T22:03:57-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "plugin",
@@ -83,11 +90,11 @@
       "sha256": "257a37f8e55a4518634e1adbfdffff1da19c7ea3a7cad9116690d9f8451a8c98",
       "sourceChangedAt": "2026-09-16T01:13:05-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "report_design_system",
@@ -95,11 +102,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "standards_register",
@@ -107,35 +114,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "f35f8f166a0397113ebc4e128c1ad4814d4c263cd9af26ecd990de8d5b5de395",
-      "sourceChangedAt": "2026-09-17T02:15:21.000Z",
+      "sha256": "76f765665aeb9a9f84cb684b81c9c7540277165ac17919bfa8b33df90f4eaf8d",
+      "sourceChangedAt": "2026-09-17T04:26:25.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "a647b89e7b4b31f96fe26cfa6c45265683ad76114db946e36f8f690fba3faccf",
-      "sourceChangedAt": "2026-09-17T02:15:21.000Z",
+      "sha256": "c168d0786eb870a91b97ea51b51eb4a65c81ba5c6e3b56ee0852c9aed51ac9dd",
+      "sourceChangedAt": "2026-09-17T04:26:25.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     },
     {
       "key": "audit",
@@ -143,11 +150,11 @@
       "sha256": "0eaca5046facd3f8d4eb7cf7a5626e66b99c493d5fde75993e0061ae498ad691",
       "sourceChangedAt": "2026-09-15T16:28:53-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewedThroughCommit": "519faf5b644c57dd71112318532c2a4da70f01ab",
-      "semanticReviewTask": "roberto-intake-production-suspect-inventory-20260916",
+      "reconciledThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewedThroughCommit": "347ca27f534e6e6619679534b44b15471faacada",
+      "semanticReviewTask": "bimlog-owner-publication-rule-correction-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T02:15:21Z"
+      "semanticReviewedAt": "2026-09-17T04:26:25Z"
     }
   ]
 }
