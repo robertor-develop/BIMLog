@@ -183,3 +183,43 @@ create the exact post-publication record-count manifest for the same tables. Any
 count change must be explained by an approved additive migration or the release is
 an incident. If the complete generated SQL or complete deployment log cannot be
 obtained, do not Publish.
+
+## September 16, 2026 publication incident and verified lessons
+
+The Replit Shell `DATABASE_URL` targeted the separate Helium development database.
+`PROD_DATABASE_URL` resolved to the same Neon host and database shown in Replit's
+managed Production Database connection details. That target was BIMLog's live
+production database, not disposable preview data. Read-only comparison found 211
+public tables, 2,927 columns, 1,161 constraints, and 542 indexes in each database.
+The column-name/type/default/nullability and index definitions matched, but six
+constraints with matching definitions were `NOT VALID` in production and valid in
+development. Equal object counts therefore did not establish exact schema parity.
+
+A separate Drizzle source-to-production preview proposed 128 `DROP CONSTRAINT`
+and eight `DROP INDEX` statements. That output was **not** Replit's provider
+Publish plan and could neither prove a destructive provider migration nor approve
+publication. A Publish action in the Replit UI was not preview-only: the first
+click prepared, built, and promoted the release automatically. Do not assume that
+click is a harmless way to obtain a migration preview. Keep Replit's "Copy your
+development database to production database" option off unless Roberto expressly
+authorizes replacing production data.
+
+The published source tree was the already-pushed GitHub `origin/master` commit
+`8ee7bb16193995380d4886d66b2e28f94d276f71`; the Replit deployment receipt
+was `c1aca811`. Replit also created an empty local publication commit, but its
+GitHub push failed authentication. The source commit was already on GitHub; the
+publication receipt commit was not proven pushed. Live `/api/v1/healthz` returned
+`{"status":"ok"}`; authenticated Chrome loaded the dashboard, an existing QA
+project's analytics, and company master-catalog data. Post-publication production
+schema counts remained 211/2,927/1,161/542. The visible application label still
+showed `v1.05.N17-P31`; report the deployment receipt and exact source identity
+separately from a stale display label. These checks do not, by themselves, prove
+every user workflow or customer acceptance.
+
+For future releases, establish the exact source, runtime, database identities,
+and schema/object differences before a provider action; do not substitute a
+Drizzle preview for the provider's actual action or infer safety from counts
+alone. Use Replit Shell for read-only inspection and build/source verification,
+not as a workaround for a denied safety action. After publication, verify the
+deployment identity, live health, authenticated representative workflows, and
+production data/schema preservation. No Replit Agent was used in this incident.
