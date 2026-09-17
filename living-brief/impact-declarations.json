@@ -29007,6 +29007,101 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "fbc4d1d74013847b19ae0d5b732111653e8d793e25e8283e77638454f36baef0"
+    },
+    {
+      "taskId": "lens-next-p32-startup-diagnostic-cleanup-20260917",
+      "reviewedThroughCommit": "f2769d615f3fb62fc39142155658f9367c36aa49",
+      "reviewedAt": "2026-09-17T19:14:50.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "run_local_validation",
+          "record_exact_gate_evidence"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "native_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "A focused source regression caught temporary queue instrumentation; original serialized startup form was restored and its seven checks now pass."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The clean release gate remains mandatory."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The focused startup guard supplements the artifact gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The original queue contract was restored; no schema or route changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and 3D gates remain open."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering behavior changed in this cleanup."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records optimized timings and the focused regression correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Requires an exact-head repeat after diagnostic removal."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserves the protected queue finding and correction."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "461bc05a4bc37d5ccc4cf94d3d68ba55acc5ca9ed72583d3593bc36c49b3b8bb"
     }
   ]
 }
