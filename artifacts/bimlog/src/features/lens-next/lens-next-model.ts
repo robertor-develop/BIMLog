@@ -391,6 +391,17 @@ export function filterLensNextIssues(
       return false;
     if (filters.priority !== "all" && issue.priority !== filters.priority)
       return false;
+    if (filters.responsibleCompany !== "all" && normalized(issue.responsibleCompany) !== normalized(filters.responsibleCompany))
+      return false;
+    if (filters.reportType !== "all" && normalized(issue.reportType) !== normalized(filters.reportType))
+      return false;
+    const capture = issue.capturedAt ? new Date(issue.capturedAt) : null;
+    const capturedDate = capture && !Number.isNaN(capture.getTime())
+      ? `${capture.getFullYear()}-${String(capture.getMonth() + 1).padStart(2, "0")}-${String(capture.getDate()).padStart(2, "0")}` : null;
+    if (filters.capturedFrom && (!capturedDate || capturedDate < filters.capturedFrom)) return false;
+    if (filters.capturedTo && (!capturedDate || capturedDate > filters.capturedTo)) return false;
+    if (filters.screenshot === "captured" && !issue.screenshotUrl) return false;
+    if (filters.screenshot === "missing" && issue.screenshotUrl) return false;
     if (queryTerms.length===0) return true;
     const haystack=normalized([
       issue.identity.viewpointId,

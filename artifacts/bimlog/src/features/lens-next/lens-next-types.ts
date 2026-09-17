@@ -86,6 +86,11 @@ export interface LensNextFilters {
   trade: string | "all";
   floor: string | "all";
   priority: number | "all";
+  responsibleCompany: string | "all";
+  reportType: string | "all";
+  capturedFrom: string;
+  capturedTo: string;
+  screenshot: "all" | "captured" | "missing";
 }
 
 export const LENS_NEXT_DEFAULT_FILTERS: Readonly<LensNextFilters> =
@@ -95,6 +100,11 @@ export const LENS_NEXT_DEFAULT_FILTERS: Readonly<LensNextFilters> =
     trade: "all",
     floor: "all",
     priority: "all",
+    responsibleCompany: "all",
+    reportType: "all",
+    capturedFrom: "",
+    capturedTo: "",
+    screenshot: "all",
   });
 
 export interface LensNextHistoryRevision {

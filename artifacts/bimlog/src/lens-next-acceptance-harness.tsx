@@ -1,7 +1,8 @@
 import { useEffect, useMemo, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { LensNextPanelView, type LensNextPanelViewProps } from "./features/lens-next/LensNextPanelView";
-import { LENS_NEXT_DEFAULT_FILTERS, type LensNextIssue } from "./features/lens-next/lens-next-types";
+import { LENS_NEXT_DEFAULT_FILTERS, type LensNextFilters, type LensNextIssue } from "./features/lens-next/lens-next-types";
+import { filterLensNextIssues } from "./features/lens-next/lens-next-model";
 import { buildLensNextIssueGroups, type LensNextViewPresetId } from "./features/lens-next/lens-next-view-settings";
 import { I18nProvider, useI18n } from "./lib/i18n";
 import "./index.css";
@@ -45,9 +46,11 @@ function Harness() {
   const { language, setLanguage } = useI18n();
   const [selectedServerId, setSelectedServerId] = useState<number | null>(1);
   const [presentation, setPresentation] = useState<LensNextViewPresetId>("floor_trade_company");
+  const [filters, setFilters] = useState<LensNextFilters>({ ...LENS_NEXT_DEFAULT_FILTERS });
   const [page, setPage] = useState(1);
   const pageSize = 20;
-  const visibleIssues = LENS_NEXT_ACCEPTANCE_FIXTURES.slice((page - 1) * pageSize, page * pageSize);
+  const filteredIssues = useMemo(() => filterLensNextIssues(LENS_NEXT_ACCEPTANCE_FIXTURES, filters), [filters]);
+  const visibleIssues = useMemo(() => filteredIssues.slice((page - 1) * pageSize, page * pageSize), [filteredIssues, page]);
   const selectedIssue = LENS_NEXT_ACCEPTANCE_FIXTURES.find(item => item.identity.serverId === selectedServerId) ?? null;
   const groups = useMemo(
     () => buildLensNextIssueGroups(visibleIssues, { id: "fixture:26:acceptance", name: "Acceptance", scope: "published", preset: presentation, groupBy: [], hideResolved: false, statuses: [], priorityMaximum: null, ownerUserId: null, projectId: 26, updatedAt: "2026-09-16T14:10:00.000Z" }),
@@ -81,12 +84,13 @@ function Harness() {
     reconciliationState: "idle", reconciliationMessage: null, onRunReconciliation: noop,
     platformPullState: "idle", platformPullMessage: null, onPullPlatformViewpoints: noop,
     xmlExportEnabled: true, xmlExportState: "idle", xmlExportMessage: null, onExportViewpointsXml: noop,
-    filteredIssues: LENS_NEXT_ACCEPTANCE_FIXTURES, visibleIssues, activeIssueCount: 100,
-    issueSort: "priority", onIssueSortChange: noop, issuePage: page, issuePageCount: 5, issuePageSize: pageSize, onIssuePageChange: setPage, onIssuePageSizeChange: noop,
+    filteredIssues, visibleIssues, activeIssueCount: 100,
+    issueSort: "priority", onIssueSortChange: noop, issuePage: page, issuePageCount: Math.max(1, Math.ceil(filteredIssues.length / pageSize)), issuePageSize: pageSize, onIssuePageChange: setPage, onIssuePageSizeChange: noop,
     issueGroups: groups, viewPreset: presentation, customGroupBy: [], onViewPresetChange: setPresentation, onCustomGroupByChange: noop,
     selectedServerId, selectedIssue, linkedItems: { links: [], eligible: [] }, linkedItemsError: null, onLinkBimlogItem: noop, onRemoveLinkedItem: noop,
     referenceAttachments: { attachments: [] }, referenceAttachmentsError: null, onUploadReferenceAttachment: noop, onOpenReferenceAttachment: noop, onRemoveReferenceAttachment: noop,
-    filters: { ...LENS_NEXT_DEFAULT_FILTERS }, onFiltersChange: noop, trades: ["HVAC", "Plumbing", "Fire Protection", "Electrical"], floors: ["L1", "L2", "L3", "Roof"],
+    filters, onFiltersChange: (next) => { setFilters(next); setPage(1); }, trades: ["HVAC", "Plumbing", "Fire Protection", "Electrical"], floors: ["L1", "L2", "L3", "Roof"],
+    filterCompanies: ["BIMTech Corp", "Elara MEP"], filterReportTypes: ["Coordination"],
     createTrades: ["HVAC", "Plumbing"], createFloors: ["L1", "L2"], createResponsibleCompanies: ["BIMTech Corp"], createReportTypes: ["Coordination"],
     apiState: "connected", bridgeState: "connected", refreshState: "fresh", apiError: null, bridgeError: null,
     history: null, historyError: null, lastRefreshedAt: "2026-09-16T14:10:00.000Z", bridgeOpenEnabled: true,

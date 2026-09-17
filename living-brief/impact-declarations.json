@@ -28075,6 +28075,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1866d2afda67785e725456283ca00ea454955e3ca58ad7e13eb6dc9777f95c52"
+    },
+    {
+      "taskId": "lens-next-mockup-independent-block05-issue-browser-20260917",
+      "reviewedThroughCommit": "28fbfceb3a7fbcaf1a9b5b40dbacc36563e36063",
+      "reviewedAt": "2026-09-17T13:32:41.000Z",
+      "status": "candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Issue-record filtering does not change BIMLog identity, source-of-truth or ecosystem doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production component remains source-gated and the fixture harness remains excluded from the production route."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing live-data, visual, field and release acceptance obligations remain in force."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This local issue-browser improvement does not change the approved mockup-parity product direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing issue fields and presentation were reused without a new route, schema, API or persistent platform contract."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents the independent five-build issue-browser slice and its source-versus-field limitations."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No reports, exports, document generation or report design-system behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards interpretation, edition, applicability or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local build and browser component-fixture proof without claiming a live release."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Marks local Builds 21 to 25 while retaining the real-clash gate and later parity work."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact local Chrome interactions and explicit limits of the synthetic fixture."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-discovery.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/features/lens-next/lens-next-types.ts",
+        "artifacts/bimlog/src/lens-next-acceptance-harness.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dc3f9dce14724129bb91e9c03b1dabed750389db8480f3b7a0f92c116b5a7951"
     }
   ]
 }

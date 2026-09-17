@@ -329,6 +329,8 @@ export interface LensNextPanelViewProps {
   onFiltersChange(next: LensNextFilters): void;
   trades: readonly string[];
   floors: readonly string[];
+  filterCompanies: readonly string[];
+  filterReportTypes: readonly string[];
   createTrades: readonly string[];
   createFloors: readonly string[];
   createResponsibleCompanies: readonly string[];
@@ -413,6 +415,8 @@ export function LensNextPanelView({
   onFiltersChange,
   trades,
   floors,
+  filterCompanies,
+  filterReportTypes,
   createTrades,
   createFloors,
   createResponsibleCompanies,
@@ -490,6 +494,9 @@ export function LensNextPanelView({
   const nextIssue = selectedIssue
     ? lensNextSelectionTarget(filteredIssues, selectedIssue.identity.serverId, "next", issuePageSize)
     : null;
+  const selectedFilteredIndex = selectedIssue
+    ? filteredIssues.findIndex(issue => issue.identity.serverId === selectedIssue.identity.serverId)
+    : -1;
   const navigateSelectedIssue = (direction: LensNextSelectionDirection) => {
     const target = direction === "previous" ? previousIssue : nextIssue;
     if (!target) return;
@@ -686,45 +693,48 @@ export function LensNextPanelView({
         {createMessage && <p role={createState === "error" ? "alert" : "status"}>{createMessage}</p>}
       </details>
 
-      <section className="lens-next__view-settings" aria-label="Personal issue view">
-        <label className="lens-next__field lens-next__field--wide">
-          <span>My view</span>
-          <select
-            value={viewPreset}
-            onChange={(event) => onViewPresetChange(event.target.value as LensNextViewPresetId)}
-          >
-            <option value="status_only">Status only</option>
-            <option value="floor_trade_company">Floor → Trade → Company</option>
-            <option value="floor_company_trade">Floor → Company → Trade</option>
-            <option value="company_floor_trade">Company → Floor → Trade</option>
-            <option value="company_trade_floor">Company → Trade → Floor</option>
-            <option value="trade_floor_company">Trade → Floor → Company</option>
-            <option value="trade_company_floor">Trade → Company → Floor</option>
-            <option value="custom">Custom</option>
-          </select>
-        </label>
-        {viewPreset === "custom" && [0, 1, 2].map((slot) => (
-          <label className="lens-next__field" key={slot}>
-            <span>Group {slot + 1}</span>
+      <details className="lens-next__view-settings" aria-label="Personal issue view">
+        <summary>My view settings</summary>
+        <div className="lens-next__view-settings-content">
+          <label className="lens-next__field lens-next__field--wide">
+            <span>My view</span>
             <select
-              value={customGroupBy[slot] ?? ""}
-              onChange={(event) => {
-                const next = [...customGroupBy];
-                const value = event.target.value as LensNextViewDimension;
-                if (value) next[slot] = value;
-                onCustomGroupByChange(next.filter(Boolean).slice(0, 4));
-              }}
+              value={viewPreset}
+              onChange={(event) => onViewPresetChange(event.target.value as LensNextViewPresetId)}
             >
-              {LENS_NEXT_VIEW_DIMENSIONS.map((dimension) => (
-                <option key={dimension} value={dimension}>{dimension}</option>
-              ))}
+              <option value="status_only">Status only</option>
+              <option value="floor_trade_company">Floor → Trade → Company</option>
+              <option value="floor_company_trade">Floor → Company → Trade</option>
+              <option value="company_floor_trade">Company → Floor → Trade</option>
+              <option value="company_trade_floor">Company → Trade → Floor</option>
+              <option value="trade_floor_company">Trade → Floor → Company</option>
+              <option value="trade_company_floor">Trade → Company → Floor</option>
+              <option value="custom">Custom</option>
             </select>
           </label>
-        ))}
-        <small className="lens-next__view-note">Personal grouping changes presentation only. It never changes issue identity, status, or another user’s view.</small>
-        <button type="button" disabled={!layoutEnabled || layoutState === "running"} onClick={onMaterializeMyView}>{layoutState === "running" ? "Organizing…" : "Organize Navisworks to match My View"}</button>
-        {layoutMessage && <small role="status">{layoutMessage}</small>}
-      </section>
+          {viewPreset === "custom" && [0, 1, 2].map((slot) => (
+            <label className="lens-next__field" key={slot}>
+              <span>Group {slot + 1}</span>
+              <select
+                value={customGroupBy[slot] ?? ""}
+                onChange={(event) => {
+                  const next = [...customGroupBy];
+                  const value = event.target.value as LensNextViewDimension;
+                  if (value) next[slot] = value;
+                  onCustomGroupByChange(next.filter(Boolean).slice(0, 4));
+                }}
+              >
+                {LENS_NEXT_VIEW_DIMENSIONS.map((dimension) => (
+                  <option key={dimension} value={dimension}>{dimension}</option>
+                ))}
+              </select>
+            </label>
+          ))}
+          <small className="lens-next__view-note">Personal grouping changes presentation only. It never changes issue identity, status, or another user’s view.</small>
+          <button type="button" disabled={!layoutEnabled || layoutState === "running"} onClick={onMaterializeMyView}>{layoutState === "running" ? "Organizing…" : "Organize Navisworks to match My View"}</button>
+          {layoutMessage && <small role="status">{layoutMessage}</small>}
+        </div>
+      </details>
 
       <div className="lens-next__browser-grid">
       <section className={`lens-next__filters lens-next__filter-pane${workspaceLayout.filtersCollapsed?" lens-next__filter-pane--collapsed":""}`} aria-label="Issue filters">
@@ -814,6 +824,34 @@ export function LensNextPanelView({
             ))}
           </select>
         </label>
+        <details className="lens-next__filter-more">
+          <summary>More issue filters</summary>
+          <div className="lens-next__filter-more-grid">
+            <label className="lens-next__field">
+              <span>Responsible company</span>
+              <select value={filters.responsibleCompany} onChange={(event) => onFiltersChange({ ...filters, responsibleCompany: event.target.value })}>
+                <option value="all">All</option>
+                {filterCompanies.map((company) => <option key={company} value={company}>{company}</option>)}
+              </select>
+            </label>
+            <label className="lens-next__field">
+              <span>Report type</span>
+              <select value={filters.reportType} onChange={(event) => onFiltersChange({ ...filters, reportType: event.target.value })}>
+                <option value="all">All</option>
+                {filterReportTypes.map((reportType) => <option key={reportType} value={reportType}>{reportType}</option>)}
+              </select>
+            </label>
+            <label className="lens-next__field"><span>Captured from</span><input type="date" value={filters.capturedFrom} onChange={(event) => onFiltersChange({ ...filters, capturedFrom: event.target.value, capturedTo: filters.capturedTo && filters.capturedTo < event.target.value ? "" : filters.capturedTo })} /></label>
+            <label className="lens-next__field"><span>Captured through</span><input type="date" min={filters.capturedFrom || undefined} value={filters.capturedTo} onChange={(event) => onFiltersChange({ ...filters, capturedTo: event.target.value })} /></label>
+            <label className="lens-next__field">
+              <span>Captured image</span>
+              <select value={filters.screenshot} onChange={(event) => onFiltersChange({ ...filters, screenshot: event.target.value as LensNextFilters["screenshot"] })}>
+                <option value="all">All</option><option value="captured">Available</option><option value="missing">Missing</option>
+              </select>
+            </label>
+            <small>These filters use BIMLog issue records. Clash severity and clash source are not available here.</small>
+          </div>
+        </details>
       </section>
 
       {(apiError || bridgeError) && (
@@ -885,7 +923,7 @@ export function LensNextPanelView({
               </div>
             </div>
             <div className="lens-next__detail-navigation" aria-label={tt("Selected issue navigation", "Navegación de incidencia seleccionada")}>
-              <span aria-live="polite">{filteredIssues.findIndex(issue => issue.identity.serverId === selectedIssue.identity.serverId) + 1} / {filteredIssues.length}</span>
+              <span aria-live="polite">{selectedFilteredIndex < 0 ? tt("Outside filters", "Fuera de filtros") : `${selectedFilteredIndex + 1} / ${filteredIssues.length}`}</span>
               <button type="button" disabled={!previousIssue} aria-label={tt("Previous issue", "Incidencia anterior")} onClick={() => navigateSelectedIssue("previous")}>
                 {tt("Previous", "Anterior")}
               </button>
@@ -902,6 +940,7 @@ export function LensNextPanelView({
               </button>
             </div>
           </header>
+          {selectedFilteredIndex < 0 && <p className="lens-next__filter-context" role="status">{tt("This selected issue is outside the current filters.", "Esta incidencia seleccionada está fuera de los filtros actuales.")} <button type="button" onClick={() => onFiltersChange({ ...LENS_NEXT_DEFAULT_FILTERS })}>{tt("Reset filters", "Restablecer filtros")}</button></p>}
           <div className="lens-next__actions lens-next__actions--primary" aria-label="Selected issue actions">
             <button
               type="button"

@@ -268,6 +268,14 @@ export function LensNextPanel({
     () => [...new Set([...responsibleCompanies, ...issues.map(issue => issue.responsibleCompany).filter((value): value is string => Boolean(value)), "Other"])].sort(),
     [issues, responsibleCompanies],
   );
+  const filterCompanies = useMemo(
+    () => [...new Set(activeIssues.map(issue => issue.responsibleCompany?.trim()).filter((value): value is string => Boolean(value)))].sort(),
+    [activeIssues],
+  );
+  const filterReportTypes = useMemo(
+    () => [...new Set(activeIssues.map(issue => issue.reportType?.trim()).filter((value): value is string => Boolean(value)))].sort(),
+    [activeIssues],
+  );
 
   const loadIssues = useCallback(
     async (mode: "initial" | "refresh", signal?: AbortSignal) => {
@@ -782,6 +790,8 @@ export function LensNextPanel({
       onFiltersChange={setFilters}
       trades={trades}
       floors={floors}
+      filterCompanies={filterCompanies}
+      filterReportTypes={filterReportTypes}
       createTrades={trades}
       createFloors={floors}
       createResponsibleCompanies={createResponsibleCompanies}
