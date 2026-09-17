@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Roberto Intake financial regression follow-up — local candidate — 2026-09-16
+
+- Independent review of the first local fix requested a direct spreadsheet-import pricing regression and same-currency APU auto-binding. Both are implemented locally: an existing $75 unit rate survives an 80-hour reimport, a new item starts at zero rather than inheriting a $6,000 plan total, and sole-version binding rejects currency mismatch. The Intake suite passes. An intermittent autosave error banner is also cleared only when a retry actually saves and only when it still matches that autosave error. These follow-ups are not pushed, published, or live verified.
+- The live project #50 remains failed QA evidence with an immutable $480,000 activated value; no historical financial baseline has been changed or approved. A separate read-only production impact inventory and governed forward-safe correction decision are required before touching any affected historical record.
+
 ## Lorena catalog release preparation — local candidate — 2026-09-16
 
 - The first full workspace build passed tracked-secret, database-source safety, mojibake, Living Brief, and TypeScript prechecks, then correctly stopped when the deterministic API generator discovered the new `CompanyMasterCatalogs` page and `/company-catalogs` route and rewrote `PLATFORM.md`. The generated diff is limited to those two structural entries; it is reconciled here before the full build is repeated. No production source, Replit state, database, or customer record is changed by this generator output.

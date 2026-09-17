@@ -260,6 +260,7 @@ export function JobIntakeWorkspace() {
     pendingSaveRef = useRef<any>(null),
     savePromiseRef = useRef<Promise<any> | null>(null),
     saveRetryRef = useRef(0),
+    autosaveErrorRef = useRef(""),
     saveTimerRef = useRef<number | null>(null);
   const openCommercialPrerequisite = (destination: string) => {
     preserveActiveStage(projectId, "scope");
@@ -337,10 +338,10 @@ export function JobIntakeWorkspace() {
       let loadedData = canRecover ? recovered.data : current.data;
       const availableApuVersions = Array.isArray(plan?.data?.history) ? plan.data.history : [];
       const soleApu = current.capabilities?.costValuePlanner && current.status !== "activated"
-        ? soleCompatibleApuVersion(availableApuVersions)
+        ? soleCompatibleApuVersion(availableApuVersions, loadedData?.identity?.currency)
         : null;
       if (soleApu && Array.isArray(loadedData?.scopeItems)) {
-        const scopeItems = applySoleApuToUnboundItems(loadedData.scopeItems, availableApuVersions);
+        const scopeItems = applySoleApuToUnboundItems(loadedData.scopeItems, availableApuVersions, loadedData.identity.currency);
         if (scopeItems.some((item, index) => item !== loadedData.scopeItems[index]))
           loadedData = { ...loadedData, scopeItems };
       }
@@ -398,6 +399,7 @@ export function JobIntakeWorkspace() {
     intakeRef.current = null;
     revisionRef.current = 0;
     pendingSaveRef.current = null;
+    autosaveErrorRef.current = "";
     setActive(readActiveStage(projectId));
     setQuickMode(readSetupMode(projectId) === "quick");
     setMappingDocument(null);
@@ -459,6 +461,11 @@ export function JobIntakeWorkspace() {
               revisionRef.current = result.revision;
               intakeRef.current = result;
               saveRetryRef.current = 0;
+              const recoveredAutosaveError = autosaveErrorRef.current;
+              if (recoveredAutosaveError) {
+                setError(current => current === recoveredAutosaveError ? "" : current);
+                autosaveErrorRef.current = "";
+              }
               lastSavedRef.current = JSON.stringify(result.data);
               clearMatchingRecovery(projectId, next);
               lastResult = result;
@@ -476,7 +483,9 @@ export function JobIntakeWorkspace() {
           } catch (cause) {
             pendingSaveRef.current = dataRef.current;
             setSaveState("error");
-            setError(cause instanceof Error ? cause.message : String(cause));
+            const autosaveError = cause instanceof Error ? cause.message : String(cause);
+            autosaveErrorRef.current = autosaveError;
+            setError(autosaveError);
             if (saveRetryRef.current < 2) {
               saveRetryRef.current += 1;
               saveTimerRef.current = window.setTimeout(
@@ -772,7 +781,7 @@ export function JobIntakeWorkspace() {
     }
   };
   const latestRate = "0",
-    latestApuVersion = soleCompatibleApuVersion(apuVersions)?.version ?? null;
+    latestApuVersion = soleCompatibleApuVersion(apuVersions, data.identity.currency)?.version ?? null;
   const apuCoverage = contractApuCoverage(
     data.commercial?.contracts || [],
     data.scopeItems || [],

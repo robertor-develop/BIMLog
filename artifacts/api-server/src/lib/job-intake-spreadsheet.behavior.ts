@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import * as XLSX from "xlsx";
 import { extractFileText } from "./extract-file-text";
+import { mergeMappedContractItems } from "./job-intake-mapped-item-pricing";
 import {
   normalizeJobIntakeData,
   previewSmartIntakeMapping,
@@ -68,6 +69,17 @@ for (const bookType of ["xlsx", "xlsm"] as const) {
   });
   assert.equal(repeated.mappingFingerprint, preview.mappingFingerprint);
   assert.equal((repeated.rows[0] as any).id, firstRow.id);
+  const mappedWithPlan = mergeMappedContractItems({
+    existingItems: [{ id: firstRow.id, name: "Earlier name", plannedHours: "1", billingHourlyRate: "75", apuPlanVersion: null }],
+    mappedRows: [preview.rows[0], preview.rows[1]],
+    candidatePlans: [{ version: 1, content: { currency: "USD", sellingPrice: "6000" } }],
+    currency: "USD",
+    workflowTemplate: "bim-submittal",
+    defaultContractId: "QA-C-1",
+  });
+  assert.equal(mappedWithPlan[0].billingHourlyRate, "75");
+  assert.equal(mappedWithPlan[1].billingHourlyRate, "0");
+  assert.equal(mappedWithPlan[1].apuPlanVersion, 1);
   const normalized = normalizeJobIntakeData({
     scopeItems: preview.rows.map((row: any) => ({
       id: row.id,

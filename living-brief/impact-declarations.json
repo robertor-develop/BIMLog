@@ -27183,6 +27183,96 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1c01767b4f92ca13745d3bec5eb98562c038634dca851b71277477330c292068"
+    },
+    {
+      "taskId": "roberto-live-intake-apu-review-followup-20260916",
+      "reviewedThroughCommit": "a0392f57c84cd1ead4d16273d4670386334884e0",
+      "reviewedAt": "2026-09-17T02:02:28Z",
+      "trigger": "independent_review_direct_import_and_currency_regression",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "local_source_correction",
+          "regression_tests"
+        ],
+        "operatorOnly": [
+          "production_database_change",
+          "replit_publish",
+          "customer_field_acceptance"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No change to tenant or financial authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing verification and release gates remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Live and local evidence retain distinct acceptance states."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product roadmap change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Clarifies sole same-currency APU binding and separately entered unit rates."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens behavior change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation contract change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records independent-review follow-up without release claims."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains publication, retest, autosave, catalog, and historic-impact gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical record was changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-intake-spreadsheet.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6976680ef735d4c62aa23c0a14ba8fd3f025f9d3f75ecb4c8454f116b0345a67"
     }
   ]
 }

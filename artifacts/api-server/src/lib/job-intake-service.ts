@@ -30,6 +30,7 @@ import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migra
 import { buildActivatedCommercialBaseline, persistActivatedCommercialBaselineWithClient } from "./job-activation-commercial-baseline";
 import { resolveEffectiveEntitlement } from "./feature-catalog-service";
 import { applyIntakePolicyDefaults, normalizeIntakePolicy } from "./job-intake-policy";
+import { mergeMappedContractItems } from "./job-intake-mapped-item-pricing";
 
 const uuid = () => crypto.randomUUID();
 const categories = new Set([
@@ -707,41 +708,14 @@ export async function applyJobIntakeDocumentMapping(input: {
           )
         ).rows)
       : [];
-    // A generic Cost & Value plan stores a total sale price, not a Contract Item unit rate.
-    const inheritedRate = "0";
-    const inheritedApuVersion =
-      candidatePlans.length === 1 && candidatePlans[0]?.content?.currency === data.identity.currency
-        ? Number(candidatePlans[0].version)
-        : null;
-    const existingById = new Map(
-      data.scopeItems.map((item) => [item.id, item]),
-    );
-    for (const mapped of preview.rows as Array<any>) {
-      const existing = existingById.get(String(mapped.id));
-      existingById.set(String(mapped.id), {
-        ...(existing ?? {
-          id: mapped.id,
-          description: "",
-          billingHourlyRate: inheritedRate,
-          contractValue: "0",
-          unit: "Hours",
-          apuPlanVersion: inheritedApuVersion,
-          budgetSnapshotLineId: "",
-          projectCostNodeId: "",
-          scheduleItemPlacementId: null,
-          assumptions: "",
-          exclusions: "",
-          workflowTemplate: data.delivery.workflowTemplate,
-          contractId: data.commercial.contracts[0].id,
-          responsibleParticipantId: "",
-          workPackages: [],
-        }),
-        name: mapped.name,
-        plannedHours: mapped.quantity,
-        provenance: mapped.provenance,
-      });
-    }
-    const mergedItems = [...existingById.values()];
+    const mergedItems = mergeMappedContractItems({
+      existingItems: data.scopeItems,
+      mappedRows: preview.rows,
+      candidatePlans,
+      currency: data.identity.currency,
+      workflowTemplate: data.delivery.workflowTemplate,
+      defaultContractId: data.commercial.contracts[0].id,
+    });
     if (mergedItems.length > 500)
       throw new FinancialControlError(
         400,
