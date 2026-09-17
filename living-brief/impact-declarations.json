@@ -27261,6 +27261,8 @@
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
         "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/job-intake-mapped-item-pricing.behavior.ts",
+        "artifacts/api-server/src/lib/job-intake-mapped-item-pricing.ts",
         "artifacts/api-server/src/lib/job-intake-service.ts",
         "artifacts/api-server/src/lib/job-intake-spreadsheet.behavior.ts",
         "artifacts/api-server/src/lib/job-intake.behavior.ts",
@@ -27272,7 +27274,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "6976680ef735d4c62aa23c0a14ba8fd3f025f9d3f75ecb4c8454f116b0345a67"
+      "reviewedChangeSha256": "e522ca9f29b46ba6d4fbb666edaec70fd97f5434de4d51663821e65bbe231011"
     }
   ]
 }
