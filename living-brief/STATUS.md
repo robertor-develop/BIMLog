@@ -3,7 +3,7 @@
 ## Roberto Intake financial regression follow-up — local candidate — 2026-09-16
 
 - Independent review of the first local fix requested a direct spreadsheet-import pricing regression and same-currency APU auto-binding. Both are implemented locally: an existing $75 unit rate survives an 80-hour reimport, a new item starts at zero rather than inheriting a $6,000 plan total, and sole-version binding rejects currency mismatch. The Intake suite passes. An intermittent autosave error banner is also cleared only when a retry actually saves and only when it still matches that autosave error. These follow-ups are not pushed, published, or live verified.
-- The live project #50 remains failed QA evidence with an immutable $480,000 activated value; no historical financial baseline has been changed or approved. A separate read-only production impact inventory and governed forward-safe correction decision are required before touching any affected historical record.
+- The live project #50 remains failed QA evidence with an immutable $480,000 activated value; no historical financial baseline has been changed or approved. MAIN's read-only query against the verified production target, with the transaction set read-only, found two suspect work items in two projects where a frozen unit rate equals a saved whole-plan selling price; one is QA project #50. This equality is a suspect filter, not proof of erroneous customer billing or an impact assessment. No unrelated customer rows or financial details were exported. Record-by-record owner review and a separately governed forward-safe decision are required before touching any affected historical record.
 
 ## Lorena catalog release preparation — local candidate — 2026-09-16
 
