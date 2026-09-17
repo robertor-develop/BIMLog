@@ -28538,6 +28538,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "99fea2d503fc09416bdc8696c23458e831796c1c58e734cdb8c62fab7665c71d"
+    },
+    {
+      "taskId": "lens-next-block10-build50-short-window-continuation-20260917",
+      "reviewedThroughCommit": "c0fc08969c026a09a16beb862cb96720a8cda2bd",
+      "reviewedAt": "2026-09-17T15:21:27.000Z",
+      "status": "candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The local responsive correction does not change product doctrine or external authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No execution or release rule changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native, live and customer acceptance remain separately gated."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved Lens Next visual direction is unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, schema, auth, persistence or platform structural contract changed."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records Build 50 local short-window continuation and Native evidence limit."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact or export changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records visual, behavior and build evidence with open field gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps Block 10 release and genuine-clash field work open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records short-window and expanded-state defects and corrections."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/lens-next-modern-workspace.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ba0e939ec0bd8fc39a2c1f12e7dd39d556b61ca04f0fdad16011e5bc870e3b72"
     }
   ]
 }

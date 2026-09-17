@@ -15,6 +15,8 @@ assert.match(css,/lens-next__filter-pane--collapsed/);
 assert.match(css,/lens-next__body--list-collapsed/);
 assert.match(css,/\.lens-next__list-heading\s*\{\s*display:\s*grid;/);
 assert.match(css,/\.lens-next-workspace--embedded \.lens-next__browser \.lens-next__issue-list\s*\{[^}]*min-height:\s*0;/);
+assert.match(css,/@media \(min-width: 761px\) and \(max-height: 720px\)[\s\S]*\.lens-next__browser:not\(:has\(> details\[open\]\)\)[\s\S]*grid-template-rows: auto auto minmax\(0, 1fr\)/);
+assert.match(css,/\.lens-next__browser:has\(> details\[open\]\)\s*\{[^}]*overflow-y: auto;/);
 assert.match(css,/@media \(max-width: 760px\)[\s\S]*lens-next__browser-grid[\s\S]*flex-direction:\s*column/);
 assert.doesNotMatch(view,/applyPlatformWorkingView[\s\S]{0,500}workspaceLayout/);
 assert.match(panel,/findIndex\(issue=>issue\.identity\.serverId===selectedServerId\)/);
