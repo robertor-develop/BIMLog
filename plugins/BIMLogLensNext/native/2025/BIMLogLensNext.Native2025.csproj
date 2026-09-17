@@ -17,6 +17,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="..\AutodeskReadOnlyAdapter.cs" Link="AutodeskReadOnlyAdapter.cs" />
+    <Compile Include="..\AutodeskAreaOfInterestProbe.cs" Link="AutodeskAreaOfInterestProbe.cs" />
     <Compile Include="..\AutodeskVisualStateAdapter.cs" Link="AutodeskVisualStateAdapter.cs" />
     <Compile Include="..\AutodeskPublishedViewpointAdapter.cs" Link="AutodeskPublishedViewpointAdapter.cs" />
     <Compile Include="..\AutodeskMyViewLayoutAdapter.cs" Link="AutodeskMyViewLayoutAdapter.cs" />

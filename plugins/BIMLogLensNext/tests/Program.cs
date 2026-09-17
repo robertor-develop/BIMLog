@@ -9,7 +9,7 @@ using System.Xml;
 
 namespace BIMLogLensNext.Tests
 {
-    internal static class Program
+    internal static partial class Program
     {
         private const string Token = "short-lived-test-session-token";
         private static int _passed;
@@ -24,6 +24,12 @@ namespace BIMLogLensNext.Tests
                     return 0;
                 }
                 Run("identifiers_are_isolated", IdentifiersAreIsolated);
+                Run("area_requires_exact_active_authorized_identity", AreaRequiresExactActiveAuthorizedIdentity);
+                Run("area_retains_pair_and_spatial_context", AreaRetainsPairAndSpatialContext);
+                Run("area_clips_long_crossing_element", AreaClipsLongCrossingElement);
+                Run("area_converts_meters_to_source_units", AreaConvertsMetersToSourceUnits);
+                Run("area_rejects_missing_pair_and_cross_model", AreaRejectsMissingPairAndCrossModel);
+                Run("area_rejects_full_model_radius_and_excess_geometry", AreaRejectsFullModelRadiusAndExcessGeometry);
                 Run("native_registration_provenance_is_exact", NativeRegistrationProvenanceIsExact);
                 Run("write_flags_default_off", WriteFlagsDefaultOff);
                 Run("only_read_commands_are_exposed", OnlyReadCommandsAreExposed);

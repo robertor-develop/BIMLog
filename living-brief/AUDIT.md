@@ -1397,3 +1397,8 @@ was performed or authorized.
 
 - Roberto rejected a two-element-only view as insufficient and selected a small interactive 3D neighborhood around the exact clash/viewpoint, including relevant surrounding systems and structure but not the whole model. Long crossing geometry must be clipped, and expansion is deliberate.
 - The existing 50-build program now assigns a one-real-clash, both-year feasibility prototype to Builds 6–10; implementation of a versioned bridge and web pane remains conditional in Builds 11–20. This records scope and sequencing only; no geometry was extracted, uploaded, rendered or published.
+
+## 2026-09-17 — Lens Next area-of-interest Block 2 local evidence
+
+- The shared C# suite passed 131/131, including six new bounded-area fixture behaviors. Both 2021 and 2025 Native adapter suites passed 56/56 and compiled the read-only exact-clash locator. A separate, non-shipped 2021 primitive-callback project compiled against installed Autodesk COM references.
+- The current production bridge exposes no area-geometry command. The Block 2 package remains an in-memory prototype; exact model binding, fragment world transforms, real item geometry, 2025 COM extraction, legal transfer, rendering and measured performance remain unverified. No live Navisworks action, customer model mutation, browser acceptance, Native ZIP or publication is claimed.

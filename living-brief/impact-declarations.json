@@ -27882,6 +27882,124 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d4efb7c0cf74c80d2d165a0fcacab7c3c8d04ea40acc67769ab439953ff18547"
+    },
+    {
+      "taskId": "lens-next-bounded-area-block02-local-prototype-20260917",
+      "reviewedThroughCommit": "d029665b2ba77a365be23240c517f6146417228e",
+      "reviewedAt": "2026-09-17T12:57:34.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "compile_both_native_years",
+          "run_local_fixtures",
+          "reconcile_in_clean_worktree"
+        ],
+        "operatorOnly": [
+          "real_model_field_acceptance",
+          "authorized_replit_publish"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "plugin",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "The local area-of-interest code exposes no new bridge command or model write and must preserve existing exact Working View, XML, digest and issue history behavior."
+        },
+        {
+          "category": "field_acceptance_contradicts_automation",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "plugin",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Synthetic clipping tests and both-year compilation do not prove real Navisworks fragment transforms, 2025 COM extraction, customer geometry rights or an interactive browser viewer."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source-of-truth and truthful-evidence boundaries prohibit presenting fixture geometry as field acceptance."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The work remains a local isolated prototype with no release, role or coordination-authority change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing real-model and browser acceptance criteria remain open beyond the passing fixture suites."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded 3D concept was already scoped; this local prototype does not amend product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Platform route, schema, persisted contract or generated architecture changed in this spike."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents exact native locator, bounded clipping/package source proof and explicit incomplete field gates."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, export format or document-rendering authority changes in the 3D feasibility prototype."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim or new standard interpretation was introduced by this local code."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Reports local passing suites and clearly separates incomplete real-model and browser gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Marks Builds 6, 7 and 9 locally proven while keeping Build 8 field and Build 10 interactive open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records exact test results and explicitly states no live geometry extraction or release occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/native/2021/BIMLogLensNext.Native2021.csproj",
+        "plugins/BIMLogLensNext/native/2025/BIMLogLensNext.Native2025.csproj",
+        "plugins/BIMLogLensNext/native/AutodeskAreaOfInterestProbe.cs",
+        "plugins/BIMLogLensNext/src/LensNextAreaOfInterestPrototype.cs",
+        "plugins/BIMLogLensNext/tests/AreaOfInterestTests.cs",
+        "plugins/BIMLogLensNext/tests/BIMLogLensNext.Tests.csproj",
+        "plugins/BIMLogLensNext/tests/Program.cs",
+        "plugins/BIMLogLensNext/tests/area-spike-2021/AreaPrimitiveSpike2021.cs",
+        "plugins/BIMLogLensNext/tests/area-spike-2021/AreaSpike2021.csproj"
+      ],
+      "reviewedChangeSha256": "dd1d271a4dbb8f3ebd4af609f33cb173fb98ad1ebf20822daaa4ce84ebd5e4d8"
     }
   ]
 }

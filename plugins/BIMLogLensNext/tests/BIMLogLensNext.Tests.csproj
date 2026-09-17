@@ -11,6 +11,7 @@
     <Deterministic>true</Deterministic>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Remove="area-spike-2021\**\*.cs" />
     <ProjectReference Include="..\BIMLogLensNext.csproj" />
     <Reference Include="System.Web.Extensions" />
     <Content Include="..\..\..\contracts\lens-next\lens-next-visual-digest-v3-vectors.json" Link="lens-next-visual-digest-v3-vectors.json" CopyToOutputDirectory="PreserveNewest" />

@@ -2789,3 +2789,9 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Block 3, Builds 11–15: after a passing prototype, implement versioned bridge, authorization/model binding, provenance and fail-closed export limits while preserving Working View/XML.
 - [ ] Block 4, Builds 16–20: after bridge proof, integrate authenticated 3D context pane, highlights, expand-area action, responsive controls and honest unavailable fallback.
 - [ ] Blocks 5–10, Builds 21–50: finish remaining mockup-parity workflow and full regressions; bounded 3D does not displace list, filter, image, issue and acceptance work.
+- [x] Build 6 local source gate: exact test/result GUID and pair-scoped read-only Navisworks locator compiles for 2021/2025; real-model invocation remains open.
+- [x] Build 7 local fixture gate: unit-aware bounded region, six-plane triangle clipping, context inclusion, pair preservation and fail-closed caps pass six behavior tests.
+- [ ] Build 8 field gate: run one genuine clash through the Native locator and fragment extractor, verify 2021/2025 API availability, stable identities, model transform/units and bounded geometry. A non-shipped 2021 COM spike compiles only; 2025 COM extraction and both live runs remain open.
+- [x] Build 9 local contract gate: in-memory package identity/provenance and size guards exist; production authorization, transport and persistence are not implemented.
+- [ ] Build 10 interactive gate: render the **real** bounded package on desktop/mobile, test orbit/focus/expansion, measure payload and latency, and compare against Navisworks. No synthetic-only browser pass may close this gate.
+- [ ] Do not start production bridge/UI integration Blocks 3–4 or publish a Native ZIP until Builds 8 and 10 provide the approved real-clash feasibility result.
