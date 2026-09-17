@@ -2251,11 +2251,13 @@ export function JobOperationsWorkspace() {
                               <select
                                 disabled={!task.canControl}
                                 name="assignmentId"
+                                required={taskAssignments(task.id).length > 0}
+                                defaultValue={taskAssignments(task.id).length === 1 ? taskAssignments(task.id)[0].id : ""}
                               >
                                 <option value="">
                                   {tt(
-                                    "Task assignee",
-                                    "Responsable de la tarea",
+                                    taskAssignments(task.id).length > 1 ? "Select a priced assignment" : "Task assignee (unpriced)",
+                                    taskAssignments(task.id).length > 1 ? "Seleccione una asignación valorizada" : "Responsable de la tarea (sin tarifa)",
                                   )}
                                 </option>
                                 {taskAssignments(task.id).map((a: any) => (

@@ -1,20 +1,22 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
+  "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
   "catalogSha256": "dd06dabab219a2560cc1e9d7af545733b75668669d2b85ee14c4e6342ccc5275",
-  "bundleSha256": "960ad11a8133724a68429fcd6da978a2b8c58cdb0c2ee25127f4cbb642e8776a",
+  "bundleSha256": "c48a2a1838f88d6c19fa7802c9871524f851db017a988ce7cfb2020364357bcd",
   "impact": {
-    "baselineCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
+    "baselineCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
     "changedPaths": [
-      "lib/api-spec/package.json",
+      "artifacts/api-server/src/lib/job-operations-service.ts",
+      "artifacts/api-server/src/lib/job-operations.behavior.ts",
+      "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json",
-      "pnpm-lock.yaml"
+      "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -25,11 +27,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "claude",
@@ -37,11 +39,11 @@
       "sha256": "d8f74e7678b4ffcc53a29c17c13a806213887cf7989bc80c985d9903e70e0074",
       "sourceChangedAt": "2026-09-17T00:34:02-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "quality",
@@ -49,11 +51,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "vision",
@@ -61,11 +63,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "platform",
@@ -73,11 +75,11 @@
       "sha256": "6bc2d1fbbbd4be0cb626f3cb3a4644505c4693fe7cfb80106a27830cb3b6548d",
       "sourceChangedAt": "2026-09-16T22:03:57-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "plugin",
@@ -85,11 +87,11 @@
       "sha256": "257a37f8e55a4518634e1adbfdffff1da19c7ea3a7cad9116690d9f8451a8c98",
       "sourceChangedAt": "2026-09-16T01:13:05-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "report_design_system",
@@ -97,11 +99,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "standards_register",
@@ -109,35 +111,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "ec01b0ad18e458d3c04a059bb5acb495d7e816ab8be34505ffc5a5c0cc53c676",
-      "sourceChangedAt": "2026-09-17T05:21:04.000Z",
+      "sha256": "4eee161a1e180e52ea96e9eab64cd1f439c2dd4f192e45fc7c249e2c65f77189",
+      "sourceChangedAt": "2026-09-17T06:07:24.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "0128f85ba7acbde409bfcbb6c4caeab7fa85aef1c04b7e8fef9fd3539d28f647",
-      "sourceChangedAt": "2026-09-17T05:21:04.000Z",
+      "sha256": "afbb2a9ce6a4b5a999ee4370b3cc04ca3458570e6e6e20e272304187bb4328cb",
+      "sourceChangedAt": "2026-09-17T06:07:24.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     },
     {
       "key": "audit",
@@ -145,11 +147,11 @@
       "sha256": "0eaca5046facd3f8d4eb7cf7a5626e66b99c493d5fde75993e0061ae498ad691",
       "sourceChangedAt": "2026-09-15T16:28:53-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewedThroughCommit": "d0c839a1d4644f2db0612005dc323c88c3e8c317",
-      "semanticReviewTask": "bimlog-orval-critical-publication-correction-20260917",
+      "reconciledThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "semanticReviewTask": "bimlog-live-priced-time-attribution-20260917",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-17T05:21:04Z"
+      "semanticReviewedAt": "2026-09-17T06:07:24Z"
     }
   ]
 }

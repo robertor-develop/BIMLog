@@ -37,6 +37,8 @@ assert.equal(canonicalJobOperationId("TASK-8761cb21", "taskId"), "TASK-8761cb21"
 assert.throws(() => canonicalJobOperationId("../package", "packageId"));
 assert.throws(() => canonicalJobOperationId("package/child", "packageId"));
 assert.match(service, /workHours/);
+assert.match(service, /JOB_OPERATIONS_ASSIGNMENT_REQUIRED/, "ambiguous priced time must require an assignment");
+assert.match(service, /matches\[0\] \?\? null/, "one priced assignment must be selected automatically");
 assert.match(service, /ON CONFLICT\(task_id,file_id,deliverable_type\)/);
 assert.match(service, /FROM files WHERE id=\$1 AND project_id=\$2/);
 assert.match(service, /job_activation_operation_events/);
@@ -55,6 +57,8 @@ for (const phrase of ["Job Operations", "Operaciones del Trabajo", "Record actua
 assert.match(ui, /data\.capabilities\?\.budget/);
 assert.match(ui, /data\.capabilities\?\.cost_value_planner/);
 assert.match(ui, /crypto\.randomUUID\(\)/);
+assert.match(ui, /required=\{taskAssignments\(task\.id\)\.length > 0\}/, "priced time must not submit without an assignment");
+assert.match(ui, /defaultValue=\{taskAssignments\(task\.id\)\.length === 1/, "a single priced assignment must be preselected");
 assert.match(ui, /@media\(max-width:900px\)/);
 assert.match(shell, /"operations"/);
 assert.match(sidebar, /\/operations/);
