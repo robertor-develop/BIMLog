@@ -199,10 +199,12 @@ A separate Drizzle source-to-production preview proposed 128 `DROP CONSTRAINT`
 and eight `DROP INDEX` statements. That output was **not** Replit's provider
 Publish plan and could neither prove a destructive provider migration nor approve
 publication. A Publish action in the Replit UI was not preview-only: the first
-click prepared, built, and promoted the release automatically. Do not assume that
-click is a harmless way to obtain a migration preview. Keep Replit's "Copy your
-development database to production database" option off unless Roberto expressly
-authorizes replacing production data.
+click prepared, built, and promoted the release automatically. A complete provider
+migration SQL preview was not obtained before that click. This was an exception to
+the pre-publication gate above, not evidence that the gate may be skipped. Do not
+assume that click is a harmless way to obtain a migration preview. Keep Replit's
+"Copy your development database to production database" option off unless
+Roberto expressly authorizes replacing production data.
 
 The published source tree was the already-pushed GitHub `origin/master` commit
 `8ee7bb16193995380d4886d66b2e28f94d276f71`; the Replit deployment receipt
@@ -213,8 +215,10 @@ publication receipt commit was not proven pushed. Live `/api/v1/healthz` returne
 project's analytics, and company master-catalog data. Post-publication production
 schema counts remained 211/2,927/1,161/542. The visible application label still
 showed `v1.05.N17-P31`; report the deployment receipt and exact source identity
-separately from a stale display label. These checks do not, by themselves, prove
-every user workflow or customer acceptance.
+separately from a stale display label. Equal post-publication object counts and
+visible records are bounded checks, not the affected-table record-count manifest
+required above and not proof that all production data was preserved. These checks
+also do not prove every user workflow or customer acceptance.
 
 For future releases, establish the exact source, runtime, database identities,
 and schema/object differences before a provider action; do not substitute a
@@ -223,3 +227,6 @@ alone. Use Replit Shell for read-only inspection and build/source verification,
 not as a workaround for a denied safety action. After publication, verify the
 deployment identity, live health, authenticated representative workflows, and
 production data/schema preservation. No Replit Agent was used in this incident.
+Before the next release, establish a supported non-destructive provider publish
+mechanism with a complete actual migration plan, or obtain exact data-preservation
+evidence sufficient for the existing gate; do not infer either from this incident.
