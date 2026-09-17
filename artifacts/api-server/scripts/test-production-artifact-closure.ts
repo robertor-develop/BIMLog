@@ -354,7 +354,17 @@ const port = await new Promise<number>((resolve, reject) => {
   });
 });
 const inheritedRuntimeEnvironment = Object.fromEntries(
-  ["PATH", "Path", "SystemRoot", "WINDIR", "TEMP", "TMP", "HOME", "USERPROFILE"]
+  [
+    "PATH",
+    "Path",
+    "SystemRoot",
+    "WINDIR",
+    "TEMP",
+    "TMP",
+    "HOME",
+    "USERPROFILE",
+    "BIMLOG_STARTUP_DIAGNOSTICS",
+  ]
     .map((key) => [key, process.env[key]])
     .filter((entry): entry is [string, string] => typeof entry[1] === "string"),
 );
@@ -641,6 +651,9 @@ try {
         stderr: invalidStorageStderr,
       },
       readyMs: Number(readyMs.toFixed(1)),
+      ...(process.env.BIMLOG_STARTUP_DIAGNOSTICS === "1"
+        ? { startupOutput: stdout.trim() }
+        : {}),
       platform: `${os.platform()}-${os.arch()}`,
     }),
   );

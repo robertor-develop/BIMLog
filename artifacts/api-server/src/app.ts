@@ -119,7 +119,9 @@ function queueDatabaseStartup<T>(task: () => Promise<T>): Promise<T> {
       return await task();
     } finally {
       if (process.env.BIMLOG_STARTUP_DIAGNOSTICS === "1") {
-        console.log(`[startup] phase=db_task task=${taskNumber} duration_ms=${Math.round(performance.now() - startedAt)}`);
+        console.log(
+          `[startup] phase=db_task task=${taskNumber} duration_ms=${Math.round(performance.now() - startedAt)}`,
+        );
       }
     }
   });
