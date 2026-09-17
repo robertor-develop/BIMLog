@@ -196,6 +196,10 @@ ${appRoutes()}
   the immutable item snapshot preserves the APU content, evaluation, fingerprint, BIM Submittal display,
   and Phase to Revision to Version to Task workflow selection. Contract detail, searchable PDF, and native
   XLSX exports expose the same Contract Item quantities, rates, values, APU identity, and workflow metadata.
+- A Generic Cost & Value APU version's selling price is a plan total, not an Intake Contract Item
+  hourly or unit rate. Selecting or auto-binding the sole compatible version preserves the item rate;
+  a new or imported item starts at zero until its unit rate is entered. Multiple saved versions require
+  an explicit version choice. Activation calculates quantity times the independently entered unit rate.
 
 ## N07 deterministic map provenance
 

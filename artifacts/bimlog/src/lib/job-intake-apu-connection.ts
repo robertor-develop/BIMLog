@@ -6,11 +6,10 @@ export type ContractItemApuConnection = {
 
 export function connectContractItemsToApu<T extends ContractItemApuConnection>(
   items: T[],
-  apu: { version: number; sellingPrice: string },
+  apu: { version: number },
 ): T[] {
   return items.map((item) => ({
     ...item,
-    billingHourlyRate: apu.sellingPrice,
     apuPlanVersion: apu.version,
   }));
 }

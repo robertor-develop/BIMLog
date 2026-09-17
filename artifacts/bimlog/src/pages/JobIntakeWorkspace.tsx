@@ -771,8 +771,8 @@ export function JobIntakeWorkspace() {
       setBusy(false);
     }
   };
-  const latestRate = String(apu?.sellingPrice ?? "0.00"),
-    latestApuVersion = apu?.version ?? null;
+  const latestRate = "0",
+    latestApuVersion = soleCompatibleApuVersion(apuVersions)?.version ?? null;
   const apuCoverage = contractApuCoverage(
     data.commercial?.contracts || [],
     data.scopeItems || [],
@@ -1904,8 +1904,8 @@ export function JobIntakeWorkspace() {
                   </strong>
                   {capabilities.costValuePlanner
                     ? tt(
-                        "Quantity × inherited APU/unit rate = calculated value. The latest compatible saved Cost & Value plan supplies the default rate.",
-                        "Cantidad × tarifa APU/unitaria heredada = valor calculado. El último plan compatible de costo y valor guardado suministra la tarifa predeterminada.",
+                        "Quantity × the Contract Item unit rate = calculated value. A saved Cost & Value plan can be linked, but its total selling price never becomes a unit rate.",
+                        "Cantidad × tarifa unitaria de la Partida de Contrato = valor calculado. Puede vincular un plan de Costo y Valor, pero su precio de venta total nunca se convierte en tarifa unitaria.",
                       )
                     : tt(
                         "Every user can define Contract Item Name and Quantity. Rates and APU links are optional Commercial features.",

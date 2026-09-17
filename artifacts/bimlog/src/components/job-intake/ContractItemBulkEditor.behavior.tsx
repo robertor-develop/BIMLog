@@ -35,7 +35,7 @@ assert.deepEqual(
     ],
     "2",
   ),
-  { apuPlanVersion: 2, billingHourlyRate: "35.47" },
+  { apuPlanVersion: 2 },
 );
 assert.deepEqual(selectSavedApuVersion([], ""), { apuPlanVersion: null });
 
@@ -110,7 +110,7 @@ const populatedStateMarkup = renderToStaticMarkup(
   />,
 );
 assert.match(populatedStateMarkup, /Select saved APU version/);
-assert.match(populatedStateMarkup, /v3 · Approved · 37\.99 USD/);
+assert.match(populatedStateMarkup, /v3 · Approved · plan total 37\.99 USD/);
 assert.match(populatedStateMarkup, /v2 · 100/);
 assert.match(populatedStateMarkup, /PL · Plumbing · 100/);
 

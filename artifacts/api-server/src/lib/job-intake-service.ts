@@ -699,20 +699,20 @@ export async function applyJobIntakeDocumentMapping(input: {
       );
     const data = normalizeJobIntakeData(intake.data);
     const capabilities = await capabilitiesFor(input.actorUserId, client);
-    const latestPlan = capabilities.costValuePlanner
+    const candidatePlans = capabilities.costValuePlanner
       ? ((
           await client.query(
-            `SELECT version,content FROM generic_cost_value_plan_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 1`,
+            `SELECT version,content FROM generic_cost_value_plan_versions WHERE project_id=$1 ORDER BY version DESC LIMIT 2`,
             [projectId],
           )
-        ).rows[0] ?? null)
-      : null;
-    const inheritedRate =
-      latestPlan?.content?.currency === data.identity.currency
-        ? String(latestPlan.content.sellingPrice ?? "0")
-        : "0";
+        ).rows)
+      : [];
+    // A generic Cost & Value plan stores a total sale price, not a Contract Item unit rate.
+    const inheritedRate = "0";
     const inheritedApuVersion =
-      inheritedRate !== "0" ? Number(latestPlan.version) : null;
+      candidatePlans.length === 1 && candidatePlans[0]?.content?.currency === data.identity.currency
+        ? Number(candidatePlans[0].version)
+        : null;
     const existingById = new Map(
       data.scopeItems.map((item) => [item.id, item]),
     );

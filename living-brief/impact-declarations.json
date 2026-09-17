@@ -27091,6 +27091,98 @@
         "scripts/test-database-safety.mjs"
       ],
       "reviewedChangeSha256": "f4ef5a76cf9b75752c47db81396c752e6eadfe74933ae7bfe4033584c39c1bed"
+    },
+    {
+      "taskId": "roberto-live-intake-apu-total-unit-regression-20260916",
+      "reviewedThroughCommit": "0ab21bcc8aca62b3b72fc13cc4b0c8af2b5733cb",
+      "reviewedAt": "2026-09-17T01:30:00Z",
+      "trigger": "live_financial_regression_total_sale_misapplied_as_unit_rate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "local_source_correction",
+          "regression_tests",
+          "controlled_chrome_sample"
+        ],
+        "operatorOnly": [
+          "production_database_change",
+          "replit_publish",
+          "customer_field_acceptance"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The total-versus-unit correction preserves multi-tenant and human financial authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established source, testing, and release gates remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Live failure and deterministic correction are recorded without claiming field acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap scope changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Defines saved APU total price as distinct from Contract Item unit rate."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens behavior changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report presentation contract changes; incorrect upstream value is corrected."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records failed live sample, local correction candidate, and release truth."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks deployment, fresh retest, catalogs, autosave, budget rights, and multi-user gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing activated QA evidence remains preserved and no audit history is rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.behavior.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/lib/job-intake-apu-connection.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-connection.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.behavior.ts",
+        "artifacts/bimlog/src/lib/job-intake-apu-default.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1c01767b4f92ca13745d3bec5eb98562c038634dca851b71277477330c292068"
     }
   ]
 }

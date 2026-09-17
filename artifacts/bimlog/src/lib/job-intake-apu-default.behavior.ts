@@ -11,7 +11,8 @@ const unbound = { id: "B", apuPlanVersion: null, billingHourlyRate: "0" };
 const applied = applySoleApuToUnboundItems([explicit, unbound], only);
 assert.deepEqual(applied[0], explicit);
 assert.equal(applied[1].apuPlanVersion, 3);
-assert.equal(applied[1].billingHourlyRate, "35.47");
+assert.equal(applied[1].billingHourlyRate, "0");
+assert.equal(applySoleApuToUnboundItems([{ ...unbound, billingHourlyRate: "75" }], [{ version: 1, sellingPrice: "6000" }])[0].billingHourlyRate, "75");
 assert.equal(applySoleApuToUnboundItems([unbound], [...only, { version: 4, sellingPrice: "40" }])[0].apuPlanVersion, null);
 const coverage = contractApuCoverage(
   [{ id: "C1", title: "Base" }, { id: "C2", contractNumber: "CO-1" }, { id: "C3" }],

@@ -12,7 +12,7 @@ export function applySoleApuToUnboundItems(items: any[], versions: IntakeApuVers
   const sole = soleCompatibleApuVersion(versions);
   if (!sole) return items;
   return items.map((item) => item.apuPlanVersion == null
-    ? { ...item, apuPlanVersion: sole.version, billingHourlyRate: sole.sellingPrice }
+    ? { ...item, apuPlanVersion: sole.version }
     : item);
 }
 

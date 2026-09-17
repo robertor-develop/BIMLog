@@ -42,7 +42,6 @@ export function selectSavedApuVersion(
   return selected
     ? {
         apuPlanVersion: selected.version,
-        billingHourlyRate: selected.sellingPrice,
       }
     : { apuPlanVersion: null };
 }
@@ -204,7 +203,7 @@ export function ContractItemBulkEditor(props: Props) {
     );
   };
   const connectAllToSavedApu = () => {
-    if (props.defaultApuVersion == null || !props.defaultRate) {
+    if (props.defaultApuVersion == null) {
       props.onError(
         props.tt(
           "Save an APU plan before connecting Contract Items.",
@@ -216,7 +215,6 @@ export function ContractItemBulkEditor(props: Props) {
     props.setItems((items) =>
       connectContractItemsToApu(items, {
         version: props.defaultApuVersion as number,
-        sellingPrice: props.defaultRate,
       }),
     );
     props.onNotice(
@@ -341,8 +339,8 @@ export function ContractItemBulkEditor(props: Props) {
           <span>
             {props.apuVersions.length > 0
               ? props.tt(
-                  `${props.apuVersions.length} immutable version(s) available. Selecting one binds the Contract Item to that exact version; leaving it blank keeps the editable rate.`,
-                  `${props.apuVersions.length} versión(es) inmutable(s) disponibles. Seleccionar una vincula la Partida de Contrato con esa versión exacta; dejarla vacía conserva la tarifa editable.`,
+                  `${props.apuVersions.length} immutable version(s) available. A plan's total selling price is not a unit rate. Select a version and enter the Contract Item's unit rate separately.`,
+                  `${props.apuVersions.length} versión(es) inmutable(s) disponibles. El precio de venta total del plan no es una tarifa unitaria. Seleccione una versión e ingrese por separado la tarifa de la Partida de Contrato.`,
                 )
               : props.tt(
                   "No saved APU versions are available yet. Continue with an editable rate, or save a version in Cost & Value Planner.",
@@ -552,7 +550,7 @@ export function ContractItemBulkEditor(props: Props) {
                       </option>
                       {props.apuVersions.map((version) => (
                         <option key={version.version} value={version.version}>
-                          v{version.version} · {version.name} · {version.sellingPrice} {props.currency}
+                          v{version.version} · {version.name} · {props.tt("plan total", "total del plan")} {version.sellingPrice} {props.currency}
                         </option>
                       ))}
                     </select>

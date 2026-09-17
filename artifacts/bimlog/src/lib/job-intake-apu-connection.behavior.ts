@@ -7,7 +7,6 @@ const original = [
 ];
 const connected = connectContractItemsToApu(original, {
   version: 7,
-  sellingPrice: "35.47",
 });
 
 assert.deepEqual(
@@ -18,8 +17,8 @@ assert.deepEqual(
     apuPlanVersion,
   })),
   [
-    { id: "CI-1", name: "Fire Protection", billingHourlyRate: "35.47", apuPlanVersion: 7 },
-    { id: "CI-2", name: "Coordination", billingHourlyRate: "35.47", apuPlanVersion: 7 },
+    { id: "CI-1", name: "Fire Protection", billingHourlyRate: "0", apuPlanVersion: 7 },
+    { id: "CI-2", name: "Coordination", billingHourlyRate: "12.50", apuPlanVersion: 7 },
   ],
 );
 assert.equal(original[0].billingHourlyRate, "0");
