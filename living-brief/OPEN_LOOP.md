@@ -2775,3 +2775,13 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Inspect the exact package/lockfile semantic delta, run the complete local gate and affected generator check, obtain independent acceptance, commit and push the reviewed source, then synchronize exact clean source through Replit Shell without Replit Agents.
 - [ ] Repeat the Replit build, schema-correspondence/no-drop check, security scan, and guarded publication; do not disable or bypass Replit's security protections or copy development data over production.
 - [ ] After a verified publication, run the full authenticated Chrome Job Intake/APU/Operations smoke with a fresh sample job and record every unexercised permission, finance, multi-user, artifact, and Lorena field gate honestly.
+
+## Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17
+
+- [x] Build 1: record the actual P31 Chrome baseline and mockup acceptance matrix in `PLUGIN.md`; P31 publication is not mockup parity, and the mockup's 148 clashes/images are illustrative.
+- [x] Build 2: distinguish Navisworks clash, native Saved Viewpoint and Platform Lens issue identities; prohibit inferred title/position matching and require explicit project/model-bound linkage.
+- [x] Build 3: trace counts, severity/status, elements/location, images, comments and synchronization to distinct authorities; mark currently absent data/linkages.
+- [x] Build 4: audit checked-in bridge and UI contracts for 3D feasibility; no clash enumeration or mesh-streaming contract currently exists, so embedded 3D remains an open design/Native/licensing/rights gate, not a delivered feature.
+- [x] Build 5: freeze short-desktop/mobile/bilingual/scroll, failure-state, security and protected-Native acceptance boundaries for implementation blocks.
+- [ ] Blocks 2–10: implement and verify the actual mockup-inspired workflow against real authorized data; do not claim literal 3D/images/counts until provenance and feasibility gates close. Preserve P31 Working View, XML, digest and history behavior.
+- [ ] Publish only an accepted integrated release checkpoint after source review and non-destructive Replit Shell release verification; never use Replit Agents. Chrome smoke and Native 2021/2025 field proof remain separate after publication.

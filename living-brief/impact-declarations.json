@@ -27679,6 +27679,113 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "dfc4825d177adcade17203c383fad01f5bdc317f0ae3d7d93678fe014fc1164f"
+    },
+    {
+      "taskId": "lens-next-mockup-parity-block01-20260917",
+      "reviewedThroughCommit": "018e813d11e762d8ede64c041b263f4c337811ff",
+      "reviewedAt": "2026-09-17T12:25:35.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "read_live_chrome",
+          "reconcile_in_clean_worktree",
+          "run_local_validation"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "native_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "field_acceptance_contradicts_automation",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "plugin",
+            "status",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "Live P31 is a governed issue/viewpoint workspace, not the requested clash-dashboard mockup; prior P31 checks cannot establish mockup parity or Native field acceptance."
+        },
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "plugin",
+            "open_loop"
+          ],
+          "summary": "Mockup implementation must preserve exact issue identity, verified Visual Package digest, Working View, XML export, active/history separation, and governed publication."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing truthful evidence and one-source-of-truth doctrine already controls this local Lens contract."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing coordination and release authority continues to govern this documentation-only block."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing desktop, mobile, bilingual, failure-state and real-component acceptance rules remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The product vision is not amended by distinguishing the requested mockup from published P31."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform route, schema, or generated architecture structure changes in this evidence block."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the five-part mockup parity contract, exact identities, data provenance and 3D feasibility boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report or exported document format is changed by this Lens Next review."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The review introduces no new external standard or regulatory conformance claim."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Separates the published P31 baseline from the local Block 1 contract candidate and unbuilt mockup work."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks all five Block 1 findings and keeps later implementation, release and Native field gates open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserves the actual Chrome baseline and bounded source findings without a false parity claim."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "568039961b87b5b1afe66f197daed6f1594be3e1f3f9fd0b0001014ed868a7ef"
     }
   ]
 }

@@ -382,3 +382,52 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 - The selected issue identity and primary actions precede properties, linked records, attachments, and controlled publishing. Help-dialog focus entry, Escape dismissal, restoration, visible focus, reduced-motion handling, bilingual actions, pagination, and large-list containment are regression-owned.
 - Previous/Next controls navigate only within the current filtered authoritative issue collection. Boundaries fail closed, page crossings are deterministic, and selection continues to use the immutable Platform server ID; the controls do not synthesize or normalize viewpoint identity.
 - These presentation and test changes do not alter Native or Platform identity contracts, camera/sectioning, XML serialization, digest enforcement, current/historical navigation rules, API behavior, database/schema, or stored evidence.
+
+## Lens Next mockup-parity program — Block 1/10 contract — 2026-09-17
+
+This is a **new** 50-build program in ten five-build blocks. It does not retroactively change the prior P31 modernization checklist. P31 is a published three-pane viewpoint/issue workspace, **not** the supplied clash-dashboard mockup. Block 1 establishes evidence and acceptance, not visual parity. No Native package, production data, schema, publication, or live behavior changes in this block.
+
+### Build 1 — live/mockup acceptance matrix
+
+The mockup's numbers and rendered clash images are illustrative, never production fixture values. Authenticated Chrome inspection of `bimlog.app/lens-next` on 2026-09-17 at 1366×607 showed `v1.05.N17-P31`, project `ELA01 ELARA EAST`, explicitly bound model `1185 RIVER AV test.nwd`, 15 active BIMLog issues, and model-tool counts 0 matched / 23 platform-only / 0 Navisworks-only / 12 blocked / 3 pullable. This is one observed session, not a universal total or a verified match to the mockup's project/model. The issue list began near viewport y=453 and expanding model tools pushed it below the viewport. One selected issue showed a captured thumbnail; most cards showed no captured thumbnail. Browser inspection did not accept Native Working View or XML export.
+
+| Mockup surface | P31 evidence / gap | Acceptance for the new program |
+| --- | --- | --- |
+| Compact header, project/model binding and connection | Present, but setup/tools consume the first screen | Exact binding and honest connector state stay visible without hiding the working list/detail. |
+| Summary counts, severity and source | Current tool/issue counts are distinct authorities; 148 is mockup-only | Each count names its denominator/source; no clash count inferred from issue count. |
+| Search, status, severity, source, discipline/system, level and date | `LensNextFilters` supports search/status/trade/floor/priority only | Filters compose/reset over authorized real records and explain unavailable/empty states. |
+| Clash list, images, severity/status | Current list is BIMLog issues; image appears only if captured | Exact authorized record identity and actual evidence; missing image has a truthful placeholder. |
+| List/table/3D modes | Cards/Table exist; embedded 3D does not | Selection survives modes; 3D only after a proven authorized geometry contract. |
+| Adjacent selected record and navigation | Adjacent detail exists; list starts too low in a short viewport | At 1366×607, list and selected actions remain reachable without page-scroll gymnastics; one intended scroll owner per pane. |
+| Overview/3D/BIMLog Issue/Properties/Activity | Current details use actions/disclosures | Tabs preserve selection and expose only authoritative available data. |
+| Elements, location/map, distance | Separate `clashes` schema has some fields; Lens issue DTO does not | Exact-linked values only, with units/provenance and explicit missing-data states. |
+| Comments/create/controlled publish | Governed issue publication already exists | Preserve permission, immutable identity, confirmation, idempotency and audit receipts; no automatic publish. |
+| Working View, sync and XML | Bridge exists; browser-only P31 test did not exercise Native paths | Exact project/model and digest-gated field proof for both supported Navisworks years. |
+| Responsive, bilingual, keyboard and failures | Bounded prior P31 checks; mockup parity unverified | Real desktop 1366×607 and mobile 390×844, English/Spanish, keyboard/focus, loading/empty/error/denied, no clipped actions. |
+
+### Build 2 — immutable identity and linkage
+
+- A Navisworks clash result is not a BIMLog Lens issue and not a Saved Viewpoint. An imported `clashes` row has project/report/row and source clash/fingerprint identifiers; a Lens issue has project, Platform `serverId`, immutable `viewpointId`, active/revision lineage and verified visual digest. A native managed Saved Viewpoint has its own GUID/physical ID and model binding.
+- The current `clashes` schema has no foreign key to `lens_viewpoints`, and the Lens issue DTO has no clash ID. A relationship is **not established** by title, floor, trade, image or position similarity. Later blocks require explicit permission-checked, project/model-bound stable-ID linkage and lifecycle/supersession rules before merging counts, cards or actions.
+- Preserve active/current operational projection and immutable history. Historical/unverified packages cannot become active cards or be repaired by guessing a local viewpoint. Working View continues to require exact persisted identity/digest.
+
+### Build 3 — data authority and provenance
+
+| Fact | Current authority and permitted presentation |
+| --- | --- |
+| Clash total/severity/status/source | Native clash inventory only after an exact bridge/ingest contract; imported `clashes` data must be labeled report-derived, not current Native inventory. |
+| BIMLog issue count/status/assignment/comments/history | Platform `lens_viewpoints` and governed events/receipts, scoped to project and active/current records. |
+| Elements/distance/grid/XYZ/discipline/level | Imported `clashes` fields exist but may enter Lens only after exact linkage and unit/provenance verification. Native selected elements are not inherently a clash pair. |
+| Screenshot/visual state | Captured screenshot and digest-verified Visual Package; missing evidence is never permission to synthesize an image. |
+| Synchronization counts | Native local inventory plus Platform inventory for one explicitly bound project/model; report denominators and blocked reasons, not a fabricated clash total. |
+
+### Build 4 — embedded 3D feasibility finding
+
+Checked-in `BridgeContracts.cs` exposes project/local inventory, capture/apply Working View and XML export, but no clash-result enumeration or geometry/mesh streaming command. `NativeAbstractions.cs` exposes managed viewpoint inventory and visual-state capture; `lens-next-types.ts` has no geometry/scene DTO. A screenshot, camera, selected-element reference or XML viewpoint is **not** a navigable 3D model. The mockup's 3D image cannot honestly be reproduced from the current bridge. Before adding embedded 3D, prove the Navisworks API/export path, version/license constraints, bounded model size/performance, security, coordinate system, permissions and right to transfer/render geometry, then review the contract. Until then, offer a real captured image plus “Show in Navisworks”/Working View, with 3D explicitly unavailable. Do not install a viewer or export customer geometry speculatively.
+
+### Build 5 — frozen acceptance and release boundaries
+
+- Desktop 1366×607: filters, a usable result-list portion and selected detail/actions remain simultaneously reachable; pane resizing/collapse creates no duplicate scrollbar. Mobile 390×844: selection replaces the list and Back restores list position.
+- Check real project/model states, zero/populated/large inventory, captured/missing image, active/historical/unverified view, disconnected bridge, denied permission, stale selection, pagination, language switch, refresh and keyboard operation. Evidence comes from the actual component/live surface, not a disconnected design mockup.
+- Every state-changing path retains tenant/permission checks, exact identity, digest, idempotency, immutable audit and explicit confirmation. Protected Native Working View, XML, save/reopen and 2021/2025 parity remain separate field gates; browser smoke cannot close them.
+- Keep Block 1 local. Later releases require accepted integrated source, exact Replit Shell synchronization (never Replit Agents), non-destructive schema correspondence if applicable, Chrome live acceptance and Native field proof. No partial-block publication or 100% parity claim before the data and 3D gates pass.

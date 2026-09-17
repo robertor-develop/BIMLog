@@ -1386,3 +1386,9 @@ was performed or authorized.
 - Failure evidence showed historical digest-contract 409, inactive-record 404, and route/immutable-identity 409 responses. The collector contained no current Platform/WebView response lines, so it cannot by itself diagnose these Platform errors.
 - Source tracing proved XML export used an all-or-nothing package load and the UI mixed historical revisions into active operational actions. The repair is bounded to per-record XML isolation, active-only operational projection, and compact presentation.
 - No digest was fabricated, no historical identity or customer record was rewritten, and strict cross-project, model, active-record, and digest protections remain in force.
+
+## 2026-09-17 — Lens Next mockup-parity Block 1 baseline
+
+- Authenticated live Chrome inspection at 1366×607 found published P31 to be a viewpoint/issue workspace, not the supplied clash-dashboard mockup. The issue list began near y=453 and expanded model tools displaced it below the viewport. The selected issue had a captured thumbnail; most visible cards did not. Observed inventory values are recorded as one-session evidence in `PLUGIN.md`, never as target data.
+- Source inspection found `LensNextFilters` limited to search/status/trade/floor/priority, a Lens issue DTO without clash or geometry fields, a separate `clashes` schema with some element/location fields but no Lens foreign key, and a Native bridge with viewpoint/visual-state/XML commands but no clash enumeration or mesh streaming. These are current-contract findings, not proof that future 3D is impossible.
+- The Block 1 matrix and protected acceptance criteria are local documentation only. No Native-connected Working View/XML, full live smoke, production publishing or literal mockup parity is claimed.
