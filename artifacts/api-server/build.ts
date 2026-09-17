@@ -3,7 +3,7 @@ import { fileURLToPath } from "url";
 import { builtinModules } from "node:module";
 import { createHash } from "node:crypto";
 import { execFileSync } from "node:child_process";
-import { createReadStream, createWriteStream } from "node:fs";
+import { constants as fsConstants, createReadStream, createWriteStream } from "node:fs";
 import { tmpdir } from "node:os";
 import { pipeline } from "node:stream/promises";
 import { build as esbuild } from "esbuild";
@@ -11,6 +11,7 @@ import {
   lstat,
   mkdir,
   mkdtemp,
+  copyFile,
   readdir,
   readFile,
   realpath,
@@ -502,11 +503,17 @@ async function assembleRuntimeFromInstalledGraph(
     assertNotCancelled();
     await mkdir(path.dirname(destination), { recursive: true });
     try {
-      await pipeline(
-        createReadStream(source),
-        createWriteStream(destination, { flags: "wx" }),
-        { signal },
-      );
+      // Native copies avoid two JS streams per small dependency file. Large files retain
+      // mid-file abortability, while every small-file boundary still checks cancellation.
+      if ((await stat(source)).size <= 8 * 1024 * 1024) {
+        await copyFile(source, destination, fsConstants.COPYFILE_EXCL);
+      } else {
+        await pipeline(
+          createReadStream(source),
+          createWriteStream(destination, { flags: "wx" }),
+          { signal },
+        );
+      }
     } catch (error) {
       if (signal?.aborted) throw new Error("Runtime graph copy was cancelled.");
       throw error;

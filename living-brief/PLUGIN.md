@@ -385,6 +385,8 @@ EditViewpointAsync (PATCH .../edit), VoidViewpointAsync (POST .../void), Reassig
 
 ## Lens Next mockup-parity program — Block 1/10 contract — 2026-09-17
 
+The bounded P32 Platform UI candidate does not mount or ship the experimental area-of-interest WebGL component and does not deploy a Native bridge or plugin ZIP. It may improve the issue-browser presentation independently, but the genuine-clash area geometry and 2021/2025 field gates remain open and must not be reported as mockup parity.
+
 This is a **new** 50-build program in ten five-build blocks. It does not retroactively change the prior P31 modernization checklist. P31 is a published three-pane viewpoint/issue workspace, **not** the supplied clash-dashboard mockup. Block 1 establishes evidence and acceptance, not visual parity. No Native package, production data, schema, publication, or live behavior changes in this block.
 
 ### Build 1 — live/mockup acceptance matrix

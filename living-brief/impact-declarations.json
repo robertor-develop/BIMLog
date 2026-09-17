@@ -28612,6 +28612,101 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ba0e939ec0bd8fc39a2c1f12e7dd39d556b61ca04f0fdad16011e5bc870e3b72"
+    },
+    {
+      "taskId": "lens-next-p32-bounded-release-20260917",
+      "reviewedThroughCommit": "84c4f6f2bbe4b32ae8890c3e999403e5cf70bda4",
+      "reviewedAt": "2026-09-17T17:54:02.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": ["read_repository", "reconcile_in_clean_worktree", "run_local_validation"],
+        "operatorOnly": ["authorized_replit_publish", "native_field_acceptance"]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": ["status", "open_loop", "audit"],
+          "summary": "The clean P32 API runtime package timed out after 600100 ms; source compilation is not a publishable runtime artifact, so publication remains stopped pending a corrected full gate."
+        },
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": ["plugin", "open_loop", "audit"],
+          "summary": "The unproven area-of-interest 3D prototype and Native bridge must remain unshipped while bounded issue-browser UI improvements are evaluated independently."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product doctrine or authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing release and runtime closure gates remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local source, production and field acceptance remain distinct."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No change to the approved Lens Next direction."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform structure, schema or route change is included in this candidate."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Clarifies the bounded P32 Platform scope and explicitly excludes unproven 3D and Native deployment."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF or report design change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the P32 candidate, release identity and runtime assembly failure."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks remaining pre-push, publication and real-clash gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserves observed pre-push failure and correction with exact limitations."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/build.ts",
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
+        "artifacts/bimlog/src/components/layout/Navbar.tsx",
+        "artifacts/bimlog/src/pages/HelpCenter.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "97476551a729ceb472244047f4a0e65971dc549b71643baf930f2e385ffc0cde"
     }
   ]
 }

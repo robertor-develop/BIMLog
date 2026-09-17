@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Lens Next P32 bounded UI release — local candidate — 2026-09-17
+
+- This clean candidate starts at committed Lens Next issue-browser source `84c4f6f2bbe4b32ae8890c3e999403e5cf70bda4` and advances only the Platform label to `v1.05.N17-P32`. The uncommitted Convention Builder responsible-company directory and its additive database column remain in the separate worktree; they are not part of P32.
+- The bounded area-of-interest 3D feasibility component is unmounted and absent from the production browser bundle. No Native bridge command, plugin ZIP, customer-model geometry export, or 2021/2025 installation is included. The genuine-clash 3D proof and Blocks 3–4 remain open; P32 does not claim full mockup parity.
+- The first clean pre-push run passed tracked-secret, database-source safety, mojibake, Living Brief, TypeScript, and frontend production bundle checks, but API runtime graph assembly timed out after 600100 ms while copying the installed package graph. A bounded assembler correction uses native exclusive copies for files at most 8 MiB and keeps abortable streams for larger files, without increasing the timeout or changing package graph/lockfile verification. Focused and full release re-tests remain pending. No push, Replit action, publication, or live acceptance occurred.
+
 ## Replit release and live Operations QA — published release plus local follow-up — 2026-09-17
 
 - GitHub `master` and clean Replit Shell were aligned at `3c4f741f536f7ac8849879799007799d2beb51ad`. Replit frozen install, zero-critical dependency audit, full release build, exact development-schema parity, and a Level 1 Replit security scan with zero critical findings passed. Replit published successfully with the critical-vulnerability guard on and development-to-production database copy off. The production screen reported the new release; this is not a claim that every Lorena acceptance path passed.
