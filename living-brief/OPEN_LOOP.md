@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Live QA financial attribution follow-up — 2026-09-17
+
+- [x] Publish the `3c4f741f` security correction through Replit Shell/UI with a clean exact commit, zero critical dependency findings, successful build, schema parity, critical-vulnerability guard enabled, and no development-database copy.
+- [x] Prove a saved sample Operations task status, assignee, progress, and logged hour persist after live Chrome refresh; prove Risk and Package filters respond to selection.
+- [x] Identify and locally correct the priced-time default that permitted an assignment-less entry and zero actual internal cost; focused source regression and API/frontend typechecks pass.
+- [ ] Independently review the priced-time correction, run complete release gates, push/publish it, and repeat live Chrome time-entry QA with a fresh priced assignment. Do not rewrite the earlier unpriced QA entry without a separately governed correction path.
+- [ ] Verify Lorena's real company PMO catalog capability and governed Client/Discipline/Service/Phase administration under her account, second-user delegation, deliverable/submittal linking, and complete sample-job acceptance. The present Roberto Test 1 account cannot establish those acceptance claims.
+
 ## Lorena company catalog correction — 2026-09-16
 
 - [x] Build a company-owned catalog and explicit company PMO grant/revoke path for the existing user account; do not grant global Super Administrator.

@@ -636,7 +636,8 @@ export async function reassignJobOperationResource(input: { actorUserId: number;
 
 export async function addJobOperationTime(input: { actorUserId: number; projectId: unknown; entryId: unknown; taskId: unknown; assignmentId?: unknown; workDate: unknown; hours: unknown; note?: unknown }) {
   await waitForJobIntakeMigration();
-  const projectId = positiveInt(input.projectId, "projectId"), entryId = id(input.entryId, "entryId"), taskId = id(input.taskId, "taskId"), assignmentId = input.assignmentId ? id(input.assignmentId, "assignmentId") : null;
+  const projectId = positiveInt(input.projectId, "projectId"), entryId = id(input.entryId, "entryId"), taskId = id(input.taskId, "taskId");
+  let assignmentId = input.assignmentId ? id(input.assignmentId, "assignmentId") : null;
   const workDate = String(input.workDate ?? ""); if (!/^\d{4}-\d{2}-\d{2}$/.test(workDate) || Number.isNaN(Date.parse(`${workDate}T00:00:00Z`))) throw new FinancialControlError(400, "JOB_OPERATIONS_DATE_INVALID", "Work date is invalid.");
   const hours = workHours(input.hours), note = text(input.note, 500, "note"), client = await pool.connect();
   try {
@@ -645,6 +646,12 @@ export async function addJobOperationTime(input: { actorUserId: number; projectI
     let assignment: any = null;
     if (assignmentId) assignment = (await client.query(`SELECT * FROM job_activation_resource_assignments WHERE id=$1 AND task_id=$2`, [assignmentId, taskId])).rows[0];
     if (assignmentId && !assignment) throw new FinancialControlError(400, "JOB_OPERATIONS_ASSIGNMENT_INVALID", "The selected assignment does not belong to this task.");
+    if (!assignmentId) {
+      const matches = (await client.query(`SELECT * FROM job_activation_resource_assignments WHERE task_id=$1 ORDER BY id LIMIT 2`, [taskId])).rows;
+      if (matches.length > 1) throw new FinancialControlError(400, "JOB_OPERATIONS_ASSIGNMENT_REQUIRED", "Select the priced assignment before recording time on a task with multiple assignments.");
+      assignment = matches[0] ?? null;
+      assignmentId = assignment?.id ?? null;
+    }
     const userId = Number(assignment?.user_id ?? control.task.assignee_user_id ?? input.actorUserId);
     if (!control.access.canManage && userId !== input.actorUserId) throw new FinancialControlError(403, "JOB_OPERATIONS_TIME_DENIED", "Team members may only record their own time.");
     const existing = (await client.query(`SELECT id FROM job_activation_time_entries WHERE id=$1`, [entryId])).rows[0];

@@ -27572,6 +27572,113 @@
         "pnpm-lock.yaml"
       ],
       "reviewedChangeSha256": "82091f60fec7fa2dc074da3997cdf9ef43ae5a669e1739058894f8577b5a0a68"
+    },
+    {
+      "taskId": "bimlog-live-priced-time-attribution-20260917",
+      "reviewedThroughCommit": "3c4f741f536f7ac8849879799007799d2beb51ad",
+      "reviewedAt": "2026-09-17T06:07:24Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "live_chrome_qa",
+          "local_financial_control_correction",
+          "focused_source_regression",
+          "local_typecheck"
+        ],
+        "operatorOnly": [
+          "independent_release_acceptance",
+          "authorized_replit_publish",
+          "customer_field_verification"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Live Chrome QA recorded an hour on a priced task without an assignment ID, causing actual internal cost to remain zero. The existing QA entry is retained as immutable evidence; a forward-safe local correction binds a unique assignment or requires explicit selection."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The exact security-corrected Replit release published with schema parity and database copy off; the new financial correction remains a separate unpushed candidate requiring build, review, publication, and live retest."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical financial and operational authority remains unchanged by this time-entry attribution correction."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing governed release and evidence rules already cover this bounded correction."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial, browser, and refresh-persistence acceptance gates apply without amendment."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The long-term product vision is unaffected by selecting a canonical priced assignment."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No architectural route, database table, or generated platform structure changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next or Navisworks code, identity, or deployment artifact changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report format or document rendering authority changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim is introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the verified publication, partial live smoke, exact financial finding, and local-only correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks release/retest and Lorena-authenticated full-cycle acceptance still outstanding."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical evidence is rewritten and this local candidate is not yet published."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/job-operations-service.ts",
+        "artifacts/api-server/src/lib/job-operations.behavior.ts",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dfc4825d177adcade17203c383fad01f5bdc317f0ae3d7d93678fe014fc1164f"
     }
   ]
 }

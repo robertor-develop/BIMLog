@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Replit release and live Operations QA — published release plus local follow-up — 2026-09-17
+
+- GitHub `master` and clean Replit Shell were aligned at `3c4f741f536f7ac8849879799007799d2beb51ad`. Replit frozen install, zero-critical dependency audit, full release build, exact development-schema parity, and a Level 1 Replit security scan with zero critical findings passed. Replit published successfully with the critical-vulnerability guard on and development-to-production database copy off. The production screen reported the new release; this is not a claim that every Lorena acceptance path passed.
+- Authenticated Chrome on production project #50 (`robertosntest job`) confirmed Intake persisted its contract, linked APU, two tasks, two priced resource assignments, budget-governance choice, and activated Operations records. Operations task assignee, in-progress status, 10% progress, and a one-hour entry survived refresh. Risk filtering reduced one row to zero and Package filtering returned the attributable row.
+- The live QA exposed a financial control gap: choosing the default task-assignee option for an existing priced task recorded one hour but no assignment ID, so actual internal cost stayed at zero. The old QA entry remains immutable evidence. A local candidate now auto-binds exactly one priced assignment and requires a choice when several exist; this follow-up is not pushed or published. Company PMO catalog access under Lorena's actual login, second-user delegation, attachment/submittal flow, and full-cycle acceptance remain unverified.
+
 ## Roberto Intake financial regression follow-up — local candidate — 2026-09-16
 
 - Independent review of the first local fix requested a direct spreadsheet-import pricing regression and same-currency APU auto-binding. Both are implemented locally: an existing $75 unit rate survives an 80-hour reimport, a new item starts at zero rather than inheriting a $6,000 plan total, and sole-version binding rejects currency mismatch. The Intake suite passes. An intermittent autosave error banner is also cleared only when a retry actually saves and only when it still matches that autosave error. These follow-ups are not pushed, published, or live verified.
