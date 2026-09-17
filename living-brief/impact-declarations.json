@@ -27786,6 +27786,102 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "568039961b87b5b1afe66f197daed6f1594be3e1f3f9fd0b0001014ed868a7ef"
+    },
+    {
+      "taskId": "lens-next-bounded-area-3d-scope-20260917",
+      "reviewedThroughCommit": "94923a30134d68a7f78ec98439866e70c0dda25c",
+      "reviewedAt": "2026-09-17T12:42:07.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "reconcile_in_clean_worktree",
+          "run_local_validation"
+        ],
+        "operatorOnly": [
+          "authorized_replit_publish",
+          "native_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "plugin",
+            "open_loop",
+            "audit"
+          ],
+          "summary": "A bounded-area 3D geometry prototype must not alter existing exact Working View, XML, digest, identity, active/history or controlled-publish behavior."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "One-source-of-truth and truthful-evidence doctrine already governs this product-scope clarification."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Coordination and release authority is unchanged; the new geometry direction remains a local plan."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing real-component, responsive, failure-state and field-acceptance requirements remain in force."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The long-term product vision is not amended by specifying bounded 3D context in Lens Next."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform route, generated architecture or database schema changes in this planning amendment."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Defines the selected bounded-area geometry target, feasibility gate and conditional block allocation."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No exported report or document rendering authority is affected by this 3D scope decision."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This plan makes no new external standard or compliance claim requiring registry revision."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Distinguishes Roberto's chosen area-of-interest target from a built or published 3D feature."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Allocates the prototype and conditional implementation to Builds 6–20 within the existing 50."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Preserves the explicit user scope decision and records that no geometry or production operation occurred."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d4efb7c0cf74c80d2d165a0fcacab7c3c8d04ea40acc67769ab439953ff18547"
     }
   ]
 }

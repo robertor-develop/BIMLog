@@ -1392,3 +1392,8 @@ was performed or authorized.
 - Authenticated live Chrome inspection at 1366×607 found published P31 to be a viewpoint/issue workspace, not the supplied clash-dashboard mockup. The issue list began near y=453 and expanded model tools displaced it below the viewport. The selected issue had a captured thumbnail; most visible cards did not. Observed inventory values are recorded as one-session evidence in `PLUGIN.md`, never as target data.
 - Source inspection found `LensNextFilters` limited to search/status/trade/floor/priority, a Lens issue DTO without clash or geometry fields, a separate `clashes` schema with some element/location fields but no Lens foreign key, and a Native bridge with viewpoint/visual-state/XML commands but no clash enumeration or mesh streaming. These are current-contract findings, not proof that future 3D is impossible.
 - The Block 1 matrix and protected acceptance criteria are local documentation only. No Native-connected Working View/XML, full live smoke, production publishing or literal mockup parity is claimed.
+
+## 2026-09-17 — Lens Next bounded-area 3D scope decision
+
+- Roberto rejected a two-element-only view as insufficient and selected a small interactive 3D neighborhood around the exact clash/viewpoint, including relevant surrounding systems and structure but not the whole model. Long crossing geometry must be clipped, and expansion is deliberate.
+- The existing 50-build program now assigns a one-real-clash, both-year feasibility prototype to Builds 6–10; implementation of a versioned bridge and web pane remains conditional in Builds 11–20. This records scope and sequencing only; no geometry was extracted, uploaded, rendered or published.
