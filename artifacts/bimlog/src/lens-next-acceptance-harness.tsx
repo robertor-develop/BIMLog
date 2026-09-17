@@ -9,6 +9,7 @@ import "./index.css";
 import "./features/lens-next/lens-next-panel.css";
 
 const noop = () => undefined;
+const imageScenario = typeof location === "undefined" ? null : new URLSearchParams(location.search).get("imageScenario");
 
 function issue(serverId: number): LensNextIssue {
   const trades = ["HVAC", "Plumbing", "Fire Protection", "Electrical"];
@@ -34,7 +35,7 @@ function issue(serverId: number): LensNextIssue {
     syncedAt: "2026-09-16T14:10:00.000Z",
     supersedesId: null,
     supersedesCode: null,
-    screenshotUrl: serverId === 2 ? "/images/hero-bg.png" : null,
+    screenshotUrl: serverId === 2 ? (imageScenario === "broken" ? "/__lens_next_missing_capture__.png" : "/images/hero-bg.png") : null,
     visualStateAvailable: true,
     visualStateDigest: "a".repeat(64),
   };

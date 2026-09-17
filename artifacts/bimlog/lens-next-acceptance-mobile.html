@@ -14,6 +14,8 @@
     <iframe title="Lens Next exact-390 production component" src="/lens-next-acceptance-harness.html?acceptanceMobile=390"></iframe>
     <pre id="acceptance-report" aria-live="polite">Waiting for exact-390 component report…</pre>
     <script>
+      const imageScenario = new URLSearchParams(location.search).get("imageScenario");
+      if (imageScenario === "broken") document.querySelector("iframe").src += "&imageScenario=broken";
       addEventListener("message", event => {
         if (event.origin !== location.origin || event.data?.type !== "lens-next-mobile-acceptance") return;
         document.getElementById("acceptance-report").textContent = JSON.stringify(event.data.metrics);

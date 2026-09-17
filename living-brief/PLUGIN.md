@@ -500,3 +500,15 @@ The genuine-clash geometry gate remains open. This block is a read-only presenta
 - Build 40: exercise mixed and empty plans in focused behavior tests, frontend typecheck, production bundle, and existing Lens Next regressions. Browser component-fixture and pixel/live/Native acceptance are separate gates and must not be inferred from typecheck.
 
 The scope is still the loaded authorized active issues plus local inventory from the explicitly bound model; applying issue filters may omit platform issues from the plan but never changes the inventory preview. No clash-to-issue join, embedded geometry, screenshot generation, automatic send, data mutation, schema change, or publish is introduced.
+
+### Independent Block 9 Builds 41–45 — capture truth and bounded-list candidate — 2026-09-17
+
+The exact clash-linkage and real Native 3D gates remain open. This independent slice corrects the presentation of **existing BIMLog screenshot references** only; it does not create or link clash imagery.
+
+- Build 41: key thumbnail and selected-capture load state by project/server identity, mutation version and screenshot URL. A prior record's loaded/error state cannot carry into a changed record; a new explicit retry has its own attempt key.
+- Build 42: label a thumbnail as captured only after the browser's image `onLoad`. Before that it says loading; a failed request becomes unavailable; no URL remains an explicit no-capture state. English/Spanish labels are supplied. The existing screenshot filter is relabeled as a **stored image reference** filter, because its predicate checks URL presence rather than download success.
+- Build 43: the selected overview reserves a bounded image area while loading, shows the stored capture timestamp only after load, and exposes a manual Retry after error. Retry cannot manufacture a replacement image and does not change the stored issue.
+- Build 44: card thumbnails remain lazy/async with low fetch priority and list page sizes remain capped at 20/50/100. A synthetic 10,000-record filter/sort/summary characterization checks deterministic counts and a 100-row slice; its elapsed time is a local calculation, **not** a browser render, network, customer-model, or Native performance guarantee.
+- Build 45: focused state, large-list, summary, responsive, accessibility and existing component-fixture tests plus frontend typecheck and production bundle. Local Chrome exercises loaded, missing and intentionally broken fixture URLs, explicit retry, desktop rendering, Spanish wording and exact-390 broken-image containment. The fixture uses a generic local asset, never customer clash evidence.
+
+The issue summary still counts **stored image references**, not successfully loaded images. Actual customer-image delivery, authentication/denial, pixel review of the released screen, cross-year Native behavior, exact clash-linked pair/context imagery, performance under real inventory and publication remain separate gates.

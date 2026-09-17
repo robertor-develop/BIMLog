@@ -28,6 +28,7 @@ import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDes
 import { lensNextSyncLabel, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance, lensNextSyncReviewCount, lensNextSyncReviewItems, type LensNextSyncReviewFilter } from "./lens-next-sync-presentation";
 import { lensNextSelectionTarget, type LensNextSelectionDirection } from "./lens-next-selection-navigation";
 import { summarizeLensNextIssues } from "./lens-next-issue-summary";
+import { lensNextCaptureKey, lensNextImageStatus, type LensNextImageLoad } from "./lens-next-image-state";
 import { useI18n } from "../../lib/i18n";
 
 const STATUS_LABELS = LENS_NEXT_STATUS_LABELS;
@@ -64,61 +65,73 @@ function ConnectionBadge({
 }
 
 function Thumbnail({ issue }: { issue: LensNextIssue }) {
-  const [loadFailed, setLoadFailed] = React.useState(false);
-  React.useEffect(() => setLoadFailed(false), [issue.screenshotUrl]);
-  if (!issue.screenshotUrl) {
+  const { tt } = useI18n();
+  const [load, setLoad] = React.useState<LensNextImageLoad | null>(null);
+  const imageKey = lensNextCaptureKey(issue);
+  const status = lensNextImageStatus(load, imageKey, issue.screenshotUrl);
+  if (status === "missing") {
     return (
       <div
         className="lens-next__thumbnail lens-next__thumbnail--empty"
         role="img"
-        aria-label="No captured thumbnail"
+        aria-label={tt("No captured thumbnail", "Sin miniatura capturada")}
       >
         <ImageOff aria-hidden="true" size={20} strokeWidth={1.75} />
-        <small>No captured thumbnail</small>
+        <small>{tt("No captured thumbnail", "Sin miniatura")}</small>
       </div>
     );
   }
-  if (loadFailed) {
+  if (status === "error") {
     return (
       <div
         className="lens-next__thumbnail lens-next__thumbnail--error"
         role="img"
-        aria-label={`Thumbnail unavailable for issue ${displayCode(issue)}`}
+        aria-label={`${tt("Thumbnail unavailable for issue", "Miniatura no disponible para la incidencia")} ${displayCode(issue)}`}
       >
         <ImageOff aria-hidden="true" size={20} strokeWidth={1.75} />
-        <small>Thumbnail unavailable</small>
+        <small>{tt("Thumbnail unavailable", "Miniatura no disponible")}</small>
       </div>
     );
   }
   return (
-    <span className="lens-next__thumbnail-frame">
+    <span className="lens-next__thumbnail-frame" aria-busy={status === "loading"}>
       <img
         className="lens-next__thumbnail"
-        src={issue.screenshotUrl}
-        alt={`Captured image for issue ${displayCode(issue)}`}
+        src={issue.screenshotUrl ?? undefined}
+        alt={status === "loaded" ? `${tt("Captured image for issue", "Imagen capturada para la incidencia")} ${displayCode(issue)}` : ""}
+        data-load-state={status}
         loading="lazy"
-        onError={() => setLoadFailed(true)}
+        decoding="async"
+        fetchPriority="low"
+        onLoad={() => setLoad({ key: imageKey, status: "loaded" })}
+        onError={() => setLoad({ key: imageKey, status: "error" })}
       />
-      <small className="lens-next__thumbnail-state">Captured image</small>
+      <small className="lens-next__thumbnail-state">{status === "loaded" ? tt("Captured image", "Imagen capturada") : tt("Loading image", "Cargando imagen")}</small>
     </span>
   );
 }
 
 function CapturedView({ issue }: { issue: LensNextIssue }) {
   const { tt } = useI18n();
-  const [loadFailed, setLoadFailed] = React.useState(false);
-  React.useEffect(() => setLoadFailed(false), [issue.screenshotUrl]);
+  const [load, setLoad] = React.useState<LensNextImageLoad | null>(null);
+  const [attempt, setAttempt] = React.useState(0);
+  const imageKey = lensNextCaptureKey(issue, attempt);
+  const status = lensNextImageStatus(load, imageKey, issue.screenshotUrl);
   return (
     <figure className="lens-next__captured-view">
-      {issue.screenshotUrl && !loadFailed ? (
-        <img src={issue.screenshotUrl} alt={`${tt("Captured BIMLog view for issue", "Vista BIMLog capturada para la incidencia")} ${displayCode(issue)}`} onError={() => setLoadFailed(true)} />
-      ) : (
-        <div className="lens-next__captured-view-empty" role="img" aria-label={loadFailed ? tt("Captured image could not be loaded", "No se pudo cargar la imagen capturada") : tt("No captured image available", "No hay imagen capturada")}>
+      {status === "missing" || status === "error" ? (
+        <div className="lens-next__captured-view-empty" role="img" aria-label={status === "error" ? tt("Captured image could not be loaded", "No se pudo cargar la imagen capturada") : tt("No captured image available", "No hay imagen capturada")}>
           <ImageOff aria-hidden="true" size={30} />
-          <span>{loadFailed ? tt("Captured image could not be loaded", "No se pudo cargar la imagen capturada") : tt("No captured image available", "No hay imagen capturada")}</span>
+          <span>{status === "error" ? tt("Captured image could not be loaded", "No se pudo cargar la imagen capturada") : tt("No captured image available", "No hay imagen capturada")}</span>
+        </div>
+      ) : (
+        <div className="lens-next__captured-image-frame" aria-busy={status === "loading"}>
+          <img key={imageKey} src={issue.screenshotUrl ?? undefined} data-load-state={status} alt={status === "loaded" ? `${tt("Captured BIMLog view for issue", "Vista BIMLog capturada para la incidencia")} ${displayCode(issue)}` : ""} decoding="async" onLoad={() => setLoad({ key: imageKey, status: "loaded" })} onError={() => setLoad({ key: imageKey, status: "error" })} />
+          {status === "loading" && <span className="lens-next__captured-image-loading" role="status">{tt("Loading stored capture…", "Cargando captura guardada…")}</span>}
         </div>
       )}
-      <figcaption>{loadFailed ? tt("The stored capture could not be displayed. No replacement image was generated.", "No se pudo mostrar la captura guardada. No se generó una imagen de reemplazo.") : issue.screenshotUrl ? `${tt("BIMLog capture", "Captura BIMLog")} · ${formatTimestamp(issue.capturedAt)}` : tt("No image is stored for this issue. Open its governed Working View in Navisworks when available.", "Esta incidencia no tiene una imagen guardada. Abra su vista de trabajo controlada en Navisworks cuando esté disponible.")}</figcaption>
+      <figcaption>{status === "error" ? tt("The stored capture could not be displayed. No replacement image was generated.", "No se pudo mostrar la captura guardada. No se generó una imagen de reemplazo.") : status === "loaded" ? `${tt("BIMLog capture", "Captura BIMLog")} · ${formatTimestamp(issue.capturedAt)}` : status === "loading" ? tt("A stored image reference exists; display is pending.", "Existe una referencia a la imagen guardada; su visualización está pendiente.") : tt("No image is stored for this issue. Open its governed Working View in Navisworks when available.", "Esta incidencia no tiene una imagen guardada. Abra su vista de trabajo controlada en Navisworks cuando esté disponible.")}</figcaption>
+      {status === "error" && <button type="button" onClick={() => setAttempt(value => value + 1)}>{tt("Retry image", "Reintentar imagen")}</button>}
     </figure>
   );
 }
@@ -900,9 +913,9 @@ export function LensNextPanelView({
             <label className="lens-next__field"><span>Captured from</span><input type="date" value={filters.capturedFrom} onChange={(event) => onFiltersChange({ ...filters, capturedFrom: event.target.value, capturedTo: filters.capturedTo && filters.capturedTo < event.target.value ? "" : filters.capturedTo })} /></label>
             <label className="lens-next__field"><span>Captured through</span><input type="date" min={filters.capturedFrom || undefined} value={filters.capturedTo} onChange={(event) => onFiltersChange({ ...filters, capturedTo: event.target.value })} /></label>
             <label className="lens-next__field">
-              <span>Captured image</span>
+              <span>{tt("Stored image reference", "Referencia de imagen guardada")}</span>
               <select value={filters.screenshot} onChange={(event) => onFiltersChange({ ...filters, screenshot: event.target.value as LensNextFilters["screenshot"] })}>
-                <option value="all">All</option><option value="captured">Available</option><option value="missing">Missing</option>
+                <option value="all">{tt("All", "Todas")}</option><option value="captured">{tt("Recorded", "Registrada")}</option><option value="missing">{tt("Not recorded", "Sin registrar")}</option>
               </select>
             </label>
             <small>These filters use BIMLog issue records. Clash severity and clash source are not available here.</small>

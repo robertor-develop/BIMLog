@@ -28382,6 +28382,85 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "491c71ea5087821dedb05993f278ae675e99e53c03039ed643a1b748bf812ae0"
+    },
+    {
+      "taskId": "lens-next-mockup-independent-block09-capture-performance-20260917",
+      "reviewedThroughCommit": "60d7cf576e13e47ce2ad26857ccd16a9da8da1a4",
+      "reviewedAt": "2026-09-17T14:36:11.000Z",
+      "status": "candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "A stored BIMLog capture remains distinct from a Native clash image or bounded 3D model."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing production component and excluded fixture preserve the governed release boundary."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Live imagery, exact linkage, Native and deployment gates remain open."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved mockup direction is unchanged; no false clash imagery is introduced."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, schema, permission, persistence or Native bridge contract changed."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records Builds 41 to 45 and the capture/performance provenance boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export asset changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local candidate evidence and open field gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Marks local Block 9 and retains Block 10 plus exact clash-linkage gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records browser loaded/broken/mobile evidence and synthetic performance limits."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/lens-next-acceptance-mobile.html",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-image-state.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-image-state.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-large-list.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/lens-next-acceptance-harness.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "2e0df614668980ef78ea11c10907f984115f617dd055d17cb2dd0ebd31e97225"
     }
   ]
 }

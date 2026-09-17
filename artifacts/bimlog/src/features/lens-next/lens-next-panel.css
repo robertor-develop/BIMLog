@@ -308,6 +308,7 @@
   width: 72px;
   height: 64px;
 }
+.lens-next__thumbnail[data-load-state="loading"] { opacity: 0; }
 .lens-next__thumbnail-state {
   position: absolute;
   right: 3px;
@@ -454,8 +455,12 @@
 .lens-next__detail-panel { display: grid; align-content: start; gap: 10px; min-width: 0; }
 .lens-next__captured-view { display: grid; gap: 6px; margin: 0; }
 .lens-next__captured-view img, .lens-next__captured-view-empty { display: block; width: 100%; max-height: 360px; min-height: 180px; border: 1px solid var(--lens-next-line); border-radius: 8px; background: #f3f6f9; object-fit: contain; }
+.lens-next__captured-image-frame { position: relative; min-height: 180px; }
+.lens-next__captured-image-frame img[data-load-state="loading"] { opacity: 0; }
+.lens-next__captured-image-loading { position: absolute; inset: 0; display: grid; place-items: center; min-height: 180px; border: 1px solid var(--lens-next-line); border-radius: 8px; color: var(--lens-next-muted); background: #f3f6f9; text-align: center; }
 .lens-next__captured-view-empty { display: grid; place-content: center; justify-items: center; gap: 6px; color: var(--lens-next-muted); text-align: center; }
 .lens-next__captured-view figcaption { color: var(--lens-next-muted); font-size: 12px; }
+.lens-next__captured-view > button { justify-self: start; }
 .lens-next__overview-facts { display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 0 !important; }
 .lens-next__overview-facts > div { min-width: 0; padding: 8px; border: 1px solid var(--lens-next-line); border-radius: 6px; }
 .lens-next__overview-facts dt { color: var(--lens-next-muted); font-size: 11px; }
