@@ -512,3 +512,11 @@ The exact clash-linkage and real Native 3D gates remain open. This independent s
 - Build 45: focused state, large-list, summary, responsive, accessibility and existing component-fixture tests plus frontend typecheck and production bundle. Local Chrome exercises loaded, missing and intentionally broken fixture URLs, explicit retry, desktop rendering, Spanish wording and exact-390 broken-image containment. The fixture uses a generic local asset, never customer clash evidence.
 
 The issue summary still counts **stored image references**, not successfully loaded images. Actual customer-image delivery, authentication/denial, pixel review of the released screen, cross-year Native behavior, exact clash-linked pair/context imagery, performance under real inventory and publication remain separate gates.
+
+### Independent Block 10 Builds 46–50 — partial local integration candidate — 2026-09-17
+
+- Build 46: compact the issue-list heading into two deliberate rows so count and card/table choice do not compete with sorting and refresh time. The source uses the existing bilingual `tt` path.
+- Build 47: remove the embedded list's 160px forced minimum, which pushed the list over pagination in a short Native-sized viewport. The list remains its own scroll owner; pagination now starts at its measured lower edge.
+- Build 48: reconcile three source-string behavior assertions with the current bilingual and capture-truth contract, then run all 37 Lens Next behavior files. All pass locally.
+- Build 49: frontend typecheck, production Vite bundle, bundle verifier and local Chrome production-component fixture checks pass. At a short desktop-sized viewport, read-only DOM geometry confirms zero list/pagination overlap. The exact-390 fixture reports `horizontalOverflow:false` in Spanish. Chrome screenshot capture timed out, so pixel inspection remains open.
+- Build 50: **not closed**. Integrated release requires a real project/model-bound clash, actual bounded 3D pair-and-nearby-context imagery, Native 2021/2025 field runs, authenticated permissions/empty/error checks, deployed Chrome smoke and customer review. None is inferred from the local fixture. No push, Replit synchronization or publication is part of this local block.

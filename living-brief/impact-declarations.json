@@ -28461,6 +28461,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2e0df614668980ef78ea11c10907f984115f617dd055d17cb2dd0ebd31e97225"
+    },
+    {
+      "taskId": "lens-next-mockup-independent-block10-partial-integration-20260917",
+      "reviewedThroughCommit": "140008e206b16273f04463c6499e9c26d97f12e0",
+      "reviewedAt": "2026-09-17T14:57:19.000Z",
+      "status": "candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "A local UI/regression candidate does not expand BIMLog product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution and release gates remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Pixel, live, Native and customer acceptance remain open."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved mockup direction and real-data provenance boundary are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, schema, authentication, persistence or platform structure changed."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records partial Builds 46 to 50 and open field gates."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export artifact changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local integration evidence and release limitations."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps Build 50 and exact genuine-clash acceptance open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the observed overlap, correction and test boundaries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-issue-presentation.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-modern-workspace.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/features/lens-next/lens-next-publishing-ui.behavior.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "99fea2d503fc09416bdc8696c23458e831796c1c58e734cdb8c62fab7665c71d"
     }
   ]
 }

@@ -931,16 +931,16 @@ export function LensNextPanelView({
       )}
 
       <div className="lens-next__list-heading">
-        <strong>{filteredIssues.length} of {activeIssueCount} {activeIssueCount === 1 ? "issue" : "issues"}</strong>
-        <div className="lens-next__presentation-toggle" role="group" aria-label="Issue presentation">
-          <button type="button" aria-pressed={issuePresentation === "cards"} onClick={() => setIssuePresentation("cards")}><List aria-hidden="true" size={14} /> Cards</button>
-          <button type="button" aria-pressed={issuePresentation === "table"} onClick={() => setIssuePresentation("table")}><Table2 aria-hidden="true" size={14} /> Table</button>
+        <strong>{filteredIssues.length} {tt("of", "de")} {activeIssueCount} {activeIssueCount === 1 ? tt("issue", "incidencia") : tt("issues", "incidencias")}</strong>
+        <div className="lens-next__presentation-toggle" role="group" aria-label={tt("Issue presentation", "Presentación de incidencias")}>
+          <button type="button" aria-pressed={issuePresentation === "cards"} onClick={() => setIssuePresentation("cards")}><List aria-hidden="true" size={14} /> {tt("Cards", "Tarjetas")}</button>
+          <button type="button" aria-pressed={issuePresentation === "table"} onClick={() => setIssuePresentation("table")}><Table2 aria-hidden="true" size={14} /> {tt("Table", "Tabla")}</button>
         </div>
-        <label>Sort <select aria-label="Sort issues" value={issueSort} onChange={event=>onIssueSortChange(event.target.value as LensNextIssueSort)}><option value="priority">Priority</option><option value="newest">Newest</option><option value="code">Issue code</option></select></label>
+        <label className="lens-next__list-sort">{tt("Sort", "Ordenar")} <select aria-label={tt("Sort issues", "Ordenar incidencias")} value={issueSort} onChange={event=>onIssueSortChange(event.target.value as LensNextIssueSort)}><option value="priority">{tt("Priority", "Prioridad")}</option><option value="newest">{tt("Newest", "Más recientes")}</option><option value="code">{tt("Issue code", "Código de incidencia")}</option></select></label>
         <small>
           {lastRefreshedAt
-            ? `Updated ${formatTimestamp(lastRefreshedAt)}`
-            : "Not refreshed"}
+            ? `${tt("Updated", "Actualizado")} ${formatTimestamp(lastRefreshedAt)}`
+            : tt("Not refreshed", "Sin actualizar")}
         </small>
       </div>
       <section

@@ -227,17 +227,43 @@
   font-size: 11px;
 }
 .lens-next__list-heading {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 8px;
+  row-gap: 4px;
   padding: 10px 16px 8px;
 }
+.lens-next__list-heading > strong {
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.25;
+}
+.lens-next__list-sort {
+  grid-column: 1;
+  grid-row: 2;
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  gap: 5px;
+}
+.lens-next__list-sort select {
+  min-width: 0;
+  max-width: 100%;
+}
 .lens-next__list-heading small {
+  grid-column: 2;
+  grid-row: 2;
+  min-width: 0;
   color: var(--lens-next-muted);
   font-size: 10px;
+  text-align: right;
+  overflow-wrap: anywhere;
 }
 .lens-next__presentation-toggle {
   display: inline-flex;
+  grid-column: 2;
+  grid-row: 1;
   gap: 2px;
   padding: 2px;
   border-radius: 8px;
@@ -872,7 +898,7 @@
 
 .lens-next-workspace--embedded .lens-next__browser .lens-next__issue-list {
   flex: 1 1 240px;
-  min-height: 160px;
+  min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
 }

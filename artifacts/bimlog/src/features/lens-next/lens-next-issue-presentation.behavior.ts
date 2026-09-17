@@ -22,10 +22,10 @@ assert.equal(LENS_NEXT_STATUS_LABELS.waiting_design, "Waiting Design");
 assert.equal(lensNextIssueAccessibleLabel(issue), "View issue CL-091, P1 Critical, Waiting Design, HVAC, Level 02");
 
 const view = readFileSync(new URL("./LensNextPanelView.tsx", import.meta.url), "utf8");
-assert.match(view, /aria-label="Issue presentation"/);
+assert.match(view, /aria-label=\{tt\("Issue presentation", "Presentación de incidencias"\)\}/);
 assert.match(view, /issuePresentation === "cards"/);
 assert.match(view, /<IssueTable issues=\{visibleIssues\}/);
-assert.match(view, /Verified capture/);
+assert.match(view, /BIMLog capture/);
 assert.match(view, /No captured thumbnail/);
 assert.match(view, /Thumbnail unavailable/);
 assert.match(view, /className="lens-next__detail-header"/);
