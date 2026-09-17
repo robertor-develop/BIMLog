@@ -28154,6 +28154,81 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a8bffc5576f9c275cb855698d9fcffe2e479f59ac68db62c0f8170203b702487"
+    },
+    {
+      "taskId": "lens-next-mockup-independent-block06-detail-20260917",
+      "reviewedThroughCommit": "3711c9f45ec83f5c8fb905ae717eb2e8e89a4752",
+      "reviewedAt": "2026-09-17T13:48:47.000Z",
+      "status": "candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The detail presentation keeps BIMLog and Native source-of-truth boundaries intact."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Production controls are reused; the synthetic fixture remains excluded from the production route."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The separate live, visual, Native and release gates remain applicable."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved mockup-parity direction is unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "There is no route, schema, API or persistence contract change."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Documents the independent selected-issue detail slice and honest clash-data boundary."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or exported artifact changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard claim or applicability change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local implementation and its unclosed visual and field gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Marks local Builds 26 to 30 and preserves remaining blocks and geometry gates."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records actual component-harness Chrome interactions and fixture limits."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/lens-next-acceptance-harness.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a1f3591c9ab02c7a456304ef9641768656b044b2b4e2e5f227a473555fa29802"
     }
   ]
 }

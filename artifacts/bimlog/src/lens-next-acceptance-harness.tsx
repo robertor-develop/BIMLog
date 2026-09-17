@@ -34,7 +34,7 @@ function issue(serverId: number): LensNextIssue {
     syncedAt: "2026-09-16T14:10:00.000Z",
     supersedesId: null,
     supersedesCode: null,
-    screenshotUrl: null,
+    screenshotUrl: serverId === 2 ? "/images/hero-bg.png" : null,
     visualStateAvailable: true,
     visualStateDigest: "a".repeat(64),
   };

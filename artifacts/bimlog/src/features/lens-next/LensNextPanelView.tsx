@@ -100,6 +100,25 @@ function Thumbnail({ issue }: { issue: LensNextIssue }) {
   );
 }
 
+function CapturedView({ issue }: { issue: LensNextIssue }) {
+  const { tt } = useI18n();
+  const [loadFailed, setLoadFailed] = React.useState(false);
+  React.useEffect(() => setLoadFailed(false), [issue.screenshotUrl]);
+  return (
+    <figure className="lens-next__captured-view">
+      {issue.screenshotUrl && !loadFailed ? (
+        <img src={issue.screenshotUrl} alt={`${tt("Captured BIMLog view for issue", "Vista BIMLog capturada para la incidencia")} ${displayCode(issue)}`} onError={() => setLoadFailed(true)} />
+      ) : (
+        <div className="lens-next__captured-view-empty" role="img" aria-label={loadFailed ? tt("Captured image could not be loaded", "No se pudo cargar la imagen capturada") : tt("No captured image available", "No hay imagen capturada")}>
+          <ImageOff aria-hidden="true" size={30} />
+          <span>{loadFailed ? tt("Captured image could not be loaded", "No se pudo cargar la imagen capturada") : tt("No captured image available", "No hay imagen capturada")}</span>
+        </div>
+      )}
+      <figcaption>{loadFailed ? tt("The stored capture could not be displayed. No replacement image was generated.", "No se pudo mostrar la captura guardada. No se generó una imagen de reemplazo.") : issue.screenshotUrl ? `${tt("BIMLog capture", "Captura BIMLog")} · ${formatTimestamp(issue.capturedAt)}` : tt("No image is stored for this issue. Open its governed Working View in Navisworks when available.", "Esta incidencia no tiene una imagen guardada. Abra su vista de trabajo controlada en Navisworks cuando esté disponible.")}</figcaption>
+    </figure>
+  );
+}
+
 function OperationStatus({ label, state }: { label: string; state: "idle" | "capturing" | "creating" | "running" | "uploading" | "publishing" | "success" | "published" | "error" }) {
   if (state === "idle") return null;
   const active = state === "capturing" || state === "creating" || state === "running" || state === "uploading" || state === "publishing";
@@ -457,6 +476,7 @@ export function LensNextPanelView({
   const [linkTargetId, setLinkTargetId] = React.useState("");
   const [guideOpen, setGuideOpen] = React.useState(false);
   const [issuePresentation, setIssuePresentation] = React.useState<"cards" | "table">("cards");
+  const [detailView, setDetailView] = React.useState<"overview" | "bimlog" | "properties" | "activity">("overview");
   const createSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const linkSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const selectedIssueRef = React.useRef<HTMLElement | null>(null);
@@ -466,6 +486,7 @@ export function LensNextPanelView({
   React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
   React.useEffect(() => { setLinkType("rfi"); setLinkTargetId(""); }, [selectedIssue?.identity.serverId]);
+  React.useEffect(() => setDetailView("overview"), [selectedIssue?.identity.serverId]);
   React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
   React.useEffect(() => {
     if (!selectedIssue || typeof window === "undefined" || !window.matchMedia("(max-width: 760px)").matches) return;
@@ -950,13 +971,31 @@ export function LensNextPanelView({
             >
               {workingViewState === "opening" ? tt("Opening Working View…", "Abriendo vista de trabajo…") : tt("Open Working View", "Abrir vista de trabajo")}
             </button>
-            <button type="button" onClick={onLoadHistory} disabled={history === "loading"}>
+            <button type="button" onClick={() => { setDetailView("activity"); onLoadHistory(); }} disabled={history === "loading"}>
               {history === "loading" ? tt("Loading history…", "Cargando historial…") : tt("View history", "Ver historial")}
             </button>
-            <button type="button" disabled={!selectedIssue.publishingAllowed} onClick={() => revealSection(linkSectionRef.current)}>
+            <button type="button" disabled={!selectedIssue.publishingAllowed} onClick={() => { setDetailView("bimlog"); window.setTimeout(() => revealSection(linkSectionRef.current), 0); }}>
               {tt("Link BIMLog item", "Vincular elemento BIMLog")}
             </button>
           </div>
+          <nav className="lens-next__detail-tabs" aria-label="Issue detail views">
+            {(["overview", "bimlog", "properties", "activity"] as const).map(view => (
+              <button key={view} type="button" aria-pressed={detailView === view} onClick={() => { setDetailView(view); if (view === "activity" && !history && !historyError) onLoadHistory(); }}>
+                {view === "overview" ? tt("Overview", "Resumen") : view === "bimlog" ? tt("BIMLog issue", "Incidencia BIMLog") : view === "properties" ? tt("Properties", "Propiedades") : tt("Activity", "Actividad")}
+              </button>
+            ))}
+          </nav>
+          {detailView === "overview" && <section className="lens-next__detail-panel" aria-label="Captured issue overview">
+            <CapturedView issue={selectedIssue} />
+            <dl className="lens-next__overview-facts">
+              <div><dt>{tt("Trade", "Disciplina")}</dt><dd>{selectedIssue.trade || tt("Not recorded", "Sin registrar")}</dd></div>
+              <div><dt>{tt("Floor", "Piso")}</dt><dd>{selectedIssue.floor || tt("Not recorded", "Sin registrar")}</dd></div>
+              <div><dt>{tt("Report type", "Tipo de informe")}</dt><dd>{selectedIssue.reportType || tt("Not recorded", "Sin registrar")}</dd></div>
+              <div><dt>{tt("Responsible company", "Empresa responsable")}</dt><dd>{selectedIssue.responsibleCompany || tt("Unassigned", "Sin asignar")}</dd></div>
+            </dl>
+            <p className="lens-next__data-boundary">{tt("Clash pair, surrounding geometry, grid and distance are unavailable for this BIMLog issue until an exact project/model-bound clash link is verified. This image is a capture, not interactive 3D.", "El par de interferencia, la geometría cercana, la retícula y la distancia no están disponibles para esta incidencia BIMLog hasta verificar un vínculo exacto con la interferencia del proyecto y modelo. Esta imagen es una captura, no un modelo 3D interactivo.")}</p>
+          </section>}
+          {detailView === "properties" && <section className="lens-next__detail-panel" aria-label="Issue properties">
           <details className="lens-next__detail-section" open>
             <summary>Properties and model evidence</summary>
           <dl className="lens-next__detail-properties" aria-label="Issue identity and model evidence">
@@ -1010,6 +1049,8 @@ export function LensNextPanelView({
             </div>
           </dl>
           </details>
+          </section>}
+          {detailView === "bimlog" && <section className="lens-next__detail-panel" aria-label="BIMLog issue records and controlled actions">
           <details ref={linkSectionRef} className="lens-next__publisher lens-next__detail-section" aria-label="Linked BIMLog items">
             <summary>Linked BIMLog items{linkedItems && linkedItems !== "loading" ? ` (${linkedItems.links.length})` : ""}</summary>
             <div className="lens-next__detail-section-content">
@@ -1084,6 +1125,8 @@ export function LensNextPanelView({
             {publishMessage && <p className={publishState === "error" ? "lens-next__inline-error" : "lens-next__publish-success"} role="status">{publishMessage}</p>}
             </div>
           </details>
+          </section>}
+          {detailView === "activity" && <section className="lens-next__detail-panel" aria-label="Issue activity and history">
           {(historyError || (history && history !== "loading")) && (
             <details className="lens-next__detail-section lens-next__detail-section--records" open>
               <summary>History and activity</summary>
@@ -1093,6 +1136,9 @@ export function LensNextPanelView({
               </div>
             </details>
           )}
+          {history === "loading" && <p role="status">{tt("Loading issue history…", "Cargando historial de la incidencia…")}</p>}
+          {!history && !historyError && <p role="status">{tt("No history loaded for this issue.", "No se ha cargado el historial de esta incidencia.")}</p>}
+          </section>}
         </section>
       ) : (
         <section

@@ -464,3 +464,15 @@ Blocks 3–4 remain gated by the unresolved real-clash geometry proof. Block 5's
 - Build 25: collapse personal view controls and additional facets until requested, preserve selection, and label a selected record that falls outside the active filters with a Reset action instead of misleading `0 / 0` navigation. The test-only acceptance harness imports the production component; it does not ship fixture data or change the production route.
 
 Focused filtering and prior Lens Next desktop/mobile/accessibility regressions pass. Local Chrome on that production component with synthetic fixture records confirmed company 100→50, date-to-empty, Reset, selected-outside-filter guidance, and exact-390 selection-to-list return without horizontal overflow. The screenshot and visual checks are **component-fixture evidence**, not authenticated live project, Native, or published acceptance. Clash severity/source/element facets remain absent until exact authoritative linkage exists. Working View, XML, digest, synchronizing commands, database and Native plugin behavior were not changed.
+
+### Independent Block 6 Builds 26–30 — selected-issue detail candidate — 2026-09-17
+
+The exact-clash geometry gate for Blocks 3–4 remains open. This block changes only the existing Lens Next issue-detail presentation; it does not establish a clash-to-issue join or introduce interactive 3D.
+
+- Build 26: show the selected issue's actual stored capture in a bounded larger overview image; an absent image has an explicit empty state and an image-load failure has an explicit error, never a generated clash illustration.
+- Build 27: put existing BIMLog links, references, repair and controlled publishing together under a selectable BIMLog Issue view while preserving their callbacks, permission gates, confirmation, digest and audit behavior.
+- Build 28: expose existing immutable identity, lifecycle, Visual Package and sync evidence in a separate Properties view. The Activity view calls the existing governed history loader and shows loading/error/empty states without inventing events.
+- Build 29: retain Working View, history and linking shortcuts above the views; next/previous selection returns to Overview. Views are accessible pressed buttons, not a new route or persistent server state.
+- Build 30: show only actual trade, floor, report type and responsible-company fields in the overview; explicitly state that clash pair, surrounding geometry, grid and distance require verified exact linkage. New overview and navigation language is English/Spanish; exact-390 wrapping avoids horizontal overflow.
+
+Local Chrome exercised the actual production `LensNextPanelView` through the excluded synthetic harness: missing image, a loaded test image asset, BIMLog Issue/Properties/Activity switching, next-issue reset, Spanish labels and exact-390 overflow report. The test asset is not a clash capture or a production record. Chrome screenshot capture timed out, so visual pixel acceptance remains open. No authenticated live project, Native connected behavior, 2021/2025 ZIP, release or publication is claimed.
