@@ -2814,3 +2814,4 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 
 - [ ] Repeat the exact clean pre-push gate after reconciliation; a single warmed standalone Windows artifact result of 7555.4 ms is below the unchanged 8000 ms gate but has narrow margin. Do not represent it as production readiness by itself.
 - [ ] Complete independent source/schema/no-DROP review, exact-commit push, MAIN-only Replit Shell synchronization and publication, then live Chrome smoke. Keep Native 3D and responsible-company/schema fixes outside P32; they need their own verified releases.
+- [ ] Validate the deferred document-library candidate with affected PDF/BMP/workbook behavior, exact-artifact startup timing, full clean release gate, and no-regression review. Do not raise the 8000 ms readiness gate to make it pass.

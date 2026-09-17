@@ -1467,3 +1467,7 @@ was performed or authorized.
 
 - An opt-in diagnostic timed all 25 serialized database startup tasks without changing their order, failure semantics, or the 8000 ms Windows gate. A restricted-custody exact artifact run on already-migrated isolated PostgreSQL passed at 7555.4 ms; app readiness was logged at 6165 ms. The task timings totaled about 1.5 seconds, so the earlier 11-second failures cannot be attributed solely to the migration queue. Cold module/process startup and Windows variability remain a release risk until the full clean gate repeats.
 - Source diff to `origin/master` has no `DROP TABLE`, `DROP COLUMN`, `TRUNCATE`, or `DELETE FROM` addition in API source/build. No production database or Replit system was touched by the local proof.
+
+### P32 startup-margin repair candidate
+
+- An isolated, opt-in require profile showed `pdf-parse` importing native canvas and `exceljs` during every process boot, although those capabilities are used only on document-specific requests. The profiler itself added overhead and failed the 8000 ms budget, so its measured total is diagnostic only. Deferred imports were added at five call sites with no schema, route, authorization, migration-order, or readiness-limit change. API TypeScript passed. A fresh artifact timing run and affected-document behavior remain mandatory before release.
