@@ -28000,6 +28000,81 @@
         "plugins/BIMLogLensNext/tests/area-spike-2021/AreaSpike2021.csproj"
       ],
       "reviewedChangeSha256": "dd1d271a4dbb8f3ebd4af609f33cb173fb98ad1ebf20822daaa4ce84ebd5e4d8"
+    },
+    {
+      "taskId": "lens-next-bounded-area-block02-preview-candidate-20260917",
+      "reviewedThroughCommit": "b2e7b4d015c0773247b68857ae1a7e6e4e796938",
+      "reviewedAt": "2026-09-17T13:11:35.000Z",
+      "status": "candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This isolated preview does not change the BIMLog source-of-truth or product identity doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution and honest-evidence boundaries remain; no production action occurred."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Real-model, visual-browser and both-year field acceptance obligations remain open."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded-area target was already approved and is not expanded by this candidate."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The unmounted preview adds no platform route, API, schema, persistence, production navigation or architecture edge."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records the unmounted viewer candidate and the still-open real-clash feasibility gate."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, document, export or presentation design system changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, edition, applicability or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Separates local typecheck and synthetic parser proof from unresolved Native and browser field gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps Build 10 and the Block 3 to 4 go-or-no-go gate open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records the actual preview candidate scope and expressly excludes live acceptance claims."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/LensNextAreaPreview.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-area-preview.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-area-preview.ts",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1866d2afda67785e725456283ca00ea454955e3ca58ad7e13eb6dc9777f95c52"
     }
   ]
 }

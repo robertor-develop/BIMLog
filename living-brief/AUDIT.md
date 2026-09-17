@@ -1402,3 +1402,8 @@ was performed or authorized.
 
 - The shared C# suite passed 131/131, including six new bounded-area fixture behaviors. Both 2021 and 2025 Native adapter suites passed 56/56 and compiled the read-only exact-clash locator. A separate, non-shipped 2021 primitive-callback project compiled against installed Autodesk COM references.
 - The current production bridge exposes no area-geometry command. The Block 2 package remains an in-memory prototype; exact model binding, fragment world transforms, real item geometry, 2025 COM extraction, legal transfer, rendering and measured performance remain unverified. No live Navisworks action, customer model mutation, browser acceptance, Native ZIP or publication is claimed.
+
+## 2026-09-17 — Lens Next bounded-area preview candidate
+
+- An unmounted React/WebGL2 area viewer and strict package parser were added without changing any production route or bridge command. The parser requires the selected clash's exact project/server/viewpoint/model identity, both clash roles, bounded finite triangles and size caps; the renderer colors the pair separately from context and supplies orbit/zoom/reset controls.
+- Synthetic parser/navigation tests passed and the frontend typecheck passed after building referenced local library declarations. This is not evidence of an actual Navisworks geometry extraction, WebGL visual behavior, mobile usability, performance or 2021/2025 parity. Build 8 and Build 10 field gates remain open; no push, ZIP, installation or publication occurred.
