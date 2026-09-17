@@ -109,22 +109,9 @@ const app: Express = express();
 let databaseStartupTail: Promise<void> = Promise.resolve();
 let databaseStartupFailure: unknown;
 let databaseStartupFailed = false;
-let databaseStartupTaskNumber = 0;
 
 function queueDatabaseStartup<T>(task: () => Promise<T>): Promise<T> {
-  const taskNumber = ++databaseStartupTaskNumber;
-  const queued = databaseStartupTail.then(async () => {
-    const startedAt = performance.now();
-    try {
-      return await task();
-    } finally {
-      if (process.env.BIMLOG_STARTUP_DIAGNOSTICS === "1") {
-        console.log(
-          `[startup] phase=db_task task=${taskNumber} duration_ms=${Math.round(performance.now() - startedAt)}`,
-        );
-      }
-    }
-  });
+  const queued = databaseStartupTail.then(task);
   databaseStartupTail = queued.then(
     () => undefined,
     (error: unknown) => {
