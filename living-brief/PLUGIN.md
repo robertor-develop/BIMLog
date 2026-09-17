@@ -488,3 +488,15 @@ This slice presents only authorized active BIMLog issue records already loaded b
 - Build 35: provide English/Spanish new labels, keep the summary compact by default, and constrain table overflow to its own horizontal surface at exact 390px while the page remains non-overflowing. Focused pure-summary tests cover total/status/evidence, filter recomputation and empty data.
 
 Local Chrome on the excluded fixture harness confirmed 100 active / 100 matching / 1 image reference; expanding status showed 25 Open, 25 Follow Up, 25 Waiting Design, 0 Approved and 25 Resolved. Filtering to Open changed the summary to 25 matching, 0 image references and 25 Visual Packages while preserving the 100 active denominator. Spanish Table mode exposed the new columns; the exact-390 shell reported no page horizontal overflow after opening the table. These are component-fixture interactions only. A saved image reference can still fail on actual download; Block 6 provides the explicit image-load error. Clash totals, geometry, grid and distance remain unavailable without exact provenance.
+
+### Independent Block 8 Builds 36–40 — synchronization review candidate — 2026-09-17
+
+The genuine-clash geometry gate remains open. This block is a read-only presentation change around the existing exact-identity synchronization plan. It neither changes Native commands nor authorizes a reconciliation.
+
+- Build 36: distinguish the loaded project inventory preview from the current filtered BIMLog issue selection used to construct the plan. Neither number is called a clash total, and local inventory is described only when available.
+- Build 37: expose the plan's exact `all`, attention, proposed-change and in-sync counts through deterministic pure presentation helpers.
+- Build 38: allow keyboard-operable, `aria-pressed` filtering of plan rows without changing the underlying plan, selection, permission, confirmation or execution state; empty categories explain their emptiness.
+- Build 39: label each row as an exact BIMLog server record or a local-only Navisworks viewpoint. Existing per-row reasons and explicit recovery guidance remain visible; only rows with a server ID retain the Review record action.
+- Build 40: exercise mixed and empty plans in focused behavior tests, frontend typecheck, production bundle, and existing Lens Next regressions. Browser component-fixture and pixel/live/Native acceptance are separate gates and must not be inferred from typecheck.
+
+The scope is still the loaded authorized active issues plus local inventory from the explicitly bound model; applying issue filters may omit platform issues from the plan but never changes the inventory preview. No clash-to-issue join, embedded geometry, screenshot generation, automatic send, data mutation, schema change, or publish is introduced.

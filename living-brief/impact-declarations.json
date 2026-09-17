@@ -28305,6 +28305,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9277f6e65824b388dae5b593f29389dea574c64098061b8e1eb7d78a1ce6cdcf"
+    },
+    {
+      "taskId": "lens-next-mockup-independent-block08-sync-review-20260917",
+      "reviewedThroughCommit": "8edfe8ed2e2d92df79996c5c9dc677b42c2583c3",
+      "reviewedAt": "2026-09-17T14:13:35.000Z",
+      "status": "candidate",
+      "captureTiming": "normal_acceptance_boundary",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "BIMLog issues, local viewpoints and Native clash results remain distinct authorities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The production component and excluded acceptance fixture retain existing boundaries."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Pixel, live-data, Native and release gates remain open."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded mockup-parity direction is unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API, schema, persistence, permission or Native bridge contract changed."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Records synchronization review Builds 36 to 40 and provenance limits."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated report or export is changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local candidate, tests and open release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Marks local Block 8 and keeps Blocks 9 to 10 and geometry proof open."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records fixture correction, browser checks and screenshot limitation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/features/lens-next/lens-next-sync-presentation.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-sync-presentation.ts",
+        "artifacts/bimlog/src/lens-next-acceptance-harness.tsx",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "491c71ea5087821dedb05993f278ae675e99e53c03039ed643a1b748bf812ae0"
     }
   ]
 }

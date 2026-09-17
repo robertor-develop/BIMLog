@@ -50,6 +50,15 @@ function Harness() {
   const [page, setPage] = useState(1);
   const pageSize = 20;
   const filteredIssues = useMemo(() => filterLensNextIssues(LENS_NEXT_ACCEPTANCE_FIXTURES, filters), [filters]);
+  const synchronizationItems = useMemo(() => filteredIssues.map(item => ({
+    disposition: (item.identity.serverId <= 63 ? "in_sync" : "pull_from_bimlog") as "in_sync" | "pull_from_bimlog",
+    platformServerId: item.identity.serverId,
+    localNavisworksGuid: item.identity.serverId <= 63 ? item.navisworksGuid : null,
+    displayId: item.displayId ?? item.identity.viewpointId,
+    reason: item.identity.serverId <= 63 ? "Fixture: exact managed identity in both inventories." : "Fixture: authoritative BIMLog visual package only.",
+  })), [filteredIssues]);
+  const synchronizedCount = synchronizationItems.filter(item => item.disposition === "in_sync").length;
+  const pullCount = synchronizationItems.length - synchronizedCount;
   const visibleIssues = useMemo(() => filteredIssues.slice((page - 1) * pageSize, page * pageSize), [filteredIssues, page]);
   const selectedIssue = LENS_NEXT_ACCEPTANCE_FIXTURES.find(item => item.identity.serverId === selectedServerId) ?? null;
   const groups = useMemo(
@@ -78,7 +87,7 @@ function Harness() {
     authorizedProjects: [{ id: 26, name: "Elara East", code: "ELA01" }], selectedProjectId: 26, onProjectChange: noop, projectLocked: true,
     bridgeDisplayName: "35-45 41ST_COORD_MODEL.nwf", bridgeModelFingerprint: "acceptance-model-fingerprint", bridgeBindingSource: "verified BIMLog marker",
     inventorySummary: { matched: 63, platformOnly: 37, navisworksOnly: 0, conflicted: 0, unresolved: 0 },
-    synchronizationPlan: { items: [], inSync: 63, confirmLocalIdentity: 0, pullFromBimlog: 37, uploadToBimlog: 0, manualConflict: 0, blocked: 0, executable: true }, uploadableLocalViewpoints: [], localUploadState: "idle", localUploadMessage: null, onUploadLocalViewpoint: noop,
+    synchronizationPlan: { items: synchronizationItems, inSync: synchronizedCount, confirmLocalIdentity: 0, pullFromBimlog: pullCount, uploadToBimlog: 0, manualConflict: 0, blocked: 0, executable: pullCount > 0 }, uploadableLocalViewpoints: [], localUploadState: "idle", localUploadMessage: null, onUploadLocalViewpoint: noop,
     createEnabled: true, createState: "idle", createMessage: null, onCreateIssue: noop,
     layoutEnabled: true, layoutState: "idle", layoutMessage: null, onMaterializeMyView: noop,
     reconciliationState: "idle", reconciliationMessage: null, onRunReconciliation: noop,

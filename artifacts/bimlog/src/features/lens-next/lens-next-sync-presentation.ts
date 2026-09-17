@@ -22,6 +22,22 @@ export function lensNextSyncLabel(disposition: LensNextSyncDisposition, locale: 
   return locale === "es" ? LENS_NEXT_SYNC_LABELS_ES[disposition] : LENS_NEXT_SYNC_LABELS[disposition];
 }
 
+export type LensNextSyncReviewFilter = "all" | "attention" | "changes" | "in_sync";
+
+export function lensNextSyncReviewCount(plan: LensNextSyncPlan, filter: LensNextSyncReviewFilter): number {
+  if (filter === "attention") return plan.manualConflict + plan.blocked;
+  if (filter === "changes") return plan.confirmLocalIdentity + plan.pullFromBimlog + plan.uploadToBimlog;
+  if (filter === "in_sync") return plan.inSync;
+  return plan.items.length;
+}
+
+export function lensNextSyncReviewItems(plan: LensNextSyncPlan, filter: LensNextSyncReviewFilter): LensNextSyncPlan["items"] {
+  if (filter === "all") return plan.items;
+  if (filter === "attention") return plan.items.filter(item => item.disposition === "manual_conflict" || item.disposition === "blocked");
+  if (filter === "changes") return plan.items.filter(item => item.disposition === "confirm_local_identity" || item.disposition === "pull_from_bimlog" || item.disposition === "upload_to_bimlog");
+  return plan.items.filter(item => item.disposition === "in_sync");
+}
+
 export function lensNextSyncPlanSummary(plan: LensNextSyncPlan, locale: "en" | "es" = "en"): string {
   const changes = plan.confirmLocalIdentity + plan.pullFromBimlog + plan.uploadToBimlog;
   const attention = plan.manualConflict + plan.blocked;

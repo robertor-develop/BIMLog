@@ -25,7 +25,7 @@ import type {
 import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./lens-next-workspace-layout";
 import type { LensNextIssueSort } from "./lens-next-model";
 import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
-import { lensNextSyncLabel, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance } from "./lens-next-sync-presentation";
+import { lensNextSyncLabel, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance, lensNextSyncReviewCount, lensNextSyncReviewItems, type LensNextSyncReviewFilter } from "./lens-next-sync-presentation";
 import { lensNextSelectionTarget, type LensNextSelectionDirection } from "./lens-next-selection-navigation";
 import { summarizeLensNextIssues } from "./lens-next-issue-summary";
 import { useI18n } from "../../lib/i18n";
@@ -485,6 +485,7 @@ export function LensNextPanelView({
   const [guideOpen, setGuideOpen] = React.useState(false);
   const [issuePresentation, setIssuePresentation] = React.useState<"cards" | "table">("cards");
   const [detailView, setDetailView] = React.useState<"overview" | "bimlog" | "properties" | "activity">("overview");
+  const [syncReviewFilter, setSyncReviewFilter] = React.useState<LensNextSyncReviewFilter>("all");
   const createSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const linkSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const selectedIssueRef = React.useRef<HTMLElement | null>(null);
@@ -638,6 +639,7 @@ export function LensNextPanelView({
           </summary>
           <div className="lens-next__active-model-content">
           <small>Binding authority: {bridgeBindingSource === "managed-marker" ? "verified BIMLog managed marker" : bridgeBindingSource === "platform-binding" ? "authorized platform binding" : bridgeBindingSource === "explicit-user-selection" ? "explicit authorized selection" : "unbound"}</small>
+          <p className="lens-next__sync-scope">{tt("Inventory preview: loaded active BIMLog issues for this project plus available local inventory. These are not clash counts.", "Vista previa del inventario: issues BIMLog activos cargados de este proyecto más el inventario local disponible. No son conteos de interferencias.")}</p>
           <div className="lens-next__inventory-summary" aria-label="Read-only reconciliation preview">
             <span><strong>{inventorySummary.matched}</strong> matched</span>
             <span><strong>{inventorySummary.platformOnly}</strong> platform only</span>
@@ -645,6 +647,7 @@ export function LensNextPanelView({
             <span><strong>{inventorySummary.conflicted}</strong> conflicts</span>
             <span><strong>{inventorySummary.unresolved}</strong> unresolved</span>
           </div>
+          <p className="lens-next__sync-scope">{tt(`Plan scope: ${filteredIssues.length} of ${activeIssueCount} active BIMLog issues in the current filtered view, plus local-only viewpoints. Review is required before any change.`, `Alcance del plan: ${filteredIssues.length} de ${activeIssueCount} issues BIMLog activos en la vista filtrada, más viewpoints solo locales. Revise antes de cualquier cambio.`)}</p>
           <div className="lens-next__inventory-summary" aria-label="Current-view synchronization plan">
             <span><strong>{synchronizationPlan.inSync}</strong> already synchronized</span>
             <span><strong>{synchronizationPlan.confirmLocalIdentity}</strong> recover confirmation</span>
@@ -678,11 +681,20 @@ export function LensNextPanelView({
           {reconciliationMessage && <small role="status">{reconciliationMessage}</small>}
           <details className="lens-next__sync-plan">
             <summary>Review synchronization plan ({synchronizationPlan.items.length} {synchronizationPlan.items.length === 1 ? "item" : "items"})</summary>
+            <div className="lens-next__sync-review-filters" role="group" aria-label={tt("Synchronization plan categories", "Categorías del plan de sincronización")}>
+              {(["all", "attention", "changes", "in_sync"] as const).map(filter => (
+                <button key={filter} type="button" aria-pressed={syncReviewFilter === filter} onClick={() => setSyncReviewFilter(filter)}>
+                  {filter === "all" ? tt("All", "Todos") : filter === "attention" ? tt("Needs review", "Requiere revisión") : filter === "changes" ? tt("Proposed changes", "Cambios propuestos") : tt("In sync", "Sincronizados")} ({lensNextSyncReviewCount(synchronizationPlan, filter)})
+                </button>
+              ))}
+            </div>
+            {lensNextSyncReviewCount(synchronizationPlan, syncReviewFilter) === 0 && <p className="lens-next__sync-empty">{tt("No plan items in this category.", "No hay elementos del plan en esta categoría.")}</p>}
             <ol>
-              {synchronizationPlan.items.map((item, index) => (
+              {lensNextSyncReviewItems(synchronizationPlan, syncReviewFilter).map((item, index) => (
                 <li key={`${item.platformServerId ?? "local"}:${item.localNavisworksGuid ?? "platform"}:${index}`}>
                   <strong>{item.displayId}</strong>
                   <span className={`lens-next__sync-disposition lens-next__sync-disposition--${item.disposition}`}>{lensNextSyncLabel(item.disposition, language)}</span>
+                  <small>{item.platformServerId !== null ? tt(`BIMLog record #${item.platformServerId}`, `Registro BIMLog #${item.platformServerId}`) : tt("Local-only Navisworks viewpoint; no BIMLog record selected", "Viewpoint solo local de Navisworks; sin registro BIMLog seleccionado")}</small>
                   <small>{item.reason}</small>
                   {lensNextSyncRecoveryGuidance(item.disposition, item.platformServerId !== null, language) && (
                     <div className="lens-next__sync-recovery">

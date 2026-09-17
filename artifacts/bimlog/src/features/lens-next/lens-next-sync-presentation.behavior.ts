@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { LENS_NEXT_SYNC_LABELS, lensNextSyncLabel, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance } from "./lens-next-sync-presentation";
+import { LENS_NEXT_SYNC_LABELS, lensNextSyncLabel, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance, lensNextSyncReviewCount, lensNextSyncReviewItems } from "./lens-next-sync-presentation";
 import type { LensNextSyncPlan } from "./lens-next-types";
 
 const plan = (values: Partial<LensNextSyncPlan>): LensNextSyncPlan => ({
@@ -17,4 +17,19 @@ assert.match(lensNextSyncRecoveryGuidance("manual_conflict", true, "es") ?? "", 
 assert.match(lensNextSyncRecoveryGuidance("manual_conflict", true) ?? "", /Automatic replacement is prohibited/);
 assert.match(lensNextSyncRecoveryGuidance("blocked", false) ?? "", /not eligible for automatic synchronization/);
 assert.equal(lensNextSyncRecoveryGuidance("in_sync", true), null);
+const mixed = plan({
+  items: [
+    { disposition: "in_sync", platformServerId: 1, localNavisworksGuid: "a", displayId: "A", reason: "paired" },
+    { disposition: "blocked", platformServerId: 2, localNavisworksGuid: null, displayId: "B", reason: "missing package" },
+    { disposition: "upload_to_bimlog", platformServerId: null, localNavisworksGuid: "c", displayId: "C", reason: "local only" },
+  ],
+  inSync: 1, blocked: 1, uploadToBimlog: 1,
+});
+assert.equal(lensNextSyncReviewCount(mixed, "all"), 3);
+assert.equal(lensNextSyncReviewCount(mixed, "attention"), 1);
+assert.equal(lensNextSyncReviewCount(mixed, "changes"), 1);
+assert.equal(lensNextSyncReviewCount(mixed, "in_sync"), 1);
+assert.deepEqual(lensNextSyncReviewItems(mixed, "attention").map(item => item.displayId), ["B"]);
+assert.deepEqual(lensNextSyncReviewItems(mixed, "changes").map(item => item.displayId), ["C"]);
+assert.equal(lensNextSyncReviewItems(plan({}), "attention").length, 0);
 console.log("Lens Next synchronization presentation: PASS");
