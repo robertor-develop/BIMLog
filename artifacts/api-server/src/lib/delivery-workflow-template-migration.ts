@@ -1,6 +1,7 @@
 import { pool } from "@workspace/db";
 import { waitForJobIntakeMigration } from "./job-intake-migration";
 import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migration";
+import { ensureWorkflowGovernancePolicySchema } from "./workflow-governance-policy-migration";
 
 export const DELIVERY_WORKFLOW_TEMPLATE_SQL = String.raw`
 CREATE TABLE IF NOT EXISTS company_delivery_workflow_templates (
@@ -92,6 +93,12 @@ CREATE TABLE IF NOT EXISTS company_delivery_workflow_work_items (
   definition jsonb NOT NULL,
   fingerprint text NOT NULL CHECK (fingerprint ~ '^[a-f0-9]{64}$'),
   selection text NOT NULL CHECK (selection IN ('explicit','single_company','bimlog_default')),
+  policy_id text REFERENCES company_workflow_governance_policies(id),
+  policy_version_id text REFERENCES company_workflow_governance_versions(id),
+  policy_code text,
+  policy_version integer,
+  policy_definition jsonb,
+  policy_fingerprint text,
   phase_index integer NOT NULL DEFAULT 1 CHECK (phase_index > 0),
   status text NOT NULL DEFAULT 'active' CHECK (status IN ('active','complete')),
   revision integer NOT NULL DEFAULT 1 CHECK (revision > 0),
@@ -100,6 +107,20 @@ CREATE TABLE IF NOT EXISTS company_delivery_workflow_work_items (
   updated_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT company_delivery_workflow_binding_source_chk CHECK ((source='bimlog' AND template_id IS NULL AND version_id IS NULL) OR (source='company' AND template_id IS NOT NULL AND version_id IS NOT NULL))
 );
+ALTER TABLE company_delivery_workflow_work_items ADD COLUMN IF NOT EXISTS policy_id text REFERENCES company_workflow_governance_policies(id);
+ALTER TABLE company_delivery_workflow_work_items ADD COLUMN IF NOT EXISTS policy_version_id text REFERENCES company_workflow_governance_versions(id);
+ALTER TABLE company_delivery_workflow_work_items ADD COLUMN IF NOT EXISTS policy_code text;
+ALTER TABLE company_delivery_workflow_work_items ADD COLUMN IF NOT EXISTS policy_version integer;
+ALTER TABLE company_delivery_workflow_work_items ADD COLUMN IF NOT EXISTS policy_definition jsonb;
+ALTER TABLE company_delivery_workflow_work_items ADD COLUMN IF NOT EXISTS policy_fingerprint text;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='company_delivery_workflow_policy_snapshot_chk') THEN
+    ALTER TABLE company_delivery_workflow_work_items ADD CONSTRAINT company_delivery_workflow_policy_snapshot_chk CHECK (
+      (policy_id IS NULL AND policy_version_id IS NULL AND policy_code IS NULL AND policy_version IS NULL AND policy_definition IS NULL AND policy_fingerprint IS NULL)
+      OR (policy_id IS NOT NULL AND policy_version_id IS NOT NULL AND policy_code IS NOT NULL AND policy_version>0 AND policy_definition IS NOT NULL AND policy_fingerprint ~ '^[a-f0-9]{64}$')
+    );
+  END IF;
+END $$;
 CREATE INDEX IF NOT EXISTS company_delivery_workflow_work_item_project_idx ON company_delivery_workflow_work_items(project_id,work_item_id);
 CREATE TABLE IF NOT EXISTS company_delivery_workflow_steps (
   work_item_id text NOT NULL REFERENCES company_delivery_workflow_work_items(work_item_id),
@@ -169,6 +190,9 @@ BEGIN
     OR NEW.project_id IS DISTINCT FROM OLD.project_id OR NEW.company_id IS DISTINCT FROM OLD.company_id
     OR NEW.template_code IS DISTINCT FROM OLD.template_code OR NEW.template_version IS DISTINCT FROM OLD.template_version
     OR NEW.selection IS DISTINCT FROM OLD.selection OR NEW.activated_by_id IS DISTINCT FROM OLD.activated_by_id
+    OR NEW.policy_id IS DISTINCT FROM OLD.policy_id OR NEW.policy_version_id IS DISTINCT FROM OLD.policy_version_id
+    OR NEW.policy_code IS DISTINCT FROM OLD.policy_code OR NEW.policy_version IS DISTINCT FROM OLD.policy_version
+    OR NEW.policy_definition IS DISTINCT FROM OLD.policy_definition OR NEW.policy_fingerprint IS DISTINCT FROM OLD.policy_fingerprint
     OR NEW.activated_at IS DISTINCT FROM OLD.activated_at THEN
     RAISE EXCEPTION 'Activated Delivery Workflow snapshot is immutable';
   END IF;
@@ -199,7 +223,7 @@ export function ensureDeliveryWorkflowTemplateSchema(migrationPool?: MigrationPo
 }
 
 export async function ensureDeliveryWorkflowRuntimeSchema(migrationPool?: MigrationPool): Promise<void> {
-  await Promise.all([ensureDeliveryWorkflowTemplateSchema(migrationPool),waitForJobIntakeMigration(),ensureCompanyMasterCatalogSchema(migrationPool)]);
+  await Promise.all([ensureDeliveryWorkflowTemplateSchema(migrationPool),waitForJobIntakeMigration(),ensureCompanyMasterCatalogSchema(migrationPool),ensureWorkflowGovernancePolicySchema(migrationPool)]);
   if (migrationPool) return runRuntimeMigration(migrationPool);
   runtimeStartup ??= runRuntimeMigration(pool).catch(error => { runtimeStartup = null; throw error; });
   return runtimeStartup;

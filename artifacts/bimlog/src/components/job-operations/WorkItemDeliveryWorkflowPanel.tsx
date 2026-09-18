@@ -13,6 +13,16 @@ type Runtime = {
   revision: number;
   canManage: boolean;
   fingerprint: string;
+  governancePolicy: null | {
+    code: string;
+    version: number;
+    versionId: string;
+    fingerprint: string;
+    definition: {
+      scope: { allWorkflows: boolean };
+      validation: Record<string, boolean>;
+    };
+  };
   definition: {
     phases: Array<{
       id: string;
@@ -176,6 +186,13 @@ export function WorkItemDeliveryWorkflowPanel({
                   "Instantánea congelada de activación",
                 )}{" "}
                 {runtime.fingerprint.slice(0, 16)}
+              </div>
+              <div style={{ background: "#eff6ff", border: "1px solid #bfdbfe", borderRadius: 8, padding: 10 }}>
+                <strong>{tt("Governance policy at activation", "Política de gobernanza en la activación")}: </strong>
+                {runtime.governancePolicy ? (
+                  <span>{runtime.governancePolicy.code} · v{runtime.governancePolicy.version} · {runtime.governancePolicy.fingerprint.slice(0, 16)}
+                    {" · "}{tt("Immutable snapshot", "Instantánea inmutable")}</span>
+                ) : <span>{tt("BIMLog defaults; no company policy was bound", "Valores BIMLog; no se vinculó una política de empresa")}</span>}
               </div>
               <p>
                 {runtime.definition.phases

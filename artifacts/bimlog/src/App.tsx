@@ -40,6 +40,7 @@ const ResetPasswordPage = namedPage(() => import("@/pages/ResetPassword"), "Rese
 const AdminPanel = namedPage(() => import("@/pages/AdminPanel"), "AdminPanel");
 const CompanyMasterCatalogs = namedPage(() => import("@/pages/CompanyMasterCatalogs"), "CompanyMasterCatalogs");
 const CompanyDeliveryWorkflows = namedPage(() => import("@/pages/CompanyDeliveryWorkflows"), "CompanyDeliveryWorkflows");
+const CompanyWorkflowGovernance = namedPage(() => import("@/pages/CompanyWorkflowGovernance"), "CompanyWorkflowGovernance");
 const CompanyPricingTemplates = namedPage(() => import("@/pages/CompanyPricingTemplates"), "CompanyPricingTemplates");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
@@ -179,6 +180,9 @@ function Router() {
       </Route>
       <Route path="/company-workflows">
         {() => <ProtectedRoute component={CompanyDeliveryWorkflows} />}
+      </Route>
+      <Route path="/company-workflow-governance">
+        {() => <ProtectedRoute component={CompanyWorkflowGovernance} />}
       </Route>
       <Route path="/company-pricing-templates">
         {() => <ProtectedRoute component={CompanyPricingTemplates} />}

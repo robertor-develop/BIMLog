@@ -15,6 +15,7 @@ import { companiesTable, usersTable } from "./users";
 import { projectsTable } from "./projects";
 import { filesTable } from "./files";
 import { jobActivationWorkItemsTable } from "./job-intakes";
+import { companyWorkflowGovernancePoliciesTable, companyWorkflowGovernanceVersionsTable } from "./workflow-governance-policies";
 
 export const companyDeliveryWorkflowTemplatesTable = pgTable(
   "company_delivery_workflow_templates",
@@ -176,6 +177,12 @@ export const companyDeliveryWorkflowWorkItemsTable = pgTable(
     definition: jsonb("definition").$type<Record<string, unknown>>().notNull(),
     fingerprint: text("fingerprint").notNull(),
     selection: text("selection").notNull(),
+    policyId: text("policy_id").references(() => companyWorkflowGovernancePoliciesTable.id),
+    policyVersionId: text("policy_version_id").references(() => companyWorkflowGovernanceVersionsTable.id),
+    policyCode: text("policy_code"),
+    policyVersion: integer("policy_version"),
+    policyDefinition: jsonb("policy_definition").$type<Record<string, unknown>>(),
+    policyFingerprint: text("policy_fingerprint"),
     phaseIndex: integer("phase_index").notNull().default(1),
     status: text("status").notNull().default("active"),
     revision: integer("revision").notNull().default(1),
@@ -230,6 +237,7 @@ export const companyDeliveryWorkflowWorkItemsTable = pgTable(
       "company_delivery_workflow_binding_source_chk",
       sql`(${table.source}='bimlog' AND ${table.templateId} IS NULL AND ${table.versionId} IS NULL) OR (${table.source}='company' AND ${table.templateId} IS NOT NULL AND ${table.versionId} IS NOT NULL)`,
     ),
+    check("company_delivery_workflow_policy_snapshot_chk", sql`(${table.policyId} IS NULL AND ${table.policyVersionId} IS NULL AND ${table.policyCode} IS NULL AND ${table.policyVersion} IS NULL AND ${table.policyDefinition} IS NULL AND ${table.policyFingerprint} IS NULL) OR (${table.policyId} IS NOT NULL AND ${table.policyVersionId} IS NOT NULL AND ${table.policyCode} IS NOT NULL AND ${table.policyVersion}>0 AND ${table.policyDefinition} IS NOT NULL AND ${table.policyFingerprint} ~ '^[a-f0-9]{64}$')`),
   ],
 );
 

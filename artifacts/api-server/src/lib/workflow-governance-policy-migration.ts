@@ -1,6 +1,5 @@
 import { pool } from "@workspace/db";
 import { ensureCompanyMasterCatalogSchema } from "./company-master-catalog-migration";
-import { ensureDeliveryWorkflowTemplateSchema } from "./delivery-workflow-template-migration";
 
 export const WORKFLOW_GOVERNANCE_POLICY_SQL = String.raw`
 CREATE TABLE IF NOT EXISTS company_workflow_governance_policies (
@@ -83,7 +82,6 @@ type MigrationPool = { connect(): Promise<{ query(sql: string): Promise<unknown>
 let startup: Promise<void> | null = null;
 export async function ensureWorkflowGovernancePolicySchema(migrationPool?: MigrationPool): Promise<void> {
   await ensureCompanyMasterCatalogSchema(migrationPool);
-  await ensureDeliveryWorkflowTemplateSchema(migrationPool);
   if (migrationPool) return runMigration(migrationPool);
   startup ??= runMigration(pool).catch(error => { startup = null; throw error; });
   return startup;

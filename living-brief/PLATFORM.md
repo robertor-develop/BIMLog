@@ -489,6 +489,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/trade-file-submission-review.ts
 - artifacts/api-server/src/lib/unified-action-contract.behavior.ts
 - artifacts/api-server/src/lib/unified-action-contract.ts
+- artifacts/api-server/src/lib/workflow-governance-binding.ts
 - artifacts/api-server/src/lib/workflow-governance-policy-contract.behavior.ts
 - artifacts/api-server/src/lib/workflow-governance-policy-contract.ts
 - artifacts/api-server/src/lib/workflow-governance-policy-migration.ts
@@ -573,6 +574,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/CompanyMasterCatalogs.tsx
 - artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx
 - artifacts/bimlog/src/pages/CompanyProfile.tsx
+- artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx
 - artifacts/bimlog/src/pages/Contact.tsx
 - artifacts/bimlog/src/pages/Dashboard.tsx
 - artifacts/bimlog/src/pages/DataRetention.tsx
@@ -658,6 +660,7 @@ It changes only when the code structure or curated architectural facts change.
 - /admin/feedback
 - /company-catalogs
 - /company-workflows
+- /company-workflow-governance
 - /company-pricing-templates
 - /admin
 - /feedback

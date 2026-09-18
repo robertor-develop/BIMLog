@@ -4,6 +4,7 @@ import { pool } from "@workspace/db";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { BIMLOG_DELIVERY_WORKFLOWS } from "./delivery-workflow-defaults";
 import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
+import { workflowGovernancePolicyFingerprint } from "./workflow-governance-policy-contract";
 import { advanceWorkItemDeliveryPhase, approveWorkItemDeliveryPhase, bindDeliveryWorkflowWithClient, getWorkItemDeliveryWorkflow, linkWorkItemDeliveryEvidence, reopenWorkItemDeliveryPhase, setWorkItemDeliveryStep } from "./delivery-workflow-runtime";
 
 const target = new URL(process.env.PROD_DATABASE_URL ?? "postgres://invalid/invalid");
@@ -36,11 +37,26 @@ const templateId = randomUUID(), versionId = randomUUID();
 await pool.query(`INSERT INTO company_delivery_workflow_templates(id,company_id,code,name,created_by_id) VALUES($1,$2,'SHOP_COMPANY','Company Shop',$3)`,[templateId,company.id,owner]);
 await pool.query(`INSERT INTO company_delivery_workflow_versions(id,template_id,version,state,definition,fingerprint,approved_at,approved_by_id,published_at,published_by_id,created_by_id,updated_by_id)
   VALUES($1,$2,1,'published',$3::jsonb,$4,now(),$5,now(),$5,$5,$5)`,[versionId,templateId,JSON.stringify(base.definition),base.fingerprint,owner]);
+const policyId=randomUUID(), policyVersionId=randomUUID();
+const policyDefinition={schemaVersion:1,scope:{allWorkflows:false,workflowTemplateIds:[templateId]},
+  approvalRules:["create_work_item","complete_phase","complete_deliverable","economic_change","template_update","activate_version"].map(action => ({action,roles:["PROJECT_MANAGER"],threshold:null})),
+  changeRules:["edit_phases","edit_tasks_roles","edit_allocation","change_apu","edit_approved_work_item","retire_version"].map(action => ({action,allowed:true,requiresReapproval:true,requiresNewVersion:["edit_phases","change_apu"].includes(action)})),
+  versioning:{lockActivatedSnapshot:true,structuralChangeCreatesVersion:true,preserveHistory:true},
+  permissions:[{role:"PROJECT_MANAGER",actions:["view","approve","publish"]}],
+  validation:{allocation_total_100:true,task_execute_role:true,phase_review_role:false,final_approval:false,required_documents:false,valid_apu:true,unique_phase_codes:true}};
+const policyFingerprint=workflowGovernancePolicyFingerprint(policyDefinition);
+await pool.query(`INSERT INTO company_workflow_governance_policies(id,company_id,code,name,created_by_id) VALUES($1,$2,'SHOP_POLICY','Shop Policy',$3)`,[policyId,company.id,owner]);
+await pool.query(`INSERT INTO company_workflow_governance_versions(id,policy_id,version,state,definition,fingerprint,approved_at,approved_by_id,published_at,published_by_id,created_by_id,updated_by_id)
+  VALUES($1,$2,1,'published',$3::jsonb,$4,now(),$5,now(),$5,$5,$5)`,[policyVersionId,policyId,JSON.stringify(policyDefinition),policyFingerprint,owner]);
 const client = await pool.connect();
 try { await client.query("BEGIN"); await bindDeliveryWorkflowWithClient({ client,companyId:company.id,projectId:project.id,workItemId,actorUserId:owner,deliverableType:"SHOP_DRAWING",selectedVersionId:"",executeUserId:producer,leaderUserId:owner }); await client.query("COMMIT"); }
 catch(error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 let runtime = await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId});
 assert.equal(runtime.versionId,versionId); assert.equal(runtime.selection,"single_company"); assert.equal(runtime.phaseIndex,1);
+assert.equal(runtime.governancePolicy?.code,"SHOP_POLICY"); assert.equal(runtime.governancePolicy?.fingerprint,policyFingerprint);
+await assert.rejects(pool.query(`UPDATE company_delivery_workflow_work_items SET policy_code='TAMPERED' WHERE work_item_id=$1`,[workItemId]));
+await pool.query(`UPDATE company_workflow_governance_versions SET state='retired',retired_at=now(),retired_by_id=$2 WHERE id=$1`,[policyVersionId,owner]);
+assert.equal((await getWorkItemDeliveryWorkflow({actorUserId:owner,projectId:project.id,workItemId})).governancePolicy?.fingerprint,policyFingerprint);
 await assert.rejects(getWorkItemDeliveryWorkflow({actorUserId:outsider,projectId:project.id,workItemId}),/membership/i);
 await assert.rejects(advanceWorkItemDeliveryPhase({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision}),/assigned approve role/);
 await assert.rejects(setWorkItemDeliveryStep({actorUserId:producer,projectId:project.id,workItemId,expectedRevision:runtime.revision + 1,phaseId:"preliminary",taskId:"prepare",status:"complete"}),/Reload before saving/);

@@ -30545,6 +30545,89 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3c9e1f05d1a276a05f3cac7a18a3cf0421cddcf4667cd15bb080093409b27f5"
+    },
+    {
+      "taskId": "dashboard-block5-governance-binding-20260918",
+      "reviewedThroughCommit": "211f70b4f8e1e82a77493c1d6015b03ab196763b",
+      "reviewedAt": "2026-09-18T19:23:04Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Commercial APU and project budget remain distinct canonical authorities."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution and release authority rules did not change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Browser, accessibility, independent and field gates remain open."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No strategic roadmap authority changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated structural map now includes policy binding and dashboard files."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and native plugin paths were untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal output was changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 5 local evidence and its precise limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps browser, independent, artifact and field acceptance gates open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit records remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-migration.ts",
+        "artifacts/api-server/src/lib/workflow-governance-binding.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy-migration.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy.http-evidence.ts",
+        "artifacts/api-server/src/routes/workflow-governance-policies.ts",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.css",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
+        "lib/db/src/schema/delivery-workflows.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "8aa90fdf654a83e1e3307f7e372c6eefb0e73d1af17d28ec93f100d29ee823e9"
     }
   ]
 }

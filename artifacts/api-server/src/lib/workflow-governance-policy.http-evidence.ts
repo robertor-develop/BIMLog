@@ -66,6 +66,12 @@ try {
   assert.equal((await call(maker,`/company/workflow-governance-policies/${id}/versions/${v1}/publish`,{ expectedRevision:1 })).status,409);
   const published = await call(checker,`/company/workflow-governance-policies/${id}/versions/${v1}/publish`,{ expectedRevision:2 });
   assert.equal(published.status,200,JSON.stringify(published.body));
+  const overlapping = await call(maker,"/company/workflow-governance-policies",{code:"GOV_OVERLAP",name:"Overlapping policy",definition});
+  assert.equal(overlapping.status,201,JSON.stringify(overlapping.body));
+  assert.equal((await call(checker,`/company/workflow-governance-policies/${overlapping.body.policyId}/versions/${overlapping.body.versionId}/approve`,{expectedRevision:1})).status,200);
+  const overlapPublish = await call(checker,`/company/workflow-governance-policies/${overlapping.body.policyId}/versions/${overlapping.body.versionId}/publish`,{expectedRevision:2});
+  assert.equal(overlapPublish.status,409,JSON.stringify(overlapPublish.body));
+  assert.equal(overlapPublish.body.code,"WORKFLOW_POLICY_SCOPE_OVERLAP");
   assert.equal((await call(member,`/company/workflow-governance-policies/${id}`)).body.versions[0].fingerprint,published.body.fingerprint);
   const clone = await call(maker,`/company/workflow-governance-policies/${id}/versions`,{});
   assert.equal(clone.status,201,JSON.stringify(clone.body)); const v2 = clone.body.versionId;

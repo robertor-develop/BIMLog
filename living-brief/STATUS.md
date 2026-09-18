@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Dashboard mockup program - Block 5 Governance binding and dashboard local candidate - 2026-09-18
+
+- Five bounded builds add (1) a company-published policy resolver with overlap prevention and workflow checks, (2) nullable immutable policy identity/definition/fingerprint columns on newly activated Work Items, (3) a bilingual company Governance Policy editor for scope, approval/change/validation/role rules and versioned lifecycle, (4) a read-only policy snapshot indicator in Operations, and (5) guarded local regression coverage. No-policy activation remains valid; existing Work Items are not backfilled or rewritten. Commercial APU and project budget governance remain separate canonical authorities.
+- API/frontend typechecks, database-source safety, encoding gate, guarded localhost policy HTTP lifecycle (including overlapping-scope denial), and guarded Work Item runtime database proof (binding, tamper denial, preserved snapshot after retirement) pass. The policy definition's role matrix expresses governed intent; actual PMO/Finance API authorization remains enforced separately. Dashboard browser/accessibility and real-account QA, complete policy-rule runtime enforcement, independent combined review, clean-source production build, push/publication and customer acceptance are not claimed by these focused tests.
+
 ## Dashboard mockup program - Block 4 Governance Policy source candidate - 2026-09-18
 
 - A separate company-scoped Delivery Workflow Governance Policy contract now covers explicit workflow scope, approval roles and currency-specific minor-unit thresholds, allowed changes and reapproval/version rules, immutable activation/history rules, configured role permissions, and mandatory validation invariants. It does not alter the existing project-level Intake/Operations budget-governance policy or grant runtime authority merely because a role appears in a policy definition.

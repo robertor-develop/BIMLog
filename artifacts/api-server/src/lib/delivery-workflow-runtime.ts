@@ -12,6 +12,8 @@ import {
   type DeliveryWorkflowDefinition,
 } from "./delivery-workflow-template-contract";
 import { jobOperationScope } from "./job-operations-service";
+import { resolveWorkflowGovernanceSnapshot } from "./workflow-governance-binding";
+import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint } from "./workflow-governance-policy-contract";
 
 type Queryable = {
   query(sql: string, params?: any[]): Promise<{ rows: any[] }>;
@@ -60,6 +62,9 @@ export async function bindDeliveryWorkflowWithClient(input: {
   executeUserId: number | null;
   leaderUserId: number | null;
 }) {
+  const prior = (await input.client.query(`SELECT work_item_id FROM company_delivery_workflow_work_items
+    WHERE work_item_id=$1 AND company_id=$2 AND project_id=$3`, [input.workItemId,input.companyId,input.projectId])).rows[0];
+  if (prior) return { workItemId: input.workItemId, created: false };
   const available = await deliveryWorkflowOptions(
     input.client,
     input.companyId,
@@ -70,11 +75,13 @@ export async function bindDeliveryWorkflowWithClient(input: {
     input.selectedVersionId,
   );
   const option = selected.option;
+  const governance = await resolveWorkflowGovernanceSnapshot(input.client, input.companyId, { templateId: option.templateId, definition: option.definition });
   const inserted = (
     await input.client.query(
       `INSERT INTO company_delivery_workflow_work_items
-    (work_item_id,project_id,company_id,template_id,version_id,source,template_code,template_version,deliverable_type,definition,fingerprint,selection,activated_by_id)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12,$13) ON CONFLICT(work_item_id) DO NOTHING RETURNING work_item_id`,
+    (work_item_id,project_id,company_id,template_id,version_id,source,template_code,template_version,deliverable_type,definition,fingerprint,selection,activated_by_id,
+      policy_id,policy_version_id,policy_code,policy_version,policy_definition,policy_fingerprint)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12,$13,$14,$15,$16,$17,$18::jsonb,$19) ON CONFLICT(work_item_id) DO NOTHING RETURNING work_item_id`,
       [
         input.workItemId,
         input.projectId,
@@ -89,6 +96,12 @@ export async function bindDeliveryWorkflowWithClient(input: {
         option.fingerprint,
         selected.selection,
         input.actorUserId,
+        governance?.policyId ?? null,
+        governance?.versionId ?? null,
+        governance?.code ?? null,
+        governance?.version ?? null,
+        governance ? JSON.stringify(governance.definition) : null,
+        governance?.fingerprint ?? null,
       ],
     )
   ).rows[0];
@@ -135,6 +148,8 @@ export async function bindDeliveryWorkflowWithClient(input: {
       source: option.source,
       fingerprint: option.fingerprint,
       selection: selected.selection,
+      governancePolicyVersionId: governance?.versionId ?? null,
+      governancePolicyFingerprint: governance?.fingerprint ?? null,
     },
   });
   return {
@@ -220,6 +235,8 @@ async function locked(
       "DELIVERY_WORKFLOW_SNAPSHOT_MISMATCH",
       "The activated Delivery Workflow snapshot failed integrity verification.",
     );
+  if (binding.policy_definition != null && workflowGovernancePolicyFingerprint(binding.policy_definition) !== binding.policy_fingerprint)
+    throw new FinancialControlError(409,"WORKFLOW_POLICY_SNAPSHOT_MISMATCH","The activated Governance Policy snapshot failed integrity verification.");
   const phase = definition.phases[Number(binding.phase_index) - 1];
   if (!phase)
     throw new FinancialControlError(
@@ -384,6 +401,9 @@ export async function getWorkItemDeliveryWorkflow(input: {
       "DELIVERY_WORKFLOW_SNAPSHOT_MISMATCH",
       "The activated Delivery Workflow snapshot failed integrity verification.",
     );
+  const governance = binding.policy_definition == null ? null : validateWorkflowGovernancePolicy(binding.policy_definition);
+  if (governance && workflowGovernancePolicyFingerprint(governance) !== binding.policy_fingerprint)
+    throw new FinancialControlError(409,"WORKFLOW_POLICY_SNAPSHOT_MISMATCH","The activated Governance Policy snapshot failed integrity verification.");
   const [steps, roles, evidence, checks, events] = await Promise.all([
     pool.query(
       `SELECT phase_id "phaseId",task_id "taskId",status,revision,completed_by_id "completedById",completed_at "completedAt" FROM company_delivery_workflow_steps WHERE work_item_id=$1 ORDER BY phase_id,task_id`,
@@ -421,6 +441,8 @@ export async function getWorkItemDeliveryWorkflow(input: {
     definition,
     fingerprint: binding.fingerprint,
     selection: binding.selection,
+    governancePolicy: governance ? { code:binding.policy_code,version:Number(binding.policy_version),
+      versionId:binding.policy_version_id,fingerprint:binding.policy_fingerprint,definition:governance } : null,
     status: binding.status,
     phaseIndex: Number(binding.phase_index),
     revision: Number(binding.revision),

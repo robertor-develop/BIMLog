@@ -5,6 +5,8 @@ import { authMiddleware } from "../middlewares/auth";
 import { ensureWorkflowGovernancePolicySchema } from "../lib/workflow-governance-policy-migration";
 import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, WorkflowGovernancePolicyError, type WorkflowGovernancePolicy } from "../lib/workflow-governance-policy-contract";
 import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
+import { ensureDeliveryWorkflowTemplateSchema } from "../lib/delivery-workflow-template-migration";
+import { policiesOverlap } from "../lib/workflow-governance-binding";
 
 const router = Router();
 const codePattern = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -14,6 +16,7 @@ type Queryable = { query(sql: string, params?: any[]): Promise<{ rows: any[] }> 
 
 async function prepare(req: Request, res: Response, write = false): Promise<Actor | null> {
   await ensureWorkflowGovernancePolicySchema();
+  await ensureDeliveryWorkflowTemplateSchema();
   if (!req.user?.userId) { res.status(401).json({ code: "AUTHORITY_INVALID" }); return null; }
   const row = (await pool.query(`SELECT u.id,u.company_id,
     (u.is_super_admin OR EXISTS (SELECT 1 FROM company_master_catalog_administrators a
@@ -188,6 +191,7 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/publi
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const current = await policy(client, actor, param(req.params.id), true);
     if (!current) { await client.query("ROLLBACK"); res.status(404).json({ code: "WORKFLOW_POLICY_NOT_FOUND" }); return; }
     const row = (await client.query(`SELECT id,definition,fingerprint,revision,state FROM company_workflow_governance_versions
@@ -200,6 +204,12 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/publi
       await client.query("ROLLBACK"); res.status(409).json({ code: "WORKFLOW_POLICY_SOURCE_CHANGED" }); return;
     }
     if (!await financeChecker(client, actor)) { await client.query("ROLLBACK"); res.status(403).json({ code: "WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED" }); return; }
+    const others = (await client.query(`SELECT v.definition FROM company_workflow_governance_policies p
+      JOIN company_workflow_governance_versions v ON v.policy_id=p.id
+      WHERE p.company_id=$1 AND p.id<>$2 AND v.state='published' FOR UPDATE OF p`, [actor.companyId,current.id])).rows;
+    if (others.some(other => policiesOverlap(value, validateWorkflowGovernancePolicy(other.definition)))) {
+      await client.query("ROLLBACK"); res.status(409).json({ code: "WORKFLOW_POLICY_SCOPE_OVERLAP" }); return;
+    }
     const prior = (await client.query(`UPDATE company_workflow_governance_versions SET state='superseded',updated_by_id=$2,updated_at=now()
       WHERE policy_id=$1 AND state='published' RETURNING id`, [current.id, actor.userId])).rows;
     for (const item of prior) await event(client, actor, current.id, item.id, "superseded", { byVersionId: row.id });

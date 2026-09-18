@@ -1,0 +1,22 @@
+.wgp-shell{display:flex;min-height:100vh;background:#f4f7fb;color:#15263e}
+.wgp-main{flex:1;min-width:0;padding:24px 32px;overflow:auto}
+.wgp-header,.wgp-title,.wgp-actions{display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap}
+.wgp-header{margin:12px 0 24px}.wgp-header h1{margin:4px 0;font-size:27px}.wgp-header p{margin:0;color:#4e6280}
+.wgp-layout{display:grid;grid-template-columns:minmax(210px,270px) minmax(0,1fr);gap:16px;align-items:start}
+.wgp-list,.wgp-editor,.wgp-card{background:#fff;border:1px solid #d8e1ee;border-radius:10px;padding:16px}
+.wgp-list{position:sticky;top:16px;display:grid;gap:8px}.wgp-list h2{font-size:16px;margin:0 0 8px}
+.wgp-list button{display:grid;gap:4px;text-align:left;background:#fff;border:1px solid #d8e1ee;border-radius:7px;padding:10px;color:inherit}
+.wgp-list button span{font-size:12px;color:#586c87}.wgp-list button.wgp-selected{border-color:#2563eb;background:#eff6ff}
+.wgp-editor{display:grid;gap:16px}.wgp-editor p{margin:4px 0;line-height:1.45}.wgp-card h3{margin:0 0 10px;font-size:16px}
+.wgp-grid{display:grid;grid-template-columns:1fr 2fr;gap:12px}.wgp-grid label,.wgp-confirm label{display:grid;gap:5px}
+.wgp-options{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:8px}.wgp-options label{display:flex;align-items:center;gap:7px}
+.wgp-table-wrap{max-width:100%;overflow:auto}.wgp-editor table{border-collapse:collapse;width:100%;font-size:13px}
+.wgp-editor th,.wgp-editor td{border-bottom:1px solid #e2e8f0;padding:8px;text-align:left;vertical-align:middle}
+.wgp-editor input:not([type=checkbox]),.wgp-editor textarea{box-sizing:border-box;width:100%;padding:8px;border:1px solid #cbd5e1;border-radius:6px}
+.wgp-editor input[type=checkbox]{width:16px;height:16px;accent-color:#1264ce}
+.wgp-main button{cursor:pointer;border:1px solid #b6c7df;border-radius:6px;background:#fff;padding:8px 12px;color:#173a6d}
+.wgp-main button:disabled{opacity:.55;cursor:not-allowed}.wgp-actions button:first-child,.wgp-header button{background:#185bd4;color:#fff;border-color:#185bd4}
+.wgp-error{color:#991b1b;background:#fef2f2;padding:10px}.wgp-notice{color:#166534;background:#ecfdf5;padding:10px}
+.wgp-dirty,.wgp-confirm{border:1px solid #f4c76b;background:#fffbeb;padding:12px;border-radius:8px}
+.wgp-confirm{display:flex;gap:12px;align-items:center;flex-wrap:wrap}.wgp-confirm label{flex:1 1 260px}
+@media(max-width:850px){.wgp-layout{grid-template-columns:1fr}.wgp-list{position:static}.wgp-grid{grid-template-columns:1fr}.wgp-main{padding:16px}}
