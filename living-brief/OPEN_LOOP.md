@@ -3,7 +3,7 @@
 ## Dashboard mockup implementation - six blocks of five
 
 - [x] Block 1: finish and review local economic-allocation preview contract and tests; no canonical Commercial or project-budget mutation. Local candidate only; not pushed, published, or user-accepted.
-- [ ] Block 2: versioned company Delivery Workflow allocation persistence, canonical Commercial APU resolution, PMO/Finance authority, and maker-checker audit. Source candidate implemented and focused tests pass; authenticated isolated-database HTTP proof and independent review remain before this block can be accepted. Published Commercial APU v1 records without phase defaults must fail closed, not be silently upgraded.
+- [ ] Block 2: versioned company Delivery Workflow allocation persistence, canonical Commercial APU resolution, PMO/Finance authority, and maker-checker audit. Source candidate, focused tests, source gates and full local production build pass; authenticated isolated-database HTTP/artifact proof and independent review remain before this block can be accepted. Published Commercial APU v1 records without phase defaults must fail closed, not be silently upgraded.
 - [ ] Block 3: Delivery Workflow economic-allocation editor and preview matching the supplied mockup, including desktop/mobile/bilingual empty/error states.
 - [ ] Block 4: Governance Policy contract, versioning, thresholds, permissions, validation, and approval/audit behavior without duplicating existing project budget governance.
 - [ ] Block 5: Governance Policy dashboard and binding/activation snapshots for new Work Items; existing history remains immutable.
