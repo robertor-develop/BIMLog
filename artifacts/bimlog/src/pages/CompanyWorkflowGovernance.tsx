@@ -116,7 +116,7 @@ export function CompanyWorkflowGovernance() {
       <button type="button" onClick={() => { setDraft(current ? structuredClone(current.definition) : starter());setDirty(false);setError(""); }}>{t("Discard changes","Descartar cambios")}</button></div>}
     <div className="wgp-layout"><aside className="wgp-list"><h2>{t("Policies","Políticas")}</h2>
       {!loading && !list.length && <p>{t("No published policies are available.","No hay políticas publicadas disponibles.")}</p>}
-      {[...new Map(list.map(row => [row.id,row])).values()].map(row => <button key={row.id} type="button" className={selectedId === row.id ? "wgp-selected" : ""}
+      {list.filter((row,index) => list.findIndex(item => item.id === row.id) === index).map(row => <button key={row.id} type="button" className={selectedId === row.id ? "wgp-selected" : ""}
         onClick={() => void select(row.id)}><strong>{row.name}</strong><span>{row.code} · v{row.version} · {row.state}</span></button>)}
     </aside><section className="wgp-editor">
       <div className="wgp-title"><h2>{selectedId ? identity.name : t("New Governance Policy","Nueva política de gobernanza")}</h2>

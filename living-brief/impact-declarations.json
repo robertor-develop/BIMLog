@@ -30548,7 +30548,7 @@
     },
     {
       "taskId": "dashboard-block5-governance-binding-20260918",
-      "reviewedThroughCommit": "211f70b4f8e1e82a77493c1d6015b03ab196763b",
+      "reviewedThroughCommit": "ed8e04982d6966739da8ec6ee269ae25e11af412",
       "reviewedAt": "2026-09-18T19:23:04Z",
       "status": "candidate",
       "authorities": [
@@ -30609,25 +30609,10 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
-        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
-        "artifacts/api-server/src/lib/delivery-workflow-template-migration.ts",
-        "artifacts/api-server/src/lib/workflow-governance-binding.ts",
-        "artifacts/api-server/src/lib/workflow-governance-policy-migration.ts",
-        "artifacts/api-server/src/lib/workflow-governance-policy.http-evidence.ts",
-        "artifacts/api-server/src/routes/workflow-governance-policies.ts",
-        "artifacts/bimlog/src/App.tsx",
-        "artifacts/bimlog/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx",
-        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
-        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.css",
         "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
-        "lib/db/src/schema/delivery-workflows.ts",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "8aa90fdf654a83e1e3307f7e372c6eefb0e73d1af17d28ec93f100d29ee823e9"
+      "reviewedChangeSha256": "bcd732fc847cd246a1391c5516120eda880bae628d30b640b6c0ef6ad2e7f87f"
     }
   ]
 }
