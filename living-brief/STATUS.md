@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Dashboard mockup program - Block 6 local verification candidate - 2026-09-18
+
+- The Governance Policy dashboard now fails closed on initial authorization/read errors instead of exposing an editable starter policy, and exact-390 mobile containment no longer traps a 153px-wide horizontal overflow. The editor explicitly distinguishes stored approval/change/role-policy intent from execution permissions.
+- Local Chrome against the production page with synthetic, intercepted APIs covered 24 English/Spanish desktop/mobile PMO, read-only, empty, denied, error, and loading scenarios, including save/discard/refresh and browser-error/overflow checks. The company-scoped policy HTTP lifecycle, Work Item runtime snapshot/reopening proof, workflow contracts, and database-safety fixtures passed against disposable localhost data. This is not real-account or published-site acceptance.
+- The broader mockup is **not 100% functionally equivalent**: approval thresholds, change-control choices, and arbitrary company-role matrix entries are not all enforced at execution time. Runtime uses assigned task roles and existing PMO/Finance API grants. Independent review, exact clean-source production artifact, real-role acceptance, Replit synchronization, publication, and live Chrome smoke remain open.
+
 ## Dashboard mockup program - Block 5 Governance binding and dashboard local candidate - 2026-09-18
 
 - Five bounded builds add (1) a company-published policy resolver with overlap prevention and workflow checks, (2) nullable immutable policy identity/definition/fingerprint columns on newly activated Work Items, (3) a bilingual company Governance Policy editor for scope, approval/change/validation/role rules and versioned lifecycle, (4) a read-only policy snapshot indicator in Operations, and (5) guarded local regression coverage. No-policy activation remains valid; existing Work Items are not backfilled or rewritten. Commercial APU and project budget governance remain separate canonical authorities.

@@ -30612,6 +30612,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "dashboard-block6-local-verification-20260918",
+      "reviewedThroughCommit": "ea4587bb202b2e073273f06e7eca50d56ff34a71",
+      "reviewedAt": "2026-09-18T20:13:58Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Commercial APU and project-budget authority are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Coordination and release authority are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local fixture evidence does not replace live or independent acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The strategic roadmap is unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated structural map is unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and native plugin are untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal output changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records local Block 6 evidence and explicit runtime-enforcement limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Carries unfinished runtime policy and release acceptance gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit records are unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/scripts/company-governance-browser-evidence.mjs",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.css",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b216bd6f741e3b3c70754a99deae98877ddefc738ee42bc1486aa443821a36e5"
     }
   ]
 }

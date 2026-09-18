@@ -61,6 +61,8 @@ export function CompanyWorkflowGovernance() {
   const [dirty,setDirty] = useState(false);
   const [busy,setBusy] = useState(false);
   const [loading,setLoading] = useState(true);
+  const [loadFailed,setLoadFailed] = useState(false);
+  const [creating,setCreating] = useState(false);
   const [error,setError] = useState("");
   const [notice,setNotice] = useState("");
   const [confirm,setConfirm] = useState<"publish"|"retire"|null>(null);
@@ -76,6 +78,7 @@ export function CompanyWorkflowGovernance() {
   },[token]);
   const load = useCallback(async (id?:string) => {
     const listing = await request("/company/workflow-governance-policies");
+    setLoadFailed(false);
     setList(listing.versions ?? []); setCanManage(listing.canManage === true);
     if (listing.canManage) {
       const workflowsResult = await request("/company/delivery-workflows");
@@ -87,11 +90,12 @@ export function CompanyWorkflowGovernance() {
       setVersions(detail.versions ?? []); setHistory(detail.history ?? []);
       const shown = detail.versions.find((version:Version) => version.state === "draft") ?? detail.versions[0];
       setDraft(structuredClone(shown.definition)); setIdentity({ code:shown.code,name:shown.name }); setSelectedId(target);
+      setCreating(false);
     } else if (target) { setSelectedId(""); setVersions([]); setHistory([]); setDraft(starter()); }
     setDirty(false);
   },[request,selectedId]);
   useEffect(() => { setLoading(true); void load().catch(cause => {
-    setList([]);setVersions([]);setHistory([]);setSelectedId("");setCanManage(false);setError(String(cause));
+    setList([]);setVersions([]);setHistory([]);setSelectedId("");setCanManage(false);setLoadFailed(true);setError(String(cause));
   }).finally(() => setLoading(false)); },[load]);
   useEffect(() => { if (!dirty) return; const guard = (event:BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
     window.addEventListener("beforeunload",guard); return () => window.removeEventListener("beforeunload",guard); },[dirty]);
@@ -101,27 +105,28 @@ export function CompanyWorkflowGovernance() {
     catch (cause) { setError(String(cause)); }
     finally { setBusy(false); } };
   const select = async (id:string) => { if (dirty) { setError(t("Save or discard changes before switching.","Guarde o descarte los cambios antes de cambiar.")); return; }
-    setError(""); setLoading(true); try { await load(id); } catch (cause) { setVersions([]);setHistory([]);setSelectedId("");setError(String(cause)); } finally { setLoading(false); } };
+    setError(""); setLoading(true); try { await load(id); } catch (cause) { setVersions([]);setHistory([]);setSelectedId("");setCanManage(false);setLoadFailed(true);setError(String(cause)); } finally { setLoading(false); } };
 
   if (!token) return null;
   return <div className="wgp-shell"><MasterSidebar /><main className="wgp-main">
     <button type="button" disabled={dirty} onClick={() => navigate("/dashboard")}>{t("Back to Headquarters","Volver a la Sede")}</button>
     <header className="wgp-header"><div><p>{t("Company configuration","Configuración de empresa")}</p><h1>{t("Governance Policies","Políticas de gobernanza")}</h1>
       <span>{t("Reusable Delivery Workflow controls. Project budget governance remains in Intake and Operations.","Controles reutilizables de flujos de entrega. La gobernanza presupuestaria del proyecto permanece en Ingreso y Operaciones.")}</span></div>
-      {canManage && <button type="button" disabled={dirty || busy} onClick={() => { setSelectedId("");setVersions([]);setHistory([]);setDraft(starter());setIdentity({code:"",name:""});setError("");setNotice(""); }}>{t("New policy","Nueva política")}</button>}</header>
+      {canManage && <button type="button" disabled={dirty || busy} onClick={() => { setSelectedId("");setCreating(true);setVersions([]);setHistory([]);setDraft(starter());setIdentity({code:"",name:""});setError("");setNotice(""); }}>{t("New policy","Nueva política")}</button>}</header>
     {loading && <p role="status">{t("Loading policies...","Cargando políticas...")}</p>}
     {error && <p role="alert" className="wgp-error">{error}</p>}
     {notice && <p role="status" className="wgp-notice">{notice}</p>}
     {dirty && <div className="wgp-dirty" role="status">{t("Unsaved changes","Cambios sin guardar")}
       <button type="button" onClick={() => { setDraft(current ? structuredClone(current.definition) : starter());setDirty(false);setError(""); }}>{t("Discard changes","Descartar cambios")}</button></div>}
-    <div className="wgp-layout"><aside className="wgp-list"><h2>{t("Policies","Políticas")}</h2>
+    {!loadFailed && !loading && <div className="wgp-layout"><aside className="wgp-list"><h2>{t("Policies","Políticas")}</h2>
       {!loading && !list.length && <p>{t("No published policies are available.","No hay políticas publicadas disponibles.")}</p>}
       {list.filter((row,index) => list.findIndex(item => item.id === row.id) === index).map(row => <button key={row.id} type="button" className={selectedId === row.id ? "wgp-selected" : ""}
         onClick={() => void select(row.id)}><strong>{row.name}</strong><span>{row.code} · v{row.version} · {row.state}</span></button>)}
-    </aside><section className="wgp-editor">
+    </aside>{(selectedId || (canManage && (creating || list.length===0))) ? <section className="wgp-editor">
       <div className="wgp-title"><h2>{selectedId ? identity.name : t("New Governance Policy","Nueva política de gobernanza")}</h2>
         {current && <span>{current.state} · v{current.version} · {current.fingerprint?.slice(0,12) ?? t("Draft","Borrador")}</span>}</div>
       <p>{t("Published policies bind only to newly activated Work Items. Existing snapshots never change.","Las políticas publicadas se vinculan solo a nuevos elementos de trabajo activados. Los registros existentes nunca cambian.")}</p>
+      <p role="note">{t("Approval thresholds, change rules, and company-role rows are recorded policy intent, not yet execution permissions. Work Item execution uses assigned task roles and existing PMO/Finance grants.","Los umbrales de aprobación, las reglas de cambio y las filas de roles se registran como política; todavía no otorgan permisos de ejecución. Los elementos de trabajo usan los roles asignados y los permisos PMO/Finanzas existentes.")}</p>
       {editable && <div className="wgp-grid"><label>{t("Code","Código")}<input value={identity.code} disabled={Boolean(selectedId)} onChange={event => { setIdentity({...identity,code:event.target.value.toUpperCase()});setDirty(true); }} /></label>
         <label>{t("Name","Nombre")}<input value={identity.name} disabled={Boolean(selectedId)} onChange={event => { setIdentity({...identity,name:event.target.value});setDirty(true); }} /></label></div>}
       <section className="wgp-card"><h3>{t("Policy scope","Alcance de política")}</h3>
@@ -194,6 +199,8 @@ export function CompanyWorkflowGovernance() {
         {history.length>0 && <div className="wgp-table-wrap"><table><thead><tr><th>{t("Time","Fecha")}</th><th>{t("Action","Acción")}</th><th>{t("Actor","Actor")}</th><th>{t("Details","Detalles")}</th></tr></thead>
           <tbody>{history.map((entry,index) => <tr key={index}><td>{new Date(entry.createdAt).toLocaleString()}</td><td>{entry.action}</td><td>{entry.actorId}</td><td>{JSON.stringify(entry.details)}</td></tr>)}</tbody></table></div>}
       </section>}
-    </section></div>
+    </section> : <section className="wgp-editor"><p>{list.length
+      ? t("Select a policy to inspect its active version and history.","Seleccione una política para ver su versión activa y el historial.")
+      : t("No company governance policy is published for your account.","No hay una política de gobernanza publicada para su cuenta.")}</p></section>}</div>}
   </main></div>;
 }
