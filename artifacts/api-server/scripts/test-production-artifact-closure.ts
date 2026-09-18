@@ -269,6 +269,7 @@ Module._resolveFilename = function(request, parent, isMain, options) {
   }
   return resolved;
 };
+process.stderr.write("BIMLOG_ARTIFACT_GUARD_READY\\n");
 `,
 );
 
@@ -418,6 +419,7 @@ invalidStorageChild.stderr.on("data", (chunk) => {
 let invalidStorageReadinessReached = false;
 let invalidStorageTcpReached = false;
 let invalidStorageTimedOut = false;
+let invalidStorageGuardTimedOut = false;
 let invalidStorageCleanupRequired = false;
 const invalidStorageProbeTimingsMs: number[] = [];
 const invalidStorageExit = new Promise<{
@@ -427,11 +429,14 @@ const invalidStorageExit = new Promise<{
   invalidStorageChild.once("exit", (code, signal) => resolve({ code, signal }));
 });
 try {
-  const denialBudgetMs = process.platform === "win32" ? 8_000 : 6_000;
-  const deadline = performance.now() + denialBudgetMs;
+  // Cold Windows process launch after the package assembly can exceed the
+  // authorization-denial budget before the test guard has even loaded.
+  // Keep the original denial budget, starting it only at JS entry.
+  const guardDeadline = performance.now() + 30_000;
   while (
     invalidStorageChild.exitCode === null &&
-    performance.now() < deadline
+    !invalidStorageStderr.includes("BIMLOG_ARTIFACT_GUARD_READY") &&
+    performance.now() < guardDeadline
   ) {
     const probeStartedAt = performance.now();
     const response = await fetch(
@@ -440,6 +445,24 @@ try {
     invalidStorageProbeTimingsMs.push(
       Number((performance.now() - probeStartedAt).toFixed(1)),
     );
+    if (response) {
+      invalidStorageTcpReached = true;
+      if (response.status === 200) invalidStorageReadinessReached = true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  invalidStorageGuardTimedOut =
+    !invalidStorageStderr.includes("BIMLOG_ARTIFACT_GUARD_READY");
+  const denialBudgetMs = process.platform === "win32" ? 8_000 : 6_000;
+  const deadline = performance.now() + denialBudgetMs;
+  while (
+    invalidStorageChild.exitCode === null &&
+    !invalidStorageGuardTimedOut &&
+    performance.now() < deadline
+  ) {
+    const response = await fetch(
+      `http://127.0.0.1:${negativePort}/api/v1/healthz`,
+    ).catch(() => null);
     if (response) {
       invalidStorageTcpReached = true;
       if (response.status === 200) invalidStorageReadinessReached = true;
@@ -467,6 +490,11 @@ if (invalidStorageTimedOut) {
     tcpReached: invalidStorageTcpReached,
   });
 }
+assert.equal(
+  invalidStorageGuardTimedOut,
+  false,
+  "Invalid authority child did not enter the guarded artifact runtime.",
+);
 assert.equal(
   invalidStorageTimedOut,
   false,

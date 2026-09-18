@@ -30757,6 +30757,76 @@
         "scripts/prepare-artifact-proof-fixture.mjs"
       ],
       "reviewedChangeSha256": "26ff092481ff6716e6e493e37af51ea8e9a025b66c4094b779736d8efa7fbec0"
+    },
+    {
+      "taskId": "dashboard-artifact-cold-start-correction-20260918",
+      "reviewedThroughCommit": "c8779eb384b442abe448634ad072acfb359a0c88",
+      "reviewedAt": "2026-09-18T22:22:54Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Artifact-test timing changes no product economics or authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The local QA fixture boundary is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The original denial budget and independent/live proof boundaries remain intact."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No strategic direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime product structure changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and Lens Next source are untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal report output changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records repeated full-gate timing failure and focused passing correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps clean exact-head full gate and release review open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit entries remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "de3245e36462fa73c7c80724b686825a703c6988d1eee065ecbe37764925f82d"
     }
   ]
 }
