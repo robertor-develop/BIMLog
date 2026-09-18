@@ -75,6 +75,7 @@ import { ensureLensNextPublishingSchema } from "./lib/lens-next-publishing";
 import { startEnterpriseIdentityMigration, waitForEnterpriseIdentityMigration } from "./lib/enterprise-identity-migration";
 import { ensureCompanyMasterCatalogSchema } from "./lib/company-master-catalog-migration";
 import { ensureConnectorFoundationSchema } from "./lib/connector-foundation-migration";
+import { ensureDeliveryWorkflowRuntimeSchema } from "./lib/delivery-workflow-template-migration";
 
 const ENV_MODE =
   process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -1406,6 +1407,11 @@ const meetingLensStartupBarrier = queueDatabaseStartup(async () => {
   }
 });
 
+const deliveryWorkflowStartupBarrier = queueDatabaseStartup(async () => {
+  await ensureDeliveryWorkflowRuntimeSchema();
+  console.log("[migration] company delivery workflow templates and runtime ensured");
+});
+
 export const startupBarrier = Promise.all([
   waitForDatabaseStartup(),
   lensNextPublishingStartupBarrier,
@@ -1417,6 +1423,7 @@ export const startupBarrier = Promise.all([
   scheduleStartupBarrier,
   livingBriefAndLensStartupBarrier,
   meetingLensStartupBarrier,
+  deliveryWorkflowStartupBarrier,
   rfiMigrationReady.then((ready) => {
     if (!ready) throw new Error("RFI_SCHEMA_MIGRATION_FAILED");
   }),

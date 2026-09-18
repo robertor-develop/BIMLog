@@ -49,6 +49,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/change_orders.ts
 - artifacts/api-server/src/routes/clash_reports.ts
 - artifacts/api-server/src/routes/company-master-catalogs.ts
+- artifacts/api-server/src/routes/company-pricing-templates.ts
 - artifacts/api-server/src/routes/company-profile.ts
 - artifacts/api-server/src/routes/config.ts
 - artifacts/api-server/src/routes/connections.ts
@@ -59,6 +60,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/coordination.ts
 - artifacts/api-server/src/routes/coordinator-actions.ts
 - artifacts/api-server/src/routes/dashboard_briefing.ts
+- artifacts/api-server/src/routes/delivery-workflow-templates.ts
 - artifacts/api-server/src/routes/documents.ts
 - artifacts/api-server/src/routes/downloads.ts
 - artifacts/api-server/src/routes/feature-policies.ts
@@ -145,6 +147,8 @@ It changes only when the code structure or curated architectural facts change.
 - coordinationHubRouter
 - masterCatalogsRouter
 - companyMasterCatalogsRouter
+- deliveryWorkflowTemplatesRouter
+- companyPricingTemplatesRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -176,6 +180,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/company-master-catalog-migration.ts
 - artifacts/api-server/src/lib/company-master-catalog.behavior.ts
 - artifacts/api-server/src/lib/company-master-catalog.http-evidence.ts
+- artifacts/api-server/src/lib/company-pricing-template-binding.ts
+- artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts
+- artifacts/api-server/src/lib/company-pricing-template-contract.ts
+- artifacts/api-server/src/lib/company-pricing-template-intake.behavior.ts
+- artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts
 - artifacts/api-server/src/lib/composite-qc.behavior.ts
 - artifacts/api-server/src/lib/composite-qc.ts
 - artifacts/api-server/src/lib/composite-source-control.behavior.ts
@@ -224,6 +233,15 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/cost-value-plan-service.ts
 - artifacts/api-server/src/lib/cost-value-plan.behavior.ts
 - artifacts/api-server/src/lib/database-startup-serialization.behavior.ts
+- artifacts/api-server/src/lib/delivery-workflow-defaults.ts
+- artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts
+- artifacts/api-server/src/lib/delivery-workflow-runtime.ts
+- artifacts/api-server/src/lib/delivery-workflow-selection.behavior.ts
+- artifacts/api-server/src/lib/delivery-workflow-selection.ts
+- artifacts/api-server/src/lib/delivery-workflow-template-contract.behavior.ts
+- artifacts/api-server/src/lib/delivery-workflow-template-contract.ts
+- artifacts/api-server/src/lib/delivery-workflow-template-migration.ts
+- artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts
 - artifacts/api-server/src/lib/design-comment-control.behavior.ts
 - artifacts/api-server/src/lib/design-comment-control.ts
 - artifacts/api-server/src/lib/email.ts
@@ -358,6 +376,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-policy-ui.behavior.ts
 - artifacts/api-server/src/lib/job-intake-policy.behavior.ts
 - artifacts/api-server/src/lib/job-intake-policy.ts
+- artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts
 - artifacts/api-server/src/lib/job-intake-service.ts
 - artifacts/api-server/src/lib/job-intake-spreadsheet.behavior.ts
 - artifacts/api-server/src/lib/job-intake-task-assignment.behavior.ts
@@ -488,6 +507,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/coordination_intake_events.ts
 - lib/db/src/schema/coordinator-bulk-operations.ts
 - lib/db/src/schema/coordinator-saved-views.ts
+- lib/db/src/schema/delivery-workflows.ts
 - lib/db/src/schema/email-log.ts
 - lib/db/src/schema/enterprise-identity.ts
 - lib/db/src/schema/feature-catalog.ts
@@ -536,7 +556,9 @@ It changes only when the code structure or curated architectural facts change.
 ## Frontend pages (artifacts/bimlog/src/pages)
 - artifacts/bimlog/src/pages/About.tsx
 - artifacts/bimlog/src/pages/AdminPanel.tsx
+- artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx
 - artifacts/bimlog/src/pages/CompanyMasterCatalogs.tsx
+- artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx
 - artifacts/bimlog/src/pages/CompanyProfile.tsx
 - artifacts/bimlog/src/pages/Contact.tsx
 - artifacts/bimlog/src/pages/Dashboard.tsx
@@ -622,6 +644,8 @@ It changes only when the code structure or curated architectural facts change.
 - /settings/financial-controls
 - /admin/feedback
 - /company-catalogs
+- /company-workflows
+- /company-pricing-templates
 - /admin
 - /feedback
 - /total-control

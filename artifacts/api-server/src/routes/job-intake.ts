@@ -70,6 +70,24 @@ const errorEs: Record<string, string> = {
   JOB_INTAKE_ID_INVALID: "El identificador proporcionado no es válido.",
   JOB_INTAKE_CLASSIFICATION_INVALID:
     "La disciplina, el servicio o la fase seleccionada ya no pertenece al catálogo maestro autorizado.",
+  PRICING_TEMPLATE_COMMERCIAL_REQUIRED:
+    "Se requiere acceso Comercial para vincular una plantilla de precios.",
+  PRICING_TEMPLATE_CONTRACT_ACTIVATION_REQUIRED:
+    "Una plantilla de precios vinculada requiere activar el contrato Comercial con un presupuesto aprobado.",
+  PRICING_TEMPLATE_VERSION_INVALID:
+    "Seleccione una versión publicada válida de la plantilla de precios.",
+  PRICING_TEMPLATE_VERSION_NOT_FOUND:
+    "La versión publicada ya no está disponible para esta empresa.",
+  PRICING_TEMPLATE_VERSION_SUPERSEDED:
+    "Esta versión fue reemplazada. Seleccione la versión publicada actual.",
+  PRICING_TEMPLATE_RETIRED:
+    "Esta plantilla fue retirada y no puede vincularse a un contrato nuevo.",
+  PRICING_TEMPLATE_CURRENCY_MISMATCH:
+    "La moneda de la plantilla debe coincidir con la del contrato.",
+  PRICING_TEMPLATE_DEFINITION_INVALID:
+    "La definición publicada no pudo verificarse. Solicite una revisión a la PMO.",
+  PRICING_TEMPLATE_FINGERPRINT_MISMATCH:
+    "La integridad de la plantilla publicada no pudo verificarse. Solicite una revisión a la PMO.",
 };
 
 const run =

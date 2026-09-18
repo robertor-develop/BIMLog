@@ -375,6 +375,7 @@ export function normalizeJobIntakeData(raw: unknown) {
         : "draft",
       parentContractId: optionalText(contract.parentContractId, `commercial.contracts[${index}].parentContractId`, 100),
       engagementId: optionalText(contract.engagementId, `commercial.contracts[${index}].engagementId`, 100),
+      pricingTemplateVersionId: optionalText(contract.pricingTemplateVersionId, `commercial.contracts[${index}].pricingTemplateVersionId`, 36),
       paymentTerms: optionalText(
         contract.paymentTerms,
         `commercial.contracts[${index}].paymentTerms`,
@@ -504,6 +505,13 @@ export function normalizeJobIntakeData(raw: unknown) {
         `scopeItems[${index}].workflowTemplate`,
         100,
       ),
+      deliverableType: (() => {
+        const type = String(item.deliverableType ?? "GENERAL").trim().toUpperCase();
+        if (!["GENERAL","SHOP_DRAWING","SLEEVE"].includes(type))
+          throw new FinancialControlError(400,"DELIVERY_WORKFLOW_TYPE_INVALID",`scopeItems[${index}].deliverableType is invalid.`);
+        return type;
+      })(),
+      deliveryWorkflowVersionId: optionalText(item.deliveryWorkflowVersionId,`scopeItems[${index}].deliveryWorkflowVersionId`,100),
       contractId:
         optionalText(item.contractId, `scopeItems[${index}].contractId`, 100) ||
         primaryContract.id,

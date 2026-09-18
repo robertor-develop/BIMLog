@@ -1,5 +1,86 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lorena Block 9 pricing administration browser correction — 2026-09-17
+
+- [x] Exercise the production company APU/Pricing administration route in local Chromium with intercepted, explicitly synthetic API responses at 1280px and exact 390px in English and Spanish, covering PMO draft, published/retirement, read-only, denied, empty, and loading states (24 combinations). Capture screenshots and check no horizontal overflow, browser exceptions, or failed pricing requests.
+- [x] Correct barely visible inputs/actions, excessive desktop form height, the mobile return control overlapping fixed navigation, and a denied-response screen that wrongly suggested an empty library. Inspect desktop/mobile and denied screenshots, then assert mobile control separation and hidden editor on denial.
+- [x] Clear stale calculated preview after definition changes, reject late preview responses for a changed definition, guard unsaved edits on template switch/new/back/unload, block publish/retire with unsaved edits, replace browser-native retirement confirmation with an in-page cancel/confirm step, and clear sensitive selected data on list denial. Verify cancel, save, refresh, reopen, and retirement confirmation in the local browser fixture.
+- [ ] The fixture does not prove real PMO/Finance maker-checker publication, retirement, company isolation, live Intake/Operations/Commercial browser journeys, or Lorena's actual account access. Complete authenticated desktop/mobile field acceptance and independent combined-source review, then clean-source assembler/no-DROP preview and separately authorized push/publish. This local candidate remains uncommitted and unpublished.
+
+## Lorena Block 8 authenticated multi-contract Intake cycle — 2026-09-17
+
+- [x] Provision an exact localhost disposable database with the full base schema and additive migrations; run an authenticated HTTP Job Intake cycle for a synthetic project with two contracts, distinct published pricing references, two Commercial APU versions, two approved budget lines, two team assignments, and a $420 baseline.
+- [x] Reject an invalid template reference without changing the Intake revision; save, reload, reject a stale save, retire a selected template before activation, reject activation without partial contracts or Work Items, select a replacement, save/reload, and activate both canonical Commercial draft contracts.
+- [x] Verify persisted per-contract template binding, exact APU versions and unit rates, immutable activated budget baseline, idempotent activation retry, retained historical contract binding after later template retirement, and the correct immutable-Intake response to an attempted post-activation edit.
+- [x] Remove concurrent queries on one PostgreSQL transaction client in Commercial entitlement resolution; the full test reruns cleanly with Node deprecation tracing. Pass API/frontend typechecks, existing Intake suite, and Commercial entitlement regression. Stop/remove the synthetic database.
+- [ ] This local HTTP/database cycle is not a browser test or a customer-field cycle. Inspect authenticated desktop and 390px English/Spanish Intake, Operations, pricing administration, and Commercial pages with real roles; independently review combined Blocks 1–8, run clean-source production assembler and no-DROP/schema preview, then obtain separate push/publish authorization. No production or Replit data was changed.
+
+## Lorena Block 7 pricing-reference integration hardening — 2026-09-17
+
+- [x] Cover two independent Intake contract-template references in one normalized job, with separate Contract Item APU versions and rates and an unchanged activated commercial baseline total.
+- [x] Exercise the authenticated project pricing-options API against isolated PostgreSQL: active member versus nonmember/other-company denial, currency filtering, published-only selection, retirement exclusion, and replacement republishing.
+- [x] Clear stale template choices while a project/currency lookup is pending or invalid, disable selection until it resolves, and show bilingual loading/error text. Add Spanish Intake errors for retired, superseded, wrong-currency, malformed, and integrity-failed references.
+- [x] Pass API/frontend typechecks, frontend production build, focused multi-contract regression, and isolated HTTP lifecycle proof; stop and remove the disposable test database.
+- [x] Block 8 adds the separate full authenticated multi-contract Intake save/reload/activate-to-Commercial database proof. Its acceptance limits and remaining browser/release gates are recorded above.
+
+## Lorena Block 6 pricing-template retirement — 2026-09-17
+
+- [x] Append an immutable retirement version with reason, stale-version control, different PMO author/checker, and an effective company Finance cost-approver grant.
+- [x] Exclude retired templates from future company/project options and reject new contract bindings to retired published versions, including after a later draft is saved. Preserve published history and permit separately approved republishing.
+- [x] Show the lifecycle and confirmation in bilingual administration UI; pass isolated PostgreSQL lifecycle/security proof and remove the disposable test database.
+- [ ] Visually verify the actual administration and Intake pages in authenticated desktop/mobile English/Spanish, including retirement confirmation, stale responses, save/refresh/reopen, historical contract display, and future-option exclusion. The HTTP test does not prove the browser experience.
+- [ ] Independently review Blocks 1–6, run clean-source API assembler and production no-DROP/schema preview, and obtain separate release authorization before push/publish. Nothing is deployed or customer accepted.
+
+## Lorena Block 5 pricing-template reference bridge — 2026-09-17
+
+- [x] Preserve optional per-contract template version selection in Intake; allow Commercial-authorized project users to see only current published versions in the matching currency.
+- [x] Revalidate company, publication state, latest version, currency, and source fingerprint on draft save and activation. Pin the reference to the canonical Commercial contract version, fingerprint and audit history without changing existing APU rates or approved budgets.
+- [x] Pass focused Intake preservation test and isolated PostgreSQL positive/negative publication and binding proof; remove disposable database.
+- [ ] Run a full authenticated multi-contract Intake-to-Commercial database test and visually inspect desktop/mobile English/Spanish UI for selection, save, refresh, return, currency change, permission denial, and activated history. Current source/isolated helper tests do not prove the complete browser journey.
+- [ ] Independently review combined Blocks 1–5, run clean-source API assembler and production no-DROP/schema preview, then seek explicit push/publish authorization. Nothing in this block is deployed or customer accepted.
+- [ ] Define separate economic rules if a reusable service template should create a project-specific Commercial APU or prefill a negotiated unit price. This block intentionally creates a versioned reference only, not a financial transformation.
+
+## Lorena Block 4 company APU/Pricing template administration — 2026-09-17
+
+- [x] Reuse the existing Generic APU tables/evaluator and existing company PMO grant; do not duplicate Commercial APU authority or mutate project budgets.
+- [x] Add bounded structured pricing components, exact-decimal preview, canonical fingerprint, append-only draft versions, stale-version rejection, separate-maker/checker publication with an effective company Finance cost-approver grant, published options, company isolation, and bilingual administration UI.
+- [x] Pass focused contract and existing evaluator regressions, API/frontend typechecks, frontend bundle, and isolated PostgreSQL HTTP proof of PMO, tenant, history, immutability, and negative behavior; stop and remove test DB.
+- [ ] Inspect the actual new page in a local interactive browser at desktop and 390px in English/Spanish, including PMO author/checker separation, loading/error, save/refresh/reopen, and read-only/direct-URL denial. Source compilation and HTTP proof do not establish UI acceptance.
+- [ ] Independently review the combined Blocks 1–4 diff and production bundle; run the API assembler from clean committed source and complete the production no-DROP/schema preview before any release claim.
+- [x] Add the separately governed, reference-only bridge from a published reusable pricing template to the canonical Commercial contract version in Block 5. An economic conversion into a project-specific Commercial APU or negotiated price remains open above; Intake must not treat a template preview as an approved contract price or invent an EDT budget allocation.
+- [x] Add governed retirement/deactivation and test historical preservation and future-option exclusion in Block 6. Additional Generic APU calculation methods remain open until their economic semantics are specified.
+- [ ] Push/publish only after separate release authorization; then run authenticated Lorena/Ruben end-to-end field acceptance. This block is not deployed or customer accepted.
+
+## Lorena Block 3 Delivery Workflow product and runtime — 2026-09-17
+
+- [x] Add company PMO administration UI for structured draft edits, version history, validation/preview, approval, publication, and retirement.
+- [x] Add default-first General/Shop Drawing/Sleeve selection at Intake; auto-apply a sole company version, require explicit choice among multiple company versions, and honor approved-only policy without copying Commercial APU.
+- [x] Bind each newly activated Work Item to a fingerprinted immutable definition/version snapshot; preserve an old binding after a company version changes.
+- [x] Add server-enforced role, checkpoint, required-document, QC, approval, advance, completion, reopen, revision, project-scope, and immutable audit behavior with an Operations control panel.
+- [x] Pass API/frontend typechecks, frontend bundle, definition/selection tests, and isolated PostgreSQL lifecycle/runtime proofs; stop and remove synthetic test databases.
+- [ ] Inspect the new administration, Intake selection, and Operations panel in a local interactive browser at desktop and 390px, including bilingual, permission, loading/error, save/refresh, and return states. Backend HTTP proof and a compiled frontend are not a full UI acceptance test.
+- [ ] Independently review all Block 1–3 changes, schema mirror, and additive/no-DROP preview; run the clean-source API production assembler from a reviewed commit. Do not publish an uncommitted candidate.
+- [ ] After separate release authorization, push and publish through governed Replit Shell, then run a complete authenticated Lorena/Ruben job cycle; do not call this local candidate published or field accepted. Existing activated Work Items must not receive invented historical workflow evidence.
+
+## Lorena Block 2 Delivery Workflow engine — 2026-09-17
+
+- [x] Add versioned company-scoped Delivery Workflow foundation and reuse existing PMO authority; no duplicate catalog or APU template system.
+- [x] Implement draft/version API, ordered definitions and role/gate validation, immutable approval/publication, supersession/retirement, and audit history.
+- [x] Pass focused definition tests, API typecheck, and isolated localhost PostgreSQL lifecycle/authority HTTP proof.
+- [x] Reconcile and pass Living Brief integrity; pass API typecheck, focused tests, isolated HTTP proof, frontend build, and diff whitespace check.
+- [ ] Complete independent source review and the API production assembler from clean committed source before any release claim. Its clean-source guard correctly rejected this uncommitted candidate. No production schema application, push, or publication is authorized by this block.
+- [x] Block 3 local candidate: administration UI, BIMLog defaults/auto-selection, preview, Work Item binding, and runtime transitions are implemented and tested against isolated synthetic Intake/Operations records without changing APU authority. Authenticated field acceptance remains open above.
+- [ ] After separately approved release, inspect additive schema correspondence/no-DROP, publish via governed Replit Shell, and complete authenticated Lorena/Ruben live acceptance. Local HTTP proof cannot substitute for these gates.
+
+## Lorena Block 1 follow-up — 2026-09-17
+
+- [x] Preserve Lens Next and reconcile the current four-catalog/Intake/Operations implementation before changing it.
+- [x] Add governed PMO name correction for company Discipline, Service, and Phase entries through the existing versioned API; retain client canonical-Company boundary and cancel/read-only behavior.
+- [x] Run local focused catalog, Intake classification, Operations classification, and Project Controls tests; inspect actual production UI components with isolated browser fixtures for PMO/read-only/denied and combined filter states.
+- [ ] Independently review the diff and complete the full local release gate. No push or publication is implied by this block.
+- [ ] With separate production approval, verify the migration preview and grant Lorena's existing account company-scoped PMO access; confirm her actual login sees the dedicated catalog route and controls, without global Super Administrator status.
+- [ ] Under authenticated production accounts, complete create/edit/deactivate/save/refresh/reopen and cross-project ID/history tests for all four catalogs; verify canonical Client correction path, classified Intake packages/tasks, activation, and real-project Operations filters/totals/exports. The local fixture cannot satisfy this field gate.
+
 ## Lens Next P32 bounded UI release — 2026-09-17
 
 - [x] Preserve the dirty responsible-company/schema work in its original worktree and prepare a separate clean committed-UI candidate; no production database migration is silently bundled.

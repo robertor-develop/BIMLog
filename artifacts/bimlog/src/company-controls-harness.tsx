@@ -23,6 +23,17 @@ window.fetch = async (input, init) => {
   if (catalogState === "denied") return Response.json({ code: "FORBIDDEN" }, { status: 403 });
   if (kind === "capabilities") return Response.json({ companyId: 1, canManage: catalogState !== "read-only", isSuperAdmin: false, mode: "approved_only", policyVersion: 1 });
   if (kind && kind in catalogEntries && (!init?.method || init.method === "GET")) return Response.json({ entries: catalogState === "empty" ? [] : catalogEntries[kind as keyof typeof catalogEntries] });
+  if (init?.method === "PATCH" && catalogState === "pmo") {
+    const parts = path.split("/");
+    const catalogKind = parts.at(-2) as keyof typeof catalogEntries;
+    const entry = catalogKind in catalogEntries ? catalogEntries[catalogKind]?.find(item => item.id === kind) : undefined;
+    const body = JSON.parse(String(init.body ?? "{}")) as { name?: string; state?: "active" | "inactive" | "retired"; expectedVersion?: number };
+    if (!entry || entry.version !== body.expectedVersion) return Response.json({ code: "COMPANY_CATALOG_NOT_FOUND_OR_VERSION_CONFLICT" }, { status: 409 });
+    if (body.name) entry.name = body.name;
+    if (body.state) entry.state = body.state;
+    entry.version += 1;
+    return Response.json({ entry });
+  }
   return Response.json({ error: "Fixture is read-only" }, { status: 403 });
 };
 

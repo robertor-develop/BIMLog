@@ -39,6 +39,8 @@ const DataRetention = namedPage(() => import("@/pages/DataRetention"), "DataRete
 const ResetPasswordPage = namedPage(() => import("@/pages/ResetPassword"), "ResetPasswordPage");
 const AdminPanel = namedPage(() => import("@/pages/AdminPanel"), "AdminPanel");
 const CompanyMasterCatalogs = namedPage(() => import("@/pages/CompanyMasterCatalogs"), "CompanyMasterCatalogs");
+const CompanyDeliveryWorkflows = namedPage(() => import("@/pages/CompanyDeliveryWorkflows"), "CompanyDeliveryWorkflows");
+const CompanyPricingTemplates = namedPage(() => import("@/pages/CompanyPricingTemplates"), "CompanyPricingTemplates");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
@@ -174,6 +176,12 @@ function Router() {
       </Route>
       <Route path="/company-catalogs">
         {() => <ProtectedRoute component={CompanyMasterCatalogs} />}
+      </Route>
+      <Route path="/company-workflows">
+        {() => <ProtectedRoute component={CompanyDeliveryWorkflows} />}
+      </Route>
+      <Route path="/company-pricing-templates">
+        {() => <ProtectedRoute component={CompanyPricingTemplates} />}
       </Route>
       <Route path="/admin">
         {() => <ProtectedRoute component={AdminPanel} />}

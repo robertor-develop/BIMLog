@@ -16,6 +16,7 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
   const [drafts, setDrafts] = useState<Record<Kind, { code: string; name: string }>>({ client: { code: "", name: "" }, discipline: { code: "", name: "" }, service: { code: "", name: "" }, phase: { code: "", name: "" } });
   const [grantEmail, setGrantEmail] = useState("");
   const [policyDraft, setPolicyDraft] = useState<PolicyMode>("defaults_allowed");
+  const [editing, setEditing] = useState<{ kind: Kind; id: string; name: string; version: number } | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -59,6 +60,20 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
     } catch (error) { setMessage(String(error)); } finally { setBusy(false); }
   }
 
+  async function saveName() {
+    if (!editing || editing.kind === "client" || !editing.name.trim()) return;
+    setBusy(true); setMessage("");
+    try {
+      await request(`/company/master-catalogs/${editing.kind}/${editing.id}`, {
+        method: "PATCH",
+        body: JSON.stringify({ name: editing.name.trim(), expectedVersion: editing.version }),
+      });
+      await load();
+      setEditing(null);
+      setMessage(t("Name saved; existing project snapshots retain their historical text.", "Nombre guardado; los registros históricos del proyecto conservan su texto anterior."));
+    } catch (error) { setMessage(String(error)); } finally { setBusy(false); }
+  }
+
   async function grant(action: "grant" | "revoke") {
     setBusy(true); setMessage("");
     try {
@@ -90,11 +105,28 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
     {message && <p role="status" style={{ padding: 10, background: "#fef3c7", borderRadius: 8 }}>{message}</p>}
     {ready && capability?.isSuperAdmin && <section style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14 }}><h3>{t("Grant or revoke Company PMO access", "Otorgar o revocar acceso PMO de empresa")}</h3><p>{t("Enter the existing user's email. The server binds the grant to that user's own company; it does not grant global Super Admin.", "Ingrese el correo de la cuenta existente. El servidor vincula el permiso a la empresa de esa cuenta; no otorga Super Administrador global.")}</p><label>{t("User email", "Correo del usuario")} <input type="email" value={grantEmail} onChange={event => setGrantEmail(event.target.value)} /></label><div style={{ display: "flex", gap: 8, marginTop: 9 }}><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("grant")}>{t("Grant PMO", "Otorgar PMO")}</button><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("revoke")}>{t("Revoke PMO", "Revocar PMO")}</button></div></section>}
     {ready && capability && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(280px,100%),1fr))", gap: 14, minWidth: 0 }}>{kinds.map(kind => <section key={kind} style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14, minWidth: 0 }}><h3>{spanish ? labels[kind][1] : labels[kind][0]}</h3>
+      {kind === "client" && <p>{t("Client names come from canonical Companies. Company PMO can add or deactivate options here; name corrections require Company Directory administration.", "Los nombres de clientes provienen de Empresas canónicas. PMO puede agregar o desactivar opciones aquí; las correcciones de nombres requieren administración del Directorio de Empresas.")}</p>}
       {capability?.canManage && <div style={{ display: "grid", gap: 7, marginBottom: 12, minWidth: 0 }}><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Code", "Código")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].code} maxLength={64} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], code: event.target.value.toUpperCase() } }))} /></label><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Name", "Nombre")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].name} maxLength={200} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], name: event.target.value } }))} /></label><button type="button" disabled={busy || !drafts[kind].code.trim() || !drafts[kind].name.trim()} onClick={() => void create(kind)}>{t("Add to company catalog", "Agregar al catálogo de empresa")}</button></div>}
       {entries[kind].length === 0 && <p>{capability?.mode === "approved_only"
         ? t("No approved company values yet. Add one before making a new project selection of this kind.", "Aún no hay valores de empresa aprobados. Agregue uno antes de hacer una nueva selección de este tipo en el proyecto.")
         : t("No company values yet; BIMLog defaults remain available in project choices.", "Aún no hay valores de empresa; los valores predeterminados de BIMLog siguen disponibles en las opciones del proyecto.")}</p>}
-      <div style={{ display: "grid", gap: 7 }}>{entries[kind].map(entry => <div key={entry.id} style={{ borderTop: "1px solid #e2e8f0", paddingTop: 7, display: "flex", justifyContent: "space-between", gap: 8 }}><span><strong>{entry.code} — {entry.name}</strong><small style={{ display: "block" }}>{({ active: t("Active", "Activo"), inactive: t("Inactive", "Inactivo"), retired: t("Retired", "Retirado") })[entry.state]} · v{entry.version}</small></span>{capability?.canManage && entry.state !== "retired" && <button type="button" disabled={busy} onClick={() => void toggle(kind, entry)}>{entry.state === "active" ? t("Deactivate", "Desactivar") : t("Activate", "Activar")}</button>}</div>)}</div>
+      <div style={{ display: "grid", gap: 7 }}>{entries[kind].map(entry => {
+        const isEditing = editing?.kind === kind && editing.id === entry.id;
+        return <div key={entry.id} style={{ borderTop: "1px solid #e2e8f0", paddingTop: 7, display: "grid", gap: 7, minWidth: 0 }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", gap: 8, flexWrap: "wrap" }}>
+            <span><strong>{entry.code} — {entry.name}</strong><small style={{ display: "block" }}>{({ active: t("Active", "Activo"), inactive: t("Inactive", "Inactivo"), retired: t("Retired", "Retirado") })[entry.state]} · v{entry.version}</small></span>
+            {capability?.canManage && entry.state !== "retired" && <span style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              {kind !== "client" && <button type="button" disabled={busy} onClick={() => setEditing({ kind, id: entry.id, name: entry.name, version: entry.version })}>{t("Edit name", "Editar nombre")}</button>}
+              <button type="button" disabled={busy} onClick={() => void toggle(kind, entry)}>{entry.state === "active" ? t("Deactivate", "Desactivar") : t("Activate", "Activar")}</button>
+            </span>}
+          </div>
+          {isEditing && <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <label style={{ flex: "1 1 180px" }}>{t("New name", "Nuevo nombre")} <input style={{ width: "100%", minWidth: 0 }} value={editing.name} maxLength={200} onChange={event => setEditing({ ...editing, name: event.target.value })} /></label>
+            <button type="button" disabled={busy || !editing.name.trim() || editing.name.trim() === entry.name} onClick={() => void saveName()}>{t("Save name", "Guardar nombre")}</button>
+            <button type="button" disabled={busy} onClick={() => setEditing(null)}>{t("Cancel", "Cancelar")}</button>
+          </div>}
+        </div>;
+      })}</div>
     </section>)}</div>}
   </section>;
 }

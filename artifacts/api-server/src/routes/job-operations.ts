@@ -2,6 +2,15 @@ import { Router } from "express";
 import { authMiddleware } from "../middlewares/auth";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import {
+  advanceWorkItemDeliveryPhase,
+  approveWorkItemDeliveryPhase,
+  assignWorkItemDeliveryRole,
+  getWorkItemDeliveryWorkflow,
+  linkWorkItemDeliveryEvidence,
+  reopenWorkItemDeliveryPhase,
+  setWorkItemDeliveryStep,
+} from "../lib/delivery-workflow-runtime";
+import {
   addJobOperationTime,
   createJobBudgetBaseline,
   createJobBudgetVarianceReview,
@@ -83,6 +92,30 @@ const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any,
 
 router.get("/projects/:projectId/operations", run(async (req, res) => {
   res.json(await getJobOperations({ actorUserId: req.user.userId, projectId: req.params.projectId }));
+}));
+router.get("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow", run(async (req, res) => {
+  res.json(await getWorkItemDeliveryWorkflow({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId }));
+}));
+router.patch("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow/roles/:role", run(async (req, res) => {
+  res.json(await assignWorkItemDeliveryRole({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId, role: req.params.role, userId: req.body?.userId, expectedRevision: req.body?.expectedRevision }));
+}));
+router.patch("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow/steps/:phaseId/:taskId", run(async (req, res) => {
+  res.json(await setWorkItemDeliveryStep({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId, phaseId: req.params.phaseId, taskId: req.params.taskId, status: req.body?.status, reason: req.body?.reason, expectedRevision: req.body?.expectedRevision }));
+}));
+router.post("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow/evidence", run(async (req, res) => {
+  res.status(201).json(await linkWorkItemDeliveryEvidence({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId, phaseId: req.body?.phaseId, taskId: req.body?.taskId, documentCode: req.body?.documentCode, fileId: req.body?.fileId, expectedRevision: req.body?.expectedRevision }));
+}));
+router.post("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow/qc", run(async (req, res) => {
+  res.json(await approveWorkItemDeliveryPhase({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId, kind: "qc", expectedRevision: req.body?.expectedRevision }));
+}));
+router.post("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow/approval", run(async (req, res) => {
+  res.json(await approveWorkItemDeliveryPhase({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId, kind: "approval", expectedRevision: req.body?.expectedRevision }));
+}));
+router.post("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow/advance", run(async (req, res) => {
+  res.json(await advanceWorkItemDeliveryPhase({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId, expectedRevision: req.body?.expectedRevision }));
+}));
+router.post("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow/reopen", run(async (req, res) => {
+  res.json(await reopenWorkItemDeliveryPhase({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId, targetPhaseId: req.body?.targetPhaseId, reason: req.body?.reason, expectedRevision: req.body?.expectedRevision }));
 }));
 router.patch("/projects/:projectId/operations/tasks/:taskId", run(async (req, res) => {
   res.json(await updateJobOperationTask({ actorUserId: req.user.userId, projectId: req.params.projectId, taskId: req.params.taskId, expectedVersion: req.body?.expectedVersion, status: req.body?.status, progressPercent: req.body?.progressPercent, assigneeUserId: req.body?.assigneeUserId }));

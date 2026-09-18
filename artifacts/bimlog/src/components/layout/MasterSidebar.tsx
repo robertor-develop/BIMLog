@@ -407,6 +407,8 @@ export function MasterSidebar() {
             {(!sidebarCollapsed || isMobile) && <span className="sidebar-section-label">{t("Administration", "Administración")}</span>}
             {showAdminPanel && navButton(t("Project Administration", "Administración de Proyectos"), "/admin", ShieldCheck)}
             {showCompanyCatalogs && navButton(t("Company Catalogs", "Catálogos de Empresa"), "/company-catalogs", Building2)}
+            {showCompanyCatalogs && navButton(t("Delivery Workflows", "Flujos de Entrega"), "/company-workflows", Building2)}
+            {showCompanyCatalogs && navButton(t("APU / Pricing Templates", "Plantillas APU / Precios"), "/company-pricing-templates", Building2)}
             {showTotalControl && navButton(t("Total Control", "Control Total"), "/total-control", ShieldCheck)}
           </>
         )}

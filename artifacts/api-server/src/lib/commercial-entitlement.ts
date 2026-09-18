@@ -80,13 +80,13 @@ export async function commercialEntitlementForUser(userId: number, client: Query
 }
 
 export async function effectiveCommercialAccessForUser(userId: number, client: Queryable = pool): Promise<EffectiveCommercialAccess> {
-  const [packageState, budgetState, contractsState, plannerState, teamPerformanceState] = await Promise.all([
-    commercialEntitlementForUser(userId, client, "package"),
-    commercialEntitlementForUser(userId, client, "budget"),
-    commercialEntitlementForUser(userId, client, "contracts"),
-    commercialEntitlementForUser(userId, client, "cost_value_planner"),
-    commercialEntitlementForUser(userId, client, "team_performance"),
-  ]);
+  // A transaction may pass one pg Client here. Concurrent client.query calls
+  // are deprecated in pg and can break when pg 9 removes its query queue.
+  const packageState = await commercialEntitlementForUser(userId, client, "package");
+  const budgetState = await commercialEntitlementForUser(userId, client, "budget");
+  const contractsState = await commercialEntitlementForUser(userId, client, "contracts");
+  const plannerState = await commercialEntitlementForUser(userId, client, "cost_value_planner");
+  const teamPerformanceState = await commercialEntitlementForUser(userId, client, "team_performance");
   const packageEnabled = packageState.enabled;
   const budget = packageEnabled || budgetState.enabled;
   const contracts = packageEnabled || contractsState.enabled;

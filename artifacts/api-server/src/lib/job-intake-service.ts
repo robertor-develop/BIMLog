@@ -31,6 +31,9 @@ import { buildActivatedCommercialBaseline, persistActivatedCommercialBaselineWit
 import { resolveEffectiveEntitlement } from "./feature-catalog-service";
 import { applyIntakePolicyDefaults, normalizeIntakePolicy } from "./job-intake-policy";
 import { mergeMappedContractItems } from "./job-intake-mapped-item-pricing";
+import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
+import { bindDeliveryWorkflowWithClient } from "./delivery-workflow-runtime";
+import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
 
 const uuid = () => crypto.randomUUID();
 const categories = new Set([
@@ -422,14 +425,19 @@ export async function saveJobIntake(input: {
         "JOB_INTAKE_STALE",
         "This intake changed in another session. Reload before saving.",
       );
-    await validateRelationshipAuthority(data, projectId, access.companyId, normalizeJobIntakeData(row.data), client);
-    const capabilities = await capabilitiesFor(input.actorUserId, client);
     if (row.status === "activated" && row.activated_contract_id)
       throw new FinancialControlError(
         409,
         "JOB_INTAKE_ACTIVATED",
         "The operational and Commercial activation is complete; the accepted intake is immutable.",
       );
+    await validateRelationshipAuthority(data, projectId, access.companyId, normalizeJobIntakeData(row.data), client);
+    const capabilities = await capabilitiesFor(input.actorUserId, client);
+    for (const contract of data.commercial.contracts) if (contract.pricingTemplateVersionId) {
+      if (!capabilities.costValuePlanner) throw new FinancialControlError(403, "PRICING_TEMPLATE_COMMERCIAL_REQUIRED", "Commercial access is required to reference a pricing template.");
+      await resolveCompanyPricingTemplateBinding({ client, companyId: access.companyId,
+        currency: data.identity.currency, versionId: contract.pricingTemplateVersionId });
+    }
     if (
       row.status === "activated" &&
       jobIntakeCoreFingerprint(normalizeJobIntakeData(row.data)) !==
@@ -1016,6 +1024,7 @@ async function createCoreActivationWithClient(
   input: {
     actorUserId: number;
     projectId: number;
+    companyId: number;
     intakeId: string;
     data: JobIntakeData;
     capabilities: JobIntakeCapabilities;
@@ -1069,6 +1078,13 @@ async function createCoreActivationWithClient(
         "The operational work item could not be created.",
       );
     if (inserted) workItemsCreated += 1;
+    await bindDeliveryWorkflowWithClient({
+      client, companyId: input.companyId, projectId: input.projectId, workItemId: actualWorkItemId,
+      actorUserId: input.actorUserId, deliverableType: item.deliverableType,
+      selectedVersionId: item.deliveryWorkflowVersionId,
+      executeUserId: input.data.team.assignments.find((assignment: JobIntakeData["team"]["assignments"][number]) => assignment.scopeItemId === item.id && assignment.userId)?.userId ?? null,
+      leaderUserId: input.data.team.projectLeaderUserId,
+    });
     const needsScopeDeliveryTask =
       item.workPackages.length === 0 ||
       input.data.team.assignments.some(
@@ -1201,6 +1217,7 @@ export async function activateJobIntake(input: {
   confirmationFingerprint: unknown;
 }) {
   await waitForJobIntakeMigration();
+  await ensureDeliveryWorkflowRuntimeSchema();
   const projectId = positiveId(input.projectId, "projectId");
   const projectAccess = await scope(input.actorUserId, projectId);
   const capabilities = await capabilitiesFor(input.actorUserId);
@@ -1272,6 +1289,9 @@ export async function activateJobIntake(input: {
       );
     const budgetLinkRequested =
       capabilities.budget && jobIntakeBudgetLinkRequested(data);
+    if (data.commercial.contracts.some((contract: any) => contract.pricingTemplateVersionId) &&
+      !(capabilities.fullCommercialActivation && budgetLinkRequested))
+      throw new FinancialControlError(409, "PRICING_TEMPLATE_CONTRACT_ACTIVATION_REQUIRED", "A referenced pricing template requires a governed Commercial contract activation and approved budget snapshot.");
     if (budgetLinkRequested) {
       const snapshot = (await client.query(
         `SELECT id,project_id "projectId",currency FROM approved_budget_snapshots WHERE id=$1 AND project_id=$2`,
@@ -1287,6 +1307,7 @@ export async function activateJobIntake(input: {
       {
         actorUserId: input.actorUserId,
         projectId,
+        companyId: projectAccess.companyId,
         intakeId: intake.id,
         data,
         capabilities,
@@ -1299,6 +1320,7 @@ export async function activateJobIntake(input: {
       contractVersionId: string;
       contractItems: number;
       contractValue: string;
+      pricingTemplateBinding: Awaited<ReturnType<typeof resolveCompanyPricingTemplateBinding>>;
     }> = [];
     let workflowBaseline = { requested: data.scopeItems.length, created: 0 };
     if (capabilities.fullCommercialActivation && budgetLinkRequested) {
@@ -1361,6 +1383,7 @@ export async function activateJobIntake(input: {
                 ),
               ),
             },
+            pricingTemplateVersionId: contract.pricingTemplateVersionId,
             initialGrants: grants,
             lines: contractItems.map((item, index) => ({
               stableLineId: item.id,
@@ -1416,6 +1439,7 @@ export async function activateJobIntake(input: {
           contractVersionId: draft.versionId,
           contractItems: contractItems.length,
           contractValue,
+          pricingTemplateBinding: draft.pricingTemplateBinding,
         });
       }
     }

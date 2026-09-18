@@ -29102,6 +29102,871 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "461bc05a4bc37d5ccc4cf94d3d68ba55acc5ca9ed72583d3593bc36c49b3b8bb"
+    },
+    {
+      "taskId": "lorena-block01-local-catalog-correction-20260917",
+      "reviewedThroughCommit": "74e736cb6bebe277a38f0241c89e71b974c15c42",
+      "reviewedAt": "2026-09-17T21:00:00.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "edit_isolated_worktree",
+          "run_local_validation",
+          "record_exact_gate_evidence"
+        ],
+        "operatorOnly": [
+          "production_database_change",
+          "company_pmo_grant",
+          "authorized_replit_publish",
+          "customer_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Company-scoped PMO/catalog/Intake/Operations authority already exists; this candidate adds classification-name correction UI and records local fixture evidence without claiming Lorena production acceptance."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Multi-tenant catalog authority and default-first product doctrine are unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution and publication gates remain mandatory."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local browser fixture evidence is recorded without replacing live acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No route, schema, or new module was introduced."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens Next behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report rendering behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local Block 1 catalog edit and browser fixture evidence with release boundaries."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps actual Lorena grant, publication, and authenticated field verification open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit entry was rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/company-controls-harness.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.master-catalogs.behavior.mjs",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cd86b3c872d918c6934add89fad486d37881ed14a223e5664f102d3e89619aa9"
+    },
+    {
+      "taskId": "lorena-block02-delivery-workflow-foundation-20260917",
+      "reviewedThroughCommit": "74e736cb6bebe277a38f0241c89e71b974c15c42",
+      "reviewedAt": "2026-09-17T21:29:36.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "edit_isolated_worktree",
+          "run_local_validation",
+          "record_exact_gate_evidence"
+        ],
+        "operatorOnly": [
+          "production_database_change",
+          "authorized_replit_publish",
+          "customer_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "summary": "The existing PMO grant is reused for a new company-scoped Delivery Workflow version foundation. Local isolated database/API proof does not claim administration UI, Intake binding, production migration, or release."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Default-first multi-tenant product doctrine is unchanged; this block only creates company workflow-version infrastructure."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution and publication gates remain mandatory."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local HTTP evidence is bounded and does not replace production field acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated structural route/library map includes the additive Delivery Workflow API foundation."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or Lens Next behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report rendering behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 2 local functionality, tests, and release limitations."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks remaining Block 3 and production field gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit entry was rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-migration.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/api-server/src/routes/index.ts",
+        "artifacts/bimlog/src/company-controls-harness.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.master-catalogs.behavior.mjs",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "0be4097028b628166f06d3bf00c5c73ab67a2eaec44e4029f19cad2203753e33"
+    },
+    {
+      "taskId": "lorena-block03-delivery-workflow-product-runtime-20260917",
+      "reviewedThroughCommit": "74e736cb6bebe277a38f0241c89e71b974c15c42",
+      "reviewedAt": "2026-09-17T22:05:03.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "edit_isolated_worktree",
+          "run_local_validation",
+          "record_exact_gate_evidence"
+        ],
+        "operatorOnly": [
+          "production_database_change",
+          "authorized_replit_publish",
+          "customer_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "summary": "The new Work Item delivery runtime snapshots an exact published definition and does not modify Commercial APU or Lens Next; prior activated Work Items are not retroactively fabricated."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "quality"
+          ],
+          "summary": "The additive runtime schema is only tested against an isolated local database; clean-source production assembly, production no-DROP preview, governed Replit publication, and live user acceptance remain open."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Default-first multi-tenant delivery behavior is implemented without changing permanent product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution, authority, and publication boundaries remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Local database proof is bounded and not substituted for release or field acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product mission or audience definition changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated structural map includes company workflow UI, Intake and Operations integration, and additive runtime modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native bridge or plugin authority changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report template or rendering rule changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim or citation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact Block 3 local implementation, isolated test results, and unresolved release limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks remaining UI inspection, independent review, schema preview, and field release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical audit entries were not rewritten by this block."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/delivery-workflow-defaults.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-migration.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-operations-service.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/api-server/src/routes/index.ts",
+        "artifacts/api-server/src/routes/job-operations.ts",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/company-controls-harness.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.master-catalogs.behavior.mjs",
+        "artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "lib/db/src/schema/delivery-workflows.ts",
+        "lib/db/src/schema/index.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "463be1701878cefd56e5985ce8fa74ce3ca29566a5961cfa4d7b133ea373efc6"
+    },
+    {
+      "taskId": "lorena-block06-pricing-template-retirement-20260917",
+      "reviewedThroughCommit": "74e736cb6bebe277a38f0241c89e71b974c15c42",
+      "reviewedAt": "2026-09-17T23:11:18.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Company pricing retirement is append-only, PMO and Finance-approver controlled, and excluded from future options and contract bindings while existing contract references remain unchanged. No price or budget is automatically changed."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Governed template retirement follows existing company, financial, and historical-contract authorities without changing permanent product laws."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This local retirement candidate remains isolated from push, publication, production finance, and Navisworks plugin operations."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing immutable history, tenancy, Finance approval, UI, and field-acceptance requirements remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The company pricing configuration extends the existing platform direction without altering the mission or target audience."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated structure still includes the pricing-template routes and tests; this block changes lifecycle logic without adding a new structural file."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native bridge, Navisworks plugin source, package, or field behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This block adds no report renderer, export artifact, or report design rule."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards metadata, applicability claim, or citation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact local Block 6 retirement lifecycle, verification, and non-deployment limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks retirement browser acceptance, historical contract verification, independent review, and release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical audit findings were not rewritten by this local implementation block."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/company-pricing-template-binding.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-intake.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-defaults.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-migration.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/financial-contract-service.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-operations-service.ts",
+        "artifacts/api-server/src/routes/company-pricing-templates.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/api-server/src/routes/index.ts",
+        "artifacts/api-server/src/routes/job-operations.ts",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/company-controls-harness.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.master-catalogs.behavior.mjs",
+        "artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx",
+        "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
+        "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "lib/db/src/schema/delivery-workflows.ts",
+        "lib/db/src/schema/index.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "94d805eeb66c00598e54e886fd617bb4a48cf07acfcff45b3e89fb161f47cee1"
+    },
+    {
+      "taskId": "lorena-block07-pricing-reference-integration-hardening-20260917",
+      "reviewedThroughCommit": "74e736cb6bebe277a38f0241c89e71b974c15c42",
+      "reviewedAt": "2026-09-17T23:27:00.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Project pricing options now have isolated membership, company, currency, retirement, and republishing evidence; a full authenticated multi-contract Intake-to-Commercial transaction and live browser acceptance remain unproved."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Pricing references remain optional company-governed configuration rather than a new mandatory project or financial authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This remains isolated local BIMLog candidate work with no push, Replit publication, or customer acceptance claim."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing independent review, browser acceptance, database preview, and clean-source release gates remain required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The regression and Intake selection hardening do not alter BIMLog product direction or audience."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new route, page, schema, or structural API entry was added in this verification block."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next, Native bridge, Navisworks plugin source, or customer model behavior was changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout, export artifact, or design-system rule was changed by this local block."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards title, edition, applicability, or external citation was changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 7 local test coverage, selection hardening, passing checks, and exact non-deployment limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks the still-open full transaction, authenticated visual acceptance, review, and release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit entry was rewritten or new accepted production evidence asserted."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/company-pricing-template-binding.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-intake.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-defaults.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-migration.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/financial-contract-service.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-operations-service.ts",
+        "artifacts/api-server/src/routes/company-pricing-templates.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/api-server/src/routes/index.ts",
+        "artifacts/api-server/src/routes/job-intake.ts",
+        "artifacts/api-server/src/routes/job-operations.ts",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/company-controls-harness.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.master-catalogs.behavior.mjs",
+        "artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx",
+        "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
+        "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "lib/db/src/schema/delivery-workflows.ts",
+        "lib/db/src/schema/index.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c27b48ebb5a6a0bfa572c0fbe79643d0780207efd768a24c6df925f3fe7470ea"
+    },
+    {
+      "taskId": "lorena-block08-authenticated-multicontract-intake-cycle-20260917",
+      "reviewedThroughCommit": "74e736cb6bebe277a38f0241c89e71b974c15c42",
+      "reviewedAt": "2026-09-17T23:42:00.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "A full isolated authenticated Intake HTTP/database cycle now proves two-contract activation, APU-rate preservation, retired-reference rollback, historical binding, and idempotency; browser, review, and publication gates remain open."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The test preserves optional company configuration and canonical Commercial pricing rather than creating a new mandatory workflow."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This is a local candidate and isolated synthetic database proof, with no push, Replit action, or customer acceptance claim."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Full browser, independent review, clean-source build, and controlled schema-preview acceptance requirements remain in force."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The integration proof and transaction-client correction do not change BIMLog mission or target customers."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new platform page, route, schema module, or generated structural entry was introduced by this block."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native bridge, Navisworks plugin code, installer, ZIP, or model behavior was edited."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design, export layout, or downstream artifact rendering requirement changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards metadata, edition, applicability, or citation was modified."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the exact local multi-contract integration result, observed fixes, passing checks, and non-deployment limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the Block 7 database-cycle gap while retaining authenticated browser, review, and release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No prior audit record or production-history claim was rewritten by this synthetic test."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/commercial-entitlement.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-binding.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-intake.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-defaults.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-migration.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/financial-contract-service.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-operations-service.ts",
+        "artifacts/api-server/src/routes/company-pricing-templates.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/api-server/src/routes/index.ts",
+        "artifacts/api-server/src/routes/job-intake.ts",
+        "artifacts/api-server/src/routes/job-operations.ts",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/company-controls-harness.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.master-catalogs.behavior.mjs",
+        "artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx",
+        "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
+        "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "lib/db/src/schema/delivery-workflows.ts",
+        "lib/db/src/schema/index.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "03d3e479bd6d4ac944c5668effe04b156242291f07e5913c1678e63e8cb3c701"
+    },
+    {
+      "taskId": "lorena-block09-pricing-admin-browser-ux-20260917",
+      "reviewedThroughCommit": "74e736cb6bebe277a38f0241c89e71b974c15c42",
+      "reviewedAt": "2026-09-17T23:55:15.000Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The local browser pass exposed under-styled controls and mobile navigation overlap; an access failure could retain a selected pricing definition in component state. The production page now clears that state and guards stale preview and unsaved edits. Live role and field acceptance remain open."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded page correction preserves optional company pricing configuration and canonical Commercial prices."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No push, publish, Replit action, or customer acceptance is claimed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "A local fixture-backed browser check does not waive authenticated field, combined-source, or release gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product mission or target-customer decision changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing administration route only; no route, API, schema, or platform-structure change in Block 9."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next, Navisworks, ZIP, and Native bridge code were not edited."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact local browser scenarios, screenshot findings, fixes, and release limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes bounded pricing UI defects while retaining real-account Intake/Operations/Commercial and release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No earlier audit evidence or production history was rewritten."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/commercial-entitlement.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-binding.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-intake.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-defaults.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-runtime.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-migration.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/financial-contract-service.ts",
+        "artifacts/api-server/src/lib/job-intake-contract.ts",
+        "artifacts/api-server/src/lib/job-intake-pricing-multicontract.http-evidence.ts",
+        "artifacts/api-server/src/lib/job-intake-service.ts",
+        "artifacts/api-server/src/lib/job-operations-service.ts",
+        "artifacts/api-server/src/routes/company-pricing-templates.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/api-server/src/routes/index.ts",
+        "artifacts/api-server/src/routes/job-intake.ts",
+        "artifacts/api-server/src/routes/job-operations.ts",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-en-denied.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-en-empty.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-en-loading.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-en-pmo.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-en-published.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-en-read-only.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-en-retirement-confirm.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-en-saved-reopened.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-es-denied.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-es-empty.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-es-loading.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-es-pmo.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-es-published.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-es-read-only.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-es-retirement-confirm.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/1280-es-saved-reopened.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-en-denied.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-en-empty.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-en-loading.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-en-pmo.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-en-published.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-en-read-only.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-en-retirement-confirm.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-en-saved-reopened.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-es-denied.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-es-empty.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-es-loading.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-es-pmo.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-es-published.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-es-read-only.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-es-retirement-confirm.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/390-es-saved-reopened.png",
+        "artifacts/bimlog/evidence/block09-company-pricing-browser/results.json",
+        "artifacts/bimlog/scripts/company-pricing-browser-evidence.mjs",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/company-controls-harness.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyDeliveryWorkflowsTab.tsx",
+        "artifacts/bimlog/src/components/admin/CompanyMasterCatalogsTab.tsx",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "artifacts/bimlog/src/components/job-operations/WorkItemDeliveryWorkflowPanel.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/pages/AdminPanel.master-catalogs.behavior.mjs",
+        "artifacts/bimlog/src/pages/CompanyDeliveryWorkflows.tsx",
+        "artifacts/bimlog/src/pages/CompanyPricingTemplates.css",
+        "artifacts/bimlog/src/pages/CompanyPricingTemplates.tsx",
+        "artifacts/bimlog/src/pages/FinancialContractWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+        "lib/db/src/schema/delivery-workflows.ts",
+        "lib/db/src/schema/index.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3c9d0b2420a0a1baf679d82b3570ae93d8c7c3b128ab947e4793e5e80f8fe9dc"
     }
   ]
 }

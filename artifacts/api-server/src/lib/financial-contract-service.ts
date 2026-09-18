@@ -3,6 +3,7 @@ import { pool } from "@workspace/db";
 import { FinancialControlError } from "./financial-control-contract";
 import { authorizeFinancialOperation } from "./financial-control-service";
 import { waitForFinancialContractMigration } from "./financial-contract-migration";
+import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
 import { boundedText, decimalFromScaled, positiveId, scaledSignedDecimal } from "./financial-budget-contract";
 import {
   absoluteExact,
@@ -177,7 +178,7 @@ export type CreateContractDraftInput = {
   actorUserId: number; projectId: unknown; contractId?: unknown; legalNumber: unknown; perspective: unknown;
   contractType: unknown; counterpartyName: unknown; title: unknown; currency: unknown; originalValue: unknown;
   budgetSnapshotId: unknown; effectiveDate?: unknown; completionDate?: unknown; paymentTerms?: unknown;
-  commercialMetadata?: unknown; signedFileId?: unknown; lines: unknown; initialGrants?: unknown;
+  commercialMetadata?: unknown; pricingTemplateVersionId?: unknown; signedFileId?: unknown; lines: unknown; initialGrants?: unknown;
 };
 
 export async function createContractDraft(input: CreateContractDraftInput) {
@@ -195,6 +196,9 @@ export async function createContractDraftWithClient(input: CreateContractDraftIn
   assertReconciledTotal(lines, originalValue, "the original contract value");
   const budgetSnapshotId = boundedText(input.budgetSnapshotId, "budgetSnapshotId", 3, 100);
   const auth = await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.prepare", operation: "prepare", client });
+  const pricingTemplateBinding = await resolveCompanyPricingTemplateBinding({
+    client, companyId: auth.scope.companyId, currency, versionId: input.pricingTemplateVersionId,
+  });
   lines = await pinContractItemApuSnapshots(client, projectId, currency, lines);
   await client.query(`SELECT pg_advisory_xact_lock(hashtextextended($1,0))`, [`financial-contract:${projectId}:${perspective}:${legalNumber}`]);
   let contractId = input.contractId == null ? uuid() : boundedText(input.contractId, "contractId", 3, 100);
@@ -215,12 +219,15 @@ export async function createContractDraftWithClient(input: CreateContractDraftIn
   const pinned = await validatePinnedSnapshot(client, { projectId, companyId: auth.scope.companyId, snapshotId: budgetSnapshotId, currency, lines });
   const signedFileId = await validateFile(client, projectId, input.signedFileId);
   const version = Number(prior?.version ?? 0) + 1, id = uuid();
-  const commercialMetadata = safeCommercialMetadata(input.commercialMetadata);
+  const commercialMetadata = {
+    ...safeCommercialMetadata(input.commercialMetadata),
+    ...(pricingTemplateBinding ? { pricingTemplateBinding } : {}),
+  };
   const contentFingerprint = contractFingerprint({ contractId, version, title, currency, originalValue, budgetSnapshotId, structureVersionId: pinned.structureVersionId, effectiveDate: input.effectiveDate ?? null, completionDate: input.completionDate ?? null, paymentTerms: input.paymentTerms ?? null, commercialMetadata, lines });
   await client.query(`INSERT INTO financial_contract_versions(id,contract_id,version,status,title,currency,original_value,effective_date,completion_date,payment_terms,commercial_metadata,budget_snapshot_id,structure_version_id,signed_file_id,prepared_by_id,content_fingerprint,supersedes_id) VALUES($1,$2,$3,'draft',$4,$5,$6,$7,$8,$9,$10::jsonb,$11,$12,$13,$14,$15,$16)`, [id, contractId, version, title, currency, originalValue, input.effectiveDate ?? null, input.completionDate ?? null, input.paymentTerms == null ? null : boundedText(input.paymentTerms, "paymentTerms", 1, 1000), JSON.stringify(commercialMetadata), budgetSnapshotId, pinned.structureVersionId, signedFileId, auth.actor.userId, contentFingerprint, prior?.id ?? null]);
   await insertSovLines(client, id, lines);
-  await history(client, { companyId: auth.scope.companyId, projectId, contractId, contractVersionId: id, actorUserId: auth.actor.userId, eventType: "contract_draft_created", afterState: "draft", code: "CONTRACT_DRAFT_CREATED", evidence: { version, contentFingerprint, budgetSnapshotId, structureVersionId: pinned.structureVersionId, currency, originalValue } });
-  return { id: contractId, bimlogId: `BIMLOG-CON-${contractId}`, versionId: id, version, status: "draft", contentFingerprint, currency, originalValue };
+  await history(client, { companyId: auth.scope.companyId, projectId, contractId, contractVersionId: id, actorUserId: auth.actor.userId, eventType: "contract_draft_created", afterState: "draft", code: "CONTRACT_DRAFT_CREATED", evidence: { version, contentFingerprint, budgetSnapshotId, structureVersionId: pinned.structureVersionId, currency, originalValue, pricingTemplateBinding } });
+  return { id: contractId, bimlogId: `BIMLOG-CON-${contractId}`, versionId: id, version, status: "draft", contentFingerprint, currency, originalValue, pricingTemplateBinding };
 }
 
 const transitionRules: Record<string, { from: string[]; to: string; operation: "prepare" | "review"; permission: "prepare" | "review"; feature: string; reason: boolean }> = {
@@ -453,8 +460,8 @@ export async function getContractWorkspace(input: { actorUserId: number; project
   const projectId = positiveId(input.projectId, "projectId");
   await authorizeFinancialOperation({ actorUserId: input.actorUserId, projectId, featureKey: "cost.commitment.view", operation: "read" });
   const contractId = input.contractId == null ? null : boundedText(input.contractId, "contractId", 3, 100);
-  const result = await pool.query(`WITH latest_grants AS (SELECT DISTINCT ON(contract_id,permission) contract_id,permission,state FROM financial_contract_record_grants WHERE user_id=$1 ORDER BY contract_id,permission,version DESC), latest_versions AS (SELECT DISTINCT ON(contract_id) * FROM financial_contract_versions ORDER BY contract_id,version DESC), committed AS (SELECT a.contract_id,COALESCE(sum(v.amount_delta) FILTER(WHERE v.status='executed'),0) amendment_total FROM financial_contract_amendments a LEFT JOIN financial_contract_amendment_versions v ON v.amendment_id=a.id GROUP BY a.contract_id) SELECT c.*,v.id version_id,v.version,v.status,v.title,v.currency,v.original_value,v.content_fingerprint,v.revision,v.budget_snapshot_id,v.structure_version_id,v.approved_at,v.executed_at,COALESCE(committed.amendment_total,0) amendment_total FROM financial_contracts c JOIN latest_versions v ON v.contract_id=c.id LEFT JOIN committed ON committed.contract_id=c.id WHERE c.project_id=$2 AND ($3::text IS NULL OR c.id=$3) AND EXISTS(SELECT 1 FROM latest_grants g WHERE g.contract_id=c.id AND g.permission='view' AND g.state='active') ORDER BY c.created_at DESC`, [input.actorUserId, projectId, contractId]);
-  const contracts = result.rows.map((r: any) => ({ id: r.id, bimlogId: r.bimlog_id, perspective: r.perspective, contractType: r.contract_type, legalNumber: r.legal_number, counterpartyName: r.counterparty_name, versionId: r.version_id, version: Number(r.version), status: r.status, title: r.title, currency: r.currency, originalValue: exactPositiveAmount(String(r.original_value)), executedAmendmentTotal: exactDelta(String(r.amendment_total)), currentCommitment: r.status === "executed" ? decimalFromScaled(scaledSignedDecimal(String(r.original_value)) + scaledSignedDecimal(String(r.amendment_total))) : "0", contentFingerprint: r.content_fingerprint, revision: Number(r.revision), budgetSnapshotId: r.budget_snapshot_id, structureVersionId: r.structure_version_id, approvedAt: r.approved_at ? iso(r.approved_at) : null, executedAt: r.executed_at ? iso(r.executed_at) : null }));
+  const result = await pool.query(`WITH latest_grants AS (SELECT DISTINCT ON(contract_id,permission) contract_id,permission,state FROM financial_contract_record_grants WHERE user_id=$1 ORDER BY contract_id,permission,version DESC), latest_versions AS (SELECT DISTINCT ON(contract_id) * FROM financial_contract_versions ORDER BY contract_id,version DESC), committed AS (SELECT a.contract_id,COALESCE(sum(v.amount_delta) FILTER(WHERE v.status='executed'),0) amendment_total FROM financial_contract_amendments a LEFT JOIN financial_contract_amendment_versions v ON v.amendment_id=a.id GROUP BY a.contract_id) SELECT c.*,v.id version_id,v.version,v.status,v.title,v.currency,v.original_value,v.commercial_metadata,v.content_fingerprint,v.revision,v.budget_snapshot_id,v.structure_version_id,v.approved_at,v.executed_at,COALESCE(committed.amendment_total,0) amendment_total FROM financial_contracts c JOIN latest_versions v ON v.contract_id=c.id LEFT JOIN committed ON committed.contract_id=c.id WHERE c.project_id=$2 AND ($3::text IS NULL OR c.id=$3) AND EXISTS(SELECT 1 FROM latest_grants g WHERE g.contract_id=c.id AND g.permission='view' AND g.state='active') ORDER BY c.created_at DESC`, [input.actorUserId, projectId, contractId]);
+  const contracts = result.rows.map((r: any) => ({ id: r.id, bimlogId: r.bimlog_id, perspective: r.perspective, contractType: r.contract_type, legalNumber: r.legal_number, counterpartyName: r.counterparty_name, versionId: r.version_id, version: Number(r.version), status: r.status, title: r.title, currency: r.currency, originalValue: exactPositiveAmount(String(r.original_value)), executedAmendmentTotal: exactDelta(String(r.amendment_total)), currentCommitment: r.status === "executed" ? decimalFromScaled(scaledSignedDecimal(String(r.original_value)) + scaledSignedDecimal(String(r.amendment_total))) : "0", pricingTemplateBinding: r.commercial_metadata?.pricingTemplateBinding ?? null, contentFingerprint: r.content_fingerprint, revision: Number(r.revision), budgetSnapshotId: r.budget_snapshot_id, structureVersionId: r.structure_version_id, approvedAt: r.approved_at ? iso(r.approved_at) : null, executedAt: r.executed_at ? iso(r.executed_at) : null }));
   let detail: any = null;
   if (contractId && contracts[0]) {
     const lines = await pool.query(`SELECT l.*,b.project_code,b.project_name,b.amount budget_amount,s.source_type schedule_source_type,s.source_id schedule_source_id FROM financial_contract_sov_lines l JOIN approved_budget_snapshot_lines b ON b.id=l.budget_snapshot_line_id LEFT JOIN schedule_item_placements s ON s.id=l.schedule_item_placement_id WHERE l.contract_version_id=$1 ORDER BY l.sort_order,l.stable_line_id`, [contracts[0].versionId]);

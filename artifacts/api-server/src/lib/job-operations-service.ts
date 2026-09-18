@@ -80,6 +80,7 @@ async function scope(actorUserId: number, projectId: number, client: Queryable =
   const leaderId = Number(row.data?.team?.projectLeaderUserId ?? 0) || null;
   return { projectId, projectName: row.name, projectCode: row.code, companyId: Number(row.project_company), intakeId: row.intake_id ?? null, leaderId, configurationSnapshot: row.activation_summary?.configurationSnapshot ?? null, canManage: row.is_super_admin === true || leaderId === actorUserId || MANAGER_ROLES.has(String(row.role ?? "").toLowerCase()) };
 }
+export { scope as jobOperationScope };
 
 async function event(client: Queryable, input: { projectId: number; actorUserId: number; eventType: string; workItemId?: string | null; taskId?: string | null; assignmentId?: string | null; packageId?: string | null; evidence?: Record<string, unknown> }) {
   await client.query(`INSERT INTO job_activation_operation_events(id,project_id,work_item_id,task_id,assignment_id,package_id,actor_user_id,event_type,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9::jsonb)`, [crypto.randomUUID(), input.projectId, input.workItemId ?? null, input.taskId ?? null, input.assignmentId ?? null, input.packageId ?? null, input.actorUserId, input.eventType, JSON.stringify(input.evidence ?? {})]);

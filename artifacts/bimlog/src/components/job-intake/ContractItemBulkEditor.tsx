@@ -16,6 +16,8 @@ type Props = {
   defaultApuVersion: number | null;
   apuVersions: Array<{ version: number; name: string; sellingPrice: string }>;
   defaultWorkflow: string;
+  deliveryWorkflowOptions?: Array<{ versionId: string; name: string; source: string; version: number; definition: { deliverableTypes: string[]; phases: Array<{ name: string; tasks: unknown[] }> } }>;
+  deliveryWorkflowMode?: "approved_only" | "defaults_allowed";
   capabilities: { costValuePlanner: boolean; budget: boolean };
   contracts: any[];
   defaultContractId: string;
@@ -64,6 +66,8 @@ function newItem(
     unit: "Hours",
     apuPlanVersion: props.defaultApuVersion,
     workflowTemplate: props.defaultWorkflow,
+    deliverableType: "GENERAL",
+    deliveryWorkflowVersionId: "",
     contractId: props.defaultContractId,
     budgetSnapshotLineId: "",
     projectCostNodeId: "",
@@ -599,6 +603,22 @@ export function ContractItemBulkEditor(props: Props) {
                     )}
                   </option>
                 </select>
+              </label>
+              <label>
+                {props.tt("Deliverable type", "Tipo de entregable")}
+                <select value={item.deliverableType || "GENERAL"} onChange={event => update(index, { deliverableType: event.target.value, deliveryWorkflowVersionId: "" })}>
+                  <option value="GENERAL">{props.tt("General", "General")}</option>
+                  <option value="SHOP_DRAWING">{props.tt("Shop drawing", "Plano de taller")}</option>
+                  <option value="SLEEVE">{props.tt("Sleeve", "Sleeve")}</option>
+                </select>
+              </label>
+              <label>
+                {props.tt("Delivery Workflow version", "Versión del flujo de entrega")}
+                <select value={item.deliveryWorkflowVersionId || ""} onChange={event => update(index, { deliveryWorkflowVersionId: event.target.value })}>
+                  <option value="">{props.tt("Auto-select when exactly one is applicable", "Selección automática si solo hay una opción aplicable")}</option>
+                  {(props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")).map(option => <option key={option.versionId} value={option.versionId}>{option.name} · v{option.version} · {option.source === "company" ? props.tt("Company", "Empresa") : "BIMLog"}</option>)}
+                </select>
+                {(() => { const matches = (props.deliveryWorkflowOptions ?? []).filter(option => option.definition.deliverableTypes.includes(item.deliverableType || "GENERAL")); const selected = matches.find(option => option.versionId === item.deliveryWorkflowVersionId) ?? (matches.filter(option => option.source === "company").length === 1 ? matches.find(option => option.source === "company") : matches.filter(option => option.source === "company").length === 0 ? matches.find(option => option.source === "bimlog") : undefined); return selected ? <small>{selected.definition.phases.map(phase => `${phase.name} (${phase.tasks.length})`).join(" → ")}</small> : <small role="alert">{props.deliveryWorkflowMode === "approved_only" && matches.length === 0 ? props.tt("Company PMO must publish a matching workflow before activation.", "PMO debe publicar un flujo compatible antes de activar.") : props.tt("Select one company workflow before activation.", "Seleccione un flujo de empresa antes de activar.")}</small>; })()}
               </label>
               {props.capabilities.budget && props.budgetSnapshotId && props.budgetLines.length > 0 && (
                 <label>

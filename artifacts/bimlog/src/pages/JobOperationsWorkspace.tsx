@@ -24,6 +24,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { BudgetGovernancePanel } from "@/components/job-operations/BudgetGovernancePanel";
 import { ProjectControlsDashboard } from "@/components/job-operations/ProjectControlsDashboard";
+import { WorkItemDeliveryWorkflowPanel } from "@/components/job-operations/WorkItemDeliveryWorkflowPanel";
 import {
   emptyOperationsClassificationFilters,
   matchesOperationsClassification,
@@ -1701,6 +1702,7 @@ export function JobOperationsWorkspace() {
                     )}
                   </div>
                 </div>
+                <WorkItemDeliveryWorkflowPanel projectId={projectId} workItemId={item.id} members={data.members ?? []} files={data.files ?? []} api={api} tt={tt} />
                 {assignmentsFor(item.id).length > 0 && (
                   <div className="jo-sub">
                     <h4>{tt("Resource plan", "Plan de recursos")}</h4>

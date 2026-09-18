@@ -20,5 +20,9 @@ assert.match(sidebar, /showCompanyCatalogs && navButton\([^]*"\/company-catalogs
 assert.match(companyPage, /<CompanyMasterCatalogsTab token=\{token\} spanish=\{spanish\}/, "the dedicated route must reuse the production catalog component");
 assert.match(companyTab, /const ready = capability !== null && !loading && !loadError/, "stale catalog controls must be hidden after failed reload");
 assert.match(companyTab, /role="alert"[^]*Reintentar/, "load errors must be visible and retryable");
+assert.match(companyTab, /async function saveName\(\)/, "PMO must be able to correct classification names");
+assert.match(companyTab, /expectedVersion: editing\.version/, "name edits must use optimistic version checks");
+assert.match(companyTab, /kind !== "client"[^]*Editar nombre/, "canonical client names must not be edited through the catalog overlay");
+assert.match(companyTab, /Directorio de Empresas/, "client rename authority must be clear in the UI");
 
 console.log("Admin master catalog behavior: PASS");

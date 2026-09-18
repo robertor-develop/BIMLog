@@ -246,6 +246,10 @@ export function JobIntakeWorkspace() {
   const [quickMode, setQuickMode] = useState(() => readSetupMode(projectId) === "quick");
   const [approvedClientIds, setApprovedClientIds] = useState<number[] | null | undefined>(undefined);
   const [clientCatalogError, setClientCatalogError] = useState(false);
+  const [deliveryWorkflowChoices, setDeliveryWorkflowChoices] = useState<any>({ mode: "defaults_allowed", options: [] });
+  const [pricingTemplateOptions, setPricingTemplateOptions] = useState<any[]>([]);
+  const [pricingTemplateOptionsError, setPricingTemplateOptionsError] = useState(false);
+  const [pricingTemplateOptionsLoading, setPricingTemplateOptionsLoading] = useState(false);
   const [showReadinessDetails, setShowReadinessDetails] = useState(false);
   const showQuickMode = () => { preserveSetupMode(projectId, "quick"); setQuickMode(true); };
   const showAdvancedMode = () => { preserveSetupMode(projectId, "advanced"); setQuickMode(false); };
@@ -310,7 +314,7 @@ export function JobIntakeWorkspace() {
         found?.intake === null
           ? await api(`/projects/${projectId}/intake`, { method: "POST" })
           : found;
-      const [plan, budget, directory] = await Promise.all([
+      const [plan, budget, directory, deliveryChoices] = await Promise.all([
         current.capabilities?.costValuePlanner
           ? api(`/projects/${projectId}/financial/apu`)
           : Promise.resolve(null),
@@ -318,6 +322,7 @@ export function JobIntakeWorkspace() {
           ? api(`/projects/${projectId}/financial/workspace`)
           : Promise.resolve(null),
         api(`/projects/${projectId}/directory`),
+        api("/company/delivery-workflows/options"),
       ]);
       const eligibleResponse = await fetch(
         `${API_BASE}/api/v1/projects/${projectId}/members/eligible`,
@@ -377,6 +382,7 @@ export function JobIntakeWorkspace() {
       setWorkspace(budget);
       setBudgetLines(selectedBudget?.snapshot?.lines ?? []);
       setDirectoryEntries(Array.isArray(directory) ? directory : []);
+      setDeliveryWorkflowChoices(deliveryChoices);
       setEligibleProjectUsers(Array.isArray(eligibleUsers) ? eligibleUsers : null);
       setEligibleProjectUserId("");
       if (soleApu && JSON.stringify(loadedData) !== JSON.stringify(current.data))
@@ -407,10 +413,34 @@ export function JobIntakeWorkspace() {
     setMappingForm({ sheetName: "", headerRow: 1, nameColumn: 0, quantityColumn: 1 });
     setError("");
     setNotice("");
+    setDeliveryWorkflowChoices({ mode: "defaults_allowed", options: [] });
   }, [projectId]);
   useEffect(() => {
     void load();
   }, [load]);
+
+  useEffect(() => {
+    if (!projectId || !intake?.capabilities?.costValuePlanner) {
+      setPricingTemplateOptions([]);
+      setPricingTemplateOptionsError(false);
+      setPricingTemplateOptionsLoading(false);
+      return;
+    }
+    const currency = String(data?.identity?.currency || "").toUpperCase();
+    setPricingTemplateOptions([]);
+    if (!/^[A-Z]{3}$/.test(currency)) {
+      setPricingTemplateOptionsLoading(false);
+      setPricingTemplateOptionsError(false);
+      return;
+    }
+    let active = true;
+    setPricingTemplateOptionsError(false);
+    setPricingTemplateOptionsLoading(true);
+    api(`/projects/${projectId}/pricing-template-options?currency=${encodeURIComponent(currency)}`)
+      .then((result) => { if (active) { setPricingTemplateOptions(Array.isArray(result.options) ? result.options : []); setPricingTemplateOptionsLoading(false); } })
+      .catch(() => { if (active) { setPricingTemplateOptions([]); setPricingTemplateOptionsError(true); setPricingTemplateOptionsLoading(false); } });
+    return () => { active = false; };
+  }, [api, projectId, intake?.capabilities?.costValuePlanner, data?.identity?.currency]);
 
   useEffect(() => {
     if (!intake) return;
@@ -1959,6 +1989,8 @@ export function JobIntakeWorkspace() {
                   }
                   apuVersions={capabilities.costValuePlanner ? apuVersions : []}
                   defaultWorkflow={data.delivery.workflowTemplate}
+                  deliveryWorkflowOptions={deliveryWorkflowChoices.options ?? []}
+                  deliveryWorkflowMode={deliveryWorkflowChoices.mode ?? "defaults_allowed"}
                   capabilities={capabilities}
                   contracts={data.commercial.contracts || []}
                   defaultContractId={
@@ -2009,6 +2041,26 @@ export function JobIntakeWorkspace() {
                           "Capture one profile per negotiated contract or purchase order. Activation groups each assigned Contract Item into its canonical draft contract without overwriting source documents.",
                           "Registre un perfil por cada contrato u orden de compra negociado. La activaci\u00f3n agrupa cada Partida de Contrato asignada en su contrato borrador can\u00f3nico sin sobrescribir los documentos fuente.",
                         )}
+                      </div>
+                    )}
+                    {capabilities.costValuePlanner && (
+                      <div className="ji-row" aria-label={tt("Reusable pricing references by contract", "Referencias de precios reutilizables por contrato")}>
+                        <strong>{tt("Reusable pricing references by contract", "Referencias de precios reutilizables por contrato")}</strong>
+                        <p className="ji-small">{tt("Optional company-approved reference only. Selecting a template does not set the Contract Item rate, approve a budget, or replace the saved Commercial APU. Each contract keeps its own exact published version when activated.", "Referencia empresarial aprobada y opcional. Seleccionar una plantilla no fija la tarifa de la Partida de Contrato, no aprueba un presupuesto ni reemplaza el APU Comercial guardado. Cada contrato conserva su versión publicada exacta al activarse.")}</p>
+                        {pricingTemplateOptionsLoading && <p role="status" className="ji-small">{tt("Loading approved templates for this currency…", "Cargando plantillas aprobadas para esta moneda…")}</p>}
+                        {pricingTemplateOptionsError && <p role="alert" className="ji-error">{tt("Pricing-template options could not be loaded. Selection is paused.", "No se pudieron cargar las plantillas de precios. La selección está en pausa.")}</p>}
+                        {(data.commercial.contracts || []).map((contract: any, index: number) => (
+                          <label key={contract.id}>
+                            {contract.title || contract.contractNumber || contract.id} — {tt("Published pricing template", "Plantilla de precios publicada")}
+                            <select value={contract.pricingTemplateVersionId || ""} disabled={pricingTemplateOptionsLoading || pricingTemplateOptionsError || intake?.status === "activated"}
+                              onChange={(event) => changeContract(index, "pricingTemplateVersionId", event.target.value)}>
+                              <option value="">{tt("No reusable template", "Sin plantilla reutilizable")}</option>
+                              {contract.pricingTemplateVersionId && !pricingTemplateOptions.some((option: any) => option.versionId === contract.pricingTemplateVersionId) &&
+                                <option value={contract.pricingTemplateVersionId}>{tt("Previously selected version—review required", "Versión seleccionada anteriormente—requiere revisión")}</option>}
+                              {pricingTemplateOptions.map((option: any) => <option key={option.versionId} value={option.versionId}>{option.name} · v{option.version} · {option.currency}</option>)}
+                            </select>
+                          </label>
+                        ))}
                       </div>
                     )}
                     <p className="ji-small">

@@ -1,0 +1,82 @@
+.company-pricing-main {
+  background: #f7f9fd;
+  color: #17243b;
+  font-size: 14px;
+}
+
+.company-pricing-main h1 { font-size: clamp(24px, 3vw, 30px); font-weight: 700; line-height: 1.2; }
+.company-pricing-main h2 { font-size: 18px; font-weight: 650; margin: 0 0 16px; }
+.company-pricing-main h3 { font-size: 15px; font-weight: 650; margin: 8px 0 0; }
+.company-pricing-main header p { color: #52627a; margin: 8px 0 0; }
+.company-pricing-layout { grid-template-columns: minmax(260px, .7fr) minmax(0, 1.3fr); }
+.company-pricing-fields { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.company-pricing-fields > h3,
+.company-pricing-fields > fieldset,
+.company-pricing-fields > button,
+.company-pricing-fields > p,
+.company-pricing-fields > div,
+.company-pricing-fields > details { grid-column: 1 / -1; }
+.company-pricing-main section {
+  background: #fff;
+  border: 1px solid #dbe3f0;
+  border-radius: 12px;
+  padding: clamp(16px, 2vw, 22px);
+  min-width: 0;
+}
+.company-pricing-main label { display: grid; gap: 5px; min-width: 0; font-weight: 600; }
+.company-pricing-main input,
+.company-pricing-main select,
+.company-pricing-main textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 40px;
+  border: 1px solid #c8d3e3;
+  border-radius: 8px;
+  padding: 8px 10px;
+  color: #17243b;
+  background: #fff;
+  font-weight: 400;
+}
+.company-pricing-main textarea { min-height: 78px; resize: vertical; }
+.company-pricing-main input:focus-visible,
+.company-pricing-main select:focus-visible,
+.company-pricing-main textarea:focus-visible,
+.company-pricing-main button:focus-visible { outline: 2px solid #2563eb; outline-offset: 2px; }
+.company-pricing-main input:disabled,
+.company-pricing-main select:disabled,
+.company-pricing-main textarea:disabled { background: #f2f5fa; color: #52627a; }
+.company-pricing-main button {
+  min-height: 38px;
+  padding: 8px 12px;
+  border: 1px solid #bfd0e8;
+  border-radius: 8px;
+  background: #fff;
+  color: #17396e;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+}
+.company-pricing-main button:hover:not(:disabled) { background: #edf4ff; }
+.company-pricing-main button:disabled { opacity: .55; cursor: not-allowed; }
+.company-pricing-main .company-pricing-primary { background: #2458c7; color: #fff; border-color: #2458c7; }
+.company-pricing-main .company-pricing-primary:hover:not(:disabled) { background: #194cae; }
+.company-pricing-main fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0; }
+.company-pricing-main legend { padding: 0 5px; font-weight: 650; }
+.company-pricing-actions { margin-top: 4px; }
+.company-pricing-unsaved { color: #8a4a00; background: #fff8e7; padding: 10px 12px; border-radius: 8px; }
+.company-pricing-retire-confirm { border: 1px solid #e9b56a; border-radius: 8px; background: #fff8e7; padding: 12px; }
+.company-pricing-retire-confirm p { margin: 0 0 10px; }
+.company-pricing-retire-confirm > div { display: flex; flex-wrap: wrap; gap: 8px; }
+.company-pricing-retire-confirm > div button:last-child { color: #9b1c1c; border-color: #e7a2a2; }
+
+@media (max-width: 900px) {
+  .company-pricing-layout,
+  .company-pricing-fields,
+  .company-pricing-main fieldset { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 720px) {
+  .company-pricing-main { padding-top: 56px !important; }
+  .company-pricing-main header { align-items: flex-start !important; }
+  .company-pricing-actions > button { width: 100%; }
+}

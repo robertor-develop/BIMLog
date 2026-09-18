@@ -1,0 +1,175 @@
+{
+  "status": "PASS",
+  "fixture": true,
+  "source": "production route and component with intercepted API",
+  "scenarios": [
+    {
+      "width": 1280,
+      "language": "en",
+      "mode": "pmo",
+      "screenshot": "1280-en-pmo.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "en",
+      "mode": "read-only",
+      "screenshot": "1280-en-read-only.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "en",
+      "mode": "denied",
+      "screenshot": "1280-en-denied.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "en",
+      "mode": "empty",
+      "screenshot": "1280-en-empty.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "en",
+      "mode": "loading",
+      "screenshot": "1280-en-loading.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "en",
+      "mode": "published",
+      "screenshot": "1280-en-published.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "es",
+      "mode": "pmo",
+      "screenshot": "1280-es-pmo.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "es",
+      "mode": "read-only",
+      "screenshot": "1280-es-read-only.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "es",
+      "mode": "denied",
+      "screenshot": "1280-es-denied.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "es",
+      "mode": "empty",
+      "screenshot": "1280-es-empty.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "es",
+      "mode": "loading",
+      "screenshot": "1280-es-loading.png",
+      "overflow": 0
+    },
+    {
+      "width": 1280,
+      "language": "es",
+      "mode": "published",
+      "screenshot": "1280-es-published.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "mode": "pmo",
+      "screenshot": "390-en-pmo.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "mode": "read-only",
+      "screenshot": "390-en-read-only.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "mode": "denied",
+      "screenshot": "390-en-denied.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "mode": "empty",
+      "screenshot": "390-en-empty.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "mode": "loading",
+      "screenshot": "390-en-loading.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "en",
+      "mode": "published",
+      "screenshot": "390-en-published.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "es",
+      "mode": "pmo",
+      "screenshot": "390-es-pmo.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "es",
+      "mode": "read-only",
+      "screenshot": "390-es-read-only.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "es",
+      "mode": "denied",
+      "screenshot": "390-es-denied.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "es",
+      "mode": "empty",
+      "screenshot": "390-es-empty.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "es",
+      "mode": "loading",
+      "screenshot": "390-es-loading.png",
+      "overflow": 0
+    },
+    {
+      "width": 390,
+      "language": "es",
+      "mode": "published",
+      "screenshot": "390-es-published.png",
+      "overflow": 0
+    }
+  ]
+}
