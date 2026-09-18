@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Dashboard mockup program - Block 4 Governance Policy source candidate - 2026-09-18
+
+- A separate company-scoped Delivery Workflow Governance Policy contract now covers explicit workflow scope, approval roles and currency-specific minor-unit thresholds, allowed changes and reapproval/version rules, immutable activation/history rules, configured role permissions, and mandatory validation invariants. It does not alter the existing project-level Intake/Operations budget-governance policy or grant runtime authority merely because a role appears in a policy definition.
+- Additive versioned policy storage, an append-only audit trail, PMO draft administration, stale-revision control, a separate effective company Finance checker, approval, publication, supersession, and reasoned retirement are implemented. The new API is not yet surfaced by the Block 5 dashboard or bound to new Work Item activation; existing Work Items are untouched. Strict contract tests, API typecheck, database-source safety, and a guarded authenticated HTTP cycle on the existing disposable localhost database pass. The cycle checked company isolation, PMO/Finance denial, save/reload, stale edit, two versions, immutable approved definition/events, supersession, and retirement. Independent review, production-artifact proof, dashboard/activation behavior, push, publication, and field acceptance remain open.
+
 ## Dashboard mockup program - Block 3 editor candidate - 2026-09-18
 
 - The existing Commercial APU administration editor now optionally defines Direct Production source nodes and percentage defaults. The existing company Delivery Workflow editor lists published APU versions, requires explicit alignment of phase identities, offers APU-default, proportional, specific-deduction and custom proposals, and displays server-calculated amounts/deltas. APU pricing remains in Commercial; no duplicate pricing module or table was added.

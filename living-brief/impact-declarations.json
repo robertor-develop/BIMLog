@@ -30465,6 +30465,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "0340ecd2d0db237a8e1a302c088a5bd10a92f42ab4248d79902e573019a4a589"
+    },
+    {
+      "taskId": "dashboard-block4-workflow-governance-policy-20260918",
+      "reviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "reviewedAt": "2026-09-18T18:49:55Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Commercial and project budget authorities remain distinct."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution and release rules did not change."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing UI, database, independent and field gates still apply."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No strategic roadmap authority changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated structural map now includes policy contract, route, migration and schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and native plugin paths were untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal output was changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 4 source and localhost HTTP evidence with limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps Block 4 independent, artifact, UI, and field acceptance gates open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit records remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy-contract.behavior.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy-contract.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy-migration.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy.http-evidence.ts",
+        "artifacts/api-server/src/routes/index.ts",
+        "artifacts/api-server/src/routes/workflow-governance-policies.ts",
+        "lib/db/src/schema/index.ts",
+        "lib/db/src/schema/workflow-governance-policies.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3c9e1f05d1a276a05f3cac7a18a3cf0421cddcf4667cd15bb080093409b27f5"
     }
   ]
 }

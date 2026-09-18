@@ -74,6 +74,7 @@ import { storage as feedbackStorage } from "./lib/storage-adapter";
 import { ensureLensNextPublishingSchema } from "./lib/lens-next-publishing";
 import { startEnterpriseIdentityMigration, waitForEnterpriseIdentityMigration } from "./lib/enterprise-identity-migration";
 import { ensureCompanyMasterCatalogSchema } from "./lib/company-master-catalog-migration";
+import { ensureWorkflowGovernancePolicySchema } from "./lib/workflow-governance-policy-migration";
 import { ensureConnectorFoundationSchema } from "./lib/connector-foundation-migration";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./lib/delivery-workflow-template-migration";
 
@@ -309,6 +310,7 @@ queueDatabaseStartup(async () => {
     startEnterpriseIdentityMigration();
     await waitForEnterpriseIdentityMigration();
     await ensureCompanyMasterCatalogSchema();
+    await ensureWorkflowGovernancePolicySchema();
     await ensureConnectorFoundationSchema(pool);
     console.log("[migration] enterprise identity and connector foundation ensured");
   } catch (error) {

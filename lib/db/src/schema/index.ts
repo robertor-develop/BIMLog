@@ -56,6 +56,7 @@ export * from "./coordinator-bulk-operations";
 export * from "./commercial-entitlements";
 export * from "./job-intakes";
 export * from "./delivery-workflows";
+export * from "./workflow-governance-policies";
 export * from "./contract-item-workflows";
 export * from "./team-resource-planning";
 export * from "./enterprise-identity";

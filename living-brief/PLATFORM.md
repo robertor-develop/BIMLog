@@ -94,6 +94,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/team-performance.ts
 - artifacts/api-server/src/routes/telegram-product.ts
 - artifacts/api-server/src/routes/transmittals.ts
+- artifacts/api-server/src/routes/workflow-governance-policies.ts
 
 ## Backend route mount order (routes/index.ts, under /api/v1)
 - downloadsRouter
@@ -149,6 +150,7 @@ It changes only when the code structure or curated architectural facts change.
 - companyMasterCatalogsRouter
 - deliveryWorkflowTemplatesRouter
 - companyPricingTemplatesRouter
+- workflowGovernancePoliciesRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -487,6 +489,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/trade-file-submission-review.ts
 - artifacts/api-server/src/lib/unified-action-contract.behavior.ts
 - artifacts/api-server/src/lib/unified-action-contract.ts
+- artifacts/api-server/src/lib/workflow-governance-policy-contract.behavior.ts
+- artifacts/api-server/src/lib/workflow-governance-policy-contract.ts
+- artifacts/api-server/src/lib/workflow-governance-policy-migration.ts
+- artifacts/api-server/src/lib/workflow-governance-policy.http-evidence.ts
 
 ## Agents (artifacts/api-server/src/agents)
 - artifacts/api-server/src/agents/base-agent.ts
@@ -558,6 +564,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/transmittals.ts
 - lib/db/src/schema/user-connections.ts
 - lib/db/src/schema/users.ts
+- lib/db/src/schema/workflow-governance-policies.ts
 
 ## Frontend pages (artifacts/bimlog/src/pages)
 - artifacts/bimlog/src/pages/About.tsx

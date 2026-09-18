@@ -1,18 +1,30 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
+  "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
   "catalogSha256": "dd06dabab219a2560cc1e9d7af545733b75668669d2b85ee14c4e6342ccc5275",
-  "bundleSha256": "1a6eec944845ded96a4e4a04aa79d20d742bda5675ce8cef62a410246e2b3dc6",
+  "bundleSha256": "9652b74e18d79d8f5b3328f3b6385df80639cb9fe6508f1f8d2bd1c818926c08",
   "impact": {
-    "baselineCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
+    "baselineCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
     "changedPaths": [
+      "artifacts/api-server/package.json",
+      "artifacts/api-server/src/app.ts",
+      "artifacts/api-server/src/lib/workflow-governance-policy-contract.behavior.ts",
+      "artifacts/api-server/src/lib/workflow-governance-policy-contract.ts",
+      "artifacts/api-server/src/lib/workflow-governance-policy-migration.ts",
+      "artifacts/api-server/src/lib/workflow-governance-policy.http-evidence.ts",
+      "artifacts/api-server/src/routes/index.ts",
+      "artifacts/api-server/src/routes/workflow-governance-policies.ts",
+      "lib/db/src/schema/index.ts",
+      "lib/db/src/schema/workflow-governance-policies.ts",
       "living-brief/OPEN_LOOP.md",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -23,11 +35,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "claude",
@@ -35,11 +47,11 @@
       "sha256": "d8f74e7678b4ffcc53a29c17c13a806213887cf7989bc80c985d9903e70e0074",
       "sourceChangedAt": "2026-09-17T00:34:02-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "quality",
@@ -47,11 +59,11 @@
       "sha256": "ff3c9ff067b525c411b02e536504b29355005df3c525be4f89d57f0a422783bb",
       "sourceChangedAt": "2026-07-29T15:02:29-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "vision",
@@ -59,23 +71,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "50ea40fcc2335d60362dcd8c48f7807c4d3cedadd96300d1e42b4319b9c372c0",
-      "sourceChangedAt": "2026-09-18T14:09:41-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "sha256": "b1ee02da6674d1c916db3e8e3879766394bce63751d87b458b46ec59662a6ad3",
+      "sourceChangedAt": "2026-09-18T18:49:55.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "plugin",
@@ -83,11 +95,11 @@
       "sha256": "f5dd0f8f1eb203d348296d04aa801efc3351f091b4c8447ff0925ee08bc7aba5",
       "sourceChangedAt": "2026-09-18T08:16:35-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "report_design_system",
@@ -95,11 +107,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "standards_register",
@@ -107,35 +119,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "80cb0a65ee9ce5c0a389a58c4dc06452bea1fdb5694c8062ef8e01ce52cfc0bf",
-      "sourceChangedAt": "2026-09-18T18:17:53.000Z",
+      "sha256": "6bdf75a5a459a2da0383f7420159ba7b5655061812ecf266fdf35347089fcecc",
+      "sourceChangedAt": "2026-09-18T18:49:55.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "b888b8dea2a4244f6bd3114fffbae33ce88fc17f3478788b5218287ee8f93b83",
-      "sourceChangedAt": "2026-09-18T18:17:53.000Z",
+      "sha256": "adb06009e854327e9981f81c7b9dba74a8cfd10c2c75e37d1e6a1602dc13e42f",
+      "sourceChangedAt": "2026-09-18T18:49:55.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     },
     {
       "key": "audit",
@@ -143,11 +155,11 @@
       "sha256": "d30bc4934f1e5e68601f4230b0309ee9927cb0fdc3aca96825e69b2f6d4468d6",
       "sourceChangedAt": "2026-09-17T15:16:09-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewedThroughCommit": "a4258c624dd9bddce28c86f79aa7f3b684fcfc83",
-      "semanticReviewTask": "dashboard-block3-economic-editor-and-http-proof-build-gate-20260918",
+      "reconciledThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewedThroughCommit": "1406d4f41ed1adc84a0b5de874130545d1e72482",
+      "semanticReviewTask": "dashboard-block4-workflow-governance-policy-20260918",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-18T18:17:53Z"
+      "semanticReviewedAt": "2026-09-18T18:49:55Z"
     }
   ]
 }

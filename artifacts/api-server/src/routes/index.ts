@@ -52,6 +52,7 @@ import masterCatalogsRouter from "./master-catalogs";
 import companyMasterCatalogsRouter from "./company-master-catalogs";
 import deliveryWorkflowTemplatesRouter from "./delivery-workflow-templates";
 import companyPricingTemplatesRouter from "./company-pricing-templates";
+import workflowGovernancePoliciesRouter from "./workflow-governance-policies";
 
 const router: IRouter = Router();
 
@@ -108,6 +109,7 @@ router.use(masterCatalogsRouter);
 router.use(companyMasterCatalogsRouter);
 router.use(deliveryWorkflowTemplatesRouter);
 router.use(companyPricingTemplatesRouter);
+router.use(workflowGovernancePoliciesRouter);
 
 // Soft-delete routes are appended inside their existing route files:
 //   clash_reports.ts → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId
