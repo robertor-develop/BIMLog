@@ -30548,7 +30548,7 @@
     },
     {
       "taskId": "dashboard-block5-governance-binding-20260918",
-      "reviewedThroughCommit": "ed8e04982d6966739da8ec6ee269ae25e11af412",
+      "reviewedThroughCommit": "2ae44b10f8ff352f5bb3182fe10583402b35f3aa",
       "reviewedAt": "2026-09-18T19:23:04Z",
       "status": "candidate",
       "authorities": [
@@ -30574,8 +30574,8 @@
         },
         {
           "key": "platform",
-          "result": "updated",
-          "reason": "Generated structural map now includes policy binding and dashboard files."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The follow-up only changes which existing policy version is shown first; no structural map changed."
         },
         {
           "key": "plugin",
@@ -30594,13 +30594,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "Records Block 5 local evidence and its precise limits."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The policy-list correction does not change the Block 5 evidence or acceptance limits already recorded."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "Keeps browser, independent, artifact and field acceptance gates open."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The policy-list correction leaves the existing browser, artifact and field gates unchanged."
         },
         {
           "key": "audit",
@@ -30609,10 +30609,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "bcd732fc847cd246a1391c5516120eda880bae628d30b640b6c0ef6ad2e7f87f"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
