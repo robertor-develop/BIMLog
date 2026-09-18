@@ -169,17 +169,20 @@ if (process.platform === "win32" && !configuredProofRoot) {
     "BIMLOG_ARTIFACT_PROOF_ROOT must point to an F: disposable directory.",
   );
 }
-const resolvedProofRoot = path.resolve(
+const proofBaseRoot = path.resolve(
   configuredProofRoot ??
     fs.mkdtempSync(path.join(os.tmpdir(), "bimlog-artifact-proof-")),
 );
 if (process.platform === "win32") {
   assert(
-    resolvedProofRoot.toUpperCase().startsWith("F:\\BIMLOG\\"),
+    proofBaseRoot.toUpperCase().startsWith("F:\\BIMLOG\\TESTPROOF\\"),
     "Artifact proof output must remain under F:\\BIMLog.",
   );
 }
-fs.mkdirSync(resolvedProofRoot, { recursive: true });
+fs.mkdirSync(proofBaseRoot, { recursive: true });
+const resolvedProofRoot = fs.mkdtempSync(
+  path.join(proofBaseRoot, "artifact-run-"),
+);
 const storageRoot = path.join(
   resolvedProofRoot,
   `feedback-durable-storage-${crypto.randomUUID()}`,

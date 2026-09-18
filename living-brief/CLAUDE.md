@@ -426,6 +426,12 @@ administrator/elevated operation, process termination, firewall or network expos
 production/Neon access, production-data mutation, Replit publish, DLL deployment/installation,
 an external paid service, or new Codex task creation or task management by the master.
 
+For the already authorized P32 local release QA, `bimlog_rfi_test` on the verified loopback
+F-rooted disposable PostgreSQL cluster is the existing artifact-proof fixture, not a
+production/remote database. Its deterministic prepare/check script may only create that exact
+UTF-8 test database when absent and may never truncate, drop, replace, or access production
+data. This does not grant authority for any other database, environment, or publication.
+
 Repository-local implementation dependencies may be added only when directly required by the
 authorized feature, with the exact package and reason reported. Never approve `DROP TABLE`,
 `DROP COLUMN`, `DROP INDEX`, or force-push.

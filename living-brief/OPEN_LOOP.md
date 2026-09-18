@@ -2916,3 +2916,9 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Complete independent source/schema/no-DROP review, exact-commit push, MAIN-only Replit Shell synchronization and publication, then live Chrome smoke. Keep Native 3D and responsible-company/schema fixes outside P32; they need their own verified releases.
 - [ ] Validate the deferred document-library candidate with affected PDF/BMP/workbook behavior, exact-artifact startup timing, full clean release gate, and no-regression review. Do not raise the 8000 ms readiness gate to make it pass.
 - [ ] Repeat the exact-head full pre-push gate after removal of temporary startup instrumentation. The protected 25-task serialization test is now green; the earlier 3484.5 ms full-gate artifact result belongs to the preceding commit and cannot alone clear this final head.
+
+## Dashboard/Governance integration release — 2026-09-18
+
+- [ ] Reconcile the tracked local QA fixture helper, private F-rooted artifact output, source diff and Living Brief state; repeat the full exact-head pre-push gate. A standalone artifact proof passed, but the subsequent full gate stopped at stale Living Brief metadata before compilation.
+- [ ] Obtain independent review of the 11-commit dashboard/economic-allocation candidate and explicitly scope its policy presentation versus execution-time enforcement. Approval thresholds, change-control rules and arbitrary role-matrix authority are not yet proven at operational execution.
+- [ ] Only after a passing source gate and reviewed release scope, push the exact commit. MAIN/Roberto then synchronizes through Replit Shell, verifies real production schema correspondence and zero destructive DROP, publishes once, and runs authenticated live Chrome workflow smoke. None of these release/field states is yet claimed.

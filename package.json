@@ -19,8 +19,10 @@
     "test:tracked-secret-exposure": "node scripts/check-tracked-secret-exposure.mjs --self-test && node scripts/check-tracked-secret-exposure.mjs",
     "check:database-safety": "node scripts/check-database-safety.mjs",
     "test:database-safety": "node scripts/test-database-safety.mjs",
+    "prepare:artifact-proof-fixture": "node scripts/prepare-artifact-proof-fixture.mjs --prepare",
+    "check:artifact-proof-fixture": "node scripts/prepare-artifact-proof-fixture.mjs --check",
     "attest:publication-source": "node scripts/check-database-safety.mjs --attest-source",
-    "gate:pre-push": "pnpm run test:tracked-secret-exposure && pnpm run test:database-safety && pnpm run build && pnpm --filter @workspace/api-server run test:production-artifact",
+    "gate:pre-push": "pnpm run test:tracked-secret-exposure && pnpm run test:database-safety && pnpm run check:artifact-proof-fixture && pnpm run build && pnpm --filter @workspace/api-server run test:production-artifact",
     "build": "node scripts/check-tracked-secret-exposure.mjs && node scripts/check-database-safety.mjs && node scripts/check-mojibake.mjs && node scripts/check-living-brief.mjs && node ./node_modules/typescript/bin/tsc --build && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck && pnpm -r --if-present run build",
     "typecheck:libs": "tsc --build",
     "typecheck": "pnpm run typecheck:libs && pnpm -r --filter \"./artifacts/**\" --filter \"./scripts\" --if-present run typecheck"
