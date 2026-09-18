@@ -58,6 +58,7 @@ namespace BIMLogLensNext.Tests
                 Run("m7_publishing_defaults_off", M7PublishingDefaultsOff);
                 Run("apply_working_view_allowed_when_viewpoint_publishing_disabled", ApplyWorkingViewAllowedWhenViewpointPublishingDisabled);
                 Run("apply_working_view_requires_authoritative_digest", ApplyWorkingViewRequiresAuthoritativeDigest);
+                Run("legacy_model_continuity_requires_exact_confirmation", LegacyModelContinuityRequiresExactConfirmation);
                 Run("bridge_command_effect_matrix_is_explicit", BridgeCommandEffectMatrixIsExplicit);
                 Run("m7_pilot_capabilities_are_explicit", M7PilotCapabilitiesAreExplicit);
                 Run("m7_confirmation_is_required", M7ConfirmationIsRequired);
@@ -2254,6 +2255,20 @@ namespace BIMLogLensNext.Tests
             Equal(0, dispatcher.InvokeCalls);
         }
 
+        private static void LegacyModelContinuityRequiresExactConfirmation()
+        {
+            var adapter = new FakeAdapter();
+            var bridge = Bridge(adapter, new RecordingDispatcher(), false);
+            var request = ApplyRequest();
+            request.Fields = request.Fields.Concat(new[] { new KeyValuePair<string, string>("legacyModelContinuityConfirmed", "false") })
+                .ToDictionary(pair => pair.Key, pair => pair.Value, StringComparer.Ordinal);
+            Equal("legacy_model_continuity_confirmation_invalid", bridge.Execute(request).Code);
+            Equal(0, adapter.ApplyCalls);
+            request.Fields = request.Fields.ToDictionary(pair => pair.Key, pair => pair.Key == "legacyModelContinuityConfirmed" ? "true" : pair.Value, StringComparer.Ordinal);
+            True(bridge.Execute(request).Success);
+            True(adapter.LastLegacyModelContinuityConfirmed);
+        }
+
         private static void BridgeCommandEffectMatrixIsExplicit()
         {
             True(LensNextBridgeCommands.AllowedWithoutSavedViewpointPublishing.Contains(
@@ -2813,6 +2828,7 @@ namespace BIMLogLensNext.Tests
             public int PlatformWrites { get; private set; }
             public int PublishCalls { get; private set; }
             public int ApplyCalls { get; private set; }
+            public bool LastLegacyModelContinuityConfirmed { get; private set; }
             public LensNextPublishRequest LastPublishRequest {
                 get;
                 private set;
@@ -2918,9 +2934,11 @@ namespace BIMLogLensNext.Tests
                 ImmutableWorkingViewIdentity identity,
                 string navigationJson,
                 string storedDigest,
-                string operationId)
+                string operationId,
+                bool legacyModelContinuityConfirmed)
             {
                 ApplyCalls++;
+                LastLegacyModelContinuityConfirmed = legacyModelContinuityConfirmed;
                 return new LensNextNavigationApplyResult { Applied = true };
             }
 

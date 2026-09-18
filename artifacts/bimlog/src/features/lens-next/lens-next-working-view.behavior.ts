@@ -19,6 +19,7 @@ const context: LensNextBridgeProjectContext = {
 const calls: string[] = [];
 const requestedModelFingerprints: Array<string | null | undefined> = [];
 const visualState = {
+  ContractVersion: "lens-next-navigation.v1",
   DigestSha256: digest,
   ModelFingerprint: context.modelFingerprint,
   Camera: { Position: { X: 1, Y: 2, Z: 3 }, Rotation: { A: 0, B: 0, C: 0, D: 1 } },
@@ -29,6 +30,7 @@ const visualState = {
   SectioningJson: "{\"Enabled\":true}",
 };
 let appliedVisualStateJson: string | null = null;
+let continuityConfirmedAtBridge = false;
 const dependencies: any = {
   apiClient: {
     loadVisualState: async (_issue: unknown, modelFingerprint?: string | null) => { calls.push("load"); requestedModelFingerprints.push(modelFingerprint); return { visualStateJson: JSON.stringify(visualState), visualStateDigest: digest }; },
@@ -36,7 +38,7 @@ const dependencies: any = {
   },
   bridgeClient: {
     captureCurrentVisualState: async () => { calls.push("capture"); return { visualStateJson: JSON.stringify({ DigestSha256: digest }), visualStateDigest: digest }; },
-    applyPlatformWorkingView: async (_issue: unknown, _context: unknown, json: string) => { calls.push("apply-platform"); appliedVisualStateJson = json; },
+    applyPlatformWorkingView: async (_issue: unknown, _context: unknown, json: string, _digest: string, _signal: unknown, confirmed: boolean) => { calls.push("apply-platform"); appliedVisualStateJson = json; continuityConfirmedAtBridge = confirmed; },
   },
 };
 
@@ -44,6 +46,19 @@ await openBimlogWorkingView(dependencies, issue(true), context);
 assert.deepEqual(calls.splice(0), ["load", "apply-platform"]);
 assert.deepEqual(requestedModelFingerprints.splice(0), [context.modelFingerprint]);
 assert.deepEqual(JSON.parse(appliedVisualStateJson!), visualState);
+assert.equal(continuityConfirmedAtBridge, false);
+
+const changedModel = { ...context, modelFingerprint: "c".repeat(64) };
+await assert.rejects(() => openBimlogWorkingView(dependencies, issue(true), changedModel), /continuity was not confirmed/);
+assert.deepEqual(calls.splice(0), ["load"]);
+let confirmationCalls = 0;
+await openBimlogWorkingView({ ...dependencies, confirmLegacyModelContinuity: () => { confirmationCalls++; return true; } }, issue(true), changedModel);
+assert.equal(confirmationCalls, 1);
+assert.equal(continuityConfirmedAtBridge, true);
+assert.deepEqual(calls.splice(0), ["load", "apply-platform"]);
+await assert.rejects(() => openBimlogWorkingView({ ...dependencies, confirmLegacyModelContinuity: () => false }, issue(true), changedModel), /continuity was not confirmed/);
+assert.deepEqual(calls.splice(0), ["load"]);
+requestedModelFingerprints.splice(0);
 
 const legacyWithoutGuid = { ...issue(false), navisworksGuid: null };
 await assert.rejects(

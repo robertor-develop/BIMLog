@@ -95,6 +95,16 @@ assert.equal(applyBodies[0], applyBodies[1]);
 assert.equal(JSON.parse(applyBodies[0]).requestId, applyRequestId);
 assert.equal(JSON.parse(applyBodies[0]).idempotencyKey, applyRequestId);
 assert.equal(JSON.parse(applyBodies[0]).fields.visualStateDigest, "d".repeat(64));
+assert.equal(JSON.parse(applyBodies[0]).fields.legacyModelContinuityConfirmed, undefined);
+await retryingApply.applyPlatformWorkingView(
+  { identity: { projectId: 29, serverId: 7, viewpointId: "VP-7", lifecycleStatus: "active", revisionNumber: 1 }, bimlogPhysicalId: "OT-007", navisworksGuid: null, visualStateDigest: "d".repeat(64) } as any,
+  { sessionId: "session", projectId: 29, modelFingerprint: "c".repeat(64), modelBindingKey: "managed", displayName: "model.nwd", bindingSource: "managed-marker", managedViewpointCount: 0 },
+  JSON.stringify({ schemaVersion: 1 }),
+  "d".repeat(64),
+  undefined,
+  true,
+);
+assert.equal(JSON.parse(applyBodies[2]).fields.legacyModelContinuityConfirmed, "true");
 
 const priorDigest = "c".repeat(64);
 const reboundDigest = "d".repeat(64);

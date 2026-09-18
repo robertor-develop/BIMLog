@@ -4,6 +4,7 @@ import type { LensNextBridgeProjectContext, LensNextIssue } from "./lens-next-ty
 export interface LensNextWorkingViewDependencies {
   apiClient: Pick<LensNextApiClient, "loadVisualState">;
   bridgeClient: Pick<LensNextBridgeClient, "applyPlatformWorkingView">;
+  confirmLegacyModelContinuity?: (issue: LensNextIssue, context: LensNextBridgeProjectContext) => boolean;
 }
 
 export interface LensNextVisualRepairDependencies {
@@ -41,7 +42,19 @@ export async function openBimlogWorkingView(
     );
 
   const stored = await dependencies.apiClient.loadVisualState(issue, context.modelFingerprint, signal);
-  await dependencies.bridgeClient.applyPlatformWorkingView(issue, context, stored.visualStateJson, stored.visualStateDigest, signal);
+  const packageState = JSON.parse(stored.visualStateJson) as Record<string, unknown>;
+  const packageModelFingerprint = String(packageState.ModelFingerprint ?? packageState.modelFingerprint ?? "").trim().toLowerCase();
+  if (!/^[0-9a-f]{64}$/.test(packageModelFingerprint)) throw new Error("BIMLog visual package has no valid model identity.");
+  let legacyModelContinuityConfirmed = false;
+  if (packageModelFingerprint !== context.modelFingerprint.toLowerCase()) {
+    const contract = String(packageState.ContractVersion ?? packageState.contractVersion ?? "");
+    if (contract !== "lens-next-navigation.v1")
+      throw new Error("This historical visual package belongs to an earlier model version and needs controlled repair; it cannot be opened automatically.");
+    if (!context.modelBindingKey || !context.displayName || !dependencies.confirmLegacyModelContinuity?.(issue, context))
+      throw new Error("Working View was not opened because model continuity was not confirmed.");
+    legacyModelContinuityConfirmed = true;
+  }
+  await dependencies.bridgeClient.applyPlatformWorkingView(issue, context, stored.visualStateJson, stored.visualStateDigest, signal, legacyModelContinuityConfirmed);
   return Object.freeze({ migratedHistoricalIssue: false, visualStateDigest: stored.visualStateDigest });
 }
 

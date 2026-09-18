@@ -62,7 +62,7 @@ namespace BIMLogLensNext
             new[]
             {
                 "sessionId", "projectId", "serverId", "viewpointId", "lifecycleStatus",
-                "revisionNumber", "modelFingerprint", "visualStateJson", "visualStateDigest"
+                "revisionNumber", "modelFingerprint", "visualStateJson", "visualStateDigest", "legacyModelContinuityConfirmed"
             },
             StringComparer.Ordinal);
 
@@ -205,6 +205,18 @@ namespace BIMLogLensNext
             }
             if ((request.Command == LensNextBridgeCommands.ApplyWorkingView || request.Command == LensNextBridgeCommands.RestoreExactVisualState) &&
                 fields.Keys.Any(key => !ApplyWorkingViewFields.Contains(key)))
+            {
+                return BridgeRequestValidation.Reject("unknown_apply_working_view_field");
+            }
+            string continuityConfirmation;
+            if (request.Command == LensNextBridgeCommands.ApplyWorkingView &&
+                fields.TryGetValue("legacyModelContinuityConfirmed", out continuityConfirmation) &&
+                !string.Equals(continuityConfirmation, "true", StringComparison.Ordinal))
+            {
+                return BridgeRequestValidation.Reject("legacy_model_continuity_confirmation_invalid");
+            }
+            if (request.Command == LensNextBridgeCommands.RestoreExactVisualState &&
+                fields.ContainsKey("legacyModelContinuityConfirmed"))
             {
                 return BridgeRequestValidation.Reject("unknown_apply_working_view_field");
             }

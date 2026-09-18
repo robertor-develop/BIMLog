@@ -29,7 +29,8 @@ namespace BIMLogLensNext
             ImmutableWorkingViewIdentity identity,
             string navigationJson,
             string storedDigest,
-            string operationId);
+            string operationId,
+            bool legacyModelContinuityConfirmed);
         LensNextVisualState CaptureCurrentVisualState(
             ImmutableWorkingViewIdentity identity,
             bool includeScreenshot);

@@ -16,9 +16,10 @@ namespace BIMLogLensNext.Native
             var info = new FileInfo(fullPath);
             if (!info.Exists) throw new FileNotFoundException("The active Navisworks document file is unavailable.", fullPath);
 
-            // Deliberately fast model-context fingerprint. It identifies the saved NWF/NWD state
-            // without hashing a potentially multi-gigabyte file on every Lens Next session.
-            var canonical = fullPath.ToUpperInvariant() + "|" + info.Length + "|" + info.LastWriteTimeUtc.Ticks;
+            // File size and modification time change on every normal model save.
+            // Working Views must remain bound to the same named model across saves.
+            // EnsureSameDocument and the BIMLog project binding protect the live context.
+            var canonical = "lens-next-model-path.v1|" + fullPath.ToUpperInvariant();
             using (var sha = SHA256.Create())
             {
                 var bytes = sha.ComputeHash(Encoding.UTF8.GetBytes(canonical));

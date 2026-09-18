@@ -423,6 +423,7 @@ export interface LensNextBridgeClient {
     visualStateJson: string,
     visualStateDigest: string,
     signal?: AbortSignal,
+    legacyModelContinuityConfirmed?: boolean,
   ): Promise<LensNextOpenWorkingViewResult>;
   captureCurrentVisualState(
     issue: LensNextIssue,
@@ -667,6 +668,7 @@ export function createLensNextBridgeClient(
       visualStateJson: string,
       visualStateDigest: string,
       signal?: AbortSignal,
+      legacyModelContinuityConfirmed = false,
     ) {
       if (!visualStateJson.trim()) throw new Error("platform_visual_state_unavailable");
       if (!/^[0-9a-f]{64}$/i.test(visualStateDigest)) throw new Error("platform_visual_state_digest_invalid");
@@ -682,7 +684,8 @@ export function createLensNextBridgeClient(
         body: JSON.stringify({
           ...request,
           command: "apply-working-view",
-          fields: { ...request.fields, visualStateDigest: visualStateDigest.toLowerCase(), visualStateJson },
+          fields: { ...request.fields, visualStateDigest: visualStateDigest.toLowerCase(), visualStateJson,
+            ...(legacyModelContinuityConfirmed ? { legacyModelContinuityConfirmed: "true" } : {}) },
         }),
         signal,
       });

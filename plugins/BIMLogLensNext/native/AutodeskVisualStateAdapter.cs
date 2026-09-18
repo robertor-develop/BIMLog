@@ -52,7 +52,7 @@ namespace BIMLogLensNext.Native
             return navigation;
         }
 
-        public LensNextNavigationApplyResult ApplyNavigationViewJson(ImmutableWorkingViewIdentity identity, string navigationJson, string storedDigest, string operationId)
+        public LensNextNavigationApplyResult ApplyNavigationViewJson(ImmutableWorkingViewIdentity identity, string navigationJson, string storedDigest, string operationId, bool legacyModelContinuityConfirmed)
         {
             var timer = Stopwatch.StartNew();
             var applied = new List<string>();
@@ -70,11 +70,18 @@ namespace BIMLogLensNext.Native
                 if (string.Equals(contractVersion, LensNextNavigationSchema.ContractVersion, StringComparison.Ordinal))
                 {
                     var value = _visualJson.Deserialize<LensNextNavigationView>(navigationJson);
-                    if (value == null || value.Camera == null || value.ProjectId != Positive(identity.ProjectId, "projectId") || value.ServerId != Positive(identity.ServerId, "serverId") || !string.Equals(value.ViewpointId, identity.ViewpointId, StringComparison.Ordinal) || !string.Equals(value.LifecycleStatus, identity.LifecycleStatus, StringComparison.Ordinal) || value.RevisionNumber != Positive(identity.RevisionNumber, "revisionNumber") || !string.Equals(value.ModelFingerprint, identity.ModelFingerprint, StringComparison.Ordinal))
+                    if (value == null || value.Camera == null || value.ProjectId != Positive(identity.ProjectId, "projectId") || value.ServerId != Positive(identity.ServerId, "serverId") || !string.Equals(value.ViewpointId, identity.ViewpointId, StringComparison.Ordinal) || !string.Equals(value.LifecycleStatus, identity.LifecycleStatus, StringComparison.Ordinal) || value.RevisionNumber != Positive(identity.RevisionNumber, "revisionNumber"))
                         return NavigationFailed("The BIMLog navigation identity does not match the active record.", warnings);
                     var recomputed = LensNextNavigationDigest.Compute(value);
                     if (string.IsNullOrWhiteSpace(storedDigest) || !string.Equals(storedDigest, value.DigestSha256, StringComparison.OrdinalIgnoreCase) || !string.Equals(storedDigest, recomputed, StringComparison.OrdinalIgnoreCase))
                         return NavigationFailed("BIMLog navigation digest validation failed.", warnings);
+                    if (!string.Equals(value.ModelFingerprint, identity.ModelFingerprint, StringComparison.Ordinal))
+                    {
+                        if (!legacyModelContinuityConfirmed)
+                            return NavigationFailed("The model file changed since this BIMLog view was captured. Confirm that the active file is the same model before opening the legacy view.", warnings);
+                        LensNextNativeLog.Info("Legacy model continuity was confirmed for the exact BIMLog navigation record. Request=" + operationId);
+                        warnings.Add("Legacy model continuity was confirmed for this temporary Working View; the stored BIMLog package was not changed.");
+                    }
                     camera = value.Camera; sectioning = value.SectioningJson; selected = value.SelectedElements ?? new List<LensNextElementReference>();
                 }
                 else

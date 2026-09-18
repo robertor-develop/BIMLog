@@ -219,7 +219,8 @@ namespace BIMLogLensNext
             var storedVisualStateDigest = Value(request.Fields, "visualStateDigest");
             if (string.IsNullOrWhiteSpace(storedVisualStateDigest))
                 return LensNextBridgeResponse.Blocked("visual_state_digest_required", "The authoritative BIMLog visual-state digest is required.");
-            var result = _dispatcher.Invoke(() => visualAdapter.ApplyNavigationViewJson(identity, visualStateJson, storedVisualStateDigest, request.RequestId));
+            var legacyModelContinuityConfirmed = string.Equals(Value(request.Fields, "legacyModelContinuityConfirmed"), "true", StringComparison.Ordinal);
+            var result = _dispatcher.Invoke(() => visualAdapter.ApplyNavigationViewJson(identity, visualStateJson, storedVisualStateDigest, request.RequestId, legacyModelContinuityConfirmed));
             if (result == null || !result.Applied)
                 return LensNextBridgeResponse.Blocked("working_view_apply_failed", result == null ? "Working-view navigation failed." : result.Message);
             return LensNextBridgeResponse.Ok("working_view_applied", new LensNextNavigationAppliedPayload

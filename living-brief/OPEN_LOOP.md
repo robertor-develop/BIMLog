@@ -1,5 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lens Next FI-002 2025 Working View regression — 2026-09-18
+
+- [x] Trace Ruben's exact 409 to the native navigation identity check; isolate save-unstable model fingerprinting and preserve digest/project/issue/revision guards.
+- [x] Implement save-stable fingerprinting for new captures and explicit confirmation for legacy signed navigation packages; pass focused core, native 2021/2025, and UI/client behavior tests.
+- [x] Pass 2021/2025 package-only integrity/installer verification without installing into Autodesk; pass full workspace TypeScript typecheck.
+- [ ] Complete clean-commit API assembler and frontend build, review exact diff, push one verified commit, synchronize/publish via Replit Shell after zero-drop preview, and perform live Chrome checks without Replit Agents.
+- [ ] Install the new 2025 package only with target-specific authorization and verify FI-002 end-to-end in Ruben's open Navisworks model. Source/package/browser success alone is not field acceptance.
+
 ## Lorena Block 9 pricing administration browser correction — 2026-09-17
 
 - [x] Exercise the production company APU/Pricing administration route in local Chromium with intercepted, explicitly synthetic API responses at 1280px and exact 390px in English and Spanish, covering PMO draft, published/retirement, read-only, denied, empty, and loading states (24 combinations). Capture screenshots and check no horizontal overflow, browser exceptions, or failed pricing requests.

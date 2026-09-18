@@ -496,7 +496,9 @@ export function LensNextPanel({
     try {
       if (!apiClient) throw new Error("BIMLog visual-state client is unavailable");
       const result = await openBimlogWorkingView(
-        { apiClient, bridgeClient },
+        { apiClient, bridgeClient, confirmLegacyModelContinuity: (issue, context) => window.confirm(
+          `BIMLog issue ${issue.displayId ?? issue.identity.viewpointId} was captured before this model file changed. Is ${context.displayName} the same project model?\n\nConfirm only if it is the same model. This opens a temporary Working View and does not change the BIMLog package or save the Navisworks file.`
+        ) },
         selectedIssue,
         bridgeContext,
       );

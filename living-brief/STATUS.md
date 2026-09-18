@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Lens Next FI-002 model-save continuity release candidate — 2026-09-18
+
+- Isolated worktree based on published `origin/master` `887589a3ee2b05ee92a51427cdd72ef0a92241af`. The native adapter error was reproduced by source trace and the file-save fingerprint instability by an automated adapter test. Candidate code adds a stable identity for future captures plus explicit, digest-preserving confirmation for legacy navigation packages; it does not change unrelated Lens Next or Commercial flows.
+- Local core 132/132, native 2021 and 2025 57/57 each, focused Working View/API-client behavior tests, and full workspace TypeScript typecheck pass. Both versioned ZIPs passed package-only integrity/installer checks with no Autodesk installation. The full API assembler requires a clean committed source tree, so commit/build, push, Replit zero-drop preview/publication, installation, and Ruben's connected-model field acceptance remain separate gates at this writing.
+
 ## Lorena Block 9 pricing administration UI browser candidate — 2026-09-17
 
 - The production company APU/Pricing route was exercised locally in Chromium at 1280px and exactly 390px, English and Spanish, with PMO draft, published/retirement, read-only, denied, empty, and loading API fixtures. Twenty-four combinations passed with screenshots, no horizontal overflow, no browser exceptions, and no failed pricing requests. Fixture-based save, cancel, refresh, reopen, and retirement confirmation passed; results and screenshots are in `artifacts/bimlog/evidence/block09-company-pricing-browser/`.

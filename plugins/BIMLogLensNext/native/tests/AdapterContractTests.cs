@@ -23,6 +23,7 @@ namespace BIMLogLensNext.Native.Tests
                 Run("sdk_version_is_bound", () => True(!string.IsNullOrWhiteSpace(NativeReferenceBinding.NavisworksApiAssemblyVersion)));
                 Run("contract_requires_positive_project", PositiveProjectRequired);
                 Run("contract_requires_sha256_model", Sha256Required);
+                Run("model_fingerprint_survives_normal_save", ModelFingerprintSurvivesNormalSave);
                 Run("exact_context_and_guid_match", ExactContextAndGuidMatch);
                 Run("exact_legacy_guid_does_not_require_lens_next_comments", ExactLegacyGuidDoesNotRequireLensNextComments);
                 Run("legacy_no_guid_uses_full_ordinal_display_name_only", LegacyNoGuidUsesFullOrdinalDisplayNameOnly);
@@ -95,6 +96,26 @@ namespace BIMLogLensNext.Native.Tests
         {
             Throws<ArgumentException>(() => new AutodeskReadOnlyAdapterContract("1", "model-label"));
             Throws<ArgumentException>(() => new AutodeskReadOnlyAdapterContract("1", new string('g', 64)));
+        }
+
+        private static void ModelFingerprintSurvivesNormalSave()
+        {
+            var model = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "lens-next-model-continuity-test.nwf");
+            var other = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "lens-next-other-model-test.nwf");
+            try
+            {
+                File.WriteAllText(model, "first save");
+                var first = LensNextModelFingerprint.ComputeContextFingerprint(model);
+                File.AppendAllText(model, " second save with a different file size");
+                Equal(first, LensNextModelFingerprint.ComputeContextFingerprint(model));
+                File.WriteAllText(other, "first save");
+                False(string.Equals(first, LensNextModelFingerprint.ComputeContextFingerprint(other), StringComparison.Ordinal));
+            }
+            finally
+            {
+                if (File.Exists(model)) File.Delete(model);
+                if (File.Exists(other)) File.Delete(other);
+            }
         }
 
         private static void ExactContextAndGuidMatch()
@@ -567,7 +588,7 @@ namespace BIMLogLensNext.Native.Tests
                 AppDomain.CurrentDomain.BaseDirectory,
                 @"..\..\..\..\..\native\LensNextDockPanelControl.cs")));
             True(source.Contains("\u25cf LIVE \u00b7 \" + LensNextConstants.ProductVersionLabel"));
-            Equal("v1.05.N17-P12", LensNextConstants.ProductVersionLabel);
+            Equal("v1.05.N18-P33", LensNextConstants.ProductVersionLabel);
         }
 
         private static void RuntimeIgnoresConfiguredProjectFallback()

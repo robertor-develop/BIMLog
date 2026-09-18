@@ -1,5 +1,11 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## Lens Next FI-002 model-save continuity candidate — 2026-09-18
+
+- Ruben's exact 409 text, "The BIMLog navigation identity does not match the active record," originates in the native `AutodeskVisualStateAdapter` navigation guard. The previous fingerprint included NWF/NWD file size and modified time, so a normal save could change model identity without changing the named model. This candidate uses a stable, normalized full-path fingerprint for new captures in both 2021 and 2025 adapters.
+- Existing signed navigation packages retain their original fingerprint and digest. If that historical fingerprint differs, the operator must explicitly confirm that the bound Navisworks document is the same model before a temporary Working View is opened. Project/issue/revision identity, digest verification, and the active document check remain mandatory; the package, BIMLog issue, and model are not silently rewritten. Non-navigation historical packages still require controlled repair.
+- Release target is `v1.05.N18-P33` (`1.5.18.33`) for separate 2021/2025 packages. A source/build/package pass does not prove installation or Ruben's live FI-002 acceptance. Do not install the DLL into Autodesk without Roberto's specific approval for that target.
+
 Owned/hand-edited in Git. The in-app Living Brief serves the verified deployed source bundle;
 the database is an exact status-bearing mirror and must never override this document.
 

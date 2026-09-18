@@ -1,7 +1,7 @@
 [CmdletBinding()]
-param([string]$Version='v1.05.N17-P12')
+param([string]$Version='v1.05.N18-P33')
 $ErrorActionPreference='Stop'
-if($Version -ne 'v1.05.N17-P12'){throw 'STOP: stale or unexpected release requested.'}
+if($Version -ne 'v1.05.N18-P33'){throw 'STOP: stale or unexpected release requested.'}
 & (Join-Path $PSScriptRoot 'Build-Package-LensNext2021.ps1') -Version $Version
 if($LASTEXITCODE){throw '2021 package build failed.'}
 & (Join-Path $PSScriptRoot 'Build-Package-LensNext2025.ps1') -Version $Version
