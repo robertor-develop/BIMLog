@@ -3,6 +3,7 @@ import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { CompanyDeliveryWorkflowsTab } from "@/components/admin/CompanyDeliveryWorkflowsTab";
+import "./CompanyDeliveryWorkflows.css";
 
 export function CompanyDeliveryWorkflows() {
   const { token } = useAuthStore();

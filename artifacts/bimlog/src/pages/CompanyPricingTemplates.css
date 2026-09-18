@@ -62,6 +62,15 @@
 .company-pricing-main .company-pricing-primary { background: #2458c7; color: #fff; border-color: #2458c7; }
 .company-pricing-main .company-pricing-primary:hover:not(:disabled) { background: #194cae; }
 .company-pricing-main fieldset { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; min-width: 0; }
+.company-pricing-main .company-pricing-economic { grid-template-columns: minmax(0, 1fr); }
+.company-pricing-main .company-pricing-economic > p { margin: 0; color: #52627a; line-height: 1.45; }
+.company-pricing-main .company-pricing-economic > h4 { margin: 8px 0 0; }
+.company-pricing-main .company-pricing-check { display: flex; align-items: center; gap: 10px; }
+.company-pricing-main .company-pricing-check input[type="checkbox"] {
+  width: 18px; min-width: 18px; height: 18px; min-height: 18px; margin: 0; padding: 0;
+  flex: 0 0 auto; accent-color: #2458c7;
+}
+.company-pricing-main .company-pricing-economic > button { justify-self: start; }
 .company-pricing-main legend { padding: 0 5px; font-weight: 650; }
 .company-pricing-actions { margin-top: 4px; }
 .company-pricing-unsaved { color: #8a4a00; background: #fff8e7; padding: 10px 12px; border-radius: 8px; }

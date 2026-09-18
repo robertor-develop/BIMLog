@@ -10,7 +10,9 @@ type Node = {
   id: string; label: string; method: "fixed_amount" | "quantity_unit_cost" | "hours_hourly_rate";
   amount?: string; quantity?: string; unitCost?: string; hours?: string; hourlyRate?: string;
 };
-type Definition = { schemaVersion: 1; currency: string; industry: string; name: string; nodes: Node[] };
+type AllocationPhase = { phaseId: string; code: string; name: string; percent: string };
+type Definition = { schemaVersion: 1; currency: string; industry: string; name: string; nodes: Node[];
+  economicAllocation?: { directProductionNodeIds: string[]; phases: AllocationPhase[] } };
 type Version = { templateId: string; versionId: string; version: number; status: string; provenance: { code: string; definition: Definition }; createdById?: number; publishedById?: number };
 const initial: Definition = { schemaVersion: 1, currency: "USD", industry: "BIM Services", name: "", nodes: [{ id: "labor", label: "Labor", method: "hours_hourly_rate", hours: "1", hourlyRate: "0" }] };
 
@@ -171,6 +173,45 @@ export function CompanyPricingTemplates() {
               <button type="button" onClick={() => setDefinition(current => ({ ...current, nodes: current.nodes.filter((_, position) => position !== index) }))} disabled={definition.nodes.length <= 1}>{t("Remove component", "Quitar componente")}</button>
             </fieldset>)}
             {canManage && <button type="button" onClick={() => setDefinition(current => ({ ...current, nodes: [...current.nodes, { id: `line${current.nodes.length + 1}`, label: "", method: "fixed_amount", amount: "0" }] }))}>{t("Add component", "Agregar componente")}</button>}
+            <fieldset className="company-pricing-economic" disabled={!canManage} style={{ border: "1px solid #CBD5E1", borderRadius: 8, padding: 12, minWidth: 0 }}>
+              <legend>{t("Direct Production phase defaults", "Fases predeterminadas de producción directa")}</legend>
+              <p>{t("Optional Commercial APU authority for Delivery Workflows. Select the cost components that fund Direct Production; percentages must total 100%. Published versions stay unchanged.", "Autoridad APU Comercial opcional para los flujos de entrega. Seleccione los componentes que financian producción directa; los porcentajes deben sumar 100 %. Las versiones publicadas permanecen sin cambios.")}</p>
+              <label className="company-pricing-check"><input type="checkbox" checked={!!definition.economicAllocation} onChange={event => setDefinition(current => ({
+                ...current, economicAllocation: event.target.checked
+                  ? { directProductionNodeIds: current.nodes.length ? [current.nodes[0].id] : [], phases: [{ phaseId: "production", code: "PRODUCTION", name: "Production", percent: "100.00" }] }
+                  : undefined,
+              }))} /> {t("Define economic phase defaults", "Definir fases económicas predeterminadas")}</label>
+              {definition.economicAllocation && <>
+                <h4>{t("Direct Production components", "Componentes de producción directa")}</h4>
+                {definition.nodes.map(node => <label className="company-pricing-check" key={node.id}>
+                  <input type="checkbox" checked={definition.economicAllocation!.directProductionNodeIds.includes(node.id)}
+                    onChange={event => setDefinition(current => {
+                      const allocation = current.economicAllocation!;
+                      return { ...current, economicAllocation: { ...allocation,
+                        directProductionNodeIds: event.target.checked
+                          ? [...allocation.directProductionNodeIds, node.id]
+                          : allocation.directProductionNodeIds.filter(id => id !== node.id) } };
+                    })} /> {node.label || node.id} ({node.id})
+                </label>)}
+                <h4>{t("Default phases", "Fases predeterminadas")}</h4>
+                {definition.economicAllocation.phases.map((phase, index) => <div key={index} style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(120px,1fr))", gap: 8, marginBottom: 8 }}>
+                  {(["phaseId", "code", "name", "percent"] as const).map(field => <label key={field}>
+                    {field === "phaseId" ? t("Stable ID", "ID estable") : field === "code" ? t("Code", "Código") : field === "name" ? t("Name", "Nombre") : t("Percent", "Porcentaje")}
+                    <input value={phase[field]} inputMode={field === "percent" ? "decimal" : undefined}
+                      onChange={event => setDefinition(current => ({ ...current, economicAllocation: { ...current.economicAllocation!,
+                        phases: current.economicAllocation!.phases.map((row, position) => position === index ? { ...row, [field]: event.target.value } : row) } }))} />
+                  </label>)}
+                  <button type="button" disabled={definition.economicAllocation!.phases.length <= 1}
+                    onClick={() => setDefinition(current => ({ ...current, economicAllocation: { ...current.economicAllocation!,
+                      phases: current.economicAllocation!.phases.filter((_, position) => position !== index) } }))}>{t("Remove phase", "Quitar fase")}</button>
+                </div>)}
+                <button type="button" disabled={definition.economicAllocation!.phases.length >= 24}
+                  onClick={() => setDefinition(current => ({ ...current, economicAllocation: { ...current.economicAllocation!,
+                    phases: [...current.economicAllocation!.phases, { phaseId: `phase_${current.economicAllocation!.phases.length + 1}`,
+                      code: `PHASE_${current.economicAllocation!.phases.length + 1}`, name: "", percent: "0.00" }] } }))}>{t("Add phase", "Agregar fase")}</button>
+                <p role="status">{t("Allocation total", "Total de asignación")}: {definition.economicAllocation.phases.reduce((sum, phase) => sum + (Number(phase.percent) || 0), 0).toFixed(2)}%</p>
+              </>}
+            </fieldset>
             {canManage && <label>{t("Reason for audit history", "Motivo para el historial de auditoría")}<textarea value={reason} onChange={event => setReason(event.target.value)} /></label>}
             {selected?.status === "retired" && <p role="status">{t("Retired: unavailable for new contracts. Earlier contracts keep their exact historical reference. To publish a replacement, save a revised definition for separate review.", "Retirada: no está disponible para contratos nuevos. Los contratos anteriores conservan su referencia histórica exacta. Para publicar un reemplazo, guarde una definición revisada para otra revisión.")}</p>}
             {hasUnsavedChanges && canManage && <p role="status" className="company-pricing-unsaved">{t("Unsaved changes. Save a new draft before leaving or publishing.", "Cambios sin guardar. Guarde un nuevo borrador antes de salir o publicar.")}</p>}

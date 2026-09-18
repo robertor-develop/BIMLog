@@ -8,7 +8,7 @@ const chromiumExecutable = process.env.BIMLOG_CHROMIUM_EXECUTABLE;
 if (!playwrightCore || !chromiumExecutable) throw new Error("Browser runtime paths are required.");
 const { chromium } = (await import(pathToFileURL(playwrightCore).href)).default;
 const origin = process.env.BIMLOG_PRICING_BROWSER_URL ?? "http://127.0.0.1:4183";
-const output = path.resolve("evidence/block09-company-pricing-browser");
+const output = path.resolve(process.env.BIMLOG_PRICING_EVIDENCE_OUTPUT ?? "evidence/block09-company-pricing-browser");
 fs.mkdirSync(output, { recursive: true });
 
 const initialDefinition = { schemaVersion: 1, currency: "USD", industry: "BIM Services", name: "Shop Drawing", nodes: [{ id: "labor", label: "Labor", method: "hours_hourly_rate", hours: "2", hourlyRate: "50" }] };
@@ -96,11 +96,30 @@ async function scenario({ width, language, mode }) {
     assert.equal(await page.getByLabel(translated ? "Nombre" : "Name", { exact: true }).first().inputValue(), "Revised Shop Drawing", "saved version must reopen after refresh");
     await page.getByLabel(translated ? "Nombre" : "Name", { exact: true }).first().scrollIntoViewIfNeeded();
     await page.screenshot({ path: path.join(output, `${width}-${language}-saved-reopened.png`) });
+    const economic = page.getByRole("group", { name: translated ? "Fases predeterminadas de producción directa" : "Direct Production phase defaults" });
+    await economic.getByRole("checkbox", { name: translated ? "Definir fases económicas predeterminadas" : "Define economic phase defaults" }).check();
+    assert.equal(await economic.getByRole("checkbox", { name: /Labor \(labor\)/ }).isChecked(), true);
+    await economic.getByRole("button", { name: translated ? "Agregar fase" : "Add phase" }).click();
+    await economic.getByLabel(translated ? "Porcentaje" : "Percent").nth(0).fill("60.00");
+    await economic.getByLabel(translated ? "Porcentaje" : "Percent").nth(1).fill("40.00");
+    await economic.getByLabel(translated ? "Nombre" : "Name").nth(1).fill("For Record");
+    await economic.getByLabel(translated ? "ID estable" : "Stable ID").nth(1).fill("record");
+    await economic.getByLabel(translated ? "Código" : "Code").nth(1).fill("RECORD");
+    await economic.getByText(translated ? "Total de asignación: 100.00%" : "Allocation total: 100.00%").waitFor();
+    await page.getByLabel(translated ? "Motivo para el historial de auditoría" : "Reason for audit history").fill("Economic phase defaults fixture");
+    await page.getByRole("button", { name: translated ? "Guardar nueva versión borrador" : "Save new draft version" }).click();
+    await page.reload({ waitUntil: "domcontentloaded" });
+    await page.getByRole("button", { name: /SHOP · Revised Shop Drawing/ }).click();
+    assert.equal(await economic.getByRole("checkbox", { name: translated ? "Definir fases económicas predeterminadas" : "Define economic phase defaults" }).isChecked(), true);
+    assert.equal(await economic.getByLabel(translated ? "Porcentaje" : "Percent").nth(1).inputValue(), "40.00");
+    await economic.scrollIntoViewIfNeeded();
+    await page.screenshot({ path: path.join(output, `${width}-${language}-economic-saved-reopened.png`) });
   }
   if (mode === "read-only") {
     await page.getByRole("button", { name: /SHOP · Shop Drawing/ }).click();
     assert.equal(await page.getByLabel(translated ? "Nombre" : "Name", { exact: true }).first().isDisabled(), true);
     assert.equal(await page.getByRole("button", { name: translated ? "Nueva plantilla" : "New template" }).isDisabled(), true);
+    assert.equal(await page.getByRole("checkbox", { name: translated ? "Definir fases económicas predeterminadas" : "Define economic phase defaults" }).isDisabled(), true);
   }
   if (mode === "published") {
     await page.getByRole("button", { name: /SHOP · Shop Drawing/ }).click();

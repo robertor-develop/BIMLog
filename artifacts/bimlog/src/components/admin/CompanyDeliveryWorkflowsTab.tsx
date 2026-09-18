@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type Task = {
@@ -18,6 +18,16 @@ type Phase = {
   qcRequired: boolean;
   approvalRequired: boolean;
 };
+type AllocationPhase = { phaseId: string; code: string; name: string; percent: string };
+type AllocationProposal =
+  | { method: "apu_default" }
+  | { method: "proportional"; additions: AllocationPhase[] }
+  | { method: "deduct_specific"; additions: AllocationPhase[]; deductions: Array<{ phaseId: string; percent: string }> }
+  | { method: "custom"; phases: AllocationPhase[]; approvalReason: string };
+type PricingOption = { versionId: string; name: string; version: number; currency: string;
+  provenance?: { definition?: { economicAllocation?: { phases: AllocationPhase[]; directProductionNodeIds: string[] } } } };
+type AllocationPreview = { currency: string; directProductionAmount: string; method: string; fingerprint: string;
+  rows: Array<{ phaseId: string; name: string; apuDefaultPercent: string; workflowPercent: string; deltaPercent: string; deltaDirection: number; amount: string }> };
 type Definition = {
   schemaVersion: 1;
   deliverableTypes: string[];
@@ -30,6 +40,7 @@ type Definition = {
     requiredDocuments: string[];
   }>;
   reopen: { role: "review" | "approve"; reasonRequired: true };
+  economicAllocation?: { sourceVersionId: string; proposal: AllocationProposal };
 };
 type Version = {
   templateId: string;
@@ -124,10 +135,14 @@ export function CompanyDeliveryWorkflowsTab({
   >([]);
   const [canManage, setCanManage] = useState(false);
   const [mode, setMode] = useState("");
+  const [apuOptions, setApuOptions] = useState<PricingOption[]>([]);
+  const [apuError, setApuError] = useState("");
   const [selectedId, setSelectedId] = useState("");
   const [versions, setVersions] = useState<Version[]>([]);
   const [history, setHistory] = useState<any[]>([]);
   const [draft, setDraft] = useState<Definition | null>(null);
+  const draftRef = useRef<Definition | null>(null);
+  draftRef.current = draft;
   const [code, setCode] = useState("");
   const [name, setName] = useState("");
   const [type, setType] = useState("GENERAL");
@@ -135,6 +150,7 @@ export function CompanyDeliveryWorkflowsTab({
     fingerprint: string;
     phaseCount: number;
     taskCount: number;
+    allocation: AllocationPreview | null;
   } | null>(null);
   const [busy, setBusy] = useState(false);
   const [loading, setLoading] = useState(true);
@@ -167,6 +183,19 @@ export function CompanyDeliveryWorkflowsTab({
       setList(listing.versions ?? []);
       setCanManage(listing.canManage === true);
       setMode(options.mode);
+      if (listing.canManage === true) {
+        try {
+          const pricing = await request("/company/pricing-templates/options");
+          setApuOptions(pricing.options ?? []);
+          setApuError("");
+        } catch (cause) {
+          setApuOptions([]);
+          setApuError(String(cause));
+        }
+      } else {
+        setApuOptions([]);
+        setApuError("");
+      }
       const target = id ?? selectedId;
       if (target) {
         const detail = await request(`/company/delivery-workflows/${target}`);
@@ -196,17 +225,110 @@ export function CompanyDeliveryWorkflowsTab({
     !!draft &&
     !!selected &&
     JSON.stringify(draft) !== JSON.stringify(selected.definition);
+  useEffect(() => {
+    if (!draftDirty) return;
+    const warn = (event: BeforeUnloadEvent) => { event.preventDefault(); event.returnValue = ""; };
+    window.addEventListener("beforeunload", warn);
+    return () => window.removeEventListener("beforeunload", warn);
+  }, [draftDirty]);
   const updateDraft = (next: Definition) => {
     setDraft(next);
     setPreview(null);
     setNotice("");
   };
-  const changePhases = (next: Phase[]) =>
-    updateDraft({
-      ...draft!,
-      phases: next,
-      transitions: reflow(next, draft!.transitions),
-    });
+  const changePhases = (next: Phase[]) => {
+    const allocation = draft!.economicAllocation;
+    let nextAllocation = allocation;
+    if (allocation?.proposal.method === "custom") {
+      nextAllocation = { ...allocation, proposal: { ...allocation.proposal,
+        phases: next.map((phase) => ({
+          phaseId: phase.id, code: phase.code, name: phase.name,
+          percent: allocation.proposal.method === "custom"
+            ? allocation.proposal.phases.find((row) => row.phaseId === phase.id)?.percent ?? "0.00"
+            : "0.00",
+        })) } };
+    } else if (allocation && "additions" in allocation.proposal) {
+      const prior = allocation.proposal;
+      const additions = next.filter((phase) => !apuPhases.some((source) => source.phaseId === phase.id))
+        .map((phase) => ({ phaseId: phase.id, code: phase.code, name: phase.name,
+          percent: prior.additions.find((row) => row.phaseId === phase.id)?.percent ?? "0.00" }));
+      nextAllocation = { ...allocation, proposal: { ...prior, additions } };
+    }
+    updateDraft({ ...draft!, phases: next, transitions: reflow(next, draft!.transitions),
+      ...(nextAllocation ? { economicAllocation: nextAllocation } : {}) });
+  };
+  const selectedApu = apuOptions.find((option) => option.versionId === draft?.economicAllocation?.sourceVersionId);
+  const apuPhases = selectedApu?.provenance?.definition?.economicAllocation?.phases ?? [];
+  const allocationAligned = !!draft?.economicAllocation &&
+    apuPhases.length > 0 &&
+    (draft.economicAllocation.proposal.method === "apu_default"
+      ? draft.phases.length === apuPhases.length
+      : true) &&
+    (draft.economicAllocation.proposal.method === "apu_default"
+      ? draft.phases.every((phase, index) => phase.id === apuPhases[index]?.phaseId && phase.code === apuPhases[index]?.code)
+      : draft.phases.slice(0, apuPhases.length).every((phase, index) => phase.id === apuPhases[index]?.phaseId && phase.code === apuPhases[index]?.code));
+  const allocationAdditions = (): AllocationPhase[] => {
+    if (!draft) return [];
+    const prior = draft.economicAllocation?.proposal;
+    const previous = prior && "additions" in prior ? prior.additions : [];
+    return draft.phases.filter((phase) => !apuPhases.some((source) => source.phaseId === phase.id))
+      .map((phase) => previous.find((row) => row.phaseId === phase.id) ??
+        { phaseId: phase.id, code: phase.code, name: phase.name, percent: "0.00" });
+  };
+  const changeAllocationMethod = (method: AllocationProposal["method"]) => {
+    if (!draft?.economicAllocation) return;
+    const additions = allocationAdditions();
+    const current = draft.economicAllocation.proposal;
+    const proposal: AllocationProposal = method === "apu_default" ? { method }
+      : method === "proportional" ? { method, additions }
+      : method === "deduct_specific" ? { method, additions,
+        deductions: apuPhases.map((phase) => ({
+          phaseId: phase.phaseId,
+          percent: current.method === "deduct_specific"
+            ? current.deductions.find((row) => row.phaseId === phase.phaseId)?.percent ?? "0.00" : "0.00",
+        })) }
+      : { method, phases: draft.phases.map((phase) => ({
+        phaseId: phase.id, code: phase.code, name: phase.name,
+        percent: current.method === "custom"
+          ? current.phases.find((row) => row.phaseId === phase.id)?.percent ?? "0.00"
+          : apuPhases.find((row) => row.phaseId === phase.id)?.percent ?? "0.00",
+      })), approvalReason: current.method === "custom" ? current.approvalReason : "" };
+    updateDraft({ ...draft, economicAllocation: { ...draft.economicAllocation, proposal } });
+  };
+  const updateAllocationProposal = (proposal: AllocationProposal) => {
+    if (!draft?.economicAllocation) return;
+    updateDraft({ ...draft, economicAllocation: { ...draft.economicAllocation, proposal } });
+  };
+  const updateAddition = (phaseId: string, percent: string) => {
+    const proposal = draft?.economicAllocation?.proposal;
+    if (!proposal || !("additions" in proposal)) return;
+    updateAllocationProposal({ ...proposal, additions: proposal.additions.map((row) =>
+      row.phaseId === phaseId ? { ...row, percent } : row) });
+  };
+  const updateDeduction = (phaseId: string, percent: string) => {
+    const proposal = draft?.economicAllocation?.proposal;
+    if (proposal?.method !== "deduct_specific") return;
+    updateAllocationProposal({ ...proposal, deductions: proposal.deductions.map((row) =>
+      row.phaseId === phaseId ? { ...row, percent } : row) });
+  };
+  const updateCustom = (phaseId: string, percent: string) => {
+    const proposal = draft?.economicAllocation?.proposal;
+    if (proposal?.method !== "custom") return;
+    updateAllocationProposal({ ...proposal, phases: proposal.phases.map((row) =>
+      row.phaseId === phaseId ? { ...row, percent } : row) });
+  };
+  const alignApuPhases = () => {
+    if (!draft || !apuPhases.length) return;
+    if (draft.phases.some((phase) => !apuPhases.some((source) => source.phaseId === phase.id)) &&
+      !window.confirm(t("Replace the current phase list with the selected APU defaults? Unsaved phase tasks that do not match will be removed.", "¿Reemplazar las fases actuales por las predeterminadas del APU? Se quitarán las tareas no guardadas de fases sin coincidencia."))) return;
+    const next = apuPhases.map((source, index): Phase => draft.phases.find((phase) => phase.id === source.phaseId)
+      ? { ...draft.phases.find((phase) => phase.id === source.phaseId)!, code: source.code, name: source.name, order: index + 1 }
+      : { id: source.phaseId, code: source.code, name: source.name, order: index + 1,
+        tasks: [{ id: `task_${source.phaseId}`, code: "PRODUCE", name: "Prepare deliverable", order: 1, requiredDocuments: [] }],
+        completionRule: "all_tasks_complete", qcRequired: false, approvalRequired: false });
+    updateDraft({ ...draft, phases: next, transitions: reflow(next, draft.transitions),
+      economicAllocation: { ...draft.economicAllocation!, proposal: { method: "apu_default" } } });
+  };
   const action = async (
     path: string,
     method: string,
@@ -239,16 +361,16 @@ export function CompanyDeliveryWorkflowsTab({
   };
   const previewDraft = async () => {
     if (!draft) return;
+    const submitted = JSON.stringify(draft);
     setBusy(true);
     setError("");
     setPreview(null);
     try {
-      setPreview(
-        await request("/company/delivery-workflows/preview", {
-          method: "POST",
-          body: JSON.stringify({ definition: draft }),
-        }),
-      );
+      const result = await request("/company/delivery-workflows/preview", {
+        method: "POST",
+        body: JSON.stringify({ definition: draft }),
+      });
+      if (JSON.stringify(draftRef.current) === submitted) setPreview(result);
     } catch (cause) {
       setError(String(cause));
     } finally {
@@ -404,6 +526,7 @@ export function CompanyDeliveryWorkflowsTab({
         <select
           value={selectedId}
           onChange={(event) => {
+            if (draftDirty && !window.confirm(t("Discard unsaved workflow changes?", "¿Descartar los cambios del flujo sin guardar?"))) return;
             setSelectedId(event.target.value);
             setPreview(null);
           }}
@@ -858,6 +981,64 @@ export function CompanyDeliveryWorkflowsTab({
               <button type="button" onClick={newPhase}>
                 {t("Add phase", "Agregar fase")}
               </button>
+              <fieldset className="company-workflow-economic" style={{ display: "grid", gap: 10, minWidth: 0, border: "1px solid #94a3b8", borderRadius: 10, padding: 14 }}>
+                <legend>{t("Economic allocation (optional)", "Asignación económica (opcional)")}</legend>
+                <p>{t("Link this workflow to a published Commercial APU. The APU remains the price authority; this workflow only allocates its Direct Production amount across matching phases. A separate Finance-authorized PMO checker must approve economic changes.", "Vincule el flujo a un APU Comercial publicado. El APU sigue siendo la autoridad de precios; este flujo solo distribuye su producción directa entre fases coincidentes. Otro PMO con autorización financiera debe aprobar los cambios económicos.")}</p>
+                {apuError && <p role="alert">{t("Could not load published APUs:", "No se pudieron cargar los APU publicados:")} {apuError}</p>}
+                {!apuError && apuOptions.length === 0 && <p role="status">{t("No published company APU with economic defaults is available. Configure and publish one in Commercial first.", "No hay un APU publicado con fases económicas. Configure y publique uno en Comercial primero.")}</p>}
+                <label>{t("Published Commercial APU", "APU Comercial publicado")}
+                  <select value={draft.economicAllocation?.sourceVersionId ?? ""} disabled={!!apuError}
+                    onChange={(event) => updateDraft({ ...draft, economicAllocation: event.target.value
+                      ? { sourceVersionId: event.target.value, proposal: { method: "apu_default" } }
+                      : undefined })}>
+                    <option value="">{t("No economic allocation", "Sin asignación económica")}</option>
+                    {apuOptions.filter((option) => !!option.provenance?.definition?.economicAllocation).map((option) =>
+                      <option key={option.versionId} value={option.versionId}>{option.name} · v{option.version} · {option.currency}</option>)}
+                  </select>
+                </label>
+                {draft.economicAllocation && !selectedApu && <p role="alert">{t("The referenced APU is unavailable or no longer published. Select a current APU; this draft cannot be approved with a stale source.", "El APU de referencia no está disponible o ya no está publicado. Seleccione uno vigente; este borrador no puede aprobarse con una fuente obsoleta.")}</p>}
+                {draft.economicAllocation && selectedApu && <>
+                  <p>{t("APU default phases", "Fases predeterminadas del APU")}: {apuPhases.map((phase) => `${phase.name} ${phase.percent}%`).join(" · ")}</p>
+                  {!allocationAligned && <div role="status" style={{ padding: 10, background: "#fff7ed", border: "1px solid #fdba74", borderRadius: 8 }}>
+                    <p>{t("Workflow phase identities/order do not match this allocation. Apply APU defaults, or add matching new phases after those defaults for a redistribution method.", "Las identidades o el orden de fases del flujo no coinciden con la asignación. Aplique los valores del APU o agregue fases nuevas después de las predeterminadas para redistribuir.")}</p>
+                    <button type="button" onClick={alignApuPhases}>{t("Apply APU default phases to draft", "Aplicar fases predeterminadas del APU al borrador")}</button>
+                  </div>}
+                  <label>{t("Allocation method", "Método de asignación")}
+                    <select value={draft.economicAllocation.proposal.method}
+                      onChange={(event) => changeAllocationMethod(event.target.value as AllocationProposal["method"])}>
+                      <option value="apu_default">{t("Use APU defaults", "Usar valores del APU")}</option>
+                      <option value="proportional">{t("Redistribute proportionally", "Redistribuir proporcionalmente")}</option>
+                      <option value="deduct_specific">{t("Deduct from selected phases", "Deducir de fases específicas")}</option>
+                      <option value="custom">{t("Custom allocation (Finance approval)", "Asignación personalizada (aprobación financiera)")}</option>
+                    </select>
+                  </label>
+                  {("additions" in draft.economicAllocation.proposal) && <>
+                    <p>{t("Add workflow phases after the APU defaults, then enter the share for each new phase.", "Agregue fases del flujo despues de las predeterminadas del APU e indique el porcentaje de cada fase nueva.")}</p>
+                    {allocationAdditions().map((phase) => <label key={phase.phaseId}>{phase.name} ({phase.code}) - {t("New phase percent", "Porcentaje de fase nueva")}
+                      <input inputMode="decimal" value={phase.percent} onChange={(event) => updateAddition(phase.phaseId, event.target.value)} />
+                    </label>)}
+                    {allocationAdditions().length === 0 && <p role="status">{t("Add a new workflow phase to use this method.", "Agregue una fase nueva al flujo para usar este metodo.")}</p>}
+                  </>}
+                  {draft.economicAllocation.proposal.method === "deduct_specific" && <>
+                    <p>{t("Deduct exactly the new-phase total from the APU phases. No phase may become negative.", "Deducir exactamente el total de fases nuevas de las fases del APU. Ninguna fase puede quedar negativa.")}</p>
+                    {draft.economicAllocation.proposal.deductions.map((row) => <label key={row.phaseId}>
+                      {apuPhases.find((phase) => phase.phaseId === row.phaseId)?.name ?? row.phaseId} - {t("Deduction percent", "Porcentaje a deducir")}
+                      <input inputMode="decimal" value={row.percent} onChange={(event) => updateDeduction(row.phaseId, event.target.value)} />
+                    </label>)}
+                  </>}
+                  {draft.economicAllocation.proposal.method === "custom" && <>
+                    <p>{t("Enter the final percentage for every workflow phase. The total must be exactly 100%.", "Indique el porcentaje final de cada fase del flujo. El total debe ser exactamente 100 %.")}</p>
+                    {draft.economicAllocation.proposal.phases.map((row) => <label key={row.phaseId}>{row.name} ({row.code})
+                      <input inputMode="decimal" value={row.percent} onChange={(event) => updateCustom(row.phaseId, event.target.value)} />
+                    </label>)}
+                    <button type="button" onClick={() => changeAllocationMethod("custom")}>{t("Match rows to current workflow phases", "Actualizar filas segun las fases actuales")}</button>
+                    <label>{t("Reason for Finance approval", "Motivo para aprobacion financiera")}
+                      <textarea value={draft.economicAllocation.proposal.approvalReason}
+                        onChange={(event) => updateAllocationProposal({ ...draft.economicAllocation!.proposal as Extract<AllocationProposal, { method: "custom" }>, approvalReason: event.target.value })} />
+                    </label>
+                  </>}
+                </>}
+              </fieldset>
               {draft.transitions.map((transition, index) => (
                 <fieldset
                   key={`${transition.from}-${transition.to}`}
@@ -944,7 +1125,7 @@ export function CompanyDeliveryWorkflowsTab({
                   <option value="approve">{t("Approver", "Aprobador")}</option>
                 </select>
               </label>
-              <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+              <div className="company-workflow-actions" style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
                 <button
                   type="button"
                   disabled={busy}
@@ -991,6 +1172,19 @@ export function CompanyDeliveryWorkflowsTab({
                   {phase.approvalRequired ? t("yes", "sí") : t("no", "no")}
                 </p>
               ))}
+              {preview.allocation && <div className="company-workflow-economic-preview" style={{ overflowX: "auto" }}>
+                <h4>{t("Direct Production allocation", "Distribucion de produccion directa")}</h4>
+                <p>{t("Commercial APU pool", "Fondo del APU Comercial")}: {preview.allocation.directProductionAmount} {preview.allocation.currency} - {t("Method", "Metodo")}: {preview.allocation.method}</p>
+                <table style={{ width: "100%", minWidth: 560, borderCollapse: "collapse" }}>
+                  <thead><tr><th>{t("Phase", "Fase")}</th><th>{t("APU default", "APU original")}</th><th>{t("Workflow", "Flujo")}</th><th>{t("Change", "Cambio")}</th><th>{t("Amount", "Monto")}</th></tr></thead>
+                  <tbody>{preview.allocation.rows.map((row) => <tr key={row.phaseId}>
+                    <td>{row.name}</td><td>{row.apuDefaultPercent}%</td><td>{row.workflowPercent}%</td>
+                    <td>{row.deltaDirection > 0 ? "+" : row.deltaDirection < 0 ? "-" : ""}{row.deltaPercent}%</td>
+                    <td>{row.amount} {preview.allocation!.currency}</td>
+                  </tr>)}</tbody>
+                </table>
+                <small>SHA-256 {preview.allocation.fingerprint.slice(0, 16)}</small>
+              </div>}
             </section>
           )}
           {history.length > 0 && (

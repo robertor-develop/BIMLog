@@ -236,6 +236,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/delivery-workflow-allocation-source-contract.ts
 - artifacts/api-server/src/lib/delivery-workflow-allocation-source.behavior.ts
 - artifacts/api-server/src/lib/delivery-workflow-allocation-source.ts
+- artifacts/api-server/src/lib/delivery-workflow-allocation.http-evidence.ts
 - artifacts/api-server/src/lib/delivery-workflow-defaults.ts
 - artifacts/api-server/src/lib/delivery-workflow-economic-allocation.behavior.ts
 - artifacts/api-server/src/lib/delivery-workflow-economic-allocation.ts
