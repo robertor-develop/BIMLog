@@ -1,5 +1,14 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Dashboard mockup implementation - six blocks of five
+
+- [x] Block 1: finish and review local economic-allocation preview contract and tests; no canonical Commercial or project-budget mutation. Local candidate only; not pushed, published, or user-accepted.
+- [ ] Block 2: versioned company Delivery Workflow allocation persistence, canonical Commercial APU resolution, PMO/Finance authority, and maker-checker audit.
+- [ ] Block 3: Delivery Workflow economic-allocation editor and preview matching the supplied mockup, including desktop/mobile/bilingual empty/error states.
+- [ ] Block 4: Governance Policy contract, versioning, thresholds, permissions, validation, and approval/audit behavior without duplicating existing project budget governance.
+- [ ] Block 5: Governance Policy dashboard and binding/activation snapshots for new Work Items; existing history remains immutable.
+- [ ] Block 6: end-to-end multi-contract, roles, negative-path, UI, accessibility, release-safety and live smoke gates. Push/publish only after a clean combined review and separate release authorization.
+
 ## Lens Next FI-002 2025 Working View regression — 2026-09-18
 
 - [x] Trace Ruben's exact 409 to the native navigation identity check; isolate save-unstable model fingerprinting and preserve digest/project/issue/revision guards.

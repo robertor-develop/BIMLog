@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Dashboard mockup program - Block 1 local foundation candidate - 2026-09-18
+
+- The requested Delivery Workflow economic-allocation and Governance Policy mockups are a 30-build / six-block program. Block 1 is the pure economic-allocation contract, not a deployed dashboard or accepted workflow.
+- A bounded preview references a canonical Commercial APU version/fingerprint without changing pricing authority. It supports unchanged APU defaults, proportional redistribution, specific-phase deductions, and approval-flagged custom allocation. Percentage and money totals use integer basis points/cents with deterministic rounding and a fingerprinted preview.
+- Local focused behavior and API typecheck are the acceptance gates. Subsequent blocks must resolve and verify the approved Commercial APU server-side, persist governed workflow versions and approval/audit, integrate UI and downstream Work Item activation, then test desktop/mobile and real roles. No push or publication in this block.
+
 ## Lens Next FI-002 model-save continuity release candidate — 2026-09-18
 
 - Isolated worktree based on published `origin/master` `887589a3ee2b05ee92a51427cdd72ef0a92241af`. The native adapter error was reproduced by source trace and the file-save fingerprint instability by an automated adapter test. Candidate code adds a stable identity for future captures plus explicit, digest-preserving confirmation for legacy navigation packages; it does not change unrelated Lens Next or Commercial flows.

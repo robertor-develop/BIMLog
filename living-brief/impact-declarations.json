@@ -30085,6 +30085,90 @@
         "plugins/BIMLogLensNext/tests/Program.cs"
       ],
       "reviewedChangeSha256": "bd2f6e056d554397a87166ea7e517d625b0c18f80fca37d7bce10565e8eeb36e"
+    },
+    {
+      "taskId": "dashboard-mockup-block1-allocation-foundation-20260918",
+      "reviewedThroughCommit": "661c9746819bb0958858de0b95e3a5c8f0fcf4a8",
+      "reviewedAt": "2026-09-18T15:44:38Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Economic preview must not become a second pricing authority or commit financial values until the canonical Commercial APU is verified server-side."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded preview follows existing canonical Commercial pricing doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Execution and release rules remain unchanged for this local foundation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing quality and UI acceptance requirements remain in force."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision authority changed in this preview-only block."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated structural map has no new route, table, or architecture fact; this isolated pure helper is not a runtime integration."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next plugin code and native behavior were not changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No reporting or export layout was changed by this preview contract."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or edition claim was added."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the local economic preview foundation and its unaccepted runtime limits."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks all six dashboard blocks and the remaining integration and release gates."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No accepted historical audit receipt was modified by this candidate."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/delivery-workflow-economic-allocation.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-economic-allocation.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "ef547ae786ad9f3ac3982c56d0e11ec21dbb86ace81e339d54716646e8588735"
     }
   ]
 }
