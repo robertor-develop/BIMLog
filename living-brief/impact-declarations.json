@@ -30169,6 +30169,96 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ef547ae786ad9f3ac3982c56d0e11ec21dbb86ace81e339d54716646e8588735"
+    },
+    {
+      "taskId": "dashboard-mockup-block2-apu-governed-workflow-20260918",
+      "reviewedThroughCommit": "0bb998e6a7ac015122bfed17137eecfee7404e0c",
+      "reviewedAt": "2026-09-18T16:13:53Z",
+      "status": "candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Published Commercial APUs had no phase allocation defaults; the additive optional schedule preserves legacy fingerprints and blocks economic workflow approval when source evidence is absent."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Commercial pricing and controlled human financial approval remain authoritative."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No execution, release, or coordination operating rule changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing financial exactness, tenancy and maker-checker quality gates remain in force."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No strategic product vision was amended by this additive source candidate."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated structural map has no added route, table or module authority; behavior extends existing Commercial and Delivery Workflow contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next or Navisworks plugin source was changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or document generation path changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records implemented source and precisely unrun database, deployment and field gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps Block 2 open for authenticated database proof and independent review."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing accepted audit history remains append-only and unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/company-pricing-template-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-allocation-source-contract.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-allocation-source.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-allocation-source.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template-contract.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4bf5a2697450bb9be99b33288af5a15077d036f66386f23837eea07a08eab072"
     }
   ]
 }

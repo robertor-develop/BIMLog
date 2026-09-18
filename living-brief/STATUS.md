@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Dashboard mockup program - Block 2 source candidate - 2026-09-18
+
+- Commercial pricing-template definitions now optionally carry a Finance-published direct-production node subset and phase-percentage defaults. Absent data is not synthesized and legacy normalized definitions retain their prior fingerprint shape.
+- A Delivery Workflow draft may reference that exact published Commercial APU version and an allocation proposal in its existing versioned definition. Preview, approval, and publish resolve and verify the current company-scoped APU, currency, fingerprint, and matching workflow phase identities. Economic approval requires a separate PMO actor with an effective company Finance cost-approver grant; the draft creator and latest editor are denied. Existing immutable workflow events record the APU/allocation fingerprint and publish rechecks it.
+- Focused pricing/workflow/source/permission behavior tests and API TypeScript typecheck pass locally. An authenticated isolated-database HTTP cycle for save, stale edit, approval, supersession, tenant denial, audit and publish remains unrun. No new database was created, no production data was touched, and this candidate is not pushed, published or customer accepted. The source has no new table or schema migration; persistence uses the existing versioned workflow definition and event records.
+
 ## Dashboard mockup program - Block 1 local foundation candidate - 2026-09-18
 
 - The requested Delivery Workflow economic-allocation and Governance Policy mockups are a 30-build / six-block program. Block 1 is the pure economic-allocation contract, not a deployed dashboard or accepted workflow.

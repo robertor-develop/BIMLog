@@ -21,6 +21,14 @@ const clone = () => structuredClone(shop);
 const valid = validateDeliveryWorkflowDefinition(shop);
 assert.equal(valid.phases.length, 2);
 assert.equal(deliveryWorkflowFingerprint(valid), deliveryWorkflowFingerprint(validateDeliveryWorkflowDefinition(clone())));
+const governed = validateDeliveryWorkflowDefinition({ ...clone(), economicAllocation: {
+  sourceVersionId: "apu-v2", proposal: { method: "apu_default" },
+} });
+assert.notEqual(deliveryWorkflowFingerprint(valid), deliveryWorkflowFingerprint(governed));
+assert.equal(governed.economicAllocation?.sourceVersionId, "apu-v2");
+assert.throws(() => validateDeliveryWorkflowDefinition({ ...clone(), economicAllocation: {
+  sourceVersionId: "apu-v2", proposal: { method: "apu_default", ignored: 10 },
+} }), { code: "WORKFLOW_ALLOCATION_FIELD_INVALID" });
 
 const sleeve = clone(); sleeve.deliverableTypes = ["SLEEVE"]; sleeve.phases[0].name = "Sleeve layout";
 assert.notEqual(deliveryWorkflowFingerprint(valid), deliveryWorkflowFingerprint(validateDeliveryWorkflowDefinition(sleeve)));

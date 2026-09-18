@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import type { AllocationProposal } from "./delivery-workflow-economic-allocation";
 
 const stableId = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/;
 const roleCode = /^[A-Z][A-Z0-9_]{1,63}$/;
@@ -29,6 +30,7 @@ export type DeliveryWorkflowDefinition = {
   phases: DeliveryWorkflowPhase[];
   transitions: Array<{ from: string; to: string; gate: "tasks_complete" | "qc_approved" | "approval_granted"; requiredDocuments: string[] }>;
   reopen: { role: "review" | "approve"; reasonRequired: true };
+  economicAllocation?: { sourceVersionId: string; proposal: AllocationProposal };
 };
 
 export class DeliveryWorkflowDefinitionError extends Error {
@@ -124,7 +126,25 @@ export function validateDeliveryWorkflowDefinition(input: unknown): DeliveryWork
   const reopenInput = record(raw.reopen, "reopen");
   if (reopenInput.role !== "review" && reopenInput.role !== "approve") fail("WORKFLOW_REOPEN_ROLE_INVALID", "reopen.role");
   if (reopenInput.reasonRequired !== true) fail("WORKFLOW_REOPEN_REASON_REQUIRED", "reopen.reasonRequired");
-  return { schemaVersion: 1, deliverableTypes, roles, phases, transitions, reopen: { role: reopenInput.role, reasonRequired: true } };
+  let economicAllocation: DeliveryWorkflowDefinition["economicAllocation"];
+  if (raw.economicAllocation !== undefined) {
+    const allocation = record(raw.economicAllocation, "economicAllocation");
+    if (Object.keys(allocation).some(key => key !== "sourceVersionId" && key !== "proposal"))
+      fail("WORKFLOW_ALLOCATION_FIELD_INVALID", "economicAllocation");
+    const sourceVersionId = code(allocation.sourceVersionId, "economicAllocation.sourceVersionId");
+    const proposal = record(allocation.proposal, "economicAllocation.proposal");
+    if (!["apu_default", "proportional", "deduct_specific", "custom"].includes(String(proposal.method)))
+      fail("WORKFLOW_ALLOCATION_METHOD_INVALID", "economicAllocation.proposal.method");
+    const allowedProposalFields = proposal.method === "apu_default" ? ["method"]
+      : proposal.method === "proportional" ? ["method", "additions"]
+      : proposal.method === "deduct_specific" ? ["method", "additions", "deductions"]
+      : ["method", "phases", "approvalReason"];
+    if (Object.keys(proposal).some(key => !allowedProposalFields.includes(key)))
+      fail("WORKFLOW_ALLOCATION_FIELD_INVALID", "economicAllocation.proposal");
+    economicAllocation = { sourceVersionId, proposal: proposal as AllocationProposal };
+  }
+  return { schemaVersion: 1, deliverableTypes, roles, phases, transitions, reopen: { role: reopenInput.role, reasonRequired: true },
+    ...(economicAllocation ? { economicAllocation } : {}) };
 }
 
 export function deliveryWorkflowFingerprint(definition: DeliveryWorkflowDefinition): string {

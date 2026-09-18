@@ -6,6 +6,11 @@ import { ensureCompanyMasterCatalogSchema } from "../lib/company-master-catalog-
 import { ensureDeliveryWorkflowTemplateSchema } from "../lib/delivery-workflow-template-migration";
 import { boundedDeliveryWorkflowDraft, deliveryWorkflowFingerprint, DeliveryWorkflowDefinitionError, validateDeliveryWorkflowDefinition } from "../lib/delivery-workflow-template-contract";
 import { deliveryWorkflowOptions } from "../lib/delivery-workflow-selection";
+import { previewGovernedWorkflowAllocation } from "../lib/delivery-workflow-allocation-source";
+import { EconomicAllocationError } from "../lib/delivery-workflow-economic-allocation";
+import { FinancialControlError } from "../lib/financial-control-contract";
+import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
+import { economicCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
 
 const router = Router();
 const templateCode = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -39,7 +44,26 @@ async function event(connection: Connection, actor: Actor, templateId: string, v
 }
 function invalid(res: Response, error: unknown): boolean {
   if (error instanceof DeliveryWorkflowDefinitionError) { res.status(400).json({ code: error.code, field: error.field }); return true; }
+  if (error instanceof EconomicAllocationError) { res.status(400).json({ code: error.code, field: error.field }); return true; }
+  if (error instanceof FinancialControlError) { res.status(error.status).json({ code: error.code }); return true; }
   return false;
+}
+async function economicPreview(connection: Connection, actor: Actor, definition: ReturnType<typeof validateDeliveryWorkflowDefinition>) {
+  if (!definition.economicAllocation) return null;
+  return previewGovernedWorkflowAllocation({
+    client: connection, companyId: actor.companyId,
+    sourceVersionId: definition.economicAllocation.sourceVersionId,
+    proposal: definition.economicAllocation.proposal,
+    workflowPhases: definition.phases,
+  });
+}
+async function canApproveEconomics(connection: Connection, actor: Actor) {
+  await waitForFinancialControlMigration();
+  return (await connection.query(`SELECT EXISTS(SELECT 1 FROM financial_authority_grants g
+    WHERE g.user_id=$1 AND g.company_id=$2 AND g.scope_type='company' AND g.authority='cost_approver'
+      AND g.effective_from<=now() AND (g.effective_to IS NULL OR g.effective_to>now())
+      AND NOT EXISTS(SELECT 1 FROM financial_authority_revocations r WHERE r.grant_id=g.id AND r.revoked_at<=now())) AS allowed`,
+    [actor.userId,actor.companyId])).rows[0]?.allowed === true;
 }
 function conflict(res: Response, error: unknown): boolean {
   if ((error as { code?: string })?.code === "23505") { res.status(409).json({ code: "DELIVERY_WORKFLOW_DUPLICATE_OR_OPEN_VERSION" }); return true; }
@@ -69,8 +93,16 @@ router.post("/company/delivery-workflows/preview", authMiddleware, async (req, r
   const actor = await prepare(req, res, true); if (!actor) return;
   try {
     const definition = validateDeliveryWorkflowDefinition(req.body?.definition);
-    res.json({ definition, fingerprint: deliveryWorkflowFingerprint(definition), phaseCount: definition.phases.length,
-      taskCount: definition.phases.reduce((count, phase) => count + phase.tasks.length, 0) });
+    const connection = await pool.connect();
+    try {
+      await connection.query("BEGIN");
+      const allocation = await economicPreview(connection, actor, definition);
+      await connection.query("COMMIT");
+      res.json({ definition, fingerprint: deliveryWorkflowFingerprint(definition), allocation,
+        phaseCount: definition.phases.length,
+        taskCount: definition.phases.reduce((count, phase) => count + phase.tasks.length, 0) });
+    } catch (error) { await connection.query("ROLLBACK"); throw error; }
+    finally { connection.release(); }
   } catch (error) { if (!invalid(res, error)) throw error; }
 });
 
@@ -163,17 +195,27 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/approve", authM
     await connection.query("BEGIN");
     const template = await scopedTemplate(connection,param(req.params.id),actor,true);
     if (!template) { await connection.query("ROLLBACK"); res.status(404).json({ code: "DELIVERY_WORKFLOW_NOT_FOUND" }); return; }
-    const version = (await connection.query(`SELECT id,definition,revision,state FROM company_delivery_workflow_versions
+    const version = (await connection.query(`SELECT id,definition,revision,state,created_by_id,updated_by_id FROM company_delivery_workflow_versions
       WHERE id=$1 AND template_id=$2 FOR UPDATE`, [param(req.params.versionId),template.id])).rows[0];
     if (!version || version.state !== "draft" || Number(version.revision) !== revision) {
       await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_NOT_DRAFT_OR_STALE" }); return;
     }
     const definition = validateDeliveryWorkflowDefinition(version.definition);
+    const allocation = await economicPreview(connection, actor, definition);
+    if (allocation && !economicCheckerAllowed({
+      creatorId: Number(version.created_by_id), lastEditorId: Number(version.updated_by_id),
+      checkerId: actor.userId, hasFinanceGrant: await canApproveEconomics(connection, actor),
+    })) {
+      await connection.query("ROLLBACK"); res.status(403).json({ code: "DELIVERY_WORKFLOW_FINANCE_CHECKER_REQUIRED" }); return;
+    }
     const fingerprint = deliveryWorkflowFingerprint(definition);
     await connection.query(`UPDATE company_delivery_workflow_versions SET state='approved',definition=$2::jsonb,fingerprint=$3,
       approved_at=now(),approved_by_id=$4,revision=revision+1,updated_by_id=$4,updated_at=now() WHERE id=$1`,
       [version.id,JSON.stringify(definition),fingerprint,actor.userId]);
-    await event(connection,actor,template.id,version.id,"approved",{ fingerprint });
+    await event(connection,actor,template.id,version.id,"approved",{
+      fingerprint, ...(allocation ? { economicAllocationFingerprint: allocation.fingerprint,
+        commercialApuVersionId: allocation.commercialApuVersionId } : {}),
+    });
     await connection.query("COMMIT");
     res.json({ versionId: version.id, state: "approved", fingerprint, revision: revision + 1 });
   } catch (error) { await connection.query("ROLLBACK"); if (!invalid(res,error)) throw error; }
@@ -197,12 +239,23 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/publish", authM
     if (deliveryWorkflowFingerprint(definition) !== version.fingerprint) {
       await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_FINGERPRINT_MISMATCH" }); return;
     }
+    const allocation = await economicPreview(connection, actor, definition);
+    if (allocation) {
+      const receipt = (await connection.query(`SELECT details FROM company_delivery_workflow_events
+        WHERE company_id=$1 AND template_id=$2 AND version_id=$3 AND action='approved'
+        ORDER BY created_at DESC,id DESC LIMIT 1`, [actor.companyId,template.id,version.id])).rows[0];
+      if (receipt?.details?.economicAllocationFingerprint !== allocation.fingerprint) {
+        await connection.query("ROLLBACK"); res.status(409).json({ code: "DELIVERY_WORKFLOW_ALLOCATION_CHANGED" }); return;
+      }
+    }
     const prior = (await connection.query(`UPDATE company_delivery_workflow_versions SET state='superseded',updated_at=now(),updated_by_id=$2
       WHERE template_id=$1 AND state='published' RETURNING id`, [template.id,actor.userId])).rows;
     for (const row of prior) await event(connection,actor,template.id,row.id,"superseded",{ byVersionId: version.id });
     await connection.query(`UPDATE company_delivery_workflow_versions SET state='published',published_at=now(),published_by_id=$2,
       effective_from=now(),revision=revision+1,updated_by_id=$2,updated_at=now() WHERE id=$1`, [version.id,actor.userId]);
-    await event(connection,actor,template.id,version.id,"published",{ fingerprint: version.fingerprint });
+    await event(connection,actor,template.id,version.id,"published",{
+      fingerprint: version.fingerprint, ...(allocation ? { economicAllocationFingerprint: allocation.fingerprint } : {}),
+    });
     await connection.query("COMMIT");
     res.json({ versionId: version.id, state: "published", fingerprint: version.fingerprint, revision: revision + 1 });
   } catch (error) { await connection.query("ROLLBACK"); if (!invalid(res,error) && !conflict(res,error)) throw error; }
