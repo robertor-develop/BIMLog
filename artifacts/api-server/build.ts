@@ -7,7 +7,7 @@ import { constants as fsConstants, createReadStream, createWriteStream } from "n
 import { tmpdir } from "node:os";
 import { pipeline } from "node:stream/promises";
 import { setTimeout as delay } from "node:timers/promises";
-import { build as esbuild } from "esbuild";
+import { build as esbuild, stop as stopEsbuild } from "esbuild";
 import {
   lstat,
   mkdir,
@@ -16,6 +16,7 @@ import {
   readdir,
   readFile,
   realpath,
+  rename,
   rm,
   stat,
   writeFile,
@@ -714,6 +715,7 @@ export async function deployRuntimeClosure(
     evidenceDir?: string;
     livingBrief?: LivingBriefBuildInput;
     fixtureRequiredRuntimePackages?: string[];
+    reuseExisting?: boolean;
     onPhaseChange?: (phase: "assembly-copy" | "assembly-hash" | "validation") => void | Promise<void>;
   } = {},
 ) {
@@ -890,6 +892,18 @@ export async function deployRuntimeClosure(
     };
   };
 
+  if (options.reuseExisting) {
+    const requiredPackages = [
+      ...new Set([
+        ...externalSpecifiers.map(packageRoot),
+        ...(options.fixtureRequiredRuntimePackages ?? requiredRuntimePackages),
+      ]),
+    ].sort();
+    const closure = await validateRuntimeClosure(runtimeDir, requiredPackages, options.signal);
+    console.log(`verified reusable production runtime closure (${closure.requiredPackageCount} direct packages, ${closure.dependencyCount} dependencies, ${closure.materialFileCount} files)`);
+    return;
+  }
+
   const configuredTempRoot = process.env.BIMLOG_BUILD_TEMP_ROOT;
   if (
     configuredTempRoot &&
@@ -1009,14 +1023,17 @@ async function buildAll() {
   const distDir = path.resolve(__dirname, "dist");
   const runtimeDir = path.join(distDir, "runtime");
   const metafilePath = path.join(distDir, "index.meta.json");
-  await removeGeneratedDirectory(distDir);
+  const livingBrief = await loadVerifiedLivingBriefBuildInput();
+  await mkdir(distDir, { recursive: true });
+  for (const generatedFile of ["start.cjs", "index.cjs", "app.mjs", "index.meta.json"]) {
+    await removeGeneratedDirectory(path.join(distDir, generatedFile));
+  }
 
   // Generate deterministic structural documentation. It writes only when structure changes.
   console.log("checking deterministic PLATFORM.md...");
   generatePlatformMd();
 
   console.log("building server...");
-  const livingBrief = await loadVerifiedLivingBriefBuildInput();
   const pkgPath = path.resolve(__dirname, "package.json");
   const pkg = JSON.parse(await readFile(pkgPath, "utf-8"));
   const allDeps = [
@@ -1083,15 +1100,40 @@ async function buildAll() {
         .map((entry) => entry.path),
     ),
   ].sort();
-  await deployRuntimeClosure(runtimeDir, externalSpecifiers, { livingBrief });
+  const existingDeploymentSource = await readFile(path.join(runtimeDir, "deployment-source.json"), "utf8")
+    .then(value => JSON.parse(value) as { sourceCommit?: string; livingBriefCatalogSha256?: string; livingBriefBundleSha256?: string })
+    .catch(() => null);
+  const reusableRuntime = existingDeploymentSource?.sourceCommit === livingBrief.sourceCommit &&
+    existingDeploymentSource.livingBriefCatalogSha256 === livingBrief.catalogSha256 &&
+    existingDeploymentSource.livingBriefBundleSha256 === livingBrief.bundleSha256;
+  if (reusableRuntime) {
+    await deployRuntimeClosure(runtimeDir, externalSpecifiers, { livingBrief, reuseExisting: true });
+  } else {
+    const retiredRuntime = await lstat(runtimeDir)
+      .then(async () => {
+        const target = path.join(distDir, `runtime-retired-${Date.now()}`);
+        await rename(runtimeDir, target);
+        return target;
+      })
+      .catch((error: NodeJS.ErrnoException) => {
+        if (error.code === "ENOENT") return null;
+        throw error;
+      });
+    if (retiredRuntime) console.log(`retired changed runtime closure without recursive pre-build deletion: ${retiredRuntime}`);
+    await deployRuntimeClosure(runtimeDir, externalSpecifiers, { livingBrief });
+  }
 }
 
 if (path.resolve(process.argv[1] ?? "") === __filename) {
   buildAll().then(
-    () => process.exit(0),
-    (err) => {
+    async () => {
+      await stopEsbuild();
+      process.exitCode = 0;
+    },
+    async (err) => {
+      await stopEsbuild();
       console.error(err);
-      process.exit(1);
+      process.exitCode = 1;
     },
   );
 }

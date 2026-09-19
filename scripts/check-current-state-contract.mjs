@@ -18,12 +18,12 @@ function validate(snapshot) {
   assert(lens.legacyStatus === "migration-only", "Legacy Lens must be migration-only");
   assert(lens.customerFacingLegacyProduct === false && lens.parallelInstallationSupported === false && lens.legacyLoaderAllowedInAcceptedSetup === false, "Legacy Lens cannot remain customer-facing, parallel-installed, or loadable");
   assert(lens.currentPlatformVersion === release.label, "Lens product and release identities must agree");
-  assert(ledger.status.completedBuilds >= 25 && ledger.status.completedBuilds <= 30, "Build ledger must remain inside stabilization Block 06");
+  assert(ledger.status.completedBuilds >= 31 && ledger.status.completedBuilds <= 35, "Build ledger must remain inside stabilization Block 07");
   assert(ledger.status.remainingBuilds === 120 - ledger.status.completedBuilds, "Build ledger remaining count must reconcile");
-  assert(ledger.status.currentUnpublishedBuilds === ledger.status.completedBuilds - 20, "Block 06 unpublished count must reconcile from the Build 020 publication");
+  assert(ledger.status.currentUnpublishedBuilds === ledger.status.completedBuilds - 30, "Block 07 unpublished count must reconcile from the Build 030 publication");
   assert(ledger.status.nextBuild === ledger.status.completedBuilds + 1, "Build ledger must advance exactly one build");
-  assert(ledger.status.nextPushAfterBuild === (ledger.status.completedBuilds < 30 ? 30 : 35), "Build ledger next-push cadence must reconcile");
-  assert(ledger.status.nextPublicationAfterBuild === 30, "Build 030 must remain the next publication milestone until its external receipt is recorded");
+  assert(ledger.status.nextPushAfterBuild === 35, "Build 035 must remain the next push boundary");
+  assert(ledger.status.nextPublicationAfterBuild === 40, "Build 040 must remain the next publication milestone");
   for (const document of [status, platform, plugin, quality]) assert(document.includes(release.label), "current authority documents must contain the exact release label");
   assert(status.includes("Replit publication receipt `e89dc3b4`"), "STATUS must retain the exact current publication receipt");
   assert(platform.includes("Replit is the established BIMLog publication provider"), "PLATFORM must name the proven Replit provider path");

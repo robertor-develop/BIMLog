@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 30,
+    "completedBuilds": 31,
     "totalBuilds": 120,
-    "remainingBuilds": 90,
-    "currentUnpublishedBuilds": 10,
-    "nextBuild": 31,
+    "remainingBuilds": 89,
+    "currentUnpublishedBuilds": 1,
+    "nextBuild": 32,
     "nextPushAfterBuild": 35,
-    "nextPublicationAfterBuild": 30,
+    "nextPublicationAfterBuild": 40,
     "blocker": null
   },
   "blocks": [
@@ -102,7 +102,7 @@
     {
       "block": 6,
       "buildRange": "026-030",
-      "status": "PASS_PENDING_PUSH_AND_PUBLICATION",
+      "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED",
       "publicationRequired": true,
       "smoke": "Full authenticated visible-Chrome smoke after Build 030 publication; focused Navisworks smoke only if accepted integration changes Native or installers.",
       "builds": [
@@ -110,7 +110,17 @@
         { "build": 27, "status": "PASS", "evidence": "BUILD_027_SOURCE_HISTORY_RECONCILIATION.md" },
         { "build": 28, "status": "PASS", "evidence": "BUILD_028_DIRTY_CANDIDATE_RECONCILIATION.md" },
         { "build": 29, "status": "PASS", "evidence": "BUILD_029_RECOVERABLE_CLEANUP_MANIFEST.md" },
-        { "build": 30, "status": "PASS_LOCAL_RELEASE_GATE", "evidence": "BUILD_030_SOURCE_AUTHORITY_INTEGRATION.md" }
+        { "build": 30, "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED", "evidence": "BUILD_030_SOURCE_AUTHORITY_INTEGRATION.md" }
+      ]
+    },
+    {
+      "block": 7,
+      "buildRange": "031-035",
+      "status": "IN_PROGRESS",
+      "publicationRequired": false,
+      "smoke": "Test-harness and release-gate reliability only; push at Build 035, no publication or Navisworks smoke.",
+      "builds": [
+        { "build": 31, "status": "PASS", "evidence": "BUILD_031_BUILD_TERMINATION_RELIABILITY.md" }
       ]
     }
   ]
