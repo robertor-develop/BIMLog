@@ -2929,3 +2929,10 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Exact commit `db4dffc06eb99ad0afe560dfa9f66204a02c03f7` passed the complete clean pre-push gate and independent bounded-scope review, then fast-forwarded GitHub `master`; approval thresholds, change rules and arbitrary company-role rows remain policy intent rather than execution permissions.
 - [ ] Status remains `PUSHED_NOT_PUBLISHED`. MAIN must use the established signed-in visible Replit workspace and Replit Shell to prove clean workspace HEAD equals the exact remote commit, run applicable schema/restore/zero-destructive checks, publish once, and capture one complete durable receipt with deployment ID/status, live identity, health, authenticated smoke, database effects and rollback.
 - [ ] The occupied Chrome automation profile and failed sandbox launcher are `TOOL_BLOCKED`, not a product hold or Roberto decision. Use one bounded safe recovery without closing Roberto's browser or substituting an unproven isolated session. Roberto's existing publish instruction remains valid; do not request it again.
+
+## 120-build stabilization program — 2026-09-19
+
+- [x] Builds 001-005: freeze baseline truth, preserve/classify every worktree and divergent branch, identify the authoritative release route, map all S1-S3 risks, establish the program branch/ledger/templates/identity verifier, pass the complete pre-push gate, and push the exact Block 01 head.
+- [ ] Builds 006-010: triage and correct production dependency advisories, lock supply-chain provenance, run the full security regression, push Build 010, publish through Replit, and complete authenticated visible-Chrome smoke.
+- [ ] Preserve the cadence: push every five builds, publish every ten, never exceed ten unpublished builds, and run focused Navisworks smoke for every Native/installer-changing block.
+- [ ] Stop continuation only for a real failed test or production defect; correct it and repeat the affected gate under the existing authorization.

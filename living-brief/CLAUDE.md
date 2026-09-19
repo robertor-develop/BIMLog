@@ -793,3 +793,11 @@ capture to decision to report to audit trail.
 - AI should assist without surprising users with cost. Cheap text assist and expensive file reading
   are separate actions.
 - Platform should move toward structured data that supports decisions, not just stored documents.
+
+## Stabilization program execution contract — 2026-09-19
+
+- The active stabilization lineage is `codex/bimlog-stabilization-program-20260919`, based exactly on published source `07d024ef3de739abb436da58fe29797af5304b8a`.
+- Execute one bounded build at a time, push every five builds, and publish every ten builds through the established GitHub → Replit Shell → Replit Publish route. Replit Agents remain prohibited.
+- Run full authenticated visible-Chrome smoke after each publication and focused Navisworks smoke whenever a block changes Lens Next Native or installers.
+- Never accumulate more than ten unpublished builds. A real failed test or production defect must be fixed and rerun before continuation; a stale instruction, fixture setup defect, or tool inconvenience does not create a new approval gate.
+- The durable ledger, templates, baseline evidence, and exact identity verifier are under `evidence/stabilization-program-20260919/` and `scripts/Test-StabilizationProgramIdentity.ps1`.
