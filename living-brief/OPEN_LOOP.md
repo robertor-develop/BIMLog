@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Convention Builder live hook-order correction - 2026-09-18
+
+- [x] Reproduce the post-publication Convention route failure in authenticated production and identify React minified error `#310` in the exact live asset.
+- [x] Move the phase-guard effect above all loading/error returns and add a regression check that preserves hook ordering. No API, schema, database, permission, or customer-data mutation is involved.
+- [x] Preserve the eight-second application readiness and invalid-authority denial budgets while separately bounding Windows launch overhead and child-exit notification latency. Invalid authority must still deny within budget, expose no TCP/readiness, and exit naturally without forced cleanup.
+- [ ] Pass the complete clean-source pre-push and production-artifact gates, push the exact corrective commit, synchronize/build/publish once through Replit Shell, and repeat the authenticated full-platform route and console-error sweep.
+
 ## Dashboard mockup implementation - six blocks of five
 
 - [ ] Block 6 local verification: 24 intercepted-API Chrome scenarios and scoped governance/runtime/database-safety regressions pass; denied/error state and exact-390 overflow are corrected. Complete independent review, clean-source full build and production artifact, authenticated PMO/Finance/read-only roles, and post-publication end-to-end browser acceptance before closing.

@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Convention Builder live hook-order corrective release candidate - 2026-09-18
+
+- The authenticated post-publication platform sweep of source `c46df4ac5dc59911a8e31090f027bc6038cfda8a` rendered the public site, headquarters dashboard, company administration surfaces, financial workspaces, and every project-sidebar route, but exposed React minified error `#310` when the project Convention workspace transitioned from loading to resolved data.
+- The cause was one phase-guard `useEffect` declared below the component's loading/error early returns, which changed the number of hooks between renders. The guard now executes above every early return, preserving the same behavior without changing API, schema, database, authorization, or customer data. A structural regression check fails if that hook moves below the loading return again.
+- The clean production-artifact proof exposed two Windows-only event-reporting races. The application readiness budget remains eight seconds and is measured from the artifact's own sanitized transition telemetry, while Windows process launch plus readiness is separately bounded at twelve seconds. Invalid storage authority must still emit its denial marker within the original eight-second application budget, must never open TCP/readiness, and must exit naturally; only the Windows child-exit notification receives a separate bounded four-second grace.
+- Focused regression passes. The exact corrective diff still requires the complete clean-source pre-push/production-artifact gate, push, Replit Shell synchronization/build, one controlled republish, and a repeated authenticated live route/console sweep before this correction is accepted as production-complete.
+
 ## Dashboard mockup program - Block 6 local verification candidate - 2026-09-18
 
 - The Governance Policy dashboard now fails closed on initial authorization/read errors instead of exposing an editable starter policy, and exact-390 mobile containment no longer traps a 153px-wide horizontal overflow. The editor explicitly distinguishes stored approval/change/role-policy intent from execution permissions.

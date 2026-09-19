@@ -30891,6 +30891,9 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+        "artifacts/bimlog/src/pages/project/ConventionBuilder.hook-order.behavior.mjs",
+        "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
@@ -30899,7 +30902,7 @@
         "package.json",
         "scripts/check-living-brief.mjs"
       ],
-      "reviewedChangeSha256": "92ef0e374ec7e4e8e75d31735454a54b4fe095225cbd8e6f2bacfe2edd03d49b"
+      "reviewedChangeSha256": "4aa44aa9eb83ac1af77a3f6eee8a4962a0cff7eb5261b0c750063709b51fc812"
     }
   ]
 }

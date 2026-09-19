@@ -4639,6 +4639,18 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
   const [historyVersions, setHistoryVersions] = useState<ConventionVersionSnapshot[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
+  const { flowPhase } = ws;
+
+  // Keep this hook above every loading/error return. Moving it below those guards changes
+  // the number of hooks between the initial loading render and the resolved render, which
+  // makes React reject the Convention workspace with minified error #310.
+  useEffect(() => {
+    if (justSaved) return;
+    if (setupStatus !== "completed" && (flowPhase === "checkpoint" || flowPhase === "edit_foundation" || flowPhase === "re_evidence" || flowPhase === "changes_review")) {
+      setWs(s => ({ ...s, flowPhase: "setup_context", step: 0 }));
+    }
+  }, [setupStatus, flowPhase, justSaved]);
+
   if (isLoading) return <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }} />)}</div>;
   if (isError) return <div style={{ textAlign: "center", padding: "48px 24px" }}><div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{w("Failed to load convention data","Error al cargar la convención",lang)}</div><Button variant="outline" onClick={() => refetch()}>{w("Retry","Reintentar",lang)}</Button></div>;
 
@@ -4687,16 +4699,6 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
       });
     } catch { /* non-critical */ }
   }
-
-  const { flowPhase } = ws;
-
-  // ── HARD GUARD: non-completed projects cannot reach checkpoint/edit/re-evidence ──
-  useEffect(() => {
-    if (justSaved) return;
-    if (setupStatus !== "completed" && (flowPhase === "checkpoint" || flowPhase === "edit_foundation" || flowPhase === "re_evidence" || flowPhase === "changes_review")) {
-      setWs(s => ({ ...s, flowPhase: "setup_context", step: 0 }));
-    }
-  }, [setupStatus, flowPhase, justSaved]);
 
   // ── ADMIN-ONLY GUARD (Issue 3): non-admins see read-only summary ──────────
   if (!isAdmin) {

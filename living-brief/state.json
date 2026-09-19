@@ -2,10 +2,13 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "39e4bd4a4b09699cff7ada520ee72bfe761ec370e274f55b689be5e3160f6d85",
+  "bundleSha256": "477023622623d00ad806b7b913df4b69255dc04f01e6b758abafefe0e5be3838",
   "impact": {
     "baselineCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7",
     "changedPaths": [
+      "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+      "artifacts/bimlog/src/pages/project/ConventionBuilder.hook-order.behavior.mjs",
+      "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
       "living-brief/CLAUDE.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
@@ -17,6 +20,7 @@
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -36,8 +40,8 @@
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "58287bdcb22f65586cfa90daf9074c74881a1eabd7a58997fa514d54da98ec9a",
-      "sourceChangedAt": "2026-09-18T23:30:00.000Z",
+      "sha256": "8194779b2f6940bf8e9a125b2579e96d4cd9d2949bf49d48efd4448f26726921",
+      "sourceChangedAt": "2026-09-19T02:36:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7",
       "semanticReviewedThroughCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7",
@@ -120,8 +124,8 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "9577a2e869e70c26ad718e47b72395eb7c90b88c1332758224001834b393102b",
-      "sourceChangedAt": "2026-09-18T23:30:00.000Z",
+      "sha256": "d047c78c0383e40012166d676fb822169c4ccfbbda1d7abbbdb9d91f7b0d1ef8",
+      "sourceChangedAt": "2026-09-19T02:36:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7",
       "semanticReviewedThroughCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7",
@@ -132,8 +136,8 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "4a9d6420d6e7bc13ef60c3a649ac227949887cb0b9896a325d2f66129afce1f6",
-      "sourceChangedAt": "2026-09-18T23:30:00.000Z",
+      "sha256": "5c262eefca17cd3219b5dcf79ed0a37a75e0cf2923d6bd503c73ef91c6cc90a8",
+      "sourceChangedAt": "2026-09-19T02:36:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7",
       "semanticReviewedThroughCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7",

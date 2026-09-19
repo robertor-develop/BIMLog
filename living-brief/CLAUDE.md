@@ -33,6 +33,13 @@ typecheck, build output, or a focused runtime test before moving to the next cha
 Every focused directive must begin with this operating sentence:
 `Stop any unrelated prior work. Verify the real repository and governing documents before editing, then proceed directly with the authorized scope.`
 
+For live browser acceptance, a route rendering visible text is not sufficient when the browser
+console reports a runtime exception. Exercise asynchronous loading-to-resolved transitions for
+each changed workspace, inspect console errors, and fail the release on React hook-order errors.
+Within a React component, every hook must execute before any conditional loading, error,
+permission, or empty-state return; preserve this invariant with a focused regression check when
+a defect is found.
+
 "Stop unrelated work" does not terminate the authorized task. A task with authorized
 implementation must not create a plan and wait: verify first, report the baseline briefly,
 and continue. A read-only request must remain read-only. An implementation request must

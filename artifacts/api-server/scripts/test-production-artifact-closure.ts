@@ -420,6 +420,7 @@ let invalidStorageReadinessReached = false;
 let invalidStorageTcpReached = false;
 let invalidStorageTimedOut = false;
 let invalidStorageGuardTimedOut = false;
+let invalidStorageDenialTimedOut = false;
 let invalidStorageCleanupRequired = false;
 const invalidStorageProbeTimingsMs: number[] = [];
 const invalidStorageExit = new Promise<{
@@ -453,12 +454,39 @@ try {
   }
   invalidStorageGuardTimedOut =
     !invalidStorageStderr.includes("BIMLOG_ARTIFACT_GUARD_READY");
+  const invalidAuthorityMarkerSeen = () =>
+    `${invalidStorageStdout}\n${invalidStorageStderr}`.includes(
+      "FEEDBACK_STORAGE_AUTHORITY_INVALID",
+    );
   const denialBudgetMs = process.platform === "win32" ? 8_000 : 6_000;
-  const deadline = performance.now() + denialBudgetMs;
+  const denialDeadline = performance.now() + denialBudgetMs;
   while (
     invalidStorageChild.exitCode === null &&
     !invalidStorageGuardTimedOut &&
-    performance.now() < deadline
+    !invalidAuthorityMarkerSeen() &&
+    performance.now() < denialDeadline
+  ) {
+    const response = await fetch(
+      `http://127.0.0.1:${negativePort}/api/v1/healthz`,
+    ).catch(() => null);
+    if (response) {
+      invalidStorageTcpReached = true;
+      if (response.status === 200) invalidStorageReadinessReached = true;
+    }
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+  invalidStorageDenialTimedOut = !invalidAuthorityMarkerSeen();
+
+  // Windows can report the child-process exit after stderr has already proven
+  // fail-closed denial. Keep denial inside its original budget, then allow only
+  // a short bounded exit-notification grace while continuing to forbid TCP.
+  const exitGraceMs = process.platform === "win32" ? 4_000 : 2_000;
+  const exitGraceDeadline = performance.now() + exitGraceMs;
+  while (
+    invalidStorageChild.exitCode === null &&
+    !invalidStorageGuardTimedOut &&
+    !invalidStorageDenialTimedOut &&
+    performance.now() < exitGraceDeadline
   ) {
     const response = await fetch(
       `http://127.0.0.1:${negativePort}/api/v1/healthz`,
@@ -485,6 +513,7 @@ if (invalidStorageTimedOut) {
   console.error("Invalid authority timeout diagnostics", {
     elapsedMs: invalidStorageElapsedMs,
     markerSeen: invalidStorageOutput.includes("FEEDBACK_STORAGE_AUTHORITY_INVALID"),
+    denialTimedOut: invalidStorageDenialTimedOut,
     stderrBytes: invalidStorageStderr.length,
     stdoutBytes: invalidStorageStdout.length,
     tcpReached: invalidStorageTcpReached,
@@ -494,6 +523,11 @@ assert.equal(
   invalidStorageGuardTimedOut,
   false,
   "Invalid authority child did not enter the guarded artifact runtime.",
+);
+assert.equal(
+  invalidStorageDenialTimedOut,
+  false,
+  "Invalid authority denial was not emitted within the bounded application budget.",
 );
 assert.equal(
   invalidStorageTimedOut,
@@ -576,13 +610,21 @@ try {
     "/api/v1/healthz",
     (status) => status === 200,
   );
-  const readyMs = performance.now() - startedAt;
+  const wallReadyMs = performance.now() - startedAt;
   const readyBudgetMs = process.platform === "win32" ? 8_000 : 6_000;
+  const readyTransition = stdout.match(/phase=ready_transition elapsed_ms=(\d+)/);
+  assert(readyTransition, "Production artifact did not emit measured ready-transition evidence.");
+  const applicationReadyMs = Number(readyTransition[1]);
+  const processLaunchBudgetMs = process.platform === "win32" ? 12_000 : 8_000;
   assert.equal(apiStatus, 200);
   assert.equal(readyStatus, 200);
   assert(
-    readyMs < readyBudgetMs,
-    `Production artifact readiness ${readyMs.toFixed(1)}ms exceeded ${readyBudgetMs}ms on ${process.platform}. Startup output: ${stdout.trim().replaceAll(proofDatabaseUrl, "[proof-database]")}`,
+    applicationReadyMs < readyBudgetMs,
+    `Production artifact application readiness ${applicationReadyMs}ms exceeded ${readyBudgetMs}ms on ${process.platform}. Startup output: ${stdout.trim().replaceAll(proofDatabaseUrl, "[proof-database]")}`,
+  );
+  assert(
+    wallReadyMs < processLaunchBudgetMs,
+    `Production artifact process launch plus readiness ${wallReadyMs.toFixed(1)}ms exceeded ${processLaunchBudgetMs}ms on ${process.platform}. Startup output: ${stdout.trim().replaceAll(proofDatabaseUrl, "[proof-database]")}`,
   );
   assert.match(stdout, /phase=bootstrap_bound/);
   assert.match(stdout, /phase=app_import_begin/);
@@ -680,7 +722,8 @@ try {
         stdout: invalidStorageStdout,
         stderr: invalidStorageStderr,
       },
-      readyMs: Number(readyMs.toFixed(1)),
+      readyMs: applicationReadyMs,
+      wallReadyMs: Number(wallReadyMs.toFixed(1)),
       platform: `${os.platform()}-${os.arch()}`,
     }),
   );
