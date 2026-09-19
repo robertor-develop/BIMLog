@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 34,
+    "completedBuilds": 35,
     "totalBuilds": 120,
-    "remainingBuilds": 86,
-    "currentUnpublishedBuilds": 4,
-    "nextBuild": 35,
-    "nextPushAfterBuild": 35,
+    "remainingBuilds": 85,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 36,
+    "nextPushAfterBuild": 40,
     "nextPublicationAfterBuild": 40,
     "blocker": null
   },
@@ -116,14 +116,15 @@
     {
       "block": 7,
       "buildRange": "031-035",
-      "status": "IN_PROGRESS",
+      "status": "PASS_PENDING_PUSH",
       "publicationRequired": false,
       "smoke": "Test-harness and release-gate reliability only; push at Build 035, no publication or Navisworks smoke.",
       "builds": [
         { "build": 31, "status": "PASS", "evidence": "BUILD_031_BUILD_TERMINATION_RELIABILITY.md" },
         { "build": 32, "status": "PASS", "evidence": "BUILD_032_DETERMINISTIC_PROOF_ROOTS.md" },
         { "build": 33, "status": "PASS", "evidence": "BUILD_033_WORKFLOW_DATABASE_FIXTURE.md" },
-        { "build": 34, "status": "PASS", "evidence": "BUILD_034_SECURITY_AUDIT_POLICY.md" }
+        { "build": 34, "status": "PASS", "evidence": "BUILD_034_SECURITY_AUDIT_POLICY.md" },
+        { "build": 35, "status": "PASS_LOCAL_RELEASE_GATE", "evidence": "BUILD_035_LOCAL_RELEASE_GATE.md" }
       ]
     }
   ]

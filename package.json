@@ -14,6 +14,8 @@
     "audit:platform": "node scripts/platform-audit.mjs",
     "audit:platform:blocking": "node scripts/platform-audit.mjs --enforce",
     "test:platform-audit-policy": "node scripts/test-platform-audit-policy.mjs",
+    "test:local-release-gate": "node scripts/test-local-release-gate.mjs",
+    "gate:local-release": "node scripts/local-release-gate.mjs",
     "audit:production": "pnpm audit --prod --audit-level low",
     "check:dependency-provenance": "node scripts/check-dependency-provenance.mjs",
     "check:release-lineage": "node scripts/check-release-lineage.mjs",

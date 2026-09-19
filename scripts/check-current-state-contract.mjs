@@ -22,7 +22,7 @@ function validate(snapshot) {
   assert(ledger.status.remainingBuilds === 120 - ledger.status.completedBuilds, "Build ledger remaining count must reconcile");
   assert(ledger.status.currentUnpublishedBuilds === ledger.status.completedBuilds - 30, "Block 07 unpublished count must reconcile from the Build 030 publication");
   assert(ledger.status.nextBuild === ledger.status.completedBuilds + 1, "Build ledger must advance exactly one build");
-  assert(ledger.status.nextPushAfterBuild === 35, "Build 035 must remain the next push boundary");
+  assert(ledger.status.nextPushAfterBuild === (ledger.status.completedBuilds < 35 ? 35 : 40), "Build ledger next-push cadence must reconcile");
   assert(ledger.status.nextPublicationAfterBuild === 40, "Build 040 must remain the next publication milestone");
   for (const document of [status, platform, plugin, quality]) assert(document.includes(release.label), "current authority documents must contain the exact release label");
   assert(status.includes("Replit publication receipt `e89dc3b4`"), "STATUS must retain the exact current publication receipt");
