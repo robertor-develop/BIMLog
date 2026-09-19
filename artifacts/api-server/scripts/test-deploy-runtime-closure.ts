@@ -536,6 +536,9 @@ const buildSource = await readFile(new URL("../build.ts", import.meta.url), "utf
 assert.match(buildSource, /"uuid\|\^8\.3\.0\|11\.1\.1"/);
 assert.match(buildSource, /"uuid\|\^9\.0\.0\|11\.1\.1"/);
 assert.match(buildSource, /"uuid\|\^9\.0\.1\|11\.1\.1"/);
+assert.match(buildSource, /const packageNameFromLockKey = \(lockKey: string\)/);
+assert.match(buildSource, /lockKey\.indexOf\("@", lockKey\.indexOf\("\/"\) \+ 1\)/);
+assert.doesNotMatch(buildSource, /issuer\.lockKey\.lastIndexOf\("@"\)/);
 assert.match(buildSource, /readYamlScalar\(overrides, 2, `\$\{issuerName\}>\$\{packageName\}`\) === version/);
 results.push({ label: "bounded-security-override-contract", status: "PASS" });
 

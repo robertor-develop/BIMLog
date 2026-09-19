@@ -313,11 +313,16 @@ async function assembleRuntimeFromInstalledGraph(
     "uuid|^9.0.0|11.1.1",
     "uuid|^9.0.1|11.1.1",
   ]);
+  const packageNameFromLockKey = (lockKey: string) => {
+    const separator = lockKey.startsWith("@")
+      ? lockKey.indexOf("@", lockKey.indexOf("/") + 1)
+      : lockKey.indexOf("@");
+    return separator > 0 ? lockKey.slice(0, separator) : lockKey;
+  };
   const hasApprovedSecurityOverride = (packageName: string, declaredSpec: string, version: string, issuer: IssuerBinding) => {
     if (!approvedSecurityOverrideContracts.has(`${packageName}|${declaredSpec}|${version}`)) return false;
     if (issuer.type !== "package") return false;
-    const separator = issuer.lockKey.lastIndexOf("@");
-    const issuerName = separator > 0 ? issuer.lockKey.slice(0, separator) : issuer.lockKey;
+    const issuerName = packageNameFromLockKey(issuer.lockKey);
     const overrides = findYamlBlock(lockLines, 0, "overrides");
     return overrides !== null && readYamlScalar(overrides, 2, `${issuerName}>${packageName}`) === version;
   };
