@@ -1,5 +1,11 @@
 # Database publication safety gate
 
+## Current verified publication state — 2026-09-19
+
+Build 020 synchronized exact reviewed source `be902808b59c264d31480f5d76424f8fdaff5cbe` through Replit Shell and ran the read-only publication database operator before Publish. Development and production matched exactly, `schemaAction=NONE`, `publishable=true`, and `developmentDataCopy=OFF_REQUIRED`. Replit receipt `e89dc3b4` passed Security, Build, Bundle, and Promote. Production rows and schema objects were unchanged.
+
+This is the proven BIMLog path: exact GitHub `master` source, clean Replit Shell synchronization, source attestation, read-only development/production correspondence, no destructive SQL, development-data copy off, one controlled Publish, then live identity, health/readiness, and authenticated Chrome verification. Replit Agents are prohibited.
+
 ## Safety decision
 
 **Status: Roberto's September 17 rule is exact development/production schema
@@ -38,7 +44,7 @@ duplicate declarations for the 33 stale-source findings.
 The exact mechanism that left Replit stale is not independently verified. The
 evidence is consistent with a workspace or deployment snapshot that was never
 advanced to authoritative `master`, while the remote default remained `main`.
-Publishing is blocked until the source chain below passes.
+At the time of that incident, publishing was blocked until the source chain below passed. Build 020 later proved that chain and published successfully; future publications must repeat it against their own exact candidate.
 
 ## Non-destructive Replit source repair
 

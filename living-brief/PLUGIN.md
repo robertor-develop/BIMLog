@@ -1,5 +1,12 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## Current supported product and release boundary — 2026-09-19
+
+- **Lens Next is the sole supported BIMLog Lens product.** Original/Legacy Lens is preserved only as historical migration evidence and must not be presented, installed, loaded, or maintained as a parallel product.
+- Current accepted Platform compatibility is `v1.05.N18-P33` / `1.5.18.33`. The Build 020 Platform publication changed no Native or installer source, so the existing accepted Native packages remain unchanged pending the dedicated Native reconciliation milestone.
+- Platform publication, Native package build, Autodesk installation, and real Navisworks 2021/2025 field acceptance remain distinct states. A web release never implies an Autodesk installation or Ruben field acceptance.
+- Historical sections below describe the version and acceptance state at their named checkpoint; they do not override this current supported-product contract.
+
 ## Lens Next FI-002 model-save continuity candidate — 2026-09-18
 
 - Ruben's exact 409 text, "The BIMLog navigation identity does not match the active record," originates in the native `AutodeskVisualStateAdapter` navigation guard. The previous fingerprint included NWF/NWD file size and modified time, so a normal save could change model identity without changing the named model. This candidate uses a stable, normalized full-path fingerprint for new captures in both 2021 and 2025 adapters.

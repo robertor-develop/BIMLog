@@ -65,6 +65,13 @@ It changes only when the code structure or curated architectural facts change.
 ${bullets(catalog.documents.map((document) => `living-brief/${document.file}`))}
 - Document and catalog SHA-256 values use canonical UTF-8 text with LF line endings so Windows and Linux checkouts verify identically.
 
+## Current release and provider contract
+- Current accepted Platform release: \`v1.05.N18-P33\`; Build 020 source \`be902808b59c264d31480f5d76424f8fdaff5cbe\`; Replit publication receipt \`e89dc3b4\`.
+- GitHub \`master\` is the product source authority. Replit is the established BIMLog publication provider; synchronize exact reviewed source through the signed-in Replit Shell, never Replit Agents.
+- Publication requires the read-only database operator to prove exact development/production schema correspondence, no destructive action, development-data copy off, and a clean exact source. Build 020 returned \`schemaAction=NONE\` and changed no production row or schema object.
+- Public \`/api/v1/healthz\` is both health and application-readiness evidence because the startup bootstrap holds that route at HTTP 503 until the real application barrier completes.
+- Lens Next is the sole supported Lens product. Original/Legacy Lens exists only as preserved historical migration input and must not appear as a parallel customer-facing product or installed loader.
+
 ## Critical Database Facts — Read Before Every Session
 - PROD_DATABASE_URL = Neon production database. This is what the running app uses for ALL reads and writes at runtime. This is the only real database.
 - DATABASE_URL = Replit Helium development database. It is used ONLY by guarded drizzle-kit development-schema synchronization and never at runtime. Its structural state can influence Replit's generated production migration at Publish.
