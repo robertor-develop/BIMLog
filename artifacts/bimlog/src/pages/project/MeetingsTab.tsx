@@ -3802,8 +3802,8 @@ export function MeetingsTab({
                               style={{ marginRight: 4 }}
                             />
                             {t(
-                              "Open Original Lens Viewpoint",
-                              "Abrir punto de vista Lens original",
+                              "Open Lens Next Working View",
+                              "Abrir Vista de trabajo de Lens Next",
                             )}
                           </button>
                         </div>
@@ -6266,8 +6266,8 @@ export function MeetingsTab({
                   >
                     <ExternalLink size={12} style={{ marginRight: 4 }} />
                     {t(
-                      "Open Original Lens Viewpoint",
-                      "Abrir punto de vista Lens original",
+                      "Open Lens Next Working View",
+                      "Abrir Vista de trabajo de Lens Next",
                     )}
                   </button>
                   {!editingMeeting && (

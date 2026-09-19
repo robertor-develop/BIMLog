@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "supportedProduct": "Lens Next",
+  "supportedProductCount": 1,
+  "legacyProduct": "Original/Legacy Lens",
+  "legacyStatus": "migration-only",
+  "customerFacingLegacyProduct": false,
+  "parallelInstallationSupported": false,
+  "legacyLoaderAllowedInAcceptedSetup": false,
+  "currentPlatformVersion": "v1.05.N18-P33",
+  "nativeAndInstallerState": "unchanged-by-build-024",
+  "fieldAcceptance": "separate-required-gate"
+}

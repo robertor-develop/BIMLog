@@ -53,7 +53,7 @@ const PROVIDERS: readonly ProviderPolicy[] = [
   },
   {
     key: "navisworks_lens",
-    label: { en: "BIMLog Lens for Navisworks", es: "BIMLog Lens para Navisworks" },
+    label: { en: "BIMLog Lens Next for Navisworks", es: "BIMLog Lens Next para Navisworks" },
     description: {
       en: "First-party Navisworks coordination workflow.",
       es: "Flujo de coordinación propio para Navisworks.",

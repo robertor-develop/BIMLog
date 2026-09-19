@@ -1123,8 +1123,8 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
           <FileText size={40} color="#D1D5DB" style={{ display: "block", margin: "0 auto 12px" }} />
           <div style={{ fontSize: 13, maxWidth: 460, margin: "0 auto" }}>
             {t(
-              "No Lens Viewpoints synced yet. Use BIMLog Lens plugin in Navisworks to capture and sync viewpoints.",
-              "Aun no hay Vistas Lens sincronizadas. Usa el plugin BIMLog Lens en Navisworks para capturar y sincronizar vistas."
+              "No Lens Next viewpoints are synced yet. Use Lens Next in Navisworks to capture and synchronize viewpoints.",
+              "Aún no hay vistas de Lens Next sincronizadas. Usa Lens Next en Navisworks para capturar y sincronizar vistas."
             )}
           </div>
         </div>
