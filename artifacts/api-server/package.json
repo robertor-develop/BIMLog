@@ -4,6 +4,7 @@
   "private": true,
   "type": "module",
   "files": [
+    "dist/start.cjs",
     "dist/index.cjs",
     "dist/index.meta.json"
   ],

@@ -9,9 +9,11 @@ import path from "node:path";
 import { performance } from "node:perf_hooks";
 
 const runtimeRoot = path.resolve("dist/runtime");
-const bundle = path.join(runtimeRoot, "dist/index.cjs");
+const bundle = path.join(runtimeRoot, "dist/start.cjs");
+const applicationBundle = path.join(runtimeRoot, "dist/index.cjs");
 const metafile = path.join(runtimeRoot, "dist/index.meta.json");
-assert(fs.existsSync(bundle), "Production artifact bundle is missing.");
+assert(fs.existsSync(bundle), "Production artifact startup entry is missing.");
+assert(fs.existsSync(applicationBundle), "Production artifact bundle is missing.");
 assert(fs.existsSync(metafile), "Production artifact metafile is missing.");
 
 const deploymentSource = JSON.parse(

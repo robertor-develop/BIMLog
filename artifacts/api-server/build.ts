@@ -624,6 +624,7 @@ async function assembleRuntimeFromInstalledGraph(
   await onPhaseChange?.("assembly-copy");
   await mkdir(runtimeDir, { recursive: false });
   await mkdir(path.join(runtimeDir, "dist"), { recursive: true });
+  await copyAbortableFile(path.join(apiRoot, "dist", "start.cjs"), path.join(runtimeDir, "dist", "start.cjs"));
   await copyAbortableFile(path.join(apiRoot, "dist", "index.cjs"), path.join(runtimeDir, "dist", "index.cjs"));
   await copyAbortableFile(path.join(apiRoot, "dist", "index.meta.json"), path.join(runtimeDir, "dist", "index.meta.json"));
   const runtimeLivingBrief = path.join(runtimeDir, "living-brief");
@@ -645,7 +646,7 @@ async function assembleRuntimeFromInstalledGraph(
   }
   await writeFile(
     path.join(runtimeDir, "package.json"),
-    `${JSON.stringify({ name: sourceManifest.name, version: sourceManifest.version, type: sourceManifest.type, main: "dist/index.cjs", dependencies: runtimeDependencies }, null, 2)}\n`,
+    `${JSON.stringify({ name: sourceManifest.name, version: sourceManifest.version, type: sourceManifest.type, main: "dist/start.cjs", dependencies: runtimeDependencies }, null, 2)}\n`,
   );
   for (const packageName of requiredPackages) {
     const packageSource = await resolveInstalledPackage(packageName);
@@ -725,6 +726,9 @@ export async function deployRuntimeClosure(
     if (runtimePackage.name !== "@workspace/api-server") {
       throw new Error("Runtime package.json must identify @workspace/api-server.");
     }
+    if (runtimePackage.main !== "dist/start.cjs") {
+      throw new Error("Runtime package.json must use the fail-fast startup entry.");
+    }
     const dependencies = Object.keys(runtimePackage.dependencies ?? {}).sort();
     if (dependencies.length === 0) {
       throw new Error("Runtime package.json must contain nonzero production dependencies.");
@@ -738,6 +742,7 @@ export async function deployRuntimeClosure(
 
     const nodeModules = path.join(root, "node_modules");
     await assertRegularDirectory(nodeModules, "Runtime node_modules");
+    await assertRegularFile(path.join(root, "dist", "start.cjs"), "Runtime startup entry");
     await assertRegularFile(path.join(root, "dist", "index.cjs"), "Runtime server bundle");
     await assertRegularFile(path.join(root, "dist", "index.meta.json"), "Runtime server metafile");
     const deploymentSourcePath = path.join(root, "deployment-source.json");
@@ -1001,6 +1006,10 @@ async function buildAll() {
     metafile: true,
     logLevel: "info",
   });
+  await copyFile(
+    path.resolve(__dirname, "src", "startup-entry.cjs"),
+    path.resolve(distDir, "start.cjs"),
+  );
   await writeFile(metafilePath, JSON.stringify(result.metafile, null, 2));
 
   const externalSpecifiers = [
