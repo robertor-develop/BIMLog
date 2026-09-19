@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const here = path.dirname(fileURLToPath(import.meta.url));
+const service = fs.readFileSync(path.join(here, "job-operations-service.ts"), "utf8");
+const intake = fs.readFileSync(path.join(here, "job-intake-service.ts"), "utf8");
+assert.match(service, /const financialAuthority = \{/);
+assert.match(service, /mode: "canonical-references"/);
+assert.match(service, /mutableCopiesAllowed: false/);
+for (const field of ["contractVersionId", "apuPlanVersion", "budgetSnapshotLineId", "projectCostNodeId", "snapshotFingerprint"]) assert.match(service, new RegExp(field));
+assert.match(service, /financialAuthority, canManage/);
+assert.match(intake, /UPDATE job_activation_work_items SET contract_id=\$2,contract_version_id=\$3/);
+assert.match(service, /job_activation_contract_item_baselines/);
+assert.match(service, /liveBudgetSnapshot/);
+assert.match(service, /job_activation_time_entries/);
+console.log("Build 058 canonical financial-reference and no-duplicate-authority contract: PASS");
