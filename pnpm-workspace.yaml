@@ -44,6 +44,9 @@ onlyBuiltDependencies:
 overrides:
   '@esbuild-kit/esm-loader': npm:tsx@^4.21.0
   axios: 1.18.1
+  body-parser: 2.3.0
+  'brace-expansion@1': 1.1.18
+  'brace-expansion@2': 2.1.4
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-arm64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-x64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-freebsd-ia32': '-'
@@ -97,6 +100,9 @@ overrides:
   lightningcss>lightningcss-linux-arm64-musl: '-'
   lightningcss>lightningcss-linux-x64-musl: '-'
   lightningcss>lightningcss-win32-arm64-msvc: '-'
+  lodash: 4.18.1
+  path-to-regexp: 8.4.0
+  qs: 6.16.0
   rollup>@rollup/rollup-android-arm-eabi: '-'
   rollup>@rollup/rollup-android-arm64: '-'
   rollup>@rollup/rollup-darwin-arm64: '-'

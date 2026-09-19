@@ -34,6 +34,6 @@
     "typescript": "~5.9.2"
   },
   "dependencies": {
-    "adm-zip": "^0.5.16"
+    "adm-zip": "0.6.1"
   }
 }

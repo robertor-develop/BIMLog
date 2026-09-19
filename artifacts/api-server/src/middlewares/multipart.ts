@@ -27,7 +27,7 @@ export function createMemoryUpload(profile: MultipartProfile) {
   const fields = profile.fields ?? 0;
   const parts = profile.parts ?? files + fields;
   const limits: NonNullable<multer.Options["limits"]> & { fieldNestingDepth: number } = {
-    // Multer 2.2.0 supports this option; @types/multer 2.1.0 has not yet added it.
+    // Multer 2.3.0 supports this option; @types/multer 2.1.0 has not yet added it.
     fieldNestingDepth: MULTIPART_LIMITS.fieldNestingDepth,
     fieldNameSize: MULTIPART_LIMITS.fieldNameSize,
     headerPairs: MULTIPART_LIMITS.headerPairs,
@@ -35,11 +35,10 @@ export function createMemoryUpload(profile: MultipartProfile) {
     files,
     // Busboy's parts limit event also fires at the configured count.
     parts: parts + 1,
-    // Multer/Busboy emits a limit event when the byte count reaches the
-    // configured value; add one byte so the declared BIMLog maximum passes.
+    // Busboy reports truncation when the configured count is reached. Permit
+    // one parser byte beyond the inclusive BIMLog maximum, then enforce the
+    // exact governed limit after parsing below.
     fileSize: profile.fileSize + 1,
-    // Busboy marks a text field truncated when its byte count reaches the
-    // configured value, so add one byte to keep the BIMLog limit inclusive.
     fieldSize: (profile.fieldSize ?? MULTIPART_LIMITS.defaultFieldSize) + 1,
   };
   return multer({
@@ -165,5 +164,30 @@ export function boundedMultipart(parser: RequestHandler): RequestHandler {
 }
 
 export function singleFileUpload(profile: MultipartProfile, fieldName = "file"): RequestHandler {
-  return boundedMultipart(createMemoryUpload(profile).single(fieldName));
+  const parse = boundedMultipart(createMemoryUpload(profile).single(fieldName));
+  const fieldSize = profile.fieldSize ?? MULTIPART_LIMITS.defaultFieldSize;
+  return (req, res, next) => parse(req, res, (error?: unknown) => {
+    if (error) { next(error); return; }
+    if (req.file && req.file.size > profile.fileSize) {
+      res.status(413).json({
+        code: "MULTIPART_FILE_TOO_LARGE",
+        error: {
+          en: "The uploaded file exceeds the allowed size.",
+          es: "El archivo cargado supera el tamaño permitido.",
+        },
+      });
+      return;
+    }
+    if (Object.values(req.body ?? {}).some(value => Buffer.byteLength(String(value)) > fieldSize)) {
+      res.status(413).json({
+        code: "MULTIPART_FIELD_TOO_LARGE",
+        error: {
+          en: "A form field exceeds the allowed size.",
+          es: "Un campo del formulario supera el tamaño permitido.",
+        },
+      });
+      return;
+    }
+    next();
+  });
 }
