@@ -186,6 +186,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.ts
 - artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts
 - artifacts/api-server/src/lib/block10-controlled-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block11-financial-acceptance.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
@@ -327,6 +328,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/feedback-telegram-worker.behavior.ts
 - artifacts/api-server/src/lib/feedback-telegram-worker.ts
 - artifacts/api-server/src/lib/ffmpeg-capability.ts
+- artifacts/api-server/src/lib/financial-apu-allocation.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-browser.behavior.ts
 - artifacts/api-server/src/lib/financial-budget-contract.ts
 - artifacts/api-server/src/lib/financial-budget-db.behavior.ts
@@ -356,6 +358,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/financial-control-migration.ts
 - artifacts/api-server/src/lib/financial-control-service.ts
 - artifacts/api-server/src/lib/financial-control.behavior.ts
+- artifacts/api-server/src/lib/financial-correctness-contract.ts
+- artifacts/api-server/src/lib/financial-correctness-golden-vectors.behavior.ts
+- artifacts/api-server/src/lib/financial-revision-ledger.behavior.ts
+- artifacts/api-server/src/lib/financial-revision-ledger.ts
+- artifacts/api-server/src/lib/financial-statement-mapping.behavior.ts
 - artifacts/api-server/src/lib/follow-up-accountability.behavior.ts
 - artifacts/api-server/src/lib/follow-up-accountability.ts
 - artifacts/api-server/src/lib/for-record-issuance.behavior.ts

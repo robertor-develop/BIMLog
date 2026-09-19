@@ -31922,7 +31922,7 @@
     },
     {
       "taskId": "bimlog-stabilization-block11-financial-correctness-20260919",
-      "reviewedThroughCommit": "500aae8c170580002267d5ba751c152a8e33dbf1",
+      "reviewedThroughCommit": "fef7a208bbc9ad6af1e3ba6e5fdc21815a223157",
       "reviewedAt": "2026-09-19T20:20:00.000Z",
       "status": "candidate",
       "authorities": [
@@ -31983,14 +31983,11 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/package.json",
-        "artifacts/api-server/src/lib/financial-revision-ledger.ts",
-        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "scripts/check-current-state-contract.mjs"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d016bcd12f7c2482aff9714e1e2e48e175f8f4fb276c52d7c75e002935785ab7"
+      "reviewedChangeSha256": "9838ab48ad7f5417c7019b1bfe41d6d1acc64bd432396733240ef388e9e8127b"
     }
   ]
 }
