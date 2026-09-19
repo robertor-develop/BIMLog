@@ -40,6 +40,8 @@
     "test:migration-preview-receipt": "node scripts/test-migration-preview-receipt.mjs",
     "rehearse:database-restore": "node scripts/database-restore-rehearsal.mjs",
     "test:database-restore-rehearsal": "node scripts/test-database-restore-rehearsal.mjs",
+    "publication:database-receipt": "node scripts/publication-database-operator.mjs",
+    "test:publication-database-operator": "node scripts/test-publication-database-operator.mjs",
     "prepare:artifact-proof-fixture": "node scripts/prepare-artifact-proof-fixture.mjs --prepare",
     "check:artifact-proof-fixture": "node scripts/prepare-artifact-proof-fixture.mjs --check",
     "test:artifact-proof-fixture-guard": "node scripts/test-artifact-proof-fixture-guard.mjs",

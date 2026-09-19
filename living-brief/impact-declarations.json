@@ -31338,6 +31338,81 @@
         "scripts/test-release-identity.mjs"
       ],
       "reviewedChangeSha256": "ff0f7e76b2b27f2903f049d1d24be5c107fb829d941dd65354a3cfbcb96fb411"
+    },
+    {
+      "taskId": "bimlog-stabilization-block04-database-safety-20260919",
+      "reviewedThroughCommit": "2149302a6f68e24c14d507133c3df1cafec8f55c",
+      "reviewedAt": "2026-09-19T11:31:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Database release evidence changes no ecosystem ownership or product authority."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Records the exact read-only schema, restore, and Replit Shell publication operating procedure."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds repeatable restore, restart, exact-artifact, and publication database acceptance evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product strategy, roadmap, or customer workflow changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Application routes and product schema are unchanged; only release and test operators changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, installer, or plugin runtime source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering, document output, or design-system behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 016–019 as proven and Build 020 as the pending publication milestone."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Replaces the broad Block 04 item with the exact remaining push, publication, and smoke actions."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit records remain append-only and unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/BUILD_020_PUBLICATION_DATABASE_OPERATOR.md",
+        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/publication-database-operator.mjs",
+        "scripts/test-publication-database-operator.mjs"
+      ],
+      "reviewedChangeSha256": "9a6a8c901d7a930c50c14d756d64a2b298638859b78d3bfba7f4f44f086ad9c5"
     }
   ]
 }

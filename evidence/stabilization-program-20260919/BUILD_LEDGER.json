@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 15,
+    "completedBuilds": 20,
     "totalBuilds": 120,
-    "remainingBuilds": 105,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 16,
-    "nextPushAfterBuild": 20,
-    "nextPublicationAfterBuild": 20,
+    "remainingBuilds": 100,
+    "currentUnpublishedBuilds": 10,
+    "nextBuild": 21,
+    "nextPushAfterBuild": 25,
+    "nextPublicationAfterBuild": 30,
     "blocker": null
   },
   "blocks": [
@@ -69,6 +69,20 @@
         { "build": 13, "status": "PASS", "evidence": "BLOCK_03_BUILDS_011_015.md" },
         { "build": 14, "status": "PASS", "evidence": "BLOCK_03_BUILDS_011_015.md" },
         { "build": 15, "status": "PASS_PENDING_FINAL_GATE_AND_PUSH", "evidence": "BLOCK_03_BUILDS_011_015.md" }
+      ]
+    },
+    {
+      "block": 4,
+      "buildRange": "016-020",
+      "status": "PASS_PENDING_FINAL_GATE_PUSH_PUBLICATION_AND_SMOKE",
+      "publicationRequired": true,
+      "smoke": "Full authenticated visible-Chrome smoke and restart/session restoration required; Navisworks smoke is not required because Native and installers are unchanged.",
+      "builds": [
+        { "build": 16, "status": "PASS", "evidence": "BUILD_016_SCHEMA_INVENTORY_RECEIPT.md" },
+        { "build": 17, "status": "PASS", "evidence": "BUILD_017_WINDOWS_FIXTURE_REPEATABILITY.md" },
+        { "build": 18, "status": "PASS", "evidence": "BUILD_018_MIGRATION_PREVIEW.md" },
+        { "build": 19, "status": "PASS", "evidence": "BUILD_019_BACKUP_RESTORE_RESTART.md" },
+        { "build": 20, "status": "PASS_PENDING_FINAL_GATE_PUSH_PUBLICATION_AND_SMOKE", "evidence": "BUILD_020_PUBLICATION_DATABASE_OPERATOR.md" }
       ]
     }
   ]
