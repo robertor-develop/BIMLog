@@ -801,3 +801,4 @@ capture to decision to report to audit trail.
 - Run full authenticated visible-Chrome smoke after each publication and focused Navisworks smoke whenever a block changes Lens Next Native or installers.
 - Never accumulate more than ten unpublished builds. A real failed test or production defect must be fixed and rerun before continuation; a stale instruction, fixture setup defect, or tool inconvenience does not create a new approval gate.
 - The durable ledger, templates, baseline evidence, and exact identity verifier are under `evidence/stabilization-program-20260919/` and `scripts/Test-StabilizationProgramIdentity.ps1`.
+- The packaged API starts through `dist/start.cjs`, which verifies a durable-filesystem authority manifest hash before loading the large application bundle. The authoritative storage adapter still performs the complete validation; the lightweight entry only guarantees fast fail-closed rejection without binding a TCP listener.

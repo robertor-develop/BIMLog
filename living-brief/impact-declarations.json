@@ -30966,13 +30966,78 @@
           "reason": "Historical audit evidence remains unchanged."
         }
       ],
+      "reviewedChangedPaths": [],
+      "reviewedChangeSha256": ""
+    },
+    {
+      "taskId": "bimlog-stabilization-build005-startup-correction-20260919",
+      "reviewedThroughCommit": "c1270965c1c057ebe89bfbc17279b0c898597d84",
+      "reviewedAt": "2026-09-19T05:43:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ownership or ecosystem doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Records the packaged fail-fast authority entry and unchanged complete storage-adapter authority."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The fixed 8000 ms Windows budget and fail-closed quality boundary remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product strategy changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Runtime packaging starts through a lightweight authority preflight, but routes, schema, provider configuration, and application behavior are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native or installer file changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records both reproduced timeout values, root cause, bounded correction, and remaining terminal gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the passing focused correction and retains the complete clean-gate requirement."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit evidence remains unchanged."
+        }
+      ],
       "reviewedChangedPaths": [
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "2e0ae7db0c8ee84a3d5cc330ffa0305a8fdf30b4a78fa0a7d36b675c60a52008"
+      "reviewedChangeSha256": "eb9108cb937b961601a23f08b20f4ec2b35f39056cc665823844c39986038774"
     }
   ]
 }
