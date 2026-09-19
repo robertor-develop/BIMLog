@@ -79,6 +79,7 @@
     "test:job-intake-multicontract-http": "tsx ./src/lib/job-intake-pricing-multicontract.http-evidence.ts",
     "test:master-catalog-selectors": "tsx ../bimlog/src/components/job-intake/MasterClassificationSelectors.behavior.tsx",
     "test:master-catalog-intake-persistence": "tsx ./src/lib/master-catalog-intake-persistence.behavior.ts",
+    "test:company-pricing-template-lifecycle": "tsx ./src/lib/company-pricing-template-contract.behavior.ts && tsx ./src/lib/company-pricing-template-lifecycle.behavior.ts",
     "test:job-classification-propagation": "tsx ./src/lib/job-classification-propagation.behavior.ts",
     "test:job-classification-activation": "tsx ./src/lib/job-classification-activation.behavior.ts",
     "test:job-operations-classification": "tsx ../bimlog/src/lib/job-operations-classification.behavior.ts",

@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 46,
+    "completedBuilds": 47,
     "totalBuilds": 120,
-    "remainingBuilds": 74,
-    "currentUnpublishedBuilds": 6,
-    "nextBuild": 47,
+    "remainingBuilds": 73,
+    "currentUnpublishedBuilds": 7,
+    "nextBuild": 48,
     "nextPushAfterBuild": 50,
     "nextPublicationAfterBuild": 50,
     "blocker": null
@@ -162,7 +162,8 @@
       "publicationRequired": true,
       "smoke": "Full authenticated visible-Chrome smoke after Build 050 publication; no Navisworks smoke unless Native or installers change.",
       "builds": [
-        { "build": 46, "status": "PASS", "evidence": "BUILD_046_CANONICAL_CATALOG_RECONCILIATION.md" }
+        { "build": 46, "status": "PASS", "evidence": "BUILD_046_CANONICAL_CATALOG_RECONCILIATION.md" },
+        { "build": 47, "status": "PASS", "evidence": "BUILD_047_PRICING_TEMPLATE_LIFECYCLE.md" }
       ]
     }
   ]
