@@ -309,6 +309,7 @@ async function assembleRuntimeFromInstalledGraph(
     return undefined;
   };
   const approvedSecurityOverrideContracts = new Set([
+    "form-data|^2.5.5|4.0.6",
     "uuid|^8.3.0|11.1.1",
     "uuid|^9.0.1|11.1.1",
   ]);

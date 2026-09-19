@@ -2937,6 +2937,7 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Builds 006-009: all 34 baseline advisories are classified; patched direct/transitive production closure installs frozen and reports zero known vulnerabilities; multipart, archive/document, image inspection, storage, watcher, mail transport and type checks pass after recorded corrections.
 - [ ] Build 010: pass the exact clean pre-push gate with dependency provenance/audit first, push the exact head, publish once through Replit Shell without Replit Agents, and capture the full authenticated visible-Chrome production receipt.
 - [x] Build 010 correction: preserve deterministic assembly while allowing only the two exact audited UUID 11.1.1 override contracts; all generic out-of-range dependency resolutions remain fail closed.
+- [x] Bind the legacy `form-data ^2.5.5` edge to exact audited 4.0.6 without authorizing any other out-of-range resolution.
 - [x] Reconcile the deterministic runtime-closure test fixture with the three-file split package before repeating the exact clean gate.
 - [x] Keep fixture package narrowing isolated from the canonical production workspace, which must retain the complete required-runtime list.
 - [ ] Preserve the cadence: push every five builds, publish every ten, never exceed ten unpublished builds, and run focused Navisworks smoke for every Native/installer-changing block.
