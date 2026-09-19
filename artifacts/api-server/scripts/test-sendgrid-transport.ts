@@ -251,9 +251,10 @@ try {
   const sourceRoot = path.resolve(scriptDirectory, "../src");
   const expectedCallers = new Map([
     ["routes/auth.ts", 1],
+    ["routes/feedback.ts", 1],
     ["routes/files.ts", 2],
     ["routes/members.ts", 2],
-    ["routes/project_directory.ts", 1],
+    ["routes/project_directory.ts", 2],
     ["routes/submittals.ts", 3],
     ["routes/transmittals.ts", 1],
     ["lib/overdue-notifier.ts", 2],
