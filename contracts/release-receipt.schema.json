@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bimlog.ignitesmart.ai/contracts/release-receipt-v1.schema.json",
+  "title": "BIMLog immutable release receipt",
+  "type": "object",
+  "required": ["schemaVersion", "release", "source", "assets", "database", "provider", "live"],
+  "properties": {
+    "schemaVersion": { "const": "bimlog-release-receipt-v1" },
+    "release": { "type": "string" },
+    "source": { "type": "object", "required": ["commit", "tree"] },
+    "assets": { "type": "object", "required": ["manifestSha256"] },
+    "database": { "type": "object", "required": ["migrationLevel"] },
+    "provider": { "type": "object", "required": ["name", "publicationReceiptId", "deploymentId"] },
+    "live": { "type": "object", "required": ["release", "sourceCommit", "assetManifestSha256", "databaseMigrationLevel", "packageId"] }
+  },
+  "additionalProperties": true
+}

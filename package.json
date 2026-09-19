@@ -19,6 +19,8 @@
     "generate:release-identity": "node scripts/generate-release-identity.mjs",
     "check:release-identity": "node scripts/check-release-identity.mjs",
     "test:release-identity": "node scripts/test-release-identity.mjs",
+    "check:release-receipt": "node scripts/check-release-receipt.mjs",
+    "test:release-receipt": "node scripts/test-release-receipt.mjs",
     "check:checkout-readiness": "node scripts/check-checkout-readiness.mjs",
     "test:checkout-readiness": "node scripts/test-checkout-readiness.mjs",
     "test:api-build-termination": "node scripts/test-api-build-termination.mjs",
