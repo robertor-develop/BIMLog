@@ -34,6 +34,8 @@
     "reconcile:source-histories": "node scripts/generate-source-history-reconciliation.mjs --output evidence/stabilization-program-20260919/SOURCE_HISTORY_RECONCILIATION.json",
     "test:source-history-reconciliation": "node scripts/test-source-history-reconciliation.mjs",
     "check:dirty-candidate-reconciliation": "node scripts/check-dirty-candidate-reconciliation.mjs",
+    "generate:recoverable-cleanup-manifest": "node scripts/generate-recoverable-cleanup-manifest.mjs --output evidence/stabilization-program-20260919/RECOVERABLE_CLEANUP_MANIFEST.json",
+    "check:recoverable-cleanup-manifest": "node scripts/check-recoverable-cleanup-manifest.mjs",
     "test:release-policy": "node scripts/check-living-brief.mjs --self-test-release-policy",
     "living-brief:state": "node scripts/update-living-brief-state.mjs",
     "test:living-brief": "node scripts/test-living-brief-gate.mjs",
