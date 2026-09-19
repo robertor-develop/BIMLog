@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the completed Block 01 head.",
+  "headBinding": "The Git commit containing this ledger is the completed local-gate Block 02 / Build 010 source head; provider publication and live receipts are recorded externally without changing that source identity.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 5,
+    "completedBuilds": 10,
     "totalBuilds": 120,
-    "remainingBuilds": 115,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 6,
-    "nextPushAfterBuild": 10,
-    "nextPublicationAfterBuild": 10,
+    "remainingBuilds": 110,
+    "currentUnpublishedBuilds": 10,
+    "nextBuild": 11,
+    "nextPushAfterBuild": 15,
+    "nextPublicationAfterBuild": 20,
     "blocker": null
   },
   "blocks": [
@@ -41,6 +41,20 @@
         { "build": 3, "status": "PASS_WITH_RELEASE_PATH_GAPS_RECORDED", "evidence": "baseline/BUILD_003_RELEASE_PROCEDURE_INVENTORY.md" },
         { "build": 4, "status": "PASS", "evidence": "baseline/BUILD_004_DEFECT_RISK_LEDGER.md" },
         { "build": 5, "status": "PASS", "evidence": "baseline/BUILD_005_PROGRAM_CONTROL_AND_PUSH.md" }
+      ]
+    },
+    {
+      "block": 2,
+      "buildRange": "006-010",
+      "status": "PASS_LOCAL_RELEASE_GATE_PUBLICATION_DUE",
+      "publicationRequired": true,
+      "smoke": "Full authenticated visible-Chrome smoke required after publication; Navisworks smoke not required because Native and installers are unchanged.",
+      "builds": [
+        { "build": 6, "status": "PASS", "evidence": "block-02/BUILD_006_PRODUCTION_DEPENDENCY_TRIAGE.md" },
+        { "build": 7, "status": "PASS", "evidence": "block-02/BUILD_007_HTTP_UPLOAD_ARCHIVE_DEPENDENCIES.md" },
+        { "build": 8, "status": "PASS", "evidence": "block-02/BUILD_008_REMAINING_RUNTIME_DEPENDENCIES.md" },
+        { "build": 9, "status": "PASS", "evidence": "block-02/BUILD_009_DEPENDENCY_PROVENANCE.md" },
+        { "build": 10, "status": "PASS_LOCAL_RELEASE_GATE", "evidence": "block-02/BUILD_010_SECURITY_REGRESSION_AND_RELEASE.md" }
       ]
     }
   ]
