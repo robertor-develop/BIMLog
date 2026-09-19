@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 49,
+    "completedBuilds": 50,
     "totalBuilds": 120,
-    "remainingBuilds": 71,
-    "currentUnpublishedBuilds": 9,
-    "nextBuild": 50,
+    "remainingBuilds": 70,
+    "currentUnpublishedBuilds": 10,
+    "nextBuild": 51,
     "nextPushAfterBuild": 50,
     "nextPublicationAfterBuild": 50,
     "blocker": null
@@ -158,14 +158,15 @@
     {
       "block": 10,
       "buildRange": "046-050",
-      "status": "IN_PROGRESS",
+      "status": "PASS_LOCAL_RELEASE_GATE_PENDING",
       "publicationRequired": true,
       "smoke": "Full authenticated visible-Chrome smoke after Build 050 publication; no Navisworks smoke unless Native or installers change.",
       "builds": [
         { "build": 46, "status": "PASS", "evidence": "BUILD_046_CANONICAL_CATALOG_RECONCILIATION.md" },
         { "build": 47, "status": "PASS", "evidence": "BUILD_047_PRICING_TEMPLATE_LIFECYCLE.md" },
         { "build": 48, "status": "PASS", "evidence": "BUILD_048_DELIVERY_WORKFLOW_AUTHORITY.md" },
-        { "build": 49, "status": "PASS", "evidence": "BUILD_049_JOB_INTAKE_PERSISTENCE.md" }
+        { "build": 49, "status": "PASS", "evidence": "BUILD_049_JOB_INTAKE_PERSISTENCE.md" },
+        { "build": 50, "status": "PASS_LOCAL_RELEASE_GATE_PENDING", "evidence": "BUILD_050_CONTROLLED_ACCEPTANCE_AND_RELEASE.md" }
       ]
     }
   ]
