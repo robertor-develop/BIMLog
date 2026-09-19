@@ -2009,3 +2009,5 @@ Builds 006-009 classify all 34 frozen production advisories, correct the HTTP/up
 Build 010 regression correction: the first complete build correctly rejected the patched global `uuid@11.1.1` resolution because ExcelJS and the storage closure declare `^8.3.0`/`^9.0.1`. The assembler now recognizes only those two exact package/spec/version security contracts and still requires the root override, exact issuer lock edge, snapshot, and integrity binding. Generic out-of-range versions remain rejected by the existing negative fixture.
 
 The focused runtime-closure fixture was also reconciled with Build 005's split package and now materializes `start.cjs`, `index.cjs`, and `app.mjs` before testing graph assembly and fail-closed cases.
+
+Fixture assembly now narrows required packages only inside its isolated non-canonical source root; the production workspace explicitly rejects a fixture package override and retains the complete required-runtime list.

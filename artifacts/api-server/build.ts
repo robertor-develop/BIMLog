@@ -687,10 +687,14 @@ export async function deployRuntimeClosure(
     workspaceRoot?: string;
     evidenceDir?: string;
     livingBrief?: LivingBriefBuildInput;
+    fixtureRequiredRuntimePackages?: string[];
     onPhaseChange?: (phase: "assembly-copy" | "assembly-hash" | "validation") => void | Promise<void>;
   } = {},
 ) {
   const sourceWorkspaceRoot = options.workspaceRoot ?? workspaceRoot;
+  if (options.fixtureRequiredRuntimePackages && path.resolve(sourceWorkspaceRoot) === path.resolve(workspaceRoot)) {
+    throw new Error("Fixture runtime package overrides are forbidden for the production workspace.");
+  }
   const timeoutMs = options.timeoutMs ?? 600_000;
   if (!Number.isInteger(timeoutMs) || timeoutMs < 1 || timeoutMs > 600_000) {
     throw new Error("Runtime closure timeout must be an integer from 1 to 600000 milliseconds.");
@@ -898,7 +902,7 @@ export async function deployRuntimeClosure(
     const requiredPackages = [
       ...new Set([
         ...externalSpecifiers.map(packageRoot),
-        ...requiredRuntimePackages,
+        ...(options.fixtureRequiredRuntimePackages ?? requiredRuntimePackages),
       ]),
     ].sort();
     assembly = await assembleRuntimeFromInstalledGraph(

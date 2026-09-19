@@ -218,6 +218,7 @@ async function invokeFixture(
   try {
     await deployRuntimeClosure(fixture.runtimeDir, ["fixture-external"], {
       workspaceRoot: fixture.sourceRoot,
+      fixtureRequiredRuntimePackages: ["@workspace/api-zod", "@workspace/db"],
       evidenceDir: fixture.evidenceDir,
       timeoutMs: options.timeoutMs ?? 5_000,
       signal: options.signal,
@@ -487,7 +488,7 @@ await writeFixtureFile(
 );
 await assert.rejects(
   invokeFixture(issuerEdgeMismatch),
-  /pnpm-lock\.yaml dependency edge mismatch: fixture-external@1\.0\.0 -> fixture-transitive@1\.0\.0/,
+  /pnpm-lock\.yaml dependency edge mismatch: fixture-external@1\.0\.0 -> fixture-transitive; locked "2\.0\.0", installed "1\.0\.0"/,
 );
 assert.equal((await readReceipt(issuerEdgeMismatch)).status, "FAIL");
 results.push({ label: "issuer-edge-version-mismatch", status: "PASS" });
@@ -638,11 +639,11 @@ const validationTimeout = await createFixture("validation-timeout");
 let validationPhaseObserved = false;
 await assert.rejects(
   invokeFixture(validationTimeout, {
-    timeoutMs: 500,
+    timeoutMs: 3_000,
     onPhaseChange: async phase => {
       if (phase === "validation" && !validationPhaseObserved) {
         validationPhaseObserved = true;
-        await new Promise(resolve => setTimeout(resolve, 550));
+        await new Promise(resolve => setTimeout(resolve, 3_050));
       }
     },
   }),
