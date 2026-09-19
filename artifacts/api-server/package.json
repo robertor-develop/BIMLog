@@ -96,6 +96,7 @@
     "test:block12-build058": "tsx ./src/lib/block12-build058-financial-authority.behavior.ts",
     "test:block12-build059": "tsx ./src/lib/block12-build059-operational-projections.behavior.ts",
     "test:block12-operations-acceptance": "tsx ./src/lib/block12-build056-canonical-project-identity.behavior.ts && tsx ./src/lib/block12-build057-task-lifecycle.behavior.ts && tsx ./src/lib/block12-build058-financial-authority.behavior.ts && tsx ./src/lib/block12-build059-operational-projections.behavior.ts && tsx ./src/lib/block12-build060-intake-operations-acceptance.behavior.ts && tsx ./src/lib/job-intake-full-lifecycle.behavior.ts && tsx ./src/lib/job-operations.behavior.ts && tsx ./src/lib/project-controls-dashboard.behavior.ts && tsx ./src/lib/team-performance.behavior.ts && tsx ./src/lib/team-resource-planning.behavior.ts",
+    "test:block13-build061": "tsx ./src/lib/block13-build061-coordination-identity.behavior.ts",
     "test:unified-action-contract": "tsx ./src/lib/unified-action-contract.behavior.ts",
     "test:connector-foundation": "tsx ./src/lib/connector-foundation.behavior.ts",
     "test:coordination-hub-service": "tsx ./src/lib/coordination-hub-service.behavior.ts",

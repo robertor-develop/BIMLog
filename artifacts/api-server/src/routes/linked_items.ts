@@ -11,13 +11,15 @@ import {
   filesTable,
   clashesTable,
   lensViewpointsTable,
+  scheduleItemPlacementsTable,
 } from "@workspace/db/schema";
 import { eq, and, or } from "drizzle-orm";
 import { authMiddleware, requireProjectMember, requirePermission } from "../middlewares/auth";
+import { canonicalCoordinationType } from "../lib/construction-coordination-records";
 
 const router: Router = Router();
 
-const linkEntityTypes = ["rfi", "submittal", "transmittal", "change_order", "meeting", "file", "clash", "lens_viewpoint"] as const;
+const linkEntityTypes = ["rfi", "submittal", "transmittal", "change_order", "meeting", "schedule", "file", "clash", "lens_viewpoint"] as const;
 type LinkEntityType = typeof linkEntityTypes[number];
 
 function isLinkEntityType(value: unknown): value is LinkEntityType {
@@ -32,6 +34,7 @@ async function entityBelongsToProject(entityType: LinkEntityType, entityId: numb
     case "transmittal": rows = await db.select({ id: transmittalsTable.id }).from(transmittalsTable).where(and(eq(transmittalsTable.id, entityId), eq(transmittalsTable.projectId, projectId))).limit(1); break;
     case "change_order": rows = await db.select({ id: changeOrdersTable.id }).from(changeOrdersTable).where(and(eq(changeOrdersTable.id, entityId), eq(changeOrdersTable.projectId, projectId))).limit(1); break;
     case "meeting": rows = await db.select({ id: meetingMinutesTable.id }).from(meetingMinutesTable).where(and(eq(meetingMinutesTable.id, entityId), eq(meetingMinutesTable.projectId, projectId))).limit(1); break;
+    case "schedule": rows = await db.select({ id: scheduleItemPlacementsTable.id }).from(scheduleItemPlacementsTable).where(and(eq(scheduleItemPlacementsTable.id, entityId), eq(scheduleItemPlacementsTable.projectId, projectId))).limit(1); break;
     case "file": rows = await db.select({ id: filesTable.id }).from(filesTable).where(and(eq(filesTable.id, entityId), eq(filesTable.projectId, projectId))).limit(1); break;
     case "clash": rows = await db.select({ id: clashesTable.id }).from(clashesTable).where(and(eq(clashesTable.id, entityId), eq(clashesTable.projectId, projectId))).limit(1); break;
     case "lens_viewpoint": rows = await db.select({ id: lensViewpointsTable.id }).from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, entityId), eq(lensViewpointsTable.projectId, projectId))).limit(1); break;
@@ -69,6 +72,8 @@ router.post("/projects/:projectId/links", authMiddleware, requirePermission("adm
       res.status(400).json({ error: "A supported source and target with authoritative numeric IDs are required" });
       return;
     }
+    if (fromType !== "file") canonicalCoordinationType(fromType);
+    if (toType !== "file") canonicalCoordinationType(toType);
     const [sourceInProject, targetInProject] = await Promise.all([
       entityBelongsToProject(fromType, fromId, projectId),
       entityBelongsToProject(toType, toId, projectId),
