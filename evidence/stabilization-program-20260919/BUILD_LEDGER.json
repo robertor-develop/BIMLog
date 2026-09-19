@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 26,
+    "completedBuilds": 27,
     "totalBuilds": 120,
-    "remainingBuilds": 94,
-    "currentUnpublishedBuilds": 6,
-    "nextBuild": 27,
+    "remainingBuilds": 93,
+    "currentUnpublishedBuilds": 7,
+    "nextBuild": 28,
     "nextPushAfterBuild": 30,
     "nextPublicationAfterBuild": 30,
     "blocker": null
@@ -107,7 +107,7 @@
       "smoke": "Full authenticated visible-Chrome smoke after Build 030 publication; focused Navisworks smoke only if accepted integration changes Native or installers.",
       "builds": [
         { "build": 26, "status": "PASS", "evidence": "BUILD_026_SOURCE_AUTHORITY_INVENTORY.md" },
-        { "build": 27, "status": "NOT_STARTED", "evidence": null },
+        { "build": 27, "status": "PASS", "evidence": "BUILD_027_SOURCE_HISTORY_RECONCILIATION.md" },
         { "build": 28, "status": "NOT_STARTED", "evidence": null },
         { "build": 29, "status": "NOT_STARTED", "evidence": null },
         { "build": 30, "status": "NOT_STARTED", "evidence": null }

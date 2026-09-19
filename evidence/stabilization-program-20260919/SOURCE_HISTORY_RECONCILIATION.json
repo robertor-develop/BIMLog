@@ -1,0 +1,1474 @@
+{
+  "schemaVersion": 1,
+  "baseCommit": "d5d2c266614d42c6bf40a1c938ff68056570570d",
+  "candidates": [
+    {
+      "name": "product-default",
+      "branch": "codex/bimlog-product-defaults-block01-20260915",
+      "head": "431558843985d59cf4a66a8e46744189c0a4a320",
+      "baseOnly": 107,
+      "candidateOnly": 44,
+      "subjects": [
+        {
+          "commit": "431558843985d59cf4a66a8e46744189c0a4a320",
+          "subject": "Lens mockup Build 35: compact mobile paging and align layout contracts"
+        },
+        {
+          "commit": "bff79c9f442e5914d0b471cc5cef96ec5f8d51f8",
+          "subject": "Lens mockup Build 34: lead issue detail with captured evidence"
+        },
+        {
+          "commit": "899412ff03b7380610e484432b8c40511a844b23",
+          "subject": "Lens mockup Build 33: guard pane and mobile header regression selectors"
+        },
+        {
+          "commit": "39ec460355be4504c0cdf3cd51bdac10164df08e",
+          "subject": "Lens mockup Build 32: wrap mobile detail tabs without nested horizontal scroll"
+        },
+        {
+          "commit": "77eb2a43aed33ba0d7f354f144da20a6d80d223f",
+          "subject": "Lens mockup Build 31: repair rendered desktop and mobile pane layout"
+        },
+        {
+          "commit": "efe14f0a18a42ca3c656a0cf361626cf6b9a6463",
+          "subject": "Reconcile Lens mockup Block 6 Living Brief"
+        },
+        {
+          "commit": "1c47989c0105a29763044e0439a33c5e4ae79bd9",
+          "subject": "Lens mockup Build 30: distinguish live list empty states"
+        },
+        {
+          "commit": "bd750bca3d71a0e6ac32474ae1ef841050cf9001",
+          "subject": "Lens mockup Build 29: localize new workflow controls"
+        },
+        {
+          "commit": "816cfa20e99ab81bb81a3350276e5661c6657811",
+          "subject": "Lens mockup Build 28: honor reduced-motion section navigation"
+        },
+        {
+          "commit": "f89855ce7b30c9974acbb28db2df392c4e78ea83",
+          "subject": "Lens mockup Build 27: compact touch-sized mobile header"
+        },
+        {
+          "commit": "d2cabbaad0686507eb7c311ce5cb984111914e1d",
+          "subject": "Lens mockup Build 26: compact keyboard-accessible metrics"
+        },
+        {
+          "commit": "0f78222f87110a6191a265aa7b9ba05666b20bdf",
+          "subject": "Reconcile Lens mockup Block 5 Living Brief"
+        },
+        {
+          "commit": "21a0e2c08819f4206703b122731966d954b0990a",
+          "subject": "Preserve single sync-plan scroll owner"
+        },
+        {
+          "commit": "c329b60109ff82a4545b95c1d0459a04ba2b703a",
+          "subject": "Lens mockup Build 25: clarify per-record recovery"
+        },
+        {
+          "commit": "60043b7fe8bfc88d03d427653af2ac3fb78a73b6",
+          "subject": "Lens mockup Build 24: bound synchronization preview"
+        },
+        {
+          "commit": "32255d9fa22e64658a3f1514cfefb54a2bfd4660",
+          "subject": "Lens mockup Build 23: validate reference selection inline"
+        },
+        {
+          "commit": "fe9ddf662bf973a2544c9290811f58db9affc942",
+          "subject": "Lens mockup Build 22: explain governed link eligibility"
+        },
+        {
+          "commit": "a4f33be8d8391bda21b6bfd0b59fb0ece0bf2137",
+          "subject": "Lens mockup Build 21: explain issue creation readiness"
+        },
+        {
+          "commit": "991d6dad1a424e2b0c7cd2dfb8f734a1d7670afd",
+          "subject": "Reconcile Lens mockup Block 4 Living Brief"
+        },
+        {
+          "commit": "3a5bf77938f0d5646bef781b2772a65be2d503ae",
+          "subject": "Keep Lens overview assertions ref-tolerant"
+        },
+        {
+          "commit": "e730c6422807c90eb1c0f7004cbcd2cd756ef51f",
+          "subject": "Lens mockup Build 20: keep read-only activity discoverable"
+        },
+        {
+          "commit": "a43c18da1045b14e92e54587080c12b7622913ac",
+          "subject": "Lens mockup Build 19: state model and location evidence limits"
+        },
+        {
+          "commit": "34fa655334f3c98de630bd741ed9eeb44472bb76",
+          "subject": "Lens mockup Build 18: navigate selected-issue sections"
+        },
+        {
+          "commit": "1fed5ad707473959eb53a518091a5e394208f074",
+          "subject": "Lens mockup Build 17: show bounded selected-view capture"
+        },
+        {
+          "commit": "f5777900d47a8b74be68645f39b02e9315defd21",
+          "subject": "Lens mockup Build 16: surface authoritative issue overview"
+        },
+        {
+          "commit": "369468220cfb9312dd50718113712a147326d1be",
+          "subject": "Reconcile Lens mockup Block 3 Living Brief"
+        },
+        {
+          "commit": "d8c5ee7d4356161810e7484866e40bb3f6aea4cd",
+          "subject": "Align Lens source assertions with current mockup UI"
+        },
+        {
+          "commit": "2436bde6a7811042bc45b75730b98072023ff8d7",
+          "subject": "Lens mockup Build 15: mark 3D boundary and fit compact cards"
+        },
+        {
+          "commit": "c6ac6e5d46f0b5af0888229ae8753ef2bea38179",
+          "subject": "Lens mockup Build 14: keep selected issue visible in table"
+        },
+        {
+          "commit": "c051e761e722fa8d9b855e9c838b508f3af3e07e",
+          "subject": "Lens mockup Build 13: align table with captured-view evidence"
+        },
+        {
+          "commit": "061f98afe86b8ec12ba48d24487edcdae35e7c31",
+          "subject": "Lens mockup Build 12: improve issue-card evidence readability"
+        },
+        {
+          "commit": "08e41309f7bd760fcb602e8e5275b1d64c479642",
+          "subject": "Lens mockup Build 11: report captured-image loading truthfully"
+        },
+        {
+          "commit": "e181853c90b0a9d077e45cca68df7193fccfa4de",
+          "subject": "Reconcile Lens mockup Block 2 Living Brief"
+        },
+        {
+          "commit": "306e5ffd3078f4dea1919ba097293fd976d04bf2",
+          "subject": "Lens mockup Build 10: normalize expanded-tool scrolling"
+        },
+        {
+          "commit": "332753a81ec250a2b6677a3a99213d8f19271858",
+          "subject": "Lens mockup Build 9: reclaim collapsed width and reset layout"
+        },
+        {
+          "commit": "3fe59ea8a5409b0c6330ed16dd2414ed26d48738",
+          "subject": "Lens mockup Build 8: compact three-pane issue workspace"
+        },
+        {
+          "commit": "e9ad6567198f538efb408f2c0eac3d4dd95329c5",
+          "subject": "Lens mockup Build 7: show authoritative issue metrics"
+        },
+        {
+          "commit": "b0a8bc1a5b13bba2a5c07a79aaa1ed3d5241bfd0",
+          "subject": "Lens mockup Build 6: align connected workspace header"
+        },
+        {
+          "commit": "64a368d21a08c1ec4346f25b219fdfbd4ae32623",
+          "subject": "Governance: reconcile Lens mockup Block 1 audit"
+        },
+        {
+          "commit": "dac7942a8ace3bbc6ebdfdcf1f0cd1d45cab5271",
+          "subject": "Lens mockup Build 5: freeze protected regression baseline"
+        },
+        {
+          "commit": "eed1f2b2ffa41528bd3021e7a7b7c1ad3c760e5b",
+          "subject": "Lens mockup Build 4: define visual contract boundaries"
+        },
+        {
+          "commit": "b76a9dc7d6dd38d427d5d7f5edb38727bb975450",
+          "subject": "Lens mockup Build 3: record Native visual feasibility"
+        },
+        {
+          "commit": "9ace16ba9d5fe1980d9cb29e38cbc6f042e96a5f",
+          "subject": "Lens mockup Build 2: map clash and issue authority"
+        },
+        {
+          "commit": "94762b756930db8aeb2c95c0b4682c14e370d635",
+          "subject": "Lens mockup Build 1: inventory reference acceptance"
+        }
+      ],
+      "productDefaultNameMismatch": true,
+      "files": [
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-compact-workspace.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-issue-presentation.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-activity.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-bilingual-controls.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-browser-boundary.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-card.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-create-readiness.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-detail-capture.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-detail-navigation.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-empty-states.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-layout.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-link-eligibility.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-location-boundary.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-metrics.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-mobile-actions.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-mobile-metrics.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-overview.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-recovery.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-reduced-motion.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-reference-validation.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-rendered-layout.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-scroll.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-selection.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-shell.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-sync-preview.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-table-evidence.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-three-pane.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-mockup-thumbnail.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-modern-workspace.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/features/lens-next/lens-next-publishing-ui.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "artifacts/bimlog/src/lens-next-acceptance-harness.tsx",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "066-070",
+          "reason": "review against current Lens Next Platform behavior; do not merge the stale branch wholesale"
+        },
+        {
+          "file": "docs/lens-next-mockup/block-01-build-01-reference-inventory.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": "066-075",
+          "reason": "Lens mockup design evidence remains input to the governed Lens completion blocks"
+        },
+        {
+          "file": "docs/lens-next-mockup/block-01-build-02-authority-map.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": "066-075",
+          "reason": "Lens mockup design evidence remains input to the governed Lens completion blocks"
+        },
+        {
+          "file": "docs/lens-next-mockup/block-01-build-03-visual-feasibility.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": "066-075",
+          "reason": "Lens mockup design evidence remains input to the governed Lens completion blocks"
+        },
+        {
+          "file": "docs/lens-next-mockup/block-01-build-04-contract-boundaries.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": "066-075",
+          "reason": "Lens mockup design evidence remains input to the governed Lens completion blocks"
+        },
+        {
+          "file": "docs/lens-next-mockup/block-01-build-05-protected-baseline.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": "066-075",
+          "reason": "Lens mockup design evidence remains input to the governed Lens completion blocks"
+        },
+        {
+          "file": "living-brief/OPEN_LOOP.md",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "living-brief/STATUS.md",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "living-brief/impact-declarations.json",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "living-brief/state.json",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        }
+      ],
+      "counts": {
+        "MAP_TO_PROGRAM": 34,
+        "SUPERSEDE": 4,
+        "EVIDENCE_ONLY": 5
+      },
+      "wholesaleIntegrationAllowed": false
+    },
+    {
+      "name": "next-200",
+      "branch": "codex/bimlog-next200-block01-20260915",
+      "head": "843c6219842aa326efc9e298b0a8caca90f39571",
+      "baseOnly": 182,
+      "candidateOnly": 71,
+      "subjects": [
+        {
+          "commit": "843c6219842aa326efc9e298b0a8caca90f39571",
+          "subject": "seal next200 Submittal decomposition authority"
+        },
+        {
+          "commit": "ff5f04d8ca166f80341eaf3189049b2c8520e101",
+          "subject": "accept next200 Submittal decomposition block"
+        },
+        {
+          "commit": "f3e2aaf223cc5722345b41be2a8a63588e2d5c82",
+          "subject": "build55 prove Submittal decomposition regression"
+        },
+        {
+          "commit": "40cfd84c81c9bdb8f7be2356feb2f280680245d8",
+          "subject": "build54 extract Submittal export helpers"
+        },
+        {
+          "commit": "30ea001766f862757dfc2cf9e610279cacc08601",
+          "subject": "build53 extract Submittal attachment helpers"
+        },
+        {
+          "commit": "a1589dc29710bc4b9ee4b2087464592e44789b9b",
+          "subject": "build52 extract Submittal state helpers"
+        },
+        {
+          "commit": "ff57426372957485656e45a97fe17a99a1691664",
+          "subject": "build51 extract Submittal panel components"
+        },
+        {
+          "commit": "ba1501cfa050b57496a590ec6e8e4345f35d2655",
+          "subject": "seal next200 hotspot decomposition authority"
+        },
+        {
+          "commit": "7383230c9bddada3cd2f38a34553be6cde0a6b0d",
+          "subject": "accept next200 hotspot decomposition block"
+        },
+        {
+          "commit": "c01bdf4fbcd436aaf5b2e1c48759c47662c10335",
+          "subject": "build50 prove hotspot decomposition equivalence"
+        },
+        {
+          "commit": "17eda1dc63e5e451297011c773fc04e76cf8189d",
+          "subject": "build49 extract Clash route helpers"
+        },
+        {
+          "commit": "d3d10dfcb9cf029da35172a6e1dde9e3f7cb8c17",
+          "subject": "build48 extract Meetings label helpers"
+        },
+        {
+          "commit": "123df68c5e02610a81f767b1ba7ced3fc7d9c526",
+          "subject": "build47 extract RFI reference helpers"
+        },
+        {
+          "commit": "3a8311ad7c31e42eb1b96eb36cf9f1beac2d21b9",
+          "subject": "build46 extract convention builder helpers"
+        },
+        {
+          "commit": "122070f1943b46534bd483523324752163bb4497",
+          "subject": "close route safety authority seal"
+        },
+        {
+          "commit": "93a85a3f89a11f2b0184043d26bd7cdae4af9bc4",
+          "subject": "seal next200 route safety authority"
+        },
+        {
+          "commit": "630f9e390274a8769f935c65a452e838b827e1d8",
+          "subject": "accept next200 route safety block"
+        },
+        {
+          "commit": "986b82c4db74fc4f6ee0dc078fb91eab3e87bc09",
+          "subject": "build45 enforce route safety in CI"
+        },
+        {
+          "commit": "8bade28a141d54cbaf85f5c1717ad746581349c7",
+          "subject": "build44 reject semantically duplicate routes"
+        },
+        {
+          "commit": "efb257f06aba568e8cf042daecf56d802a14f121",
+          "subject": "build43 order literal clash route safely"
+        },
+        {
+          "commit": "0cc2b88ffea3de55f85bb7c0326d12e3e579c8e9",
+          "subject": "build42 prove parameter route shadowing"
+        },
+        {
+          "commit": "f6db18777f2228c12dc36345c2fcbed37833801c",
+          "subject": "build41 inventory API route order"
+        },
+        {
+          "commit": "272101e6020989e9dea5191e4862a4625635f317",
+          "subject": "seal next200 block08 PDF convergence evidence"
+        },
+        {
+          "commit": "d87d4001015cc0b36e6f5b8ce1fc6896b1468778",
+          "subject": "record next200 block08 PDF acceptance"
+        },
+        {
+          "commit": "fe3efdedfbf9173ee6709c1d22eb2ea0be4475c4",
+          "subject": "build40 seal PDF family convergence"
+        },
+        {
+          "commit": "c559a7f5b3c866a1ebd294fd1680effa5b9f0ac0",
+          "subject": "build39 preserve Feedback PDF bilingual fidelity"
+        },
+        {
+          "commit": "a720d092716545832251d1573b226d5867c99542",
+          "subject": "build38 normalize Feedback PDF chrome"
+        },
+        {
+          "commit": "1ba888e70f36ef94ec447a1b4cce17868e0b269f",
+          "subject": "build37 migrate Feedback PDF to shared document factory"
+        },
+        {
+          "commit": "80e22133ad37a12db0926c3868eed9630264424e",
+          "subject": "build36 inventory governed PDF family"
+        },
+        {
+          "commit": "eda26a1c84e845e84dd4b2f4f0860ea0ff1235f5",
+          "subject": "seal next200 block07 platform P1 evidence"
+        },
+        {
+          "commit": "b435f9cf89d280ff5bd3b5af5bbd46c9102469dc",
+          "subject": "build35 enforce selected platform P1 baseline"
+        },
+        {
+          "commit": "e57348a74fd84b0a17643c626934f21d40f15403",
+          "subject": "build34 classify intentional optional error handling"
+        },
+        {
+          "commit": "451e305256a1a1ed6b3799fd7b4fed38b7b6901d",
+          "subject": "build33 surface feedback package cleanup failures"
+        },
+        {
+          "commit": "941494376c7f80fe937a7fef60529d9639611136",
+          "subject": "build32 add structured best-effort cleanup reporting"
+        },
+        {
+          "commit": "f594b7dd90e6c32f28c37d6ae076e386d1522269",
+          "subject": "build31 add machine-readable P1 audit contract"
+        },
+        {
+          "commit": "2b1d987e86bd4e10b7e9ee3ce4da6d81b6b8db99",
+          "subject": "build 030: seal Block 06 Lens acceptance preparation"
+        },
+        {
+          "commit": "a4108dccf448bd6202615ea9ee01480ba01e7523",
+          "subject": "build 030: consolidate Lens field gates"
+        },
+        {
+          "commit": "c392e08500a260b76b090025610aff9178b89a2b",
+          "subject": "build 029: freeze Revere Tremont camera gate"
+        },
+        {
+          "commit": "9e6f7354a1d8832c6e3d4f14e68b3ca6808ef818",
+          "subject": "build 028: freeze historical Working View gate"
+        },
+        {
+          "commit": "7665a494746e21b8d412f457392f2c77c68076b9",
+          "subject": "build 027: freeze Navisworks 2025 field gate"
+        },
+        {
+          "commit": "b90d92dcbeece3ee9de734c181dc6219b26e376f",
+          "subject": "build 026: freeze Navisworks 2021 field gate"
+        },
+        {
+          "commit": "2ee609ee242f76a16b86de1f80843a653dfe9b30",
+          "subject": "build 025: seal Block 05 acceptance preparation"
+        },
+        {
+          "commit": "c438d730624b6829e7865f1d3ceee169db5f1f62",
+          "subject": "build 025: consolidate P27 field acceptance gates"
+        },
+        {
+          "commit": "d8b7ff13f8b5999b950dc836977df2476e34d870",
+          "subject": "build 024: freeze P27 field checklist"
+        },
+        {
+          "commit": "4d8514afcb4ac7382e81d2daa133e352dbe7b6cc",
+          "subject": "build 023: freeze activation Operations field gate"
+        },
+        {
+          "commit": "024985337c5abbd822dae3ffa28a3807ef36f749",
+          "subject": "build 022: freeze multi-company APU field gate"
+        },
+        {
+          "commit": "4f6d6787298e7ff9ee38ad6a0a28180fb3893bd7",
+          "subject": "build 021: classify field return provenance"
+        },
+        {
+          "commit": "75ed6bba4fbdae9a48ca4f3d7a7f7ebd5b64dc61",
+          "subject": "build 020: seal Block 04 optional delivery"
+        },
+        {
+          "commit": "1b556e49a535c866cbc95f280e3c187378c23b4a",
+          "subject": "build 020: consolidate optional delivery proof"
+        },
+        {
+          "commit": "1c3e78ed6a92c9a99975832b79d251361cc70910",
+          "subject": "build 019: prove cancellation and no-send"
+        },
+        {
+          "commit": "b5d7e328bb262d062b957854dfbb0813f46e2014",
+          "subject": "build 018: prove authenticated download boundary"
+        },
+        {
+          "commit": "6690bb1887d1bde4c3f54aba6b90996b2e0de72a",
+          "subject": "build 017: prove Telegram confirmation boundary"
+        },
+        {
+          "commit": "1323b9040ccf2da9213939a7727829db2cff7232",
+          "subject": "build 016: prove optional email compose"
+        },
+        {
+          "commit": "59ba47620be353037e665ee974657f1ed13f4e5b",
+          "subject": "build 015: seal Block 03 controlled lifecycle"
+        },
+        {
+          "commit": "f43c059f83b75f76236cb6acb412f2b4aa791c91",
+          "subject": "build 015: prove Change Order and Block 03"
+        },
+        {
+          "commit": "66c41fe8d068abbdf74aa6c215fc1ea6b52a5c82",
+          "subject": "build 014: prove Transmittal lifecycle"
+        },
+        {
+          "commit": "449acc1fe918636d6ab6397c71974b7d883ec2aa",
+          "subject": "build 013: prove Submittal lifecycle"
+        },
+        {
+          "commit": "bf81787301f599228e16fc4c3a9b8ebac20e4ac9",
+          "subject": "build 012: prove second-user budget approval"
+        },
+        {
+          "commit": "94b94ad967ba076f657bb00555e21778a613c5dd",
+          "subject": "build 011: prove Job Intake lifecycle"
+        },
+        {
+          "commit": "eca016d1c9f358dd72bf238632488a5af5f15d3d",
+          "subject": "build 010: seal Block 02 release truth"
+        },
+        {
+          "commit": "539e4a5a19413945f7d7b2371da66dbd99302738",
+          "subject": "build 010: establish authoritative release register"
+        },
+        {
+          "commit": "6100034fc649f9d6d03c4e51c92364784897c4cc",
+          "subject": "build 009: prove rollback source contract"
+        },
+        {
+          "commit": "092a4f6c7c3474ca904985ee26f0bff1c824d429",
+          "subject": "build 008: freeze field acceptance denominator"
+        },
+        {
+          "commit": "dd0740a99a86c415e58f36e8ef83ac83e16b6a5d",
+          "subject": "build 007: lock P27 live source parity"
+        },
+        {
+          "commit": "4a164be58f5637fca5951aca69136634ec48417e",
+          "subject": "build 006: reconcile P27 release evidence"
+        },
+        {
+          "commit": "2fd283bb81657637d69106119da317f4149e8a22",
+          "subject": "build 005: seal source continuity evidence"
+        },
+        {
+          "commit": "4bb4367204f96194125f76f9d51ecd544e9e84e3",
+          "subject": "build 005: consolidate source continuity gate"
+        },
+        {
+          "commit": "2b21a889cbbc8e09ddfe009b2a5439efbd8cd4a5",
+          "subject": "build 004: add accepted source continuity snapshot"
+        },
+        {
+          "commit": "85c7915bf909ef5e72ac22bce9d00d434b6e4d9d",
+          "subject": "build 003: add recoverability-first worktree inventory"
+        },
+        {
+          "commit": "47309d55e9ee62a7764b17d38975ef1d79e0408d",
+          "subject": "build 002: strengthen checkout readiness classification"
+        },
+        {
+          "commit": "6620eaab47abe27f5043c52d1c2f7b22fd822e83",
+          "subject": "build 001: register next 200 block authority"
+        }
+      ],
+      "productDefaultNameMismatch": false,
+      "files": [
+        {
+          "file": "artifacts/api-server/package.json",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-115",
+          "reason": "server correction requires current-lineage review in its owning block"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/best-effort-cleanup.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-115",
+          "reason": "server correction requires current-lineage review in its owning block"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/best-effort-cleanup.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-115",
+          "reason": "server correction requires current-lineage review in its owning block"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/clash-route-helpers.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "061-070",
+          "reason": "coordination and Lens Platform blocks"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/clash-route-helpers.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "061-070",
+          "reason": "coordination and Lens Platform blocks"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/feedback-package-source.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "076-080",
+          "reason": "feedback and delivery completion block"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/feedback-package-worker.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "076-080",
+          "reason": "feedback and delivery completion block"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/feedback-package.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "076-080",
+          "reason": "feedback and delivery completion block"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/feedback-pdf-copy.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "076-080",
+          "reason": "feedback and delivery completion block"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/feedback-relay/receiver-http.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "076-080",
+          "reason": "feedback and delivery completion block"
+        },
+        {
+          "file": "artifacts/api-server/src/lib/pdf-kit.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "061-065,081-085",
+          "reason": "coordination/report quality blocks"
+        },
+        {
+          "file": "artifacts/api-server/src/routes/clash_reports.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "061-065,081-085",
+          "reason": "coordination/report quality blocks"
+        },
+        {
+          "file": "artifacts/api-server/src/routes/feedback.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "076-080",
+          "reason": "feedback and delivery completion block"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/ConventionBuilder.tsx",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/RfisTab.tsx",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/convention-builder-helpers.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/convention-builder-helpers.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/meeting-label-helpers.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/meeting-label-helpers.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/rfi-reference-helpers.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/rfi-reference-helpers.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/submittal-attachment-helpers.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/submittal-attachment-helpers.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/submittal-export-helpers.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/submittal-export-helpers.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/submittal-panel-components.tsx",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/submittal-state-helpers.behavior.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "artifacts/bimlog/src/pages/project/submittal-state-helpers.ts",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "041-070",
+          "reason": "UI behavior belongs to shell, coordination, or Lens Platform acceptance"
+        },
+        {
+          "file": "evidence/next200-block02/field-acceptance-denominator.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block02/p27-release-evidence.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block02/release-register.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block02/rollback-contract.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block03/build011-job-intake.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block03/build012-second-user-budget.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block03/build013-submittal.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block03/build014-transmittal.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block03/build015-change-order-and-block.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block04/build016-email-compose.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block04/build017-telegram-confirmation.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block04/build018-authenticated-download.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block04/build019-cancel-no-send.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block04/build020-delivery-block.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block05/build021-field-return-provenance.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block05/build022-multi-company-multi-apu-gate.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block05/build023-activation-operations-gate.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block05/build024-p27-acceptance-checklist.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block05/build025-field-acceptance-register.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block06/build026-navisworks2021-gate.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block06/build027-navisworks2025-gate.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block06/build028-historical-working-view.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block06/build029-revere-tremont-camera-sectioning.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-block06/build030-lens-field-register.json",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-builds031-035/ACCEPTANCE.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-builds036-040/ACCEPTANCE.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-builds041-045/ACCEPTANCE.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-builds046-050/ACCEPTANCE.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "evidence/next200-builds051-055/ACCEPTANCE.md",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "preserve historical proof without promoting it as current behavior"
+        },
+        {
+          "file": "living-brief/AUDIT.md",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "living-brief/OPEN_LOOP.md",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "living-brief/PLATFORM.md",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "living-brief/REPORT_DESIGN_SYSTEM.md",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "living-brief/STATUS.md",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "living-brief/impact-declarations.json",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "living-brief/state.json",
+          "disposition": "SUPERSEDE",
+          "mappedBuilds": "021-025",
+          "reason": "current P33 Living Brief authority supersedes candidate narrative"
+        },
+        {
+          "file": "package.json",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035",
+          "reason": "test/release harness dependency surface"
+        },
+        {
+          "file": "scripts/check-checkout-readiness.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/check-platform-p1-baseline.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-115",
+          "reason": "test/tooling correction is reviewed in its owning stabilization block"
+        },
+        {
+          "file": "scripts/check-route-safety.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/inventory-worktrees.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/pdf-family-inventory.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "081-085",
+          "reason": "PDF/report tooling belongs to artifact and handover quality"
+        },
+        {
+          "file": "scripts/platform-audit.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/route-safety-inventory.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/route-safety.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/source-continuity-snapshot.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/test-checkout-readiness.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/test-field-acceptance-denominator.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-inventory-worktrees.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/test-live-source-parity.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-115",
+          "reason": "test/tooling correction is reviewed in its owning stabilization block"
+        },
+        {
+          "file": "scripts/test-next200-build011.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build012.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build013.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build014.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build015.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build016.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build017.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build018.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build019.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build020.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build021.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build022.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build023.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build024.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build025.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build026.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build027.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build028.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build029.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build030.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build046.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build047.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build048.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build050.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build051.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-next200-build055.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-p27-release-evidence.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-115",
+          "reason": "test/tooling correction is reviewed in its owning stabilization block"
+        },
+        {
+          "file": "scripts/test-pdf-family-convergence.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "081-085",
+          "reason": "PDF/report tooling belongs to artifact and handover quality"
+        },
+        {
+          "file": "scripts/test-pdf-family-inventory.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "081-085",
+          "reason": "PDF/report tooling belongs to artifact and handover quality"
+        },
+        {
+          "file": "scripts/test-platform-audit-allowances.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/test-platform-audit-json.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/test-release-register.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-release-truth-block.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-115",
+          "reason": "test/tooling correction is reviewed in its owning stabilization block"
+        },
+        {
+          "file": "scripts/test-rollback-contract.mjs",
+          "disposition": "EVIDENCE_ONLY",
+          "mappedBuilds": null,
+          "reason": "candidate-specific acceptance evidence is retained but not current authority"
+        },
+        {
+          "file": "scripts/test-route-duplicate-proof.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/test-route-safety-contract.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/test-route-shadow-proof.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/test-source-continuity-block.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        },
+        {
+          "file": "scripts/test-source-continuity-snapshot.mjs",
+          "disposition": "MAP_TO_PROGRAM",
+          "mappedBuilds": "031-035,061-065,106-115",
+          "reason": "release-harness, route-safety, or final acceptance tooling"
+        }
+      ],
+      "counts": {
+        "MAP_TO_PROGRAM": 54,
+        "SUPERSEDE": 7,
+        "EVIDENCE_ONLY": 58
+      },
+      "wholesaleIntegrationAllowed": false
+    }
+  ]
+}
