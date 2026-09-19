@@ -1,0 +1,39 @@
+{
+  "schemaVersion": 1,
+  "supportedRuntimeProduct": "Lens Next",
+  "legacyRuntimePolicy": "migration-only",
+  "productionReferences": {
+    "supportedRuntime": [
+      "artifacts/bimlog/src/features/lens-next",
+      "plugins/BIMLogLensNext"
+    ],
+    "migrationCompatibility": [
+      "artifacts/api-server/src/app.ts",
+      "artifacts/api-server/src/routes/clash_reports.ts",
+      "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+      "artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
+      "artifacts/bimlog/src/pages/project/LensViewpointsView.tsx",
+      "lib/db/src/schema/lens-viewpoint-sequence-counters.ts",
+      "plugins/BIMLogLensNext/native/AutodeskReadOnlyAdapter.cs"
+    ],
+    "governanceOnly": [
+      "contracts/lens-product-status.json",
+      "contracts/lens-next/DIGEST-V3-PLATFORM-CONTRACT-REPORT.md",
+      "scripts/check-current-state-contract.mjs",
+      "artifacts/api-server/scripts/generate-platform-md.ts"
+    ],
+    "testOnlyPattern": "*.behavior.*",
+    "historicalEvidenceRoots": [
+      "attached_assets",
+      "evidence",
+      "living-brief"
+    ]
+  },
+  "customerSurfacePolicy": {
+    "legacyNavigationAllowed": false,
+    "legacyBrandingAllowed": false,
+    "legacyMigrationGuidanceInsideLensNextAllowed": true,
+    "parallelProductAllowed": false
+  },
+  "nativeInstallerRetirementBuilds": "071-075"
+}
