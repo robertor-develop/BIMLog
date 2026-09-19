@@ -34,7 +34,8 @@ export function LangToggle({ floating = false, compact = false }: { floating?: b
     <button
       type="button"
       className={floating ? undefined : "sidebar-utility-button"}
-      aria-label="Toggle language"
+      aria-label={language === "en" ? "Switch language to Spanish" : "Cambiar idioma a inglés"}
+      title={language === "en" ? "Español" : "English"}
       onClick={() => setLanguage(language === "en" ? "es" : "en")}
       style={floating ? { ...baseStyle, ...floatStyle } : undefined}
     >

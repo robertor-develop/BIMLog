@@ -18,19 +18,30 @@ export function Navbar() {
   const isDashboard = location === "/dashboard";
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [companyLogoUrl, setCompanyLogoUrl] = useState<string | null>(null);
-  const [darkMode, setDarkMode] = useState(false);
+  const [darkMode, setDarkMode] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      const saved = window.localStorage.getItem("bimlog-theme");
+      return saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    } catch { return false; }
+  });
 
   useEffect(() => {
-    const saved = localStorage.getItem("bimlog-theme");
-    const dark = saved === "dark" || (!saved && window.matchMedia("(prefers-color-scheme: dark)").matches);
-    document.documentElement.classList.toggle("dark", dark);
-    setDarkMode(dark);
+    document.documentElement.classList.toggle("dark", darkMode);
+    const synchronize = (event: StorageEvent) => {
+      if (event.key !== "bimlog-theme") return;
+      const dark = event.newValue === "dark";
+      setDarkMode(dark);
+      document.documentElement.classList.toggle("dark", dark);
+    };
+    window.addEventListener("storage", synchronize);
+    return () => window.removeEventListener("storage", synchronize);
   }, []);
 
   function toggleTheme() {
     const dark = !darkMode;
     document.documentElement.classList.toggle("dark", dark);
-    localStorage.setItem("bimlog-theme", dark ? "dark" : "light");
+    try { localStorage.setItem("bimlog-theme", dark ? "dark" : "light"); } catch { /* the visible theme still changes for this session */ }
     setDarkMode(dark);
   }
 
@@ -124,7 +135,7 @@ export function Navbar() {
               onClick={toggleTheme}
               aria-label={darkMode ? tt("Use light mode", "Usar modo claro") : tt("Use dark mode", "Usar modo oscuro")}
               title={darkMode ? tt("Light mode", "Modo claro") : tt("Dark mode", "Modo oscuro")}
-              style={{ width: 32, height: 32, color: "hsl(var(--muted-foreground))" }}
+              style={{ width: 44, height: 44, color: "hsl(var(--muted-foreground))" }}
             >
               {darkMode ? <Sun size={16} /> : <Moon size={16} />}
             </Button>

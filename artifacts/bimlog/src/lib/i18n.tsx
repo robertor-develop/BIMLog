@@ -44,6 +44,14 @@ export function I18nProvider({ children }: { children: React.ReactNode }) {
     if (typeof document !== 'undefined') document.documentElement.lang = lang;
   }, [lang]);
 
+  useEffect(() => {
+    const synchronize = (event: StorageEvent) => {
+      if (event.key === LS_KEY && (event.newValue === 'en' || event.newValue === 'es')) setLangState(event.newValue);
+    };
+    window.addEventListener('storage', synchronize);
+    return () => window.removeEventListener('storage', synchronize);
+  }, []);
+
   const t = (key: TranslationKey) => {
     return translations[lang][key] || translations['en'][key] || key;
   };

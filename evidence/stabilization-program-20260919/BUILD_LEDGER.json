@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 43,
+    "completedBuilds": 44,
     "totalBuilds": 120,
-    "remainingBuilds": 77,
-    "currentUnpublishedBuilds": 3,
-    "nextBuild": 44,
+    "remainingBuilds": 76,
+    "currentUnpublishedBuilds": 4,
+    "nextBuild": 45,
     "nextPushAfterBuild": 45,
     "nextPublicationAfterBuild": 50,
     "blocker": null
@@ -150,7 +150,8 @@
       "builds": [
         { "build": 41, "status": "PASS", "evidence": "BUILD_041_ROUTE_ACCESSIBILITY.md" },
         { "build": 42, "status": "PASS", "evidence": "BUILD_042_GLOBAL_SHELL_RESPONSIVE.md" },
-        { "build": 43, "status": "PASS", "evidence": "BUILD_043_TRUTHFUL_ROUTE_STATES.md" }
+        { "build": 43, "status": "PASS", "evidence": "BUILD_043_TRUTHFUL_ROUTE_STATES.md" },
+        { "build": 44, "status": "PASS", "evidence": "BUILD_044_INTERACTION_PREFERENCES.md" }
       ]
     }
   ]

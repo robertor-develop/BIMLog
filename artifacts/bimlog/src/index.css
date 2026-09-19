@@ -186,7 +186,7 @@ iframe[aria-label*="Replit" i],
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  height: 30px;
+  min-height: 40px;
   max-width: 100%;
   padding: 0 10px;
   border-radius: 8px;
@@ -701,6 +701,11 @@ iframe[aria-label*="Replit" i],
   select,
   textarea {
     max-width: 100%;
+  }
+  .sidebar-utility-button,
+  .phasea-mobile-nav-trigger,
+  .phasea-mobile-nav-close {
+    min-height: 44px;
   }
 }
 .nav-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }
