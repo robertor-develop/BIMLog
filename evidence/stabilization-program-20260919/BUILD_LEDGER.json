@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 48,
+    "completedBuilds": 49,
     "totalBuilds": 120,
-    "remainingBuilds": 72,
-    "currentUnpublishedBuilds": 8,
-    "nextBuild": 49,
+    "remainingBuilds": 71,
+    "currentUnpublishedBuilds": 9,
+    "nextBuild": 50,
     "nextPushAfterBuild": 50,
     "nextPublicationAfterBuild": 50,
     "blocker": null
@@ -164,7 +164,8 @@
       "builds": [
         { "build": 46, "status": "PASS", "evidence": "BUILD_046_CANONICAL_CATALOG_RECONCILIATION.md" },
         { "build": 47, "status": "PASS", "evidence": "BUILD_047_PRICING_TEMPLATE_LIFECYCLE.md" },
-        { "build": 48, "status": "PASS", "evidence": "BUILD_048_DELIVERY_WORKFLOW_AUTHORITY.md" }
+        { "build": 48, "status": "PASS", "evidence": "BUILD_048_DELIVERY_WORKFLOW_AUTHORITY.md" },
+        { "build": 49, "status": "PASS", "evidence": "BUILD_049_JOB_INTAKE_PERSISTENCE.md" }
       ]
     }
   ]
