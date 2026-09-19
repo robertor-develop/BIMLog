@@ -25,6 +25,8 @@
     "test:checkout-readiness": "node scripts/test-checkout-readiness.mjs",
     "test:api-build-termination": "node scripts/test-api-build-termination.mjs",
     "test:proof-roots": "node scripts/test-proof-root.mjs",
+    "fixture:workflow-database": "node scripts/workflow-database-fixture.mjs",
+    "test:workflow-database-fixture": "node scripts/test-workflow-database-fixture.mjs",
     "check:living-brief": "node scripts/check-living-brief.mjs",
     "check:open-loop-dispositions": "node scripts/open-loop-dispositions.mjs",
     "generate:open-loop-dispositions": "node scripts/open-loop-dispositions.mjs --write",

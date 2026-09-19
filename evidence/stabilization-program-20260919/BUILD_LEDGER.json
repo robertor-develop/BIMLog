@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 32,
+    "completedBuilds": 33,
     "totalBuilds": 120,
-    "remainingBuilds": 88,
-    "currentUnpublishedBuilds": 2,
-    "nextBuild": 33,
+    "remainingBuilds": 87,
+    "currentUnpublishedBuilds": 3,
+    "nextBuild": 34,
     "nextPushAfterBuild": 35,
     "nextPublicationAfterBuild": 40,
     "blocker": null
@@ -121,7 +121,8 @@
       "smoke": "Test-harness and release-gate reliability only; push at Build 035, no publication or Navisworks smoke.",
       "builds": [
         { "build": 31, "status": "PASS", "evidence": "BUILD_031_BUILD_TERMINATION_RELIABILITY.md" },
-        { "build": 32, "status": "PASS", "evidence": "BUILD_032_DETERMINISTIC_PROOF_ROOTS.md" }
+        { "build": 32, "status": "PASS", "evidence": "BUILD_032_DETERMINISTIC_PROOF_ROOTS.md" },
+        { "build": 33, "status": "PASS", "evidence": "BUILD_033_WORKFLOW_DATABASE_FIXTURE.md" }
       ]
     }
   ]
