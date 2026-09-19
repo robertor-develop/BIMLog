@@ -309,14 +309,17 @@ async function assembleRuntimeFromInstalledGraph(
     return undefined;
   };
   const approvedSecurityOverrideContracts = new Set([
-    "form-data|^2.5.5|4.0.6",
     "uuid|^8.3.0|11.1.1",
+    "uuid|^9.0.0|11.1.1",
     "uuid|^9.0.1|11.1.1",
   ]);
-  const hasApprovedSecurityOverride = (packageName: string, declaredSpec: string, version: string) => {
+  const hasApprovedSecurityOverride = (packageName: string, declaredSpec: string, version: string, issuer: IssuerBinding) => {
     if (!approvedSecurityOverrideContracts.has(`${packageName}|${declaredSpec}|${version}`)) return false;
+    if (issuer.type !== "package") return false;
+    const separator = issuer.lockKey.lastIndexOf("@");
+    const issuerName = separator > 0 ? issuer.lockKey.slice(0, separator) : issuer.lockKey;
     const overrides = findYamlBlock(lockLines, 0, "overrides");
-    return overrides !== null && readYamlScalar(overrides, 2, packageName) === version;
+    return overrides !== null && readYamlScalar(overrides, 2, `${issuerName}>${packageName}`) === version;
   };
   const parseSemver = (value: string) => {
     const match = value.trim().replace(/^v/, "").match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/);
@@ -434,7 +437,7 @@ async function assembleRuntimeFromInstalledGraph(
       const workspaceKey = `workspace:${packageName}@${lockedReference}`;
       return { packageLockKey: workspaceKey, snapshotLockKey: workspaceKey };
     }
-    if (!satisfiesDeclaredSpec(version, declaredSpec) && !hasApprovedSecurityOverride(packageName, declaredSpec, version)) {
+    if (!satisfiesDeclaredSpec(version, declaredSpec) && !hasApprovedSecurityOverride(packageName, declaredSpec, version, issuer)) {
       throw new Error(`Installed package version does not satisfy its declared spec: ${packageName} expected ${declaredSpec}, received ${version}.`);
     }
     const lockedReference = assertDependencyEdge(issuer, packageName, declaredSpec, version);

@@ -31177,9 +31177,11 @@
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
+        "living-brief/impact-declarations.json",
+        "pnpm-lock.yaml",
+        "pnpm-workspace.yaml"
       ],
-      "reviewedChangeSha256": "11cfe7d46204bcf960794283c9b0bef0f4aa255389eadb52312c3c22c6a6c2a8"
+      "reviewedChangeSha256": "312e9fabf40faa4cae56a3bc49c446036dae0f57b0d250d6b31a491d6e6b530f"
     }
   ]
 }
