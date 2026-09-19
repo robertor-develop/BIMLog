@@ -31,7 +31,17 @@
     "controlledLocalOwnsSourceDependencyEvidenceCommitReviewAndPush": true,
     "replitOwnsVerifiedPullSchemaCorrespondenceApprovedPublishAndRuntimeVerification": true,
     "replitDiagnoseThenStopOnSourceCorrection": true,
-    "exceptionRequiresRobertoScopedApprovalAfterPreflight": true
+    "exceptionRequiresRobertoScopedApprovalAfterPreflight": true,
+    "fixedGithubReplitShellPublishChromePath": true,
+    "replitAgentsAndPromptSourceChangesProhibited": true,
+    "connectorPublishRequiresVerifiedWorkspaceHead": true,
+    "clearAuthorizationPersistsWithoutMagicPhrase": true,
+    "establishedAuthenticatedVisibleBrowserRequired": true,
+    "toolFailureIsToolBlockedNotProductHold": true,
+    "oneBoundedSafeBrowserRecovery": true,
+    "completePublicationReceiptRequired": true,
+    "missingReceiptMeansPushedNotPublished": true,
+    "releaseBlockTerminalFieldsRequired": true
   },
   "defensiveSecurityExecutionPolicy": {
     "authorizedBoundedDefensiveBimlogOwnedOnly": true,

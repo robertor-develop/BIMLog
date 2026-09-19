@@ -30827,6 +30827,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "de3245e36462fa73c7c80724b686825a703c6988d1eee065ecbe37764925f82d"
+    },
+    {
+      "taskId": "fixed-main-replit-release-contract-20260918",
+      "reviewedThroughCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7",
+      "reviewedAt": "2026-09-18T23:30:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release-process correction changes no product doctrine or economic authority."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Defines the fixed MAIN-only Replit Shell release path, persistent authorization, TOOL_BLOCKED classification and durable receipt."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing source, behavior, artifact and field evidence boundaries remain unchanged."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No strategic product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime structure, route, schema or provider configuration changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next and Native source remain untouched."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No formal output design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records exact pushed commit, passing gate, bounded review, missing publication receipt and PUSHED_NOT_PUBLISHED state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Carries the fixed Replit Shell publication and complete receipt gates without reauthorization."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit entries remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/catalog.json",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/check-living-brief.mjs"
+      ],
+      "reviewedChangeSha256": "92ef0e374ec7e4e8e75d31735454a54b4fe095225cbd8e6f2bacfe2edd03d49b"
     }
   ]
 }

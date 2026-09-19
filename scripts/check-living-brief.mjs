@@ -53,6 +53,45 @@ function report(file, message) {
   errors.push(`${file}: ${message}`);
 }
 
+const requiredToolBoundaryControls = [
+  "controlledLocalOwnsSourceDependencyEvidenceCommitReviewAndPush",
+  "replitOwnsVerifiedPullSchemaCorrespondenceApprovedPublishAndRuntimeVerification",
+  "replitDiagnoseThenStopOnSourceCorrection",
+  "exceptionRequiresRobertoScopedApprovalAfterPreflight",
+  "fixedGithubReplitShellPublishChromePath",
+  "replitAgentsAndPromptSourceChangesProhibited",
+  "connectorPublishRequiresVerifiedWorkspaceHead",
+  "clearAuthorizationPersistsWithoutMagicPhrase",
+  "establishedAuthenticatedVisibleBrowserRequired",
+  "toolFailureIsToolBlockedNotProductHold",
+  "oneBoundedSafeBrowserRecovery",
+  "completePublicationReceiptRequired",
+  "missingReceiptMeansPushedNotPublished",
+  "releaseBlockTerminalFieldsRequired",
+];
+const requiredReleaseLanguage = [
+  /Replit Agents and prompt-based Replit\s+source changes are prohibited/i,
+  /connector must never publish from an unverified workspace HEAD/i,
+  /no repeated or\s+magic phrase is required/i,
+  /fresh\s+isolated browser is not a substitute unless session preservation is proven/i,
+  /browser or tool failure is\s+`TOOL_BLOCKED`, not a product hold/i,
+  /candidate commit, remote head, Replit workspace\s+HEAD, schema\/restore result, deployment ID and status/i,
+  /`PUSHED_NOT_PUBLISHED`/i,
+];
+const forbiddenMagicPhrase = /must contain the exact (?:words|phrase).*I am asking you directly/i;
+function fixedReleasePolicyProblems(toolBoundary, claudeText) {
+  const problems = [];
+  if (!toolBoundary || Object.keys(toolBoundary).length !== requiredToolBoundaryControls.length ||
+      requiredToolBoundaryControls.some((control) => toolBoundary[control] !== true)) {
+    problems.push("machine-readable release controls");
+  }
+  if (requiredReleaseLanguage.some((pattern) => !pattern.test(claudeText)) ||
+      forbiddenMagicPhrase.test(claudeText)) {
+    problems.push("release guidance");
+  }
+  return problems;
+}
+
 function relativeName(filePath) {
   return path.relative(repoRoot, filePath).split(path.sep).join("/");
 }
@@ -358,8 +397,9 @@ function validateCatalogAndFreshness() {
     report("living-brief/catalog.json", "deployment supply-chain preflight must cover publish policy, full lockfile, bounded override, builds, exact files, checkpoints, and semantic lockfile delta");
   }
   const toolBoundary = catalog.toolResponsibilityBoundary;
-  if (!toolBoundary || Object.values(toolBoundary).length !== 4 || Object.values(toolBoundary).some((value) => value !== true)) {
-    report("living-brief/catalog.json", "tool responsibility boundary must keep source/Git work local and Replit limited to verified pull, schema correspondence, approved publish, and runtime verification");
+  const claudeText = fs.readFileSync(path.join(livingBriefRoot, "CLAUDE.md"), "utf8");
+  if (fixedReleasePolicyProblems(toolBoundary, claudeText).length > 0) {
+    report("living-brief/catalog.json", "tool responsibility boundary must enforce the fixed verified GitHub/Replit Shell/Publish/live-Chrome path, persistent authorization, safe browser recovery, and complete publication receipt");
   }
   const defensiveSecurityPolicy = catalog.defensiveSecurityExecutionPolicy;
   const defensiveSecurityControls = [
@@ -650,6 +690,18 @@ validateActiveDocument(
 validateRequiredReferences();
 validateStandardsLinks();
 validateCatalogAndFreshness();
+
+if (process.argv.includes("--self-test-release-policy")) {
+  const validText = fs.readFileSync(path.join(livingBriefRoot, "CLAUDE.md"), "utf8");
+  const invalidBoundary = { ...catalog.toolResponsibilityBoundary, replitAgentsAndPromptSourceChangesProhibited: false };
+  const invalidText = `${validText}\nA release must contain the exact words I am asking you directly.\n`;
+  if (fixedReleasePolicyProblems(invalidBoundary, validText).length === 0 ||
+      fixedReleasePolicyProblems(catalog.toolResponsibilityBoundary, invalidText).length === 0) {
+    report("scripts/check-living-brief.mjs", "release-policy self-test failed to reject contradictory provider or magic-phrase guidance");
+  } else {
+    console.log("Fixed Replit release-policy negative self-test passed.");
+  }
+}
 
 if (errors.length > 0) {
   console.error(`Living Brief integrity check failed with ${errors.length} error(s):`);

@@ -323,6 +323,26 @@ or acceptance of an automatic checkpoint as history. If publish-only evidence id
 Replit diagnoses and reports, then stops. A controlled local task implements, reviews, and pushes the correction;
 Replit pulls that verified commit and retries. An exception needs Roberto's explicit scoped approval after preflight.
 
+### Fixed MAIN-only Replit release contract
+
+An authorized BIMLog release has one fixed path: verify the exact GitHub candidate, use the established signed-in
+visible Replit workspace, align its clean HEAD to that exact remote commit through Replit Shell, run the existing
+schema-correspondence, restore and zero-destructive-change checks when applicable, perform one Replit Publish, then
+verify the live release identity, health and authenticated Chrome workflow. Replit Agents and prompt-based Replit
+source changes are prohibited. A connector must never publish from an unverified workspace HEAD.
+
+Roberto's clear instruction to proceed, push, publish or deploy remains valid through completion; no repeated or
+magic phrase is required. The established authenticated visible browser session is the release session. A fresh
+isolated browser is not a substitute unless session preservation is proven before use. A browser or tool failure is
+`TOOL_BLOCKED`, not a product hold or a Roberto decision. Attempt one bounded safe recovery without closing or
+replacing Roberto's active browser; if access remains unavailable, preserve the exact candidate and evidence.
+
+Publication is complete only when one durable receipt records the candidate commit, remote head, Replit workspace
+HEAD, schema/restore result, deployment ID and status, live asset or release identity, health, authenticated smoke,
+database effects and rollback reference. Without that complete receipt, the exact status is
+`PUSHED_NOT_PUBLISHED`; an older healthy deployment does not prove the candidate was published. Every release
+work block ends with completed, current, remaining, next, authorization, blocker and task-status fields.
+
 ### AI CEO / lifecycle-network execution boundary
 
 BIMLog's approved lifecycle-network roadmap uses Roberto, the master orchestrator, focused product agents,
