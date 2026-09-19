@@ -529,6 +529,12 @@ assert.equal((await readReceipt(outOfRange)).status, "FAIL");
 assert.equal(await pathExists(outOfRange.fakePnpmMarker), false);
 results.push({ label: "out-of-range-version-present-in-lock", status: "PASS" });
 
+const buildSource = await readFile(new URL("../build.ts", import.meta.url), "utf8");
+assert.match(buildSource, /"uuid\|\^8\.3\.0\|11\.1\.1"/);
+assert.match(buildSource, /"uuid\|\^9\.0\.1\|11\.1\.1"/);
+assert.match(buildSource, /readYamlScalar\(overrides, 2, packageName\) === version/);
+results.push({ label: "bounded-security-override-contract", status: "PASS" });
+
 const escaped = await createFixture("escape");
 const outside = path.join(escaped.root, "outside-package");
 await writeFixtureFile(outside, "outside.txt", "outside\n");

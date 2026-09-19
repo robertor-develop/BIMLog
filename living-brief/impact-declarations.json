@@ -31172,12 +31172,14 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/build.ts",
+        "artifacts/api-server/scripts/test-deploy-runtime-closure.ts",
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "fc077526a22eeb44a8bb25774d198772dcbc7544976040b5a31c22f0a845ae28"
+      "reviewedChangeSha256": "ff390b24bb5214974df113dc923bd4c996493831a4e77490435a13c44a01af6e"
     }
   ]
 }

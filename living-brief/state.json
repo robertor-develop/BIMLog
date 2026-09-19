@@ -2,10 +2,12 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "93b58852e2bd448bd863e946307131a4cc7944b3",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "9e7b330ba10ecab694f0d8f6eb67c79ef2ad7f553cd9d1579fd516990388251e",
+  "bundleSha256": "71f881da28f2c8f33149915fb560be51207ec29136abf98ba2b2a283eab7f31f",
   "impact": {
     "baselineCommit": "93b58852e2bd448bd863e946307131a4cc7944b3",
     "changedPaths": [
+      "artifacts/api-server/build.ts",
+      "artifacts/api-server/scripts/test-deploy-runtime-closure.ts",
       "living-brief/CLAUDE.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/STATUS.md",
@@ -14,6 +16,7 @@
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -33,7 +36,7 @@
     {
       "key": "claude",
       "file": "CLAUDE.md",
-      "sha256": "a18f41a849593a6db6167701bb45a882783198a5b4b409ae2783a1616412cf58",
+      "sha256": "76c6e33eadab0e4588a7d00155f8883a121992e0faec1da48e4275ea15ce7c15",
       "sourceChangedAt": "2026-09-19T07:30:23.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "93b58852e2bd448bd863e946307131a4cc7944b3",
@@ -117,7 +120,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "3f458cc46fc408651fefabc16dcc24e4ba960f6883ef078ef51078e284f05093",
+      "sha256": "f9a70fae3766e91208e745c5eabe927b541e763a7b50fb52c3c02fca3937d531",
       "sourceChangedAt": "2026-09-19T07:30:23.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "93b58852e2bd448bd863e946307131a4cc7944b3",
@@ -129,7 +132,7 @@
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "3277f8b940421b2a67e21ed058e643e112c83cf38447824f39d85add32ce828f",
+      "sha256": "74e4ec1f42dd3ad164e2f959d78254ae986bcf89374803bea72a5f2f26d9044e",
       "sourceChangedAt": "2026-09-19T07:30:23.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "93b58852e2bd448bd863e946307131a4cc7944b3",

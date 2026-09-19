@@ -308,6 +308,15 @@ async function assembleRuntimeFromInstalledGraph(
     }
     return undefined;
   };
+  const approvedSecurityOverrideContracts = new Set([
+    "uuid|^8.3.0|11.1.1",
+    "uuid|^9.0.1|11.1.1",
+  ]);
+  const hasApprovedSecurityOverride = (packageName: string, declaredSpec: string, version: string) => {
+    if (!approvedSecurityOverrideContracts.has(`${packageName}|${declaredSpec}|${version}`)) return false;
+    const overrides = findYamlBlock(lockLines, 0, "overrides");
+    return overrides !== null && readYamlScalar(overrides, 2, packageName) === version;
+  };
   const parseSemver = (value: string) => {
     const match = value.trim().replace(/^v/, "").match(/^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?/);
     return match ? { major: Number(match[1]), minor: Number(match[2]), patch: Number(match[3]), prerelease: match[4] ?? "" } : null;
@@ -424,7 +433,7 @@ async function assembleRuntimeFromInstalledGraph(
       const workspaceKey = `workspace:${packageName}@${lockedReference}`;
       return { packageLockKey: workspaceKey, snapshotLockKey: workspaceKey };
     }
-    if (!satisfiesDeclaredSpec(version, declaredSpec)) {
+    if (!satisfiesDeclaredSpec(version, declaredSpec) && !hasApprovedSecurityOverride(packageName, declaredSpec, version)) {
       throw new Error(`Installed package version does not satisfy its declared spec: ${packageName} expected ${declaredSpec}, received ${version}.`);
     }
     const lockedReference = assertDependencyEdge(issuer, packageName, declaredSpec, version);
