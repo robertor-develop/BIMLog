@@ -7,7 +7,7 @@ const drift = [];
 for (const [relativePath, expected] of generatedReleaseFiles(identity)) {
   const outputPath = path.join(repositoryRoot, relativePath);
   const actual = fs.existsSync(outputPath) ? fs.readFileSync(outputPath, "utf8") : null;
-  if (actual !== expected) drift.push(relativePath);
+  if (actual?.replace(/\r\n/g, "\n") !== expected.replace(/\r\n/g, "\n")) drift.push(relativePath);
 }
 if (drift.length) {
   console.error(`RELEASE_IDENTITY_DRIFT=${drift.join(",")}`);

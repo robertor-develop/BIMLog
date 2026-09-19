@@ -1,0 +1,16 @@
+{
+  "schemaVersion": "bimlog-release-history-v1",
+  "currentPublished": "block-02-p32",
+  "currentCandidate": "block-03-n18-p33",
+  "records": [
+    { "id": "p18", "sourceCommit": "e6d4074e97b5bdf339bde28e48272fe745b104d8", "status": "superseded", "evidence": "accepted Living Brief publication and live verification" },
+    { "id": "p31", "sourceCommit": "8ee7bb16193995380d4886d66b2e28f94d276f71", "publicationReceiptId": "c1aca811", "status": "superseded", "evidence": "accepted health and authenticated Chrome verification" },
+    { "id": "baseline-p32", "sourceCommit": "07d024ef3de739abb436da58fe29797af5304b8a", "publicationReceiptId": "9bb79bc6", "deploymentId": "ae1fd4d7", "status": "superseded", "supersededBy": "block-02-p32" },
+    { "id": "block-02-p32", "sourceCommit": "fdb2be13622aa0f8ed2fc1e4f60792a7bfbcc7d0", "sourceTree": "dc3252c270d8449e21ebf8a444cb8ee6256a54df", "publicationReceiptId": "e89dc3b4", "status": "current-published", "visibleRelease": "v1.05.N17-P32", "evidence": "external Block 02 live receipt; health and authenticated Chrome PASS" },
+    { "id": "block-03-n18-p33", "release": "v1.05.N18-P33", "status": "current-candidate", "sourceBinding": "exact clean Build 015 head in Git and external push receipt", "publicationDueAfterBuild": 20 }
+  ],
+  "nonReleaseRecords": [
+    { "sourceCommit": "db4dffc06eb99ad0afe560dfa9f66204a02c03f7", "classification": "superseded-intermediate-never-published" },
+    { "sourceCommit": "349d90a9650fd85a49e57d777ce7e3567a0e9569", "classification": "historical-migration-rehearsal-only" }
+  ]
+}

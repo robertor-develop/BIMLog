@@ -31252,6 +31252,92 @@
         "scripts/check-dependency-provenance.mjs"
       ],
       "reviewedChangeSha256": "abb9781c747f4b4e4c16e725e347166bc81301b183b47cb2c797357ce4874424"
+    },
+    {
+      "taskId": "bimlog-stabilization-block03-release-identity-20260919",
+      "reviewedThroughCommit": "d19f48b5438035f4cc616b25ba694cbd7faa28ef",
+      "reviewedAt": "2026-09-19T10:31:59Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release identity coherence changes no ecosystem ownership or product law."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Records the executable identity and immutable receipt operating contracts."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing full-gate, field-proof, and publication acceptance remain required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product strategy or roadmap changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic structural inventory now includes the release-metadata implementation and behavior proof; routes and schema otherwise remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native behavior is unchanged; only generated release identity is unified."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer report design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 02 as published and Block 03 as the current push-only candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes stale Block 02 publication items and records exact Block 03/04 milestones."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit evidence remains append-only."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/BLOCK_03_BUILDS_011_015.md",
+        "evidence/stabilization-program-20260919/BLOCK_03_RELEASE_HISTORY.json",
+        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N18-P33.zip",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N18-P33.zip.sha256",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N18-P33.zip",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N18-P33.zip.sha256",
+        "plugins/BIMLogLensNext/Build-Package-LensNext.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json",
+        "scripts/check-release-identity.mjs",
+        "scripts/release-identity.mjs",
+        "scripts/test-release-identity.mjs"
+      ],
+      "reviewedChangeSha256": "ff0f7e76b2b27f2903f049d1d24be5c107fb829d941dd65354a3cfbcb96fb411"
     }
   ]
 }

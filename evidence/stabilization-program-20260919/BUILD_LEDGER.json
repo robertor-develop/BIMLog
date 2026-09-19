@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 10,
+    "completedBuilds": 15,
     "totalBuilds": 120,
-    "remainingBuilds": 110,
-    "currentUnpublishedBuilds": 10,
-    "nextBuild": 11,
-    "nextPushAfterBuild": 15,
+    "remainingBuilds": 105,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 16,
+    "nextPushAfterBuild": 20,
     "nextPublicationAfterBuild": 20,
     "blocker": null
   },
@@ -55,6 +55,20 @@
         { "build": 8, "status": "PASS", "evidence": "block-02/BUILD_008_REMAINING_RUNTIME_DEPENDENCIES.md" },
         { "build": 9, "status": "PASS", "evidence": "block-02/BUILD_009_DEPENDENCY_PROVENANCE.md" },
         { "build": 10, "status": "PASS_LOCAL_RELEASE_GATE", "evidence": "block-02/BUILD_010_SECURITY_REGRESSION_AND_RELEASE.md" }
+      ]
+    },
+    {
+      "block": 3,
+      "buildRange": "011-015",
+      "status": "PASS_PENDING_FINAL_GATE_AND_PUSH",
+      "publicationRequired": false,
+      "smoke": "Focused Navisworks 2021/2025 package and test smoke required; no install. Production publication and authenticated Chrome smoke are due after Build 020.",
+      "builds": [
+        { "build": 11, "status": "PASS", "evidence": "BLOCK_03_BUILDS_011_015.md" },
+        { "build": 12, "status": "PASS", "evidence": "BLOCK_03_BUILDS_011_015.md" },
+        { "build": 13, "status": "PASS", "evidence": "BLOCK_03_BUILDS_011_015.md" },
+        { "build": 14, "status": "PASS", "evidence": "BLOCK_03_BUILDS_011_015.md" },
+        { "build": 15, "status": "PASS_PENDING_FINAL_GATE_AND_PUSH", "evidence": "BLOCK_03_BUILDS_011_015.md" }
       ]
     }
   ]

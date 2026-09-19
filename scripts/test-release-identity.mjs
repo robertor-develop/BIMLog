@@ -11,7 +11,7 @@ assert.throws(() => validateReleaseIdentity({ ...identity, binaryVersion: "1.5.1
 assert.throws(() => validateReleaseIdentity({ ...identity, release: { ...identity.release, platform: 34 } }), /label mismatch/i);
 
 for (const [relativePath, expected] of generatedReleaseFiles(identity)) {
-  assert.equal(fs.readFileSync(path.join(repositoryRoot, relativePath), "utf8"), expected, `${relativePath} must match the contract`);
+  assert.equal(fs.readFileSync(path.join(repositoryRoot, relativePath), "utf8").replace(/\r\n/g, "\n"), expected.replace(/\r\n/g, "\n"), `${relativePath} must match the contract`);
 }
 
 const navbar = fs.readFileSync(path.join(repositoryRoot, "artifacts/bimlog/src/components/layout/Navbar.tsx"), "utf8");
