@@ -63,6 +63,10 @@ const errorEs: Record<string, string> = {
   JOB_OPERATIONS_STALE: "Este registro cambió en otra sesión. Recargue antes de guardar.",
   JOB_OPERATIONS_HOURS_INVALID: "Las horas deben ser mayores que cero y no pueden exceder 24.",
   JOB_OPERATIONS_DATE_INVALID: "La fecha de trabajo no es válida.",
+  JOB_OPERATIONS_DATE_RANGE_INVALID: "La fecha inicial de la tarea no puede ser posterior a su fecha límite.",
+  JOB_OPERATIONS_DEPENDENCIES_INVALID: "Las dependencias de la tarea no son válidas.",
+  JOB_OPERATIONS_DEPENDENCY_CYCLE: "Las dependencias de la tarea no pueden formar un ciclo.",
+  JOB_OPERATIONS_SCHEDULE_DENIED: "Solamente el líder del proyecto puede cambiar fechas o dependencias.",
   JOB_OPERATIONS_PROGRESS_INVALID: "El progreso debe ser un número entero de 0 a 100.",
   JOB_OPERATIONS_STATUS_INVALID: "El estado de la tarea no es válido.",
   JOB_OPERATIONS_DELIVERABLE_TYPE_INVALID: "El tipo de entregable no es válido.",
@@ -118,7 +122,7 @@ router.post("/projects/:projectId/operations/work-items/:workItemId/delivery-wor
   res.json(await reopenWorkItemDeliveryPhase({ actorUserId: req.user.userId, projectId: req.params.projectId, workItemId: req.params.workItemId, targetPhaseId: req.body?.targetPhaseId, reason: req.body?.reason, expectedRevision: req.body?.expectedRevision }));
 }));
 router.patch("/projects/:projectId/operations/tasks/:taskId", run(async (req, res) => {
-  res.json(await updateJobOperationTask({ actorUserId: req.user.userId, projectId: req.params.projectId, taskId: req.params.taskId, expectedVersion: req.body?.expectedVersion, status: req.body?.status, progressPercent: req.body?.progressPercent, assigneeUserId: req.body?.assigneeUserId }));
+  res.json(await updateJobOperationTask({ actorUserId: req.user.userId, projectId: req.params.projectId, taskId: req.params.taskId, expectedVersion: req.body?.expectedVersion, status: req.body?.status, progressPercent: req.body?.progressPercent, assigneeUserId: req.body?.assigneeUserId, startDate: req.body?.startDate, dueDate: req.body?.dueDate, predecessorTaskIds: req.body?.predecessorTaskIds }));
 }));
 router.patch("/projects/:projectId/operations/assignments/:assignmentId", run(async (req, res) => {
   res.json(await reassignJobOperationResource({ actorUserId: req.user.userId, projectId: req.params.projectId, assignmentId: req.params.assignmentId, expectedVersion: req.body?.expectedVersion, userId: req.body?.userId, reason: req.body?.reason }));

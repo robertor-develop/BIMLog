@@ -136,9 +136,13 @@ ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS service_name text;
 ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS phase_id text;
 ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS phase_code text;
 ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS phase_name text;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS start_date date;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS due_date date;
+ALTER TABLE job_activation_tasks ADD COLUMN IF NOT EXISTS predecessor_task_ids text[] NOT NULL DEFAULT '{}'::text[];
 ALTER TABLE job_activation_resource_assignments ADD COLUMN IF NOT EXISTS version integer NOT NULL DEFAULT 1;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_version_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_version_chk CHECK(version>0); END IF; END $$;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_progress_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_progress_chk CHECK(progress_percent>=0 AND progress_percent<=100); END IF; END $$;
+DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_task_dates_chk') THEN ALTER TABLE job_activation_tasks ADD CONSTRAINT job_activation_task_dates_chk CHECK(start_date IS NULL OR due_date IS NULL OR start_date<=due_date); END IF; END $$;
 DO $$ BEGIN IF NOT EXISTS(SELECT 1 FROM pg_constraint WHERE conname='job_activation_resource_version_chk') THEN ALTER TABLE job_activation_resource_assignments ADD CONSTRAINT job_activation_resource_version_chk CHECK(version>0); END IF; END $$;
 CREATE TABLE IF NOT EXISTS job_activation_time_entries(
   id text PRIMARY KEY,

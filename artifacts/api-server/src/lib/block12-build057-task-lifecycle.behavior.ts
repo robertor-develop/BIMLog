@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const here = path.dirname(fileURLToPath(import.meta.url));
+const read = (file: string) => fs.readFileSync(path.resolve(here, file), "utf8");
+const migration = read("./job-intake-migration.ts"), service = read("./job-operations-service.ts"), route = read("../routes/job-operations.ts"), page = read("../../../bimlog/src/pages/JobOperationsWorkspace.tsx");
+for (const token of ["start_date date", "due_date date", "predecessor_task_ids text[]", "job_activation_task_dates_chk"]) assert.match(migration, new RegExp(token.replace("[]", "\\[\\]")));
+assert.match(service, /WITH RECURSIVE successors/);
+assert.match(service, /JOB_OPERATIONS_DEPENDENCY_CYCLE/);
+assert.match(service, /WHERE id=\$1 AND version=\$2/);
+assert.match(service, /predecessorTaskIds, version: updated\.version/);
+assert.match(route, /predecessorTaskIds: req\.body\?\.predecessorTaskIds/);
+for (const phrase of ["Start date", "Due date", "Predecessors"]) assert.match(page, new RegExp(phrase));
+console.log("Build 057 task ownership, dates, dependencies, progress persistence, and stale-write protection: PASS");

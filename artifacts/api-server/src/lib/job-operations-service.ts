@@ -374,7 +374,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
   if (!access.intakeId) return { available: false, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity: { projectId, intakeId: null, companyId: access.companyId, clientCompanyId: null, jobCode: access.projectCode, jobName: access.projectName }, canManage: access.canManage, capabilities, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta };
   const [workItems, tasks, assignments, timeEntries, deliverables, packages, packageTasks, members, files, totals, intakeData, apuSnapshots] = await Promise.all([
     pool.query(`SELECT id,stable_scope_item_id "stableScopeItemId",name,description,unit,planned_hours "plannedHours",workflow_template "workflowTemplate",status,billing_hourly_rate "billingHourlyRate",planned_billable_value "plannedBillableValue",contract_id "contractId" FROM job_activation_work_items WHERE intake_id=$1 ORDER BY created_at,id`, [access.intakeId]),
-    pool.query(`SELECT t.id,t.work_item_id "workItemId",t.task_key "taskKey",t.name_en "nameEn",t.name_es "nameEs",t.status,t.version,t.progress_percent "progressPercent",t.planned_hours "plannedHours",t.assignee_user_id "assigneeUserId",t.discipline_id "disciplineId",t.discipline_code "disciplineCode",t.discipline_name "disciplineName",t.service_id "serviceId",t.service_code "serviceCode",t.service_name "serviceName",t.phase_id "phaseId",t.phase_code "phaseCode",t.phase_name "phaseName",COALESCE(e.actual_hours,0)::text "actualHours",COALESCE(d.deliverable_count,0)::int "deliverableCount"
+    pool.query(`SELECT t.id,t.work_item_id "workItemId",t.task_key "taskKey",t.name_en "nameEn",t.name_es "nameEs",t.status,t.version,t.progress_percent "progressPercent",t.planned_hours "plannedHours",t.assignee_user_id "assigneeUserId",t.start_date "startDate",t.due_date "dueDate",t.predecessor_task_ids "predecessorTaskIds",t.discipline_id "disciplineId",t.discipline_code "disciplineCode",t.discipline_name "disciplineName",t.service_id "serviceId",t.service_code "serviceCode",t.service_name "serviceName",t.phase_id "phaseId",t.phase_code "phaseCode",t.phase_name "phaseName",COALESCE(e.actual_hours,0)::text "actualHours",COALESCE(d.deliverable_count,0)::int "deliverableCount"
       FROM job_activation_tasks t
       JOIN job_activation_work_items w ON w.id=t.work_item_id
       LEFT JOIN LATERAL (SELECT SUM(hours) actual_hours FROM job_activation_time_entries WHERE task_id=t.id) e ON true
@@ -595,7 +595,7 @@ export async function updateJobOperationPackage(input: { actorUserId: number; pr
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 
-export async function updateJobOperationTask(input: { actorUserId: number; projectId: unknown; taskId: unknown; expectedVersion: unknown; status: unknown; progressPercent: unknown; assigneeUserId?: unknown }) {
+export async function updateJobOperationTask(input: { actorUserId: number; projectId: unknown; taskId: unknown; expectedVersion: unknown; status: unknown; progressPercent: unknown; assigneeUserId?: unknown; startDate?: unknown; dueDate?: unknown; predecessorTaskIds?: unknown }) {
   await waitForJobIntakeMigration();
   const projectId = positiveInt(input.projectId, "projectId"), taskId = id(input.taskId, "taskId"), expectedVersion = positiveInt(input.expectedVersion, "expectedVersion");
   const status = String(input.status ?? "");
@@ -605,18 +605,31 @@ export async function updateJobOperationTask(input: { actorUserId: number; proje
   if (status === "complete") progress = 100;
   if (status === "not_started") progress = 0;
   const assigneeUserId = input.assigneeUserId == null || input.assigneeUserId === "" ? null : positiveInt(input.assigneeUserId, "assigneeUserId");
+  const startDate = optionalDate(input.startDate, "startDate"), dueDate = optionalDate(input.dueDate, "dueDate");
+  if (startDate && dueDate && startDate > dueDate) throw new FinancialControlError(400, "JOB_OPERATIONS_DATE_RANGE_INVALID", "Task start date must not be after its due date.");
+  if (!Array.isArray(input.predecessorTaskIds)) throw new FinancialControlError(400, "JOB_OPERATIONS_DEPENDENCIES_INVALID", "Task predecessors must be an array.");
+  const predecessorTaskIds = [...new Set(input.predecessorTaskIds.map((value) => id(value, "predecessorTaskId")))];
+  if (predecessorTaskIds.length !== input.predecessorTaskIds.length || predecessorTaskIds.includes(taskId)) throw new FinancialControlError(400, "JOB_OPERATIONS_DEPENDENCIES_INVALID", "Task predecessors must be unique and cannot include the task itself.");
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
     const control = await taskAccess(client, input.actorUserId, projectId, taskId);
     if (!control.canControl) throw new FinancialControlError(403, "JOB_OPERATIONS_TASK_CONTROL_DENIED", "Only the project leader or assigned team members may update this task.");
+    const schedulingChanged = startDate !== (control.task.start_date ? String(control.task.start_date).slice(0, 10) : null) || dueDate !== (control.task.due_date ? String(control.task.due_date).slice(0, 10) : null) || JSON.stringify(predecessorTaskIds.sort()) !== JSON.stringify([...(control.task.predecessor_task_ids ?? [])].sort());
+    if (schedulingChanged && !control.access.canManage) throw new FinancialControlError(403, "JOB_OPERATIONS_SCHEDULE_DENIED", "Only the project leader may change task dates or dependencies.");
     if (assigneeUserId !== Number(control.task.assignee_user_id) && !control.access.canManage) throw new FinancialControlError(403, "JOB_OPERATIONS_REASSIGN_DENIED", "Only the project leader may reassign tasks.");
     if (assigneeUserId && !(await client.query(`SELECT 1 FROM project_members WHERE project_id=$1 AND user_id=$2 AND status='active'`, [projectId, assigneeUserId])).rows[0]) throw new FinancialControlError(400, "JOB_OPERATIONS_ASSIGNEE_INVALID", "The assignee must be an active project member.");
-    const updated = (await client.query(`UPDATE job_activation_tasks SET status=$3,progress_percent=$4,assignee_user_id=$5,version=version+1,updated_at=now() WHERE id=$1 AND version=$2 RETURNING id,work_item_id,version`, [taskId, expectedVersion, status, progress, assigneeUserId])).rows[0];
+    if (predecessorTaskIds.length) {
+      const valid = (await client.query(`SELECT COUNT(*)::integer count FROM job_activation_tasks t JOIN job_activation_work_items w ON w.id=t.work_item_id WHERE t.id=ANY($1::text[]) AND w.project_id=$2`, [predecessorTaskIds, projectId])).rows[0]?.count ?? 0;
+      if (Number(valid) !== predecessorTaskIds.length) throw new FinancialControlError(400, "JOB_OPERATIONS_DEPENDENCIES_INVALID", "Every predecessor must belong to this project.");
+      const cycle = (await client.query(`WITH RECURSIVE successors(id) AS (SELECT id FROM job_activation_tasks WHERE $1=ANY(predecessor_task_ids) UNION SELECT t.id FROM job_activation_tasks t JOIN successors s ON s.id=ANY(t.predecessor_task_ids)) SELECT 1 FROM successors WHERE id=ANY($2::text[]) LIMIT 1`, [taskId, predecessorTaskIds])).rows[0];
+      if (cycle) throw new FinancialControlError(409, "JOB_OPERATIONS_DEPENDENCY_CYCLE", "Task dependencies cannot create a cycle.");
+    }
+    const updated = (await client.query(`UPDATE job_activation_tasks SET status=$3,progress_percent=$4,assignee_user_id=$5,start_date=$6,due_date=$7,predecessor_task_ids=$8::text[],version=version+1,updated_at=now() WHERE id=$1 AND version=$2 RETURNING id,work_item_id,version`, [taskId, expectedVersion, status, progress, assigneeUserId, startDate, dueDate, predecessorTaskIds])).rows[0];
     if (!updated) throw new FinancialControlError(409, "JOB_OPERATIONS_STALE", "This task changed in another session. Reload before saving.");
-    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "task_updated", workItemId: updated.work_item_id, taskId, evidence: { status, progressPercent: progress, assigneeUserId, version: updated.version } });
+    await event(client, { projectId, actorUserId: input.actorUserId, eventType: "task_updated", workItemId: updated.work_item_id, taskId, evidence: { status, progressPercent: progress, assigneeUserId, startDate, dueDate, predecessorTaskIds, version: updated.version } });
     await client.query("COMMIT");
-    return { id: taskId, version: Number(updated.version), status, progressPercent: progress, assigneeUserId };
+    return { id: taskId, version: Number(updated.version), status, progressPercent: progress, assigneeUserId, startDate, dueDate, predecessorTaskIds };
   } catch (error) { await client.query("ROLLBACK"); throw error; } finally { client.release(); }
 }
 

@@ -893,6 +893,9 @@ export function JobOperationsWorkspace() {
               status: task.status,
               progressPercent: task.progressPercent,
               assigneeUserId: task.assigneeUserId ?? "",
+              startDate: task.startDate?.slice?.(0, 10) ?? "",
+              dueDate: task.dueDate?.slice?.(0, 10) ?? "",
+              predecessorTaskIds: task.predecessorTaskIds ?? [],
             },
           ]),
         ),
@@ -2187,6 +2190,20 @@ export function JobOperationsWorkspace() {
                             ))}
                           </select>
                         </label>
+                        <label>
+                          {tt("Start date", "Fecha inicial")}
+                          <input disabled={!data.canManage} type="date" value={draft.startDate ?? ""} onChange={(e) => setDrafts((old) => ({ ...old, [task.id]: { ...draft, startDate: e.target.value } }))} />
+                        </label>
+                        <label>
+                          {tt("Due date", "Fecha límite")}
+                          <input disabled={!data.canManage} type="date" value={draft.dueDate ?? ""} onChange={(e) => setDrafts((old) => ({ ...old, [task.id]: { ...draft, dueDate: e.target.value } }))} />
+                        </label>
+                        <label>
+                          {tt("Predecessors", "Predecesoras")}
+                          <select disabled={!data.canManage} multiple value={draft.predecessorTaskIds ?? []} onChange={(e) => setDrafts((old) => ({ ...old, [task.id]: { ...draft, predecessorTaskIds: Array.from(e.target.selectedOptions, (option) => option.value) } }))}>
+                            {(data.tasks ?? []).filter((candidate: any) => candidate.id !== task.id).map((candidate: any) => <option key={candidate.id} value={candidate.id}>{language === "es" ? candidate.nameEs : candidate.nameEn}</option>)}
+                          </select>
+                        </label>
                         <div className="jo-actions">
                           <button
                             className="primary"
@@ -2206,6 +2223,9 @@ export function JobOperationsWorkspace() {
                                     assigneeUserId: draft.assigneeUserId
                                       ? Number(draft.assigneeUserId)
                                       : null,
+                                    startDate: draft.startDate || null,
+                                    dueDate: draft.dueDate || null,
+                                    predecessorTaskIds: draft.predecessorTaskIds ?? [],
                                   }),
                                 },
                                 tt("Task updated.", "Tarea actualizada."),
