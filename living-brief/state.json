@@ -1,17 +1,32 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
+  "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "b751fc36f4a545753eeac8bfa4ec7b1ca98fc4f070c03aff9fcd124eb5eaeb76",
+  "bundleSha256": "8a9ea621e7e23701996dc41e3374d88296ad89833773497abcc7785135775df2",
   "impact": {
-    "baselineCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
+    "baselineCommit": "209046fbc2dee34dc29019d20109ee702b244447",
     "changedPaths": [
-      "artifacts/api-server/src/lib/financial-budget-contract.ts",
-      "artifacts/api-server/src/lib/financial-correctness-contract.ts",
-      "artifacts/api-server/src/lib/financial-statement-mapping.behavior.ts",
-      "evidence/stabilization-program-20260919/BUILD_052_STATEMENT_MAPPING_REGRESSION.md",
+      "artifacts/api-server/package.json",
+      "artifacts/api-server/src/lib/block12-build056-canonical-project-identity.behavior.ts",
+      "artifacts/api-server/src/lib/block12-build057-task-lifecycle.behavior.ts",
+      "artifacts/api-server/src/lib/block12-build058-financial-authority.behavior.ts",
+      "artifacts/api-server/src/lib/block12-build059-operational-projections.behavior.ts",
+      "artifacts/api-server/src/lib/block12-build060-intake-operations-acceptance.behavior.ts",
+      "artifacts/api-server/src/lib/job-intake-migration.ts",
+      "artifacts/api-server/src/lib/job-operations-service.ts",
+      "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
+      "artifacts/api-server/src/routes/job-operations.ts",
+      "artifacts/bimlog/src/pages/JobOperationsWorkspace.tsx",
+      "evidence/stabilization-program-20260919/BUILD_056_CANONICAL_PROJECT_IDENTITY.md",
+      "evidence/stabilization-program-20260919/BUILD_057_OPERATIONS_TASK_LIFECYCLE.md",
+      "evidence/stabilization-program-20260919/BUILD_058_CANONICAL_FINANCIAL_AUTHORITY.md",
+      "evidence/stabilization-program-20260919/BUILD_059_LIVE_OPERATIONAL_PROJECTIONS.md",
+      "evidence/stabilization-program-20260919/BUILD_060_INTAKE_OPERATIONS_ACCEPTANCE.md",
+      "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json"
+      "living-brief/impact-declarations.json",
+      "scripts/check-current-state-contract.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -27,11 +42,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "claude",
@@ -39,11 +54,11 @@
       "sha256": "fda29c7bd0b092e1de189b54249545c345a7d2e84f3cdea4675a027637794270",
       "sourceChangedAt": "2026-09-19T07:40:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "quality",
@@ -51,11 +66,11 @@
       "sha256": "4e2b063d11ac9a8bc64376e71f5a175bab4eafc93dc003d311ec2ca3ccc10525",
       "sourceChangedAt": "2026-09-19T13:19:19-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "vision",
@@ -63,23 +78,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "d1229ff76de3e4df4df76a282bbd53e517b6dee88a399311705cba8e63d4bd14",
-      "sourceChangedAt": "2026-09-19T16:25:18-04:00",
-      "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "sha256": "26dc11c4c38ea20f8f8124e62f581fc2693151c38de93e4db3a5752f0e5e99d0",
+      "sourceChangedAt": "2026-09-19T21:00:00.000Z",
+      "changeState": "candidate",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "plugin",
@@ -87,11 +102,11 @@
       "sha256": "fb795b9d05a3a7cd591c740980ebfeb5d4dfa42aae31e8d51ecaea1438e4f5a4",
       "sourceChangedAt": "2026-09-19T12:29:20-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "report_design_system",
@@ -99,11 +114,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "standards_register",
@@ -111,23 +126,23 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "070bc1cc89eb98d412f9221a8b28f9fd22b4e5fbc6b77c1277cd3f09fc282b61",
-      "sourceChangedAt": "2026-09-19T20:36:00.000Z",
+      "sha256": "5f7fe5ffff84c373764eae19f07198baba29b4f98560575e39150492527bd252",
+      "sourceChangedAt": "2026-09-19T21:00:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "open_loop",
@@ -135,11 +150,11 @@
       "sha256": "bdd401c41207bc441a15ae996317d2b788c338be7776d706d77b742f3c4ab659",
       "sourceChangedAt": "2026-09-19T09:34:06-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     },
     {
       "key": "audit",
@@ -147,11 +162,11 @@
       "sha256": "d30bc4934f1e5e68601f4230b0309ee9927cb0fdc3aca96825e69b2f6d4468d6",
       "sourceChangedAt": "2026-09-17T15:16:09-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
-      "semanticReviewTask": "bimlog-stabilization-block11-financial-correctness-20260919",
+      "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewedThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
+      "semanticReviewTask": "bimlog-stabilization-block12-operations-lifecycle-20260919",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-19T20:20:00.000Z"
+      "semanticReviewedAt": "2026-09-19T21:00:00.000Z"
     }
   ]
 }

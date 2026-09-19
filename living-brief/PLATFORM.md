@@ -187,6 +187,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts
 - artifacts/api-server/src/lib/block10-controlled-acceptance.behavior.ts
 - artifacts/api-server/src/lib/block11-financial-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block12-build056-canonical-project-identity.behavior.ts
+- artifacts/api-server/src/lib/block12-build057-task-lifecycle.behavior.ts
+- artifacts/api-server/src/lib/block12-build058-financial-authority.behavior.ts
+- artifacts/api-server/src/lib/block12-build059-operational-projections.behavior.ts
+- artifacts/api-server/src/lib/block12-build060-intake-operations-acceptance.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
