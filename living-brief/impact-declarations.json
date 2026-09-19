@@ -31038,6 +31038,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "eb9108cb937b961601a23f08b20f4ec2b35f39056cc665823844c39986038774"
+    },
+    {
+      "taskId": "bimlog-stabilization-build005-valid-startup-correction-20260919",
+      "reviewedThroughCommit": "06bec6af3f0aa90a3ffceecf29fac1cc96b1f8e0",
+      "reviewedAt": "2026-09-19T06:03:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ownership or ecosystem doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Records the split liveness bootstrap, deferred application bundle, and protected readiness semantics."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing cold-start budgets remain unchanged and must pass on the exact clean artifact."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product strategy changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Packaging separates listener bootstrap from application parsing without changing routes, schema, provider configuration, or application behavior."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native or installer file changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the valid-runtime probe failure, root cause, bounded correction, and remaining terminal gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Records the passing focused bootstrap correction and retains the complete clean-gate requirement."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit evidence remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "37fa14afe6b881b427f9f64b9cf9daccfdb9432444e6830b25d3439d6c9802ba"
     }
   ]
 }
