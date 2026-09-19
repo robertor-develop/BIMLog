@@ -31111,8 +31111,8 @@
     },
     {
       "taskId": "bimlog-stabilization-build010-dependency-security-reconciliation-20260919",
-      "reviewedThroughCommit": "78544cbc13f9a65b0d425feee2a6c938bc5e45bc",
-      "reviewedAt": "2026-09-19T08:23:37Z",
+      "reviewedThroughCommit": "385731167397bc6204a6c43e358e675a9331e09f",
+      "reviewedAt": "2026-09-19T08:38:09Z",
       "status": "candidate",
       "authorities": [
         {
@@ -31177,7 +31177,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "bcbdce5e5e57f1ed558efb229ea02bac415db13dca302a6c0e2ec9bb4c6e06b9"
+      "reviewedChangeSha256": "d0dabc2b61e8fe9b412c6f0f22856fce469498968d61464d3330162f254c0351"
     }
   ]
 }
