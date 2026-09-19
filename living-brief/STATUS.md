@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## 120-build stabilization current authority — Block 04 published — 2026-09-19
+
+- The current published Platform is `v1.05.N18-P33`, produced from stabilization Build 020 commit `be902808b59c264d31480f5d76424f8fdaff5cbe` and tree `3dab033cc3f109e78e69c1d5934b6959d1842717`. GitHub `master`, the stabilization branch, and the clean Replit workspace matched that commit before publication; Replit publication receipt `e89dc3b4` passed Security, Build, Bundle, and Promote.
+- The read-only publication database operator returned `schemaAction=NONE`, `publishable=true`, and `developmentDataCopy=OFF_REQUIRED`. Publication changed no production schema, database rows, or customer data.
+- Public `/api/v1/healthz` returns HTTP 200 with release `v1.05.N18-P33`. The existing authenticated Super Administrator session and a second Chrome tab survived reload; Total Control, dashboard, administration, catalogs, Help, and Profile rendered without observed console errors.
+- Historical candidate sections below remain preserved evidence. Their statements such as `local candidate`, `uncommitted`, `pushed-not-published`, or a named P17–P32 publication gate describe that historical checkpoint only and do not override this current authority.
+- The active stabilization program has completed Builds 001–020. Builds 021–025 reconcile the Living Brief and executable documentation contracts; Build 025 is the next push milestone and no production publication is due until Build 030.
+
 ## Convention Builder live hook-order corrective release candidate - 2026-09-18
 
 - The authenticated post-publication platform sweep of source `c46df4ac5dc59911a8e31090f027bc6038cfda8a` rendered the public site, headquarters dashboard, company administration surfaces, financial workspaces, and every project-sidebar route, but exposed React minified error `#310` when the project Convention workspace transitioned from loading to resolved data.
