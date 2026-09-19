@@ -87,3 +87,51 @@ export function reconcileCoordinationLinks(records: readonly CoordinationRecordI
 
   return { records: [...canonicalRecords.values()], links: [...canonicalLinks.values()] };
 }
+
+export type CoordinationStatus = "draft" | "open" | "in_progress" | "submitted" | "under_review" | "responded" | "sent" | "acknowledged" | "approved" | "rejected" | "resolved" | "closed" | "complete" | "issued" | "revised" | "void";
+export type CoordinationTransitionAction = "start" | "submit" | "review" | "respond" | "send" | "acknowledge" | "approve" | "reject" | "resolve" | "close" | "complete" | "issue" | "revise" | "reopen" | "void";
+
+const lifecycle: Readonly<Record<CoordinationRecordType, Readonly<Record<string, Partial<Record<CoordinationTransitionAction, CoordinationStatus>>>>>> = {
+  issue: { open: { start: "in_progress", resolve: "resolved", void: "void" }, in_progress: { resolve: "resolved", void: "void" }, resolved: { close: "closed", reopen: "open" }, closed: { reopen: "open" }, void: { reopen: "open" } },
+  rfi: { draft: { submit: "open", void: "void" }, open: { respond: "responded", void: "void" }, responded: { close: "closed", revise: "revised", reopen: "open" }, revised: { submit: "open", void: "void" }, closed: { reopen: "open" }, void: { reopen: "draft" } },
+  submittal: { draft: { submit: "submitted", void: "void" }, submitted: { review: "under_review", void: "void" }, under_review: { approve: "approved", reject: "rejected", void: "void" }, approved: { revise: "revised" }, rejected: { revise: "revised" }, revised: { submit: "submitted", void: "void" }, void: { reopen: "draft" } },
+  transmittal: { draft: { send: "sent", void: "void" }, sent: { acknowledge: "acknowledged", void: "void" }, acknowledged: { revise: "revised" }, revised: { send: "sent", void: "void" }, void: { reopen: "draft" } },
+  meeting: { draft: { issue: "issued", void: "void" }, issued: { revise: "revised", void: "void" }, revised: { issue: "issued", void: "void" }, void: { reopen: "draft" } },
+  schedule: { draft: { start: "in_progress", void: "void" }, in_progress: { complete: "complete", void: "void" }, complete: { reopen: "in_progress" }, void: { reopen: "draft" } },
+  change_order: { draft: { submit: "submitted", void: "void" }, submitted: { approve: "approved", reject: "rejected", void: "void" }, approved: { revise: "revised" }, rejected: { revise: "revised", reopen: "draft" }, revised: { submit: "submitted", void: "void" }, void: { reopen: "draft" } },
+};
+
+export type CoordinationAuditEntry = {
+  sequence: number;
+  recordKey: string;
+  from: CoordinationStatus;
+  to: CoordinationStatus;
+  action: CoordinationTransitionAction;
+  reason: string | null;
+  actorUserId: number;
+  occurredAt: string;
+};
+
+export function transitionCoordinationRecord(input: {
+  identity: CoordinationRecordIdentity;
+  status: CoordinationStatus;
+  action: CoordinationTransitionAction;
+  reason?: string | null;
+  actorUserId: number;
+  occurredAt: string;
+  history?: readonly CoordinationAuditEntry[];
+}) {
+  const identity = canonicalCoordinationIdentity(input.identity);
+  const next = lifecycle[identity.type][input.status]?.[input.action];
+  if (!next) throw new Error(`Transition ${input.action} is not allowed from ${input.status} for ${identity.type}`);
+  const reason = input.reason?.trim() || null;
+  if (["reopen", "revise", "void", "reject"].includes(input.action) && !reason) {
+    throw new Error(`Transition ${input.action} requires a reason`);
+  }
+  if (!Number.isInteger(input.actorUserId) || input.actorUserId <= 0 || !Number.isFinite(Date.parse(input.occurredAt))) {
+    throw new Error("Transition actor and timestamp are required");
+  }
+  const history = [...(input.history ?? [])];
+  history.push({ sequence: history.length + 1, recordKey: identity.key, from: input.status, to: next, action: input.action, reason, actorUserId: input.actorUserId, occurredAt: input.occurredAt });
+  return { identity, status: next, history };
+}
