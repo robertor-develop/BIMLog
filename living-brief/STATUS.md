@@ -8,6 +8,7 @@
 - The production budget-line normalizer enforces that exact quantity/rate/total invariant for both manual Intake drafts and controlled statement imports; the regression is not a test-only proxy.
 - Block 12 adds only backward-compatible task schedule columns with empty/null defaults; no existing row is rewritten. It changes no customer data, Lens Next Native source, installer, manifest, or package. Push, Replit publication, migration receipt, and authenticated Chrome smoke are due at Build 060.
 - The production assembler's generated platform inventory includes the new financial contract and regression modules; its Living Brief hash bundle is reconciled before the final clean-source rerun.
+- Block 060 full regression corrected two stale Help/staffing assertions so both now verify the generated release authority instead of embedding an obsolete P33/P34 string.
 
 ## 120-build stabilization current authority — Block 10 publication candidate — 2026-09-19
 

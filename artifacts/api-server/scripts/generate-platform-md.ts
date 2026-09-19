@@ -199,6 +199,8 @@ ${appRoutes()}
   use the shared governed Print PDF confirmation and authenticated PDF response. Current-view
   filters are preserved where present; otherwise PDF-only section choices are explicit. The
   completed PDF downloads directly, without blank tabs, browser print screens, or window.print.
+- Navbar and Help consume the same generated release-identity module. Regression checks compare
+  that generated module with the canonical release contract instead of freezing a stale release label.
 - Commercial Contract Items turn an approved budget line and saved APU version into an operational
   contract scope. Quantity multiplied by the frozen APU selling price calculates the contractual value;
   the immutable item snapshot preserves the APU content, evaluation, fingerprint, BIM Submittal display,

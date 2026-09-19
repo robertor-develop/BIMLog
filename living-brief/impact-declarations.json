@@ -32056,11 +32056,13 @@
       ],
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/generate-platform-md.ts",
         "artifacts/api-server/src/lib/block12-build056-canonical-project-identity.behavior.ts",
         "artifacts/api-server/src/lib/block12-build057-task-lifecycle.behavior.ts",
         "artifacts/api-server/src/lib/block12-build058-financial-authority.behavior.ts",
         "artifacts/api-server/src/lib/block12-build059-operational-projections.behavior.ts",
         "artifacts/api-server/src/lib/block12-build060-intake-operations-acceptance.behavior.ts",
+        "artifacts/api-server/src/lib/help-center.behavior.ts",
         "artifacts/api-server/src/lib/job-intake-migration.ts",
         "artifacts/api-server/src/lib/job-operations-service.ts",
         "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
@@ -32077,7 +32079,7 @@
         "living-brief/impact-declarations.json",
         "scripts/check-current-state-contract.mjs"
       ],
-      "reviewedChangeSha256": "7c518c86eedc3971218dc9314f0df81f34554327ee0cc67c236398146e4403f4"
+      "reviewedChangeSha256": "a89145f8b8da6c9ba9d6843fd20742d7e20122f06c1ea8d07dc0fe3acde0ae92"
     }
   ]
 }

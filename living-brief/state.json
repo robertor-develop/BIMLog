@@ -2,16 +2,18 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "8a9ea621e7e23701996dc41e3374d88296ad89833773497abcc7785135775df2",
+  "bundleSha256": "9cc3d340b595665eef3f0711ceb3715749c3a0a2670d605b585b72413e9d4836",
   "impact": {
     "baselineCommit": "209046fbc2dee34dc29019d20109ee702b244447",
     "changedPaths": [
       "artifacts/api-server/package.json",
+      "artifacts/api-server/scripts/generate-platform-md.ts",
       "artifacts/api-server/src/lib/block12-build056-canonical-project-identity.behavior.ts",
       "artifacts/api-server/src/lib/block12-build057-task-lifecycle.behavior.ts",
       "artifacts/api-server/src/lib/block12-build058-financial-authority.behavior.ts",
       "artifacts/api-server/src/lib/block12-build059-operational-projections.behavior.ts",
       "artifacts/api-server/src/lib/block12-build060-intake-operations-acceptance.behavior.ts",
+      "artifacts/api-server/src/lib/help-center.behavior.ts",
       "artifacts/api-server/src/lib/job-intake-migration.ts",
       "artifacts/api-server/src/lib/job-operations-service.ts",
       "artifacts/api-server/src/lib/team-resource-planning.behavior.ts",
@@ -87,7 +89,7 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "26dc11c4c38ea20f8f8124e62f581fc2693151c38de93e4db3a5752f0e5e99d0",
+      "sha256": "ec29063d5c41a165da760f640e1b847e8cfd11bdca86d6fd280712c955d99a66",
       "sourceChangedAt": "2026-09-19T21:00:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
@@ -135,7 +137,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "5f7fe5ffff84c373764eae19f07198baba29b4f98560575e39150492527bd252",
+      "sha256": "75067ed6116c02b29c5e9b65b6ed0c7a50737251f36829529b334cf9b7f0b4cf",
       "sourceChangedAt": "2026-09-19T21:00:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "209046fbc2dee34dc29019d20109ee702b244447",
