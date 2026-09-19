@@ -636,6 +636,9 @@ iframe[aria-label*="Replit" i],
   .app-shell:has(.phasea-mobile-nav-trigger) > .main-area {
     padding-top: 48px;
   }
+  .app-shell:has(.master-mobile-nav-trigger) > .main-area {
+    padding-top: 48px;
+  }
   .project-context-bar {
     min-width: 0;
     padding-left: 12px;
@@ -704,7 +707,9 @@ iframe[aria-label*="Replit" i],
   }
   .sidebar-utility-button,
   .phasea-mobile-nav-trigger,
-  .phasea-mobile-nav-close {
+  .phasea-mobile-nav-close,
+  .master-mobile-nav-trigger,
+  .master-mobile-nav-close {
     min-height: 44px;
   }
 }

@@ -318,16 +318,15 @@ export function MasterSidebar() {
     const isActive = location === route || (route !== "/dashboard" && location.startsWith(route));
     return (
       <button
-        ref={mobileTriggerRef}
         type="button"
         className={`sidebar-nav-item${isActive ? " active" : ""}`}
         aria-current={isActive ? "page" : undefined}
         title={label}
-        style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", justifyContent: sidebarCollapsed ? "center" : "flex-start", gap: sidebarCollapsed ? 0 : 8 }}
+        style={{ width: "100%", background: "none", border: "none", cursor: "pointer", textAlign: "left", display: "flex", alignItems: "center", justifyContent: sidebarCollapsed && !isMobile ? "center" : "flex-start", gap: sidebarCollapsed && !isMobile ? 0 : 8 }}
         onClick={() => { setLocation(route); setMobileOpen(false); }}
       >
         <Icon style={{ width: 14, height: 14, flexShrink: 0 }} />
-        {!sidebarCollapsed && <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>}
+        {(!sidebarCollapsed || isMobile) && <span style={{ minWidth: 0, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{label}</span>}
       </button>
     );
   };
@@ -336,7 +335,9 @@ export function MasterSidebar() {
     <>
     {isMobile && (
       <button
+        ref={mobileTriggerRef}
         type="button"
+        className="master-mobile-nav-trigger"
         aria-expanded={mobileOpen}
         aria-controls="headquarters-global-sidebar"
         onClick={() => setMobileOpen(true)}
@@ -350,7 +351,7 @@ export function MasterSidebar() {
       <div
         role="presentation"
         onClick={() => setMobileOpen(false)}
-        style={{ position: "fixed", inset: 0, zIndex: 1290, background: "rgba(15,23,42,0.48)" }}
+        style={{ position: "fixed", top: 52, right: 0, bottom: 0, left: 0, zIndex: 1290, background: "rgba(15,23,42,0.48)" }}
       />
     )}
     <div
@@ -361,13 +362,14 @@ export function MasterSidebar() {
       aria-hidden={isMobile ? !mobileOpen : undefined}
       inert={isMobile && !mobileOpen ? true : undefined}
       className={`sidebar${!isMobile && sidebarCollapsed ? " master-sidebar-collapsed" : ""}`}
-      style={isMobile ? { position: "fixed", top: 0, bottom: 0, left: 0, zIndex: 1310, width: "min(340px, 88vw)", transform: mobileOpen ? "translateX(0)" : "translateX(-105%)", transition: "transform 0.18s ease", boxShadow: mobileOpen ? "20px 0 60px rgba(15,23,42,0.28)" : undefined } : { position: "relative", width: sidebarCollapsed ? 58 : sidebarWidth, transition: sidebarResizing ? undefined : "width .16s ease" }}
+      style={isMobile ? { position: "fixed", top: 52, bottom: 0, left: 0, zIndex: 1310, width: "min(340px, 88vw)", transform: mobileOpen ? "translateX(0)" : "translateX(-105%)", transition: "transform 0.18s ease", boxShadow: mobileOpen ? "20px 0 60px rgba(15,23,42,0.28)" : undefined } : { position: "relative", width: sidebarCollapsed ? 58 : sidebarWidth, transition: sidebarResizing ? undefined : "width .16s ease" }}
     >
       {!isMobile && !sidebarCollapsed && <button type="button" className="master-sidebar-resizer" aria-label={t("Resize main navigation", "Cambiar ancho de la navegación principal")} aria-keyshortcuts="ArrowLeft ArrowRight Home End" title={t("Drag or use arrow keys to resize navigation", "Arrastre o use las flechas para cambiar el ancho")} onPointerDown={(event) => { event.preventDefault(); setSidebarResizing(true); }} onKeyDown={(event) => { if (event.key === "ArrowLeft") { event.preventDefault(); adjustSidebarWidth(sidebarWidth - 16); } else if (event.key === "ArrowRight") { event.preventDefault(); adjustSidebarWidth(sidebarWidth + 16); } else if (event.key === "Home") { event.preventDefault(); adjustSidebarWidth(196); } else if (event.key === "End") { event.preventDefault(); adjustSidebarWidth(420); } }} />}
       {isMobile && (
         <button
           ref={mobileCloseRef}
           type="button"
+          className="master-mobile-nav-close"
           onClick={() => setMobileOpen(false)}
           style={{ display: "inline-flex", alignItems: "center", gap: 6, margin: "12px 10px 0", padding: "7px 10px", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 8, background: "rgba(255,255,255,0.06)", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
         >

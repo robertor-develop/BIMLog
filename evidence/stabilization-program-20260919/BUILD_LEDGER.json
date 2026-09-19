@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 44,
+    "completedBuilds": 45,
     "totalBuilds": 120,
-    "remainingBuilds": 76,
-    "currentUnpublishedBuilds": 4,
-    "nextBuild": 45,
-    "nextPushAfterBuild": 45,
+    "remainingBuilds": 75,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 46,
+    "nextPushAfterBuild": 50,
     "nextPublicationAfterBuild": 50,
     "blocker": null
   },
@@ -144,14 +144,15 @@
     {
       "block": 9,
       "buildRange": "041-045",
-      "status": "IN_PROGRESS",
+      "status": "PASS_PENDING_PUSH",
       "publicationRequired": false,
       "smoke": "Authenticated shell accessibility and responsive visual evidence; push at Build 045, no production publication.",
       "builds": [
         { "build": 41, "status": "PASS", "evidence": "BUILD_041_ROUTE_ACCESSIBILITY.md" },
         { "build": 42, "status": "PASS", "evidence": "BUILD_042_GLOBAL_SHELL_RESPONSIVE.md" },
         { "build": 43, "status": "PASS", "evidence": "BUILD_043_TRUTHFUL_ROUTE_STATES.md" },
-        { "build": 44, "status": "PASS", "evidence": "BUILD_044_INTERACTION_PREFERENCES.md" }
+        { "build": 44, "status": "PASS", "evidence": "BUILD_044_INTERACTION_PREFERENCES.md" },
+        { "build": 45, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_045_VISUAL_REGRESSION_AND_PUSH.md" }
       ]
     }
   ]

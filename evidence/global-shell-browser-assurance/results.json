@@ -1,0 +1,10 @@
+{
+  "suite": "global-shell-production-component-browser-assurance",
+  "status": "PASS",
+  "screenshots": 7,
+  "viewports": [
+    "1440x800",
+    "390x844"
+  ],
+  "errors": []
+}

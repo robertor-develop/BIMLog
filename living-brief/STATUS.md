@@ -1,13 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
-## 120-build stabilization current authority — Block 08 release candidate — 2026-09-19
+## 120-build stabilization current authority — Block 09 push candidate — 2026-09-19
 
 - The fully accepted Platform is `v1.05.N18-P34`, published from stabilization Build 040 corrective commit `4472d982c2fc7ab5fde552048f024cd7e90fab96`; Replit publication receipt `b8718795` passed Security, Build, Bundle, and Promote, and authenticated Chrome acceptance verified exact live source/package/database identity plus two-tab restoration.
 - The read-only publication database operator returned `schemaAction=NONE`, `publishable=true`, and `developmentDataCopy=OFF_REQUIRED`. Publication changed no production schema, database rows, or customer data.
 - The first P34 publication reached production under Replit receipt `443e0a80`, but authenticated acceptance correctly failed because `/api/v1/healthz` reported all deployment identity fields as unbound. That runtime is not accepted release evidence. Build 040 corrective work now embeds exact immutable source, tracked client-asset inventory, package, and database-contract identities into the artifact and requires the public health contract to expose their exact correspondence. Inventory collection uses ordinary cross-platform Git paths and deterministic in-process filtering so Windows and provider Linux builds bind the same contract.
 - Historical candidate sections below remain preserved evidence. Their statements such as `local candidate`, `uncommitted`, `pushed-not-published`, or a named P17–P32 publication gate describe that historical checkpoint only and do not override this current authority.
-- The active stabilization program has completed Builds 001–040. Builds 031–035 corrected owner-role semantics, company/project isolation, inherited permissions, URL authorization, and canonical forbidden/loading/error handling. Builds 036–040 bind one access matrix to login/session continuity, privileged routes, exact project context, and a machine-validated authenticated release receipt.
-- Build 040 is the exact `v1.05.N18-P34` / `1.5.18.34` release candidate. Package-only Navisworks 2021/2025 smoke passed without installation. P34 remains unaccepted until the corrected immutable artifact is republished and its exact identity plus authenticated visible-Chrome acceptance pass.
+- The active stabilization program has completed Builds 001–045. Builds 041–045 normalize route titles, landmarks and focus; harden desktop/mobile navigation; distinguish loading, denial and service failure; preserve language/theme preferences; and bind the production shell to inspected desktop and exact-390 Chrome regression evidence.
+- Build 040 is the accepted `v1.05.N18-P34` / `1.5.18.34` publication described above. Builds 041–045 are the next push-only block; they change no Native code, installer, schema, database rows, provider configuration, or customer data. The next publication and authenticated live Chrome acceptance are due after Build 050.
 
 ## Convention Builder live hook-order corrective release candidate - 2026-09-18
 
