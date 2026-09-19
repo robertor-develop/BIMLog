@@ -5,6 +5,7 @@ import { useI18n } from "@/lib/i18n";
 import { SidebarUtilities } from "@/components/layout/SidebarUtilities";
 import { logClientError } from "@/lib/client-log";
 import { getMe } from "@workspace/api-client-react";
+import { loadAccessProfile } from "@/lib/access-profile";
 import { Bell, Search, X, Building2, CircleDollarSign, LayoutDashboard, ShieldCheck, Menu, Settings2, ChevronLeft, ChevronRight, GripVertical } from "lucide-react";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
@@ -80,6 +81,8 @@ export function MasterSidebar() {
   useEffect(() => {
     let active = true;
     setShowCompanyCatalogs(false);
+    setShowAdminPanel(false);
+    setShowTotalControl(false);
     if (!token) return;
     getMe()
       .then((data) => {
@@ -96,21 +99,14 @@ export function MasterSidebar() {
         if (cp?.companyName) setCompanyName(prev => prev || cp.companyName!);
       })
       .catch((error) => logClientError("master sidebar company profile load", error));
-    fetch(`${API_BASE}/api/v1/projects`, { headers })
-      .then(r => r.json())
-      .then((projects: Array<{ userRole?: string }>) => {
-        if (Array.isArray(projects) && projects.some(p => p.userRole === "project_admin")) {
-          setShowAdminPanel(true);
-        }
+    loadAccessProfile(token)
+      .then(profile => {
+        if (!active) return;
+        setShowAdminPanel(profile.decisions.project_administration.allow);
+        setShowCompanyCatalogs(profile.decisions.company_catalogs.allow);
+        setShowTotalControl(profile.decisions.total_control.allow);
       })
-      .catch((error) => logClientError("master sidebar projects load", error));
-    fetch(`${API_BASE}/api/v1/company/master-catalogs/capabilities`, { headers })
-      .then(async response => {
-        if (!response.ok) throw new Error(`Catalog capability request failed (${response.status})`);
-        return response.json() as Promise<{ canManage?: boolean }>;
-      })
-      .then(capability => { if (active) setShowCompanyCatalogs(capability.canManage === true); })
-      .catch((error) => logClientError("master sidebar company catalog capability load", error));
+      .catch((error) => logClientError("master sidebar access profile load", error));
     loadNotifications();
     return () => { active = false; };
   }, [user?.id, token]);

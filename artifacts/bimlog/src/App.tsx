@@ -1,5 +1,5 @@
 import { Switch, Route, Router as WouterRouter, useLocation } from "wouter";
-import { lazy, Suspense, useEffect, useRef } from "react";
+import { lazy, Suspense, useEffect, useRef, useState } from "react";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,6 +11,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { DebugBanner } from "@/components/DebugBanner";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { PublicRouteMetadata } from "@/components/PublicRouteMetadata";
+import { loadAccessProfile, type AccessSurface } from "@/lib/access-profile";
 
 const namedPage = (loader: () => Promise<object>, name: string) =>
   lazy(async () => ({ default: (await loader() as Record<string, React.ComponentType<any>>)[name] }));
@@ -65,6 +66,36 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
     return null;
   }
 
+  return <Component />;
+}
+
+function AccessRoute({ component: Component, surface }: { component: React.ComponentType; surface: AccessSurface }) {
+  const { token, logout } = useAuthStore();
+  const [, setLocation] = useLocation();
+  const [state, setState] = useState<"loading" | "allowed" | "denied">("loading");
+  const [code, setCode] = useState("ACCESS_CHECK_PENDING");
+
+  useEffect(() => {
+    if (!token) { setLocation("/login"); return; }
+    const controller = new AbortController();
+    setState("loading");
+    loadAccessProfile(token, controller.signal)
+      .then((profile) => {
+        const decision = profile.decisions[surface];
+        setCode(decision?.code ?? "ACCESS_SURFACE_UNKNOWN");
+        setState(decision?.allow ? "allowed" : "denied");
+      })
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        if (String(error).includes("401")) { logout(); setLocation("/login"); return; }
+        setCode("ACCESS_PROFILE_UNAVAILABLE");
+        setState("denied");
+      });
+    return () => controller.abort();
+  }, [token, surface, logout, setLocation]);
+
+  if (state === "loading") return <div className="route-loading" role="status">Verifying access… / Verificando acceso…</div>;
+  if (state === "denied") return <section role="alert" style={{ maxWidth: 680, margin: "48px auto", padding: 24 }}><h1>Access unavailable / Acceso no disponible</h1><p>This workspace is not authorized for your current account. / Este espacio no está autorizado para su cuenta actual.</p><code>{code}</code></section>;
   return <Component />;
 }
 
@@ -173,31 +204,31 @@ function Router() {
         {() => <ProtectedRoute component={FinancialControlsSettings} />}
       </Route>
       <Route path="/admin/feedback">
-        {() => <ProtectedRoute component={AdminPanel} />}
+        {() => <AccessRoute component={AdminPanel} surface="feedback_administration" />}
       </Route>
       <Route path="/company-catalogs">
-        {() => <ProtectedRoute component={CompanyMasterCatalogs} />}
+        {() => <AccessRoute component={CompanyMasterCatalogs} surface="company_catalogs" />}
       </Route>
       <Route path="/company-workflows">
-        {() => <ProtectedRoute component={CompanyDeliveryWorkflows} />}
+        {() => <AccessRoute component={CompanyDeliveryWorkflows} surface="company_workflows" />}
       </Route>
       <Route path="/company-workflow-governance">
-        {() => <ProtectedRoute component={CompanyWorkflowGovernance} />}
+        {() => <AccessRoute component={CompanyWorkflowGovernance} surface="company_workflows" />}
       </Route>
       <Route path="/company-pricing-templates">
-        {() => <ProtectedRoute component={CompanyPricingTemplates} />}
+        {() => <AccessRoute component={CompanyPricingTemplates} surface="company_pricing" />}
       </Route>
       <Route path="/admin">
-        {() => <ProtectedRoute component={AdminPanel} />}
+        {() => <AccessRoute component={AdminPanel} surface="project_administration" />}
       </Route>
       <Route path="/feedback">
         {() => <ProtectedRoute component={Dashboard} />}
       </Route>
       <Route path="/total-control">
-        {() => <ProtectedRoute component={TotalControl} />}
+        {() => <AccessRoute component={TotalControl} surface="total_control" />}
       </Route>
       <Route path="/living-brief">
-        {() => <ProtectedRoute component={LivingBrief} />}
+        {() => <AccessRoute component={LivingBrief} surface="living_brief" />}
       </Route>
       <Route path="/pricing" component={Pricing} />
       <Route path="/features" component={Features} />

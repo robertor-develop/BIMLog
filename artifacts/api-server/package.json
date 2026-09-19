@@ -24,6 +24,7 @@
     "test:release-metadata": "tsx ./src/lib/release-metadata.behavior.ts",
     "test:access-policy": "tsx ./src/lib/access-policy.behavior.ts",
     "test:session-continuity": "tsx ../bimlog/src/store/session-continuity.behavior.ts",
+    "test:access-route-authority": "tsx ./src/lib/access-route-authority.behavior.ts",
     "test:lens-import": "tsx ./scripts/test-lens-import-contract.ts",
     "test:lens-import-api": "tsx ./scripts/test-lens-import-api-evidence.ts",
     "test:lens-next-publishing": "tsx ./src/lib/lens-next-publishing.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-publishing-ui.behavior.ts",

@@ -21,6 +21,7 @@ import {
 } from "../middlewares/auth";
 import { effectiveCommercialAccessForUser } from "../lib/commercial-entitlement";
 import { waitForProjectInvitationMigration } from "../lib/project-invitation-migration";
+import { resolveAccessProfile } from "../lib/access-profile";
 import {
   invitationEmailLockKey,
   normalizeInvitationEmail,
@@ -306,6 +307,15 @@ router.get("/auth/me", authMiddleware, async (req, res) => {
         }
       : null,
   });
+});
+
+router.get("/auth/access-profile", authMiddleware, async (req, res) => {
+  const profile = await resolveAccessProfile(req.user!.userId);
+  if (!profile) {
+    res.status(401).json({ code: "AUTHORITY_INVALID" });
+    return;
+  }
+  res.json(profile);
 });
 
 router.patch("/users/me", authMiddleware, async (req, res) => {
