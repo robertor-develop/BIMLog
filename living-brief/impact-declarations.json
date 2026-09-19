@@ -32153,7 +32153,7 @@
     },
     {
       "taskId": "bimlog-stabilization-block14-lens-next-platform-20260919",
-      "reviewedThroughCommit": "d0108ae006d0c4caa2053243f43298cdc28682b0",
+      "reviewedThroughCommit": "5204326e2e4d217f03231cdc2a91953896b14e16",
       "reviewedAt": "2026-09-19T23:14:41.835Z",
       "status": "candidate",
       "authorities": [
@@ -32217,12 +32217,11 @@
         "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/PLUGIN.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "f89417522dc3836b27130df27e4300eea138523c293037d48a21cc1b4068b1b8"
+      "reviewedChangeSha256": "b3c8217371b3e1ba148b5581fb4d3431603387fe30ef9ba82f017720ec94545f"
     }
   ]
 }

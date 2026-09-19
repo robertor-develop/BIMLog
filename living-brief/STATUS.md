@@ -6,6 +6,7 @@
 - Builds 066–070 reconcile the stale September 17 mockup worktree without importing its proposed schema or generated brief state; complete the existing Lens Next issue browser and exact workflow acceptance; and remove Original/Legacy Lens wording from customer Platform source.
 - `contracts/lens-product-reference-inventory.json` mechanically separates supported Lens Next runtime from migration-only compatibility, tests, governance, and historical evidence. `/lens-next` remains the only standalone Lens product route.
 - The candidate release identity is `v1.05.N18-P35` / `1.5.18.35`. Native behavior is unchanged; generated dual-year release metadata advances only the Platform counter, so focused 2021/2025 package/contract smoke is mandatory before push.
+- Focused package smoke now passes after correcting stale P34 checklist/installer guards: core `132/132`, both Native suites `57/57`, integrity and package-only installers, with no installation performed.
 - Build 070 is not production-complete until exact clean-head release evidence, normal push, Replit Shell publication without Replit Agents, exact live identity, and authenticated visible-Chrome Lens Next create/link/reconcile acceptance all pass.
 
 ## 120-build stabilization current authority — Block 13 coordination workflow candidate — 2026-09-19

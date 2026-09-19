@@ -2965,5 +2965,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Builds 066–069: reconcile project-bound company choices without the stale schema, inventory every production legacy reference, bind the complete Lens Next browser contract, and prove create/sync/reconcile/Working View stale/conflict/idempotency/rollback behavior.
 - [x] Build 070 source: remove Original/Legacy Lens wording from customer Platform source, enforce `/lens-next` as the sole standalone Lens product route, and advance the shared candidate identity to P35.
 - [ ] Build 070 release: pass exact clean-head and focused dual-year metadata/package smoke, push, publish through Replit Shell without Agents, and pass exact-identity authenticated visible-Chrome Lens Next create/link/reconcile smoke.
+- [x] Build 070 focused package correction: fail closed on stale P34 package text/guards, align current package files to P35, and repeat core plus Native 2021/2025 integrity/package-only smoke with no installation.
 - [x] Reconcile Block 13 Platform, Status, Open Loop, evidence ledger, and generated Living Brief state against the exact Build 065 implementation commit.
 - [x] Bind the Block 13 Platform authority to its generator source and reseal the generated Living Brief state before the final clean gate.
