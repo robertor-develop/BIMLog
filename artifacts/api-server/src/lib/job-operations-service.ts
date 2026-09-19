@@ -371,7 +371,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     documentConnectionList(pool, projectId, input.actorUserId, access.canManage),
   ]);
   const documentConnections = connectionView.connections;
-  if (!access.intakeId) return { available: false, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, capabilities, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta };
+  if (!access.intakeId) return { available: false, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity: { projectId, intakeId: null, companyId: access.companyId, clientCompanyId: null, jobCode: access.projectCode, jobName: access.projectName }, canManage: access.canManage, capabilities, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta };
   const [workItems, tasks, assignments, timeEntries, deliverables, packages, packageTasks, members, files, totals, intakeData, apuSnapshots] = await Promise.all([
     pool.query(`SELECT id,stable_scope_item_id "stableScopeItemId",name,description,unit,planned_hours "plannedHours",workflow_template "workflowTemplate",status,billing_hourly_rate "billingHourlyRate",planned_billable_value "plannedBillableValue",contract_id "contractId" FROM job_activation_work_items WHERE intake_id=$1 ORDER BY created_at,id`, [access.intakeId]),
     pool.query(`SELECT t.id,t.work_item_id "workItemId",t.task_key "taskKey",t.name_en "nameEn",t.name_es "nameEs",t.status,t.version,t.progress_percent "progressPercent",t.planned_hours "plannedHours",t.assignee_user_id "assigneeUserId",t.discipline_id "disciplineId",t.discipline_code "disciplineCode",t.discipline_name "disciplineName",t.service_id "serviceId",t.service_code "serviceCode",t.service_name "serviceName",t.phase_id "phaseId",t.phase_code "phaseCode",t.phase_name "phaseName",COALESCE(e.actual_hours,0)::text "actualHours",COALESCE(d.deliverable_count,0)::int "deliverableCount"
@@ -404,6 +404,15 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     pool.query(`SELECT stable_line_id "stableLineId",contract_id "contractId",contract_version_id "contractVersionId",pricing_snapshot "pricingSnapshot",snapshot_fingerprint "snapshotFingerprint",created_at "createdAt" FROM job_activation_contract_item_baselines WHERE intake_id=$1 ORDER BY created_at,id`, [access.intakeId]),
   ]);
   const authoritativeIntake = intakeData.rows[0]?.data ?? {};
+  const identity = {
+    projectId,
+    intakeId: access.intakeId,
+    companyId: access.companyId,
+    clientCompanyId: authoritativeIntake.identity?.clientCompanyId ?? null,
+    clientCompany: authoritativeIntake.identity?.clientCompany ?? "",
+    jobCode: authoritativeIntake.identity?.jobCode || access.projectCode,
+    jobName: authoritativeIntake.identity?.jobName || access.projectName,
+  };
   const reportingContracts = (authoritativeIntake.commercial?.contracts ?? []).map((contract: any) => {
     const contractItems = (authoritativeIntake.scopeItems ?? []).filter((item: any) => item.contractId === contract.id);
     const apuPlanVersions = [...new Set(contractItems.map((item: any) => item.apuPlanVersion).filter((version: unknown) => Number.isSafeInteger(version)))];
@@ -461,7 +470,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     approved: safePackages.filter((row) => row.status === "approved").length,
   };
   const [budgetGovernance, projectControls] = await Promise.all([budgetGovernanceView(pool, access, capabilities), projectControlsView(pool, access, capabilities)]);
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
 }
 
 export async function createJobBudgetBaseline(input: { actorUserId: number; projectId: unknown; baselineId: unknown; revisionReason?: unknown }) {
