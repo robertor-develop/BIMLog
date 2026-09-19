@@ -4,4 +4,5 @@
 - Every imported statement row proves `quantity × unit rate = stated total` under the Build 051 exact-money rules.
 - The historical defect vector that treated the `$480,000` whole-plan total as the unit rate now fails with `FINANCIAL_STATEMENT_TOTAL_MISMATCH`.
 - Historical evidence is unchanged; this is a permanent forward regression.
+- The production budget-line normalizer now enforces the same exact quantity/rate/total invariant for manual Intake and controlled statement imports.
 - Native/installer impact: none.

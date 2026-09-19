@@ -5,6 +5,7 @@ import {
   parseDecimal,
   scaledDecimal,
 } from "./financial-control-contract";
+import { assertExactQuantityRateTotal } from "./financial-correctness-contract";
 
 export const BUDGET_STATUSES = [
   "draft",
@@ -191,7 +192,7 @@ export function normalizeBudgetLines(input: unknown): BudgetLineInput[] {
         "Budget line identities must be unique.",
       );
     ids.add(stableLineId);
-    return {
+    const normalized = {
       stableLineId,
       projectCostNodeId: boundedText(
         r.projectCostNodeId,
@@ -215,5 +216,8 @@ export function normalizeBudgetLines(input: unknown): BudgetLineInput[] {
         ? Number(r.sortOrder)
         : index,
     };
+    if (normalized.quantity !== null && normalized.unitRate !== null)
+      assertExactQuantityRateTotal(normalized.quantity, normalized.unitRate, normalized.amount);
+    return normalized;
   });
 }

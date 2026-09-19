@@ -31922,7 +31922,7 @@
     },
     {
       "taskId": "bimlog-stabilization-block11-financial-correctness-20260919",
-      "reviewedThroughCommit": "fef7a208bbc9ad6af1e3ba6e5fdc21815a223157",
+      "reviewedThroughCommit": "191617c6599ea25a9d13bb84382e5c15fa39682a",
       "reviewedAt": "2026-09-19T20:20:00.000Z",
       "status": "candidate",
       "authorities": [
@@ -31983,11 +31983,14 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/PLATFORM.md",
+        "artifacts/api-server/src/lib/financial-budget-contract.ts",
+        "artifacts/api-server/src/lib/financial-correctness-contract.ts",
+        "artifacts/api-server/src/lib/financial-statement-mapping.behavior.ts",
+        "evidence/stabilization-program-20260919/BUILD_052_STATEMENT_MAPPING_REGRESSION.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "9838ab48ad7f5417c7019b1bfe41d6d1acc64bd432396733240ef388e9e8127b"
+      "reviewedChangeSha256": "16629d8f1134532e14ef5ba770f8f0d3db57817b49c80e2a0cc051ae31fae00c"
     }
   ]
 }
