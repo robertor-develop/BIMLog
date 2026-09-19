@@ -51,10 +51,10 @@ router.get("/master-catalogs/:catalog", authMiddleware, async (req, res): Promis
     res.json({ catalog: catalogName, scope: "global", entries }); return;
   }
   const governed = (await pool.query(`SELECT mode FROM company_master_catalog_policies WHERE company_id=$1`, [companyId])).rows[0]?.mode === "approved_only";
-  const companyRows = (await pool.query(`SELECT id,code,name,state,version,canonical_company_id "canonicalCompanyId"
+  const companyRows = (await pool.query(`SELECT id,code,name,aliases,state,version,canonical_company_id "canonicalCompanyId"
     FROM company_master_catalog_entries WHERE company_id=$1 AND kind=$2 AND state='active' ORDER BY name,id`, [companyId,kind])).rows;
   if (catalogName === "clients") {
-    const clients = (await pool.query(`SELECT e.id "catalogEntryId",e.code,c.name,c.id,e.state,e.version
+    const clients = (await pool.query(`SELECT e.id "catalogEntryId",e.code,c.name,c.id,e.aliases,e.state,e.version
       FROM company_master_catalog_entries e JOIN companies c ON c.id=e.canonical_company_id
       WHERE e.company_id=$1 AND e.kind='client' AND e.state='active' ORDER BY c.name,c.id`, [companyId])).rows;
     res.json({ catalog: catalogName, governed, entries: clients.map(row => ({ ...row, source: "company" })) }); return;

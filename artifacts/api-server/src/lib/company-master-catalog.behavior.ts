@@ -20,6 +20,8 @@ assert.match(COMPANY_MASTER_CATALOG_SQL, /company_master_catalog_admin_active_uq
 assert.match(COMPANY_MASTER_CATALOG_SQL, /CREATE TABLE IF NOT EXISTS company_master_catalog_policies/);
 assert.match(COMPANY_MASTER_CATALOG_SQL, /approved_only.*defaults_allowed/);
 assert.match(COMPANY_MASTER_CATALOG_SQL, /canonical_company_id integer REFERENCES companies/);
+assert.match(COMPANY_MASTER_CATALOG_SQL, /aliases jsonb NOT NULL DEFAULT '\[\]'::jsonb/);
+assert.match(COMPANY_MASTER_CATALOG_SQL, /ADD COLUMN IF NOT EXISTS aliases/);
 assert.doesNotMatch(COMPANY_MASTER_CATALOG_SQL, /\bDROP\b|\bDELETE\b/i);
 
 const route = fs.readFileSync(new URL("../routes/company-master-catalogs.ts", import.meta.url), "utf8");
@@ -34,11 +36,14 @@ assert.match(route, /a\.company_id=u\.company_id AND a\.user_id=u\.id AND a\.sta
 assert.match(route, /WHERE company_id=\$1 AND kind=\$2/);
 assert.match(route, /authMiddleware, isSuperAdminMiddleware/);
 assert.match(route, /expectedVersion/);
+assert.match(route, /function aliasesOf/);
+assert.match(route, /aliases=CASE WHEN/);
 assert.match(route, /company_master_catalog_policies\(company_id,mode,updated_by_id\)/);
 assert.match(route, /ON CONFLICT \(company_id\) DO NOTHING/);
 assert.match(route, /SELECT id,company_id,email,full_name FROM users WHERE lower\(email\)/);
 assert.match(selector, /PROJECT_CATALOG_SCOPE_FORBIDDEN/);
 assert.match(selector, /company_master_catalog_entries WHERE company_id=\$1 AND kind=\$2/);
+assert.match(selector, /SELECT id,code,name,aliases,state/);
 assert.match(selector, /if \(governed\).*entries: companyRows/s);
 assert.match(intake, /company_master_catalog_entries WHERE id=\$1 AND company_id=\$2 AND kind=\$3/);
 assert.match(intake, /JOB_INTAKE_CLIENT_CATALOG_REQUIRED/);

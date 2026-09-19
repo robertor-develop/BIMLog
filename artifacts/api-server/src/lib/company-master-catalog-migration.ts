@@ -28,6 +28,7 @@ CREATE TABLE IF NOT EXISTS company_master_catalog_entries (
   kind text NOT NULL CHECK (kind IN ('client','discipline','service','phase')),
   code text NOT NULL CHECK (code ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$'),
   name text NOT NULL,
+  aliases jsonb NOT NULL DEFAULT '[]'::jsonb CHECK (jsonb_typeof(aliases)='array'),
   canonical_company_id integer REFERENCES companies(id),
   state text NOT NULL DEFAULT 'active' CHECK (state IN ('active','inactive','retired')),
   version integer NOT NULL DEFAULT 1 CHECK (version>0),
@@ -40,6 +41,11 @@ CREATE TABLE IF NOT EXISTS company_master_catalog_entries (
   CONSTRAINT company_master_catalog_retired_chk CHECK ((state='retired')=(retired_at IS NOT NULL)),
   CONSTRAINT company_master_catalog_scope_code_uq UNIQUE(company_id,kind,code)
 );
+ALTER TABLE company_master_catalog_entries ADD COLUMN IF NOT EXISTS aliases jsonb NOT NULL DEFAULT '[]'::jsonb;
+DO $$ BEGIN
+  ALTER TABLE company_master_catalog_entries ADD CONSTRAINT company_master_catalog_aliases_array_chk CHECK (jsonb_typeof(aliases)='array');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 CREATE INDEX IF NOT EXISTS company_master_catalog_active_idx
   ON company_master_catalog_entries(company_id,kind,state);
 CREATE UNIQUE INDEX IF NOT EXISTS company_master_catalog_client_uq

@@ -10,6 +10,22 @@ const codePattern = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
 const plainName = (value: unknown) => typeof value === "string" && value.trim().length > 0 && value.trim().length <= 200 && !/[\u0000-\u001f\u007f]/.test(value);
 const parameter = (value: string | string[]) => Array.isArray(value) ? value[0] ?? "" : value;
 
+function aliasesOf(value: unknown, name: string, code: string): string[] | null {
+  if (value === undefined) return [];
+  if (!Array.isArray(value) || value.length > 20) return null;
+  const seen = new Set([name.trim().toLocaleLowerCase(), code.trim().toLocaleLowerCase()]);
+  const aliases: string[] = [];
+  for (const candidate of value) {
+    if (!plainName(candidate)) return null;
+    const alias = candidate.trim();
+    const key = alias.toLocaleLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    aliases.push(alias);
+  }
+  return aliases;
+}
+
 async function actor(req: Request): Promise<{ userId: number; companyId: number; isSuperAdmin: boolean; isPmo: boolean } | null> {
   if (!req.user?.userId) return null;
   const result = await pool.query(`SELECT u.id,u.company_id,u.is_super_admin,
@@ -57,7 +73,7 @@ router.get("/company/master-catalogs/:kind", authMiddleware, async (req, res): P
   const current = await actor(req);
   if (!current) { res.status(401).json({ code: "AUTHORITY_INVALID" }); return; }
   const includeInactive = req.query.includeInactive === "true" && (current.isPmo || current.isSuperAdmin);
-  const result = await pool.query(`SELECT id,kind,code,name,canonical_company_id "canonicalCompanyId",state,version,created_at "createdAt",updated_at "updatedAt"
+  const result = await pool.query(`SELECT id,kind,code,name,aliases,canonical_company_id "canonicalCompanyId",state,version,created_at "createdAt",updated_at "updatedAt"
     FROM company_master_catalog_entries WHERE company_id=$1 AND kind=$2 AND ($3::boolean OR state='active') ORDER BY name,id`, [current.companyId,kind,includeInactive]);
   res.json({ kind, companyId: current.companyId, canManage: current.isPmo || current.isSuperAdmin, entries: result.rows });
 });
@@ -69,7 +85,8 @@ router.post("/company/master-catalogs/:kind", authMiddleware, async (req, res): 
   if (!current || (!current.isPmo && !current.isSuperAdmin)) { res.status(403).json({ code: "COMPANY_CATALOG_PMO_REQUIRED" }); return; }
   const code = String(req.body?.code ?? "").trim().toUpperCase();
   const name = req.body?.name;
-  if (!codePattern.test(code) || !plainName(name)) { res.status(400).json({ code: "COMPANY_CATALOG_INVALID" }); return; }
+  const aliases = plainName(name) ? aliasesOf(req.body?.aliases, name.trim(), code) : null;
+  if (!codePattern.test(code) || !plainName(name) || aliases === null) { res.status(400).json({ code: "COMPANY_CATALOG_INVALID" }); return; }
   const suppliedClientCompanyId = req.body?.canonicalCompanyId == null ? null : Number(req.body.canonicalCompanyId);
   if (kind === "client" && suppliedClientCompanyId !== null && (!Number.isSafeInteger(suppliedClientCompanyId) || suppliedClientCompanyId <= 0)) { res.status(400).json({ code: "CLIENT_COMPANY_INVALID" }); return; }
   const connection = await pool.connect();
@@ -88,10 +105,10 @@ router.post("/company/master-catalogs/:kind", authMiddleware, async (req, res): 
       }
     }
     const result = await connection.query(`INSERT INTO company_master_catalog_entries
-      (id,company_id,kind,code,name,canonical_company_id,created_by_id,updated_by_id)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$7)
-      RETURNING id,kind,code,name,canonical_company_id "canonicalCompanyId",state,version`,
-      [randomUUID(),current.companyId,kind,code,name.trim(),clientCompanyId,current.userId]);
+      (id,company_id,kind,code,name,aliases,canonical_company_id,created_by_id,updated_by_id)
+      VALUES($1,$2,$3,$4,$5,$6::jsonb,$7,$8,$8)
+      RETURNING id,kind,code,name,aliases,canonical_company_id "canonicalCompanyId",state,version`,
+      [randomUUID(),current.companyId,kind,code,name.trim(),JSON.stringify(aliases),clientCompanyId,current.userId]);
     await connection.query("COMMIT");
     res.status(201).json({ entry: result.rows[0] });
   } catch (error: any) {
@@ -110,17 +127,23 @@ router.patch("/company/master-catalogs/:kind/:id", authMiddleware, async (req, r
   if (!current || (!current.isPmo && !current.isSuperAdmin)) { res.status(403).json({ code: "COMPANY_CATALOG_PMO_REQUIRED" }); return; }
   const state = req.body?.state;
   const name = req.body?.name;
+  const aliasesProvided = req.body?.aliases !== undefined;
   const expectedVersion = Number(req.body?.expectedVersion);
   if (!Number.isSafeInteger(expectedVersion) || expectedVersion <= 0 || (state !== undefined && !["active","inactive","retired"].includes(state)) || (name !== undefined && !plainName(name))) {
     res.status(400).json({ code: "COMPANY_CATALOG_UPDATE_INVALID" }); return;
   }
   if (kind === "client" && name !== undefined) { res.status(400).json({ code: "CLIENT_NAME_CANONICAL_COMPANY_ONLY" }); return; }
+  const currentEntry = (await pool.query(`SELECT code,name FROM company_master_catalog_entries WHERE id=$1 AND company_id=$2 AND kind=$3 LIMIT 1`, [parameter(req.params.id),current.companyId,kind])).rows[0];
+  if (!currentEntry) { res.status(404).json({ code: "COMPANY_CATALOG_NOT_FOUND" }); return; }
+  const aliases = aliasesProvided ? aliasesOf(req.body.aliases, name?.trim() ?? currentEntry.name, currentEntry.code) : undefined;
+  if (aliasesProvided && aliases === null) { res.status(400).json({ code: "COMPANY_CATALOG_ALIASES_INVALID" }); return; }
   const result = await pool.query(`UPDATE company_master_catalog_entries SET
-    name=COALESCE($5,name), state=COALESCE($6,state), retired_at=CASE WHEN $6='retired' THEN now() WHEN $6 IS NOT NULL THEN NULL ELSE retired_at END,
-    version=version+1,updated_by_id=$7,updated_at=now()
+    name=COALESCE($5,name), aliases=CASE WHEN $6::boolean THEN $7::jsonb ELSE aliases END,
+    state=COALESCE($8,state), retired_at=CASE WHEN $8='retired' THEN now() WHEN $8 IS NOT NULL THEN NULL ELSE retired_at END,
+    version=version+1,updated_by_id=$9,updated_at=now()
     WHERE id=$1 AND company_id=$2 AND kind=$3 AND version=$4
-    RETURNING id,kind,code,name,canonical_company_id "canonicalCompanyId",state,version`,
-    [parameter(req.params.id),current.companyId,kind,expectedVersion,name?.trim() ?? null,state ?? null,current.userId]);
+    RETURNING id,kind,code,name,aliases,canonical_company_id "canonicalCompanyId",state,version`,
+    [parameter(req.params.id),current.companyId,kind,expectedVersion,name?.trim() ?? null,aliasesProvided,JSON.stringify(aliases ?? []),state ?? null,current.userId]);
   if (!result.rows[0]) { res.status(409).json({ code: "COMPANY_CATALOG_NOT_FOUND_OR_VERSION_CONFLICT" }); return; }
   res.json({ entry: result.rows[0] });
 });

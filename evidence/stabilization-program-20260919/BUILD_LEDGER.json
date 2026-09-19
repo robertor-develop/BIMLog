@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 45,
+    "completedBuilds": 46,
     "totalBuilds": 120,
-    "remainingBuilds": 75,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 46,
+    "remainingBuilds": 74,
+    "currentUnpublishedBuilds": 6,
+    "nextBuild": 47,
     "nextPushAfterBuild": 50,
     "nextPublicationAfterBuild": 50,
     "blocker": null
@@ -153,6 +153,16 @@
         { "build": 43, "status": "PASS", "evidence": "BUILD_043_TRUTHFUL_ROUTE_STATES.md" },
         { "build": 44, "status": "PASS", "evidence": "BUILD_044_INTERACTION_PREFERENCES.md" },
         { "build": 45, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_045_VISUAL_REGRESSION_AND_PUSH.md" }
+      ]
+    },
+    {
+      "block": 10,
+      "buildRange": "046-050",
+      "status": "IN_PROGRESS",
+      "publicationRequired": true,
+      "smoke": "Full authenticated visible-Chrome smoke after Build 050 publication; no Navisworks smoke unless Native or installers change.",
+      "builds": [
+        { "build": 46, "status": "PASS", "evidence": "BUILD_046_CANONICAL_CATALOG_RECONCILIATION.md" }
       ]
     }
   ]
