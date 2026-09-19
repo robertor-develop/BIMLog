@@ -1,4 +1,5 @@
 <Project>
+  <Import Project="$(MSBuildThisFileDirectory)ReleaseIdentity.g.props" />
   <PropertyGroup>
     <LensNextCanonicalRoot>$(MSBuildThisFileDirectory)</LensNextCanonicalRoot>
     <BaseOutputPath>$(MSBuildThisFileDirectory).build\bin\$(MSBuildProjectName)\</BaseOutputPath>

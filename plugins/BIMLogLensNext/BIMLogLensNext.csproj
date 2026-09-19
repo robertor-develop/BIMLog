@@ -10,10 +10,6 @@
     <GenerateAssemblyInfo>true</GenerateAssemblyInfo>
     <Deterministic>true</Deterministic>
     <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
-    <Version>1.5.18.33</Version>
-    <AssemblyVersion>1.5.18.33</AssemblyVersion>
-    <FileVersion>1.5.18.33</FileVersion>
-    <InformationalVersion>v1.05.N18-P33</InformationalVersion>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System.Web.Extensions" />

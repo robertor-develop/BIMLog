@@ -6,8 +6,9 @@ import { useI18n } from "@/lib/i18n";
 import { logClientError } from "@/lib/client-log";
 import { useAuthStore } from "@/store/auth";
 import { Moon, Sun } from "lucide-react";
+import { BIMLOG_RELEASE_VERSION } from "@workspace/api-zod";
 
-export const BIMLOG_RELEASE_VERSION = "v1.05.N17-P32";
+export { BIMLOG_RELEASE_VERSION };
 
 export function Navbar() {
   const { t, tt } = useI18n();

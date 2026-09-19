@@ -1,0 +1,7 @@
+{
+  "schemaVersion": "bimlog-release-identity-v1",
+  "product": "BIMLog",
+  "release": { "major": 1, "minor": 5, "native": 18, "platform": 33 },
+  "label": "v1.05.N18-P33",
+  "binaryVersion": "1.5.18.33"
+}

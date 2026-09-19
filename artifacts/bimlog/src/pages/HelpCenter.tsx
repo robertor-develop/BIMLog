@@ -5,11 +5,12 @@ import { useI18n } from "@/lib/i18n";
 import { downloadPdfResponse, PrintPdfButton } from "@/components/PrintPdfButton";
 import { useAuthStore } from "@/store/auth";
 import { HELP_CATEGORIES, HELP_RELEASES, HELP_TOPICS, HELP_TROUBLESHOOTING, helpTopicForContext, type HelpText } from "@/lib/help-content";
+import { BIMLOG_RELEASE_VERSION } from "@workspace/api-zod";
 
 type View = "manual" | "guides" | "troubleshooting" | "releases";
 
 const HELP_VIEWS: View[] = ["manual", "guides", "troubleshooting", "releases"];
-const HELP_RELEASE_VERSION = "v1.05.N17-P32";
+const HELP_RELEASE_VERSION = BIMLOG_RELEASE_VERSION;
 
 function queryValue(name: string) {
   if (typeof window === "undefined") return "";
