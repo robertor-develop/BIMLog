@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 27,
+    "completedBuilds": 28,
     "totalBuilds": 120,
-    "remainingBuilds": 93,
-    "currentUnpublishedBuilds": 7,
-    "nextBuild": 28,
+    "remainingBuilds": 92,
+    "currentUnpublishedBuilds": 8,
+    "nextBuild": 29,
     "nextPushAfterBuild": 30,
     "nextPublicationAfterBuild": 30,
     "blocker": null
@@ -108,7 +108,7 @@
       "builds": [
         { "build": 26, "status": "PASS", "evidence": "BUILD_026_SOURCE_AUTHORITY_INVENTORY.md" },
         { "build": 27, "status": "PASS", "evidence": "BUILD_027_SOURCE_HISTORY_RECONCILIATION.md" },
-        { "build": 28, "status": "NOT_STARTED", "evidence": null },
+        { "build": 28, "status": "PASS", "evidence": "BUILD_028_DIRTY_CANDIDATE_RECONCILIATION.md" },
         { "build": 29, "status": "NOT_STARTED", "evidence": null },
         { "build": 30, "status": "NOT_STARTED", "evidence": null }
       ]
