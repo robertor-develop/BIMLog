@@ -37,7 +37,13 @@ export function classifySchemaInventory(receipt, actual) {
     extra: observed.filter((name) => !expected.includes(name)),
   });
   const tables = compare(receipt.contract.tables, [...actual.tables].sort());
-  const indexes = compare(receipt.contract.indexes, [...actual.indexes].sort());
+  const rawIndexes = compare(receipt.contract.indexes, [...actual.indexes].sort());
+  const constraintIndexes = new Set(actual.constraintIndexes ?? []);
+  const indexes = {
+    missing: rawIndexes.missing,
+    extra: rawIndexes.extra.filter((name) => !constraintIndexes.has(name)),
+    constraintBackedExtra: rawIndexes.extra.filter((name) => constraintIndexes.has(name)),
+  };
   const missingStartupTables = receipt.contract.startupTables.filter((name) => !actual.tables.includes(name));
   return {
     tables,
@@ -47,7 +53,7 @@ export function classifySchemaInventory(receipt, actual) {
   };
 }
 
-async function readDatabaseInventory(databaseUrl) {
+export async function readDatabaseInventory(databaseUrl) {
   const client = new Client({ connectionString: databaseUrl, connectionTimeoutMillis: 5_000, statement_timeout: 15_000 });
   await client.connect();
   try {
@@ -55,11 +61,20 @@ async function readDatabaseInventory(databaseUrl) {
     const identity = await client.query("SELECT current_database() database, current_setting('server_encoding') encoding");
     const tables = await client.query("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname='public' ORDER BY tablename");
     const indexes = await client.query("SELECT indexname FROM pg_catalog.pg_indexes WHERE schemaname='public' ORDER BY indexname");
+    const constraintIndexes = await client.query(
+      `SELECT i.relname indexname
+       FROM pg_catalog.pg_constraint c
+       JOIN pg_catalog.pg_class i ON i.oid=c.conindid
+       JOIN pg_catalog.pg_namespace n ON n.oid=i.relnamespace
+       WHERE n.nspname='public' AND c.conindid <> 0
+       ORDER BY i.relname`,
+    );
     await client.query("COMMIT");
     return {
       identity: identity.rows[0],
       tables: tables.rows.map((row) => row.tablename),
       indexes: indexes.rows.map((row) => row.indexname),
+      constraintIndexes: constraintIndexes.rows.map((row) => row.indexname),
     };
   } catch (error) {
     await client.query("ROLLBACK").catch(() => undefined);

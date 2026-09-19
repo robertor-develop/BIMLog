@@ -6,6 +6,7 @@ Result: `PASS`
 - Source contract: `223 tables / 273 indexes / 184 startup tables`.
 - The receipt hashes the sorted source contract and the observed database inventory.
 - Missing and extra tables/indexes are reported separately; startup tables are checked explicitly.
+- PostgreSQL constraint-backed indexes are catalog-proven and classified separately from unexplained indexes.
 - Database access runs in a read-only transaction and performs no schema or data mutation.
 - Focused positive and mismatch-classification tests pass.
 
