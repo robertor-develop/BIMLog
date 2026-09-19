@@ -135,3 +135,68 @@ export function transitionCoordinationRecord(input: {
   history.push({ sequence: history.length + 1, recordKey: identity.key, from: input.status, to: next, action: input.action, reason, actorUserId: input.actorUserId, occurredAt: input.occurredAt });
   return { identity, status: next, history };
 }
+
+export const coordinationEvidenceKinds = ["attachment", "reference", "comment", "responsible_company"] as const;
+export type CoordinationEvidenceKind = typeof coordinationEvidenceKinds[number];
+
+export type CoordinationEvidence = {
+  id: string;
+  recordKey: string;
+  recordVersion: number;
+  kind: CoordinationEvidenceKind;
+  value: string;
+  contentSha256: string | null;
+  actorUserId: number;
+  createdAt: string;
+};
+
+export type CoordinationNotification = {
+  eventKey: string;
+  recordKey: string;
+  recordVersion: number;
+  event: "comment_added" | "attachment_added" | "responsibility_changed";
+  recipients: number[];
+};
+
+export function bindCoordinationEvidence(input: {
+  identity: CoordinationRecordIdentity;
+  evidence: Omit<CoordinationEvidence, "recordKey" | "recordVersion">;
+  existing?: readonly CoordinationEvidence[];
+  responsibleUserIds?: readonly number[];
+}) {
+  const identity = canonicalCoordinationIdentity(input.identity);
+  const evidence = input.evidence;
+  if (!evidence.id.trim() || !evidence.value.trim() || !Number.isInteger(evidence.actorUserId) || evidence.actorUserId <= 0 || !Number.isFinite(Date.parse(evidence.createdAt))) {
+    throw new Error("Complete coordination evidence identity, value, actor, and time are required");
+  }
+  if (evidence.kind === "attachment" && !/^[a-f0-9]{64}$/.test(evidence.contentSha256 ?? "")) {
+    throw new Error("Attachments require an exact SHA-256 digest");
+  }
+  if (evidence.kind !== "attachment" && evidence.contentSha256 !== null) {
+    throw new Error("Only attachment evidence carries a content digest");
+  }
+  const existing = [...(input.existing ?? [])];
+  const duplicate = existing.find((entry) => entry.id === evidence.id);
+  if (duplicate) {
+    if (duplicate.recordKey !== identity.key || duplicate.recordVersion !== identity.version || duplicate.kind !== evidence.kind || duplicate.value !== evidence.value || duplicate.contentSha256 !== evidence.contentSha256) {
+      throw new Error("Evidence identity cannot be rebound or overwritten");
+    }
+    return { evidence: existing, notification: null, result: "idempotent" as const };
+  }
+  const bound: CoordinationEvidence = { ...evidence, recordKey: identity.key, recordVersion: identity.version };
+  const recipients = [...new Set((input.responsibleUserIds ?? []).filter((id) => Number.isInteger(id) && id > 0 && id !== evidence.actorUserId))].sort((a, b) => a - b);
+  const event = evidence.kind === "comment" ? "comment_added" : evidence.kind === "attachment" ? "attachment_added" : evidence.kind === "responsible_company" ? "responsibility_changed" : null;
+  const notification: CoordinationNotification | null = event && recipients.length > 0 ? {
+    eventKey: `${identity.key}:v${identity.version}:${event}:${evidence.id}`,
+    recordKey: identity.key,
+    recordVersion: identity.version,
+    event,
+    recipients,
+  } : null;
+  return { evidence: [...existing, bound], notification, result: "created" as const };
+}
+
+export function evidenceForCoordinationVersion(identityInput: CoordinationRecordIdentity, evidence: readonly CoordinationEvidence[]) {
+  const identity = canonicalCoordinationIdentity(identityInput);
+  return evidence.filter((entry) => entry.recordKey === identity.key && entry.recordVersion === identity.version);
+}
