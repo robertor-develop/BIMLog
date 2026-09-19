@@ -73,8 +73,10 @@ export function MasterSidebar() {
   const [searchRetryKey, setSearchRetryKey] = useState(0);
   const searchRef = useRef<HTMLDivElement>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() => typeof window !== "undefined" && window.matchMedia("(max-width: 720px)").matches);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const mobileTriggerRef = useRef<HTMLButtonElement>(null);
+  const mobileCloseRef = useRef<HTMLButtonElement>(null);
 
   const headers = { Authorization: `Bearer ${token}` };
 
@@ -117,6 +119,27 @@ export function MasterSidebar() {
     window.addEventListener("resize", update);
     return () => window.removeEventListener("resize", update);
   }, []);
+
+  useEffect(() => {
+    if (!isMobile || !mobileOpen) return;
+    const previousOverflow = document.body.style.overflow;
+    const close = () => {
+      setMobileOpen(false);
+      requestAnimationFrame(() => mobileTriggerRef.current?.focus());
+    };
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") close();
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKeyDown);
+    requestAnimationFrame(() => mobileCloseRef.current?.focus());
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [isMobile, mobileOpen]);
+
+  useEffect(() => setMobileOpen(false), [location]);
 
   useEffect(() => {
     if (!notificationPanelResizing) return;
@@ -295,6 +318,7 @@ export function MasterSidebar() {
     const isActive = location === route || (route !== "/dashboard" && location.startsWith(route));
     return (
       <button
+        ref={mobileTriggerRef}
         type="button"
         className={`sidebar-nav-item${isActive ? " active" : ""}`}
         aria-current={isActive ? "page" : undefined}
@@ -331,12 +355,18 @@ export function MasterSidebar() {
     )}
     <div
       id="headquarters-global-sidebar"
+      role={isMobile ? "dialog" : undefined}
+      aria-modal={isMobile ? true : undefined}
+      aria-label={isMobile ? t("Headquarters navigation", "Navegación de sede") : undefined}
+      aria-hidden={isMobile ? !mobileOpen : undefined}
+      inert={isMobile && !mobileOpen ? true : undefined}
       className={`sidebar${!isMobile && sidebarCollapsed ? " master-sidebar-collapsed" : ""}`}
       style={isMobile ? { position: "fixed", top: 0, bottom: 0, left: 0, zIndex: 1310, width: "min(340px, 88vw)", transform: mobileOpen ? "translateX(0)" : "translateX(-105%)", transition: "transform 0.18s ease", boxShadow: mobileOpen ? "20px 0 60px rgba(15,23,42,0.28)" : undefined } : { position: "relative", width: sidebarCollapsed ? 58 : sidebarWidth, transition: sidebarResizing ? undefined : "width .16s ease" }}
     >
       {!isMobile && !sidebarCollapsed && <button type="button" className="master-sidebar-resizer" aria-label={t("Resize main navigation", "Cambiar ancho de la navegación principal")} aria-keyshortcuts="ArrowLeft ArrowRight Home End" title={t("Drag or use arrow keys to resize navigation", "Arrastre o use las flechas para cambiar el ancho")} onPointerDown={(event) => { event.preventDefault(); setSidebarResizing(true); }} onKeyDown={(event) => { if (event.key === "ArrowLeft") { event.preventDefault(); adjustSidebarWidth(sidebarWidth - 16); } else if (event.key === "ArrowRight") { event.preventDefault(); adjustSidebarWidth(sidebarWidth + 16); } else if (event.key === "Home") { event.preventDefault(); adjustSidebarWidth(196); } else if (event.key === "End") { event.preventDefault(); adjustSidebarWidth(420); } }} />}
       {isMobile && (
         <button
+          ref={mobileCloseRef}
           type="button"
           onClick={() => setMobileOpen(false)}
           style={{ display: "inline-flex", alignItems: "center", gap: 6, margin: "12px 10px 0", padding: "7px 10px", border: "1px solid rgba(255,255,255,0.16)", borderRadius: 8, background: "rgba(255,255,255,0.06)", color: "#fff", fontSize: 12, fontWeight: 700, cursor: "pointer" }}
