@@ -31111,8 +31111,8 @@
     },
     {
       "taskId": "bimlog-stabilization-build010-dependency-security-reconciliation-20260919",
-      "reviewedThroughCommit": "93b58852e2bd448bd863e946307131a4cc7944b3",
-      "reviewedAt": "2026-09-19T07:30:23Z",
+      "reviewedThroughCommit": "78544cbc13f9a65b0d425feee2a6c938bc5e45bc",
+      "reviewedAt": "2026-09-19T08:23:37Z",
       "status": "candidate",
       "authorities": [
         {
@@ -31172,16 +31172,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/build.ts",
-        "artifacts/api-server/scripts/test-deploy-runtime-closure.ts",
         "living-brief/CLAUDE.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "pnpm-lock.yaml",
-        "pnpm-workspace.yaml"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "312e9fabf40faa4cae56a3bc49c446036dae0f57b0d250d6b31a491d6e6b530f"
+      "reviewedChangeSha256": "bcbdce5e5e57f1ed558efb229ea02bac415db13dca302a6c0e2ec9bb4c6e06b9"
     }
   ]
 }

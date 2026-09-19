@@ -2013,3 +2013,5 @@ The repeated build proved the global `form-data` and `uuid` overrides were too b
 The focused runtime-closure fixture was also reconciled with Build 005's split package and now materializes `start.cjs`, `index.cjs`, and `app.mjs` before testing graph assembly and fail-closed cases.
 
 Fixture assembly now narrows required packages only inside its isolated non-canonical source root; the production workspace explicitly rejects a fixture package override and retains the complete required-runtime list.
+
+The exact production graph then exposed a peer-qualified `gaxios` lock key. The issuer-scoped override verifier now extracts package identity before the version and peer suffix instead of using the final `@`; scoped package names remain supported. The focused production API assembly now verifies 15 direct packages, 15 transitive dependencies and 17,340 files, and the 18-case closure regression remains fail closed.

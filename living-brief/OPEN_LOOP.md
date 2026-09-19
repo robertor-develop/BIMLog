@@ -2940,6 +2940,7 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Replace broad form-data/UUID overrides with issuer-scoped advisory-path overrides; keep form-data semver-compatible and bind only the three exact UUID issuer/spec/version exceptions.
 - [x] Reconcile the deterministic runtime-closure test fixture with the three-file split package before repeating the exact clean gate.
 - [x] Keep fixture package narrowing isolated from the canonical production workspace, which must retain the complete required-runtime list.
+- [x] Parse issuer-scoped overrides correctly for peer-qualified and scoped lock keys; focused API assembly and all 18 runtime-closure cases pass on the corrected graph.
 - [ ] Preserve the cadence: push every five builds, publish every ten, never exceed ten unpublished builds, and run focused Navisworks smoke for every Native/installer-changing block.
 - [ ] Stop continuation only for a real failed test or production defect; correct it and repeat the affected gate under the existing authorization.
 - [x] Preserve the unchanged 8000 ms Windows negative-authority budget. Build 005 reproduced cold denials at 8174 ms and 8217 ms, then added the packaged fail-fast `dist/start.cjs` entry; focused malformed-authority proof passes in 443 ms without TCP binding. The complete clean gate must pass before push.
