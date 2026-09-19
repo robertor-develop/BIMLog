@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 33,
+    "completedBuilds": 34,
     "totalBuilds": 120,
-    "remainingBuilds": 87,
-    "currentUnpublishedBuilds": 3,
-    "nextBuild": 34,
+    "remainingBuilds": 86,
+    "currentUnpublishedBuilds": 4,
+    "nextBuild": 35,
     "nextPushAfterBuild": 35,
     "nextPublicationAfterBuild": 40,
     "blocker": null
@@ -122,7 +122,8 @@
       "builds": [
         { "build": 31, "status": "PASS", "evidence": "BUILD_031_BUILD_TERMINATION_RELIABILITY.md" },
         { "build": 32, "status": "PASS", "evidence": "BUILD_032_DETERMINISTIC_PROOF_ROOTS.md" },
-        { "build": 33, "status": "PASS", "evidence": "BUILD_033_WORKFLOW_DATABASE_FIXTURE.md" }
+        { "build": 33, "status": "PASS", "evidence": "BUILD_033_WORKFLOW_DATABASE_FIXTURE.md" },
+        { "build": 34, "status": "PASS", "evidence": "BUILD_034_SECURITY_AUDIT_POLICY.md" }
       ]
     }
   ]

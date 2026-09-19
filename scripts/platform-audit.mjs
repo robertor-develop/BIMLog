@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const root = path.resolve(scriptDir, "..");
+const policy = JSON.parse(fs.readFileSync(path.join(scriptDir, "platform-audit-policy.json"), "utf8"));
 const scanRoots = [
   "artifacts/api-server/src",
   "artifacts/bimlog/src",
@@ -194,4 +195,25 @@ for (const finding of findings) {
 }
 
 console.log("");
-console.log("Audit is intentionally non-blocking today. Use these findings to drive stabilization batches, then make selected categories fail CI once cleaned.");
+const categoryCounts = findings.reduce((acc, finding) => {
+  acc[finding.category] = (acc[finding.category] ?? 0) + 1;
+  return acc;
+}, {});
+const unowned = [...new Set(findings.map(finding => finding.category))].filter(category => !policy.categories[category]);
+if (unowned.length) throw new Error(`Audit categories lack owners: ${unowned.join(", ")}`);
+const receipt = {
+  schemaVersion: 1,
+  status: (counts.P0 ?? 0) === 0 ? "PASS" : "FAIL",
+  scannedFiles: files.length,
+  routesFound: routeRegistrations.length,
+  counts: { P0: counts.P0 ?? 0, P1: counts.P1 ?? 0, P2: counts.P2 ?? 0, INFO: counts.INFO ?? 0 },
+  categories: Object.fromEntries(Object.entries(categoryCounts).sort().map(([category, count]) => [category, { count, ...policy.categories[category] }])),
+};
+const outputIndex = process.argv.indexOf("--output");
+if (outputIndex >= 0) {
+  const output = process.argv[outputIndex + 1];
+  if (!output) throw new Error("--output requires a path.");
+  fs.writeFileSync(path.resolve(output), `${JSON.stringify(receipt, null, 2)}\n`);
+}
+console.log(`Blocking policy: P0=${receipt.counts.P0 === 0 ? "PASS" : "FAIL"}; P1 findings are owned and scheduled, not silently waived.`);
+if (process.argv.includes("--enforce") && receipt.counts.P0 > 0) process.exitCode = 1;
