@@ -27,6 +27,11 @@ export const GetConfigResponse = zod.record(
  */
 export const HealthCheckResponse = zod.object({
   status: zod.string(),
+  release: zod.string().optional(),
+  sourceCommit: zod.string().optional(),
+  packageId: zod.string().optional(),
+  identityFingerprint: zod.string().optional(),
+  identityBound: zod.boolean().optional(),
 });
 
 /**

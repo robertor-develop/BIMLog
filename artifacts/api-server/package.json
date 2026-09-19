@@ -21,6 +21,7 @@
     "test:startup-bootstrap": "tsx ./scripts/test-startup-bootstrap.ts && tsx ./src/lib/database-startup-serialization.behavior.ts",
     "test:startup-bundle": "tsx ./scripts/test-startup-bundle.ts",
     "test:production-artifact": "tsx ./scripts/test-production-artifact-closure.ts",
+    "test:release-metadata": "tsx ./src/lib/release-metadata.behavior.ts",
     "test:lens-import": "tsx ./scripts/test-lens-import-contract.ts",
     "test:lens-import-api": "tsx ./scripts/test-lens-import-api-evidence.ts",
     "test:lens-next-publishing": "tsx ./src/lib/lens-next-publishing.behavior.ts && tsx ../bimlog/src/features/lens-next/lens-next-publishing-ui.behavior.ts",
