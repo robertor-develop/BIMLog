@@ -192,9 +192,10 @@ export function createLensNextApiClient(
     },
     async loadReferenceData(projectId: number, signal?: AbortSignal) {
       const exactProjectId = assertLensNextProjectId(projectId);
-      const [levelsRaw, membersRaw] = await Promise.all([
+      const [levelsRaw, membersRaw, conventionRaw] = await Promise.all([
         get(`/projects/${exactProjectId}/levels`, signal),
         get(`/projects/${exactProjectId}/members`, signal),
+        get(`/projects/${exactProjectId}/conventions`, signal),
       ]);
       const levelsBody = levelsRaw && typeof levelsRaw === "object" && !Array.isArray(levelsRaw)
         ? levelsRaw as Record<string, unknown>
@@ -202,11 +203,20 @@ export function createLensNextApiClient(
       const floors = Array.isArray(levelsBody?.levels)
         ? levelsBody.levels.map(value => String(value).trim()).filter(Boolean)
         : [];
-      const responsibleCompanies = Array.isArray(membersRaw)
+      const memberCompanies = Array.isArray(membersRaw)
         ? membersRaw
             .map(member => member && typeof member === "object" ? String((member as Record<string, unknown>).userCompanyName ?? "").trim() : "")
             .filter(Boolean)
         : [];
+      const conventionBody = conventionRaw && typeof conventionRaw === "object" && !Array.isArray(conventionRaw)
+        ? conventionRaw as Record<string, unknown>
+        : null;
+      const conventionCompanies = Array.isArray(conventionBody?.companyAssignmentStatus)
+        ? conventionBody.companyAssignmentStatus
+            .map(company => company && typeof company === "object" ? String((company as Record<string, unknown>).companyName ?? "").trim() : "")
+            .filter(Boolean)
+        : [];
+      const responsibleCompanies = [...memberCompanies, ...conventionCompanies];
       return Object.freeze({
         floors: [...new Set(floors)].sort(),
         responsibleCompanies: [...new Set(responsibleCompanies)].sort(),
