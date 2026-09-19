@@ -192,6 +192,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block12-build058-financial-authority.behavior.ts
 - artifacts/api-server/src/lib/block12-build059-operational-projections.behavior.ts
 - artifacts/api-server/src/lib/block12-build060-intake-operations-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block13-build061-coordination-identity.behavior.ts
+- artifacts/api-server/src/lib/block13-build062-lifecycle.behavior.ts
+- artifacts/api-server/src/lib/block13-build063-evidence-notifications.behavior.ts
+- artifacts/api-server/src/lib/block13-build064-register-export.behavior.ts
+- artifacts/api-server/src/lib/block13-build065-coordination-acceptance.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
@@ -228,6 +233,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/connector-validation-operations-postgres-store.ts
 - artifacts/api-server/src/lib/connector-validation-operations.behavior.ts
 - artifacts/api-server/src/lib/connector-validation-operations.ts
+- artifacts/api-server/src/lib/construction-coordination-records.ts
 - artifacts/api-server/src/lib/contract-item-workflow-contract.ts
 - artifacts/api-server/src/lib/contract-item-workflow-migration.ts
 - artifacts/api-server/src/lib/contract-item-workflow-service.ts
