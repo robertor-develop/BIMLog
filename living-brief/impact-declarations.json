@@ -31041,8 +31041,8 @@
     },
     {
       "taskId": "bimlog-stabilization-build005-valid-startup-correction-20260919",
-      "reviewedThroughCommit": "06bec6af3f0aa90a3ffceecf29fac1cc96b1f8e0",
-      "reviewedAt": "2026-09-19T06:03:00Z",
+      "reviewedThroughCommit": "4d444f23b3ea6ba93fe22f31038449ead797c723",
+      "reviewedAt": "2026-09-19T06:16:00Z",
       "status": "candidate",
       "authorities": [
         {
@@ -31088,7 +31088,7 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records the valid-runtime probe failure, root cause, bounded correction, and remaining terminal gate."
+          "reason": "Records the valid-runtime probe failure, split-package correction, CommonJS boundary normalization, and remaining terminal gate."
         },
         {
           "key": "open_loop",
@@ -31107,7 +31107,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "37fa14afe6b881b427f9f64b9cf9daccfdb9432444e6830b25d3439d6c9802ba"
+      "reviewedChangeSha256": "eb0e96bbed390afb38c9007c81dbef565f1236f0280205046c9a6bd5896fbf84"
     }
   ]
 }
