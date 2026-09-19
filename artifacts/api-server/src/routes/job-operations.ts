@@ -95,6 +95,7 @@ const run = (handler: (req: any, res: any) => Promise<void>) => async (req: any,
 };
 
 router.get("/projects/:projectId/operations", run(async (req, res) => {
+  res.setHeader("Cache-Control", "private, no-store");
   res.json(await getJobOperations({ actorUserId: req.user.userId, projectId: req.params.projectId }));
 }));
 router.get("/projects/:projectId/operations/work-items/:workItemId/delivery-workflow", run(async (req, res) => {

@@ -1,0 +1,16 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
+const here = path.dirname(fileURLToPath(import.meta.url));
+const service = fs.readFileSync(path.join(here, "job-operations-service.ts"), "utf8");
+const route = fs.readFileSync(path.resolve(here, "../routes/job-operations.ts"), "utf8");
+assert.match(service, /job_activation_operation_events e JOIN users/);
+assert.match(service, /ORDER BY e\.created_at DESC,e\.id DESC LIMIT 100/);
+assert.match(service, /source: "canonical-live-records"/);
+assert.match(service, /cacheable: false/);
+for (const count of ["workItems", "activeTasks", "completedTasks", "blockedTasks", "assignments", "timeEntries", "deliverables", "packages"]) assert.match(service, new RegExp(`${count}:`));
+assert.match(service, /latestActivityAt: operationEvents\.rows\[0\]\?\.createdAt \?\? null/);
+assert.match(service, /activity: operationEvents\.rows/);
+assert.match(route, /Cache-Control", "private, no-store/);
+console.log("Build 059 canonical command-center, activity, team, controls, and analytics projection freshness: PASS");

@@ -372,7 +372,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
   ]);
   const documentConnections = connectionView.connections;
   if (!access.intakeId) return { available: false, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity: { projectId, intakeId: null, companyId: access.companyId, clientCompanyId: null, jobCode: access.projectCode, jobName: access.projectName }, canManage: access.canManage, capabilities, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta };
-  const [workItems, tasks, assignments, timeEntries, deliverables, packages, packageTasks, members, files, totals, intakeData, apuSnapshots] = await Promise.all([
+  const [workItems, tasks, assignments, timeEntries, deliverables, packages, packageTasks, members, files, totals, intakeData, apuSnapshots, operationEvents] = await Promise.all([
     pool.query(`SELECT id,stable_scope_item_id "stableScopeItemId",name,description,unit,planned_hours "plannedHours",workflow_template "workflowTemplate",status,billing_hourly_rate "billingHourlyRate",planned_billable_value "plannedBillableValue",apu_plan_version "apuPlanVersion",budget_snapshot_line_id "budgetSnapshotLineId",project_cost_node_id "projectCostNodeId",contract_id "contractId",contract_version_id "contractVersionId" FROM job_activation_work_items WHERE intake_id=$1 ORDER BY created_at,id`, [access.intakeId]),
     pool.query(`SELECT t.id,t.work_item_id "workItemId",t.task_key "taskKey",t.name_en "nameEn",t.name_es "nameEs",t.status,t.version,t.progress_percent "progressPercent",t.planned_hours "plannedHours",t.assignee_user_id "assigneeUserId",t.start_date "startDate",t.due_date "dueDate",t.predecessor_task_ids "predecessorTaskIds",t.discipline_id "disciplineId",t.discipline_code "disciplineCode",t.discipline_name "disciplineName",t.service_id "serviceId",t.service_code "serviceCode",t.service_name "serviceName",t.phase_id "phaseId",t.phase_code "phaseCode",t.phase_name "phaseName",COALESCE(e.actual_hours,0)::text "actualHours",COALESCE(d.deliverable_count,0)::int "deliverableCount"
       FROM job_activation_tasks t
@@ -402,6 +402,7 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
       COALESCE((SELECT SUM(e.hours*COALESCE(r.billing_hourly_rate,w.billing_hourly_rate)) FROM job_activation_time_entries e JOIN job_activation_work_items w ON w.id=e.work_item_id LEFT JOIN job_activation_resource_assignments r ON r.id=e.assignment_id WHERE e.intake_id=$1),0)::text "earnedBillableValue"`, [access.intakeId]),
     pool.query(`SELECT data FROM job_intakes WHERE id=$1`, [access.intakeId]),
     pool.query(`SELECT stable_line_id "stableLineId",contract_id "contractId",contract_version_id "contractVersionId",pricing_snapshot "pricingSnapshot",snapshot_fingerprint "snapshotFingerprint",created_at "createdAt" FROM job_activation_contract_item_baselines WHERE intake_id=$1 ORDER BY created_at,id`, [access.intakeId]),
+    pool.query(`SELECT e.id,e.event_type "eventType",e.work_item_id "workItemId",e.task_id "taskId",e.assignment_id "assignmentId",e.package_id "packageId",e.actor_user_id "actorUserId",u.full_name "actorName",e.evidence,e.created_at "createdAt" FROM job_activation_operation_events e JOIN users u ON u.id=e.actor_user_id WHERE e.project_id=$1 ORDER BY e.created_at DESC,e.id DESC LIMIT 100`, [projectId]),
   ]);
   const authoritativeIntake = intakeData.rows[0]?.data ?? {};
   const identity = {
@@ -483,8 +484,25 @@ export async function getJobOperations(input: { actorUserId: number; projectId: 
     blocked: safePackages.filter((row) => Number(row.blockedCount) > 0).length,
     approved: safePackages.filter((row) => row.status === "approved").length,
   };
+  const operationalProjection = {
+    source: "canonical-live-records",
+    cacheable: false,
+    generatedAt: new Date().toISOString(),
+    counts: {
+      workItems: safeWorkItems.length,
+      tasks: safeTasks.length,
+      activeTasks: safeTasks.filter((row) => !["complete", "cancelled"].includes(row.status)).length,
+      completedTasks: safeTasks.filter((row) => row.status === "complete").length,
+      blockedTasks: safeTasks.filter((row) => row.status === "blocked").length,
+      assignments: safeAssignments.length,
+      timeEntries: timeEntries.rows.length,
+      deliverables: safeDeliverables.length,
+      packages: safePackages.length,
+    },
+    latestActivityAt: operationEvents.rows[0]?.createdAt ?? null,
+  };
   const [budgetGovernance, projectControls] = await Promise.all([budgetGovernanceView(pool, access, capabilities), projectControlsView(pool, access, capabilities)]);
-  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity, financialAuthority, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
+  return { available: safeWorkItems.length > 0, project: { id: projectId, name: access.projectName, code: access.projectCode }, identity, financialAuthority, operationalProjection, activity: operationEvents.rows, canManage: access.canManage, leaderId: access.leaderId, configurationSnapshot: access.configurationSnapshot, capabilities, budgetGovernance, projectControls, reportingContracts, apuSnapshots: apuSnapshots.rows, workItems: safeWorkItems, tasks: safeTasks, assignments: safeAssignments, timeEntries: timeEntries.rows, deliverables: safeDeliverables, packages: safePackages, packageTasks: packageTasks.rows, packageSummary, members: members.rows, files: files.rows, documentConnections, documentConnectionMeta: connectionView.meta, documentConnectionOptions: connectionOptionView.options, documentConnectionOptionMeta: connectionOptionView.meta, totals: safeTotals };
 }
 
 export async function createJobBudgetBaseline(input: { actorUserId: number; projectId: unknown; baselineId: unknown; revisionReason?: unknown }) {
