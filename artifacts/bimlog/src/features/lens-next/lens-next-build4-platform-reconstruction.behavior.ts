@@ -14,7 +14,7 @@ const openFunction = workingView.slice(
 );
 assert.doesNotMatch(openFunction, /bridgeClient\.openWorkingView|captureCurrentVisualState|saveVisualState/);
 assert.match(openFunction, /apiClient\.loadVisualState\(issue, context\.modelFingerprint, signal\)/);
-assert.match(openFunction, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, stored\.visualStateDigest, signal\)/);
+assert.match(openFunction, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, stored\.visualStateDigest, signal(?:, legacyModelContinuityConfirmed)?\)/);
 assert.match(workingView, /bridgeClient\.captureCurrentVisualState\(issue, context, signal\)/);
 assert.match(workingView, /apiClient\.saveVisualState\(issue, captured\.visualStateJson, captured\.visualStateDigest, signal\)/);
 assert.match(workingView, /apiClient\.loadVisualState\(migratedIssue, context\.modelFingerprint, signal\)/);

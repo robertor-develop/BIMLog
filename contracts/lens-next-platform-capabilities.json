@@ -1,0 +1,23 @@
+{
+  "schemaVersion": 1,
+  "product": "Lens Next",
+  "issueBrowser": {
+    "listAndDetail": true,
+    "grouping": true,
+    "filters": ["status", "trade", "floor", "priority", "responsibleCompany", "reportType", "capturedDate", "storedImageReference"],
+    "presentations": ["cards", "table"],
+    "responsive": true,
+    "keyboardAccessible": true
+  },
+  "evidence": {
+    "capturedImageStates": ["missing", "loading", "loaded", "error"],
+    "referenceAttachmentTypes": ["application/pdf", "image/png", "image/jpeg"],
+    "maximumReferenceBytes": 5242880,
+    "sameProjectLinks": ["rfi", "submittal"]
+  },
+  "threeDimensionalState": {
+    "productionInteractive3dAvailable": false,
+    "truthfulCustomerMessageRequired": true,
+    "prototypeIsNotProductionCapability": true
+  }
+}
