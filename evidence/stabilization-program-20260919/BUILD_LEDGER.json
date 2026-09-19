@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 42,
+    "completedBuilds": 43,
     "totalBuilds": 120,
-    "remainingBuilds": 78,
-    "currentUnpublishedBuilds": 2,
-    "nextBuild": 43,
+    "remainingBuilds": 77,
+    "currentUnpublishedBuilds": 3,
+    "nextBuild": 44,
     "nextPushAfterBuild": 45,
     "nextPublicationAfterBuild": 50,
     "blocker": null
@@ -149,7 +149,8 @@
       "smoke": "Authenticated shell accessibility and responsive visual evidence; push at Build 045, no production publication.",
       "builds": [
         { "build": 41, "status": "PASS", "evidence": "BUILD_041_ROUTE_ACCESSIBILITY.md" },
-        { "build": 42, "status": "PASS", "evidence": "BUILD_042_GLOBAL_SHELL_RESPONSIVE.md" }
+        { "build": 42, "status": "PASS", "evidence": "BUILD_042_GLOBAL_SHELL_RESPONSIVE.md" },
+        { "build": 43, "status": "PASS", "evidence": "BUILD_043_TRUTHFUL_ROUTE_STATES.md" }
       ]
     }
   ]

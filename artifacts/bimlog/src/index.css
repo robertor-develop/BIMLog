@@ -109,6 +109,12 @@ iframe[aria-label*="Replit" i],
 .sidebar { width: 220px; min-height: 0; flex-shrink: 0; background: hsl(var(--sidebar)); display: flex; flex-direction: column; overflow: hidden; border-right: 1px solid var(--sidebar-border); }
 .main-area { min-width: 0; min-height: 0; flex: 1; display: flex; flex-direction: column; overflow: hidden; }
 .page-content { min-height: 0; flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 20px 24px; }
+.route-state { box-sizing: border-box; width: calc(100% - 24px); max-width: 680px; margin: 48px auto; padding: 24px; border: 1px solid hsl(var(--border)); border-radius: 12px; background: hsl(var(--card)); color: hsl(var(--foreground)); }
+.route-state h1 { margin: 0; font-size: 22px; line-height: 1.25; }
+.route-state p { margin: 10px 0 0; color: hsl(var(--muted-foreground)); line-height: 1.55; }
+.route-state code { display: inline-block; margin-top: 12px; overflow-wrap: anywhere; }
+.route-state-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 18px; }
+@media (max-width: 390px) { .route-state { margin: 20px auto; padding: 18px 16px; } .route-state-actions { display: grid; grid-template-columns: 1fr; } }
 
 /*
  * Workspace width contract

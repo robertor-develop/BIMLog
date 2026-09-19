@@ -12,6 +12,7 @@ import { DebugBanner } from "@/components/DebugBanner";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { PublicRouteMetadata } from "@/components/PublicRouteMetadata";
 import { RouteAccessibility } from "@/components/layout/RouteAccessibility";
+import { RouteState } from "@/components/layout/RouteState";
 import { loadAccessProfile, resolveProjectContext, type AccessSurface } from "@/lib/access-profile";
 
 const namedPage = (loader: () => Promise<object>, name: string) =>
@@ -73,8 +74,9 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 function AccessRoute({ component: Component, surface }: { component: React.ComponentType; surface: AccessSurface }) {
   const { token, logout } = useAuthStore();
   const [, setLocation] = useLocation();
-  const [state, setState] = useState<"loading" | "allowed" | "denied">("loading");
+  const [state, setState] = useState<"loading" | "allowed" | "denied" | "error">("loading");
   const [code, setCode] = useState("ACCESS_CHECK_PENDING");
+  const [retryKey, setRetryKey] = useState(0);
 
   useEffect(() => {
     if (!token) { setLocation("/login"); return; }
@@ -90,13 +92,14 @@ function AccessRoute({ component: Component, surface }: { component: React.Compo
         if (controller.signal.aborted) return;
         if (String(error).includes("401")) { logout(); setLocation("/login"); return; }
         setCode("ACCESS_PROFILE_UNAVAILABLE");
-        setState("denied");
+        setState("error");
       });
     return () => controller.abort();
-  }, [token, surface, logout, setLocation]);
+  }, [token, surface, logout, setLocation, retryKey]);
 
-  if (state === "loading") return <div className="route-loading" role="status">Verifying access… / Verificando acceso…</div>;
-  if (state === "denied") return <section role="alert" style={{ maxWidth: 680, margin: "48px auto", padding: 24 }}><h1>Access unavailable / Acceso no disponible</h1><p>This workspace is not authorized for your current account. / Este espacio no está autorizado para su cuenta actual.</p><code>{code}</code></section>;
+  if (state === "loading") return <RouteState kind="loading" title="Verifying access / Verificando acceso" />;
+  if (state === "error") return <RouteState kind="error" code="ACCESS_PROFILE_UNAVAILABLE" onRetry={() => setRetryKey(value => value + 1)} />;
+  if (state === "denied") return <RouteState kind="denied" code={code} />;
   return <Component />;
 }
 
@@ -104,24 +107,28 @@ function ProjectRoute({ component: Component }: { component: React.ComponentType
   const { token, logout } = useAuthStore();
   const [location, setLocation] = useLocation();
   const [context, setContext] = useState<ReturnType<typeof resolveProjectContext> | null>(null);
+  const [projectError, setProjectError] = useState(false);
+  const [retryKey, setRetryKey] = useState(0);
   const projectId = Number(location.match(/^\/projects\/(\d+)/)?.[1] ?? 0);
 
   useEffect(() => {
     if (!token) { setLocation("/login"); return; }
     const controller = new AbortController();
     setContext(null);
+    setProjectError(false);
     loadAccessProfile(token, controller.signal)
       .then((profile) => setContext(resolveProjectContext(profile, projectId)))
       .catch((error) => {
         if (controller.signal.aborted) return;
         if (String(error).includes("401")) { logout(); setLocation("/login"); return; }
-        setContext({ allow: false, kind: "project_denied", projectId, role: null });
+        setProjectError(true);
       });
     return () => controller.abort();
-  }, [token, projectId, logout, setLocation]);
+  }, [token, projectId, logout, setLocation, retryKey]);
 
-  if (!context) return <div className="route-loading" role="status">Verifying project context… / Verificando contexto del proyecto…</div>;
-  if (!context.allow) return <section role="alert" style={{ maxWidth: 680, margin: "48px auto", padding: 24 }}><h1>{context.kind === "zero_project" ? "No active project / Sin proyecto activo" : "Project access unavailable / Acceso al proyecto no disponible"}</h1><p>{context.kind === "zero_project" ? "Your headquarters account is active without a project assignment." : "This project is outside your current authorized scope."}</p></section>;
+  if (projectError) return <RouteState kind="error" code="PROJECT_CONTEXT_UNAVAILABLE" onRetry={() => setRetryKey(value => value + 1)} />;
+  if (!context) return <RouteState kind="loading" title="Verifying project context / Verificando contexto del proyecto" />;
+  if (!context.allow) return <RouteState kind="denied" title={context.kind === "zero_project" ? "No active project / Sin proyecto activo" : "Project access unavailable / Acceso al proyecto no disponible"} detail={context.kind === "zero_project" ? "Your headquarters account is active without a project assignment. / Su cuenta de sede está activa sin asignación de proyecto." : "This project is outside your current authorized scope. / Este proyecto está fuera de su alcance autorizado actual."} />;
   return <>{context.kind === "global_super_admin" && <div role="status" style={{ padding: "6px 16px", background: "#EFF6FF", color: "#1E3A5F", fontSize: 12, fontWeight: 700 }}>Global Super Administrator context / Contexto global de Super Administrador</div>}<Component /></>;
 }
 
