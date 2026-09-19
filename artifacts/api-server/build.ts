@@ -438,7 +438,10 @@ async function assembleRuntimeFromInstalledGraph(
       return { packageLockKey: workspaceKey, snapshotLockKey: workspaceKey };
     }
     if (!satisfiesDeclaredSpec(version, declaredSpec) && !hasApprovedSecurityOverride(packageName, declaredSpec, version, issuer)) {
-      throw new Error(`Installed package version does not satisfy its declared spec: ${packageName} expected ${declaredSpec}, received ${version}.`);
+      const issuerIdentity = issuer.type === "package" ? issuer.lockKey : `importer:${issuer.key}`;
+      throw new Error(
+        `Installed package version does not satisfy its declared spec: ${packageName} expected ${declaredSpec}, received ${version}; issuer ${issuerIdentity}.`,
+      );
     }
     const lockedReference = assertDependencyEdge(issuer, packageName, declaredSpec, version);
     const lockKeyPattern = new RegExp(
