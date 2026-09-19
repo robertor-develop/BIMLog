@@ -15,7 +15,12 @@ if (Number.isNaN(port) || port <= 0) {
   throw new Error(`Invalid PORT value: "${rawPort}"`);
 }
 
-const bootstrap = createApplicationBootstrap(() => import("./app"));
+// Keep the listener bootstrap in a small bundle so production can bind and
+// answer liveness before the full application graph is parsed. The build
+// emits app.cjs beside index.cjs; the runtime string intentionally keeps that
+// graph out of the bootstrap bundle.
+const applicationBundle = "./app.cjs";
+const bootstrap = createApplicationBootstrap(() => import(applicationBundle));
 
 async function main(): Promise<void> {
   try {

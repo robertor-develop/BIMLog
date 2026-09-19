@@ -11,9 +11,11 @@ import { performance } from "node:perf_hooks";
 const runtimeRoot = path.resolve("dist/runtime");
 const bundle = path.join(runtimeRoot, "dist/start.cjs");
 const applicationBundle = path.join(runtimeRoot, "dist/index.cjs");
+const deferredApplicationBundle = path.join(runtimeRoot, "dist/app.cjs");
 const metafile = path.join(runtimeRoot, "dist/index.meta.json");
 assert(fs.existsSync(bundle), "Production artifact startup entry is missing.");
 assert(fs.existsSync(applicationBundle), "Production artifact bundle is missing.");
+assert(fs.existsSync(deferredApplicationBundle), "Production artifact deferred application bundle is missing.");
 assert(fs.existsSync(metafile), "Production artifact metafile is missing.");
 
 const deploymentSource = JSON.parse(

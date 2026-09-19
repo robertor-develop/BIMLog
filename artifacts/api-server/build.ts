@@ -626,6 +626,7 @@ async function assembleRuntimeFromInstalledGraph(
   await mkdir(path.join(runtimeDir, "dist"), { recursive: true });
   await copyAbortableFile(path.join(apiRoot, "dist", "start.cjs"), path.join(runtimeDir, "dist", "start.cjs"));
   await copyAbortableFile(path.join(apiRoot, "dist", "index.cjs"), path.join(runtimeDir, "dist", "index.cjs"));
+  await copyAbortableFile(path.join(apiRoot, "dist", "app.cjs"), path.join(runtimeDir, "dist", "app.cjs"));
   await copyAbortableFile(path.join(apiRoot, "dist", "index.meta.json"), path.join(runtimeDir, "dist", "index.meta.json"));
   const runtimeLivingBrief = path.join(runtimeDir, "living-brief");
   await mkdir(runtimeLivingBrief, { recursive: false });
@@ -744,6 +745,7 @@ export async function deployRuntimeClosure(
     await assertRegularDirectory(nodeModules, "Runtime node_modules");
     await assertRegularFile(path.join(root, "dist", "start.cjs"), "Runtime startup entry");
     await assertRegularFile(path.join(root, "dist", "index.cjs"), "Runtime server bundle");
+    await assertRegularFile(path.join(root, "dist", "app.cjs"), "Runtime application bundle");
     await assertRegularFile(path.join(root, "dist", "index.meta.json"), "Runtime server metafile");
     const deploymentSourcePath = path.join(root, "deployment-source.json");
     await assertRegularFile(deploymentSourcePath, "Runtime deployment source identity");
@@ -991,12 +993,10 @@ async function buildAll() {
     ...explicitRuntimeExternals,
   ];
 
-  const result = await esbuild({
-    entryPoints: [path.resolve(__dirname, "src/index.ts")],
-    platform: "node",
+  const buildOptions = {
+    platform: "node" as const,
     bundle: true,
-    format: "cjs",
-    outfile: path.resolve(distDir, "index.cjs"),
+    format: "cjs" as const,
     define: {
       "process.env.NODE_ENV": '"production"',
       "process.env.BIMLOG_BUILD_SOURCE_COMMIT": JSON.stringify(livingBrief.sourceCommit),
@@ -1004,17 +1004,37 @@ async function buildAll() {
     minify: true,
     external: [...new Set(externals)],
     metafile: true,
-    logLevel: "info",
+    logLevel: "info" as const,
+  };
+  const bootstrapResult = await esbuild({
+    entryPoints: [path.resolve(__dirname, "src/index.ts")],
+    outfile: path.resolve(distDir, "index.cjs"),
+    ...buildOptions,
+  });
+  const applicationResult = await esbuild({
+    entryPoints: [path.resolve(__dirname, "src/app.ts")],
+    outfile: path.resolve(distDir, "app.cjs"),
+    ...buildOptions,
   });
   await copyFile(
     path.resolve(__dirname, "src", "startup-entry.cjs"),
     path.resolve(distDir, "start.cjs"),
   );
-  await writeFile(metafilePath, JSON.stringify(result.metafile, null, 2));
+  const combinedMetafile = {
+    inputs: {
+      ...bootstrapResult.metafile.inputs,
+      ...applicationResult.metafile.inputs,
+    },
+    outputs: {
+      ...bootstrapResult.metafile.outputs,
+      ...applicationResult.metafile.outputs,
+    },
+  };
+  await writeFile(metafilePath, JSON.stringify(combinedMetafile, null, 2));
 
   const externalSpecifiers = [
     ...new Set(
-      Object.values(result.metafile.outputs)
+      Object.values(combinedMetafile.outputs)
         .flatMap((output) => output.imports)
         .filter((entry) => entry.external && !isNodeBuiltin(entry.path))
         .map((entry) => entry.path),
