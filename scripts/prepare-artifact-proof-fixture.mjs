@@ -10,8 +10,11 @@ const dbDirectory = path.join(root, "lib", "db");
 const requireApi = createRequire(path.join(root, "artifacts", "api-server", "package.json"));
 const { Client } = requireApi("pg");
 const prepare = process.argv.includes("--prepare");
-if (process.argv.some((value, index) => index > 1 && value !== "--prepare" && value !== "--check"))
-  throw new Error("Use --prepare or --check for the local artifact fixture.");
+const recreate = process.argv.includes("--recreate");
+if (process.argv.some((value, index) => index > 1 && !["--prepare", "--check", "--recreate"].includes(value)))
+  throw new Error("Use --prepare, --check, or --prepare --recreate for the local artifact fixture.");
+if (recreate && (!prepare || process.env.BIMLOG_ALLOW_DISPOSABLE_FIXTURE_RECREATE !== "YES"))
+  throw new Error("Fixture recreation requires --prepare and BIMLOG_ALLOW_DISPOSABLE_FIXTURE_RECREATE=YES.");
 
 const rawUrl = process.env.BIMLOG_ARTIFACT_PROOF_DATABASE_URL;
 const rawRoot = process.env.BIMLOG_ARTIFACT_PROOF_ROOT;
@@ -51,7 +54,12 @@ try {
       (process.platform === "win32" &&
        !path.resolve(observed.data_dir).toUpperCase().startsWith("F:\\BIMLOG\\TESTPROOF\\")))
     throw new Error("The responding PostgreSQL service is not the verified F-rooted loopback test cluster.");
-  const existing = await admin.query("SELECT pg_encoding_to_char(encoding) encoding FROM pg_database WHERE datname='bimlog_rfi_test'");
+  let existing = await admin.query("SELECT pg_encoding_to_char(encoding) encoding FROM pg_database WHERE datname='bimlog_rfi_test'");
+  if (recreate && existing.rows.length) {
+    await admin.query("SELECT pg_terminate_backend(pid) FROM pg_stat_activity WHERE datname='bimlog_rfi_test' AND pid <> pg_backend_pid()");
+    await admin.query("DROP DATABASE bimlog_rfi_test");
+    existing = { rows: [] };
+  }
   if (!existing.rows.length) {
     if (!prepare) throw new Error("Disposable bimlog_rfi_test is absent. Run this fixture helper with --prepare first.");
     await admin.query("CREATE DATABASE bimlog_rfi_test WITH ENCODING 'UTF8' LC_COLLATE 'C' LC_CTYPE 'C' TEMPLATE template0");
