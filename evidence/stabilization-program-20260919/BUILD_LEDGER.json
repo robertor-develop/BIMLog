@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 25,
+    "completedBuilds": 26,
     "totalBuilds": 120,
-    "remainingBuilds": 95,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 26,
+    "remainingBuilds": 94,
+    "currentUnpublishedBuilds": 6,
+    "nextBuild": 27,
     "nextPushAfterBuild": 30,
     "nextPublicationAfterBuild": 30,
     "blocker": null
@@ -97,6 +97,20 @@
         { "build": 23, "status": "PASS", "evidence": "BUILD_023_DOCUMENTATION_CONTRACT.md" },
         { "build": 24, "status": "PASS", "evidence": "BUILD_024_LENS_NEXT_SOLE_PRODUCT.md" },
         { "build": 25, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_025_CONTRADICTION_GATE.md" }
+      ]
+    },
+    {
+      "block": 6,
+      "buildRange": "026-030",
+      "status": "IN_PROGRESS",
+      "publicationRequired": true,
+      "smoke": "Full authenticated visible-Chrome smoke after Build 030 publication; focused Navisworks smoke only if accepted integration changes Native or installers.",
+      "builds": [
+        { "build": 26, "status": "PASS", "evidence": "BUILD_026_SOURCE_AUTHORITY_INVENTORY.md" },
+        { "build": 27, "status": "NOT_STARTED", "evidence": null },
+        { "build": 28, "status": "NOT_STARTED", "evidence": null },
+        { "build": 29, "status": "NOT_STARTED", "evidence": null },
+        { "build": 30, "status": "NOT_STARTED", "evidence": null }
       ]
     }
   ]
