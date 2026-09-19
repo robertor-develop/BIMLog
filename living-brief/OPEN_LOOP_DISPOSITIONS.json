@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "198640c6a8893c6e50d5681707c4a70aa1f7f5d2565c3593aee3ea2d92b06ce4",
-  "itemCount": 130,
+  "sourceSha256": "714698d28ef590916401130268378a595a38eda5707f209db12227d424786326",
+  "itemCount": 131,
   "counts": {
-    "ACTIVE": 113,
+    "ACTIVE": 114,
     "SUPERSEDED": 14,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 0
@@ -1443,6 +1443,17 @@
       "classification": "ACTIVE",
       "evidence": [
         "OPEN_LOOP.md:2964",
+        "120-build stabilization program — 2026-09-19"
+      ]
+    },
+    {
+      "id": "6c77d43f94be4765",
+      "sourceLine": 2967,
+      "heading": "120-build stabilization program — 2026-09-19",
+      "statement": "Build 070 release: pass exact clean-head and focused dual-year metadata/package smoke, push, publish through Replit Shell without Agents, and pass exact-identity authenticated visible-Chrome Lens Next create/link/reconcile smoke.",
+      "classification": "ACTIVE",
+      "evidence": [
+        "OPEN_LOOP.md:2967",
         "120-build stabilization program — 2026-09-19"
       ]
     }

@@ -5,6 +5,7 @@
 - **Lens Next is the sole supported BIMLog Lens product.** Original/Legacy Lens is preserved only as historical migration evidence and must not be presented, installed, loaded, or maintained as a parallel product.
 - Current accepted Platform compatibility is `v1.05.N18-P33` / `1.5.18.33`. The Build 020 Platform publication changed no Native or installer source, so the existing accepted Native packages remain unchanged pending the dedicated Native reconciliation milestone.
 - Build 040 candidate compatibility is `v1.05.N18-P34` / `1.5.18.34`. Its 2021 and 2025 package-only builds, core suites, native suites, installer package-only checks, and identity checks pass; no Autodesk installation or field acceptance is implied.
+- Build 070 Platform candidate compatibility is `v1.05.N18-P35` / `1.5.18.35`. Native behavior is unchanged; generated assembly and dual-year manifest metadata advance only the Platform counter. Focused package/contract smoke is required before push, while installation and real-model field acceptance remain separate Build 071–075 work.
 - Platform publication, Native package build, Autodesk installation, and real Navisworks 2021/2025 field acceptance remain distinct states. A web release never implies an Autodesk installation or Ruben field acceptance.
 - Historical sections below describe the version and acceptance state at their named checkpoint; they do not override this current supported-product contract.
 

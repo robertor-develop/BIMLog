@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## 120-build stabilization current authority — Block 14 Lens Next P35 publication candidate — 2026-09-19
+
+- The accepted live Platform remains `v1.05.N18-P34` from exact Build 060 source `1673457735ba00c815a12ee0543592bbc62f5506` and Replit receipt `e1998027` until this candidate passes the clean gate, push, Replit publication, and authenticated production smoke.
+- Builds 066–070 reconcile the stale September 17 mockup worktree without importing its proposed schema or generated brief state; complete the existing Lens Next issue browser and exact workflow acceptance; and remove Original/Legacy Lens wording from customer Platform source.
+- `contracts/lens-product-reference-inventory.json` mechanically separates supported Lens Next runtime from migration-only compatibility, tests, governance, and historical evidence. `/lens-next` remains the only standalone Lens product route.
+- The candidate release identity is `v1.05.N18-P35` / `1.5.18.35`. Native behavior is unchanged; generated dual-year release metadata advances only the Platform counter, so focused 2021/2025 package/contract smoke is mandatory before push.
+- Build 070 is not production-complete until exact clean-head release evidence, normal push, Replit Shell publication without Replit Agents, exact live identity, and authenticated visible-Chrome Lens Next create/link/reconcile acceptance all pass.
+
 ## 120-build stabilization current authority — Block 13 coordination workflow candidate — 2026-09-19
 
 - The accepted live platform is `v1.05.N18-P34`, published after Build 060 from exact pushed source `1673457735ba00c815a12ee0543592bbc62f5506` under Replit receipt `e1998027`; health/readiness and the authenticated Intake-to-Operations Chrome journey passed.
