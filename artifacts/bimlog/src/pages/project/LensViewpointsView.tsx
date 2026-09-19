@@ -402,7 +402,7 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   }, [projectId]);
 
   // Lens Next owns its authenticated bridge on 127.0.0.1:8766. Do not report the
-  // legacy Original Lens 8765 endpoint as Lens Next connection state.
+  // retired unauthenticated 8765 endpoint as Lens Next connection state.
   useEffect(() => {
     let cancelled = false;
     let activeController: AbortController | null = null;
@@ -701,8 +701,8 @@ export function LensViewpointsView({ projectId, canWrite, focusViewpointId }: { 
   // rejected by the browser before the request is even acted on. Use no-cors:
   // the GET still reaches the plugin and drives Navisworks; the opaque response
   // cannot be read, so a fetch that resolves means the plugin received it (jump
-  // Open through the authenticated Lens Next contract. Never call the legacy
-  // Original Lens localhost endpoint or resolve a row by a display label.
+  // Open through the authenticated Lens Next contract. Never call the retired
+  // localhost endpoint or resolve a row by a display label.
   const jumpToViewpoint = async (v: LensViewpoint) => {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), 8000);

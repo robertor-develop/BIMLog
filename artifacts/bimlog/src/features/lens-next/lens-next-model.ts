@@ -77,7 +77,7 @@ export function planLensNextSynchronization(
       localNavisworksGuid: view.navisworksGuid,
       displayId: view.displayId ?? view.displayName,
       reason: view.exactManagedIdentity
-        ? "An exact Original Lens-managed viewpoint exists only in Navisworks."
+        ? "An exact BIMLog-managed historical viewpoint exists only in Navisworks."
         : "The local viewpoint lacks exact BIMLog-managed identity.",
     }));
   });

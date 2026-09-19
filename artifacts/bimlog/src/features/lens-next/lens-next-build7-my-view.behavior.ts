@@ -8,7 +8,7 @@ assert.ok(start >= 0);
 assert.match(block, /filter\(viewpoint => viewpoint\.lensNextPublished\)/);
 assert.match(block, /publishedGuids\.has/);
 assert.match(block, /bridgeClient\.materializeMyView/);
-assert.match(block, /Original Lens and unmanaged folders will not be changed/);
+assert.match(block, /Migration-only and unmanaged folders will not be changed/);
 assert.doesNotMatch(block, /lens-sync|remove|delete/i);
 const client = fs.readFileSync(new URL("./lens-next-client.ts", import.meta.url), "utf8");
 assert.match(client, /\/v1\/materialize-my-view/);

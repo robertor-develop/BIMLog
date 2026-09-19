@@ -1,9 +1,9 @@
 <Project>
   <!-- Generated from contracts/release-identity.json. Do not edit. -->
   <PropertyGroup>
-    <Version>1.5.18.34</Version>
-    <AssemblyVersion>1.5.18.34</AssemblyVersion>
-    <FileVersion>1.5.18.34</FileVersion>
-    <InformationalVersion>v1.05.N18-P34</InformationalVersion>
+    <Version>1.5.18.35</Version>
+    <AssemblyVersion>1.5.18.35</AssemblyVersion>
+    <FileVersion>1.5.18.35</FileVersion>
+    <InformationalVersion>v1.05.N18-P35</InformationalVersion>
   </PropertyGroup>
 </Project>

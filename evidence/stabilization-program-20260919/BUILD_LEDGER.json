@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the completed local-gate Block 13 / Build 065 source head; Build 060 publication and live receipts remain the accepted production chain until Build 070.",
+  "headBinding": "The Git commit containing this ledger is the Block 14 / Build 070 P35 publication candidate; Build 060 publication and live receipts remain the accepted production chain until the exact Build 070 head passes publication and authenticated smoke.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 65,
+    "completedBuilds": 70,
     "totalBuilds": 120,
-    "remainingBuilds": 55,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 66,
-    "nextPushAfterBuild": 65,
+    "remainingBuilds": 50,
+    "currentUnpublishedBuilds": 10,
+    "nextBuild": 71,
+    "nextPushAfterBuild": 70,
     "nextPublicationAfterBuild": 70,
     "blocker": null
   },
@@ -209,6 +209,20 @@
         { "build": 63, "status": "PASS", "evidence": "BUILD_063_COORDINATION_EVIDENCE.md" },
         { "build": 64, "status": "PASS", "evidence": "BUILD_064_COORDINATION_REGISTER_EXPORT.md" },
         { "build": 65, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_065_COORDINATION_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 14,
+      "buildRange": "066-070",
+      "status": "PASS_PENDING_CLEAN_GATE_PUSH_PUBLICATION",
+      "publicationRequired": true,
+      "smoke": "Full authenticated visible-Chrome Lens Next create/link/reconcile smoke after Build 070 publication; focused dual-year package/contract smoke before push because shared P35 release metadata changed.",
+      "builds": [
+        { "build": 66, "status": "PASS", "evidence": "BUILD_066_LENS_MOCKUP_RECONCILIATION.md" },
+        { "build": 67, "status": "PASS", "evidence": "BUILD_067_LEGACY_LENS_REFERENCE_INVENTORY.md" },
+        { "build": 68, "status": "PASS", "evidence": "BUILD_068_LENS_NEXT_PLATFORM_BROWSER.md" },
+        { "build": 69, "status": "PASS", "evidence": "BUILD_069_LENS_NEXT_WORKFLOW_INTEGRITY.md" },
+        { "build": 70, "status": "PASS_PENDING_CLEAN_GATE_PUSH_PUBLICATION", "evidence": "BUILD_070_LENS_NEXT_SOLE_PRODUCT.md" }
       ]
     }
   ]

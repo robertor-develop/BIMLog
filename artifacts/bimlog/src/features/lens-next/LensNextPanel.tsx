@@ -503,7 +503,7 @@ export function LensNextPanel({
         bridgeContext,
       );
       if (result.migratedHistoricalIssue) {
-        setBridgeError("Historical Original Lens issue recovered by exact identity and stored in BIMLog.");
+        setBridgeError("Historical BIMLog issue recovered by exact identity and stored in Lens Next.");
         await loadIssues("refresh");
       }
       setWorkingViewState("success");
@@ -607,7 +607,7 @@ export function LensNextPanel({
     const items: LensNextLayoutItem[] = filteredIssues.filter(issue => Boolean(issue.navisworksGuid) && publishedGuids.has(issue.navisworksGuid!.toLowerCase())).map(issue => ({ navisworksGuid: issue.navisworksGuid!, folderPath: dimensions.map(dimension => value(issue, dimension)?.trim() || `Unassigned ${dimension}`).join("/") }));
     if (!items.length) { setLayoutState("error"); setLayoutMessage("No exact local Lens Next-published viewpoints are available for this My View."); return; }
     const reason = window.prompt("Reason for materializing this My View folder layout in Navisworks:")?.trim();
-    if (!reason || !window.confirm(`Organize ${items.length} exact Lens Next-published Saved Viewpoint(s) under the dedicated My View root? Original Lens and unmanaged folders will not be changed.`)) return;
+    if (!reason || !window.confirm(`Organize ${items.length} exact Lens Next-published Saved Viewpoint(s) under the dedicated My View root? Migration-only and unmanaged folders will not be changed.`)) return;
     setLayoutState("running"); setLayoutMessage(null);
     try { const receipt = await bridgeClient.materializeMyView(items, bridgeContext, reason); setLayoutState("success"); setLayoutMessage(`My View organized: ${receipt.moved} moved, ${receipt.alreadyPlaced} already placed. Save the NWF/NWD when ready.`); setLocalInventory(await bridgeClient.loadLocalInventory()); }
     catch (error) { setLayoutState("error"); setLayoutMessage(error instanceof Error ? error.message : "My View materialization failed"); }

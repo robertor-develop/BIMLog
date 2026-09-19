@@ -319,6 +319,14 @@ ${appRoutes()}
 - Attachments, references, comments, responsible-company evidence, and notifications bind to the exact canonical record version. Attachment hashes and notification event keys are deterministic; evidence identities cannot be rebound.
 - Saved views own filters, search, sorting, and page size. Screen pagination and PDF/CSV producers consume the same project-scoped filtered rows, preventing hidden or cross-project export divergence.
 - Block 13 changes no schema, Native source, installer, provider configuration, or customer data. It is push-only; Build 070 remains the next publication milestone.
+
+## 120-build stabilization — Block 14 Lens Next Platform sole-product completion
+
+- The September 17 dirty mockup worktree remains preserved but is not a source authority. Its useful responsible-company behavior is implemented without its proposed schema: Lens Next combines names from exact-project membership and the existing Convention assignment response, deduplicates them, and never fabricates a company name from an unbound code.
+- A tracked inventory mechanically separates Lens Next supported runtime, migration-only compatibility, governance, tests, and historical evidence. New unclassified Original/Legacy Lens, retired bundle, or \`lens-sync\` references fail the focused acceptance gate.
+- The Lens Next Platform capability contract binds list/detail, grouping, filters, captured-image states, references, same-project RFI/Submittal links, responsive/keyboard behavior, and the truthful rule that a captured image is not interactive 3D.
+- Create, Working View, repair, refresh, and reconciliation acceptance preserves exact project/model identity, idempotency, stale-response refusal, manual conflict handling, readback, and transaction rollback.
+- Customer Platform source no longer presents Original/Legacy Lens. \`/lens-next\` is the sole Lens product route. The shared release identity advances only the Platform counter to \`v1.05.N18-P35\`; generated Native metadata remains behaviorally unchanged and requires focused dual-year package/contract smoke before push.
 `;
 
   const outDir = path.join(REPO_ROOT, "living-brief");
