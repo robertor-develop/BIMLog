@@ -19,19 +19,8 @@ if (Number.isNaN(port) || port <= 0) {
 // answer liveness before the full application graph is parsed. The build
 // emits app.cjs beside index.cjs; the runtime string intentionally keeps that
 // graph out of the bootstrap bundle.
-const applicationBundle = "./app.cjs";
-const bootstrap = createApplicationBootstrap(async () => {
-  const imported = await import(applicationBundle);
-  // Node exposes a CommonJS bundle as the namespace default. esbuild's CJS
-  // wrapper then holds the actual default handler and named startup exports.
-  // Normalize that single wrapper without weakening bootstrap validation.
-  const candidate = imported.default;
-  return (
-    candidate && typeof candidate === "object" && "default" in candidate
-      ? candidate
-      : imported
-  ) as typeof imported;
-});
+const applicationBundle = "./app.mjs";
+const bootstrap = createApplicationBootstrap(() => import(applicationBundle));
 
 async function main(): Promise<void> {
   try {

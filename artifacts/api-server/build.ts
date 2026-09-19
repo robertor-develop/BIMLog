@@ -626,7 +626,7 @@ async function assembleRuntimeFromInstalledGraph(
   await mkdir(path.join(runtimeDir, "dist"), { recursive: true });
   await copyAbortableFile(path.join(apiRoot, "dist", "start.cjs"), path.join(runtimeDir, "dist", "start.cjs"));
   await copyAbortableFile(path.join(apiRoot, "dist", "index.cjs"), path.join(runtimeDir, "dist", "index.cjs"));
-  await copyAbortableFile(path.join(apiRoot, "dist", "app.cjs"), path.join(runtimeDir, "dist", "app.cjs"));
+  await copyAbortableFile(path.join(apiRoot, "dist", "app.mjs"), path.join(runtimeDir, "dist", "app.mjs"));
   await copyAbortableFile(path.join(apiRoot, "dist", "index.meta.json"), path.join(runtimeDir, "dist", "index.meta.json"));
   const runtimeLivingBrief = path.join(runtimeDir, "living-brief");
   await mkdir(runtimeLivingBrief, { recursive: false });
@@ -745,7 +745,7 @@ export async function deployRuntimeClosure(
     await assertRegularDirectory(nodeModules, "Runtime node_modules");
     await assertRegularFile(path.join(root, "dist", "start.cjs"), "Runtime startup entry");
     await assertRegularFile(path.join(root, "dist", "index.cjs"), "Runtime server bundle");
-    await assertRegularFile(path.join(root, "dist", "app.cjs"), "Runtime application bundle");
+    await assertRegularFile(path.join(root, "dist", "app.mjs"), "Runtime application bundle");
     await assertRegularFile(path.join(root, "dist", "index.meta.json"), "Runtime server metafile");
     const deploymentSourcePath = path.join(root, "deployment-source.json");
     await assertRegularFile(deploymentSourcePath, "Runtime deployment source identity");
@@ -1013,8 +1013,9 @@ async function buildAll() {
   });
   const applicationResult = await esbuild({
     entryPoints: [path.resolve(__dirname, "src/app.ts")],
-    outfile: path.resolve(distDir, "app.cjs"),
+    outfile: path.resolve(distDir, "app.mjs"),
     ...buildOptions,
+    format: "esm",
   });
   await copyFile(
     path.resolve(__dirname, "src", "startup-entry.cjs"),
