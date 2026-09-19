@@ -24,6 +24,7 @@
     "check:checkout-readiness": "node scripts/check-checkout-readiness.mjs",
     "test:checkout-readiness": "node scripts/test-checkout-readiness.mjs",
     "test:api-build-termination": "node scripts/test-api-build-termination.mjs",
+    "test:proof-roots": "node scripts/test-proof-root.mjs",
     "check:living-brief": "node scripts/check-living-brief.mjs",
     "check:open-loop-dispositions": "node scripts/open-loop-dispositions.mjs",
     "generate:open-loop-dispositions": "node scripts/open-loop-dispositions.mjs --write",
