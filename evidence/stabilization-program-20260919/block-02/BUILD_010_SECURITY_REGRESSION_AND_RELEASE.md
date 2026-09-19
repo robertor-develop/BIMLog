@@ -17,7 +17,7 @@ Status: PASS_LOCAL_RELEASE_GATE
 
 ## Exact local release evidence
 
-- Dependency provenance: PASS (`pnpm@11.17.0` via exact `engines.pnpm`, provider-triggering `packageManager` absent, lockfile v9, 15 patched resolutions, 981 integrity-bound resolutions).
+- Dependency provenance: PASS (governed local/CI `pnpm@11.17.0`, Replit engine range `>=10.26.1 <12`, provider-triggering `packageManager` absent, lockfile v9, 15 patched resolutions, 981 integrity-bound resolutions).
 - Production audit: PASS, zero known vulnerabilities.
 - Tracked-secret self-test and scan: PASS.
 - Database safety: PASS (223 tables, 273 indexes, 184 startup tables reconciled).

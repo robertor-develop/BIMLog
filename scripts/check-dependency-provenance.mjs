@@ -10,7 +10,9 @@ const workspace = read("pnpm-workspace.yaml");
 const lockfile = read("pnpm-lock.yaml");
 const npmrc = read(".npmrc");
 
-assert.equal(packageJson.engines?.pnpm, "11.17.0", "pnpm engine identity must be exact");
+assert.equal(packageJson.engines?.pnpm, ">=10.26.1 <12", "Replit-compatible pnpm engine range must be exact");
+assert.equal(packageJson.bimlogToolchain?.localPnpm, "11.17.0", "governed local pnpm identity must be exact");
+assert.equal(packageJson.bimlogToolchain?.replitPnpmRange, packageJson.engines.pnpm, "Replit pnpm contract must match engines.pnpm");
 assert.equal(packageJson.packageManager, undefined, "packageManager is forbidden because Replit misinterprets it as a self-install request");
 assert.match(packageJson.scripts?.preinstall ?? "", /rm -f package-lock\.json yarn\.lock/);
 assert.match(packageJson.scripts?.preinstall ?? "", /npm_config_user_agent/);
@@ -58,7 +60,8 @@ assert.ok(integrityCount >= 500, `unexpectedly small integrity-bound closure: ${
 
 console.log(JSON.stringify({
   status: "PASS",
-  packageManager: `pnpm@${packageJson.engines.pnpm}`,
+  packageManager: `pnpm@${packageJson.bimlogToolchain.localPnpm}`,
+  replitPackageManagerRange: packageJson.bimlogToolchain.replitPnpmRange,
   lockfileVersion: "9.0",
   minimumReleaseAge,
   patchedResolutions: patchedResolutions.length,

@@ -2,7 +2,11 @@
   "name": "workspace",
   "version": "0.0.0",
   "engines": {
-    "pnpm": "11.17.0"
+    "pnpm": ">=10.26.1 <12"
+  },
+  "bimlogToolchain": {
+    "localPnpm": "11.17.0",
+    "replitPnpmRange": ">=10.26.1 <12"
   },
   "license": "MIT",
   "scripts": {

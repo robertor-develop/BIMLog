@@ -31181,8 +31181,8 @@
     },
     {
       "taskId": "bimlog-stabilization-build010-replit-bootstrap-correction-20260919",
-      "reviewedThroughCommit": "056b30e7fdbea2fbaca80fec91698dae938bdd14",
-      "reviewedAt": "2026-09-19T09:11:18Z",
+      "reviewedThroughCommit": "420b35e495b00e653c66ab3aae6772942a16f055",
+      "reviewedAt": "2026-09-19T09:32:21Z",
       "status": "candidate",
       "authorities": [
         {
@@ -31193,7 +31193,7 @@
         {
           "key": "claude",
           "result": "updated",
-          "reason": "Records the exact pnpm engine pin and prohibits the provider-triggering packageManager field."
+          "reason": "Records exact governed local/CI pnpm 11.17.0, the Replit-compatible pnpm range, and prohibition of the provider-triggering packageManager field."
         },
         {
           "key": "quality",
@@ -31228,7 +31228,7 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records the failed Replit provider bootstrap, exact root cause, bounded correction, and unchanged production state."
+          "reason": "Records both failed Replit provider bootstrap checks, their exact causes, the bounded dual-toolchain correction, and unchanged production state."
         },
         {
           "key": "open_loop",
@@ -31251,7 +31251,7 @@
         "package.json",
         "scripts/check-dependency-provenance.mjs"
       ],
-      "reviewedChangeSha256": "2f87c2b07d82710dd7ed8208fdf20948f5466602bc4e59611c15bad47966b2cb"
+      "reviewedChangeSha256": "abb9781c747f4b4e4c16e725e347166bc81301b183b47cb2c797357ce4874424"
     }
   ]
 }
