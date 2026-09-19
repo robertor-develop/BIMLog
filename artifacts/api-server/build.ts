@@ -1016,6 +1016,9 @@ async function buildAll() {
     outfile: path.resolve(distDir, "app.mjs"),
     ...buildOptions,
     format: "esm",
+    banner: {
+      js: 'import { createRequire as __bimlogCreateRequire } from "node:module"; const require = __bimlogCreateRequire(import.meta.url);',
+    },
   });
   await copyFile(
     path.resolve(__dirname, "src", "startup-entry.cjs"),
