@@ -897,3 +897,11 @@ It changes only when the code structure or curated architectural facts change.
 - Builds 16–17 control For Record issuance and immutable delivery receipts. Issuance requires approved QC, the observed current revision, explicit recipients and human approval; provider outcomes replay only when immutable receipt evidence agrees.
 - Build 18 evaluates one complete 18-gate release-readiness record and fails closed on any missing, duplicated or failed gate. Its contract requires the local checkpoint to attest that database application, provider activation, outbound messaging, deployment and publication are all false.
 - The full 18-build Coordination Delivery roadmap is now implemented as locally tested contracts and service boundaries. Provider adapters, routes, UI, migrations, live activation and deployment remain separately reviewed delivery work rather than implied effects of this checkpoint.
+
+## 120-build stabilization — Block 13 coordination records
+
+- Issue/clash, RFI, submittal, transmittal, meeting, schedule, and change-order records now share one strict project-bound identity and link contract. Schedule placements participate in the same authoritative same-project check as the existing record families.
+- Lifecycle actions use explicit per-record matrices. Reopen, revise, void, and reject require reasons, and accepted transitions append ordered actor/time/from/to evidence.
+- Attachments, references, comments, responsible-company evidence, and notifications bind to the exact canonical record version. Attachment hashes and notification event keys are deterministic; evidence identities cannot be rebound.
+- Saved views own filters, search, sorting, and page size. Screen pagination and PDF/CSV producers consume the same project-scoped filtered rows, preventing hidden or cross-project export divergence.
+- Block 13 changes no schema, Native source, installer, provider configuration, or customer data. It is push-only; Build 070 remains the next publication milestone.

@@ -9,6 +9,7 @@
 - Block 13 changes no schema, customer data, Lens Next Native source, installer, manifest, or package. Build 065 is push-only; publication and authenticated Chrome smoke remain due after Build 070.
 - The production assembler's generated platform inventory includes the new financial contract and regression modules; its Living Brief hash bundle is reconciled before the final clean-source rerun.
 - Build 065 acceptance traces all seven record families, links, actors, times, version-bound formal-response evidence, notifications, and exact exported rows under one project authority.
+- The Block 13 semantic-impact reconciliation covers the exact Build 065 implementation commit; Platform and current/open-loop authorities agree that Build 065 is push-only and Build 070 is the next publication milestone.
 
 ## 120-build stabilization current authority — Block 10 publication candidate — 2026-09-19
 
