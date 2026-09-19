@@ -57,6 +57,32 @@ function sha256(value: Buffer | string): string {
   return createHash("sha256").update(canonicalText(value)).digest("hex");
 }
 
+function trackedInventorySha256(pathspecs: string[], includePath?: RegExp): string {
+  const rawInventory = execFileSync(
+    "git",
+    [
+      "-c",
+      `safe.directory=${workspaceRoot.replaceAll("\\", "/")}`,
+      "-C",
+      workspaceRoot,
+      "ls-tree",
+      "-r",
+      "--full-tree",
+      "HEAD",
+      "--",
+      ...pathspecs,
+    ],
+    { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] },
+  );
+  const inventory = rawInventory
+    .split(/\r?\n/)
+    .filter(Boolean)
+    .filter(line => !includePath || includePath.test(line.slice(line.indexOf("\t") + 1)))
+    .join("\n");
+  if (!inventory) throw new Error(`Tracked build inventory is empty: ${pathspecs.join(", ")}`);
+  return sha256(inventory);
+}
+
 async function loadVerifiedLivingBriefBuildInput(): Promise<LivingBriefBuildInput> {
   const catalogBytes = await readFile(path.join(livingBriefSourceRoot, "catalog.json"));
   const stateBytes = await readFile(path.join(livingBriefSourceRoot, "state.json"));
@@ -1024,6 +1050,18 @@ async function buildAll() {
   const runtimeDir = path.join(distDir, "runtime");
   const metafilePath = path.join(distDir, "index.meta.json");
   const livingBrief = await loadVerifiedLivingBriefBuildInput();
+  const assetManifestSha256 = trackedInventorySha256([
+    "artifacts/bimlog",
+    "lib/api-client-react",
+    "lib/api-zod",
+  ]);
+  const databaseContractSha256 = trackedInventorySha256([
+    "lib/db/src/schema",
+    "artifacts/api-server/src/lib",
+    "artifacts/api-server/src/app.ts",
+  ], /^(?:lib\/db\/src\/schema\/|artifacts\/api-server\/src\/app\.ts$|artifacts\/api-server\/src\/lib\/[^/]*migration[^/]*\.ts$)/);
+  const packageId = `bimlog-${livingBrief.sourceCommit.slice(0, 16)}-${assetManifestSha256.slice(0, 16)}`;
+  const databaseMigrationLevel = `schema-${databaseContractSha256.slice(0, 24)}`;
   await mkdir(distDir, { recursive: true });
   for (const generatedFile of ["start.cjs", "index.cjs", "app.mjs", "index.meta.json"]) {
     await removeGeneratedDirectory(path.join(distDir, generatedFile));
@@ -1056,6 +1094,9 @@ async function buildAll() {
     define: {
       "process.env.NODE_ENV": '"production"',
       "process.env.BIMLOG_BUILD_SOURCE_COMMIT": JSON.stringify(livingBrief.sourceCommit),
+      "process.env.BIMLOG_BUILD_ASSET_MANIFEST_SHA256": JSON.stringify(assetManifestSha256),
+      "process.env.BIMLOG_BUILD_PACKAGE_ID": JSON.stringify(packageId),
+      "process.env.BIMLOG_BUILD_DATABASE_MIGRATION_LEVEL": JSON.stringify(databaseMigrationLevel),
     },
     minify: true,
     external: [...new Set(externals)],

@@ -10,7 +10,7 @@
     "release": { "type": "string" },
     "source": { "type": "object", "required": ["commit", "tree"] },
     "provider": { "type": "object", "required": ["sourceTree", "publicationReceiptId"] },
-    "live": { "type": "object", "required": ["healthStatus", "release", "identityBound"] },
+    "live": { "type": "object", "required": ["healthStatus", "release", "sourceCommit", "assetManifestSha256", "packageId", "databaseMigrationLevel", "identityBound"] },
     "assets": { "type": "object", "required": ["manifestSha256", "sessionCoordinatorAssets"] },
     "actors": { "type": "object", "required": ["superAdmin", "scopedUser"] },
     "session": { "type": "object", "required": ["reloadRestored", "twoTabsContinuous", "staleResponseRejected"] },

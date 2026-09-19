@@ -29,7 +29,9 @@ export const HealthCheckResponse = zod.object({
   status: zod.string(),
   release: zod.string().optional(),
   sourceCommit: zod.string().optional(),
+  assetManifestSha256: zod.string().optional(),
   packageId: zod.string().optional(),
+  databaseMigrationLevel: zod.string().optional(),
   identityFingerprint: zod.string().optional(),
   identityBound: zod.boolean().optional(),
 });

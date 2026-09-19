@@ -20,6 +20,13 @@ export interface AppConfig {
 
 export interface HealthStatus {
   status: string;
+  release?: string;
+  sourceCommit?: string;
+  assetManifestSha256?: string;
+  packageId?: string;
+  databaseMigrationLevel?: string;
+  identityFingerprint?: string;
+  identityBound?: boolean;
 }
 
 export interface ErrorResponse {

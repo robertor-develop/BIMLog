@@ -660,6 +660,20 @@ components:
       properties:
         status:
           type: string
+        release:
+          type: string
+        sourceCommit:
+          type: string
+        assetManifestSha256:
+          type: string
+        packageId:
+          type: string
+        databaseMigrationLevel:
+          type: string
+        identityFingerprint:
+          type: string
+        identityBound:
+          type: boolean
       required:
         - status
 

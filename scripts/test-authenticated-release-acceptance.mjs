@@ -8,7 +8,7 @@ const valid = {
   release: "v1.05.N18-P34",
   source: { commit, tree },
   provider: { sourceTree: tree, publicationReceiptId: "provider-receipt" },
-  live: { healthStatus: 200, release: "v1.05.N18-P34", identityBound: true },
+  live: { healthStatus: 200, release: "v1.05.N18-P34", sourceCommit: commit, assetManifestSha256: sha, packageId: "bimlog-package", databaseMigrationLevel: "schema-contract", identityBound: true },
   assets: { manifestSha256: sha, sessionCoordinatorAssets: [{ path: "/assets/index.js", packageSha256: sha, servedSha256: sha }] },
   actors: {
     superAdmin: { authenticated: true, totalControl: true, livingBrief: true },
@@ -21,6 +21,8 @@ assert.equal(validateAuthenticatedReleaseAcceptance(valid).ok, true);
 for (const mutate of [
   (v) => { v.live.release = "v1.05.N18-P33"; },
   (v) => { v.live.identityBound = false; },
+  (v) => { v.live.sourceCommit = "d".repeat(40); },
+  (v) => { v.live.assetManifestSha256 = "d".repeat(64); },
   (v) => { v.assets.sessionCoordinatorAssets[0].servedSha256 = "d".repeat(64); },
   (v) => { v.actors.scopedUser.totalControlDenied = false; },
   (v) => { v.session.twoTabsContinuous = false; },
@@ -29,4 +31,4 @@ for (const mutate of [
   const candidate = structuredClone(valid); mutate(candidate);
   assert.equal(validateAuthenticatedReleaseAcceptance(candidate).ok, false);
 }
-console.log("authenticated release acceptance contract: 7/7 passed");
+console.log("authenticated release acceptance contract: 9/9 passed");

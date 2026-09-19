@@ -13,13 +13,20 @@ const environment = {
   BIMLOG_DATABASE_MIGRATION_LEVEL: "delivery-workflow-v1",
 };
 const metadata = resolveReleaseMetadata(environment);
-assert.equal(metadata.release, "v1.05.N18-P33");
+assert.equal(metadata.release, "v1.05.N18-P34");
 assert.equal(metadata.sourceCommit, commit);
 assert.equal(metadata.assetManifestSha256, asset);
 assert.equal(metadata.bound, true);
 assert.match(metadata.identityFingerprint, /^[0-9a-f]{64}$/);
 assert.equal(resolveReleaseMetadata({ BIMLOG_SOURCE_COMMIT: "stale" }).bound, false);
-assert.deepEqual(Object.keys(publicReleaseMetadata(environment)).sort(), ["identityBound", "identityFingerprint", "packageId", "release", "sourceCommit"]);
+const embedded = resolveReleaseMetadata(
+  { BIMLOG_SOURCE_COMMIT: "c".repeat(40), BIMLOG_PACKAGE_ID: "stale-runtime-package" },
+  { sourceCommit: commit, assetManifestSha256: asset, packageId: "immutable-package", databaseMigrationLevel: "schema-contract" },
+);
+assert.equal(embedded.sourceCommit, commit);
+assert.equal(embedded.packageId, "immutable-package");
+assert.equal(embedded.bound, true);
+assert.deepEqual(Object.keys(publicReleaseMetadata(environment)).sort(), ["assetManifestSha256", "databaseMigrationLevel", "identityBound", "identityFingerprint", "packageId", "release", "sourceCommit"]);
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const route = fs.readFileSync(path.resolve(here, "../routes/health.ts"), "utf8");

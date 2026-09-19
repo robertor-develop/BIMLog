@@ -31698,6 +31698,7 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/build.ts",
         "artifacts/api-server/package.json",
         "artifacts/api-server/scripts/generate-platform-md.ts",
         "artifacts/api-server/src/lib/access-policy.behavior.ts",
@@ -31705,6 +31706,8 @@
         "artifacts/api-server/src/lib/access-profile.ts",
         "artifacts/api-server/src/lib/access-route-authority.behavior.ts",
         "artifacts/api-server/src/lib/project-context-source.behavior.ts",
+        "artifacts/api-server/src/lib/release-metadata.behavior.ts",
+        "artifacts/api-server/src/lib/release-metadata.ts",
         "artifacts/api-server/src/middlewares/auth.ts",
         "artifacts/api-server/src/routes/auth.ts",
         "artifacts/bimlog/src/App.tsx",
@@ -31724,6 +31727,9 @@
         "evidence/stabilization-program-20260919/BUILD_039_PROJECT_CONTEXT.md",
         "evidence/stabilization-program-20260919/BUILD_040_AUTHENTICATED_RELEASE_GATE.md",
         "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "lib/api-client-react/src/generated/api.schemas.ts",
+        "lib/api-spec/openapi.yaml",
+        "lib/api-zod/src/generated/api.ts",
         "lib/api-zod/src/release-identity.ts",
         "living-brief/PLATFORM.md",
         "living-brief/PLUGIN.md",
@@ -31755,7 +31761,7 @@
         "scripts/test-authenticated-release-acceptance.mjs",
         "scripts/test-release-identity.mjs"
       ],
-      "reviewedChangeSha256": "6669433f0ccef919bc8d9ada46ccf684b23cf743a6c73b9954eeff31b94f8fa6"
+      "reviewedChangeSha256": "bc5f35dda7914f16d531cc21defd0d4c322ec6bb867fcc8a4d74e438d04ecce2"
     }
   ]
 }

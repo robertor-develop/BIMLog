@@ -15,6 +15,10 @@ export function validateAuthenticatedReleaseAcceptance(receipt) {
   require(receipt?.live?.release === receipt?.release, "live.release", "live release is stale or mismatched");
   require(receipt?.live?.identityBound === true, "live.identityBound", "live package identity is unbound");
   require(SHA256.test(receipt?.assets?.manifestSha256 ?? ""), "assets.manifestSha256", "asset manifest digest is missing");
+  require(receipt?.live?.sourceCommit === receipt?.source?.commit, "live.sourceCommit", "live source differs from the published commit");
+  require(receipt?.live?.assetManifestSha256 === receipt?.assets?.manifestSha256, "live.assetManifestSha256", "live asset manifest differs from the published package");
+  require(typeof receipt?.live?.packageId === "string" && receipt.live.packageId.length > 0 && receipt.live.packageId !== "unbound", "live.packageId", "live package identity is missing");
+  require(typeof receipt?.live?.databaseMigrationLevel === "string" && receipt.live.databaseMigrationLevel.length > 0 && receipt.live.databaseMigrationLevel !== "unbound", "live.databaseMigrationLevel", "live database contract is missing");
   const assets = receipt?.assets?.sessionCoordinatorAssets;
   require(Array.isArray(assets) && assets.length > 0, "assets.sessionCoordinatorAssets", "session coordinator assets are absent");
   for (const [index, asset] of (Array.isArray(assets) ? assets : []).entries()) {
