@@ -22,7 +22,7 @@ It changes only when the code structure or curated architectural facts change.
 
 ## Current release and provider contract
 - Current accepted Platform release: `v1.05.N18-P34` / `1.5.18.34`; Build 040 corrective source `4472d982c2fc7ab5fde552048f024cd7e90fab96`; Replit publication receipt `b8718795`. Exact live source/package/database identity and authenticated two-tab restoration passed.
-- Builds 041–045 are the next push-only global-shell stabilization block: route titles, landmarks and focus; desktop/mobile navigation; truthful loading/denied/error states; language/theme continuity; and inspected desktop/exact-390 Chrome regression. They change no Native code, installer, schema, database rows, provider configuration, or customer data. Publication and authenticated live acceptance are next due at Build 050.
+- Builds 041–050 are the due ten-build publication batch. Builds 041–045 harden the global shell; Builds 046–050 add governed catalog aliases, canonical Intake classification selection, permanent pricing/workflow/Intake lifecycle regressions, and controlled role acceptance. The only schema delta is the additive, default-empty company-catalog `aliases` column. No Lens Next Native source or installer changed. Publication and authenticated live acceptance are required before Build 051.
 - GitHub `master` is the product source authority. Replit is the established BIMLog publication provider; synchronize exact reviewed source through the signed-in Replit Shell, never Replit Agents.
 - Publication requires the read-only database operator to prove exact development/production schema correspondence, no destructive action, development-data copy off, and a clean exact source. Build 020 returned `schemaAction=NONE` and changed no production row or schema object.
 - Public `/api/v1/healthz` is both health and application-readiness evidence because the startup bootstrap holds that route at HTTP 503 until the real application barrier completes.
@@ -185,6 +185,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.behavior.ts
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.ts
 - artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts
+- artifacts/api-server/src/lib/block10-controlled-acceptance.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
@@ -198,6 +199,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/company-pricing-template-contract.behavior.ts
 - artifacts/api-server/src/lib/company-pricing-template-contract.ts
 - artifacts/api-server/src/lib/company-pricing-template-intake.behavior.ts
+- artifacts/api-server/src/lib/company-pricing-template-lifecycle.behavior.ts
 - artifacts/api-server/src/lib/company-pricing-template.http-evidence.ts
 - artifacts/api-server/src/lib/composite-qc.behavior.ts
 - artifacts/api-server/src/lib/composite-qc.ts
@@ -254,6 +256,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/delivery-workflow-defaults.ts
 - artifacts/api-server/src/lib/delivery-workflow-economic-allocation.behavior.ts
 - artifacts/api-server/src/lib/delivery-workflow-economic-allocation.ts
+- artifacts/api-server/src/lib/delivery-workflow-intake-authority.behavior.ts
 - artifacts/api-server/src/lib/delivery-workflow-runtime.http-evidence.ts
 - artifacts/api-server/src/lib/delivery-workflow-runtime.ts
 - artifacts/api-server/src/lib/delivery-workflow-selection.behavior.ts
@@ -387,6 +390,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/job-intake-configuration.ts
 - artifacts/api-server/src/lib/job-intake-contract.ts
 - artifacts/api-server/src/lib/job-intake-empty-commercial-prerequisites.behavior.ts
+- artifacts/api-server/src/lib/job-intake-full-lifecycle.behavior.ts
 - artifacts/api-server/src/lib/job-intake-mapped-item-pricing.behavior.ts
 - artifacts/api-server/src/lib/job-intake-mapped-item-pricing.ts
 - artifacts/api-server/src/lib/job-intake-member-assignment.behavior.ts
