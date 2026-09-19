@@ -74,3 +74,22 @@ export function evaluateCommercialPrice(input: CommercialPriceInput): Commercial
 export function financialFingerprint(value: unknown): string {
   return createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
+
+export type StatementPricingInput = Readonly<{
+  quantity: string;
+  unitRate: string;
+  statedTotal: string;
+  currency: string;
+  source: Readonly<{ quantityColumn: string; unitRateColumn: string; totalColumn: string }>;
+}>;
+
+export function mapStatementPricing(input: StatementPricingInput): CommercialPriceResult & { statedTotal: string; source: StatementPricingInput["source"] } {
+  const keys = [input?.source?.quantityColumn, input?.source?.unitRateColumn, input?.source?.totalColumn];
+  if (keys.some(key => typeof key !== "string" || !key.trim()) || new Set(keys).size !== 3)
+    fail("FINANCIAL_STATEMENT_MAPPING_INVALID", "Quantity, unit-rate, and total columns must be distinct and explicit.");
+  const statedTotal = money(scaledDecimal(decimal(input.statedTotal, "statedTotal")));
+  const result = evaluateCommercialPrice({ quantity: input.quantity, unitPrice: input.unitRate, currency: input.currency });
+  if (result.total !== statedTotal)
+    fail("FINANCIAL_STATEMENT_TOTAL_MISMATCH", `Quantity × unit rate is ${result.total} ${result.currency}, not the stated ${statedTotal} ${result.currency}.`);
+  return Object.freeze({ ...result, statedTotal, source: Object.freeze({ ...input.source }) });
+}
