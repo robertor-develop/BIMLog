@@ -34,6 +34,8 @@
     "test:tracked-secret-exposure": "node scripts/check-tracked-secret-exposure.mjs --self-test && node scripts/check-tracked-secret-exposure.mjs",
     "check:database-safety": "node scripts/check-database-safety.mjs",
     "test:database-safety": "node scripts/test-database-safety.mjs",
+    "schema:receipt": "node scripts/database-schema-receipt.mjs",
+    "test:schema-receipt": "node scripts/test-database-schema-receipt.mjs",
     "prepare:artifact-proof-fixture": "node scripts/prepare-artifact-proof-fixture.mjs --prepare",
     "check:artifact-proof-fixture": "node scripts/prepare-artifact-proof-fixture.mjs --check",
     "attest:publication-source": "node scripts/check-database-safety.mjs --attest-source",
