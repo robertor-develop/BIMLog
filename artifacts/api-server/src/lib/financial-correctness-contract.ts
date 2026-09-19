@@ -93,3 +93,27 @@ export function mapStatementPricing(input: StatementPricingInput): CommercialPri
     fail("FINANCIAL_STATEMENT_TOTAL_MISMATCH", `Quantity × unit rate is ${result.total} ${result.currency}, not the stated ${statedTotal} ${result.currency}.`);
   return Object.freeze({ ...result, statedTotal, source: Object.freeze({ ...input.source }) });
 }
+
+export type PhaseAllocationInput = Readonly<{ phaseId: string; percent: string }>;
+export function allocateCommercialTotal(total: string, currencyValue: string, phases: readonly PhaseAllocationInput[]) {
+  const currency = parseCurrency(currencyValue);
+  if (!Array.isArray(phases) || phases.length === 0 || phases.length > 100) fail("FINANCIAL_PHASES_INVALID", "One to 100 phases are required.");
+  if (new Set(phases.map(phase => phase.phaseId)).size !== phases.length || phases.some(phase => !/^[A-Za-z0-9][A-Za-z0-9._:-]{0,99}$/.test(phase.phaseId)))
+    fail("FINANCIAL_PHASES_INVALID", "Phase identities must be unique and stable.");
+  const percents = phases.map(phase => scaledDecimal(decimal(phase.percent, `phases.${phase.phaseId}.percent`)));
+  if (percents.reduce((sum, value) => sum + value, 0n) !== 100n * SCALE) fail("FINANCIAL_PHASE_TOTAL_INVALID", "Phase percentages must total exactly 100%.");
+  const totalMinor = roundMinor(scaledDecimal(decimal(total, "total")));
+  const denominator = 100n * SCALE;
+  const allocations = phases.map((phase, index) => {
+    const numerator = totalMinor * percents[index];
+    return { phaseId: phase.phaseId, percent: decimal(phase.percent, `phases.${phase.phaseId}.percent`), minor: numerator / denominator, remainder: numerator % denominator };
+  });
+  let residual = totalMinor - allocations.reduce((sum, item) => sum + item.minor, 0n);
+  for (const item of [...allocations].sort((a, b) => a.remainder === b.remainder ? a.phaseId.localeCompare(b.phaseId) : a.remainder > b.remainder ? -1 : 1)) {
+    if (residual === 0n) break;
+    item.minor += 1n;
+    residual -= 1n;
+  }
+  const lines = allocations.map(({ phaseId, percent, minor }) => Object.freeze({ phaseId, percent, amount: `${minor / 100n}.${(minor % 100n).toString().padStart(2, "0")}`, currency }));
+  return Object.freeze({ total: money(totalMinor * MINOR), currency, lines: Object.freeze(lines), reconciled: lines.reduce((sum, line) => sum + BigInt(line.amount.replace(".", "")), 0n) === totalMinor });
+}
