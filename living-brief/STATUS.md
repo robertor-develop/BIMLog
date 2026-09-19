@@ -1,14 +1,14 @@
 # STATUS.md - Current Accepted Platform State
 
-## 120-build stabilization current authority — Block 12 Operations lifecycle candidate — 2026-09-19
+## 120-build stabilization current authority — Block 13 coordination workflow candidate — 2026-09-19
 
-- The accepted live platform is `v1.05.N18-P34`, published from exact source `752b79739e7874d2a530f22937aae6a05ebf88dd` under Replit receipt `c2e7dc7e`; live health reported `identityBound=true`, and authenticated Chrome acceptance passed after Build 050.
-- Builds 051–060 are the ten-build publication batch after that accepted release. Builds 051–055 establish exact financial arithmetic and revision authority. Builds 056–060 bind activated Intake and Operations to one canonical project/customer identity, persist task ownership/progress/dates/dependencies with stale-write and cycle rejection, expose only canonical financial references, and generate no-store command-center/activity/team/control projections from live records.
+- The accepted live platform is `v1.05.N18-P34`, published after Build 060 from exact pushed source `1673457735ba00c815a12ee0543592bbc62f5506` under Replit receipt `e1998027`; health/readiness and the authenticated Intake-to-Operations Chrome journey passed.
+- Builds 061–065 are the first five-build candidate after that accepted release. They establish one project-bound identity for issue/clash, RFI, submittal, transmittal, meeting, schedule and change-order records; enforce reasoned lifecycle transitions and audit history; bind evidence and notifications to exact versions; and make saved-view filtering/pagination and export content consume one result.
 - The controlled `$480,000` vector accepts quantity `12` at unit rate `40,000` and rejects unit rate `480,000` against the same stated total. Historical evidence is unchanged.
 - The production budget-line normalizer enforces that exact quantity/rate/total invariant for both manual Intake drafts and controlled statement imports; the regression is not a test-only proxy.
-- Block 12 adds only backward-compatible task schedule columns with empty/null defaults; no existing row is rewritten. It changes no customer data, Lens Next Native source, installer, manifest, or package. Push, Replit publication, migration receipt, and authenticated Chrome smoke are due at Build 060.
+- Block 13 changes no schema, customer data, Lens Next Native source, installer, manifest, or package. Build 065 is push-only; publication and authenticated Chrome smoke remain due after Build 070.
 - The production assembler's generated platform inventory includes the new financial contract and regression modules; its Living Brief hash bundle is reconciled before the final clean-source rerun.
-- Block 060 full regression corrected two stale Help/staffing assertions so both now verify the generated release authority instead of embedding an obsolete P33/P34 string.
+- Build 065 acceptance traces all seven record families, links, actors, times, version-bound formal-response evidence, notifications, and exact exported rows under one project authority.
 
 ## 120-build stabilization current authority — Block 10 publication candidate — 2026-09-19
 

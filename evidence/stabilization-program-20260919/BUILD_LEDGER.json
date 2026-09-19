@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the completed local-gate Block 12 / Build 060 source head; provider publication and live receipts are recorded externally without changing that source identity.",
+  "headBinding": "The Git commit containing this ledger is the completed local-gate Block 13 / Build 065 source head; Build 060 publication and live receipts remain the accepted production chain until Build 070.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 60,
+    "completedBuilds": 65,
     "totalBuilds": 120,
-    "remainingBuilds": 60,
-    "currentUnpublishedBuilds": 10,
-    "nextBuild": 61,
-    "nextPushAfterBuild": 60,
-    "nextPublicationAfterBuild": 60,
+    "remainingBuilds": 55,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 66,
+    "nextPushAfterBuild": 65,
+    "nextPublicationAfterBuild": 70,
     "blocker": null
   },
   "blocks": [
@@ -130,7 +130,7 @@
     {
       "block": 8,
       "buildRange": "036-040",
-      "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION",
+      "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED",
       "publicationRequired": true,
       "smoke": "Full authenticated visible-Chrome smoke with Super Administrator, scoped user, and two-tab restoration after Build 040 publication.",
       "builds": [
@@ -194,7 +194,21 @@
         { "build": 57, "status": "PASS", "evidence": "BUILD_057_OPERATIONS_TASK_LIFECYCLE.md" },
         { "build": 58, "status": "PASS", "evidence": "BUILD_058_CANONICAL_FINANCIAL_AUTHORITY.md" },
         { "build": 59, "status": "PASS", "evidence": "BUILD_059_LIVE_OPERATIONAL_PROJECTIONS.md" },
-        { "build": 60, "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION", "evidence": "BUILD_060_INTAKE_OPERATIONS_ACCEPTANCE.md" }
+        { "build": 60, "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED", "evidence": "BUILD_060_INTAKE_OPERATIONS_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 13,
+      "buildRange": "061-065",
+      "status": "PASS_PENDING_PUSH",
+      "publicationRequired": false,
+      "smoke": "Coordination workflow candidate acceptance; push at Build 065, no production publication or Navisworks smoke because Native and installers are unchanged.",
+      "builds": [
+        { "build": 61, "status": "PASS", "evidence": "BUILD_061_COORDINATION_RECORD_IDENTITY.md" },
+        { "build": 62, "status": "PASS", "evidence": "BUILD_062_COORDINATION_LIFECYCLE.md" },
+        { "build": 63, "status": "PASS", "evidence": "BUILD_063_COORDINATION_EVIDENCE.md" },
+        { "build": 64, "status": "PASS", "evidence": "BUILD_064_COORDINATION_REGISTER_EXPORT.md" },
+        { "build": 65, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_065_COORDINATION_ACCEPTANCE.md" }
       ]
     }
   ]

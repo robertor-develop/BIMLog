@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "bdd401c41207bc441a15ae996317d2b788c338be7776d706d77b742f3c4ab659",
-  "itemCount": 129,
+  "sourceSha256": "c9b3e32dafe1d343e8b2710a0aa95a08a7b945157c89aa6a1c19a939782158a9",
+  "itemCount": 130,
   "counts": {
-    "ACTIVE": 112,
+    "ACTIVE": 113,
     "SUPERSEDED": 14,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 0
@@ -1432,6 +1432,17 @@
       "classification": "ACTIVE",
       "evidence": [
         "OPEN_LOOP.md:2953",
+        "120-build stabilization program — 2026-09-19"
+      ]
+    },
+    {
+      "id": "c69d16da74474ffa",
+      "sourceLine": 2964,
+      "heading": "120-build stabilization program — 2026-09-19",
+      "statement": "Builds 066–070: complete Lens Next Platform sole-product scope, push Build 070, publish the ten-build batch, and run full authenticated visible-Chrome acceptance. Run focused Navisworks smoke only if this block changes Native or installers.",
+      "classification": "ACTIVE",
+      "evidence": [
+        "OPEN_LOOP.md:2964",
         "120-build stabilization program — 2026-09-19"
       ]
     }
