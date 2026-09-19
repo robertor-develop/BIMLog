@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "cb71a2d0458c3d4d86a2f65104441c6dc5c694a6f69f6273c5b0514799c6e3d2",
-  "itemCount": 134,
+  "sourceSha256": "bdd401c41207bc441a15ae996317d2b788c338be7776d706d77b742f3c4ab659",
+  "itemCount": 129,
   "counts": {
     "ACTIVE": 112,
     "SUPERSEDED": 14,
     "ACCEPTED_LIMITATION": 3,
-    "CLOSED_WITH_EVIDENCE": 5
+    "CLOSED_WITH_EVIDENCE": 0
   },
   "allowedClassifications": [
     "ACTIVE",
@@ -1414,28 +1414,6 @@
       ]
     },
     {
-      "id": "e0a12f1580c79b91",
-      "sourceLine": 2943,
-      "heading": "120-build stabilization program — 2026-09-19",
-      "statement": "Builds 006-010: triage and correct production dependency advisories, lock supply-chain provenance, run the full security regression, push Build 010, publish through Replit, and complete authenticated visible-Chrome smoke.",
-      "classification": "CLOSED_WITH_EVIDENCE",
-      "evidence": [
-        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
-        "Block 02, Block 03, and Block 04 milestone receipts"
-      ]
-    },
-    {
-      "id": "b7b0e96d0901b0b6",
-      "sourceLine": 2945,
-      "heading": "120-build stabilization program — 2026-09-19",
-      "statement": "Build 010: pass the exact clean pre-push gate with dependency provenance/audit first, push the exact head, publish once through Replit Shell without Replit Agents, and capture the full authenticated visible-Chrome production receipt.",
-      "classification": "CLOSED_WITH_EVIDENCE",
-      "evidence": [
-        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
-        "Block 02, Block 03, and Block 04 milestone receipts"
-      ]
-    },
-    {
       "id": "c3ab319313f0a5d7",
       "sourceLine": 2952,
       "heading": "120-build stabilization program — 2026-09-19",
@@ -1455,39 +1433,6 @@
       "evidence": [
         "OPEN_LOOP.md:2953",
         "120-build stabilization program — 2026-09-19"
-      ]
-    },
-    {
-      "id": "003d68be56821bfa",
-      "sourceLine": 2956,
-      "heading": "120-build stabilization program — 2026-09-19",
-      "statement": "Complete the Build 010 publication correction: rerun the exact full gate with governed local/CI pnpm 11.17.0 and Replit constrained to `>=10.26.1 <12`, push the corrective exact head to both remote branches, repeat Replit publication without Agents, and require authenticated visible-Chrome smoke before starting Build 011. Both failed provider builds changed neither production nor the database.",
-      "classification": "CLOSED_WITH_EVIDENCE",
-      "evidence": [
-        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
-        "Block 02, Block 03, and Block 04 milestone receipts"
-      ]
-    },
-    {
-      "id": "c92374cda52aa6b2",
-      "sourceLine": 2958,
-      "heading": "120-build stabilization program — 2026-09-19",
-      "statement": "Block 03 Builds 011–015: run the exact full gate and focused Navisworks 2021/2025 package/test smoke, then push the clean head normally. No install or publication is due at Build 015.",
-      "classification": "CLOSED_WITH_EVIDENCE",
-      "evidence": [
-        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
-        "Block 02, Block 03, and Block 04 milestone receipts"
-      ]
-    },
-    {
-      "id": "bfd80640982c78d0",
-      "sourceLine": 2960,
-      "heading": "120-build stabilization program — 2026-09-19",
-      "statement": "Build 020: pass the exact clean full gate, push the block head, run the read-only publication database operator in Replit Shell, publish once with development-data copy off, and pass exact-identity authenticated visible-Chrome smoke plus restart/session restoration. Replit Agents remain prohibited.",
-      "classification": "CLOSED_WITH_EVIDENCE",
-      "evidence": [
-        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
-        "Block 02, Block 03, and Block 04 milestone receipts"
       ]
     }
   ]

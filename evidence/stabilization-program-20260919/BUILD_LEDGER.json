@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 29,
+    "completedBuilds": 30,
     "totalBuilds": 120,
-    "remainingBuilds": 91,
-    "currentUnpublishedBuilds": 9,
-    "nextBuild": 30,
-    "nextPushAfterBuild": 30,
+    "remainingBuilds": 90,
+    "currentUnpublishedBuilds": 10,
+    "nextBuild": 31,
+    "nextPushAfterBuild": 35,
     "nextPublicationAfterBuild": 30,
     "blocker": null
   },
@@ -88,7 +88,7 @@
     {
       "block": 5,
       "buildRange": "021-025",
-      "status": "PASS_PENDING_PUSH",
+      "status": "PASS_PUSHED",
       "publicationRequired": false,
       "smoke": "Documentation and contradiction contracts only; no publication or Navisworks smoke due at Build 025.",
       "builds": [
@@ -102,7 +102,7 @@
     {
       "block": 6,
       "buildRange": "026-030",
-      "status": "IN_PROGRESS",
+      "status": "PASS_PENDING_PUSH_AND_PUBLICATION",
       "publicationRequired": true,
       "smoke": "Full authenticated visible-Chrome smoke after Build 030 publication; focused Navisworks smoke only if accepted integration changes Native or installers.",
       "builds": [
@@ -110,7 +110,7 @@
         { "build": 27, "status": "PASS", "evidence": "BUILD_027_SOURCE_HISTORY_RECONCILIATION.md" },
         { "build": 28, "status": "PASS", "evidence": "BUILD_028_DIRTY_CANDIDATE_RECONCILIATION.md" },
         { "build": 29, "status": "PASS", "evidence": "BUILD_029_RECOVERABLE_CLEANUP_MANIFEST.md" },
-        { "build": 30, "status": "NOT_STARTED", "evidence": null }
+        { "build": 30, "status": "PASS_LOCAL_RELEASE_GATE", "evidence": "BUILD_030_SOURCE_AUTHORITY_INTEGRATION.md" }
       ]
     }
   ]

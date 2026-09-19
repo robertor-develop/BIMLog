@@ -1,13 +1,14 @@
 # STATUS.md - Current Accepted Platform State
 
-## 120-build stabilization current authority — Block 04 published — 2026-09-19
+## 120-build stabilization current authority — Block 06 release candidate — 2026-09-19
 
 - The current published Platform is `v1.05.N18-P33`, produced from stabilization Build 020 commit `be902808b59c264d31480f5d76424f8fdaff5cbe` and tree `3dab033cc3f109e78e69c1d5934b6959d1842717`. GitHub `master`, the stabilization branch, and the clean Replit workspace matched that commit before publication; Replit publication receipt `e89dc3b4` passed Security, Build, Bundle, and Promote.
 - The read-only publication database operator returned `schemaAction=NONE`, `publishable=true`, and `developmentDataCopy=OFF_REQUIRED`. Publication changed no production schema, database rows, or customer data.
 - Public `/api/v1/healthz` returns HTTP 200 with release `v1.05.N18-P33`. The existing authenticated Super Administrator session and a second Chrome tab survived reload; Total Control, dashboard, administration, catalogs, Help, and Profile rendered without observed console errors.
 - Historical candidate sections below remain preserved evidence. Their statements such as `local candidate`, `uncommitted`, `pushed-not-published`, or a named P17–P32 publication gate describe that historical checkpoint only and do not override this current authority.
-- The active stabilization program has completed Builds 001–020. Builds 021–025 reconcile the Living Brief and executable documentation contracts; Build 025 is the next push milestone and no production publication is due until Build 030.
-- Builds 021–025 now reconcile current versus historical state, classify every unchecked product loop, align executable documentation, establish Lens Next as the sole supported Lens product, and fail CI on release/provider/Lens contradictions. Build 025 is ready for its required push; the published runtime remains P33 until the Build 030 milestone.
+- The active stabilization program has completed Builds 001–030. Builds 021–025 were pushed after reconciling current truth, open-loop dispositions, executable documentation, and Lens Next sole-product status.
+- Builds 026–030 classify all 143 current worktrees and 143 local branches, preserve the 18-worktree dirty baseline and one prunable entry, map product-default/Next-200 and five dirty candidate families by effective behavior, and define recoverable cleanup plans without executing them. No stale product, schema, Native, installer, or package patch was integrated.
+- Build 030 is the current exact release candidate for the required push and Replit publication milestone. The published runtime remains P33 from Build 020 until that controlled publication and authenticated Chrome smoke complete.
 
 ## Convention Builder live hook-order corrective release candidate - 2026-09-18
 
