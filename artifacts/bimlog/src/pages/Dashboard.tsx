@@ -230,7 +230,11 @@ export function Dashboard() {
   const [showOperationalDetails, setShowOperationalDetails] = useState(false);
 
   useEffect(() => {
-    if (!projects || !token || projects.length === 0) return;
+    if (!projects || !token) return;
+    if (projects.length === 0) {
+      setAgg({ rfis: [], submittals: [], activity: [], files: [], loading: false });
+      return;
+    }
     setAgg(prev => ({ ...prev, loading: true }));
     Promise.all(
       (projects as any[]).map(async (p: any) => {
@@ -252,7 +256,7 @@ export function Dashboard() {
         loading:    false,
       });
     }).catch(() => setAgg(prev => ({ ...prev, loading: false })));
-  }, [projects?.length, token]);
+  }, [projects, token]);
 
   // ── Existing helpers ───────────────────────────────────────────────────────
   function clearSessionAndRetry() {

@@ -19,23 +19,28 @@ export async function resolveAccessProfile(userId: number) {
                AND NOT EXISTS (SELECT 1 FROM financial_authority_revocations r WHERE r.grant_id=g.id)
            ) AS is_financial_administrator,
            COALESCE((
-             SELECT jsonb_agg(DISTINCT pm.role ORDER BY pm.role)
-             FROM project_members pm
-             JOIN projects p ON p.id=pm.project_id
-             WHERE pm.user_id=u.id AND pm.status='active' AND p.status<>'archived'
-           ), '[]'::jsonb) AS active_project_roles
+             SELECT jsonb_agg(jsonb_build_object('id', memberships.project_id, 'role', memberships.role) ORDER BY memberships.project_id)
+             FROM (
+               SELECT DISTINCT pm.project_id, pm.role
+               FROM project_members pm
+               JOIN projects p ON p.id=pm.project_id
+               WHERE pm.user_id=u.id AND pm.status='active' AND p.status<>'archived'
+             ) memberships
+           ), '[]'::jsonb) AS active_projects
     FROM users u WHERE u.id=$1 LIMIT 1`, [userId]);
   const row = result.rows[0];
   if (!row) return null;
+  const activeProjects: Array<{ id: number; role: ProjectRole }> = Array.isArray(row.active_projects)
+    ? row.active_projects.map((project: { id: unknown; role: unknown }) => ({ id: Number(project.id), role: String(project.role) as ProjectRole }))
+      .filter((project: { id: number; role: ProjectRole }) => Number.isSafeInteger(project.id) && project.id > 0)
+    : [];
   const facts: AccessFacts = {
     authenticated: true,
     isSuperAdmin: row.is_super_admin === true,
     canAccessLivingBrief: row.can_access_living_brief === true,
     isCompanyPmo: row.is_company_pmo === true,
     isFinancialAdministrator: row.is_financial_administrator === true,
-    activeProjectRoles: Array.isArray(row.active_project_roles)
-      ? row.active_project_roles as ProjectRole[]
-      : [],
+    activeProjectRoles: [...new Set(activeProjects.map((project: { role: ProjectRole }) => project.role))],
   };
-  return { facts, decisions: accessMatrix(facts) };
+  return { facts: { ...facts, activeProjects }, decisions: accessMatrix(facts) };
 }

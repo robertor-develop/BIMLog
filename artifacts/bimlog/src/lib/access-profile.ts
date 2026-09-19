@@ -17,8 +17,24 @@ export interface AccessProfile {
     isCompanyPmo: boolean;
     isFinancialAdministrator: boolean;
     activeProjectRoles: string[];
+    activeProjects: Array<{ id: number; role: string }>;
   };
   decisions: Record<AccessSurface, { allow: boolean; code: string }>;
+}
+
+export type ProjectContext =
+  | { allow: true; kind: "global_super_admin" | "project_membership"; projectId: number; role: string }
+  | { allow: false; kind: "zero_project" | "project_denied"; projectId: number | null; role: null };
+
+export function resolveProjectContext(profile: AccessProfile, requestedProjectId: number | null): ProjectContext {
+  if (!requestedProjectId || !Number.isSafeInteger(requestedProjectId) || requestedProjectId <= 0)
+    return { allow: false, kind: profile.facts.activeProjects.length ? "project_denied" : "zero_project", projectId: null, role: null };
+  if (profile.facts.isSuperAdmin)
+    return { allow: true, kind: "global_super_admin", projectId: requestedProjectId, role: "super_admin" };
+  const membership = profile.facts.activeProjects.find((project) => project.id === requestedProjectId);
+  return membership
+    ? { allow: true, kind: "project_membership", projectId: requestedProjectId, role: membership.role }
+    : { allow: false, kind: profile.facts.activeProjects.length ? "project_denied" : "zero_project", projectId: requestedProjectId, role: null };
 }
 
 export async function loadAccessProfile(token: string, signal?: AbortSignal): Promise<AccessProfile> {

@@ -11,7 +11,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { DebugBanner } from "@/components/DebugBanner";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { PublicRouteMetadata } from "@/components/PublicRouteMetadata";
-import { loadAccessProfile, type AccessSurface } from "@/lib/access-profile";
+import { loadAccessProfile, resolveProjectContext, type AccessSurface } from "@/lib/access-profile";
 
 const namedPage = (loader: () => Promise<object>, name: string) =>
   lazy(async () => ({ default: (await loader() as Record<string, React.ComponentType<any>>)[name] }));
@@ -99,6 +99,31 @@ function AccessRoute({ component: Component, surface }: { component: React.Compo
   return <Component />;
 }
 
+function ProjectRoute({ component: Component }: { component: React.ComponentType }) {
+  const { token, logout } = useAuthStore();
+  const [location, setLocation] = useLocation();
+  const [context, setContext] = useState<ReturnType<typeof resolveProjectContext> | null>(null);
+  const projectId = Number(location.match(/^\/projects\/(\d+)/)?.[1] ?? 0);
+
+  useEffect(() => {
+    if (!token) { setLocation("/login"); return; }
+    const controller = new AbortController();
+    setContext(null);
+    loadAccessProfile(token, controller.signal)
+      .then((profile) => setContext(resolveProjectContext(profile, projectId)))
+      .catch((error) => {
+        if (controller.signal.aborted) return;
+        if (String(error).includes("401")) { logout(); setLocation("/login"); return; }
+        setContext({ allow: false, kind: "project_denied", projectId, role: null });
+      });
+    return () => controller.abort();
+  }, [token, projectId, logout, setLocation]);
+
+  if (!context) return <div className="route-loading" role="status">Verifying project context… / Verificando contexto del proyecto…</div>;
+  if (!context.allow) return <section role="alert" style={{ maxWidth: 680, margin: "48px auto", padding: 24 }}><h1>{context.kind === "zero_project" ? "No active project / Sin proyecto activo" : "Project access unavailable / Acceso al proyecto no disponible"}</h1><p>{context.kind === "zero_project" ? "Your headquarters account is active without a project assignment." : "This project is outside your current authorized scope."}</p></section>;
+  return <>{context.kind === "global_super_admin" && <div role="status" style={{ padding: "6px 16px", background: "#EFF6FF", color: "#1E3A5F", fontSize: 12, fontWeight: 700 }}>Global Super Administrator context / Contexto global de Super Administrador</div>}<Component /></>;
+}
+
 // F5 intercept: eligible admins (super admin or granted access) are sent to the
 // Living Brief instead of a browser refresh. Everyone else gets a normal F5 refresh.
 // Ctrl+R / Cmd+R are intentionally NOT intercepted.
@@ -156,34 +181,34 @@ function Router() {
         {() => <ProtectedRoute component={LensNextWorkspace} />}
       </Route>
       <Route path="/projects/:id/financial/cost-structure">
-        {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="structure" />} />}
+        {() => <ProjectRoute component={() => <FinancialBudgetWorkspace mode="structure" />} />}
       </Route>
       <Route path="/projects/:id/financial/budget">
-        {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="budget" />} />}
+        {() => <ProjectRoute component={() => <FinancialBudgetWorkspace mode="budget" />} />}
       </Route>
       <Route path="/projects/:id/financial/history">
-        {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="history" />} />}
+        {() => <ProjectRoute component={() => <FinancialBudgetWorkspace mode="history" />} />}
       </Route>
       <Route path="/projects/:id/financial/snapshots/:snapshotId">
-        {() => <ProtectedRoute component={() => <FinancialBudgetWorkspace mode="snapshot" />} />}
+        {() => <ProjectRoute component={() => <FinancialBudgetWorkspace mode="snapshot" />} />}
       </Route>
       <Route path="/projects/:id/financial/contracts">
-        {() => <ProtectedRoute component={FinancialContractWorkspace} />}
+        {() => <ProjectRoute component={FinancialContractWorkspace} />}
       </Route>
       <Route path="/projects/:id/financial/apu">
-        {() => <ProtectedRoute component={FinancialApuWorkspace} />}
+        {() => <ProjectRoute component={FinancialApuWorkspace} />}
       </Route>
       <Route path="/projects/:id/commercial/team-performance">
-        {() => <ProtectedRoute component={TeamPerformanceWorkspace} />}
+        {() => <ProjectRoute component={TeamPerformanceWorkspace} />}
       </Route>
       <Route path="/projects/:id/intake">
-        {() => <ProtectedRoute component={JobIntakeWorkspace} />}
+        {() => <ProjectRoute component={JobIntakeWorkspace} />}
       </Route>
       <Route path="/projects/:id/operations">
-        {() => <ProtectedRoute component={JobOperationsWorkspace} />}
+        {() => <ProjectRoute component={JobOperationsWorkspace} />}
       </Route>
       <Route path="/projects/:id/:tab?">
-        {() => <ProtectedRoute component={ProjectDetail} />}
+        {() => <ProjectRoute component={ProjectDetail} />}
       </Route>
       <Route path="/help">
         {() => <ProtectedRoute component={HelpCenter} />}

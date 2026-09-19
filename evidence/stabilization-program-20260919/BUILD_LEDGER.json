@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 38,
+    "completedBuilds": 39,
     "totalBuilds": 120,
-    "remainingBuilds": 82,
-    "currentUnpublishedBuilds": 8,
-    "nextBuild": 39,
+    "remainingBuilds": 81,
+    "currentUnpublishedBuilds": 9,
+    "nextBuild": 40,
     "nextPushAfterBuild": 40,
     "nextPublicationAfterBuild": 40,
     "blocker": null
@@ -136,7 +136,8 @@
       "builds": [
         { "build": 36, "status": "PASS", "evidence": "BUILD_036_AUTHORITY_MATRIX.md" },
         { "build": 37, "status": "PASS", "evidence": "BUILD_037_SESSION_CONTINUITY.md" },
-        { "build": 38, "status": "PASS", "evidence": "BUILD_038_PRIVILEGED_ROUTE_AUTHORITY.md" }
+        { "build": 38, "status": "PASS", "evidence": "BUILD_038_PRIVILEGED_ROUTE_AUTHORITY.md" },
+        { "build": 39, "status": "PASS", "evidence": "BUILD_039_PROJECT_CONTEXT.md" }
       ]
     }
   ]
