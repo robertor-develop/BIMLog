@@ -294,7 +294,11 @@ assert(
     proofDatabasePort >= 1024 &&
     proofDatabasePort <= 65535,
 );
-assert.equal(proofDatabaseIdentity.pathname, "/bimlog_rfi_test");
+const allowedProofDatabase =
+  proofDatabaseIdentity.pathname === "/bimlog_rfi_test" ||
+  (proofDatabaseIdentity.pathname === "/bimlog_rfi_restore_test" &&
+    process.env.BIMLOG_ALLOW_RESTORED_ARTIFACT_PROOF === "YES");
+assert(allowedProofDatabase, "Artifact proof database must be the canonical fixture or explicitly authorized restored fixture.");
 const { Pool } = requireFromArtifact("pg") as typeof import("pg");
 const proofPool = new Pool({ connectionString: proofDatabaseUrl, max: 2 });
 const proofMarker = `artifact-living-brief-${process.pid}-${Date.now()}`;

@@ -6,6 +6,7 @@ import { execFileSync } from "node:child_process";
 import { constants as fsConstants, createReadStream, createWriteStream } from "node:fs";
 import { tmpdir } from "node:os";
 import { pipeline } from "node:stream/promises";
+import { setTimeout as delay } from "node:timers/promises";
 import { build as esbuild } from "esbuild";
 import {
   lstat,
@@ -25,6 +26,19 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const workspaceRoot = path.resolve(__dirname, "../..");
 const livingBriefSourceRoot = path.join(workspaceRoot, "living-brief");
+
+async function removeGeneratedDirectory(target: string): Promise<void> {
+  for (let attempt = 1; attempt <= 10; attempt += 1) {
+    try {
+      await rm(target, { recursive: true, force: true, maxRetries: 2, retryDelay: 100 });
+      return;
+    } catch (error) {
+      const code = (error as NodeJS.ErrnoException).code;
+      if (!new Set(["EBUSY", "ENOTEMPTY", "EPERM"]).has(code ?? "") || attempt === 10) throw error;
+      await delay(attempt * 150);
+    }
+  }
+}
 
 type LivingBriefBuildInput = {
   sourceRoot: string;
@@ -995,7 +1009,7 @@ async function buildAll() {
   const distDir = path.resolve(__dirname, "dist");
   const runtimeDir = path.join(distDir, "runtime");
   const metafilePath = path.join(distDir, "index.meta.json");
-  await rm(distDir, { recursive: true, force: true });
+  await removeGeneratedDirectory(distDir);
 
   // Generate deterministic structural documentation. It writes only when structure changes.
   console.log("checking deterministic PLATFORM.md...");
