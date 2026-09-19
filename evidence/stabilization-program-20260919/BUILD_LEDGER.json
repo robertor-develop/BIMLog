@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 39,
+    "completedBuilds": 40,
     "totalBuilds": 120,
-    "remainingBuilds": 81,
-    "currentUnpublishedBuilds": 9,
-    "nextBuild": 40,
-    "nextPushAfterBuild": 40,
-    "nextPublicationAfterBuild": 40,
+    "remainingBuilds": 80,
+    "currentUnpublishedBuilds": 10,
+    "nextBuild": 41,
+    "nextPushAfterBuild": 45,
+    "nextPublicationAfterBuild": 50,
     "blocker": null
   },
   "blocks": [
@@ -130,14 +130,15 @@
     {
       "block": 8,
       "buildRange": "036-040",
-      "status": "IN_PROGRESS",
+      "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION",
       "publicationRequired": true,
       "smoke": "Full authenticated visible-Chrome smoke with Super Administrator, scoped user, and two-tab restoration after Build 040 publication.",
       "builds": [
         { "build": 36, "status": "PASS", "evidence": "BUILD_036_AUTHORITY_MATRIX.md" },
         { "build": 37, "status": "PASS", "evidence": "BUILD_037_SESSION_CONTINUITY.md" },
         { "build": 38, "status": "PASS", "evidence": "BUILD_038_PRIVILEGED_ROUTE_AUTHORITY.md" },
-        { "build": 39, "status": "PASS", "evidence": "BUILD_039_PROJECT_CONTEXT.md" }
+        { "build": 39, "status": "PASS", "evidence": "BUILD_039_PROJECT_CONTEXT.md" },
+        { "build": 40, "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION", "evidence": "BUILD_040_AUTHENTICATED_RELEASE_GATE.md" }
       ]
     }
   ]

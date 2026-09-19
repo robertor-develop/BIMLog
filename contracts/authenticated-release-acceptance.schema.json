@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://bimlog.ignitesmart.ai/contracts/authenticated-release-acceptance-v1.schema.json",
+  "title": "BIMLog authenticated release acceptance receipt",
+  "type": "object",
+  "required": ["schemaVersion", "status", "release", "source", "provider", "live", "assets", "actors", "session", "browser"],
+  "properties": {
+    "schemaVersion": { "const": "bimlog-authenticated-release-acceptance-v1" },
+    "status": { "const": "PASS" },
+    "release": { "type": "string" },
+    "source": { "type": "object", "required": ["commit", "tree"] },
+    "provider": { "type": "object", "required": ["sourceTree", "publicationReceiptId"] },
+    "live": { "type": "object", "required": ["healthStatus", "release", "identityBound"] },
+    "assets": { "type": "object", "required": ["manifestSha256", "sessionCoordinatorAssets"] },
+    "actors": { "type": "object", "required": ["superAdmin", "scopedUser"] },
+    "session": { "type": "object", "required": ["reloadRestored", "twoTabsContinuous", "staleResponseRejected"] },
+    "browser": { "type": "object", "required": ["visibleChrome", "consoleErrors", "pageErrors"] }
+  },
+  "additionalProperties": true
+}

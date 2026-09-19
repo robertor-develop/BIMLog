@@ -31634,6 +31634,128 @@
         "scripts/test-local-release-gate.mjs"
       ],
       "reviewedChangeSha256": "0bcd4db24ec39546aaac41bad1040b9b53cb862a16df259edc3f2ea352051996"
+    },
+    {
+      "taskId": "bimlog-stabilization-block08-authenticated-release-20260919",
+      "reviewedThroughCommit": "82b19f3f3e1e43e87dfa1b6aeb34d834ac19dcc4",
+      "reviewedAt": "2026-09-19T16:20:00Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Authentication hardening and release evidence change no ecosystem ownership or permanent product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The candidate adds exact authenticated live identity, asset, role, session, and browser acceptance evidence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product strategy, market direction, or roadmap claim changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The platform authority records the P34 candidate and its authenticated publication acceptance contract."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Lens Next package manifests and installers bind P34 and package-only 2021 and 2025 verification passed without installation."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer report, document rendering, or report-design behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Current authority records Builds 036 through 040 and distinguishes the P34 candidate from the P33 live predecessor."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The execution plan already defines the Build 040 publication and authenticated acceptance milestone."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit evidence remains append-only; exact Block 08 evidence is stored in the build reports and receipts."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/access-policy.behavior.ts",
+        "artifacts/api-server/src/lib/access-policy.ts",
+        "artifacts/api-server/src/lib/access-profile.ts",
+        "artifacts/api-server/src/lib/access-route-authority.behavior.ts",
+        "artifacts/api-server/src/lib/project-context-source.behavior.ts",
+        "artifacts/api-server/src/middlewares/auth.ts",
+        "artifacts/api-server/src/routes/auth.ts",
+        "artifacts/bimlog/src/App.tsx",
+        "artifacts/bimlog/src/components/layout/MasterSidebar.tsx",
+        "artifacts/bimlog/src/lib/access-profile.ts",
+        "artifacts/bimlog/src/lib/project-context.behavior.ts",
+        "artifacts/bimlog/src/pages/Dashboard.tsx",
+        "artifacts/bimlog/src/store/auth.ts",
+        "artifacts/bimlog/src/store/session-continuity.behavior.ts",
+        "artifacts/bimlog/src/store/session-continuity.ts",
+        "contracts/authenticated-release-acceptance.schema.json",
+        "contracts/lens-product-status.json",
+        "contracts/release-identity.json",
+        "evidence/stabilization-program-20260919/BUILD_036_AUTHORITY_MATRIX.md",
+        "evidence/stabilization-program-20260919/BUILD_037_SESSION_CONTINUITY.md",
+        "evidence/stabilization-program-20260919/BUILD_038_PRIVILEGED_ROUTE_AUTHORITY.md",
+        "evidence/stabilization-program-20260919/BUILD_039_PROJECT_CONTEXT.md",
+        "evidence/stabilization-program-20260919/BUILD_040_AUTHENTICATED_RELEASE_GATE.md",
+        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "lib/api-zod/src/release-identity.ts",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N18-P34.zip",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N18-P34.zip.sha256",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N18-P34.zip",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N18-P34.zip.sha256",
+        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2021.ps1",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext2025.ps1",
+        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
+        "plugins/BIMLogLensNext/ReleaseIdentity.g.props",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json",
+        "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
+        "plugins/BIMLogLensNext/src/ReleaseIdentity.g.cs",
+        "scripts/authenticated-release-acceptance.mjs",
+        "scripts/check-authenticated-release-acceptance.mjs",
+        "scripts/check-current-state-contract.mjs",
+        "scripts/test-authenticated-release-acceptance.mjs",
+        "scripts/test-release-identity.mjs"
+      ],
+      "reviewedChangeSha256": "6669433f0ccef919bc8d9ada46ccf684b23cf743a6c73b9954eeff31b94f8fa6"
     }
   ]
 }

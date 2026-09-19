@@ -67,6 +67,7 @@ ${bullets(catalog.documents.map((document) => `living-brief/${document.file}`))}
 
 ## Current release and provider contract
 - Current accepted Platform release: \`v1.05.N18-P33\`; Build 020 source \`be902808b59c264d31480f5d76424f8fdaff5cbe\`; Replit publication receipt \`e89dc3b4\`.
+- Build 040 release candidate: \`v1.05.N18-P34\` / \`1.5.18.34\`; publication acceptance requires exact live identity, deployed session-asset hashes, canonical Super Administrator authority, scoped-user denial, reload restoration, stale-response rejection, and two-tab continuity.
 - GitHub \`master\` is the product source authority. Replit is the established BIMLog publication provider; synchronize exact reviewed source through the signed-in Replit Shell, never Replit Agents.
 - Publication requires the read-only database operator to prove exact development/production schema correspondence, no destructive action, development-data copy off, and a clean exact source. Build 020 returned \`schemaAction=NONE\` and changed no production row or schema object.
 - Public \`/api/v1/healthz\` is both health and application-readiness evidence because the startup bootstrap holds that route at HTTP 503 until the real application barrier completes.

@@ -7,7 +7,7 @@
   "customerFacingLegacyProduct": false,
   "parallelInstallationSupported": false,
   "legacyLoaderAllowedInAcceptedSetup": false,
-  "currentPlatformVersion": "v1.05.N18-P33",
-  "nativeAndInstallerState": "unchanged-by-build-024",
+  "currentPlatformVersion": "v1.05.N18-P34",
+  "nativeAndInstallerState": "build-040-package-only-verified-no-install",
   "fieldAcceptance": "separate-required-gate"
 }

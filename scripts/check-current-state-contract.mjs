@@ -12,20 +12,20 @@ function assert(condition, message) {
 
 function validate(snapshot) {
   const { release, lens, ledger, status, openLoop, platform, plugin, quality, migration, meeting, viewpoints, provider } = snapshot;
-  assert(release.label === "v1.05.N18-P33", "release identity must remain the accepted P33 contract");
-  assert(release.binaryVersion === "1.5.18.33", "binary identity must match P33");
+  assert(release.label === "v1.05.N18-P34", "release identity must match the Build 040 P34 candidate");
+  assert(release.binaryVersion === "1.5.18.34", "binary identity must match P34");
   assert(lens.supportedProduct === "Lens Next" && lens.supportedProductCount === 1, "Lens Next must be the sole supported Lens product");
   assert(lens.legacyStatus === "migration-only", "Legacy Lens must be migration-only");
   assert(lens.customerFacingLegacyProduct === false && lens.parallelInstallationSupported === false && lens.legacyLoaderAllowedInAcceptedSetup === false, "Legacy Lens cannot remain customer-facing, parallel-installed, or loadable");
   assert(lens.currentPlatformVersion === release.label, "Lens product and release identities must agree");
-  assert(ledger.status.completedBuilds >= 31 && ledger.status.completedBuilds <= 35, "Build ledger must remain inside stabilization Block 07");
+  assert(ledger.status.completedBuilds === 40, "Build ledger must close stabilization Block 08 at Build 040");
   assert(ledger.status.remainingBuilds === 120 - ledger.status.completedBuilds, "Build ledger remaining count must reconcile");
-  assert(ledger.status.currentUnpublishedBuilds === ledger.status.completedBuilds - 30, "Block 07 unpublished count must reconcile from the Build 030 publication");
+  assert(ledger.status.currentUnpublishedBuilds === 10, "Build 040 must contain exactly the ten builds due for publication");
   assert(ledger.status.nextBuild === ledger.status.completedBuilds + 1, "Build ledger must advance exactly one build");
-  assert(ledger.status.nextPushAfterBuild === (ledger.status.completedBuilds < 35 ? 35 : 40), "Build ledger next-push cadence must reconcile");
-  assert(ledger.status.nextPublicationAfterBuild === 40, "Build 040 must remain the next publication milestone");
+  assert(ledger.status.nextPushAfterBuild === 45, "Build ledger next-push cadence must advance to Build 045");
+  assert(ledger.status.nextPublicationAfterBuild === 50, "Build ledger next-publication cadence must advance to Build 050");
   for (const document of [status, platform, plugin, quality]) assert(document.includes(release.label), "current authority documents must contain the exact release label");
-  assert(status.includes("Replit publication receipt `e89dc3b4`"), "STATUS must retain the exact current publication receipt");
+  assert(status.includes("Replit publication receipt `e89dc3b4`"), "STATUS must retain the exact predecessor publication receipt until P34 is accepted live");
   assert(platform.includes("Replit is the established BIMLog publication provider"), "PLATFORM must name the proven Replit provider path");
   assert(migration.includes("development-data copy off") && migration.includes("Replit Agents are prohibited"), "release documentation must preserve the proven database and provider boundaries");
   assert(!meeting.includes("Open Original Lens Viewpoint"), "customer meeting UI must not advertise Original Lens");

@@ -14,6 +14,7 @@ only in [STANDARDS_REGISTER.md](./STANDARDS_REGISTER.md).
 ## Current release-evidence contract — 2026-09-19
 
 - Current accepted Platform evidence is `v1.05.N18-P33`, exact Build 020 source `be902808b59c264d31480f5d76424f8fdaff5cbe`, Replit publication receipt `e89dc3b4`, database `schemaAction=NONE`, HTTP 200 readiness, and authenticated two-tab reload continuity.
+- Build 040 candidate evidence is `v1.05.N18-P34` / `1.5.18.34`; acceptance is fail-closed unless the exact live identity and served session assets match the published package and visible authenticated Chrome proves canonical and scoped-user authority plus reload, stale-response, and two-tab continuity.
 - A historical `local candidate`, `uncommitted`, `pushed-not-published`, or earlier P-series release statement is checkpoint evidence, not current production truth. `STATUS.md` current authority and the exact milestone receipt control release reporting.
 - Public `/api/v1/healthz` is the canonical application readiness route: startup keeps it at HTTP 503 until the actual application and startup barrier are ready. There is no separate `/readyz` contract.
 - Documentation-only blocks still require link, architecture, freshness, contradiction, and clean-build checks. They do not require publication or Navisworks smoke unless runtime, Native, or installer behavior changes.
