@@ -1,0 +1,145 @@
+{
+  "schemaVersion": "1.0.0",
+  "program": "BIMLog stabilization, completion, and release program — 120 builds",
+  "baselineCommit": "07d024ef3de739abb436da58fe29797af5304b8a",
+  "generatedAt": "2026-09-19",
+  "owner": "BIMLog MAIN04 under MAIN00 program oversight",
+  "summary": { "total": 27, "S1": 4, "S2": 17, "S3": 6, "acceptedLimitations": 1, "allFindingsMapped": true },
+  "entries": [
+    {
+      "id": "R001", "severity": "S1", "title": "Production dependency advisories remain open", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [6, 7, 8, 9, 10], "dependencies": [], "evidence": ["REPORT.md#s1--releasesecurity-blockers"],
+      "acceptance": "Every production advisory is fixed, proven unreachable, or retained with bounded evidence; no unreviewed high-severity production advisory remains.", "acceptedLimitation": false
+    },
+    {
+      "id": "R002", "severity": "S1", "title": "Lens release assertion is stale and red", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [12], "dependencies": ["R003"], "evidence": ["REPORT.md#s1--releasesecurity-blockers"],
+      "acceptance": "Contract-driven current-version and stale/mixed-version negative tests pass without hard-coded P12 assumptions.", "acceptedLimitation": false
+    },
+    {
+      "id": "R003", "severity": "S1", "title": "Platform, Native, and package version identity is incoherent", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [11, 12, 13, 14, 15, 71], "dependencies": [], "evidence": ["REPORT.md#s1--releasesecurity-blockers", "BUILD_001_AUTHORITATIVE_BASELINE.md"],
+      "acceptance": "Platform label, API metadata, Native constants, DLL metadata, package manifests, receipts, and compatibility tests derive from and agree with one executable contract.", "acceptedLimitation": false
+    },
+    {
+      "id": "R004", "severity": "S1", "title": "Rollback operator and current production restore receipt are incomplete", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [19, 20, 109, 116], "dependencies": ["R020", "R021"], "evidence": ["BUILD_003_RELEASE_PROCEDURE_INVENTORY.md#rollback-inventory"],
+      "acceptance": "An executable bounded rollback and isolated restore rehearsal prove exact recovery identity, checksums, application readiness, and authenticated login for the release candidate.", "acceptedLimitation": false
+    },
+    {
+      "id": "R005", "severity": "S2", "title": "Living Brief and OPEN_LOOP contain stale current-state claims", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [21, 22, 23, 24, 25], "dependencies": ["R019", "R022", "R023"], "evidence": ["REPORT.md#s2--high-priority-product-and-control-gaps"],
+      "acceptance": "Current truth is separated from history; all 126 unchecked items have a disposition and evidence; contradictions fail CI.", "acceptedLimitation": false
+    },
+    {
+      "id": "R006", "severity": "S2", "title": "Repository and worktree debt is material", "state": "BASELINE_CLASSIFIED", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [26, 27, 28, 29, 30], "dependencies": [], "evidence": ["BUILD_002_SOURCE_WORKTREE_RECONCILIATION.md"],
+      "acceptance": "All 142 worktrees and 61 ancestry-unmerged branches have reviewed dispositions; only accepted corrections enter clean program lineage.", "acceptedLimitation": false
+    },
+    {
+      "id": "R007", "severity": "S2", "title": "Canonical local checkout is dirty and stale", "state": "BASELINE_CLASSIFIED", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [26, 29, 30], "dependencies": ["R006", "R012"], "evidence": ["REPORT.md#s2--high-priority-product-and-control-gaps", "BUILD_002_SOURCE_WORKTREE_RECONCILIATION.md"],
+      "acceptance": "The canonical release checkout is clean, points to the authoritative lineage, and passes exact local/remote identity checks without deleting preserved evidence.", "acceptedLimitation": false
+    },
+    {
+      "id": "R008", "severity": "S2", "title": "Unfinished product candidates are distributed across worktrees", "state": "BASELINE_CLASSIFIED", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [27, 28, 30, 66, 67, 68, 69, 70, 71, 72, 73, 74, 75], "dependencies": ["R006"], "evidence": ["REPORT.md#work-left-in-mid-build-or-in-the-air", "BUILD_002_SOURCE_WORKTREE_RECONCILIATION.md"],
+      "acceptance": "Every effective product change is integrated, proven superseded, or retained as evidence; no branch is accepted by name or commit count alone.", "acceptedLimitation": false
+    },
+    {
+      "id": "R009", "severity": "S2", "title": "Static platform audit reports 65 non-blocking P1 findings", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [34, 35], "dependencies": ["R006"], "evidence": ["REPORT.md#s2--high-priority-product-and-control-gaps"],
+      "acceptance": "Stable release-blocking categories have zero findings and each deferred P1 has an owner, rationale, evidence, and target build.", "acceptedLimitation": false
+    },
+    {
+      "id": "R010", "severity": "S2", "title": "Complete role and object-authorization matrix is not yet proven", "state": "PARTIALLY_PROVEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [36, 38, 39, 40, 106], "dependencies": [], "evidence": ["REPORT.md#s2--high-priority-product-and-control-gaps"],
+      "acceptance": "Super Admin, PMO/Finance, project admin, member, denied-user, tenant, project, file, report, Lens, feedback, and integration matrices pass server-side and visible-route tests.", "acceptedLimitation": false
+    },
+    {
+      "id": "R011", "severity": "S2", "title": "Feedback composer and review route semantics are confusing", "state": "PARTIALLY_PROVEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [38, 77], "dependencies": ["R010"], "evidence": ["REPORT.md#s2--high-priority-product-and-control-gaps"],
+      "acceptance": "Help, deep links, route tests, and role behavior clearly distinguish /feedback composition from /admin/feedback review.", "acceptedLimitation": false
+    },
+    {
+      "id": "R012", "severity": "S2", "title": "GitHub main/master and canonical lineage are divergent", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [5, 15, 26, 30], "dependencies": ["R006", "R007"], "evidence": ["BUILD_002_SOURCE_WORKTREE_RECONCILIATION.md"],
+      "acceptance": "One canonical branch and release lineage is enforced by exact local/remote identity checks; stale heads cannot be selected as release source.", "acceptedLimitation": false
+    },
+    {
+      "id": "R013", "severity": "S2", "title": "Replit publication marker lacks a durable synchronization operator", "state": "MECHANISM_PROVEN_GAP_REMAINS", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [5, 14, 35], "dependencies": ["R012"], "evidence": ["BUILD_002_SOURCE_WORKTREE_RECONCILIATION.md", "BUILD_003_RELEASE_PROCEDURE_INVENTORY.md#stale-conflicting-or-incomplete-alternatives"],
+      "acceptance": "A repeatable operator proves exact tree/source identity, preserves provider publication markers without treating them as product code, and emits a machine-readable receipt.", "acceptedLimitation": false
+    },
+    {
+      "id": "R014", "severity": "S2", "title": "Production database migration and checksum identity is not exposed in one release contract", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [14, 16, 18, 20], "dependencies": ["R013"], "evidence": ["BUILD_003_RELEASE_PROCEDURE_INVENTORY.md#schema-and-restore-controls"],
+      "acceptance": "Production schema, migration checksums, built assets, source commit, and publication receipt are bound and mismatch fails before publication.", "acceptedLimitation": false
+    },
+    {
+      "id": "R015", "severity": "S2", "title": "Repository release instructions contain stale force-push guidance", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [23, 25], "dependencies": ["R012"], "evidence": ["BUILD_003_RELEASE_PROCEDURE_INVENTORY.md#stale-conflicting-or-incomplete-alternatives"],
+      "acceptance": "Documentation describes only the proven normal-push release path and contradiction checks reject stale force-push guidance.", "acceptedLimitation": false
+    },
+    {
+      "id": "R016", "severity": "S2", "title": "Automatic post-merge Helium synchronization is broader than the governed release path", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [20, 25, 35], "dependencies": ["R014"], "evidence": ["BUILD_003_RELEASE_PROCEDURE_INVENTORY.md#stale-conflicting-or-incomplete-alternatives"],
+      "acceptance": "Database synchronization runs only through the conditional guarded operator when schema correspondence proves it necessary; ordinary merges cannot mutate data.", "acceptedLimitation": false
+    },
+    {
+      "id": "R017", "severity": "S2", "title": "Release-lineage checker assumes stale origin/main authority", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [15, 25, 35], "dependencies": ["R012", "R013"], "evidence": ["BUILD_003_RELEASE_PROCEDURE_INVENTORY.md#stale-conflicting-or-incomplete-alternatives"],
+      "acceptance": "Lineage verification uses declared canonical authority and a valid tree/source relationship and is part of the normal pre-push gate.", "acceptedLimitation": false
+    },
+    {
+      "id": "R018", "severity": "S2", "title": "No single complete machine-readable release receipt exists", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [14, 20, 35, 116], "dependencies": ["R003", "R013", "R014"], "evidence": ["BUILD_003_RELEASE_PROCEDURE_INVENTORY.md#historical-release-receipts-and-status"],
+      "acceptance": "One validated receipt binds source, tree, assets, schema, provider publication, live identity, rollback, and smoke evidence with exact hashes.", "acceptedLimitation": false
+    },
+    {
+      "id": "R019", "severity": "S2", "title": "Live API does not independently expose immutable release identity", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [13, 14, 40], "dependencies": ["R003", "R018"], "evidence": ["REPORT.md#s1--releasesecurity-blockers", "BUILD_001_AUTHORITATIVE_BASELINE.md"],
+      "acceptance": "Safe diagnostics expose exact deployed commit/package/receipt identity, and browser acceptance fails when it reaches an old runtime.", "acceptedLimitation": false
+    },
+    {
+      "id": "R020", "severity": "S2", "title": "Current production restore evidence is not bound to the active publication", "state": "PARTIALLY_PROVEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [19, 20, 109], "dependencies": ["R014"], "evidence": ["BUILD_003_RELEASE_PROCEDURE_INVENTORY.md#rollback-inventory"],
+      "acceptance": "A fresh isolated backup/restore rehearsal is tied to the exact candidate and proves migration replay, readiness, and login.", "acceptedLimitation": false
+    },
+    {
+      "id": "R021", "severity": "S2", "title": "Named disposable workflow database fixtures are not deterministic", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [17, 18, 32, 33, 35], "dependencies": [], "evidence": ["REPORT.md#evidence-collected"],
+      "acceptance": "Delivery and economic-allocation HTTP fixtures create, execute, and clean up twice on Windows with correct UTF-8 identity and no shared-server residue.", "acceptedLimitation": false
+    },
+    {
+      "id": "R022", "severity": "S3", "title": "Lens Next real Navisworks field acceptance is open", "state": "OPEN", "owner": "BIMLog MAIN04 with Ruben field acceptance",
+      "assignedBuilds": [71, 72, 73, 74, 75, 114, 119], "dependencies": ["R003", "R008"], "evidence": ["REPORT.md#s3--incomplete-functions-and-acceptance", "BUILD_001_AUTHORITATIVE_BASELINE.md"],
+      "acceptance": "Navisworks 2021/2025 pass create, camera, sectioning, Working View, XML, save/reopen, migration, real bounded 3D, and duplicate-loader checks on controlled model copies.", "acceptedLimitation": false
+    },
+    {
+      "id": "R023", "severity": "S3", "title": "Legacy Lens remains installed and Lens Next sole-product transition is incomplete", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [24, 67, 68, 69, 70, 73, 74, 75], "dependencies": ["R008", "R022"], "evidence": ["REPORT.md#s3--incomplete-functions-and-acceptance", "BUILD_001_AUTHORITATIVE_BASELINE.md"],
+      "acceptance": "Customer surfaces and verified installers present only Lens Next; historical data migrates once; Legacy loaders are absent from Autodesk discovery roots while rollback evidence is preserved externally.", "acceptedLimitation": false
+    },
+    {
+      "id": "R024", "severity": "S3", "title": "Historical Job Intake financial mapping defect requires permanent regression", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [49, 51, 52, 53, 55, 60], "dependencies": ["R025"], "evidence": ["REPORT.md#s3--incomplete-functions-and-acceptance"],
+      "acceptance": "A fresh project cannot reproduce the whole-plan-price/unit-rate error; totals reconcile across input, persistence, display, and export while Project 50 evidence remains unchanged.", "acceptedLimitation": false
+    },
+    {
+      "id": "R025", "severity": "S3", "title": "Intended company pricing and PMO/Finance authority is not proven end to end", "state": "OPEN", "owner": "BIMLog MAIN04 with controlled Lorena acceptance",
+      "assignedBuilds": [46, 47, 48, 49, 50, 55, 60], "dependencies": ["R010"], "evidence": ["REPORT.md#s3--incomplete-functions-and-acceptance"],
+      "acceptance": "The intended PMO/Finance account completes catalog, pricing, Intake, APU, activation, Operations, and export workflows with correct role boundaries and persistence.", "acceptedLimitation": false
+    },
+    {
+      "id": "R026", "severity": "S3", "title": "Authenticated project pages lack consistent page-level h1 structure", "state": "OPEN", "owner": "BIMLog MAIN04",
+      "assignedBuilds": [41, 45, 113], "dependencies": [], "evidence": ["REPORT.md#s3--incomplete-functions-and-acceptance"],
+      "acceptance": "Every audited route has one meaningful h1, correct landmarks, skip navigation, focus order, and reviewed viewport evidence.", "acceptedLimitation": false
+    },
+    {
+      "id": "R027", "severity": "S3", "title": "Unfinished features and customer-impacting paths lack final acceptance", "state": "ACCEPTED_LIMITATION_READ_ONLY_AUDIT", "owner": "BIMLog MAIN04 with controlled customer acceptance",
+      "assignedBuilds": [56, 60, 65, 76, 77, 78, 79, 80, 81, 83, 84, 85, 92, 93, 94, 95, 101, 103, 104, 105, 111, 112, 113, 115, 118, 120], "dependencies": ["R010", "R014", "R018"], "evidence": ["REPORT.md#s3--incomplete-functions-and-acceptance", "REPORT.md#audit-boundary-and-status"],
+      "acceptance": "Unsupported promises are implemented or removed; every formerly excluded mutation is exercised only in a controlled acceptance path with pre/post reconciliation, rollback, truthful result, and no unexplained skip.", "acceptedLimitation": true
+    }
+  ]
+}

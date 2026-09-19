@@ -1,0 +1,47 @@
+{
+  "schemaVersion": "1.0.0",
+  "programId": "bimlog-stabilization-20260919",
+  "programName": "BIMLog stabilization, completion, and release program — 120 builds",
+  "owner": "BIMLog MAIN04",
+  "coordination": "MAIN00 / Norte",
+  "branch": "codex/bimlog-stabilization-program-20260919",
+  "authoritativeBase": "07d024ef3de739abb436da58fe29797af5304b8a",
+  "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
+  "remote": "https://github.com/robertor-develop/BIMLog.git",
+  "canonicalRemoteBranch": "master",
+  "headBinding": "The Git commit containing this ledger is the completed Block 01 head.",
+  "releaseCadence": {
+    "buildsPerBlock": 5,
+    "pushEveryBuilds": 5,
+    "publishEveryBuilds": 10,
+    "maximumUnpublishedBuilds": 10,
+    "authenticatedChromeSmokeAfterPublication": true,
+    "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
+  },
+  "status": {
+    "completedBuilds": 5,
+    "totalBuilds": 120,
+    "remainingBuilds": 115,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 6,
+    "nextPushAfterBuild": 10,
+    "nextPublicationAfterBuild": 10,
+    "blocker": null
+  },
+  "blocks": [
+    {
+      "block": 1,
+      "buildRange": "001-005",
+      "status": "PASS",
+      "publicationRequired": false,
+      "smoke": "Read-only comparison against unchanged P32",
+      "builds": [
+        { "build": 1, "status": "PASS_WITH_BASELINE_GAPS_CAPTURED", "evidence": "baseline/BUILD_001_AUTHORITATIVE_BASELINE.md" },
+        { "build": 2, "status": "PASS_WITH_PRESERVATION_MAP", "evidence": "baseline/BUILD_002_SOURCE_WORKTREE_RECONCILIATION.md" },
+        { "build": 3, "status": "PASS_WITH_RELEASE_PATH_GAPS_RECORDED", "evidence": "baseline/BUILD_003_RELEASE_PROCEDURE_INVENTORY.md" },
+        { "build": 4, "status": "PASS", "evidence": "baseline/BUILD_004_DEFECT_RISK_LEDGER.md" },
+        { "build": 5, "status": "PASS", "evidence": "baseline/BUILD_005_PROGRAM_CONTROL_AND_PUSH.md" }
+      ]
+    }
+  ]
+}
