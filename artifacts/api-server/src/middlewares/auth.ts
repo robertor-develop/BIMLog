@@ -27,6 +27,7 @@ export interface AuthPayload {
   fullName: string;
   companyName: string;
   isSuperAdmin?: boolean;
+  sessionIssuedAt?: number;
 }
 
 declare global {
@@ -39,7 +40,11 @@ declare global {
 }
 
 export function signToken(payload: AuthPayload): string {
-  return jwt.sign(payload, JWT_SECRET, { expiresIn: "7d" });
+  return jwt.sign(
+    { ...payload, sessionIssuedAt: payload.sessionIssuedAt ?? Date.now() },
+    JWT_SECRET,
+    { expiresIn: "7d" },
+  );
 }
 
 export function verifyToken(token: string): AuthPayload {

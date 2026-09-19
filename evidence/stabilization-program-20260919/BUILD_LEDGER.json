@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 36,
+    "completedBuilds": 37,
     "totalBuilds": 120,
-    "remainingBuilds": 84,
-    "currentUnpublishedBuilds": 6,
-    "nextBuild": 37,
+    "remainingBuilds": 83,
+    "currentUnpublishedBuilds": 7,
+    "nextBuild": 38,
     "nextPushAfterBuild": 40,
     "nextPublicationAfterBuild": 40,
     "blocker": null
@@ -134,7 +134,8 @@
       "publicationRequired": true,
       "smoke": "Full authenticated visible-Chrome smoke with Super Administrator, scoped user, and two-tab restoration after Build 040 publication.",
       "builds": [
-        { "build": 36, "status": "PASS", "evidence": "BUILD_036_AUTHORITY_MATRIX.md" }
+        { "build": 36, "status": "PASS", "evidence": "BUILD_036_AUTHORITY_MATRIX.md" },
+        { "build": 37, "status": "PASS", "evidence": "BUILD_037_SESSION_CONTINUITY.md" }
       ]
     }
   ]

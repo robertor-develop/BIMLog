@@ -5,7 +5,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { I18nProvider } from "@/lib/i18n";
 import { ConfigProvider } from "@/lib/config-context";
-import { useAuthStore } from "@/store/auth";
+import { installAuthStorageContinuity, useAuthStore } from "@/store/auth";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { DebugBanner } from "@/components/DebugBanner";
@@ -210,6 +210,7 @@ function Router() {
 }
 
 function App() {
+  useEffect(() => installAuthStorageContinuity(), []);
   return (
     <QueryClientProvider client={queryClient}>
       <DebugBanner />
