@@ -200,3 +200,74 @@ export function evidenceForCoordinationVersion(identityInput: CoordinationRecord
   const identity = canonicalCoordinationIdentity(identityInput);
   return evidence.filter((entry) => entry.recordKey === identity.key && entry.recordVersion === identity.version);
 }
+
+export type CoordinationRegisterRow = {
+  identity: CoordinationRecordIdentity;
+  number: string;
+  title: string;
+  status: CoordinationStatus;
+  responsibleCompany: string | null;
+  updatedAt: string;
+};
+
+export const coordinationSavedViewSchema = z.object({
+  id: z.string().trim().min(1).max(128),
+  projectId: z.number().int().positive(),
+  name: z.string().trim().min(1).max(128),
+  filters: z.object({
+    types: z.array(z.enum(coordinationRecordTypes)).default([]),
+    statuses: z.array(z.string().trim().min(1)).default([]),
+    responsibleCompanies: z.array(z.string().trim().min(1)).default([]),
+    search: z.string().trim().max(256).default(""),
+  }).strict(),
+  sort: z.enum(["updated_desc", "updated_asc", "number_asc"]),
+  pageSize: z.number().int().min(1).max(200),
+}).strict();
+
+export type CoordinationSavedView = z.infer<typeof coordinationSavedViewSchema>;
+
+export function coordinationRegisterView(input: { rows: readonly CoordinationRegisterRow[]; view: CoordinationSavedView; page: number }) {
+  const view = coordinationSavedViewSchema.parse(input.view);
+  if (!Number.isInteger(input.page) || input.page < 1) throw new Error("Coordination register page must be positive");
+  for (const row of input.rows) {
+    const identity = canonicalCoordinationIdentity(row.identity);
+    if (identity.projectId !== view.projectId) throw new Error("Saved view cannot read records from another project");
+  }
+  const typeSet = new Set(view.filters.types);
+  const statusSet = new Set(view.filters.statuses);
+  const companySet = new Set(view.filters.responsibleCompanies.map((value) => value.toLocaleLowerCase()));
+  const search = view.filters.search.toLocaleLowerCase();
+  const filtered = input.rows.filter((row) => {
+    const identity = canonicalCoordinationIdentity(row.identity);
+    return (typeSet.size === 0 || typeSet.has(identity.type))
+      && (statusSet.size === 0 || statusSet.has(row.status))
+      && (companySet.size === 0 || companySet.has((row.responsibleCompany ?? "").toLocaleLowerCase()))
+      && (!search || [row.number, row.title, row.responsibleCompany ?? "", identity.type].some((value) => value.toLocaleLowerCase().includes(search)));
+  });
+  const sorted = [...filtered].sort((left, right) => {
+    if (view.sort === "number_asc") return left.number.localeCompare(right.number);
+    const difference = Date.parse(left.updatedAt) - Date.parse(right.updatedAt);
+    return view.sort === "updated_asc" ? difference : -difference;
+  });
+  const totalPages = Math.max(1, Math.ceil(sorted.length / view.pageSize));
+  const page = Math.min(input.page, totalPages);
+  const visibleRows = sorted.slice((page - 1) * view.pageSize, page * view.pageSize);
+  return { view, page, pageSize: view.pageSize, totalRows: sorted.length, totalPages, filteredRows: sorted, visibleRows };
+}
+
+function csvCell(value: string | number | null) {
+  const text = value === null ? "" : String(value);
+  return /[",\r\n]/.test(text) ? `"${text.replaceAll('"', '""')}"` : text;
+}
+
+export function coordinationExportModel(result: ReturnType<typeof coordinationRegisterView>) {
+  const rows = result.filteredRows.map((row) => {
+    const identity = canonicalCoordinationIdentity(row.identity);
+    return { key: identity.key, version: identity.version, type: identity.type, number: row.number, title: row.title, status: row.status, responsibleCompany: row.responsibleCompany ?? "", updatedAt: row.updatedAt };
+  });
+  const headers = ["Key", "Version", "Type", "Number", "Title", "Status", "Responsible company", "Updated at"];
+  const csv = [headers, ...rows.map((row) => [row.key, row.version, row.type, row.number, row.title, row.status, row.responsibleCompany, row.updatedAt])]
+    .map((line) => line.map((value) => csvCell(value)).join(","))
+    .join("\r\n");
+  return { viewId: result.view.id, projectId: result.view.projectId, filters: result.view.filters, sort: result.view.sort, totalRows: rows.length, rows, csv };
+}
