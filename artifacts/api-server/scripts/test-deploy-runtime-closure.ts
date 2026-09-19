@@ -95,7 +95,9 @@ snapshots:
       },
     }),
   );
+  await writeFixtureFile(sourceRoot, "artifacts/api-server/dist/start.cjs", "require('./index.cjs');\n");
   await writeFixtureFile(sourceRoot, "artifacts/api-server/dist/index.cjs", "module.exports = {};\n");
+  await writeFixtureFile(sourceRoot, "artifacts/api-server/dist/app.mjs", "export default {};\n");
   await writeFixtureFile(sourceRoot, "artifacts/api-server/dist/index.meta.json", "{}\n");
   await writeFixtureFile(sourceRoot, "lib/api-zod/package.json", JSON.stringify({ name: "@workspace/api-zod", version: "1.0.0" }));
   await writeFixtureFile(sourceRoot, "lib/api-zod/src/index.ts", "export {};\n");
