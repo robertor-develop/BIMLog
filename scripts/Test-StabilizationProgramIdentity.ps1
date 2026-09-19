@@ -32,7 +32,7 @@ if ($remoteUrl -ne $ExpectedRemoteUrl) { throw "Remote mismatch: expected $Expec
 Invoke-Git merge-base --is-ancestor $ExpectedBase HEAD | Out-Null
 if (-not $AllowDirty -and $status.Count -ne 0) { throw "Worktree is dirty: $($status.Count) entries" }
 
-$remoteLines = Invoke-Git ls-remote --heads origin "refs/heads/$ExpectedRemoteBranch"
+$remoteLines = @(Invoke-Git ls-remote --heads origin "refs/heads/$ExpectedRemoteBranch")
 $remoteHead = $null
 if ($remoteLines.Count -gt 0 -and -not [string]::IsNullOrWhiteSpace($remoteLines[0])) {
     $remoteHead = ($remoteLines[0] -split '\s+')[0]
