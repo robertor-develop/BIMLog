@@ -18,14 +18,14 @@ function validate(snapshot) {
   assert(lens.legacyStatus === "migration-only", "Legacy Lens must be migration-only");
   assert(lens.customerFacingLegacyProduct === false && lens.parallelInstallationSupported === false && lens.legacyLoaderAllowedInAcceptedSetup === false, "Legacy Lens cannot remain customer-facing, parallel-installed, or loadable");
   assert(lens.currentPlatformVersion === release.label, "Lens product and release identities must agree");
-  assert(ledger.status.completedBuilds === 40, "Build ledger must close stabilization Block 08 at Build 040");
+  assert(ledger.status.completedBuilds >= 41 && ledger.status.completedBuilds <= 45, "Build ledger must track stabilization Block 09");
   assert(ledger.status.remainingBuilds === 120 - ledger.status.completedBuilds, "Build ledger remaining count must reconcile");
-  assert(ledger.status.currentUnpublishedBuilds === 10, "Build 040 must contain exactly the ten builds due for publication");
+  assert(ledger.status.currentUnpublishedBuilds === ledger.status.completedBuilds - 40, "Block 09 unpublished count must start after the accepted Build 040 publication");
   assert(ledger.status.nextBuild === ledger.status.completedBuilds + 1, "Build ledger must advance exactly one build");
   assert(ledger.status.nextPushAfterBuild === 45, "Build ledger next-push cadence must advance to Build 045");
   assert(ledger.status.nextPublicationAfterBuild === 50, "Build ledger next-publication cadence must advance to Build 050");
   for (const document of [status, platform, plugin, quality]) assert(document.includes(release.label), "current authority documents must contain the exact release label");
-  assert(status.includes("Replit publication receipt `e89dc3b4`"), "STATUS must retain the exact predecessor publication receipt until P34 is accepted live");
+  assert(status.includes("Replit publication receipt `b8718795`"), "STATUS must retain the accepted P34 publication receipt");
   assert(platform.includes("Replit is the established BIMLog publication provider"), "PLATFORM must name the proven Replit provider path");
   assert(migration.includes("development-data copy off") && migration.includes("Replit Agents are prohibited"), "release documentation must preserve the proven database and provider boundaries");
   assert(!meeting.includes("Open Original Lens Viewpoint"), "customer meeting UI must not advertise Original Lens");

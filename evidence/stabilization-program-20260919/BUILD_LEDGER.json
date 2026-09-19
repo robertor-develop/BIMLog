@@ -19,11 +19,11 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 40,
+    "completedBuilds": 41,
     "totalBuilds": 120,
-    "remainingBuilds": 80,
-    "currentUnpublishedBuilds": 10,
-    "nextBuild": 41,
+    "remainingBuilds": 79,
+    "currentUnpublishedBuilds": 1,
+    "nextBuild": 42,
     "nextPushAfterBuild": 45,
     "nextPublicationAfterBuild": 50,
     "blocker": null
@@ -139,6 +139,16 @@
         { "build": 38, "status": "PASS", "evidence": "BUILD_038_PRIVILEGED_ROUTE_AUTHORITY.md" },
         { "build": 39, "status": "PASS", "evidence": "BUILD_039_PROJECT_CONTEXT.md" },
         { "build": 40, "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION", "evidence": "BUILD_040_AUTHENTICATED_RELEASE_GATE.md" }
+      ]
+    },
+    {
+      "block": 9,
+      "buildRange": "041-045",
+      "status": "IN_PROGRESS",
+      "publicationRequired": false,
+      "smoke": "Authenticated shell accessibility and responsive visual evidence; push at Build 045, no production publication.",
+      "builds": [
+        { "build": 41, "status": "PASS", "evidence": "BUILD_041_ROUTE_ACCESSIBILITY.md" }
       ]
     }
   ]

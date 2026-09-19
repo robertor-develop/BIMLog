@@ -11,6 +11,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { DebugBanner } from "@/components/DebugBanner";
 import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { PublicRouteMetadata } from "@/components/PublicRouteMetadata";
+import { RouteAccessibility } from "@/components/layout/RouteAccessibility";
 import { loadAccessProfile, resolveProjectContext, type AccessSurface } from "@/lib/access-profile";
 
 const namedPage = (loader: () => Promise<object>, name: string) =>
@@ -275,6 +276,7 @@ function App() {
         <TooltipProvider>
           <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
             <PublicRouteMetadata />
+            <RouteAccessibility />
             <LivingBriefHotkey />
             <div className="min-h-screen flex flex-col bg-background selection:bg-primary/30 text-foreground font-sans">
               <a className="skip-to-main" href="#main-content">Skip to main content / Ir al contenido principal</a>
