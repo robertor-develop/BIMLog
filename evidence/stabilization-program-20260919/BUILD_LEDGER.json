@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the completed local-gate Block 02 / Build 010 source head; provider publication and live receipts are recorded externally without changing that source identity.",
+  "headBinding": "The Git commit containing this ledger is the completed local-gate Block 12 / Build 060 source head; provider publication and live receipts are recorded externally without changing that source identity.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 55,
+    "completedBuilds": 60,
     "totalBuilds": 120,
-    "remainingBuilds": 65,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 56,
-    "nextPushAfterBuild": 55,
+    "remainingBuilds": 60,
+    "currentUnpublishedBuilds": 10,
+    "nextBuild": 61,
+    "nextPushAfterBuild": 60,
     "nextPublicationAfterBuild": 60,
     "blocker": null
   },
@@ -181,6 +181,20 @@
         { "build": 53, "status": "PASS", "evidence": "BUILD_053_APU_ALLOCATION_RECONCILIATION.md" },
         { "build": 54, "status": "PASS", "evidence": "BUILD_054_FINANCIAL_REVISION_HISTORY.md" },
         { "build": 55, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_055_FINANCE_ROLE_EXPORT_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 12,
+      "buildRange": "056-060",
+      "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION",
+      "publicationRequired": true,
+      "smoke": "Full authenticated visible-Chrome smoke after Build 060 publication; no Navisworks smoke because Native and installers are unchanged.",
+      "builds": [
+        { "build": 56, "status": "PASS", "evidence": "BUILD_056_CANONICAL_PROJECT_IDENTITY.md" },
+        { "build": 57, "status": "PASS", "evidence": "BUILD_057_OPERATIONS_TASK_LIFECYCLE.md" },
+        { "build": 58, "status": "PASS", "evidence": "BUILD_058_CANONICAL_FINANCIAL_AUTHORITY.md" },
+        { "build": 59, "status": "PASS", "evidence": "BUILD_059_LIVE_OPERATIONAL_PROJECTIONS.md" },
+        { "build": 60, "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION", "evidence": "BUILD_060_INTAKE_OPERATIONS_ACCEPTANCE.md" }
       ]
     }
   ]

@@ -18,11 +18,11 @@ function validate(snapshot) {
   assert(lens.legacyStatus === "migration-only", "Legacy Lens must be migration-only");
   assert(lens.customerFacingLegacyProduct === false && lens.parallelInstallationSupported === false && lens.legacyLoaderAllowedInAcceptedSetup === false, "Legacy Lens cannot remain customer-facing, parallel-installed, or loadable");
   assert(lens.currentPlatformVersion === release.label, "Lens product and release identities must agree");
-  assert(ledger.status.completedBuilds >= 51 && ledger.status.completedBuilds <= 55, "Build ledger must track stabilization Block 11");
+  assert(ledger.status.completedBuilds >= 56 && ledger.status.completedBuilds <= 60, "Build ledger must track stabilization Block 12");
   assert(ledger.status.remainingBuilds === 120 - ledger.status.completedBuilds, "Build ledger remaining count must reconcile");
-  assert(ledger.status.currentUnpublishedBuilds === ledger.status.completedBuilds - 50, "Block 11 unpublished count must start after the accepted Build 050 publication");
+  assert(ledger.status.currentUnpublishedBuilds === ledger.status.completedBuilds - 50, "Block 12 unpublished count must start after the accepted Build 050 publication");
   assert(ledger.status.nextBuild === ledger.status.completedBuilds + 1, "Build ledger must advance exactly one build");
-  const expectedNextPush = 55;
+  const expectedNextPush = 60;
   assert(ledger.status.nextPushAfterBuild === expectedNextPush, `Build ledger next-push cadence must advance to Build ${expectedNextPush}`);
   assert(ledger.status.nextPublicationAfterBuild === 60, "Build ledger next-publication cadence must advance to Build 060");
   for (const document of [status, platform, plugin, quality]) assert(document.includes(release.label), "current authority documents must contain the exact release label");

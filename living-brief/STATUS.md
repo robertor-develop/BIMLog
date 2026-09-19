@@ -1,12 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
-## 120-build stabilization current authority — Block 11 financial correctness candidate — 2026-09-19
+## 120-build stabilization current authority — Block 12 Operations lifecycle candidate — 2026-09-19
 
 - The accepted live platform is `v1.05.N18-P34`, published from exact source `752b79739e7874d2a530f22937aae6a05ebf88dd` under Replit receipt `c2e7dc7e`; live health reported `identityBound=true`, and authenticated Chrome acceptance passed after Build 050.
-- Builds 051–055 are the first five unpublished builds after that accepted release. They establish exact quantity/unit-rate/total/currency/tax/overhead/contingency arithmetic, reject the historical whole-plan-price-as-unit-rate defect, reconcile APU phase allocation to the cent, preserve immutable revision/supersession authority, and verify Finance role/export behavior.
+- Builds 051–060 are the ten-build publication batch after that accepted release. Builds 051–055 establish exact financial arithmetic and revision authority. Builds 056–060 bind activated Intake and Operations to one canonical project/customer identity, persist task ownership/progress/dates/dependencies with stale-write and cycle rejection, expose only canonical financial references, and generate no-store command-center/activity/team/control projections from live records.
 - The controlled `$480,000` vector accepts quantity `12` at unit rate `40,000` and rejects unit rate `480,000` against the same stated total. Historical evidence is unchanged.
 - The production budget-line normalizer enforces that exact quantity/rate/total invariant for both manual Intake drafts and controlled statement imports; the regression is not a test-only proxy.
-- Block 11 changes no production schema, database rows, customer data, Lens Next Native source, installer, manifest, or package. Push is due at Build 055; publication and authenticated Chrome smoke remain due at Build 060.
+- Block 12 adds only backward-compatible task schedule columns with empty/null defaults; no existing row is rewritten. It changes no customer data, Lens Next Native source, installer, manifest, or package. Push, Replit publication, migration receipt, and authenticated Chrome smoke are due at Build 060.
 - The production assembler's generated platform inventory includes the new financial contract and regression modules; its Living Brief hash bundle is reconciled before the final clean-source rerun.
 
 ## 120-build stabilization current authority — Block 10 publication candidate — 2026-09-19
