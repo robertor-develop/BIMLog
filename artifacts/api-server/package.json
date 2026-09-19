@@ -89,6 +89,7 @@
     "test:financial-statement-mapping": "tsx ./src/lib/financial-statement-mapping.behavior.ts",
     "test:financial-apu-allocation": "tsx ./src/lib/financial-apu-allocation.behavior.ts",
     "test:financial-revision-ledger": "tsx ./src/lib/financial-revision-ledger.behavior.ts",
+    "test:block11-financial-acceptance": "tsx ./src/lib/financial-correctness-golden-vectors.behavior.ts && tsx ./src/lib/financial-statement-mapping.behavior.ts && tsx ./src/lib/financial-apu-allocation.behavior.ts && tsx ./src/lib/financial-revision-ledger.behavior.ts && tsx ./src/lib/block11-financial-acceptance.behavior.ts",
     "test:job-operations-classification": "tsx ../bimlog/src/lib/job-operations-classification.behavior.ts",
     "test:unified-action-contract": "tsx ./src/lib/unified-action-contract.behavior.ts",
     "test:connector-foundation": "tsx ./src/lib/connector-foundation.behavior.ts",

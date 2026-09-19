@@ -40,3 +40,10 @@ export function approveFinancialRevision(history: readonly FinancialRevision[], 
   if (current.preparedBy === approver) fail("FIN_MAKER_CHECKER_REQUIRED", "The preparing user cannot approve the same revision.");
   return Object.freeze([...history.slice(0, -1), seal({ ...current, status: "approved", approvedBy: approver, reason: reason(auditReason) })]);
 }
+
+export function exportFinancialRevisionCsv(history: readonly FinancialRevision[]): string {
+  const quote = (value: unknown) => `"${String(value ?? "").replaceAll('"', '""')}"`;
+  const header = ["Version", "Status", "Prepared By", "Approved By", "Currency", "Quantity", "Unit Price", "Total", "Fingerprint"];
+  const rows = history.map(item => [item.version, item.status, item.preparedBy, item.approvedBy ?? "", item.price.currency, item.price.quantity, item.price.unitPrice, item.price.total, item.fingerprint]);
+  return `${[header, ...rows].map(row => row.map(quote).join(",")).join("\r\n")}\r\n`;
+}

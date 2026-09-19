@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## 120-build stabilization current authority — Block 11 financial correctness candidate — 2026-09-19
+
+- The accepted live platform is `v1.05.N18-P34`, published from exact source `752b79739e7874d2a530f22937aae6a05ebf88dd` under Replit receipt `c2e7dc7e`; live health reported `identityBound=true`, and authenticated Chrome acceptance passed after Build 050.
+- Builds 051–055 are the first five unpublished builds after that accepted release. They establish exact quantity/unit-rate/total/currency/tax/overhead/contingency arithmetic, reject the historical whole-plan-price-as-unit-rate defect, reconcile APU phase allocation to the cent, preserve immutable revision/supersession authority, and verify Finance role/export behavior.
+- The controlled `$480,000` vector accepts quantity `12` at unit rate `40,000` and rejects unit rate `480,000` against the same stated total. Historical evidence is unchanged.
+- Block 11 changes no production schema, database rows, customer data, Lens Next Native source, installer, manifest, or package. Push is due at Build 055; publication and authenticated Chrome smoke remain due at Build 060.
+
 ## 120-build stabilization current authority — Block 10 publication candidate — 2026-09-19
 
 - The fully accepted Platform is `v1.05.N18-P34`, published from stabilization Build 040 corrective commit `4472d982c2fc7ab5fde552048f024cd7e90fab96`; Replit publication receipt `b8718795` passed Security, Build, Bundle, and Promote, and authenticated Chrome acceptance verified exact live source/package/database identity plus two-tab restoration.

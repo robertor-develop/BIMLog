@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 50,
+    "completedBuilds": 55,
     "totalBuilds": 120,
-    "remainingBuilds": 70,
-    "currentUnpublishedBuilds": 10,
-    "nextBuild": 51,
-    "nextPushAfterBuild": 50,
-    "nextPublicationAfterBuild": 50,
+    "remainingBuilds": 65,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 56,
+    "nextPushAfterBuild": 55,
+    "nextPublicationAfterBuild": 60,
     "blocker": null
   },
   "blocks": [
@@ -167,6 +167,20 @@
         { "build": 48, "status": "PASS", "evidence": "BUILD_048_DELIVERY_WORKFLOW_AUTHORITY.md" },
         { "build": 49, "status": "PASS", "evidence": "BUILD_049_JOB_INTAKE_PERSISTENCE.md" },
         { "build": 50, "status": "PASS_LOCAL_RELEASE_GATE_PENDING", "evidence": "BUILD_050_CONTROLLED_ACCEPTANCE_AND_RELEASE.md" }
+      ]
+    },
+    {
+      "block": 11,
+      "buildRange": "051-055",
+      "status": "PASS_PENDING_PUSH",
+      "publicationRequired": false,
+      "smoke": "Financial golden-vector acceptance; push at Build 055, publication and authenticated Chrome smoke remain due at Build 060.",
+      "builds": [
+        { "build": 51, "status": "PASS", "evidence": "BUILD_051_FINANCIAL_GOLDEN_VECTORS.md" },
+        { "build": 52, "status": "PASS", "evidence": "BUILD_052_STATEMENT_MAPPING_REGRESSION.md" },
+        { "build": 53, "status": "PASS", "evidence": "BUILD_053_APU_ALLOCATION_RECONCILIATION.md" },
+        { "build": 54, "status": "PASS", "evidence": "BUILD_054_FINANCIAL_REVISION_HISTORY.md" },
+        { "build": 55, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_055_FINANCE_ROLE_EXPORT_ACCEPTANCE.md" }
       ]
     }
   ]
