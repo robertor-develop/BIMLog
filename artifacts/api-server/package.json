@@ -74,6 +74,7 @@
     "test:bimlog-configuration-authorities": "tsx ./src/lib/bimlog-configuration-authorities.behavior.ts",
     "test:master-catalog-pmo": "tsx ./src/lib/master-catalog-pmo.behavior.ts",
     "test:delivery-workflow-template": "tsx ./src/lib/delivery-workflow-template-contract.behavior.ts && tsx ./src/lib/delivery-workflow-economic-allocation.behavior.ts && tsx ./src/lib/delivery-workflow-allocation-source.behavior.ts",
+    "test:delivery-workflow-intake-authority": "tsx ./src/lib/delivery-workflow-selection.behavior.ts && tsx ./src/lib/workflow-governance-policy-contract.behavior.ts && tsx ./src/lib/delivery-workflow-intake-authority.behavior.ts",
     "test:delivery-workflow-template-http": "tsx ./src/lib/delivery-workflow-template.http-evidence.ts",
     "test:delivery-workflow-allocation-http": "tsx ./src/lib/delivery-workflow-allocation.http-evidence.ts",
     "test:job-intake-multicontract-http": "tsx ./src/lib/job-intake-pricing-multicontract.http-evidence.ts",
