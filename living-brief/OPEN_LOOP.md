@@ -2963,3 +2963,4 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Builds 061–065: reconcile project-bound coordination identities, lifecycle/audit transitions, immutable version evidence, deterministic notifications, saved-view/export parity, and one issue-to-formal-response closure scenario; push at Build 065 with no publication or Native smoke due.
 - [ ] Builds 066–070: complete Lens Next Platform sole-product scope, push Build 070, publish the ten-build batch, and run full authenticated visible-Chrome acceptance. Run focused Navisworks smoke only if this block changes Native or installers.
 - [x] Reconcile Block 13 Platform, Status, Open Loop, evidence ledger, and generated Living Brief state against the exact Build 065 implementation commit.
+- [x] Bind the Block 13 Platform authority to its generator source and reseal the generated Living Brief state before the final clean gate.

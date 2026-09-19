@@ -10,6 +10,7 @@
 - The production assembler's generated platform inventory includes the new financial contract and regression modules; its Living Brief hash bundle is reconciled before the final clean-source rerun.
 - Build 065 acceptance traces all seven record families, links, actors, times, version-bound formal-response evidence, notifications, and exact exported rows under one project authority.
 - The Block 13 semantic-impact reconciliation covers the exact Build 065 implementation commit; Platform and current/open-loop authorities agree that Build 065 is push-only and Build 070 is the next publication milestone.
+- The generated Platform inventory now owns the Block 13 authority text, preventing a production build from replacing a manually maintained section after its hash is sealed.
 
 ## 120-build stabilization current authority — Block 10 publication candidate — 2026-09-19
 

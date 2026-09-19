@@ -32083,7 +32083,7 @@
     },
     {
       "taskId": "bimlog-stabilization-block13-coordination-records-20260919",
-      "reviewedThroughCommit": "23a882a8eb3f459dbf8962c293e5f3e834b18918",
+      "reviewedThroughCommit": "70297f78e47cb206ccb4a5ca066cddf32ba636c2",
       "reviewedAt": "2026-09-19T22:10:00.000Z",
       "status": "candidate",
       "authorities": [
@@ -32146,11 +32146,10 @@
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "540f8c9da904d5ee994f80d95a21114ea0ea50664406247813e7f7e97f01b1e4"
+      "reviewedChangeSha256": "d7392979d0f12aeedd28fd817579c74f004686c52d6119873a52cf05db5cc2ee"
     }
   ]
 }
