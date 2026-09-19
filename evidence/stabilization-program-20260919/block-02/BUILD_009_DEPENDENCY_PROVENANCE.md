@@ -11,7 +11,7 @@ Make the corrected dependency state reproducible and fail closed when package-ma
 
 ## Changes
 
-- Bound the workspace to `pnpm@11.17.0` through `packageManager`.
+- Bound the workspace to `pnpm@11.17.0` through the exact `engines.pnpm` contract. Replit publication proved that its provider bootstrap misinterprets `packageManager` as a self-install request, so that provider-triggering field is explicitly prohibited while the exact engine contract remains enforced.
 - Added `check:dependency-provenance`, which verifies pnpm identity, lockfile v9, frozen integrity entries for all 15 corrected resolutions, the one-day minimum release age, the exact native install-script allowlists, peer-install policy, and absence of npm/yarn lockfiles.
 - Added `audit:production` at audit level low and placed both provenance and advisory checks at the beginning of `gate:pre-push`.
 - Preserved the existing preinstall rejection for package managers other than pnpm.

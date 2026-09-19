@@ -17,7 +17,7 @@ Status: PASS_LOCAL_RELEASE_GATE
 
 ## Exact local release evidence
 
-- Dependency provenance: PASS (`pnpm@11.17.0`, lockfile v9, 15 patched resolutions, 981 integrity-bound resolutions).
+- Dependency provenance: PASS (`pnpm@11.17.0` via exact `engines.pnpm`, provider-triggering `packageManager` absent, lockfile v9, 15 patched resolutions, 981 integrity-bound resolutions).
 - Production audit: PASS, zero known vulnerabilities.
 - Tracked-secret self-test and scan: PASS.
 - Database safety: PASS (223 tables, 273 indexes, 184 startup tables reconciled).
@@ -35,4 +35,3 @@ The full clean-gate receipt above was produced by source commit `4472b222215cbb5
 ## Release boundary
 
 Build 010 is the second five-build block and therefore requires normal push, Replit Shell publication without Replit Agents, and authenticated visible-Chrome production smoke under Roberto's standing authorization. Publication and live receipts are stored outside the immutable source candidate so the deployed source identity is not changed after verification.
-

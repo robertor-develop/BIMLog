@@ -31178,6 +31178,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d0dabc2b61e8fe9b412c6f0f22856fce469498968d61464d3330162f254c0351"
+    },
+    {
+      "taskId": "bimlog-stabilization-build010-replit-bootstrap-correction-20260919",
+      "reviewedThroughCommit": "056b30e7fdbea2fbaca80fec91698dae938bdd14",
+      "reviewedAt": "2026-09-19T09:11:18Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity, ownership, or product law changed."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "Records the exact pnpm engine pin and prohibits the provider-triggering packageManager field."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "All existing source, artifact, publication, and live-smoke gates remain required."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product strategy changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction changes package-manager metadata only; runtime behavior, routes, schema, and provider configuration are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native or installer source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report output or design rule changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the failed Replit provider bootstrap, exact root cause, bounded correction, and unchanged production state."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Retains the corrective full gate, push, publication, and authenticated live smoke before Build 011."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical audit evidence remains append-only and unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/block-02/BUILD_009_DEPENDENCY_PROVENANCE.md",
+        "evidence/stabilization-program-20260919/block-02/BUILD_010_SECURITY_REGRESSION_AND_RELEASE.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/check-dependency-provenance.mjs"
+      ],
+      "reviewedChangeSha256": "2f87c2b07d82710dd7ed8208fdf20948f5466602bc4e59611c15bad47966b2cb"
     }
   ]
 }

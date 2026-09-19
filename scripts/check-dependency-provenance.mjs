@@ -10,7 +10,8 @@ const workspace = read("pnpm-workspace.yaml");
 const lockfile = read("pnpm-lock.yaml");
 const npmrc = read(".npmrc");
 
-assert.equal(packageJson.packageManager, "pnpm@11.17.0", "package manager identity must be exact");
+assert.equal(packageJson.engines?.pnpm, "11.17.0", "pnpm engine identity must be exact");
+assert.equal(packageJson.packageManager, undefined, "packageManager is forbidden because Replit misinterprets it as a self-install request");
 assert.match(packageJson.scripts?.preinstall ?? "", /rm -f package-lock\.json yarn\.lock/);
 assert.match(packageJson.scripts?.preinstall ?? "", /npm_config_user_agent/);
 assert.equal(existsSync(path.join(root, "package-lock.json")), false, "package-lock.json is forbidden");
@@ -57,7 +58,7 @@ assert.ok(integrityCount >= 500, `unexpectedly small integrity-bound closure: ${
 
 console.log(JSON.stringify({
   status: "PASS",
-  packageManager: packageJson.packageManager,
+  packageManager: `pnpm@${packageJson.engines.pnpm}`,
   lockfileVersion: "9.0",
   minimumReleaseAge,
   patchedResolutions: patchedResolutions.length,
