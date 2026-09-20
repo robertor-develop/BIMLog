@@ -7,6 +7,7 @@ import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
+import { PERFORMANCE_BUDGETS, percentile } from "../src/lib/performance-budget";
 
 const runtimeRoot = path.resolve("dist/runtime");
 const bundle = path.join(runtimeRoot, "dist/start.cjs");
@@ -644,6 +645,18 @@ try {
   );
   assert(storageAuthority.capabilities.includes("bounded-read"));
   assert.equal(storageAuthority.maxReadBytes, storageMaxReadBytes);
+  const loadTimings = await Promise.all(Array.from({ length: 25 }, async () => {
+    const requestStartedAt = performance.now();
+    const response = await fetch(`http://127.0.0.1:${port}/api/v1/healthz`, {
+      headers: { "X-Correlation-Id": `artifact-load-${crypto.randomUUID()}` },
+    });
+    assert.equal(response.status, 200);
+    assert.match(response.headers.get("x-correlation-id") ?? "", /^artifact-load-/);
+    await response.arrayBuffer();
+    return performance.now() - requestStartedAt;
+  }));
+  const healthP95Ms = percentile(loadTimings, 0.95);
+  assert(healthP95Ms <= PERFORMANCE_BUDGETS.apiP95Ms, `Health p95 ${healthP95Ms.toFixed(1)}ms exceeded ${PERFORMANCE_BUDGETS.apiP95Ms}ms.`);
   assert.doesNotMatch(stderr, /outside its runtime closure/);
   const api = async (
     pathname: string,

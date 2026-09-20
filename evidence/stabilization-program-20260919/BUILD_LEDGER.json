@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the Block 19 / Build 095 push-only candidate. Production remains the accepted P36 Build 090 publication; the next publication and authenticated Chrome smoke are due after Build 100.",
+  "headBinding": "The Git commit containing this ledger is the Block 20 / Build 100 publication candidate. It must pass the exact clean-source gate, normal push, proven Replit publication procedure, immutable live identity check, and full authenticated visible-Chrome smoke before production acceptance.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 95,
+    "completedBuilds": 100,
     "totalBuilds": 120,
-    "remainingBuilds": 25,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 96,
-    "nextPushAfterBuild": 100,
-    "nextPublicationAfterBuild": 100,
+    "remainingBuilds": 20,
+    "currentUnpublishedBuilds": 0,
+    "nextBuild": 101,
+    "nextPushAfterBuild": 105,
+    "nextPublicationAfterBuild": 110,
     "blocker": null
   },
   "blocks": [
@@ -293,6 +293,20 @@
         { "build": 93, "status": "PASS", "evidence": "BUILD_093_AI_DRAFT_AUTHORITY.md" },
         { "build": 94, "status": "PASS", "evidence": "BUILD_094_AI_CAPABILITY_TRUTH.md" },
         { "build": 95, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_095_AI_ASSISTANCE_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 20,
+      "buildRange": "096-100",
+      "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION",
+      "publicationRequired": true,
+      "smoke": "Publish Build 100 and run full authenticated visible-Chrome standard, cold-start, multi-tab, browser-resume, degraded-provider and performance smoke. Native and installers are unchanged, so no Navisworks smoke is required.",
+      "builds": [
+        { "build": 96, "status": "PASS", "evidence": "BUILD_096_PERFORMANCE_BUDGETS.md" },
+        { "build": 97, "status": "PASS", "evidence": "BUILD_097_RUNTIME_PERFORMANCE.md" },
+        { "build": 98, "status": "PASS", "evidence": "BUILD_098_OBSERVABILITY.md" },
+        { "build": 99, "status": "PASS", "evidence": "BUILD_099_RESILIENCE.md" },
+        { "build": 100, "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION", "evidence": "BUILD_100_PERFORMANCE_RESILIENCE_ACCEPTANCE.md" }
       ]
     }
   ]

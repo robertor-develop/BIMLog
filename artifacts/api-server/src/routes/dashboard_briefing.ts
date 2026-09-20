@@ -7,6 +7,7 @@ import {
 import { eq, and, inArray, ne, or, count, desc } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
 import { deterministicBriefing, type BriefingDraft } from "../lib/ai-assistance-governance";
+import { ScopedBriefingCache } from "../lib/scoped-briefing-cache";
 import {
   addPageNumbers,
   computeContentHash,
@@ -21,8 +22,9 @@ import {
 
 const router: Router = Router();
 
-// In-memory cache: userId → { result, expiresAt }
-const cache = new Map<number, { result: BriefingDraft; expiresAt: number }>();
+// Short-lived, scope-aware cache. Concurrent requests for the same authorized
+// project set share one loader; membership changes necessarily select a new key.
+const cache = new ScopedBriefingCache<BriefingDraft>();
 
 const PENDING_TYPES = ["rfis", "submittals", "files"] as const;
 type PendingType = typeof PENDING_TYPES[number];
@@ -719,18 +721,18 @@ router.get("/dashboard/stats", authMiddleware, async (req, res) => {
 router.get("/dashboard/briefing", authMiddleware, async (req, res) => {
   const userId = req.user!.userId;
   const now = Date.now();
-  const cached = cache.get(userId);
-  if (cached && cached.expiresAt > now) {
-    res.json(cached.result);
-    return;
-  }
-
   const todaysDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
   try {
     const memberships = await db.select({ projectId: projectMembersTable.projectId })
       .from(projectMembersTable).where(eq(projectMembersTable.userId, userId));
     const projectIds = memberships.map((m: { projectId: number }) => m.projectId);
+    const cacheKey = ScopedBriefingCache.scopeKey(userId, projectIds);
+    const cached = cache.get(cacheKey, now);
+    if (cached) {
+      res.json(cached);
+      return;
+    }
 
     if (!projectIds.length) {
       res.json(deterministicBriefing({
@@ -741,41 +743,29 @@ router.get("/dashboard/briefing", authMiddleware, async (req, res) => {
       return;
     }
 
-    const [openRfis, pendingSubs, rejectedFiles, projects] = await Promise.all([
-      db.select({ id: rfisTable.id, dueDate: rfisTable.dueDate }).from(rfisTable)
-        .where(and(inArray(rfisTable.projectId, projectIds), ne(rfisTable.status, "closed"))),
-      db.select({ id: submittalsTable.id }).from(submittalsTable)
-        .where(and(inArray(submittalsTable.projectId, projectIds), eq(submittalsTable.status, "pending"))),
-      db.select({ id: filesTable.id }).from(filesTable)
-        .where(and(inArray(filesTable.projectId, projectIds), eq(filesTable.status, "rejected"))),
-      db.select({ name: projectsTable.name }).from(projectsTable)
-        .where(inArray(projectsTable.id, projectIds)),
-    ]);
-
-    const overdueRfis = openRfis.filter((r: { dueDate?: Date | string | null }) => r.dueDate && new Date(r.dueDate).getTime() < now);
-    const stats = {
-      projects: projects.length,
-      openRfis: openRfis.length,
-      overdueRfis: overdueRfis.length,
-      pendingSubmittals: pendingSubs.length,
-      namingIssues: rejectedFiles.length,
-    };
-
-    const criticalItems = [
-      stats.overdueRfis > 0 ? `${stats.overdueRfis} overdue RFI${stats.overdueRfis === 1 ? "" : "s"} require review.` : "",
-      stats.pendingSubmittals > 0 ? `${stats.pendingSubmittals} pending submittal${stats.pendingSubmittals === 1 ? "" : "s"} require review.` : "",
-      stats.namingIssues > 0 ? `${stats.namingIssues} file naming issue${stats.namingIssues === 1 ? "" : "s"} require review.` : "",
-    ].filter(Boolean).slice(0, 3);
-    const result: BriefingDraft = {
-      ...deterministicBriefing({
-        summary: `${stats.projects} active project${stats.projects === 1 ? "" : "s"}, ${stats.openRfis} open RFI${stats.openRfis === 1 ? "" : "s"}, and ${stats.pendingSubmittals} pending submittal${stats.pendingSubmittals === 1 ? "" : "s"}.`,
-        todaysDate,
-        status: "not_required",
-      }),
-      criticalItems,
-    };
-
-    cache.set(userId, { result, expiresAt: now + 60 * 60 * 1000 });
+    const result = await cache.resolve(cacheKey, async () => {
+      const [openRfis, pendingSubs, rejectedFiles, projects] = await Promise.all([
+        db.select({ id: rfisTable.id, dueDate: rfisTable.dueDate }).from(rfisTable)
+          .where(and(inArray(rfisTable.projectId, projectIds), ne(rfisTable.status, "closed"))),
+        db.select({ id: submittalsTable.id }).from(submittalsTable)
+          .where(and(inArray(submittalsTable.projectId, projectIds), eq(submittalsTable.status, "pending"))),
+        db.select({ id: filesTable.id }).from(filesTable)
+          .where(and(inArray(filesTable.projectId, projectIds), eq(filesTable.status, "rejected"))),
+        db.select({ name: projectsTable.name }).from(projectsTable)
+          .where(inArray(projectsTable.id, projectIds)),
+      ]);
+      const overdueRfis = openRfis.filter((r: { dueDate?: Date | string | null }) => r.dueDate && new Date(r.dueDate).getTime() < now);
+      const stats = { projects: projects.length, openRfis: openRfis.length, overdueRfis: overdueRfis.length, pendingSubmittals: pendingSubs.length, namingIssues: rejectedFiles.length };
+      const criticalItems = [
+        stats.overdueRfis > 0 ? `${stats.overdueRfis} overdue RFI${stats.overdueRfis === 1 ? "" : "s"} require review.` : "",
+        stats.pendingSubmittals > 0 ? `${stats.pendingSubmittals} pending submittal${stats.pendingSubmittals === 1 ? "" : "s"} require review.` : "",
+        stats.namingIssues > 0 ? `${stats.namingIssues} file naming issue${stats.namingIssues === 1 ? "" : "s"} require review.` : "",
+      ].filter(Boolean).slice(0, 3);
+      return {
+        ...deterministicBriefing({ summary: `${stats.projects} active project${stats.projects === 1 ? "" : "s"}, ${stats.openRfis} open RFI${stats.openRfis === 1 ? "" : "s"}, and ${stats.pendingSubmittals} pending submittal${stats.pendingSubmittals === 1 ? "" : "s"}.`, todaysDate, status: "not_required" }),
+        criticalItems,
+      };
+    }, now);
     res.json(result);
   } catch {
     res.json(deterministicBriefing({ summary: "Project briefing data is temporarily unavailable.", todaysDate, failureCode: "BRIEFING_DATA_UNAVAILABLE" }));

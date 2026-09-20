@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import { EventEmitter } from "node:events";
+import { requestDiagnostics, resolveCorrelationId } from "../middlewares/request-diagnostics";
+
+assert.equal(resolveCorrelationId("trace-12345678"), "trace-12345678");
+assert.match(resolveCorrelationId("bad value"), /^[0-9a-f-]{36}$/);
+const records: unknown[] = [];
+const response = new EventEmitter() as EventEmitter & { statusCode: number; setHeader(name: string, value: string): void; correlation?: string };
+response.statusCode = 201;
+response.setHeader = (_name, value) => { response.correlation = value; };
+const request = { method: "POST", path: "/api/v1/projects/7", headers: { "x-correlation-id": "trace-12345678", authorization: "Bearer secret" }, body: { password: "secret" }, query: { token: "secret" } };
+let continued = false;
+requestDiagnostics((record) => records.push(record))(request as never, response as never, () => { continued = true; });
+response.emit("finish");
+assert.equal(continued, true);
+assert.equal(response.correlation, "trace-12345678");
+const serialized = JSON.stringify(records);
+assert.match(serialized, /http_request_complete/);
+assert.doesNotMatch(serialized, /Bearer|password|token|secret/);
+console.log("block20 build098 request diagnostics: PASS");

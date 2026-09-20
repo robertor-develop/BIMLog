@@ -77,6 +77,7 @@ import { ensureCompanyMasterCatalogSchema } from "./lib/company-master-catalog-m
 import { ensureWorkflowGovernancePolicySchema } from "./lib/workflow-governance-policy-migration";
 import { ensureConnectorFoundationSchema } from "./lib/connector-foundation-migration";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./lib/delivery-workflow-template-migration";
+import { requestDiagnostics } from "./middlewares/request-diagnostics";
 
 const ENV_MODE =
   process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -167,6 +168,7 @@ const lensNextPublishingStartupBarrier = queueDatabaseStartup(() =>
 app.disable("etag");
 app.set("trust proxy", 1);
 app.use(cors());
+app.use(requestDiagnostics());
 app.use(
   "/api/v1/projects/:projectId/rfis/import/procore",
   (_req: Request, res: Response, next: NextFunction) => {

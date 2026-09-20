@@ -2,9 +2,12 @@
 
 ## Current open-loop authority — 120-build stabilization program — 2026-09-19
 
+- [x] Builds 001–095 are complete through the pushed Block 19 head `9a6437a87d2816cb96f72449747582b80fa262b1`; production remains the accepted P36 Build 090 publication pending the Build 100 release boundary.
+- [ ] [ACTIVE] Complete the clean Build 100 release gate, push the exact Block 20 head, publish through the established Replit Shell path without Replit Agents, and pass immutable live identity plus full authenticated visible-Chrome standard/cold-start/multi-tab/resume/performance smoke. Do not start Build 101 before this closes.
+
 - [x] Builds 001–020 are complete. Build 020 is pushed and published at `v1.05.N18-P33` from commit `be902808b59c264d31480f5d76424f8fdaff5cbe`; Replit receipt `e89dc3b4`, database `schemaAction=NONE`, public health HTTP 200, and authenticated two-tab reload continuity passed.
 - [x] Builds 021–025 reconcile current truth, classify every unchecked item, align executable documentation, establish Lens Next as the sole supported product, and add blocking contradiction checks. Push the exact Build 025 head; preserve the no-publication boundary until Build 030.
-- [ ] [ACTIVE] Complete Builds 026–030 worktree/branch reconciliation, push Build 030, and publish only if the accepted integration changes runtime behavior. Evidence authority: `evidence/stabilization-program-20260919/BUILD_LEDGER.json` and the Build 025 push receipt.
+- [x] Builds 026–030 worktree/branch reconciliation and source-authority integration were completed and published; later accepted block records supersede that historical active marker. Evidence authority: `evidence/stabilization-program-20260919/BUILD_LEDGER.json`.
 - Historical sections below are preserved as checkpoint evidence. Every unchecked historical entry is classified by `OPEN_LOOP_DISPOSITIONS.json`; an old candidate publication statement is not current release truth unless that inventory classifies its remaining portion as active.
 
 ## Convention Builder live hook-order correction - 2026-09-18

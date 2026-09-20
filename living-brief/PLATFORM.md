@@ -164,6 +164,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/middlewares/auth.ts
 - artifacts/api-server/src/middlewares/config-validator.ts
 - artifacts/api-server/src/middlewares/multipart.ts
+- artifacts/api-server/src/middlewares/request-diagnostics.ts
 - artifacts/api-server/src/middlewares/team-resource-planning-rate-limit.ts
 
 ## Backend libs (artifacts/api-server/src/lib)
@@ -220,6 +221,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block18-build089-connector-matrix.ts
 - artifacts/api-server/src/lib/block18-build090-integration-recovery.behavior.ts
 - artifacts/api-server/src/lib/block18-build090-integration-recovery.ts
+- artifacts/api-server/src/lib/block20-build096-performance-budget.behavior.ts
+- artifacts/api-server/src/lib/block20-build097-cache-coherence.behavior.ts
+- artifacts/api-server/src/lib/block20-build098-request-diagnostics.behavior.ts
+- artifacts/api-server/src/lib/block20-build099-runtime-resilience.behavior.ts
+- artifacts/api-server/src/lib/block20-build100-release-acceptance.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
@@ -490,6 +496,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/pdf-kit.ts
 - artifacts/api-server/src/lib/pdf-logo.ts
 - artifacts/api-server/src/lib/pdf-route-authorization.behavior.ts
+- artifacts/api-server/src/lib/performance-budget.ts
 - artifacts/api-server/src/lib/post-p17-apu-workbook-acceptance.behavior.ts
 - artifacts/api-server/src/lib/post-p17-build21-financial-invariants.behavior.ts
 - artifacts/api-server/src/lib/post-p17-intake-file-inspection.behavior.ts
@@ -523,7 +530,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/rfi-complete-package.ts
 - artifacts/api-server/src/lib/rfi-register-export.ts
 - artifacts/api-server/src/lib/rfi-standard-exports.ts
+- artifacts/api-server/src/lib/runtime-resilience.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
+- artifacts/api-server/src/lib/scoped-briefing-cache.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts
 - artifacts/api-server/src/lib/sharepoint-credential-validator.behavior.ts
 - artifacts/api-server/src/lib/sharepoint-credential-validator.ts

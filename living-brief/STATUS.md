@@ -1,5 +1,14 @@
 # STATUS.md - Current Accepted Platform State
 
+## 120-build stabilization current authority — Block 20 performance and resilience — 2026-09-20
+
+- Builds 096–100 preserve the existing eight-second Windows application-readiness requirement and add release-gated API p95, browser-asset, Lens-payload, and report-generation budgets.
+- Dashboard briefing work now uses a bounded 30-second cache keyed to the authenticated user and exact project membership scope, with concurrent same-scope requests deduplicated. The former one-hour user-only cache is removed.
+- Every API request receives a safe correlation ID and emits a redacted structured completion record without query strings, bodies, credentials, cookies, authorization headers, or customer content.
+- Recovery policy retries only reads and unacknowledged idempotent writes, resumes acknowledged work without duplicate mutation, and fails closed for non-idempotent partial writes and invalid sessions. Permanent stale-asset and session-continuity tests remain in the aggregate gate.
+- Build 100 is the publication boundary. Production remains accepted at P36 Build 090 until the exact clean candidate is pushed, published through the established Replit procedure, its immutable live identity is confirmed, and full authenticated visible-Chrome standard/cold-start/multi-tab/resume/performance smoke passes.
+- No database schema, customer data, provider configuration, Lens Next Native source, installer, or package changes are part of this block; focused Navisworks smoke is therefore not required.
+
 ## 120-build stabilization current authority — Block 19 AI assistance governance — 2026-09-20
 
 - Builds 091–095 inventory all 45 provider-generation call sites and make the tracked inventory a normal pre-push gate. Direct provider clients outside the approved usage/control-plane modules fail the gate.

@@ -33088,6 +33088,99 @@
         "scripts/check-current-state-contract.mjs"
       ],
       "reviewedChangeSha256": "4df9b4d405d41afd7bbfdb5f73cfd298e0073e08aaf596d3ae09af64814a421e"
+    },
+    {
+      "taskId": "bimlog-stabilization-block20-performance-resilience-20260920",
+      "reviewedThroughCommit": "9a6437a87d2816cb96f72449747582b80fa262b1",
+      "reviewedAt": "2026-09-20T04:30:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine or cross-product authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push, ten-build publication, visible-Chrome, Replit Shell, and no-Replit-Agents workflow remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The normal pre-push gate now enforces performance budgets, safe diagnostics, cache coherence, session continuity, stale-asset recovery, and exact-artifact load acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change; the block improves reliability and diagnosability."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated structural inventory now includes Block 20 performance, cache, diagnostics, resilience, and acceptance modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, packages, and supported-product identity are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report layout and rendering are unchanged; only the existing generation-time budget is governed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, version, or applicability decision changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Builds 096–100 and the required Build 100 publication and authenticated Chrome acceptance boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The active program loop now records the Build 100 publication boundary and prohibits starting Build 101 before live acceptance closes."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five tracked build evidence records and the permanent gate carry the implementation audit evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/block20-build096-performance-budget.behavior.ts",
+        "artifacts/api-server/src/lib/block20-build097-cache-coherence.behavior.ts",
+        "artifacts/api-server/src/lib/block20-build098-request-diagnostics.behavior.ts",
+        "artifacts/api-server/src/lib/block20-build099-runtime-resilience.behavior.ts",
+        "artifacts/api-server/src/lib/block20-build100-release-acceptance.behavior.ts",
+        "artifacts/api-server/src/lib/performance-budget.ts",
+        "artifacts/api-server/src/lib/runtime-resilience.ts",
+        "artifacts/api-server/src/lib/scoped-briefing-cache.ts",
+        "artifacts/api-server/src/middlewares/request-diagnostics.ts",
+        "artifacts/api-server/src/routes/dashboard_briefing.ts",
+        "evidence/stabilization-program-20260919/BUILD_096_PERFORMANCE_BUDGETS.md",
+        "evidence/stabilization-program-20260919/BUILD_097_RUNTIME_PERFORMANCE.md",
+        "evidence/stabilization-program-20260919/BUILD_098_OBSERVABILITY.md",
+        "evidence/stabilization-program-20260919/BUILD_099_RESILIENCE.md",
+        "evidence/stabilization-program-20260919/BUILD_100_PERFORMANCE_RESILIENCE_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/check-block20-performance-budgets.mjs",
+        "scripts/check-current-state-contract.mjs"
+      ],
+      "reviewedChangeSha256": "94fbe1ec91c6e946cb0e90feac1f422cd38da61f15f22d4950bf98780a1c908e"
     }
   ]
 }
