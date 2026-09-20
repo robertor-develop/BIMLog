@@ -2968,3 +2968,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Build 070 focused package correction: fail closed on stale P34 package text/guards, align current package files to P35, and repeat core plus Native 2021/2025 integrity/package-only smoke with no installation.
 - [x] Reconcile Block 13 Platform, Status, Open Loop, evidence ledger, and generated Living Brief state against the exact Build 065 implementation commit.
 - [x] Bind the Block 13 Platform authority to its generator source and reseal the generated Living Brief state before the final clean gate.
+- [x] Stop the first Build 070 provider publication before promotion when its real preview proposed removing three populated task-lifecycle columns and one check; production remained unchanged.
+- [x] Restore the Build 057 task-lifecycle fields in the authoritative Drizzle schema and extend publication correspondence to every column and check constraint.
+- [ ] Repeat the exact clean gate and provider preview on the corrective Build 070 head; publish only when the preview contains no destructive task-lifecycle change, then complete authenticated live Lens Next acceptance.

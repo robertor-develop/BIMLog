@@ -32222,6 +32222,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b3c8217371b3e1ba148b5581fb4d3431603387fe30ef9ba82f017720ec94545f"
+    },
+    {
+      "taskId": "bimlog-stabilization-block14-publication-schema-correction-20260919",
+      "reviewedThroughCommit": "922b6d2b85394a67a84e40942a57caad03e92733",
+      "reviewedAt": "2026-09-19T20:18:49.463Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction changes no ecosystem ownership or permanent product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved cadence and existing release authority remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Publication proof now fails closed on column and check-constraint drift exposed by the real provider preview."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product strategy, market direction, or roadmap claim changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform authority now binds Build 057 task-lifecycle columns and checks across startup migration, Drizzle schema, and publication receipts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native source, installers, package identity, and field-acceptance boundaries are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report rendering or design-system authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or certification interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the safely cancelled provider preview, exact root cause, correction, and pending repeated release gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The corrective exact-head gate, provider preview, publication, and authenticated smoke remain explicitly open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Build 070 evidence report preserves the provider finding and corrective proof without rewriting prior audit history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9c21df56fa9e19706b2729df99972816e771b31695b0fed9764297ddff520b88"
     }
   ]
 }
