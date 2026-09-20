@@ -48,7 +48,7 @@ const assertions: Array<[string, RegExp]> = [
   ["CSV action is audited", /eventType: "admin_exported"/],
   ["intake persists a notification outbox before delivery", /submission_notification_outbox_created.*return \{ status: 201, row/s],
   ["notification failure cannot roll back canonical intake", /notificationState = "retry-required".*canonical intake remains durable/s],
-  ["reviewer notification opens the real feedback tab", /actionUrl: `\/admin\?tab=feedback&feedback=/],
+  ["reviewer notification opens the canonical feedback administration route", /actionUrl: `\/admin\/feedback\?feedback=/],
   ["admin queue projects evidence disposition", /packageState: counts\.total === 0.*awaiting-scan/s],
   ["admin package detail exposes sanitized evidence state", /\/feedback\/admin\/:id\/detail.*scannerAdapter.*scanState/s],
   ["customer snapshot downloads recheck reporter authority", /package-snapshot\.pdf.*accessible\(id,user\).*sendPackageSnapshot/s],

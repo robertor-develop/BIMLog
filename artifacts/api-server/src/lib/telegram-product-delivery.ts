@@ -4,6 +4,7 @@ import { storage } from "./storage-adapter";
 import { signToken } from "../middlewares/auth";
 import { decryptEvidence, getTelegramProductConfig, hmacValue, TelegramProductError, type TelegramLanguage } from "./telegram-product";
 import { TELEGRAM_DELIVERY_ARTIFACTS, type DeliveryArtifactType } from "./telegram-delivery-artifacts";
+import { parseJsonWithOperationalEvidence } from "./operational-failure";
 
 export type DeliveryChannel = "telegram" | "email";
 export type { DeliveryArtifactType } from "./telegram-delivery-artifacts";
@@ -436,7 +437,7 @@ async function sendProvider(row:DeliveryRow,artifact:Artifact,transport:Provider
     if(linkUrl){const form=new URLSearchParams({chat_id:chat.chatId,text:row.language==="es"?`Tu archivo supera el limite directo. Enlace BIMLog seguro y temporal: ${linkUrl}`:`Your file exceeds the direct limit. Secure temporary BIMLog link: ${linkUrl}`});body=form;}
     else{const form=new FormData();const bytes=new Uint8Array(artifact.buffer.length);bytes.set(artifact.buffer);form.set("chat_id",chat.chatId);form.set("caption",row.language==="es"?`Entrega BIMLog ${row.id}`:`BIMLog delivery ${row.id}`);form.set("document",new Blob([bytes],{type:artifact.contentType}),artifact.fileName);body=form;}
     const response=await transport(`${endpoint}/bot${config.botToken}/${linkUrl?"sendMessage":"sendDocument"}`,{method:"POST",body,signal});
-    const json=await response.json().catch(()=>null) as any;
+    const json=await parseJsonWithOperationalEvidence(response,"TELEGRAM_DELIVERY_RESPONSE_INVALID") as any;
     if(!response.ok||json?.ok!==true) throw new TelegramProductError(502,"PROVIDER_REJECTED","Telegram rejected the delivery.");
     const id=json?.result?.message_id; if(id==null) throw new TelegramProductError(502,"PROVIDER_REJECTED","Telegram returned no acknowledgement ID.");
     return `telegram:${String(id)}`;

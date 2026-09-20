@@ -5,6 +5,7 @@ import { feedbackAuditEventsTable, feedbackItemsTable } from "../../../../lib/db
 import { FEEDBACK_RELEASE } from "./feedback-evidence-contract";
 import { buildFeedbackPackageFromAuthority } from "./feedback-package-source";
 import { storage } from "./storage-adapter";
+import { cleanupWithOperationalEvidence } from "./operational-failure";
 
 const DEFAULT_INTERVAL_MS = 30_000;
 const DEFAULT_BATCH_SIZE = 10;
@@ -63,10 +64,19 @@ async function snapshotOne(candidate: Candidate, visibility: "customer" | "inter
     if (!inserted) { await storage.delete(manifestPath); await storage.delete(pdfPath); await storage.delete(docxPath); await storage.delete(workbookPath); }
     return inserted;
   } catch (error) {
-    try { await storage.delete(manifestPath); } catch {}
-    if (pdfPath) try { await storage.delete(pdfPath); } catch {}
-    if (docxPath) try { await storage.delete(docxPath); } catch {}
-    if (workbookPath) try { await storage.delete(workbookPath); } catch {}
+    await cleanupWithOperationalEvidence(() => storage.delete(manifestPath), "FEEDBACK_PACKAGE_MANIFEST_CLEANUP_FAILED");
+    if (pdfPath) {
+      const failedPdfPath = pdfPath;
+      await cleanupWithOperationalEvidence(() => storage.delete(failedPdfPath), "FEEDBACK_PACKAGE_PDF_CLEANUP_FAILED");
+    }
+    if (docxPath) {
+      const failedDocxPath = docxPath;
+      await cleanupWithOperationalEvidence(() => storage.delete(failedDocxPath), "FEEDBACK_PACKAGE_DOCX_CLEANUP_FAILED");
+    }
+    if (workbookPath) {
+      const failedWorkbookPath = workbookPath;
+      await cleanupWithOperationalEvidence(() => storage.delete(failedWorkbookPath), "FEEDBACK_PACKAGE_WORKBOOK_CLEANUP_FAILED");
+    }
     throw error;
   }
 }
@@ -90,7 +100,10 @@ export async function reconcileFeedbackPackageSnapshotsOnce(limit = DEFAULT_BATC
       failed += 1;
       console.error("[feedback] package snapshot deferred", error instanceof Error ? error.name : "unknown");
     } finally {
-      if (locked) try { await client.query("SELECT pg_advisory_unlock(hashtextextended($1,0))", [`feedback-package:${candidate.id}`]); } catch {}
+      if (locked) await cleanupWithOperationalEvidence(
+        () => client.query("SELECT pg_advisory_unlock(hashtextextended($1,0))", [`feedback-package:${candidate.id}`]),
+        "FEEDBACK_PACKAGE_UNLOCK_FAILED",
+      );
       client.release();
     }
   }

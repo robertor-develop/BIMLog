@@ -23,6 +23,7 @@ import { LensNextPublishError, parseLensNextPublishRequest, publishLensNextActio
 import { LensNextLocalUploadError, lensNextNavigationIdentity, rebindLegacyNavigationServerIdentity, sameLensNextAuthoritativeLineage, validateAndRebindLocalVisualState, validatePersistedLensNextVisualState } from "../lib/lens-next-local-upload";
 import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-telemetry";
 import { storage } from "../lib/storage-adapter";
+import { reportOperationalFailure } from "../lib/operational-failure";
 import { LENS_REFERENCE_MAX_BYTES, validateLensReferenceFile } from "../lib/lens-next-reference-attachment";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
@@ -813,7 +814,8 @@ router.post("/projects/:projectId/clash-reports/lens-next/issues/create",
       trace("PASS", { serverId: result.serverId, displayId: result.displayId });
       res.status(201).json({ success: true, contractVersion: "lens-next-create.v1", created: true, result });
     } catch (error) {
-      try { console.error(serializeLensNextCreateFailure({ error, correlationId, projectId, stage })); } catch {}
+      try { console.error(serializeLensNextCreateFailure({ error, correlationId, projectId, stage })); }
+      catch { reportOperationalFailure("LENS_NEXT_CREATE_FAILURE_SERIALIZATION_FAILED"); }
       if (transactionStarted && !transactionCommitted) {
         stage = "transaction_rollback";
         trace("PASS");

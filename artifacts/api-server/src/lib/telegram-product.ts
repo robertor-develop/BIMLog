@@ -10,6 +10,7 @@ import {
 } from "./ai-control-plane";
 import { TelegramProviderBrokerError, executeTelegramAssistantBroker, executeTelegramDeliveryIntentBroker } from "./telegram-product-provider-broker";
 import { cancelDeliveryRequest, confirmDeliveryRequest, createDeliveryRequest, executeDeliveryRequest, listDeliveryRequests } from "./telegram-product-delivery";
+import { parseJsonWithOperationalEvidence } from "./operational-failure";
 
 const TOKEN_BYTES = 32;
 const TOKEN_TTL_MS = 10 * 60 * 1000;
@@ -1446,7 +1447,7 @@ export async function sendTelegramReply(reply: TelegramReply | null): Promise<st
     }
     throw new TelegramProductError(502, "TELEGRAM_SEND_FAILED", `Telegram sendMessage failed with status ${response.status}.`);
   }
-  const body = await response.json().catch(() => null) as { ok?: boolean; result?: { message_id?: number | string } } | null;
+  const body = await parseJsonWithOperationalEvidence(response, "TELEGRAM_TEXT_RESPONSE_INVALID") as { ok?: boolean; result?: { message_id?: number | string } } | null;
   const messageId = body?.ok === true && body.result?.message_id != null ? String(body.result.message_id) : "";
   if (!messageId) {
     if (reply.outboundMessageId) {
@@ -1497,7 +1498,7 @@ export async function sendVerifiedTelegramDocument(
   form.set("chat_id", chat.telegramChatId); form.set("caption", String(document.caption || "BIMLog feedback document").replace(/[\u0000-\u001f\u007f]/g, " ").slice(0, 900)); form.set("document", new Blob([bytes], { type: document.contentType }), fileName);
   const endpoint = (process.env.TELEGRAM_PRODUCT_TELEGRAM_API_BASE_URL || BOT_API_BASE).replace(/\/$/, "");
   const response = await transport(`${endpoint}/bot${config.botToken}/sendDocument`, { method: "POST", body: form, signal: AbortSignal.timeout(Math.max(1000, Number(process.env.BIMLOG_FEEDBACK_TELEGRAM_TIMEOUT_MS || 15000))) });
-  const payload = await response.json().catch(() => null) as { ok?: boolean; result?: { message_id?: string | number } } | null;
+  const payload = await parseJsonWithOperationalEvidence(response, "TELEGRAM_DOCUMENT_RESPONSE_INVALID") as { ok?: boolean; result?: { message_id?: string | number } } | null;
   const messageId = payload?.ok === true && payload.result?.message_id != null ? String(payload.result.message_id) : "";
   if (!response.ok || !messageId) throw new TelegramProductError(502, "TELEGRAM_DOCUMENT_SEND_FAILED", "Telegram did not acknowledge the feedback document.");
   return `telegram:${messageId}`;
