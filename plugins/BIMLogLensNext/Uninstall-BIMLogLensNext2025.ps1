@@ -14,4 +14,4 @@ if(-not(Test-Path -LiteralPath $target)){Write-Host 'Lens Next 2025 is not insta
 $removed="$target.removed-$(Get-Date -Format 'yyyyMMdd-HHmmss')"
 Move-Item -LiteralPath $target -Destination $removed
 Write-Host "UNINSTALL PASS - recoverable copy: $removed" -ForegroundColor Green
-Write-Host 'Original BIMLog Lens bundle was not changed.' -ForegroundColor Green
+Write-Host 'Verified Pulse-only BIMLog.bundle remains installed; Original Lens is not restored.' -ForegroundColor Green

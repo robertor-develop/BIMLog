@@ -5,6 +5,7 @@
 - [x] Complete Builds 116–118: exact manifest, zero-mutation database plan, governed provider path, and authenticated live-smoke contract.
 - [x] Build 119 closed from connected Navisworks 2021 proof plus dual-year package and installer proof. Roberto assigned physical Navisworks 2025 confirmation to Ruben as post-closure evidence.
 - [ ] [ACTIVE] Complete Build 120 exact push, Replit publication without Replit Agents, immutable live identity, full authenticated visible-Chrome acceptance, and full-system audit.
+- [x] Correct the durable open-loop classifier so this current Build 120 authority cannot be mislabeled as a superseded historical publication marker.
 
 ## Current open-loop authority — Block 23 frozen candidate — 2026-09-20
 

@@ -15,7 +15,7 @@ Model:
 [ ] A BIMLog Issue is created with its Visual Package and screenshot, without creating a local Saved Viewpoint.
 [ ] Open Working View reconstructs the selected BIMLog visual state.
 [ ] Status/history publication works and produces an audit record.
-[ ] Original BIMLog Lens is absent from Autodesk load paths; only the correct Lens Next year bundle is loadable.
+[ ] Original BIMLog Lens is absent from Autodesk load paths; BIMLog Pulse and only the correct Lens Next year bundle are loadable.
 [ ] No model geometry was edited or saved by Lens Next.
 
 Result: PASS / FAIL

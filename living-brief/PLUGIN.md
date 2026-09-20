@@ -1,5 +1,9 @@
 # PLUGIN.md — BIMLog Lens Navisworks Plugin Reference
 
+## Build 119 accepted installation topology — 2026-09-20
+
+The accepted Navisworks topology is one Pulse-only `BIMLog.bundle` plus the matching-year Lens Next bundle. Original/Legacy BIMLog Lens is retired and must not be restored by install, upgrade, rollback, or uninstall messaging. Connected Navisworks 2021 execution and the complete dependency tree passed; Ruben's physical Navisworks 2025 confirmation remains post-closure field evidence and is not an automated-field-pass claim.
+
 ## Current supported product and release boundary — 2026-09-19
 
 - **Lens Next is the sole supported BIMLog Lens product.** Original/Legacy Lens is preserved only as historical migration evidence and must not be presented, installed, loaded, or maintained as a parallel product.

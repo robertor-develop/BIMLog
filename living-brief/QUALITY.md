@@ -576,3 +576,5 @@ Additional enforcement:
 - New installations must expose Pulse and Lens Next, never Original/Legacy Lens.
 - Installer acceptance must verify the Pulse-only assembly contains the Pulse command and contains no legacy Lens command/plugin classes, verify the complete Lens Next WebView2 dependency tree, preserve rollback evidence, and leave exactly the two intended active BIMLog bundle roots.
 - Package-only or simulated 2025 proof must never be reported as a connected Navisworks 2025 field pass.
+- Build 119 closes on verified connected 2021 execution plus dual-year package/installer proof. Ruben owns the deferred physical 2025 confirmation; that post-closure evidence must not be restated as an automated 2025 field pass.
+- The Build 120 regression contract must keep installer/readme/uninstaller wording aligned with the active topology: Pulse remains, Original Lens is retired, and Lens Next is the only supported Lens product.

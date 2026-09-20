@@ -31,6 +31,7 @@ for (let index = 0; index < lines.length; index += 1) {
   const match = line.match(/^\s*- \[ \]\s+(.*)$/);
   if (!match) continue;
   const statement = match[1].trim();
+  const isCurrentAuthority = /^Current open-loop authority\b/i.test(heading);
   const id = crypto.createHash("sha256").update(`${heading}\n${statement}`).digest("hex").slice(0, 16);
   let classification = "ACTIVE";
   let evidence = [`OPEN_LOOP.md:${index + 1}`, heading];
@@ -44,7 +45,7 @@ for (let index = 0; index < lines.length; index += 1) {
   } else if (acceptedLimitationPatterns.some((pattern) => pattern.test(statement))) {
     classification = "ACCEPTED_LIMITATION";
     evidence = [`OPEN_LOOP.md:${index + 1}`, "Preserved fail-closed product boundary"];
-  } else if (historicalPublicationPattern.test(statement) && !residualAcceptancePattern.test(statement)) {
+  } else if (!isCurrentAuthority && historicalPublicationPattern.test(statement) && !residualAcceptancePattern.test(statement)) {
     classification = "SUPERSEDED";
     evidence = [
       "living-brief/STATUS.md current authority",

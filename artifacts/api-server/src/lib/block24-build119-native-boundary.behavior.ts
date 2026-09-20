@@ -7,8 +7,14 @@ assert.equal(requiresFocusedNavisworksSmoke(["living-brief/STATUS.md", "evidence
 assert.equal(requiresFocusedNavisworksSmoke(["plugins/BIMLogLensNext/PackageContents.xml"]), true);
 assert.equal(requiresFocusedNavisworksSmoke(["plugins/BIMLogLensNext/Native2025/BIMLogLensNext.Native2025.csproj"]), true);
 const evidence = fs.readFileSync(path.resolve(process.cwd(), "../../evidence/stabilization-program-20260919/BUILD_119_NATIVE_BOUNDARY.md"), "utf8");
+const fieldReadme = fs.readFileSync(path.resolve(process.cwd(), "../../plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt"), "utf8");
+const dispositionSource = fs.readFileSync(path.resolve(process.cwd(), "../../scripts/open-loop-dispositions.mjs"), "utf8");
 assert.match(evidence, /PASS_WITH_OWNER_ACCEPTED_2025_FIELD_CONFIRMATION_DEFERRED/);
 assert.match(evidence, /-2146959355/);
 assert.match(evidence, /assigned the later physical 2025 confirmation to Ruben/);
 assert.match(evidence, /does not block Build 120/);
+assert.match(fieldReadme, /Pulse-only BIMLog\.bundle/);
+assert.match(fieldReadme, /retires the shared Original BIMLog Lens loader/);
+assert.match(fieldReadme, /post-closure evidence/);
+assert.match(dispositionSource, /!isCurrentAuthority/);
 console.log("block24 build119 boundary contract: PASS; 2021 live and dual-year installer proof accepted, physical 2025 confirmation deferred");

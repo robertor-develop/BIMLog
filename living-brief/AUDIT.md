@@ -1,5 +1,9 @@
 # AUDIT.md - Historical Evidence Register
 
+## Build 120 full-system audit — 2026-09-20
+
+The repository-wide census and semantic findings are recorded in `evidence/stabilization-program-20260919/POST_120_FULL_SITE_AUDIT_20260920.md`; the resulting 100-build follow-on program is recorded in `POST_120_EXECUTION_PLAN_100_BUILDS.md`. The scan covers all tracked text through deterministic tooling and focused semantic review, and does not misrepresent automated ingestion as a manual human reading of every line.
+
 Status: Active append-only historical record
 
 Every finding and production row count below is scoped to its stated observation date. It is not a

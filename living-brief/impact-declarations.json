@@ -33450,26 +33450,33 @@
         "evidence/stabilization-program-20260919/BUILD_119_NATIVE_BOUNDARY.md",
         "evidence/stabilization-program-20260919/BUILD_120_FINAL_CLOSURE.md",
         "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "living-brief/AUDIT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
         "living-brief/QUALITY.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
         "package.json",
         "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
         "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
+        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
         "plugins/BIMLogLensNext/Install-BIMLogLensNext.ps1",
+        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
         "plugins/BIMLogLensNext/Test-LensNextInstallerUpgrade.ps1",
+        "plugins/BIMLogLensNext/Uninstall-BIMLogLensNext2021.ps1",
+        "plugins/BIMLogLensNext/Uninstall-BIMLogLensNext2025.ps1",
         "plugins/BIMLogLensNext/pulse/2021/BIMLogPulse2021.bundle/Contents/2021/BIMLogNavisPlugin.dll",
         "plugins/BIMLogLensNext/pulse/2021/BIMLogPulse2021.bundle/Contents/2021/BIMLogNavisPlugin.pdb",
         "plugins/BIMLogLensNext/pulse/2021/BIMLogPulse2021.bundle/PackageContents.xml",
         "plugins/BIMLogLensNext/pulse/2025/BIMLogPulse2025.bundle/Contents/2025/BIMLogNavisPlugin.dll",
         "plugins/BIMLogLensNext/pulse/2025/BIMLogPulse2025.bundle/Contents/2025/BIMLogNavisPlugin.pdb",
         "plugins/BIMLogLensNext/pulse/2025/BIMLogPulse2025.bundle/PackageContents.xml",
-        "scripts/check-current-state-contract.mjs"
+        "scripts/check-current-state-contract.mjs",
+        "scripts/open-loop-dispositions.mjs"
       ],
-      "reviewedChangeSha256": "c57c074d34c7d2c1b85beba9d0f551ba70c5d9d60543dad25345af839bb8bde2"
+      "reviewedChangeSha256": "73c5ea3b31491e28cf5deb9c294cd5bc929cf4fe527dc03e2edf2c9efd7813de"
     }
   ]
 }
