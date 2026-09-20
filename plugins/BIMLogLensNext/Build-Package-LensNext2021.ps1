@@ -1,12 +1,16 @@
 [CmdletBinding()]
 param([string]$Version)
 $ErrorActionPreference = 'Stop'
-$releaseIdentity = Get-Content -LiteralPath (Join-Path $PSScriptRoot '..\..\contracts\release-identity.json') -Raw | ConvertFrom-Json
+$releaseIdentityPath = Join-Path $PSScriptRoot 'contracts\release-identity.json'
+if (-not (Test-Path -LiteralPath $releaseIdentityPath -PathType Leaf)) { throw 'STOP: staged release identity is missing.' }
+$releaseIdentity = Get-Content -LiteralPath $releaseIdentityPath -Raw | ConvertFrom-Json
 $binaryVersion = $releaseIdentity.binaryVersion
 if (-not $Version) { $Version = $releaseIdentity.label }
 if ($Version -ne $releaseIdentity.label) { throw 'STOP: stale or unexpected release requested.' }
 $year = 2021
 $sourceRoot = [IO.Path]::GetFullPath($PSScriptRoot).TrimEnd('\')
+$requiredBuildRoot = 'H:\BIMLogPlugin2021'
+if (-not ($sourceRoot.StartsWith($requiredBuildRoot + '\',[StringComparison]::OrdinalIgnoreCase))) { throw "STOP: Navisworks 2021 source/build/package root must be under $requiredBuildRoot." }
 $canonicalRoot = $sourceRoot
 function Assert-CanonicalPath([string]$Path) {
   $resolved = [IO.Path]::GetFullPath($Path)
