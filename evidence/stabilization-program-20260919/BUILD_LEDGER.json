@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the Block 17 / Build 085 push candidate. Production remains the accepted P36 Build 080 publication until the Build 090 publication milestone passes its release and authenticated smoke gates.",
+  "headBinding": "The Git commit containing this ledger is the Block 18 / Build 090 publication candidate. Production remains the accepted P36 Build 080 publication until this exact candidate passes push, Replit publication, and authenticated visible-Chrome M09 smoke.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 85,
+    "completedBuilds": 90,
     "totalBuilds": 120,
-    "remainingBuilds": 35,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 86,
-    "nextPushAfterBuild": 90,
-    "nextPublicationAfterBuild": 90,
+    "remainingBuilds": 30,
+    "currentUnpublishedBuilds": 0,
+    "nextBuild": 91,
+    "nextPushAfterBuild": 95,
+    "nextPublicationAfterBuild": 100,
     "blocker": null
   },
   "blocks": [
@@ -265,6 +265,20 @@
         { "build": 83, "status": "PASS", "evidence": "BUILD_083_SHARED_PDF_FIDELITY.md" },
         { "build": 84, "status": "PASS", "evidence": "BUILD_084_PORTABLE_EXPORTS.md" },
         { "build": 85, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_085_OWNER_HANDOVER_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 18,
+      "buildRange": "086-090",
+      "status": "PASS_LOCAL_PENDING_PUSH_PUBLICATION",
+      "publicationRequired": true,
+      "smoke": "Publish Build 090 and run authenticated visible-Chrome files/report/export plus controlled connector reconciliation smoke. Native and installers are unchanged, so no Navisworks smoke is required.",
+      "builds": [
+        { "build": 86, "status": "PASS", "evidence": "BUILD_086_PROCORE_RECONCILIATION.md" },
+        { "build": 87, "status": "PASS", "evidence": "BUILD_087_SHAREPOINT_REFERENCE_AUTHORITY.md" },
+        { "build": 88, "status": "PASS", "evidence": "BUILD_088_OUTLOOK_CUSTODY.md" },
+        { "build": 89, "status": "PASS", "evidence": "BUILD_089_CONNECTOR_MATRIX.md" },
+        { "build": 90, "status": "PASS_LOCAL_PENDING_PUSH_PUBLICATION", "evidence": "BUILD_090_INTEGRATION_RECOVERY.md" }
       ]
     }
   ]

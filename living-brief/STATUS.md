@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## 120-build stabilization current authority — Block 18 integration publication candidate — 2026-09-20
+
+- Builds 086–090 verify controlled Procore import/return reconciliation, canonical SharePoint references, Outlook message/attachment custody, truthful connector availability, and idempotent outage recovery without activating any provider.
+- Exact replays remain idempotent; cursor stalls, divergent payloads, cross-tenant mappings, duplicate attachment identities, stale/different acknowledgements, expired credentials, and revoked credentials fail safely and truthfully.
+- Block 18 changes no schema, customer data, provider configuration, Lens Next Native source, installer, package, or accepted live release. Build 090 is the required push/publication boundary; M09 requires exact live identity plus authenticated visible-Chrome files/report/export and controlled connector reconciliation smoke.
+- No Navisworks smoke is required because Native and installers are unchanged.
+
 ## 120-build stabilization current authority — Block 17 document custody and owner handover — 2026-09-20
 
 - `v1.05.N18-P36` is the accepted live Platform release from Build 080; its GitHub push, Replit publication, exact live identity and authenticated Chrome smoke passed.

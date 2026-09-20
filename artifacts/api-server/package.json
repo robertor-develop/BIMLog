@@ -121,6 +121,8 @@
     "test:block18-build087": "tsx ./src/lib/block18-build087-sharepoint-reference.behavior.ts && pnpm run test:coordination-delivery-build2 && pnpm run test:coordination-delivery-build3",
     "test:block18-build088": "tsx ./src/lib/block18-build088-outlook-custody.behavior.ts && pnpm run test:coordination-delivery-build4 && pnpm run test:coordination-delivery-build5",
     "test:block18-build089": "tsx ./src/lib/block18-build089-connector-matrix.behavior.ts && pnpm run test:provider-governance && pnpm run test:coordination-hub-credential-lifecycle",
+    "test:block18-build090": "tsx ./src/lib/block18-build090-integration-recovery.behavior.ts",
+    "test:block18-integration-acceptance": "pnpm run test:block18-build086 && pnpm run test:block18-build087 && pnpm run test:block18-build088 && pnpm run test:block18-build089 && pnpm run test:block18-build090",
     "test:unified-action-contract": "tsx ./src/lib/unified-action-contract.behavior.ts",
     "test:connector-foundation": "tsx ./src/lib/connector-foundation.behavior.ts",
     "test:coordination-hub-service": "tsx ./src/lib/coordination-hub-service.behavior.ts",
