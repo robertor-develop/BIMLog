@@ -12,19 +12,19 @@ function assert(condition, message) {
 
 function validate(snapshot) {
   const { release, lens, ledger, status, openLoop, platform, plugin, quality, migration, meeting, viewpoints, provider } = snapshot;
-  assert(release.label === "v1.05.N18-P35", "release identity must match the Build 070 P35 candidate");
-  assert(release.binaryVersion === "1.5.18.35", "binary identity must match P35");
+  assert(release.label === "v1.05.N18-P36", "release identity must match the Build 080 P36 candidate");
+  assert(release.binaryVersion === "1.5.18.36", "binary identity must match P36");
   assert(lens.supportedProduct === "Lens Next" && lens.supportedProductCount === 1, "Lens Next must be the sole supported Lens product");
   assert(lens.legacyStatus === "migration-only", "Legacy Lens must be migration-only");
   assert(lens.customerFacingLegacyProduct === false && lens.parallelInstallationSupported === false && lens.legacyLoaderAllowedInAcceptedSetup === false, "Legacy Lens cannot remain customer-facing, parallel-installed, or loadable");
   assert(lens.currentPlatformVersion === release.label, "Lens product and release identities must agree");
-  assert(ledger.status.completedBuilds >= 66 && ledger.status.completedBuilds <= 70, "Build ledger must track stabilization Block 14");
+  assert(ledger.status.completedBuilds === 80, "Build ledger must track completed stabilization Build 080");
   assert(ledger.status.remainingBuilds === 120 - ledger.status.completedBuilds, "Build ledger remaining count must reconcile");
-  assert(ledger.status.currentUnpublishedBuilds === ledger.status.completedBuilds - 60, "Block 14 unpublished count must start after the accepted Build 060 publication");
+  assert(ledger.status.currentUnpublishedBuilds === 10, "Build 080 must close the current ten-build publication batch");
   assert(ledger.status.nextBuild === ledger.status.completedBuilds + 1, "Build ledger must advance exactly one build");
-  const expectedNextPush = 70;
+  const expectedNextPush = 80;
   assert(ledger.status.nextPushAfterBuild === expectedNextPush, `Build ledger next-push cadence must advance to Build ${expectedNextPush}`);
-  assert(ledger.status.nextPublicationAfterBuild === 70, "Build ledger next-publication cadence must advance to Build 070");
+  assert(ledger.status.nextPublicationAfterBuild === 80, "Build ledger next-publication cadence must advance to Build 080");
   for (const document of [status, platform, plugin]) assert(document.includes(release.label), "current release authorities must contain the exact release label");
   assert(quality.includes("Evidence and Release Quality Gate"), "QUALITY must retain the release-quality authority");
   assert(status.includes("Replit publication receipt `b8718795`"), "STATUS must retain the accepted P34 publication receipt");

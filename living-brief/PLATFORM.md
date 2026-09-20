@@ -197,6 +197,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block13-build063-evidence-notifications.behavior.ts
 - artifacts/api-server/src/lib/block13-build064-register-export.behavior.ts
 - artifacts/api-server/src/lib/block13-build065-coordination-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block16-build076-feedback-durability.behavior.ts
+- artifacts/api-server/src/lib/block16-build077-feedback-routing.behavior.ts
+- artifacts/api-server/src/lib/block16-build078-notification-determinism.behavior.ts
+- artifacts/api-server/src/lib/block16-build079-delivery-contracts.behavior.ts
+- artifacts/api-server/src/lib/block16-build080-feedback-notification-acceptance.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
@@ -432,6 +437,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.behavior.ts
 - artifacts/api-server/src/lib/lens-next-create-failure-telemetry.ts
 - artifacts/api-server/src/lib/lens-next-create.behavior.ts
+- artifacts/api-server/src/lib/lens-next-legacy-migration.behavior.ts
 - artifacts/api-server/src/lib/lens-next-local-upload.behavior.ts
 - artifacts/api-server/src/lib/lens-next-local-upload.ts
 - artifacts/api-server/src/lib/lens-next-model-binding.behavior.ts
@@ -925,3 +931,9 @@ It changes only when the code structure or curated architectural facts change.
 - `job_activation_tasks` lifecycle dates and predecessor identities are jointly owned by the Build 057 startup migration and the authoritative Drizzle schema. The declared contract includes `start_date`, `due_date`, `predecessor_task_ids`, and `job_activation_task_dates_chk`; provider synchronization may not remove them.
 - Publication correspondence introspects the executable Drizzle schema and compares every table, explicit index, column, and table-qualified check constraint against both provider databases. Duplicate constraint names on different tables remain distinct, and the existing master-catalog aliases-array check is declared in both startup and Drizzle authorities. Any missing or extra column/check returns a stopped publication decision instead of a zero-change receipt.
 - The first P35 provider preview exposed the prior mismatch against 18 populated records and was cancelled before promotion. Production remained unchanged; the corrective release must pass a fresh provider preview before publication.
+
+## 120-build stabilization — Block 16 feedback and notifications
+
+- Platform candidate `v1.05.N18-P36` completes the current ten-build publication batch through Build 080 with durable feedback recovery, canonical customer/reviewer routes, deterministic preferences, governed delivery contracts, and production-safe feedback-to-resolution acceptance.
+- Replit remains the established publication provider. Publication uses Replit Shell and visible Chrome; Replit Agents are prohibited. No external email, Telegram message, or document is sent by the acceptance gate.
+- Native behavior remains N18. Shared P36 metadata was rebuilt deterministically for Navisworks 2021 and 2025 without installation; installed compatibility and absence of customer-facing Legacy Lens remain a focused post-publication scan.

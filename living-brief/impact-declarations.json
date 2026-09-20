@@ -32564,6 +32564,103 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a7136a9c45e056689a551ad4157a9dd75fee1570ad471a285ca28252de7c8d14"
+    },
+    {
+      "taskId": "bimlog-stabilization-block16-build080-release-reconciliation-20260920",
+      "reviewedThroughCommit": "b6ece710eab59b1b404d6b3472dbb8a0583ed80b",
+      "reviewedAt": "2026-09-20T04:06:39.913Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The standing five-build push and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release-quality gates cover the Block 16 acceptance and deterministic package proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Recorded the P36 feedback and notifications publication candidate and exact Replit provider path."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Recorded behaviorally unchanged N18 with deterministic P36 dual-year package metadata and pending installed scan."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report-design contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Builds 071–080 as the current P36 candidate without upgrading historical publication claims."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Push, publication, authenticated smoke and focused installed Lens scan remain open until proven."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build evidence records the release-gate findings without rewriting prior history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/block16-build080-feedback-notification-acceptance.behavior.ts",
+        "contracts/lens-product-status.json",
+        "contracts/release-identity.json",
+        "evidence/stabilization-program-20260919/BUILD_080_FEEDBACK_NOTIFICATION_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "lib/api-zod/src/release-identity.ts",
+        "living-brief/PLATFORM.md",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N18-P36.zip",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2021-v1.05.N18-P36.zip.sha256",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N18-P36.zip",
+        "plugins/BIMLogLensNext/BIMLog-Lens-Next-Navisworks2025-v1.05.N18-P36.zip.sha256",
+        "plugins/BIMLogLensNext/FIELD-ACCEPTANCE-CHECKLIST.txt",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/INSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext.ps1",
+        "plugins/BIMLogLensNext/README-ROBERTO-RUBEN.txt",
+        "plugins/BIMLogLensNext/ReleaseIdentity.g.props",
+        "plugins/BIMLogLensNext/Test-LensNextFieldAcceptanceReadiness.ps1",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2021.bat",
+        "plugins/BIMLogLensNext/UNINSTALL-BIMLOG-LENS-NEXT-2025.bat",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2021.json",
+        "plugins/BIMLogLensNext/evidence/build-package-receipt-2025.json",
+        "plugins/BIMLogLensNext/native/2021/PackageContents.xml",
+        "plugins/BIMLogLensNext/native/2025/PackageContents.xml",
+        "plugins/BIMLogLensNext/src/ReleaseIdentity.g.cs",
+        "scripts/check-current-state-contract.mjs"
+      ],
+      "reviewedChangeSha256": "3b4cfe2d8dcabe6becfe69e3726858d7b91c91181a2ae8a6aed97fef9a8c37c7"
     }
   ]
 }

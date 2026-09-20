@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the Block 14 / Build 070 P35 publication candidate; Build 060 publication and live receipts remain the accepted production chain until the exact Build 070 head passes publication and authenticated smoke.",
+  "headBinding": "The Git commit containing this ledger is the Block 16 / Build 080 P36 publication candidate. Historical accepted production receipts remain unchanged until the exact Build 080 head passes push, publication, authenticated smoke, and focused Lens Next compatibility verification.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 70,
+    "completedBuilds": 80,
     "totalBuilds": 120,
-    "remainingBuilds": 50,
+    "remainingBuilds": 40,
     "currentUnpublishedBuilds": 10,
-    "nextBuild": 71,
-    "nextPushAfterBuild": 70,
-    "nextPublicationAfterBuild": 70,
+    "nextBuild": 81,
+    "nextPushAfterBuild": 80,
+    "nextPublicationAfterBuild": 80,
     "blocker": null
   },
   "blocks": [
@@ -223,6 +223,34 @@
         { "build": 68, "status": "PASS", "evidence": "BUILD_068_LENS_NEXT_PLATFORM_BROWSER.md" },
         { "build": 69, "status": "PASS", "evidence": "BUILD_069_LENS_NEXT_WORKFLOW_INTEGRITY.md" },
         { "build": 70, "status": "CORRECTIVE_RELEASE_GATE_PENDING_AFTER_SAFE_PROVIDER_STOP", "evidence": "BUILD_070_LENS_NEXT_SOLE_PRODUCT.md" }
+      ]
+    },
+    {
+      "block": 15,
+      "buildRange": "071-075",
+      "status": "PASS_PUSHED",
+      "publicationRequired": false,
+      "smoke": "Dual-year package, controlled migration and installer-upgrade verification; no Autodesk installation or production publication.",
+      "builds": [
+        { "build": 71, "status": "PASS", "evidence": "BUILD_071_NATIVE_RELEASE_IDENTITY.md" },
+        { "build": 72, "status": "PASS", "evidence": "BUILD_072_DETERMINISTIC_DUAL_YEAR_PACKAGING.md" },
+        { "build": 73, "status": "PASS", "evidence": "BUILD_073_CONTROLLED_LEGACY_MIGRATION.md" },
+        { "build": 74, "status": "PASS", "evidence": "BUILD_074_VERIFIED_UPGRADE_INSTALLER.md" },
+        { "build": 75, "status": "PASS_PUSHED_FIELD_ACCEPTANCE_PENDING", "evidence": "BUILD_075_FIELD_ACCEPTANCE_STATUS.md" }
+      ]
+    },
+    {
+      "block": 16,
+      "buildRange": "076-080",
+      "status": "PASS_PENDING_PUSH_PUBLICATION_LIVE_VERIFICATION",
+      "publicationRequired": true,
+      "smoke": "Full authenticated visible-Chrome feedback and notification smoke after Build 080 publication; focused installed Lens Next compatibility and Legacy Lens absence scan.",
+      "builds": [
+        { "build": 76, "status": "PASS", "evidence": "BUILD_076_FEEDBACK_DURABILITY.md" },
+        { "build": 77, "status": "PASS", "evidence": "BUILD_077_FEEDBACK_ROUTE_SEMANTICS.md" },
+        { "build": 78, "status": "PASS", "evidence": "BUILD_078_NOTIFICATION_DETERMINISM.md" },
+        { "build": 79, "status": "PASS", "evidence": "BUILD_079_DOCUMENT_DELIVERY_CONTRACTS.md" },
+        { "build": 80, "status": "PASS_PENDING_PUSH_PUBLICATION_LIVE_VERIFICATION", "evidence": "BUILD_080_FEEDBACK_NOTIFICATION_ACCEPTANCE.md" }
       ]
     }
   ]

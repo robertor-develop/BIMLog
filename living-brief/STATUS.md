@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## 120-build stabilization current authority — Block 16 feedback and notifications P36 publication candidate — 2026-09-20
+
+- Builds 071–080 form the current due ten-build publication batch. Historical accepted production receipts remain unchanged until this exact candidate is published and live-verified.
+- Builds 076–080 bind durable feedback capture and recovery, separate customer and reviewer routes, deterministic notification preferences and unread state, governed email/Telegram delivery contracts, and production-safe feedback-to-resolution acceptance. No external notification was sent by the acceptance gate.
+- The candidate release identity is `v1.05.N18-P36` / `1.5.18.36`. Native behavior remains N18; shared package metadata was deterministically rebuilt for Navisworks 2021 and 2025 and passed both repeated package-only gates without Autodesk installation.
+- Build 080 remains a candidate until the exact clean head is pushed, published through the established Replit Shell path without Replit Agents, live identity is exact, authenticated visible-Chrome acceptance passes, and the focused installed Lens Next/Legacy Lens scan is recorded.
+
 ## 120-build stabilization current authority — Block 14 Lens Next P35 publication candidate — 2026-09-19
 
 - The accepted live Platform remains `v1.05.N18-P34` from exact Build 060 source `1673457735ba00c815a12ee0543592bbc62f5506` and Replit receipt `e1998027` until this candidate passes the clean gate, push, Replit publication, and authenticated production smoke.
