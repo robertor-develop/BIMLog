@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Post-120 stabilization — Block 28 source acceptance — 2026-09-20
+
+- Builds 136–140 inventory every production PDF renderer/delivery contract, add one path-safe shared download adapter, and migrate the operational-register and bilingual directory families without changing report data, layout, fingerprints, authorization, or localization.
+- Four PDFs generated through the actual Activity and Coordinator production renderers passed structure, MediaBox, text extraction, security header, filename, and every-page visual inspection in English and Spanish.
+- Build 140 is the ten-build publication boundary. The exact candidate still requires the clean pre-push gate, normal push, Replit Shell publication without Replit Agents, exact live identity, and full authenticated visible-Chrome smoke.
+- No database/schema/customer-data, Native, installer, bridge-protocol, or provider-configuration mutation is part of this block; focused Navisworks smoke is not retriggered.
+
 ## Post-120 stabilization — Block 27 source acceptance — 2026-09-20
 
 - Builds 131–135 remove 17 silent-failure occurrences across job-intake transactions and autosave, meeting-directory recovery, optional document-delivery cancellation, report-package cleanup, Telegram acknowledgement parsing, and Lens Next create-failure diagnostics.

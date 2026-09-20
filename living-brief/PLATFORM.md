@@ -526,6 +526,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/post-p17-apu-workbook-acceptance.behavior.ts
 - artifacts/api-server/src/lib/post-p17-build21-financial-invariants.behavior.ts
 - artifacts/api-server/src/lib/post-p17-intake-file-inspection.behavior.ts
+- artifacts/api-server/src/lib/post120-build137-pdf-adapter.behavior.ts
+- artifacts/api-server/src/lib/post120-build138-operational-pdf-family.behavior.ts
+- artifacts/api-server/src/lib/post120-build139-directory-pdf-family.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts

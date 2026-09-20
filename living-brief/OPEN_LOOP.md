@@ -1,10 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — post-120 Block 27 — 2026-09-20
+## Current open-loop authority — post-120 Block 28 — 2026-09-20
 
 - [x] Builds 131–135: classify and remove 17 workflow/document and export/report silent-failure occurrences, add bounded user feedback and code-only telemetry, pass negative-path tests, and complete the full clean gate.
-- [ ] [ACTIVE] Push the exact Build 135 source head normally to the stabilization branch and `master`.
-- [ ] Builds 136–140: consolidate shared PDF architecture, push Build 140, publish through Replit Shell without Replit Agents, compare representative outputs, and run full authenticated visible-Chrome smoke.
+- [x] Push the exact Build 135 source head normally to the stabilization branch and `master`.
+- [x] Builds 136–139: inventory the complete PDF surface, establish the shared safe delivery adapter, and migrate the operational-register and bilingual-directory report families.
+- [ ] [ACTIVE] Build 140: pass the exact clean gate, push normally, publish through Replit Shell without Replit Agents, verify exact live identity, and run full authenticated visible-Chrome smoke.
+- [ ] Builds 141–145: continue PDF-family convergence after Build 140 live acceptance.
 
 ## Current open-loop authority — post-120 Block 26 — 2026-09-20
 

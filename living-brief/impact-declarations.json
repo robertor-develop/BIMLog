@@ -33720,6 +33720,92 @@
         "scripts/test-post120-block26.mjs"
       ],
       "reviewedChangeSha256": "814759bee043d5eea77749058137ee51337069f49841b214b7158d8b72c5c133"
+    },
+    {
+      "taskId": "bimlog-post120-block28-shared-pdf-architecture-20260920",
+      "reviewedThroughCommit": "15598b93346e08f905100722a3c9e6bf0a4f0cde",
+      "reviewedAt": "2026-09-20T19:14:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, product boundary, or provider authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing five-build push, ten-build publication, visible-Chrome, and no-Replit-Agents procedures remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The normal pre-push gate now enforces source-derived PDF inventory, safe delivery compatibility, migrated-family contracts, extracted text, page geometry, and representative rendered artifacts."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product vision and intended customer outcomes are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the shared PDF delivery adapter and the two migrated report families."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, installer, package, bridge protocol, or supported-year behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing visual identity and layouts are preserved; this block consolidates safe delivery around them and records actual rendered comparison evidence."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, applicability, or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 136-140 and the exact push/publication/live-smoke boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 136-139 and makes Build 140 publication and live acceptance the active loop."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The source inventory, executable tests, PDFs, per-page renders, hashes, and contact sheet carry the new audit evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-block28-pdf-comparison.ts",
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
+        "evidence/stabilization-program-20260919/BUILD_140_SOURCE_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/activity-en.pdf",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/activity-en.png",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/activity-es.pdf",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/activity-es.png",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/comparison.json",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/contact-sheet.png",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/coordinator-en.pdf",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/coordinator-en.png",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/coordinator-es.pdf",
+        "evidence/stabilization-program-20260919/block28-pdf-qa/coordinator-es.png",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "361fa696eea5bef932146550b5a635e8f764eeaa29d9fbdc894a91df2900d06b"
     }
   ]
 }

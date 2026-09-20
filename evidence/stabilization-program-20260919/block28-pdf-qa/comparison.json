@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "build": 140,
+  "samples": [
+    {
+      "file": "activity-en.pdf",
+      "bytes": 2055,
+      "sha256": "eb5cc8f34d75e22ce2ea27405202c71611e7e14ff397f8ec0f23cf078afc499d",
+      "pageCount": 1,
+      "mediaBox": {
+        "width": 792,
+        "height": 612
+      },
+      "requiredText": [
+        "Activity Log",
+        "No activity events match the current filters"
+      ],
+      "headers": {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": "attachment; filename=\"Activity-Log-BLK28.pdf\"; filename*=UTF-8''Activity-Log-BLK28.pdf",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "private, no-store"
+      }
+    },
+    {
+      "file": "activity-es.pdf",
+      "bytes": 2063,
+      "sha256": "35a121e2f4001433ea1f84fc26ac4b9d7dcca0b1e45f62f9d61c6b93ae7491cd",
+      "pageCount": 1,
+      "mediaBox": {
+        "width": 792,
+        "height": 612
+      },
+      "requiredText": [
+        "Registro de Actividad",
+        "Ningún evento de actividad coincide con los filtros actuales"
+      ],
+      "headers": {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": "attachment; filename=\"Activity-Log-BLK28.pdf\"; filename*=UTF-8''Activity-Log-BLK28.pdf",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "private, no-store"
+      }
+    },
+    {
+      "file": "coordinator-en.pdf",
+      "bytes": 2131,
+      "sha256": "7717d54ef3d815adf193daab1f379c20b1068b53aaa1a811b5ef75e9c5d31225",
+      "pageCount": 1,
+      "mediaBox": {
+        "width": 792,
+        "height": 612
+      },
+      "requiredText": [
+        "Coordinator Command Center",
+        "No actions match the current filters"
+      ],
+      "headers": {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": "attachment; filename=\"Coordinator-Command-Center-BLK28.pdf\"; filename*=UTF-8''Coordinator-Command-Center-BLK28.pdf",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "private, no-store"
+      }
+    },
+    {
+      "file": "coordinator-es.pdf",
+      "bytes": 2142,
+      "sha256": "d09454be52f4a04b73a2cc2508116402f5d8ae7ffd76cd066d96578ef626749d",
+      "pageCount": 1,
+      "mediaBox": {
+        "width": 792,
+        "height": 612
+      },
+      "requiredText": [
+        "Centro de Control de Coordinación",
+        "Ninguna acción coincide con los filtros actuales"
+      ],
+      "headers": {
+        "Content-Type": "application/pdf",
+        "Content-Disposition": "attachment; filename=\"Coordinator-Command-Center-BLK28.pdf\"; filename*=UTF-8''Coordinator-Command-Center-BLK28.pdf",
+        "X-Content-Type-Options": "nosniff",
+        "Cache-Control": "private, no-store"
+      }
+    }
+  ]
+}
