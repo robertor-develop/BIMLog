@@ -10,10 +10,16 @@ export function createMigrationPreviewReceipt(source, actual) {
   const pending = {
     tables: comparison.tables.missing,
     indexes: comparison.indexes.missing,
+    columns: comparison.columns.missing,
+    columnShapes: comparison.columnShapes.missing,
+    checks: comparison.checks.missing,
   };
   const unexpected = {
     tables: comparison.tables.extra,
     indexes: comparison.indexes.extra,
+    columns: comparison.columns.extra,
+    columnShapes: comparison.columnShapes.extra,
+    checks: comparison.checks.extra,
     constraintBackedIndexes: comparison.indexes.constraintBackedExtra,
   };
   const status = comparison.exact ? "ZERO_PENDING" : "PROVIDER_PREVIEW_REQUIRED";

@@ -6,6 +6,9 @@ const source = sourceSchemaReceipt();
 const exact = createMigrationPreviewReceipt(source, {
   tables: [...source.contract.tables],
   indexes: [...source.contract.indexes],
+  columns: [...source.contract.columns],
+  columnShapes: [...source.contract.columnShapes],
+  checks: [...source.contract.checks],
 });
 assert.equal(exact.status, "ZERO_PENDING");
 assert.equal(exact.rollbackRequirement, "NO_SCHEMA_CHANGE");
@@ -14,6 +17,9 @@ assert.match(exact.receiptSha256, /^[a-f0-9]{64}$/);
 const changed = createMigrationPreviewReceipt(source, {
   tables: source.contract.tables.slice(1),
   indexes: source.contract.indexes.slice(1),
+  columns: source.contract.columns.slice(1),
+  columnShapes: source.contract.columnShapes.slice(1),
+  checks: source.contract.checks.slice(1),
 });
 assert.equal(changed.status, "PROVIDER_PREVIEW_REQUIRED");
 assert.equal(changed.pending.tables.length, 1);

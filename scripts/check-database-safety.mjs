@@ -13,6 +13,11 @@ const productionMigrationRoots = [
   path.join(root, "artifacts", "api-server", "src", "lib"),
 ];
 const authoritativeRemoteIdentity = "github.com/robertor-develop/BIMLog";
+const releaseCriticalColumnNames = new Set([
+  "job_activation_tasks.start_date",
+  "job_activation_tasks.due_date",
+  "job_activation_tasks.predecessor_task_ids",
+]);
 
 const destructiveRules = [
   ["DROP TABLE", /\bDROP\s+TABLE\b/i],
@@ -275,6 +280,7 @@ export function collectSchemaContract() {
   const tables = new Set();
   const indexes = new Set();
   const columns = new Set();
+  const columnShapes = new Set();
   const checks = new Set();
   const missingExports = [];
 
@@ -308,7 +314,13 @@ export function collectSchemaContract() {
       if (!isTable(value)) continue;
       const table = getTableName(value);
       for (const column of Object.values(getTableColumns(value))) {
-        columns.add(`${table}.${column.name}`);
+        const qualifiedName = `${table}.${column.name}`;
+        columns.add(qualifiedName);
+        if (releaseCriticalColumnNames.has(qualifiedName)) {
+          columnShapes.add(
+            `${qualifiedName}|notNull=${column.notNull ? 1 : 0}|hasDefault=${column.hasDefault ? 1 : 0}`,
+          );
+        }
       }
       for (const tableCheck of getTableConfig(value).checks) {
         checks.add(`${table}.${tableCheck.name}`);
@@ -322,6 +334,7 @@ export function collectSchemaContract() {
     tables: [...tables].sort(),
     indexes: [...indexes].sort(),
     columns: [...columns].sort(),
+    columnShapes: [...columnShapes].sort(),
     checks: [...checks].sort(),
     missingExports: missingExports.sort(),
   };

@@ -18,6 +18,7 @@ export function sourceSchemaReceipt() {
     tables: source.contract.tables,
     indexes: source.contract.indexes,
     columns: source.contract.columns,
+    columnShapes: source.contract.columnShapes,
     checks: source.contract.checks,
     startupTables: source.startupTables,
   };
@@ -28,6 +29,7 @@ export function sourceSchemaReceipt() {
       tables: contract.tables.length,
       indexes: contract.indexes.length,
       columns: contract.columns.length,
+      columnShapes: contract.columnShapes.length,
       checks: contract.checks.length,
       startupTables: contract.startupTables.length,
     },
@@ -42,6 +44,13 @@ export function classifySchemaInventory(receipt, actual) {
   });
   const tables = compare(receipt.contract.tables, [...actual.tables].sort());
   const columns = compare(receipt.contract.columns, [...actual.columns].sort());
+  const expectedShapeNames = new Set(
+    receipt.contract.columnShapes.map((shape) => shape.slice(0, shape.indexOf("|"))),
+  );
+  const observedColumnShapes = [...(actual.columnShapes ?? [])]
+    .filter((shape) => expectedShapeNames.has(shape.slice(0, shape.indexOf("|"))))
+    .sort();
+  const columnShapes = compare(receipt.contract.columnShapes, observedColumnShapes);
   const checks = compare(receipt.contract.checks, [...actual.checks].sort());
   const rawIndexes = compare(receipt.contract.indexes, [...actual.indexes].sort());
   const constraintIndexes = new Set(actual.constraintIndexes ?? []);
@@ -54,10 +63,11 @@ export function classifySchemaInventory(receipt, actual) {
   return {
     tables,
     columns,
+    columnShapes,
     checks,
     indexes,
     missingStartupTables,
-    exact: !tables.missing.length && !tables.extra.length && !columns.missing.length && !columns.extra.length && !checks.missing.length && !checks.extra.length && !indexes.missing.length && !indexes.extra.length && !missingStartupTables.length,
+    exact: !tables.missing.length && !tables.extra.length && !columns.missing.length && !columns.extra.length && !columnShapes.missing.length && !columnShapes.extra.length && !checks.missing.length && !checks.extra.length && !indexes.missing.length && !indexes.extra.length && !missingStartupTables.length,
   };
 }
 
@@ -69,7 +79,7 @@ export async function readDatabaseInventory(databaseUrl) {
     const identity = await client.query("SELECT current_database() database, current_setting('server_encoding') encoding");
     const tables = await client.query("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname='public' ORDER BY tablename");
     const indexes = await client.query("SELECT indexname FROM pg_catalog.pg_indexes WHERE schemaname='public' ORDER BY indexname");
-    const columns = await client.query("SELECT table_name,column_name FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name,column_name");
+    const columns = await client.query("SELECT table_name,column_name,is_nullable,column_default FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name,column_name");
     const checks = await client.query(
       `SELECT cls.relname table_name,c.conname
        FROM pg_catalog.pg_constraint c
@@ -92,6 +102,9 @@ export async function readDatabaseInventory(databaseUrl) {
       tables: tables.rows.map((row) => row.tablename),
       indexes: indexes.rows.map((row) => row.indexname),
       columns: columns.rows.map((row) => `${row.table_name}.${row.column_name}`),
+      columnShapes: columns.rows.map(
+        (row) => `${row.table_name}.${row.column_name}|notNull=${row.is_nullable === "NO" ? 1 : 0}|hasDefault=${row.column_default === null ? 0 : 1}`,
+      ),
       checks: checks.rows.map((row) => `${row.table_name}.${row.conname}`),
       constraintIndexes: constraintIndexes.rows.map((row) => row.indexname),
     };
@@ -121,7 +134,7 @@ async function main() {
       indexCount: actual.indexes.length,
       columnCount: actual.columns.length,
       checkCount: actual.checks.length,
-      inventorySha256: sha256(JSON.stringify({ tables: actual.tables, indexes: actual.indexes, columns: actual.columns, checks: actual.checks })),
+      inventorySha256: sha256(JSON.stringify({ tables: actual.tables, indexes: actual.indexes, columns: actual.columns, columnShapes: actual.columnShapes, checks: actual.checks })),
     },
     comparison,
     classification: comparison.exact ? "EXACT" : "DIFFERENT_CLASSIFIED",

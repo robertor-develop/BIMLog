@@ -3,7 +3,7 @@ import { sourceSchemaReceipt } from "./database-schema-receipt.mjs";
 import { evaluatePublicationDatabases } from "./publication-database-operator.mjs";
 
 const source = sourceSchemaReceipt();
-const exact = { tables: [...source.contract.tables], indexes: [...source.contract.indexes], columns: [...source.contract.columns], checks: [...source.contract.checks], constraintIndexes: [] };
+const exact = { tables: [...source.contract.tables], indexes: [...source.contract.indexes], columns: [...source.contract.columns], columnShapes: [...source.contract.columnShapes], checks: [...source.contract.checks], constraintIndexes: [] };
 const pass = evaluatePublicationDatabases(source, exact, exact);
 assert.equal(pass.publishable, true);
 assert.equal(pass.schemaAction, "NONE");
@@ -14,6 +14,8 @@ assert.equal(fail.publishable, false);
 assert.equal(fail.schemaAction, "STOP_COMPLETE_PREVIEW_AND_RESTORE_PROOF_REQUIRED");
 const columnDrift = { ...exact, columns: exact.columns.filter((name) => name !== "job_activation_tasks.start_date") };
 assert.equal(evaluatePublicationDatabases(source, exact, columnDrift).publishable, false);
+const columnShapeDrift = { ...exact, columnShapes: exact.columnShapes.map((shape) => shape.includes("predecessor_task_ids") ? shape.replace("notNull=1|hasDefault=1", "notNull=0|hasDefault=0") : shape) };
+assert.equal(evaluatePublicationDatabases(source, exact, columnShapeDrift).publishable, false);
 const checkDrift = { ...exact, checks: exact.checks.filter((name) => name !== "job_activation_tasks.job_activation_task_dates_chk") };
 assert.equal(evaluatePublicationDatabases(source, exact, checkDrift).publishable, false);
-console.log("PUBLICATION_DATABASE_OPERATOR_TESTS=PASS exact=1 table_mismatch_stop=1 column_mismatch_stop=1 check_mismatch_stop=1 data_copy_off=1");
+console.log("PUBLICATION_DATABASE_OPERATOR_TESTS=PASS exact=1 table_mismatch_stop=1 column_mismatch_stop=1 column_shape_mismatch_stop=1 check_mismatch_stop=1 data_copy_off=1");
