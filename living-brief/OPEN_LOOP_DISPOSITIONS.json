@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "69809c10307e9e2e85988e238b536eda665b12b2e3592ef61b8039ef9b270a0c",
-  "itemCount": 139,
+  "sourceSha256": "b894d0eab2762b998829a5dc8eafe08ef6ac9b2a0ed06694d609a204854011e6",
+  "itemCount": 141,
   "counts": {
-    "ACTIVE": 120,
+    "ACTIVE": 122,
     "SUPERSEDED": 16,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 0
@@ -1543,6 +1543,28 @@
       "evidence": [
         "living-brief/STATUS.md current authority",
         "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
+      ]
+    },
+    {
+      "id": "9788301db013d48e",
+      "sourceLine": 2996,
+      "heading": "120-build stabilization program — 2026-09-19",
+      "statement": "Run connected Navisworks Manage 2025 field acceptance on a workstation where 2025 is already installed; do not substitute simulation evidence or modify Navisworks licensing to manufacture this gate.",
+      "classification": "ACTIVE",
+      "evidence": [
+        "OPEN_LOOP.md:2996",
+        "120-build stabilization program — 2026-09-19"
+      ]
+    },
+    {
+      "id": "4ac51eab4fb72a76",
+      "sourceLine": 2997,
+      "heading": "120-build stabilization program — 2026-09-19",
+      "statement": "After that connected 2025 result, complete Build 120 exact-source push, Replit Shell publication without Agents, and authenticated visible-Chrome smoke.",
+      "classification": "ACTIVE",
+      "evidence": [
+        "OPEN_LOOP.md:2997",
+        "120-build stabilization program — 2026-09-19"
       ]
     }
   ]
