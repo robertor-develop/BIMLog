@@ -117,6 +117,7 @@
     "test:block17-build084": "tsx ./src/lib/block17-build084-portable-exports.behavior.ts",
     "test:block17-build085": "tsx ./src/lib/block17-build085-owner-handover-acceptance.behavior.ts",
     "test:block17-document-handover-acceptance": "tsx ./src/lib/block17-build081-file-download.behavior.ts && tsx ./src/lib/block17-build082-upload-retention.behavior.ts && tsx ./src/lib/block17-build083-pdf-fidelity.behavior.ts && tsx ./src/lib/block17-build084-portable-exports.behavior.ts && tsx ./src/lib/block17-build085-owner-handover-acceptance.behavior.ts",
+    "test:block18-build086": "tsx ./src/lib/block18-build086-procore-reconciliation.behavior.ts && pnpm run test:rfi-import && pnpm run test:coordination-delivery-build12",
     "test:unified-action-contract": "tsx ./src/lib/unified-action-contract.behavior.ts",
     "test:connector-foundation": "tsx ./src/lib/connector-foundation.behavior.ts",
     "test:coordination-hub-service": "tsx ./src/lib/coordination-hub-service.behavior.ts",
