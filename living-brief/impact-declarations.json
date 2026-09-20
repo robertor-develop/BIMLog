@@ -32293,6 +32293,73 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "88c2ad4dd2fc9f40fcb1fb3e5263562c5c056b99feb0defbdc709a5fbf63fcb9"
+    },
+    {
+      "taskId": "bimlog-stabilization-block14-platform-generator-correction-20260919",
+      "reviewedThroughCommit": "8a33316bc4deb1d713c4b8033796dd75ebb97a4d",
+      "reviewedAt": "2026-09-19T20:40:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generator correction changes no ecosystem authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release cadence and operating instructions are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted schema-correspondence correction is now deterministically generated without changing its quality requirements."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The existing Build 070 schema-correspondence section is now owned by the deterministic Platform generator."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and installer behavior remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changes."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The candidate remains corrective-gate pending; no release state changed."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The same exact-head gate, provider preview, publication, and live-smoke items remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit evidence changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
