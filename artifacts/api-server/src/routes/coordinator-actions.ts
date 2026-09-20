@@ -2,7 +2,7 @@ import { Router, type IRouter, type Request, type Response } from "express";
 import { db } from "@workspace/db";
 import { projectsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
-import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeader, PALETTE, REPORT_THEMES } from "../lib/pdf-kit";
+import { addPageNumbers, applyPdfDownloadHeaders, computeContentHash, createPdfDocument, drawBrandedHeader, PALETTE, REPORT_THEMES } from "../lib/pdf-kit";
 import { drawOperationalRegisterTable } from "../lib/operational-register-table";
 import { authMiddleware } from "../middlewares/auth";
 import {
@@ -96,8 +96,7 @@ export function sendCoordinatorPdf(res: Response, input: {
   const label = (en: string, es: string) => (input.lang === "es" ? es : en);
   const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 36, bufferPages: true, autoFirstPage: true });
   const filename = `Coordinator-Command-Center-${input.project.code || input.project.id}.pdf`.replace(/[^A-Za-z0-9._-]/g, "-");
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  applyPdfDownloadHeaders(res, { fileName: filename });
   doc.pipe(res);
 
   const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
@@ -378,9 +377,7 @@ router.get(
         superAdminAccess: String(req.header("x-bimlog-super-admin-access") ?? ""),
         superAdminReason: String(req.header("x-bimlog-super-admin-reason") ?? ""),
       });
-      res.setHeader("Cache-Control", "private, no-store");
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", `attachment; filename="${result.fileName}"`);
+      applyPdfDownloadHeaders(res, { fileName: result.fileName });
       res.setHeader("X-BIMLog-Content-SHA256", result.contentHash);
       res.send(result.buffer);
     } catch (error) {

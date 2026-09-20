@@ -4,7 +4,7 @@ import { activityLogTable, projectsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { ListActivityParams } from "@workspace/api-zod";
 import { authMiddleware, requireProjectMember } from "../middlewares/auth";
-import { addPageNumbers, computeContentHash, createPdfDocument, drawBrandedHeader, PALETTE, REPORT_THEMES } from "../lib/pdf-kit";
+import { addPageNumbers, applyPdfDownloadHeaders, computeContentHash, createPdfDocument, drawBrandedHeader, PALETTE, REPORT_THEMES } from "../lib/pdf-kit";
 import { drawOperationalRegisterTable } from "../lib/operational-register-table";
 
 const router: IRouter = Router();
@@ -207,8 +207,7 @@ export function sendActivityPdf(res: import("express").Response, input: {
   const label = (en: string, es: string) => (filters.lang === "es" ? es : en);
   const doc = createPdfDocument({ size: "LETTER", layout: "landscape", margin: 36, bufferPages: true, autoFirstPage: true });
   const filename = `Activity-Log-${input.project.code || input.project.id}.pdf`.replace(/[^A-Za-z0-9._-]/g, "-");
-  res.setHeader("Content-Type", "application/pdf");
-  res.setHeader("Content-Disposition", `attachment; filename="${filename}"`);
+  applyPdfDownloadHeaders(res, { fileName: filename });
   doc.pipe(res);
 
   const width = doc.page.width - doc.page.margins.left - doc.page.margins.right;
