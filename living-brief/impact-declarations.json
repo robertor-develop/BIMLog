@@ -32428,6 +32428,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "4afa86fad965b2df3e28bdfcef42ef22840e50ffe8a67a5706b156ff6c327471"
+    },
+    {
+      "taskId": "bimlog-stabilization-block14-deployed-check-name-reconciliation-20260919",
+      "reviewedThroughCommit": "b4b2fbda99ac3a960187955e89dd12e90de09078",
+      "reviewedAt": "2026-09-20T01:36:20.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The standing release cadence and authorization remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Source now preserves six already-deployed governance constraint names instead of proposing replacement of valid predicates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The generated Platform contract remains table-qualified and unchanged; this correction aligns source names to deployed truth."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and installer behavior remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the provider-proven constraint-name reconciliation and retains publication as pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The exact-head gate, additive development reconciliation, publication, and authenticated live smoke remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 070 evidence records the provider finding without rewriting prior history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "331cc4f885399513ffa039da864b22481bb5c67f4e84a7f0345b2bb1e870bb66"
     }
   ]
 }

@@ -2059,7 +2059,7 @@ The corrective Living Brief reconciliation is bound to implementation commit `92
 
 Table-qualified check identity and the aliases-array source declaration are reconciled through corrective commit `892bf1468fb8b12b7b127fbc6c525aba1f1fbd1a`; publication is still not claimed.
 
-The first table-qualified provider receipt proved that six governance predicates already exist in production under their older authoritative `_check` names. Drizzle now preserves those exact deployed names rather than proposing constraint replacement. Production remains unchanged; the only expected provider reconciliation is the additive development-only lifecycle trio and date check. Publication is still not claimed until a fresh exact-head gate, push, clean provider preview, successful publication, and authenticated live smoke pass.
+The first table-qualified provider receipt proved that six governance predicates already exist in production under their older authoritative `_check` names. Drizzle now preserves those exact deployed names rather than proposing constraint replacement. This naming reconciliation changes no predicate or production data. Production remains unchanged; the only expected provider reconciliation is the additive development-only lifecycle trio and date check. Publication is still not claimed until a fresh exact-head gate, push, clean provider preview, successful publication, and authenticated live smoke pass.
 
 ## 120-build stabilization program — Block 03 candidate
 
