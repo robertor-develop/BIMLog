@@ -14,6 +14,9 @@
       "artifacts/bimlog/src/features/lens-next/lens-next-model.ts",
       "artifacts/bimlog/src/pages/project/LensViewpointsView.tsx",
       "lib/db/src/schema/lens-viewpoint-sequence-counters.ts",
+      "plugins/BIMLogLensNext/Install-BIMLogLensNext.ps1",
+      "plugins/BIMLogLensNext/Test-LensNextFieldAcceptanceReadiness.ps1",
+      "plugins/BIMLogLensNext/Test-LensNextInstallerUpgrade.ps1",
       "plugins/BIMLogLensNext/native/AutodeskReadOnlyAdapter.cs"
     ],
     "governanceOnly": [
