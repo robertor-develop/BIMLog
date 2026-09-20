@@ -1207,6 +1207,7 @@ router.post(
           documentRelationshipDeclaredAt: new Date(),
           fileTypeTier: rejectedTier,
           source: "user-uploaded",
+          storagePath: filePath,
           rejectionDetails: validation.details ?? [],
         }).returning();
         pendingStoragePath = null;
@@ -1321,6 +1322,7 @@ router.post(
         documentRelationshipDeclaredAt: new Date(),
         fileTypeTier,
         source: "user-uploaded",
+        storagePath: filePath,
       }).returning();
       pendingStoragePath = null;
 
