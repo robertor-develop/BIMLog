@@ -1,22 +1,28 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Current open-loop authority — post-120 Block 27 — 2026-09-20
+
+- [x] Builds 131–135: classify and remove 17 workflow/document and export/report silent-failure occurrences, add bounded user feedback and code-only telemetry, pass negative-path tests, and complete the full clean gate.
+- [ ] [ACTIVE] Push the exact Build 135 source head normally to the stabilization branch and `master`.
+- [ ] Builds 136–140: consolidate shared PDF architecture, push Build 140, publish through Replit Shell without Replit Agents, compare representative outputs, and run full authenticated visible-Chrome smoke.
+
 ## Current open-loop authority — post-120 Block 26 — 2026-09-20
 
 - [x] Builds 126–129: classify and remove five authentication/session and project/model silent-failure occurrences; add bounded code-only diagnostics plus denial, malformed-response, rollback-failure, and single-retry tests.
-- [ ] [ACTIVE] Build 130: pass the complete clean-source gate, push normally, publish through Replit Shell without Replit Agents, verify exact live identity, and run authenticated visible-Chrome login, reload, project-switch, and two-tab smoke.
-- [ ] Builds 131–135: continue silent-failure removal across workflow/document and export/report paths after Build 130 live closure.
+- [x] Build 130: passed the complete clean-source gate, pushed normally, published through Replit Shell without Replit Agents, verified exact live identity, and passed authenticated visible-Chrome login, reload, project-switch, and two-tab smoke.
+- [x] Builds 131–135: continue silent-failure removal across workflow/document and export/report paths after Build 130 live closure.
 
 ## Current open-loop authority — post-120 Block 25 — 2026-09-20
 
 - [x] Builds 121–125: freeze all 66 P1 identities, deduplicate them into 38 root-cause groups, block P0 growth and new/unclassified P1 identities, remove the final source suppression, and complete the full regression gate.
-- [ ] [ACTIVE] Builds 126–130: remove silent failures from authentication/session and project/model-binding paths, then push, publish, and run authenticated Chrome login, reload, project-switch, and two-tab smoke.
+- [x] Builds 126–130: remove silent failures from authentication/session and project/model-binding paths, then push, publish, and run authenticated Chrome login, reload, project-switch, and two-tab smoke.
 - [ ] Physical Navisworks 2025 confirmation remains assigned to Ruben as post-closure field evidence. It does not reopen Build 119 and this platform-only block does not retrigger focused Navisworks smoke.
 
 ## Current open-loop authority — Build 120 final closure — 2026-09-20
 
 - [x] Complete Builds 116–118: exact manifest, zero-mutation database plan, governed provider path, and authenticated live-smoke contract.
 - [x] Build 119 closed from connected Navisworks 2021 proof plus dual-year package and installer proof. Roberto assigned physical Navisworks 2025 confirmation to Ruben as post-closure evidence.
-- [ ] [ACTIVE] Complete Build 120 exact push, Replit publication without Replit Agents, immutable live identity, full authenticated visible-Chrome acceptance, and full-system audit.
+- [x] Complete Build 120 exact push, Replit publication without Replit Agents, immutable live identity, full authenticated visible-Chrome acceptance, and full-system audit.
 - [x] Correct the durable open-loop classifier so this current Build 120 authority cannot be mislabeled as a superseded historical publication marker.
 - [x] Remove residual retired-product wording detected by the complete Lens product-reference gate and repeat the focused regression successfully.
 

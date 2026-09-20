@@ -7,10 +7,10 @@ const classification = JSON.parse(read("evidence/stabilization-program-20260919/
 const expectedResolved = ["AUD-00C88CD223CC", "AUD-4BF3C701F3B4", "AUD-7AE788FF597C", "AUD-A315DD285073", "AUD-C3C7BFB4BDCC"].sort();
 
 assert.equal(normalized.counts.P0, 0);
-assert.equal(normalized.counts.P1, 61);
-assert.equal(normalized.rootCauseGroups.length, 34);
+assert.ok(normalized.counts.P1 <= 61, "later blocks may reduce, but never increase, the Build 130 P1 count");
+assert.ok(normalized.rootCauseGroups.length <= 34, "later blocks may reduce, but never increase, the Build 130 root-cause count");
 assert.equal(normalized.baseline.unexpectedP1.length, 0);
-assert.deepEqual([...normalized.baseline.resolvedP1].sort(), expectedResolved);
+for (const findingId of expectedResolved) assert.ok(normalized.baseline.resolvedP1.includes(findingId), `${findingId} must remain resolved`);
 assert.deepEqual(classification.classifiedOccurrences.map(({ findingId }) => findingId).sort(), expectedResolved);
 
 const lease = read("artifacts/api-server/src/lib/connector-credential-lease-resolver.ts");
@@ -25,4 +25,4 @@ for (const code of ["CONNECTOR_CREDENTIAL_LEASE_ROLLBACK_FAILED", "CONNECTOR_CRE
 for (const code of ["SESSION_STORAGE_INVALID", "BRIDGE_RESPONSE_JSON_INVALID", "BRIDGE_PROBE_FAILED", "BRIDGE_SESSION_RENEWAL_REQUIRED"])
   assert.match(`${session}\n${lens}`, new RegExp(code));
 
-console.log("POST120_BLOCK26=PASS resolvedP1=5 currentP1=61 rootCauseGroups=34 diagnostics=code-only");
+console.log(`POST120_BLOCK26=PASS block26ResolvedP1=5 currentP1=${normalized.counts.P1} rootCauseGroups=${normalized.rootCauseGroups.length} diagnostics=code-only`);

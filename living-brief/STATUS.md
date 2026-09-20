@@ -1,11 +1,19 @@
 # STATUS.md - Current Accepted Platform State
 
-## Post-120 stabilization — Block 26 publication candidate — 2026-09-20
+## Post-120 stabilization — Block 27 source acceptance — 2026-09-20
+
+- Builds 131–135 remove 17 silent-failure occurrences across job-intake transactions and autosave, meeting-directory recovery, optional document-delivery cancellation, report-package cleanup, Telegram acknowledgement parsing, and Lens Next create-failure diagnostics.
+- All new telemetry is bounded to fixed event codes. User-visible workflow failures retain recovery state, and the authoritative original operation error is preserved.
+- Current audit result is P0=0, P1=44 occurrences, 26 root-cause groups, 22 resolved baseline identities, and zero unexpected P1.
+- This is a five-build push-only boundary. Publication and full authenticated visible-Chrome smoke remain due after Build 140.
+- No database/schema/customer-data, Native, installer, package, bridge-protocol, or provider-configuration mutation is part of this block.
+
+## Post-120 stabilization — Block 26 live acceptance — 2026-09-20
 
 - Builds 126–130 replace five silent-failure occurrences across runtime/auth configuration, credential transaction cleanup, and Lens Next project/model bridge communication with bounded code-only diagnostics.
 - Diagnostics disclose no token, credential, cookie, authorization header, URL, project/model identity, customer content, or exception message. Authoritative failures and fail-closed behavior remain unchanged.
 - Current audit result is P0=0, P1=61 occurrences, 34 root-cause groups, five resolved baseline identities, and zero unexpected P1.
-- This is the ten-build publication boundary. Exact push, Replit Shell publication without Replit Agents, immutable live identity, and authenticated visible-Chrome login/reload/project-switch/two-tab smoke are required before live closure.
+- The exact candidate was pushed, published through Replit Shell without Replit Agents, and accepted live at `v1.05.N18-P36` after exact-identity authenticated visible-Chrome login, reload, project-switch, and two-tab smoke.
 - No database/schema/customer-data, Native, installer, package, bridge-protocol, or provider-configuration mutation is part of this block.
 
 ## Post-120 stabilization — Block 25 source acceptance — 2026-09-20

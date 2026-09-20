@@ -14,7 +14,7 @@ This audit inventories every tracked file and ingests every tracked text line th
 - Database safety inventory: 223 tables, 273 indexes, and 184 startup tables reconciled.
 - AI entry points inventoried: 45.
 - Open-loop records classified: 140 total; 122 active, 15 superseded, 3 accepted limitations.
-- Automated product audit baseline: P0 = 0, P1 = 66 occurrences, P2 = 0. Builds 121–122 normalized those occurrences into 38 executable root-cause groups with stable evidence identities. Builds 126–129 resolved five occurrences across four groups without adding any new P1 identity; current result is P0=0, P1=61, groups=34.
+- Automated product audit baseline: P0 = 0, P1 = 66 occurrences, P2 = 0. Builds 121–122 normalized those occurrences into 38 executable root-cause groups with stable evidence identities. Builds 126–134 resolved 22 occurrences across 12 groups without adding any new P1 identity; current result is P0=0, P1=44, groups=26.
 - Dependency audit: no known package vulnerabilities at the Build 120 candidate gate.
 
 ## Confirmed product truth
@@ -38,7 +38,7 @@ This audit inventories every tracked file and ingests every tracked text line th
 
 ### P1 architecture and maintainability
 
-- 61 P1 audit occurrences remain across 34 root-cause groups: 2 bespoke-PDF occurrences in one source module, 58 silent-catch occurrences in 32 modules, and one UI-symbol/emoji occurrence. The exact initial accepted inventory remains `scripts/platform-audit-baseline.json`; the current machine-readable receipt is `PLATFORM_AUDIT_NORMALIZED.json`. Five resolved identities remain visible in baseline reconciliation, and new P1 identities fail the blocking audit until classified.
+- 44 P1 audit occurrences remain across 26 root-cause groups: 2 bespoke-PDF occurrences in one source module, 41 silent-catch occurrences in 24 modules, and one UI-symbol/emoji occurrence. The exact initial accepted inventory remains `scripts/platform-audit-baseline.json`; the current machine-readable receipt is `PLATFORM_AUDIT_NORMALIZED.json`. Twenty-two resolved identities remain visible in baseline reconciliation, and new P1 identities fail the blocking audit until classified.
 - Largest source modules remain too concentrated: `MeetingsTab.tsx` (6,510 lines), `ConventionBuilder.tsx` (4,996), `clash_reports.ts` (4,430), `RfisTab.tsx` (4,132), `rfis.ts` (4,033), `meeting_minutes.ts` (4,003), `JobIntakeWorkspace.tsx` (2,965), and `SubmittalsTab.tsx` (2,963).
 - The final source suppression in `living-brief-source.ts` was removed in Build 124 and replaced by an explicit typed CommonJS/ESM boundary.
 

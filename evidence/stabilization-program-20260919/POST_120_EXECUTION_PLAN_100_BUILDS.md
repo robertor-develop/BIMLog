@@ -21,7 +21,7 @@
 
 ## Block 26 — Builds 126–130 — silent-failure removal A
 
-Status: source accepted for the Build 130 publication boundary; publication and authenticated live smoke execute after the exact candidate push.
+Status: complete, pushed, published, and authenticated live-smoke accepted at `v1.05.N18-P36`.
 
 - 126: classify silent catches in authentication/session paths.
 - 127: make actionable authentication failures observable without exposing secrets.
@@ -30,6 +30,8 @@ Status: source accepted for the Build 130 publication boundary; publication and 
 - 130: publish and run authenticated Chrome login, reload, project-switch, and two-tab smoke.
 
 ## Block 27 — Builds 131–135 — silent-failure removal B
+
+Status: source accepted for the Build 135 push boundary; publication remains scheduled after Build 140.
 
 - 131: classify silent catches in workflow and document operations.
 - 132: add bounded user feedback and telemetry for workflow failures.

@@ -1,5 +1,9 @@
 # AUDIT.md - Historical Evidence Register
 
+## Post-120 silent-failure removal B — Builds 131–135 — 2026-09-20
+
+Seventeen accepted P1 identities were resolved across eight root-cause groups. The normalized receipt reports P0=0, P1=44, groups=26, resolved baseline identities=22, and unexpected P1=0. The focused workflow and report suites exposed one stale feedback-route assertion; the assertion was corrected to the canonical `/admin/feedback` route and the complete failed suite passed on rerun.
+
 ## Post-120 silent-failure removal A — Builds 126–130 — 2026-09-20
 
 Five accepted P1 identities were resolved across four root-cause groups. The current normalized receipt reports P0=0, P1=61, groups=34, resolved baseline identities=5, and unexpected P1=0. New diagnostics contain fixed event codes only and tests prohibit credential, token, URL, customer-content, identity, and exception-message disclosure.

@@ -511,6 +511,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/meeting-report-action-extraction.behavior.ts
 - artifacts/api-server/src/lib/meeting-report-action-extraction.ts
 - artifacts/api-server/src/lib/oauth.ts
+- artifacts/api-server/src/lib/operational-failure.behavior.ts
 - artifacts/api-server/src/lib/operational-failure.ts
 - artifacts/api-server/src/lib/operational-register-table.ts
 - artifacts/api-server/src/lib/outlook-intake-envelope.behavior.ts
