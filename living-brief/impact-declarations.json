@@ -33392,8 +33392,8 @@
         },
         {
           "key": "platform",
-          "result": "updated",
-          "reason": "The platform inventory includes the Block 23 and 24 contracts and the corrected dual-year plugin packaging and installer behavior."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The owner-approved field-evidence disposition changes release status but does not change platform architecture, provider topology, or runtime composition."
         },
         {
           "key": "plugin",
@@ -33413,12 +33413,12 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Recorded Builds 111–120, the successful 2021 live correction, dual-year isolated installer proof, and the unmet connected Navisworks 2025 field requirement."
+          "reason": "Records Build 119 closure from 2021 live and dual-year installer evidence, with Ruben's physical 2025 confirmation deferred as post-closure evidence, and advances Build 120."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Build 119 remains explicitly open only for connected Navisworks 2025 field proof, and Build 120 remains unstarted."
+          "reason": "Closes Build 119, tracks Ruben's physical 2025 confirmation as post-closure evidence, and makes Build 120 publication, smoke, and audit the active loop."
         },
         {
           "key": "audit",
@@ -33469,7 +33469,7 @@
         "plugins/BIMLogLensNext/pulse/2025/BIMLogPulse2025.bundle/PackageContents.xml",
         "scripts/check-current-state-contract.mjs"
       ],
-      "reviewedChangeSha256": "7e7b78e20fba3c212f716105ffee36cc7b9dc95d5b6cfbb0df5665ab6c942a5d"
+      "reviewedChangeSha256": "c57c074d34c7d2c1b85beba9d0f551ba70c5d9d60543dad25345af839bb8bde2"
     }
   ]
 }

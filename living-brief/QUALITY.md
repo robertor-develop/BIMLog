@@ -3,7 +3,7 @@
 ## Block 24 final closure gate
 
 - Build 120 is not live-complete until exact GitHub/Replit/live source identity, HTTP 200 health/readiness, authenticated visible-Chrome Super Administrator access, dashboard, project workspace, Lens Next, reload restoration, two-tab continuity, and zero page/console errors pass.
-- Database action is `NONE`; Replit Agents and development-data copying are prohibited. The accepted Build 119 connected 2021/2025/customer field gate remains mandatory before final closure.
+- Database action is `NONE`; Replit Agents and development-data copying are prohibited. Build 119 is accepted from connected 2021 proof and dual-year installer/package proof; Ruben's physical 2025 confirmation remains post-closure evidence and is not claimed by this workstation.
 
 This document translates the Calidad 4.0 source material into BIMLog's build doctrine.
 The original PDFs are Spanish scanned source documents; this Living Brief entry is the

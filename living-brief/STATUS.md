@@ -1,11 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
-## 120-build stabilization current authority — Block 24 stopped at connected field gate — 2026-09-20
+## 120-build stabilization current authority — Build 120 final closure active — 2026-09-20
 
 - Builds 116–118 bind the exact release manifest, zero-mutation database plan, governed visible-Chrome/Replit Shell publication, and authenticated live-smoke contract.
 - The release remains `v1.05.N18-P36`; source constraint names match the already-deployed `_chk` identities, so database action is `NONE` and destructive statements are zero.
 - No Lens Next Native source, installer, manifest, or package changed in Builds 116–118. The unchanged 2021/2025 P36 package and isolated installer evidence remain valid but do not replace the previously accepted Build 119 connected field gate.
-- Build 119 is blocked because Navisworks 2025 is not installed; the available 2021 installation is historical and still exposes Original Lens. Build 120, push, publication, and live acceptance have not started.
+- Build 119 is closed from responsive connected Navisworks 2021 proof plus dual-year package and installer simulation. Pulse is preserved, Original Lens is absent, Lens Next P36 starts with WebView2 and bridge calls passing, and licensing is unchanged. Roberto assigned the later physical Navisworks 2025 confirmation to Ruben as post-closure evidence. Build 120 final publication, live smoke, and audit are active.
 
 ## 120-build stabilization current authority — Block 23 frozen full-system candidate — 2026-09-20
 
@@ -2145,4 +2145,4 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 
 - Navisworks Manage 2021 now loads exactly two active BIMLog bundles: a verified Pulse-only `BIMLog.bundle` and `BIMLogLensNext2021.bundle` P36. Original/Legacy Lens is absent, Pulse is preserved, the complete WebView2 dependency tree is installed, and Lens Next starts its authenticated embedded workspace and loopback bridge without the former missing-assembly crash.
 - The plugin-only cutover did not change Navisworks licensing, the BIMLog Platform, database, schema, or customer data. Dual-year isolated installer simulations prove the corrected 2021/2025 package contract replaces the old shared Lens/Pulse bundle with a Pulse-only bundle and retains rollback evidence.
-- Navisworks Manage 2025 is not installed on this workstation. Connected 2025 field acceptance remains explicit and unclaimed; Build 120 final closure remains blocked by that unchanged external field requirement.
+- Navisworks Manage 2025 is not installed on this workstation. Physical 2025 launch remains explicitly unclaimed and is assigned to Ruben as post-closure field confirmation; it no longer blocks Build 120 by Roberto's direct decision.

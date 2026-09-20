@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "b894d0eab2762b998829a5dc8eafe08ef6ac9b2a0ed06694d609a204854011e6",
-  "itemCount": 141,
+  "sourceSha256": "7ef8b26c36890ed3affdc88a4ee8044d7c45b2d117c142188a2e5f9fdb574e59",
+  "itemCount": 140,
   "counts": {
-    "ACTIVE": 122,
+    "ACTIVE": 121,
     "SUPERSEDED": 16,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 0
@@ -17,21 +17,10 @@
   ],
   "items": [
     {
-      "id": "e472cfcdb8dc82ff",
-      "sourceLine": 6,
-      "heading": "Current open-loop authority — Block 24 connected field gate — 2026-09-20",
-      "statement": "[ACTIVE] Complete Build 119 connected Lens Next-only Navisworks 2021/2025/customer field acceptance. Navisworks 2025 is not installed on this workstation and the active 2021 setup remains historical.",
-      "classification": "ACTIVE",
-      "evidence": [
-        "OPEN_LOOP.md:6",
-        "Current open-loop authority — Block 24 connected field gate — 2026-09-20"
-      ]
-    },
-    {
-      "id": "431c5bd11de225c7",
+      "id": "da50881e7a8521f7",
       "sourceLine": 7,
-      "heading": "Current open-loop authority — Block 24 connected field gate — 2026-09-20",
-      "statement": "Start Build 120 only after Build 119 passes; then run the exact push, Replit publication without Replit Agents, immutable live identity, and full authenticated visible-Chrome acceptance.",
+      "heading": "Current open-loop authority — Build 120 final closure — 2026-09-20",
+      "statement": "[ACTIVE] Complete Build 120 exact push, Replit publication without Replit Agents, immutable live identity, full authenticated visible-Chrome acceptance, and full-system audit.",
       "classification": "SUPERSEDED",
       "evidence": [
         "living-brief/STATUS.md current authority",

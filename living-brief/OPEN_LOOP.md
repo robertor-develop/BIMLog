@@ -1,10 +1,10 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — Block 24 connected field gate — 2026-09-20
+## Current open-loop authority — Build 120 final closure — 2026-09-20
 
 - [x] Complete Builds 116–118: exact manifest, zero-mutation database plan, governed provider path, and authenticated live-smoke contract.
-- [ ] [ACTIVE] Complete Build 119 connected Lens Next-only Navisworks 2021/2025/customer field acceptance. Navisworks 2025 is not installed on this workstation and the active 2021 setup remains historical.
-- [ ] Start Build 120 only after Build 119 passes; then run the exact push, Replit publication without Replit Agents, immutable live identity, and full authenticated visible-Chrome acceptance.
+- [x] Build 119 closed from connected Navisworks 2021 proof plus dual-year package and installer proof. Roberto assigned physical Navisworks 2025 confirmation to Ruben as post-closure evidence.
+- [ ] [ACTIVE] Complete Build 120 exact push, Replit publication without Replit Agents, immutable live identity, full authenticated visible-Chrome acceptance, and full-system audit.
 
 ## Current open-loop authority — Block 23 frozen candidate — 2026-09-20
 
