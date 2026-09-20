@@ -25,6 +25,10 @@ for (const relative of [
   }
 }
 
+const sharedInstaller = read(`${plugin}/Install-BIMLogLensNext.ps1`);
+assert.ok(sharedInstaller.includes(`$manifest.release -ne '${identity.label}'`), "shared installer release guard");
+assert.ok(sharedInstaller.includes(`$manifest.binaryVersion -ne '${identity.binaryVersion}'`), "shared installer binary guard");
+
 for (const year of [2021, 2025]) {
   const packageXml = read(`${plugin}/native/${year}/PackageContents.xml`);
   assert.ok(packageXml.includes(`AppVersion="${identity.binaryVersion}"`), `${year} manifest binary version`);
@@ -32,8 +36,8 @@ for (const year of [2021, 2025]) {
   assert.ok(packageXml.includes(`BIMLogLensNext.Native${year}.dll`), `${year} manifest native module`);
 
   const installer = read(`${plugin}/Install-BIMLogLensNext${year}.ps1`);
-  assert.ok(installer.includes(`$manifest.release -ne '${identity.label}'`), `${year} installer release guard`);
-  assert.ok(installer.includes(`$manifest.binaryVersion -ne '${identity.binaryVersion}'`), `${year} installer binary guard`);
+  assert.ok(installer.includes(`Install-BIMLogLensNext.ps1`), `${year} installer must use the verified shared installer`);
+  assert.ok(installer.includes(`-Year ${year}`), `${year} installer must bind the exact product year`);
 
   const receipt = json(`${plugin}/evidence/build-package-receipt-${year}.json`);
   assert.equal(receipt.productYear, year);
