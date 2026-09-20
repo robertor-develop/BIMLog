@@ -13,6 +13,8 @@
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "audit:platform": "node scripts/platform-audit.mjs",
     "audit:platform:blocking": "node scripts/platform-audit.mjs --enforce",
+    "audit:platform:freeze-baseline": "node scripts/platform-audit.mjs --write-baseline",
+    "test:platform-audit-identity": "node scripts/platform-audit.mjs --self-test",
     "test:platform-audit-policy": "node scripts/test-platform-audit-policy.mjs",
     "test:local-release-gate": "node scripts/test-local-release-gate.mjs",
     "gate:local-release": "node scripts/local-release-gate.mjs",

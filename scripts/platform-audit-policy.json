@@ -6,10 +6,10 @@
     "ai-billing-bypass": { "owner": "BIMLog AI governance", "targetBuild": 34, "blocking": true },
     "dummy-ai-key": { "owner": "BIMLog security", "targetBuild": 34, "blocking": true },
     "super-admin-permission-bypass": { "owner": "BIMLog authorization", "targetBuild": 34, "blocking": true },
-    "bespoke-pdf": { "owner": "BIMLog report platform", "targetBuild": 54, "blocking": false },
-    "emoji-source": { "owner": "BIMLog frontend quality", "targetBuild": 44, "blocking": false },
-    "silent-catch": { "owner": "BIMLog reliability", "targetBuild": 45, "blocking": false },
-    "duplicate-route": { "owner": "BIMLog API architecture", "targetBuild": 59, "blocking": false },
-    "route-order": { "owner": "BIMLog API architecture", "targetBuild": 59, "blocking": false }
+    "bespoke-pdf": { "owner": "BIMLog report platform", "targetBuild": 136, "blocking": false, "disposition": "planned-shared-pdf-migration" },
+    "emoji-source": { "owner": "BIMLog frontend quality", "targetBuild": 196, "blocking": false, "disposition": "planned-accessibility-cleanup" },
+    "silent-catch": { "owner": "BIMLog reliability", "targetBuild": 126, "blocking": false, "disposition": "planned-observability-reconciliation" },
+    "duplicate-route": { "owner": "BIMLog API architecture", "targetBuild": 181, "blocking": false, "disposition": "planned-route-reconciliation" },
+    "route-order": { "owner": "BIMLog API architecture", "targetBuild": 181, "blocking": false, "disposition": "planned-route-reconciliation" }
   }
 }
