@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "status": "PASS",
-  "scannedFiles": 885,
+  "scannedFiles": 886,
   "routesFound": 501,
   "counts": {
     "P0": 0,
-    "P1": 66,
+    "P1": 61,
     "P2": 0,
     "INFO": 0
   },
@@ -25,7 +25,7 @@
       "disposition": "planned-accessibility-cleanup"
     },
     "silent-catch": {
-      "count": 63,
+      "count": 58,
       "owner": "BIMLog reliability",
       "targetBuild": 126,
       "blocking": false,
@@ -33,10 +33,16 @@
     }
   },
   "baseline": {
-    "present": false,
-    "expectedP1": 0,
+    "present": true,
+    "expectedP1": 66,
     "unexpectedP1": [],
-    "resolvedP1": []
+    "resolvedP1": [
+      "AUD-7AE788FF597C",
+      "AUD-A315DD285073",
+      "AUD-00C88CD223CC",
+      "AUD-C3C7BFB4BDCC",
+      "AUD-4BF3C701F3B4"
+    ]
   },
   "rootCauseGroups": [
     {
@@ -73,30 +79,6 @@
       "targetBuild": 126,
       "findingIds": [
         "AUD-A296E60DB35C"
-      ],
-      "occurrences": 1
-    },
-    {
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-credential-lease-resolver.ts",
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/connector-credential-lease-resolver.ts",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "findingIds": [
-        "AUD-7AE788FF597C"
-      ],
-      "occurrences": 1
-    },
-    {
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-credential-lifecycle-postgres-store.ts",
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/connector-credential-lifecycle-postgres-store.ts",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "findingIds": [
-        "AUD-A315DD285073"
       ],
       "occurrences": 1
     },
@@ -399,18 +381,6 @@
       "occurrences": 1
     },
     {
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/runtime-security.ts",
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/runtime-security.ts",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "findingIds": [
-        "AUD-00C88CD223CC"
-      ],
-      "occurrences": 1
-    },
-    {
       "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/storage-adapter.ts",
       "severity": "P1",
       "category": "silent-catch",
@@ -483,19 +453,6 @@
         "AUD-5F8A5A2D6A4D"
       ],
       "occurrences": 1
-    },
-    {
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "findingIds": [
-        "AUD-C3C7BFB4BDCC",
-        "AUD-4BF3C701F3B4"
-      ],
-      "occurrences": 2
     },
     {
       "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
@@ -575,34 +532,6 @@
       "detail": "Silent catch can hide broken user workflows.",
       "findingId": "AUD-A296E60DB35C",
       "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/ai-control-plane.http-evidence.ts",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/connector-credential-lease-resolver.ts",
-      "line": 101,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-7AE788FF597C",
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-credential-lease-resolver.ts",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/connector-credential-lifecycle-postgres-store.ts",
-      "line": 114,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-A315DD285073",
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-credential-lifecycle-postgres-store.ts",
       "sourceKind": "production",
       "owner": "BIMLog reliability",
       "targetBuild": 126,
@@ -1242,20 +1171,6 @@
     {
       "severity": "P1",
       "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/runtime-security.ts",
-      "line": 9,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-00C88CD223CC",
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/runtime-security.ts",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
       "file": "artifacts/api-server/src/lib/storage-adapter.ts",
       "line": 46,
       "detail": "Silent catch can hide broken user workflows.",
@@ -1368,34 +1283,6 @@
     {
       "severity": "P1",
       "category": "silent-catch",
-      "file": "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
-      "line": 75,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-C3C7BFB4BDCC",
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
-      "line": 532,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-4BF3C701F3B4",
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
       "file": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
       "line": 522,
       "detail": "Silent catch can hide broken user workflows.",
@@ -1451,5 +1338,3 @@
     }
   ]
 }
-
-
