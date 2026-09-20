@@ -1,29 +1,29 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
+  "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "a9c4514257d7a753c81a682d43553235558b0574cb9da5698b6b64b1b7be6308",
+  "bundleSha256": "79c2e1db542c1d47d136b26d666c6bf4bd905e6cea4359edeac8280942fd2949",
   "impact": {
-    "baselineCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
+    "baselineCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
     "changedPaths": [
       "artifacts/api-server/package.json",
-      "artifacts/api-server/src/lib/block21-build101-commercial-truth.behavior.ts",
-      "artifacts/api-server/src/lib/block21-build102-onboarding.behavior.ts",
-      "artifacts/api-server/src/lib/block21-build103-help.behavior.ts",
-      "artifacts/api-server/src/lib/block21-build104-unsupported-actions.behavior.ts",
-      "artifacts/api-server/src/lib/block21-build105-public-onboarding-acceptance.behavior.ts",
-      "artifacts/api-server/src/lib/block21-source-reader.ts",
-      "artifacts/bimlog/src/components/OnboardingFlow.tsx",
-      "artifacts/bimlog/src/lib/help-content.ts",
-      "artifacts/bimlog/src/pages/Landing.tsx",
-      "artifacts/bimlog/src/pages/Pricing.tsx",
-      "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
-      "evidence/stabilization-program-20260919/BUILD_101_COMMERCIAL_TRUTH.md",
-      "evidence/stabilization-program-20260919/BUILD_102_ONBOARDING_RECOVERY.md",
-      "evidence/stabilization-program-20260919/BUILD_103_HELP_COVERAGE.md",
-      "evidence/stabilization-program-20260919/BUILD_104_UNSUPPORTED_ACTIONS.md",
-      "evidence/stabilization-program-20260919/BUILD_105_PUBLIC_ONBOARDING_ACCEPTANCE.md",
+      "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+      "artifacts/api-server/src/app.ts",
+      "artifacts/api-server/src/lib/block22-build106-object-authorization.behavior.ts",
+      "artifacts/api-server/src/lib/block22-build107-runtime-security.behavior.ts",
+      "artifacts/api-server/src/lib/block22-build108-data-lifecycle.behavior.ts",
+      "artifacts/api-server/src/lib/block22-build109-recovery-readiness.behavior.ts",
+      "artifacts/api-server/src/lib/block22-build110-security-recovery-acceptance.behavior.ts",
+      "artifacts/api-server/src/lib/block22-data-lifecycle.ts",
+      "artifacts/api-server/src/lib/block22-object-authority.ts",
+      "artifacts/api-server/src/lib/runtime-security.ts",
+      "evidence/stabilization-program-20260919/BUILD_106_OBJECT_AUTHORIZATION.md",
+      "evidence/stabilization-program-20260919/BUILD_107_RUNTIME_SECURITY.md",
+      "evidence/stabilization-program-20260919/BUILD_108_DATA_LIFECYCLE.md",
+      "evidence/stabilization-program-20260919/BUILD_109_RECOVERY_REHEARSAL.md",
+      "evidence/stabilization-program-20260919/BUILD_110_SECURITY_RECOVERY_ACCEPTANCE.md",
       "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+      "lib/db/src/schema/workflow-governance-policies.ts",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/PLATFORM.md",
@@ -46,11 +46,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "claude",
@@ -58,11 +58,11 @@
       "sha256": "fda29c7bd0b092e1de189b54249545c345a7d2e84f3cdea4675a027637794270",
       "sourceChangedAt": "2026-09-19T07:40:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "quality",
@@ -70,11 +70,11 @@
       "sha256": "4e2b063d11ac9a8bc64376e71f5a175bab4eafc93dc003d311ec2ca3ccc10525",
       "sourceChangedAt": "2026-09-19T13:19:19-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "vision",
@@ -82,23 +82,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "0f6b87c306ad984d986bf08cf9352a8c5339bc4ae50f5754346cfc20e24bd34e",
-      "sourceChangedAt": "2026-09-20T09:28:00.000Z",
+      "sha256": "63c6db6dbe88d78cd59f1ccef40bc4448054eaeb7c9eb22a9723939f2a2d1b43",
+      "sourceChangedAt": "2026-09-20T10:26:42.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "plugin",
@@ -106,11 +106,11 @@
       "sha256": "a20bfab004cdcebbc9ceb45eee554751c51be5fcd4bfe186832d39505097ca3f",
       "sourceChangedAt": "2026-09-20T00:12:42-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "report_design_system",
@@ -118,11 +118,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "standards_register",
@@ -130,35 +130,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "57d9838aa8778f89f8ddb09e39bbc05333cd3d45d515a28982b105d8e5f53482",
-      "sourceChangedAt": "2026-09-20T09:28:00.000Z",
+      "sha256": "a8c98b0a6b7568f32fa298f3236b743155d01b3b01d30e09f9f4679b6224a36f",
+      "sourceChangedAt": "2026-09-20T10:26:42.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "64b355a244ce2f3726eed6c2b9b87b80e366203e2e143c7f182f2efa3901b038",
-      "sourceChangedAt": "2026-09-20T09:28:00.000Z",
+      "sha256": "dacde95c643a9297f28dadb5a9e731a525bfbede2e33af218c72c31c5e3149b1",
+      "sourceChangedAt": "2026-09-20T10:26:42.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     },
     {
       "key": "audit",
@@ -166,11 +166,11 @@
       "sha256": "23190c3669d18d8b2c950bf2bd0174d082fab1097ee6f89237eb02a8c3f11296",
       "sourceChangedAt": "2026-09-19T19:33:13-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
-      "semanticReviewTask": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reconciledThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "semanticReviewTask": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T05:28:00-04:00"
+      "semanticReviewedAt": "2026-09-20T06:26:42-04:00"
     }
   ]
 }

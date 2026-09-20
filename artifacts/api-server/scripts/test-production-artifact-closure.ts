@@ -314,7 +314,7 @@ const users = await Promise.all([
      VALUES ($1,$2,$3,$4,false,true) RETURNING id,email`,
     [
       `${proofMarker}-eligible@example.test`,
-      "artifact-proof-not-used",
+      passwordHash,
       "Artifact Eligible",
       companyId,
     ],
@@ -406,6 +406,7 @@ const invalidStorageChild = spawn(process.execPath, [bundle], {
     DATABASE_URL: proofDatabaseUrl,
     PROD_DATABASE_URL: proofDatabaseUrl,
     JWT_SECRET: jwtSecret,
+    SESSION_SECRET: jwtSecret,
     BIMLOG_SOURCE_COMMIT: deploymentSource.sourceCommit,
     BIMLOG_ARTIFACT_RUNTIME_ROOT: runtimeRoot,
     ...feedbackStorageEnvironment,
@@ -574,6 +575,7 @@ const child = spawn(process.execPath, [bundle], {
     DATABASE_URL: proofDatabaseUrl,
     PROD_DATABASE_URL: proofDatabaseUrl,
     JWT_SECRET: jwtSecret,
+    SESSION_SECRET: jwtSecret,
     BIMLOG_SOURCE_COMMIT: deploymentSource.sourceCommit,
     BIMLOG_ARTIFACT_RUNTIME_ROOT: runtimeRoot,
     ...feedbackStorageEnvironment,
@@ -643,6 +645,15 @@ try {
     stdout,
     /\[feedback-storage\] artifact-proof-durable durable-filesystem healthy/,
   );
+  const restoredLogin = await fetch(`http://127.0.0.1:${port}/api/v1/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email: eligibleUser.email, password: "artifact-proof" }),
+  });
+  assert.equal(restoredLogin.status, 200);
+  const restoredLoginBody = await restoredLogin.json() as { token?: unknown; user?: { email?: unknown } };
+  assert.equal(typeof restoredLoginBody.token, "string");
+  assert.equal(restoredLoginBody.user?.email, eligibleUser.email);
   assert(storageAuthority.capabilities.includes("bounded-read"));
   assert.equal(storageAuthority.maxReadBytes, storageMaxReadBytes);
   const loadTimings = await Promise.all(Array.from({ length: 25 }, async () => {
@@ -724,6 +735,7 @@ try {
       readinessStatus: readyStatus,
       packagedLivingBriefDocuments: docs.length,
       passwordlessEligibleUnlock: true,
+      passwordLoginAgainstExactDatabase: true,
       ineligibleUnlockDenied: deniedUnlock.status,
       deployedSourceCommit: deploymentSource.sourceCommit,
       feedbackStorageBackend: "durable-filesystem",

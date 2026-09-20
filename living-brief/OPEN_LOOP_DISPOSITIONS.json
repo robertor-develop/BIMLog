@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "64b355a244ce2f3726eed6c2b9b87b80e366203e2e143c7f182f2efa3901b038",
-  "itemCount": 133,
+  "sourceSha256": "dacde95c643a9297f28dadb5a9e731a525bfbede2e33af218c72c31c5e3149b1",
+  "itemCount": 134,
   "counts": {
-    "ACTIVE": 115,
+    "ACTIVE": 116,
     "SUPERSEDED": 15,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 0
@@ -1469,8 +1469,19 @@
       ]
     },
     {
+      "id": "8f462f9d87c378a3",
+      "sourceLine": 2979,
+      "heading": "120-build stabilization program — 2026-09-19",
+      "statement": "Builds 111–115: run complete clean-install, authenticated route, visual/accessibility, and dual-year Navisworks acceptance; burn down release-blocking findings and push Build 115.",
+      "classification": "ACTIVE",
+      "evidence": [
+        "OPEN_LOOP.md:2979",
+        "120-build stabilization program — 2026-09-19"
+      ]
+    },
+    {
       "id": "b387daa9fb9c86d9",
-      "sourceLine": 2978,
+      "sourceLine": 2980,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Builds 106–110: complete security, privacy, retention and isolated recovery review; push and publish Build 110, then run exact-identity authenticated visible-Chrome smoke. No Native/installer smoke is required unless those paths change.",
       "classification": "SUPERSEDED",

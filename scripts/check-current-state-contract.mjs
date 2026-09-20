@@ -18,7 +18,7 @@ function validate(snapshot) {
   assert(lens.legacyStatus === "migration-only", "Legacy Lens must be migration-only");
   assert(lens.customerFacingLegacyProduct === false && lens.parallelInstallationSupported === false && lens.legacyLoaderAllowedInAcceptedSetup === false, "Legacy Lens cannot remain customer-facing, parallel-installed, or loadable");
   assert(lens.currentPlatformVersion === release.label, "Lens product and release identities must agree");
-  assert(ledger.status.completedBuilds === 105, "Build ledger must track completed stabilization Build 105");
+  assert(ledger.status.completedBuilds === 110, "Build ledger must track completed stabilization Build 110");
   assert(ledger.status.remainingBuilds === 120 - ledger.status.completedBuilds, "Build ledger remaining count must reconcile");
   const expectedUnpublished = ledger.status.completedBuilds % ledger.releaseCadence.publishEveryBuilds;
   assert(ledger.status.currentUnpublishedBuilds === expectedUnpublished, "Build ledger unpublished count must follow the publication cadence");

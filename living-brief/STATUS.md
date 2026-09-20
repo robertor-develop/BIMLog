@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## 120-build stabilization current authority — Block 22 security, privacy, retention, and recovery — 2026-09-20
+
+- Builds 106–110 add permanent cross-tenant/guessed-object denial across API, files, reports, Lens Next, feedback and integrations; governed production CORS and browser security headers; fail-closed production session-secret handling; lifecycle authority for export/correction/archive/deletion; retention holds; and immutable evidence preservation.
+- The unauthenticated environment probe and startup logs no longer expose database host/name. Request diagnostics remain metadata-only and upload paths remain bounded.
+- The first isolated restore rehearsal found six source declarations whose Workflow Governance check-constraint names differed from the already deployed `_chk` identities. Source was corrected without renaming or mutating any database. The retry proved exact schema, exact record-count digest, exact backup hash, packaged health/readiness, and credential login against a disposable restored database; that database was then removed.
+- Build 110 is the publication boundary. The candidate must pass the full clean-source gate, normal push, established Replit Shell publication without Replit Agents, exact live identity, and full authenticated visible-Chrome smoke before operational closure.
+- No customer data, production database/schema, provider binding, Lens Next Native source, installer, or package changed. Focused Navisworks smoke is not required.
+
 ## 120-build stabilization current authority — Block 20 performance and resilience — 2026-09-20
 
 - Builds 096–100 preserve the existing eight-second Windows application-readiness requirement and add release-gated API p95, browser-asset, Lens-payload, and report-generation budgets.

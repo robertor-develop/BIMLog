@@ -78,6 +78,7 @@ import { ensureWorkflowGovernancePolicySchema } from "./lib/workflow-governance-
 import { ensureConnectorFoundationSchema } from "./lib/connector-foundation-migration";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./lib/delivery-workflow-template-migration";
 import { requestDiagnostics } from "./middlewares/request-diagnostics";
+import { governedCorsOptions, resolveSessionSecret, securityHeaders } from "./lib/runtime-security";
 
 const ENV_MODE =
   process.env.REPLIT_DEPLOYMENT === "1" ? "PRODUCTION" : "DEVELOPMENT";
@@ -85,20 +86,17 @@ const ENV_MODE =
 // PROD_DATABASE_URL (Neon). Do NOT use PGHOST/PGDATABASE — those point at the
 // unused Replit built-in heliumdb and previously made this banner lie about the
 // real database, causing false "data loss" diagnoses.
-let DB_HOST = "unknown";
-let DB_NAME = "unknown";
+let DATABASE_CONFIGURED = false;
 try {
   const dbUrl = new URL(process.env.PROD_DATABASE_URL ?? "");
-  DB_HOST = dbUrl.hostname || "unknown";
-  DB_NAME = dbUrl.pathname.replace(/^\//, "") || "unknown";
+  DATABASE_CONFIGURED = Boolean(dbUrl.hostname && dbUrl.pathname.replace(/^\//, ""));
 } catch {
   // PROD_DATABASE_URL missing/unparseable — lib/db already fails loud on boot.
 }
 
 console.log("========================================");
 console.log(`[ENV] MODE: ${ENV_MODE}`);
-console.log(`[ENV] DB_HOST: ${DB_HOST}`);
-console.log(`[ENV] DB_NAME: ${DB_NAME}`);
+console.log(`[ENV] DATABASE: ${DATABASE_CONFIGURED ? "configured" : "unavailable"}`);
 console.log(`[ENV] NODE_ENV: ${process.env.NODE_ENV || "not set"}`);
 console.log("========================================");
 
@@ -167,7 +165,8 @@ const lensNextPublishingStartupBarrier = queueDatabaseStartup(() =>
 
 app.disable("etag");
 app.set("trust proxy", 1);
-app.use(cors());
+app.use(cors(governedCorsOptions()));
+app.use(securityHeaders);
 app.use(requestDiagnostics());
 app.use(
   "/api/v1/projects/:projectId/rfis/import/procore",
@@ -273,7 +272,7 @@ app.use(
 
 app.use(
   session({
-    secret: process.env.SESSION_SECRET || "bimlog-aps-session-secret",
+    secret: resolveSessionSecret(),
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -298,9 +297,7 @@ app.use("/api/v1", (_req: Request, res: Response, next: NextFunction) => {
 app.get("/api/v1/env-check", (_req: Request, res: Response) => {
   res.json({
     mode: ENV_MODE,
-    dbHost: DB_HOST,
-    dbName: DB_NAME,
-    nodeEnv: process.env.NODE_ENV || "not set",
+    database: DATABASE_CONFIGURED ? "configured" : "unavailable",
     timestamp: new Date().toISOString(),
   });
 });

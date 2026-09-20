@@ -232,6 +232,13 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block21-build104-unsupported-actions.behavior.ts
 - artifacts/api-server/src/lib/block21-build105-public-onboarding-acceptance.behavior.ts
 - artifacts/api-server/src/lib/block21-source-reader.ts
+- artifacts/api-server/src/lib/block22-build106-object-authorization.behavior.ts
+- artifacts/api-server/src/lib/block22-build107-runtime-security.behavior.ts
+- artifacts/api-server/src/lib/block22-build108-data-lifecycle.behavior.ts
+- artifacts/api-server/src/lib/block22-build109-recovery-readiness.behavior.ts
+- artifacts/api-server/src/lib/block22-build110-security-recovery-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block22-data-lifecycle.ts
+- artifacts/api-server/src/lib/block22-object-authority.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
@@ -537,6 +544,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/rfi-register-export.ts
 - artifacts/api-server/src/lib/rfi-standard-exports.ts
 - artifacts/api-server/src/lib/runtime-resilience.ts
+- artifacts/api-server/src/lib/runtime-security.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
 - artifacts/api-server/src/lib/scoped-briefing-cache.ts
 - artifacts/api-server/src/lib/sendgrid-transport.ts

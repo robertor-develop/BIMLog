@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the Block 21 / Build 105 push candidate. It must pass the exact clean-source gate and normal non-force push. Publication and full authenticated visible-Chrome smoke are due at Build 110.",
+  "headBinding": "The Git commit containing this ledger is the Block 22 / Build 110 publication candidate. It must pass the exact clean-source gate, normal non-force push, established Replit Shell publication without Replit Agents, exact live identity, and full authenticated visible-Chrome smoke.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 105,
+    "completedBuilds": 110,
     "totalBuilds": 120,
-    "remainingBuilds": 15,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 106,
-    "nextPushAfterBuild": 110,
-    "nextPublicationAfterBuild": 110,
+    "remainingBuilds": 10,
+    "currentUnpublishedBuilds": 0,
+    "nextBuild": 111,
+    "nextPushAfterBuild": 115,
+    "nextPublicationAfterBuild": 120,
     "blocker": null
   },
   "blocks": [
@@ -116,7 +116,7 @@
     {
       "block": 7,
       "buildRange": "031-035",
-      "status": "PASS_PENDING_PUSH",
+      "status": "PASS_PUSHED",
       "publicationRequired": false,
       "smoke": "Test-harness and release-gate reliability only; push at Build 035, no publication or Navisworks smoke.",
       "builds": [
@@ -320,7 +320,21 @@
         { "build": 102, "status": "PASS", "evidence": "BUILD_102_ONBOARDING_RECOVERY.md" },
         { "build": 103, "status": "PASS", "evidence": "BUILD_103_HELP_COVERAGE.md" },
         { "build": 104, "status": "PASS", "evidence": "BUILD_104_UNSUPPORTED_ACTIONS.md" },
-        { "build": 105, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_105_PUBLIC_ONBOARDING_ACCEPTANCE.md" }
+        { "build": 105, "status": "PASS_PUSHED", "evidence": "BUILD_105_PUBLIC_ONBOARDING_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 22,
+      "buildRange": "106-110",
+      "status": "PASS_PENDING_PUSH_PUBLICATION",
+      "publicationRequired": true,
+      "smoke": "Security, privacy, retention, isolated restore, post-restore login, and recovery acceptance; push and publish Build 110, then run exact-identity authenticated visible-Chrome smoke. Native and installers are unchanged, so no Navisworks smoke is required.",
+      "builds": [
+        { "build": 106, "status": "PASS", "evidence": "BUILD_106_OBJECT_AUTHORIZATION.md" },
+        { "build": 107, "status": "PASS", "evidence": "BUILD_107_RUNTIME_SECURITY.md" },
+        { "build": 108, "status": "PASS", "evidence": "BUILD_108_DATA_LIFECYCLE.md" },
+        { "build": 109, "status": "PASS_AFTER_CORRECTION", "evidence": "BUILD_109_RECOVERY_REHEARSAL.md" },
+        { "build": 110, "status": "PASS_PENDING_PUSH_PUBLICATION", "evidence": "BUILD_110_SECURITY_RECOVERY_ACCEPTANCE.md" }
       ]
     }
   ]

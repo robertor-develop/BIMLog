@@ -33272,6 +33272,97 @@
         "scripts/check-current-state-contract.mjs"
       ],
       "reviewedChangeSha256": "faf618f3b002bb307bf08075e566fc1dba78ca3cc92c72a53f1ed400d0ba5096"
+    },
+    {
+      "taskId": "bimlog-stabilization-block22-security-privacy-recovery-20260920",
+      "reviewedThroughCommit": "7c03ae3a3ac4f569b93d24a3e2070211d66e6f32",
+      "reviewedAt": "2026-09-20T06:26:42-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem owner, provider authority, or cross-product boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push, ten-build publication, visible Chrome, and no-Replit-Agents rules remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The normal pre-push gate now permanently enforces Block 22 authorization, runtime security, lifecycle, retention, restore, login, and recovery checks."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product direction is unchanged; the block hardens existing platform behavior."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory includes the Block 22 runtime and executable acceptance contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, packages, and supported-product identity are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report rendering and design-system behavior are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, version, or applicability decision changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Builds 106–110, the recovered restore defect, and the Build 110 publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closed Block 22 implementation and advanced the active program loop to Builds 111–115 after publication acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five tracked evidence records, an isolated restore receipt, and permanent executable contracts carry the audit evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/test-production-artifact-closure.ts",
+        "artifacts/api-server/src/app.ts",
+        "artifacts/api-server/src/lib/block22-build106-object-authorization.behavior.ts",
+        "artifacts/api-server/src/lib/block22-build107-runtime-security.behavior.ts",
+        "artifacts/api-server/src/lib/block22-build108-data-lifecycle.behavior.ts",
+        "artifacts/api-server/src/lib/block22-build109-recovery-readiness.behavior.ts",
+        "artifacts/api-server/src/lib/block22-build110-security-recovery-acceptance.behavior.ts",
+        "artifacts/api-server/src/lib/block22-data-lifecycle.ts",
+        "artifacts/api-server/src/lib/block22-object-authority.ts",
+        "artifacts/api-server/src/lib/runtime-security.ts",
+        "evidence/stabilization-program-20260919/BUILD_106_OBJECT_AUTHORIZATION.md",
+        "evidence/stabilization-program-20260919/BUILD_107_RUNTIME_SECURITY.md",
+        "evidence/stabilization-program-20260919/BUILD_108_DATA_LIFECYCLE.md",
+        "evidence/stabilization-program-20260919/BUILD_109_RECOVERY_REHEARSAL.md",
+        "evidence/stabilization-program-20260919/BUILD_110_SECURITY_RECOVERY_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "lib/db/src/schema/workflow-governance-policies.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/check-current-state-contract.mjs"
+      ],
+      "reviewedChangeSha256": "1726aa8ac34d12a63b94b67ece316b35931cd83557af3d71275e7d36aabe6cdc"
     }
   ]
 }
