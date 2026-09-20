@@ -2057,6 +2057,8 @@ The first Build 070 Replit publication attempt was cancelled before promotion af
 
 The corrective Living Brief reconciliation is bound to implementation commit `922b6d2b85394a67a84e40942a57caad03e92733`; it records the provider stop and correction without claiming publication.
 
+Table-qualified check identity and the aliases-array source declaration are reconciled through corrective commit `892bf1468fb8b12b7b127fbc6c525aba1f1fbd1a`; publication is still not claimed.
+
 ## 120-build stabilization program — Block 03 candidate
 
 Builds 011–015 establish one generated N18-P33 identity across Platform, API, Lens Next assemblies and Autodesk manifests; reject stale/mixed identities; expose safe live identity diagnostics; define an immutable Replit/source/assets/database/live receipt; and classify historical releases without rewriting them. Block 02 source `fdb2be13622aa0f8ed2fc1e4f60792a7bfbcc7d0` with receipt `e89dc3b4` remains the singular published production chain until the Build 020 milestone. Block 03 is push-only and changes no database/schema/customer data. Because Native/package identity infrastructure changed, 2021 and 2025 focused package/test smoke is mandatory before the Build 015 push; no installation is authorized or required.

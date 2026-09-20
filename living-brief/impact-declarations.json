@@ -32360,6 +32360,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-stabilization-block14-table-qualified-schema-receipt-20260919",
+      "reviewedThroughCommit": "892bf1468fb8b12b7b127fbc6c525aba1f1fbd1a",
+      "reviewedAt": "2026-09-19T21:08:00.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing authorization and release cadence remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Database check identities are table-qualified and the existing aliases-array invariant is declared consistently."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform authority records table-qualified check correspondence across startup, Drizzle, disposable, and provider databases."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and installer behavior remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the corrected provider-receipt identity and retains publication as pending."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The same exact-head gate, provider preview, publication, and live-smoke steps remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Build 070 evidence retains the provider finding and corrected proof without rewriting history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4afa86fad965b2df3e28bdfcef42ef22840e50ffe8a67a5706b156ff6c327471"
     }
   ]
 }
