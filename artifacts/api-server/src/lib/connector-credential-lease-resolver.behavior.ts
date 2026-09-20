@@ -87,5 +87,22 @@ await assert.rejects(() => operationFailure.withBearerToken({ credentialId: cont
 assert.equal(failedLease?.every((value) => value === 0), true);
 assert.equal(Object.values(operationRow).filter(Buffer.isBuffer).every((value) => value.every((byte) => byte === 0)), true);
 
+const rollbackEvents: unknown[] = [];
+const rollbackFailure = new PostgresConnectorCredentialLeaseResolver({
+  async connect() {
+    return {
+      async query(sql) {
+        if (sql === "ROLLBACK") throw new Error("sensitive database detail");
+        if (sql.startsWith("SELECT")) return { rows: [], rowCount: 0 };
+        return { rows: [], rowCount: null };
+      },
+      release() {},
+    };
+  },
+}, keySource, (event) => rollbackEvents.push(event));
+await assert.rejects(() => rollbackFailure.withBearerToken({ credentialId: context.credentialId, companyId: context.companyId, provider: context.provider }, async () => undefined), ConnectorValidationUnavailableError);
+assert.deepEqual(rollbackEvents, [{ event: "bimlog_operational_failure", code: "CONNECTOR_CREDENTIAL_LEASE_ROLLBACK_FAILED" }]);
+assert.doesNotMatch(JSON.stringify(rollbackEvents), /sensitive|credentialId|companyId|token/i);
+
 key.fill(0);
 console.log("PostgreSQL connector credential lease resolver behavior: PASS");

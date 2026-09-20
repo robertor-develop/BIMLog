@@ -6,6 +6,7 @@ import {
   type ConnectorCredentialLifecycleQuery,
   type ConnectorCredentialLifecycleStore,
 } from "./connector-credential-lifecycle";
+import { rollbackWithOperationalEvidence, type OperationalFailureReporter } from "./operational-failure";
 
 type QueryResult = { rows: Array<Record<string, unknown>>; rowCount: number | null };
 type Client = { query(sql: string, values?: unknown[]): Promise<QueryResult>; release(): void };
@@ -21,7 +22,10 @@ function positiveOrNull(value: unknown): number | null {
 }
 
 export class PostgresConnectorCredentialLifecycleStore implements ConnectorCredentialLifecycleStore {
-  constructor(private readonly database: ConnectorCredentialLifecyclePool) {}
+  constructor(
+    private readonly database: ConnectorCredentialLifecyclePool,
+    private readonly reportOperationalFailure?: OperationalFailureReporter,
+  ) {}
 
   async read(input: ConnectorCredentialLifecycleQuery) {
     const client = await this.database.connect();
@@ -111,7 +115,7 @@ export class PostgresConnectorCredentialLifecycleStore implements ConnectorCrede
       await client.query("COMMIT");
       return { credentials, events };
     } catch (error) {
-      await client.query("ROLLBACK").catch(() => undefined);
+      await rollbackWithOperationalEvidence(client, "CONNECTOR_CREDENTIAL_LIFECYCLE_ROLLBACK_FAILED", this.reportOperationalFailure);
       throw error;
     } finally { client.release(); }
   }

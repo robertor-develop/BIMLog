@@ -5,8 +5,14 @@ export interface SessionSnapshot<User> {
 }
 
 type TokenClaims = { exp?: number; iat?: number; sessionIssuedAt?: number };
+export type SessionContinuityDiagnosticCode = "SESSION_TOKEN_CLAIMS_INVALID" | "SESSION_STORAGE_INVALID";
+export type SessionContinuityReporter = (code: SessionContinuityDiagnosticCode) => void;
 
-function decodeClaims(token: string): TokenClaims | null {
+const reportSessionContinuityFailure: SessionContinuityReporter = (code) => {
+  console.warn(`[BIMLogSessionContinuity] ${code}`);
+};
+
+function decodeClaims(token: string, reporter: SessionContinuityReporter = reportSessionContinuityFailure): TokenClaims | null {
   try {
     const segment = token.split(".")[1];
     if (!segment) return null;
@@ -14,6 +20,7 @@ function decodeClaims(token: string): TokenClaims | null {
     const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, "=");
     return JSON.parse(atob(padded)) as TokenClaims;
   } catch {
+    reporter("SESSION_TOKEN_CLAIMS_INVALID");
     return null;
   }
 }
@@ -46,7 +53,7 @@ export function selectCurrentSession<User>(
   return incoming;
 }
 
-export function readPersistedSession<User>(serialized: string | null): SessionSnapshot<User> | null {
+export function readPersistedSession<User>(serialized: string | null, reporter: SessionContinuityReporter = reportSessionContinuityFailure): SessionSnapshot<User> | null {
   if (!serialized) return null;
   try {
     const parsed = JSON.parse(serialized) as { state?: Partial<SessionSnapshot<User>> };
@@ -57,6 +64,7 @@ export function readPersistedSession<User>(serialized: string | null): SessionSn
     if ((token === null) !== (user === null)) return null;
     return { token, user, changedAt: state.changedAt };
   } catch {
+    reporter("SESSION_STORAGE_INVALID");
     return null;
   }
 }

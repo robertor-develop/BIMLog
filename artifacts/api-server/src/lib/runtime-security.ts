@@ -1,19 +1,23 @@
 import type { CorsOptions } from "cors";
 import type { NextFunction, Request, Response } from "express";
+import { reportOperationalFailure, type OperationalFailureReporter } from "./operational-failure";
 
-const parseOrigin = (value: string | undefined): string | null => {
+const parseOrigin = (value: string | undefined, reporter?: OperationalFailureReporter): string | null => {
   if (!value) return null;
   try {
     const parsed = new URL(value);
     return parsed.protocol === "https:" || ["127.0.0.1", "localhost", "::1"].includes(parsed.hostname) ? parsed.origin : null;
-  } catch { return null; }
+  } catch {
+    reportOperationalFailure("PUBLIC_ORIGIN_CONFIGURATION_INVALID", reporter);
+    return null;
+  }
 };
 
-export function productionOrigins(environment: NodeJS.ProcessEnv = process.env): ReadonlySet<string> {
+export function productionOrigins(environment: NodeJS.ProcessEnv = process.env, reporter?: OperationalFailureReporter): ReadonlySet<string> {
   const candidates = [environment.BIMLOG_PUBLIC_URL, environment.BIMLOG_URL, environment.APP_URL];
   for (const domain of (environment.REPLIT_DOMAINS ?? "").split(",")) candidates.push(domain.trim() ? `https://${domain.trim()}` : undefined);
   if (environment.REPLIT_DEV_DOMAIN) candidates.push(`https://${environment.REPLIT_DEV_DOMAIN}`);
-  return new Set(candidates.map(parseOrigin).filter((value): value is string => Boolean(value)));
+  return new Set(candidates.map((candidate) => parseOrigin(candidate, reporter)).filter((value): value is string => Boolean(value)));
 }
 
 export function governedCorsOptions(environment: NodeJS.ProcessEnv = process.env): CorsOptions {

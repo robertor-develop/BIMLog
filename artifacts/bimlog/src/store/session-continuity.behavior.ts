@@ -23,4 +23,9 @@ assert.deepEqual(readPersistedSession(JSON.stringify({ state: { token: newer, us
 assert.equal(readPersistedSession(JSON.stringify({ state: { token: newer, user: null, changedAt: 30 } })), null);
 assert.equal(readPersistedSession("not-json"), null);
 
-console.log("session continuity: 10/10 passed");
+const diagnostics: string[] = [];
+assert.equal(readPersistedSession("still-not-json", code => diagnostics.push(code)), null);
+assert.deepEqual(diagnostics, ["SESSION_STORAGE_INVALID"]);
+assert.doesNotMatch(JSON.stringify(diagnostics), /still-not-json|token|user/i);
+
+console.log("session continuity: 13/13 passed");

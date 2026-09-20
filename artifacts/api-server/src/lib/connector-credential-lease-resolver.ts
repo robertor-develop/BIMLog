@@ -7,6 +7,7 @@ import {
   type ConnectorKekLeaseSource,
 } from "./connector-credential-envelope";
 import { ConnectorValidationUnavailableError } from "./coordination-hub-configuration-service";
+import { rollbackWithOperationalEvidence, type OperationalFailureReporter } from "./operational-failure";
 
 const leaseRequestSchema = z.object({
   credentialId: z.string().trim().min(1).max(1_024),
@@ -62,6 +63,7 @@ export class PostgresConnectorCredentialLeaseResolver {
   constructor(
     private readonly database: ConnectorCredentialLeasePool,
     private readonly keySource: ConnectorKekLeaseSource,
+    private readonly reportOperationalFailure?: OperationalFailureReporter,
   ) {}
 
   async withBearerToken<T>(rawInput: unknown, operation: (token: Uint8Array) => Promise<T>): Promise<T> {
@@ -98,7 +100,7 @@ export class PostgresConnectorCredentialLeaseResolver {
         };
         await client.query("COMMIT");
       } catch (error) {
-        await client.query("ROLLBACK").catch(() => undefined);
+        await rollbackWithOperationalEvidence(client, "CONNECTOR_CREDENTIAL_LEASE_ROLLBACK_FAILED", this.reportOperationalFailure);
         throw error;
       } finally { client.release(); }
 

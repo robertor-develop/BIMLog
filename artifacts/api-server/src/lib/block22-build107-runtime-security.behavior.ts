@@ -15,6 +15,11 @@ assert.equal((await decide(undefined)).allow, true);
 assert.equal((await decide("https://bimlog.example.test")).allow, true);
 assert.match((await decide("https://attacker.example")).error?.message ?? "", /CORS_ORIGIN_DENIED/);
 
+const originEvents: unknown[] = [];
+assert.deepEqual([...productionOrigins({ BIMLOG_PUBLIC_URL: "not a valid URL" }, (event) => originEvents.push(event))], []);
+assert.deepEqual(originEvents, [{ event: "bimlog_operational_failure", code: "PUBLIC_ORIGIN_CONFIGURATION_INVALID" }]);
+assert.doesNotMatch(JSON.stringify(originEvents), /not a valid URL/);
+
 const headers = new Map<string, string>();
 securityHeaders({} as never, { setHeader: (name: string, value: string) => headers.set(name, value) } as never, () => undefined);
 for (const name of ["Content-Security-Policy", "Referrer-Policy", "X-Content-Type-Options", "X-Frame-Options", "Permissions-Policy"]) assert.ok(headers.has(name), name);

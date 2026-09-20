@@ -73,4 +73,21 @@ const deniedPool: ConnectorCredentialLifecyclePool = {
 await assert.rejects(() => new PostgresConnectorCredentialLifecycleStore(deniedPool).read({ scope, credentialLimit: 20, eventLimit: 50 }), CoordinationConflictError);
 assert.equal(rolledBack, true);
 
+const rollbackEvents: unknown[] = [];
+const rollbackFailurePool: ConnectorCredentialLifecyclePool = {
+  async connect() {
+    return {
+      async query(sql) {
+        if (sql === "ROLLBACK") throw new Error("sensitive database detail");
+        if (sql.includes("FROM users")) return { rows: [], rowCount: 0 };
+        return { rows: [], rowCount: null };
+      },
+      release() {},
+    };
+  },
+};
+await assert.rejects(() => new PostgresConnectorCredentialLifecycleStore(rollbackFailurePool, (event) => rollbackEvents.push(event)).read({ scope, credentialLimit: 20, eventLimit: 50 }), CoordinationConflictError);
+assert.deepEqual(rollbackEvents, [{ event: "bimlog_operational_failure", code: "CONNECTOR_CREDENTIAL_LIFECYCLE_ROLLBACK_FAILED" }]);
+assert.doesNotMatch(JSON.stringify(rollbackEvents), /sensitive|projectId|companyId|actorUserId/i);
+
 console.log("connector credential lifecycle projection behavior: PASS");
