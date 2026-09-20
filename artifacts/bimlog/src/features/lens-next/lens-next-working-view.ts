@@ -70,15 +70,18 @@ export async function repairBimlogWorkingViewFromCurrent(
   dependencies: LensNextVisualRepairDependencies,
   issue: LensNextIssue,
   context: LensNextBridgeProjectContext,
+  confirmationReason: string,
   signal?: AbortSignal,
 ): Promise<LensNextVisualRepairResult> {
   if (issue.identity.projectId !== context.projectId)
     throw new Error("The active Navisworks model is not bound to this BIMLog issue.");
   if (issue.visualStateAvailable || issue.visualStateDigest)
     throw new Error("This platform record already has a visual package. Refresh and open it normally.");
+  if (confirmationReason.trim().length < 3 || confirmationReason.trim().length > 500)
+    throw new Error("A bounded migration reason is required.");
 
   const captured = await dependencies.bridgeClient.captureCurrentVisualState(issue, context, signal);
-  await dependencies.apiClient.saveVisualState(issue, captured.visualStateJson, captured.visualStateDigest, signal);
+  await dependencies.apiClient.saveVisualState(issue, captured.visualStateJson, captured.visualStateDigest, confirmationReason.trim(), signal);
   const migratedIssue: LensNextIssue = Object.freeze({
     ...issue,
     visualStateAvailable: true,

@@ -34,7 +34,7 @@ let continuityConfirmedAtBridge = false;
 const dependencies: any = {
   apiClient: {
     loadVisualState: async (_issue: unknown, modelFingerprint?: string | null) => { calls.push("load"); requestedModelFingerprints.push(modelFingerprint); return { visualStateJson: JSON.stringify(visualState), visualStateDigest: digest }; },
-    saveVisualState: async () => { calls.push("save"); },
+    saveVisualState: async (_issue: unknown, _json: string, _digest: string, reason: string) => { calls.push(`save:${reason}`); },
   },
   bridgeClient: {
     captureCurrentVisualState: async () => { calls.push("capture"); return { visualStateJson: JSON.stringify({ DigestSha256: digest }), visualStateDigest: digest }; },
@@ -67,10 +67,13 @@ await assert.rejects(
 );
 assert.deepEqual(calls.splice(0), []);
 
-const repaired = await repairBimlogWorkingViewFromCurrent(dependencies, legacyWithoutGuid, context);
+const repaired = await repairBimlogWorkingViewFromCurrent(dependencies, legacyWithoutGuid, context, "Exact historical view confirmed");
 assert.equal(repaired.visualStateDigest, digest);
-assert.deepEqual(calls.splice(0), ["capture", "save", "load", "apply-platform"]);
+assert.deepEqual(calls.splice(0), ["capture", "save:Exact historical view confirmed", "load", "apply-platform"]);
 assert.deepEqual(requestedModelFingerprints.splice(0), [context.modelFingerprint]);
+
+await assert.rejects(() => repairBimlogWorkingViewFromCurrent(dependencies, legacyWithoutGuid, context, " "), /migration reason/);
+assert.deepEqual(calls.splice(0), []);
 
 await assert.rejects(() => openBimlogWorkingView(dependencies, issue(false), { ...context, projectId: 99 }), /not bound/);
 assert.deepEqual(calls, []);

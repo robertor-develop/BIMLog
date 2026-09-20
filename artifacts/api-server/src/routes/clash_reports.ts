@@ -1553,11 +1553,15 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/vis
     const identity = req.body?.identity;
     const visualStateJson = typeof req.body?.visualStateJson === "string" ? req.body.visualStateJson.trim() : "";
     const visualStateDigest = typeof req.body?.visualStateDigest === "string" ? req.body.visualStateDigest.trim().toLowerCase() : "";
+    const confirmationReason = typeof req.body?.confirmationReason === "string" ? req.body.confirmationReason.trim() : "";
     if (!Number.isSafeInteger(projectId) || projectId <= 0 || !Number.isSafeInteger(serverId) || serverId <= 0) {
       res.status(400).json({ error: "visual_state_identity_invalid" }); return;
     }
     if (!visualStateJson || Buffer.byteLength(visualStateJson, "utf8") > 4 * 1024 * 1024 || !/^[0-9a-f]{64}$/.test(visualStateDigest)) {
       res.status(422).json({ error: "visual_state_invalid", message: "A bounded visual-state package and SHA-256 digest are required." }); return;
+    }
+    if (confirmationReason.length < 3 || confirmationReason.length > 500) {
+      res.status(422).json({ error: "migration_reason_invalid", message: "A bounded historical migration reason is required." }); return;
     }
     const [row] = await db.select().from(lensViewpointsTable).where(and(eq(lensViewpointsTable.id, serverId), eq(lensViewpointsTable.projectId, projectId))).limit(1);
     if (!row) { res.status(404).json({ error: "lens_viewpoint_not_found" }); return; }
@@ -1575,8 +1579,37 @@ router.post("/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/vis
       }
       throw error;
     }
-    await db.update(lensViewpointsTable).set({ visualStateJson, visualStateDigest, updatedAt: new Date() }).where(eq(lensViewpointsTable.id, row.id));
-    res.json({ success: true, serverId: row.id, visualStateDigest });
+    const outcome = await db.transaction(async tx => {
+      const [updated] = await tx.update(lensViewpointsTable)
+        .set({ visualStateJson, visualStateDigest, updatedAt: new Date() })
+        .where(and(
+          eq(lensViewpointsTable.id, row.id),
+          eq(lensViewpointsTable.projectId, row.projectId),
+          isNull(lensViewpointsTable.visualStateJson),
+          isNull(lensViewpointsTable.visualStateDigest),
+        ))
+        .returning({ id: lensViewpointsTable.id });
+      if (updated) {
+        await tx.insert(lensViewpointEventsTable).values({
+          projectId: row.projectId,
+          viewpointId: row.id,
+          eventType: "legacy_visual_state_migrated",
+          changedById: req.user?.userId ?? null,
+        });
+        return { migrated: true, replayed: false };
+      }
+      const [current] = await tx.select({ visualStateJson: lensViewpointsTable.visualStateJson, visualStateDigest: lensViewpointsTable.visualStateDigest })
+        .from(lensViewpointsTable)
+        .where(and(eq(lensViewpointsTable.id, row.id), eq(lensViewpointsTable.projectId, row.projectId)))
+        .limit(1);
+      if (current?.visualStateDigest === visualStateDigest && current.visualStateJson === visualStateJson)
+        return { migrated: false, replayed: true };
+      return { migrated: false, replayed: false };
+    });
+    if (!outcome.migrated && !outcome.replayed) {
+      res.status(409).json({ error: "visual_state_already_present", message: "This BIMLog record already has a different visual package; historical migration was refused." }); return;
+    }
+    res.status(outcome.migrated ? 201 : 200).json({ success: true, serverId: row.id, visualStateDigest, replayed: outcome.replayed });
   }
 );
 

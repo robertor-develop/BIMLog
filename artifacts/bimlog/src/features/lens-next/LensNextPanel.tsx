@@ -529,7 +529,7 @@ export function LensNextPanel({
     setVisualRepairState("repairing");
     setVisualRepairMessage(null);
     try {
-      const result = await repairBimlogWorkingViewFromCurrent({ apiClient, bridgeClient }, selectedIssue, bridgeContext);
+      const result = await repairBimlogWorkingViewFromCurrent({ apiClient, bridgeClient }, selectedIssue, bridgeContext, reason);
       await loadIssues("refresh");
       setVisualRepairState("success");
       setVisualRepairMessage(`BIMLog Visual Package repaired and round-trip verified (${result.visualStateDigest.slice(0, 12)}…). Open Working View is now available.`);

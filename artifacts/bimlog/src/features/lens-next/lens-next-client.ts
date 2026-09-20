@@ -106,7 +106,7 @@ export interface LensNextApiClient {
     signal?: AbortSignal,
   ): Promise<LensNextHistory>;
   publishAction(issue: LensNextIssue, action: LensNextPublishAction, reason: string, idempotencyKey: string, modelFingerprint?: string | null, signal?: AbortSignal): Promise<LensNextPublishResult>;
-  saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, signal?: AbortSignal): Promise<void>;
+  saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, confirmationReason: string, signal?: AbortSignal): Promise<void>;
   loadVisualState(issue: LensNextIssue, modelFingerprint?: string | null, signal?: AbortSignal): Promise<{ visualStateJson: string; visualStateDigest: string }>;
   uploadLocalViewpoint(localViewpoint: LensNextLocalViewpoint, modelFingerprint: string, visualState: Record<string, unknown>, confirmationReason: string, signal?: AbortSignal): Promise<LensNextLocalUploadReceipt>;
   createIssue(projectId: number, viewpointId: string, modelFingerprint: string, visualState: Record<string, unknown>, issue: LensNextCreateDraft, confirmationReason: string, signal?: AbortSignal): Promise<LensNextCreateReceipt>;
@@ -250,10 +250,10 @@ export function createLensNextApiClient(
       if (body.success !== true || body.contractVersion !== "lens-next-publish.v1" || !body.receipt || !body.issue) throw new Error("Controlled publish receipt is invalid");
       return body as LensNextPublishResult;
     },
-    async saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, signal?: AbortSignal) {
+    async saveVisualState(issue: LensNextIssue, visualStateJson: string, visualStateDigest: string, confirmationReason: string, signal?: AbortSignal) {
       const identity = assertLensNextImmutableIdentity(issue.identity);
       const raw = await post(`/projects/${identity.projectId}/clash-reports/lens-viewpoints/${identity.serverId}/visual-state`, {
-        identity, visualStateJson, visualStateDigest,
+        identity, visualStateJson, visualStateDigest, confirmationReason,
       }, signal);
       if (!raw || typeof raw !== "object" || (raw as Record<string, unknown>).success !== true)
         throw new Error("BIMLog did not confirm visual-state persistence");
