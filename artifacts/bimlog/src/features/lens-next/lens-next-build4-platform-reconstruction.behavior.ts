@@ -16,7 +16,7 @@ assert.doesNotMatch(openFunction, /bridgeClient\.openWorkingView|captureCurrentV
 assert.match(openFunction, /apiClient\.loadVisualState\(issue, context\.modelFingerprint, signal\)/);
 assert.match(openFunction, /bridgeClient\.applyPlatformWorkingView\(issue, context, stored\.visualStateJson, stored\.visualStateDigest, signal(?:, legacyModelContinuityConfirmed)?\)/);
 assert.match(workingView, /bridgeClient\.captureCurrentVisualState\(issue, context, signal\)/);
-assert.match(workingView, /apiClient\.saveVisualState\(issue, captured\.visualStateJson, captured\.visualStateDigest, signal\)/);
+assert.match(workingView, /apiClient\.saveVisualState\(issue, captured\.visualStateJson, captured\.visualStateDigest, confirmationReason\.trim\(\), signal\)/);
 assert.match(workingView, /apiClient\.loadVisualState\(migratedIssue, context\.modelFingerprint, signal\)/);
 assert.match(workingView, /bridgeClient\.applyPlatformWorkingView\(migratedIssue, context, stored\.visualStateJson, stored\.visualStateDigest, signal\)/);
 assert.match(client, /visual-state digest changed after inventory refresh/);
