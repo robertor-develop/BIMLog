@@ -6,6 +6,7 @@
 - Exact replays remain idempotent; cursor stalls, divergent payloads, cross-tenant mappings, duplicate attachment identities, stale/different acknowledgements, expired credentials, and revoked credentials fail safely and truthfully.
 - Block 18 changes no schema, customer data, provider configuration, Lens Next Native source, installer, package, or accepted live release. Build 090 is the required push/publication boundary; M09 requires exact live identity plus authenticated visible-Chrome files/report/export and controlled connector reconciliation smoke.
 - No Navisworks smoke is required because Native and installers are unchanged.
+- The generated Platform inventory and semantic-impact receipt are reconciled through the exact Build 090 implementation commit before the clean release gate and publication action.
 
 ## 120-build stabilization current authority — Block 17 document custody and owner handover — 2026-09-20
 

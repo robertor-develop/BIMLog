@@ -32730,6 +32730,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2b73f78b9864f0ef3dbee8202f553d114058e3117b287b8749010d868c69fd0e"
+    },
+    {
+      "taskId": "bimlog-stabilization-block18-build090-integration-reconciliation-20260920",
+      "reviewedThroughCommit": "3becd1074554dbb138974675916b364349ed3f74",
+      "reviewedAt": "2026-09-20T01:46:14.7002314-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The authorized five-build push and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing integration, provenance, idempotency, privacy, and release-quality rules govern Block 18."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated inventory now includes the Block 18 integration reconciliation and recovery modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, packages, and release identity are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report visual-policy change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Builds 086–090 as the current integration publication candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 091–120 remain open after the Build 090 publication milestone."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build evidence and ledger preserve the focused and aggregate acceptance results."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1220f0ba43da49ab48b64c45089900180c25bf3218208cc164526cc3c61a3c7c"
     }
   ]
 }

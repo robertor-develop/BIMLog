@@ -207,6 +207,16 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block17-build083-pdf-fidelity.behavior.ts
 - artifacts/api-server/src/lib/block17-build084-portable-exports.behavior.ts
 - artifacts/api-server/src/lib/block17-build085-owner-handover-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block18-build086-procore-reconciliation.behavior.ts
+- artifacts/api-server/src/lib/block18-build086-procore-reconciliation.ts
+- artifacts/api-server/src/lib/block18-build087-sharepoint-reference.behavior.ts
+- artifacts/api-server/src/lib/block18-build087-sharepoint-reference.ts
+- artifacts/api-server/src/lib/block18-build088-outlook-custody.behavior.ts
+- artifacts/api-server/src/lib/block18-build088-outlook-custody.ts
+- artifacts/api-server/src/lib/block18-build089-connector-matrix.behavior.ts
+- artifacts/api-server/src/lib/block18-build089-connector-matrix.ts
+- artifacts/api-server/src/lib/block18-build090-integration-recovery.behavior.ts
+- artifacts/api-server/src/lib/block18-build090-integration-recovery.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
