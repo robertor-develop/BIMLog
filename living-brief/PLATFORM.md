@@ -202,6 +202,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block16-build078-notification-determinism.behavior.ts
 - artifacts/api-server/src/lib/block16-build079-delivery-contracts.behavior.ts
 - artifacts/api-server/src/lib/block16-build080-feedback-notification-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block17-build081-file-download.behavior.ts
+- artifacts/api-server/src/lib/block17-build082-upload-retention.behavior.ts
+- artifacts/api-server/src/lib/block17-build083-pdf-fidelity.behavior.ts
+- artifacts/api-server/src/lib/block17-build084-portable-exports.behavior.ts
+- artifacts/api-server/src/lib/block17-build085-owner-handover-acceptance.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts
@@ -487,6 +492,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/project-analytics-current-view-export.ts
 - artifacts/api-server/src/lib/project-context-source.behavior.ts
 - artifacts/api-server/src/lib/project-controls-dashboard.behavior.ts
+- artifacts/api-server/src/lib/project-file-upload-contract.ts
+- artifacts/api-server/src/lib/project-handover-package.ts
 - artifacts/api-server/src/lib/project-insights-metrics.ts
 - artifacts/api-server/src/lib/project-intelligence.ts
 - artifacts/api-server/src/lib/project-invitation-contract.ts

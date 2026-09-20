@@ -32661,6 +32661,75 @@
         "scripts/check-current-state-contract.mjs"
       ],
       "reviewedChangeSha256": "3b4cfe2d8dcabe6becfe69e3726858d7b91c91181a2ae8a6aed97fef9a8c37c7"
+    },
+    {
+      "taskId": "bimlog-stabilization-block17-build085-handover-reconciliation-20260920",
+      "reviewedThroughCommit": "d67a0ca38c526c5cdce0c365d9ec9b826c2dcf41",
+      "reviewedAt": "2026-09-20T01:15:00.000-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The standing five-build push and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release-quality gates cover the Block 17 document custody and handover acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated inventory now includes the governed project upload and owner-handover modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, packages, and release identity are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing shared PDF design system is reused without visual-policy change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded accepted P36 and Builds 081–085 as the current push-only Block 17."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 086–090 and the next publication milestone remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build evidence records the failed-and-corrected current-state gate and clean artifact proof."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "2b73f78b9864f0ef3dbee8202f553d114058e3117b287b8749010d868c69fd0e"
     }
   ]
 }

@@ -1,11 +1,18 @@
 # STATUS.md - Current Accepted Platform State
 
-## 120-build stabilization current authority — Block 16 feedback and notifications P36 publication candidate — 2026-09-20
+## 120-build stabilization current authority — Block 17 document custody and owner handover — 2026-09-20
+
+- `v1.05.N18-P36` is the accepted live Platform release from Build 080; its GitHub push, Replit publication, exact live identity and authenticated Chrome smoke passed.
+- Builds 081–085 are the current push-only block. They restore durable-key binding and arbitrary-file download for customer uploads, reject active-content/path/size hazards, enforce retention-aware deletion, normalize files PDF delivery, and add hash-verifiable CSV/XML/ZIP owner handover packages.
+- Build 085 changes no schema, customer data, provider configuration, Lens Next Native code, installer, package, or release identity. The next publication and authenticated Chrome smoke remain due after Build 090.
+- The Block 17 aggregate behavior suite, API typecheck, database-source safety, secret scan, encoding scan, current-state contract, and clean detached production-artifact proof are the required local acceptance evidence. No Navisworks smoke is required because Native and installers are unchanged.
+
+## Historical Block 16 publication candidate record — 2026-09-20
 
 - Builds 071–080 form the current due ten-build publication batch. Historical accepted production receipts remain unchanged until this exact candidate is published and live-verified.
 - Builds 076–080 bind durable feedback capture and recovery, separate customer and reviewer routes, deterministic notification preferences and unread state, governed email/Telegram delivery contracts, and production-safe feedback-to-resolution acceptance. No external notification was sent by the acceptance gate.
 - The candidate release identity is `v1.05.N18-P36` / `1.5.18.36`. Native behavior remains N18; shared package metadata was deterministically rebuilt for Navisworks 2021 and 2025 and passed both repeated package-only gates without Autodesk installation.
-- Build 080 remains a candidate until the exact clean head is pushed, published through the established Replit Shell path without Replit Agents, live identity is exact, authenticated visible-Chrome acceptance passes, and the focused installed Lens Next/Legacy Lens scan is recorded.
+- This section records the pre-publication Build 080 checkpoint. Build 080 subsequently passed push, Replit publication, exact live identity and authenticated Chrome acceptance; the accepted live release is P36.
 
 ## 120-build stabilization current authority — Block 14 Lens Next P35 publication candidate — 2026-09-19
 
