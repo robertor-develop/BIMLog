@@ -2059,6 +2059,8 @@ The corrective Living Brief reconciliation is bound to implementation commit `92
 
 Table-qualified check identity and the aliases-array source declaration are reconciled through corrective commit `892bf1468fb8b12b7b127fbc6c525aba1f1fbd1a`; publication is still not claimed.
 
+The first table-qualified provider receipt proved that six governance predicates already exist in production under their older authoritative `_check` names. Drizzle now preserves those exact deployed names rather than proposing constraint replacement. Production remains unchanged; the only expected provider reconciliation is the additive development-only lifecycle trio and date check. Publication is still not claimed until a fresh exact-head gate, push, clean provider preview, successful publication, and authenticated live smoke pass.
+
 ## 120-build stabilization program — Block 03 candidate
 
 Builds 011–015 establish one generated N18-P33 identity across Platform, API, Lens Next assemblies and Autodesk manifests; reject stale/mixed identities; expose safe live identity diagnostics; define an immutable Replit/source/assets/database/live receipt; and classify historical releases without rewriting them. Block 02 source `fdb2be13622aa0f8ed2fc1e4f60792a7bfbcc7d0` with receipt `e89dc3b4` remains the singular published production chain until the Build 020 milestone. Block 03 is push-only and changes no database/schema/customer data. Because Native/package identity infrastructure changed, 2021 and 2025 focused package/test smoke is mandatory before the Build 015 push; no installation is authorized or required.

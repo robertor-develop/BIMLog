@@ -11,7 +11,7 @@ export const companyWorkflowGovernancePoliciesTable = pgTable("company_workflow_
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [
   unique("company_workflow_governance_policies_company_code_uq").on(table.companyId, table.code),
-  check("company_workflow_governance_policies_code_chk", sql`${table.code} ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$'`),
+  check("company_workflow_governance_policies_code_check", sql`${table.code} ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$'`),
 ]);
 
 export const companyWorkflowGovernanceVersionsTable = pgTable("company_workflow_governance_versions", {
@@ -36,10 +36,10 @@ export const companyWorkflowGovernanceVersionsTable = pgTable("company_workflow_
   unique("company_workflow_governance_versions_policy_version_uq").on(table.policyId, table.version),
   uniqueIndex("company_workflow_governance_one_open_uq").on(table.policyId).where(sql`${table.state} IN ('draft','approved')`),
   uniqueIndex("company_workflow_governance_one_published_uq").on(table.policyId).where(sql`${table.state}='published'`),
-  check("company_workflow_governance_versions_version_chk", sql`${table.version}>0`),
-  check("company_workflow_governance_versions_revision_chk", sql`${table.revision}>0`),
-  check("company_workflow_governance_versions_state_chk", sql`${table.state} IN ('draft','approved','published','superseded','retired')`),
-  check("company_workflow_governance_versions_fingerprint_chk", sql`${table.fingerprint} IS NULL OR ${table.fingerprint} ~ '^[a-f0-9]{64}$'`),
+  check("company_workflow_governance_versions_version_check", sql`${table.version}>0`),
+  check("company_workflow_governance_versions_revision_check", sql`${table.revision}>0`),
+  check("company_workflow_governance_versions_state_check", sql`${table.state} IN ('draft','approved','published','superseded','retired')`),
+  check("company_workflow_governance_versions_fingerprint_check", sql`${table.fingerprint} IS NULL OR ${table.fingerprint} ~ '^[a-f0-9]{64}$'`),
   check("company_workflow_governance_versions_approved_chk", sql`(${table.state} IN ('approved','published','superseded','retired')) = (${table.approvedById} IS NOT NULL AND ${table.approvedAt} IS NOT NULL AND ${table.fingerprint} IS NOT NULL)`),
 ]);
 
@@ -54,5 +54,5 @@ export const companyWorkflowGovernanceEventsTable = pgTable("company_workflow_go
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 }, table => [
   index("company_workflow_governance_events_history_idx").on(table.companyId, table.policyId, table.createdAt),
-  check("company_workflow_governance_events_action_chk", sql`${table.action} IN ('created','edited','approved','published','superseded','retired')`),
+  check("company_workflow_governance_events_action_check", sql`${table.action} IN ('created','edited','approved','published','superseded','retired')`),
 ]);
