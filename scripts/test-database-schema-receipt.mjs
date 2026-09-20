@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { classifySchemaInventory, sourceSchemaReceipt } from "./database-schema-receipt.mjs";
 
 const receipt = sourceSchemaReceipt();
-assert.deepEqual(receipt.counts, { tables: 223, indexes: 273, columns: 3057, checks: 301, startupTables: 184 });
+assert.deepEqual(receipt.counts, { tables: 223, indexes: 273, columns: 3057, checks: 303, startupTables: 184 });
 assert.match(receipt.sourceContractSha256, /^[a-f0-9]{64}$/);
 
 const exact = classifySchemaInventory(receipt, {
@@ -40,4 +40,4 @@ const constraintBacked = classifySchemaInventory(receipt, {
 assert.equal(constraintBacked.exact, true);
 assert.deepEqual(constraintBacked.indexes.constraintBackedExtra, ["example_pkey"]);
 
-console.log("DATABASE_SCHEMA_RECEIPT_TESTS=PASS exact=1 classified_difference=1 counts=223/273/3057/301/184");
+console.log("DATABASE_SCHEMA_RECEIPT_TESTS=PASS exact=1 classified_difference=1 counts=223/273/3057/303/184");

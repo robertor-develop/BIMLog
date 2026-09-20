@@ -311,7 +311,7 @@ export function collectSchemaContract() {
         columns.add(`${table}.${column.name}`);
       }
       for (const tableCheck of getTableConfig(value).checks) {
-        checks.add(tableCheck.name);
+        checks.add(`${table}.${tableCheck.name}`);
       }
     }
   } finally {

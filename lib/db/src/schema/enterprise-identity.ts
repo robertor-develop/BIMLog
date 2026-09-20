@@ -334,6 +334,7 @@ export const companyMasterCatalogEntriesTable = pgTable("company_master_catalog_
   check("company_master_catalog_entries_code_check", sql`${t.code} ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$'`),
   check("company_master_catalog_entries_state_check", sql`${t.state} IN ('active','inactive','retired')`),
   check("company_master_catalog_entries_version_check", sql`${t.version}>0`),
+  check("company_master_catalog_aliases_array_chk", sql`jsonb_typeof(${t.aliases})='array'`),
   check("company_master_catalog_client_chk", sql`(${t.kind}='client')=(${t.canonicalCompanyId} IS NOT NULL)`),
   check("company_master_catalog_retired_chk", sql`(${t.state}='retired')=(${t.retiredAt} IS NOT NULL)`),
 ]);

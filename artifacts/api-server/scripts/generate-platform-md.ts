@@ -331,7 +331,7 @@ ${appRoutes()}
 ## Build 070 publication schema-correspondence correction
 
 - \`job_activation_tasks\` lifecycle dates and predecessor identities are jointly owned by the Build 057 startup migration and the authoritative Drizzle schema. The declared contract includes \`start_date\`, \`due_date\`, \`predecessor_task_ids\`, and \`job_activation_task_dates_chk\`; provider synchronization may not remove them.
-- Publication correspondence introspects the executable Drizzle schema and compares every table, explicit index, column, and check constraint against both provider databases. Any missing or extra column/check returns a stopped publication decision instead of a zero-change receipt.
+- Publication correspondence introspects the executable Drizzle schema and compares every table, explicit index, column, and table-qualified check constraint against both provider databases. Duplicate constraint names on different tables remain distinct, and the existing master-catalog aliases-array check is declared in both startup and Drizzle authorities. Any missing or extra column/check returns a stopped publication decision instead of a zero-change receipt.
 - The first P35 provider preview exposed the prior mismatch against 18 populated records and was cancelled before promotion. Production remained unchanged; the corrective release must pass a fresh provider preview before publication.
 `;
 

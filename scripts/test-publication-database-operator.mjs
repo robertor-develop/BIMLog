@@ -14,6 +14,6 @@ assert.equal(fail.publishable, false);
 assert.equal(fail.schemaAction, "STOP_COMPLETE_PREVIEW_AND_RESTORE_PROOF_REQUIRED");
 const columnDrift = { ...exact, columns: exact.columns.filter((name) => name !== "job_activation_tasks.start_date") };
 assert.equal(evaluatePublicationDatabases(source, exact, columnDrift).publishable, false);
-const checkDrift = { ...exact, checks: exact.checks.filter((name) => name !== "job_activation_task_dates_chk") };
+const checkDrift = { ...exact, checks: exact.checks.filter((name) => name !== "job_activation_tasks.job_activation_task_dates_chk") };
 assert.equal(evaluatePublicationDatabases(source, exact, checkDrift).publishable, false);
 console.log("PUBLICATION_DATABASE_OPERATOR_TESTS=PASS exact=1 table_mismatch_stop=1 column_mismatch_stop=1 check_mismatch_stop=1 data_copy_off=1");

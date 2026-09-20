@@ -71,11 +71,12 @@ export async function readDatabaseInventory(databaseUrl) {
     const indexes = await client.query("SELECT indexname FROM pg_catalog.pg_indexes WHERE schemaname='public' ORDER BY indexname");
     const columns = await client.query("SELECT table_name,column_name FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name,column_name");
     const checks = await client.query(
-      `SELECT c.conname
+      `SELECT cls.relname table_name,c.conname
        FROM pg_catalog.pg_constraint c
+       JOIN pg_catalog.pg_class cls ON cls.oid=c.conrelid
        JOIN pg_catalog.pg_namespace n ON n.oid=c.connamespace
        WHERE n.nspname='public' AND c.contype='c'
-       ORDER BY c.conname`,
+       ORDER BY cls.relname,c.conname`,
     );
     const constraintIndexes = await client.query(
       `SELECT i.relname indexname
@@ -91,7 +92,7 @@ export async function readDatabaseInventory(databaseUrl) {
       tables: tables.rows.map((row) => row.tablename),
       indexes: indexes.rows.map((row) => row.indexname),
       columns: columns.rows.map((row) => `${row.table_name}.${row.column_name}`),
-      checks: checks.rows.map((row) => row.conname),
+      checks: checks.rows.map((row) => `${row.table_name}.${row.conname}`),
       constraintIndexes: constraintIndexes.rows.map((row) => row.indexname),
     };
   } catch (error) {
