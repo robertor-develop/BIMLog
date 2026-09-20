@@ -32867,6 +32867,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "668fa7015bee9b5c24c4fbd089b558da89de8848674ff2a29d17235c0232db41"
+    },
+    {
+      "taskId": "bimlog-stabilization-build090-lens-repair-regression-20260920",
+      "reviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "reviewedAt": "2026-09-20T02:02:28.4341666-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release cadence and provider workflow are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The stale test now verifies the accepted bounded repair-reason safety contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No production runtime module or architecture changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next repair behavior is unchanged; only the regression signature was corrected."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout, rendering, export, or visual-design contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the stale regression and exact passing correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No open-loop disposition changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate failure and complete passing Lens rerun remain in execution evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "164cf6b22402fc927e2210fa22e6abbfd94b3e3da46cb2f3b2c560af1cb30d46"
     }
   ]
 }

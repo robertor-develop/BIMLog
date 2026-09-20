@@ -8,6 +8,7 @@
 - No Navisworks smoke is required because Native and installers are unchanged.
 - The generated Platform inventory and semantic-impact receipt are reconciled through the exact Build 090 implementation commit before the clean release gate and publication action.
 - The pre-push Lens inventory gate classifies the three installer/readiness checks that detect and remove the retired `BIMLog.bundle` as migration compatibility; this preserves the no-parallel-Lens rule without misreporting those safeguards as customer-facing legacy product code.
+- The pre-push Lens reconstruction regression now verifies the accepted bounded confirmation reason passed to `saveVisualState`; the production repair implementation and its safety requirement were unchanged.
 
 ## 120-build stabilization current authority — Block 17 document custody and owner handover — 2026-09-20
 

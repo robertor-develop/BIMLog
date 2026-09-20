@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
+  "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "313278f22de4472e4379f94e49c4f2012ae777e35df9c0cc5eb772762a86d985",
+  "bundleSha256": "9172792642100f7d700700676db0a42ae8787e2a18c6ae694918d5b6f8145778",
   "impact": {
-    "baselineCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
+    "baselineCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
     "changedPaths": [
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
@@ -22,11 +22,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "claude",
@@ -34,11 +34,11 @@
       "sha256": "fda29c7bd0b092e1de189b54249545c345a7d2e84f3cdea4675a027637794270",
       "sourceChangedAt": "2026-09-19T07:40:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "quality",
@@ -46,11 +46,11 @@
       "sha256": "4e2b063d11ac9a8bc64376e71f5a175bab4eafc93dc003d311ec2ca3ccc10525",
       "sourceChangedAt": "2026-09-19T13:19:19-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "vision",
@@ -58,11 +58,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "platform",
@@ -70,11 +70,11 @@
       "sha256": "ba764a384f65e88b9f4a6949332cf0e7a1e463ead19c25bd53a423a4937c31eb",
       "sourceChangedAt": "2026-09-20T01:48:00-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "plugin",
@@ -82,11 +82,11 @@
       "sha256": "a20bfab004cdcebbc9ceb45eee554751c51be5fcd4bfe186832d39505097ca3f",
       "sourceChangedAt": "2026-09-20T00:12:42-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "report_design_system",
@@ -94,11 +94,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "standards_register",
@@ -106,23 +106,23 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "62c1940154ca34c54cfd7d5c02c6cb03dda617c0e2537de4dcb467bff3f4d34b",
-      "sourceChangedAt": "2026-09-20T05:53:39.728Z",
+      "sha256": "8e86f06911e62c2b42d2d09051f2f1169318d5c8e3b79e672d1470508eadbc53",
+      "sourceChangedAt": "2026-09-20T06:02:28.434Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "open_loop",
@@ -130,11 +130,11 @@
       "sha256": "c80de4b52cc738a075dcaaad5454a7ef60d331a1a9ef1331b01a58570e2ed552",
       "sourceChangedAt": "2026-09-19T20:21:10-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     },
     {
       "key": "audit",
@@ -142,11 +142,11 @@
       "sha256": "23190c3669d18d8b2c950bf2bd0174d082fab1097ee6f89237eb02a8c3f11296",
       "sourceChangedAt": "2026-09-19T19:33:13-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
-      "semanticReviewTask": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reconciledThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewedThroughCommit": "35a39ebe48f99a3c0d4b701d4c2b59b613b7d85b",
+      "semanticReviewTask": "bimlog-stabilization-build090-lens-repair-regression-20260920",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-20T01:53:39.7287533-04:00"
+      "semanticReviewedAt": "2026-09-20T02:02:28.4341666-04:00"
     }
   ]
 }
