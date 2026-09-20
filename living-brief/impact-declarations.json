@@ -32496,6 +32496,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "331cc4f885399513ffa039da864b22481bb5c67f4e84a7f0345b2bb1e870bb66"
+    },
+    {
+      "taskId": "bimlog-stabilization-block14-column-shape-reconciliation-20260919",
+      "reviewedThroughCommit": "3ce9bd6788c6e6b3e216be2b2d11a1e375f42e79",
+      "reviewedAt": "2026-09-20T02:12:47.000Z",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The standing release cadence and authorization remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Publication receipts now fail closed when release-critical lifecycle columns differ in nullability or default presence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The Platform contract already requires predecessor_task_ids to be non-null with an empty-array default."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and installer behavior remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report design behavior changes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the cancelled weakening preview and the corrected column-shape proof."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Development alignment, exact-head gate, publication, and authenticated live smoke remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 070 evidence preserves the provider finding without rewriting prior history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "a7136a9c45e056689a551ad4157a9dd75fee1570ad471a285ca28252de7c8d14"
     }
   ]
 }
