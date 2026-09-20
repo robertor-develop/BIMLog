@@ -15,6 +15,10 @@ import {
   updateMeetingActionItem,
 } from "./meetings/meeting-data";
 import {
+  useMeetingAgendaState,
+  useMeetingDraftMachine,
+} from "./meetings/meeting-editor-state";
+import {
   ClipboardList,
   CheckCircle2,
   Calendar,
@@ -645,7 +649,7 @@ export function MeetingsTab({
   const [meetingDate, setMeetingDate] = useState("");
   const [meetingTime, setMeetingTime] = useState("10:00");
   const [location, setLocation] = useState("");
-  const [agendaItems, setAgendaItems] = useState<string[]>(["", "", "", ""]);
+  const [agendaItems, setAgendaItems] = useMeetingAgendaState();
   const [attendees, setAttendees] = useState<Attendee[]>([
     {
       trade: "",
@@ -728,9 +732,7 @@ export function MeetingsTab({
   const [editingMeeting, setEditingMeeting] = useState<Meeting | null>(null);
   const [validationSummary, setValidationSummary] = useState<string[]>([]);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [draftStatus, setDraftStatus] = useState<
-    "idle" | "saving" | "saved" | "failed"
-  >("idle");
+  const [draftStatus, setDraftStatus] = useMeetingDraftMachine();
   const [draftSavedAt, setDraftSavedAt] = useState<string | null>(null);
   const [draftDirty, setDraftDirty] = useState(false);
   const [draftLoaded, setDraftLoaded] = useState(false);
