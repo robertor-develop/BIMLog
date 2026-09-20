@@ -32,12 +32,12 @@ import {
 import { validateConfigValue } from "../middlewares/config-validator";
 import {
   addPageNumbers,
+  applyPdfDownloadHeaders,
   computeContentHash,
   createPdfDocument,
   drawBrandedHeader,
   drawTable,
   REPORT_THEMES,
-  reportFileName,
   sectionBar,
 } from "../lib/pdf-kit";
 import {
@@ -414,11 +414,7 @@ router.get(
         margin: 40,
         bufferPages: true,
       });
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${reportFileName(title)}"`,
-      );
+      applyPdfDownloadHeaders(res, { title });
       doc.pipe(res);
 
       const reportNumber = `TEAM-${projectId}-${generatedAt.toISOString().slice(0, 10).replace(/-/g, "")}`;

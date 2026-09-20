@@ -30,6 +30,7 @@ import { extractFileText } from "../lib/extract-file-text";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import {
   addPageNumbers,
+  applyPdfDownloadHeaders,
   computeContentHash,
   createPdfDocument,
   drawBrandedHeader,
@@ -504,11 +505,7 @@ router.get(
         bufferPages: true,
         autoFirstPage: true,
       });
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader(
-        "Content-Disposition",
-        `attachment; filename="${fileName}"`,
-      );
+      applyPdfDownloadHeaders(res, { fileName });
       res.setHeader("X-Report-Filename", fileName);
       doc.pipe(res);
 
