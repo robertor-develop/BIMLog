@@ -13,6 +13,7 @@ import {
   PALETTE,
   REPORT_THEMES,
   addPageNumbers,
+  applyPdfDownloadHeaders,
   computeContentHash,
   createPdfDocument,
   drawBrandedHeader,
@@ -773,8 +774,7 @@ router.get("/projects/:projectId/files/current-view.pdf", authMiddleware, requir
     });
     doc.end();
     await complete;
-    res.type("application/pdf");
-    res.setHeader("Content-Disposition", `attachment; filename="${reportFileName(tr("Files Current View", "Archivos Vista Actual"))}"`);
+    applyPdfDownloadHeaders(res, tr("Files Current View", "Archivos Vista Actual"));
     res.send(Buffer.concat(chunks));
   } catch (error) {
     console.error("[files-current-view-pdf] generation failed", error instanceof Error ? error.message : "unknown error");
@@ -862,8 +862,7 @@ router.get("/projects/:projectId/files/:fileId/download", authMiddleware, requir
     doc.on("data", (chunk: Buffer) => chunks.push(chunk));
     doc.on("end", () => {
       const pdfBuffer = Buffer.concat(chunks);
-      res.setHeader("Content-Type", "application/pdf");
-      res.setHeader("Content-Disposition", safeDownloadDisposition(file.fileName));
+      applyPdfDownloadHeaders(res, file.fileName.replace(/\.pdf$/i, ""));
       res.setHeader("Content-Length", pdfBuffer.length);
       res.send(pdfBuffer);
     });

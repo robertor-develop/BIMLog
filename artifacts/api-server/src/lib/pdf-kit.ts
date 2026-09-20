@@ -49,6 +49,18 @@ export function createPdfDocument(options: PdfDocumentOptions = {}): PDFKit.PDFD
   return doc;
 }
 
+type PdfResponse = {
+  type(value: string): unknown;
+  setHeader(name: string, value: string): unknown;
+};
+
+export function applyPdfDownloadHeaders(response: PdfResponse, title: string) {
+  response.type("application/pdf");
+  response.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
+  response.setHeader("X-Content-Type-Options", "nosniff");
+  response.setHeader("Cache-Control", "private, no-store");
+}
+
 
 // ── Palette / shared constants ──
 export const PALETTE = {
