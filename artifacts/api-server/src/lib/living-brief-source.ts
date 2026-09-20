@@ -4,6 +4,8 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { execFileSync } from "node:child_process";
 
+declare const __dirname: string | undefined;
+
 export type LivingBriefCatalogEntry = {
   key: string;
   file: string;
@@ -44,8 +46,7 @@ export type LivingBriefSourceBundle = {
 
 function moduleDirectory(): string | null {
   try {
-    // @ts-ignore __dirname exists in the CommonJS production bundle.
-    if (typeof __dirname !== "undefined") return __dirname as string;
+    if (typeof __dirname !== "undefined") return __dirname;
   } catch { /* ESM runtime */ }
   try {
     if (import.meta.url) return path.dirname(fileURLToPath(import.meta.url));
