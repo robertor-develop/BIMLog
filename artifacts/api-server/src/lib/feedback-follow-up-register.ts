@@ -10,7 +10,7 @@ export const FEEDBACK_FOLLOW_UP_HEADERS = [
 export type FeedbackFollowUpRecord = Record<string, unknown> & { stable_id: string; status: string };
 const safeCell = (value: unknown) => { const text = String(value ?? "").replace(/[\u0000-\u001f\u007f]/g, " "); return /^[=+\-@\t\r]/.test(text) ? `'${text}` : text; };
 const iso = (value: unknown) => value instanceof Date ? value.toISOString() : value;
-export const feedbackReviewUrl = (baseUrl: string, stableId: string) => `${baseUrl}/admin?tab=feedback&feedback=${encodeURIComponent(stableId)}`;
+export const feedbackReviewUrl = (baseUrl: string, stableId: string) => `${baseUrl}/admin/feedback?feedback=${encodeURIComponent(stableId)}`;
 export const feedbackNextAction = (row: FeedbackFollowUpRecord) => {
   if (Number(row.evidence_quarantined) > 0) return "Review scanner quarantine";
   if (Number(row.evidence_rejected) > 0) return "Review rejected evidence";

@@ -8,7 +8,7 @@ const checks: Array<[string, RegExp]> = [
   ["legacy reviewer route remains valid", /Route path="\/admin\/feedback"/],
   ["customer feedback notification route remains valid", /Route path="\/feedback"/],
   ["feedback query opens the review tab only for a super-admin", /requested && isSuperAdmin\) setActiveTab\(9\)/],
-  ["reviewer tab is hidden behind super-admin authority", /tab !== "Feedback" \|\| isSuperAdmin/],
+  ["reviewer tab is hidden behind super-admin authority", /\(tab !== "Feedback" && tab !== "Master Catalogs"\) \|\| isSuperAdmin/],
   ["reviewer panel is never rendered without super-admin authority", /activeTab === 9 && isSuperAdmin && <FeedbackTab token=\{token\}/],
   ["stable ticket deep-link opens exact package", /URLSearchParams\(window\.location\.search\)\.get\("feedback"\).*openDetail\(match\.id\)/s],
   ["queue exposes evidence counts and quarantine", /clean.*awaiting scan.*rejected/s],

@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import fs from "node:fs";
+const read = (relative: string) => fs.readFileSync(new URL(relative, import.meta.url), "utf8");
+const app = read("../../../bimlog/src/App.tsx");
+const help = read("../../../bimlog/src/lib/help-content.ts");
+const sources = [read("../routes/feedback.ts"), read("./feedback-notification-worker.ts"), read("./feedback-follow-up-register.ts"), read("./feedback-package.ts")].join("\n");
+assert.match(app, /Route path="\/feedback"[\s\S]*ProtectedRoute component=\{Dashboard\}/);
+assert.match(app, /Route path="\/admin\/feedback"[\s\S]*surface="feedback_administration"/);
+assert.match(help, /Use \/feedback to compose[\s\S]*\/admin\/feedback to review/);
+assert.doesNotMatch(sources, /\/admin\?tab=feedback/);
+assert.match(sources, /\/admin\/feedback\?feedback=/);
+console.log("PASS Build 077 customer composer and authorized reviewer deep-link semantics");
