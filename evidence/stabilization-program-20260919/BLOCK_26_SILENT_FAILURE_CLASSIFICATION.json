@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "build": 126,
+  "scope": "authentication/session and project/model-binding silent-failure paths",
+  "classifiedOccurrences": [
+    { "findingId": "AUD-7AE788FF597C", "module": "connector credential lease", "classification": "transaction cleanup failure", "requiredOutcome": "preserve the authoritative operation error and emit a code-only rollback diagnostic" },
+    { "findingId": "AUD-A315DD285073", "module": "connector credential lifecycle", "classification": "transaction cleanup failure", "requiredOutcome": "preserve the authoritative operation error and emit a code-only rollback diagnostic" },
+    { "findingId": "AUD-00C88CD223CC", "module": "runtime authentication/CORS configuration", "classification": "invalid public-origin configuration", "requiredOutcome": "omit the invalid origin safely and emit a code-only configuration diagnostic" },
+    { "findingId": "AUD-C3C7BFB4BDCC", "module": "Lens Next bridge response", "classification": "unparseable project/model bridge response", "requiredOutcome": "fail safely and emit a code-only response diagnostic" },
+    { "findingId": "AUD-4BF3C701F3B4", "module": "Lens Next bridge probe", "classification": "unavailable or invalid project/model bridge", "requiredOutcome": "return disconnected and emit a code-only probe diagnostic" }
+  ],
+  "prohibitedDiagnosticData": ["credential values", "tokens", "cookies", "authorization headers", "URLs", "customer content", "database exception messages"]
+}
