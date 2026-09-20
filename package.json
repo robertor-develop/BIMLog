@@ -22,6 +22,7 @@
     "test:release-lineage": "node scripts/test-release-lineage.mjs",
     "generate:release-identity": "node scripts/generate-release-identity.mjs",
     "check:release-identity": "node scripts/check-release-identity.mjs",
+    "check:lens-next-native-release": "node scripts/check-lens-next-native-release.mjs",
     "test:release-identity": "node scripts/test-release-identity.mjs",
     "check:release-receipt": "node scripts/check-release-receipt.mjs",
     "test:release-receipt": "node scripts/test-release-receipt.mjs",
