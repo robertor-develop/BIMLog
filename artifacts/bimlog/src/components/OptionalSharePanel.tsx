@@ -117,11 +117,20 @@ export function OptionalSharePanel({ language, artifactLabel, defaultRecipients 
 
   async function closeWithoutSending() {
     if (telegramDeliveryId && token && telegramReady) {
-      await fetch(`/api/v1/integrations/telegram/deliveries/${encodeURIComponent(telegramDeliveryId)}/cancel`, {
-        method: "POST",
-        headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
-        body: "{}",
-      }).catch(() => undefined);
+      try {
+        const response = await fetch(`/api/v1/integrations/telegram/deliveries/${encodeURIComponent(telegramDeliveryId)}/cancel`, {
+          method: "POST",
+          headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+          body: "{}",
+        });
+        if (!response.ok) throw new Error("telegram_cancel_failed");
+      } catch {
+        console.error(JSON.stringify({ event: "bimlog_workflow_failure", code: "TELEGRAM_DELIVERY_CANCEL_FAILED" }));
+        setNotice(es
+          ? "No se pudo confirmar la cancelación. La entrega preparada sigue disponible para reintentar."
+          : "Cancellation could not be confirmed. The prepared delivery remains available to retry.");
+        return;
+      }
     }
     setTelegramReady(false);
     setTelegramDeliveryId("");

@@ -34,6 +34,7 @@ import { mergeMappedContractItems } from "./job-intake-mapped-item-pricing";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./delivery-workflow-template-migration";
 import { bindDeliveryWorkflowWithClient } from "./delivery-workflow-runtime";
 import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
+import { rollbackWithOperationalEvidence } from "./operational-failure";
 
 const uuid = () => crypto.randomUUID();
 const categories = new Set([
@@ -774,9 +775,7 @@ export async function applyJobIntakeDocumentMapping(input: {
     });
     await client.query("COMMIT");
   } catch (error) {
-    try {
-      await client.query("ROLLBACK");
-    } catch {}
+    await rollbackWithOperationalEvidence(client, "JOB_INTAKE_IMPORT_ROLLBACK_FAILED");
     throw error;
   } finally {
     client.release();
@@ -933,9 +932,7 @@ export async function uploadJobIntakeDocument(input: {
       completion,
     };
   } catch (error) {
-    try {
-      await client.query("ROLLBACK");
-    } catch {}
+    await rollbackWithOperationalEvidence(client, "JOB_INTAKE_UPLOAD_ROLLBACK_FAILED");
     if (storagePath) await storage.delete(storagePath);
     throw error;
   } finally {
@@ -1561,9 +1558,7 @@ export async function activateJobIntake(input: {
       idempotent: false,
     };
   } catch (error) {
-    try {
-      await client.query("ROLLBACK");
-    } catch {}
+    await rollbackWithOperationalEvidence(client, "JOB_INTAKE_ACTIVATION_ROLLBACK_FAILED");
     throw error;
   } finally {
     client.release();

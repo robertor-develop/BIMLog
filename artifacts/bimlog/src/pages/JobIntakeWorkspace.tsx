@@ -35,6 +35,8 @@ import {
 import { applySoleApuToUnboundItems, contractApuCoverage, soleCompatibleApuVersion } from "@/lib/job-intake-apu-default";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
+const reportIntakeWorkflowFailure = (code: "JOB_INTAKE_AUTOSAVE_RETRY_FAILED" | "JOB_INTAKE_AUTOSAVE_FAILED") =>
+  console.error(JSON.stringify({ event: "bimlog_workflow_failure", code }));
 const recoveryKey = (projectId: number) =>
   `bimlog:job-intake-recovery:${projectId}`;
 
@@ -519,7 +521,7 @@ export function JobIntakeWorkspace() {
             if (saveRetryRef.current < 2) {
               saveRetryRef.current += 1;
               saveTimerRef.current = window.setTimeout(
-                () => void persist(dataRef.current).catch(() => undefined),
+                () => void persist(dataRef.current).catch(() => reportIntakeWorkflowFailure("JOB_INTAKE_AUTOSAVE_RETRY_FAILED")),
                 2000,
               );
             }
@@ -561,7 +563,7 @@ export function JobIntakeWorkspace() {
     }
     if (saveTimerRef.current) window.clearTimeout(saveTimerRef.current);
     saveTimerRef.current = window.setTimeout(
-      () => void persist(dataRef.current).catch(() => undefined),
+      () => void persist(dataRef.current).catch(() => reportIntakeWorkflowFailure("JOB_INTAKE_AUTOSAVE_FAILED")),
       900,
     );
     return () => {

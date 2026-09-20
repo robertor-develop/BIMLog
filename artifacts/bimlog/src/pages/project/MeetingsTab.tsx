@@ -25,6 +25,8 @@ import {
 } from "lucide-react";
 
 const API = "/api/v1";
+const reportMeetingWorkflowFailure = (code: "MEETING_DIRECTORY_LOAD_FAILED" | "MEETING_DIRECTORY_REFRESH_FAILED") =>
+  console.error(JSON.stringify({ event: "bimlog_workflow_failure", code }));
 
 interface Meeting {
   id: number;
@@ -518,7 +520,16 @@ export function MeetingsTab({
       const rest = prev.filter((item) => item.id !== entry.id);
       return [...rest, entry];
     });
-    await loadDirectoryEntries().catch(() => undefined);
+    await loadDirectoryEntries().catch(() => {
+      reportMeetingWorkflowFailure("MEETING_DIRECTORY_REFRESH_FAILED");
+      setCompanyAddErrors((prev) => ({
+        ...prev,
+        [index]: t(
+          "The company was saved, but the directory could not be refreshed. Reload the page before adding another contact.",
+          "La empresa se guardó, pero no se pudo actualizar el directorio. Recargue la página antes de agregar otro contacto.",
+        ),
+      }));
+    });
     setAttendees((prev) => {
       const arr = [...prev];
       arr[index] = {
@@ -842,7 +853,10 @@ export function MeetingsTab({
 
   useEffect(() => {
     loadMeetings();
-    void loadDirectoryEntries().catch(() => undefined);
+    void loadDirectoryEntries().catch(() => {
+      reportMeetingWorkflowFailure("MEETING_DIRECTORY_LOAD_FAILED");
+      setError(t("The project directory could not be loaded.", "No se pudo cargar el directorio del proyecto."));
+    });
   }, [projectId]);
 
   useEffect(() => {

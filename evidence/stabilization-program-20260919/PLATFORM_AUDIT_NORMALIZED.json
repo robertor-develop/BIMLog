@@ -5,7 +5,7 @@
   "routesFound": 501,
   "counts": {
     "P0": 0,
-    "P1": 61,
+    "P1": 53,
     "P2": 0,
     "INFO": 0
   },
@@ -25,7 +25,7 @@
       "disposition": "planned-accessibility-cleanup"
     },
     "silent-catch": {
-      "count": 58,
+      "count": 50,
       "owner": "BIMLog reliability",
       "targetBuild": 126,
       "blocking": false,
@@ -39,9 +39,17 @@
     "resolvedP1": [
       "AUD-7AE788FF597C",
       "AUD-A315DD285073",
+      "AUD-E1B9BDBCC779",
+      "AUD-B099C5626C39",
+      "AUD-1FC8A2BF3E7F",
       "AUD-00C88CD223CC",
+      "AUD-5F8A5A2D6A4D",
       "AUD-C3C7BFB4BDCC",
-      "AUD-4BF3C701F3B4"
+      "AUD-4BF3C701F3B4",
+      "AUD-DEE3CB86905F",
+      "AUD-12B63F6526D5",
+      "AUD-E70DB8B9655A",
+      "AUD-48911D6FB090"
     ]
   },
   "rootCauseGroups": [
@@ -331,20 +339,6 @@
       "occurrences": 1
     },
     {
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/job-intake-service.ts",
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/job-intake-service.ts",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "findingIds": [
-        "AUD-E1B9BDBCC779",
-        "AUD-B099C5626C39",
-        "AUD-1FC8A2BF3E7F"
-      ],
-      "occurrences": 3
-    },
-    {
       "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
       "severity": "P1",
       "category": "silent-catch",
@@ -441,44 +435,6 @@
         "AUD-982B31FF6A81"
       ],
       "occurrences": 1
-    },
-    {
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/components/OptionalSharePanel.tsx",
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "findingIds": [
-        "AUD-5F8A5A2D6A4D"
-      ],
-      "occurrences": 1
-    },
-    {
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "findingIds": [
-        "AUD-DEE3CB86905F",
-        "AUD-12B63F6526D5"
-      ],
-      "occurrences": 2
-    },
-    {
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "findingIds": [
-        "AUD-E70DB8B9655A",
-        "AUD-48911D6FB090"
-      ],
-      "occurrences": 2
     }
   ],
   "findings": [
@@ -1087,48 +1043,6 @@
     {
       "severity": "P1",
       "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/job-intake-service.ts",
-      "line": 779,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-E1B9BDBCC779",
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/job-intake-service.ts",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/job-intake-service.ts",
-      "line": 938,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-B099C5626C39",
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/job-intake-service.ts",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/api-server/src/lib/job-intake-service.ts",
-      "line": 1566,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-1FC8A2BF3E7F",
-      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/job-intake-service.ts",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
       "file": "artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
       "line": 73,
       "detail": "Silent catch can hide broken user workflows.",
@@ -1260,76 +1174,6 @@
       "detail": "Silent catch can hide broken user workflows.",
       "findingId": "AUD-982B31FF6A81",
       "rootCauseKey": "silent-catch:artifacts/api-server/src/routes/feedback.ts",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
-      "line": 124,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-5F8A5A2D6A4D",
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/components/OptionalSharePanel.tsx",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
-      "line": 522,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-DEE3CB86905F",
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
-      "line": 564,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-12B63F6526D5",
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
-      "line": 521,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-E70DB8B9655A",
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
-      "sourceKind": "production",
-      "owner": "BIMLog reliability",
-      "targetBuild": 126,
-      "blocking": false,
-      "disposition": "planned-observability-reconciliation"
-    },
-    {
-      "severity": "P1",
-      "category": "silent-catch",
-      "file": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
-      "line": 845,
-      "detail": "Silent catch can hide broken user workflows.",
-      "findingId": "AUD-48911D6FB090",
-      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
       "sourceKind": "production",
       "owner": "BIMLog reliability",
       "targetBuild": 126,
