@@ -1,0 +1,1079 @@
+{
+  "schemaVersion": 1,
+  "build": 136,
+  "scope": "artifacts/api-server/src production TypeScript excluding behavior/test fixtures",
+  "generatedFrom": "source",
+  "counts": {
+    "files": 28,
+    "sharedFactoryFiles": 19,
+    "directConstructorFiles": 1,
+    "responseOnlyFiles": 8,
+    "sharedHeaderFiles": 1,
+    "bespokeDeliveryFiles": 22,
+    "rendererSites": 46,
+    "pdfResponseSites": 63
+  },
+  "sharedPrimitive": {
+    "path": "artifacts/api-server/src/lib/pdf-kit.ts",
+    "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+    "deliveryContract": "SHARED_SAFE_DOWNLOAD_HEADERS",
+    "sharedDocumentCreates": [
+      {
+        "line": 21,
+        "text": "export function createPdfDocument(options: PdfDocumentOptions = {}): PDFKit.PDFDocument {"
+      }
+    ],
+    "directDocumentCreates": [
+      {
+        "line": 22,
+        "text": "const doc = new PDFDocument(options);"
+      }
+    ],
+    "pdfResponses": [
+      {
+        "line": 58,
+        "text": "response.type(\"application/pdf\");"
+      }
+    ],
+    "directDispositions": [
+      {
+        "line": 59,
+        "text": "response.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(title)}\"`);"
+      }
+    ],
+    "sharedHeaderCalls": [
+      {
+        "line": 57,
+        "text": "export function applyPdfDownloadHeaders(response: PdfResponse, title: string) {"
+      }
+    ]
+  },
+  "files": [
+    {
+      "path": "artifacts/api-server/src/lib/cloud-files.ts",
+      "rendererContract": "PDF_BYTES_OR_RESPONSE_ONLY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 44,
+          "text": "? `https://www.googleapis.com/drive/v3/files/${ref}/export?mimeType=application/pdf`"
+        }
+      ],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/lib/feedback-evidence-contract.ts",
+      "rendererContract": "PDF_BYTES_OR_RESPONSE_ONLY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 8,
+          "text": "const MEDIA_TYPES: Record<string, string> = { \".pdf\": \"application/pdf\", \".doc\": \"application/msword\", \".docx\": \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\", \".xls\": \"application/vnd.ms-excel\", \".xlsx\": \"applica"
+        }
+      ],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/lib/feedback-package.ts",
+      "rendererContract": "BESPOKE_PDFKIT_CONSTRUCTOR",
+      "deliveryContract": "INTERNAL_ARTIFACT_ONLY",
+      "sharedDocumentCreates": [],
+      "directDocumentCreates": [
+        {
+          "line": 113,
+          "text": "const chunks: Buffer[] = []; const doc = new PDFDocument({ size: \"LETTER\", margin: 50, bufferPages: true, info: { Title: `${manifest.feedback.stableId} Feedback Package`, Author: \"BIMLog by IgniteSmart\", Subject: `Feedback package ${manifes"
+        }
+      ],
+      "pdfResponses": [],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "rendererContract": "PDF_BYTES_OR_RESPONSE_ONLY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 372,
+          "text": "\"application/pdf\": \"document\","
+        }
+      ],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/lib/financial-budget-export.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "INTERNAL_ARTIFACT_ONLY",
+      "sharedDocumentCreates": [
+        {
+          "line": 79,
+          "text": "const doc = createPdfDocument({"
+        },
+        {
+          "line": 175,
+          "text": "const doc = createPdfDocument({"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/lib/financial-contract-export.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "INTERNAL_ARTIFACT_ONLY",
+      "sharedDocumentCreates": [
+        {
+          "line": 31,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: \"landscape\", margin: 40, bufferPages: true, info: { Title: \"Contracts & Commitments — Current View\", Author: \"BIMLog\", Subject: \"Contracts and commitments current-view register\" } });"
+        },
+        {
+          "line": 173,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 42, bufferPages: true, info: { Title: `Contract ${safe(data.contract.legalNumber)}`, Author: \"BIMLog\", Subject: \"Operational contract and schedule of values\" } });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/lib/lens-next-reference-attachment.ts",
+      "rendererContract": "PDF_BYTES_OR_RESPONSE_ONLY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 2,
+          "text": "const types = new Map([[\"pdf\", \"application/pdf\"], [\"png\", \"image/png\"], [\"jpg\", \"image/jpeg\"], [\"jpeg\", \"image/jpeg\"]]);"
+        }
+      ],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/lib/project-analytics-current-view-export.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "INTERNAL_ARTIFACT_ONLY",
+      "sharedDocumentCreates": [
+        {
+          "line": 195,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 40, bufferPages: true, autoFirstPage: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/lib/rfi-complete-package.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "INTERNAL_ARTIFACT_ONLY",
+      "sharedDocumentCreates": [
+        {
+          "line": 683,
+          "text": "const doc = createPdfDocument({ margin: 44, size: \"LETTER\", autoFirstPage: true, bufferPages: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/lib/telegram-delivery-artifacts.ts",
+      "rendererContract": "PDF_BYTES_OR_RESPONSE_ONLY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 13,
+          "text": "rfi_pdf: { route: \"/projects/{projectId}/rfis/{entityId}/export\", suffix: \"-Request-for-Information.pdf\", contentType: \"application/pdf\" },"
+        },
+        {
+          "line": 14,
+          "text": "rfi_complete_pdf: { route: \"/projects/{projectId}/rfis/{entityId}/export-complete\", suffix: \"-Complete-RFI-Package.pdf\", contentType: \"application/pdf\" },"
+        },
+        {
+          "line": 16,
+          "text": "rfi_audit_pdf: { route: \"/projects/{projectId}/rfis/{entityId}/audit-certificate\", suffix: \"-RFI-Audit.pdf\", contentType: \"application/pdf\" },"
+        },
+        {
+          "line": 17,
+          "text": "submittal_pdf: { route: \"/projects/{projectId}/submittals/{entityId}/export\", suffix: \"-Submittal.pdf\", contentType: \"application/pdf\" },"
+        },
+        {
+          "line": 19,
+          "text": "submittal_audit_pdf: { route: \"/projects/{projectId}/submittals/{entityId}/audit-certificate\", suffix: \"-Submittal-Audit.pdf\", contentType: \"application/pdf\" },"
+        },
+        {
+          "line": 20,
+          "text": "change_order_pdf: { route: \"/projects/{projectId}/change-orders/{entityId}/export\", suffix: \"-Change-Order.pdf\", contentType: \"application/pdf\" },"
+        }
+      ],
+      "directDispositions": [],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/activity.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 208,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: \"landscape\", margin: 36, bufferPages: true, autoFirstPage: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 210,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 211,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${filename}\"`);"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/change_orders.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 186,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: \"landscape\", margin: 40, bufferPages: true });"
+        },
+        {
+          "line": 427,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 50, bufferPages: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 187,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 429,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 484,
+          "text": "{ type: \"document\", source: { type: \"base64\", media_type: \"application/pdf\", data: pdfBase64 } },"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 188,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(reportTitle)}\"`);"
+        },
+        {
+          "line": 430,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(title)}\"`);"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/clash_reports.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 3169,
+          "text": "const doc = createPdfDocument({ size: \"TABLOID\", layout: \"landscape\", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });"
+        },
+        {
+          "line": 3613,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: \"landscape\", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });"
+        },
+        {
+          "line": 3967,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: \"landscape\", margin: 40, bufferPages: true, autoFirstPage: true, margins: { top: 40, bottom: 50, left: 40, right: 40 } });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 3172,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 3614,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 3970,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 2029,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"Lens-Viewpoints-Project${projectId}.xlsx\"`);"
+        },
+        {
+          "line": 3173,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(reportTitle)}\"`);"
+        },
+        {
+          "line": 3615,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(`${reportNumber} - Clash Current View`)}\"`);"
+        },
+        {
+          "line": 3971,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(title)}\"`);"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/coordinator-actions.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 97,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: \"landscape\", margin: 36, bufferPages: true, autoFirstPage: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 99,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 382,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 100,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${filename}\"`);"
+        },
+        {
+          "line": 383,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${result.fileName}\"`);"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/dashboard_briefing.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 216,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 40, bufferPages: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 807,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 842,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 808,
+          "text": "res.setHeader(\"Content-Disposition\", disposition(\"bimlog-headquarters-dashboard-current-view.pdf\"));"
+        },
+        {
+          "line": 843,
+          "text": "res.setHeader(\"Content-Disposition\", disposition(`pending-${type}-current-view.pdf`));"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/feedback.ts",
+      "rendererContract": "PDF_BYTES_OR_RESPONSE_ONLY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 422,
+          "text": "const mediaType = format === \"pdf\" ? \"application/pdf\" : format === \"docx\" ? \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\" : format === \"xlsx\" ? \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\""
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 396,
+          "text": "res.setHeader(\"Content-Type\", asset.mediaType); res.setHeader(\"Content-Disposition\", `attachment; filename*=UTF-8''${encodeURIComponent(asset.safeName)}`);"
+        },
+        {
+          "line": 407,
+          "text": "try { const result = await packageSource(id, \"customer\", user); if (!result) return res.status(403).json({ code: \"FEEDBACK_PACKAGE_DENIED\", error: \"Package access changed\" }); res.setHeader(\"Content-Type\", \"application/zip\"); res.setHeader("
+        },
+        {
+          "line": 413,
+          "text": "try { const result = await packageSource(id, \"internal\"); if (!result) return res.status(404).json({ code: \"FEEDBACK_NOT_FOUND\", error: \"Feedback not found\" }); await db.insert(feedbackAuditEventsTable).values({ feedbackId: id, actorUserId:"
+        },
+        {
+          "line": 423,
+          "text": "res.setHeader(\"Content-Type\", mediaType); res.setHeader(\"Content-Disposition\", `attachment; filename=\"feedback-${id}-current.${format}\"`); res.setHeader(\"X-Content-Type-Options\", \"nosniff\"); res.setHeader(\"X-Feedback-Snapshot-SHA256\", expec"
+        },
+        {
+          "line": 437,
+          "text": "await db.insert(feedbackAuditEventsTable).values({ feedbackId:id,actorUserId:req.user!.userId,eventType:\"admin_asset_exported\",afterState:{assetId,sha256:asset.sha256,release:FEEDBACK_RELEASE},reason }); res.setHeader(\"Content-Type\",asset.m"
+        },
+        {
+          "line": 482,
+          "text": "res.setHeader(\"Content-Type\", \"text/csv; charset=utf-8\"); res.setHeader(\"Content-Disposition\", \"attachment; filename=feedback-review-v1.60.35.12-F.csv\");"
+        },
+        {
+          "line": 490,
+          "text": "res.setHeader(\"Content-Type\", \"text/csv; charset=utf-8\"); res.setHeader(\"Content-Disposition\", \"attachment; filename=feedback-follow-up-v1.60.35.12-F.csv\"); return res.send(buildFeedbackFollowUpCsv(rows,publicBaseUrl()));"
+        },
+        {
+          "line": 515,
+          "text": "res.setHeader(\"Content-Type\", \"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet\"); res.setHeader(\"Content-Disposition\", \"attachment; filename=bimlog-feedback-follow-up.xlsx\"); res.setHeader(\"X-Content-Type-Options\", \"nosnif"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/files.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "SHARED_SAFE_DOWNLOAD_HEADERS",
+      "sharedDocumentCreates": [
+        {
+          "line": 717,
+          "text": "const doc = createPdfDocument({"
+        },
+        {
+          "line": 905,
+          "text": "const doc = createPdfDocument({ margin: MARGIN, size: \"LETTER\", autoFirstPage: true, bufferPages: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 848,
+          "text": "pdf: \"application/pdf\", doc: \"application/msword\", docx: \"application/vnd.openxmlformats-officedocument.wordprocessingml.document\","
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 822,
+          "text": "res.setHeader(\"Content-Disposition\", safeDownloadDisposition(`${project.code}-owner-handover.zip`));"
+        },
+        {
+          "line": 877,
+          "text": "res.setHeader(\"Content-Disposition\", safeDownloadDisposition(file.fileName, \"inline\"));"
+        }
+      ],
+      "sharedHeaderCalls": [
+        {
+          "line": 778,
+          "text": "applyPdfDownloadHeaders(res, tr(\"Files Current View\", \"Archivos Vista Actual\"));"
+        },
+        {
+          "line": 911,
+          "text": "applyPdfDownloadHeaders(res, file.fileName.replace(/\\.pdf$/i, \"\"));"
+        }
+      ]
+    },
+    {
+      "path": "artifacts/api-server/src/routes/financial-budgets.ts",
+      "rendererContract": "PDF_BYTES_OR_RESPONSE_ONLY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 234,
+          "text": ".type(\"application/pdf\")"
+        },
+        {
+          "line": 475,
+          "text": ".type(\"application/pdf\")"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 235,
+          "text": ".setHeader(\"Content-Disposition\", `attachment; filename=${budgetCurrentViewFileName(payload)}`);"
+        },
+        {
+          "line": 477,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 496,
+          "text": "\"Content-Disposition\","
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/financial-contracts.ts",
+      "rendererContract": "PDF_BYTES_OR_RESPONSE_ONLY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 146,
+          "text": "res.type(\"application/pdf\").setHeader(\"Content-Disposition\", `attachment; filename=contracts-current-view-${safeFilePart(data.project.code || String(project(req)))}.pdf`);"
+        },
+        {
+          "line": 179,
+          "text": "router.get(\"/projects/:projectId/financial/contracts/:contractId/export.pdf\", run(async (req, res) => { const projectId = project(req), data = await contractExportData({ actorUserId: req.user.userId, projectId, contractId: req.params.contra"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 146,
+          "text": "res.type(\"application/pdf\").setHeader(\"Content-Disposition\", `attachment; filename=contracts-current-view-${safeFilePart(data.project.code || String(project(req)))}.pdf`);"
+        },
+        {
+          "line": 179,
+          "text": "router.get(\"/projects/:projectId/financial/contracts/:contractId/export.pdf\", run(async (req, res) => { const projectId = project(req), data = await contractExportData({ actorUserId: req.user.userId, projectId, contractId: req.params.contra"
+        },
+        {
+          "line": 180,
+          "text": "router.get(\"/projects/:projectId/financial/contracts/:contractId/export.xlsx\", run(async (req, res) => { const projectId = project(req), data = await contractExportData({ actorUserId: req.user.userId, projectId, contractId: req.params.contr"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/meeting_minutes.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 1528,
+          "text": "const doc = createPdfDocument({"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 1536,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 3731,
+          "text": "media_type: \"application/pdf\","
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 1538,
+          "text": "\"Content-Disposition\","
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/members.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 411,
+          "text": "const doc = createPdfDocument({"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 417,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 419,
+          "text": "\"Content-Disposition\","
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/project_directory.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 501,
+          "text": "const doc = createPdfDocument({"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 507,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 1351,
+          "text": "media_type: \"application/pdf\","
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 509,
+          "text": "\"Content-Disposition\","
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/reports.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 201,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: columns.length > 4 ? \"landscape\" : \"portrait\", margin: 50, bufferPages: true });"
+        },
+        {
+          "line": 256,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: \"portrait\", margin: 50, bufferPages: true });"
+        },
+        {
+          "line": 307,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 50, bufferPages: true });"
+        },
+        {
+          "line": 367,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 50, bufferPages: true });"
+        },
+        {
+          "line": 433,
+          "text": "const doc = createPdfDocument({"
+        },
+        {
+          "line": 500,
+          "text": "const doc = createPdfDocument({"
+        },
+        {
+          "line": 573,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 50, bufferPages: true });"
+        },
+        {
+          "line": 652,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 50, bufferPages: true });"
+        },
+        {
+          "line": 709,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 50, bufferPages: true });"
+        },
+        {
+          "line": 833,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 50, bufferPages: true });"
+        },
+        {
+          "line": 1114,
+          "text": "const doc = createPdfDocument({"
+        },
+        {
+          "line": 1195,
+          "text": "const doc = createPdfDocument({"
+        },
+        {
+          "line": 1319,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 50, bufferPages: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 202,
+          "text": "res.type(\"application/pdf\");"
+        },
+        {
+          "line": 257,
+          "text": "res.type(\"application/pdf\"); res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(title)}\"`); doc.pipe(res);"
+        },
+        {
+          "line": 308,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 368,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 439,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 506,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 574,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 653,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 710,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 834,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 1120,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 1201,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 1320,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 203,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(title)}\"`);"
+        },
+        {
+          "line": 257,
+          "text": "res.type(\"application/pdf\"); res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(title)}\"`); doc.pipe(res);"
+        },
+        {
+          "line": 311,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 371,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 442,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 509,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 577,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 656,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 713,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 840,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 1123,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 1204,
+          "text": "\"Content-Disposition\","
+        },
+        {
+          "line": 1323,
+          "text": "\"Content-Disposition\","
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/rfis.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 1153,
+          "text": "const measDoc = createPdfDocument({ autoFirstPage: false });"
+        },
+        {
+          "line": 1438,
+          "text": "const doc = createPdfDocument({"
+        },
+        {
+          "line": 2449,
+          "text": "const doc = createPdfDocument({ margin: MARGIN, size: \"LETTER\", autoFirstPage: true, bufferPages: true });"
+        },
+        {
+          "line": 2503,
+          "text": "const doc = createPdfDocument({ margin: MARGIN, size: \"LETTER\", autoFirstPage: true, bufferPages: true });"
+        },
+        {
+          "line": 3032,
+          "text": "const doc = createPdfDocument({ margin: MARGIN, size: \"LETTER\", autoFirstPage: true, bufferPages: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 1657,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 2240,
+          "text": "fileType: \"application/pdf\","
+        },
+        {
+          "line": 2454,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 2613,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 3037,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 3208,
+          "text": "? `https://www.googleapis.com/drive/v3/files/${fileId}/export?mimeType=application/pdf`"
+        },
+        {
+          "line": 3287,
+          "text": "{ type: \"document\", source: { type: \"base64\", media_type: \"application/pdf\", data: pdfBase64 } },"
+        },
+        {
+          "line": 3860,
+          "text": "{ type: \"document\", source: { type: \"base64\", media_type: \"application/pdf\", data: pdfBase64 } },"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 1658,
+          "text": "res.setHeader(\"Content-Disposition\", `${disposition}; filename=\"${output.filename}\"`);"
+        },
+        {
+          "line": 1752,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${output.filename}\"`);"
+        },
+        {
+          "line": 2455,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(`${rfi.number} - Request for Information`)}\"`);"
+        },
+        {
+          "line": 2614,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(`${rfi.number} - Complete RFI Package`)}\"`);"
+        },
+        {
+          "line": 3038,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(`${rfi.number} - RFI Audit Report`)}\"`);"
+        },
+        {
+          "line": 3624,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${rfi.number}-Request-for-Information.docx\"`);"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/schedule.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 570,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: \"landscape\", margin: 40, bufferPages: true, autoFirstPage: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 571,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 572,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${fileName}\"`);"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/submittal_reports.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 408,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", layout: \"landscape\", margin: 40, bufferPages: true, autoFirstPage: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 411,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 412,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(title)}\"`);"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/submittals.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 607,
+          "text": "const doc = createPdfDocument({ margin: LOG_MARGIN, size: \"LETTER\", layout: \"landscape\", autoFirstPage: true, bufferPages: true });"
+        },
+        {
+          "line": 859,
+          "text": "const doc = createPdfDocument({ margin: LOG_MARGIN, size: \"LETTER\", layout: \"landscape\", autoFirstPage: true, bufferPages: true });"
+        },
+        {
+          "line": 1453,
+          "text": "const doc = createPdfDocument({ margin: MARGIN, size: \"LETTER\", autoFirstPage: true, bufferPages: true });"
+        },
+        {
+          "line": 1707,
+          "text": "const doc = createPdfDocument({ margin: MARGIN, size: \"LETTER\", autoFirstPage: true, bufferPages: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 613,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 866,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 1459,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 1713,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 2075,
+          "text": "{ type: \"document\", source: { type: \"base64\", media_type: \"application/pdf\", data: pdfBase64 } },"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 584,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${fileBase}-Submittals-Current-View.xlsx\"`);"
+        },
+        {
+          "line": 614,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(\"Submittals — Current View\")}\"`);"
+        },
+        {
+          "line": 841,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${projectCode}-Shop-Drawing-Control.xlsx\"`);"
+        },
+        {
+          "line": 867,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(\"Shop Drawing Control Report\")}\"`);"
+        },
+        {
+          "line": 1460,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(`${sub.number} - Submittal`)}\"`);"
+        },
+        {
+          "line": 1677,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${sub.number}-Submittal.doc\"`);"
+        },
+        {
+          "line": 1714,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(`${sub.number} - Submittal Audit Report`)}\"`);"
+        }
+      ],
+      "sharedHeaderCalls": []
+    },
+    {
+      "path": "artifacts/api-server/src/routes/transmittals.ts",
+      "rendererContract": "SHARED_PDF_DOCUMENT_FACTORY",
+      "deliveryContract": "BESPOKE_OR_BUFFERED_DELIVERY",
+      "sharedDocumentCreates": [
+        {
+          "line": 107,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 40, bufferPages: true });"
+        },
+        {
+          "line": 479,
+          "text": "const doc = createPdfDocument({ size: \"LETTER\", margin: 50, bufferPages: true });"
+        }
+      ],
+      "directDocumentCreates": [],
+      "pdfResponses": [
+        {
+          "line": 313,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 481,
+          "text": "res.setHeader(\"Content-Type\", \"application/pdf\");"
+        },
+        {
+          "line": 546,
+          "text": "{ type: \"document\", source: { type: \"base64\", media_type: \"application/pdf\", data: pdfBase64 } },"
+        }
+      ],
+      "directDispositions": [
+        {
+          "line": 314,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${output.filename}\"`);"
+        },
+        {
+          "line": 482,
+          "text": "res.setHeader(\"Content-Disposition\", `attachment; filename=\"${reportFileName(title)}\"`);"
+        }
+      ],
+      "sharedHeaderCalls": []
+    }
+  ]
+}
