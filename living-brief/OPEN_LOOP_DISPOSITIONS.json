@@ -1,10 +1,10 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "bf81622b712d18c92649bf9cb55ae39ff1941437157c8e300cd5a4504f762bd0",
-  "itemCount": 131,
+  "sourceSha256": "c80de4b52cc738a075dcaaad5454a7ef60d331a1a9ef1331b01a58570e2ed552",
+  "itemCount": 132,
   "counts": {
-    "ACTIVE": 114,
+    "ACTIVE": 115,
     "SUPERSEDED": 14,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 0
@@ -1454,6 +1454,17 @@
       "classification": "ACTIVE",
       "evidence": [
         "OPEN_LOOP.md:2967",
+        "120-build stabilization program — 2026-09-19"
+      ]
+    },
+    {
+      "id": "b980542cb976ac69",
+      "sourceLine": 2973,
+      "heading": "120-build stabilization program — 2026-09-19",
+      "statement": "Repeat the exact clean gate and provider preview on the corrective Build 070 head; publish only when the preview contains no destructive task-lifecycle change, then complete authenticated live Lens Next acceptance.",
+      "classification": "ACTIVE",
+      "evidence": [
+        "OPEN_LOOP.md:2973",
         "120-build stabilization program — 2026-09-19"
       ]
     }
