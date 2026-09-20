@@ -32935,6 +32935,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "164cf6b22402fc927e2210fa22e6abbfd94b3e3da46cb2f3b2c560af1cb30d46"
+    },
+    {
+      "taskId": "bimlog-stabilization-build090-stale-module-recovery-20260920",
+      "reviewedThroughCommit": "c7a0fbc57fd792a68168b400971a6e84dedc6410",
+      "reviewedAt": "2026-09-20T02:49:01.2048593-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine or cross-product authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing failed-smoke correction and repeat-publication rule is being followed."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The release gate now permanently exercises bounded stale deployment-module recovery."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change; the correction preserves usable continuity across releases."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Top-level and project-workspace lazy modules now perform one bounded stale-asset reload."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, packages, and product identity remain unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report layout, rendering, and export contracts remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, version, or applicability decision changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the failed live smoke, exact correction, and mandatory repeated acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 091–120 remain open and Build 091 is not started."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Browser error evidence and the corrective test results remain in the task execution record."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3e4f3e80fe68103d4f9090d931258ea1a25262b88310dace2ab42238d592f260"
     }
   ]
 }

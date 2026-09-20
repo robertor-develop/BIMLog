@@ -9,6 +9,7 @@
 - The generated Platform inventory and semantic-impact receipt are reconciled through the exact Build 090 implementation commit before the clean release gate and publication action.
 - The pre-push Lens inventory gate classifies the three installer/readiness checks that detect and remove the retired `BIMLog.bundle` as migration compatibility; this preserves the no-parallel-Lens rule without misreporting those safeguards as customer-facing legacy product code.
 - The pre-push Lens reconstruction regression now verifies the accepted bounded confirmation reason passed to `saveVisualState`; the production repair implementation and its safety requirement were unchanged.
+- The first Build 090 live smoke exposed a real stale-tab deployment defect: an already-open dashboard attempted to import the superseded `ProjectDetail` asset and rendered blank. The corrective runtime now recognizes only known stale dynamic-module failures, performs one session-bounded reload, clears the marker after a successful module load, and remains fail-closed for unrelated or repeated failures. Top-level routes, project workspaces, and the normal pre-push gate retain permanent regression coverage. Exact corrective push, republish, and repeated authenticated smoke are required before Block 18 closes.
 
 ## 120-build stabilization current authority — Block 17 document custody and owner handover — 2026-09-20
 
