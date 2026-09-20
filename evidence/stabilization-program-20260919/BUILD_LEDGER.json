@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the Block 16 / Build 080 P36 publication candidate. Historical accepted production receipts remain unchanged until the exact Build 080 head passes push, publication, authenticated smoke, and focused Lens Next compatibility verification.",
+  "headBinding": "The Git commit containing this ledger is the Block 17 / Build 085 push candidate. Production remains the accepted P36 Build 080 publication until the Build 090 publication milestone passes its release and authenticated smoke gates.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,13 +19,13 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 80,
+    "completedBuilds": 85,
     "totalBuilds": 120,
-    "remainingBuilds": 40,
-    "currentUnpublishedBuilds": 10,
-    "nextBuild": 81,
-    "nextPushAfterBuild": 80,
-    "nextPublicationAfterBuild": 80,
+    "remainingBuilds": 35,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 86,
+    "nextPushAfterBuild": 90,
+    "nextPublicationAfterBuild": 90,
     "blocker": null
   },
   "blocks": [
@@ -242,7 +242,7 @@
     {
       "block": 16,
       "buildRange": "076-080",
-      "status": "PASS_PENDING_PUSH_PUBLICATION_LIVE_VERIFICATION",
+      "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED",
       "publicationRequired": true,
       "smoke": "Full authenticated visible-Chrome feedback and notification smoke after Build 080 publication; focused installed Lens Next compatibility and Legacy Lens absence scan.",
       "builds": [
@@ -250,7 +250,21 @@
         { "build": 77, "status": "PASS", "evidence": "BUILD_077_FEEDBACK_ROUTE_SEMANTICS.md" },
         { "build": 78, "status": "PASS", "evidence": "BUILD_078_NOTIFICATION_DETERMINISM.md" },
         { "build": 79, "status": "PASS", "evidence": "BUILD_079_DOCUMENT_DELIVERY_CONTRACTS.md" },
-        { "build": 80, "status": "PASS_PENDING_PUSH_PUBLICATION_LIVE_VERIFICATION", "evidence": "BUILD_080_FEEDBACK_NOTIFICATION_ACCEPTANCE.md" }
+        { "build": 80, "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED", "evidence": "BUILD_080_FEEDBACK_NOTIFICATION_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 17,
+      "buildRange": "081-085",
+      "status": "PASS_PENDING_PUSH",
+      "publicationRequired": false,
+      "smoke": "Document custody and owner-handover acceptance; push at Build 085. Publication and authenticated Chrome smoke remain due at Build 090. Native and installers are unchanged, so no Navisworks smoke is required.",
+      "builds": [
+        { "build": 81, "status": "PASS", "evidence": "BUILD_081_ARBITRARY_FILE_DOWNLOAD.md" },
+        { "build": 82, "status": "PASS", "evidence": "BUILD_082_UPLOAD_RETENTION_CONTRACT.md" },
+        { "build": 83, "status": "PASS", "evidence": "BUILD_083_SHARED_PDF_FIDELITY.md" },
+        { "build": 84, "status": "PASS", "evidence": "BUILD_084_PORTABLE_EXPORTS.md" },
+        { "build": 85, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_085_OWNER_HANDOVER_ACCEPTANCE.md" }
       ]
     }
   ]

@@ -23,6 +23,7 @@ import {
 } from "../lib/pdf-kit";
 import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { ProjectFileUploadError, inspectProjectFileUpload } from "../lib/project-file-upload-contract";
+import { buildProjectHandoverPackage, type HandoverFileRecord } from "../lib/project-handover-package";
 
 async function pdfParse(buffer: Buffer) {
   const { PDFParse: PDFParseClass } = await import("pdf-parse");
@@ -782,6 +783,51 @@ router.get("/projects/:projectId/files/current-view.pdf", authMiddleware, requir
       error: "The files PDF could not be generated.",
       errorEs: "No se pudo generar el PDF de archivos.",
     });
+  }
+});
+
+router.get("/projects/:projectId/files/handover.zip", authMiddleware, requireProjectMember(), async (req, res) => {
+  try {
+    const projectId = Number(req.params.projectId);
+    if (!Number.isSafeInteger(projectId) || projectId <= 0) return res.status(400).json({ code: "HANDOVER_PROJECT_INVALID", error: "Invalid project id" });
+    const [project] = await db.select({ id: projectsTable.id, code: projectsTable.code, name: projectsTable.name }).from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
+    if (!project) return res.status(404).json({ code: "HANDOVER_PROJECT_NOT_FOUND", error: "Project not found" });
+    const q = singleQuery(req.query.q).slice(0, 100).toLocaleLowerCase();
+    const type = singleQuery(req.query.type).toLocaleLowerCase();
+    const status = singleQuery(req.query.status);
+    const declaration = singleQuery(req.query.declaration);
+    const rows = await db.select().from(filesTable).where(eq(filesTable.projectId, projectId));
+    const selected = rows.filter(file => {
+      const extension = (file.fileName.split(".").pop() || file.fileType || "").toLocaleLowerCase();
+      return (!q || file.fileName.toLocaleLowerCase().includes(q))
+        && (!type || type === "all" || extension === type)
+        && (!status || status === "all" || (status === "rejected" ? file.status === "rejected" : file.status !== "rejected"))
+        && (!declaration || declaration === "all" || file.documentRelationship === declaration);
+    });
+    const files: HandoverFileRecord[] = [];
+    let totalBytes = 0;
+    for (const file of selected) {
+      const expectedBytes = file.fileSizeBytes ?? file.fileSize;
+      if (!file.storagePath || !file.fileHash || !/^[a-f0-9]{64}$/.test(file.fileHash) || !Number.isSafeInteger(expectedBytes) || expectedBytes < 0) {
+        return res.status(409).json({ code: "HANDOVER_FILE_NOT_PORTABLE", error: `File ${file.id} does not have complete portable custody evidence.` });
+      }
+      totalBytes += expectedBytes;
+      if (totalBytes > 250 * 1024 * 1024) return res.status(413).json({ code: "HANDOVER_PACKAGE_TOO_LARGE", error: "The selected handover exceeds the 250 MB package limit. Narrow the visible filters." });
+      const bytes = await storage.downloadBounded(file.storagePath, Math.max(1, expectedBytes));
+      files.push({ id: file.id, fileName: file.fileName, mediaType: storedFileContentType(file.fileType, file.fileName), byteSize: expectedBytes, sha256: file.fileHash, status: file.status, relationship: file.documentRelationship || "created", version: file.version, createdAt: file.createdAt.toISOString(), bytes });
+    }
+    const built = buildProjectHandoverPackage({ project, generatedAt: new Date().toISOString(), files });
+    await db.insert(activityLogTable).values({ projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName, actionType: "export", entityType: "project_handover", entityId: projectId, fileNameBefore: null, fileNameAfter: `${project.code}-owner-handover.zip`, details: `Exported owner handover with ${files.length} controlled file record(s); archive SHA-256 ${built.archiveSha256}.` });
+    res.type("application/zip");
+    res.setHeader("Content-Disposition", safeDownloadDisposition(`${project.code}-owner-handover.zip`));
+    res.setHeader("X-Content-Type-Options", "nosniff");
+    res.setHeader("Cache-Control", "private, no-store");
+    res.setHeader("X-BIMLog-Handover-SHA256", built.archiveSha256);
+    res.setHeader("X-BIMLog-Manifest-SHA256", built.manifestSha256);
+    return res.send(built.archive);
+  } catch (error) {
+    console.error("[project-handover] export failed", error instanceof Error ? error.message : "unknown error");
+    return res.status(500).json({ code: "HANDOVER_EXPORT_FAILED", error: "The owner handover package could not be completed." });
   }
 });
 
