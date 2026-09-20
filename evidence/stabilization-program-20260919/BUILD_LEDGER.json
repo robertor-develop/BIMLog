@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the Block 22 / Build 110 publication candidate. It must pass the exact clean-source gate, normal non-force push, established Replit Shell publication without Replit Agents, exact live identity, and full authenticated visible-Chrome smoke.",
+  "headBinding": "The Git commit containing this ledger is the frozen Block 23 / Build 115 full-system candidate. It must pass the exact clean-source gate and normal non-force push. Publication is not due until Build 120 and final connected Navisworks/customer acceptance remains mandatory at Build 119.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 110,
+    "completedBuilds": 115,
     "totalBuilds": 120,
-    "remainingBuilds": 10,
-    "currentUnpublishedBuilds": 0,
-    "nextBuild": 111,
-    "nextPushAfterBuild": 115,
+    "remainingBuilds": 5,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 116,
+    "nextPushAfterBuild": 120,
     "nextPublicationAfterBuild": 120,
     "blocker": null
   },
@@ -335,6 +335,20 @@
         { "build": 108, "status": "PASS", "evidence": "BUILD_108_DATA_LIFECYCLE.md" },
         { "build": 109, "status": "PASS_AFTER_CORRECTION", "evidence": "BUILD_109_RECOVERY_REHEARSAL.md" },
         { "build": 110, "status": "PASS_PENDING_PUSH_PUBLICATION", "evidence": "BUILD_110_SECURITY_RECOVERY_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 23,
+      "buildRange": "111-115",
+      "status": "PASS_PENDING_PUSH_FINAL_FIELD_ACCEPTANCE_RESERVED_FOR_BUILD_119",
+      "publicationRequired": false,
+      "smoke": "Clean-install complete gate, authenticated desktop route matrix, reviewed desktop/tablet/exact-390 evidence, dual-year Native contracts and package-only installer migration. Push at Build 115; no publication until Build 120. Final connected 2021/2025/customer field proof remains mandatory at Build 119.",
+      "builds": [
+        { "build": 111, "status": "PASS", "evidence": "BUILD_111_CLEAN_INSTALL_SUITE.md" },
+        { "build": 112, "status": "PASS", "evidence": "BUILD_112_AUTHENTICATED_ROUTE_MATRIX.md" },
+        { "build": 113, "status": "PASS", "evidence": "BUILD_113_RESPONSIVE_ACCESSIBILITY_ACCEPTANCE.md" },
+        { "build": 114, "status": "PASS_AUTOMATED_FIELD_ENVIRONMENT_PENDING", "evidence": "BUILD_114_DUAL_YEAR_FIELD_READINESS.md" },
+        { "build": 115, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_115_RELEASE_CANDIDATE_ACCEPTANCE.md" }
       ]
     }
   ]

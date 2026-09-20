@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Current open-loop authority — Block 23 frozen candidate — 2026-09-20
+
+- [x] Complete Builds 111–115: clean-install full gate, exact packaged-artifact proof, complete authenticated desktop route matrix, reviewed desktop/tablet/exact-390 acceptance, dual-year Native contracts, exact package hashes, and isolated package-only migration/rollback simulation.
+- [ ] [ACTIVE] Push the exact Build 115 head normally. Do not publish at this five-build boundary.
+- [ ] Complete Builds 116–120. Build 119 must close the real connected Navisworks 2021/2025/customer field evidence gap, including a Lens Next-only accepted installation. Build 120 is the final publication, authenticated Chrome smoke, exact identity reconciliation, rollback, and durable handoff boundary.
+- [ ] The controlled 2021 NWD and Navisworks 2025 environment are unavailable on this workstation; live 2021 remains historical and still exposes Original Lens. This is explicit final-release evidence debt, not a silently waived product result.
+
 ## Current open-loop authority — 120-build stabilization program — 2026-09-19
 
 - [x] Builds 001–095 are complete through the pushed Block 19 head `9a6437a87d2816cb96f72449747582b80fa262b1`; production remains the accepted P36 Build 090 publication pending the Build 100 release boundary.

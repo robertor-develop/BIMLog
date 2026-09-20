@@ -239,6 +239,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block22-build110-security-recovery-acceptance.behavior.ts
 - artifacts/api-server/src/lib/block22-data-lifecycle.ts
 - artifacts/api-server/src/lib/block22-object-authority.ts
+- artifacts/api-server/src/lib/block23-build111-clean-suite.behavior.ts
+- artifacts/api-server/src/lib/block23-build112-route-matrix.behavior.ts
+- artifacts/api-server/src/lib/block23-build113-responsive-accessibility.behavior.ts
+- artifacts/api-server/src/lib/block23-build114-native-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block23-build115-final-acceptance.behavior.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts

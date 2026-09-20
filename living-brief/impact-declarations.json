@@ -33363,6 +33363,92 @@
         "scripts/check-current-state-contract.mjs"
       ],
       "reviewedChangeSha256": "1726aa8ac34d12a63b94b67ece316b35931cd83557af3d71275e7d36aabe6cdc"
+    },
+    {
+      "taskId": "bimlog-stabilization-block23-full-system-candidate-20260920",
+      "reviewedThroughCommit": "40231b3661b13c325c6611e1750c15d819e29d8e",
+      "reviewedAt": "2026-09-20T08:20:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem owner, provider authority, or cross-product boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five-build push, ten-build publication, visible Chrome, and no-Replit-Agents operating rules remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The normal pre-push gate now permanently enforces the Block 23 full-system candidate acceptance contract and preserves real field proof as a separate final-release gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product direction is unchanged; this block verifies and freezes existing behavior."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform inventory includes the five Block 23 executable acceptance contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Native and installer implementation are unchanged; dual-year package and isolated upgrade evidence was revalidated."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report rendering and design-system behavior are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, version, or applicability decision changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Builds 111–115, the frozen push-only candidate, and the explicit Build 119 field dependency."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closed Block 23 implementation and advanced the active program loop to Builds 116–120 while retaining the final connected field gate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five tracked evidence records, Chrome route/viewport review, dual-year tests, and installer simulation receipts carry the audit evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/block23-build111-clean-suite.behavior.ts",
+        "artifacts/api-server/src/lib/block23-build112-route-matrix.behavior.ts",
+        "artifacts/api-server/src/lib/block23-build113-responsive-accessibility.behavior.ts",
+        "artifacts/api-server/src/lib/block23-build114-native-acceptance.behavior.ts",
+        "artifacts/api-server/src/lib/block23-build115-final-acceptance.behavior.ts",
+        "evidence/stabilization-program-20260919/BUILD_111_CLEAN_INSTALL_SUITE.md",
+        "evidence/stabilization-program-20260919/BUILD_112_AUTHENTICATED_ROUTE_MATRIX.md",
+        "evidence/stabilization-program-20260919/BUILD_113_RESPONSIVE_ACCESSIBILITY_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/BUILD_114_DUAL_YEAR_FIELD_READINESS.md",
+        "evidence/stabilization-program-20260919/BUILD_115_RELEASE_CANDIDATE_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/check-current-state-contract.mjs"
+      ],
+      "reviewedChangeSha256": "5c1fda43c419072d475f42a40d6f2a5ddebf7eb39fac11051fcef37c27c0c033"
     }
   ]
 }
