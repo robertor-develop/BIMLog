@@ -8,9 +8,10 @@ import { ProjectSidebar } from "@/components/layout/ProjectSidebar";
 import { ChevronLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROLES, getRole, type RoleKey } from "@/lib/roles";
+import { loadDeploymentModule } from "@/lib/deployment-module-recovery";
 
 const namedProjectTab = (loader: () => Promise<object>, name: string) =>
-  React.lazy(async () => ({ default: (await loader() as Record<string, React.ComponentType<any>>)[name] }));
+  React.lazy(async () => ({ default: (await loadDeploymentModule(loader) as Record<string, React.ComponentType<any>>)[name] }));
 
 const FilesTab = namedProjectTab(() => import("./project/FilesTab"), "FilesTab");
 const RfisTab = namedProjectTab(() => import("./project/RfisTab"), "RfisTab");

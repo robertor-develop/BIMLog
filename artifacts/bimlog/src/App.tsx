@@ -14,9 +14,10 @@ import { PublicRouteMetadata } from "@/components/PublicRouteMetadata";
 import { RouteAccessibility } from "@/components/layout/RouteAccessibility";
 import { RouteState } from "@/components/layout/RouteState";
 import { loadAccessProfile, resolveProjectContext, type AccessSurface } from "@/lib/access-profile";
+import { loadDeploymentModule } from "@/lib/deployment-module-recovery";
 
 const namedPage = (loader: () => Promise<object>, name: string) =>
-  lazy(async () => ({ default: (await loader() as Record<string, React.ComponentType<any>>)[name] }));
+  lazy(async () => ({ default: (await loadDeploymentModule(loader) as Record<string, React.ComponentType<any>>)[name] }));
 
 const Landing = namedPage(() => import("@/pages/Landing"), "Landing");
 const Login = namedPage(() => import("@/pages/Login"), "Login");
@@ -52,7 +53,7 @@ const About = namedPage(() => import("@/pages/About"), "About");
 const Contact = namedPage(() => import("@/pages/Contact"), "Contact");
 const Features = namedPage(() => import("@/pages/Features"), "Features");
 const LensNextWorkspace = namedPage(() => import("@/features/lens-next/LensNextWorkspace"), "LensNextWorkspace");
-const NotFound = lazy(() => import("@/pages/not-found"));
+const NotFound = lazy(() => loadDeploymentModule(() => import("@/pages/not-found")));
 
 const queryClient = new QueryClient();
 
