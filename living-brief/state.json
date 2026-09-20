@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "40231b3661b13c325c6611e1750c15d819e29d8e",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "5a9e896a17a958b3626403d5428b44ce1b3443a217b43d7722f525a851b1c4e7",
+  "bundleSha256": "60574253cf09f18b304b352549ee81245e4cee7cd78a0dcd3546caf905e18835",
   "impact": {
     "baselineCommit": "40231b3661b13c325c6611e1750c15d819e29d8e",
     "changedPaths": [
@@ -107,7 +107,7 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "226445cc25144f28a0738f040c4f81d1e280eba5741a8bbd89f72b82494a2e19",
+      "sha256": "bba28cb4215ed4ec40093d39d384e83bbfdbd94d55bb909cb842dbfb8b9b906e",
       "sourceChangedAt": "2026-09-20T18:55:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "40231b3661b13c325c6611e1750c15d819e29d8e",

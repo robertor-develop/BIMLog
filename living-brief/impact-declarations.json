@@ -33469,7 +33469,7 @@
         "plugins/BIMLogLensNext/pulse/2025/BIMLogPulse2025.bundle/PackageContents.xml",
         "scripts/check-current-state-contract.mjs"
       ],
-      "reviewedChangeSha256": "19e4c5db2f604a91261733fb4a697e613b218be7096f373fd52b865dec798c25"
+      "reviewedChangeSha256": "7e7b78e20fba3c212f716105ffee36cc7b9dc95d5b6cfbb0df5665ab6c942a5d"
     }
   ]
 }
