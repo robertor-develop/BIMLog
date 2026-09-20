@@ -10,6 +10,11 @@ import { downloadAuthenticatedPdf, PrintPdfButton } from "@/components/PrintPdfB
 import { isDebug } from "@/lib/debug";
 import { MeetingClashesPanel } from "./MeetingClashesPanel";
 import {
+  loadMeetingWorkspace,
+  loadProjectMeetingDirectory,
+  updateMeetingActionItem,
+} from "./meetings/meeting-data";
+import {
   ClipboardList,
   CheckCircle2,
   Calendar,
@@ -429,10 +434,11 @@ export function MeetingsTab({
 
   const loadDirectoryEntries = async () => {
     if (!token) return;
-    const response = await fetch(`${API}/projects/${projectId}/directory`, {
-      headers: { Authorization: `Bearer ${token}` },
+    const entries = await loadProjectMeetingDirectory<ProjectDirectoryEntry>({
+      projectId,
+      token,
     });
-    if (response.ok) setDirectoryEntries(await response.json());
+    if (entries) setDirectoryEntries(entries);
   };
 
   const handleAddCompany = async (index: number) => {
@@ -836,16 +842,13 @@ export function MeetingsTab({
   const loadMeetings = async () => {
     setLoading(true);
     try {
-      const [mr, ar] = await Promise.all([
-        fetch(`${API}/projects/${projectId}/meetings`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-        fetch(`${API}/projects/${projectId}/action-items`, {
-          headers: { Authorization: `Bearer ${token}` },
-        }),
-      ]);
-      if (mr.ok) setMeetings(await mr.json());
-      if (ar.ok) setActionItems(await ar.json());
+      if (!token) return;
+      const workspace = await loadMeetingWorkspace<Meeting, ActionItem>({
+        projectId,
+        token,
+      });
+      if (workspace.meetings) setMeetings(workspace.meetings);
+      if (workspace.actionItems) setActionItems(workspace.actionItems);
     } finally {
       setLoading(false);
     }
@@ -3153,11 +3156,8 @@ export function MeetingsTab({
   };
 
   const updateActionItem = async (id: number, status: string) => {
-    await fetch(`${API}/projects/${projectId}/action-items/${id}`, {
-      method: "PATCH",
-      headers,
-      body: JSON.stringify({ status }),
-    });
+    if (!token) return;
+    await updateMeetingActionItem({ projectId, token }, id, status);
     await loadMeetings();
   };
 
