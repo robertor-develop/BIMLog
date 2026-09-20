@@ -21,6 +21,7 @@ import {
   type TableColumn,
 } from "../lib/pdf-kit";
 import { AiUsageError, getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
+import { ProjectFileUploadError, inspectProjectFileUpload } from "../lib/project-file-upload-contract";
 
 async function pdfParse(buffer: Buffer) {
   const { PDFParse: PDFParseClass } = await import("pdf-parse");
@@ -1155,6 +1156,16 @@ router.post(
         return;
       }
 
+      try {
+        inspectProjectFileUpload({ fileName, mediaType: req.file.mimetype, bytes: req.file.buffer });
+      } catch (error) {
+        if (error instanceof ProjectFileUploadError) {
+          res.status(error.status).json({ code: error.code, error: { en: error.message, es: error.messageEs } });
+          return;
+        }
+        throw error;
+      }
+
       let filePath: string;
       try {
         filePath = await storage.upload(req.file.buffer, projectId, req.file.originalname);
@@ -1466,6 +1477,16 @@ router.delete("/projects/:projectId/files/:fileId", authMiddleware, requirePermi
     if (existing.length === 0) {
       res.status(404).json({ error: "File not found" });
       return;
+    }
+
+    const metadata = existing[0].fileMetadata as Record<string, unknown> | null;
+    if (metadata?.retentionHold === true) {
+      res.status(423).json({ code: "FILE_RETENTION_HOLD_ACTIVE", error: "This file is under retention hold and cannot be deleted." });
+      return;
+    }
+
+    if (existing[0].storagePath) {
+      await storage.delete(existing[0].storagePath);
     }
 
     await db.delete(filesTable).where(eq(filesTable.id, fileId));
