@@ -17,6 +17,8 @@ export function sourceSchemaReceipt() {
   const contract = {
     tables: source.contract.tables,
     indexes: source.contract.indexes,
+    columns: source.contract.columns,
+    checks: source.contract.checks,
     startupTables: source.startupTables,
   };
   return {
@@ -25,6 +27,8 @@ export function sourceSchemaReceipt() {
     counts: {
       tables: contract.tables.length,
       indexes: contract.indexes.length,
+      columns: contract.columns.length,
+      checks: contract.checks.length,
       startupTables: contract.startupTables.length,
     },
     contract,
@@ -37,6 +41,8 @@ export function classifySchemaInventory(receipt, actual) {
     extra: observed.filter((name) => !expected.includes(name)),
   });
   const tables = compare(receipt.contract.tables, [...actual.tables].sort());
+  const columns = compare(receipt.contract.columns, [...actual.columns].sort());
+  const checks = compare(receipt.contract.checks, [...actual.checks].sort());
   const rawIndexes = compare(receipt.contract.indexes, [...actual.indexes].sort());
   const constraintIndexes = new Set(actual.constraintIndexes ?? []);
   const indexes = {
@@ -47,9 +53,11 @@ export function classifySchemaInventory(receipt, actual) {
   const missingStartupTables = receipt.contract.startupTables.filter((name) => !actual.tables.includes(name));
   return {
     tables,
+    columns,
+    checks,
     indexes,
     missingStartupTables,
-    exact: !tables.missing.length && !tables.extra.length && !indexes.missing.length && !indexes.extra.length && !missingStartupTables.length,
+    exact: !tables.missing.length && !tables.extra.length && !columns.missing.length && !columns.extra.length && !checks.missing.length && !checks.extra.length && !indexes.missing.length && !indexes.extra.length && !missingStartupTables.length,
   };
 }
 
@@ -61,6 +69,14 @@ export async function readDatabaseInventory(databaseUrl) {
     const identity = await client.query("SELECT current_database() database, current_setting('server_encoding') encoding");
     const tables = await client.query("SELECT tablename FROM pg_catalog.pg_tables WHERE schemaname='public' ORDER BY tablename");
     const indexes = await client.query("SELECT indexname FROM pg_catalog.pg_indexes WHERE schemaname='public' ORDER BY indexname");
+    const columns = await client.query("SELECT table_name,column_name FROM information_schema.columns WHERE table_schema='public' ORDER BY table_name,column_name");
+    const checks = await client.query(
+      `SELECT c.conname
+       FROM pg_catalog.pg_constraint c
+       JOIN pg_catalog.pg_namespace n ON n.oid=c.connamespace
+       WHERE n.nspname='public' AND c.contype='c'
+       ORDER BY c.conname`,
+    );
     const constraintIndexes = await client.query(
       `SELECT i.relname indexname
        FROM pg_catalog.pg_constraint c
@@ -74,6 +90,8 @@ export async function readDatabaseInventory(databaseUrl) {
       identity: identity.rows[0],
       tables: tables.rows.map((row) => row.tablename),
       indexes: indexes.rows.map((row) => row.indexname),
+      columns: columns.rows.map((row) => `${row.table_name}.${row.column_name}`),
+      checks: checks.rows.map((row) => row.conname),
       constraintIndexes: constraintIndexes.rows.map((row) => row.indexname),
     };
   } catch (error) {
@@ -100,7 +118,9 @@ async function main() {
       encoding: actual.identity.encoding,
       tableCount: actual.tables.length,
       indexCount: actual.indexes.length,
-      inventorySha256: sha256(JSON.stringify({ tables: actual.tables, indexes: actual.indexes })),
+      columnCount: actual.columns.length,
+      checkCount: actual.checks.length,
+      inventorySha256: sha256(JSON.stringify({ tables: actual.tables, indexes: actual.indexes, columns: actual.columns, checks: actual.checks })),
     },
     comparison,
     classification: comparison.exact ? "EXACT" : "DIFFERENT_CLASSIFIED",

@@ -6,6 +6,8 @@ const here = path.dirname(fileURLToPath(import.meta.url));
 const read = (file: string) => fs.readFileSync(path.resolve(here, file), "utf8");
 const migration = read("./job-intake-migration.ts"), service = read("./job-operations-service.ts"), route = read("../routes/job-operations.ts"), page = read("../../../bimlog/src/pages/JobOperationsWorkspace.tsx");
 for (const token of ["start_date date", "due_date date", "predecessor_task_ids text[]", "job_activation_task_dates_chk"]) assert.match(migration, new RegExp(token.replace("[]", "\\[\\]")));
+const drizzleSchema = fs.readFileSync(new URL("../../../../lib/db/src/schema/job-intakes.ts", import.meta.url), "utf8");
+for (const token of ["startDate: date(\"start_date\")", "dueDate: date(\"due_date\")", "predecessorTaskIds: text(\"predecessor_task_ids\").array()", "check(\"job_activation_task_dates_chk\""]) assert.ok(drizzleSchema.includes(token), `Drizzle schema must preserve ${token}`);
 assert.match(service, /WITH RECURSIVE successors/);
 assert.match(service, /JOB_OPERATIONS_DEPENDENCY_CYCLE/);
 assert.match(service, /WHERE id=\$1 AND version=\$2/);

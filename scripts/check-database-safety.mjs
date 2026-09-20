@@ -1,6 +1,7 @@
 import crypto from "node:crypto";
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
+import { createRequire } from "node:module";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -273,15 +274,18 @@ export function collectSchemaContract() {
   const indexSource = fs.readFileSync(schemaIndexPath, "utf8");
   const tables = new Set();
   const indexes = new Set();
+  const columns = new Set();
+  const checks = new Set();
   const missingExports = [];
 
   for (const filePath of walk(schemaDirectory).filter((file) => file.endsWith(".ts") && file !== schemaIndexPath)) {
     const source = fs.readFileSync(filePath, "utf8");
-    const fileTables = [...source.matchAll(/\bpgTable\(\s*["'`]([^"'`]+)["'`]/g)].map(
+    const parseSource = stripSqlComments(source);
+    const fileTables = [...parseSource.matchAll(/\bpgTable\(\s*["'`]([^"'`]+)["'`]/g)].map(
       (match) => match[1],
     );
     for (const table of fileTables) tables.add(table);
-    for (const match of source.matchAll(/\b(?:uniqueIndex|index)\(\s*["'`]([^"'`]+)["'`]/g)) {
+    for (const match of parseSource.matchAll(/\b(?:uniqueIndex|index)\(\s*["'`]([^"'`]+)["'`]/g)) {
       indexes.add(match[1]);
     }
     if (fileTables.length > 0) {
@@ -293,9 +297,32 @@ export function collectSchemaContract() {
     }
   }
 
+  const requireApi = createRequire(path.join(root, "artifacts", "api-server", "package.json"));
+  const tsxApi = requireApi("tsx/cjs/api");
+  const unregister = tsxApi.register();
+  try {
+    const schema = tsxApi.require(schemaIndexPath, import.meta.url);
+    const { getTableColumns, getTableName, isTable } = requireApi("drizzle-orm");
+    const { getTableConfig } = requireApi("drizzle-orm/pg-core");
+    for (const value of Object.values(schema)) {
+      if (!isTable(value)) continue;
+      const table = getTableName(value);
+      for (const column of Object.values(getTableColumns(value))) {
+        columns.add(`${table}.${column.name}`);
+      }
+      for (const tableCheck of getTableConfig(value).checks) {
+        checks.add(tableCheck.name);
+      }
+    }
+  } finally {
+    unregister();
+  }
+
   return {
     tables: [...tables].sort(),
     indexes: [...indexes].sort(),
+    columns: [...columns].sort(),
+    checks: [...checks].sort(),
     missingExports: missingExports.sort(),
   };
 }
