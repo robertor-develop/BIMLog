@@ -327,6 +327,12 @@ ${appRoutes()}
 - The Lens Next Platform capability contract binds list/detail, grouping, filters, captured-image states, references, same-project RFI/Submittal links, responsive/keyboard behavior, and the truthful rule that a captured image is not interactive 3D.
 - Create, Working View, repair, refresh, and reconciliation acceptance preserves exact project/model identity, idempotency, stale-response refusal, manual conflict handling, readback, and transaction rollback.
 - Customer Platform source no longer presents Original/Legacy Lens. \`/lens-next\` is the sole Lens product route. The shared release identity advances only the Platform counter to \`v1.05.N18-P35\`; generated Native metadata remains behaviorally unchanged and requires focused dual-year package/contract smoke before push.
+
+## Build 070 publication schema-correspondence correction
+
+- \`job_activation_tasks\` lifecycle dates and predecessor identities are jointly owned by the Build 057 startup migration and the authoritative Drizzle schema. The declared contract includes \`start_date\`, \`due_date\`, \`predecessor_task_ids\`, and \`job_activation_task_dates_chk\`; provider synchronization may not remove them.
+- Publication correspondence introspects the executable Drizzle schema and compares every table, explicit index, column, and check constraint against both provider databases. Any missing or extra column/check returns a stopped publication decision instead of a zero-change receipt.
+- The first P35 provider preview exposed the prior mismatch against 18 populated records and was cancelled before promotion. Production remained unchanged; the corrective release must pass a fresh provider preview before publication.
 `;
 
   const outDir = path.join(REPO_ROOT, "living-brief");
