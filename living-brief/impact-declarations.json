@@ -32799,6 +32799,74 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "1220f0ba43da49ab48b64c45089900180c25bf3218208cc164526cc3c61a3c7c"
+    },
+    {
+      "taskId": "bimlog-stabilization-build090-lens-migration-classification-20260920",
+      "reviewedThroughCommit": "943cdde0d24d22532c9fc5cec4dff640a36e64a4",
+      "reviewedAt": "2026-09-20T01:53:39.7287533-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Release cadence and provider workflow are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction makes the existing Lens inventory gate classify required migration safeguards accurately."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime module or architecture changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next remains the sole supported product; installer checks only detect and remove retired BIMLog.bundle state."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout, rendering, export, or visual-design contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded the failed-and-corrected pre-push Lens reference classification."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No open-loop disposition changed."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The pre-push failure and focused passing correction remain in execution evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "668fa7015bee9b5c24c4fbd089b558da89de8848674ff2a29d17235c0232db41"
     }
   ]
 }
