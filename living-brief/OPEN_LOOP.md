@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Current open-loop authority — post-120 Block 26 — 2026-09-20
+
+- [x] Builds 126–129: classify and remove five authentication/session and project/model silent-failure occurrences; add bounded code-only diagnostics plus denial, malformed-response, rollback-failure, and single-retry tests.
+- [ ] [ACTIVE] Build 130: pass the complete clean-source gate, push normally, publish through Replit Shell without Replit Agents, verify exact live identity, and run authenticated visible-Chrome login, reload, project-switch, and two-tab smoke.
+- [ ] Builds 131–135: continue silent-failure removal across workflow/document and export/report paths after Build 130 live closure.
+
 ## Current open-loop authority — post-120 Block 25 — 2026-09-20
 
 - [x] Builds 121–125: freeze all 66 P1 identities, deduplicate them into 38 root-cause groups, block P0 growth and new/unclassified P1 identities, remove the final source suppression, and complete the full regression gate.

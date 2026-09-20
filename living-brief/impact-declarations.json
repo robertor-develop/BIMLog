@@ -33566,6 +33566,82 @@
         "scripts/test-post120-block01.mjs"
       ],
       "reviewedChangeSha256": "ea379cb96a285e5557ed28cad562f754bec6bacc55ef58deef307488ff300a21"
+    },
+    {
+      "taskId": "bimlog-post120-block26-silent-failure-removal-20260920",
+      "reviewedThroughCommit": "7eb724e0d7d3076955ba59282a8eb3eb21df1249",
+      "reviewedAt": "2026-09-20T17:48:12-04:00",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, product boundary, or provider authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing push, publication, visible-Chrome, and no-Replit-Agents procedures remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds the bounded code-only diagnostic and single-retry quality contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product vision and intended customer outcomes are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No schema, database, provider topology, or platform capability changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, installer, package, bridge protocol, or supported-year behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report generation and design-system behavior are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, applicability, or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Build 126-130 candidate, five resolved P1 identities, and publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 126-129 and makes exact Build 130 publication and live acceptance the active loop."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records P0=0, P1=61, 34 root-cause groups, five resolved identities, and zero unexpected P1."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/BUILD_130_PUBLICATION_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
+        "evidence/stabilization-program-20260919/POST_120_FULL_SITE_AUDIT_20260920.md",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b58b38302031e12e21cf166a0ad84b3d01c058fd8573bf8a3afbc34945e7abfb"
     }
   ]
 }

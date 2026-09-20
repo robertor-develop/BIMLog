@@ -1,5 +1,11 @@
 # QUALITY.md - BIMLog Quality 4.0 Doctrine
 
+## Silent-failure observability contract
+
+- Authentication/session and project/model failures must preserve fail-closed outcomes while emitting bounded action-oriented codes.
+- Operational diagnostics may not contain credentials, tokens, cookies, authorization headers, URLs, project/model identities, customer content, or exception messages.
+- Transaction rollback evidence never replaces the authoritative operation failure. Session renewal retries once with the exact original mutation identity; malformed bridge probes report disconnected rather than fabricating health.
+
 ## Post-120 audit-regression contract
 
 - A release gate fails on any P0 finding or any new/unclassified P1 identity. Existing P1 debt remains exact, owned, scheduled, and measurable; deleting or changing an identity is reported rather than silently accepted.

@@ -21,6 +21,8 @@
 
 ## Block 26 — Builds 126–130 — silent-failure removal A
 
+Status: source accepted for the Build 130 publication boundary; publication and authenticated live smoke execute after the exact candidate push.
+
 - 126: classify silent catches in authentication/session paths.
 - 127: make actionable authentication failures observable without exposing secrets.
 - 128: classify silent catches in project/model binding paths.

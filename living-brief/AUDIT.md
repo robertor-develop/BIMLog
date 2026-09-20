@@ -1,5 +1,9 @@
 # AUDIT.md - Historical Evidence Register
 
+## Post-120 silent-failure removal A — Builds 126–130 — 2026-09-20
+
+Five accepted P1 identities were resolved across four root-cause groups. The current normalized receipt reports P0=0, P1=61, groups=34, resolved baseline identities=5, and unexpected P1=0. New diagnostics contain fixed event codes only and tests prohibit credential, token, URL, customer-content, identity, and exception-message disclosure.
+
 ## Post-120 audit normalization — Builds 121–125 — 2026-09-20
 
 The exact accepted inventory is `scripts/platform-audit-baseline.json`: 66 P1 occurrences, 38 root-cause groups, and zero P0. Each finding has a stable SHA-256-derived identity, owner, target build, disposition, and production/test classification. The blocking audit now rejects P0 findings and any P1 identity absent from that accepted inventory. The baseline records known debt; it does not waive it.
