@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "53db585f5216d1519a8b7251975f5163b160d7e08d2e4b5185f314657bdc1b5d",
+  "sourceSha256": "69809c10307e9e2e85988e238b536eda665b12b2e3592ef61b8039ef9b270a0c",
   "itemCount": 139,
   "counts": {
-    "ACTIVE": 121,
-    "SUPERSEDED": 15,
+    "ACTIVE": 120,
+    "SUPERSEDED": 16,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 0
   },
@@ -17,25 +17,25 @@
   ],
   "items": [
     {
-      "id": "23c3d62f111ac560",
+      "id": "e472cfcdb8dc82ff",
       "sourceLine": 6,
-      "heading": "Current open-loop authority — Block 24 final publication — 2026-09-20",
-      "statement": "[ACTIVE] Push exact Build 120 source normally, synchronize through signed-in Replit Shell, publish without Replit Agents, and complete exact-identity authenticated visible-Chrome acceptance.",
+      "heading": "Current open-loop authority — Block 24 connected field gate — 2026-09-20",
+      "statement": "[ACTIVE] Complete Build 119 connected Lens Next-only Navisworks 2021/2025/customer field acceptance. Navisworks 2025 is not installed on this workstation and the active 2021 setup remains historical.",
       "classification": "ACTIVE",
       "evidence": [
         "OPEN_LOOP.md:6",
-        "Current open-loop authority — Block 24 final publication — 2026-09-20"
+        "Current open-loop authority — Block 24 connected field gate — 2026-09-20"
       ]
     },
     {
-      "id": "68df5118d041cd9e",
+      "id": "431c5bd11de225c7",
       "sourceLine": 7,
-      "heading": "Current open-loop authority — Block 24 final publication — 2026-09-20",
-      "statement": "Preserve the separate environment fact that Navisworks 2025 is not installed; do not misreport unchanged package-only evidence as a live 2025 customer field run.",
-      "classification": "ACTIVE",
+      "heading": "Current open-loop authority — Block 24 connected field gate — 2026-09-20",
+      "statement": "Start Build 120 only after Build 119 passes; then run the exact push, Replit publication without Replit Agents, immutable live identity, and full authenticated visible-Chrome acceptance.",
+      "classification": "SUPERSEDED",
       "evidence": [
-        "OPEN_LOOP.md:7",
-        "Current open-loop authority — Block 24 final publication — 2026-09-20"
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
       ]
     },
     {

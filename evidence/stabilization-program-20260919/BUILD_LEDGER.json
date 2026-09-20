@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the Block 24 / Build 120 final web-release candidate. It must pass the exact clean-source gate, normal non-force push, governed Replit Shell publication, exact live identity, and authenticated visible-Chrome acceptance.",
+  "headBinding": "The Git commit containing this ledger preserves completed Builds 116–118 and the actual Build 119 environment blocker. Build 120, push, publication, and live acceptance cannot be claimed until connected 2021/2025 field acceptance is complete.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,14 +19,14 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 120,
+    "completedBuilds": 118,
     "totalBuilds": 120,
-    "remainingBuilds": 0,
-    "currentUnpublishedBuilds": 10,
-    "nextBuild": null,
-    "nextPushAfterBuild": null,
+    "remainingBuilds": 2,
+    "currentUnpublishedBuilds": 8,
+    "nextBuild": 119,
+    "nextPushAfterBuild": 120,
     "nextPublicationAfterBuild": 120,
-    "blocker": null
+    "blocker": "Build 119 requires connected Lens Next-only Navisworks 2021 and 2025 field acceptance. Navisworks 2025 is not installed. The 2021 read-only automation probe compiled but Navisworks failed to start with -2146959355; the active installation is historical and Original Lens remains present."
   },
   "blocks": [
     {
@@ -354,15 +354,15 @@
     {
       "block": 24,
       "buildRange": "116-120",
-      "status": "PASS_LOCAL_PENDING_PUSH_PUBLICATION_LIVE_SMOKE",
+      "status": "BLOCKED_AT_BUILD_119_FIELD_ENVIRONMENT",
       "publicationRequired": true,
       "smoke": "Push exact Build 120 source, publish through visible Chrome and Replit Shell without Replit Agents, then run exact-identity authenticated Chrome health, readiness, dashboard, project, Lens Next, reload and two-tab smoke. No Native or installer source changed, so the current cadence does not retrigger installed Navisworks smoke.",
       "builds": [
         { "build": 116, "status": "PASS", "evidence": "BUILD_116_FINAL_RELEASE_MANIFEST.md" },
         { "build": 117, "status": "PASS_RELEASE_PATH_READY", "evidence": "BUILD_117_GOVERNED_PUBLICATION.md" },
         { "build": 118, "status": "PASS_LIVE_SMOKE_CONTRACT_READY", "evidence": "BUILD_118_AUTHENTICATED_LIVE_SMOKE.md" },
-        { "build": 119, "status": "PASS_NO_NATIVE_OR_INSTALLER_CHANGE", "evidence": "BUILD_119_NATIVE_BOUNDARY.md" },
-        { "build": 120, "status": "PASS_LOCAL_PENDING_PUSH_PUBLICATION_LIVE_SMOKE", "evidence": "BUILD_120_FINAL_CLOSURE.md" }
+        { "build": 119, "status": "BLOCKED_MISSING_CONNECTED_2025_FIELD_ENVIRONMENT", "evidence": "BUILD_119_NATIVE_BOUNDARY.md" },
+        { "build": 120, "status": "NOT_STARTED", "evidence": "BUILD_120_FINAL_CLOSURE.md" }
       ]
     }
   ]

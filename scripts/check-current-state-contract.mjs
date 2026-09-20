@@ -18,13 +18,14 @@ function validate(snapshot) {
   assert(lens.legacyStatus === "migration-only", "Legacy Lens must be migration-only");
   assert(lens.customerFacingLegacyProduct === false && lens.parallelInstallationSupported === false && lens.legacyLoaderAllowedInAcceptedSetup === false, "Legacy Lens cannot remain customer-facing, parallel-installed, or loadable");
   assert(lens.currentPlatformVersion === release.label, "Lens product and release identities must agree");
-  assert(ledger.status.completedBuilds === 120, "Build ledger must track completed stabilization Build 120");
+  assert(ledger.status.completedBuilds === 118, "Build ledger must track completed stabilization Build 118");
   assert(ledger.status.remainingBuilds === 120 - ledger.status.completedBuilds, "Build ledger remaining count must reconcile");
   const expectedUnpublished = ledger.status.completedBuilds % ledger.releaseCadence.publishEveryBuilds;
   assert(ledger.status.currentUnpublishedBuilds === expectedUnpublished, "Build ledger unpublished count must follow the publication cadence");
-  assert(ledger.status.nextBuild === null, "Completed stabilization program cannot advertise another build");
-  assert(ledger.status.nextPushAfterBuild === null, "Completed stabilization program cannot advertise another push boundary");
-  assert(ledger.status.nextPublicationAfterBuild === 120, "Final publication boundary must remain Build 120 until live acceptance is recorded");
+  assert(ledger.status.nextBuild === 119, "Build ledger must stop at the actual Build 119 field gate");
+  assert(ledger.status.nextPushAfterBuild === 120, "Final push boundary must remain Build 120");
+  assert(ledger.status.nextPublicationAfterBuild === 120, "Final publication boundary must remain Build 120");
+  assert(typeof ledger.status.blocker === "string" && ledger.status.blocker.includes("Navisworks 2025"), "Build 119 environment blocker must remain explicit");
   for (const document of [status, platform, plugin]) assert(document.includes(release.label), "current release authorities must contain the exact release label");
   assert(quality.includes("Evidence and Release Quality Gate"), "QUALITY must retain the release-quality authority");
   assert(status.includes("Replit publication receipt `b8718795`"), "STATUS must retain the accepted P34 publication receipt");

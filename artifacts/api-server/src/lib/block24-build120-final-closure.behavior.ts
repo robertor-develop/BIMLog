@@ -9,6 +9,7 @@ for (let build = 116; build <= 120; build += 1) {
 }
 const closure = fs.readFileSync(path.join(evidenceRoot, "BUILD_120_FINAL_CLOSURE.md"), "utf8");
 assert.match(closure, /exact source/i);
+assert.match(closure, /Status: `NOT_STARTED`/);
 assert.match(closure, /visible Chrome/i);
 assert.match(closure, /Replit Agents.*prohibited/i);
 assert.match(closure, /no Native or installer source changed/i);

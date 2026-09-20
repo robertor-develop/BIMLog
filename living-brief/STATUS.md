@@ -1,11 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
-## 120-build stabilization current authority — Block 24 final local release gate — 2026-09-20
+## 120-build stabilization current authority — Block 24 stopped at connected field gate — 2026-09-20
 
-- Builds 116–120 bind the exact release manifest, zero-mutation database plan, governed visible-Chrome/Replit Shell publication, authenticated live-smoke contract, Native-change boundary, and final closure gate.
+- Builds 116–118 bind the exact release manifest, zero-mutation database plan, governed visible-Chrome/Replit Shell publication, and authenticated live-smoke contract.
 - The release remains `v1.05.N18-P36`; source constraint names match the already-deployed `_chk` identities, so database action is `NONE` and destructive statements are zero.
-- No Lens Next Native source, installer, manifest, or package changed in this block. Under Roberto's current cadence, focused installed Navisworks smoke is therefore not retriggered; the unchanged 2021/2025 P36 package and isolated installer evidence remain authoritative.
-- Build 120 has passed its focused local gate. Normal push, Replit publication without Replit Agents, exact live identity, and full authenticated visible-Chrome acceptance are now due before final live closure.
+- No Lens Next Native source, installer, manifest, or package changed in Builds 116–118. The unchanged 2021/2025 P36 package and isolated installer evidence remain valid but do not replace the previously accepted Build 119 connected field gate.
+- Build 119 is blocked because Navisworks 2025 is not installed; the available 2021 installation is historical and still exposes Original Lens. Build 120, push, publication, and live acceptance have not started.
 
 ## 120-build stabilization current authority — Block 23 frozen full-system candidate — 2026-09-20
 
