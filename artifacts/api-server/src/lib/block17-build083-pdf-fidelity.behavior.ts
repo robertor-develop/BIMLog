@@ -4,7 +4,7 @@ import { applyPdfDownloadHeaders, createPdfDocument } from "./pdf-kit";
 const headers = new Map<string, string>();
 applyPdfDownloadHeaders({ type(value) { headers.set("Content-Type", value); }, setHeader(name, value) { headers.set(name, value); } }, "Owner / Files — Current View");
 assert.equal(headers.get("Content-Type"), "application/pdf");
-assert.equal(headers.get("Content-Disposition"), 'attachment; filename="Owner-Files-Current-View.pdf"');
+assert.equal(headers.get("Content-Disposition"), "attachment; filename=\"Owner-Files-Current-View.pdf\"; filename*=UTF-8''Owner-Files-Current-View.pdf");
 assert.equal(headers.get("X-Content-Type-Options"), "nosniff");
 assert.equal(headers.get("Cache-Control"), "private, no-store");
 

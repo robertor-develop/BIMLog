@@ -54,9 +54,50 @@ type PdfResponse = {
   setHeader(name: string, value: string): unknown;
 };
 
-export function applyPdfDownloadHeaders(response: PdfResponse, title: string) {
+export type PdfDownloadIdentity = string | { title: string } | { fileName: string };
+
+function normalizedPdfFileName(identity: PdfDownloadIdentity): string {
+  const requested = typeof identity === "string"
+    ? reportFileName(identity)
+    : "fileName" in identity
+      ? identity.fileName
+      : reportFileName(identity.title);
+  const withoutPath = requested.replaceAll("\\", "/").split("/").at(-1) ?? "";
+  const withoutControls = withoutPath.replace(/[\u0000-\u001f\u007f]/gu, "").trim();
+  const base = withoutControls.toLowerCase().endsWith(".pdf")
+    ? withoutControls.slice(0, -4)
+    : withoutControls;
+  const safeBase = base
+    .normalize("NFKC")
+    .replace(/[<>:"/\\|?*]+/gu, "-")
+    .replace(/\s+/gu, " ")
+    .replace(/^[. -]+|[. -]+$/gu, "")
+    .slice(0, 140);
+  return `${safeBase || "BIMLog-Report"}.pdf`;
+}
+
+function asciiPdfFileName(fileName: string): string {
+  const ascii = fileName
+    .normalize("NFKD")
+    .replace(/[^\x20-\x7e]/gu, "")
+    .replace(/["\\]/gu, "-")
+    .replace(/\s+/gu, "-")
+    .replace(/-+/gu, "-");
+  return ascii && ascii !== ".pdf" ? ascii : "BIMLog-Report.pdf";
+}
+
+export function pdfDownloadFileName(identity: PdfDownloadIdentity): string {
+  return normalizedPdfFileName(identity);
+}
+
+export function pdfDownloadDisposition(identity: PdfDownloadIdentity): string {
+  const fileName = normalizedPdfFileName(identity);
+  return `attachment; filename="${asciiPdfFileName(fileName)}"; filename*=UTF-8''${encodeURIComponent(fileName)}`;
+}
+
+export function applyPdfDownloadHeaders(response: PdfResponse, identity: PdfDownloadIdentity) {
   response.type("application/pdf");
-  response.setHeader("Content-Disposition", `attachment; filename="${reportFileName(title)}"`);
+  response.setHeader("Content-Disposition", pdfDownloadDisposition(identity));
   response.setHeader("X-Content-Type-Options", "nosniff");
   response.setHeader("Cache-Control", "private, no-store");
 }
