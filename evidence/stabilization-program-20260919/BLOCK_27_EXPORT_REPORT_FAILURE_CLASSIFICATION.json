@@ -1,0 +1,47 @@
+{
+  "schemaVersion": 1,
+  "build": 133,
+  "scope": "export-report-and-controlled-delivery",
+  "classification": [
+    {
+      "findingIds": [
+        "AUD-CF43D5DCDB94",
+        "AUD-56C4E52B1C71",
+        "AUD-9EBD5A493B75",
+        "AUD-5675800A739C"
+      ],
+      "path": "artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "operation": "failed report-package artifact cleanup",
+      "failureClass": "artifact-cleanup-observability",
+      "requiredCorrection": "emit bounded code-only evidence for each failed cleanup while preserving the original package failure"
+    },
+    {
+      "findingIds": ["AUD-EF4D022A37C8"],
+      "path": "artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "operation": "report-package advisory unlock",
+      "failureClass": "lock-release-observability",
+      "requiredCorrection": "emit bounded code-only evidence when lock release fails"
+    },
+    {
+      "findingIds": ["AUD-7E91801A655F"],
+      "path": "artifacts/api-server/src/lib/telegram-product-delivery.ts",
+      "operation": "controlled document-delivery acknowledgement parsing",
+      "failureClass": "provider-response-observability",
+      "requiredCorrection": "emit bounded code-only evidence and preserve provider rejection behavior when JSON is invalid"
+    },
+    {
+      "findingIds": ["AUD-B552BEF3DD7D", "AUD-C1222BA239FB"],
+      "path": "artifacts/api-server/src/lib/telegram-product.ts",
+      "operation": "text and document acknowledgement parsing",
+      "failureClass": "provider-response-observability",
+      "requiredCorrection": "emit bounded code-only evidence and preserve failed-delivery state when JSON is invalid"
+    },
+    {
+      "findingIds": ["AUD-B5E545D5DF9B"],
+      "path": "artifacts/api-server/src/routes/clash_reports.ts",
+      "operation": "Lens Next report-creation failure serialization",
+      "failureClass": "diagnostic-fallback-observability",
+      "requiredCorrection": "emit a fixed code-only fallback if bounded serialization itself fails"
+    }
+  ]
+}
