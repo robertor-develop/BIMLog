@@ -1,0 +1,1455 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scannedFiles": 885,
+  "routesFound": 501,
+  "counts": {
+    "P0": 0,
+    "P1": 66,
+    "P2": 0,
+    "INFO": 0
+  },
+  "categories": {
+    "bespoke-pdf": {
+      "count": 2,
+      "owner": "BIMLog report platform",
+      "targetBuild": 136,
+      "blocking": false,
+      "disposition": "planned-shared-pdf-migration"
+    },
+    "emoji-source": {
+      "count": 1,
+      "owner": "BIMLog frontend quality",
+      "targetBuild": 196,
+      "blocking": false,
+      "disposition": "planned-accessibility-cleanup"
+    },
+    "silent-catch": {
+      "count": 63,
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    }
+  },
+  "baseline": {
+    "present": false,
+    "expectedP1": 0,
+    "unexpectedP1": [],
+    "resolvedP1": []
+  },
+  "rootCauseGroups": [
+    {
+      "rootCauseKey": "bespoke-pdf:artifacts/api-server/src/lib/feedback-package.ts",
+      "severity": "P1",
+      "category": "bespoke-pdf",
+      "file": "artifacts/api-server/src/lib/feedback-package.ts",
+      "owner": "BIMLog report platform",
+      "targetBuild": 136,
+      "findingIds": [
+        "AUD-A6F3B27E8C48",
+        "AUD-435EF9F8C995"
+      ],
+      "occurrences": 2
+    },
+    {
+      "rootCauseKey": "emoji-source:artifacts/bimlog/src/pages/project/CoordinatorCommandCenter.tsx",
+      "severity": "P1",
+      "category": "emoji-source",
+      "file": "artifacts/bimlog/src/pages/project/CoordinatorCommandCenter.tsx",
+      "owner": "BIMLog frontend quality",
+      "targetBuild": 196,
+      "findingIds": [
+        "AUD-9DADEBEDEB4F"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/ai-control-plane.http-evidence.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/ai-control-plane.http-evidence.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-A296E60DB35C"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-credential-lease-resolver.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/connector-credential-lease-resolver.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-7AE788FF597C"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-credential-lifecycle-postgres-store.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/connector-credential-lifecycle-postgres-store.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-A315DD285073"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-validation-operations-postgres-store.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/connector-validation-operations-postgres-store.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-250F6A0F98A8"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/coordination-hub-configuration-postgres-store.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/coordination-hub-configuration-postgres-store.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-EA73D3F19262"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/coordination-hub-postgres-store.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/coordination-hub-postgres-store.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-E18661893958",
+        "AUD-EE517B09DCE0"
+      ],
+      "occurrences": 2
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/cost-value-forecast-service.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/cost-value-forecast-service.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-97DCD6FC0C5B"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/cost-value-performance-service.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/cost-value-performance-service.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-3E939E647CD2"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/cost-value-plan-service.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/cost-value-plan-service.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-FB12591DD71E"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feature-policy-browser.behavior.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feature-policy-browser.behavior.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-268A764D53F4"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feature-policy.behavior.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feature-policy.behavior.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-F79E51F2A999"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-backup-worker.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-backup-worker.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-D18ED25D5A1C",
+        "AUD-7EB27C1ECEF4"
+      ],
+      "occurrences": 2
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-CF43D5DCDB94",
+        "AUD-56C4E52B1C71",
+        "AUD-9EBD5A493B75",
+        "AUD-5675800A739C",
+        "AUD-EF4D022A37C8"
+      ],
+      "occurrences": 5
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-http.behavior.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-http.behavior.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-77E233846535"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-http.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-http.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-35F7385D7F4E"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-5BB317D4C98F",
+        "AUD-C3588F79EAC2",
+        "AUD-9DA3460817EB",
+        "AUD-D1F2F1772F99",
+        "AUD-10A96B3218E5",
+        "AUD-DE3F4C95C53D",
+        "AUD-D3A0235DBEDC",
+        "AUD-1415F20E7501",
+        "AUD-0CFF3A78C57C",
+        "AUD-461DA4AE6CB9",
+        "AUD-6D321AF12FCD",
+        "AUD-C95CCF9F9AB5",
+        "AUD-6E7D5CA28F54",
+        "AUD-EA05178EB031"
+      ],
+      "occurrences": 14
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-telegram-worker.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-telegram-worker.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-0AE900D887E5",
+        "AUD-479A202FE6F4"
+      ],
+      "occurrences": 2
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-budget-browser.behavior.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-budget-browser.behavior.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-8C27A73CDF63"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-budget-import.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-budget-import.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-3F7194D099AA"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-contract-browser.behavior.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-contract-browser.behavior.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-B31A32DAADF5"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-contract-import.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-contract-import.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-0157955E8748"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-control-browser.behavior.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-control-browser.behavior.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-53B900DE2048"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/job-intake-service.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/job-intake-service.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-E1B9BDBCC779",
+        "AUD-B099C5626C39",
+        "AUD-1FC8A2BF3E7F"
+      ],
+      "occurrences": 3
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-C54C11FD0696"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/living-brief-gate.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/living-brief-gate.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-CC35DE5BC3CF"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/living-brief-migration.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/living-brief-migration.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-FBA119C219DD"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/runtime-security.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/runtime-security.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-00C88CD223CC"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/storage-adapter.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/storage-adapter.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-2227B7058C7E",
+        "AUD-B69182CF1D2F"
+      ],
+      "occurrences": 2
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/telegram-product-delivery.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/telegram-product-delivery.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-7E91801A655F"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/telegram-product.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/telegram-product.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-B552BEF3DD7D",
+        "AUD-C1222BA239FB"
+      ],
+      "occurrences": 2
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/routes/clash_reports.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/routes/clash_reports.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-B5E545D5DF9B"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/routes/feedback.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/routes/feedback.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-982B31FF6A81"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/components/OptionalSharePanel.tsx",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-5F8A5A2D6A4D"
+      ],
+      "occurrences": 1
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-C3C7BFB4BDCC",
+        "AUD-4BF3C701F3B4"
+      ],
+      "occurrences": 2
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-DEE3CB86905F",
+        "AUD-12B63F6526D5"
+      ],
+      "occurrences": 2
+    },
+    {
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "findingIds": [
+        "AUD-E70DB8B9655A",
+        "AUD-48911D6FB090"
+      ],
+      "occurrences": 2
+    }
+  ],
+  "findings": [
+    {
+      "severity": "P1",
+      "category": "bespoke-pdf",
+      "file": "artifacts/api-server/src/lib/feedback-package.ts",
+      "line": 3,
+      "detail": "PDF code appears outside shared pdf-kit helpers.",
+      "findingId": "AUD-A6F3B27E8C48",
+      "rootCauseKey": "bespoke-pdf:artifacts/api-server/src/lib/feedback-package.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog report platform",
+      "targetBuild": 136,
+      "blocking": false,
+      "disposition": "planned-shared-pdf-migration"
+    },
+    {
+      "severity": "P1",
+      "category": "bespoke-pdf",
+      "file": "artifacts/api-server/src/lib/feedback-package.ts",
+      "line": 113,
+      "detail": "PDF code appears outside shared pdf-kit helpers.",
+      "findingId": "AUD-435EF9F8C995",
+      "rootCauseKey": "bespoke-pdf:artifacts/api-server/src/lib/feedback-package.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog report platform",
+      "targetBuild": 136,
+      "blocking": false,
+      "disposition": "planned-shared-pdf-migration"
+    },
+    {
+      "severity": "P1",
+      "category": "emoji-source",
+      "file": "artifacts/bimlog/src/pages/project/CoordinatorCommandCenter.tsx",
+      "line": 656,
+      "detail": "Owner rule violation: emoji found in source code or user-visible text.",
+      "findingId": "AUD-9DADEBEDEB4F",
+      "rootCauseKey": "emoji-source:artifacts/bimlog/src/pages/project/CoordinatorCommandCenter.tsx",
+      "sourceKind": "production",
+      "owner": "BIMLog frontend quality",
+      "targetBuild": 196,
+      "blocking": false,
+      "disposition": "planned-accessibility-cleanup"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/ai-control-plane.http-evidence.ts",
+      "line": 83,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-A296E60DB35C",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/ai-control-plane.http-evidence.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/connector-credential-lease-resolver.ts",
+      "line": 101,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-7AE788FF597C",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-credential-lease-resolver.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/connector-credential-lifecycle-postgres-store.ts",
+      "line": 114,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-A315DD285073",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-credential-lifecycle-postgres-store.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/connector-validation-operations-postgres-store.ts",
+      "line": 48,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-250F6A0F98A8",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/connector-validation-operations-postgres-store.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/coordination-hub-configuration-postgres-store.ts",
+      "line": 150,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-EA73D3F19262",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/coordination-hub-configuration-postgres-store.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/coordination-hub-postgres-store.ts",
+      "line": 186,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-E18661893958",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/coordination-hub-postgres-store.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/coordination-hub-postgres-store.ts",
+      "line": 200,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-EE517B09DCE0",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/coordination-hub-postgres-store.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/cost-value-forecast-service.ts",
+      "line": 93,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-97DCD6FC0C5B",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/cost-value-forecast-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/cost-value-performance-service.ts",
+      "line": 139,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-3E939E647CD2",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/cost-value-performance-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/cost-value-plan-service.ts",
+      "line": 196,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-FB12591DD71E",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/cost-value-plan-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feature-policy-browser.behavior.ts",
+      "line": 25,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-268A764D53F4",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feature-policy-browser.behavior.ts",
+      "sourceKind": "test",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feature-policy.behavior.ts",
+      "line": 55,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-F79E51F2A999",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feature-policy.behavior.ts",
+      "sourceKind": "test",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-backup-worker.ts",
+      "line": 151,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-D18ED25D5A1C",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-backup-worker.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-backup-worker.ts",
+      "line": 161,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-7EB27C1ECEF4",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-backup-worker.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "line": 66,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-CF43D5DCDB94",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "line": 67,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-56C4E52B1C71",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "line": 68,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-9EBD5A493B75",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "line": 69,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-5675800A739C",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "line": 93,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-EF4D022A37C8",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-package-worker.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-http.behavior.ts",
+      "line": 248,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-77E233846535",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-http.behavior.ts",
+      "sourceKind": "test",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-http.ts",
+      "line": 26,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-35F7385D7F4E",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-http.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 246,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-5BB317D4C98F",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 249,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-C3588F79EAC2",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 250,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-9DA3460817EB",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 344,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-D1F2F1772F99",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 348,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-10A96B3218E5",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 582,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-DE3F4C95C53D",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 596,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-D3A0235DBEDC",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 780,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-1415F20E7501",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 833,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-0CFF3A78C57C",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 844,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-461DA4AE6CB9",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 871,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-6D321AF12FCD",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 873,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-C95CCF9F9AB5",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 874,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-6E7D5CA28F54",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "line": 875,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-EA05178EB031",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-relay/receiver-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-telegram-worker.ts",
+      "line": 31,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-0AE900D887E5",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-telegram-worker.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/feedback-telegram-worker.ts",
+      "line": 47,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-479A202FE6F4",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/feedback-telegram-worker.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-budget-browser.behavior.ts",
+      "line": 156,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-8C27A73CDF63",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-budget-browser.behavior.ts",
+      "sourceKind": "test",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-budget-import.ts",
+      "line": 393,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-3F7194D099AA",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-budget-import.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-contract-browser.behavior.ts",
+      "line": 32,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-B31A32DAADF5",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-contract-browser.behavior.ts",
+      "sourceKind": "test",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-contract-import.ts",
+      "line": 85,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-0157955E8748",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-contract-import.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/financial-control-browser.behavior.ts",
+      "line": 170,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-53B900DE2048",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/financial-control-browser.behavior.ts",
+      "sourceKind": "test",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/job-intake-service.ts",
+      "line": 779,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-E1B9BDBCC779",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/job-intake-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/job-intake-service.ts",
+      "line": 938,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-B099C5626C39",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/job-intake-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/job-intake-service.ts",
+      "line": 1566,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-1FC8A2BF3E7F",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/job-intake-service.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
+      "line": 73,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-C54C11FD0696",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/living-brief-gate.behavior.ts",
+      "sourceKind": "test",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/living-brief-gate.ts",
+      "line": 135,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-CC35DE5BC3CF",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/living-brief-gate.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/living-brief-migration.ts",
+      "line": 83,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-FBA119C219DD",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/living-brief-migration.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/runtime-security.ts",
+      "line": 9,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-00C88CD223CC",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/runtime-security.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/storage-adapter.ts",
+      "line": 46,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-2227B7058C7E",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/storage-adapter.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/storage-adapter.ts",
+      "line": 95,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-B69182CF1D2F",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/storage-adapter.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/telegram-product-delivery.ts",
+      "line": 439,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-7E91801A655F",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/telegram-product-delivery.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/telegram-product.ts",
+      "line": 1449,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-B552BEF3DD7D",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/telegram-product.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/lib/telegram-product.ts",
+      "line": 1500,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-C1222BA239FB",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/lib/telegram-product.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/routes/clash_reports.ts",
+      "line": 816,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-B5E545D5DF9B",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/routes/clash_reports.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/api-server/src/routes/feedback.ts",
+      "line": 100,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-982B31FF6A81",
+      "rootCauseKey": "silent-catch:artifacts/api-server/src/routes/feedback.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/components/OptionalSharePanel.tsx",
+      "line": 124,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-5F8A5A2D6A4D",
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/components/OptionalSharePanel.tsx",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+      "line": 75,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-C3C7BFB4BDCC",
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+      "line": 532,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-4BF3C701F3B4",
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+      "line": 522,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-DEE3CB86905F",
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+      "line": 564,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-12B63F6526D5",
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+      "line": 521,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-E70DB8B9655A",
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    },
+    {
+      "severity": "P1",
+      "category": "silent-catch",
+      "file": "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+      "line": 845,
+      "detail": "Silent catch can hide broken user workflows.",
+      "findingId": "AUD-48911D6FB090",
+      "rootCauseKey": "silent-catch:artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+      "sourceKind": "production",
+      "owner": "BIMLog reliability",
+      "targetBuild": 126,
+      "blocking": false,
+      "disposition": "planned-observability-reconciliation"
+    }
+  ]
+}
+
+
