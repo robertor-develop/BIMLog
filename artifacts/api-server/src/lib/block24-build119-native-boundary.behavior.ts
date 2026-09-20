@@ -13,8 +13,8 @@ assert.match(evidence, /PASS_WITH_OWNER_ACCEPTED_2025_FIELD_CONFIRMATION_DEFERRE
 assert.match(evidence, /-2146959355/);
 assert.match(evidence, /assigned the later physical 2025 confirmation to Ruben/);
 assert.match(evidence, /does not block Build 120/);
-assert.match(fieldReadme, /Pulse-only BIMLog\.bundle/);
-assert.match(fieldReadme, /retires the shared Original BIMLog Lens loader/);
+assert.match(fieldReadme, /Pulse-only command bundle/);
+assert.match(fieldReadme, /retires the unsupported prior Lens loader/);
 assert.match(fieldReadme, /post-closure evidence/);
 assert.match(dispositionSource, /!isCurrentAuthority/);
 console.log("block24 build119 boundary contract: PASS; 2021 live and dual-year installer proof accepted, physical 2025 confirmation deferred");

@@ -6,6 +6,7 @@
 - [x] Build 119 closed from connected Navisworks 2021 proof plus dual-year package and installer proof. Roberto assigned physical Navisworks 2025 confirmation to Ruben as post-closure evidence.
 - [ ] [ACTIVE] Complete Build 120 exact push, Replit publication without Replit Agents, immutable live identity, full authenticated visible-Chrome acceptance, and full-system audit.
 - [x] Correct the durable open-loop classifier so this current Build 120 authority cannot be mislabeled as a superseded historical publication marker.
+- [x] Remove residual retired-product wording detected by the complete Lens product-reference gate and repeat the focused regression successfully.
 
 ## Current open-loop authority — Block 23 frozen candidate — 2026-09-20
 

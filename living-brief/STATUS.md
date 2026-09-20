@@ -12,6 +12,7 @@
 - Builds 111–115 completed clean-install automation, exact packaged-artifact proof, the complete authenticated desktop route matrix, reviewed desktop/tablet/exact-390 surfaces, accessibility/keyboard/theme/language checks, dual-year Native contracts, exact package hashes, and isolated package-only upgrade/rollback simulation.
 - Release-blocking product findings are `P0=0` and `P1=0`. Lens Next truthfully reports a disconnected native bridge when Navisworks is absent; the expected refused loopback probe does not break the workspace.
 - Historical Block 23 field proof was superseded by the Build 119 plugin-only correction: Navisworks Manage 2021 and controlled NWD material exist; the live 2021 installation now contains Pulse plus Lens Next and excludes Original Lens. Navisworks 2025 remains absent, and its physical confirmation is assigned to Ruben as post-closure evidence.
+- Build 120's complete gate caught and removed residual retired-product wording from three 2021/2025 package operator files; the focused sole-product inventory passes again.
 - Build 115 is push-only. Production remains accepted at P36; no Replit publication is due until Build 120.
 - The candidate changes no production database/schema, customer data, provider binding, Native implementation, installer implementation, or deployed package.
 

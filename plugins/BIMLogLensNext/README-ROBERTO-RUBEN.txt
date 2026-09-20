@@ -12,8 +12,8 @@ INSTALL
 6. Start Navisworks Manage 2025 and open BIMLog Lens Next.
 
 IMPORTANT
-- This installs BIMLogLensNext2025.bundle and the verified Pulse-only BIMLog.bundle.
-- It retires the shared Original BIMLog Lens loader while preserving BIMLog Pulse.
+- This installs the 2025 Lens Next bundle and the verified Pulse-only command bundle.
+- It retires the unsupported prior Lens loader while preserving BIMLog Pulse.
 - Do not copy individual DLL files by hand.
 - Do not run the 2021 package in Navisworks 2025.
 - Internet access and an authorized BIMLog account are required.
