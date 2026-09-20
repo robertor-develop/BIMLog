@@ -1,10 +1,17 @@
 # STATUS.md - Current Accepted Platform State
 
+## 120-build stabilization current authority — Block 24 final local release gate — 2026-09-20
+
+- Builds 116–120 bind the exact release manifest, zero-mutation database plan, governed visible-Chrome/Replit Shell publication, authenticated live-smoke contract, Native-change boundary, and final closure gate.
+- The release remains `v1.05.N18-P36`; source constraint names match the already-deployed `_chk` identities, so database action is `NONE` and destructive statements are zero.
+- No Lens Next Native source, installer, manifest, or package changed in this block. Under Roberto's current cadence, focused installed Navisworks smoke is therefore not retriggered; the unchanged 2021/2025 P36 package and isolated installer evidence remain authoritative.
+- Build 120 has passed its focused local gate. Normal push, Replit publication without Replit Agents, exact live identity, and full authenticated visible-Chrome acceptance are now due before final live closure.
+
 ## 120-build stabilization current authority — Block 23 frozen full-system candidate — 2026-09-20
 
 - Builds 111–115 completed clean-install automation, exact packaged-artifact proof, the complete authenticated desktop route matrix, reviewed desktop/tablet/exact-390 surfaces, accessibility/keyboard/theme/language checks, dual-year Native contracts, exact package hashes, and isolated package-only upgrade/rollback simulation.
 - Release-blocking product findings are `P0=0` and `P1=0`. Lens Next truthfully reports a disconnected native bridge when Navisworks is absent; the expected refused loopback probe does not break the workspace.
-- Real connected field proof remains incomplete on this workstation: the controlled 2021 NWD is absent, live 2021 installation state is historical and still includes Original Lens, and Navisworks 2025 is absent. No Autodesk installation directory was changed. Build 119 remains the mandatory final connected/customer field gate.
+- Historical connected field proof remains bounded: Navisworks Manage 2021 and controlled NWD material exist, the live 2021 installation is historical and still includes Original Lens, and Navisworks 2025 is absent. No Autodesk installation directory was changed in Block 23.
 - Build 115 is push-only. Production remains accepted at P36; no Replit publication is due until Build 120.
 - The candidate changes no production database/schema, customer data, provider binding, Native implementation, installer implementation, or deployed package.
 

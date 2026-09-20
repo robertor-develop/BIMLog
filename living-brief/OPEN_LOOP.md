@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Current open-loop authority — Block 24 final publication — 2026-09-20
+
+- [x] Complete Builds 116–120 locally: exact manifest, zero-mutation database plan, governed provider path, authenticated live-smoke contract, Native-change boundary, and final closure gate.
+- [ ] [ACTIVE] Push exact Build 120 source normally, synchronize through signed-in Replit Shell, publish without Replit Agents, and complete exact-identity authenticated visible-Chrome acceptance.
+- [ ] Preserve the separate environment fact that Navisworks 2025 is not installed; do not misreport unchanged package-only evidence as a live 2025 customer field run.
+
 ## Current open-loop authority — Block 23 frozen candidate — 2026-09-20
 
 - [x] Complete Builds 111–115: clean-install full gate, exact packaged-artifact proof, complete authenticated desktop route matrix, reviewed desktop/tablet/exact-390 acceptance, dual-year Native contracts, exact package hashes, and isolated package-only migration/rollback simulation.

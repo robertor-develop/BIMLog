@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the frozen Block 23 / Build 115 full-system candidate. It must pass the exact clean-source gate and normal non-force push. Publication is not due until Build 120 and final connected Navisworks/customer acceptance remains mandatory at Build 119.",
+  "headBinding": "The Git commit containing this ledger is the Block 24 / Build 120 final web-release candidate. It must pass the exact clean-source gate, normal non-force push, governed Replit Shell publication, exact live identity, and authenticated visible-Chrome acceptance.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 115,
+    "completedBuilds": 120,
     "totalBuilds": 120,
-    "remainingBuilds": 5,
-    "currentUnpublishedBuilds": 5,
-    "nextBuild": 116,
-    "nextPushAfterBuild": 120,
+    "remainingBuilds": 0,
+    "currentUnpublishedBuilds": 10,
+    "nextBuild": null,
+    "nextPushAfterBuild": null,
     "nextPublicationAfterBuild": 120,
     "blocker": null
   },
@@ -349,6 +349,20 @@
         { "build": 113, "status": "PASS", "evidence": "BUILD_113_RESPONSIVE_ACCESSIBILITY_ACCEPTANCE.md" },
         { "build": 114, "status": "PASS_AUTOMATED_FIELD_ENVIRONMENT_PENDING", "evidence": "BUILD_114_DUAL_YEAR_FIELD_READINESS.md" },
         { "build": 115, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_115_RELEASE_CANDIDATE_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 24,
+      "buildRange": "116-120",
+      "status": "PASS_LOCAL_PENDING_PUSH_PUBLICATION_LIVE_SMOKE",
+      "publicationRequired": true,
+      "smoke": "Push exact Build 120 source, publish through visible Chrome and Replit Shell without Replit Agents, then run exact-identity authenticated Chrome health, readiness, dashboard, project, Lens Next, reload and two-tab smoke. No Native or installer source changed, so the current cadence does not retrigger installed Navisworks smoke.",
+      "builds": [
+        { "build": 116, "status": "PASS", "evidence": "BUILD_116_FINAL_RELEASE_MANIFEST.md" },
+        { "build": 117, "status": "PASS_RELEASE_PATH_READY", "evidence": "BUILD_117_GOVERNED_PUBLICATION.md" },
+        { "build": 118, "status": "PASS_LIVE_SMOKE_CONTRACT_READY", "evidence": "BUILD_118_AUTHENTICATED_LIVE_SMOKE.md" },
+        { "build": 119, "status": "PASS_NO_NATIVE_OR_INSTALLER_CHANGE", "evidence": "BUILD_119_NATIVE_BOUNDARY.md" },
+        { "build": 120, "status": "PASS_LOCAL_PENDING_PUSH_PUBLICATION_LIVE_SMOKE", "evidence": "BUILD_120_FINAL_CLOSURE.md" }
       ]
     }
   ]
