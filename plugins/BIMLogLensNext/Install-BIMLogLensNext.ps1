@@ -23,6 +23,9 @@ if($PackageOnly){Write-Host 'PACKAGE-ONLY PASS - INSTALL_PERFORMED=false' -Foreg
 $bundleName="BIMLogLensNext$Year.bundle"
 $source=Join-Path $packageRoot $bundleName
 if(-not(Test-Path -LiteralPath $source -PathType Container)){throw "STOP: packaged bundle is missing: $bundleName"}
+$pulseBundleName="BIMLogPulse$Year.bundle"
+$pulseSource=Join-Path $packageRoot $pulseBundleName
+if(-not(Test-Path -LiteralPath $pulseSource -PathType Container)){throw "STOP: packaged Pulse-only bundle is missing: $pulseBundleName"}
 $isSimulation=-not [string]::IsNullOrWhiteSpace($SimulationRoot)
 if($isSimulation){
   $installRoot=[IO.Path]::GetFullPath($SimulationRoot).TrimEnd('\')
@@ -50,14 +53,13 @@ function Assert-MatchingTrees([string]$Expected,[string]$Actual){
 
 New-Item -ItemType Directory -Force -Path $installRoot,$rollbackBase|Out-Null
 $target=Join-Path $installRoot $bundleName
+$pulseTarget=Join-Path $installRoot 'BIMLog.bundle'
 $stamp=Get-Date -Format 'yyyyMMdd-HHmmss-fffffff'
 $evidenceRoot=Join-Path $rollbackBase $stamp
 $stage=Join-Path $installRoot "$bundleName.installing-$stamp"
+$pulseStage=Join-Path $installRoot "BIMLog.bundle.installing-$stamp"
 $candidates=@()
-foreach($path in @($target,(Join-Path $installRoot 'BIMLog.bundle'))){if(Test-Path -LiteralPath $path -PathType Container){$candidates+=[IO.Path]::GetFullPath($path)}}
-foreach($pattern in @("$bundleName.rollback-*","$bundleName.installing-*")){
-  $candidates+=@(Get-ChildItem -LiteralPath $installRoot -Directory -Filter $pattern -ErrorAction SilentlyContinue|ForEach-Object FullName)
-}
+foreach($path in @($target,$pulseTarget)){if(Test-Path -LiteralPath $path -PathType Container){$candidates+=[IO.Path]::GetFullPath($path)}}
 $candidates=@($candidates|Sort-Object -Unique)
 $preserved=@()
 try{
@@ -73,8 +75,11 @@ try{
 
   Copy-Item -LiteralPath $source -Destination $stage -Recurse -Force
   Assert-MatchingTrees $source $stage
+  Copy-Item -LiteralPath $pulseSource -Destination $pulseStage -Recurse -Force
+  Assert-MatchingTrees $pulseSource $pulseStage
   foreach($candidate in $candidates){Remove-Item -LiteralPath $candidate -Recurse -Force}
   Move-Item -LiteralPath $stage -Destination $target
+  Move-Item -LiteralPath $pulseStage -Destination $pulseTarget
 
   $installedManifest=Join-Path $target 'PackageContents.xml'
   $installedNative=Join-Path $target "Contents\BIMLogLensNext.Native$Year.dll"
@@ -87,14 +92,19 @@ try{
   $expectedSeries=if($Year -eq 2021){'Nw18'}else{'Nw22'}
   if($component.AppType -ne 'ManagedPlugin' -or $component.ModuleName -ne $expectedModule){throw 'STOP: installed package points to the wrong native module.'}
   if($requirements.Platform -ne 'NAVMAN' -or $requirements.SeriesMin -ne $expectedSeries -or $requirements.SeriesMax -ne $expectedSeries){throw "STOP: installed package does not target Navisworks Manage $Year exactly."}
-  if(Test-Path -LiteralPath (Join-Path $installRoot 'BIMLog.bundle')){throw 'STOP: Original Lens remains in the Autodesk load root.'}
-  $stale=@(Get-ChildItem -LiteralPath $installRoot -Directory -Filter "$bundleName*"|Where-Object Name -ne $bundleName)
-  if($stale.Count){throw 'STOP: a stale Lens Next manifest-bearing directory remains in the Autodesk load root.'}
+  $pulseDll=Join-Path $pulseTarget "Contents\$Year\BIMLogNavisPlugin.dll"
+  if(-not(Test-Path -LiteralPath $pulseDll -PathType Leaf)){throw 'STOP: installed Pulse-only DLL is missing.'}
+  $pulseBytes=[Text.Encoding]::ASCII.GetString([IO.File]::ReadAllBytes($pulseDll))
+  if(-not $pulseBytes.Contains('BIMLog Pulse') -or $pulseBytes.Contains('BIMLogLensButton') -or $pulseBytes.Contains('BIMLogLensPlugin') -or $pulseBytes.Contains('BIMLog Lens')){throw 'STOP: installed BIMLog.bundle is not Pulse-only.'}
+  $active=@(Get-ChildItem -LiteralPath $installRoot -Directory -Filter '*.bundle'|Where-Object Name -like 'BIMLog*'|Select-Object -ExpandProperty Name|Sort-Object)
+  if(($active -join '|') -ne "BIMLog.bundle|$bundleName"){throw "STOP: unexpected active BIMLog bundles: $($active -join '|')"}
   Write-Host "INSTALL PASS: $target" -ForegroundColor Green
   Write-Host "ROLLBACK EVIDENCE PASS: $evidenceRoot" -ForegroundColor Green
 }catch{
   if(Test-Path -LiteralPath $stage){Remove-Item -LiteralPath $stage -Recurse -Force -ErrorAction SilentlyContinue}
+  if(Test-Path -LiteralPath $pulseStage){Remove-Item -LiteralPath $pulseStage -Recurse -Force -ErrorAction SilentlyContinue}
   if(Test-Path -LiteralPath $target){Remove-Item -LiteralPath $target -Recurse -Force -ErrorAction SilentlyContinue}
+  if(Test-Path -LiteralPath $pulseTarget){Remove-Item -LiteralPath $pulseTarget -Recurse -Force -ErrorAction SilentlyContinue}
   foreach($entry in $preserved){if(Test-Path -LiteralPath $entry.evidence){Copy-Item -LiteralPath $entry.evidence -Destination $entry.source -Recurse -Force}}
   throw
 }

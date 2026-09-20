@@ -985,3 +985,9 @@ It changes only when the code structure or curated architectural facts change.
 - Platform candidate `v1.05.N18-P36` completes the current ten-build publication batch through Build 080 with durable feedback recovery, canonical customer/reviewer routes, deterministic preferences, governed delivery contracts, and production-safe feedback-to-resolution acceptance.
 - Replit remains the established publication provider. Publication uses Replit Shell and visible Chrome; Replit Agents are prohibited. No external email, Telegram message, or document is sent by the acceptance gate.
 - Native behavior remains N18. Shared P36 metadata was rebuilt deterministically for Navisworks 2021 and 2025 without installation; installed compatibility and absence of customer-facing Legacy Lens remain a focused post-publication scan.
+
+## Build 119 Pulse/Lens Next installation boundary
+
+- The historical `BIMLog.bundle` combined Pulse and Original Lens, so deleting that bundle was not a valid legacy-Lens retirement strategy. The corrected package carries an explicit year-matched Pulse-only replacement assembly and installs it as `BIMLog.bundle` beside `BIMLogLensNext<year>.bundle`.
+- Installer integrity covers both source bundles. Upgrade evidence preserves the exact prior active roots, and post-install validation requires Pulse presence, legacy Lens class absence, the year-specific Autodesk manifest, the Lens Next native module, and exactly two active BIMLog `.bundle` discovery roots.
+- The 2021 live cutover and bridge/WebView2 startup passed without a licensing-file hash change. The 2025 assembly and isolated installer simulation pass, while physical 2025 application acceptance remains unclaimed until an installed 2025 field environment is available.

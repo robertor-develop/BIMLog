@@ -2991,3 +2991,7 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Builds 106–110: enforce object authorization, production runtime security, lifecycle/retention authority, isolated restore with post-restore login, and aggregate security/privacy/recovery acceptance; pass the clean gate, push, publish, and run authenticated Chrome smoke.
 - [ ] Builds 111–115: run complete clean-install, authenticated route, visual/accessibility, and dual-year Navisworks acceptance; burn down release-blocking findings and push Build 115.
 - [ ] Builds 106–110: complete security, privacy, retention and isolated recovery review; push and publish Build 110, then run exact-identity authenticated visible-Chrome smoke. No Native/installer smoke is required unless those paths change.
+- [x] Repair the Navisworks 2021 plugin installation so Pulse remains, Original/Legacy Lens disappears, Lens Next P36 includes WebView2, and the live bridge/workspace starts without modifying Navisworks licensing.
+- [x] Correct the 2021/2025 package installer so future upgrades replace the shared legacy bundle with a verified Pulse-only bundle and preserve exact rollback evidence.
+- [ ] Run connected Navisworks Manage 2025 field acceptance on a workstation where 2025 is already installed; do not substitute simulation evidence or modify Navisworks licensing to manufacture this gate.
+- [ ] After that connected 2025 result, complete Build 120 exact-source push, Replit Shell publication without Agents, and authenticated visible-Chrome smoke.

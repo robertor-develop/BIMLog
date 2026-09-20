@@ -25,17 +25,19 @@ foreach($directory in @($legacy,$active,$staleRollback,$staleStage)){New-Item -I
 $installer=Join-Path $package "Install-BIMLogLensNext$Year.ps1"
 & $installer -SimulationRoot $loadRoot -RollbackRoot $rollbackRoot
 if($LASTEXITCODE){throw 'STOP: first simulated upgrade failed.'}
-if(Test-Path -LiteralPath $legacy){throw 'STOP: Original Lens remained after simulated upgrade.'}
+if(-not(Test-Path -LiteralPath $legacy -PathType Container)){throw 'STOP: Pulse-only BIMLog.bundle was not installed.'}
 if(-not(Test-Path -LiteralPath $active -PathType Container)){throw 'STOP: Lens Next was not installed.'}
-if(@(Get-ChildItem -LiteralPath $loadRoot -Directory).Count -ne 1){throw 'STOP: load root contains more than the single intended Lens Next bundle.'}
+$activeBundles=@(Get-ChildItem -LiteralPath $loadRoot -Directory -Filter '*.bundle'|Sort-Object Name)
+if(($activeBundles.Name -join '|') -ne "BIMLog.bundle|$bundleName"){throw "STOP: active bundle set is wrong: $($activeBundles.Name -join '|')"}
 $receipts=@(Get-ChildItem -LiteralPath $rollbackRoot -Filter rollback-evidence.json -Recurse -File)
 if($receipts.Count -ne 1){throw 'STOP: first upgrade did not produce exactly one rollback receipt.'}
 $first=Get-Content -LiteralPath $receipts[0].FullName -Raw|ConvertFrom-Json
-if($first.preserved.Count -ne 4){throw "STOP: expected four preserved load-root trees, got $($first.preserved.Count)."}
+if($first.preserved.Count -ne 2){throw "STOP: expected the two exact active load-root trees to be preserved, got $($first.preserved.Count)."}
 
 & $installer -SimulationRoot $loadRoot -RollbackRoot $rollbackRoot
 if($LASTEXITCODE){throw 'STOP: repeated simulated upgrade failed.'}
-if(@(Get-ChildItem -LiteralPath $loadRoot -Directory).Count -ne 1){throw 'STOP: repeated upgrade left more than one loadable bundle.'}
+$activeBundles=@(Get-ChildItem -LiteralPath $loadRoot -Directory -Filter '*.bundle'|Sort-Object Name)
+if(($activeBundles.Name -join '|') -ne "BIMLog.bundle|$bundleName"){throw "STOP: repeated upgrade left the wrong active bundle set: $($activeBundles.Name -join '|')"}
 $receipts=@(Get-ChildItem -LiteralPath $rollbackRoot -Filter rollback-evidence.json -Recurse -File)
 if($receipts.Count -ne 2){throw 'STOP: repeated upgrade did not preserve independent rollback evidence.'}
 [ordered]@{status='PASS';year=$Year;packageRoot=$package;proofRoot=$proofRoot;activeBundle=$active;rollbackReceipts=$receipts.FullName}|ConvertTo-Json -Depth 5

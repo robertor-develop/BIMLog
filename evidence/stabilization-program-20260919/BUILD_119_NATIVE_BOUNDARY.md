@@ -1,8 +1,12 @@
 # Build 119 — Connected Lens Next field acceptance
 
-- Status: `BLOCKED_MISSING_CONNECTED_2025_FIELD_ENVIRONMENT`.
-- The final web closure block changes no Lens Next Native source, installer, manifest, or package, but the previously accepted final program plan still requires connected 2021/2025 Lens Next-only field acceptance before Build 120.
-- Existing deterministic P36 Navisworks 2021/2025 package hashes, Native suites, and isolated installer migration/rollback evidence remain valid but do not substitute for real installed field acceptance.
-- Navisworks Manage 2021 and controlled NWD material exist on this workstation. The active installation is historical and Original Lens remains present.
-- A read-only 2021 camera automation probe compiled with zero warnings/errors, but the Navisworks automation constructor failed to start the application with `-2146959355`; no model or installation was changed.
-- Navisworks Manage 2025 is not installed, so its connected field run cannot be performed here. Build 119 is not complete and Build 120 has not started.
+- Status: `BLOCKED_MISSING_CONNECTED_2025_FIELD_ENVIRONMENT` after the available 2021 connected correction and dual-year installer proof passed.
+- Navisworks Manage 2021 opened responsive production and controlled NWD windows after one safe retry. No Navisworks program, licensing, or license file was modified; the license SHA-256 remained `518AE6746CCCF1BEB4B90FF86E84E4C0083E60E11E9CF6928654348D0D2978D6` before and after the plugin-only cutover.
+- Active Autodesk BIMLog discovery roots are exactly `BIMLog.bundle` and `BIMLogLensNext2021.bundle`. `BIMLog.bundle` contains Pulse and no Original/Legacy Lens command classes. Lens Next P36 contains the complete WebView2 dependency tree.
+- Connected Lens Next started at `2026-09-20 14:28:12 -04:00`, listened on `127.0.0.1:8766`, restored its floating workspace, initialized embedded WebView2, and navigated to the authenticated `v1.05.N18-P36` Lens Next route without the former missing-assembly crash.
+- Live bridge `session`, `ping`, `capabilities`, `project-context`, and `local-inventory` calls passed. The controlled model remained honestly unbound; no synthetic project binding or model mutation was performed merely to force deeper write/capture commands green.
+- The installer/package defect that previously removed Pulse together with Original Lens is corrected: deterministic Pulse-only assemblies were built for 2021 and 2025, both exclude all legacy Lens command/plugin classes, and isolated dual-year upgrade simulations passed with exactly `BIMLog.bundle|BIMLogLensNext<year>.bundle` active plus rollback evidence.
+- The former read-only 2021 camera automation attempt had failed with `-2146959355`; that 2021 startup limitation is now closed by the responsive live 2021 launch and bridge proof above.
+- Navisworks Manage 2025 is not installed on this workstation, so no claim of a physical 2025 application launch is made. Its P36 package/native suites and the new 2025 Pulse-preserving installer simulation are the available evidence, but they do not replace the pre-existing connected 2025 field requirement. Build 120 has not started because that exact external environment remains unavailable and the requirement has not been changed.
+- Cutover receipt: `F:\BIMLog\TestProof\build119-plugin-only-cutover-20260920\20260920-142556-v3\cutover-receipt.json`.
+- Dual-year installer proof: `F:\Temp\bimlog-build119-pulse-preservation-proof`.

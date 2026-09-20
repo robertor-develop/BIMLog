@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ApplicationPackage SchemaVersion="1.0" AutodeskProduct="Navisworks" Name="BIMLog Pulse" AppVersion="1.60.33" ProductCode="{E7616029-2021-2025-B1A0-000000000033}" UpgradeCode="{E7616000-2021-2025-B1A0-000000000000}">
+  <CompanyDetails Name="BIMLog" />
+  <Components Description="BIMLog Pulse Navisworks 2021">
+    <RuntimeRequirements OS="Win64" Platform="NAVMAN" SeriesMin="Nw18" SeriesMax="Nw18" />
+    <ComponentEntry AppName="BIMLog Pulse 2021" Version="1.60.33" ModuleName="./Contents/2021/BIMLogNavisPlugin.dll" AppDescription="BIMLog Pulse for Navisworks 2021" LoadOnCommandInvocation="True" />
+  </Components>
+</ApplicationPackage>

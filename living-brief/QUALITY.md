@@ -570,3 +570,9 @@ Additional enforcement:
 - [OPEN_LOOP.md](./OPEN_LOOP.md) is the source of truth for unfinished customer feedback.
 - A feature is not ready for customer retest until code, exports/reports, guidance, release note, commit/push, publish/package status, and real workflow verification are accounted for.
 - If a request includes multiple examples, extract the underlying category and audit the whole category, not only the first example.
+
+## Navisworks plugin-install quality invariant
+
+- New installations must expose Pulse and Lens Next, never Original/Legacy Lens.
+- Installer acceptance must verify the Pulse-only assembly contains the Pulse command and contains no legacy Lens command/plugin classes, verify the complete Lens Next WebView2 dependency tree, preserve rollback evidence, and leave exactly the two intended active BIMLog bundle roots.
+- Package-only or simulated 2025 proof must never be reported as a connected Navisworks 2025 field pass.

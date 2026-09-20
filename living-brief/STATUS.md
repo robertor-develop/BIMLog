@@ -2140,3 +2140,9 @@ Builds 016–020 bind the exact 223-table/273-explicit-index/184-startup-table s
 ## 120-build stabilization program — Block 21 candidate
 
 Builds 101–105 reconcile public and pricing claims with implemented behavior, preserve invitation identity, fail visibly when onboarding cannot load project access, extend canonical Help for roles, Lens Next, integrations and recovery, and remove the unavailable Meeting recording action. The five focused contracts and TypeScript checks pass. Block 21 changes no database, schema, provider configuration, Native code, or installer. Build 105 is push-only; publication and authenticated visible-Chrome smoke remain due at Build 110.
+
+## Build 119 Pulse-preserving Lens Next correction — 2026-09-20
+
+- Navisworks Manage 2021 now loads exactly two active BIMLog bundles: a verified Pulse-only `BIMLog.bundle` and `BIMLogLensNext2021.bundle` P36. Original/Legacy Lens is absent, Pulse is preserved, the complete WebView2 dependency tree is installed, and Lens Next starts its authenticated embedded workspace and loopback bridge without the former missing-assembly crash.
+- The plugin-only cutover did not change Navisworks licensing, the BIMLog Platform, database, schema, or customer data. Dual-year isolated installer simulations prove the corrected 2021/2025 package contract replaces the old shared Lens/Pulse bundle with a Pulse-only bundle and retains rollback evidence.
+- Navisworks Manage 2025 is not installed on this workstation. Connected 2025 field acceptance remains explicit and unclaimed; Build 120 final closure remains blocked by that unchanged external field requirement.
