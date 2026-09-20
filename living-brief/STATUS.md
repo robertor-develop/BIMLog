@@ -1,5 +1,14 @@
 # STATUS.md - Current Accepted Platform State
 
+## 120-build stabilization current authority — Block 19 AI assistance governance — 2026-09-20
+
+- Builds 091–095 inventory all 45 provider-generation call sites and make the tracked inventory a normal pre-push gate. Direct provider clients outside the approved usage/control-plane modules fail the gate.
+- Prompt sources are explicitly project-scoped and untrusted; cross-project context, oversized context, malformed output, unauthorized fields, provider failures, and timeouts fail safely. AI output remains non-authoritative.
+- Draft decision receipts distinguish accepted, edited, and rejected output with source/original/final SHA-256 provenance. AI generation cannot issue, approve, certify, transmit, or mutate project state; those actions remain separate authenticated routes.
+- The dashboard's former silent external "AI Briefing" call is removed. The visible Project Briefing is deterministic, sends no external AI request, and labels incomplete data truthfully. Concierge capabilities remain `coming_later` rather than overstated.
+- Build 095 is push-only. Production remains the accepted `v1.05.N18-P36` Build 090 publication; the next publication and full authenticated Chrome smoke are due after Build 100. No schema, customer data, provider configuration, Lens Next Native source, installer, or package changed, so no Navisworks smoke is required.
+- Block 18 is accepted live from exact source `4dce1c472479070fc3661037ed81300e192cd0f1`, Replit publication receipt `65d06374`, and live package `bimlog-4dce1c472479070f-6de4b77c63078f47` after repeated authenticated Chrome acceptance.
+
 ## 120-build stabilization current authority — Block 18 integration publication candidate — 2026-09-20
 
 - Builds 086–090 verify controlled Procore import/return reconciliation, canonical SharePoint references, Outlook message/attachment custody, truthful connector availability, and idempotent outage recovery without activating any provider.

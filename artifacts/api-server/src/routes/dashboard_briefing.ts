@@ -6,7 +6,7 @@ import {
 } from "@workspace/db/schema";
 import { eq, and, inArray, ne, or, count, desc } from "drizzle-orm";
 import { authMiddleware } from "../middlewares/auth";
-import { getAnthropicClientForUser } from "../lib/ai-usage";
+import { deterministicBriefing, type BriefingDraft } from "../lib/ai-assistance-governance";
 import {
   addPageNumbers,
   computeContentHash,
@@ -22,7 +22,7 @@ import {
 const router: Router = Router();
 
 // In-memory cache: userId → { result, expiresAt }
-const cache = new Map<number, { result: object; expiresAt: number }>();
+const cache = new Map<number, { result: BriefingDraft; expiresAt: number }>();
 
 const PENDING_TYPES = ["rfis", "submittals", "files"] as const;
 type PendingType = typeof PENDING_TYPES[number];
@@ -725,11 +725,7 @@ router.get("/dashboard/briefing", authMiddleware, async (req, res) => {
     return;
   }
 
-  const fallback = {
-    summary: "Your projects are active — review open items.",
-    criticalItems: [] as string[],
-    todaysDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-  };
+  const todaysDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
 
   try {
     const memberships = await db.select({ projectId: projectMembersTable.projectId })
@@ -737,11 +733,11 @@ router.get("/dashboard/briefing", authMiddleware, async (req, res) => {
     const projectIds = memberships.map((m: { projectId: number }) => m.projectId);
 
     if (!projectIds.length) {
-      res.json({
+      res.json(deterministicBriefing({
         summary: "Welcome to BIMLog. Create or join a project to get started.",
-        criticalItems: [],
-        todaysDate: new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" }),
-      });
+        todaysDate,
+        status: "not_required",
+      }));
       return;
     }
 
@@ -763,42 +759,26 @@ router.get("/dashboard/briefing", authMiddleware, async (req, res) => {
       overdueRfis: overdueRfis.length,
       pendingSubmittals: pendingSubs.length,
       namingIssues: rejectedFiles.length,
-      projectNames: projects.slice(0, 3).map((p: { name: string }) => p.name).join(", "),
     };
 
-    const todaysDate = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
-
-    const anthropic = await getAnthropicClientForUser({
-      userId,
-      feature: "dashboard_briefing",
-    });
-    const msg = await anthropic.messages.create({
-      model: "claude-sonnet-4-5",
-      max_tokens: 200,
-      system: "You are BIMLog's intelligence engine. Return ONLY valid JSON. No markdown. No explanation.",
-      messages: [{
-        role: "user",
-        content: `Project data: ${JSON.stringify(stats)}
-Return exactly:
-{"summary":"one sentence, most important thing today with specific numbers","criticalItems":["up to 3 short urgent strings"],"todaysDate":"${todaysDate}"}`,
-      }],
-    });
-
-    const raw = msg.content[0]?.type === "text" ? msg.content[0].text.trim() : "";
-    // Strip markdown fences if present
-    const cleaned = raw.replace(/^```(?:json)?\s*/i, "").replace(/\s*```$/, "").trim();
-
-    let result: object;
-    try {
-      result = JSON.parse(cleaned);
-    } catch {
-      result = { ...fallback, todaysDate };
-    }
+    const criticalItems = [
+      stats.overdueRfis > 0 ? `${stats.overdueRfis} overdue RFI${stats.overdueRfis === 1 ? "" : "s"} require review.` : "",
+      stats.pendingSubmittals > 0 ? `${stats.pendingSubmittals} pending submittal${stats.pendingSubmittals === 1 ? "" : "s"} require review.` : "",
+      stats.namingIssues > 0 ? `${stats.namingIssues} file naming issue${stats.namingIssues === 1 ? "" : "s"} require review.` : "",
+    ].filter(Boolean).slice(0, 3);
+    const result: BriefingDraft = {
+      ...deterministicBriefing({
+        summary: `${stats.projects} active project${stats.projects === 1 ? "" : "s"}, ${stats.openRfis} open RFI${stats.openRfis === 1 ? "" : "s"}, and ${stats.pendingSubmittals} pending submittal${stats.pendingSubmittals === 1 ? "" : "s"}.`,
+        todaysDate,
+        status: "not_required",
+      }),
+      criticalItems,
+    };
 
     cache.set(userId, { result, expiresAt: now + 60 * 60 * 1000 });
     res.json(result);
   } catch {
-    res.json(fallback);
+    res.json(deterministicBriefing({ summary: "Project briefing data is temporarily unavailable.", todaysDate, failureCode: "BRIEFING_DATA_UNAVAILABLE" }));
   }
 });
 

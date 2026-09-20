@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the Block 18 / Build 090 publication candidate. Production remains the accepted P36 Build 080 publication until this exact candidate passes push, Replit publication, and authenticated visible-Chrome M09 smoke.",
+  "headBinding": "The Git commit containing this ledger is the Block 19 / Build 095 push-only candidate. Production remains the accepted P36 Build 090 publication; the next publication and authenticated Chrome smoke are due after Build 100.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 90,
+    "completedBuilds": 95,
     "totalBuilds": 120,
-    "remainingBuilds": 30,
-    "currentUnpublishedBuilds": 0,
-    "nextBuild": 91,
-    "nextPushAfterBuild": 95,
+    "remainingBuilds": 25,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 96,
+    "nextPushAfterBuild": 100,
     "nextPublicationAfterBuild": 100,
     "blocker": null
   },
@@ -270,7 +270,7 @@
     {
       "block": 18,
       "buildRange": "086-090",
-      "status": "PASS_LOCAL_PENDING_PUSH_PUBLICATION",
+      "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED",
       "publicationRequired": true,
       "smoke": "Publish Build 090 and run authenticated visible-Chrome files/report/export plus controlled connector reconciliation smoke. Native and installers are unchanged, so no Navisworks smoke is required.",
       "builds": [
@@ -278,7 +278,21 @@
         { "build": 87, "status": "PASS", "evidence": "BUILD_087_SHAREPOINT_REFERENCE_AUTHORITY.md" },
         { "build": 88, "status": "PASS", "evidence": "BUILD_088_OUTLOOK_CUSTODY.md" },
         { "build": 89, "status": "PASS", "evidence": "BUILD_089_CONNECTOR_MATRIX.md" },
-        { "build": 90, "status": "PASS_LOCAL_PENDING_PUSH_PUBLICATION", "evidence": "BUILD_090_INTEGRATION_RECOVERY.md" }
+        { "build": 90, "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED", "evidence": "BUILD_090_INTEGRATION_RECOVERY.md" }
+      ]
+    },
+    {
+      "block": 19,
+      "buildRange": "091-095",
+      "status": "PASS_PENDING_PUSH",
+      "publicationRequired": false,
+      "smoke": "AI-assistance governance and capability-truth acceptance; push at Build 095. Publication and authenticated Chrome smoke remain due after Build 100. Native and installers are unchanged, so no Navisworks smoke is required.",
+      "builds": [
+        { "build": 91, "status": "PASS", "evidence": "BUILD_091_AI_ENTRY_POINT_INVENTORY.md" },
+        { "build": 92, "status": "PASS", "evidence": "BUILD_092_AI_BOUNDARIES.md" },
+        { "build": 93, "status": "PASS", "evidence": "BUILD_093_AI_DRAFT_AUTHORITY.md" },
+        { "build": 94, "status": "PASS", "evidence": "BUILD_094_AI_CAPABILITY_TRUTH.md" },
+        { "build": 95, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_095_AI_ASSISTANCE_ACCEPTANCE.md" }
       ]
     }
   ]

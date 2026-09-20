@@ -110,7 +110,12 @@ function actionStyle(type: string) {
 function AiBriefingCard({ token }: { token?: string }) {
   const { lang } = useI18n();
   const tl = (en: string, es: string) => lang === "es" ? es : en;
-  const [briefing, setBriefing] = useState<{ summary: string; criticalItems: string[]; todaysDate: string } | null>(null);
+  const [briefing, setBriefing] = useState<{
+    summary: string;
+    criticalItems: string[];
+    todaysDate: string;
+    generation: { status: "ai_draft" | "deterministic_fallback" | "not_required"; authoritative: false; feature: string; failureCode?: string };
+  } | null>(null);
   const [loading, setLoading] = useState(false);
   const [shown, setShown] = useState(false);
   const [open, setOpen] = useState(false);
@@ -140,24 +145,29 @@ function AiBriefingCard({ token }: { token?: string }) {
           }}
         >
           <Sparkles style={{ width: 18, height: 18 }} />
-          {tl("Get AI Morning Briefing — smart summary of what needs your attention today", "Obtener Briefing IA — resumen inteligente de lo que necesita atención hoy")}
+          {tl("Open project briefing — current operational summary", "Abrir briefing del proyecto — resumen operativo actual")}
         </button>
       )}
       {loading && (
         <div style={{ padding: "10px 16px", borderRadius: 9, background: "#EFF6FF", border: "1px solid #BFDBFE", fontSize: 12, color: "#2563EB" }}>
-          <Sparkles style={{ width: 12, height: 12, marginRight: 4 }} />{tl("Generating AI briefing…", "Generando briefing IA…")}
+          <Sparkles style={{ width: 12, height: 12, marginRight: 4 }} />{tl("Loading project briefing…", "Cargando briefing del proyecto…")}
         </div>
       )}
       {open && briefing && (
         <div style={{ padding: 16, borderRadius: 9, background: "linear-gradient(135deg, #EFF6FF, #F5F3FF)", border: "1px solid #BFDBFE" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: 10 }}>
             <div>
-              <span style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8", display: "flex", alignItems: "center", gap: 4 }}><Sparkles style={{ width: 13, height: 13 }} />{tl("AI Briefing", "Briefing IA")}</span>
+              <span style={{ fontSize: 13, fontWeight: 700, color: "#1D4ED8", display: "flex", alignItems: "center", gap: 4 }}><Sparkles style={{ width: 13, height: 13 }} />{tl("Project briefing", "Briefing del proyecto")}</span>
               <span style={{ fontSize: 10, color: "#6B7280", marginLeft: 8 }}>{briefing.todaysDate}</span>
             </div>
             <button onClick={() => setOpen(false)} style={{ background: "none", border: "none", cursor: "pointer", color: "#9CA3AF", padding: 0 }}>X</button>
           </div>
           <p style={{ fontSize: 12, color: "#374151", margin: "0 0 10px", lineHeight: 1.6 }}>{briefing.summary}</p>
+          <p style={{ fontSize: 10, color: briefing.generation.status === "deterministic_fallback" ? "#92400E" : "#4B5563", margin: "0 0 10px", lineHeight: 1.5 }}>
+            {briefing.generation.status === "deterministic_fallback"
+              ? tl("Current data could not be loaded completely. No AI request was made.", "Los datos actuales no se pudieron cargar por completo. No se realizó ninguna solicitud de IA.")
+              : tl("Deterministic BIMLog summary · No external AI request · Review before acting", "Resumen determinista de BIMLog · Sin solicitud externa de IA · Revise antes de actuar")}
+          </p>
           {briefing.criticalItems?.length > 0 && (
             <ul style={{ margin: 0, padding: "0 0 0 16px" }}>
               {briefing.criticalItems.map((item, i) => (

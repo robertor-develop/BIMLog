@@ -33003,6 +33003,91 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "3e4f3e80fe68103d4f9090d931258ea1a25262b88310dace2ab42238d592f260"
+    },
+    {
+      "taskId": "bimlog-stabilization-block19-ai-assistance-20260920",
+      "reviewedThroughCommit": "4dce1c472479070fc3661037ed81300e192cd0f1",
+      "reviewedAt": "2026-09-20T03:34:39.3598347-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine or cross-product authority changes."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing five-build push and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The normal pre-push gate now enforces AI entry-point and draft-authority checks without changing the quality doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "AI assistance remains reviewable support rather than autonomous project authority."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated structural inventory now includes the three AI-assistance governance and truth modules; the implementation removes one silent external call and retains the existing governed AI control plane."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, packages, and product identity are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report layout, rendering, and export contracts are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, version, or applicability decision changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Builds 091–095, the deterministic briefing correction, and the Build 100 publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 096–120 remain open; Build 096 is not started."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The tracked inventory and five build evidence records carry the implementation audit evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/ai-assistance-governance.behavior.ts",
+        "artifacts/api-server/src/lib/ai-assistance-governance.ts",
+        "artifacts/api-server/src/lib/ai-assistance-truth.behavior.ts",
+        "artifacts/api-server/src/routes/dashboard_briefing.ts",
+        "artifacts/bimlog/src/pages/Dashboard.tsx",
+        "evidence/stabilization-program-20260919/AI_ENTRY_POINT_INVENTORY.json",
+        "evidence/stabilization-program-20260919/BUILD_091_AI_ENTRY_POINT_INVENTORY.md",
+        "evidence/stabilization-program-20260919/BUILD_092_AI_BOUNDARIES.md",
+        "evidence/stabilization-program-20260919/BUILD_093_AI_DRAFT_AUTHORITY.md",
+        "evidence/stabilization-program-20260919/BUILD_094_AI_CAPABILITY_TRUTH.md",
+        "evidence/stabilization-program-20260919/BUILD_095_AI_ASSISTANCE_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/check-ai-entry-points.mjs",
+        "scripts/check-current-state-contract.mjs"
+      ],
+      "reviewedChangeSha256": "4df9b4d405d41afd7bbfdb5f73cfd298e0073e08aaf596d3ae09af64814a421e"
     }
   ]
 }

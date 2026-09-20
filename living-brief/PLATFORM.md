@@ -173,6 +173,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/access-route-authority.behavior.ts
 - artifacts/api-server/src/lib/accountability-outbox.behavior.ts
 - artifacts/api-server/src/lib/accountability-outbox.ts
+- artifacts/api-server/src/lib/ai-assistance-governance.behavior.ts
+- artifacts/api-server/src/lib/ai-assistance-governance.ts
+- artifacts/api-server/src/lib/ai-assistance-truth.behavior.ts
 - artifacts/api-server/src/lib/ai-control-plane-migration.ts
 - artifacts/api-server/src/lib/ai-control-plane.behavior.ts
 - artifacts/api-server/src/lib/ai-control-plane.http-evidence.ts
