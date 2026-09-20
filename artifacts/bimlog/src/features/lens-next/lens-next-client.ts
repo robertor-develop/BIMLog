@@ -71,8 +71,27 @@ function normalizeApiBase(value: string): string {
   return base;
 }
 
-async function jsonBody(response: Response, label: string): Promise<unknown> {
-  const body = await response.json().catch(() => null);
+export type LensNextClientDiagnosticCode =
+  | "BRIDGE_RESPONSE_JSON_INVALID"
+  | "BRIDGE_PROBE_FAILED"
+  | "BRIDGE_SESSION_RENEWAL_REQUIRED";
+export type LensNextClientDiagnosticReporter = (code: LensNextClientDiagnosticCode) => void;
+
+const defaultLensNextClientDiagnosticReporter: LensNextClientDiagnosticReporter = (code) => {
+  console.warn(`[BIMLogLensNext] ${code}`);
+};
+
+async function jsonBody(
+  response: Response,
+  label: string,
+  reporter: LensNextClientDiagnosticReporter = defaultLensNextClientDiagnosticReporter,
+): Promise<unknown> {
+  let body: unknown = null;
+  try {
+    body = await response.json();
+  } catch {
+    reporter("BRIDGE_RESPONSE_JSON_INVALID");
+  }
   if (!response.ok) {
     const detail =
       body && typeof body === "object" && "message" in body
@@ -413,6 +432,7 @@ export interface LensNextBridgeClientOptions {
   bridgeOrigin?: string;
   fetchImpl?: FetchLike;
   requestIdFactory?: () => string;
+  diagnosticReporter?: LensNextClientDiagnosticReporter;
 }
 
 export interface LensNextBridgeClient {
@@ -498,6 +518,7 @@ export function createLensNextBridgeClient(
     options.bridgeOrigin ?? "http://127.0.0.1:8766",
   );
   const requestIdFactory = options.requestIdFactory ?? defaultRequestId;
+  const diagnosticReporter = options.diagnosticReporter ?? defaultLensNextClientDiagnosticReporter;
   const requestHeaders = () => ({
     Accept: "application/json",
     Authorization: `Bearer ${sessionToken}`,
@@ -507,6 +528,7 @@ export function createLensNextBridgeClient(
   const fetchWithSessionRenewal: FetchLike = async (input, init) => {
     let response = await fetchImpl(input, init);
     if (response.status !== 401) return response;
+    diagnosticReporter("BRIDGE_SESSION_RENEWAL_REQUIRED");
     const renewed = await bootstrapLensNextBridgeSession(
       bridgeOrigin,
       fetchImpl,
@@ -529,9 +551,10 @@ export function createLensNextBridgeClient(
           signal,
         });
         if (!response.ok) return false;
-        const body = await response.json().catch(() => null);
+        const body = await jsonBody(response, "Lens Next bridge probe", diagnosticReporter);
         return bridgePayload(body, "pong").protocolVersion === 1;
       } catch {
+        diagnosticReporter("BRIDGE_PROBE_FAILED");
         return false;
       }
     },

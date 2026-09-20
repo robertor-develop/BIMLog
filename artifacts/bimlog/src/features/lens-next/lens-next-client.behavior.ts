@@ -68,6 +68,17 @@ assert.equal(await client.probe(), true);
 assert.equal(calls.at(-1)?.authorization, `Bearer ${newToken}`);
 assert.equal(calls.at(-1)?.contentType, "application/json; charset=utf-8");
 
+const diagnostics: string[] = [];
+const failedProbe = createLensNextBridgeClient({
+  sessionToken: oldToken,
+  bridgeOrigin: "http://127.0.0.1:8800",
+  diagnosticReporter: code => diagnostics.push(code),
+  fetchImpl: async () => new Response("not-json", { status: 200, headers: { "Content-Type": "application/json" } }),
+});
+assert.equal(await failedProbe.probe(), false);
+assert.deepEqual(diagnostics, ["BRIDGE_RESPONSE_JSON_INVALID", "BRIDGE_PROBE_FAILED"]);
+assert.doesNotMatch(JSON.stringify(diagnostics), /not-json|token|127\.0\.0\.1/i);
+
 const applyRequestId = "apply-request-00000001";
 const applyBodies: string[] = [];
 let applyAttempts = 0;
