@@ -16,6 +16,7 @@
     "audit:platform:freeze-baseline": "node scripts/platform-audit.mjs --write-baseline",
     "test:platform-audit-identity": "node scripts/platform-audit.mjs --self-test",
     "test:living-brief-typed-boundary": "node scripts/test-living-brief-typed-boundary.mjs",
+    "test:post120-block01": "node scripts/test-post120-block01.mjs",
     "test:platform-audit-policy": "node scripts/test-platform-audit-policy.mjs",
     "test:local-release-gate": "node scripts/test-local-release-gate.mjs",
     "gate:local-release": "node scripts/local-release-gate.mjs",

@@ -1,5 +1,9 @@
 # AUDIT.md - Historical Evidence Register
 
+## Post-120 audit normalization — Builds 121–125 — 2026-09-20
+
+The exact accepted inventory is `scripts/platform-audit-baseline.json`: 66 P1 occurrences, 38 root-cause groups, and zero P0. Each finding has a stable SHA-256-derived identity, owner, target build, disposition, and production/test classification. The blocking audit now rejects P0 findings and any P1 identity absent from that accepted inventory. The baseline records known debt; it does not waive it.
+
 ## Build 120 full-system audit — 2026-09-20
 
 The repository-wide census and semantic findings are recorded in `evidence/stabilization-program-20260919/POST_120_FULL_SITE_AUDIT_20260920.md`; the resulting 100-build follow-on program is recorded in `POST_120_EXECUTION_PLAN_100_BUILDS.md`. The scan covers all tracked text through deterministic tooling and focused semantic review, and does not misrepresent automated ingestion as a manual human reading of every line.

@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "program": "BIMLog post-Build-120 stabilization",
+  "range": { "firstBuild": 121, "lastBuild": 220, "completedThrough": 125 },
+  "currentBlock": { "number": 25, "builds": "121-125", "status": "PASS_PENDING_PUSH" },
+  "audit": { "p0": 0, "p1Occurrences": 66, "rootCauseGroups": 38, "unexpectedP1": 0 },
+  "remainingBuilds": 95,
+  "unpublishedBuilds": 5,
+  "nextBlock": "Builds 126-130 — silent-failure removal A",
+  "nextPush": 130,
+  "nextPublication": 130,
+  "nativeOrInstallerChanged": false,
+  "databaseOrSchemaChanged": false,
+  "customerDataChanged": false
+}

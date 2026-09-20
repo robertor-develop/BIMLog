@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Current open-loop authority — post-120 Block 25 — 2026-09-20
+
+- [x] Builds 121–125: freeze all 66 P1 identities, deduplicate them into 38 root-cause groups, block P0 growth and new/unclassified P1 identities, remove the final source suppression, and complete the full regression gate.
+- [ ] [ACTIVE] Builds 126–130: remove silent failures from authentication/session and project/model-binding paths, then push, publish, and run authenticated Chrome login, reload, project-switch, and two-tab smoke.
+- [ ] Physical Navisworks 2025 confirmation remains assigned to Ruben as post-closure field evidence. It does not reopen Build 119 and this platform-only block does not retrigger focused Navisworks smoke.
+
 ## Current open-loop authority — Build 120 final closure — 2026-09-20
 
 - [x] Complete Builds 116–118: exact manifest, zero-mutation database plan, governed provider path, and authenticated live-smoke contract.

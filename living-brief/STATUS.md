@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Post-120 stabilization — Block 25 source acceptance — 2026-09-20
+
+- Builds 121–125 normalize the repository audit into 66 stable P1 evidence identities across 38 executable root-cause groups, with exact owner, target build, disposition, and production/test classification.
+- The blocking audit remains P0-zero and now also fails on any new or unclassified P1 identity. The accepted baseline is not a waiver: resolved identities are reported and remaining groups stay scheduled in Builds 126, 136, and 196.
+- The last `@ts-ignore` in the Living Brief source loader is removed and replaced with a typed CommonJS/ESM boundary plus a direct regression test.
+- This block changes no runtime product workflow, database/schema, customer data, Native code, installer, package, or provider configuration. It is a push-only boundary; publication and authenticated Chrome smoke remain due after Build 130.
+
 ## 120-build stabilization current authority — Build 120 final closure active — 2026-09-20
 
 - Builds 116–118 bind the exact release manifest, zero-mutation database plan, governed visible-Chrome/Replit Shell publication, and authenticated live-smoke contract.

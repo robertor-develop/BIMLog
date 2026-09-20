@@ -33479,6 +33479,93 @@
         "scripts/open-loop-dispositions.mjs"
       ],
       "reviewedChangeSha256": "2c3b4e10fd4d02fd71b55ba0b273293cfb01338790f494a26438b8537f1f6a5c"
+    },
+    {
+      "taskId": "bimlog-post120-block25-audit-normalization-20260920",
+      "reviewedThroughCommit": "0755c11310255e0d7568f0a39674c6e386874dcc",
+      "reviewedAt": "2026-09-20T17:19:44-04:00",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem owner, provider authority, or cross-product boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds the permanent zero-P0 and no-new-unclassified-P1 audit regression contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product direction and intended customer outcomes are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform runtime architecture, provider topology, schema, or production behavior changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, Pulse, installer, package, or supported-year behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bespoke-PDF debt is inventoried and scheduled; no rendering behavior changed in this block."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, applicability, or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Build 121-125 normalized audit baseline and push-only boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 121-125 and activates Builds 126-130 without reopening Build 119."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "Records 66 stable P1 occurrence identities, 38 root-cause groups, zero P0, and the new fail-closed gate."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/living-brief-source.ts",
+        "evidence/stabilization-program-20260919/BUILD_121_AUDIT_INVENTORY.md",
+        "evidence/stabilization-program-20260919/BUILD_122_FINDING_DEDUPLICATION.md",
+        "evidence/stabilization-program-20260919/BUILD_123_AUDIT_REGRESSION_GATE.md",
+        "evidence/stabilization-program-20260919/BUILD_124_LIVING_BRIEF_TYPED_BOUNDARY.md",
+        "evidence/stabilization-program-20260919/BUILD_125_NORMALIZED_BASELINE.md",
+        "evidence/stabilization-program-20260919/PLATFORM_AUDIT_NORMALIZED.json",
+        "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/POST_120_FULL_SITE_AUDIT_20260920.md",
+        "living-brief/AUDIT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/QUALITY.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/platform-audit-baseline.json",
+        "scripts/platform-audit-policy.json",
+        "scripts/platform-audit.mjs",
+        "scripts/test-living-brief-typed-boundary.mjs",
+        "scripts/test-platform-audit-policy.mjs",
+        "scripts/test-post120-block01.mjs"
+      ],
+      "reviewedChangeSha256": "ea379cb96a285e5557ed28cad562f754bec6bacc55ef58deef307488ff300a21"
     }
   ]
 }

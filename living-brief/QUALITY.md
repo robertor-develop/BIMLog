@@ -1,5 +1,11 @@
 # QUALITY.md - BIMLog Quality 4.0 Doctrine
 
+## Post-120 audit-regression contract
+
+- A release gate fails on any P0 finding or any new/unclassified P1 identity. Existing P1 debt remains exact, owned, scheduled, and measurable; deleting or changing an identity is reported rather than silently accepted.
+- Audit occurrence counts and root-cause counts are distinct. Builds are planned against executable root causes while preserving every exact occurrence as evidence.
+- Type suppressions may not substitute for a typed runtime boundary in Living Brief authority loading.
+
 ## Block 24 final closure gate
 
 - Build 120 is not live-complete until exact GitHub/Replit/live source identity, HTTP 200 health/readiness, authenticated visible-Chrome Super Administrator access, dashboard, project workspace, Lens Next, reload restoration, two-tab continuity, and zero page/console errors pass.

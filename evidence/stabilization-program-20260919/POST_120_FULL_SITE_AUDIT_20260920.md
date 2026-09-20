@@ -14,7 +14,7 @@ This audit inventories every tracked file and ingests every tracked text line th
 - Database safety inventory: 223 tables, 273 indexes, and 184 startup tables reconciled.
 - AI entry points inventoried: 45.
 - Open-loop records classified: 140 total; 122 active, 15 superseded, 3 accepted limitations.
-- Automated product audit: P0 = 0, P1 = 66, P2 = 0.
+- Automated product audit: P0 = 0, P1 = 66 occurrences, P2 = 0. Builds 121–122 normalize those occurrences into 38 executable root-cause groups with stable evidence identities.
 - Dependency audit: no known package vulnerabilities at the Build 120 candidate gate.
 
 ## Confirmed product truth
@@ -38,9 +38,9 @@ This audit inventories every tracked file and ingests every tracked text line th
 
 ### P1 architecture and maintainability
 
-- 66 P1 audit findings remain. The dominant categories are bespoke PDF paths outside shared rendering helpers, silent catches that obscure actionable failures, and one UI-symbol/emoji rule violation.
+- 66 P1 audit occurrences remain across 38 root-cause groups: 2 bespoke-PDF occurrences in one source module, 63 silent-catch occurrences in 36 modules, and one UI-symbol/emoji occurrence. The exact accepted inventory is `scripts/platform-audit-baseline.json`; the full machine-readable receipt is `PLATFORM_AUDIT_NORMALIZED.json`. New P1 identities now fail the blocking audit until classified.
 - Largest source modules remain too concentrated: `MeetingsTab.tsx` (6,510 lines), `ConventionBuilder.tsx` (4,996), `clash_reports.ts` (4,430), `RfisTab.tsx` (4,132), `rfis.ts` (4,033), `meeting_minutes.ts` (4,003), `JobIntakeWorkspace.tsx` (2,965), and `SubmittalsTab.tsx` (2,963).
-- One source suppression remains in `living-brief-source.ts` (`@ts-ignore`) and should be replaced by a typed boundary.
+- The final source suppression in `living-brief-source.ts` was removed in Build 124 and replaced by an explicit typed CommonJS/ESM boundary.
 
 ### Performance and delivery
 
