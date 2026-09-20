@@ -22,6 +22,8 @@ Build and inspect one complete owner handover package from controlled project re
 `tsx artifacts/api-server/src/lib/block17-build085-owner-handover-acceptance.behavior.ts`  
 `test:block17-document-handover-acceptance`
 
+The first aggregate current-state run correctly failed because its validator was hard-coded to Build 080. The validator now checks Build 085 and derives push/publication counters from the governed cadence; the repeated gate passes.
+
 ## Position
 
 - Completed builds: `85 of 120`
