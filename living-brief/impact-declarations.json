@@ -33383,7 +33383,7 @@
         {
           "key": "quality",
           "result": "updated",
-          "reason": "The normal pre-push gate now permanently enforces the Block 23 full-system candidate acceptance contract and preserves real field proof as a separate final-release gate."
+          "reason": "The normal pre-push gate enforces Blocks 23 and 24, Pulse preservation, legacy Lens retirement, complete Lens Next dependencies, unchanged licensing, and the remaining real field gate."
         },
         {
           "key": "vision",
@@ -33393,12 +33393,12 @@
         {
           "key": "platform",
           "result": "updated",
-          "reason": "The generated platform inventory includes the five Block 23 executable acceptance contracts."
+          "reason": "The platform inventory includes the Block 23 and 24 contracts and the corrected dual-year plugin packaging and installer behavior."
         },
         {
           "key": "plugin",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Native and installer implementation are unchanged; dual-year package and isolated upgrade evidence was revalidated."
+          "result": "updated",
+          "reason": "The plugin topology now retains BIMLog Pulse, removes original BIMLog Lens, and installs Lens Next with its complete WebView2 dependency tree."
         },
         {
           "key": "report_design_system",
@@ -33413,17 +33413,17 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Recorded Builds 111–115, the frozen push-only candidate, and the explicit Build 119 field dependency."
+          "reason": "Recorded Builds 111–120, the successful 2021 live correction, dual-year isolated installer proof, and the unmet connected Navisworks 2025 field requirement."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Closed Block 23 implementation and advanced the active program loop to Builds 116–120 while retaining the final connected field gate."
+          "reason": "Build 119 remains explicitly open only for connected Navisworks 2025 field proof, and Build 120 remains unstarted."
         },
         {
           "key": "audit",
           "result": "reviewed_no_semantic_change",
-          "reason": "Five tracked evidence records, Chrome route/viewport review, dual-year tests, and installer simulation receipts carry the audit evidence."
+          "reason": "Tracked build evidence, the cutover receipt, hashes, live bridge evidence, and isolated 2021 and 2025 upgrade simulations carry the audit evidence."
         }
       ],
       "reviewedChangedPaths": [
@@ -33433,11 +33433,22 @@
         "artifacts/api-server/src/lib/block23-build113-responsive-accessibility.behavior.ts",
         "artifacts/api-server/src/lib/block23-build114-native-acceptance.behavior.ts",
         "artifacts/api-server/src/lib/block23-build115-final-acceptance.behavior.ts",
+        "artifacts/api-server/src/lib/block24-build116-release-manifest.behavior.ts",
+        "artifacts/api-server/src/lib/block24-build117-publication.behavior.ts",
+        "artifacts/api-server/src/lib/block24-build118-live-smoke.behavior.ts",
+        "artifacts/api-server/src/lib/block24-build119-native-boundary.behavior.ts",
+        "artifacts/api-server/src/lib/block24-build120-final-closure.behavior.ts",
+        "artifacts/api-server/src/lib/block24-final-release-contract.ts",
         "evidence/stabilization-program-20260919/BUILD_111_CLEAN_INSTALL_SUITE.md",
         "evidence/stabilization-program-20260919/BUILD_112_AUTHENTICATED_ROUTE_MATRIX.md",
         "evidence/stabilization-program-20260919/BUILD_113_RESPONSIVE_ACCESSIBILITY_ACCEPTANCE.md",
         "evidence/stabilization-program-20260919/BUILD_114_DUAL_YEAR_FIELD_READINESS.md",
         "evidence/stabilization-program-20260919/BUILD_115_RELEASE_CANDIDATE_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/BUILD_116_FINAL_RELEASE_MANIFEST.md",
+        "evidence/stabilization-program-20260919/BUILD_117_GOVERNED_PUBLICATION.md",
+        "evidence/stabilization-program-20260919/BUILD_118_AUTHENTICATED_LIVE_SMOKE.md",
+        "evidence/stabilization-program-20260919/BUILD_119_NATIVE_BOUNDARY.md",
+        "evidence/stabilization-program-20260919/BUILD_120_FINAL_CLOSURE.md",
         "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -33446,9 +33457,19 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
         "package.json",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2021.ps1",
+        "plugins/BIMLogLensNext/Build-Package-LensNext2025.ps1",
+        "plugins/BIMLogLensNext/Install-BIMLogLensNext.ps1",
+        "plugins/BIMLogLensNext/Test-LensNextInstallerUpgrade.ps1",
+        "plugins/BIMLogLensNext/pulse/2021/BIMLogPulse2021.bundle/Contents/2021/BIMLogNavisPlugin.dll",
+        "plugins/BIMLogLensNext/pulse/2021/BIMLogPulse2021.bundle/Contents/2021/BIMLogNavisPlugin.pdb",
+        "plugins/BIMLogLensNext/pulse/2021/BIMLogPulse2021.bundle/PackageContents.xml",
+        "plugins/BIMLogLensNext/pulse/2025/BIMLogPulse2025.bundle/Contents/2025/BIMLogNavisPlugin.dll",
+        "plugins/BIMLogLensNext/pulse/2025/BIMLogPulse2025.bundle/Contents/2025/BIMLogNavisPlugin.pdb",
+        "plugins/BIMLogLensNext/pulse/2025/BIMLogPulse2025.bundle/PackageContents.xml",
         "scripts/check-current-state-contract.mjs"
       ],
-      "reviewedChangeSha256": "5c1fda43c419072d475f42a40d6f2a5ddebf7eb39fac11051fcef37c27c0c033"
+      "reviewedChangeSha256": "390caf6218da37dabdf9991cfe30e51d7c0ee7857a54970eed03a622b15d4a09"
     }
   ]
 }
