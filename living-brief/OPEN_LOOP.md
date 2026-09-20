@@ -2974,3 +2974,5 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Stop the first Build 070 provider publication before promotion when its real preview proposed removing three populated task-lifecycle columns and one check; production remained unchanged.
 - [x] Restore the Build 057 task-lifecycle fields in the authoritative Drizzle schema and extend publication correspondence to every column and check constraint.
 - [ ] Repeat the exact clean gate and provider preview on the corrective Build 070 head; publish only when the preview contains no destructive task-lifecycle change, then complete authenticated live Lens Next acceptance.
+- [x] Builds 101–105: reconcile public/commercial truth, invitation-aware onboarding recovery, canonical Help coverage, unsupported Meeting recording/Mac claims, and public-to-authenticated route acceptance; pass the full gate and push Build 105.
+- [ ] Builds 106–110: complete security, privacy, retention and isolated recovery review; push and publish Build 110, then run exact-identity authenticated visible-Chrome smoke. No Native/installer smoke is required unless those paths change.

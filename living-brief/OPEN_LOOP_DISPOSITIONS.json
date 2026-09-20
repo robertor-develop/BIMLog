@@ -1,11 +1,11 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "01cc6869d3af031d6804269b4940cf94857b5db8f4e4f0d0cbc95e64a0f9a9fd",
-  "itemCount": 132,
+  "sourceSha256": "64b355a244ce2f3726eed6c2b9b87b80e366203e2e143c7f182f2efa3901b038",
+  "itemCount": 133,
   "counts": {
     "ACTIVE": 115,
-    "SUPERSEDED": 14,
+    "SUPERSEDED": 15,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 0
   },
@@ -1466,6 +1466,17 @@
       "evidence": [
         "OPEN_LOOP.md:2976",
         "120-build stabilization program — 2026-09-19"
+      ]
+    },
+    {
+      "id": "b387daa9fb9c86d9",
+      "sourceLine": 2978,
+      "heading": "120-build stabilization program — 2026-09-19",
+      "statement": "Builds 106–110: complete security, privacy, retention and isolated recovery review; push and publish Build 110, then run exact-identity authenticated visible-Chrome smoke. No Native/installer smoke is required unless those paths change.",
+      "classification": "SUPERSEDED",
+      "evidence": [
+        "living-brief/STATUS.md current authority",
+        "Block 04 publication receipt: v1.05.N18-P33 / e89dc3b4"
       ]
     }
   ]

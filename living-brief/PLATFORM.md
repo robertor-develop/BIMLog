@@ -226,6 +226,12 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block20-build098-request-diagnostics.behavior.ts
 - artifacts/api-server/src/lib/block20-build099-runtime-resilience.behavior.ts
 - artifacts/api-server/src/lib/block20-build100-release-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block21-build101-commercial-truth.behavior.ts
+- artifacts/api-server/src/lib/block21-build102-onboarding.behavior.ts
+- artifacts/api-server/src/lib/block21-build103-help.behavior.ts
+- artifacts/api-server/src/lib/block21-build104-unsupported-actions.behavior.ts
+- artifacts/api-server/src/lib/block21-build105-public-onboarding-acceptance.behavior.ts
+- artifacts/api-server/src/lib/block21-source-reader.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
 - artifacts/api-server/src/lib/cloud-files.ts

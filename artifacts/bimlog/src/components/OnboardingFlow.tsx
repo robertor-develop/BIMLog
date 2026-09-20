@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
-import { PartyPopper, Folder, CheckCircle2, Lock, Rocket, Hand, HardHat, Ruler, Users, Package, Sparkles, Zap } from "lucide-react";
+import { PartyPopper, Folder, CheckCircle2, Lock, Rocket, Hand, HardHat, Ruler, Users, Package, Sparkles, Zap, AlertCircle } from "lucide-react";
 
 const STORAGE_KEY = "bimlog-onboarding-done";
 const API = "/api/v1";
@@ -118,19 +118,36 @@ export function OnboardingFlow({ onDone }: { onDone: () => void }) {
 
   const [flowType, setFlowType] = useState<FlowType>(null);
   const [step, setStep] = useState(0);
-  const [hasProjects, setHasProjects] = useState(false);
+  const [loadError, setLoadError] = useState(false);
+  const [loadAttempt, setLoadAttempt] = useState(0);
 
   useEffect(() => {
     if (!token) return;
     fetch(`${API}/projects`, { headers: { Authorization: `Bearer ${token}` } })
-      .then(r => r.json())
+      .then(r => {
+        if (!r.ok) throw new Error(`project_access_${r.status}`);
+        return r.json();
+      })
       .then((projects: unknown[]) => {
         const inProject = Array.isArray(projects) && projects.length > 0;
-        setHasProjects(inProject);
+        setLoadError(false);
         setFlowType(inProject ? "invited" : "new");
       })
-      .catch(() => setFlowType("new"));
-  }, [token]);
+      .catch(() => setLoadError(true));
+  }, [token, loadAttempt]);
+
+  if (loadError) {
+    return (
+      <div role="dialog" aria-modal="true" aria-labelledby="onboarding-load-error" style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.55)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 10000 }}>
+        <div style={{ background: "white", borderRadius: 16, padding: 32, width: 420, maxWidth: "92vw", textAlign: "center" }}>
+          <AlertCircle size={36} color="#B91C1C" aria-hidden="true" />
+          <h2 id="onboarding-load-error" style={{ color: "#111827", fontSize: 18 }}>{tl("We could not load your project access", "No pudimos cargar su acceso a proyectos")}</h2>
+          <p style={{ color: "#4B5563", fontSize: 13, lineHeight: 1.6 }}>{tl("Nothing was changed. Retry before choosing a workflow so BIMLog does not mistake an invited account for a new workspace.", "No se cambió nada. Reintente antes de elegir un flujo para que BIMLog no confunda una cuenta invitada con un espacio nuevo.")}</p>
+          <button type="button" onClick={() => { setLoadError(false); setFlowType(null); setLoadAttempt(value => value + 1); }} style={{ padding: "10px 18px", border: 0, borderRadius: 8, background: "#2563EB", color: "white", fontWeight: 700, cursor: "pointer" }}>{tl("Retry", "Reintentar")}</button>
+        </div>
+      </div>
+    );
+  }
 
   if (!flowType) {
     return (

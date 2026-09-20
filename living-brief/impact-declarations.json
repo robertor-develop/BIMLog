@@ -33181,6 +33181,97 @@
         "scripts/check-current-state-contract.mjs"
       ],
       "reviewedChangeSha256": "94fbe1ec91c6e946cb0e90feac1f422cd38da61f15f22d4950bf98780a1c908e"
+    },
+    {
+      "taskId": "bimlog-stabilization-block21-public-onboarding-20260920",
+      "reviewedThroughCommit": "3eefe2bf1d978d1f26cfdde2ac4abb48a9e3e265",
+      "reviewedAt": "2026-09-20T05:28:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, provider authority, or cross-product boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The normal pre-push gate now enforces public truth, onboarding recovery, Help coverage, and unsupported-action absence."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The product direction is unchanged; customer-facing claims now match implemented behavior."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated inventory gains the Block 21 permanent behavior contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native, installers, packages, and supported-product identity are unchanged."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report layout, generation, and rendering behavior are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, version, or applicability decision changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Recorded Builds 101–105 as the push-only Block 21 candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closed the Block 21 scope and advanced the active program loop to Builds 106–110."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five focused build records and permanent executable contracts carry the implementation evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/block21-build101-commercial-truth.behavior.ts",
+        "artifacts/api-server/src/lib/block21-build102-onboarding.behavior.ts",
+        "artifacts/api-server/src/lib/block21-build103-help.behavior.ts",
+        "artifacts/api-server/src/lib/block21-build104-unsupported-actions.behavior.ts",
+        "artifacts/api-server/src/lib/block21-build105-public-onboarding-acceptance.behavior.ts",
+        "artifacts/api-server/src/lib/block21-source-reader.ts",
+        "artifacts/bimlog/src/components/OnboardingFlow.tsx",
+        "artifacts/bimlog/src/lib/help-content.ts",
+        "artifacts/bimlog/src/pages/Landing.tsx",
+        "artifacts/bimlog/src/pages/Pricing.tsx",
+        "artifacts/bimlog/src/pages/project/MeetingsTab.tsx",
+        "evidence/stabilization-program-20260919/BUILD_101_COMMERCIAL_TRUTH.md",
+        "evidence/stabilization-program-20260919/BUILD_102_ONBOARDING_RECOVERY.md",
+        "evidence/stabilization-program-20260919/BUILD_103_HELP_COVERAGE.md",
+        "evidence/stabilization-program-20260919/BUILD_104_UNSUPPORTED_ACTIONS.md",
+        "evidence/stabilization-program-20260919/BUILD_105_PUBLIC_ONBOARDING_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/check-current-state-contract.mjs"
+      ],
+      "reviewedChangeSha256": "faf618f3b002bb307bf08075e566fc1dba78ca3cc92c72a53f1ed400d0ba5096"
     }
   ]
 }

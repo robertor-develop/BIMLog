@@ -109,8 +109,8 @@ export function Landing() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6 text-center">
             {[
               { value: tt("Works with", "Compatible con"), label: tt("your existing tools", "tus herramientas actuales") },
-              { value: "100%", label: tt("server-side validation", "validación del lado del servidor") },
-              { value: tt("Real-time", "En tiempo real"), label: tt("audit trail", "registro de auditoría") },
+              { value: tt("Server-side", "En servidor"), label: tt("validated project actions", "acciones de proyecto validadas") },
+              { value: tt("Traceable", "Trazable"), label: tt("project history", "historial del proyecto") },
               { value: "ISO 19650", label: tt("standards aligned", "alineado con estándar") },
             ].map((stat) => (
               <div key={stat.label}>
@@ -300,7 +300,7 @@ export function Landing() {
         <div className="mt-12 surface rounded-2xl p-8 flex flex-col md:flex-row items-center justify-between gap-6">
           <div>
             <div className="font-display font-bold text-foreground text-lg mb-1">{tt("Ready to start?", "¿Listo para empezar?")}</div>
-            <div className="text-sm text-muted-foreground">{tt("Create an account and build your first project in under 2 minutes.", "Crea una cuenta y arma tu primer proyecto en menos de 2 minutos.")}</div>
+            <div className="text-sm text-muted-foreground">{tt("Create an account, follow the guided setup, and start your first controlled project.", "Crea una cuenta, sigue la configuración guiada e inicia tu primer proyecto controlado.")}</div>
           </div>
           <div className="flex gap-3 flex-shrink-0">
             <Link href="/login">

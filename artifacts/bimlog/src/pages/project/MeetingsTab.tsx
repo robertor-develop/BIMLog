@@ -4903,51 +4903,6 @@ export function MeetingsTab({
         </div>
       </div>
 
-      <div
-        style={{
-          background: "#F9FAFB",
-          border: "1px dashed #D1D5DB",
-          borderRadius: 10,
-          padding: 16,
-          marginBottom: 12,
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
-        }}
-      >
-        <div>
-          <div
-            style={{
-              fontWeight: 700,
-              fontSize: 14,
-              color: "#6B7280",
-              marginBottom: 2,
-            }}
-          >
-            {t("Upload Meeting Recording - Coming Soon", "Subir grabación de reunión - Próximamente")}
-          </div>
-          <div style={{ fontSize: 12, color: "#9CA3AF", lineHeight: 1.5 }}>
-            {t(
-              "Upload an audio or video file and AI will auto-fill this form. Available in the next update.",
-              "Suba un archivo de audio o video y la IA completará este formulario. Disponible en la próxima actualización.",
-            )}
-          </div>
-        </div>
-        <div
-          style={{
-            fontSize: 11,
-            background: "#F3F4F6",
-            border: "1px solid #E5E7EB",
-            borderRadius: 6,
-            padding: "4px 10px",
-            color: "#9CA3AF",
-            fontWeight: 600,
-          }}
-        >
-          {t("COMING SOON", "PRÓXIMAMENTE")}
-        </div>
-      </div>
-
       <div style={{ marginBottom: 12 }}>
         <SectionHeader label={t("Agenda", "Agenda")} sectionKey="agenda" />
         {expandedSections.agenda && (

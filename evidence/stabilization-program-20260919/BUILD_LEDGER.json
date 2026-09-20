@@ -9,7 +9,7 @@
   "authoritativeBaseTree": "fb27a5e19d9572cb96c1c7b01af1f5f01617590d",
   "remote": "https://github.com/robertor-develop/BIMLog.git",
   "canonicalRemoteBranch": "master",
-  "headBinding": "The Git commit containing this ledger is the Block 20 / Build 100 publication candidate. It must pass the exact clean-source gate, normal push, proven Replit publication procedure, immutable live identity check, and full authenticated visible-Chrome smoke before production acceptance.",
+  "headBinding": "The Git commit containing this ledger is the Block 21 / Build 105 push candidate. It must pass the exact clean-source gate and normal non-force push. Publication and full authenticated visible-Chrome smoke are due at Build 110.",
   "releaseCadence": {
     "buildsPerBlock": 5,
     "pushEveryBuilds": 5,
@@ -19,12 +19,12 @@
     "focusedNavisworksSmokeWhenNativeOrInstallerChanges": true
   },
   "status": {
-    "completedBuilds": 100,
+    "completedBuilds": 105,
     "totalBuilds": 120,
-    "remainingBuilds": 20,
-    "currentUnpublishedBuilds": 0,
-    "nextBuild": 101,
-    "nextPushAfterBuild": 105,
+    "remainingBuilds": 15,
+    "currentUnpublishedBuilds": 5,
+    "nextBuild": 106,
+    "nextPushAfterBuild": 110,
     "nextPublicationAfterBuild": 110,
     "blocker": null
   },
@@ -186,7 +186,7 @@
     {
       "block": 12,
       "buildRange": "056-060",
-      "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION",
+      "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED",
       "publicationRequired": true,
       "smoke": "Full authenticated visible-Chrome smoke after Build 060 publication; no Navisworks smoke because Native and installers are unchanged.",
       "builds": [
@@ -306,7 +306,21 @@
         { "build": 97, "status": "PASS", "evidence": "BUILD_097_RUNTIME_PERFORMANCE.md" },
         { "build": 98, "status": "PASS", "evidence": "BUILD_098_OBSERVABILITY.md" },
         { "build": 99, "status": "PASS", "evidence": "BUILD_099_RESILIENCE.md" },
-        { "build": 100, "status": "PASS_LOCAL_RELEASE_GATE_PENDING_PUBLICATION", "evidence": "BUILD_100_PERFORMANCE_RESILIENCE_ACCEPTANCE.md" }
+        { "build": 100, "status": "PASS_PUSHED_PUBLISHED_LIVE_VERIFIED", "evidence": "BUILD_100_PERFORMANCE_RESILIENCE_ACCEPTANCE.md" }
+      ]
+    },
+    {
+      "block": 21,
+      "buildRange": "101-105",
+      "status": "PASS_PENDING_PUSH",
+      "publicationRequired": false,
+      "smoke": "Public/commercial truth, invitation/onboarding recovery, canonical Help coverage, unsupported-action removal, and public-to-authenticated acceptance; push at Build 105. Publication and full authenticated visible-Chrome smoke are due after Build 110. Native and installers are unchanged, so no Navisworks smoke is required.",
+      "builds": [
+        { "build": 101, "status": "PASS", "evidence": "BUILD_101_COMMERCIAL_TRUTH.md" },
+        { "build": 102, "status": "PASS", "evidence": "BUILD_102_ONBOARDING_RECOVERY.md" },
+        { "build": 103, "status": "PASS", "evidence": "BUILD_103_HELP_COVERAGE.md" },
+        { "build": 104, "status": "PASS", "evidence": "BUILD_104_UNSUPPORTED_ACTIONS.md" },
+        { "build": 105, "status": "PASS_PENDING_PUSH", "evidence": "BUILD_105_PUBLIC_ONBOARDING_ACCEPTANCE.md" }
       ]
     }
   ]
