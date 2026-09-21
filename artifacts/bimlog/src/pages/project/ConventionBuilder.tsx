@@ -24,6 +24,13 @@ import {
   savedConventionLevelsNeedRepair,
   validateConventionDocumentState,
 } from "./convention-builder/convention-document-state";
+import {
+  resolveCheckpointContinuation,
+  resolveSetupContinuation,
+  resolveWizardBackPhase,
+  useConventionPhaseGuard,
+  type ConventionFlowPhase,
+} from "./convention-builder/convention-navigation";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
@@ -296,7 +303,7 @@ interface WizardState {
   enableExtRestrictions: boolean;
   extRestrictions: Record<string, string[]>;
   // ── front-door setup context ──────────────────────────────────────────────
-  flowPhase: "setup_context" | "industrial_discovery" | "import_structure" | "ai_suggestions" | "main_wizard" | "re_evidence" | "changes_review" | "checkpoint" | "edit_foundation";
+  flowPhase: ConventionFlowPhase;
   setupCtx: SetupContext;
   discoveryResult: DiscoveryResult | null;
   reanalysisResult: ReanalysisResult | null;
@@ -4629,12 +4636,7 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
   // Keep this hook above every loading/error return. Moving it below those guards changes
   // the number of hooks between the initial loading render and the resolved render, which
   // makes React reject the Convention workspace with minified error #310.
-  useEffect(() => {
-    if (justSaved) return;
-    if (setupStatus !== "completed" && (flowPhase === "checkpoint" || flowPhase === "edit_foundation" || flowPhase === "re_evidence" || flowPhase === "changes_review")) {
-      setWs(s => ({ ...s, flowPhase: "setup_context", step: 0 }));
-    }
-  }, [setupStatus, flowPhase, justSaved]);
+  useConventionPhaseGuard({ setupStatus, flowPhase, justSaved, setState: setWs });
 
   if (isLoading) return <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>{[1,2,3].map(i => <div key={i} className="skeleton" style={{ height: 60, borderRadius: 8 }} />)}</div>;
   if (isError) return <div style={{ textAlign: "center", padding: "48px 24px" }}><div style={{ fontSize: 15, fontWeight: 600, marginBottom: 12 }}>{w("Failed to load convention data","Error al cargar la convención",lang)}</div><Button variant="outline" onClick={() => refetch()}>{w("Retry","Reintentar",lang)}</Button></div>;
@@ -4643,13 +4645,8 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
 
   // ── routing logic: determine the next phase after Step 0 ──────────────────
   function handleSetupContinue() {
-    const ctx = ws.setupCtx;
-    const intent = ctx.builderIntent;
-    const env = ctx.projectEnvironment;
-    const isAnalyze = ctx.analysisOnlyMode || intent === "analyze_existing" || intent === "mirror_existing" || ctx.setupContextChoice === "takeover" || ctx.setupContextChoice === "analyze_first";
-    if (isAnalyze) { setWs(s => ({ ...s, flowPhase: "import_structure" })); return; }
-    if (env === "industrial_epc") { setWs(s => ({ ...s, flowPhase: "industrial_discovery" })); return; }
-    setWs(s => ({ ...s, flowPhase: "main_wizard", step: 0 }));
+    const nextPhase = resolveSetupContinuation(ws.setupCtx);
+    setWs(s => ({ ...s, flowPhase: nextPhase, step: nextPhase === "main_wizard" ? 0 : s.step }));
   }
 
   async function loadHistory() {
@@ -4756,7 +4753,7 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
         projectId={projectId}
         token={token ?? ""}
         lang={lang}
-        onContinueEditing={() => setWs(s => ({ ...s, flowPhase: hasExisting ? "main_wizard" : "setup_context", step: hasExisting ? 4 : 0 }))}
+        onContinueEditing={() => setWs(s => ({ ...s, ...resolveCheckpointContinuation(hasExisting) }))}
         onReEvidence={() => setWs(s => ({ ...s, importState: defaultImportState(), flowPhase: "re_evidence" }))}
         showHistory={showHistory}
         historyVersions={historyVersions}
@@ -4939,7 +4936,7 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
               ? null
               : hasExisting
                 ? <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: "checkpoint" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Return to Checkpoint","Volver al checkpoint",lang)}</Button>
-                : <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: s.enteredFromDiscovery && s.discoveryResult ? "ai_suggestions" : "setup_context" }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{ws.enteredFromDiscovery && ws.discoveryResult ? w("Back to AI Results","Volver a resultados IA",lang) : w("Back to Setup","Volver",lang)}</Button>
+                : <Button variant="outline" onClick={() => setWs(s => ({ ...s, flowPhase: resolveWizardBackPhase(s.enteredFromDiscovery, !!s.discoveryResult) }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{ws.enteredFromDiscovery && ws.discoveryResult ? w("Back to AI Results","Volver a resultados IA",lang) : w("Back to Setup","Volver",lang)}</Button>
             : <Button variant="outline" onClick={() => setWs(s => ({ ...s, step: s.step - 1 }))} style={{ gap: 6, fontSize: 13 }}><ChevronLeft style={{ width: 15, height: 15 }} />{w("Back","Atrás",lang)}</Button>
           }
         </div>
