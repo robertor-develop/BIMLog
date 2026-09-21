@@ -36720,7 +36720,7 @@
     },
     {
       "taskId": "bimlog-coordination-knowledge-block04-source-candidate-20260921",
-      "reviewedThroughCommit": "8130dfc429db5428d7402e9b70985bff4088214b",
+      "reviewedThroughCommit": "6a2e920d0be0aa54944a69f457a7c2d62e1c220c",
       "reviewedAt": "2026-09-21T19:22:35-04:00",
       "status": "candidate",
       "capabilityPreflight": {
@@ -36806,10 +36806,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/PLATFORM.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "d3e395014af56d2cba80e1cfe6acbe8c2764ba570b23bacc678a162ef0b1e4c0"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
