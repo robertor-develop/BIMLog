@@ -1,0 +1,282 @@
+{
+  "schemaVersion": 1,
+  "build": 201,
+  "sourceCommit": "227c4d541dc17d46ee6f5b7937f616f23af4c2b5",
+  "entry": {
+    "source": "index.html",
+    "fileBytes": 511219,
+    "loadedBytes": 511219
+  },
+  "javascript": {
+    "assetCount": 139,
+    "totalBytes": 3611304,
+    "largestBytes": 511219
+  },
+  "routes": [
+    {
+      "source": "src/pages/project/RfisTab.tsx",
+      "fileBytes": 203154,
+      "loadedBytes": 838676
+    },
+    {
+      "source": "src/pages/project/ConventionBuilder.tsx",
+      "fileBytes": 194696,
+      "loadedBytes": 768133
+    },
+    {
+      "source": "src/pages/HelpCenter.tsx",
+      "fileBytes": 206535,
+      "loadedBytes": 750164
+    },
+    {
+      "source": "src/pages/project/SubmittalsTab.tsx",
+      "fileBytes": 103257,
+      "loadedBytes": 718087
+    },
+    {
+      "source": "src/pages/JobIntakeWorkspace.tsx",
+      "fileBytes": 138051,
+      "loadedBytes": 712642
+    },
+    {
+      "source": "src/pages/project/ClashReportsTab.tsx",
+      "fileBytes": 105242,
+      "loadedBytes": 704835
+    },
+    {
+      "source": "src/pages/JobOperationsWorkspace.tsx",
+      "fileBytes": 90139,
+      "loadedBytes": 665908
+    },
+    {
+      "source": "src/pages/project/MeetingsTab.tsx",
+      "fileBytes": 103734,
+      "loadedBytes": 659070
+    },
+    {
+      "source": "src/pages/FinancialContractWorkspace.tsx",
+      "fileBytes": 75028,
+      "loadedBytes": 647838
+    },
+    {
+      "source": "src/features/lens-next/LensNextWorkspace.tsx",
+      "fileBytes": 89425,
+      "loadedBytes": 643824
+    },
+    {
+      "source": "src/pages/Dashboard.tsx",
+      "fileBytes": 52749,
+      "loadedBytes": 632839
+    },
+    {
+      "source": "src/pages/AdminPanel.tsx",
+      "fileBytes": 102703,
+      "loadedBytes": 631543
+    },
+    {
+      "source": "src/pages/FinancialApuWorkspace.tsx",
+      "fileBytes": 54633,
+      "loadedBytes": 628691
+    },
+    {
+      "source": "src/pages/TeamPerformanceWorkspace.tsx",
+      "fileBytes": 53756,
+      "loadedBytes": 628248
+    },
+    {
+      "source": "src/pages/Profile.tsx",
+      "fileBytes": 84252,
+      "loadedBytes": 627050
+    },
+    {
+      "source": "src/pages/project/TeamTab.tsx",
+      "fileBytes": 30481,
+      "loadedBytes": 621472
+    },
+    {
+      "source": "src/pages/project/ReportsTab.tsx",
+      "fileBytes": 50013,
+      "loadedBytes": 618755
+    },
+    {
+      "source": "src/pages/project/FilesTab.tsx",
+      "fileBytes": 43915,
+      "loadedBytes": 612220
+    },
+    {
+      "source": "src/pages/FinancialBudgetWorkspace.tsx",
+      "fileBytes": 37326,
+      "loadedBytes": 610136
+    },
+    {
+      "source": "src/pages/project/ScheduleTab.tsx",
+      "fileBytes": 51971,
+      "loadedBytes": 594253
+    },
+    {
+      "source": "src/pages/project/AnalyticsTab.tsx",
+      "fileBytes": 17571,
+      "loadedBytes": 588275
+    },
+    {
+      "source": "src/pages/project/CoordinatorCommandCenter.tsx",
+      "fileBytes": 41677,
+      "loadedBytes": 585109
+    },
+    {
+      "source": "src/pages/project/ChangeOrdersTab.tsx",
+      "fileBytes": 20160,
+      "loadedBytes": 578682
+    },
+    {
+      "source": "src/pages/project/ActivityTab.tsx",
+      "fileBytes": 12012,
+      "loadedBytes": 577161
+    },
+    {
+      "source": "src/pages/CompanyDeliveryWorkflows.tsx",
+      "fileBytes": 26323,
+      "loadedBytes": 568245
+    },
+    {
+      "source": "src/pages/TotalControl.tsx",
+      "fileBytes": 46578,
+      "loadedBytes": 567246
+    },
+    {
+      "source": "src/pages/project/TransmittalsTab.tsx",
+      "fileBytes": 19712,
+      "loadedBytes": 566890
+    },
+    {
+      "source": "src/pages/NotificationSettings.tsx",
+      "fileBytes": 2655,
+      "loadedBytes": 566382
+    },
+    {
+      "source": "src/pages/FinancialControlsSettings.tsx",
+      "fileBytes": 19902,
+      "loadedBytes": 562967
+    },
+    {
+      "source": "src/pages/CompanyWorkflowGovernance.tsx",
+      "fileBytes": 18223,
+      "loadedBytes": 560145
+    },
+    {
+      "source": "src/pages/project/DirectoryTab.tsx",
+      "fileBytes": 17954,
+      "loadedBytes": 559213
+    },
+    {
+      "source": "src/pages/CompanyPricingTemplates.tsx",
+      "fileBytes": 16558,
+      "loadedBytes": 558480
+    },
+    {
+      "source": "src/pages/ProjectDetail.tsx",
+      "fileBytes": 14927,
+      "loadedBytes": 555596
+    },
+    {
+      "source": "src/pages/CompanyMasterCatalogs.tsx",
+      "fileBytes": 1164,
+      "loadedBytes": 554564
+    },
+    {
+      "source": "src/pages/project/IntegrationsTab.tsx",
+      "fileBytes": 11200,
+      "loadedBytes": 552473
+    },
+    {
+      "source": "src/pages/CompanyProfile.tsx",
+      "fileBytes": 7109,
+      "loadedBytes": 551399
+    },
+    {
+      "source": "src/pages/project/CoordinationHub.tsx",
+      "fileBytes": 26511,
+      "loadedBytes": 545829
+    },
+    {
+      "source": "src/pages/Pricing.tsx",
+      "fileBytes": 29677,
+      "loadedBytes": 545051
+    },
+    {
+      "source": "src/pages/Features.tsx",
+      "fileBytes": 23703,
+      "loadedBytes": 538590
+    },
+    {
+      "source": "src/pages/Landing.tsx",
+      "fileBytes": 18721,
+      "loadedBytes": 536521
+    },
+    {
+      "source": "src/pages/project/NameGenerator.tsx",
+      "fileBytes": 17389,
+      "loadedBytes": 535443
+    },
+    {
+      "source": "src/pages/LivingBrief.tsx",
+      "fileBytes": 18903,
+      "loadedBytes": 532183
+    },
+    {
+      "source": "src/pages/Terms.tsx",
+      "fileBytes": 12026,
+      "loadedBytes": 526779
+    },
+    {
+      "source": "src/pages/DataRetention.tsx",
+      "fileBytes": 11456,
+      "loadedBytes": 526209
+    },
+    {
+      "source": "src/pages/Privacy.tsx",
+      "fileBytes": 11163,
+      "loadedBytes": 525916
+    },
+    {
+      "source": "src/pages/Contact.tsx",
+      "fileBytes": 8605,
+      "loadedBytes": 525058
+    },
+    {
+      "source": "src/pages/Disclaimer.tsx",
+      "fileBytes": 9021,
+      "loadedBytes": 523774
+    },
+    {
+      "source": "src/pages/About.tsx",
+      "fileBytes": 6748,
+      "loadedBytes": 521501
+    },
+    {
+      "source": "src/pages/PendingItems.tsx",
+      "fileBytes": 5199,
+      "loadedBytes": 517560
+    },
+    {
+      "source": "src/pages/ResetPassword.tsx",
+      "fileBytes": 3682,
+      "loadedBytes": 516346
+    },
+    {
+      "source": "src/pages/Login.tsx",
+      "fileBytes": 2645,
+      "loadedBytes": 516020
+    },
+    {
+      "source": "src/pages/Register.tsx",
+      "fileBytes": 3002,
+      "loadedBytes": 515666
+    },
+    {
+      "source": "src/pages/not-found.tsx",
+      "fileBytes": 641,
+      "loadedBytes": 511860
+    }
+  ]
+}
