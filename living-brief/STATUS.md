@@ -2272,3 +2272,4 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - The shared installer now preserves that legacy tree in rollback evidence, removes it during cutover, and fails if it remains active. Canonical staging now includes the Pulse DLL/PDB instead of producing a manifest-only Pulse bundle.
 - Governed H-root packages are deterministic for 2021 and 2025. Core 132/132 and each Native 57/57 pass; repeated upgrade/rollback simulations leave exactly Pulse plus matching-year Lens Next and no retired direct loader.
 - No Autodesk load path was changed. Installing the corrected package in physical 2021 and Ruben's physical 2025 affected-model confirmation remain explicit field evidence.
+- The source/package implementation is bound to commit `81d91fe85b0de995cd2eb914cb05ea29be88538f`; Living Brief reconciliation and the exact-head gate follow on the evidence-bearing successor.
