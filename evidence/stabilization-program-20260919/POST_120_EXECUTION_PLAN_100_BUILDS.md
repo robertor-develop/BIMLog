@@ -127,6 +127,8 @@ Status: implemented and focused verification passed. Build 175 is the exact-head
 - 179: add cross-role, stale-update, and attachment failure tests.
 - 180: publish and run authenticated submittal lifecycle smoke.
 
+Status: implemented and focused verification passed. Build 180 is the exact-head full-gate, push, Replit publication, and authenticated production-smoke boundary. Native and installers did not change.
+
 ## Block 37 — Builds 181–185 — route and interconnection graph
 
 - 181: generate route-to-screen-to-API-to-table ownership graph.

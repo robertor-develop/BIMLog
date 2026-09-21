@@ -2237,3 +2237,11 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Partial recovery, stale/equal revision handling, upload-failure preservation, denial/error state retention, document-assistance classification, and AI cost gating are bound to the normal pre-push gate. No database/schema, customer data, Native, installer, bridge, provider, or production mutation is included. Build 175 is push-only; publication remains due at Build 180.
 - Final reconciliation corrected the acceptance fixture to carry the complete spreadsheet row contract; the focused behavior and TypeScript checks pass before the complete pre-push rerun.
 - The Job Intake architecture statement is emitted by the authoritative Platform generator, keeping generated documentation and packaged-runtime hash closure identical.
+
+## 120-build stabilization program — Block 36 candidate — 2026-09-21
+
+- Builds 176–180 separate Submittals list/query state, editor/review request construction, and report/export/history scope from the routed page.
+- Editor, attachment, and review mutations carry the record's exact `updatedAt` identity. Missing or stale versions return `SUBMITTAL_STALE_UPDATE` with HTTP 409 instead of overwriting newer work, and update queries remain project-bound.
+- Structured bilingual attachment failures now render as useful messages while the server compensates incomplete storage writes; visible-export and item-history actions use explicit project/submittal scopes.
+- The focused regression covers list filters and counts, deep links, editor/review version identity, project scopes, permission middleware, stale-write guards, attachment compensation, and localized errors. No database/schema, customer data, Native, installer, bridge, package, or provider configuration changed.
+- Build 180 reaches the required ten-build publication boundary. It is not complete until the exact candidate passes the full pre-push gate, is pushed and published through the established Replit Shell path, and passes authenticated visible-Chrome Submittals smoke.

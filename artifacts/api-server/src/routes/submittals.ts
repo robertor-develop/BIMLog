@@ -20,6 +20,22 @@ import * as XLSX from "xlsx";
 
 const router: IRouter = Router();
 
+function rejectStaleSubmittalMutation(
+  res: Response,
+  expectedUpdatedAt: unknown,
+  actualUpdatedAt: Date,
+): boolean {
+  if (typeof expectedUpdatedAt !== "string" || expectedUpdatedAt !== actualUpdatedAt.toISOString()) {
+    res.status(409).json({
+      code: "SUBMITTAL_STALE_UPDATE",
+      error: "This submittal changed after it was opened. Refresh it before saving again.",
+      currentUpdatedAt: actualUpdatedAt.toISOString(),
+    });
+    return true;
+  }
+  return false;
+}
+
 // ─── PDF constants ────────────────────────────────────────────────────────────
 const LETTER_HEIGHT = 792;
 const LETTER_WIDTH  = 612;
@@ -984,6 +1000,7 @@ router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, req
     const [existing] = await db.select().from(submittalsTable)
       .where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId))).limit(1);
     if (!existing) { res.status(404).json({ error: "Submittal not found" }); return; }
+    if (rejectStaleSubmittalMutation(res, body.expectedUpdatedAt, existing.updatedAt)) return;
 
     const updates: Record<string, unknown> = { updatedAt: new Date() };
     const textFields = [
@@ -1006,7 +1023,7 @@ router.patch("/projects/:projectId/submittals/:submittalId", authMiddleware, req
     if (body.ballInCourtHistory !== undefined) updates.ballInCourtHistory = body.ballInCourtHistory;
 
     const [updated] = await db.update(submittalsTable).set(updates)
-      .where(eq(submittalsTable.id, submittalId)).returning();
+      .where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId))).returning();
 
     await db.insert(activityLogTable).values({
       projectId,
@@ -1107,11 +1124,13 @@ router.post("/projects/:projectId/submittals/:submittalId/respond", authMiddlewa
       reviewDecision: string;
       complianceNotes?: string;
       rejectionReason?: string;
+      expectedUpdatedAt?: string;
     };
 
     const [existing] = await db.select().from(submittalsTable)
       .where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId))).limit(1);
     if (!existing) { res.status(404).json({ error: "Submittal not found" }); return; }
+    if (rejectStaleSubmittalMutation(res, body.expectedUpdatedAt, existing.updatedAt)) return;
 
     const statusMap: Record<string, string> = {
       approved: "approved",
@@ -1157,7 +1176,7 @@ router.post("/projects/:projectId/submittals/:submittalId/respond", authMiddlewa
       reviewedAt: new Date(),
       rapidApprovalFlag,
       updatedAt: new Date(),
-    }).where(eq(submittalsTable.id, submittalId)).returning();
+    }).where(and(eq(submittalsTable.id, submittalId), eq(submittalsTable.projectId, projectId))).returning();
 
     await db.insert(activityLogTable).values({
       projectId,

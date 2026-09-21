@@ -189,6 +189,9 @@ ${appRoutes()}
   state. Spreadsheet inspection and mapping remain deterministic and consume zero AI credits;
   PDF/DOCX remain manual-review evidence. Any future AI text or file operation must fail closed
   unless its funding source, estimated cost, and explicit user confirmation are all visible first.
+- Submittals use separated list/query, editor/review, and presentation-scope contracts. Editor,
+  attachment, and review mutations carry exact record-version identity and reject stale writes with
+  HTTP 409; report/export/history operations remain explicitly project and submittal scoped.
 - Build 3 multi-contract activation keeps up to 50 independent contract profiles in the same
   canonical Intake draft. Every Contract Item references one owning contract. Activation creates
   or reuses the canonical Commercial contract records, freezes the selected APU or pricing snapshot

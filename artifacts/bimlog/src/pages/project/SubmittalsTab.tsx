@@ -19,6 +19,20 @@ import { DeleteConfirmModal } from "@/components/DeleteConfirmModal";
 import { LinkedItemsPanel } from "@/components/LinkedItemsPanel";
 import { OptionalSharePanel } from "@/components/OptionalSharePanel";
 import { format, differenceInDays, isValid } from "date-fns";
+import {
+  countSubmittalStates,
+  filterSubmittals,
+  resolveSubmittalDeepLink,
+} from "@/lib/submittal-list-query-state";
+import {
+  attachmentValues,
+  buildSubmittalReviewRequest,
+  buildSubmittalUpdateRequest,
+  mergeAttachment,
+  readSubmittalMutationError,
+  submittalToEditorForm,
+} from "@/lib/submittal-editor-contract";
+import { createSubmittalHistoryScope, createSubmittalPresentationScope } from "@/lib/submittal-presentation-scope";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 type AiCheckResult = {
@@ -144,9 +158,6 @@ function attachmentLabel(value: string) {
   } catch {
     return value;
   }
-}
-function attachmentValues(value: string) {
-  return value.split(/\r?\n|,/).map(v => v.trim()).filter(Boolean);
 }
 function uniqSorted(values: Array<string | null | undefined>) {
   return Array.from(new Set(values.map(v => v?.trim()).filter(Boolean) as string[]))
@@ -739,9 +750,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
   useEffect(() => {
     if (!submittals.length) return;
     const params = new URLSearchParams(window.location.search);
-    const requestedId = Number(params.get("submittal"));
-    if (!Number.isInteger(requestedId) || requestedId <= 0) return;
-    const requested = submittals.find(submittal => submittal.id === requestedId);
+    const requested = resolveSubmittalDeepLink(submittals, params.get("submittal"));
     if (!requested) return;
     setView("submittals");
     setSelectedSubmittal(requested);
@@ -750,12 +759,7 @@ export function SubmittalsTab({ projectId, canWrite = true, initialView = "submi
     window.history.replaceState(null, "", `${window.location.pathname}${query ? `?${query}` : ""}${window.location.hash}`);
   }, [submittals]);
 
-  const pendingCount = submittals.filter(s => !["approved", "approved_as_noted", "rejected"].includes(s.status)).length;
-  const approvedCount = submittals.filter(s => s.status === "approved" || s.status === "approved_as_noted").length;
-  const actionNeeded = submittals.filter(s => {
-    const d = daysOut(s.createdAt);
-    return ["submitted", "under_review"].includes(s.status) && d !== null && d > 14;
-  }).length;
+  const { pending: pendingCount, approved: approvedCount, actionNeeded } = countSubmittalStates(submittals);
 
   return (
     <div id="submittal-register-current-view">
@@ -1202,6 +1206,14 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
   const [filterStatus, setFilterStatus] = useState("");
   const [filterType, setFilterType] = useState("");
 
+  const query = { search, status: filterStatus, type: filterType };
+  const filtered = useMemo(() => filterSubmittals(submittals, query), [submittals, search, filterStatus, filterType]);
+  const presentationScope = useMemo(() => createSubmittalPresentationScope({
+    projectId,
+    visibleSubmittalIds: filtered.map((submittal) => submittal.id),
+    query,
+  }), [projectId, filtered, search, filterStatus, filterType]);
+
   const handleExport = async (format: "pdf" | "excel") => {
     if (filtered.length === 0) {
       toast({
@@ -1211,7 +1223,7 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
       return;
     }
     try {
-      await downloadSubmittalLog(projectId, format, { search, status: filterStatus, type: filterType });
+      await downloadSubmittalLog(presentationScope.projectId, format, presentationScope.query);
       toast({
         title: format === "pdf"
           ? w("Current-view PDF exported", "PDF de vista actual exportado", lang)
@@ -1228,9 +1240,10 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
   };
 
   const handleRowExport = async (s: Submittal, fmt: "pdf" | "word") => {
+    const scope = createSubmittalHistoryScope(projectId, s.id);
     const endpoint = fmt === "pdf"
-      ? `/api/v1/projects/${projectId}/submittals/${s.id}/export`
-      : `/api/v1/projects/${projectId}/submittals/${s.id}/export-word`;
+      ? `/api/v1/projects/${scope.projectId}/submittals/${scope.submittalId}/export`
+      : `/api/v1/projects/${scope.projectId}/submittals/${scope.submittalId}/export-word`;
     const ext = fmt === "pdf" ? "pdf" : "doc";
     const r = await fetch(endpoint, { headers: { Authorization: `Bearer ${getToken()}` } });
     if (r.ok) {
@@ -1240,14 +1253,6 @@ function SubmittalsList({ projectId, submittals, isLoading, lang, canWrite, onSe
       URL.revokeObjectURL(url);
     }
   };
-
-  const filtered = submittals.filter(s => {
-    const q = search.trim().toLowerCase();
-    const matchQ = !q || s.title.toLowerCase().includes(q) || s.number.toLowerCase().includes(q) || (s.specSection || "").toLowerCase().includes(q) || (s.manufacturer || "").toLowerCase().includes(q);
-    const matchStatus = !filterStatus || s.status === filterStatus;
-    const matchType = !filterType || s.submittalCategory === filterType || s.submittalType === filterType;
-    return matchQ && matchStatus && matchType;
-  });
 
   if (isLoading) {
     return <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -2067,66 +2072,12 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
   const [projectFiles, setProjectFiles] = useState<ProjectFile[]>([]);
   const [directory, setDirectory] = useState<DirectoryEntry[]>([]);
   const attachFileRef = useRef<HTMLInputElement>(null);
-  const [editForm, setEditForm] = useState({
-    title: submittal.title || "",
-    status: submittal.status || "pending",
-    specSection: submittal.specSection || "",
-    submittalCategory: submittal.submittalCategory || submittal.submittalType || "shop_drawing",
-    submittalType: submittal.submittalType || "shop_drawing",
-    trade: submittal.trade || "",
-    floor: submittal.floor || "",
-    responsibleCompany: submittal.responsibleCompany || "",
-    submittedByCompany: submittal.submittedByCompany || "",
-    submittedByPerson: submittal.submittedByPerson || "",
-    submittedByEmail: submittal.submittedByEmail || "",
-    submittedByPhone: submittal.submittedByPhone || "",
-    submittedToCompany: submittal.submittedToCompany || "",
-    submittedToPerson: submittal.submittedToPerson || "",
-    submittedToEmail: submittal.submittedToEmail || "",
-    manufacturer: submittal.manufacturer || "",
-    modelNumber: submittal.modelNumber || "",
-    procurementStatus: submittal.procurementStatus || "not_ordered",
-    ballInCourt: submittal.ballInCourt || "",
-    drawingNumber: submittal.drawingNumber || "",
-    drawingTitle: submittal.drawingTitle || "",
-    dateSubmitted: submittal.dateSubmitted ? submittal.dateSubmitted.slice(0, 10) : "",
-    dateRequired: submittal.dateRequired ? submittal.dateRequired.slice(0, 10) : "",
-    linkedRfiId: submittal.linkedRfiId ? String(submittal.linkedRfiId) : "",
-    description: submittal.description || "",
-    attachmentsText: (submittal.attachmentsJson || []).join("\n"),
-  });
+  const [editForm, setEditForm] = useState(() => submittalToEditorForm(submittal));
   const respondRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     setEditOpen(canWrite);
-    setEditForm({
-      title: submittal.title || "",
-      status: submittal.status || "pending",
-      specSection: submittal.specSection || "",
-      submittalCategory: submittal.submittalCategory || submittal.submittalType || "shop_drawing",
-      submittalType: submittal.submittalType || "shop_drawing",
-      trade: submittal.trade || "",
-      floor: submittal.floor || "",
-      responsibleCompany: submittal.responsibleCompany || "",
-      submittedByCompany: submittal.submittedByCompany || "",
-      submittedByPerson: submittal.submittedByPerson || "",
-      submittedByEmail: submittal.submittedByEmail || "",
-      submittedByPhone: submittal.submittedByPhone || "",
-      submittedToCompany: submittal.submittedToCompany || "",
-      submittedToPerson: submittal.submittedToPerson || "",
-      submittedToEmail: submittal.submittedToEmail || "",
-      manufacturer: submittal.manufacturer || "",
-      modelNumber: submittal.modelNumber || "",
-      procurementStatus: submittal.procurementStatus || "not_ordered",
-      ballInCourt: submittal.ballInCourt || "",
-      drawingNumber: submittal.drawingNumber || "",
-      drawingTitle: submittal.drawingTitle || "",
-      dateSubmitted: submittal.dateSubmitted ? submittal.dateSubmitted.slice(0, 10) : "",
-      dateRequired: submittal.dateRequired ? submittal.dateRequired.slice(0, 10) : "",
-      linkedRfiId: submittal.linkedRfiId ? String(submittal.linkedRfiId) : "",
-      description: submittal.description || "",
-      attachmentsText: (submittal.attachmentsJson || []).join("\n"),
-    });
+    setEditForm(submittalToEditorForm(submittal));
   }, [submittal.id, canWrite]);
 
   useEffect(() => {
@@ -2200,20 +2151,19 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
         body: fd,
       });
       if (!upload.ok) {
-        const err = await upload.json().catch(() => ({})) as { error?: string };
-        throw new Error(err.error || "Upload failed");
+        const err = await upload.json().catch(() => ({}));
+        throw new Error(readSubmittalMutationError(err, w("Upload failed", "Error al subir", lang), lang));
       }
       const { downloadUrl } = await upload.json() as { downloadUrl: string };
-      const nextAttachments = [...(submittal.attachmentsJson || [])];
-      if (!nextAttachments.includes(downloadUrl)) nextAttachments.push(downloadUrl);
+      const nextAttachments = mergeAttachment(submittal.attachmentsJson, downloadUrl);
       const save = await fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ attachmentsJson: nextAttachments }),
+        body: JSON.stringify({ attachmentsJson: nextAttachments, expectedUpdatedAt: submittal.updatedAt }),
       });
       if (!save.ok) {
-        const err = await save.json().catch(() => ({})) as { error?: string };
-        throw new Error(err.error || "Attachment save failed");
+        const err = await save.json().catch(() => ({}));
+        throw new Error(readSubmittalMutationError(err, w("Attachment save failed", "Error al guardar el adjunto", lang), lang));
       }
       const updated = await save.json() as Submittal;
       setEditForm(f => ({ ...f, attachmentsText: (updated.attachmentsJson || []).join("\n") }));
@@ -2234,42 +2184,15 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
     }
     setEditSaving(true);
     try {
-      const body = {
-        title: editForm.title.trim(),
-        status: editForm.status,
-        specSection: editForm.specSection || null,
-        submittalCategory: editForm.submittalCategory || null,
-        submittalType: editForm.submittalType || editForm.submittalCategory || "shop_drawing",
-        trade: editForm.trade || null,
-        floor: editForm.floor || null,
-        responsibleCompany: editForm.responsibleCompany || null,
-        submittedByCompany: editForm.submittedByCompany || null,
-        submittedByPerson: editForm.submittedByPerson || null,
-        submittedByEmail: editForm.submittedByEmail || null,
-        submittedByPhone: editForm.submittedByPhone || null,
-        submittedToCompany: editForm.submittedToCompany || null,
-        submittedToPerson: editForm.submittedToPerson || null,
-        submittedToEmail: editForm.submittedToEmail || null,
-        manufacturer: editForm.manufacturer || null,
-        modelNumber: editForm.modelNumber || null,
-        procurementStatus: editForm.procurementStatus || null,
-        ballInCourt: editForm.ballInCourt || null,
-        drawingNumber: editForm.drawingNumber || null,
-        drawingTitle: editForm.drawingTitle || null,
-        dateSubmitted: editForm.dateSubmitted || null,
-        dateRequired: editForm.dateRequired || null,
-        linkedRfiId: editForm.linkedRfiId ? parseInt(editForm.linkedRfiId) : null,
-        description: editForm.description || null,
-        attachmentsJson: attachmentValues(editForm.attachmentsText),
-      };
+      const body = buildSubmittalUpdateRequest(editForm, submittal.updatedAt);
       const r = await fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
         body: JSON.stringify(body),
       });
       if (!r.ok) {
-        const err = await r.json().catch(() => ({})) as { error?: string };
-        throw new Error(err.error || "Save failed");
+        const err = await r.json().catch(() => ({}));
+        throw new Error(readSubmittalMutationError(err, w("Save failed", "Error al guardar", lang), lang));
       }
       const updated = await r.json() as Submittal;
       queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/submittals`] });
@@ -2410,16 +2333,18 @@ function SubmittalDetail({ projectId, submittal, lang, canWrite, onClose, onUpda
       const r = await fetch(`/api/v1/projects/${projectId}/submittals/${submittal.id}/respond`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${getToken()}` },
-        body: JSON.stringify({ reviewDecision, complianceNotes, rejectionReason }),
+        body: JSON.stringify(buildSubmittalReviewRequest({ reviewDecision, complianceNotes, rejectionReason, expectedUpdatedAt: submittal.updatedAt })),
       });
-      if (r.ok) {
-        const updated = await r.json() as Submittal;
-        queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/submittals`] });
-        toast({ title: w("Review saved", "Revisión guardada", lang) });
-        onUpdated({ ...submittal, ...updated });
-        setRespondOpen(false);
+      if (!r.ok) {
+        const error = await r.json().catch(() => ({}));
+        throw new Error(readSubmittalMutationError(error, w("Failed to save review", "Error al guardar revisión", lang), lang));
       }
-    } catch { toast({ title: w("Failed to save review", "Error al guardar revisión", lang), variant: "destructive" }); }
+      const updated = await r.json() as Submittal;
+      queryClient.invalidateQueries({ queryKey: [`/api/v1/projects/${projectId}/submittals`] });
+      toast({ title: w("Review saved", "Revisión guardada", lang) });
+      onUpdated({ ...submittal, ...updated });
+      setRespondOpen(false);
+    } catch (error) { toast({ title: error instanceof Error ? error.message : w("Failed to save review", "Error al guardar revisión", lang), variant: "destructive" }); }
     finally { setRespondLoading(false); }
   };
 
