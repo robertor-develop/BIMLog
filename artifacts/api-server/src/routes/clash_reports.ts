@@ -32,6 +32,7 @@ import {
   type ClashColumnMapping, type ClashImportRow,
 } from "../lib/clash-report-contracts";
 import { clashReportScopeWhere, clashScopeWhere } from "../lib/clash-report-provenance";
+import { classifyVisualPackageTruth, presentLensReferenceAttachment } from "../lib/clash-visual-package-truth";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -780,7 +781,7 @@ async function readLensReferenceAttachments(projectId: number, serverId: number)
   const links = await db.select({ linkId: linkedItemsTable.id, fileId: filesTable.id, fileName: filesTable.fileName, fileSize: filesTable.fileSizeBytes, mimeType: filesTable.fileType, createdAt: filesTable.createdAt })
     .from(linkedItemsTable).innerJoin(filesTable, and(eq(filesTable.id, linkedItemsTable.toId), eq(filesTable.projectId, projectId), eq(filesTable.source, "lens-viewpoint-reference")))
     .where(and(eq(linkedItemsTable.projectId, projectId), eq(linkedItemsTable.fromType, "lens_viewpoint"), eq(linkedItemsTable.fromId, serverId), eq(linkedItemsTable.toType, "file"), eq(linkedItemsTable.linkType, "reference"))).orderBy(linkedItemsTable.id);
-  return links.map(item => ({ ...item, fileSize: item.fileSize ?? 0, downloadUrl: `/api/v1/projects/${projectId}/files/${item.fileId}/download` }));
+  return links.map(item => presentLensReferenceAttachment(projectId, item));
 }
 
 async function readLensLinkedItems(projectId: number, serverId: number) {
@@ -910,7 +911,7 @@ router.delete("/projects/:projectId/clash-reports/lens-next/issues/:serverId/att
       const [file] = await tx.select({ id: filesTable.id }).from(filesTable).where(and(eq(filesTable.id, link.fileId), eq(filesTable.projectId, projectId))).for("update").limit(1);
       if (!file) throw Object.assign(new Error("Reference attachment metadata is unavailable."), { status: 404, code: "attachment_not_found" });
       await tx.delete(linkedItemsTable).where(eq(linkedItemsTable.id, link.id));
-      const remaining = await tx.select({ id: linkedItemsTable.id }).from(linkedItemsTable).where(or(and(eq(linkedItemsTable.fromType, "file"), eq(linkedItemsTable.fromId, file.id)), and(eq(linkedItemsTable.toType, "file"), eq(linkedItemsTable.toId, file.id)))).limit(1);
+      const remaining = await tx.select({ id: linkedItemsTable.id }).from(linkedItemsTable).where(and(eq(linkedItemsTable.projectId, projectId), or(and(eq(linkedItemsTable.fromType, "file"), eq(linkedItemsTable.fromId, file.id)), and(eq(linkedItemsTable.toType, "file"), eq(linkedItemsTable.toId, file.id))))).limit(1);
       if (remaining.length) return null;
       await tx.delete(filesTable).where(and(eq(filesTable.id, file.id), eq(filesTable.projectId, projectId), eq(filesTable.source, "lens-viewpoint-reference")));
       return link.storagePath;
@@ -1404,7 +1405,9 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         return `${abbr}-${String(row.tradeFloorSeq).padStart(3, "0")}`;
       };
       const byId = new Map(rows.map(r => [r.id, r]));
-      const viewpoints = rows.map(r => ({
+      const viewpoints = rows.map(r => {
+        const visualPackage = classifyVisualPackageTruth(r);
+        return ({
         id: r.id,
         projectId: r.projectId,
         viewpointId: r.viewpointId,
@@ -1435,9 +1438,11 @@ router.get("/projects/:projectId/clash-reports/lens-pull",
         sourcePhysicalId: r.sourcePhysicalId,
         importedLineageStatus: r.importedLineageStatus,
         screenshotUrl: r.screenshotUrl,
-        visualStateAvailable: Boolean(r.visualStateJson && r.visualStateDigest),
-        visualStateDigest: r.visualStateDigest,
-      }));
+        visualStateAvailable: visualPackage.available,
+        visualStateDigest: visualPackage.digest,
+        visualPackageState: visualPackage.state,
+      });
+      });
       const [currentUser] = await db.select({ isSuperAdmin: usersTable.isSuperAdmin }).from(usersTable).where(eq(usersTable.id, req.user!.userId)).limit(1);
       const activeMembership = currentUser?.isSuperAdmin ? null : await pool.query(`SELECT role FROM project_members WHERE project_id=$1 AND user_id=$2 AND status='active'`, [projectId, req.user!.userId]);
       const activeRole = currentUser?.isSuperAdmin ? "project_admin" : activeMembership?.rows[0]?.role ?? null;
