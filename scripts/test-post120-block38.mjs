@@ -7,8 +7,8 @@ const inventory = JSON.parse(read("living-brief/OPEN_LOOP_DISPOSITIONS.json"));
 
 assert.equal(inventory.schemaVersion, 2, "open-loop inventory uses the typed ownership contract");
 assert.equal((openLoop.match(/CURRENT_OPEN_LOOP_AUTHORITY/g) ?? []).length, 1, "exactly one current authority marker exists");
-assert.equal(inventory.currentAuthority.heading, "Current open-loop authority — post-120 Block 44 — 2026-09-21");
-assert.equal(inventory.currentAuthority.uncheckedItems.length, 1, "current authority preserves only Ruben's deferred 2025 field evidence after Platform and 2021 closure");
+assert.equal(inventory.currentAuthority.heading, "Current open-loop authority — Coordination Knowledge Library Block 1 — 2026-09-21");
+assert.equal(inventory.currentAuthority.uncheckedItems.length, 2, "current authority preserves the next knowledge block and Ruben's deferred 2025 field evidence");
 assert.deepEqual(inventory.duplicateStatements, [], "duplicate unchecked statements are prohibited");
 assert.equal(inventory.reconciledDuplicateGroups.length, 7, "all seven discovered historical duplicate loops remain explicitly reconciled");
 
@@ -23,6 +23,8 @@ for (const item of inventory.items) {
 const currentItems = inventory.items.filter(item => item.currentAuthority);
 assert.equal(currentItems.filter(item => item.workClass === "PROVIDER_EVIDENCE").length, 0, "Build 220 provider work is closed");
 assert.equal(currentItems.filter(item => item.workClass === "FIELD_EVIDENCE").length, 1, "only Ruben's 2025 confirmation remains current field evidence");
+assert.equal(currentItems.filter(item => item.workClass === "PRODUCT_WORK").length, 1, "the next Coordination Knowledge block remains current product work");
+assert.ok(currentItems.some(item => item.statement.includes("Builds 231–235")), "the next Coordination Knowledge block remains explicit");
 assert.ok(currentItems.some(item => item.statement.includes("Navisworks 2025") && item.statement.includes("Ruben")), "Ruben's 2025 confirmation remains explicit");
 assert.ok(inventory.items.some(item => item.statement.includes("Build 160") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 160 publication marker is closed");
 assert.ok(inventory.items.some(item => item.statement.includes("Builds 166–170") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 170 marker is closed");

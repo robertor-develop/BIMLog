@@ -61,3 +61,4 @@ export * from "./contract-item-workflows";
 export * from "./team-resource-planning";
 export * from "./enterprise-identity";
 export * from "./connector-foundation";
+export * from "./coordination-knowledge";

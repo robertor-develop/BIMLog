@@ -77,6 +77,7 @@ import { ensureCompanyMasterCatalogSchema } from "./lib/company-master-catalog-m
 import { ensureWorkflowGovernancePolicySchema } from "./lib/workflow-governance-policy-migration";
 import { ensureConnectorFoundationSchema } from "./lib/connector-foundation-migration";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./lib/delivery-workflow-template-migration";
+import { ensureCoordinationKnowledgeSchema } from "./lib/coordination-knowledge-migration";
 import { requestDiagnostics } from "./middlewares/request-diagnostics";
 import { governedCorsOptions, resolveSessionSecret, securityHeaders } from "./lib/runtime-security";
 
@@ -1413,6 +1414,11 @@ const deliveryWorkflowStartupBarrier = queueDatabaseStartup(async () => {
   console.log("[migration] company delivery workflow templates and runtime ensured");
 });
 
+const coordinationKnowledgeStartupBarrier = queueDatabaseStartup(async () => {
+  await ensureCoordinationKnowledgeSchema();
+  console.log("[migration] Coordination Knowledge schema ensured");
+});
+
 export const startupBarrier = Promise.all([
   waitForDatabaseStartup(),
   lensNextPublishingStartupBarrier,
@@ -1425,6 +1431,7 @@ export const startupBarrier = Promise.all([
   livingBriefAndLensStartupBarrier,
   meetingLensStartupBarrier,
   deliveryWorkflowStartupBarrier,
+  coordinationKnowledgeStartupBarrier,
   rfiMigrationReady.then((ready) => {
     if (!ready) throw new Error("RFI_SCHEMA_MIGRATION_FAILED");
   }),

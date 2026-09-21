@@ -1,5 +1,14 @@
 # STATUS.md - Current Accepted Platform State
 
+## Coordination Knowledge Library — Block 1 source candidate — 2026-09-21
+
+- Builds 226–230 establish the organization-owned Coordination Knowledge domain without adding a second issue authority: Project Cases reference the existing canonical `lens_viewpoints` issue identity.
+- Conflict Types, Coordination Rules, and Resolution Methods use stable company-scoped identities plus immutable revisions, explicit draft/review/approved/retired truth, and tenant-bound many-to-many relationships.
+- Lesson Learned Proposals remain separate review objects. A project case cannot silently become an organizational standard, and existing issues remain valid without classification.
+- The additive startup migration creates twelve new tables and immutable history triggers. It contains no DROP, TRUNCATE, destructive rename, replacement, or customer-row mutation and is mirrored in Drizzle source.
+- Focused contract, transition, repository, tenant-boundary, repeat-migration, rollback, typecheck, and restored-database tests pass. The restored proof preserved all existing project and Lens viewpoint rows and left no synthetic test row.
+- This five-build boundary is push-only. No UI, Lens Next Native code, bridge protocol, installer, package, production database, or customer data changes are included; the blue-marked compact Lens panel remains scheduled for Builds 246–250.
+
 ## Post-220 closure — Block 45 source acceptance — 2026-09-21
 
 - Builds 221–225 reconcile the completed Build 220 provider receipt, close the verified physical Navisworks 2021 P36 installation, preserve Ruben's physical Navisworks 2025 confirmation as the sole deferred field-evidence item, and bind those facts to permanent current-state regressions.
