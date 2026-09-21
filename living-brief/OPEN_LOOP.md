@@ -4,7 +4,7 @@
 
 - [x] Builds 121–180 are complete. Build 180 source reached `origin/master` at `9dab04343e90e8ad94391c5967a4b9f804ee1f4d`, was published through the established Replit Shell path without Replit Agents, and passed authenticated production smoke.
 - [x] Builds 181–185 generated the route/interconnection ownership graph, removed duplicate route identities through compatibility redirects, passed the exact clean full gate, and were pushed at `8df24fd15763b1b76a4e7fc0fab0983f560e3698`.
-- [ ] [ACTIVE] Complete Builds 186–190: reconcile every unchecked loop under one current authority, close stale contradictions with exact evidence, bind product work to owning routes/modules, push and publish the ten-build batch, and pass authenticated visible-Chrome production smoke.
+- [x] Builds 186–190 reconciled every unchecked loop under one current authority, closed stale contradictions with exact evidence, bound product work to owning routes/modules, passed the exact full gate, pushed exact source `50ee888807974b5c20772331944a1ee78442f96a`, published as Replit receipt `dcbe8579`, and passed authenticated visible-Chrome production smoke at `v1.05.N18-P36` with exact live source and package identity.
 - [ ] Physical Navisworks 2025 confirmation remains assigned to Ruben as post-closure field evidence. It does not reopen Build 119 and does not block this Platform-only publication.
 
 All older headings named “Current open-loop authority” are preserved historical checkpoints. They cannot override this marked section. `OPEN_LOOP_DISPOSITIONS.json` classifies every unchecked item as product work, field evidence, provider evidence, or stale contradiction and binds each to an owner.

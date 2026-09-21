@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "1acb05fcd965580622bebb1d972524eff903189de42b47c0a655badb40143a39",
-  "itemCount": 144,
+  "sourceSha256": "81061d91cc5690e472b0c504545042ce28598c1616dff3eb3d610b303d4306b4",
+  "itemCount": 143,
   "counts": {
-    "ACTIVE": 111,
+    "ACTIVE": 110,
     "SUPERSEDED": 21,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -25,7 +25,6 @@
     "marker": "CURRENT_OPEN_LOOP_AUTHORITY",
     "heading": "Current open-loop authority — post-120 Block 38 — 2026-09-21",
     "uncheckedItems": [
-      "aae2087392aa9074",
       "ceecf8afb9f21204"
     ]
   },
@@ -61,24 +60,6 @@
     }
   ],
   "items": [
-    {
-      "id": "aae2087392aa9074",
-      "sourceLine": 7,
-      "heading": "Current open-loop authority — post-120 Block 38 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
-      "statement": "[ACTIVE] Complete Builds 186–190: reconcile every unchecked loop under one current authority, close stale contradictions with exact evidence, bind product work to owning routes/modules, push and publish the ten-build batch, and pass authenticated visible-Chrome production smoke.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:7",
-        "Current open-loop authority — post-120 Block 38 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
-      ],
-      "currentAuthority": true
-    },
     {
       "id": "ceecf8afb9f21204",
       "sourceLine": 8,

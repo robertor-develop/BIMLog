@@ -16,9 +16,13 @@ Builds 186–190 complete post-120 Block 38, the open-loop truth reconciliation 
 
 - Focused Block 38 regression: `POST120_BLOCK38=PASS`.
 - Current-authority marker count: exactly one.
-- Current unchecked records: exactly two, covering the Build 190 release boundary and Ruben's deferred Navisworks 2025 field evidence.
+- Current unchecked records after live closure: exactly one, covering only Ruben's deferred Navisworks 2025 field evidence.
 - Unresolved duplicate statement groups: zero.
-- Complete exact-head pre-push gate: required before push and publication.
+- Complete exact-head pre-push gate: passed for source `50ee888807974b5c20772331944a1ee78442f96a` before push and publication.
+- GitHub stabilization branch and `master`: exact source `50ee888807974b5c20772331944a1ee78442f96a`.
+- Replit publication: `dcbe8579`, completed without Replit Agents.
+- Live identity: `v1.05.N18-P36`, package `bimlog-50ee888807974b5c-6efedd640d558eb0`, health/readiness HTTP 200.
+- Authenticated Chrome smoke: dashboard, project analytics, compatibility redirects, Submittals, Lens Next, Living Brief, reload, and two-tab session continuity passed with no console errors.
 
 ## Boundaries
 
