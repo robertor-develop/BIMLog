@@ -2,9 +2,9 @@
 
 Date: 2026-09-20
 
-The first read-only Replit publication receipt stopped before Publish because five workflow-governance CHECK constraints had identical predicates but different source and database identifiers. Both development and production used the established `*_check` names while source declared `*_chk` names.
+The read-only Replit publication receipts stopped before Publish because six workflow-governance CHECK constraints had identical predicates but different source and database identifiers. Both development and production used the established `*_check` names while source declared `*_chk` names. The first receipt exposed five names; the repeated exact comparison exposed the remaining version constraint, which was corrected before publication.
 
-The corrective source change renames only those five Drizzle constraint identifiers to the exact names already present in both databases. It changes no table, column, index, predicate, row, customer data, runtime permission, workflow behavior, or provider configuration.
+The corrective source change renames only those six Drizzle constraint identifiers to the exact names already present in both databases. It changes no table, column, index, predicate, row, customer data, runtime permission, workflow behavior, or provider configuration.
 
 Acceptance requires:
 

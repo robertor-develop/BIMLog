@@ -33984,7 +33984,7 @@
         {
           "key": "platform",
           "result": "reviewed_no_semantic_change",
-          "reason": "Five source CHECK identifiers are reconciled to the exact names already established in development and production; structural behavior is unchanged."
+          "reason": "Six source CHECK identifiers are reconciled to the exact names already established in development and production; structural behavior is unchanged."
         },
         {
           "key": "plugin",
@@ -34023,7 +34023,7 @@
         "lib/db/src/schema/workflow-governance-policies.ts",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "222a5f1c93f1e8ca015a29dbcfc1416fcff47e65a40c3c553a0e0e328ff37b46"
+      "reviewedChangeSha256": "9c8c2fe9e1ebc3841ecc79e08fbee445189ae446fd00306f3b4dc0155148d255"
     }
   ]
 }

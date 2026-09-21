@@ -36,7 +36,7 @@ export const companyWorkflowGovernanceVersionsTable = pgTable("company_workflow_
   unique("company_workflow_governance_versions_policy_version_uq").on(table.policyId, table.version),
   uniqueIndex("company_workflow_governance_one_open_uq").on(table.policyId).where(sql`${table.state} IN ('draft','approved')`),
   uniqueIndex("company_workflow_governance_one_published_uq").on(table.policyId).where(sql`${table.state}='published'`),
-  check("company_workflow_governance_versions_version_chk", sql`${table.version}>0`),
+  check("company_workflow_governance_versions_version_check", sql`${table.version}>0`),
   check("company_workflow_governance_versions_revision_check", sql`${table.revision}>0`),
   check("company_workflow_governance_versions_state_check", sql`${table.state} IN ('draft','approved','published','superseded','retired')`),
   check("company_workflow_governance_versions_fingerprint_check", sql`${table.fingerprint} IS NULL OR ${table.fingerprint} ~ '^[a-f0-9]{64}$'`),

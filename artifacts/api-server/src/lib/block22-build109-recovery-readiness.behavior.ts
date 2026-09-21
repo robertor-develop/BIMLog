@@ -7,7 +7,7 @@ for (const safeguard of ["bimlog_rfi_restore_test", "pg_dump.exe", "pg_restore.e
 assert.match(restore, /F:\\\\BIMLOG\\\\TESTPROOF/);
 assert.doesNotMatch(restore, /PROD_DATABASE_URL/);
 const schema = fs.readFileSync(new URL("../../../../lib/db/src/schema/workflow-governance-policies.ts", import.meta.url), "utf8");
-for (const stableName of ["policies_code_check", "versions_version_chk", "versions_revision_check", "versions_state_check", "versions_fingerprint_check", "events_action_check"]) assert.ok(schema.includes(stableName), stableName);
+for (const stableName of ["policies_code_check", "versions_version_check", "versions_revision_check", "versions_state_check", "versions_fingerprint_check", "events_action_check"]) assert.ok(schema.includes(stableName), stableName);
 assert.equal(recoveryDecision({ operation: "read", failure: "database_disconnect", acknowledged: false }), "retry");
 assert.equal(recoveryDecision({ operation: "non_idempotent_write", failure: "partial_response", acknowledged: false }), "fail_closed");
 
