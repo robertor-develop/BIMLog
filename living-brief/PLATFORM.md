@@ -713,7 +713,6 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx
 - artifacts/bimlog/src/pages/Contact.tsx
 - artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx
-- artifacts/bimlog/src/pages/coordination-knowledge-block3.behavior.ts
 - artifacts/bimlog/src/pages/Dashboard.tsx
 - artifacts/bimlog/src/pages/DataRetention.tsx
 - artifacts/bimlog/src/pages/Disclaimer.tsx
@@ -804,6 +803,7 @@ It changes only when the code structure or curated architectural facts change.
 - /company-workflows
 - /company-workflow-governance
 - /company-pricing-templates
+- /knowledge
 - /admin
 - /feedback
 - /total-control
