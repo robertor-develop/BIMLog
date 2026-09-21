@@ -41,6 +41,15 @@ import {
   type RfiImagePresentation,
   type RfiPackageItem,
 } from "./rfi-frontend/rfi-editor-state";
+import {
+  getRfiCanonicalActionMatrix,
+  getSavedRfiActionMatrix,
+  type RfiActionDefinition,
+  type RfiActionKey,
+  type RfiCanonicalPermissions,
+  type RfiRecordState,
+  type RfiUiMode,
+} from "./rfi-frontend/rfi-action-presentation";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
@@ -290,33 +299,6 @@ async function acquireCapturedFrame(fileName: string): Promise<CapturedFrame> {
   }
 }
 
-type RfiUiMode = "create" | "view" | "edit";
-type RfiRecordState = "new" | "draft" | "sent" | "closed" | "reopened" | "revised";
-
-type RfiActionKey =
-  | "back"
-  | "submit"
-  | "cancel"
-  | "save-rfi"
-  | "export-pdf"
-  | "export-complete-pdf"
-  | "export-docx"
-  | "export-audit-pdf"
-  | "viewed-by"
-  | "edit"
-  | "close"
-  | "reopen"
-  | "raise-change-order"
-  | "jump-viewpoint"
-  | "revise"
-  | "save-response";
-
-type RfiActionDefinition = {
-  key: RfiActionKey;
-  label: string;
-  variant: "primary" | "secondary" | "danger";
-};
-
 type RfiCanonicalValues = {
   number?: string;
   projectName?: string;
@@ -359,16 +341,6 @@ type RfiCanonicalValues = {
   questionAssistDescription?: string;
   responseText?: string;
   answeredBy?: string;
-};
-
-type RfiCanonicalPermissions = {
-  canEdit: boolean;
-  canRespond: boolean;
-  canClose: boolean;
-  canReopen: boolean;
-  canExport: boolean;
-  canRaiseChangeOrder: boolean;
-  canJumpViewpoint: boolean;
 };
 
 type RfiCanonicalActions = Partial<Record<RfiActionKey, () => void>>;
@@ -425,89 +397,6 @@ type RfiCanonicalFormProps = {
   onClearImageCrop?: () => void;
   actionMatrix?: RfiActionDefinition[];
 };
-
-function getCreateRfiActionMatrix(params: { hasViewpoint: boolean; lang: string }): RfiActionDefinition[] {
-  const { hasViewpoint, lang } = params;
-  const actions: RfiActionDefinition[] = [
-    { key: "submit", label: w("Submit RFI", "Enviar RFI", lang), variant: "primary" },
-    { key: "cancel", label: w("Cancel", "Cancelar", lang), variant: "secondary" },
-  ];
-  if (hasViewpoint) actions.push({ key: "jump-viewpoint", label: w("Jump to Viewpoint", "Ir al Punto de Vista", lang), variant: "secondary" });
-  return actions;
-}
-
-export function getRfiCanonicalActionMatrix(params: {
-  mode: RfiUiMode;
-  recordState: RfiRecordState;
-  permissions: RfiCanonicalPermissions;
-  lang: string;
-}): RfiActionDefinition[] {
-  const { mode, recordState, permissions, lang } = params;
-  if (recordState === "new") return getCreateRfiActionMatrix({ hasViewpoint: permissions.canJumpViewpoint, lang });
-  if (mode === "edit") {
-    const editActions: RfiActionDefinition[] = [
-      { key: "save-rfi", label: w("Save RFI", "Guardar RFI", lang), variant: "primary" },
-      { key: "cancel", label: w("Cancel", "Cancelar", lang), variant: "secondary" },
-    ];
-    if (permissions.canRespond) editActions.push({ key: "save-response", label: w("Save Response", "Guardar Respuesta", lang), variant: "primary" });
-    if (recordState === "closed" && permissions.canReopen) editActions.push({ key: "reopen", label: w("Reopen RFI", "Reabrir RFI", lang), variant: "secondary" });
-    return editActions;
-  }
-  const actions: RfiActionDefinition[] = [];
-  if (permissions.canEdit) actions.push({ key: "edit", label: w("Edit RFI", "Editar RFI", lang), variant: "secondary" });
-  if (permissions.canExport) {
-    actions.push(
-      { key: "export-pdf", label: w("RFI PDF", "RFI PDF", lang), variant: "secondary" },
-      { key: "export-complete-pdf", label: w("Complete RFI PDF", "PDF Completo RFI", lang), variant: "secondary" },
-      { key: "export-docx", label: w("RFI DOCX", "RFI DOCX", lang), variant: "secondary" },
-      { key: "export-audit-pdf", label: w("RFI Audit PDF", "PDF Auditoria RFI", lang), variant: "secondary" },
-    );
-  }
-  if (recordState === "closed") {
-    if (permissions.canReopen) actions.push({ key: "reopen", label: w("Reopen RFI", "Reabrir RFI", lang), variant: "secondary" });
-  } else if (permissions.canClose) {
-    actions.push({ key: "close", label: w("Close RFI", "Cerrar RFI", lang), variant: "danger" });
-  }
-  if (permissions.canRespond) actions.push({ key: "save-response", label: w("Save Response", "Guardar Respuesta", lang), variant: "primary" });
-  if (permissions.canJumpViewpoint) actions.push({ key: "jump-viewpoint", label: w("Jump to Viewpoint", "Ir al Punto de Vista", lang), variant: "secondary" });
-  if (permissions.canRaiseChangeOrder) actions.push({ key: "raise-change-order", label: w("Raise Change Order", "Crear Orden de Cambio", lang), variant: "secondary" });
-  return actions;
-}
-
-function getSavedRfiActionMatrix(params: {
-  rfi: Rfi;
-  canWrite: boolean;
-  isProjectAdmin: boolean;
-  hasViewpoint: boolean;
-  isEditing: boolean;
-  lang: string;
-}): RfiActionDefinition[] {
-  const { rfi, canWrite, isProjectAdmin, hasViewpoint, isEditing, lang } = params;
-  if (canWrite && isEditing) {
-    return [
-      { key: "save-rfi", label: w("Save RFI", "Guardar RFI", lang), variant: "primary" },
-      { key: "cancel", label: w("Cancel", "Cancelar", lang), variant: "secondary" },
-    ];
-  }
-  const actions: RfiActionDefinition[] = [
-    { key: "back", label: w("Back to RFI Log", "Volver al Registro RFI", lang), variant: "secondary" },
-    { key: "export-pdf", label: w("RFI PDF", "RFI PDF", lang), variant: "secondary" },
-    { key: "export-complete-pdf", label: w("Complete RFI PDF", "PDF Completo RFI", lang), variant: "secondary" },
-    { key: "export-docx", label: w("RFI DOCX", "RFI DOCX", lang), variant: "secondary" },
-    { key: "export-audit-pdf", label: w("RFI Audit PDF", "PDF Auditoria RFI", lang), variant: "secondary" },
-    { key: "viewed-by", label: w("Viewed By", "Visto Por", lang), variant: "secondary" },
-  ];
-  if (canWrite && !isEditing) actions.push({ key: "edit", label: w("Edit RFI", "Editar RFI", lang), variant: "secondary" });
-  if (canWrite && !isEditing) actions.push({ key: "revise", label: w("Create Revision", "Crear Revision", lang), variant: "secondary" });
-  if (rfi.status === "closed") {
-    if (canWrite) actions.push({ key: "reopen", label: w("Reopen RFI", "Reabrir RFI", lang), variant: "secondary" });
-  } else if (isProjectAdmin) {
-    actions.push({ key: "close", label: w("Close RFI", "Cerrar RFI", lang), variant: "danger" });
-  }
-  if (canWrite) actions.push({ key: "raise-change-order", label: w("Raise Change Order", "Crear Orden de Cambio", lang), variant: "secondary" });
-  if (hasViewpoint) actions.push({ key: "jump-viewpoint", label: w("Jump to Viewpoint", "Ir al Punto de Vista", lang), variant: "secondary" });
-  return actions;
-}
 
 function fileIdFromAttachment(value: string): number | null {
   return parseInternalFileLocator(value)?.fileId ?? null;
