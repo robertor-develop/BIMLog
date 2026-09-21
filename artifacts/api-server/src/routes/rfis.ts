@@ -1562,18 +1562,23 @@ router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjec
 router.get("/projects/:projectId/rfis/export-excel", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     const { projectId } = ListRfisParams.parse({ projectId: req.params.projectId });
-    const status = String(req.query.status || "all");
-    const search = String(req.query.search || "").trim();
-    if (status !== "all" && !(await validateConfigValue("rfi_status", status))) {
+    const filters = parseRfiRegisterFilters(req.query as Record<string, unknown>);
+    if (filters.status !== "all" && !(await validateConfigValue("rfi_status", filters.status))) {
       res.status(422).json({ error: "Invalid RFI status filter." });
       return;
     }
 
     const [project] = await db.select().from(projectsTable).where(eq(projectsTable.id, projectId)).limit(1);
-    const rfis = await db.query.rfisTable.findMany({
+    const allRfis = await db.query.rfisTable.findMany({
       where: and(eq(rfisTable.projectId, projectId), isNull(rfisTable.deletedAt)),
       orderBy: (rfis, { asc }) => [asc(rfis.createdAt)],
     });
+    const creatorIds = [...new Set(allRfis.map(rfi => rfi.createdById))];
+    const creators = creatorIds.length
+      ? await db.select({ id: usersTable.id, fullName: usersTable.fullName }).from(usersTable).where(inArray(usersTable.id, creatorIds))
+      : [];
+    const creatorNames = new Map(creators.map(creator => [creator.id, creator.fullName || ""]));
+    const rfis = filterRfisForRegister(allRfis, filters, creatorNames);
     const rfiIds = rfis.map(rfi => rfi.id);
     const [responses, custody, directoryRows] = await Promise.all([
       rfiIds.length
@@ -1617,7 +1622,8 @@ router.get("/projects/:projectId/rfis/export-excel", authMiddleware, requireProj
         address: row.address,
       })),
       attachmentLabels,
-      filters: { status, search },
+      filters: { status: "all", search: "" },
+      sourceTotalCount: allRfis.length,
       generatedAt,
       generatedBy: req.user!.fullName || "BIMLog user",
     });
@@ -1632,10 +1638,10 @@ router.get("/projects/:projectId/rfis/export-excel", authMiddleware, requireProj
       details: JSON.stringify({
         event: "rfi.register_excel_exported",
         success: true,
-        statusFilter: status,
-        searchApplied: Boolean(search),
-        matchingRfis: output.result.filteredCount,
-        totalRfis: output.result.totalCount,
+        filters: { ...filters, dateFrom: filters.dateFrom?.toISOString().slice(0, 10) ?? null, dateTo: filters.dateTo?.toISOString().slice(0, 10) ?? null },
+        searchApplied: Boolean(filters.search),
+        matchingRfis: rfis.length,
+        totalRfis: allRfis.length,
         generatedAt: generatedAt.toISOString(),
       }),
     });
@@ -1644,6 +1650,7 @@ router.get("/projects/:projectId/rfis/export-excel", authMiddleware, requireProj
     res.setHeader("Content-Length", output.buffer.length);
     res.send(output.buffer);
   } catch (error) {
+    if (error instanceof RfiQueryValidationError) { res.status(error.status).json({ error: error.message }); return; }
     console.error("[rfis] RFI Register Excel generation failed:", error instanceof Error ? error.message : error);
     res.status(500).json({ error: "RFI Register Excel could not be generated." });
   }

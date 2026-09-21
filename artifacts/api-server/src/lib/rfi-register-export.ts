@@ -117,6 +117,7 @@ export type RfiRegisterWorkbookInput = {
   directory: RfiRegisterDirectoryPerson[];
   attachmentLabels: Map<string, string>;
   filters: { status: string; search: string };
+  sourceTotalCount?: number;
   generatedAt?: Date;
   generatedBy?: string;
 };
@@ -418,7 +419,7 @@ export function buildRfiRegisterWorkbook(input: RfiRegisterWorkbookInput): { buf
   const rows = result.selected;
   const projectLabel = input.project.name ? `${input.project.name}${input.project.code ? ` (${input.project.code})` : ""}` : `Project ${input.project.id}`;
   const projectCode = sanitizeExcelText(input.project.code || input.project.name || `Project-${input.project.id}`).replace(/[^A-Za-z0-9_.-]+/g, "-");
-  const filterSummary = `Status: ${sanitizeExcelText(input.filters.status || "all")} | Search: ${sanitizeExcelText(input.filters.search || "none")} | Matching RFIs: ${result.filteredCount} of ${result.totalCount}`;
+  const filterSummary = `Status: ${sanitizeExcelText(input.filters.status || "all")} | Search: ${sanitizeExcelText(input.filters.search || "none")} | Matching RFIs: ${result.filteredCount} of ${input.sourceTotalCount ?? result.totalCount}`;
   const directory = new Map(input.directory.filter(item => item.email).map(item => [item.email.toLowerCase(), item]));
   const directoryById = new Map(input.directory.filter(item => item.id != null).map(item => [item.id!, item]));
   const responsesByRfi = new Map<number, RfiRegisterResponseSource[]>();
