@@ -629,6 +629,7 @@ export function MeetingsTab({
     "current" | "summary"
   >("current");
   const [currentViewExporting, setCurrentViewExporting] = useState(false);
+  const createIdempotencyKeyRef = useRef(`meeting-${crypto.randomUUID()}`);
   const [aiLoading, setAiLoading] = useState(false);
   const [error, setError] = useState("");
   const [expandedSections, setExpandedSections] = useState<
@@ -3097,7 +3098,9 @@ export function MeetingsTab({
           : `${API}/projects/${projectId}/meetings`,
         {
           method: editingMeeting ? "PATCH" : "POST",
-          headers,
+          headers: editingMeeting
+            ? headers
+            : { ...headers, "Idempotency-Key": createIdempotencyKeyRef.current },
           body: JSON.stringify(body),
         },
       );
@@ -3115,6 +3118,8 @@ export function MeetingsTab({
         return;
       }
       await loadMeetings();
+      if (!editingMeeting)
+        createIdempotencyKeyRef.current = `meeting-${crypto.randomUUID()}`;
       setView("list");
     } finally {
       setSaving(false);
@@ -3131,7 +3136,7 @@ export function MeetingsTab({
       const notes = buildNotes();
       const tempSave = await fetch(`${API}/projects/${projectId}/meetings`, {
         method: "POST",
-        headers,
+        headers: { ...headers, "Idempotency-Key": `meeting-ai-${crypto.randomUUID()}` },
         body: JSON.stringify({
           title: title || "Draft",
           meeting_date: `${meetingDate}T${meetingTime}:00`,

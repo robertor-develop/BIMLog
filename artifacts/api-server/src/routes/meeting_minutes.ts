@@ -73,6 +73,8 @@ import {
 import {
   formatMeetingReportDate,
   meetingCurrentViewSectionLabel,
+  meetingCommandIdempotencyDigest,
+  parseMeetingCommandReceipt,
   parseMeetingCurrentViewQuery,
   safeMeetingReportText,
 } from "../lib/meeting-minute-contracts";
@@ -1956,6 +1958,10 @@ router.post(
       return;
     }
     try {
+      const idempotencyDigest = meetingCommandIdempotencyDigest(
+        req.get("Idempotency-Key"),
+        { projectId, userId: req.user!.userId, command: "meeting.create" },
+      );
       if (
         body.rfi_ids !== undefined &&
         (!Array.isArray(body.rfi_ids) ||
@@ -1980,7 +1986,30 @@ router.post(
         res.status(400).json({ error: "valid_lens_viewpoint_ids_required" });
         return;
       }
-      const meeting = await db.transaction(async (tx) => {
+      const outcome = await db.transaction(async (tx) => {
+        if (idempotencyDigest) {
+          await tx.execute(sql`SELECT pg_advisory_xact_lock(hashtextextended(${idempotencyDigest}, 0))`);
+          const [receiptRow] = await tx
+            .select({ entityId: activityLogTable.entityId, details: activityLogTable.details })
+            .from(activityLogTable)
+            .where(and(
+              eq(activityLogTable.projectId, projectId),
+              eq(activityLogTable.userId, req.user!.userId),
+              eq(activityLogTable.actionType, "create"),
+              eq(activityLogTable.entityType, "meeting"),
+              ilike(activityLogTable.details, `%\"idempotencyDigest\":\"${idempotencyDigest}\"%`),
+            ))
+            .limit(1);
+          const receipt = parseMeetingCommandReceipt(receiptRow?.details);
+          if (receipt?.idempotencyDigest === idempotencyDigest && receiptRow?.entityId) {
+            const [existing] = await tx.select().from(meetingMinutesTable).where(and(
+              eq(meetingMinutesTable.id, receiptRow.entityId),
+              eq(meetingMinutesTable.projectId, projectId),
+              isNull(meetingMinutesTable.deletedAt),
+            )).limit(1);
+            if (existing) return { record: existing, replayed: true };
+          }
+        }
         const [created] = await tx
           .insert(meetingMinutesTable)
           .values({
@@ -2043,16 +2072,24 @@ router.post(
           entityId: created.id,
           fileNameBefore: null,
           fileNameAfter: null,
-          details: `Created meeting: ${body.title} on ${new Date(body.meeting_date).toLocaleDateString()}`,
+          details: JSON.stringify({
+            event: "meeting.created",
+            title: body.title,
+            meetingDate: new Date(body.meeting_date).toISOString(),
+            idempotencyDigest,
+          }),
         });
         await tx.delete(meetingDraftsTable).where(and(
           eq(meetingDraftsTable.projectId, projectId),
           eq(meetingDraftsTable.userId, req.user!.userId),
           eq(meetingDraftsTable.draftKey, draftKeyFor(null)),
         ));
-        return created;
+        return { record: created, replayed: false };
       });
-      res.status(201).json(meeting);
+      res.status(outcome.replayed ? 200 : 201).json({
+        ...outcome.record,
+        idempotentReplay: outcome.replayed,
+      });
     } catch (err) {
       if (err instanceof MeetingRfiLinkError) {
         res.status(err.status).json({ error: err.code });
@@ -2064,6 +2101,10 @@ router.post(
       }
       if (err instanceof MeetingLensViewpointLinkError) {
         res.status(err.status).json({ error: err.code });
+        return;
+      }
+      if (err instanceof Error && err.message === "meeting_idempotency_key_invalid") {
+        res.status(400).json({ error: err.message });
         return;
       }
       res
@@ -3233,9 +3274,11 @@ router.patch(
               eq(meetingMinutesTable.id, meetingId),
               eq(meetingMinutesTable.projectId, projectId),
               isNull(meetingMinutesTable.deletedAt),
+              eq(meetingMinutesTable.updatedAt, existing.updatedAt),
             ),
           )
           .returning();
+        if (!row) throw new MeetingClashLinkError(409, "meeting_stale_update");
         if (Array.isArray(body.attendees)) {
           const participants = resolveMeetingParticipants(body.attendees);
           for (const attendee of participants) {

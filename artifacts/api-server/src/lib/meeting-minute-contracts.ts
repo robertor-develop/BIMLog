@@ -1,4 +1,5 @@
 import { z } from "zod/v4";
+import { createHash } from "node:crypto";
 
 const boundedText = (maximum: number) => z.string().trim().min(1).max(maximum);
 const optionalNullableText = (maximum: number) =>
@@ -95,4 +96,28 @@ export function meetingCurrentViewSectionLabel(
     linked_records: { en: "Linked Records", es: "Registros vinculados" },
   };
   return labels[token]?.[language] ?? "";
+}
+
+export function meetingCommandIdempotencyDigest(
+  rawKey: unknown,
+  context: { projectId: number; userId: number; command: string },
+) {
+  if (typeof rawKey !== "string" || !rawKey.trim()) return null;
+  const key = rawKey.trim();
+  if (key.length > 200 || !/^[A-Za-z0-9._:-]+$/.test(key)) {
+    throw new Error("meeting_idempotency_key_invalid");
+  }
+  return createHash("sha256")
+    .update(`${context.projectId}:${context.userId}:${context.command}:${key}`)
+    .digest("hex");
+}
+
+export function parseMeetingCommandReceipt(details: string | null | undefined) {
+  if (!details) return null;
+  try {
+    const value = JSON.parse(details) as Record<string, unknown>;
+    return typeof value.idempotencyDigest === "string" ? value : null;
+  } catch {
+    return null;
+  }
 }
