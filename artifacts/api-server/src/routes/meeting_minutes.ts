@@ -1,5 +1,6 @@
 ﻿import { Router } from "express";
 import crypto from "crypto";
+import * as XLSX from "xlsx";
 import { db } from "@workspace/db";
 import {
   meetingMinutesTable,
@@ -79,6 +80,11 @@ import {
   resolveMeetingActionInputs,
   resolveMeetingParticipants,
 } from "../lib/meeting-participant-action-identity";
+import {
+  filterMeetingCurrentView,
+  meetingCurrentViewScopeSummary,
+  parseMeetingCurrentViewScope,
+} from "../lib/meeting-current-view-scope";
 
 const router: Router = Router();
 
@@ -1312,7 +1318,8 @@ router.get(
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
-      const meetings = await db
+      const scope = parseMeetingCurrentViewScope(req.query);
+      const meetingRows = await db
         .select()
         .from(meetingMinutesTable)
         .where(
@@ -1322,6 +1329,7 @@ router.get(
           ),
         )
         .orderBy(desc(meetingMinutesTable.meetingDate));
+      const meetings = filterMeetingCurrentView(meetingRows, [], scope).meetings;
       const result = await Promise.all(
         meetings.map(async (m) => {
           const attendees = await db
@@ -1380,6 +1388,7 @@ router.get(
     const { language, view, sections } = parseMeetingCurrentViewQuery(req.query);
 
     try {
+      const scope = parseMeetingCurrentViewScope(req.query);
       const [project] = await db
         .select({
           id: projectsTable.id,
@@ -1396,7 +1405,7 @@ router.get(
         return;
       }
 
-      const meetings = await db
+      const meetingRows = await db
         .select()
         .from(meetingMinutesTable)
         .where(
@@ -1407,7 +1416,7 @@ router.get(
         )
         .orderBy(desc(meetingMinutesTable.meetingDate));
 
-      const actionItems = await db
+      const actionRows = await db
         .select()
         .from(actionItemsTable)
         .where(
@@ -1417,6 +1426,9 @@ router.get(
           ),
         )
         .orderBy(desc(actionItemsTable.createdAt));
+      const scopedView = filterMeetingCurrentView(meetingRows, actionRows, scope);
+      const meetings = scopedView.meetings;
+      const actionItems = scopedView.actions;
 
       const linkedCounts = new Map<
         number,
@@ -1486,8 +1498,8 @@ router.get(
         .join(", ");
       const activeFilters = labelFor(
         language,
-        `Project scope: ${project.name}; View: ${sourceView}; Sections: ${sectionSummary}`,
-        `Alcance del proyecto: ${project.name}; Vista: ${sourceView}; Secciones: ${sectionSummary}`,
+        `Project scope: ${project.name}; View: ${sourceView}; Sections: ${sectionSummary}; Filters: ${JSON.stringify(meetingCurrentViewScopeSummary(scope))}`,
+        `Alcance del proyecto: ${project.name}; Vista: ${sourceView}; Secciones: ${sectionSummary}; Filtros: ${JSON.stringify(meetingCurrentViewScopeSummary(scope))}`,
       );
       const resultCount = view === "actions" ? actionItems.length : meetings.length;
       const theme = REPORT_THEMES.meeting.log;
@@ -1706,6 +1718,7 @@ router.get(
           projectId,
           view,
           sections: Array.from(sections),
+          scope: meetingCurrentViewScopeSummary(scope),
           meetings,
           actionItems,
           linkedCounts: Array.from(linkedCounts.entries()),
@@ -1718,6 +1731,105 @@ router.get(
       } else {
         res.end();
       }
+    }
+  },
+);
+
+router.get(
+  "/projects/:projectId/meetings/current-view/xlsx",
+  authMiddleware,
+  requireProjectMember(),
+  async (req, res) => {
+    const projectId = Number(req.params.projectId);
+    try {
+      const scope = parseMeetingCurrentViewScope(req.query);
+      const view = req.query.view === "actions" ? "actions" : "meetings";
+      const [project] = await db
+        .select({ name: projectsTable.name, code: projectsTable.code })
+        .from(projectsTable)
+        .where(eq(projectsTable.id, projectId))
+        .limit(1);
+      if (!project) {
+        res.status(404).json({ error: "project_not_found" });
+        return;
+      }
+      const [meetingRows, actionRows, activityRows] = await Promise.all([
+        db.select().from(meetingMinutesTable).where(and(
+          eq(meetingMinutesTable.projectId, projectId),
+          isNull(meetingMinutesTable.deletedAt),
+        )).orderBy(desc(meetingMinutesTable.meetingDate)),
+        db.select().from(actionItemsTable).where(and(
+          eq(actionItemsTable.projectId, projectId),
+          ne(actionItemsTable.status, "cancelled"),
+        )).orderBy(desc(actionItemsTable.createdAt)),
+        db.select().from(activityLogTable).where(and(
+          eq(activityLogTable.projectId, projectId),
+          inArray(activityLogTable.entityType, ["meeting", "action_items"]),
+        )).orderBy(asc(activityLogTable.createdAt)),
+      ]);
+      const filtered = filterMeetingCurrentView(meetingRows, actionRows, scope);
+      const meetingIds = new Set(filtered.meetings.map((meeting) => meeting.id));
+      const actionIds = new Set(filtered.actions.map((action) => action.id));
+      const activity = activityRows.filter((event) =>
+        event.entityId !== null &&
+        ((event.entityType === "meeting" && meetingIds.has(event.entityId)) ||
+          (event.entityType === "action_items" &&
+            (meetingIds.has(event.entityId) || actionIds.has(event.entityId))))
+      );
+      const scopeSummary = JSON.stringify(meetingCurrentViewScopeSummary(scope));
+      const workbook = XLSX.utils.book_new();
+      const meetingSheet = XLSX.utils.aoa_to_sheet([
+        ["BIMLog by IgniteSmart", project.name, project.code || "", scopeSummary],
+        ["Date", "Title", "Location", "Notes", "Created", "Updated"],
+        ...filtered.meetings.map((meeting) => [
+          new Date(meeting.meetingDate).toISOString(),
+          meeting.title,
+          meeting.location || "",
+          meeting.notes || "",
+          meeting.createdAt?.toISOString?.() ?? String(meeting.createdAt ?? ""),
+          meeting.updatedAt?.toISOString?.() ?? String(meeting.updatedAt ?? ""),
+        ]),
+      ]);
+      meetingSheet["!cols"] = [{ wch: 24 }, { wch: 42 }, { wch: 28 }, { wch: 72 }, { wch: 24 }, { wch: 24 }];
+      XLSX.utils.book_append_sheet(workbook, meetingSheet, "Meetings");
+      const actionSheet = XLSX.utils.aoa_to_sheet([
+        ["BIMLog by IgniteSmart", project.name, project.code || "", scopeSummary],
+        ["Description", "Assigned", "Due", "Status", "Meeting ID", "Created"],
+        ...filtered.actions.map((action) => [
+          action.description,
+          action.assignedToName || action.assignedToExternalEmail || "",
+          action.dueDate?.toISOString?.() ?? String(action.dueDate ?? ""),
+          action.status,
+          action.meetingId ?? "",
+          action.createdAt?.toISOString?.() ?? String(action.createdAt ?? ""),
+        ]),
+      ]);
+      actionSheet["!cols"] = [{ wch: 72 }, { wch: 32 }, { wch: 20 }, { wch: 18 }, { wch: 14 }, { wch: 24 }];
+      XLSX.utils.book_append_sheet(workbook, actionSheet, "Actions");
+      const activitySheet = XLSX.utils.aoa_to_sheet([
+        ["BIMLog by IgniteSmart", project.name, project.code || "", scopeSummary],
+        ["Time", "Actor", "Action", "Record Type", "Record ID", "Details"],
+        ...activity.map((event) => [
+          event.createdAt?.toISOString?.() ?? String(event.createdAt ?? ""),
+          event.userFullName,
+          event.actionType,
+          event.entityType,
+          event.entityId,
+          event.details || "",
+        ]),
+      ]);
+      activitySheet["!cols"] = [{ wch: 24 }, { wch: 28 }, { wch: 24 }, { wch: 18 }, { wch: 14 }, { wch: 80 }];
+      XLSX.utils.book_append_sheet(workbook, activitySheet, "Activity History");
+      const bytes = XLSX.write(workbook, { bookType: "xlsx", type: "buffer" });
+      res.type("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      res.setHeader(
+        "Content-Disposition",
+        `attachment; filename="${reportFileName(`meetings-${view}-current-view`).replace(/\.pdf$/i, ".xlsx")}"`,
+      );
+      res.send(bytes);
+    } catch (err) {
+      res.status(err instanceof Error && err.message === "meeting_view_date_range_invalid" ? 400 : 500)
+        .json({ error: err instanceof Error ? err.message : "meeting_current_view_export_failed" });
     }
   },
 );
@@ -3010,11 +3122,23 @@ router.get(
         .select()
         .from(actionItemsTable)
         .where(eq(actionItemsTable.meetingId, meetingId));
+      const activityHistory = await db
+        .select()
+        .from(activityLogTable)
+        .where(
+          and(
+            eq(activityLogTable.projectId, projectId),
+            eq(activityLogTable.entityType, "meeting"),
+            eq(activityLogTable.entityId, meetingId),
+          ),
+        )
+        .orderBy(asc(activityLogTable.createdAt));
       const clashes = await getMeetingClashLinks(meetingId);
       res.json({
         ...meeting,
         attendees,
         actionItems,
+        activityHistory,
         linkedRfis: await getMeetingRfiLinks(meetingId),
         linkedSubmittals: await getMeetingSubmittalLinks(meetingId),
         linkedLensViewpoints: await getMeetingLensViewpointLinks(meetingId),
@@ -3313,7 +3437,8 @@ router.get(
   async (req, res) => {
     const projectId = Number(req.params.projectId);
     try {
-      const items = await db
+      const scope = parseMeetingCurrentViewScope(req.query);
+      const actionRows = await db
         .select()
         .from(actionItemsTable)
         .where(
@@ -3323,6 +3448,7 @@ router.get(
           ),
         )
         .orderBy(desc(actionItemsTable.createdAt));
+      const items = filterMeetingCurrentView([], actionRows, scope).actions;
       const now = Date.now();
       const withOverdue = items.map((i) => ({
         ...i,
