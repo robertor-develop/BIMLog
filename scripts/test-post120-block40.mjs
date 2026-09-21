@@ -38,5 +38,10 @@ assert.match(globalCss, /--accent: 24 95% 40%;/, "accent foreground contrast is 
 assert.match(globalCss, /--destructive: 0 72% 45%;/, "destructive foreground contrast exceeds 4.5:1");
 assert.doesNotMatch(coordinatorCommandCenter, /★/, "saved-view meaning is not conveyed by a symbol alone");
 assert.match(coordinatorCommandCenter, /tr\("Default", "Predeterminada"\)/, "default saved views have localized text");
+assert.match(globalCss, /body, #root \{ width: 100%; max-width: 100%; min-width: 0; \}/, "document containers cannot force page overflow");
+assert.match(globalCss, /overflow-x: hidden;/, "page-level horizontal overflow is contained");
+assert.match(globalCss, /:where\(img, video\) \{ max-width: 100%; height: auto; \}/, "media remains inside its content width");
+assert.match(globalCss, /@media \(pointer: coarse\)[\s\S]*min-height: 44px;/, "coarse-pointer controls meet the touch-height contract");
+assert.match(globalCss, /touch-action: manipulation;/, "coarse-pointer buttons use stable touch behavior");
 
-console.log(`POST120_BLOCK40=PASS surfaces=${matrix.counts.customerSurfaces} viewportCases=${matrix.counts.viewportCases} dialogFocus=PASS contrastThemeMotion=PASS`);
+console.log(`POST120_BLOCK40=PASS surfaces=${matrix.counts.customerSurfaces} viewportCases=${matrix.counts.viewportCases} dialogFocus=PASS contrastThemeMotion=PASS responsiveTouch=PASS`);

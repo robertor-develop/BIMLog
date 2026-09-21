@@ -89,12 +89,16 @@ iframe[aria-label*="Replit" i],
 
 @layer base {
   * { @apply border-border; }
-  html { font-size: 14px; }
+  html { width: 100%; max-width: 100%; min-width: 0; font-size: 14px; }
+  body, #root { width: 100%; max-width: 100%; min-width: 0; }
   body {
     @apply font-sans antialiased;
     background: hsl(var(--background));
     color: hsl(var(--foreground));
+    overflow-x: hidden;
   }
+  :where(main, section, article, aside, header, footer, form, fieldset) { min-width: 0; }
+  :where(img, video) { max-width: 100%; height: auto; }
   h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-display);
     @apply tracking-tight;
@@ -712,6 +716,16 @@ iframe[aria-label*="Replit" i],
   .master-mobile-nav-trigger,
   .master-mobile-nav-close {
     min-height: 44px;
+  }
+}
+
+@media (pointer: coarse) {
+  :where(button, [role="button"], select, textarea, input:not([type="checkbox"]):not([type="radio"])) {
+    min-height: 44px;
+  }
+  :where(button, [role="button"]) {
+    min-width: 44px;
+    touch-action: manipulation;
   }
 }
 
