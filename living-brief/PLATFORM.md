@@ -511,6 +511,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/master-catalog-intake-persistence.behavior.ts
 - artifacts/api-server/src/lib/master-catalog-pmo.behavior.ts
 - artifacts/api-server/src/lib/meeting-canonical-links.ts
+- artifacts/api-server/src/lib/meeting-current-view-scope.ts
+- artifacts/api-server/src/lib/meeting-minute-contracts.ts
+- artifacts/api-server/src/lib/meeting-participant-action-identity.ts
 - artifacts/api-server/src/lib/meeting-report-action-extraction.behavior.ts
 - artifacts/api-server/src/lib/meeting-report-action-extraction.ts
 - artifacts/api-server/src/lib/oauth.ts
@@ -537,6 +540,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/post120-build162-clash-provenance.behavior.ts
 - artifacts/api-server/src/lib/post120-build163-clash-visual-truth.behavior.ts
 - artifacts/api-server/src/lib/post120-build164-clash-negative-matrix.behavior.ts
+- artifacts/api-server/src/lib/post120-build166-meeting-contracts.behavior.ts
+- artifacts/api-server/src/lib/post120-build167-meeting-identities.behavior.ts
+- artifacts/api-server/src/lib/post120-build168-meeting-view-scope.behavior.ts
+- artifacts/api-server/src/lib/post120-build169-meeting-concurrency.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts
@@ -1028,3 +1035,11 @@ It changes only when the code structure or curated architectural facts change.
 - Classic clash reads and mutations bind project, report, and clash identity through shared provenance predicates; cross-project and cross-object identities fail closed.
 - Lens Next Visual Package completeness and reference-attachment presentation have one project-scoped truth source. Partial packages are explicitly invalid rather than silently presented as unavailable.
 - The permanent Block 33 matrix covers large reports, exact chunk preservation, malformed AI output, duplicate identities, cross-project/object denial, and incomplete Visual Package denial.
+
+## Post-120 meeting-minutes backend — Build 170
+
+- Meeting command payloads, current-view query scope, and report presentation use bounded shared contracts instead of route-local interpretations.
+- Participant and action-assignee identity normalization is centralized. Exact duplicate participant identities fail closed before persistence.
+- The live meeting register, action list, PDF, native XLSX, and activity history consume one project-scoped scope contract; invalid date ranges fail closed.
+- Create retries serialize under an actor/project/command-bound receipt and PostgreSQL transaction advisory lock. Concurrent meeting updates compare the observed version inside the update predicate and reject stale writers atomically.
+- Block 34 changes no schema, Native source, installer, bridge protocol, provider configuration, or customer data.

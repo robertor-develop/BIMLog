@@ -1100,6 +1100,14 @@ is reserved for genuine completion.
 
 See [OPEN_LOOP.md](./OPEN_LOOP.md) for actions and [AUDIT.md](./AUDIT.md) for dated evidence.
 
+## Post-120 meeting-minutes backend — Build 170
+
+- Builds 166–170 separate bounded meeting command/query/rendering contracts, centralize participant and action-assignee identity, and reject duplicate participant identities.
+- Meeting lists, action lists, current-view PDF, native XLSX, and meeting activity history share one project-scoped query/filter contract. XLSX contains branded Meetings, Actions, and Activity History sheets.
+- Create retries use an actor/project/command-bound SHA-256 receipt under a PostgreSQL transaction advisory lock. Browser retries reuse the same key; a different actor, project, command, or key cannot replay the receipt.
+- Meeting updates include the observed `updated_at` in the update predicate. A concurrent winner makes the later update return `meeting_stale_update` before attendees, audit, or draft state can be changed.
+- Block 34 changes no schema, Native source, installer, bridge, provider configuration, or customer data. Build 170 is the next established publication and authenticated meeting-lifecycle acceptance boundary.
+
 ## 2026-08-05 consolidated local Release lineage
 
 Living Brief runtime-source packaging and commit identity, Linked Items creation UX, Project-26 Procore RFI

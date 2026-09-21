@@ -107,6 +107,8 @@ Status: source accepted; Build 165 push is active. Native and installers did not
 - 169: add idempotency and concurrent-edit tests.
 - 170: publish and run authenticated meeting/minutes lifecycle smoke.
 
+Status: source accepted pending the exact-head full gate, push, established Replit Shell publication, and authenticated live lifecycle smoke. Native and installers did not change.
+
 ## Block 35 — Builds 171–175 — job intake workspace
 
 - 171: extract intake schema and form-state boundaries.

@@ -34445,6 +34445,78 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
+      "reviewedAt": "2026-09-21T00:20:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Meeting records preserve the existing canonical project-record doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established ten-build publication procedure remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing professional export and audit requirements are applied without changing doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product purpose and customer outcomes are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records centralized meeting identity, scope, export, idempotency, and concurrency contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native source, installer, package, or bridge protocol changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The new XLSX uses the existing professional export rules; PDF design is unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 34 source acceptance and Build 170 publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing stabilization execution plan already owns the remaining Builds 171–220."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused regressions and exact Git history preserve the audit evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "f50bc8652287a05d8a492e0b58c5b1da39bb018e87589bfb4391782ba5060c31"
     }
   ]
 }

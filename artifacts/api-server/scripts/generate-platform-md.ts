@@ -358,6 +358,14 @@ ${appRoutes()}
 - Classic clash reads and mutations bind project, report, and clash identity through shared provenance predicates; cross-project and cross-object identities fail closed.
 - Lens Next Visual Package completeness and reference-attachment presentation have one project-scoped truth source. Partial packages are explicitly invalid rather than silently presented as unavailable.
 - The permanent Block 33 matrix covers large reports, exact chunk preservation, malformed AI output, duplicate identities, cross-project/object denial, and incomplete Visual Package denial.
+
+## Post-120 meeting-minutes backend — Build 170
+
+- Meeting command payloads, current-view query scope, and report presentation use bounded shared contracts instead of route-local interpretations.
+- Participant and action-assignee identity normalization is centralized. Exact duplicate participant identities fail closed before persistence.
+- The live meeting register, action list, PDF, native XLSX, and activity history consume one project-scoped scope contract; invalid date ranges fail closed.
+- Create retries serialize under an actor/project/command-bound receipt and PostgreSQL transaction advisory lock. Concurrent meeting updates compare the observed version inside the update predicate and reject stale writers atomically.
+- Block 34 changes no schema, Native source, installer, bridge protocol, provider configuration, or customer data.
 `;
 
   const outDir = path.join(REPO_ROOT, "living-brief");
