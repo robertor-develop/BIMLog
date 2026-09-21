@@ -1,0 +1,21 @@
+{
+  "schemaVersion": "bimlog-provider-recovery-evidence-v1",
+  "receipt": {
+    "schemaVersion": "bimlog-database-restore-receipt-v1",
+    "sourceDatabase": "bimlog_rfi_test",
+    "restoredDatabase": "bimlog_rfi_restore_test",
+    "sourceContractSha256": "c03c7e9e9db31b23830611c49119a28ae614d8e4205ffacfdd8da5387dab5306",
+    "backupSha256": "79177013e583e96a875441db329bc4b67467d14babe91f783e92bb93d9e7cad1",
+    "backupBytes": 1521332,
+    "sourceRecordCountManifestSha256": "332dcbc6e566dd23cfbf067be1cb78d42743ab1ea72d9ba727e01d3a9b42a8da",
+    "restoredRecordCountManifestSha256": "332dcbc6e566dd23cfbf067be1cb78d42743ab1ea72d9ba727e01d3a9b42a8da",
+    "schemaExact": true,
+    "recordCountsExact": true,
+    "restoreRetainedForReadinessProof": true
+  },
+  "observedBackupSha256": "79177013e583e96a875441db329bc4b67467d14babe91f783e92bb93d9e7cad1",
+  "observedBackupBytes": 1521332,
+  "target": { "disposable": true, "production": false },
+  "productionMutation": false,
+  "cleanup": { "restoredTargetRemoved": true }
+}
