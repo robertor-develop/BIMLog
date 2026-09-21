@@ -244,7 +244,10 @@ export class CoordinationKnowledgeRepository {
 
   async listResolutionMethods(companyIdInput: number, includeDrafts: boolean): Promise<Array<Record<string, unknown>>> {
     const companyId = positive(companyIdInput, "companyId");
-    return (await this.pool.query(`SELECT base.*,revision.* FROM coordination_resolution_methods base JOIN LATERAL (
+    return (await this.pool.query(`SELECT base.*,revision.*,
+      COALESCE((SELECT jsonb_agg(link.conflict_type_id ORDER BY link.display_order) FROM coordination_resolution_method_conflict_types link WHERE link.company_id=base.company_id AND link.resolution_method_revision_id=revision.id),'[]'::jsonb) conflict_type_ids,
+      COALESCE((SELECT jsonb_agg(link.rule_revision_id) FROM coordination_resolution_method_rules link WHERE link.company_id=base.company_id AND link.resolution_method_revision_id=revision.id),'[]'::jsonb) rule_revision_ids
+      FROM coordination_resolution_methods base JOIN LATERAL (
       SELECT * FROM coordination_resolution_method_revisions candidate WHERE candidate.resolution_method_id=base.id AND candidate.company_id=base.company_id
         AND ($2::boolean OR candidate.status='approved') ORDER BY candidate.revision DESC LIMIT 1
       ) revision ON true WHERE base.company_id=$1 ORDER BY lower(revision.name),base.code,base.id`, [companyId, includeDrafts])).rows;

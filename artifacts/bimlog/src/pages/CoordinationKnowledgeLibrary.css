@@ -26,6 +26,8 @@
 .knowledge-filters button, .knowledge-error button { min-height: 38px; border: 1px solid #b9cae1; border-radius: 7px; padding: 7px 10px; background: #fff; color: #184f99; font-weight: 750; cursor: pointer; }
 .knowledge-rule-filters { grid-template-columns: minmax(280px, 2fr) minmax(220px, 1.4fr) minmax(140px, .8fr) auto; }
 .knowledge-rule-filters .knowledge-search { grid-column: auto; }
+.knowledge-method-filters { grid-template-columns: repeat(4, minmax(150px, 1fr)); }
+.knowledge-method-filters .knowledge-search { grid-column: span 2; }
 .knowledge-filters :focus-visible, .knowledge-error button:focus-visible { outline: 3px solid #7aafff; outline-offset: 2px; }
 .knowledge-search { grid-column: span 2; }
 .knowledge-input-icon { display: flex; align-items: center; position: relative; }
@@ -59,9 +61,13 @@
 .knowledge-history-button:disabled { opacity: .6; }
 .knowledge-history { margin: 10px 0 0; padding-left: 22px; color: #4e6179; font-size: 12px; }
 .knowledge-inline-error { color: #991b1b !important; font-size: 12px; }
+.knowledge-precedent-note { display: flex; align-items: flex-start; gap: 9px; margin: 0 0 14px; padding: 11px 13px; border: 1px solid #f0d999; border-radius: 9px; background: #fffaf0; color: #674d12; line-height: 1.45; }
+.knowledge-precedent-note svg { flex: 0 0 auto; width: 18px; height: 18px; margin-top: 1px; }
+.knowledge-retired-warning { padding: 8px 10px; border-radius: 7px; background: #f5f0f3; color: #684b5b !important; font-size: 12px; }
+.knowledge-method-card.is-retired { border-style: dashed; background: #fcfafb; }
 .knowledge-spinner { width: 24px; height: 24px; border: 3px solid #c9d9ef; border-top-color: #2563eb; border-radius: 50%; animation: knowledge-spin .8s linear infinite; }
 @keyframes knowledge-spin { to { transform: rotate(360deg); } }
-@media (max-width: 1180px) { .knowledge-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); } .knowledge-search { grid-column: span 2; } }
+@media (max-width: 1180px) { .knowledge-filters, .knowledge-method-filters { grid-template-columns: repeat(3, minmax(0, 1fr)); } .knowledge-search { grid-column: span 2; } }
 @media (max-width: 900px) { .knowledge-card-grid { grid-template-columns: minmax(0, 1fr); } .knowledge-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
 @media (max-width: 720px) {
   .knowledge-main { padding-top: 68px; }

@@ -16,9 +16,12 @@ type CapabilityResponse = { capabilities: string[]; companyId: number; isCompany
 type ConflictFilters = { search: string; discipline: string; element: string; category: string; status: string; tag: string };
 type RuleRecord = { id: string; rule_id: string; code: string; revision: number; status: KnowledgeStatus; title: string; guidance: string; applicability: Record<string, unknown>; rationale: string; exceptions: unknown[]; references: unknown[]; approved_by_id?: number | null; approved_at?: string | null };
 type RuleFilters = { search: string; applicability: string; status: string };
+type ResolutionMethodRecord = { id: string; resolution_method_id: string; code: string; revision: number; status: KnowledgeStatus; name: string; description: string; applicability: Record<string, unknown>; responsible_trade?: string | null; constraints: unknown[]; advantages: unknown[]; disadvantages: unknown[]; required_approvals: unknown[]; rfi_requirement: "yes" | "no" | "conditional"; details: Record<string, unknown>; conflict_type_ids: string[]; rule_revision_ids: string[] };
+type MethodFilters = { search: string; conflictType: string; trade: string; discipline: string; rfi: string; approval: string; status: string };
 
 const emptyConflictFilters: ConflictFilters = { search: "", discipline: "", element: "", category: "", status: "", tag: "" };
 const emptyRuleFilters: RuleFilters = { search: "", applicability: "", status: "" };
+const emptyMethodFilters: MethodFilters = { search: "", conflictType: "", trade: "", discipline: "", rfi: "", approval: "", status: "" };
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const values = (items: string[]) => [...new Set(items.filter(Boolean))].sort((a, b) => a.localeCompare(b));
 const normalized = (value: unknown) => String(value ?? "").toLocaleLowerCase();
@@ -48,6 +51,11 @@ export function CoordinationKnowledgeLibrary() {
   const [ruleError, setRuleError] = useState("");
   const [ruleReloadKey, setRuleReloadKey] = useState(0);
   const [ruleHistory, setRuleHistory] = useState<Record<string, RuleRecord[] | "loading" | "error">>({});
+  const [methods, setMethods] = useState<ResolutionMethodRecord[]>([]);
+  const [methodFilters, setMethodFilters] = useState<MethodFilters>(emptyMethodFilters);
+  const [methodState, setMethodState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [methodError, setMethodError] = useState("");
+  const [methodReloadKey, setMethodReloadKey] = useState(0);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
@@ -102,6 +110,36 @@ export function CoordinationKnowledgeLibrary() {
       setRuleHistory(current => ({ ...current, [stableId]: Array.isArray(payload.items) ? payload.items : [] }));
     } catch { setRuleHistory(current => ({ ...current, [stableId]: "error" })); }
   };
+
+  useEffect(() => {
+    if (!token || active !== "methods") return;
+    const controller = new AbortController(); setMethodState("loading"); setMethodError("");
+    fetch(`${API_BASE}/api/v1/coordination-knowledge/resolution-methods`, { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal })
+      .then(async response => { const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload.code || `KNOWLEDGE_METHODS_${response.status}`); return payload; })
+      .then(payload => { setMethods(Array.isArray(payload.items) ? payload.items : []); setMethodState("ready"); })
+      .catch(error => { if (!controller.signal.aborted) { setMethods([]); setMethodState("error"); setMethodError(String(error instanceof Error ? error.message : error)); } });
+    return () => controller.abort();
+  }, [token, active, methodReloadKey]);
+
+  const methodOptions = useMemo(() => ({
+    trades: values(methods.map(item => item.responsible_trade ?? "")),
+    disciplines: values(methods.flatMap(item => {
+      const candidate = item.applicability?.disciplines;
+      return Array.isArray(candidate) ? candidate.map(String) : candidate ? [String(candidate)] : [];
+    })),
+  }), [methods]);
+  const filteredMethods = useMemo(() => methods.filter(item => {
+    const query = normalized(methodFilters.search).trim(), applicationText = normalized(JSON.stringify(item.applicability ?? {}));
+    const previousCases = item.details?.previousCases ?? item.details?.previousCaseIds ?? [];
+    const approvalRequired = Array.isArray(item.required_approvals) && item.required_approvals.length > 0;
+    return (!query || normalized([item.code, item.name, item.description, item.responsible_trade, JSON.stringify(item.constraints), JSON.stringify(previousCases)].join(" ")).includes(query))
+      && (!methodFilters.conflictType || item.conflict_type_ids?.includes(methodFilters.conflictType))
+      && (!methodFilters.trade || item.responsible_trade === methodFilters.trade)
+      && (!methodFilters.discipline || applicationText.includes(normalized(methodFilters.discipline)))
+      && (!methodFilters.rfi || item.rfi_requirement === methodFilters.rfi)
+      && (!methodFilters.approval || (methodFilters.approval === "required") === approvalRequired)
+      && (!methodFilters.status || item.status === methodFilters.status);
+  }), [methods, methodFilters]);
 
   const conflictOptions = useMemo(() => ({
     disciplines: values(conflictTypes.flatMap(item => [item.discipline_a, item.discipline_b])),
@@ -220,6 +258,31 @@ export function CoordinationKnowledgeLibrary() {
               <button className="knowledge-history-button" type="button" onClick={() => void loadRuleHistory(item)} disabled={history === "loading"}>{history === "loading" ? t("Loading history…", "Cargando historial…") : t("View revision history", "Ver historial de revisiones")}</button>
               {history === "error" && <p className="knowledge-inline-error" role="alert">{t("History is unavailable. Try again.", "El historial no está disponible. Intente nuevamente.")}</p>}
               {Array.isArray(history) && <ol className="knowledge-history">{history.map(version => <li key={version.id}>v{version.revision} · {statusText(version.status)}</li>)}</ol>}
+            </article>; })}
+          </div></>}
+        </div> : active === "methods" ? <div className="knowledge-catalog" aria-busy={methodState === "loading"}>
+          <p className="knowledge-precedent-note"><Route aria-hidden /><span><strong>{t("Options, not instructions.", "Opciones, no instrucciones.")}</strong> {t("Resolution Methods describe reviewed possibilities. The project team remains responsible for each decision and required approval.", "Los Métodos de Resolución describen posibilidades revisadas. El equipo del proyecto sigue siendo responsable de cada decisión y aprobación requerida.")}</span></p>
+          <div className="knowledge-filters knowledge-method-filters" role="search" aria-label={t("Filter Resolution Methods", "Filtrar Métodos de Resolución")}>
+            <label className="knowledge-search"><span>{t("Search methods", "Buscar métodos")}</span><span className="knowledge-input-icon"><Search aria-hidden /><input value={methodFilters.search} onChange={event => setMethodFilters(current => ({ ...current, search: event.target.value }))} placeholder={t("Code, method, constraint or case…", "Código, método, restricción o caso…")} /></span></label>
+            <label>{t("Conflict Type", "Tipo de Conflicto")}<select value={methodFilters.conflictType} onChange={event => setMethodFilters(current => ({ ...current, conflictType: event.target.value }))}><option value="">{t("All", "Todos")}</option>{conflictTypes.map(item => <option key={item.id} value={item.id}>{item.code} · {item.name}</option>)}</select></label>
+            <label>{t("Responsible trade", "Empresa responsable")}<select value={methodFilters.trade} onChange={event => setMethodFilters(current => ({ ...current, trade: event.target.value }))}><option value="">{t("All", "Todos")}</option>{methodOptions.trades.map(option => <option key={option}>{option}</option>)}</select></label>
+            <label>{t("Discipline", "Disciplina")}<select value={methodFilters.discipline} onChange={event => setMethodFilters(current => ({ ...current, discipline: event.target.value }))}><option value="">{t("All", "Todas")}</option>{methodOptions.disciplines.map(option => <option key={option}>{option}</option>)}</select></label>
+            <label>{t("RFI", "RFI")}<select value={methodFilters.rfi} onChange={event => setMethodFilters(current => ({ ...current, rfi: event.target.value }))}><option value="">{t("All", "Todos")}</option><option value="yes">{t("Typically required", "Generalmente requerido")}</option><option value="no">{t("Typically not required", "Generalmente no requerido")}</option><option value="conditional">{t("Depends", "Depende")}</option></select></label>
+            <label>{t("Approvals", "Aprobaciones")}<select value={methodFilters.approval} onChange={event => setMethodFilters(current => ({ ...current, approval: event.target.value }))}><option value="">{t("All", "Todas")}</option><option value="required">{t("Required", "Requeridas")}</option><option value="not-required">{t("Not specified", "No especificadas")}</option></select></label>
+            <label>{t("Status", "Estado")}<select value={methodFilters.status} onChange={event => setMethodFilters(current => ({ ...current, status: event.target.value }))}><option value="">{t("All", "Todos")}</option>{["draft", "under_review", "approved", "retired"].map(option => <option key={option} value={option}>{option.replace("_", " ")}</option>)}</select></label>
+            <button type="button" onClick={() => setMethodFilters(emptyMethodFilters)}>{t("Reset filters", "Restablecer filtros")}</button>
+          </div>
+          {methodState === "loading" && <div className="knowledge-placeholder" role="status"><span className="knowledge-spinner" aria-hidden /><strong>{t("Loading Resolution Methods…", "Cargando Métodos de Resolución…")}</strong></div>}
+          {methodState === "error" && <div className="knowledge-error" role="alert"><strong>{t("Resolution Methods could not be loaded.", "No se pudieron cargar los Métodos de Resolución.")}</strong><span>{methodError}</span><button type="button" onClick={() => setMethodReloadKey(value => value + 1)}>{t("Try again", "Reintentar")}</button></div>}
+          {methodState === "ready" && !filteredMethods.length && <div className="knowledge-placeholder" role="status"><Route aria-hidden /><strong>{methods.length ? t("No methods match these filters", "Ningún método coincide con estos filtros") : t("No Resolution Methods yet", "Aún no hay Métodos de Resolución")}</strong><span>{t("Methods remain optional and require project-specific professional judgment.", "Los métodos siguen siendo opcionales y requieren criterio profesional específico del proyecto.")}</span></div>}
+          {methodState === "ready" && filteredMethods.length > 0 && <><p className="knowledge-result-count" role="status">{filteredMethods.length} {t("Resolution Methods", "Métodos de Resolución")}</p><div className="knowledge-card-grid">
+            {filteredMethods.map(item => { const cases = (item.details?.previousCases ?? item.details?.previousCaseIds ?? []) as unknown[]; return <article className={`knowledge-card knowledge-method-card${item.status === "retired" ? " is-retired" : ""}`} key={item.resolution_method_id || item.id}>
+              <div className="knowledge-card-top"><span className="knowledge-code">{item.code}</span><span className={`knowledge-status knowledge-status-${item.status}`}><span aria-hidden>●</span>{statusText(item.status)}</span></div>
+              <h3>{item.name}</h3><p>{item.description}</p>
+              {item.status === "retired" && <p className="knowledge-retired-warning"><strong>{t("Historical reference only.", "Solo referencia histórica.")}</strong> {t("This method cannot be selected for a new resolution.", "Este método no puede seleccionarse para una nueva resolución.")}</p>}
+              <dl><div><dt>{t("Responsible trade", "Empresa responsable")}</dt><dd>{item.responsible_trade || t("Project decision", "Decisión del proyecto")}</dd></div><div><dt>{t("RFI requirement", "Requisito de RFI")}</dt><dd>{item.rfi_requirement}</dd></div><div><dt>{t("Conflict Types", "Tipos de Conflicto")}</dt><dd>{item.conflict_type_ids?.length || 0}</dd></div><div><dt>{t("Related Rules", "Reglas relacionadas")}</dt><dd>{item.rule_revision_ids?.length || 0}</dd></div><div><dt>{t("Required approvals", "Aprobaciones requeridas")}</dt><dd>{item.required_approvals?.length || 0}</dd></div><div><dt>{t("Previous cases", "Casos anteriores")}</dt><dd>{cases.length}</dd></div></dl>
+              <details className="knowledge-structured"><summary>{t("Constraints, benefits and references", "Restricciones, beneficios y referencias")}</summary><pre>{JSON.stringify({ applicability: item.applicability, constraints: item.constraints, advantages: item.advantages, disadvantages: item.disadvantages, conflictTypeIds: item.conflict_type_ids, ruleRevisionIds: item.rule_revision_ids, previousCases: cases }, null, 2)}</pre></details>
+              <div className="knowledge-card-footer"><span>v{item.revision}</span><span>{t("Informational catalog", "Catálogo informativo")}</span></div>
             </article>; })}
           </div></>}
         </div> : <div className="knowledge-placeholder" role="status">
