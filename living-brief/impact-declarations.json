@@ -34729,6 +34729,74 @@
         "package.json"
       ],
       "reviewedChangeSha256": "e488b47bfc1b219c172954cd507471bd16c0d047200cc4c3a4bece5bd1a889e6"
+    },
+    {
+      "taskId": "bimlog-build180-submittals-reconciliation-20260921",
+      "reviewedThroughCommit": "553b6631e67128e8a9a436dda09db566246eb6df",
+      "reviewedAt": "2026-09-21T02:33:02-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The submittal decomposition preserves established BIMLog ownership and product boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push and ten-build publication procedure is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 180 adds executable stale-write, role, scope, and attachment-failure acceptance coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product purpose and customer outcomes remain unchanged by the submittal refactor."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The Platform now records separated submittal state contracts and version-bound project-scoped mutations."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native source, installer, package, or bridge protocol changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing exports retain their formats while gaining explicit current-view and item identity scopes."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulatory mapping, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records Builds 176-180 as the accepted source candidate at the publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted execution plan continues to own remaining Builds 181-220."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused and full-gate evidence remains preserved in Git history and the Build 180 acceptance record."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3f3189e2f13437e097f4e64a31be4540f397baf730851d97c92c0e85a4aa10ed"
     }
   ]
 }
