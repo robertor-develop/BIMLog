@@ -8,6 +8,7 @@
 - Block 42 implementation authority is exact commit `5ab189dc38bbf79e166384b24eacdd8a255c9773`; release acceptance binds to its later clean reconciliation head without changing these product boundaries.
 - Current-authority regression correction `ae986f1e0062ddd41eada78140ccb4b051388032` recognizes the active Build 210 provider boundary and preserves the two separate Navisworks field-evidence items.
 - Deterministic inventory refresh `a4d3b23767d2bb6122cdcebd708a735a34d3f1b4` updates three AI route line locations only; all 45 entry-point classifications and controlled-use boundaries are unchanged.
+- Current-authority generator correction `4fa559db38f88c96824b8f616026805cfa9869f1` enforces exactly one Build 210 provider item and the two independent Navisworks field items.
 - No database/schema, customer data, Native source, installer, package, bridge protocol, provider credential/configuration, or Navisworks license changed; focused Navisworks smoke is not retriggered.
 
 ## Post-120 stabilization — Block 33 source acceptance — 2026-09-20
