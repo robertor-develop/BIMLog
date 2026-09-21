@@ -10,6 +10,7 @@
 - Deterministic inventory refresh `a4d3b23767d2bb6122cdcebd708a735a34d3f1b4` updates three AI route line locations only; all 45 entry-point classifications and controlled-use boundaries are unchanged.
 - Current-authority generator correction `4fa559db38f88c96824b8f616026805cfa9869f1` enforces exactly one Build 210 provider item and the two independent Navisworks field items.
 - Publication recovery commit `d05d63d3ed60bf28261bbcb815ef872805972305` removes generated `runtime-retired-*` closures only after the replacement runtime completes. This corrects the proven Replit 8 GiB bundle failure and permanently prevents repeated builds from accumulating stale runtime images; the active runtime is preserved and the cleanup contract is part of the standard release gate.
+- Generated Platform inventory commit `80c377031960605cff6e898143f89be5fb273e83` records that regression without changing runtime behavior or release scope.
 - No database/schema, customer data, Native source, installer, package, bridge protocol, provider credential/configuration, or Navisworks license changed; focused Navisworks smoke is not retriggered.
 
 ## Post-120 stabilization — Block 33 source acceptance — 2026-09-20

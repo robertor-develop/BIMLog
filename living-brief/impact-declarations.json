@@ -35669,7 +35669,7 @@
     },
     {
       "taskId": "bimlog-build210-replit-bundle-recovery-20260921",
-      "reviewedThroughCommit": "d05d63d3ed60bf28261bbcb815ef872805972305",
+      "reviewedThroughCommit": "80c377031960605cff6e898143f89be5fb273e83",
       "reviewedAt": "2026-09-21T08:06:16-04:00",
       "status": "candidate",
       "capabilityPreflight": {
@@ -35721,8 +35721,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Application behavior is unchanged; only generated deployment closure lifecycle changed."
+          "result": "updated",
+          "reason": "The deterministic generated inventory now includes the runtime-closure retirement regression file; application behavior is unchanged."
         },
         {
           "key": "plugin",
@@ -35757,11 +35757,10 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "3073a6d0d93651786a861833f5609f7841cf2c265105f22befc14685dcbadbc6"
+      "reviewedChangeSha256": "01d5d514683c483e346b17fbb56fe7ab6ed2d35c2f5b0eb6d02c396a1773febb"
     }
   ]
 }
