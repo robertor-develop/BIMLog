@@ -2312,3 +2312,10 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Builds 211–215 revalidate the preserved isolated backup/restore evidence, rehearse exact-identity rollback on a disposable target, make session mutation ordering strictly monotonic, and fail provider retries closed on candidate drift, exhausted attempts, or ambiguous promotion.
 - Block 43 changes no database/schema, customer data, Native source, installer, bridge, package, provider configuration, Autodesk load path, or Navisworks license. Build 215 is push-only; publication and authenticated visible-Chrome smoke remain due at Build 220.
 - Build 215's complete exact-head gate passed at `8c4c82a377d1d295c8a94acf005215a6b6382321`; both GitHub `master` and `codex/bimlog-stabilization-program-20260919` were directly verified at that commit. Five unpublished builds remain, within the ten-build limit.
+
+## 120-build stabilization program — Block 44 source candidate — 2026-09-21
+
+- Builds 216–220 complete the planned source program: repository-wide census, final P0/P1/open-loop reconciliation, complete source/database/security/accessibility/performance/dual-year Native gates, exact publication contract, and final freeze candidate.
+- The executable census records 2,399 tracked files, 1,806 source files, zero P0 findings, and zero unexpected P1 identities. Shared core passes 132/132 and both Navisworks 2021/2025 suites pass 57/57.
+- Block 44 changes no database/schema, customer data, Native source, installer, bridge, package, provider configuration, Autodesk load path, or Navisworks license. Focused live Navisworks smoke is not retriggered.
+- The immutable source candidate must still pass the exact complete gate, reach both authoritative refs, publish once through the established Replit Shell path without Replit Agents and with `schemaAction=NONE`, then pass exact-identity authenticated visible-Chrome smoke before final freeze is claimed.

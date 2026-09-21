@@ -192,5 +192,5 @@ Status: implemented and focused verification passed. Build 190 is the exact-head
 - 216: rerun repository-wide file/line/finding census.
 - 217: reconcile all remaining P0/P1/open-loop items with evidence.
 - 218: run complete source, database, security, accessibility, performance, Native, and package gates.
-- 219: publish exact candidate and run full authenticated visible-Chrome plus focused Navisworks acceptance.
-- 220: reconcile local/remote/provider/live identities, record rollback and handoff, and freeze the accepted program state.
+- 219: freeze the exact publication candidate and executable provider/live acceptance contract without mutating the immutable candidate after publication.
+- 220: pass the final gate, push, publish, run full authenticated visible-Chrome acceptance, reconcile local/remote/provider/live identities, record rollback and handoff, and freeze the accepted program state. Focused Navisworks acceptance is required only when the block changes Native or installers.

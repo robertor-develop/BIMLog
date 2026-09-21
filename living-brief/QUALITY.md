@@ -31,6 +31,7 @@ only in [STANDARDS_REGISTER.md](./STANDARDS_REGISTER.md).
 ## Current release-evidence contract — 2026-09-19
 
 - Block 23 freezes the full-system candidate only after a clean dependency install, complete pre-push gate, exact packaged-artifact startup/login proof, authenticated desktop route matrix, reviewed desktop/tablet/exact-390 accessibility and keyboard evidence, dual-year Native contracts, exact package hashes, and isolated package-only upgrade/rollback proof. Its permanent executable aggregate is part of `gate:pre-push`.
+- Block 44 permanently binds the final repository census, open-loop reconciliation, complete release-gate receipt, exact publication candidate contract, and source-freeze ledger to `gate:pre-push`; provider and live-smoke receipts remain external so they cannot alter the deployed source identity.
 - A package-only Navisworks result is not real field acceptance. The final release must retain an explicit hold at Build 119 until controlled 2021/2025 models, Lens Next-only installed loaders, normal workflow, migration, camera, sectioning, Working View, XML, save/reopen, and customer evidence pass.
 
 - Current accepted Platform evidence is `v1.05.N18-P33`, exact Build 020 source `be902808b59c264d31480f5d76424f8fdaff5cbe`, Replit publication receipt `e89dc3b4`, database `schemaAction=NONE`, HTTP 200 readiness, and authenticated two-tab reload continuity.
