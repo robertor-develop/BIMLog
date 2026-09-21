@@ -33,6 +33,14 @@ import { bootstrapLensNextBridgeSession, createLensNextApiClient, createLensNext
 import { openBimlogWorkingView } from "@/features/lens-next/lens-next-working-view";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
 import { rfiBallInCourtValue, useRfiListState } from "./rfi-frontend/rfi-list-state";
+import {
+  useRfiCreateEvidenceState,
+  type CapturedFrame,
+  type PendingImage,
+  type PendingImageInput,
+  type RfiImagePresentation,
+  type RfiPackageItem,
+} from "./rfi-frontend/rfi-editor-state";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
@@ -221,38 +229,6 @@ async function sha256File(file: File): Promise<string> {
   const digest = await crypto.subtle.digest("SHA-256", bytes);
   return Array.from(new Uint8Array(digest), byte => byte.toString(16).padStart(2, "0")).join("");
 }
-
-type RfiPackageItem = {
-  key: string;
-  label: string;
-  fileId?: number | null;
-  attachment?: string | null;
-  source?: string | null;
-  include: boolean;
-  order: number;
-};
-
-type RfiImagePresentation = {
-  sourceFileId?: number | null;
-  replacementFileId?: number | null;
-  sourceKind?: "viewpoint" | "upload" | "paste" | "screen-snip" | null;
-  replacementKind?: "upload" | "paste" | "screen-snip" | null;
-  showInRfi?: boolean;
-  includeInCompletePdf?: boolean;
-  crop?: { x: number; y: number; width: number; height: number } | null;
-  reportScreenshots?: Array<{ fileId: number; kind: "upload" | "paste" | "screen-snip"; caption?: string | null; description?: string | null; include?: boolean; order: number }>;
-} | null;
-
-type PendingImage = {
-  file: File;
-  url: string;
-  mode: "source" | "replacement";
-  kind: "upload" | "paste" | "screen-snip";
-};
-
-type PendingImageInput = Omit<PendingImage, "url">;
-
-type CapturedFrame = { url: string; fileName: string };
 
 async function validateImageForReview(file: File): Promise<void> {
   if (!file.type.startsWith("image/") || file.size <= 0 || !["image/png", "image/jpeg"].includes(file.type)) throw new Error("unsupported_or_empty_image");
@@ -1999,23 +1975,24 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
   const [noteNum, setNoteNum] = useState("");
   const [location, setLocation] = useState(prefill?.location || "");
 
-  // Fix 3 — file search state per reference field
-  const [fileSearch, setFileSearch] = useState<string | null>(null);
-
   const [question, setQuestion] = useState(prefill?.question || "");
-  const [references, setReferences] = useState<string[]>([]);
-  const [attachments, setAttachments] = useState<string[]>([]);
+  const {
+    fileSearch, setFileSearch,
+    references, setReferences,
+    attachments, setAttachments,
+    packageItems, setPackageItems,
+    imagePresentation, setImagePresentation,
+    pendingImage, setPendingImage,
+    pendingImageQueue, setPendingImageQueue,
+    capturedFrame, setCapturedFrame,
+    savedImagePreviewUrl, setSavedImagePreviewUrl,
+    editingSavedImage, setEditingSavedImage,
+    attachInput, setAttachInput,
+    uploadResults, setUploadResults,
+    uploadingAtt, setUploadingAtt,
+  } = useRfiCreateEvidenceState();
   const allEvidence = useMemo(() => [...references, ...attachments], [references, attachments]);
-  const [packageItems, setPackageItems] = useState<RfiPackageItem[]>([]);
-  const [imagePresentation, setImagePresentation] = useState<RfiImagePresentation>(null);
-  const [pendingImage, setPendingImage] = useState<PendingImage | null>(null);
-  const [pendingImageQueue, setPendingImageQueue] = useState<PendingImageInput[]>([]);
-  const [capturedFrame, setCapturedFrame] = useState<CapturedFrame | null>(null);
-  const [savedImagePreviewUrl, setSavedImagePreviewUrl] = useState<string | null>(null);
-  const [editingSavedImage, setEditingSavedImage] = useState(false);
-  const [attachInput, setAttachInput] = useState("");
   const stagedFileIds = useRef(new Set<number>());
-  const [uploadResults, setUploadResults] = useState<Array<{ name: string; state: "uploading" | "success" | "error"; message?: string }>>([]);
 
   const [costImpact, setCostImpact] = useState("No Cost Impact");
   const [costAmount, setCostAmount] = useState("");
@@ -2105,7 +2082,6 @@ function RfiCreatePanel({ projectId, prefill, existingRfis, members, user, lang,
   // Upload an attachment from the user's computer, then add its download URL.
   const attachFileRef = useRef<HTMLInputElement>(null);
   const imageFileRef = useRef<HTMLInputElement>(null);
-  const [uploadingAtt, setUploadingAtt] = useState(false);
   const uploadAttachment = async (file: File, imageCrop?: NormalizedCrop | null, imageKind: PendingImage["kind"] = "upload") => {
     setUploadingAtt(true);
     setUploadResults(prev => [...prev.filter(item => item.name !== file.name), { name: file.name, state: "uploading" }]);
