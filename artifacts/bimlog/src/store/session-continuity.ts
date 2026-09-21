@@ -8,6 +8,10 @@ type TokenClaims = { exp?: number; iat?: number; sessionIssuedAt?: number };
 export type SessionContinuityDiagnosticCode = "SESSION_TOKEN_CLAIMS_INVALID" | "SESSION_STORAGE_INVALID";
 export type SessionContinuityReporter = (code: SessionContinuityDiagnosticCode) => void;
 
+export function nextSessionChangedAt(previousChangedAt: number, now = Date.now()): number {
+  return Math.max(now, Number.isFinite(previousChangedAt) ? previousChangedAt + 1 : now);
+}
+
 const reportSessionContinuityFailure: SessionContinuityReporter = (code) => {
   console.warn(`[BIMLogSessionContinuity] ${code}`);
 };

@@ -1,7 +1,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { User } from '@workspace/api-client-react';
-import { isExpiredSession, readPersistedSession, selectCurrentSession } from './session-continuity';
+import { isExpiredSession, nextSessionChangedAt, readPersistedSession, selectCurrentSession } from './session-continuity';
 
 interface AuthState {
   token: string | null;
@@ -19,9 +19,9 @@ export const useAuthStore = create<AuthState>()(
       token: null,
       user: null,
       changedAt: 0,
-      setAuth: (token, user) => set((current) => selectCurrentSession(current, { token, user, changedAt: Date.now() })),
-      login: (token, user) => set((current) => selectCurrentSession(current, { token, user, changedAt: Date.now() })),
-      logout: () => set({ token: null, user: null, changedAt: Date.now() }),
+      setAuth: (token, user) => set((current) => selectCurrentSession(current, { token, user, changedAt: nextSessionChangedAt(current.changedAt) })),
+      login: (token, user) => set((current) => selectCurrentSession(current, { token, user, changedAt: nextSessionChangedAt(current.changedAt) })),
+      logout: () => set((current) => ({ token: null, user: null, changedAt: nextSessionChangedAt(current.changedAt) })),
       synchronize: (serialized) => set((current) => {
         const incoming = readPersistedSession<User>(serialized);
         return incoming ? selectCurrentSession(current, incoming) : current;

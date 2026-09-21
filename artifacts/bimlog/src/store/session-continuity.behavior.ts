@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { isExpiredSession, readPersistedSession, selectCurrentSession, sessionIssuedAt } from "./session-continuity";
+import { isExpiredSession, nextSessionChangedAt, readPersistedSession, selectCurrentSession, sessionIssuedAt } from "./session-continuity";
 
 const token = (issuedAt: number, expiresAt: number) => {
   const encode = (value: object) => Buffer.from(JSON.stringify(value)).toString("base64url");
@@ -22,10 +22,20 @@ assert.equal(selectCurrentSession({ token: newer, user, changedAt: 10 }, { token
 assert.deepEqual(readPersistedSession(JSON.stringify({ state: { token: newer, user, changedAt: 30 } })), { token: newer, user, changedAt: 30 });
 assert.equal(readPersistedSession(JSON.stringify({ state: { token: newer, user: null, changedAt: 30 } })), null);
 assert.equal(readPersistedSession("not-json"), null);
+assert.equal(nextSessionChangedAt(100, 100), 101);
+assert.equal(nextSessionChangedAt(100, 200), 200);
+
+const tabA = { token: newer, user, changedAt: nextSessionChangedAt(1_500_000, 1_500_000) };
+const tabB = selectCurrentSession({ token: older, user, changedAt: 1_500_000 }, tabA, now);
+assert.equal(tabB.token, newer, "a second tab accepts the monotonic newer session");
+const staleOutOfOrderResponse = { token: older, user, changedAt: 1_500_002 };
+assert.equal(selectCurrentSession(tabB, staleOutOfOrderResponse, now).token, newer, "an out-of-order older token cannot overwrite the current session");
+const loggedOut = { token: null, user: null, changedAt: nextSessionChangedAt(tabB.changedAt, 1_500_001) };
+assert.equal(selectCurrentSession(loggedOut, staleOutOfOrderResponse, now).token, null, "a stale response cannot restore a logged-out session");
 
 const diagnostics: string[] = [];
 assert.equal(readPersistedSession("still-not-json", code => diagnostics.push(code)), null);
 assert.deepEqual(diagnostics, ["SESSION_STORAGE_INVALID"]);
 assert.doesNotMatch(JSON.stringify(diagnostics), /still-not-json|token|user/i);
 
-console.log("session continuity: 13/13 passed");
+console.log("session continuity: 18/18 passed");
