@@ -865,7 +865,7 @@ It changes only when the code structure or curated architectural facts change.
   resumed, a stale draft is discarded, and upload/save failures preserve the latest recoverable
   state. Spreadsheet inspection and mapping remain deterministic and consume zero AI credits;
   PDF/DOCX remain manual-review evidence. Any future AI text or file operation must fail closed
-  unless its funding source, estimated cost, and user confirmation are all visible first.
+  unless its funding source, estimated cost, and explicit user confirmation are all visible first.
 - Build 3 multi-contract activation keeps up to 50 independent contract profiles in the same
   canonical Intake draft. Every Contract Item references one owning contract. Activation creates
   or reuses the canonical Commercial contract records, freezes the selected APU or pricing snapshot

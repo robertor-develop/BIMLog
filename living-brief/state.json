@@ -2,10 +2,11 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "f4d743248dbe694ce87e270456376e96aafb387d",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "87a9031007502d83a9d503c301596f2adbb8c6994859506c3923e8d0eb9bca0c",
+  "bundleSha256": "060fecd0b2de4420b08039ed57124ae313dd59699e80e3bab8b624c02d63f3dd",
   "impact": {
     "baselineCommit": "f4d743248dbe694ce87e270456376e96aafb387d",
     "changedPaths": [
+      "artifacts/api-server/scripts/generate-platform-md.ts",
       "artifacts/bimlog/src/lib/job-intake-document-contract.ts",
       "artifacts/bimlog/src/lib/job-intake-workspace-state.ts",
       "artifacts/bimlog/src/lib/post120-block35-job-intake.behavior.ts",
@@ -77,7 +78,7 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "63ef579a76d39325201e332e841029d315bed98d36221d8410176f6aeae1ec32",
+      "sha256": "cd007a4e226c3f0631e02d3d2acb4a6fdbad20381388a56c01becb3dc0fe25b7",
       "sourceChangedAt": "2026-09-21T06:02:30.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "f4d743248dbe694ce87e270456376e96aafb387d",
@@ -125,7 +126,7 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "ee0fd44ecdb96b92e44fb66612991aca5406941540e34dd2a0f2452ffdbcf0cd",
+      "sha256": "79bd11b22c13c290336bcde239e6a06020a9e4ac213f06e22e1a7e6ac77c97de",
       "sourceChangedAt": "2026-09-21T06:02:30.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "f4d743248dbe694ce87e270456376e96aafb387d",

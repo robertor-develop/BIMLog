@@ -34715,6 +34715,7 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
         "artifacts/bimlog/src/lib/job-intake-document-contract.ts",
         "artifacts/bimlog/src/lib/job-intake-workspace-state.ts",
         "artifacts/bimlog/src/lib/post120-block35-job-intake.behavior.ts",
@@ -34727,7 +34728,7 @@
         "living-brief/impact-declarations.json",
         "package.json"
       ],
-      "reviewedChangeSha256": "6999669bbe475d770de0161318b92eae5e4aba1012f4a2a78fe867c2c953b5bf"
+      "reviewedChangeSha256": "e488b47bfc1b219c172954cd507471bd16c0d047200cc4c3a4bece5bd1a889e6"
     }
   ]
 }
