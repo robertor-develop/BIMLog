@@ -76,16 +76,16 @@ const recoveryKey = (projectId: number) => `bimlog:job-intake-recovery:${project
 const activeStageKey = (projectId: number) => `bimlog:job-intake-active-stage:${projectId}`;
 const setupModeKey = (projectId: number) => `bimlog:job-intake-setup-mode:${projectId}`;
 
-export type JobIntakeRecovery = {
+export type JobIntakeRecovery<T = any> = {
   revision: number;
-  data: Record<string, unknown>;
+  data: T;
   preservedAt?: string;
 };
 
-export function resolveJobIntakeRecovery(
+export function resolveJobIntakeRecovery<T>(
   serverRevision: number,
-  serverData: Record<string, unknown>,
-  recovered: JobIntakeRecovery | null,
+  serverData: T,
+  recovered: JobIntakeRecovery<T> | null,
 ) {
   const resume = recovered?.revision === serverRevision && JSON.stringify(recovered.data) !== JSON.stringify(serverData);
   return {

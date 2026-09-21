@@ -9,7 +9,7 @@ export type JobIntakeDocument = {
   id: string;
   fileName?: string;
   fileType?: string;
-  extractionSummary?: { sheets?: Array<{ name: string; rowCount: number; columnCount: number; rows?: unknown[][] }> };
+  extractionSummary?: { sheets?: Array<{ name: string; rowCount: number; columnCount: number; rows: unknown[][] }> };
 };
 
 export function defaultJobIntakeMappingForm(document: JobIntakeDocument): JobIntakeMappingForm | null {
