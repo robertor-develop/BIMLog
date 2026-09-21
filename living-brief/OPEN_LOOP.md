@@ -13,6 +13,7 @@
 - [x] Builds 206–209 inventory all 605 production API endpoints, close proven Autodesk and project-route authority gaps, and add permanent cross-scope plus upload/export/AI/Lens Next regression coverage.
 - [ ] Build 210 must complete exact-head full gate, push, Replit Shell publication without Replit Agents, exact live identity, and authenticated multi-role Chrome smoke before the current ten-build batch is live accepted.
 - [x] Block 42 implementation authority is preserved at exact commit `5ab189dc38bbf79e166384b24eacdd8a255c9773`; subsequent reconciliation may update release evidence but not silently change the accepted scope.
+- [x] Exact regression correction `ae986f1e0062ddd41eada78140ccb4b051388032` keeps Build 210 as the sole current provider boundary while preserving both independent Navisworks field items.
 - [ ] Install the corrected P36 package in the physical Navisworks 2021 environment and verify the retired direct-load `BIMLogNavisPlugin` path is absent while Pulse and Lens Next remain available. Source/package correction is complete; this is the remaining installed-environment proof.
 - [ ] Physical Navisworks 2025 confirmation remains assigned to Ruben as post-closure field evidence. It does not reopen Build 119 and does not block this Platform-only publication.
 
