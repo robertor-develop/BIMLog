@@ -74,6 +74,8 @@ import {
   formatMeetingReportDate,
   meetingCurrentViewSectionLabel,
   meetingCommandIdempotencyDigest,
+  nextMeetingVersionTimestamp,
+  parseMeetingLegacyAgendaItems,
   parseMeetingCommandReceipt,
   parseMeetingCurrentViewQuery,
   safeMeetingReportText,
@@ -3186,6 +3188,7 @@ router.get(
         linkedClashes: clashes.links,
         clashRefreshEvents: clashes.events,
         scheduleBuckets: await getMeetingScheduleBucketLinks(meetingId),
+        legacyAgendaItems: parseMeetingLegacyAgendaItems(meeting.notes),
         legacyRfis: parseLegacyRfiRows(meeting.notes),
         legacyDeliverables: parseLegacyDeliverableRows(meeting.notes),
         legacyViewpoints: parseLegacyViewpointRows(meeting.notes),
@@ -3258,7 +3261,10 @@ router.patch(
         ) {
           throw new MeetingClashLinkError(409, "meeting_stale_update");
         }
-        const updates: Record<string, unknown> = { updatedAt: new Date() };
+        const existingUpdatedAt = new Date(existing.updatedAt);
+        const updates: Record<string, unknown> = {
+          updatedAt: nextMeetingVersionTimestamp(existingUpdatedAt),
+        };
         if (body.title !== undefined) updates.title = body.title.trim();
         if (body.meeting_date !== undefined)
           updates.meetingDate = new Date(body.meeting_date);
@@ -3274,7 +3280,7 @@ router.patch(
               eq(meetingMinutesTable.id, meetingId),
               eq(meetingMinutesTable.projectId, projectId),
               isNull(meetingMinutesTable.deletedAt),
-              eq(meetingMinutesTable.updatedAt, existing.updatedAt),
+              sql`date_trunc('milliseconds', ${meetingMinutesTable.updatedAt}) = ${existingUpdatedAt}`,
             ),
           )
           .returning();

@@ -85,6 +85,29 @@ export const formatMeetingReportDate = (
   });
 };
 
+export function parseMeetingLegacyAgendaItems(notes: string | null | undefined) {
+  if (!notes) return [];
+  const block = notes.match(
+    /(?:^|\n\n)AGENDA:\n([\s\S]*?)(?=\n\n[A-Z][A-Z /]+:\n|$)/,
+  )?.[1];
+  if (!block) return [];
+  return block
+    .split("\n")
+    .map((line) => line.replace(/^\s*\d+\.\s*/, "").trim())
+    .filter(Boolean);
+}
+
+export function nextMeetingVersionTimestamp(
+  current: string | Date,
+  now = Date.now(),
+) {
+  const currentMilliseconds = new Date(current).getTime();
+  if (!Number.isFinite(currentMilliseconds)) {
+    throw new Error("meeting_updated_at_invalid");
+  }
+  return new Date(Math.max(now, currentMilliseconds + 1));
+}
+
 export function meetingCurrentViewSectionLabel(
   token: string,
   language: "en" | "es",

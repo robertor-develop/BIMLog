@@ -59,6 +59,7 @@ interface Meeting {
   linkedLensViewpoints?: LinkedLensViewpoint[];
   linkedClashes?: LinkedClash[];
   legacyViewpoints?: LegacyViewpointRow[];
+  legacyAgendaItems?: string[];
   scheduleBuckets?: MeetingScheduleBucket[];
   updatedAt?: string;
 }
@@ -1340,7 +1341,11 @@ export function MeetingsTab({
       Number.isNaN(when.getTime()) ? "10:00" : when.toTimeString().slice(0, 5),
     );
     setLocation(detail.location || "");
-    setAgendaItems(["", "", "", ""]);
+    setAgendaItems(
+      detail.legacyAgendaItems?.length
+        ? [...detail.legacyAgendaItems, "", "", "", ""].slice(0, 4)
+        : ["", "", "", ""],
+    );
     setAttendees(
       detail.attendees?.length
         ? detail.attendees.map((attendee) => ({
