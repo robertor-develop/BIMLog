@@ -4,9 +4,10 @@ import path from "node:path";
 const root=path.dirname(new URL(import.meta.url).pathname.replace(/^\/(?:[A-Za-z]:)/,value=>value.slice(1)));
 const authoring=fs.readFileSync(path.join(root,"CoordinationKnowledgeAuthoring.tsx"),"utf8");
 const library=fs.readFileSync(path.join(root,"CoordinationKnowledgeLibrary.tsx"),"utf8");
+const styles=fs.readFileSync(path.join(root,"CoordinationKnowledgeLibrary.css"),"utf8");
 const route=fs.readFileSync(path.resolve(root,"../../../api-server/src/routes/coordination-knowledge.ts"),"utf8");
 const repository=fs.readFileSync(path.resolve(root,"../../../api-server/src/lib/coordination-knowledge-repository.ts"),"utf8");
-function expect(fragment:string,message:string){if(!authoring.includes(fragment)&&!library.includes(fragment)&&!route.includes(fragment)&&!repository.includes(fragment))throw new Error(message);}
+function expect(fragment:string,message:string){if(!authoring.includes(fragment)&&!library.includes(fragment)&&!styles.includes(fragment)&&!route.includes(fragment)&&!repository.includes(fragment))throw new Error(message);}
 expect("expectedRevision:item.revision","Conflict editor must send optimistic revision authority.");
 expect('item.status === "draft"',"Only draft Conflict Types may expose editing.");
 expect("Approved revisions are immutable","Approved Conflict Types must explain immutability.");
@@ -27,3 +28,9 @@ expect("JOIN files file ON file.id=evidence.file_id","Evidence projection must r
 expect("/api/v1/projects/${entry.project_id}/files/${entry.file_id}/download","Downloads must pass through the existing project-authorized file route.");
 expect("coordination_knowledge_events","Detail views must expose immutable audit events.");
 console.log("coordination knowledge Build 244 behavior: PASS");
+expect('role="dialog" aria-modal="true"',"Authoring workspaces must expose accessible modal semantics.");
+expect("¿Descartar cambios sin guardar?","Unsaved-change recovery must be localized.");
+expect("Retry history","Recoverable loading failures must provide a retry action.");
+expect("prefers-reduced-motion","Motion-sensitive users must receive a stable loading state.");
+expect('<option value="required">',"RFI filters must use the canonical required/never/conditional contract.");
+console.log("coordination knowledge Build 245 behavior: PASS");
