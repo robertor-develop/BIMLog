@@ -1,0 +1,333 @@
+{
+  "schemaVersion": 1,
+  "status": "PASS",
+  "scope": "all Git-tracked repository files at the Build 216 candidate",
+  "totals": {
+    "trackedFiles": 2399,
+    "trackedBytes": 853444473,
+    "textFiles": 2183,
+    "binaryFiles": 216,
+    "textLines": 387238,
+    "sourceFiles": 1806,
+    "sourceLines": 354686
+  },
+  "byTopLevel": {
+    ".agents": {
+      "files": 26,
+      "bytes": 54399,
+      "textLines": 627
+    },
+    ".gitattributes": {
+      "files": 1,
+      "bytes": 411,
+      "textLines": 5
+    },
+    ".gitignore": {
+      "files": 1,
+      "bytes": 717,
+      "textLines": 50
+    },
+    ".npmrc": {
+      "files": 1,
+      "bytes": 58,
+      "textLines": 3
+    },
+    ".replit": {
+      "files": 1,
+      "bytes": 1861,
+      "textLines": 70
+    },
+    ".replitignore": {
+      "files": 1,
+      "bytes": 441,
+      "textLines": 19
+    },
+    "artifacts": {
+      "files": 1197,
+      "bytes": 311346132,
+      "textLines": 208000
+    },
+    "attached_assets": {
+      "files": 384,
+      "bytes": 11956769,
+      "textLines": 35977
+    },
+    "bimlog_src.tar.gz": {
+      "files": 1,
+      "bytes": 508695590,
+      "textLines": 0
+    },
+    "contracts": {
+      "files": 9,
+      "bytes": 49004,
+      "textLines": 879
+    },
+    "docs": {
+      "files": 2,
+      "bytes": 23195,
+      "textLines": 316
+    },
+    "evidence": {
+      "files": 377,
+      "bytes": 2983801,
+      "textLines": 42666
+    },
+    "lib": {
+      "files": 120,
+      "bytes": 535101,
+      "textLines": 13368
+    },
+    "living-brief": {
+      "files": 15,
+      "bytes": 2888897,
+      "textLines": 50151
+    },
+    "package.json": {
+      "files": 1,
+      "bytes": 12457,
+      "textLines": 117
+    },
+    "PLATFORM_STABILIZATION_AUDIT.md": {
+      "files": 1,
+      "bytes": 8446,
+      "textLines": 233
+    },
+    "plugins": {
+      "files": 145,
+      "bytes": 11620764,
+      "textLines": 14896
+    },
+    "pnpm-lock.yaml": {
+      "files": 1,
+      "bytes": 354829,
+      "textLines": 10083
+    },
+    "pnpm-workspace.yaml": {
+      "files": 1,
+      "bytes": 4764,
+      "textLines": 137
+    },
+    "replit.md": {
+      "files": 1,
+      "bytes": 15856,
+      "textLines": 214
+    },
+    "RFI_HANDOVER.md": {
+      "files": 1,
+      "bytes": 15027,
+      "textLines": 270
+    },
+    "scripts": {
+      "files": 108,
+      "bytes": 464682,
+      "textLines": 9099
+    },
+    "tsconfig.base.json": {
+      "files": 1,
+      "bytes": 692,
+      "textLines": 26
+    },
+    "tsconfig.json": {
+      "files": 1,
+      "bytes": 252,
+      "textLines": 17
+    },
+    "vendor": {
+      "files": 2,
+      "bytes": 2410328,
+      "textLines": 15
+    }
+  },
+  "byExtension": {
+    ".bat": {
+      "files": 9,
+      "bytes": 2802,
+      "textLines": 82
+    },
+    ".cjs": {
+      "files": 2,
+      "bytes": 2780,
+      "textLines": 80
+    },
+    ".conf": {
+      "files": 1,
+      "bytes": 256,
+      "textLines": 11
+    },
+    ".cs": {
+      "files": 63,
+      "bytes": 743490,
+      "textLines": 13777
+    },
+    ".csproj": {
+      "files": 13,
+      "bytes": 15402,
+      "textLines": 255
+    },
+    ".css": {
+      "files": 7,
+      "bytes": 132245,
+      "textLines": 2992
+    },
+    ".csv": {
+      "files": 5,
+      "bytes": 4906,
+      "textLines": 49
+    },
+    ".dll": {
+      "files": 2,
+      "bytes": 217088,
+      "textLines": 0
+    },
+    ".exe": {
+      "files": 1,
+      "bytes": 76737225,
+      "textLines": 0
+    },
+    ".gz": {
+      "files": 2,
+      "bytes": 617006633,
+      "textLines": 0
+    },
+    ".html": {
+      "files": 15,
+      "bytes": 24871,
+      "textLines": 556
+    },
+    ".icns": {
+      "files": 1,
+      "bytes": 5292,
+      "textLines": 0
+    },
+    ".ico": {
+      "files": 2,
+      "bytes": 4063,
+      "textLines": 0
+    },
+    ".jpg": {
+      "files": 1,
+      "bytes": 60261,
+      "textLines": 0
+    },
+    ".js": {
+      "files": 2,
+      "bytes": 8803,
+      "textLines": 283
+    },
+    ".json": {
+      "files": 115,
+      "bytes": 3116529,
+      "textLines": 79003
+    },
+    ".md": {
+      "files": 291,
+      "bytes": 1864321,
+      "textLines": 21343
+    },
+    ".mjs": {
+      "files": 184,
+      "bytes": 636495,
+      "textLines": 10023
+    },
+    ".pdb": {
+      "files": 2,
+      "bytes": 55632,
+      "textLines": 0
+    },
+    ".pdf": {
+      "files": 4,
+      "bytes": 8391,
+      "textLines": 0
+    },
+    ".png": {
+      "files": 179,
+      "bytes": 17440727,
+      "textLines": 0
+    },
+    ".props": {
+      "files": 2,
+      "bytes": 1825,
+      "textLines": 25
+    },
+    ".ps1": {
+      "files": 31,
+      "bytes": 94382,
+      "textLines": 1441
+    },
+    ".sh": {
+      "files": 3,
+      "bytes": 6191,
+      "textLines": 193
+    },
+    ".sha256": {
+      "files": 18,
+      "bytes": 2070,
+      "textLines": 36
+    },
+    ".sql": {
+      "files": 4,
+      "bytes": 32808,
+      "textLines": 250
+    },
+    ".svg": {
+      "files": 1,
+      "bytes": 334,
+      "textLines": 5
+    },
+    ".targets": {
+      "files": 1,
+      "bytes": 1773,
+      "textLines": 25
+    },
+    ".tgz": {
+      "files": 1,
+      "bytes": 2409319,
+      "textLines": 0
+    },
+    ".toml": {
+      "files": 4,
+      "bytes": 1652,
+      "textLines": 80
+    },
+    ".ts": {
+      "files": 800,
+      "bytes": 7339472,
+      "textLines": 127030
+    },
+    ".tsx": {
+      "files": 273,
+      "bytes": 4459425,
+      "textLines": 83484
+    },
+    ".txt": {
+      "files": 308,
+      "bytes": 1684468,
+      "textLines": 31546
+    },
+    ".xlsx": {
+      "files": 1,
+      "bytes": 91919,
+      "textLines": 0
+    },
+    ".xml": {
+      "files": 17,
+      "bytes": 127616,
+      "textLines": 3003
+    },
+    ".yaml": {
+      "files": 4,
+      "bytes": 390249,
+      "textLines": 11501
+    },
+    ".zip": {
+      "files": 20,
+      "bytes": 118709092,
+      "textLines": 0
+    },
+    "<none>": {
+      "files": 10,
+      "bytes": 3666,
+      "textLines": 165
+    }
+  }
+}
