@@ -14,4 +14,11 @@ for (const section of ["conflict-types", "rules", "methods", "lessons"]) assert.
 assert.match(page, /role="tablist"/); assert.match(page, /role="tab"/); assert.match(page, /role="tabpanel"/);
 assert.match(page, /ArrowRight/); assert.match(page, /ArrowLeft/); assert.match(page, /Home/); assert.match(page, /End/);
 assert.match(css, /@media \(max-width: 720px\)/); assert.doesNotMatch(page, /BIMLens/);
+assert.match(page, /coordination-knowledge\/capabilities/);
+assert.match(page, /coordination-knowledge\/conflict-types/);
+for (const filter of ["discipline", "element", "category", "status", "tag"]) assert.match(page, new RegExp(filter));
+assert.match(css, /knowledge-status-approved/); assert.match(css, /knowledge-status-retired/);
+assert.match(page, /role="alert"/); assert.match(page, /Try again/); assert.match(page, /No Conflict Types yet/);
+assert.match(css, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
 console.log("Coordination Knowledge Build 236 workspace shell: navigation, responsive layout and keyboard tabs passed");
+console.log("Coordination Knowledge Build 237 Conflict Type catalog: permission scope, filters, revision/status semantics and loading/empty/error states passed");
