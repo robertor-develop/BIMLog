@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "87e92972659b217dd22fdbf5d63599b96322f75d8e21bfbfdc32116d08d2ee35",
+  "sourceSha256": "ce240b3af1c027be5a939254e3adaad901758c337f8110917d47162377ac0d05",
   "itemCount": 144,
   "counts": {
     "ACTIVE": 111,
@@ -2443,46 +2443,28 @@
       "currentAuthority": false
     },
     {
-      "id": "7fc6d4c56c28be3c",
-      "sourceLine": 2995,
+      "id": "644963ddbcf80033",
+      "sourceLine": 2996,
       "heading": "P32 bounded release gates — 2026-09-17",
-      "statement": "Repeat the exact-head full pre-push gate after removal of temporary startup instrumentation. The protected 25-task serialization test is now green; the earlier 3484.5 ms full-gate artifact result belongs to the preceding commit and cannot alone clear this final head.",
+      "statement": "Builds 201–205: pass the exact clean full gate and push Block 41. Publication and authenticated Chrome smoke remain due at Build 210; focused Navisworks smoke is not retriggered because Native and installers are unchanged.",
       "classification": "ACTIVE",
-      "workClass": "PRODUCT_WORK",
+      "workClass": "FIELD_EVIDENCE",
       "ownership": {
-        "owner": "Platform",
-        "route": "/dashboard",
-        "module": "artifacts/bimlog/src/App.tsx"
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2995",
+        "OPEN_LOOP.md:2996",
         "P32 bounded release gates — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "635b76e5cb21a85e",
-      "sourceLine": 3000,
-      "heading": "Dashboard/Governance integration release — 2026-09-18",
-      "statement": "Status remains `PUSHED_NOT_PUBLISHED`. MAIN must use the established signed-in visible Replit workspace and Replit Shell to prove clean workspace HEAD equals the exact remote commit, run applicable schema/restore/zero-destructive checks, publish once, and capture one complete durable receipt with deployment ID/status, live identity, health, authenticated smoke, database effects and rollback.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:3000",
-        "Dashboard/Governance integration release — 2026-09-18"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "1df9762ae8604005",
       "sourceLine": 3001,
       "heading": "Dashboard/Governance integration release — 2026-09-18",
-      "statement": "The occupied Chrome automation profile and failed sandbox launcher are `TOOL_BLOCKED`, not a product hold or Roberto decision. Use one bounded safe recovery without closing Roberto's browser or substituting an unproven isolated session. Roberto's existing publish instruction remains valid; do not request it again.",
+      "statement": "Status remains `PUSHED_NOT_PUBLISHED`. MAIN must use the established signed-in visible Replit workspace and Replit Shell to prove clean workspace HEAD equals the exact remote commit, run applicable schema/restore/zero-destructive checks, publish once, and capture one complete durable receipt with deployment ID/status, live identity, health, authenticated smoke, database effects and rollback.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -2497,8 +2479,26 @@
       "currentAuthority": false
     },
     {
+      "id": "1df9762ae8604005",
+      "sourceLine": 3002,
+      "heading": "Dashboard/Governance integration release — 2026-09-18",
+      "statement": "The occupied Chrome automation profile and failed sandbox launcher are `TOOL_BLOCKED`, not a product hold or Roberto decision. Use one bounded safe recovery without closing Roberto's browser or substituting an unproven isolated session. Roberto's existing publish instruction remains valid; do not request it again.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3002",
+        "Dashboard/Governance integration release — 2026-09-18"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "c3ab319313f0a5d7",
-      "sourceLine": 3015,
+      "sourceLine": 3016,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Preserve the cadence: push every five builds, publish every ten, never exceed ten unpublished builds, and run focused Navisworks smoke for every Native/installer-changing block.",
       "classification": "ACTIVE",
@@ -2509,14 +2509,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3015",
+        "OPEN_LOOP.md:3016",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "69f5260727f6b5d8",
-      "sourceLine": 3016,
+      "sourceLine": 3017,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Stop continuation only for a real failed test or production defect; correct it and repeat the affected gate under the existing authorization.",
       "classification": "ACTIVE",
@@ -2527,14 +2527,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:3016",
+        "OPEN_LOOP.md:3017",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "c69d16da74474ffa",
-      "sourceLine": 3027,
+      "sourceLine": 3028,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Builds 066–070: complete Lens Next Platform sole-product scope, push Build 070, publish the ten-build batch, and run full authenticated visible-Chrome acceptance. Run focused Navisworks smoke only if this block changes Native or installers.",
       "classification": "ACTIVE",
@@ -2545,14 +2545,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3027",
+        "OPEN_LOOP.md:3028",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "6c77d43f94be4765",
-      "sourceLine": 3030,
+      "sourceLine": 3031,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Build 070 release: pass exact clean-head and focused dual-year metadata/package smoke, push, publish through Replit Shell without Agents, and pass exact-identity authenticated visible-Chrome Lens Next create/link/reconcile smoke.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -2571,7 +2571,7 @@
     },
     {
       "id": "b980542cb976ac69",
-      "sourceLine": 3036,
+      "sourceLine": 3037,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Repeat the exact clean gate and provider preview on the corrective Build 070 head; publish only when the preview contains no destructive task-lifecycle change, then complete authenticated live Lens Next acceptance.",
       "classification": "ACTIVE",
@@ -2582,14 +2582,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3036",
+        "OPEN_LOOP.md:3037",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "8f462f9d87c378a3",
-      "sourceLine": 3039,
+      "sourceLine": 3040,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Builds 111–115: run complete clean-install, authenticated route, visual/accessibility, and dual-year Navisworks acceptance; burn down release-blocking findings and push Build 115.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -2608,7 +2608,7 @@
     },
     {
       "id": "b387daa9fb9c86d9",
-      "sourceLine": 3040,
+      "sourceLine": 3041,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Builds 106–110: complete security, privacy, retention and isolated recovery review; push and publish Build 110, then run exact-identity authenticated visible-Chrome smoke. No Native/installer smoke is required unless those paths change.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -2627,7 +2627,7 @@
     },
     {
       "id": "9788301db013d48e",
-      "sourceLine": 3043,
+      "sourceLine": 3044,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Run connected Navisworks Manage 2025 field acceptance on a workstation where 2025 is already installed; do not substitute simulation evidence or modify Navisworks licensing to manufacture this gate.",
       "classification": "ACTIVE",
@@ -2638,14 +2638,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3043",
+        "OPEN_LOOP.md:3044",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "4ac51eab4fb72a76",
-      "sourceLine": 3044,
+      "sourceLine": 3045,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "After that connected 2025 result, complete Build 120 exact-source push, Replit Shell publication without Agents, and authenticated visible-Chrome smoke.",
       "classification": "CLOSED_WITH_EVIDENCE",

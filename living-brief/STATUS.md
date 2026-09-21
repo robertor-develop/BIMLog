@@ -2283,3 +2283,11 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - The known symbol-only saved-view marker is replaced with localized text. The blocking platform audit reports zero P0 and zero unexpected P1 identities.
 - Source acceptance is bound to `1400d050a0cb12e344717eb94dc0d101db37ef0a`. No Native, installer, database/schema, customer-data, provider, or Autodesk state changed. Build 200 remains a publication candidate until exact-head gate, push, Replit Shell publication without Agents, and authenticated visible-Chrome acceptance pass.
 - Full-gate correction `8c396efe9825950a0be08ee570eb9dc8be9715e7` updates the permanent current-authority assertion from Block 39 to Block 40; the field evidence, product behavior, and release scope are unchanged.
+
+## 120-build stabilization program — Block 41 source acceptance — 2026-09-21
+
+- Builds 201–205 establish a 53-route production bundle baseline, defer the authenticated feedback workspace off anonymous startup, and lazy-load capture markup editing only when invoked.
+- The initial entry is 458,348 bytes, 10.34% below the 511,219-byte baseline. Route-owned chunks remain at or below 206,589 bytes and total browser JavaScript is 3,619,435 bytes.
+- Timer teardown, file-identity editor reset, report/editor lazy boundaries, and entry/chunk/total budgets are permanent pre-push contracts.
+- Block 40 is live at exact source `227c4d541dc17d46ee6f5b7937f616f23af4c2b5`, release `v1.05.N18-P36`, and Replit receipt `99ce6600`; its authenticated Chrome route, viewport, two-tab, and session acceptance passed.
+- Block 41 changes no database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license. Build 205 is push-only; publication and authenticated visible-Chrome smoke remain due at Build 210.
