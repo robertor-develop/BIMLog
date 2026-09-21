@@ -1,10 +1,14 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { lazy, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import type { CSSProperties } from "react";
 import { AlertCircle, Camera, FilePlus2, MessageSquare, Mic, Pause, Play, Send, Square, Trash2, X } from "lucide-react";
 import { useLocation, useSearch } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
-import { FeedbackMarkupEditor } from "@/components/FeedbackMarkupEditor";
+import { loadDeploymentModule } from "@/lib/deployment-module-recovery";
+
+const FeedbackMarkupEditor = lazy(async () => ({
+  default: (await loadDeploymentModule(() => import("@/components/FeedbackMarkupEditor"))).FeedbackMarkupEditor,
+}));
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 
@@ -481,7 +485,17 @@ export function FeedbackWidget() {
           </div>
         </div>
       )}
-      {editingCapture && <FeedbackMarkupEditor file={editingCapture} language={es ? "es" : "en"} onCancel={() => setEditingCapture(null)} onSave={(rendered, metadata) => void acceptMarkedCapture(rendered, metadata)} />}
+      {editingCapture && (
+        <Suspense fallback={<div role="status" aria-live="polite">{tt("Loading image editor…", "Cargando editor de imagen…")}</div>}>
+          <FeedbackMarkupEditor
+            key={`${editingCapture.name}:${editingCapture.size}:${editingCapture.lastModified}`}
+            file={editingCapture}
+            language={es ? "es" : "en"}
+            onCancel={() => setEditingCapture(null)}
+            onSave={(rendered, metadata) => void acceptMarkedCapture(rendered, metadata)}
+          />
+        </Suspense>
+      )}
     </>
   );
 }
