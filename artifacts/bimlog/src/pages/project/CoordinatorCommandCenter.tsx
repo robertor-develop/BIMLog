@@ -653,7 +653,7 @@ export function CoordinatorCommandCenter({ projectId }: { projectId: number }) {
               }}
             >
               <option value="">{savedViewsLoading ? tr("Loading…", "Cargando…") : tr("Current filters (unsaved)", "Filtros actuales (sin guardar)")}</option>
-              {savedViews.map((view) => <option key={view.id} value={view.id}>{view.isDefault ? "★ " : ""}{view.name}</option>)}
+              {savedViews.map((view) => <option key={view.id} value={view.id}>{view.isDefault ? `${tr("Default", "Predeterminada")}: ` : ""}{view.name}</option>)}
             </select>
           </label>
           <div className="ccc-saved-actions">

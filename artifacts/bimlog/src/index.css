@@ -45,6 +45,7 @@ iframe[aria-label*="Replit" i],
 }
 
 :root {
+  color-scheme: light;
   --background: 220 20% 97%;
   --foreground: 220 40% 8%;
   --card: 0 0% 100%;
@@ -57,9 +58,9 @@ iframe[aria-label*="Replit" i],
   --secondary-foreground: 220 40% 8%;
   --muted: 220 16% 95%;
   --muted-foreground: 220 10% 43%;
-  --accent: 24 95% 53%;
+  --accent: 24 95% 40%;
   --accent-foreground: 0 0% 100%;
-  --destructive: 0 84% 58%;
+  --destructive: 0 72% 45%;
   --destructive-foreground: 0 0% 100%;
   --border: 220 14% 90%;
   --input: 220 14% 90%;
@@ -711,6 +712,12 @@ iframe[aria-label*="Replit" i],
   .master-mobile-nav-trigger,
   .master-mobile-nav-close {
     min-height: 44px;
+  }
+}
+
+@media (forced-colors: active) {
+  :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
+    outline: 3px solid Highlight;
   }
 }
 .nav-badge { margin-left: auto; font-size: 10px; font-weight: 700; padding: 1px 6px; border-radius: 8px; }

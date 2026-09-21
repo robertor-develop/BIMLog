@@ -8,6 +8,8 @@ const recorded = JSON.parse(read("evidence/stabilization-program-20260919/ACCESS
 const matrix = buildAccessibilityResponsiveMatrix();
 const graph = buildRouteInterconnectionGraph();
 const routeAccessibility = read("artifacts/bimlog/src/components/layout/RouteAccessibility.tsx");
+const globalCss = read("artifacts/bimlog/src/index.css");
+const coordinatorCommandCenter = read("artifacts/bimlog/src/pages/project/CoordinatorCommandCenter.tsx");
 
 assert.deepEqual(recorded, matrix, "the committed accessibility matrix must match tracked routes");
 assert.deepEqual(governedViewports.map(item => `${item.width}x${item.height}`), ["1440x900", "820x1180", "390x844"]);
@@ -28,5 +30,13 @@ assert.match(routeAccessibility, /MutationObserver\(refreshDialog\)/, "modal add
 assert.match(routeAccessibility, /event\.key !== "Tab"/, "modal keyboard focus is contained");
 assert.match(routeAccessibility, /target\?\.isConnected/, "focus is restored after a modal closes");
 assert.match(routeAccessibility, /focusableElements\(activeDialog\)/, "dialogs receive deterministic initial focus");
+assert.match(globalCss, /:root\s*\{[\s\S]*color-scheme: light;/, "light controls use the light system palette");
+assert.match(globalCss, /\.dark\s*\{[\s\S]*color-scheme: dark;/, "dark controls use the dark system palette");
+assert.match(globalCss, /@media \(forced-colors: active\)[\s\S]*outline: 3px solid Highlight;/, "forced colors preserve visible focus");
+assert.match(globalCss, /@media \(prefers-reduced-motion: reduce\)/, "reduced motion remains governed");
+assert.match(globalCss, /--accent: 24 95% 40%;/, "accent foreground contrast is at least 4.5:1");
+assert.match(globalCss, /--destructive: 0 72% 45%;/, "destructive foreground contrast exceeds 4.5:1");
+assert.doesNotMatch(coordinatorCommandCenter, /★/, "saved-view meaning is not conveyed by a symbol alone");
+assert.match(coordinatorCommandCenter, /tr\("Default", "Predeterminada"\)/, "default saved views have localized text");
 
-console.log(`POST120_BLOCK40=PASS surfaces=${matrix.counts.customerSurfaces} viewportCases=${matrix.counts.viewportCases} dialogFocus=PASS`);
+console.log(`POST120_BLOCK40=PASS surfaces=${matrix.counts.customerSurfaces} viewportCases=${matrix.counts.viewportCases} dialogFocus=PASS contrastThemeMotion=PASS`);
