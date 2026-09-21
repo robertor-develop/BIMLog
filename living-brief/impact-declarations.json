@@ -35563,8 +35563,8 @@
     },
     {
       "taskId": "bimlog-build210-endpoint-authority-reconciliation-20260921",
-      "reviewedThroughCommit": "ae986f1e0062ddd41eada78140ccb4b051388032",
-      "reviewedAt": "2026-09-21T07:08:00-04:00",
+      "reviewedThroughCommit": "a4d3b23767d2bb6122cdcebd708a735a34d3f1b4",
+      "reviewedAt": "2026-09-21T07:10:22-04:00",
       "status": "candidate",
       "capabilityPreflight": {
         "checkedBeforeExecution": true,
@@ -35664,7 +35664,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "59fa38982576d6f9031a3e34d5a23c9e99a9196194d43b877db66f40a00663cd"
+      "reviewedChangeSha256": "c233abbcbeb882a7e3a9cf33105985b554af4d5bec2309ec031332388873228b"
     }
   ]
 }
