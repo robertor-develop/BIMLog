@@ -23,6 +23,8 @@
       "contracts/lens-product-status.json",
       "contracts/lens-next/DIGEST-V3-PLATFORM-CONTRACT-REPORT.md",
       "scripts/check-current-state-contract.mjs",
+      "scripts/check-lens-next-native-release.mjs",
+      "scripts/test-post120-block39.mjs",
       "artifacts/api-server/scripts/generate-platform-md.ts"
     ],
     "testOnlyPattern": "*.behavior.*",
