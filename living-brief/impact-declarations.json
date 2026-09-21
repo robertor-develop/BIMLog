@@ -35835,13 +35835,13 @@
         },
         {
           "key": "status",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Status was already reconciled in the reviewed Build 215 baseline; metadata refresh adds no new product state."
+          "result": "updated",
+          "reason": "Status records the verified Build 215 push and the unchanged Build 220 publication boundary."
         },
         {
           "key": "open_loop",
-          "result": "reviewed_no_semantic_change",
-          "reason": "Open Loop was already reconciled in the reviewed Build 215 baseline; metadata refresh adds no new work item."
+          "result": "updated",
+          "reason": "Open Loop closes the Build 215 push item while preserving publication at Build 220."
         },
         {
           "key": "audit",
@@ -35850,9 +35850,14 @@
         }
       ],
       "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/BUILD_215_SOURCE_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "reviewedChangeSha256": "eb2feb9e31946a0dfc31f2a3970011ba144945be09706b2f0a061595e22bb236"
     }
   ]
 }

@@ -3055,4 +3055,4 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] After that connected 2025 result, complete Build 120 exact-source push, Replit Shell publication without Agents, and authenticated visible-Chrome smoke.
 - [x] Builds 206–210 passed the exact gate, reached both GitHub refs at `98eeb3da15b497982a73cf13014e187fd4303ca1`, published as Replit receipt `d4ff8790`, and passed exact-identity authenticated Chrome smoke. Native/installers were unchanged.
 - [x] Builds 211–214: verify preserved isolated backup/restore evidence, rehearse disposable exact-identity rollback, harden monotonic session ordering, and enforce bounded fail-closed provider retries.
-- [ ] Build 215: pass the exact complete pre-push gate and push both authoritative refs. Publication remains due only at Build 220.
+- [x] Build 215: the exact complete pre-push gate passed at `8c4c82a377d1d295c8a94acf005215a6b6382321`, and both authoritative refs matched that commit after push. Publication remains due only at Build 220.

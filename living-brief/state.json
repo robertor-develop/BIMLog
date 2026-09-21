@@ -2,10 +2,15 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "47bb79d85135a58ff90516611442feecee20e920",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "831142bb014cd2d0d5a079a0ff21d692838935f9635e7f885fd1dbd17eff891b",
+  "bundleSha256": "24c5d66c9a05ac99d95e4868adb3512ca8ccf9f77503bd9e459a0e11ac942ca0",
   "impact": {
     "baselineCommit": "47bb79d85135a58ff90516611442feecee20e920",
     "changedPaths": [
+      "evidence/stabilization-program-20260919/BUILD_215_SOURCE_ACCEPTANCE.md",
+      "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
+      "living-brief/OPEN_LOOP.md",
+      "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
@@ -114,25 +119,25 @@
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "aa0dd2e7f636553bf6f99f4d7ae2422871b774d07fdefdfa2c76860797fec094",
-      "sourceChangedAt": "2026-09-21T08:56:02-04:00",
-      "changeState": "accepted",
+      "sha256": "ac91a250e881458668da3e991b88c4f4b3dc8f72bb908df154b688ffd6c22b6f",
+      "sourceChangedAt": "2026-09-21T13:18:54.931Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "47bb79d85135a58ff90516611442feecee20e920",
       "semanticReviewedThroughCommit": "47bb79d85135a58ff90516611442feecee20e920",
       "semanticReviewTask": "bimlog-builds211-215-recovery-resilience-20260921",
-      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewResult": "updated",
       "semanticReviewedAt": "2026-09-21T08:56:02-04:00"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "59367d6429e8d34a57e2fd13cdfd9ce4c3d259cf2fdade2e09f616df3cb10f41",
-      "sourceChangedAt": "2026-09-21T08:56:02-04:00",
-      "changeState": "accepted",
+      "sha256": "f964d4e35f7378febe60bd79f90646ff3a55542a30b0d33fa9af9eb371a61659",
+      "sourceChangedAt": "2026-09-21T13:18:54.931Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "47bb79d85135a58ff90516611442feecee20e920",
       "semanticReviewedThroughCommit": "47bb79d85135a58ff90516611442feecee20e920",
       "semanticReviewTask": "bimlog-builds211-215-recovery-resilience-20260921",
-      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewResult": "updated",
       "semanticReviewedAt": "2026-09-21T08:56:02-04:00"
     },
     {
