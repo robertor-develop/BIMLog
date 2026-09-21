@@ -14,8 +14,11 @@ type ConflictTypeRecord = {
 };
 type CapabilityResponse = { capabilities: string[]; companyId: number; isCompanyPmo: boolean; isSuperAdmin: boolean };
 type ConflictFilters = { search: string; discipline: string; element: string; category: string; status: string; tag: string };
+type RuleRecord = { id: string; rule_id: string; code: string; revision: number; status: KnowledgeStatus; title: string; guidance: string; applicability: Record<string, unknown>; rationale: string; exceptions: unknown[]; references: unknown[]; approved_by_id?: number | null; approved_at?: string | null };
+type RuleFilters = { search: string; applicability: string; status: string };
 
 const emptyConflictFilters: ConflictFilters = { search: "", discipline: "", element: "", category: "", status: "", tag: "" };
+const emptyRuleFilters: RuleFilters = { search: "", applicability: "", status: "" };
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const values = (items: string[]) => [...new Set(items.filter(Boolean))].sort((a, b) => a.localeCompare(b));
 const normalized = (value: unknown) => String(value ?? "").toLocaleLowerCase();
@@ -39,6 +42,12 @@ export function CoordinationKnowledgeLibrary() {
   const [conflictState, setConflictState] = useState<"loading" | "ready" | "error">("loading");
   const [conflictError, setConflictError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [rules, setRules] = useState<RuleRecord[]>([]);
+  const [ruleFilters, setRuleFilters] = useState<RuleFilters>(emptyRuleFilters);
+  const [ruleState, setRuleState] = useState<"idle" | "loading" | "ready" | "error">("idle");
+  const [ruleError, setRuleError] = useState("");
+  const [ruleReloadKey, setRuleReloadKey] = useState(0);
+  const [ruleHistory, setRuleHistory] = useState<Record<string, RuleRecord[] | "loading" | "error">>({});
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
@@ -63,6 +72,36 @@ export function CoordinationKnowledgeLibrary() {
     });
     return () => controller.abort();
   }, [token, reloadKey]);
+
+  useEffect(() => {
+    if (!token || active !== "rules") return;
+    const controller = new AbortController(); setRuleState("loading"); setRuleError("");
+    fetch(`${API_BASE}/api/v1/coordination-knowledge/rules`, { headers: { Authorization: `Bearer ${token}` }, signal: controller.signal })
+      .then(async response => { const payload = await response.json().catch(() => ({})); if (!response.ok) throw new Error(payload.code || `KNOWLEDGE_RULES_${response.status}`); return payload; })
+      .then(payload => { setRules(Array.isArray(payload.items) ? payload.items : []); setRuleState("ready"); })
+      .catch(error => { if (!controller.signal.aborted) { setRules([]); setRuleState("error"); setRuleError(String(error instanceof Error ? error.message : error)); } });
+    return () => controller.abort();
+  }, [token, active, ruleReloadKey]);
+
+  const filteredRules = useMemo(() => rules.filter(item => {
+    const query = normalized(ruleFilters.search).trim(), applicability = normalized(ruleFilters.applicability).trim();
+    const referenceText = JSON.stringify(item.references ?? []), applicationText = JSON.stringify(item.applicability ?? {});
+    return (!query || normalized([item.code, item.title, item.guidance, item.rationale, referenceText].join(" ")).includes(query))
+      && (!applicability || normalized(applicationText).includes(applicability))
+      && (!ruleFilters.status || item.status === ruleFilters.status);
+  }), [rules, ruleFilters]);
+
+  const loadRuleHistory = async (item: RuleRecord) => {
+    const stableId = item.rule_id;
+    if (!token || !stableId) return;
+    setRuleHistory(current => ({ ...current, [stableId]: "loading" }));
+    try {
+      const response = await fetch(`${API_BASE}/api/v1/coordination-knowledge/rules/${encodeURIComponent(stableId)}/history`, { headers: { Authorization: `Bearer ${token}` } });
+      const payload = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(payload.code || `KNOWLEDGE_RULE_HISTORY_${response.status}`);
+      setRuleHistory(current => ({ ...current, [stableId]: Array.isArray(payload.items) ? payload.items : [] }));
+    } catch { setRuleHistory(current => ({ ...current, [stableId]: "error" })); }
+  };
 
   const conflictOptions = useMemo(() => ({
     disciplines: values(conflictTypes.flatMap(item => [item.discipline_a, item.discipline_b])),
@@ -160,6 +199,28 @@ export function CoordinationKnowledgeLibrary() {
               <dl><div><dt>{t("Disciplines", "Disciplinas")}</dt><dd>{item.discipline_a} · {item.discipline_b}</dd></div><div><dt>{t("Elements", "Elementos")}</dt><dd>{item.element_type_a} · {item.element_type_b}</dd></div><div><dt>{t("Category", "Categoría")}</dt><dd>{item.conflict_category}</dd></div><div><dt>{t("Stage", "Etapa")}</dt><dd>{item.coordination_stage}</dd></div></dl>
               <div className="knowledge-card-footer"><span>v{item.revision}</span><div>{item.tags?.map(tag => <span className="knowledge-tag" key={tag}>{tag}</span>)}</div></div>
             </article>)}
+          </div></>}
+        </div> : active === "rules" ? <div className="knowledge-catalog" aria-busy={ruleState === "loading"}>
+          {capability && <p className="knowledge-access-note"><ShieldCheck aria-hidden />{capability.capabilities.includes("view_draft") ? t("Draft visibility is enabled by your governed company capability.", "La visibilidad de borradores está habilitada por su capacidad gobernada de empresa.") : t("Only approved guidance is visible in this role.", "Solo la guía aprobada es visible para este rol.")}</p>}
+          <div className="knowledge-filters knowledge-rule-filters" role="search" aria-label={t("Filter Coordination Rules", "Filtrar Reglas de Coordinación")}>
+            <label className="knowledge-search"><span>{t("Search rules", "Buscar reglas")}</span><span className="knowledge-input-icon"><Search aria-hidden /><input value={ruleFilters.search} onChange={event => setRuleFilters(current => ({ ...current, search: event.target.value }))} placeholder={t("Code, guidance, rationale or reference…", "Código, guía, justificación o referencia…")} /></span></label>
+            <label>{t("Applicability", "Aplicabilidad")}<input value={ruleFilters.applicability} onChange={event => setRuleFilters(current => ({ ...current, applicability: event.target.value }))} placeholder={t("Discipline, element or Conflict Type", "Disciplina, elemento o Tipo de Conflicto")} /></label>
+            <label>{t("Status", "Estado")}<select value={ruleFilters.status} onChange={event => setRuleFilters(current => ({ ...current, status: event.target.value }))}><option value="">{t("All", "Todos")}</option>{["draft", "under_review", "approved", "retired"].map(option => <option key={option} value={option}>{option.replace("_", " ")}</option>)}</select></label>
+            <button type="button" onClick={() => setRuleFilters(emptyRuleFilters)}>{t("Reset filters", "Restablecer filtros")}</button>
+          </div>
+          {ruleState === "loading" && <div className="knowledge-placeholder" role="status"><span className="knowledge-spinner" aria-hidden /><strong>{t("Loading Coordination Rules…", "Cargando Reglas de Coordinación…")}</strong></div>}
+          {ruleState === "error" && <div className="knowledge-error" role="alert"><strong>{t("Coordination Rules could not be loaded.", "No se pudieron cargar las Reglas de Coordinación.")}</strong><span>{ruleError}</span><button type="button" onClick={() => setRuleReloadKey(value => value + 1)}>{t("Try again", "Reintentar")}</button></div>}
+          {ruleState === "ready" && !filteredRules.length && <div className="knowledge-placeholder" role="status"><ShieldCheck aria-hidden /><strong>{rules.length ? t("No rules match these filters", "Ninguna regla coincide con estos filtros") : t("No Coordination Rules yet", "Aún no hay Reglas de Coordinación")}</strong><span>{t("Approved guidance will appear here without changing existing issue workflows.", "La guía aprobada aparecerá aquí sin cambiar los flujos existentes de incidencias.")}</span></div>}
+          {ruleState === "ready" && filteredRules.length > 0 && <><p className="knowledge-result-count" role="status">{filteredRules.length} {t("Coordination Rules", "Reglas de Coordinación")}</p><div className="knowledge-card-grid">
+            {filteredRules.map(item => { const history = ruleHistory[item.rule_id]; const conflicts = ((item.applicability?.conflictTypeIds ?? item.applicability?.conflict_type_ids ?? []) as unknown[]).map(String); const attachments = (item.references ?? []).filter(reference => typeof reference === "object" && reference !== null && ("fileId" in reference || "attachmentId" in reference)); return <article className="knowledge-card knowledge-rule-card" key={item.rule_id || item.id}>
+              <div className="knowledge-card-top"><span className="knowledge-code">{item.code}</span><span className={`knowledge-status knowledge-status-${item.status}`}><span aria-hidden>●</span>{statusText(item.status)}</span></div>
+              <h3>{item.title}</h3><p className="knowledge-guidance"><strong>{t("Guidance", "Guía")}:</strong> {item.guidance}</p>
+              <dl><div><dt>{t("Revision", "Revisión")}</dt><dd>v{item.revision}</dd></div><div><dt>{t("Approved by", "Aprobado por")}</dt><dd>{item.approved_by_id ? `#${item.approved_by_id}` : t("Not approved", "No aprobado")}</dd></div><div><dt>{t("Linked Conflict Types", "Tipos de Conflicto vinculados")}</dt><dd>{conflicts.length ? conflicts.join(", ") : t("Defined by applicability", "Definidos por aplicabilidad")}</dd></div><div><dt>{t("References / attachments", "Referencias / adjuntos")}</dt><dd>{(item.references ?? []).length} / {attachments.length}</dd></div></dl>
+              <details className="knowledge-structured"><summary>{t("Applicability and references", "Aplicabilidad y referencias")}</summary><pre>{JSON.stringify({ applicability: item.applicability, references: item.references }, null, 2)}</pre></details>
+              <button className="knowledge-history-button" type="button" onClick={() => void loadRuleHistory(item)} disabled={history === "loading"}>{history === "loading" ? t("Loading history…", "Cargando historial…") : t("View revision history", "Ver historial de revisiones")}</button>
+              {history === "error" && <p className="knowledge-inline-error" role="alert">{t("History is unavailable. Try again.", "El historial no está disponible. Intente nuevamente.")}</p>}
+              {Array.isArray(history) && <ol className="knowledge-history">{history.map(version => <li key={version.id}>v{version.revision} · {statusText(version.status)}</li>)}</ol>}
+            </article>; })}
           </div></>}
         </div> : <div className="knowledge-placeholder" role="status">
           <selected.icon aria-hidden />

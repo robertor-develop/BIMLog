@@ -20,5 +20,10 @@ for (const filter of ["discipline", "element", "category", "status", "tag"]) ass
 assert.match(css, /knowledge-status-approved/); assert.match(css, /knowledge-status-retired/);
 assert.match(page, /role="alert"/); assert.match(page, /Try again/); assert.match(page, /No Conflict Types yet/);
 assert.match(css, /grid-template-columns: repeat\(2, minmax\(0, 1fr\)\)/);
+assert.match(page, /coordination-knowledge\/rules/); assert.match(page, /\/history/);
+for (const field of ["guidance", "applicability", "approved_by_id", "references", "conflictTypeIds"]) assert.match(page, new RegExp(field));
+assert.match(page, /Only approved guidance is visible in this role/);
+assert.match(page, /View revision history/); assert.match(page, /History is unavailable/);
 console.log("Coordination Knowledge Build 236 workspace shell: navigation, responsive layout and keyboard tabs passed");
 console.log("Coordination Knowledge Build 237 Conflict Type catalog: permission scope, filters, revision/status semantics and loading/empty/error states passed");
+console.log("Coordination Knowledge Build 238 Rules catalog: applicability/status filters, approval distinction, references and authorized revision history passed");
