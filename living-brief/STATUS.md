@@ -2274,3 +2274,11 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - No Autodesk load path was changed. Installing the corrected package in physical 2021 and Ruben's physical 2025 affected-model confirmation remain explicit field evidence.
 - The source/package implementation is bound to commit `81d91fe85b0de995cd2eb914cb05ea29be88538f`; Living Brief reconciliation and the exact-head gate follow on the evidence-bearing successor.
 - Exact-head gate correction `e2aa8eb96496953ac4c1101578810ef4e87b97d6` classifies only the two new retirement-enforcement scripts as governance/test references. The production legacy-reference scan remains fail closed for every unclassified Original Lens reference.
+
+## 120-build stabilization program — Block 40 source acceptance — 2026-09-21
+
+- Builds 196–200 derive a 59-surface accessibility/responsive inventory from tracked route authority and govern 177 desktop, tablet, and exact-390 route cases.
+- Application-level modal handling supplies initial focus only when a workflow has not already done so, contains Tab navigation in the top modal, and restores the invoker after closure.
+- Light/dark native controls, AA accent/destructive contrast, forced-colors focus, reduced motion, exact-390 containment, and 44px coarse-pointer controls are permanent pre-push contracts.
+- The known symbol-only saved-view marker is replaced with localized text. The blocking platform audit reports zero P0 and zero unexpected P1 identities.
+- No Native, installer, database/schema, customer-data, provider, or Autodesk state changed. Build 200 remains a publication candidate until exact-head gate, push, Replit Shell publication without Agents, and authenticated visible-Chrome acceptance pass.

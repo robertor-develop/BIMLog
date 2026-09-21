@@ -1,12 +1,13 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — post-120 Block 39 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Current open-loop authority — post-120 Block 40 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
 - [x] Builds 121–180 are complete. Build 180 source reached `origin/master` at `9dab04343e90e8ad94391c5967a4b9f804ee1f4d`, was published through the established Replit Shell path without Replit Agents, and passed authenticated production smoke.
 - [x] Builds 181–185 generated the route/interconnection ownership graph, removed duplicate route identities through compatibility redirects, passed the exact clean full gate, and were pushed at `8df24fd15763b1b76a4e7fc0fab0983f560e3698`.
 - [x] Builds 186–190 reconciled every unchecked loop under one current authority, closed stale contradictions with exact evidence, bound product work to owning routes/modules, passed the exact full gate, pushed exact source `50ee888807974b5c20772331944a1ee78442f96a`, published as Replit receipt `dcbe8579`, and passed authenticated visible-Chrome production smoke at `v1.05.N18-P36` with exact live source and package identity.
 - [x] Builds 191–195 reconciled dual-year field/package evidence at implementation commit `81d91fe85b0de995cd2eb914cb05ea29be88538f`, exposed the missed physical 2021 direct-load Original Lens DLL, corrected deterministic Pulse packaging and retirement/rollback behavior, and passed shared 132/132 plus both Native 57/57 suites and repeated dual-year upgrade simulations.
 - [x] Exact-head correction `e2aa8eb96496953ac4c1101578810ef4e87b97d6` keeps the legacy-reference inventory fail closed while classifying its two retirement-enforcement scripts as governance/test evidence rather than active legacy product code.
+- [x] Builds 196–200 govern all 59 tracked customer surfaces across 177 desktop/tablet/exact-390 cases and add permanent dialog-focus, contrast/theme/motion, overflow, and coarse-pointer contracts. The evidence-bearing source still requires its exact full gate, push, Replit publication, and authenticated visible-Chrome acceptance before live closure.
 - [ ] Install the corrected P36 package in the physical Navisworks 2021 environment and verify the retired direct-load `BIMLogNavisPlugin` path is absent while Pulse and Lens Next remain available. Source/package correction is complete; this is the remaining installed-environment proof.
 - [ ] Physical Navisworks 2025 confirmation remains assigned to Ruben as post-closure field evidence. It does not reopen Build 119 and does not block this Platform-only publication.
 
