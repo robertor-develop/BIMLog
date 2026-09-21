@@ -139,6 +139,8 @@ Status: implemented and focused verification passed. Build 180 is the exact-head
 
 ## Block 38 — Builds 186–190 — open-loop truth reconciliation
 
+Status: implemented and focused verification passed. Build 190 is the exact-head full-gate, push, Replit publication, and authenticated visible-Chrome acceptance boundary. Native and installers did not change.
+
 - 186: classify every active loop as product work, field evidence, provider evidence, or stale contradiction.
 - 187: close stale contradictions with exact commit/test evidence.
 - 188: bind genuine product work to owning routes/modules.

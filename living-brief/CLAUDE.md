@@ -332,6 +332,13 @@ Replit pulls that verified commit and retries. An exception needs Roberto's expl
 
 ### Fixed MAIN-only Replit release contract
 
+The open-loop authority is deterministic. Exactly one `CURRENT_OPEN_LOOP_AUTHORITY` marker defines present work;
+historical headings cannot override it. Every unchecked record must be classified as product work, field evidence,
+provider evidence, or stale contradiction, with an owner and module/route binding where applicable. Repeated historical
+statements must identify one canonical record and remain superseded. The normal pre-push gate regenerates and verifies
+`living-brief/OPEN_LOOP_DISPOSITIONS.json`; unresolved duplicate statements, competing current markers, or stale
+contradictions marked active fail the release.
+
 An authorized BIMLog release has one fixed path: verify the exact GitHub candidate, use the established signed-in
 visible Replit workspace, align its clean HEAD to that exact remote commit through Replit Shell, run the existing
 schema-correspondence, restore and zero-destructive-change checks when applicable, perform one Replit Publish, then

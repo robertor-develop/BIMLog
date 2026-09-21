@@ -2255,3 +2255,11 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - `/setup-guide` now canonicalizes to the Help setup view, while legacy `/projects/:id/submittal-tracker` bookmarks canonicalize to Submittals tracking. Both redirects precede the generic project route and preserve authenticated/project access checks.
 - Deep-link ordering and anonymous, zero-project, member, administrator, and global-super-administrator guard coverage are permanent regression contracts. No database/schema, customer data, Native, installer, bridge, package, provider, or production mutation is included.
 - Build 185 is push-only. Publication and authenticated visible-Chrome smoke remain due at Build 190; Navisworks smoke is not retriggered because Native and installers are unchanged.
+
+## 120-build stabilization program — Block 38 candidate — 2026-09-21
+
+- Builds 186–190 replace ambiguous historical “Current” headings with one explicit current-authority marker and classify all 144 open-loop records as product work, field evidence, provider evidence, or stale contradiction.
+- Every open record carries an owner and module; product work also carries its owning route. Seven repeated historical statements are linked to one canonical record and retained as superseded evidence instead of competing present work.
+- The normal pre-push gate rejects missing or competing current markers, unresolved duplicate statements, unowned records, route-less product work, and stale contradictions labeled active.
+- Current truth contains exactly two open records: the Builds 186–190 release action and Ruben's deferred physical Navisworks 2025 field confirmation. Older Build 100/115/160/170 checkpoint wording cannot override them.
+- No database/schema, customer data, Native source, installer, bridge protocol, package, or provider configuration changed. Build 190 is the push, Replit publication, and authenticated visible-Chrome smoke boundary; focused Navisworks smoke is not retriggered.

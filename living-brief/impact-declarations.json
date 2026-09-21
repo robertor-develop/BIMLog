@@ -35004,6 +35004,79 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-build190-open-loop-reconciliation-20260921",
+      "reviewedThroughCommit": "69be9bc424ca0c77e4f6be484678f60477bab0a7",
+      "reviewedAt": "2026-09-21T03:44:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Current product ownership remains unchanged while stale historical authority is removed."
+        },
+        {
+          "key": "claude",
+          "result": "updated",
+          "reason": "The normal release gate now enforces one current marker, ownership, route binding, and duplicate reconciliation."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing evidence and release-quality doctrine are enforced through the new deterministic contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product outcome, customer promise, or commercial scope changed."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Platform records the sole current-authority marker and deterministic open-loop disposition model."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native source, installer, package, or bridge changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report content, format, rendering, or visual contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, compliance claim, or evidence boundary changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records Builds 186-190 and the exact two-record current open-loop truth."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop now marks one authoritative current section and preserves historical records without current effect."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical evidence remains preserved and every reconciliation is attributable in tracked output."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
+        "living-brief/CLAUDE.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "017d8afacf9886261a2207d526b49ea4bce3d5cc77e53a8edb541262fcab7284"
     }
   ]
 }
