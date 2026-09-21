@@ -35493,7 +35493,7 @@
     },
     {
       "taskId": "bimlog-build205-performance-code-splitting-reconciliation-20260921",
-      "reviewedThroughCommit": "a2ee71a2428190091e9ff7276726cf393bea735c",
+      "reviewedThroughCommit": "0503c26580ef70b23d64052debe31131f2e20ef4",
       "reviewedAt": "2026-09-21T06:35:00-04:00",
       "status": "candidate",
       "authorities": [
@@ -35554,16 +35554,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/BUILD_205_SOURCE_ACCEPTANCE.md",
-        "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
-        "living-brief/QUALITY.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b7aa8fbc6a8ca87e217a9a51d86d9b4af5b2f084dda77a4ffc9bbbc93bff655c"
+      "reviewedChangeSha256": "dcf0ec956f8b51d58c300463df273674a0d3bbf6ae6bb87b305e7f56492bfb4b"
     }
   ]
 }

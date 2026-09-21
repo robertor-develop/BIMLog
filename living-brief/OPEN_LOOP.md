@@ -2994,6 +2994,7 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [ ] Validate the deferred document-library candidate with affected PDF/BMP/workbook behavior, exact-artifact startup timing, full clean release gate, and no-regression review. Do not raise the 8000 ms readiness gate to make it pass.
 - [x] Block 40 exact-head acceptance completed at source `227c4d541dc17d46ee6f5b7937f616f23af4c2b5`, Replit receipt `99ce6600`, and live `v1.05.N18-P36`; authenticated route, viewport, two-tab, and session smoke passed.
 - [ ] Builds 201–205: pass the exact clean full gate and push Block 41. Publication and authenticated Chrome smoke remain due at Build 210; focused Navisworks smoke is not retriggered because Native and installers are unchanged.
+- [x] Preserve Block 41 Platform authority in the deterministic generator so production builds cannot remove the accepted performance contract.
 
 ## Dashboard/Governance integration release — 2026-09-18
 

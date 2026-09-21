@@ -2291,3 +2291,4 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Timer teardown, file-identity editor reset, report/editor lazy boundaries, and entry/chunk/total budgets are permanent pre-push contracts.
 - Block 40 is live at exact source `227c4d541dc17d46ee6f5b7937f616f23af4c2b5`, release `v1.05.N18-P36`, and Replit receipt `99ce6600`; its authenticated Chrome route, viewport, two-tab, and session acceptance passed.
 - Block 41 changes no database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license. Build 205 is push-only; publication and authenticated visible-Chrome smoke remain due at Build 210.
+- The exact-head build proved that Platform authority must remain generator-owned; commit `0503c26580ef70b23d64052debe31131f2e20ef4` binds the Block 41 section to `generate-platform-md.ts` before final reconciliation.
