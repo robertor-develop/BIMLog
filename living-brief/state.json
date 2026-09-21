@@ -6,8 +6,10 @@
   "impact": {
     "baselineCommit": "67d1bb2f9be72bdc1eced945fcb26a1ac8e3e843",
     "changedPaths": [
+      "evidence/stabilization-program-20260919/BUILD_165_SOURCE_ACCEPTANCE.md",
       "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
       "living-brief/OPEN_LOOP.md",
+      "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"

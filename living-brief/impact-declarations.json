@@ -34369,13 +34369,15 @@
         }
       ],
       "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/BUILD_165_SOURCE_ACCEPTANCE.md",
         "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
         "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "6e372082d6df8e795456b30064ee13bb4c46b6532ba09207ee3f2f32f88fbcd0"
+      "reviewedChangeSha256": "5de5094e02542605da01eabdf49cbb7b6d5070b3cdd582ec36b643ea0675ff09"
     }
   ]
 }
