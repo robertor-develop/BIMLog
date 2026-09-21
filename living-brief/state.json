@@ -2,10 +2,11 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "1f4da420cb205ec11f3b39d31986efb30fad4830",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "5252d8fcf6ff6299e7dd07f075398ba34206840198d029181e75c2f65f8aa8bd",
+  "bundleSha256": "61df4e8954222f3d61339d8c6699f539f7f4bcd71753a8f22bd750e4b26f18bf",
   "impact": {
     "baselineCommit": "1f4da420cb205ec11f3b39d31986efb30fad4830",
     "changedPaths": [
+      "artifacts/api-server/scripts/generate-platform-md.ts",
       "evidence/stabilization-program-20260919/BUILD_155_SOURCE_ACCEPTANCE.md",
       "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
       "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
@@ -18,6 +19,7 @@
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
+      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -73,7 +75,7 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "fa281ff0e7f38d264365dfa2f1a06303d780902fb61717159982ce55bae87b7f",
+      "sha256": "272f24f9672ced9b939e00171658c9d6ff2aea805fa54f664324d209ea304292",
       "sourceChangedAt": "2026-09-21T02:07:00.000Z",
       "changeState": "candidate",
       "reconciledThroughCommit": "1f4da420cb205ec11f3b39d31986efb30fad4830",

@@ -34088,6 +34088,7 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
         "evidence/stabilization-program-20260919/BUILD_155_SOURCE_ACCEPTANCE.md",
         "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
         "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
@@ -34097,7 +34098,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b3fe801f342601199318ddb6f7b11c5099fca6434149b1ea123a82b3eb225a55"
+      "reviewedChangeSha256": "e5d8f3c8f5d88c8bf2f035f7a3991691dd488a1ac0cf6a4b70a5a85eee5a409b"
     }
   ]
 }
