@@ -7,6 +7,7 @@
     "baselineCommit": "d05d63d3ed60bf28261bbcb815ef872805972305",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
+      "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
