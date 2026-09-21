@@ -6,7 +6,7 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 605,
+    "apiRoutes": 625,
     "frontendApiReferences": 231,
     "routeOwnedTables": 61
   },
@@ -2583,6 +2583,126 @@
       "method": "POST",
       "path": "/projects/:projectId/coordination-hub/jobs",
       "owner": "artifacts/api-server/src/routes/coordination-hub.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/capabilities",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/search",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/conflict-types",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/conflict-types",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/conflict-types/:id/history",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/conflict-types/:id",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/coordination-knowledge/conflict-types/:id",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/conflict-types/:id/${action.replaceAll(",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/rules",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/rules",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/rules/:id/history",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/rules/:id",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/coordination-knowledge/rules/:id",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/rules/:id/${action.replaceAll(",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/resolution-methods",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/resolution-methods",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/resolution-methods/:id/history",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/resolution-methods/:id",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/coordination-knowledge/resolution-methods/:id",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/resolution-methods/:id/${action.replaceAll(",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
       "tables": []
     },
     {

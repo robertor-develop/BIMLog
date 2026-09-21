@@ -36522,6 +36522,108 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block02-source-candidate-20260921",
+      "reviewedThroughCommit": "448d069ecdce81372a3fc0d2bf0892e18d1260b6",
+      "reviewedAt": "2026-09-21T15:49:11-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "knowledge_api_implementation",
+          "authorization_and_security_regression",
+          "restored_database_proof",
+          "push_exact_fast_forward"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication_at_build235",
+          "authenticated_chrome_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "coordination_knowledge_api_authority",
+          "disposition": "implemented_and_regressed",
+          "authorities": [
+            "platform",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Builds 231–235 add tenant-scoped governed knowledge APIs and permission-aware search without changing canonical BIMLog issue ownership or Native integration surfaces."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating boundary changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing fail-closed security and publication gates remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The approved library program implements the existing product direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform inventory now includes the additive Coordination Knowledge route and server modules; existing authentication, company scope, roles, database, and canonical issue authority remain unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native bridge, installer, package, or Navisworks contract changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The program remains active and Build 235 is the scheduled publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Later library UI and field acceptance work remain open; this block does not claim them complete."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Immutable revision and actor-owned audit evidence extend existing audit doctrine."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/coordination-knowledge-authorization.ts",
+        "artifacts/api-server/src/lib/coordination-knowledge-repository.ts",
+        "artifacts/api-server/src/lib/coordination-knowledge-search.behavior.ts",
+        "artifacts/api-server/src/routes/coordination-knowledge.ts",
+        "evidence/coordination-knowledge-program-20260921/BLOCK_02_REPORT.md",
+        "evidence/coordination-knowledge-program-20260921/BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9c5b1ec015a25f7a5763a7e8e89d3f707ce40857e0b5e844fbf5c70cd805c60e"
     }
   ]
 }

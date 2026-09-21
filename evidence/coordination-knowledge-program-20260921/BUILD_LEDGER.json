@@ -4,25 +4,26 @@
   "date": "2026-09-21",
   "range": {
     "firstBuild": 226,
-    "completedThrough": 230,
+    "completedThrough": 235,
     "finalBuild": 275
   },
   "currentBlock": {
-    "number": 1,
-    "builds": "226-230",
+    "number": 2,
+    "builds": "231-235",
     "status": "PASS_SOURCE_CANDIDATE",
     "pushDue": true,
-    "publicationDue": false
+    "publicationDue": true
   },
-  "remainingBlocks": 9,
-  "remainingBuilds": 45,
-  "nextBlock": "Block 2 — Builds 231-235 — API, authorization and search foundation",
+  "remainingBlocks": 8,
+  "remainingBuilds": 40,
+  "nextBlock": "Block 3 — Builds 236-240 — conflict taxonomy and curation",
   "database": {
     "changed": true,
     "tablesAdded": 12,
     "destructiveStatements": 0,
     "restoredDatabaseProof": "PASS",
-    "productionApplied": false
+    "productionApplied": false,
+    "block2SchemaChange": "none; API/search only"
   },
   "lensNext": {
     "visibleWorkflowChanged": false,
@@ -34,6 +35,8 @@
     "restoredDatabase": "PASS",
     "typecheck": "PASS",
     "databaseSafety": "PASS",
-    "completePrePushGate": "PENDING_CLEAN_COMMIT"
+    "block2Focused": "PASS",
+    "completePrePushGate": "PENDING_CLEAN_COMMIT",
+    "publication": "PENDING_PUSH"
   }
 }

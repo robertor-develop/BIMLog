@@ -69,7 +69,7 @@ export async function resolveKnowledgeAuthorizationContext(
     LIMIT 1`, [userId, projectId]);
   const row = result.rows[0];
   if (!row?.company_id) throw new CoordinationKnowledgeAuthorizationError("KNOWLEDGE_AUTHORITY_INVALID", 401);
-  if (projectId !== null && !row.project_role && row.is_super_admin !== true) {
+  if (projectId !== null && !row.project_role && row.is_super_admin !== true && row.is_company_pmo !== true) {
     throw new CoordinationKnowledgeAuthorizationError("KNOWLEDGE_PROJECT_ACCESS_DENIED", 403);
   }
   const capabilities = new Set<KnowledgeCapability>(["view_approved"]);

@@ -36,6 +36,16 @@ function expectedRevision(value: unknown): number {
   if (!Number.isSafeInteger(parsed) || parsed < 1) throw new CoordinationKnowledgeContractError("KNOWLEDGE_EXPECTED_REVISION_REQUIRED", "expectedRevision");
   return parsed;
 }
+function boundedQuery(value: unknown, field: string, max=160): string | undefined {
+  if(value==null||value==="") return undefined;
+  if(Array.isArray(value)||typeof value!=="string"||value.trim().length>max) throw new CoordinationKnowledgeContractError("KNOWLEDGE_SEARCH_INVALID",field);
+  return value.trim();
+}
+function pageNumber(value: unknown, field: string, fallback: number, maximum: number): number {
+  if(value==null||value==="") return fallback;
+  const parsed=Number(value); if(!Number.isSafeInteger(parsed)||parsed<1||parsed>maximum) throw new CoordinationKnowledgeContractError("KNOWLEDGE_SEARCH_INVALID",field);
+  return parsed;
+}
 function conflictContent(body: Record<string, unknown>, actorId: number, companyId: number, conflictTypeId: string, revision: number) {
   return validateConflictTypeRevision({
     id: randomUUID(), conflictTypeId, companyId, revision, status: "draft",
@@ -71,6 +81,23 @@ router.get("/coordination-knowledge/capabilities", authMiddleware, async (req, r
     const resolved = await context(req, "view_approved");
     res.json({ companyId: resolved.companyId, isCompanyPmo: resolved.isCompanyPmo, isSuperAdmin: resolved.isSuperAdmin, capabilities: [...resolved.capabilities] });
   } catch (error) { sendError(res, error); }
+});
+
+router.get("/coordination-knowledge/search",authMiddleware,async(req,res)=>{
+  try{
+    const resolved=await context(req,"view_approved");
+    const status=boundedQuery(req.query.status,"status",40);
+    if(status&&!(["draft","under_review","approved","retired"] as const).includes(status as "draft"|"under_review"|"approved"|"retired")) throw new CoordinationKnowledgeContractError("KNOWLEDGE_SEARCH_INVALID","status");
+    if(status&&status!=="approved"&&!resolved.capabilities.has("view_draft")) throw new CoordinationKnowledgeAuthorizationError("KNOWLEDGE_CAPABILITY_REQUIRED",403);
+    const rawTags=boundedQuery(req.query.tags,"tags",1000);
+    const tags=rawTags?rawTags.split(",").map(tag=>tag.trim()).filter(Boolean):[];
+    if(tags.length>25||tags.some(tag=>tag.length>120)) throw new CoordinationKnowledgeContractError("KNOWLEDGE_SEARCH_INVALID","tags");
+    const items=await repository.searchKnowledge({companyId:resolved.companyId,includeDrafts:resolved.capabilities.has("view_draft"),
+      keyword:boundedQuery(req.query.keyword,"keyword",240),discipline:boundedQuery(req.query.discipline,"discipline"),conflictTypeId:boundedQuery(req.query.conflictTypeId,"conflictTypeId",64),
+      element:boundedQuery(req.query.element,"element"),category:boundedQuery(req.query.category,"category"),methodId:boundedQuery(req.query.methodId,"methodId",64),
+      projectId:resolved.projectId??undefined,status,tags,page:pageNumber(req.query.page,"page",1,100000),pageSize:pageNumber(req.query.pageSize,"pageSize",25,100)});
+    res.json(items);
+  }catch(error){sendError(res,error);}
 });
 
 router.get("/coordination-knowledge/conflict-types", authMiddleware, async (req, res) => {

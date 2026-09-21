@@ -15,6 +15,11 @@ export type KnowledgeQueryClient = { query(sql: string, params?: unknown[]): Pro
 export type KnowledgeRepositoryPool = KnowledgeQueryClient & {
   connect(): Promise<KnowledgeQueryClient & { release(): void }>;
 };
+export type KnowledgeSearchInput = {
+  companyId: number; includeDrafts: boolean; keyword?: string; discipline?: string; conflictTypeId?: string;
+  element?: string; category?: string; methodId?: string; projectId?: number; status?: string; tags?: string[];
+  page: number; pageSize: number;
+};
 
 export class CoordinationKnowledgeRepositoryError extends Error {
   constructor(public readonly code: string, message: string, public readonly status = 400) { super(message); }
@@ -49,6 +54,43 @@ async function transaction<T>(pool: KnowledgeRepositoryPool, work: (client: Know
 
 export class CoordinationKnowledgeRepository {
   constructor(private readonly pool: KnowledgeRepositoryPool) {}
+
+  async searchKnowledge(input: KnowledgeSearchInput): Promise<{items:Array<Record<string,unknown>>;page:number;pageSize:number;hasMore:boolean}> {
+    const companyId=positive(input.companyId,"companyId"), page=positive(input.page,"page"), pageSize=positive(input.pageSize,"pageSize");
+    if(pageSize>100) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_PAGE_SIZE_INVALID","pageSize cannot exceed 100.");
+    const keyword=input.keyword?.trim()||null, discipline=input.discipline?.trim()||null, element=input.element?.trim()||null, category=input.category?.trim()||null;
+    const tags=input.tags?.map(tag=>tag.trim()).filter(Boolean)??[];
+    const result=await this.pool.query(`WITH candidates AS (
+      SELECT 'conflict_type'::text entity_type,base.id entity_id,revision.id revision_id,base.code,revision.status,revision.name title,revision.description,
+        revision.discipline_a,revision.discipline_b,revision.element_type_a,revision.element_type_b,revision.conflict_category category,revision.tags,
+        base.id conflict_type_id,NULL::text method_id
+      FROM coordination_conflict_types base JOIN LATERAL (SELECT * FROM coordination_conflict_type_revisions candidate WHERE candidate.conflict_type_id=base.id AND candidate.company_id=base.company_id AND ($2::boolean OR candidate.status='approved') ORDER BY candidate.revision DESC LIMIT 1) revision ON true WHERE base.company_id=$1
+      UNION ALL
+      SELECT 'coordination_rule',base.id,revision.id,base.code,revision.status,revision.title,revision.guidance,NULL,NULL,NULL,NULL,NULL,'[]'::jsonb,NULL,NULL
+      FROM coordination_rules base JOIN LATERAL (SELECT * FROM coordination_rule_revisions candidate WHERE candidate.rule_id=base.id AND candidate.company_id=base.company_id AND ($2::boolean OR candidate.status='approved') ORDER BY candidate.revision DESC LIMIT 1) revision ON true WHERE base.company_id=$1
+      UNION ALL
+      SELECT 'resolution_method',base.id,revision.id,base.code,revision.status,revision.name,revision.description,NULL,NULL,NULL,NULL,NULL,'[]'::jsonb,NULL,base.id
+      FROM coordination_resolution_methods base JOIN LATERAL (SELECT * FROM coordination_resolution_method_revisions candidate WHERE candidate.resolution_method_id=base.id AND candidate.company_id=base.company_id AND ($2::boolean OR candidate.status='approved') ORDER BY candidate.revision DESC LIMIT 1) revision ON true WHERE base.company_id=$1
+    ) SELECT candidate.* FROM candidates candidate WHERE
+      ($3::text IS NULL OR candidate.title ILIKE '%'||$3||'%' OR candidate.description ILIKE '%'||$3||'%' OR candidate.code ILIKE '%'||$3||'%')
+      AND ($4::text IS NULL OR candidate.discipline_a=$4 OR candidate.discipline_b=$4)
+      AND ($5::text IS NULL OR candidate.conflict_type_id=$5 OR EXISTS(SELECT 1 FROM coordination_resolution_method_conflict_types link WHERE link.company_id=$1 AND link.resolution_method_revision_id=candidate.revision_id AND link.conflict_type_id=$5))
+      AND ($6::text IS NULL OR candidate.element_type_a=$6 OR candidate.element_type_b=$6)
+      AND ($7::text IS NULL OR candidate.category=$7)
+      AND ($8::text IS NULL OR candidate.method_id=$8)
+      AND ($9::text IS NULL OR candidate.status=$9)
+      AND (cardinality($10::text[])=0 OR candidate.tags ?& $10::text[])
+      AND ($11::integer IS NULL OR EXISTS(
+        SELECT 1 FROM coordination_project_cases project_case
+        LEFT JOIN coordination_conflict_type_revisions case_conflict ON case_conflict.id=project_case.conflict_type_revision_id AND case_conflict.company_id=project_case.company_id
+        LEFT JOIN coordination_resolution_method_revisions case_method ON case_method.id=project_case.resolution_method_revision_id AND case_method.company_id=project_case.company_id
+        WHERE project_case.company_id=$1 AND project_case.project_id=$11 AND (
+          case_conflict.conflict_type_id=candidate.entity_id OR case_method.resolution_method_id=candidate.entity_id OR
+          (candidate.entity_type='coordination_rule' AND EXISTS(SELECT 1 FROM coordination_resolution_method_rules method_rule WHERE method_rule.company_id=$1 AND method_rule.resolution_method_revision_id=case_method.id AND method_rule.rule_revision_id=candidate.revision_id)))))
+      ORDER BY candidate.entity_type,lower(candidate.title),candidate.entity_id,candidate.revision_id
+      LIMIT $12 OFFSET $13`,[companyId,input.includeDrafts,keyword,discipline,input.conflictTypeId??null,element,category,input.methodId??null,input.status??null,tags,input.projectId??null,pageSize+1,(page-1)*pageSize]);
+    return {items:result.rows.slice(0,pageSize),page,pageSize,hasMore:result.rows.length>pageSize};
+  }
 
   async getConflictType(companyIdInput: number, conflictTypeId: string, includeDrafts = true): Promise<Record<string, unknown> | null> {
     const companyId = positive(companyIdInput, "companyId");

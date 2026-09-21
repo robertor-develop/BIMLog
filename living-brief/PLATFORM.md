@@ -65,6 +65,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/routes/contract-item-workflows.ts
 - artifacts/api-server/src/routes/conventions.ts
 - artifacts/api-server/src/routes/coordination-hub.ts
+- artifacts/api-server/src/routes/coordination-knowledge.ts
 - artifacts/api-server/src/routes/coordination.ts
 - artifacts/api-server/src/routes/coordinator-actions.ts
 - artifacts/api-server/src/routes/dashboard_briefing.ts
@@ -159,6 +160,7 @@ It changes only when the code structure or curated architectural facts change.
 - deliveryWorkflowTemplatesRouter
 - companyPricingTemplatesRouter
 - workflowGovernancePoliciesRouter
+- coordinationKnowledgeRouter
 
 ## Backend middlewares (artifacts/api-server/src/middlewares)
 - artifacts/api-server/src/middlewares/auth.ts
@@ -303,6 +305,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-hub-runtime.behavior.ts
 - artifacts/api-server/src/lib/coordination-hub-service.behavior.ts
 - artifacts/api-server/src/lib/coordination-hub-service.ts
+- artifacts/api-server/src/lib/coordination-knowledge-authorization.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-authorization.ts
+- artifacts/api-server/src/lib/coordination-knowledge-conflict-api.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-contract.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-contract.ts
 - artifacts/api-server/src/lib/coordination-knowledge-database.behavior.ts
@@ -310,6 +315,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-knowledge-migration.ts
 - artifacts/api-server/src/lib/coordination-knowledge-repository.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-repository.ts
+- artifacts/api-server/src/lib/coordination-knowledge-rules-methods-api.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-search.behavior.ts
 - artifacts/api-server/src/lib/coordination-release-readiness.behavior.ts
 - artifacts/api-server/src/lib/coordination-release-readiness.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
