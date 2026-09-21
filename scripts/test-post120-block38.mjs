@@ -7,8 +7,8 @@ const inventory = JSON.parse(read("living-brief/OPEN_LOOP_DISPOSITIONS.json"));
 
 assert.equal(inventory.schemaVersion, 2, "open-loop inventory uses the typed ownership contract");
 assert.equal((openLoop.match(/CURRENT_OPEN_LOOP_AUTHORITY/g) ?? []).length, 1, "exactly one current authority marker exists");
-assert.equal(inventory.currentAuthority.heading, "Current open-loop authority — post-120 Block 39 — 2026-09-21");
-assert.equal(inventory.currentAuthority.uncheckedItems.length, 2, "current authority owns physical 2021 remediation and deferred 2025 field evidence after Build 195 source closure");
+assert.equal(inventory.currentAuthority.heading, "Current open-loop authority — post-120 Block 40 — 2026-09-21");
+assert.equal(inventory.currentAuthority.uncheckedItems.length, 2, "current authority preserves physical 2021 remediation and deferred 2025 field evidence after Build 200 source closure");
 assert.deepEqual(inventory.duplicateStatements, [], "duplicate unchecked statements are prohibited");
 assert.equal(inventory.reconciledDuplicateGroups.length, 7, "all seven discovered historical duplicate loops remain explicitly reconciled");
 
