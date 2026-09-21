@@ -3053,3 +3053,6 @@ This is the operating register for unfinished BIMLog work. It exists so customer
 - [x] Correct the 2021/2025 package installer so future upgrades replace the shared legacy bundle with a verified Pulse-only bundle and preserve exact rollback evidence.
 - [ ] Run connected Navisworks Manage 2025 field acceptance on a workstation where 2025 is already installed; do not substitute simulation evidence or modify Navisworks licensing to manufacture this gate.
 - [ ] After that connected 2025 result, complete Build 120 exact-source push, Replit Shell publication without Agents, and authenticated visible-Chrome smoke.
+- [x] Builds 206–210 passed the exact gate, reached both GitHub refs at `98eeb3da15b497982a73cf13014e187fd4303ca1`, published as Replit receipt `d4ff8790`, and passed exact-identity authenticated Chrome smoke. Native/installers were unchanged.
+- [x] Builds 211–214: verify preserved isolated backup/restore evidence, rehearse disposable exact-identity rollback, harden monotonic session ordering, and enforce bounded fail-closed provider retries.
+- [ ] Build 215: pass the exact complete pre-push gate and push both authoritative refs. Publication remains due only at Build 220.

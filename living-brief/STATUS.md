@@ -2305,3 +2305,9 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Block 40 is live at exact source `227c4d541dc17d46ee6f5b7937f616f23af4c2b5`, release `v1.05.N18-P36`, and Replit receipt `99ce6600`; its authenticated Chrome route, viewport, two-tab, and session acceptance passed.
 - Block 41 changes no database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license. Build 205 is push-only; publication and authenticated visible-Chrome smoke remain due at Build 210.
 - The exact-head build proved that Platform authority must remain generator-owned; commit `0503c26580ef70b23d64052debe31131f2e20ef4` binds the Block 41 section to `generate-platform-md.ts` before final reconciliation.
+
+## 120-build stabilization program — Block 43 source acceptance — 2026-09-21
+
+- Block 42 is live at exact source `98eeb3da15b497982a73cf13014e187fd4303ca1`, release `v1.05.N18-P36`, package `bimlog-98eeb3da15b49798-4657b63db5e44747`, and Replit receipt `d4ff8790`; authenticated dashboard, project, company-governance, Lens Next, reload, and two-tab smoke passed.
+- Builds 211–215 revalidate the preserved isolated backup/restore evidence, rehearse exact-identity rollback on a disposable target, make session mutation ordering strictly monotonic, and fail provider retries closed on candidate drift, exhausted attempts, or ambiguous promotion.
+- Block 43 changes no database/schema, customer data, Native source, installer, bridge, package, provider configuration, Autodesk load path, or Navisworks license. Build 215 is push-only; publication and authenticated visible-Chrome smoke remain due at Build 220.
