@@ -16,6 +16,14 @@ import {
 } from "lucide-react";
 import { logClientError } from "@/lib/client-log";
 import { downloadGovernedCurrentViewPdf } from "@/components/PrintPdfButton";
+import {
+  buildConventionDocumentPayload,
+  buildRevisionCodes,
+  readSavedConventionFoundation,
+  resolveConventionSetupStatus,
+  savedConventionLevelsNeedRepair,
+  validateConventionDocumentState,
+} from "./convention-builder/convention-document-state";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
@@ -456,12 +464,6 @@ function buildLevelList(
   if (hasRoof) codes.push(roofCode || "RF");
   if (includeZZ) codes.push("ZZ");
   return codes.map(code => ({ id: uid(), code }));
-}
-
-function buildRevisionCodes(format: "alpha" | "numerical" | "custom", custom: string[]): string[] {
-  if (format === "alpha") return ["A","B","C","D","E","F","G","H","I","J","K","L","M","N","O","P"];
-  if (format === "numerical") return ["P01","P02","P03","P04","C01","C02","C03","C04","S0","S1","S2"];
-  return custom;
 }
 
 // ─── hydrate wizard state from an accepted AI discovery result ────────────────
@@ -4465,19 +4467,16 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
   const hasHydratedFoundational = useRef(false);
   useEffect(() => {
     if (hasHydratedFoundational.current || !convention) return;
-    const conv = convention as any;
-    const savedSep: "-" | "_" = conv.separator === "_" ? "_" : "-";
-    const projCodeField = (conv.fields || []).find((f: any) => f.label === "Project Code");
-    const codes: string[] = Array.isArray(projCodeField?.allowedValues) ? projCodeField.allowedValues as string[] : [];
-    if (!conv.separator && codes.length === 0) return; // no useful data yet
+    const foundation = readSavedConventionFoundation(convention as any);
+    if (!(convention as any).separator && foundation.companyCodes.length === 0) return; // no useful data yet
     hasHydratedFoundational.current = true;
     setWs(s => ({
       ...s,
-      separator: savedSep,
-      enforceUppercase: typeof conv.enforceUppercase === "boolean" ? conv.enforceUppercase : s.enforceUppercase,
-      applyCharLimits: typeof conv.applyCharLimits === "boolean" ? conv.applyCharLimits : s.applyCharLimits,
-      ...(codes.length > 0
-        ? { companies: codes.map(code => ({ id: uid(), name: code, code })) }
+      separator: foundation.separator,
+      enforceUppercase: foundation.enforceUppercase ?? s.enforceUppercase,
+      applyCharLimits: foundation.applyCharLimits ?? s.applyCharLimits,
+      ...(foundation.companyCodes.length > 0
+        ? { companies: foundation.companyCodes.map(code => ({ id: uid(), name: code, code })) }
         : {}),
     }));
   }, [convention]);
@@ -4488,25 +4487,18 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
   const hasHydratedLevels = useRef(false);
   useEffect(() => {
     if (hasHydratedLevels.current || !convention) return;
-    const conv = convention as any;
-    const fields = Array.isArray(conv.fields) ? conv.fields : [];
-    const levelField = fields.find((f: any) => f.label === "Level");
-    if (!levelField) return; // genuinely new convention with no saved fields — keep the default
+    const foundation = readSavedConventionFoundation(convention as any);
+    if (foundation.levelCodes === null) return; // genuinely new convention with no saved fields — keep the default
     hasHydratedLevels.current = true;
-    const codes: string[] = Array.isArray(levelField.allowedValues) ? levelField.allowedValues : [];
-    setWs(s => ({ ...s, levelList: codes.map((code: string) => ({ id: uid(), code })) }));
+    setWs(s => ({ ...s, levelList: foundation.levelCodes!.map(code => ({ id: uid(), code })) }));
   }, [convention]);
 
-  const setupStatus: "not_started" | "in_progress" | "completed" =
-    (convention as any)?.setupStatus === "completed" ? "completed"
-    : (convention as any)?.setupStatus === "in_progress" ? "in_progress"
-    : "not_started";
+  const setupStatus = resolveConventionSetupStatus(convention as any);
 
   // Decision 3: a completed convention whose saved "Level" field is empty must be flagged for
   // repair, not silently defaulted.
-  const savedLevelField = (convention as any)?.fields?.find((f: any) => f.label === "Level");
-  const levelsNeedRepair = setupStatus === "completed" && !!savedLevelField
-    && (!Array.isArray(savedLevelField.allowedValues) || savedLevelField.allowedValues.length === 0);
+  const savedFoundation = readSavedConventionFoundation(convention as any);
+  const levelsNeedRepair = savedConventionLevelsNeedRepair(setupStatus, savedFoundation);
 
   const hasAutoLoaded = useRef(false);
   useEffect(() => {
@@ -4613,24 +4605,17 @@ export function ConventionBuilder({ projectId, isAdmin = false, currentUserRole 
   });
 
   const handleSave = () => {
-    const levels = ws.levelList.map(l => l.code);
-    const selectedDiscs  = ws.disciplines.filter(d => d.selected);
-    const selectedDocs   = ws.docTypes.filter(d => d.selected);
-    const selectedStatus = ws.statusCodes.filter(sc => sc.selected);
-    const revCodes = buildRevisionCodes(ws.revisionFormat, ws.customRevisions);
-    const seqVals  = Array.from({ length: Math.min(10, Math.pow(10, ws.seqDigits) - 1) }, (_, i) => String(i + 1).padStart(ws.seqDigits, "0"));
-    const fields = [
-      { label: "Project Code", fieldOrder: 0, allowedValues: ws.companies.map(c => c.code) },
-      { label: "Originator",   fieldOrder: 1, allowedValues: ws.companies.map(c => c.code) },
-      { label: "Discipline",   fieldOrder: 2, allowedValues: selectedDiscs.map(d => d.code) },
-      { label: "Level",        fieldOrder: 3, allowedValues: levels },
-      { label: "Type",         fieldOrder: 4, allowedValues: selectedDocs.map(d => d.code) },
-      { label: "Sequence",     fieldOrder: 5, allowedValues: seqVals },
-      { label: "Status",       fieldOrder: 6, allowedValues: selectedStatus.map(sc => sc.code) },
-      { label: "Revision",     fieldOrder: 7, allowedValues: revCodes },
-    ];
+    const validation = validateConventionDocumentState(ws);
+    if (!validation.valid) {
+      toast({
+        title: w("Complete the required convention fields before saving", "Complete los campos requeridos de la convención antes de guardar", lang),
+        description: validation.errors.join(", "),
+        variant: "destructive",
+      });
+      return;
+    }
     setIsSaving(true);
-    mutate({ projectId, data: { separator: ws.separator, isActive: true, enforceUppercase: ws.enforceUppercase, applyCharLimits: ws.applyCharLimits, fields, markCompleted: true, ...(ws.userGuidance ? { userGuidance: ws.userGuidance } : {}) } as any });
+    mutate({ projectId, data: buildConventionDocumentPayload(ws) as any });
   };
 
   const [foundationalUnlocked, setFoundationalUnlocked] = useState(false);
