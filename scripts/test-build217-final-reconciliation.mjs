@@ -11,9 +11,9 @@ if (census.status !== "PASS" || census.totals.trackedFiles < 1 || census.totals.
   throw new Error("Build 216 repository census is missing or empty.");
 if (audit.status !== "PASS" || audit.counts.P0 !== 0 || audit.baseline.unexpectedP1.length !== 0)
   throw new Error("Final audit contains a P0 or an unclassified P1 identity.");
-if (current.length !== 2 || provider.length !== 0 || field.length !== 2)
-  throw new Error("Current open-loop authority must contain only the two field-evidence items after Build 220 provider closure.");
-if (!field.some((item) => item.statement.includes("Navisworks 2021")) || !field.some((item) => item.statement.includes("Navisworks 2025")))
-  throw new Error("The two independent physical Navisworks evidence items were not preserved.");
+if (current.length !== 1 || provider.length !== 0 || field.length !== 1)
+  throw new Error("Current open-loop authority must contain only the deferred Navisworks 2025 field-evidence item after Platform and 2021 closure.");
+if (!field[0].statement.includes("Navisworks 2025") || !field[0].statement.includes("Ruben"))
+  throw new Error("Ruben's deferred physical Navisworks 2025 evidence item was not preserved.");
 
-console.log(`BUILD217_FINAL_RECONCILIATION=PASS P0=0 P1=${audit.counts.P1} unexpectedP1=0 currentProvider=0 fieldEvidence=2 activeHistorical=${open.counts.ACTIVE - current.length}`);
+console.log(`BUILD217_FINAL_RECONCILIATION=PASS P0=0 P1=${audit.counts.P1} unexpectedP1=0 currentProvider=0 fieldEvidence=1 activeHistorical=${open.counts.ACTIVE - current.length}`);

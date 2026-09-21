@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "be7860a07f15c7515f7dc0f9552bb712156969777a729f6dec9f87ba0fc0e735",
-  "itemCount": 144,
+  "sourceSha256": "6f966659a473fc51358049a9fb636ec622a70eea46110ee5f1f9411f4af165ad",
+  "itemCount": 143,
   "counts": {
-    "ACTIVE": 111,
+    "ACTIVE": 110,
     "SUPERSEDED": 21,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -25,7 +25,6 @@
     "marker": "CURRENT_OPEN_LOOP_AUTHORITY",
     "heading": "Current open-loop authority — post-120 Block 44 — 2026-09-21",
     "uncheckedItems": [
-      "d6d4fdfe5947cf72",
       "8ec464a6e8ed4a7b"
     ]
   },
@@ -61,24 +60,6 @@
     }
   ],
   "items": [
-    {
-      "id": "d6d4fdfe5947cf72",
-      "sourceLine": 22,
-      "heading": "Current open-loop authority — post-120 Block 44 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
-      "statement": "Install the corrected P36 package in the physical Navisworks 2021 environment and verify the retired direct-load `BIMLogNavisPlugin` path is absent while Pulse and Lens Next remain available. Source/package correction is complete; this is the remaining installed-environment proof.",
-      "classification": "ACTIVE",
-      "workClass": "FIELD_EVIDENCE",
-      "ownership": {
-        "owner": "Field acceptance",
-        "route": null,
-        "module": "evidence/field-acceptance"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:22",
-        "Current open-loop authority — post-120 Block 44 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
-      ],
-      "currentAuthority": true
-    },
     {
       "id": "8ec464a6e8ed4a7b",
       "sourceLine": 23,
