@@ -117,6 +117,8 @@ Status: source accepted pending the exact-head full gate, push, established Repl
 - 174: add partial-save, resume, denial, and upload-failure tests.
 - 175: run full gate and push.
 
+Status: implemented and focused verification passed. Build 175 is the exact-head full-gate and push-only boundary. Native and installers did not change; publication remains scheduled for Build 180.
+
 ## Block 36 — Builds 176–180 — submittals decomposition
 
 - 176: separate submittal list/query state.

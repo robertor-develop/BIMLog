@@ -2229,3 +2229,9 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Navisworks Manage 2021 now loads exactly two active BIMLog bundles: a verified Pulse-only `BIMLog.bundle` and `BIMLogLensNext2021.bundle` P36. Original/Legacy Lens is absent, Pulse is preserved, the complete WebView2 dependency tree is installed, and Lens Next starts its authenticated embedded workspace and loopback bridge without the former missing-assembly crash.
 - The plugin-only cutover did not change Navisworks licensing, the BIMLog Platform, database, schema, or customer data. Dual-year isolated installer simulations prove the corrected 2021/2025 package contract replaces the old shared Lens/Pulse bundle with a Pulse-only bundle and retains rollback evidence.
 - Navisworks Manage 2025 is not installed on this workstation. Physical 2025 launch remains explicitly unclaimed and is assigned to Ruben as post-closure field confirmation; it no longer blocks Build 120 by Roberto's direct decision.
+
+## 120-build stabilization program — Block 35 candidate — 2026-09-21
+
+- Builds 171–175 separate Job Intake schema/browser state from the 2,900-line workspace, centralize upload and spreadsheet-mapping request contracts, and preserve revision-bound autosave/recovery behavior.
+- Spreadsheet inspection remains deterministic with zero AI credits; PDF/Word remain manual-review evidence. A permanent contract rejects any future AI text/file operation until funding source, estimate, and user confirmation are all visible.
+- Partial recovery, stale/equal revision handling, upload-failure preservation, denial/error state retention, document-assistance classification, and AI cost gating are bound to the normal pre-push gate. No database/schema, customer data, Native, installer, bridge, provider, or production mutation is included. Build 175 is push-only; publication remains due at Build 180.

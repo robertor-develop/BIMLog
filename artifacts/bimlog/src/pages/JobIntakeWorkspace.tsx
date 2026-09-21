@@ -33,171 +33,35 @@ import {
   rateForApuProfile,
 } from "@/lib/job-intake-apu-rates";
 import { applySoleApuToUnboundItems, contractApuCoverage, soleCompatibleApuVersion } from "@/lib/job-intake-apu-default";
+import {
+  blankJobIntakeData,
+  clearMatchingJobIntakeRecovery,
+  jobIntakeStages,
+  preserveJobIntakeActiveStage,
+  preserveJobIntakeRecovery,
+  preserveJobIntakeSetupMode,
+  readJobIntakeActiveStage,
+  readJobIntakeRecovery,
+  readJobIntakeSetupMode,
+  removeJobIntakeRecovery,
+  resolveJobIntakeRecovery,
+  type JobIntakeStage,
+} from "@/lib/job-intake-workspace-state";
+import {
+  buildJobIntakeMappingRequest,
+  defaultJobIntakeMappingForm,
+  jobIntakeDocumentAssistance,
+  jobIntakeMappingSheet,
+  prepareJobIntakeUpload,
+  type JobIntakeMappingForm,
+} from "@/lib/job-intake-document-contract";
 
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const reportIntakeWorkflowFailure = (code: "JOB_INTAKE_AUTOSAVE_RETRY_FAILED" | "JOB_INTAKE_AUTOSAVE_FAILED") =>
   console.error(JSON.stringify({ event: "bimlog_workflow_failure", code }));
-const recoveryKey = (projectId: number) =>
-  `bimlog:job-intake-recovery:${projectId}`;
-
-function readRecovery(projectId: number) {
-  try {
-    const parsed = JSON.parse(
-      window.localStorage.getItem(recoveryKey(projectId)) || "null",
-    );
-    return parsed &&
-      typeof parsed === "object" &&
-      Number.isInteger(parsed.revision) &&
-      parsed.data &&
-      typeof parsed.data === "object"
-      ? parsed
-      : null;
-  } catch {
-    return null;
-  }
-}
-
-function preserveRecovery(projectId: number, revision: number, data: unknown) {
-  try {
-    window.localStorage.setItem(
-      recoveryKey(projectId),
-      JSON.stringify({ revision, data, preservedAt: new Date().toISOString() }),
-    );
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function clearMatchingRecovery(projectId: number, data: unknown) {
-  const recovered = readRecovery(projectId);
-  if (recovered && JSON.stringify(recovered.data) === JSON.stringify(data)) {
-    try {
-      window.localStorage.removeItem(recoveryKey(projectId));
-    } catch {
-      // A completed server save remains authoritative if browser storage is unavailable.
-    }
-  }
-}
-
-function removeRecovery(projectId: number) {
-  try {
-    window.localStorage.removeItem(recoveryKey(projectId));
-  } catch {
-    // The next load safely ignores unreadable browser storage.
-  }
-}
-const stages = [
-  "documents",
-  "identity",
-  "contract",
-  "scope",
-  "delivery",
-  "team",
-  "review",
-] as const;
-type IntakeStage = (typeof stages)[number];
-const activeStageKey = (projectId: number) =>
-  `bimlog:job-intake-active-stage:${projectId}`;
-const setupModeKey = (projectId: number) =>
-  `bimlog:job-intake-setup-mode:${projectId}`;
-
-function readSetupMode(projectId: number) {
-  try {
-    return window.localStorage.getItem(setupModeKey(projectId)) === "advanced" ? "advanced" : "quick";
-  } catch {
-    return "quick";
-  }
-}
-
-function preserveSetupMode(projectId: number, mode: "quick" | "advanced") {
-  try {
-    window.localStorage.setItem(setupModeKey(projectId), mode);
-  } catch {
-    // Mode switching remains usable when browser storage is unavailable.
-  }
-}
-
-function readActiveStage(projectId: number): IntakeStage {
-  if (!Number.isInteger(projectId) || projectId <= 0) return "documents";
-  try {
-    const saved = window.localStorage.getItem(activeStageKey(projectId));
-    return stages.includes(saved as IntakeStage)
-      ? (saved as IntakeStage)
-      : "documents";
-  } catch {
-    return "documents";
-  }
-}
-
-function preserveActiveStage(projectId: number, stage: IntakeStage) {
-  if (!Number.isInteger(projectId) || projectId <= 0) return;
-  try {
-    window.localStorage.setItem(activeStageKey(projectId), stage);
-  } catch {
-    // Section navigation remains usable when browser storage is unavailable.
-  }
-}
-const blank = {
-  identity: {
-    jobName: "",
-    jobCode: "",
-    clientName: "",
-    clientCompany: "",
-    location: "",
-    currency: "USD",
-    primaryContact: "",
-    startDate: "",
-    targetCompletionDate: "",
-  },
-  scopeItems: [] as any[],
-  commercial: {
-    contracts: [
-      {
-        id: "PRIMARY",
-        title: "",
-        quotationNumber: "",
-        contractNumber: "",
-        counterpartyName: "",
-        perspective: "downstream",
-        contractType: "subcontract",
-        reportingType: "base_contract",
-        reportingStatus: "work_in_progress",
-        paymentTerms: "",
-        effectiveDate: "",
-        completionDate: "",
-      },
-    ],
-    title: "",
-    quotationNumber: "",
-    contractNumber: "",
-    counterpartyName: "",
-    perspective: "downstream",
-    contractType: "subcontract",
-    budgetSnapshotId: "",
-    paymentTerms: "",
-    effectiveDate: "",
-    completionDate: "",
-  },
-  delivery: {
-    workflowTemplate: "bim-submittal",
-    submittalStrategy: "",
-    milestoneSummary: "",
-  },
-  governance: { budgetPolicy: "standard" },
-  team: {
-    projectLeaderUserId: null as number | null,
-    assignments: [] as any[],
-  },
-  review: {
-    sourceConfirmed: false,
-    scopeConfirmed: false,
-    pricingConfirmed: false,
-    contractConfirmed: false,
-    deliveryConfirmed: false,
-    teamConfirmed: false,
-  },
-};
+const stages = jobIntakeStages;
+type IntakeStage = JobIntakeStage;
+const blank = blankJobIntakeData;
 
 const css = `
 .ji-workspace{border:0;padding:0;margin:0;min-width:0}
@@ -223,7 +87,7 @@ export function JobIntakeWorkspace() {
     [busy, setBusy] = useState(false),
     [guide, setGuide] = useState(true),
     [active, setActive] = useState<IntakeStage>(() =>
-      readActiveStage(projectId),
+      readJobIntakeActiveStage(projectId),
     ),
     [apu, setApu] = useState<any>(null),
     [apuVersions, setApuVersions] = useState<any[]>([]),
@@ -234,7 +98,7 @@ export function JobIntakeWorkspace() {
     [eligibleProjectUserId, setEligibleProjectUserId] = useState(""),
     [addingProjectMember, setAddingProjectMember] = useState(false),
     [mappingDocument, setMappingDocument] = useState<any>(null),
-    [mappingForm, setMappingForm] = useState({
+    [mappingForm, setMappingForm] = useState<JobIntakeMappingForm>({
       sheetName: "",
       headerRow: 1,
       nameColumn: 0,
@@ -245,7 +109,7 @@ export function JobIntakeWorkspace() {
     [saveState, setSaveState] = useState<
       "saved" | "unsaved" | "saving" | "error"
     >("saved");
-  const [quickMode, setQuickMode] = useState(() => readSetupMode(projectId) === "quick");
+  const [quickMode, setQuickMode] = useState(() => readJobIntakeSetupMode(projectId) === "quick");
   const [approvedClientIds, setApprovedClientIds] = useState<number[] | null | undefined>(undefined);
   const [clientCatalogError, setClientCatalogError] = useState(false);
   const [deliveryWorkflowChoices, setDeliveryWorkflowChoices] = useState<any>({ mode: "defaults_allowed", options: [] });
@@ -253,8 +117,8 @@ export function JobIntakeWorkspace() {
   const [pricingTemplateOptionsError, setPricingTemplateOptionsError] = useState(false);
   const [pricingTemplateOptionsLoading, setPricingTemplateOptionsLoading] = useState(false);
   const [showReadinessDetails, setShowReadinessDetails] = useState(false);
-  const showQuickMode = () => { preserveSetupMode(projectId, "quick"); setQuickMode(true); };
-  const showAdvancedMode = () => { preserveSetupMode(projectId, "advanced"); setQuickMode(false); };
+  const showQuickMode = () => { preserveJobIntakeSetupMode(projectId, "quick"); setQuickMode(true); };
+  const showAdvancedMode = () => { preserveJobIntakeSetupMode(projectId, "advanced"); setQuickMode(false); };
   const [exportingPdf, setExportingPdf] = useState(false);
   const [packageCreation, setPackageCreation] = useState<{ assignmentIndex: number; title: string; dimensionType: string; dimensionValue: string } | null>(null);
   const [pdfSections, setPdfSections] = useState({ identity: true, scope: true, contracts: true, delivery: true, team: true, review: true });
@@ -269,9 +133,9 @@ export function JobIntakeWorkspace() {
     autosaveErrorRef = useRef(""),
     saveTimerRef = useRef<number | null>(null);
   const openCommercialPrerequisite = (destination: string) => {
-    preserveActiveStage(projectId, "scope");
-    preserveSetupMode(projectId, "advanced");
-    preserveRecovery(projectId, revisionRef.current, dataRef.current);
+    preserveJobIntakeActiveStage(projectId, "scope");
+    preserveJobIntakeSetupMode(projectId, "advanced");
+    preserveJobIntakeRecovery(projectId, revisionRef.current, dataRef.current);
     setLocation(destination);
   };
   projectIdRef.current = projectId;
@@ -338,11 +202,10 @@ export function JobIntakeWorkspace() {
               throw new Error(payload?.error || tt("Project member list failed to load.", "No se pudo cargar la lista de miembros del proyecto."));
             });
       if (projectIdRef.current !== projectId) return;
-      const recovered = readRecovery(projectId);
-      const canRecover =
-        recovered?.revision === current.revision &&
-        JSON.stringify(recovered.data) !== JSON.stringify(current.data);
-      let loadedData = canRecover ? recovered.data : current.data;
+      const recovered = readJobIntakeRecovery(projectId);
+      const recovery = resolveJobIntakeRecovery(current.revision, current.data, recovered);
+      const canRecover = recovery.resume;
+      let loadedData = recovery.data;
       const availableApuVersions = Array.isArray(plan?.data?.history) ? plan.data.history : [];
       const soleApu = current.capabilities?.costValuePlanner && current.status !== "activated"
         ? soleCompatibleApuVersion(availableApuVersions, loadedData?.identity?.currency)
@@ -377,8 +240,8 @@ export function JobIntakeWorkspace() {
             "Se recuperaron Partidas de Contrato no guardadas de este navegador. El guardado autom\u00e1tico se reintenta ahora.",
           ),
         );
-      else if (recovered && recovered.revision < current.revision)
-        removeRecovery(projectId);
+      else if (recovery.discardStale)
+        removeJobIntakeRecovery(projectId);
       setApu(plan?.data?.plan ?? null);
       setApuVersions(availableApuVersions);
       setWorkspace(budget);
@@ -408,8 +271,8 @@ export function JobIntakeWorkspace() {
     revisionRef.current = 0;
     pendingSaveRef.current = null;
     autosaveErrorRef.current = "";
-    setActive(readActiveStage(projectId));
-    setQuickMode(readSetupMode(projectId) === "quick");
+    setActive(readJobIntakeActiveStage(projectId));
+    setQuickMode(readJobIntakeSetupMode(projectId) === "quick");
     setMappingDocument(null);
     setMappingPreview(null);
     setMappingForm({ sheetName: "", headerRow: 1, nameColumn: 0, quantityColumn: 1 });
@@ -446,7 +309,7 @@ export function JobIntakeWorkspace() {
 
   useEffect(() => {
     if (!intake) return;
-    const restored = readActiveStage(projectId);
+    const restored = readJobIntakeActiveStage(projectId);
     setActive(restored);
     const frame = window.requestAnimationFrame(() =>
       document
@@ -499,7 +362,7 @@ export function JobIntakeWorkspace() {
                 autosaveErrorRef.current = "";
               }
               lastSavedRef.current = JSON.stringify(result.data);
-              clearMatchingRecovery(projectId, next);
+              clearMatchingJobIntakeRecovery(projectId, next);
               lastResult = result;
               setIntake(result);
               if (JSON.stringify(dataRef.current) === JSON.stringify(next)) {
@@ -552,7 +415,7 @@ export function JobIntakeWorkspace() {
     )
       return;
     setSaveState("unsaved");
-    if (!preserveRecovery(projectId, revisionRef.current, data)) {
+    if (!preserveJobIntakeRecovery(projectId, revisionRef.current, data)) {
       setSaveState("error");
       setError(
         tt(
@@ -831,8 +694,7 @@ export function JobIntakeWorkspace() {
   };
   const upload = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    const form = event.currentTarget,
-      formData = new FormData(form);
+    const form = event.currentTarget;
     setBusy(true);
     setError("");
     try {
@@ -844,10 +706,9 @@ export function JobIntakeWorkspace() {
             "El ingreso no está listo para guardar.",
           ),
         );
-      formData.set("expectedRevision", String(saved.revision));
       await api(`/projects/${projectId}/intake/documents`, {
         method: "POST",
-        body: formData,
+        body: prepareJobIntakeUpload(form, saved.revision),
       });
       form.reset();
       await load();
@@ -876,15 +737,10 @@ export function JobIntakeWorkspace() {
     }
   };
   const openMapper = (doc: any) => {
-    const sheet = doc.extractionSummary?.sheets?.[0];
-    if (!sheet) return;
+    const nextMapping = defaultJobIntakeMappingForm(doc);
+    if (!nextMapping) return;
     setMappingDocument(doc);
-    setMappingForm({
-      sheetName: sheet.name,
-      headerRow: 1,
-      nameColumn: 0,
-      quantityColumn: Math.min(1, Math.max(0, sheet.columnCount - 1)),
-    });
+    setMappingForm(nextMapping);
     setMappingPreview(null);
     setError("");
   };
@@ -899,7 +755,7 @@ export function JobIntakeWorkspace() {
           {
             method: "POST",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify(mappingForm),
+            body: JSON.stringify(buildJobIntakeMappingRequest(mappingForm)),
           },
         ),
       );
@@ -929,7 +785,7 @@ export function JobIntakeWorkspace() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            ...mappingForm,
+            ...buildJobIntakeMappingRequest(mappingForm),
             expectedRevision: saved.revision,
             mappingFingerprint: mappingPreview.mappingFingerprint,
           }),
@@ -1124,7 +980,7 @@ export function JobIntakeWorkspace() {
     !data.review[field];
   const openFinalReview = () => {
     setActive("review");
-    preserveActiveStage(projectId, "review");
+    preserveJobIntakeActiveStage(projectId, "review");
     window.requestAnimationFrame(() => document.getElementById("ji-review")?.scrollIntoView({ block: "start" }));
   };
   const reviewItems = [
@@ -1185,9 +1041,7 @@ export function JobIntakeWorkspace() {
       true,
     ],
   ].filter(([, , visible]) => visible) as Array<[string, string, boolean]>;
-  const mappingSheet = mappingDocument?.extractionSummary?.sheets?.find(
-    (sheet: any) => sheet.name === mappingForm.sheetName,
-  );
+  const mappingSheet = jobIntakeMappingSheet(mappingDocument, mappingForm);
   const headerCells = mappingSheet?.rows?.[mappingForm.headerRow - 1] ?? [];
   const columnLabel = (index: number) => {
     let value = index + 1,
@@ -1421,7 +1275,7 @@ export function JobIntakeWorkspace() {
                     aria-current={active === key ? "step" : undefined}
                     onClick={() => {
                       setActive(key);
-                      preserveActiveStage(projectId, key);
+                      preserveJobIntakeActiveStage(projectId, key);
                       document
                         .getElementById(`ji-${key}`)
                         ?.scrollIntoView({ behavior: "smooth" });
@@ -1507,6 +1361,13 @@ export function JobIntakeWorkspace() {
                     <FileUp size={15} /> {tt("Upload", "Cargar")}
                   </button>
                 </form>
+                <div className="ji-lock" data-testid="job-intake-assistance-cost-gate">
+                  <strong>{tt("Document assistance cost boundary", "Límite de costo de asistencia documental")}</strong>
+                  <p>{tt(
+                    "Spreadsheet inspection and mapping are deterministic and use zero AI credits. PDF and Word stay manual-review evidence. Any future AI file reading must show its funding source and estimated credit cost before a separate confirmation can run it.",
+                    "La inspección y el mapeo de hojas de cálculo son deterministas y usan cero créditos de IA. PDF y Word permanecen como evidencia de revisión manual. Cualquier lectura futura de archivos con IA debe mostrar su fuente de financiamiento y el costo estimado en créditos antes de una confirmación separada.",
+                  )}</p>
+                </div>
                 {intake.documents?.map(
                   (doc: any) =>
                     !doc.removedAt && (
@@ -1517,6 +1378,11 @@ export function JobIntakeWorkspace() {
                             {categoryLabel(doc.category)} ·{" "}
                             {doc.revisionLabel || "—"} · SHA{" "}
                             {doc.sourceHash?.slice(0, 12)}…
+                          </div>
+                          <div className="ji-small" data-assistance-mode={jobIntakeDocumentAssistance(doc).mode}>
+                            {jobIntakeDocumentAssistance(doc).mode === "deterministic_spreadsheet"
+                              ? tt("Deterministic spreadsheet inspection · 0 AI credits", "Inspección determinista de hoja de cálculo · 0 créditos IA")
+                              : tt("Manual-review evidence · no AI file reading", "Evidencia de revisión manual · sin lectura de archivos por IA")}
                           </div>
                         </div>
                         <div className="ji-actions">
