@@ -1,6 +1,6 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — post-120 Block 42 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Current open-loop authority — post-120 Block 44 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
 - [x] Builds 121–180 are complete. Build 180 source reached `origin/master` at `9dab04343e90e8ad94391c5967a4b9f804ee1f4d`, was published through the established Replit Shell path without Replit Agents, and passed authenticated production smoke.
 - [x] Builds 181–185 generated the route/interconnection ownership graph, removed duplicate route identities through compatibility redirects, passed the exact clean full gate, and were pushed at `8df24fd15763b1b76a4e7fc0fab0983f560e3698`.
@@ -11,13 +11,14 @@
 - [x] Exact-head correction `8c396efe9825950a0be08ee570eb9dc8be9715e7` advances the permanent current-authority regression from Block 39 to Block 40 without changing either remaining physical Navisworks field item.
 - [x] Builds 201–205 establish route-level bundle baselines, reduce the initial entry by 10.34%, safely defer Feedback/editor code, and bind performance budgets to the standard gate; exact source `5fa1570a91f4c51a8a1a6b0a9fdf120aea03fef2` is pushed on the stabilization branch.
 - [x] Builds 206–209 inventory all 605 production API endpoints, close proven Autodesk and project-route authority gaps, and add permanent cross-scope plus upload/export/AI/Lens Next regression coverage.
-- [ ] Build 210 must complete exact-head full gate, push, Replit Shell publication without Replit Agents, exact live identity, and authenticated multi-role Chrome smoke before the current ten-build batch is live accepted.
+- [x] Build 210 passed the exact-head full gate, reached both GitHub refs at `98eeb3da15b497982a73cf13014e187fd4303ca1`, published through Replit Shell without Replit Agents as receipt `d4ff8790`, and passed exact-identity authenticated multi-role Chrome smoke.
 - [x] Block 42 implementation authority is preserved at exact commit `5ab189dc38bbf79e166384b24eacdd8a255c9773`; subsequent reconciliation may update release evidence but not silently change the accepted scope.
 - [x] Exact regression correction `ae986f1e0062ddd41eada78140ccb4b051388032` keeps Build 210 as the sole current provider boundary while preserving both independent Navisworks field items.
 - [x] Deterministic AI inventory refresh `a4d3b23767d2bb6122cdcebd708a735a34d3f1b4` updates shifted source locations only and introduces no AI behavior or authority change.
 - [x] Current-authority generator correction `4fa559db38f88c96824b8f616026805cfa9869f1` prevents the Build 210 provider boundary from displacing either Navisworks field-evidence item.
 - [x] The first Build 210 publication attempt failed before promotion because sixteen generated `runtime-retired-*` closures expanded the Replit workspace to 11 GiB. Corrective commit `d05d63d3ed60bf28261bbcb815ef872805972305` makes post-success cleanup permanent while preserving the active runtime; repeat the exact gate, push, publish, and live smoke under the existing authorization.
 - [x] Deterministic Platform inventory commit `80c377031960605cff6e898143f89be5fb273e83` records the new regression file; no product, database, Native, installer, or provider behavior changed.
+- [ ] Build 220 must pass the exact complete gate, push both authoritative refs, publish the accumulated Builds 211–220 through Replit Shell without Replit Agents, prove exact live identity, and pass full authenticated visible-Chrome smoke before the stabilization program is frozen.
 - [ ] Install the corrected P36 package in the physical Navisworks 2021 environment and verify the retired direct-load `BIMLogNavisPlugin` path is absent while Pulse and Lens Next remain available. Source/package correction is complete; this is the remaining installed-environment proof.
 - [ ] Physical Navisworks 2025 confirmation remains assigned to Ruben as post-closure field evidence. It does not reopen Build 119 and does not block this Platform-only publication.
 
