@@ -260,7 +260,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/rfis.ts",
-      "line": 2669,
+      "line": 2565,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -270,7 +270,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/rfis.ts",
-      "line": 2735,
+      "line": 2631,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -280,7 +280,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/rfis.ts",
-      "line": 3094,
+      "line": 2990,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -290,7 +290,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/rfis.ts",
-      "line": 3172,
+      "line": 3068,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -300,7 +300,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/rfis.ts",
-      "line": 3281,
+      "line": 3177,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -310,7 +310,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/rfis.ts",
-      "line": 3295,
+      "line": 3191,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -320,7 +320,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/rfis.ts",
-      "line": 3854,
+      "line": 3750,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -330,7 +330,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/rfis.ts",
-      "line": 3875,
+      "line": 3771,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
