@@ -19,13 +19,17 @@ import {
   useMeetingDraftMachine,
 } from "./meetings/meeting-editor-state";
 import {
+  MeetingActionItemsTable,
+  type MeetingActionItem,
+} from "./meetings/MeetingActionItemsTable";
+import { MeetingParticipantField } from "./meetings/MeetingParticipantField";
+import {
   ClipboardList,
   CheckCircle2,
   Calendar,
   MapPin,
   Users,
   Sparkles,
-  AlertTriangle,
   Plus,
   Download,
   ChevronDown,
@@ -272,14 +276,7 @@ interface ViewpointRow {
   deadline: string;
 }
 
-interface ActionItem {
-  id: number;
-  description: string;
-  assignedToName?: string;
-  dueDate?: string;
-  status: string;
-  isOverdue?: boolean;
-}
+type ActionItem = MeetingActionItem;
 
 const CELL_STYLE = {
   border: "1px solid #E5E7EB",
@@ -4423,139 +4420,15 @@ export function MeetingsTab({
           />
         )}
 
-        {!loading &&
-          view === "actions" &&
-          (actionItems.length === 0 ? (
-            <div style={{ textAlign: "center", padding: 60, color: "#9CA3AF" }}>
-              <CheckCircle2
-                size={40}
-                color="#D1D5DB"
-                style={{ display: "block", margin: "0 auto 12px" }}
-              />
-              <div style={{ fontWeight: 600 }}>
-                {t("No action items yet", "Sin acciones aún")}
-              </div>
-            </div>
-          ) : (
-            <div
-              style={{
-                background: "white",
-                border: "1px solid #E5E7EB",
-                borderRadius: 10,
-                overflow: "hidden",
-              }}
-            >
-              <table style={{ width: "100%", borderCollapse: "collapse" }}>
-                <thead>
-                  <tr style={{ background: "#F9FAFB" }}>
-                    {[
-                      t("Description", "Descripción"),
-                      t("Assigned To", "Asignado"),
-                      t("Due Date", "Fecha"),
-                      t("Status", "Estado"),
-                      "",
-                    ].map((h) => (
-                      <th
-                        key={h}
-                        style={{
-                          padding: "10px 12px",
-                          fontSize: 11,
-                          fontWeight: 700,
-                          textAlign: "left",
-                          color: "#6B7280",
-                          borderBottom: "1px solid #E5E7EB",
-                          textTransform: "uppercase",
-                        }}
-                      >
-                        {h}
-                      </th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {actionItems.map((ai) => (
-                    <tr
-                      key={ai.id}
-                      data-meeting-action-id={ai.id}
-                      style={{
-                        background: ai.isOverdue ? "#FEF2F2" : "white",
-                        borderBottom: "1px solid #F3F4F6",
-                      }}
-                    >
-                      <td style={{ padding: "10px 12px" }}>
-                        <div style={{ fontWeight: 500, fontSize: 13 }}>
-                          {ai.description}
-                        </div>
-                        {ai.isOverdue && (
-                          <div
-                            style={{
-                              fontSize: 11,
-                              color: "#DC2626",
-                              display: "flex",
-                              alignItems: "center",
-                              gap: 3,
-                              marginTop: 2,
-                            }}
-                          >
-                            <AlertTriangle size={10} />{" "}
-                            {t("Overdue", "Vencido")}
-                          </div>
-                        )}
-                      </td>
-                      <td style={{ padding: "10px 12px", fontSize: 13 }}>
-                        {ai.assignedToName || "?"}
-                      </td>
-                      <td
-                        style={{
-                          padding: "10px 12px",
-                          fontSize: 12,
-                          color: "#6B7280",
-                        }}
-                      >
-                        {ai.dueDate
-                          ? new Date(ai.dueDate).toLocaleDateString()
-                          : "?"}
-                      </td>
-                      <td style={{ padding: "10px 12px" }}>
-                        <span
-                          style={{
-                            padding: "2px 8px",
-                            borderRadius: 20,
-                            fontSize: 11,
-                            fontWeight: 600,
-                            background:
-                              ai.status === "completed"
-                                ? "#DCFCE7"
-                                : ai.isOverdue
-                                  ? "#FEE2E2"
-                                  : "#FEF3C7",
-                            color:
-                              ai.status === "completed"
-                                ? "#16A34A"
-                                : ai.isOverdue
-                                  ? "#DC2626"
-                                  : "#D97706",
-                          }}
-                        >
-                          {statusLabel(ai.status)}
-                        </span>
-                      </td>
-                      <td style={{ padding: "10px 12px" }}>
-                        {canWrite && ai.status !== "completed" && (
-                          <button
-                            className="btn btn-sm btn-outline"
-                            onClick={() => updateActionItem(ai.id, "completed")}
-                          >
-                            {t("Done", "Listo")}
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ))}
+        {!loading && view === "actions" && (
+          <MeetingActionItemsTable
+            items={actionItems}
+            canWrite={canWrite}
+            statusLabel={statusLabel}
+            t={t}
+            onComplete={(id) => void updateActionItem(id, "completed")}
+          />
+        )}
         <RfiSelectorModal />
         <SubmittalSelectorModal />
         <LensSelectorModal />
@@ -5049,17 +4922,15 @@ export function MeetingsTab({
                   return (
                     <Fragment key={i}>
                       <tr style={{ borderBottom: "1px solid #F3F4F6" }}>
-                        <td style={CELL_STYLE}>
-                          <input
-                            value={a.trade}
-                            onChange={(e) => {
-                              const arr = [...attendees];
-                              arr[i] = { ...arr[i], trade: e.target.value };
-                              setAttendees(arr);
-                            }}
-                            style={inputStyle}
-                          />
-                        </td>
+                        <MeetingParticipantField
+                          label={t("Trade", "Trade")}
+                          value={a.trade}
+                          onChange={(value) => {
+                            const arr = [...attendees];
+                            arr[i] = { ...arr[i], trade: value };
+                            setAttendees(arr);
+                          }}
+                        />
                         <td style={CELL_STYLE}>
                           <input
                             list={companyListId}
@@ -5269,39 +5140,35 @@ export function MeetingsTab({
                             </div>
                           )}
                         </td>
-                        <td style={CELL_STYLE}>
-                          <input
-                            value={a.role}
-                            onChange={(e) => {
-                              const arr = [...attendees];
-                              arr[i] = { ...arr[i], role: e.target.value };
-                              setAttendees(arr);
-                            }}
-                            style={inputStyle}
-                          />
-                        </td>
-                        <td style={CELL_STYLE}>
-                          <input
-                            value={a.email}
-                            onChange={(e) => {
-                              const arr = [...attendees];
-                              arr[i] = { ...arr[i], email: e.target.value };
-                              setAttendees(arr);
-                            }}
-                            style={inputStyle}
-                          />
-                        </td>
-                        <td style={CELL_STYLE}>
-                          <input
-                            value={a.phone}
-                            onChange={(e) => {
-                              const arr = [...attendees];
-                              arr[i] = { ...arr[i], phone: e.target.value };
-                              setAttendees(arr);
-                            }}
-                            style={inputStyle}
-                          />
-                        </td>
+                        <MeetingParticipantField
+                          label={t("Role", "Rol")}
+                          value={a.role}
+                          onChange={(value) => {
+                            const arr = [...attendees];
+                            arr[i] = { ...arr[i], role: value };
+                            setAttendees(arr);
+                          }}
+                        />
+                        <MeetingParticipantField
+                          type="email"
+                          label={t("Email", "Email")}
+                          value={a.email}
+                          onChange={(value) => {
+                            const arr = [...attendees];
+                            arr[i] = { ...arr[i], email: value };
+                            setAttendees(arr);
+                          }}
+                        />
+                        <MeetingParticipantField
+                          type="tel"
+                          label={t("Phone", "Teléfono")}
+                          value={a.phone}
+                          onChange={(value) => {
+                            const arr = [...attendees];
+                            arr[i] = { ...arr[i], phone: value };
+                            setAttendees(arr);
+                          }}
+                        />
                         <td style={CELL_STYLE}>
                           <button
                             onClick={() => {
