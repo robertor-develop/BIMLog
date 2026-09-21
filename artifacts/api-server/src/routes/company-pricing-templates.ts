@@ -1,7 +1,7 @@
 import { createHash, randomUUID } from "node:crypto";
 import { Router, type Request, type Response } from "express";
 import { pool } from "@workspace/db";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { ensureCompanyMasterCatalogSchema } from "../lib/company-master-catalog-migration";
 import { waitForGenericApuPersistenceMigration } from "../lib/generic-apu-persistence-migration";
 import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
@@ -47,7 +47,7 @@ function respondError(error: unknown, res: Response) {
   res.status(500).json({ code: "PRICING_TEMPLATE_UNAVAILABLE" });
 }
 
-router.get("/projects/:projectId/pricing-template-options", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/pricing-template-options", authMiddleware, requireProjectMember(), async (req, res) => {
   try {
     await waitForGenericApuPersistenceMigration();
     const projectId = Number(parameter(req.params.projectId));

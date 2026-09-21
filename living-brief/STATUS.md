@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Post-120 stabilization — Block 42 source acceptance — 2026-09-21
+
+- Builds 206–209 inventory all 605 production API endpoints, close the proven Autodesk and project-route guard gaps, and permanently reject anonymous, cross-tenant, cross-project, guessed-project, and mismatched-object requests.
+- Upload, export, AI control-plane, and Lens Next sensitive-operation boundaries are explicitly covered by the standard source gate.
+- Build 210 is the ten-build publication boundary. Exact clean-head push, Replit Shell publication without Replit Agents, exact live identity, and authenticated multi-role Chrome acceptance are active.
+- No database/schema, customer data, Native source, installer, package, bridge protocol, provider credential/configuration, or Navisworks license changed; focused Navisworks smoke is not retriggered.
+
 ## Post-120 stabilization — Block 33 source acceptance — 2026-09-20
 
 - Builds 161–164 separate clash-report parsing, report identity, status presentation, project/report/clash provenance, and Visual Package/reference truth from the monolithic route.

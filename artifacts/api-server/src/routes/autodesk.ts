@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { authMiddleware } from "../middlewares/auth";
 import { isLegacyAutodeskAllowed } from "../lib/provider-governance";
 
 declare module "express-session" {
@@ -134,7 +135,7 @@ router.get("/autodesk/callback", async (req, res) => {
   }
 });
 
-router.get("/autodesk/hubs", async (req, res) => {
+router.get("/autodesk/hubs", authMiddleware, async (req, res) => {
   const token = req.session.apsToken;
 
   if (!token) {
@@ -154,7 +155,7 @@ router.get("/autodesk/hubs", async (req, res) => {
   }
 });
 
-router.get("/autodesk/projects/:hubId", async (req, res) => {
+router.get("/autodesk/projects/:hubId", authMiddleware, async (req, res) => {
   const token = req.session.apsToken;
 
   if (!token) {

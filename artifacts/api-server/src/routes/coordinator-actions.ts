@@ -4,7 +4,7 @@ import { projectsTable } from "@workspace/db/schema";
 import { eq } from "drizzle-orm";
 import { addPageNumbers, applyPdfDownloadHeaders, computeContentHash, createPdfDocument, drawBrandedHeader, PALETTE, REPORT_THEMES } from "../lib/pdf-kit";
 import { drawOperationalRegisterTable } from "../lib/operational-register-table";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import {
   CoordinatorRegisterError,
   loadCoordinatorActionRegister,
@@ -32,6 +32,7 @@ import {
 } from "../lib/project-analytics-current-view-export";
 
 const router: IRouter = Router();
+router.use("/projects/:projectId", authMiddleware, requireProjectMember());
 
 const safeText = (value: unknown) =>
   String(value ?? "")

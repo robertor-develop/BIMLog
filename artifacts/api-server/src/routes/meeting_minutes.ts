@@ -3569,6 +3569,7 @@ router.patch(
 router.post(
   "/projects/:projectId/meetings/transcribe-audio",
   authMiddleware,
+  requireProjectMember(),
   singleFileUpload({ fileSize: 500 * 1024 * 1024 }, "audio"),
   async (req, res) => {
     const projectId = Number(req.params.projectId);

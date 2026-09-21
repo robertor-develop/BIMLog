@@ -1,7 +1,7 @@
 import { Router, type Request, type Response, type NextFunction } from "express";
 import crypto from "crypto";
 import { pool } from "@workspace/db";
-import { authMiddleware } from "../middlewares/auth";
+import { authMiddleware, requireProjectMember } from "../middlewares/auth";
 import { listUsage, type Actor } from "../lib/ai-control-plane";
 import {
   TelegramProductError,
@@ -122,12 +122,12 @@ router.put("/integrations/telegram/notification-settings/modules/rfi", authMiddl
   catch (err) { sendTelegramError(res, err); }
 });
 
-router.get("/projects/:projectId/rfis/:rfiId/notification-context", authMiddleware, async (req, res) => {
+router.get("/projects/:projectId/rfis/:rfiId/notification-context", authMiddleware, requireProjectMember(), async (req, res) => {
   try { res.json(await getRfiNotificationContext(req.user!.userId, Number(req.params.projectId), Number(req.params.rfiId))); }
   catch (err) { sendTelegramError(res, err); }
 });
 
-router.put("/projects/:projectId/rfis/:rfiId/notification-watch", authMiddleware, async (req, res) => {
+router.put("/projects/:projectId/rfis/:rfiId/notification-watch", authMiddleware, requireProjectMember(), async (req, res) => {
   try { res.json(await setRfiWatch(req.user!.userId, Number(req.params.projectId), Number(req.params.rfiId), req.body?.enabled === true)); }
   catch (err) { sendTelegramError(res, err); }
 });
