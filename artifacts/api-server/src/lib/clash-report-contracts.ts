@@ -112,7 +112,10 @@ export function mapClashSpreadsheetRows(rows: unknown[][], mapping: ClashColumnM
   const getDate = (row: unknown[], index: number) => {
     if (index < 0 || !row[index]) return null;
     try { return spreadsheetDateOnlyToUtcDate(row[index], serial => XLSX.SSF.parse_date_code(serial)); }
-    catch { return null; }
+    catch (error) {
+      console.warn("[clash-report-contracts] invalid spreadsheet date", { errorName: error instanceof Error ? error.name : "UnknownError" });
+      return null;
+    }
   };
   return rows.map(row => ({
     clashIdOriginal: get(row, mapping.viewpoint) || get(row, mapping.clashId),
