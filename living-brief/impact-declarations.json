@@ -36151,6 +36151,101 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "49fe180a83862e813080515929275cb0176541f44354391459d584a43056941f"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block01-gate-correction-20260921",
+      "reviewedThroughCommit": "09e7d5232122cee15fcf5c775a3a85e842992b1a",
+      "reviewedAt": "2026-09-21T12:08:07-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "correct_deterministic_inventory",
+          "run_complete_gate",
+          "push_exact_fast_forward"
+        ],
+        "operatorOnly": [
+          "replit_publication_at_build235",
+          "ruben_physical_navisworks_2025_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "deterministic_evidence_failure",
+          "disposition": "corrected_and_regressed",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The complete gate found route-table inventory output dependent on Windows line endings and an overbroad import regex. Source now normalizes EOLs and captures only the exact schema import."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product or stakeholder authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The gate and release workflow remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction strengthens deterministic evidence without weakening a gate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The route and database runtime are unchanged; only their generated ownership inventory was corrected."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No plugin or Native behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the complete-gate root-cause correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop records the correction as closed without changing the next product block."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The corrected graph and permanent assertion preserve auditable evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "96aee8f8e133a392afc55d2dfa52a2702c8d429c05e620f9914855d91bc9678f"
     }
   ]
 }
