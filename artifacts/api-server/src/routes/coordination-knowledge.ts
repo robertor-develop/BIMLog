@@ -50,6 +50,9 @@ function pageNumber(value: unknown, field: string, fallback: number, maximum: nu
   const parsed=Number(value); if(!Number.isSafeInteger(parsed)||parsed<1||parsed>maximum) throw new CoordinationKnowledgeContractError("KNOWLEDGE_SEARCH_INVALID",field);
   return parsed;
 }
+const evidenceEntityTypes=["conflict_type","coordination_rule","resolution_method","project_case","lesson_proposal"] as const;
+const evidenceRoles=["attachment","reference","before","after","supporting"] as const;
+function evidenceChoice(value:unknown,choices:readonly string[],field:string):string{if(typeof value!=="string"||!choices.includes(value))throw new CoordinationKnowledgeContractError("KNOWLEDGE_EVIDENCE_INVALID",field);return value;}
 function conflictContent(body: Record<string, unknown>, actorId: number, companyId: number, conflictTypeId: string, revision: number) {
   return validateConflictTypeRevision({
     id: randomUUID(), conflictTypeId, companyId, revision, status: "draft",
@@ -86,6 +89,10 @@ router.get("/coordination-knowledge/capabilities", authMiddleware, async (req, r
     res.json({ companyId: resolved.companyId, isCompanyPmo: resolved.isCompanyPmo, isSuperAdmin: resolved.isSuperAdmin, capabilities: [...resolved.capabilities] });
   } catch (error) { sendError(res, error); }
 });
+
+router.get("/coordination-knowledge/evidence/:entityType/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved"),entityType=evidenceChoice(parameter(req.params.entityType),evidenceEntityTypes,"entityType"),entityId=parameter(req.params.id);res.json({items:await repository.listEvidence(resolved.companyId,entityType,entityId)});}catch(error){sendError(res,error);}});
+router.get("/coordination-knowledge/events/:entityType/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved"),entityType=evidenceChoice(parameter(req.params.entityType),evidenceEntityTypes,"entityType"),entityId=parameter(req.params.id);res.json({items:await repository.listEvents(resolved.companyId,entityType,entityId)});}catch(error){sendError(res,error);}});
+router.post("/coordination-knowledge/evidence/:entityType/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"edit_draft");if(!resolved.projectId)throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_REQUIRED","projectId");const entityType=evidenceChoice(parameter(req.params.entityType),evidenceEntityTypes,"entityType"),entityId=parameter(req.params.id),fileId=Number(req.body?.fileId);if(!Number.isSafeInteger(fileId)||fileId<1)throw new CoordinationKnowledgeContractError("KNOWLEDGE_EVIDENCE_INVALID","fileId");const item=await repository.addEvidence({companyId:resolved.companyId,projectId:resolved.projectId,entityType,entityId,revisionId:typeof req.body?.revisionId==="string"?req.body.revisionId:null,fileId,evidenceRole:evidenceChoice(req.body?.evidenceRole,evidenceRoles,"evidenceRole"),actorId:resolved.userId});res.status(201).json({item});}catch(error){sendError(res,error);}});
 
 router.get("/coordination-knowledge/search",authMiddleware,async(req,res)=>{
   try{

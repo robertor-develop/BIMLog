@@ -271,6 +271,32 @@ export class CoordinationKnowledgeRepository {
       AND ($3::boolean OR revision.status='approved') ORDER BY revision.revision DESC`, [methodId,companyId,includeDrafts])).rows;
   }
 
+  async listEvidence(companyIdInput:number,entityType:string,entityId:string):Promise<Array<Record<string,unknown>>>{
+    const companyId=positive(companyIdInput,"companyId");
+    return (await this.pool.query(`SELECT evidence.*,file.file_name,file.file_type,file.file_size
+      FROM coordination_knowledge_evidence evidence JOIN files file ON file.id=evidence.file_id
+      WHERE evidence.company_id=$1 AND evidence.entity_type=$2 AND evidence.entity_id=$3 ORDER BY evidence.added_at DESC`,[companyId,entityType,entityId])).rows;
+  }
+
+  async listEvents(companyIdInput:number,entityType:string,entityId:string):Promise<Array<Record<string,unknown>>>{
+    const companyId=positive(companyIdInput,"companyId");
+    return (await this.pool.query(`SELECT event.id,event.entity_type,event.entity_id,event.revision_id,event.action,event.actor_id,event.details,event.created_at
+      FROM coordination_knowledge_events event WHERE event.company_id=$1 AND event.entity_type=$2 AND event.entity_id=$3 ORDER BY event.created_at DESC`,[companyId,entityType,entityId])).rows;
+  }
+
+  async addEvidence(input:{companyId:number;projectId:number;entityType:string;entityId:string;revisionId:string|null;fileId:number;evidenceRole:string;actorId:number}):Promise<Record<string,unknown>>{
+    const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),fileId=positive(input.fileId,"fileId");
+    return transaction(this.pool,async client=>{
+      const file=(await client.query(`SELECT id FROM files WHERE id=$1 AND project_id=$2`,[fileId,projectId])).rows[0];
+      if(!file)throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_EVIDENCE_FILE_SCOPE_INVALID","The file is unavailable in the authorized project.",403);
+      const inserted=(await client.query(`INSERT INTO coordination_knowledge_evidence(id,company_id,project_id,entity_type,entity_id,revision_id,file_id,evidence_role,added_by_id)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) RETURNING *`,[randomUUID(),companyId,projectId,input.entityType,input.entityId,input.revisionId,fileId,input.evidenceRole,input.actorId])).rows[0];
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,project_id,entity_type,entity_id,revision_id,action,actor_id,details)
+        VALUES($1,$2,$3,$4,$5,$6,'evidence_linked',$7,$8::jsonb)`,[randomUUID(),companyId,projectId,input.entityType,input.entityId,input.revisionId,input.actorId,JSON.stringify({fileId,evidenceRole:input.evidenceRole})]);
+      return inserted;
+    });
+  }
+
   async appendResolutionMethodRevision(input: { companyId: number; resolutionMethodId: string; expectedRevision: number; actorId: number;
     action: "update_draft" | "submit_for_review" | "return_to_draft" | "approve" | "revise" | "retire";
     rationale?: string;

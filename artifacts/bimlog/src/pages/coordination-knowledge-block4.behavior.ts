@@ -22,3 +22,8 @@ expect("return-to-draft","Lifecycle UI must expose governed review return.");
 expect("expectedRevision:item.revision,rationale","Lifecycle decisions must send concurrency authority and rationale.");
 expect("KNOWLEDGE_RATIONALE_REQUIRED","Server must reject missing lifecycle rationale.");
 console.log("coordination knowledge Build 243 behavior: PASS");
+expect("coordination_knowledge_evidence","Evidence must reuse the governed immutable evidence store.");
+expect("JOIN files file ON file.id=evidence.file_id","Evidence projection must reuse canonical file metadata.");
+expect("/api/v1/projects/${entry.project_id}/files/${entry.file_id}/download","Downloads must pass through the existing project-authorized file route.");
+expect("coordination_knowledge_events","Detail views must expose immutable audit events.");
+console.log("coordination knowledge Build 244 behavior: PASS");

@@ -93,6 +93,11 @@
 .knowledge-lifecycle textarea { min-height: 72px; border: 1px solid #b8c8dc; border-radius: 7px; padding: 9px; font: inherit; }
 .knowledge-lifecycle>div { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; }
 .knowledge-lifecycle p { color: #a92828; }
+.knowledge-evidence { margin-top: 20px; padding-top: 18px; border-top: 1px solid #dce6f1; }
+.knowledge-evidence ul { padding-left: 20px; }
+.knowledge-evidence-link { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.knowledge-evidence-link input,.knowledge-evidence-link select { min-height: 40px; border: 1px solid #b8c8dc; border-radius: 7px; padding: 8px; }
+.knowledge-evidence-link button { grid-column: 1 / -1; }
 .knowledge-editor label:has(textarea) { grid-column: 1 / -1; }
 @media (max-width: 700px) { .knowledge-workspace { inset: 8px; width: auto; } .knowledge-editor { grid-template-columns: 1fr; } .knowledge-editor label,.knowledge-editor label:nth-child(2),.knowledge-editor-buttons { grid-column: 1; } }
 .knowledge-lessons { margin-top: 20px; }
