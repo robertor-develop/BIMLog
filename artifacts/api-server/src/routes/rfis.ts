@@ -65,6 +65,13 @@ import {
   createPostgresProcoreRfiImportStore,
   type ProcoreRfiPgPool,
 } from "../lib/procore-rfi-import-atomic-store";
+import {
+  filterRfisForRegister,
+  parseRfiRegisterFilters,
+  rfiRegisterBallInCourt,
+  RfiQueryValidationError,
+  type RfiRegisterFilters,
+} from "../lib/rfi-query-service";
 const router: IRouter = Router();
 
 class RfiReportSettingsOverrideError extends Error {
@@ -1305,122 +1312,6 @@ function makeRfiListPdf(
 
 // ─── GET /projects/:projectId/rfis ──────────────────────────────────────────
 type RfiRegisterView = "list" | "log";
-type RfiRegisterDateField = "created" | "requested" | "required" | "answered";
-type RfiRegisterSort = "created_asc" | "created_desc" | "required_asc" | "required_desc" | "number_asc" | "number_desc" | "status_asc";
-type RfiRegisterFilters = {
-  status: string;
-  search: string;
-  rfiType: string;
-  ballInCourt: string;
-  sentToCompany: string;
-  dateField: RfiRegisterDateField;
-  dateFrom: Date | null;
-  dateTo: Date | null;
-  sort: RfiRegisterSort;
-};
-
-function textQuery(value: unknown, fallback = ""): string {
-  const raw = Array.isArray(value) ? value[0] : value;
-  return typeof raw === "string" ? raw.trim().slice(0, 160) : fallback;
-}
-
-function parseDateQuery(value: unknown, label: string): Date | null {
-  const raw = textQuery(value);
-  if (!raw) return null;
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(raw)) throw new RfiAttachmentError(`Invalid ${label}.`, 400);
-  const parsed = new Date(`${raw}T00:00:00`);
-  if (Number.isNaN(parsed.getTime())) throw new RfiAttachmentError(`Invalid ${label}.`, 400);
-  return parsed;
-}
-
-function rfiRegisterDateValue(rfi: typeof rfisTable.$inferSelect, field: RfiRegisterDateField) {
-  if (field === "requested") return rfi.dateRequested || rfi.createdAt;
-  if (field === "required") return rfi.dateRequired || rfi.dueDate;
-  if (field === "answered") return rfi.dateAnswered || rfi.respondedAt;
-  return rfi.createdAt;
-}
-
-function rfiRegisterBallInCourt(
-  rfi: typeof rfisTable.$inferSelect,
-  creatorNames: ReadonlyMap<number, string>,
-) {
-  if (rfi.status === "closed") return "Closed";
-  if (rfi.sendStatus !== "sent" && !rfi.sentAt) {
-    return `${rfi.submittedByCompany || creatorNames.get(rfi.createdById) || "Author"} — to send`;
-  }
-  const storedResponsibility = rfi.ballInCourt?.trim();
-  if (storedResponsibility) return storedResponsibility;
-  if (rfi.status === "responded") {
-    return rfi.submittedByCompany || creatorNames.get(rfi.createdById) || "Unassigned";
-  }
-  return rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
-}
-
-function parseRfiRegisterFilters(query: Record<string, unknown>): RfiRegisterFilters {
-  const dateField = textQuery(query.date_field, "required");
-  const sort = textQuery(query.sort, "created_asc");
-  if (!["created", "requested", "required", "answered"].includes(dateField)) throw new RfiAttachmentError("Invalid RFI date field.", 400);
-  if (!["created_asc", "created_desc", "required_asc", "required_desc", "number_asc", "number_desc", "status_asc"].includes(sort)) throw new RfiAttachmentError("Invalid RFI sort.", 400);
-  const dateFrom = parseDateQuery(query.date_from, "date_from");
-  const dateTo = parseDateQuery(query.date_to, "date_to");
-  if (dateFrom && dateTo && dateFrom > dateTo) throw new RfiAttachmentError("date_from must be on or before date_to.", 400);
-  return {
-    status: textQuery(query.status, "all") || "all",
-    search: textQuery(query.search),
-    rfiType: textQuery(query.rfi_type, "all") || "all",
-    ballInCourt: textQuery(query.ball_in_court, "all") || "all",
-    sentToCompany: textQuery(query.sent_to_company, "all") || "all",
-    dateField: dateField as RfiRegisterDateField,
-    dateFrom,
-    dateTo,
-    sort: sort as RfiRegisterSort,
-  };
-}
-
-function filterRfisForRegisterPdf(
-  rfis: (typeof rfisTable.$inferSelect)[],
-  filters: RfiRegisterFilters,
-  creatorNames: ReadonlyMap<number, string>,
-) {
-  const q = filters.search.trim().toLowerCase();
-  return rfis
-    .filter(rfi => filters.status === "all" || rfi.status === filters.status)
-    .filter(rfi => filters.rfiType === "all" || (rfi.rfiType || "") === filters.rfiType)
-    .filter(rfi => filters.ballInCourt === "all" || rfiRegisterBallInCourt(rfi, creatorNames) === filters.ballInCourt)
-    .filter(rfi => filters.sentToCompany === "all" || (rfi.submittedToCompany || rfi.submittedToPerson || "") === filters.sentToCompany)
-    .filter(rfi => {
-      if (!filters.dateFrom && !filters.dateTo) return true;
-      const dateValue = rfiRegisterDateValue(rfi, filters.dateField);
-      if (!dateValue) return false;
-      const date = new Date(dateValue);
-      if (filters.dateFrom && date < filters.dateFrom) return false;
-      if (filters.dateTo) {
-        const end = new Date(filters.dateTo);
-        end.setHours(23, 59, 59, 999);
-        if (date > end) return false;
-      }
-      return true;
-    })
-    .filter(rfi => {
-      if (!q) return true;
-      return [rfi.number, rfi.subject, rfi.rfiType, rfiRegisterBallInCourt(rfi, creatorNames), rfi.submittedByCompany, rfi.submittedByContact, rfi.submittedToCompany, rfi.submittedToPerson]
-        .some(value => String(value || "").toLowerCase().includes(q));
-    })
-    .sort((left, right) => {
-      if (filters.sort === "created_desc") return new Date(right.createdAt).getTime() - new Date(left.createdAt).getTime();
-      if (filters.sort === "required_asc" || filters.sort === "required_desc") {
-        const leftDate = new Date(left.dateRequired || left.dueDate || "9999-12-31").getTime();
-        const rightDate = new Date(right.dateRequired || right.dueDate || "9999-12-31").getTime();
-        return filters.sort === "required_desc" ? rightDate - leftDate : leftDate - rightDate;
-      }
-      if (filters.sort === "number_asc" || filters.sort === "number_desc") {
-        const result = left.number.localeCompare(right.number, undefined, { numeric: true, sensitivity: "base" });
-        return filters.sort === "number_desc" ? -result : result;
-      }
-      if (filters.sort === "status_asc") return `${left.status}-${left.number}`.localeCompare(`${right.status}-${right.number}`, undefined, { numeric: true, sensitivity: "base" });
-      return new Date(left.createdAt).getTime() - new Date(right.createdAt).getTime();
-    });
-}
 
 export function renderGovernedRfiRegisterPdf(args: {
   view: RfiRegisterView;
@@ -1614,7 +1505,7 @@ router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjec
       ? await db.select({ id: usersTable.id, fullName: usersTable.fullName }).from(usersTable).where(inArray(usersTable.id, creatorIds))
       : [];
     const creatorNames = new Map(creators.map(creator => [creator.id, creator.fullName || ""]));
-    const rfis = filterRfisForRegisterPdf(allRfis, filters, creatorNames);
+    const rfis = filterRfisForRegister(allRfis, filters, creatorNames);
     const generatedAt = new Date();
     const output = renderGovernedRfiRegisterPdf({
       view,
@@ -1659,7 +1550,7 @@ router.get("/projects/:projectId/rfis/export-pdf", authMiddleware, requireProjec
     res.setHeader("Content-Length", buffer.length);
     res.send(buffer);
   } catch (error) {
-    if (error instanceof RfiAttachmentError) {
+    if (error instanceof RfiAttachmentError || error instanceof RfiQueryValidationError) {
       res.status(error.status).json({ error: error.message });
       return;
     }
