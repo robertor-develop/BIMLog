@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## Post-220 closure — Block 45 source acceptance — 2026-09-21
+
+- Builds 221–225 reconcile the completed Build 220 provider receipt, close the verified physical Navisworks 2021 P36 installation, preserve Ruben's physical Navisworks 2025 confirmation as the sole deferred field-evidence item, and bind those facts to permanent current-state regressions.
+- Build 220 is live at exact source `bfcba657f73ed0195957aa2ed6902c9358b74cce`, release `v1.05.N18-P36`, package `bimlog-bfcba657f73ed019-6da3bfa4ffbd1afd`, and Replit receipt `3a6db4ae`; `schemaAction=NONE` and authenticated dashboard, project, reports, control-center, governance, Lens Next, reload, and multi-tab smoke passed.
+- Physical Navisworks 2021 is closed with exactly Pulse plus Lens Next P36 active, Original/Legacy Lens and the retired direct loader absent, WebView2 complete, and licensing unchanged.
+- Ruben's physical Navisworks 2025 result remains open field evidence. It is not touched, simulated, waived, or treated as a Platform/code blocker; its result will be reconciled when Ruben provides it.
+- Block 45 changes no runtime product code, database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license. Build 225 is push-only; no publication or Chrome smoke is due at this five-build boundary.
+
 ## Post-120 stabilization — Block 42 source acceptance — 2026-09-21
 
 - Builds 206–209 inventory all 605 production API endpoints, close the proven Autodesk and project-route guard gaps, and permanently reject anonymous, cross-tenant, cross-project, guessed-project, and mismatched-object requests.
