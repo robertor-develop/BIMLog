@@ -18,10 +18,18 @@ type RuleRecord = { id: string; rule_id: string; code: string; revision: number;
 type RuleFilters = { search: string; applicability: string; status: string };
 type ResolutionMethodRecord = { id: string; resolution_method_id: string; code: string; revision: number; status: KnowledgeStatus; name: string; description: string; applicability: Record<string, unknown>; responsible_trade?: string | null; constraints: unknown[]; advantages: unknown[]; disadvantages: unknown[]; required_approvals: unknown[]; rfi_requirement: "yes" | "no" | "conditional"; details: Record<string, unknown>; conflict_type_ids: string[]; rule_revision_ids: string[] };
 type MethodFilters = { search: string; conflictType: string; trade: string; discipline: string; rfi: string; approval: string; status: string };
+type LessonQueueState = "proposed" | "under_review" | "approved" | "rejected" | "merged";
 
 const emptyConflictFilters: ConflictFilters = { search: "", discipline: "", element: "", category: "", status: "", tag: "" };
 const emptyRuleFilters: RuleFilters = { search: "", applicability: "", status: "" };
 const emptyMethodFilters: MethodFilters = { search: "", conflictType: "", trade: "", discipline: "", rfi: "", approval: "", status: "" };
+const lessonQueueStates: Array<{ id: LessonQueueState; en: string; es: string }> = [
+  { id: "proposed", en: "Proposed", es: "Propuestas" },
+  { id: "under_review", en: "Under Review", es: "En Revisión" },
+  { id: "approved", en: "Approved", es: "Aprobadas" },
+  { id: "rejected", en: "Rejected", es: "Rechazadas" },
+  { id: "merged", en: "Merged", es: "Fusionadas" },
+];
 const API_BASE = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 const values = (items: string[]) => [...new Set(items.filter(Boolean))].sort((a, b) => a.localeCompare(b));
 const normalized = (value: unknown) => String(value ?? "").toLocaleLowerCase();
@@ -56,6 +64,7 @@ export function CoordinationKnowledgeLibrary() {
   const [methodState, setMethodState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [methodError, setMethodError] = useState("");
   const [methodReloadKey, setMethodReloadKey] = useState(0);
+  const [lessonQueueState, setLessonQueueState] = useState<LessonQueueState>("proposed");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
@@ -171,6 +180,9 @@ export function CoordinationKnowledgeLibrary() {
   };
 
   const selected = sections.find(section => section.id === active)!;
+  const canReviewLessons = capability?.capabilities.includes("review") === true;
+  const canProposeLessons = capability?.capabilities.includes("propose_lesson") === true;
+  const canPromoteLessons = capability?.capabilities.includes("promote_approved_lesson") === true;
   const statusText = (status: KnowledgeStatus) => status === "under_review" ? t("Under review", "En revisión")
     : status === "approved" ? t("Approved", "Aprobado") : status === "retired" ? t("Retired", "Retirado") : t("Draft", "Borrador");
   const filterSelect = (label: string, key: keyof ConflictFilters, options: string[]) => <label>{label}<select value={conflictFilters[key]} onChange={event => setConflictFilters(current => ({ ...current, [key]: event.target.value }))}>
@@ -285,10 +297,27 @@ export function CoordinationKnowledgeLibrary() {
               <div className="knowledge-card-footer"><span>v{item.revision}</span><span>{t("Informational catalog", "Catálogo informativo")}</span></div>
             </article>; })}
           </div></>}
-        </div> : <div className="knowledge-placeholder" role="status">
-          <selected.icon aria-hidden />
-          <strong>{t("Workspace ready", "Espacio listo")}</strong>
-          <span>{t("Catalog content becomes available in the following builds of this block.", "El contenido del catálogo se habilita en los siguientes builds de este bloque.")}</span>
+        </div> : <div className="knowledge-lessons">
+          <p className="knowledge-access-note"><ShieldCheck aria-hidden /><span>{canReviewLessons ? t("Reviewer queue enabled for your company role.", "Cola de revisión habilitada para su rol de empresa.") : canProposeLessons ? t("You can propose lessons and follow their governed status. Review actions remain restricted.", "Puede proponer lecciones y seguir su estado gobernado. Las acciones de revisión permanecen restringidas.") : t("Read-only access to approved organizational learning.", "Acceso de solo lectura al aprendizaje organizacional aprobado.")}</span></p>
+          <div className="knowledge-lesson-policy">
+            <Lightbulb aria-hidden />
+            <div><strong>{t("Evidence before promotion", "Evidencia antes de promoción")}</strong><p>{t("Every proposal must retain its source issue and evidence link. Submission never approves or changes company knowledge automatically.", "Cada propuesta debe conservar el vínculo al incidente fuente y a su evidencia. El envío nunca aprueba ni cambia automáticamente el conocimiento de la empresa.")}</p></div>
+          </div>
+          <div className="knowledge-lesson-tabs" role="tablist" aria-label={t("Lessons Learned queue status", "Estado de la cola de Lecciones Aprendidas")}>
+            {lessonQueueStates.map(state => <button key={state.id} type="button" role="tab" aria-selected={lessonQueueState === state.id} onClick={() => setLessonQueueState(state.id)}>
+              <span>{es ? state.es : state.en}</span><span className="knowledge-lesson-count" aria-label={t("0 items", "0 elementos")}>0</span>
+            </button>)}
+          </div>
+          <section className="knowledge-lesson-queue" role="tabpanel" aria-live="polite">
+            <div className="knowledge-lesson-queue-heading"><div><h3>{es ? lessonQueueStates.find(state => state.id === lessonQueueState)?.es : lessonQueueStates.find(state => state.id === lessonQueueState)?.en}</h3><p>{t("Company-scoped, permission-aware review queue", "Cola de revisión por empresa y controlada por permisos")}</p></div>{canProposeLessons && <button type="button" disabled title={t("Proposal authoring is delivered in the governed authoring milestone.", "La creación de propuestas se entrega en el hito de autoría gobernada.")}>{t("Propose from an issue", "Proponer desde un incidente")}</button>}</div>
+            <div className="knowledge-placeholder" role="status"><Lightbulb aria-hidden /><strong>{t("No lessons in this queue", "No hay lecciones en esta cola")}</strong><span>{t("A proposal will appear here only after it is created from a source issue with supporting evidence. No automatic approval is performed.", "Una propuesta aparecerá aquí solo después de crearse desde un incidente fuente con evidencia de respaldo. No se realiza ninguna aprobación automática.")}</span></div>
+          </section>
+          <div className="knowledge-lesson-contract" aria-label={t("Lesson proposal evidence contract", "Contrato de evidencia de propuesta")}>
+            <div><strong>{t("Source issue", "Incidente fuente")}</strong><span>{t("Required immutable link", "Vínculo inmutable requerido")}</span></div>
+            <div><strong>{t("Supporting evidence", "Evidencia de respaldo")}</strong><span>{t("Required before review", "Requerida antes de revisión")}</span></div>
+            <div><strong>{t("Review authority", "Autoridad de revisión")}</strong><span>{canReviewLessons ? t("Available for governed review", "Disponible para revisión gobernada") : t("Not granted to this role", "No concedida a este rol")}</span></div>
+            <div><strong>{t("Library promotion", "Promoción a la biblioteca")}</strong><span>{canPromoteLessons ? t("Separate controlled action", "Acción controlada separada") : t("Restricted to company PMO", "Restringida al PMO de empresa")}</span></div>
+          </div>
         </div>}
       </section>
     </main>

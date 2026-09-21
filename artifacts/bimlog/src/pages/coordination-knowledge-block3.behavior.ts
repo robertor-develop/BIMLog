@@ -29,7 +29,13 @@ for (const field of ["conflict_type_ids", "responsible_trade", "rfi_requirement"
 assert.match(page, /Options, not instructions/); assert.match(page, /Historical reference only/); assert.match(page, /cannot be selected for a new resolution/);
 const repository = read("../../../api-server/src/lib/coordination-knowledge-repository.ts");
 assert.match(repository, /listResolutionMethods[\s\S]+conflict_type_ids[\s\S]+rule_revision_ids/);
+for (const queueState of ["proposed", "under_review", "approved", "rejected", "merged"]) assert.match(page, new RegExp(queueState));
+for (const capability of ["propose_lesson", "review", "promote_approved_lesson"]) assert.match(page, new RegExp(capability));
+assert.match(page, /Source issue/); assert.match(page, /Supporting evidence/);
+assert.match(page, /No automatic approval is performed/); assert.match(page, /Submission never approves or changes company knowledge automatically/);
+assert.match(page, /Separate controlled action/); assert.match(css, /knowledge-lesson-contract/);
 console.log("Coordination Knowledge Build 236 workspace shell: navigation, responsive layout and keyboard tabs passed");
 console.log("Coordination Knowledge Build 237 Conflict Type catalog: permission scope, filters, revision/status semantics and loading/empty/error states passed");
 console.log("Coordination Knowledge Build 238 Rules catalog: applicability/status filters, approval distinction, references and authorized revision history passed");
 console.log("Coordination Knowledge Build 239 Resolution Methods catalog: governed filters, related rules/cases, optional semantics and retired-selection protection passed");
+console.log("Coordination Knowledge Build 240 Lessons Learned queue shell: lifecycle states, permission boundaries, source evidence and no-auto-approval semantics passed");

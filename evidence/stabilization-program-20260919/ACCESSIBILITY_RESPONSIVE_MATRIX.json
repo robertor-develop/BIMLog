@@ -2,10 +2,10 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked route graph; deterministic",
   "counts": {
-    "routeTemplates": 40,
+    "routeTemplates": 41,
     "projectSurfaces": 19,
-    "customerSurfaces": 59,
-    "viewportCases": 177
+    "customerSurfaces": 60,
+    "viewportCases": 180
   },
   "viewports": [
     {
@@ -763,6 +763,29 @@
     },
     {
       "order": 42,
+      "path": "/knowledge",
+      "guard": "access",
+      "target": "CoordinationKnowledgeLibrary",
+      "samplePath": "/knowledge",
+      "routeKind": "customer-surface",
+      "themes": [
+        "light",
+        "dark"
+      ],
+      "reducedMotion": true,
+      "checks": [
+        "route-resolves-without-console-error",
+        "document-title-and-main-focus",
+        "keyboard-visible-focus",
+        "dialog-focus-containment-and-restoration",
+        "text-and-control-contrast",
+        "no-horizontal-page-overflow",
+        "touch-target-minimum",
+        "layout-stability"
+      ]
+    },
+    {
+      "order": 43,
       "path": "/admin",
       "guard": "access",
       "target": "AdminPanel",
@@ -785,7 +808,7 @@
       ]
     },
     {
-      "order": 43,
+      "order": 44,
       "path": "/feedback",
       "guard": "access",
       "target": "Dashboard",
@@ -808,7 +831,7 @@
       ]
     },
     {
-      "order": 44,
+      "order": 45,
       "path": "/total-control",
       "guard": "access",
       "target": "TotalControl",
@@ -831,7 +854,7 @@
       ]
     },
     {
-      "order": 45,
+      "order": 46,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief",
@@ -854,7 +877,7 @@
       ]
     },
     {
-      "order": 46,
+      "order": 47,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing",
@@ -877,7 +900,7 @@
       ]
     },
     {
-      "order": 47,
+      "order": 48,
       "path": "/features",
       "guard": "public",
       "target": "Features",
@@ -900,7 +923,7 @@
       ]
     },
     {
-      "order": 48,
+      "order": 49,
       "path": "/about",
       "guard": "public",
       "target": "About",
@@ -923,7 +946,7 @@
       ]
     },
     {
-      "order": 49,
+      "order": 50,
       "path": "/contact",
       "guard": "public",
       "target": "Contact",

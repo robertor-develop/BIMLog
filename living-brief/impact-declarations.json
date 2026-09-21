@@ -36624,6 +36624,98 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9c5b1ec015a25f7a5763a7e8e89d3f707ce40857e0b5e844fbf5c70cd805c60e"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block03-source-candidate-20260921",
+      "reviewedThroughCommit": "17456e0bd34aaa179d7d1d68ff241d1ab0fa2624",
+      "reviewedAt": "2026-09-21T18:22:14-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "knowledge_workspace_implementation",
+          "catalog_and_permission_regression",
+          "push_exact_fast_forward"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication_at_build245",
+          "authenticated_chrome_acceptance_at_build245"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "coordination_knowledge_workspace",
+          "disposition": "implemented_and_regressed",
+          "authorities": [
+            "platform",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Builds 236–240 add the company-scoped knowledge workspace, governed catalogs, and permission-aware Lessons Learned queue shell without changing canonical issue or Native authority."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating boundary changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed permission, evidence, and release gates remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The workspace implements the approved Coordination Knowledge Library direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The platform inventory now records the protected Coordination Knowledge page and its focused behavior contract."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Native, bridge, installer, package, or Navisworks behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 240 is a push-only boundary; publication remains scheduled for Build 245."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Governed authoring, embedded Lens guidance, and later field acceptance remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The UI exposes server-owned revision and approval evidence without creating a competing audit authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }

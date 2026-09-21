@@ -2,12 +2,12 @@
   "schemaVersion": 1,
   "generatedFrom": "tracked source; deterministic",
   "counts": {
-    "frontendRoutes": 52,
+    "frontendRoutes": 53,
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
     "apiRoutes": 625,
-    "frontendApiReferences": 231,
+    "frontendApiReferences": 236,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -269,66 +269,72 @@
     },
     {
       "order": 42,
+      "path": "/knowledge",
+      "guard": "access",
+      "target": "CoordinationKnowledgeLibrary"
+    },
+    {
+      "order": 43,
       "path": "/admin",
       "guard": "access",
       "target": "AdminPanel"
     },
     {
-      "order": 43,
+      "order": 44,
       "path": "/feedback",
       "guard": "access",
       "target": "Dashboard"
     },
     {
-      "order": 44,
+      "order": 45,
       "path": "/total-control",
       "guard": "access",
       "target": "TotalControl"
     },
     {
-      "order": 45,
+      "order": 46,
       "path": "/living-brief",
       "guard": "access",
       "target": "LivingBrief"
     },
     {
-      "order": 46,
+      "order": 47,
       "path": "/pricing",
       "guard": "public",
       "target": "Pricing"
     },
     {
-      "order": 47,
+      "order": 48,
       "path": "/features",
       "guard": "public",
       "target": "Features"
     },
     {
-      "order": 48,
+      "order": 49,
       "path": "/about",
       "guard": "public",
       "target": "About"
     },
     {
-      "order": 49,
+      "order": 50,
       "path": "/contact",
       "guard": "public",
       "target": "Contact"
     },
     {
-      "order": 50,
+      "order": 51,
       "path": "*",
       "guard": "public",
       "target": "NotFound"
     },
     {
-      "order": 51,
+      "order": 52,
       "path": "*",
       "guard": "public",
       "target": "inline"
     },
     {
-      "order": 52,
+      "order": 53,
       "path": "*",
       "guard": "public",
       "target": "inline"
@@ -8766,6 +8772,26 @@
     {
       "screen": "artifacts/bimlog/src/pages/Contact.tsx",
       "apiPath": "${API_BASE}/api/v1/contact"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/capabilities"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/conflict-types"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/rules"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/rules/${encodeURIComponent(stableId)}/history"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/resolution-methods"
     },
     {
       "screen": "artifacts/bimlog/src/pages/Dashboard.tsx",

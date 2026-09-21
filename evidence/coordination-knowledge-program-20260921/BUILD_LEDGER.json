@@ -4,39 +4,44 @@
   "date": "2026-09-21",
   "range": {
     "firstBuild": 226,
-    "completedThrough": 235,
+    "completedThrough": 240,
     "finalBuild": 275
   },
   "currentBlock": {
-    "number": 2,
-    "builds": "231-235",
+    "number": 3,
+    "builds": "236-240",
     "status": "PASS_SOURCE_CANDIDATE",
     "pushDue": true,
-    "publicationDue": true
+    "publicationDue": false
   },
-  "remainingBlocks": 8,
-  "remainingBuilds": 40,
-  "nextBlock": "Block 3 — Builds 236-240 — conflict taxonomy and curation",
+  "buildCommits": {
+    "236": "1be73dc1",
+    "237": "d7df7610",
+    "238": "b8819aab",
+    "239": "39dba06c",
+    "240": "PENDING"
+  },
+  "remainingBlocks": 7,
+  "remainingBuilds": 35,
+  "nextBlock": "Block 4 — Builds 241-245 — governed authoring and curation",
   "database": {
-    "changed": true,
-    "tablesAdded": 12,
+    "changed": false,
     "destructiveStatements": 0,
-    "restoredDatabaseProof": "PASS",
     "productionApplied": false,
-    "block2SchemaChange": "none; API/search only"
+    "block3SchemaChange": "none; workspace and catalog presentation only"
   },
   "lensNext": {
     "visibleWorkflowChanged": false,
     "nativeChanged": false,
+    "installerChanged": false,
     "panelScheduledBuilds": "246-250"
   },
   "tests": {
     "focused": "PASS",
-    "restoredDatabase": "PASS",
     "typecheck": "PASS",
-    "databaseSafety": "PASS",
-    "block2Focused": "PASS",
+    "databaseSafety": "PENDING_FINAL_GATE",
+    "security": "PENDING_FINAL_GATE",
     "completePrePushGate": "PENDING_CLEAN_COMMIT",
-    "publication": "PENDING_PUSH"
+    "publication": "NOT_DUE"
   }
 }
