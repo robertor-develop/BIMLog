@@ -1,11 +1,17 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Current open-loop authority — post-120 Block 30 — 2026-09-20
+
+- [x] Builds 146–149: extract Convention document state/validation, navigation/hook invariants, party assignment, and financial/legal catalogs; add permanent persistence, denial, recovery, and accessibility regressions.
+- [ ] Build 150: commit the exact candidate, pass the complete clean-tree release gate, push normally, publish through Replit Shell without Replit Agents, verify exact live identity, and complete authenticated visible-Chrome Convention workflow acceptance.
+- [ ] Builds 151–155: decompose RFI list, editor, permission/status presentation, and deep-link/cross-role tests; push the five-build block after Build 155.
+
 ## Current open-loop authority — post-120 Block 29 — 2026-09-20
 
 - [x] Build 140 passed the complete gate, pushed normally, published through Replit Shell without Replit Agents, exposed exact source identity `1bb9ec7ee353d14a90cc0f2e925f9e3424599cd2`, and passed authenticated Chrome route, PDF-generation, reload, and two-tab continuity smoke.
 - [x] Builds 141–144: extract Meetings data/query orchestration, agenda and draft state machines, action-item presentation, participant field presentation, and permanent integration/accessibility regressions.
 - [x] Build 145: complete the five-build source-acceptance record, commit the exact candidate, run the complete gate from the clean committed tree, and push the exact head normally. This is a push-only boundary; the first dirty-tree gate attempt correctly failed closed before runtime assembly and is superseded by the clean-tree rerun.
-- [ ] Builds 146–150: decompose Convention Builder, push Build 150, publish the ten-build batch, and run full authenticated visible-Chrome acceptance.
+- [x] Builds 146–150: decompose Convention Builder; Build 150 is recorded above as the active push/publication/live-acceptance boundary.
 
 ## Current open-loop authority — post-120 Block 26 — 2026-09-20
 

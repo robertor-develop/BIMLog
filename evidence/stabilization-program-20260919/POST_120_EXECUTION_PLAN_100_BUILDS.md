@@ -51,7 +51,7 @@ Status: complete, pushed, published, and authenticated live-smoke accepted at `v
 
 ## Block 29 — Builds 141–145 — meetings frontend decomposition
 
-Status: Builds 141–144 implemented and verified; Build 145 is the full-gate and push boundary. Publication remains scheduled after Build 150.
+Status: complete, full-gate accepted, and pushed. Publication remains scheduled after Build 150.
 
 - 141: extract meeting data/query orchestration from `MeetingsTab.tsx`.
 - 142: extract agenda/minutes state machines.
@@ -60,6 +60,8 @@ Status: Builds 141–144 implemented and verified; Build 145 is the full-gate an
 - 145: run full gate and push.
 
 ## Block 30 — Builds 146–150 — convention builder decomposition
+
+Status: Builds 146–149 implemented and verified; Build 150 is the full-gate, push, publication, and authenticated visible-Chrome acceptance boundary.
 
 - 146: extract convention document state and validation.
 - 147: extract phase navigation and hook-order invariants.

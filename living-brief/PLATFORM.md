@@ -730,6 +730,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/SubmittalsTab.tsx
 - artifacts/bimlog/src/pages/project/TeamTab.tsx
 - artifacts/bimlog/src/pages/project/TransmittalsTab.tsx
+- artifacts/bimlog/src/pages/project/convention-builder/ConventionPartyAssignment.tsx
 - artifacts/bimlog/src/pages/project/meetings/MeetingActionItemsTable.tsx
 - artifacts/bimlog/src/pages/project/meetings/MeetingParticipantField.tsx
 

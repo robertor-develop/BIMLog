@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Post-120 stabilization — Block 30 source acceptance — 2026-09-20
+
+- Builds 146–149 extract Convention document state/validation, phase navigation and hook-order protection, party assignment, and the Cost & Quantity / Contracts & Legal catalogs from the Convention Builder without changing routes, permissions, stored data, workflow meaning, or clause definitions.
+- The permanent Block 30 regression gate verifies required-field and duplicate-code denial, exact save payload semantics, saved-state restoration, empty-level repair, setup/checkpoint navigation, hook ordering, non-admin denial, load/retry behavior, party assignment authorization and accessibility, and complete unique clause codes; frontend TypeScript passes.
+- Build 150 is the ten-build publication boundary. The exact candidate still requires the clean pre-push gate, normal push, Replit Shell publication without Replit Agents, exact live identity, and full authenticated visible-Chrome Convention acceptance.
+- No database/schema/customer-data, Native, installer, package, bridge-protocol, report-rendering, or provider-configuration mutation is part of Block 30; focused Navisworks smoke is not retriggered.
+
 ## Post-120 stabilization — Block 29 source acceptance — 2026-09-20
 
 - Builds 141–144 extract Meetings data/query orchestration, the agenda reducer, the draft lifecycle state machine, the action-item table, and reusable participant fields from the 6,500-line Meetings page without changing routes, permissions, stored data, workflow semantics, or report output.
