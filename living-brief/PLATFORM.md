@@ -999,3 +999,6 @@ It changes only when the code structure or curated architectural facts change.
 - Platform candidate `v1.05.N18-P36` completes the current ten-build publication batch through Build 080 with durable feedback recovery, canonical customer/reviewer routes, deterministic preferences, governed delivery contracts, and production-safe feedback-to-resolution acceptance.
 - Replit remains the established publication provider. Publication uses Replit Shell and visible Chrome; Replit Agents are prohibited. No external email, Telegram message, or document is sent by the acceptance gate.
 - Native behavior remains N18. Shared P36 metadata was rebuilt deterministically for Navisworks 2021 and 2025 without installation; installed compatibility and absence of customer-facing Legacy Lens remain a focused post-publication scan.
+# Post-120 RFI frontend decomposition — Build 155
+
+Builds 151–155 isolate RFI list/query state, create evidence state, and permission-aware action presentation under `artifacts/bimlog/src/pages/project/rfi-frontend/`. The route, API contracts, database, customer data, Native boundary, installers, and release cadence are unchanged. The permanent Block 31 regression covers cross-role status actions and project-scoped deep links.

@@ -1,5 +1,18 @@
 # STATUS.md - Current Accepted Platform State
 
+## Post-120 stabilization — Block 31 source acceptance — 2026-09-20
+
+- Builds 151–154 isolate RFI list/filter/export-query state, create-form evidence/upload state, and permission-aware action/status presentation without changing the RFI route, API contracts, stored data, or user-visible workflow meaning.
+- The permanent Block 31 regression verifies filter and export-query parity, author/ball-in-court semantics, attachment and image lifecycle coverage, project-admin close authority, reopen/respond/export permissions, existing-RFI deep links, meeting return links, Lens prefill links, authenticated project scoping, and visible deep-link failure recovery; frontend TypeScript passes.
+- Build 155 is the five-build push boundary. Publication and authenticated Chrome smoke remain scheduled after Build 160, so the unpublished count remains within the ten-build ceiling.
+- No database/schema/customer-data, Native, installer, package, bridge-protocol, report-rendering, provider-configuration, or production mutation is part of Block 31; focused Navisworks smoke is not retriggered.
+
+## Post-120 stabilization — Block 30 live acceptance — 2026-09-20
+
+- Exact source `7d50a5140c9d5015c677ecfa19c4fa1482deb907` synchronized to GitHub and Replit, passed the exact development/production schema receipt with `schemaAction=NONE`, and published successfully without Replit Agents.
+- Authenticated visible-Chrome acceptance at `v1.05.N18-P36` verified the Convention setup route, phase navigation, clean reload, retained authentication, and Lens Next second-tab restoration. No save or production-data mutation was performed.
+- No Native or installer source changed, so focused Navisworks smoke was not required.
+
 ## Post-120 stabilization — Block 30 source acceptance — 2026-09-20
 
 - Builds 146–149 extract Convention document state/validation, phase navigation and hook-order protection, party assignment, and the Cost & Quantity / Contracts & Legal catalogs from the Convention Builder without changing routes, permissions, stored data, workflow meaning, or clause definitions.

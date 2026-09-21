@@ -1,10 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — post-120 Block 30 — 2026-09-20
+## Current open-loop authority — post-120 Block 31 — 2026-09-20
 
-- [x] Builds 146–149: extract Convention document state/validation, navigation/hook invariants, party assignment, and financial/legal catalogs; add permanent persistence, denial, recovery, and accessibility regressions.
-- [ ] Build 150: commit the exact candidate, pass the complete clean-tree release gate, push normally, publish through Replit Shell without Replit Agents, verify exact live identity, and complete authenticated visible-Chrome Convention workflow acceptance.
-- [ ] Builds 151–155: decompose RFI list, editor, permission/status presentation, and deep-link/cross-role tests; push the five-build block after Build 155.
+- [x] Build 150: exact source `7d50a5140c9d5015c677ecfa19c4fa1482deb907` passed the governed release path, synchronized to GitHub and Replit, published without Replit Agents, and passed authenticated visible-Chrome Convention navigation/reload plus Lens Next second-tab continuity at `v1.05.N18-P36`.
+- [x] Builds 151–154: isolate RFI list/query state, create evidence state, and permission/status action presentation; add permanent cross-role and deep-link regressions.
+- [ ] Build 155: record the exact candidate, pass the complete clean-tree gate, and push normally. This is a push-only boundary.
+- [ ] Builds 156–160: decompose RFI backend command/query services, authorization predicates, audit records, failure telemetry, and route regressions; push, publish, and run authenticated visible-Chrome acceptance after Build 160.
 
 ## Current open-loop authority — post-120 Block 29 — 2026-09-20
 

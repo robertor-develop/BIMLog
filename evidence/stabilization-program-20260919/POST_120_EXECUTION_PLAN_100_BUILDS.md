@@ -71,6 +71,8 @@ Status: Builds 146–149 implemented and verified; Build 150 is the full-gate, p
 
 ## Block 31 — Builds 151–155 — RFI frontend decomposition
 
+Status: Builds 151–154 implemented and verified; Build 155 is the full-gate and normal-push boundary.
+
 - 151: separate RFI list/filter/query state.
 - 152: separate RFI editor/attachment state.
 - 153: separate permissions/status-transition presentation.
@@ -78,6 +80,8 @@ Status: Builds 146–149 implemented and verified; Build 150 is the full-gate, p
 - 155: run full gate and push.
 
 ## Block 32 — Builds 156–160 — RFI backend decomposition
+
+Status: next authorized block; Build 160 is the next push, publication, and authenticated visible-Chrome acceptance boundary.
 
 - 156: separate RFI command and query services.
 - 157: centralize authorization predicates and audit records.
