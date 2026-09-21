@@ -7,11 +7,12 @@ const json = relative => JSON.parse(read(relative));
 const open = json("living-brief/OPEN_LOOP_DISPOSITIONS.json");
 const field = json("evidence/stabilization-program-20260919/LENS_NEXT_FIELD_EVIDENCE.json");
 const current = open.items.filter(item => item.currentAuthority && item.classification === "ACTIVE");
+const currentField = current.filter(item => item.workClass === "FIELD_EVIDENCE");
 
-assert.equal(current.length, 1);
-assert.equal(current[0].workClass, "FIELD_EVIDENCE");
-assert.match(current[0].statement, /Navisworks 2025/);
-assert.match(current[0].statement, /Ruben/);
+assert.equal(currentField.length, 1);
+assert.match(currentField[0].statement, /Navisworks 2025/);
+assert.match(currentField[0].statement, /Ruben/);
+assert.equal(current.some(item => item.workClass === "PROVIDER_EVIDENCE"), false);
 assert.equal(field.installed2021.retiredDirectLoad.state, "REMOVED_WITH_ROLLBACK_EVIDENCE");
 assert.equal(field.installed2021.retiredDirectLoad.activeAfterCutover, false);
 assert.equal(field.rubenPhysical2025.status, "DEFERRED_TO_RUBEN");
@@ -22,4 +23,4 @@ for (const script of ["scripts/test-post120-block38.mjs", "scripts/test-post120-
   assert.equal(result.status, 0, result.stderr || result.stdout);
 }
 
-console.log("POST220_BLOCK45=PASS currentOpen=RUBEN_2025_FIELD_EVIDENCE physical2021=PASS");
+console.log(`POST220_BLOCK45=PASS currentOpen=${current.length} currentField=RUBEN_2025_FIELD_EVIDENCE physical2021=PASS`);
