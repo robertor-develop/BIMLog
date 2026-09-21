@@ -35560,6 +35560,111 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "dcf0ec956f8b51d58c300463df273674a0d3bbf6ae6bb87b305e7f56492bfb4b"
+    },
+    {
+      "taskId": "bimlog-build210-endpoint-authority-reconciliation-20260921",
+      "reviewedThroughCommit": "5ab189dc38bbf79e166384b24eacdd8a255c9773",
+      "reviewedAt": "2026-09-21T07:03:06-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "edit_isolated_worktree",
+          "run_local_validation",
+          "push_exact_fast_forward",
+          "replit_shell_sync",
+          "chrome_live_acceptance"
+        ],
+        "operatorOnly": [
+          "production_database_destructive_override",
+          "native_customer_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The complete endpoint inventory exposed missing explicit authentication and project boundaries; those routes are now guarded and protected by permanent negative tests."
+        },
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Build 210 is the established ten-build publication boundary and remains unclaimed until exact-source push, Replit Shell publication, live identity, and authenticated Chrome acceptance pass."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical records, human authority, and product ownership remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The standard gate now enforces the complete endpoint authority and sensitive-operation matrix."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No commercial scope, customer promise, or roadmap outcome changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing Platform operations retain their behavior while explicit server-side boundaries are strengthened."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native source, installer, bridge, package, Autodesk load path, or license changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report presentation and artifact rendering remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance claim was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the Block 42 security correction and active Build 210 publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Current authority records Builds 201 through 210 and the remaining publication acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The endpoint inventory, corrected gaps, negative tests, and release boundary remain attributable."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9abb327292d5b0b5196cb5d9419fa1d7fcf2952daaed385adac6a81839dedddf"
     }
   ]
 }
