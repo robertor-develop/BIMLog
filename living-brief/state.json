@@ -1,22 +1,16 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
+  "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
   "bundleSha256": "a4b023286fb038466a7ef0a06c2c5091f3b114106897eb184f8e0cac8c7a206d",
   "impact": {
-    "baselineCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
+    "baselineCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
     "changedPaths": [
-      "artifacts/api-server/scripts/generate-platform-md.ts",
-      "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
-      "living-brief/PLATFORM.md",
-      "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json",
-      "package.json"
+      "living-brief/impact-declarations.json"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -27,11 +21,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "claude",
@@ -39,11 +33,11 @@
       "sha256": "fda29c7bd0b092e1de189b54249545c345a7d2e84f3cdea4675a027637794270",
       "sourceChangedAt": "2026-09-19T07:40:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "quality",
@@ -51,11 +45,11 @@
       "sha256": "4fb5e842b2d14c60c8c0c7a48f08f5912ba1f8294c9817579e5340fdf753fc40",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "vision",
@@ -63,23 +57,23 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "platform",
       "file": "PLATFORM.md",
       "sha256": "ed9f2cf2d6171f6bffe4d88805a7e54f99856f1a9456d8e8e5ec5aad2223464e",
-      "sourceChangedAt": "2026-09-21T04:20:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "sourceChangedAt": "2026-09-21T00:19:32-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "plugin",
@@ -87,11 +81,11 @@
       "sha256": "e94257d7ffac7797b283bf4b66cbdcde4b9de881539fc07e56133129ed363fe1",
       "sourceChangedAt": "2026-09-20T16:24:07-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "report_design_system",
@@ -99,11 +93,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "standards_register",
@@ -111,23 +105,23 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "status",
       "file": "STATUS.md",
       "sha256": "5af6543223d8f9d5f58890e852ff25f5a248d7e2d67488e5bfb1450d1ab756d4",
-      "sourceChangedAt": "2026-09-21T04:20:00.000Z",
-      "changeState": "candidate",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "sourceChangedAt": "2026-09-21T00:19:32-04:00",
+      "changeState": "accepted",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "open_loop",
@@ -135,11 +129,11 @@
       "sha256": "ab229608f818412310c5cfec6681afaba1b9377503c96c03d40689c10fd7303f",
       "sourceChangedAt": "2026-09-20T23:39:04-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     },
     {
       "key": "audit",
@@ -147,11 +141,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewedThroughCommit": "7d544e272af0e648c9abb4772f5487a5d7a30595",
-      "semanticReviewTask": "bimlog-build170-meeting-backend-reconciliation-20260921",
+      "reconciledThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewedThroughCommit": "aad0e5434c4e0b11e90b1831b5a6051b82d29036",
+      "semanticReviewTask": "bimlog-build170-ai-inventory-reconciliation-20260921",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-21T00:20:00-04:00"
+      "semanticReviewedAt": "2026-09-21T00:21:00-04:00"
     }
   ]
 }
