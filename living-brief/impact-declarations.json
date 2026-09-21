@@ -34166,6 +34166,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-post120-block32-rfi-backend-decomposition-20260920",
+      "reviewedThroughCommit": "e33640cc6be9394af805925cde9e050efb9cc1c8",
+      "reviewedAt": "2026-09-20T22:41:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership or provider boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five-build push and ten-build Replit publication cadence remains authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Adds permanent query, authority, audit, export-scope, and negative-matrix coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Customer workflow meaning is unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the RFI backend query and command service boundaries."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Lens Next installer, package, or bridge behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing report layouts remain unchanged; exports now share filter truth."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Builds 156–160 source acceptance and active publication boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Build 155 push and activates Build 160 publication acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Executable negative tests and exact release evidence carry the audit trail."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "db93146955123ae48b517402b55fd727b32bb71a79d8568335d36f29cd5bc10f"
     }
   ]
 }

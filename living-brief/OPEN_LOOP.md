@@ -8,6 +8,7 @@
 - [x] Builds 156–159: decompose RFI backend query/command authority, centralize admin and audit truth, align Excel/PDF filter scope, and add a permanent tenant/project/object/role negative matrix.
 - [ ] Build 160: pass the complete clean-tree gate, push, publish through Replit Shell without Replit Agents, verify `schemaAction=NONE`, and run authenticated visible-Chrome RFI lifecycle/export/reload acceptance.
 - [ ] Builds 161–165: decompose clash-report architecture and push the next five-build block.
+- Block 32 narrative reconciliation is bound to source-acceptance commit `e33640cc6be9394af805925cde9e050efb9cc1c8`.
 
 ## Current open-loop authority — post-120 Block 29 — 2026-09-20
 

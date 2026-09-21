@@ -6,6 +6,7 @@
 - The permanent negative matrix rejects wrong project/object identity, non-admin close authority, malformed filters, invalid date ranges, and confirms attributable audit records.
 - Build 160 is the ten-build publication boundary. The full clean-tree gate, exact GitHub/Replit source identity, zero-change database receipt, and authenticated visible-Chrome RFI lifecycle/export/reload smoke remain active.
 - No schema, customer data, Native source, installer, package, bridge protocol, provider configuration, or outbound message changed; focused Navisworks smoke is not retriggered.
+- Source-acceptance authority is exact commit `e33640cc6be9394af805925cde9e050efb9cc1c8`; publication acceptance must bind to its later clean gated head without changing these product boundaries.
 
 ## Post-120 stabilization — Block 31 source acceptance — 2026-09-20
 
