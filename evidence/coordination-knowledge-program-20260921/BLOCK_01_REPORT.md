@@ -41,6 +41,7 @@ Status: `PASS_SOURCE_CANDIDATE`
 - `pnpm run check:open-loop-dispositions` — PASS.
 - `pnpm run test:post120-block38` — PASS.
 - `pnpm run check:mojibake` — PASS.
+- The first complete gate exposed a pre-existing route-inventory parser that absorbed unrelated imports and platform line endings. The generator now reads only the exact `@workspace/db/schema` import, normalizes EOLs, and carries a permanent no-import/no-newline table-identity assertion; the focused route graph regression passes with 605 API routes and 61 real table identities.
 
 ## Release boundary
 

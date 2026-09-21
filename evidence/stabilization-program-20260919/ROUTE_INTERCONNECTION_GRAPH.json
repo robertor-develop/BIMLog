@@ -8,7 +8,7 @@
     "sidebarLinks": 4,
     "apiRoutes": 605,
     "frontendApiReferences": 231,
-    "routeOwnedTables": 88
+    "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
     {
@@ -458,7 +458,7 @@
       "path": "/projects/:projectId/activity",
       "owner": "artifacts/api-server/src/routes/activity.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { activityLogTable",
+        "activityLogTable",
         "projectsTable"
       ]
     },
@@ -467,7 +467,7 @@
       "path": "/projects/:projectId/activity/export.pdf",
       "owner": "artifacts/api-server/src/routes/activity.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { activityLogTable",
+        "activityLogTable",
         "projectsTable"
       ]
     },
@@ -476,7 +476,7 @@
       "path": "/admin/platform-stats",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -495,7 +495,7 @@
       "path": "/admin/ai-usage",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -514,7 +514,7 @@
       "path": "/admin/overview",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -533,7 +533,7 @@
       "path": "/admin/activity",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -552,7 +552,7 @@
       "path": "/admin/users",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -571,7 +571,7 @@
       "path": "/admin/users/:id/commercial-entitlement",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -590,7 +590,7 @@
       "path": "/admin/users",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -609,7 +609,7 @@
       "path": "/admin/users/:id",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -628,7 +628,7 @@
       "path": "/admin/users/:id",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -647,7 +647,7 @@
       "path": "/admin/users/:id/reset-password",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -666,7 +666,7 @@
       "path": "/admin/companies",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -685,7 +685,7 @@
       "path": "/admin/companies/:id",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -704,7 +704,7 @@
       "path": "/admin/companies/:id",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -723,7 +723,7 @@
       "path": "/admin/projects",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -742,7 +742,7 @@
       "path": "/admin/projects/:id",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -761,7 +761,7 @@
       "path": "/admin/projects/:id",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -780,7 +780,7 @@
       "path": "/admin/projects/:id/transfer",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -799,7 +799,7 @@
       "path": "/admin/email-log",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -818,7 +818,7 @@
       "path": "/admin/feature-flags",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -837,7 +837,7 @@
       "path": "/admin/feature-flags/:id",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -856,7 +856,7 @@
       "path": "/admin/actions-log",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -875,7 +875,7 @@
       "path": "/admin/fix-specific-link",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -894,7 +894,7 @@
       "path": "/admin/projects-list",
       "owner": "artifacts/api-server/src/routes/admin.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectsTable",
         "projectMembersTable",
@@ -913,7 +913,7 @@
       "path": "/projects/:projectId/insights",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { agentInsightsTable"
+        "agentInsightsTable"
       ]
     },
     {
@@ -921,7 +921,7 @@
       "path": "/projects/:projectId/briefing",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { agentInsightsTable"
+        "agentInsightsTable"
       ]
     },
     {
@@ -929,7 +929,7 @@
       "path": "/projects/:projectId/agents/clash/:clashId",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { agentInsightsTable"
+        "agentInsightsTable"
       ]
     },
     {
@@ -937,7 +937,7 @@
       "path": "/projects/:projectId/agents/rfi/:rfiId",
       "owner": "artifacts/api-server/src/routes/agents.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { agentInsightsTable"
+        "agentInsightsTable"
       ]
     },
     {
@@ -1095,7 +1095,7 @@
       "path": "/auth/register",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1108,7 +1108,7 @@
       "path": "/auth/login",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1121,7 +1121,7 @@
       "path": "/auth/me",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1134,7 +1134,7 @@
       "path": "/auth/access-profile",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1147,7 +1147,7 @@
       "path": "/users/me",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1160,7 +1160,7 @@
       "path": "/users/me/company",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1173,7 +1173,7 @@
       "path": "/users/me/password",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1186,7 +1186,7 @@
       "path": "/auth/openai-key",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1199,7 +1199,7 @@
       "path": "/auth/openai-key",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1212,7 +1212,7 @@
       "path": "/users/me/api-token",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1225,7 +1225,7 @@
       "path": "/users/me/performance-score",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1238,7 +1238,7 @@
       "path": "/auth/forgot-password",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1251,7 +1251,7 @@
       "path": "/auth/reset-password",
       "owner": "artifacts/api-server/src/routes/auth.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport bcrypt from \"bcryptjs\";\r\nimport { randomBytes } from \"crypto\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  usersTable",
+        "usersTable",
         "companiesTable",
         "projectMembersTable",
         "filesTable",
@@ -1294,7 +1294,7 @@
       "path": "/projects/:projectId/change-orders",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1309,7 +1309,7 @@
       "path": "/projects/:projectId/change-orders",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1324,7 +1324,7 @@
       "path": "/projects/:projectId/change-orders/current-view/pdf",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1339,7 +1339,7 @@
       "path": "/projects/:projectId/change-orders/:changeOrderId",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1354,7 +1354,7 @@
       "path": "/projects/:projectId/change-orders/:changeOrderId",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1369,7 +1369,7 @@
       "path": "/projects/:projectId/change-orders/:changeOrderId/${action}",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1384,7 +1384,7 @@
       "path": "/projects/:projectId/change-orders/:changeOrderId/ai-draft",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1399,7 +1399,7 @@
       "path": "/projects/:projectId/change-orders/:changeOrderId/export",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1414,7 +1414,7 @@
       "path": "/projects/:projectId/change-orders/import",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1429,7 +1429,7 @@
       "path": "/projects/:projectId/change-orders/:changeOrderId",
       "owner": "artifacts/api-server/src/routes/change_orders.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  changeOrdersTable",
+        "changeOrdersTable",
         "changeOrderDocumentsTable",
         "activityLogTable",
         "projectsTable",
@@ -1444,7 +1444,7 @@
       "path": "/projects/:projectId/clash-reports",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1458,7 +1458,7 @@
       "path": "/projects/:projectId/clash-reports",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1472,7 +1472,7 @@
       "path": "/projects/:projectId/clash-reports/upload",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1486,7 +1486,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/local-viewpoints/upload",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1500,7 +1500,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/issues/create",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1514,7 +1514,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/local-viewpoint",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1528,7 +1528,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/links",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1542,7 +1542,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/links",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1556,7 +1556,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/links/:linkId",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1570,7 +1570,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/attachments",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1584,7 +1584,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/attachments",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1598,7 +1598,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:serverId/attachments/:attachmentId",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1612,7 +1612,7 @@
       "path": "/projects/:projectId/clash-reports/lens-sync",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1626,7 +1626,7 @@
       "path": "/projects/:projectId/clash-reports/lens-import-context",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1640,7 +1640,7 @@
       "path": "/projects/:projectId/clash-reports/lens-import",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1654,7 +1654,7 @@
       "path": "/projects/:projectId/clash-reports/lens-pull",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1668,7 +1668,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1682,7 +1682,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:viewpointId/visual-state",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1696,7 +1696,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/export-excel",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1710,7 +1710,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/repair-lifecycle",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1724,7 +1724,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/responsible-companies",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1738,7 +1738,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/batch-floor",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1752,7 +1752,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/batch-responsible-company",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1766,7 +1766,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next/issues/:id/publish",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1780,7 +1780,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:id",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1794,7 +1794,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:id/edit",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1808,7 +1808,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:id/reassign",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1822,7 +1822,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:id/void",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1836,7 +1836,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:id/history",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1850,7 +1850,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:id/active",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1864,7 +1864,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/:id",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1878,7 +1878,7 @@
       "path": "/projects/:projectId/clash-reports/lens-next-id",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1892,7 +1892,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/reports",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1906,7 +1906,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/reports/:reportRecordId",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1920,7 +1920,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/reset-test-data",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1934,7 +1934,7 @@
       "path": "/projects/:projectId/clash-reports/lens-viewpoints/report",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1948,7 +1948,7 @@
       "path": "/projects/:projectId/clashes/:clashId",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1962,7 +1962,7 @@
       "path": "/projects/:projectId/clash-reports/:reportId/current-view/pdf",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1976,7 +1976,7 @@
       "path": "/projects/:projectId/clash-reports/:reportId",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -1990,7 +1990,7 @@
       "path": "/projects/:projectId/clash-reports/:reportId/rerank",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -2004,7 +2004,7 @@
       "path": "/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -2018,7 +2018,7 @@
       "path": "/projects/:projectId/clash-reports/:reportId/clashes",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -2032,7 +2032,7 @@
       "path": "/projects/:projectId/clash-reports/:reportId/rename",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -2046,7 +2046,7 @@
       "path": "/projects/:projectId/clash-reports/:reportId",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -2060,7 +2060,7 @@
       "path": "/projects/:projectId/clash-reports/:reportId/pdf",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -2074,7 +2074,7 @@
       "path": "/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -2088,7 +2088,7 @@
       "path": "/projects/:projectId/clash-reports/plugin-sync",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -2102,7 +2102,7 @@
       "path": "/projects/:projectId/clash-reports/plugin-pull",
       "owner": "artifacts/api-server/src/routes/clash_reports.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport type { Request } from \"express\";\r\nimport { clashReportsTable",
+        "clashReportsTable",
         "clashesTable",
         "lensViewpointsTable",
         "lensViewpointReportsTable",
@@ -2224,7 +2224,7 @@
       "path": "/users/me/company-profile",
       "owner": "artifacts/api-server/src/routes/company-profile.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { companyProfilesTable"
+        "companyProfilesTable"
       ]
     },
     {
@@ -2232,7 +2232,7 @@
       "path": "/users/me/company-profile",
       "owner": "artifacts/api-server/src/routes/company-profile.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { companyProfilesTable"
+        "companyProfilesTable"
       ]
     },
     {
@@ -2240,7 +2240,7 @@
       "path": "/users/me/company-logo",
       "owner": "artifacts/api-server/src/routes/company-profile.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { companyProfilesTable"
+        "companyProfilesTable"
       ]
     },
     {
@@ -2248,7 +2248,7 @@
       "path": "/users/:userId/company-profile",
       "owner": "artifacts/api-server/src/routes/company-profile.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { companyProfilesTable"
+        "companyProfilesTable"
       ]
     },
     {
@@ -2256,7 +2256,7 @@
       "path": "/config",
       "owner": "artifacts/api-server/src/routes/config.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { configOptionsTable"
+        "configOptionsTable"
       ]
     },
     {
@@ -2264,7 +2264,7 @@
       "path": "/me/connections",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2273,7 +2273,7 @@
       "path": "/me/provider-catalog",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2282,7 +2282,7 @@
       "path": "/me/ai-usage",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2291,7 +2291,7 @@
       "path": "/me/connections/sendgrid",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2300,7 +2300,7 @@
       "path": "/me/connections/anthropic",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2309,7 +2309,7 @@
       "path": "/me/connections/:provider/authorize",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2318,7 +2318,7 @@
       "path": "/connections/:provider/callback",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2327,7 +2327,7 @@
       "path": "/me/connections/google-drive/files",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2336,7 +2336,7 @@
       "path": "/me/connections/:provider/browse",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2345,7 +2345,7 @@
       "path": "/me/connections/:provider",
       "owner": "artifacts/api-server/src/routes/connections.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { userConnectionsTable",
+        "userConnectionsTable",
         "usersTable"
       ]
     },
@@ -2354,7 +2354,7 @@
       "path": "/contact",
       "owner": "artifacts/api-server/src/routes/contact.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { contactSubmissionsTable"
+        "contactSubmissionsTable"
       ]
     },
     {
@@ -2386,7 +2386,7 @@
       "path": "/projects/:projectId/conventions",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2401,7 +2401,7 @@
       "path": "/projects/:projectId/levels",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2416,7 +2416,7 @@
       "path": "/projects/:projectId/conventions",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2431,7 +2431,7 @@
       "path": "/projects/:projectId/conventions/suggest-value",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2446,7 +2446,7 @@
       "path": "/projects/:projectId/convention/discover",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2461,7 +2461,7 @@
       "path": "/projects/:projectId/convention/discover-upload",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2476,7 +2476,7 @@
       "path": "/projects/:projectId/convention/versions",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2491,7 +2491,7 @@
       "path": "/projects/:projectId/convention/status",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2506,7 +2506,7 @@
       "path": "/projects/:projectId/convention/versions",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2521,7 +2521,7 @@
       "path": "/projects/:projectId/convention/reanalyze",
       "owner": "artifacts/api-server/src/routes/conventions.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { namingConventionsTable",
+        "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
         "projectMembersTable",
@@ -2590,7 +2590,7 @@
       "path": "/projects/:projectId/coordination/events",
       "owner": "artifacts/api-server/src/routes/coordination.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  coordinationIntakeEventsTable",
+        "coordinationIntakeEventsTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "projectsTable",
@@ -2605,7 +2605,7 @@
       "path": "/projects/:projectId/coordination/intake",
       "owner": "artifacts/api-server/src/routes/coordination.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  coordinationIntakeEventsTable",
+        "coordinationIntakeEventsTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "projectsTable",
@@ -2620,7 +2620,7 @@
       "path": "/projects/:projectId/coordination/confirm",
       "owner": "artifacts/api-server/src/routes/coordination.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  coordinationIntakeEventsTable",
+        "coordinationIntakeEventsTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "projectsTable",
@@ -2635,7 +2635,7 @@
       "path": "/projects/:projectId/coordinator-actions",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2643,7 +2643,7 @@
       "path": "/projects/:projectId/coordinator-actions/export.pdf",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2651,7 +2651,7 @@
       "path": "/projects/:projectId/project-insights",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2659,7 +2659,7 @@
       "path": "/projects/:projectId/project-insights/export-pdf",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2667,7 +2667,7 @@
       "path": "/projects/:projectId/coordinator-actions/meeting-links/preview",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2675,7 +2675,7 @@
       "path": "/projects/:projectId/coordinator-actions/meeting-links/execute",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2683,7 +2683,7 @@
       "path": "/projects/:projectId/coordinator-saved-views",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2691,7 +2691,7 @@
       "path": "/projects/:projectId/coordinator-saved-views",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2699,7 +2699,7 @@
       "path": "/projects/:projectId/coordinator-saved-views/:savedViewId",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2707,7 +2707,7 @@
       "path": "/projects/:projectId/coordinator-saved-views/:savedViewId",
       "owner": "artifacts/api-server/src/routes/coordinator-actions.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable"
+        "projectsTable"
       ]
     },
     {
@@ -2715,7 +2715,7 @@
       "path": "/dashboard/stats",
       "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  rfisTable",
+        "rfisTable",
         "submittalsTable",
         "filesTable",
         "projectMembersTable",
@@ -2734,7 +2734,7 @@
       "path": "/dashboard/briefing",
       "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  rfisTable",
+        "rfisTable",
         "submittalsTable",
         "filesTable",
         "projectMembersTable",
@@ -2753,7 +2753,7 @@
       "path": "/dashboard/export-pdf",
       "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  rfisTable",
+        "rfisTable",
         "submittalsTable",
         "filesTable",
         "projectMembersTable",
@@ -2772,7 +2772,7 @@
       "path": "/dashboard/pending/export-pdf",
       "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  rfisTable",
+        "rfisTable",
         "submittalsTable",
         "filesTable",
         "projectMembersTable",
@@ -2791,7 +2791,7 @@
       "path": "/dashboard/pending/rfis",
       "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  rfisTable",
+        "rfisTable",
         "submittalsTable",
         "filesTable",
         "projectMembersTable",
@@ -2810,7 +2810,7 @@
       "path": "/dashboard/pending/submittals",
       "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  rfisTable",
+        "rfisTable",
         "submittalsTable",
         "filesTable",
         "projectMembersTable",
@@ -2829,7 +2829,7 @@
       "path": "/dashboard/pending/files",
       "owner": "artifacts/api-server/src/routes/dashboard_briefing.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  rfisTable",
+        "rfisTable",
         "submittalsTable",
         "filesTable",
         "projectMembersTable",
@@ -2908,7 +2908,7 @@
       "path": "/projects/:projectId/documents/search",
       "owner": "artifacts/api-server/src/routes/documents.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "usersTable"
       ]
     },
@@ -2917,7 +2917,7 @@
       "path": "/projects/:projectId/documents/ai-search",
       "owner": "artifacts/api-server/src/routes/documents.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "usersTable"
       ]
     },
@@ -3052,7 +3052,7 @@
       "path": "/feedback",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3063,7 +3063,7 @@
       "path": "/feedback/capture-consents",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3074,7 +3074,7 @@
       "path": "/feedback/capture-consents/:id/revoke",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3085,7 +3085,7 @@
       "path": "/feedback/:id/assets",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3096,7 +3096,7 @@
       "path": "/feedback/:id/transcription",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3107,7 +3107,7 @@
       "path": "/feedback/:id/transcription/:jobId/review",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3118,7 +3118,7 @@
       "path": "/feedback/mine",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3129,7 +3129,7 @@
       "path": "/feedback/:id/reopen",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3140,7 +3140,7 @@
       "path": "/feedback/:id/history",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3151,7 +3151,7 @@
       "path": "/feedback/:id/assets",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3162,7 +3162,7 @@
       "path": "/feedback/:id/comments",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3173,7 +3173,7 @@
       "path": "/feedback/notifications",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3184,7 +3184,7 @@
       "path": "/feedback/notifications/:eventId/read",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3195,7 +3195,7 @@
       "path": "/feedback/:id/assets/:assetId/download",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3206,7 +3206,7 @@
       "path": "/feedback/:id/package.zip",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3217,7 +3217,7 @@
       "path": "/feedback/admin/:id/package.zip",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3228,7 +3228,7 @@
       "path": "/feedback/:id/package-snapshot.pdf",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3239,7 +3239,7 @@
       "path": "/feedback/:id/package-snapshot.json",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3250,7 +3250,7 @@
       "path": "/feedback/admin/:id/package-snapshot.pdf",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3261,7 +3261,7 @@
       "path": "/feedback/admin/:id/package-snapshot.json",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3272,7 +3272,7 @@
       "path": "/feedback/admin/:id/package-snapshot.docx",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3283,7 +3283,7 @@
       "path": "/feedback/admin/:id/package-snapshot.xlsx",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3294,7 +3294,7 @@
       "path": "/feedback/admin/:id/assets/:assetId/download",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3305,7 +3305,7 @@
       "path": "/feedback/admin",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3316,7 +3316,7 @@
       "path": "/feedback/admin/:id/detail",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3327,7 +3327,7 @@
       "path": "/feedback/admin/export.csv",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3338,7 +3338,7 @@
       "path": "/feedback/admin/follow-up.csv",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3349,7 +3349,7 @@
       "path": "/feedback/admin/operations-status",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3360,7 +3360,7 @@
       "path": "/feedback/admin/follow-up.xlsx",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3371,7 +3371,7 @@
       "path": "/feedback/admin/:id/events",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3382,7 +3382,7 @@
       "path": "/feedback/admin/:id",
       "owner": "artifacts/api-server/src/routes/feedback.ts",
       "tables": [
-        "sql } from \"drizzle-orm\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable",
+        "notificationsTable",
         "projectMembersTable",
         "projectsTable",
         "usersTable"
@@ -3393,7 +3393,7 @@
       "path": "/projects/:projectId/files",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3410,7 +3410,7 @@
       "path": "/projects/:projectId/files/current-view.pdf",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3427,7 +3427,7 @@
       "path": "/projects/:projectId/files/handover.zip",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3444,7 +3444,7 @@
       "path": "/projects/:projectId/files/:fileId/download",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3461,7 +3461,7 @@
       "path": "/projects/:projectId/files/suggest-name",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3478,7 +3478,7 @@
       "path": "/projects/:projectId/files",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3495,7 +3495,7 @@
       "path": "/projects/:projectId/files/:fileId",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3512,7 +3512,7 @@
       "path": "/projects/:projectId/files/:fileId",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3529,7 +3529,7 @@
       "path": "/projects/:projectId/files/:fileId/cvr-proceed",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3546,7 +3546,7 @@
       "path": "/projects/:projectId/files/:fileId/cvr-approve",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3563,7 +3563,7 @@
       "path": "/projects/:projectId/files/:fileId/cvr-reject",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3580,7 +3580,7 @@
       "path": "/projects/:projectId/cvr-report",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3597,7 +3597,7 @@
       "path": "/:projectId/files/:fileId/confirm-violation",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3614,7 +3614,7 @@
       "path": "/cvr-health",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -3631,7 +3631,7 @@
       "path": "/:projectId/files/:fileId/supersede",
       "owner": "artifacts/api-server/src/routes/files.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { createHash } from \"crypto\";\r\nimport { singleFileUpload } from \"../middlewares/multipart\";\r\nimport { db } from \"@workspace/db\";\r\nimport { filesTable",
+        "filesTable",
         "namingConventionsTable",
         "namingFieldsTable",
         "namingConventionVersionsTable",
@@ -4164,7 +4164,7 @@
       "path": "/projects/:projectId/links/:entityType/:entityId",
       "owner": "artifacts/api-server/src/routes/linked_items.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  linkedItemsTable",
+        "linkedItemsTable",
         "activityLogTable",
         "rfisTable",
         "submittalsTable",
@@ -4182,7 +4182,7 @@
       "path": "/projects/:projectId/links",
       "owner": "artifacts/api-server/src/routes/linked_items.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  linkedItemsTable",
+        "linkedItemsTable",
         "activityLogTable",
         "rfisTable",
         "submittalsTable",
@@ -4200,7 +4200,7 @@
       "path": "/projects/:projectId/links/:linkId",
       "owner": "artifacts/api-server/src/routes/linked_items.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  linkedItemsTable",
+        "linkedItemsTable",
         "activityLogTable",
         "rfisTable",
         "submittalsTable",
@@ -4218,7 +4218,7 @@
       "path": "/living-brief/eligibility",
       "owner": "artifacts/api-server/src/routes/living_brief.ts",
       "tables": [
-        "type NextFunction } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { usersTable"
+        "usersTable"
       ]
     },
     {
@@ -4226,7 +4226,7 @@
       "path": "/living-brief/unlock",
       "owner": "artifacts/api-server/src/routes/living_brief.ts",
       "tables": [
-        "type NextFunction } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { usersTable"
+        "usersTable"
       ]
     },
     {
@@ -4234,7 +4234,7 @@
       "path": "/living-brief/docs",
       "owner": "artifacts/api-server/src/routes/living_brief.ts",
       "tables": [
-        "type NextFunction } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { usersTable"
+        "usersTable"
       ]
     },
     {
@@ -4242,7 +4242,7 @@
       "path": "/living-brief/password/recovery",
       "owner": "artifacts/api-server/src/routes/living_brief.ts",
       "tables": [
-        "type NextFunction } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { usersTable"
+        "usersTable"
       ]
     },
     {
@@ -4250,7 +4250,7 @@
       "path": "/living-brief/reconcile",
       "owner": "artifacts/api-server/src/routes/living_brief.ts",
       "tables": [
-        "type NextFunction } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { usersTable"
+        "usersTable"
       ]
     },
     {
@@ -4258,7 +4258,7 @@
       "path": "/living-brief/password",
       "owner": "artifacts/api-server/src/routes/living_brief.ts",
       "tables": [
-        "type NextFunction } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { usersTable"
+        "usersTable"
       ]
     },
     {
@@ -4266,7 +4266,7 @@
       "path": "/living-brief/access",
       "owner": "artifacts/api-server/src/routes/living_brief.ts",
       "tables": [
-        "type NextFunction } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { usersTable"
+        "usersTable"
       ]
     },
     {
@@ -4274,7 +4274,7 @@
       "path": "/living-brief/access",
       "owner": "artifacts/api-server/src/routes/living_brief.ts",
       "tables": [
-        "type NextFunction } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { usersTable"
+        "usersTable"
       ]
     },
     {
@@ -4282,7 +4282,7 @@
       "path": "/master-catalogs/:catalog",
       "owner": "artifacts/api-server/src/routes/master-catalogs.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { enterprisePhasesTable",
+        "enterprisePhasesTable",
         "enterpriseServicesTable",
         "enterpriseTradesTable"
       ]
@@ -4292,7 +4292,7 @@
       "path": "/admin/master-catalogs/:catalog",
       "owner": "artifacts/api-server/src/routes/master-catalogs.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { enterprisePhasesTable",
+        "enterprisePhasesTable",
         "enterpriseServicesTable",
         "enterpriseTradesTable"
       ]
@@ -4302,7 +4302,7 @@
       "path": "/admin/master-catalogs/:catalog/:id",
       "owner": "artifacts/api-server/src/routes/master-catalogs.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { enterprisePhasesTable",
+        "enterprisePhasesTable",
         "enterpriseServicesTable",
         "enterpriseTradesTable"
       ]
@@ -4312,7 +4312,7 @@
       "path": "/projects/:projectId/meetings",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4346,7 +4346,7 @@
       "path": "/projects/:projectId/meetings/current-view/pdf",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4380,7 +4380,7 @@
       "path": "/projects/:projectId/meetings/current-view/xlsx",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4414,7 +4414,7 @@
       "path": "/projects/:projectId/meetings/draft",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4448,7 +4448,7 @@
       "path": "/projects/:projectId/meetings/draft",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4482,7 +4482,7 @@
       "path": "/projects/:projectId/meetings/draft",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4516,7 +4516,7 @@
       "path": "/projects/:projectId/meetings",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4550,7 +4550,7 @@
       "path": "/projects/:projectId/meetings/rfi-candidates",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4584,7 +4584,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/rfis",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4618,7 +4618,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/rfis/:rfiId",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4652,7 +4652,7 @@
       "path": "/projects/:projectId/meetings/submittal-candidates",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4686,7 +4686,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/submittals",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4720,7 +4720,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/submittals/:submittalId",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4754,7 +4754,7 @@
       "path": "/projects/:projectId/meetings/lens-viewpoint-candidates",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4788,7 +4788,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/schedule-bucket/preview",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4822,7 +4822,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/schedule-bucket",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4856,7 +4856,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/schedule-bucket/:bucketLinkId/sync",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4890,7 +4890,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/clashes/load",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4924,7 +4924,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/clashes/refresh",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4958,7 +4958,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/clashes/:clashId",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -4992,7 +4992,7 @@
       "path": "/projects/:projectId/meetings/:meetingId",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -5026,7 +5026,7 @@
       "path": "/projects/:projectId/meetings/:meetingId",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -5060,7 +5060,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/ai-summary",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -5094,7 +5094,7 @@
       "path": "/projects/:projectId/meetings/:meetingId/action-items",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -5128,7 +5128,7 @@
       "path": "/projects/:projectId/action-items",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -5162,7 +5162,7 @@
       "path": "/projects/:projectId/action-items/:itemId",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -5196,7 +5196,7 @@
       "path": "/projects/:projectId/meetings/transcribe-audio",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -5230,7 +5230,7 @@
       "path": "/projects/:projectId/meetings/import",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -5264,7 +5264,7 @@
       "path": "/projects/:projectId/meetings/:meetingId",
       "owner": "artifacts/api-server/src/routes/meeting_minutes.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport crypto from \"crypto\";\nimport * as XLSX from \"xlsx\";\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  meetingMinutesTable",
+        "meetingMinutesTable",
         "meetingAttendeesTable",
         "actionItemsTable",
         "activityLogTable",
@@ -5298,7 +5298,7 @@
       "path": "/projects/:projectId/members/eligible",
       "owner": "artifacts/api-server/src/routes/members.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectMembersTable",
+        "projectMembersTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -5311,7 +5311,7 @@
       "path": "/projects/:projectId/members",
       "owner": "artifacts/api-server/src/routes/members.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectMembersTable",
+        "projectMembersTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -5324,7 +5324,7 @@
       "path": "/projects/:projectId/members/current-view/pdf",
       "owner": "artifacts/api-server/src/routes/members.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectMembersTable",
+        "projectMembersTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -5337,7 +5337,7 @@
       "path": "/projects/:projectId/members",
       "owner": "artifacts/api-server/src/routes/members.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectMembersTable",
+        "projectMembersTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -5350,7 +5350,7 @@
       "path": "/projects/:projectId/members/:memberId",
       "owner": "artifacts/api-server/src/routes/members.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectMembersTable",
+        "projectMembersTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -5363,7 +5363,7 @@
       "path": "/projects/:projectId/members/:memberId",
       "owner": "artifacts/api-server/src/routes/members.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectMembersTable",
+        "projectMembersTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -5376,7 +5376,7 @@
       "path": "/projects/:projectId/invitations",
       "owner": "artifacts/api-server/src/routes/members.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectMembersTable",
+        "projectMembersTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -5389,7 +5389,7 @@
       "path": "/projects/:projectId/invitations",
       "owner": "artifacts/api-server/src/routes/members.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectMembersTable",
+        "projectMembersTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -5402,7 +5402,7 @@
       "path": "/projects/:projectId/invitations/:invId",
       "owner": "artifacts/api-server/src/routes/members.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectMembersTable",
+        "projectMembersTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -5415,7 +5415,7 @@
       "path": "/notifications",
       "owner": "artifacts/api-server/src/routes/notifications.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable"
+        "notificationsTable"
       ]
     },
     {
@@ -5423,7 +5423,7 @@
       "path": "/notifications/read-all",
       "owner": "artifacts/api-server/src/routes/notifications.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable"
+        "notificationsTable"
       ]
     },
     {
@@ -5431,7 +5431,7 @@
       "path": "/notifications/:id/read",
       "owner": "artifacts/api-server/src/routes/notifications.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable"
+        "notificationsTable"
       ]
     },
     {
@@ -5439,7 +5439,7 @@
       "path": "/notifications/:id",
       "owner": "artifacts/api-server/src/routes/notifications.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { notificationsTable"
+        "notificationsTable"
       ]
     },
     {
@@ -5447,7 +5447,7 @@
       "path": "/projects",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable",
+        "projectsTable",
         "projectMembersTable",
         "projectCompanyBindingVersionsTable",
         "lensNextModelBindingsTable",
@@ -5461,7 +5461,7 @@
       "path": "/projects/list-for-plugin",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable",
+        "projectsTable",
         "projectMembersTable",
         "projectCompanyBindingVersionsTable",
         "lensNextModelBindingsTable",
@@ -5475,7 +5475,7 @@
       "path": "/lens-next/model-bindings/resolve",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable",
+        "projectsTable",
         "projectMembersTable",
         "projectCompanyBindingVersionsTable",
         "lensNextModelBindingsTable",
@@ -5489,7 +5489,7 @@
       "path": "/projects",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable",
+        "projectsTable",
         "projectMembersTable",
         "projectCompanyBindingVersionsTable",
         "lensNextModelBindingsTable",
@@ -5503,7 +5503,7 @@
       "path": "/projects/:projectId",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable",
+        "projectsTable",
         "projectMembersTable",
         "projectCompanyBindingVersionsTable",
         "lensNextModelBindingsTable",
@@ -5517,7 +5517,7 @@
       "path": "/projects/:projectId/retirement-preview",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable",
+        "projectsTable",
         "projectMembersTable",
         "projectCompanyBindingVersionsTable",
         "lensNextModelBindingsTable",
@@ -5531,7 +5531,7 @@
       "path": "/projects/:projectId/retire",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable",
+        "projectsTable",
         "projectMembersTable",
         "projectCompanyBindingVersionsTable",
         "lensNextModelBindingsTable",
@@ -5545,7 +5545,7 @@
       "path": "/projects/:projectId",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable",
+        "projectsTable",
         "projectMembersTable",
         "projectCompanyBindingVersionsTable",
         "lensNextModelBindingsTable",
@@ -5559,7 +5559,7 @@
       "path": "/projects/:projectId/assign-company-user",
       "owner": "artifacts/api-server/src/routes/projects.ts",
       "tables": [
-        "type IRouter } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { projectsTable",
+        "projectsTable",
         "projectMembersTable",
         "projectCompanyBindingVersionsTable",
         "lensNextModelBindingsTable",
@@ -5573,7 +5573,7 @@
       "path": "/projects/:projectId/directory",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { ensureCompanyMasterCatalogSchema } from \"../lib/company-master-catalog-migration\";\r\nimport {\r\n  companiesTable",
+        "companiesTable",
         "projectDirectoryTable",
         "usersTable",
         "activityLogTable",
@@ -5587,7 +5587,7 @@
       "path": "/projects/:projectId/directory/export-pdf",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { ensureCompanyMasterCatalogSchema } from \"../lib/company-master-catalog-migration\";\r\nimport {\r\n  companiesTable",
+        "companiesTable",
         "projectDirectoryTable",
         "usersTable",
         "activityLogTable",
@@ -5601,7 +5601,7 @@
       "path": "/projects/:projectId/directory",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { ensureCompanyMasterCatalogSchema } from \"../lib/company-master-catalog-migration\";\r\nimport {\r\n  companiesTable",
+        "companiesTable",
         "projectDirectoryTable",
         "usersTable",
         "activityLogTable",
@@ -5615,7 +5615,7 @@
       "path": "/projects/:projectId/directory/companies",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { ensureCompanyMasterCatalogSchema } from \"../lib/company-master-catalog-migration\";\r\nimport {\r\n  companiesTable",
+        "companiesTable",
         "projectDirectoryTable",
         "usersTable",
         "activityLogTable",
@@ -5629,7 +5629,7 @@
       "path": "/projects/:projectId/directory/contacts",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { ensureCompanyMasterCatalogSchema } from \"../lib/company-master-catalog-migration\";\r\nimport {\r\n  companiesTable",
+        "companiesTable",
         "projectDirectoryTable",
         "usersTable",
         "activityLogTable",
@@ -5643,7 +5643,7 @@
       "path": "/projects/:projectId/directory/:entryId",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { ensureCompanyMasterCatalogSchema } from \"../lib/company-master-catalog-migration\";\r\nimport {\r\n  companiesTable",
+        "companiesTable",
         "projectDirectoryTable",
         "usersTable",
         "activityLogTable",
@@ -5657,7 +5657,7 @@
       "path": "/projects/:projectId/directory/:entryId",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { ensureCompanyMasterCatalogSchema } from \"../lib/company-master-catalog-migration\";\r\nimport {\r\n  companiesTable",
+        "companiesTable",
         "projectDirectoryTable",
         "usersTable",
         "activityLogTable",
@@ -5671,7 +5671,7 @@
       "path": "/projects/:projectId/directory/:entryId/invite",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { ensureCompanyMasterCatalogSchema } from \"../lib/company-master-catalog-migration\";\r\nimport {\r\n  companiesTable",
+        "companiesTable",
         "projectDirectoryTable",
         "usersTable",
         "activityLogTable",
@@ -5685,7 +5685,7 @@
       "path": "/projects/:projectId/directory/import",
       "owner": "artifacts/api-server/src/routes/project_directory.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { ensureCompanyMasterCatalogSchema } from \"../lib/company-master-catalog-migration\";\r\nimport {\r\n  companiesTable",
+        "companiesTable",
         "projectDirectoryTable",
         "usersTable",
         "activityLogTable",
@@ -5699,7 +5699,7 @@
       "path": "/projects/:projectId/reports/current-view/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5726,7 +5726,7 @@
       "path": "/help/manual/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5753,7 +5753,7 @@
       "path": "/projects/:projectId/reports/project-health/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5780,7 +5780,7 @@
       "path": "/projects/:projectId/reports/compliance/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5807,7 +5807,7 @@
       "path": "/projects/:projectId/reports/rfi-aging/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5834,7 +5834,7 @@
       "path": "/projects/:projectId/reports/submittal-status/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5861,7 +5861,7 @@
       "path": "/projects/:projectId/reports/performance/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5888,7 +5888,7 @@
       "path": "/projects/:projectId/reports/dispute/:module/:itemId/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5915,7 +5915,7 @@
       "path": "/projects/:projectId/reports/audit-certificate/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5942,7 +5942,7 @@
       "path": "/projects/:projectId/reports/meeting-minutes/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5969,7 +5969,7 @@
       "path": "/projects/:projectId/reports/change-order-log/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -5996,7 +5996,7 @@
       "path": "/projects/:projectId/reports/transmittal-log/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -6023,7 +6023,7 @@
       "path": "/projects/:projectId/reports/cvr/pdf",
       "owner": "artifacts/api-server/src/routes/reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  projectsTable",
+        "projectsTable",
         "rfisTable",
         "submittalsTable",
         "filesTable",
@@ -6050,7 +6050,7 @@
       "path": "/projects/:projectId/rfis",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6077,7 +6077,7 @@
       "path": "/projects/:projectId/rfis/export-pdf",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6104,7 +6104,7 @@
       "path": "/projects/:projectId/rfis/export-excel",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6131,7 +6131,7 @@
       "path": "/projects/:projectId/rfis",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6158,7 +6158,7 @@
       "path": "/projects/:projectId/rfis/report-settings",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6185,7 +6185,7 @@
       "path": "/projects/:projectId/rfis/report-settings/preview",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6212,7 +6212,7 @@
       "path": "/projects/:projectId/rfis/report-settings",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6239,7 +6239,7 @@
       "path": "/projects/:projectId/rfis/report-settings/reset",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6266,7 +6266,7 @@
       "path": "/projects/:projectId/rfis/from-viewpoint",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6293,7 +6293,7 @@
       "path": "/projects/:projectId/rfis/:rfiId",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6320,7 +6320,7 @@
       "path": "/projects/:projectId/rfis/:rfiId",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6347,7 +6347,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/close",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6374,7 +6374,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/reopen",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6401,7 +6401,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/revise",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6428,7 +6428,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/export",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6455,7 +6455,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/export-complete",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6482,7 +6482,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/generate-response",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6509,7 +6509,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/generate-email-preview",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6536,7 +6536,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/mark-sent",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6563,7 +6563,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/send",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6590,7 +6590,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/view",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6617,7 +6617,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/viewed-by",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6644,7 +6644,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/ball-in-court-history",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6671,7 +6671,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/audit-certificate",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6698,7 +6698,7 @@
       "path": "/rfis/generate-question",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6725,7 +6725,7 @@
       "path": "/projects/:projectId/rfis/generate-email-draft",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6752,7 +6752,7 @@
       "path": "/projects/:projectId/rfis/attachments/from-google-drive",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6779,7 +6779,7 @@
       "path": "/projects/:projectId/rfis/attachments/from-cloud",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6806,7 +6806,7 @@
       "path": "/projects/:projectId/rfis/import-prefill",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6833,7 +6833,7 @@
       "path": "/projects/:projectId/rfis/attachments/upload",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6860,7 +6860,7 @@
       "path": "/projects/:projectId/rfis/attachments/paste-image",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6887,7 +6887,7 @@
       "path": "/projects/:projectId/rfis/attachments/screen-snip",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6914,7 +6914,7 @@
       "path": "/projects/:projectId/rfis/attachments/staged/:fileId",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6941,7 +6941,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/responses",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6968,7 +6968,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/responses",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -6995,7 +6995,7 @@
       "path": "/projects/:projectId/rfis/:rfiId/export-word",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -7022,7 +7022,7 @@
       "path": "/projects/:projectId/rfis/import/procore/preview",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -7049,7 +7049,7 @@
       "path": "/projects/:projectId/rfis/import/procore/commit",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -7076,7 +7076,7 @@
       "path": "/projects/:projectId/rfis/import",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -7103,7 +7103,7 @@
       "path": "/projects/:projectId/rfis/:rfiId",
       "owner": "artifacts/api-server/src/routes/rfis.ts",
       "tables": [
-        "pool } from \"@workspace/db\";\r\nimport { rfisTable",
+        "rfisTable",
         "usersTable",
         "companiesTable",
         "activityLogTable",
@@ -7130,7 +7130,7 @@
       "path": "/projects/:projectId/schedule/buckets",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7147,7 +7147,7 @@
       "path": "/projects/:projectId/schedule/buckets",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7164,7 +7164,7 @@
       "path": "/projects/:projectId/schedule/buckets/:bucketId",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7181,7 +7181,7 @@
       "path": "/projects/:projectId/schedule/live",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7198,7 +7198,7 @@
       "path": "/projects/:projectId/schedule/export-pdf",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7215,7 +7215,7 @@
       "path": "/projects/:projectId/schedule/items/move",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7232,7 +7232,7 @@
       "path": "/projects/:projectId/schedule/buckets/:fromBucketId/rollover",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7249,7 +7249,7 @@
       "path": "/projects/:projectId/schedule/items/:sourceType/:sourceId/history",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7266,7 +7266,7 @@
       "path": "/projects/:projectId/milestones",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7283,7 +7283,7 @@
       "path": "/projects/:projectId/milestones",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7300,7 +7300,7 @@
       "path": "/projects/:projectId/milestones/:milestoneId",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7317,7 +7317,7 @@
       "path": "/projects/:projectId/milestones/:milestoneId",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7334,7 +7334,7 @@
       "path": "/projects/:projectId/milestones/import",
       "owner": "artifacts/api-server/src/routes/schedule.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  activityLogTable",
+        "activityLogTable",
         "meetingMinutesTable",
         "projectsTable",
         "projectMilestonesTable",
@@ -7351,7 +7351,7 @@
       "path": "/search",
       "owner": "artifacts/api-server/src/routes/search.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  filesTable",
+        "filesTable",
         "rfisTable",
         "submittalsTable",
         "transmittalsTable",
@@ -7368,7 +7368,7 @@
       "path": "/projects/:projectId/submittals",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7387,7 +7387,7 @@
       "path": "/projects/:projectId/submittals",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7406,7 +7406,7 @@
       "path": "/projects/:projectId/submittals/export-excel",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7425,7 +7425,7 @@
       "path": "/projects/:projectId/submittals/export-all",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7444,7 +7444,7 @@
       "path": "/projects/:projectId/submittals/tracker-excel",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7463,7 +7463,7 @@
       "path": "/projects/:projectId/submittals/tracker-pdf",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7482,7 +7482,7 @@
       "path": "/projects/:projectId/submittals/:submittalId",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7501,7 +7501,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/view",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7520,7 +7520,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/viewed-by",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7539,7 +7539,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/respond",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7558,7 +7558,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/ai-check",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7577,7 +7577,7 @@
       "path": "/projects/:projectId/submittals/ai-assist-description",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7596,7 +7596,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/ai-assist-description",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7615,7 +7615,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/ai-email-draft",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7634,7 +7634,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/export",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7653,7 +7653,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/export-word",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7672,7 +7672,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/audit-certificate",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7691,7 +7691,7 @@
       "path": "/projects/:projectId/submittal-register",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7710,7 +7710,7 @@
       "path": "/projects/:projectId/submittal-register",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7729,7 +7729,7 @@
       "path": "/projects/:projectId/submittal-register/:itemId",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7748,7 +7748,7 @@
       "path": "/projects/:projectId/submittal-register/:itemId",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7767,7 +7767,7 @@
       "path": "/projects/:projectId/submittals/:submittalId/ai-draft-rejection",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7786,7 +7786,7 @@
       "path": "/projects/:projectId/submittals/inline-ai-check",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7805,7 +7805,7 @@
       "path": "/projects/:projectId/submittals/attachments/upload",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7824,7 +7824,7 @@
       "path": "/projects/:projectId/submittals/import",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7843,7 +7843,7 @@
       "path": "/projects/:projectId/submittals/:submittalId",
       "owner": "artifacts/api-server/src/routes/submittals.ts",
       "tables": [
-        "type Response } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  submittalsTable",
+        "submittalsTable",
         "usersTable",
         "activityLogTable",
         "projectsTable",
@@ -7862,7 +7862,7 @@
       "path": "/projects/:projectId/submittal-reports",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -7871,7 +7871,7 @@
       "path": "/projects/:projectId/submittal-reports",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -7880,7 +7880,7 @@
       "path": "/projects/:projectId/submittal-reports/upload",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -7889,7 +7889,7 @@
       "path": "/projects/:projectId/submittal-reports/:reportId",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -7898,7 +7898,7 @@
       "path": "/projects/:projectId/submittal-reports/:reportId/rename",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -7907,7 +7907,7 @@
       "path": "/projects/:projectId/submittal-reports/:reportId/items/:itemId",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -7916,7 +7916,7 @@
       "path": "/projects/:projectId/submittal-reports/:reportId/items",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -7925,7 +7925,7 @@
       "path": "/projects/:projectId/submittal-reports/:reportId",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -7934,7 +7934,7 @@
       "path": "/projects/:projectId/submittal-reports/:reportId/items/:itemId",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -7943,7 +7943,7 @@
       "path": "/projects/:projectId/submittal-reports/:reportId/pdf",
       "owner": "artifacts/api-server/src/routes/submittal_reports.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport { submittalReportsTable",
+        "submittalReportsTable",
         "submittalItemsTable"
       ]
     },
@@ -8174,7 +8174,7 @@
       "path": "/projects/:projectId/transmittals",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8190,7 +8190,7 @@
       "path": "/projects/:projectId/transmittals",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8206,7 +8206,7 @@
       "path": "/projects/:projectId/transmittals/export-pdf",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8222,7 +8222,7 @@
       "path": "/projects/:projectId/transmittals/:transmittalId",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8238,7 +8238,7 @@
       "path": "/projects/:projectId/transmittals/:transmittalId",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8254,7 +8254,7 @@
       "path": "/projects/:projectId/transmittals/:transmittalId/send",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8270,7 +8270,7 @@
       "path": "/projects/:projectId/transmittals/:transmittalId/acknowledge",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8286,7 +8286,7 @@
       "path": "/projects/:projectId/transmittals/:transmittalId/ai-draft",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8302,7 +8302,7 @@
       "path": "/projects/:projectId/transmittals/:transmittalId/export",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8318,7 +8318,7 @@
       "path": "/projects/:projectId/transmittals/import",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",
@@ -8334,7 +8334,7 @@
       "path": "/projects/:projectId/transmittals/:transmittalId",
       "owner": "artifacts/api-server/src/routes/transmittals.ts",
       "tables": [
-        "Router } from \"express\";\r\nimport { db } from \"@workspace/db\";\r\nimport {\r\n  transmittalsTable",
+        "transmittalsTable",
         "transmittalItemsTable",
         "activityLogTable",
         "projectsTable",

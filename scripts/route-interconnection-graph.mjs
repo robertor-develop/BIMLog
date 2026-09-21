@@ -4,7 +4,8 @@ import { fileURLToPath } from "node:url";
 import { pathToFileURL } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const read = relative => fs.readFileSync(path.join(root, relative), "utf8");
+const normalizedSource = value => value.replace(/\r\n?/g, "\n");
+const read = relative => normalizedSource(fs.readFileSync(path.join(root, relative), "utf8"));
 const walk = directory => fs.readdirSync(directory, { withFileTypes: true }).flatMap(entry => {
   const full = path.join(directory, entry.name);
   return entry.isDirectory() ? walk(full) : [full];
@@ -36,8 +37,8 @@ export function buildRouteInterconnectionGraph() {
 
   const apiRoutes = [];
   for (const file of apiFiles) {
-    const source = fs.readFileSync(file, "utf8");
-    const tableImport = source.match(/import\s*\{([\s\S]*?)\}\s*from\s*["']@workspace\/db\/schema["']/);
+    const source = normalizedSource(fs.readFileSync(file, "utf8"));
+    const tableImport = source.match(/import\s*\{([^}]*)\}\s*from\s*["']@workspace\/db\/schema["']/);
     const tables = tableImport ? tableImport[1].split(",").map(value => value.trim()).filter(value => /Table$/.test(value)) : [];
     const regex = /\brouter\s*\.\s*(get|post|put|patch|delete)\s*\(\s*["'`]([^"'`]+)["'`]/g;
     for (const match of source.matchAll(regex)) {
@@ -47,7 +48,7 @@ export function buildRouteInterconnectionGraph() {
 
   const apiReferences = [];
   for (const file of frontendFiles) {
-    const source = fs.readFileSync(file, "utf8");
+    const source = normalizedSource(fs.readFileSync(file, "utf8"));
     const paths = new Set([...source.matchAll(/["'`]((?:\$\{[^}]+\})?\/api\/v1\/[^"'`\s?]*)/g)].map(match => match[1]));
     for (const apiPath of paths) apiReferences.push({ screen: relative(file), apiPath });
   }

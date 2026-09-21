@@ -13,6 +13,7 @@ assert.ok(graph.counts.frontendRoutes >= 35, "all routed frontend surfaces remai
 assert.ok(graph.counts.apiRoutes >= 450, "the complete API route surface remains inventoried");
 assert.ok(graph.counts.frontendApiReferences >= 100, "screen-to-API references remain represented");
 assert.ok(graph.counts.routeOwnedTables >= 40, "route-to-table ownership remains represented");
+assert.ok(graph.apiRoutes.every(route => route.tables.every(table => !/[\r\n]|\bimport\b/.test(table))), "route table identities cannot absorb unrelated imports or platform line endings");
 assert.deepEqual(graph.findings.duplicateApiRoutes, [], "no API method/path is owned by multiple route modules");
 assert.deepEqual(graph.findings.sidebarTabsWithoutScreen, [], "every project sidebar tab resolves to a screen");
 assert.deepEqual(graph.findings.screensWithoutSidebar, [], "every canonical project tab is reachable from navigation");
