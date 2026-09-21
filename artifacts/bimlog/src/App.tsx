@@ -9,7 +9,6 @@ import { installAuthStorageContinuity, useAuthStore } from "@/store/auth";
 
 import { Navbar } from "@/components/layout/Navbar";
 import { DebugBanner } from "@/components/DebugBanner";
-import { FeedbackWidget } from "@/components/FeedbackWidget";
 import { PublicRouteMetadata } from "@/components/PublicRouteMetadata";
 import { RouteAccessibility } from "@/components/layout/RouteAccessibility";
 import { RouteState } from "@/components/layout/RouteState";
@@ -54,6 +53,7 @@ const Contact = namedPage(() => import("@/pages/Contact"), "Contact");
 const Features = namedPage(() => import("@/pages/Features"), "Features");
 const LensNextWorkspace = namedPage(() => import("@/features/lens-next/LensNextWorkspace"), "LensNextWorkspace");
 const NotFound = lazy(() => loadDeploymentModule(() => import("@/pages/not-found")));
+const FeedbackWidget = namedPage(() => import("@/components/FeedbackWidget"), "FeedbackWidget");
 
 const queryClient = new QueryClient();
 
@@ -178,6 +178,25 @@ function LivingBriefHotkey() {
   }, [setLocation]);
 
   return null;
+}
+
+const FEEDBACK_IDLE_DELAY_MS = 400;
+
+function DeferredFeedbackWidget() {
+  const { token } = useAuthStore();
+  const [ready, setReady] = useState(false);
+
+  useEffect(() => {
+    if (!token) {
+      setReady(false);
+      return;
+    }
+    const timer = window.setTimeout(() => setReady(true), FEEDBACK_IDLE_DELAY_MS);
+    return () => window.clearTimeout(timer);
+  }, [token]);
+
+  if (!token || !ready) return null;
+  return <Suspense fallback={null}><FeedbackWidget /></Suspense>;
 }
 
 function Router() {
@@ -313,7 +332,7 @@ function App() {
                 </Suspense>
               </main>
             </div>
-            <FeedbackWidget />
+            <DeferredFeedbackWidget />
           </WouterRouter>
           <Toaster />
         </TooltipProvider>
