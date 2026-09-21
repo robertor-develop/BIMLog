@@ -8,6 +8,7 @@
 - The additive startup migration creates twelve new tables and immutable history triggers. It contains no DROP, TRUNCATE, destructive rename, replacement, or customer-row mutation and is mirrored in Drizzle source.
 - Focused contract, transition, repository, tenant-boundary, repeat-migration, rollback, typecheck, and restored-database tests pass. The restored proof preserved all existing project and Lens viewpoint rows and left no synthetic test row.
 - This five-build boundary is push-only. No UI, Lens Next Native code, bridge protocol, installer, package, production database, or customer data changes are included; the blue-marked compact Lens panel remains scheduled for Builds 246–250.
+- Narrative reconciliation binds this accepted source scope to implementation commit `cce77c1d813b16952873a9faa192208276dd7b31`; the later reconciliation commit changes evidence metadata only.
 
 ## Post-220 closure — Block 45 source acceptance — 2026-09-21
 

@@ -1,7 +1,7 @@
 # Coordination Knowledge Library — Block 1 source acceptance
 
-Date: 2026-09-21  
-Builds: 226–230  
+Date: 2026-09-21
+Builds: 226–230
 Status: `PASS_SOURCE_CANDIDATE`
 
 ## Scope delivered
@@ -45,4 +45,3 @@ Status: `PASS_SOURCE_CANDIDATE`
 ## Release boundary
 
 This is the five-build push-only boundary. Publication, Replit synchronization, authenticated Chrome smoke, and any production schema application are not due until Build 235. Focused Navisworks smoke is not required because this block changes no Native/API bridge contract, installer, package, or Navisworks-facing behavior.
-

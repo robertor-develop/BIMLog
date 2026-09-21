@@ -303,6 +303,13 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-hub-runtime.behavior.ts
 - artifacts/api-server/src/lib/coordination-hub-service.behavior.ts
 - artifacts/api-server/src/lib/coordination-hub-service.ts
+- artifacts/api-server/src/lib/coordination-knowledge-contract.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-contract.ts
+- artifacts/api-server/src/lib/coordination-knowledge-database.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-migration.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-migration.ts
+- artifacts/api-server/src/lib/coordination-knowledge-repository.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-repository.ts
 - artifacts/api-server/src/lib/coordination-release-readiness.behavior.ts
 - artifacts/api-server/src/lib/coordination-release-readiness.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
@@ -638,6 +645,7 @@ It changes only when the code structure or curated architectural facts change.
 - lib/db/src/schema/contact-submissions.ts
 - lib/db/src/schema/contract-item-workflows.ts
 - lib/db/src/schema/conventions.ts
+- lib/db/src/schema/coordination-knowledge.ts
 - lib/db/src/schema/coordination_intake_events.ts
 - lib/db/src/schema/coordinator-bulk-operations.ts
 - lib/db/src/schema/coordinator-saved-views.ts

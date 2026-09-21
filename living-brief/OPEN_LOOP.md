@@ -3,6 +3,7 @@
 ## Current open-loop authority — Coordination Knowledge Library Block 1 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
 - [x] Builds 226–230 establish the canonical company-scoped domain, immutable revisions, tenant-bound repositories, additive migration, clean/repeat/rollback coverage, and restored-database preservation proof. This boundary is push-only and does not change the visible Lens Next workspace.
+- [x] Block 1 implementation authority is exact commit `cce77c1d813b16952873a9faa192208276dd7b31`; reconciliation may update evidence metadata but cannot silently change the accepted product scope.
 - [ ] Builds 231–235 add server-authorized knowledge APIs, bounded search, existing-role integration, and complete product verification while preserving the current Lens Next experience.
 
 - [x] Builds 221–225 reconcile exact Build 220 live acceptance and close the verified physical Navisworks 2021 P36 installation. This five-build boundary is push-only and changes no runtime product code, database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license.
