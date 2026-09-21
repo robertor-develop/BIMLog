@@ -4,11 +4,12 @@ import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import "./CoordinationKnowledgeLibrary.css";
+import { ConflictTypeWorkspace, type KnowledgeRecord } from "./CoordinationKnowledgeAuthoring";
 
 type WorkspaceSection = "conflict-types" | "rules" | "methods" | "lessons";
 type KnowledgeStatus = "draft" | "under_review" | "approved" | "retired";
 type ConflictTypeRecord = {
-  id: string; code: string; revision: number; status: KnowledgeStatus; name: string; description: string;
+  id: string; conflict_type_id?: string; code: string; revision: number; status: KnowledgeStatus; name: string; description: string;
   discipline_a: string; discipline_b: string; element_type_a: string; element_type_b: string;
   conflict_category: string; coordination_stage: string; tags: string[];
 };
@@ -53,6 +54,7 @@ export function CoordinationKnowledgeLibrary() {
   const [conflictState, setConflictState] = useState<"loading" | "ready" | "error">("loading");
   const [conflictError, setConflictError] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
+  const [selectedConflict, setSelectedConflict] = useState<ConflictTypeRecord | null>(null);
   const [rules, setRules] = useState<RuleRecord[]>([]);
   const [ruleFilters, setRuleFilters] = useState<RuleFilters>(emptyRuleFilters);
   const [ruleState, setRuleState] = useState<"idle" | "loading" | "ready" | "error">("idle");
@@ -243,11 +245,12 @@ export function CoordinationKnowledgeLibrary() {
           {conflictState === "error" && <div className="knowledge-error" role="alert"><strong>{t("Conflict Types could not be loaded.", "No se pudieron cargar los Tipos de Conflicto.")}</strong><span>{conflictError}</span><button type="button" onClick={() => setReloadKey(value => value + 1)}>{t("Try again", "Reintentar")}</button></div>}
           {conflictState === "ready" && !filteredConflictTypes.length && <div className="knowledge-placeholder" role="status"><GitPullRequest aria-hidden /><strong>{conflictTypes.length ? t("No Conflict Types match these filters", "Ningún Tipo de Conflicto coincide con estos filtros") : t("No Conflict Types yet", "Aún no hay Tipos de Conflicto")}</strong><span>{conflictTypes.length ? t("Change or reset the filters to continue.", "Cambie o restablezca los filtros para continuar.") : t("An authorized BIM Manager can create the first governed draft in the authoring milestone.", "Un BIM Manager autorizado podrá crear el primer borrador gobernado en el hito de autoría.")}</span></div>}
           {conflictState === "ready" && filteredConflictTypes.length > 0 && <><p className="knowledge-result-count" role="status">{filteredConflictTypes.length} {t("Conflict Types", "Tipos de Conflicto")}</p><div className="knowledge-card-grid">
-            {filteredConflictTypes.map(item => <article className="knowledge-card" key={item.id}>
+            {filteredConflictTypes.map(item => <article className="knowledge-card knowledge-card-action" key={item.conflict_type_id || item.id} onClick={() => setSelectedConflict(item)}>
               <div className="knowledge-card-top"><span className="knowledge-code">{item.code}</span><span className={`knowledge-status knowledge-status-${item.status}`}><span aria-hidden>●</span>{statusText(item.status)}</span></div>
               <h3>{item.name}</h3><p>{item.description}</p>
               <dl><div><dt>{t("Disciplines", "Disciplinas")}</dt><dd>{item.discipline_a} · {item.discipline_b}</dd></div><div><dt>{t("Elements", "Elementos")}</dt><dd>{item.element_type_a} · {item.element_type_b}</dd></div><div><dt>{t("Category", "Categoría")}</dt><dd>{item.conflict_category}</dd></div><div><dt>{t("Stage", "Etapa")}</dt><dd>{item.coordination_stage}</dd></div></dl>
               <div className="knowledge-card-footer"><span>v{item.revision}</span><div>{item.tags?.map(tag => <span className="knowledge-tag" key={tag}>{tag}</span>)}</div></div>
+              <button type="button" onClick={event=>{event.stopPropagation();setSelectedConflict(item);}}>{t("Open detail","Abrir detalle")}</button>
             </article>)}
           </div></>}
         </div> : active === "rules" ? <div className="knowledge-catalog" aria-busy={ruleState === "loading"}>
@@ -320,6 +323,7 @@ export function CoordinationKnowledgeLibrary() {
           </div>
         </div>}
       </section>
+      {selectedConflict && <ConflictTypeWorkspace item={selectedConflict as unknown as KnowledgeRecord} token={token} capabilities={capability?.capabilities ?? []} lang={es?"es":"en"} onClose={()=>setSelectedConflict(null)} onChanged={changed=>{setSelectedConflict(changed as unknown as ConflictTypeRecord);setConflictTypes(current=>current.map(item=>(item.conflict_type_id||item.id)===(changed.conflict_type_id||changed.id)?changed as unknown as ConflictTypeRecord:item));}} />}
     </main>
   </div>;
 }
