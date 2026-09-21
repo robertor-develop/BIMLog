@@ -34099,6 +34099,73 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e5d8f3c8f5d88c8bf2f035f7a3991691dd488a1ac0cf6a4b70a5a85eee5a409b"
+    },
+    {
+      "taskId": "bimlog-build155-deterministic-platform-authority-repair-20260920",
+      "reviewedThroughCommit": "30dddc2fd8260819adb06c947408960ee24d5989",
+      "reviewedAt": "2026-09-20T22:22:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem or ownership boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established build, push, publication, and browser acceptance procedure is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The production build now preserves deterministic generated Platform authority and can verify its runtime closure hash."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product direction and customer outcomes are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generator now owns the Build 155 RFI frontend decomposition text instead of relying on a manual generated-file edit."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, Pulse, installer, package, or supported-year behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report contract or rendering behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 155 remains the active source-acceptance and push boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing Build 155 push and Builds 156–160 continuation remain active."
+        },
+        {
+          "key": "audit",
+          "result": "updated",
+          "reason": "The failed gate and deterministic generator repair are preserved by exact commit and repeated full-gate evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
