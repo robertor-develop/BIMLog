@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { pathToFileURL } from "node:url";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
 const read = relative => fs.readFileSync(path.join(root, relative), "utf8");
@@ -86,7 +87,8 @@ export function buildRouteInterconnectionGraph() {
   };
 }
 
-const output = process.argv.includes("--output")
+const isDirectExecution = process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href;
+const output = isDirectExecution && process.argv.includes("--output")
   ? process.argv[process.argv.indexOf("--output") + 1]
   : null;
 if (output) {
