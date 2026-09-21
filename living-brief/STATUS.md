@@ -1,11 +1,19 @@
 # STATUS.md - Current Accepted Platform State
 
-## Post-120 stabilization — Block 28 source acceptance — 2026-09-20
+## Post-120 stabilization — Block 29 source acceptance — 2026-09-20
+
+- Builds 141–144 extract Meetings data/query orchestration, the agenda reducer, the draft lifecycle state machine, the action-item table, and reusable participant fields from the 6,500-line Meetings page without changing routes, permissions, stored data, workflow semantics, or report output.
+- The permanent Block 29 regression gate verifies API identity, authorization headers, reducer transitions, component integration, responsive action-table containment, labeled participant controls, bilingual empty states, and completion wiring; frontend TypeScript passes.
+- Build 145 is the five-build push boundary. Publication remains scheduled after Build 150, so no Replit publication or live production mutation is due in this block.
+- No database/schema/customer-data, Native, installer, package, bridge-protocol, report-rendering, or provider-configuration mutation is part of Block 29; focused Navisworks smoke is not retriggered.
+
+## Post-120 stabilization — Block 28 live acceptance — 2026-09-20
 
 - Builds 136–140 inventory every production PDF renderer/delivery contract, add one path-safe shared download adapter, and migrate the operational-register and bilingual directory families without changing report data, layout, fingerprints, authorization, or localization.
 - Four PDFs generated through the actual Activity and Coordinator production renderers passed structure, MediaBox, text extraction, security header, filename, and every-page visual inspection in English and Spanish.
-- Build 140 is the ten-build publication boundary. The exact candidate still requires the clean pre-push gate, normal push, Replit Shell publication without Replit Agents, exact live identity, and full authenticated visible-Chrome smoke.
-- No database/schema/customer-data, Native, installer, bridge-protocol, or provider-configuration mutation is part of this block; focused Navisworks smoke is not retriggered.
+- Exact source `1bb9ec7ee353d14a90cc0f2e925f9e3424599cd2` was pushed, published through Replit Shell without Replit Agents as publication `684c8337`, and live-verified at `v1.05.N18-P36`.
+- Public health returned HTTP 200 with identity binding enabled. Authenticated Analytics, Command Center, Activity, Reports, Directory, Team, governed PDF generation, project-tab reload, and Lens Next second-tab reload all passed with no browser console errors.
+- No database/schema/customer-data, Native, installer, bridge-protocol, or provider-configuration mutation occurred; focused Navisworks smoke was not required.
 
 ## Post-120 stabilization — Block 27 source acceptance — 2026-09-20
 

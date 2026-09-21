@@ -41,6 +41,8 @@ Status: source accepted for the Build 135 push boundary; publication remains sch
 
 ## Block 28 — Builds 136–140 — shared PDF architecture
 
+Status: complete, pushed, published, and authenticated live-smoke accepted at `v1.05.N18-P36` from `1bb9ec7ee353d14a90cc0f2e925f9e3424599cd2`.
+
 - 136: inventory every bespoke PDF renderer and output contract.
 - 137: define one shared safe rendering adapter and migration compatibility tests.
 - 138: migrate the first report family without visual/output regression.
@@ -48,6 +50,8 @@ Status: source accepted for the Build 135 push boundary; publication remains sch
 - 140: publish; compare representative PDFs and run full Chrome smoke.
 
 ## Block 29 — Builds 141–145 — meetings frontend decomposition
+
+Status: Builds 141–144 implemented and verified; Build 145 is the full-gate and push boundary. Publication remains scheduled after Build 150.
 
 - 141: extract meeting data/query orchestration from `MeetingsTab.tsx`.
 - 142: extract agenda/minutes state machines.

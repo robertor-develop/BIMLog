@@ -1,12 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — post-120 Block 28 — 2026-09-20
+## Current open-loop authority — post-120 Block 29 — 2026-09-20
 
-- [x] Builds 131–135: classify and remove 17 workflow/document and export/report silent-failure occurrences, add bounded user feedback and code-only telemetry, pass negative-path tests, and complete the full clean gate.
-- [x] Push the exact Build 135 source head normally to the stabilization branch and `master`.
-- [x] Builds 136–139: inventory the complete PDF surface, establish the shared safe delivery adapter, and migrate the operational-register and bilingual-directory report families.
-- [ ] [ACTIVE] Build 140: pass the exact clean gate, push normally, publish through Replit Shell without Replit Agents, verify exact live identity, and run full authenticated visible-Chrome smoke.
-- [ ] Builds 141–145: continue PDF-family convergence after Build 140 live acceptance.
+- [x] Build 140 passed the complete gate, pushed normally, published through Replit Shell without Replit Agents, exposed exact source identity `1bb9ec7ee353d14a90cc0f2e925f9e3424599cd2`, and passed authenticated Chrome route, PDF-generation, reload, and two-tab continuity smoke.
+- [x] Builds 141–144: extract Meetings data/query orchestration, agenda and draft state machines, action-item presentation, participant field presentation, and permanent integration/accessibility regressions.
+- [x] Build 145: complete the five-build source-acceptance record, commit the exact candidate, run the complete gate from the clean committed tree, and push the exact head normally. This is a push-only boundary; the first dirty-tree gate attempt correctly failed closed before runtime assembly and is superseded by the clean-tree rerun.
+- [ ] Builds 146–150: decompose Convention Builder, push Build 150, publish the ten-build batch, and run full authenticated visible-Chrome acceptance.
 
 ## Current open-loop authority — post-120 Block 26 — 2026-09-20
 

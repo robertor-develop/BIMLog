@@ -33806,6 +33806,80 @@
         "package.json"
       ],
       "reviewedChangeSha256": "361fa696eea5bef932146550b5a635e8f764eeaa29d9fbdc894a91df2900d06b"
+    },
+    {
+      "taskId": "bimlog-post120-block29-meetings-decomposition-20260920",
+      "reviewedThroughCommit": "8a4ad922e997474d0073502d36c83e604b075d09",
+      "reviewedAt": "2026-09-20T20:06:20-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, product boundary, human authority, or provider boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push, ten-build publication, visible-Chrome, and no-Replit-Agents procedures remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The extraction preserves the accepted Meetings workflow and adds executable integration and accessibility regression coverage without changing quality doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product direction and customer outcomes are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the extracted Meetings data, editor-state, action presentation, and participant presentation modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, Pulse, installer, package, bridge protocol, or supported-year behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Meeting report bytes, queries, titles, filenames, layouts, and delivery contracts are unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, applicability, or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Build 141-145 Meetings decomposition and push-only boundary, and closes Build 140 live acceptance truth."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the Build 140 publication loop, records Builds 141-144, activates Build 145 push, and schedules Builds 146-150."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Executable source and regression tests carry the evidence; no new audit doctrine or historical finding is introduced."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/BUILD_145_SOURCE_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9995a971d954c8f6abcb0ff0f37573a7b2d7429914186a77e0901928f706f29e"
     }
   ]
 }

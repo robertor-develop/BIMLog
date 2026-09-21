@@ -730,6 +730,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/bimlog/src/pages/project/SubmittalsTab.tsx
 - artifacts/bimlog/src/pages/project/TeamTab.tsx
 - artifacts/bimlog/src/pages/project/TransmittalsTab.tsx
+- artifacts/bimlog/src/pages/project/meetings/MeetingActionItemsTable.tsx
+- artifacts/bimlog/src/pages/project/meetings/MeetingParticipantField.tsx
 
 ## Frontend routes (artifacts/bimlog/src/App.tsx, wouter)
 - /
