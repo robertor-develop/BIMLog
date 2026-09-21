@@ -34024,6 +34024,80 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9c8c2fe9e1ebc3841ecc79e08fbee445189ae446fd00306f3b4dc0155148d255"
+    },
+    {
+      "taskId": "bimlog-post120-block31-rfi-frontend-decomposition-20260920",
+      "reviewedThroughCommit": "1f4da420cb205ec11f3b39d31986efb30fad4830",
+      "reviewedAt": "2026-09-20T22:07:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem ownership, product boundary, human authority, or provider boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five-build push, ten-build publication, visible-Chrome, and no-Replit-Agents procedures remain authoritative."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The extraction preserves RFI behavior and adds executable cross-role and deep-link coverage without changing quality doctrine."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product direction and customer outcomes are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the extracted RFI list, evidence-editor, and permission-aware action-presentation modules."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, Pulse, installer, package, bridge protocol, or supported-year behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report bytes, titles, filenames, layouts, fingerprints, or delivery contracts changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition, applicability, or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 30 live acceptance and Builds 151-155 source acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes the RFI frontend implementation and activates Build 155 push plus Builds 156-160."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Executable source and regression tests carry the evidence; no new audit doctrine or historical finding is introduced."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/BUILD_155_SOURCE_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b3fe801f342601199318ddb6f7b11c5099fca6434149b1ea123a82b3eb225a55"
     }
   ]
 }
