@@ -142,7 +142,8 @@ export class CoordinationKnowledgeRepository {
     conflictTypeId: string;
     expectedRevision: number;
     actorId: number;
-    action: "update_draft" | "submit_for_review" | "approve" | "revise" | "retire";
+    action: "update_draft" | "submit_for_review" | "return_to_draft" | "approve" | "revise" | "retire";
+    rationale?: string;
     content?: Omit<ConflictTypeRevision, "id" | "conflictTypeId" | "companyId" | "revision" | "status" | "authoredById">;
   }): Promise<Record<string, unknown>> {
     return transaction(this.pool, async client => {
@@ -158,7 +159,7 @@ export class CoordinationKnowledgeRepository {
         if (from !== "approved" && from !== "retired") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_APPROVED_REVISION_REQUIRED", "Only approved or retired knowledge may start a new draft revision.", 409);
         status = "draft";
       } else {
-        status = input.action === "submit_for_review" ? "under_review" : input.action === "approve" ? "approved" : "retired";
+        status = input.action === "submit_for_review" ? "under_review" : input.action === "return_to_draft" ? "draft" : input.action === "approve" ? "approved" : "retired";
         assertKnowledgeTransition(from, status);
       }
       const next = validateConflictTypeRevision({
@@ -185,7 +186,7 @@ export class CoordinationKnowledgeRepository {
         [next.id,next.conflictTypeId,next.companyId,next.revision,next.status,next.name,next.description,next.disciplineA,next.disciplineB,next.elementTypeA,next.elementTypeB,next.conflictCategory,next.coordinationStage,JSON.stringify(next.tags),next.authoredById,approvalBy,approvalAt,retiredBy,retiredAt]);
       await client.query(`UPDATE coordination_conflict_types SET updated_at=now() WHERE id=$1 AND company_id=$2`, [input.conflictTypeId,input.companyId]);
       await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,entity_type,entity_id,revision_id,action,actor_id,details)
-        VALUES($1,$2,'conflict_type',$3,$4,$5,$6,$7::jsonb)`, [randomUUID(),input.companyId,input.conflictTypeId,next.id,input.action,input.actorId,JSON.stringify({ from, to: status, expectedRevision: input.expectedRevision })]);
+        VALUES($1,$2,'conflict_type',$3,$4,$5,$6,$7::jsonb)`, [randomUUID(),input.companyId,input.conflictTypeId,next.id,input.action,input.actorId,JSON.stringify({ from, to: status, expectedRevision: input.expectedRevision, rationale: input.rationale ?? null, decidedAt: new Date().toISOString() })]);
       return inserted.rows[0];
     });
   }
@@ -213,7 +214,8 @@ export class CoordinationKnowledgeRepository {
   }
 
   async appendRuleRevision(input: { companyId: number; ruleId: string; expectedRevision: number; actorId: number;
-    action: "update_draft" | "submit_for_review" | "approve" | "revise" | "retire";
+    action: "update_draft" | "submit_for_review" | "return_to_draft" | "approve" | "revise" | "retire";
+    rationale?: string;
     content?: Omit<CoordinationRuleRevision, "id" | "ruleId" | "companyId" | "revision" | "status" | "authoredById"> }): Promise<Record<string, unknown>> {
     return transaction(this.pool, async client => {
       const companyId = positive(input.companyId, "companyId");
@@ -224,7 +226,7 @@ export class CoordinationKnowledgeRepository {
       let status = from;
       if (input.action === "update_draft") { if (from !== "draft") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_DRAFT_REQUIRED", "Only a draft may be edited.", 409); }
       else if (input.action === "revise") { if (from !== "approved" && from !== "retired") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_APPROVED_REVISION_REQUIRED", "Only approved or retired knowledge may start a new draft revision.", 409); status = "draft"; }
-      else { status = input.action === "submit_for_review" ? "under_review" : input.action === "approve" ? "approved" : "retired"; assertKnowledgeTransition(from, status); }
+      else { status = input.action === "submit_for_review" ? "under_review" : input.action === "return_to_draft" ? "draft" : input.action === "approve" ? "approved" : "retired"; assertKnowledgeTransition(from, status); }
       const next = validateCoordinationRuleRevision({ id: randomUUID(), ruleId: input.ruleId, companyId, revision: input.expectedRevision + 1, status,
         title: input.content?.title ?? current.title, guidance: input.content?.guidance ?? current.guidance,
         applicability: input.content?.applicability ?? current.applicability, rationale: input.content?.rationale ?? current.rationale,
@@ -237,7 +239,7 @@ export class CoordinationKnowledgeRepository {
         [next.id,next.ruleId,next.companyId,next.revision,next.status,next.title,next.guidance,JSON.stringify(next.applicability),next.rationale,JSON.stringify(next.exceptions),JSON.stringify(next.references),next.authoredById,approvedBy,approvedAt,status === "retired" ? input.actorId : null,status === "retired" ? new Date().toISOString() : null]);
       await client.query(`UPDATE coordination_rules SET updated_at=now() WHERE id=$1 AND company_id=$2`, [input.ruleId,companyId]);
       await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,entity_type,entity_id,revision_id,action,actor_id,details)
-        VALUES($1,$2,'coordination_rule',$3,$4,$5,$6,$7::jsonb)`, [randomUUID(),companyId,input.ruleId,next.id,input.action,input.actorId,JSON.stringify({ from,to:status,expectedRevision:input.expectedRevision })]);
+        VALUES($1,$2,'coordination_rule',$3,$4,$5,$6,$7::jsonb)`, [randomUUID(),companyId,input.ruleId,next.id,input.action,input.actorId,JSON.stringify({ from,to:status,expectedRevision:input.expectedRevision,rationale:input.rationale??null,decidedAt:new Date().toISOString() })]);
       return inserted.rows[0];
     });
   }
@@ -270,7 +272,8 @@ export class CoordinationKnowledgeRepository {
   }
 
   async appendResolutionMethodRevision(input: { companyId: number; resolutionMethodId: string; expectedRevision: number; actorId: number;
-    action: "update_draft" | "submit_for_review" | "approve" | "revise" | "retire";
+    action: "update_draft" | "submit_for_review" | "return_to_draft" | "approve" | "revise" | "retire";
+    rationale?: string;
     content?: Omit<ResolutionMethodRevision, "id" | "resolutionMethodId" | "companyId" | "revision" | "status" | "authoredById"> }): Promise<Record<string, unknown>> {
     return transaction(this.pool, async client => {
       const companyId = positive(input.companyId, "companyId");
@@ -281,7 +284,7 @@ export class CoordinationKnowledgeRepository {
       let status = from;
       if (input.action === "update_draft") { if (from !== "draft") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_DRAFT_REQUIRED", "Only a draft may be edited.", 409); }
       else if (input.action === "revise") { if (from !== "approved" && from !== "retired") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_APPROVED_REVISION_REQUIRED", "Only approved or retired knowledge may start a new draft revision.", 409); status = "draft"; }
-      else { status = input.action === "submit_for_review" ? "under_review" : input.action === "approve" ? "approved" : "retired"; assertKnowledgeTransition(from,status); }
+      else { status = input.action === "submit_for_review" ? "under_review" : input.action === "return_to_draft" ? "draft" : input.action === "approve" ? "approved" : "retired"; assertKnowledgeTransition(from,status); }
       const oldConflicts = (await client.query(`SELECT conflict_type_id FROM coordination_resolution_method_conflict_types WHERE company_id=$1 AND resolution_method_revision_id=$2 ORDER BY display_order`, [companyId,current.id])).rows.map(row => String(row.conflict_type_id));
       const oldRules = (await client.query(`SELECT rule_revision_id FROM coordination_resolution_method_rules WHERE company_id=$1 AND resolution_method_revision_id=$2`, [companyId,current.id])).rows.map(row => String(row.rule_revision_id));
       const next = validateResolutionMethodRevision({ id:randomUUID(),resolutionMethodId:input.resolutionMethodId,companyId,revision:input.expectedRevision+1,status,
@@ -301,7 +304,7 @@ export class CoordinationKnowledgeRepository {
       for(const [index,conflictTypeId] of next.conflictTypeIds.entries()) await client.query(`INSERT INTO coordination_resolution_method_conflict_types(company_id,resolution_method_revision_id,conflict_type_id,display_order,linked_by_id) VALUES($1,$2,$3,$4,$5)`,[companyId,next.id,conflictTypeId,index,input.actorId]);
       for(const ruleRevisionId of next.ruleRevisionIds) await client.query(`INSERT INTO coordination_resolution_method_rules(company_id,resolution_method_revision_id,rule_revision_id,linked_by_id) VALUES($1,$2,$3,$4)`,[companyId,next.id,ruleRevisionId,input.actorId]);
       await client.query(`UPDATE coordination_resolution_methods SET updated_at=now() WHERE id=$1 AND company_id=$2`,[input.resolutionMethodId,companyId]);
-      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,'resolution_method',$3,$4,$5,$6,$7::jsonb)`,[randomUUID(),companyId,input.resolutionMethodId,next.id,input.action,input.actorId,JSON.stringify({from,to:status,expectedRevision:input.expectedRevision})]);
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,'resolution_method',$3,$4,$5,$6,$7::jsonb)`,[randomUUID(),companyId,input.resolutionMethodId,next.id,input.action,input.actorId,JSON.stringify({from,to:status,expectedRevision:input.expectedRevision,rationale:input.rationale??null,decidedAt:new Date().toISOString()})]);
       return inserted.rows[0];
     });
   }
