@@ -2247,3 +2247,11 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Build 180 reaches the required ten-build publication boundary. It is not complete until the exact candidate passes the full pre-push gate, is pushed and published through the established Replit Shell path, and passes authenticated visible-Chrome Submittals smoke.
 - The semantic reconciliation is bound to implementation commit `553b6631e67128e8a9a436dda09db566246eb6df`; provider publication is not claimed by that source commit.
 - Generated AI-entry-point evidence was refreshed at `1cc2d45ee192b7c3da475467808ee111705a34ef` after the Submittals line movement; its 45-entry set is unchanged and contains no behavioral or provider mutation.
+
+## 120-build stabilization program — Block 37 candidate — 2026-09-21
+
+- Builds 181–185 generate a deterministic route-to-screen-to-API-to-table ownership graph directly from tracked source: 52 frontend routes, 19 canonical project tabs, 605 API operations, 231 frontend API references, and 88 route-owned database tables.
+- The graph proves zero cross-module duplicate API method/path owners, zero project-sidebar tabs without screens, and zero canonical project screens without navigation. Its exact content is now enforced by the normal pre-push gate.
+- `/setup-guide` now canonicalizes to the Help setup view, while legacy `/projects/:id/submittal-tracker` bookmarks canonicalize to Submittals tracking. Both redirects precede the generic project route and preserve authenticated/project access checks.
+- Deep-link ordering and anonymous, zero-project, member, administrator, and global-super-administrator guard coverage are permanent regression contracts. No database/schema, customer data, Native, installer, bridge, package, provider, or production mutation is included.
+- Build 185 is push-only. Publication and authenticated visible-Chrome smoke remain due at Build 190; Navisworks smoke is not retriggered because Native and installers are unchanged.
