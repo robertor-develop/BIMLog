@@ -4,7 +4,7 @@ import { MasterSidebar } from "@/components/layout/MasterSidebar";
 import { useI18n } from "@/lib/i18n";
 import { useAuthStore } from "@/store/auth";
 import "./CoordinationKnowledgeLibrary.css";
-import { ConflictTypeWorkspace, type KnowledgeRecord } from "./CoordinationKnowledgeAuthoring";
+import { ConflictTypeWorkspace, RuleMethodWorkspace, type KnowledgeRecord } from "./CoordinationKnowledgeAuthoring";
 
 type WorkspaceSection = "conflict-types" | "rules" | "methods" | "lessons";
 type KnowledgeStatus = "draft" | "under_review" | "approved" | "retired";
@@ -61,11 +61,13 @@ export function CoordinationKnowledgeLibrary() {
   const [ruleError, setRuleError] = useState("");
   const [ruleReloadKey, setRuleReloadKey] = useState(0);
   const [ruleHistory, setRuleHistory] = useState<Record<string, RuleRecord[] | "loading" | "error">>({});
+  const [selectedRule, setSelectedRule] = useState<RuleRecord | null>(null);
   const [methods, setMethods] = useState<ResolutionMethodRecord[]>([]);
   const [methodFilters, setMethodFilters] = useState<MethodFilters>(emptyMethodFilters);
   const [methodState, setMethodState] = useState<"idle" | "loading" | "ready" | "error">("idle");
   const [methodError, setMethodError] = useState("");
   const [methodReloadKey, setMethodReloadKey] = useState(0);
+  const [selectedMethod, setSelectedMethod] = useState<ResolutionMethodRecord | null>(null);
   const [lessonQueueState, setLessonQueueState] = useState<LessonQueueState>("proposed");
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
@@ -273,6 +275,7 @@ export function CoordinationKnowledgeLibrary() {
               <button className="knowledge-history-button" type="button" onClick={() => void loadRuleHistory(item)} disabled={history === "loading"}>{history === "loading" ? t("Loading history…", "Cargando historial…") : t("View revision history", "Ver historial de revisiones")}</button>
               {history === "error" && <p className="knowledge-inline-error" role="alert">{t("History is unavailable. Try again.", "El historial no está disponible. Intente nuevamente.")}</p>}
               {Array.isArray(history) && <ol className="knowledge-history">{history.map(version => <li key={version.id}>v{version.revision} · {statusText(version.status)}</li>)}</ol>}
+              <button type="button" onClick={()=>setSelectedRule(item)}>{t("Open detail / edit","Abrir detalle / editar")}</button>
             </article>; })}
           </div></>}
         </div> : active === "methods" ? <div className="knowledge-catalog" aria-busy={methodState === "loading"}>
@@ -298,6 +301,7 @@ export function CoordinationKnowledgeLibrary() {
               <dl><div><dt>{t("Responsible trade", "Empresa responsable")}</dt><dd>{item.responsible_trade || t("Project decision", "Decisión del proyecto")}</dd></div><div><dt>{t("RFI requirement", "Requisito de RFI")}</dt><dd>{item.rfi_requirement}</dd></div><div><dt>{t("Conflict Types", "Tipos de Conflicto")}</dt><dd>{item.conflict_type_ids?.length || 0}</dd></div><div><dt>{t("Related Rules", "Reglas relacionadas")}</dt><dd>{item.rule_revision_ids?.length || 0}</dd></div><div><dt>{t("Required approvals", "Aprobaciones requeridas")}</dt><dd>{item.required_approvals?.length || 0}</dd></div><div><dt>{t("Previous cases", "Casos anteriores")}</dt><dd>{cases.length}</dd></div></dl>
               <details className="knowledge-structured"><summary>{t("Constraints, benefits and references", "Restricciones, beneficios y referencias")}</summary><pre>{JSON.stringify({ applicability: item.applicability, constraints: item.constraints, advantages: item.advantages, disadvantages: item.disadvantages, conflictTypeIds: item.conflict_type_ids, ruleRevisionIds: item.rule_revision_ids, previousCases: cases }, null, 2)}</pre></details>
               <div className="knowledge-card-footer"><span>v{item.revision}</span><span>{t("Informational catalog", "Catálogo informativo")}</span></div>
+              <button type="button" onClick={()=>setSelectedMethod(item)}>{t("Open detail / edit","Abrir detalle / editar")}</button>
             </article>; })}
           </div></>}
         </div> : <div className="knowledge-lessons">
@@ -324,6 +328,8 @@ export function CoordinationKnowledgeLibrary() {
         </div>}
       </section>
       {selectedConflict && <ConflictTypeWorkspace item={selectedConflict as unknown as KnowledgeRecord} token={token} capabilities={capability?.capabilities ?? []} lang={es?"es":"en"} onClose={()=>setSelectedConflict(null)} onChanged={changed=>{setSelectedConflict(changed as unknown as ConflictTypeRecord);setConflictTypes(current=>current.map(item=>(item.conflict_type_id||item.id)===(changed.conflict_type_id||changed.id)?changed as unknown as ConflictTypeRecord:item));}} />}
+      {selectedRule && <RuleMethodWorkspace kind="rules" item={selectedRule as unknown as KnowledgeRecord} token={token} capabilities={capability?.capabilities??[]} lang={es?"es":"en"} onClose={()=>setSelectedRule(null)} onChanged={changed=>{setSelectedRule(changed as unknown as RuleRecord);setRules(current=>current.map(item=>item.rule_id===(changed.rule_id||changed.id)?changed as unknown as RuleRecord:item));}}/>}
+      {selectedMethod && <RuleMethodWorkspace kind="resolution-methods" item={selectedMethod as unknown as KnowledgeRecord} token={token} capabilities={capability?.capabilities??[]} lang={es?"es":"en"} onClose={()=>setSelectedMethod(null)} onChanged={changed=>{setSelectedMethod(changed as unknown as ResolutionMethodRecord);setMethods(current=>current.map(item=>item.resolution_method_id===(changed.resolution_method_id||changed.id)?changed as unknown as ResolutionMethodRecord:item));}}/>}
     </main>
   </div>;
 }

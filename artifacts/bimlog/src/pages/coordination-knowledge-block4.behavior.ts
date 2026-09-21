@@ -11,3 +11,8 @@ expect("Approved revisions are immutable","Approved Conflict Types must explain 
 expect("beforeunload","Dirty Conflict Type edits must warn before navigation.");
 expect("Revision history","Conflict Type detail must expose history.");
 console.log("coordination knowledge Build 241 behavior: PASS");
+expect("Save draft only","Rule and Method editors must explicitly avoid accidental publication.");
+expect("JSON.parse(draft.applicability)","Structured applicability must be validated before save.");
+expect("setDraft(source);setEditing(false)","Editor cancellation must restore the original record.");
+expect("requiredApprovals","Resolution Method editor must expose governed approval fields.");
+console.log("coordination knowledge Build 242 behavior: PASS");

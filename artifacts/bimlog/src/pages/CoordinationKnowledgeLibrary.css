@@ -87,6 +87,8 @@
 .knowledge-editor label:nth-child(2),.knowledge-editor-buttons { grid-column: 1 / -1; }
 .knowledge-editor-buttons { display: flex; justify-content: flex-end; gap: 8px; }
 .knowledge-workspace-message { padding: 10px; border-radius: 7px; background: #eef5ff; }
+.knowledge-detail-json { overflow: auto; max-height: 62vh; padding: 14px; border-radius: 8px; background: #f5f8fc; white-space: pre-wrap; }
+.knowledge-editor label:has(textarea) { grid-column: 1 / -1; }
 @media (max-width: 700px) { .knowledge-workspace { inset: 8px; width: auto; } .knowledge-editor { grid-template-columns: 1fr; } .knowledge-editor label,.knowledge-editor label:nth-child(2),.knowledge-editor-buttons { grid-column: 1; } }
 .knowledge-lessons { margin-top: 20px; }
 .knowledge-lesson-policy { display: flex; gap: 12px; margin-bottom: 14px; padding: 14px; border: 1px solid #c8d9ef; border-radius: 10px; background: #f4f8ff; }
