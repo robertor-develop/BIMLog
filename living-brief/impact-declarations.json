@@ -35666,6 +35666,101 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "78e9886551b44f30eda37319c06c785956afbdab8781dfa373e2a7f1cb9b1549"
+    },
+    {
+      "taskId": "bimlog-build210-replit-bundle-recovery-20260921",
+      "reviewedThroughCommit": "d05d63d3ed60bf28261bbcb815ef872805972305",
+      "reviewedAt": "2026-09-21T08:06:16-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "edit_isolated_worktree",
+          "run_local_validation",
+          "push_exact_fast_forward",
+          "replit_shell_sync",
+          "chrome_live_acceptance"
+        ],
+        "operatorOnly": [
+          "production_database_destructive_override",
+          "native_customer_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "The first Build 210 provider bundle failed before promotion because generated retired runtime closures accumulated to 6.1 GiB; post-success cleanup now prevents recurrence without removing the active runtime."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product ownership and human authority remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five-build push and ten-build publication cadence remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "The standard release gate now exercises the retired-runtime cleanup contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer promise or roadmap scope changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Application behavior is unchanged; only generated deployment closure lifecycle changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, installer, package, Autodesk load path, or license changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report rendering and design remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the real provider failure, exact cause, and permanent correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The active Build 210 release loop records the failed attempt and required retry."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The failure and corrective commit remain attributable through release evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7f3d61bef61b29a0914207787c5d1906f339301105d23680ebab21ccd9b02080"
     }
   ]
 }
