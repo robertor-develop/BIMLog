@@ -36717,6 +36717,99 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "60ebf9da16be3f32a26b707615529815f52a4a81e9f56ef96619ba9da1f36ed8"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block04-source-candidate-20260921",
+      "reviewedThroughCommit": "8130dfc429db5428d7402e9b70985bff4088214b",
+      "reviewedAt": "2026-09-21T19:22:35-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "governed_authoring_implementation",
+          "local_regression",
+          "push_exact_fast_forward"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_chrome_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "coordination_knowledge_authoring",
+          "disposition": "implemented_and_regressed",
+          "authorities": [
+            "platform",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Builds 241–245 add company-scoped detail, draft editors, server-owned lifecycle decisions, immutable evidence/audit history, and accessible recovery behavior without changing Lens Native or canonical project file authority."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating boundary changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed permission, evidence, database, and release gates remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Governed authoring implements the approved Coordination Knowledge Library direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The platform inventory now records the separate governed authoring workspace source."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Native, bridge, installer, package, or Navisworks behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 245 is the scheduled Replit publication boundary and requires live acceptance before completion."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Embedded Lens guidance and later field acceptance remain open after this authoring block."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lifecycle decisions and evidence reuse the immutable coordination knowledge audit authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/PLATFORM.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "d3e395014af56d2cba80e1cfe6acbe8c2764ba570b23bacc678a162ef0b1e4c0"
     }
   ]
 }
