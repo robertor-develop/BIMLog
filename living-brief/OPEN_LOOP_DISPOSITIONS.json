@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "0c7e7f7e56b2970004c32f45f28541a40c9a3768b755a9c7c5ce5027ff85644e",
-  "itemCount": 145,
+  "sourceSha256": "be7860a07f15c7515f7dc0f9552bb712156969777a729f6dec9f87ba0fc0e735",
+  "itemCount": 144,
   "counts": {
-    "ACTIVE": 112,
+    "ACTIVE": 111,
     "SUPERSEDED": 21,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -25,7 +25,6 @@
     "marker": "CURRENT_OPEN_LOOP_AUTHORITY",
     "heading": "Current open-loop authority — post-120 Block 44 — 2026-09-21",
     "uncheckedItems": [
-      "b4e765fb1cc3f691",
       "d6d4fdfe5947cf72",
       "8ec464a6e8ed4a7b"
     ]
@@ -62,24 +61,6 @@
     }
   ],
   "items": [
-    {
-      "id": "b4e765fb1cc3f691",
-      "sourceLine": 21,
-      "heading": "Current open-loop authority — post-120 Block 44 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
-      "statement": "Build 220 must pass the exact complete gate, push both authoritative refs, publish the accumulated Builds 211–220 through Replit Shell without Replit Agents, prove exact live identity, and pass full authenticated visible-Chrome smoke before the stabilization program is frozen.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:21",
-        "Current open-loop authority — post-120 Block 44 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
-      ],
-      "currentAuthority": true
-    },
     {
       "id": "d6d4fdfe5947cf72",
       "sourceLine": 22,

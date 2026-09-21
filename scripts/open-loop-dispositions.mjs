@@ -157,8 +157,8 @@ if (process.argv.includes("--write")) {
     throw new Error("Every unchecked open-loop item requires a governed work class and owner binding");
   if (duplicateStatements.length) throw new Error(`Duplicate unchecked open-loop statements: ${JSON.stringify(duplicateStatements)}`);
   const currentAuthorityItems = items.filter((item) => item.currentAuthority);
-  if (result.currentAuthority.uncheckedItems.length !== 3 || currentAuthorityItems.filter((item) => item.workClass === "FIELD_EVIDENCE").length !== 2 || currentAuthorityItems.filter((item) => item.workClass === "PROVIDER_EVIDENCE" && item.statement.includes("Build 220")).length !== 1) {
-    throw new Error("The marked current authority must own Build 220 publication plus the physical 2021 remediation and deferred 2025 field-evidence loops");
+  if (result.currentAuthority.uncheckedItems.length !== 2 || currentAuthorityItems.filter((item) => item.workClass === "FIELD_EVIDENCE").length !== 2 || currentAuthorityItems.some((item) => item.workClass === "PROVIDER_EVIDENCE")) {
+    throw new Error("The marked current authority must contain only the physical 2021 remediation and deferred 2025 field-evidence loops after Build 220 provider closure");
   }
   console.log(JSON.stringify({ status: "PASS", itemCount: items.length, counts }));
 }

@@ -35,6 +35,6 @@ assert.equal(ledger.databaseOrSchemaChanged, false);
 
 const openLoop = read("living-brief/OPEN_LOOP.md");
 assert.equal((openLoop.match(/CURRENT_OPEN_LOOP_AUTHORITY/g) ?? []).length, 1);
-assert.match(openLoop, /Build 220 must pass the exact complete gate, push both authoritative refs, publish/);
+assert.match(openLoop, /Build 220 passed the exact complete gate, reached both authoritative refs/);
 
-console.log("POST120_BLOCK44=PASS completed=220 remaining=0 unpublished=10 publication=Build220 nativeInstallerChanged=false");
+console.log("POST120_BLOCK44=PASS completed=220 remaining=0 publication=PASS nativeInstallerChanged=false");
