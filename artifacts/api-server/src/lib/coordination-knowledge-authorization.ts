@@ -10,6 +10,9 @@ export const knowledgeCapabilities = [
   "approve",
   "retire",
   "manage_taxonomy",
+  "classify_issue",
+  "select_resolution",
+  "document_outcome",
   "propose_lesson",
   "promote_approved_lesson",
 ] as const;
@@ -73,7 +76,12 @@ export async function resolveKnowledgeAuthorizationContext(
   const projectRole = row.project_role ? String(row.project_role) : null;
   const isSuperAdmin = row.is_super_admin === true;
   const isCompanyPmo = row.is_company_pmo === true;
-  if (projectRole && projectRole !== "read_only") capabilities.add("propose_lesson");
+  if (projectRole && projectRole !== "read_only") {
+    for (const capability of ["classify_issue", "select_resolution", "document_outcome", "propose_lesson"] as const) capabilities.add(capability);
+  }
+  if (["project_admin", "convention_manager", "discipline_lead"].includes(projectRole ?? "")) {
+    for (const capability of ["view_draft", "create_draft", "edit_draft", "submit_for_review", "review"] as const) capabilities.add(capability);
+  }
   if (isCompanyPmo || isSuperAdmin) {
     for (const capability of knowledgeCapabilities) capabilities.add(capability);
   }

@@ -24,7 +24,10 @@ const codePattern = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
 
 async function context(req: Parameters<typeof authMiddleware>[0], capability: KnowledgeCapability) {
   await ensureCoordinationKnowledgeSchema();
-  const resolved = await resolveKnowledgeAuthorizationContext(pool, req.user!.userId);
+  const rawProjectId = req.query.projectId;
+  const projectId = rawProjectId == null ? null : Number(Array.isArray(rawProjectId) ? rawProjectId[0] : rawProjectId);
+  if (projectId !== null && (!Number.isSafeInteger(projectId) || projectId <= 0)) throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_INVALID", "projectId");
+  const resolved = await resolveKnowledgeAuthorizationContext(pool, req.user!.userId, projectId);
   requireKnowledgeCapability(resolved, capability);
   return resolved;
 }

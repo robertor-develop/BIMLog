@@ -34,7 +34,7 @@ assert.ok(calls.includes("ROLLBACK"));
 
 const route = fs.readFileSync(new URL("../routes/coordination-knowledge.ts", import.meta.url), "utf8");
 assert.match(route, /authMiddleware/);
-assert.match(route, /resolveKnowledgeAuthorizationContext\(pool, req\.user!\.userId\)/);
+assert.match(route, /resolveKnowledgeAuthorizationContext\(pool, req\.user!\.userId, projectId\)/);
 assert.doesNotMatch(route, /req\.body\?\.companyId|req\.query\.companyId/);
 for (const operation of ["conflict-types", "submit_for_review", "approve", "revise", "retire", "history"]) assert.match(route, new RegExp(operation));
 assert.match(route, /action\.replaceAll\("_", "-"\)/);
