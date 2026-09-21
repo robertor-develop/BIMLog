@@ -18,7 +18,8 @@
       "path": "C:\\Program Files\\Autodesk\\Navisworks Manage 2021\\Plugins\\BIMLogNavisPlugin",
       "dllSha256": "574281AFD60F81C894D66F24663E4C1626F86F383A9A6C93D55CBAC37851D793",
       "containsRetiredLensPanel": true,
-      "state": "DETECTED_REMEDIATION_REQUIRED"
+      "state": "REMOVED_WITH_ROLLBACK_EVIDENCE",
+      "activeAfterCutover": false
     }
   },
   "packageCandidates": [
@@ -55,6 +56,7 @@
     "requestIdRetryCollapse": "PASS",
     "rollbackCapture": "PASS",
     "legacySavedViewpointsUntouched": "PASS",
+    "physical2021InstalledTopology": "PASS_PULSE_AND_LENS_NEXT_ONLY",
     "physical2025AffectedModel": "DEFERRED_TO_RUBEN"
   }
 }
