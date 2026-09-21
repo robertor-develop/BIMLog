@@ -590,3 +590,10 @@ Additional enforcement:
 - Package-only or simulated 2025 proof must never be reported as a connected Navisworks 2025 field pass.
 - Build 119 closes on verified connected 2021 execution plus dual-year package/installer proof. Ruben owns the deferred physical 2025 confirmation; that post-closure evidence must not be restated as an automated 2025 field pass.
 - The Build 120 regression contract must keep installer/readme/uninstaller wording aligned with the active topology: Pulse remains, Original Lens is retired, and Lens Next is the only supported Lens product.
+
+## Block 41 browser performance gate
+
+- Record route-level production bundle evidence from the emitted Vite manifest; never infer performance from source size alone.
+- The initial entry must remain at least 5% below the Build 201 baseline of 511,219 bytes.
+- Non-entry, non-spreadsheet chunks must remain at or below 250 KiB; route-owned chunks at or below 225 KiB; total browser JavaScript at or below 4 MiB.
+- Feedback and capture editing must remain bounded dynamic chunks. Deferred mounts require teardown cancellation, and editor state requires exact file identity.

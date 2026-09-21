@@ -1064,3 +1064,10 @@ It changes only when the code structure or curated architectural facts change.
 - Exactly one marked section in `living-brief/OPEN_LOOP.md` owns current open-loop truth; historical sections remain evidence and cannot become current by heading text alone.
 - The generated disposition inventory classifies every open record, binds ownership and module/route responsibility, and links repeated historical statements to one canonical record.
 - The normal pre-push gate rejects unresolved duplicate statements, competing or missing current markers, unowned records, route-less product work, and stale contradictions classified as active.
+
+## Browser performance and lazy-loading integrity — Build 205
+
+- The production Vite manifest is the machine-readable authority for initial-entry and route-owned browser chunks.
+- Anonymous startup excludes authenticated feedback tooling. Authenticated feedback mounts after a bounded 400 ms delay with teardown cancellation.
+- Capture markup editing is a separate deployment-recoverable dynamic entry keyed to the selected file, preventing stale editor state from crossing captures.
+- Reports and convention editing remain independently lazy project workspaces. Initial-entry, route-chunk, total-JavaScript, feedback, and editor size budgets run in the normal pre-push gate.
