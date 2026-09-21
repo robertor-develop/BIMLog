@@ -26,8 +26,12 @@ for (const relative of [
 }
 
 const sharedInstaller = read(`${plugin}/Install-BIMLogLensNext.ps1`);
+const canonicalBuilder = read(`${plugin}/Build-CanonicalLensNextPackages.ps1`);
 assert.ok(sharedInstaller.includes(`$manifest.release -ne '${identity.label}'`), "shared installer release guard");
 assert.ok(sharedInstaller.includes(`$manifest.binaryVersion -ne '${identity.binaryVersion}'`), "shared installer binary guard");
+assert.ok(sharedInstaller.includes("Navisworks Manage $Year\\Plugins\\BIMLogNavisPlugin"), "shared installer must retire the historical direct-load Original Lens path");
+assert.ok(sharedInstaller.includes("retired direct-load Original Lens plugin remains active"), "shared installer must fail if the retired direct loader survives cutover");
+assert.ok(canonicalBuilder.includes("$isPulseBinary"), "canonical staging must include the Pulse-only DLL and PDB instead of producing a manifest-only Pulse bundle");
 
 for (const year of [2021, 2025]) {
   const packageXml = read(`${plugin}/native/${year}/PackageContents.xml`);

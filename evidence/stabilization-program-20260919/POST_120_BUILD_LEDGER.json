@@ -1,15 +1,15 @@
 {
   "schemaVersion": 1,
   "program": "BIMLog post-Build-120 stabilization",
-  "range": { "firstBuild": 121, "lastBuild": 220, "completedThrough": 190 },
-  "currentBlock": { "number": 38, "builds": "186-190", "status": "SOURCE_ACCEPTED_PENDING_PUBLICATION" },
+  "range": { "firstBuild": 121, "lastBuild": 220, "completedThrough": 195 },
+  "currentBlock": { "number": 39, "builds": "191-195", "status": "SOURCE_ACCEPTED_PENDING_PUSH" },
   "audit": { "p0": 0, "p1Occurrences": 44, "rootCauseGroups": 26, "resolvedP1": 23, "unexpectedP1": 0 },
-  "remainingBuilds": 30,
-  "unpublishedBuilds": 10,
-  "nextBlock": "Builds 191-195 — Lens Next post-closure field evidence",
-  "nextPush": 190,
-  "nextPublication": 190,
-  "nativeOrInstallerChanged": false,
+  "remainingBuilds": 25,
+  "unpublishedBuilds": 5,
+  "nextBlock": "Builds 196-200 — accessibility and responsive matrix",
+  "nextPush": 195,
+  "nextPublication": 200,
+  "nativeOrInstallerChanged": true,
   "databaseOrSchemaChanged": false,
   "customerDataChanged": false
 }

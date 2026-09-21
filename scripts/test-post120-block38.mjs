@@ -7,8 +7,8 @@ const inventory = JSON.parse(read("living-brief/OPEN_LOOP_DISPOSITIONS.json"));
 
 assert.equal(inventory.schemaVersion, 2, "open-loop inventory uses the typed ownership contract");
 assert.equal((openLoop.match(/CURRENT_OPEN_LOOP_AUTHORITY/g) ?? []).length, 1, "exactly one current authority marker exists");
-assert.equal(inventory.currentAuthority.heading, "Current open-loop authority — post-120 Block 38 — 2026-09-21");
-assert.equal(inventory.currentAuthority.uncheckedItems.length, 1, "current authority owns only deferred 2025 field evidence after Build 190 closure");
+assert.equal(inventory.currentAuthority.heading, "Current open-loop authority — post-120 Block 39 — 2026-09-21");
+assert.equal(inventory.currentAuthority.uncheckedItems.length, 2, "current authority owns physical 2021 remediation and deferred 2025 field evidence after Build 195 source closure");
 assert.deepEqual(inventory.duplicateStatements, [], "duplicate unchecked statements are prohibited");
 assert.equal(inventory.reconciledDuplicateGroups.length, 7, "all seven discovered historical duplicate loops remain explicitly reconciled");
 
@@ -22,7 +22,7 @@ for (const item of inventory.items) {
 
 const currentItems = inventory.items.filter(item => item.currentAuthority);
 assert.ok(!currentItems.some(item => item.workClass === "PROVIDER_EVIDENCE"), "Build 190 publication no longer remains current provider work");
-assert.ok(currentItems.some(item => item.workClass === "FIELD_EVIDENCE"), "Ruben's 2025 confirmation remains current field evidence");
+assert.equal(currentItems.filter(item => item.workClass === "FIELD_EVIDENCE").length, 2, "2021 remediation and Ruben's 2025 confirmation remain current field evidence");
 assert.ok(inventory.items.some(item => item.statement.includes("Build 160") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 160 publication marker is closed");
 assert.ok(inventory.items.some(item => item.statement.includes("Builds 166–170") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 170 marker is closed");
 

@@ -1,0 +1,60 @@
+{
+  "schemaVersion": 1,
+  "observedDate": "2026-09-21",
+  "release": "v1.05.N18-P36",
+  "sourceDigest": "225976b6ef9217ed941d532a16868679ec0b176e974587c4712b58ff8ff472f2",
+  "rubenPhysical2025": {
+    "status": "DEFERRED_TO_RUBEN",
+    "resultIngested": false,
+    "reopensBuild119": false,
+    "blocksPlatformPublication": false
+  },
+  "installed2021": {
+    "environmentAvailable": true,
+    "acceptedPulseBundle": "C:\\ProgramData\\Autodesk\\ApplicationPlugins\\BIMLog.bundle",
+    "acceptedLensNextBundle": "C:\\ProgramData\\Autodesk\\ApplicationPlugins\\BIMLogLensNext2021.bundle",
+    "lensNextVersion": "1.5.18.36",
+    "retiredDirectLoad": {
+      "path": "C:\\Program Files\\Autodesk\\Navisworks Manage 2021\\Plugins\\BIMLogNavisPlugin",
+      "dllSha256": "574281AFD60F81C894D66F24663E4C1626F86F383A9A6C93D55CBAC37851D793",
+      "containsRetiredLensPanel": true,
+      "state": "DETECTED_REMEDIATION_REQUIRED"
+    }
+  },
+  "packageCandidates": [
+    {
+      "year": 2021,
+      "stageRoot": "H:\\BIMLogPlugin2021\\LensNext-Source-225976b6ef9217ed",
+      "zipSha256": "6A44858FE05A2CDF94CFFD79E32B22F7A5906257F0133AF990F1017CEA0DB33D",
+      "manifestSha256": "E467374E04B7E83799EB4ACE0C97D3D9B474232EB5C393649C59D63057A9D066",
+      "pulseDllSha256": "6500A46F1134298CEFE9B9AD6F6201CB80F782876A0CE2DD0C27E48BD9696377",
+      "coreTests": "132/132 PASS",
+      "nativeTests": "57/57 PASS",
+      "deterministicRebuild": true,
+      "upgradeRollbackSimulation": "PASS",
+      "activeTopologyAfterSimulation": ["BIMLog.bundle", "BIMLogLensNext2021.bundle"],
+      "retiredDirectLoadAfterSimulation": false
+    },
+    {
+      "year": 2025,
+      "stageRoot": "H:\\BIMLogPlugin2025\\LensNext-Source-225976b6ef9217ed",
+      "zipSha256": "54B85CF9F6BAE7F18FF3EB6C34D7D29E9E51973A9B1DA016EB7A62B0FDED2A0E",
+      "manifestSha256": "ED3AA4517A08088209095D5920F927A00BC0B5751D012ECA1D5AD4B4CE996C87",
+      "pulseDllSha256": "3757243696485CF6A1EFF8502C0EED0985165CA362515032B2FA92B7E908D760",
+      "coreTests": "132/132 PASS",
+      "nativeTests": "57/57 PASS",
+      "deterministicRebuild": true,
+      "upgradeRollbackSimulation": "PASS",
+      "activeTopologyAfterSimulation": ["BIMLog.bundle", "BIMLogLensNext2025.bundle"],
+      "retiredDirectLoadAfterSimulation": false
+    }
+  ],
+  "workflowAndRollback": {
+    "exactProjectModelGuidGuards": "PASS",
+    "workingViewApplyAndDigest": "PASS",
+    "requestIdRetryCollapse": "PASS",
+    "rollbackCapture": "PASS",
+    "legacySavedViewpointsUntouched": "PASS",
+    "physical2025AffectedModel": "DEFERRED_TO_RUBEN"
+  }
+}

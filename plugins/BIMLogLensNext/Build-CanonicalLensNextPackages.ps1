@@ -9,7 +9,8 @@ $allowedRootFiles=@('.cs','.csproj','.props','.ps1','.bat','.txt','.xml','.json'
 $sourceFiles=Get-ChildItem -LiteralPath $pluginRoot -Recurse -File|Where-Object{
   $relative=$_.FullName.Substring($pluginRoot.Length).TrimStart('\').Replace('\','/')
   $top=$relative.Split('/')[0]
-  $allowedRootFiles -contains $_.Extension.ToLowerInvariant() -and
+  $isPulseBinary=$relative -match '^pulse/(2021|2025)/BIMLogPulse\1\.bundle/Contents/\1/BIMLogNavisPlugin\.(dll|pdb)$'
+  ($allowedRootFiles -contains $_.Extension.ToLowerInvariant() -or $isPulseBinary) -and
     $top -notin @('.build','.dotnet-home','.nuget-packages','evidence','packaging') -and
     $relative -notmatch '(^|/)(bin|obj|package-[^/]+)(/|$)' -and
     $relative -notmatch '\.zip(?:\.sha256)?$'

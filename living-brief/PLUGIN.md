@@ -4,6 +4,10 @@
 
 The accepted Navisworks topology is one Pulse-only `BIMLog.bundle` plus the matching-year Lens Next bundle. Original/Legacy BIMLog Lens is retired and must not be restored by install, upgrade, rollback, or uninstall messaging. Connected Navisworks 2021 execution and the complete dependency tree passed; Ruben's physical Navisworks 2025 confirmation remains post-closure field evidence and is not an automated-field-pass claim.
 
+### Build 195 direct-load retirement correction — 2026-09-21
+
+Physical 2021 inventory exposed an additional historical direct-load DLL at `C:\Program Files\Autodesk\Navisworks Manage 2021\Plugins\BIMLogNavisPlugin`. It contains the retired Original Lens panel and is outside the ApplicationPlugins inventory previously checked by Build 119. The verified installer now treats that exact year-bound path as a rollback-preserved retirement candidate, installs the complete Pulse-only bundle and Lens Next bundle, removes the direct loader, and fails if it survives. Package staging includes the Pulse DLL/PDB for both years. Dual-year deterministic package, core/native, and repeated upgrade/rollback simulation pass; physical 2021 cutover and physical 2025 confirmation remain field actions.
+
 ## Current supported product and release boundary — 2026-09-19
 
 - **Lens Next is the sole supported BIMLog Lens product.** Original/Legacy Lens is preserved only as historical migration evidence and must not be presented, installed, loaded, or maintained as a parallel product.

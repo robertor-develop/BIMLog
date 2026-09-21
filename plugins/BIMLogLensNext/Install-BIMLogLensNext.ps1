@@ -3,6 +3,7 @@ param(
   [Parameter(Mandatory=$true)][ValidateSet(2021,2025)][int]$Year,
   [switch]$PackageOnly,
   [string]$SimulationRoot,
+  [string]$LegacyDirectPluginRoot,
   [string]$RollbackRoot
 )
 $ErrorActionPreference='Stop'
@@ -29,13 +30,17 @@ if(-not(Test-Path -LiteralPath $pulseSource -PathType Container)){throw "STOP: p
 $isSimulation=-not [string]::IsNullOrWhiteSpace($SimulationRoot)
 if($isSimulation){
   $installRoot=[IO.Path]::GetFullPath($SimulationRoot).TrimEnd('\')
+  if([string]::IsNullOrWhiteSpace($LegacyDirectPluginRoot)){throw 'STOP: simulation requires an explicit legacy direct-plugin root.'}
 }else{
   if(Get-Process -Name 'roamer' -ErrorAction SilentlyContinue){throw "STOP: close Navisworks Manage $Year before installation."}
   $identity=[Security.Principal.WindowsIdentity]::GetCurrent()
   $principal=[Security.Principal.WindowsPrincipal]::new($identity)
   if(-not $principal.IsInRole([Security.Principal.WindowsBuiltInRole]::Administrator)){throw 'STOP: the verified Autodesk load-root cutover requires an Administrator PowerShell.'}
   $installRoot='C:\ProgramData\Autodesk\ApplicationPlugins'
+  if([string]::IsNullOrWhiteSpace($LegacyDirectPluginRoot)){$LegacyDirectPluginRoot="C:\Program Files\Autodesk\Navisworks Manage $Year\Plugins\BIMLogNavisPlugin"}
 }
+$legacyDirectPlugin=[IO.Path]::GetFullPath($LegacyDirectPluginRoot).TrimEnd('\')
+if($legacyDirectPlugin.Equals($installRoot,[StringComparison]::OrdinalIgnoreCase) -or $legacyDirectPlugin.StartsWith($installRoot+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'STOP: legacy direct-plugin root must be separate from Autodesk ApplicationPlugins.'}
 if([string]::IsNullOrWhiteSpace($RollbackRoot)){$RollbackRoot=Join-Path $packageRoot "rollback-evidence\$Year"}
 $rollbackBase=[IO.Path]::GetFullPath($RollbackRoot).TrimEnd('\')
 if($rollbackBase.Equals($installRoot,[StringComparison]::OrdinalIgnoreCase) -or $rollbackBase.StartsWith($installRoot+'\',[StringComparison]::OrdinalIgnoreCase)){throw 'STOP: rollback evidence must remain outside the Autodesk load root.'}
@@ -59,7 +64,7 @@ $evidenceRoot=Join-Path $rollbackBase $stamp
 $stage=Join-Path $installRoot "$bundleName.installing-$stamp"
 $pulseStage=Join-Path $installRoot "BIMLog.bundle.installing-$stamp"
 $candidates=@()
-foreach($path in @($target,$pulseTarget)){if(Test-Path -LiteralPath $path -PathType Container){$candidates+=[IO.Path]::GetFullPath($path)}}
+foreach($path in @($target,$pulseTarget,$legacyDirectPlugin)){if(Test-Path -LiteralPath $path -PathType Container){$candidates+=[IO.Path]::GetFullPath($path)}}
 $candidates=@($candidates|Sort-Object -Unique)
 $preserved=@()
 try{
@@ -96,6 +101,7 @@ try{
   if(-not(Test-Path -LiteralPath $pulseDll -PathType Leaf)){throw 'STOP: installed Pulse-only DLL is missing.'}
   $pulseBytes=[Text.Encoding]::ASCII.GetString([IO.File]::ReadAllBytes($pulseDll))
   if(-not $pulseBytes.Contains('BIMLog Pulse') -or $pulseBytes.Contains('BIMLogLensButton') -or $pulseBytes.Contains('BIMLogLensPlugin') -or $pulseBytes.Contains('BIMLog Lens')){throw 'STOP: installed BIMLog.bundle is not Pulse-only.'}
+  if(Test-Path -LiteralPath $legacyDirectPlugin){throw "STOP: retired direct-load Original Lens plugin remains active: $legacyDirectPlugin"}
   $active=@(Get-ChildItem -LiteralPath $installRoot -Directory -Filter '*.bundle'|Where-Object Name -like 'BIMLog*'|Select-Object -ExpandProperty Name|Sort-Object)
   if(($active -join '|') -ne "BIMLog.bundle|$bundleName"){throw "STOP: unexpected active BIMLog bundles: $($active -join '|')"}
   Write-Host "INSTALL PASS: $target" -ForegroundColor Green

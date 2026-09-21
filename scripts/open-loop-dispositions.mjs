@@ -156,6 +156,6 @@ if (process.argv.includes("--write")) {
   if (items.some((item) => !result.allowedWorkClasses.includes(item.workClass) || !item.ownership?.owner || !item.ownership?.module))
     throw new Error("Every unchecked open-loop item requires a governed work class and owner binding");
   if (duplicateStatements.length) throw new Error(`Duplicate unchecked open-loop statements: ${JSON.stringify(duplicateStatements)}`);
-  if (result.currentAuthority.uncheckedItems.length !== 1) throw new Error("The marked current authority must own exactly the deferred field-evidence loop after Build 190 closure");
+  if (result.currentAuthority.uncheckedItems.length !== 2) throw new Error("The marked current authority must own exactly the physical 2021 remediation and deferred 2025 field-evidence loops after Build 195 source closure");
   console.log(JSON.stringify({ status: "PASS", itemCount: items.length, counts }));
 }

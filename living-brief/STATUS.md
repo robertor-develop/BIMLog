@@ -2262,5 +2262,13 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Every open record carries an owner and module; product work also carries its owning route. Seven repeated historical statements are linked to one canonical record and retained as superseded evidence instead of competing present work.
 - The normal pre-push gate rejects missing or competing current markers, unresolved duplicate statements, unowned records, route-less product work, and stale contradictions labeled active.
 - Builds 186–190 passed the complete exact-head gate, reached both GitHub refs at `50ee888807974b5c20772331944a1ee78442f96a`, published through Replit without Replit Agents as receipt `dcbe8579`, and passed authenticated Chrome smoke at `v1.05.N18-P36` with package `bimlog-50ee888807974b5c-6efedd640d558eb0`.
-- Current truth contains exactly one open record: Ruben's deferred physical Navisworks 2025 field confirmation. Older Build 100/115/160/170 checkpoint wording and the completed Builds 186–190 release action cannot override it.
+- At Build 190 closure, current truth contained exactly one open record: Ruben's deferred physical Navisworks 2025 field confirmation. Build 195 adds the newly proven physical 2021 direct-loader remediation below; older checkpoint wording cannot override either current field item.
 - No database/schema, customer data, Native source, installer, bridge protocol, package, or provider configuration changed. Build 190 is the push, Replit publication, and authenticated visible-Chrome smoke boundary; focused Navisworks smoke is not retriggered.
+
+## 120-build stabilization program — Block 39 source acceptance — 2026-09-21
+
+- Builds 191–195 preserve Ruben's unavailable physical 2025 result as deferred post-closure evidence without reopening Build 119.
+- Physical 2021 inspection found a retired direct-load `BIMLogNavisPlugin.dll` under the Navisworks `Plugins` root. Reflection confirms it still contains `BIMLogLensPanel`; the accepted Pulse bundle does not.
+- The shared installer now preserves that legacy tree in rollback evidence, removes it during cutover, and fails if it remains active. Canonical staging now includes the Pulse DLL/PDB instead of producing a manifest-only Pulse bundle.
+- Governed H-root packages are deterministic for 2021 and 2025. Core 132/132 and each Native 57/57 pass; repeated upgrade/rollback simulations leave exactly Pulse plus matching-year Lens Next and no retired direct loader.
+- No Autodesk load path was changed. Installing the corrected package in physical 2021 and Ruben's physical 2025 affected-model confirmation remain explicit field evidence.
