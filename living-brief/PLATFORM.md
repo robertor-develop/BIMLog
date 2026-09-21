@@ -577,6 +577,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/rfi-query-service.ts
 - artifacts/api-server/src/lib/rfi-register-export.ts
 - artifacts/api-server/src/lib/rfi-standard-exports.ts
+- artifacts/api-server/src/lib/runtime-closure-retirement.behavior.ts
 - artifacts/api-server/src/lib/runtime-resilience.ts
 - artifacts/api-server/src/lib/runtime-security.ts
 - artifacts/api-server/src/lib/scoped-authority.ts
