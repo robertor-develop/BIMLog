@@ -32,6 +32,7 @@ import { logClientError } from "@/lib/client-log";
 import { bootstrapLensNextBridgeSession, createLensNextApiClient, createLensNextBridgeClient } from "@/features/lens-next/lens-next-client";
 import { openBimlogWorkingView } from "@/features/lens-next/lens-next-working-view";
 import { format, differenceInDays, isValid, parseISO } from "date-fns";
+import { rfiBallInCourtValue, useRfiListState } from "./rfi-frontend/rfi-list-state";
 
 // ─── helpers ─────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
@@ -594,20 +595,6 @@ function normalizePackageItems(value: unknown, attachments: string[], files: Pro
   }).map((item, order) => ({ ...item, order }));
 }
 
-function rfiBallInCourtValue(rfi: Rfi): string {
-  if (rfi.status === "closed") return "Closed";
-  // Not sent yet: the author still holds it — nobody is "responding" to a draft.
-  if (rfi.sendStatus !== "sent" && !rfi.sentAt) {
-    return `${rfi.submittedByCompany || rfi.createdByName || "Author"} — to send`;
-  }
-  const storedResponsibility = rfi.ballInCourt?.trim();
-  if (storedResponsibility) return storedResponsibility;
-  if (rfi.status === "responded") {
-    return rfi.submittedByCompany || rfi.createdByName || "Unassigned";
-  }
-  return rfi.submittedToCompany || rfi.submittedToPerson || "Unassigned";
-}
-
 function getBallInCourt(rfi: Rfi): { label: string; color: string } | null {
   if (rfi.status === "closed") return null;
   return {
@@ -1058,16 +1045,6 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   const { data: members } = useListMembers(projectId);
   const { toast } = useToast();
 
-  const [view, setView] = useState<"list" | "log">("list");
-  const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
-  const [typeFilter, setTypeFilter] = useState<string>("all");
-  const [ballInCourtFilter, setBallInCourtFilter] = useState<string>("all");
-  const [sentToCompanyFilter, setSentToCompanyFilter] = useState<string>("all");
-  const [dateField, setDateField] = useState<"created" | "requested" | "required" | "answered">("required");
-  const [dateFrom, setDateFrom] = useState("");
-  const [dateTo, setDateTo] = useState("");
-  const [sortBy, setSortBy] = useState<"created_asc" | "created_desc" | "required_asc" | "required_desc" | "number_asc" | "number_desc" | "status_asc">("created_asc");
   const [showCreate, setShowCreate] = useState(false);
   const [showReportSettings, setShowReportSettings] = useState(false);
   const [reportRequest, setReportRequest] = useState<RfiReportRequest | null>(null);
@@ -1304,35 +1281,18 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
   };
 
   const rfiTypeOptions = getOptions("rfi_type");
-  const typeFilterOptions = rfiTypeOptions.length ? rfiTypeOptions.map(option => option.value) : DEFAULT_RFI_TYPES;
-  const rfiDateValue = (rfi: Rfi, field: typeof dateField) => {
-    if (field === "requested") return rfi.dateRequested || rfi.createdAt;
-    if (field === "required") return rfi.dateRequired || rfi.dueDate;
-    if (field === "answered") return rfi.dateAnswered || rfi.respondedAt;
-    return rfi.createdAt;
-  };
-  const rfiBallInCourtDisplay = (value: string) =>
-    value === "Closed" ? w("Closed", "Cerrado", lang) : value === "Unassigned" ? w("Unassigned", "Sin asignar", lang) : value;
-  const uniqueRfiValues = (values: Array<string | null | undefined>) =>
-    [...new Set(values.map(value => String(value || "").trim()).filter(Boolean))].sort((a, b) => a.localeCompare(b));
-  const ballInCourtOptions = useMemo(() => uniqueRfiValues((rfis || []).map(rfi => rfiBallInCourtValue(rfi))), [rfis]);
-  const sentToCompanyOptions = useMemo(() => uniqueRfiValues((rfis || []).map(rfi => rfi.submittedToCompany || rfi.submittedToPerson)), [rfis]);
-  const buildCurrentViewParams = (mode?: "download" | "print") => {
-    const params = new URLSearchParams({
-      view,
-      status: statusFilter,
-      search: search.trim(),
-      rfi_type: typeFilter,
-      ball_in_court: ballInCourtFilter,
-      sent_to_company: sentToCompanyFilter,
-      date_field: dateField,
-      sort: sortBy,
-    });
-    if (dateFrom) params.set("date_from", dateFrom);
-    if (dateTo) params.set("date_to", dateTo);
-    if (mode === "print") params.set("disposition", "inline");
-    return params;
-  };
+  const {
+    view, setView, search, setSearch, statusFilter, setStatusFilter, typeFilter, setTypeFilter,
+    ballInCourtFilter, setBallInCourtFilter, sentToCompanyFilter, setSentToCompanyFilter,
+    dateField, setDateField, dateFrom, setDateFrom, dateTo, setDateTo, sortBy, setSortBy,
+    typeFilterOptions, ballInCourtOptions, sentToCompanyOptions, filtered, currentViewSummary,
+    buildCurrentViewParams, ballInCourtDisplay: rfiBallInCourtDisplay,
+  } = useRfiListState({
+    rfis,
+    lang,
+    getStatusLabel: value => getLabel("rfi_status", value),
+    typeOptions: rfiTypeOptions.length ? rfiTypeOptions.map(option => option.value) : DEFAULT_RFI_TYPES,
+  });
 
   const handleRfiViewPdf = async (mode: "download" | "print") => {
     const token = JSON.parse(localStorage.getItem("bimlog-auth") || "{}").state?.token;
@@ -1369,64 +1329,6 @@ export function RfisTab({ projectId, canWrite = true }: { projectId: number; can
       if (mode === "download") setExportingViewPdf(false);
     }
   };
-  const filtered = useMemo(() => {
-    if (!rfis) return [];
-    return rfis
-      .filter(r => statusFilter === "all" || r.status === statusFilter)
-      .filter(r => typeFilter === "all" || (r.rfiType || "") === typeFilter)
-      .filter(r => ballInCourtFilter === "all" || rfiBallInCourtValue(r) === ballInCourtFilter)
-      .filter(r => sentToCompanyFilter === "all" || (r.submittedToCompany || r.submittedToPerson || "") === sentToCompanyFilter)
-      .filter(r => {
-        if (!dateFrom && !dateTo) return true;
-        const raw = rfiDateValue(r, dateField);
-        if (!raw) return false;
-        const value = new Date(raw).getTime();
-        if (dateFrom && value < new Date(`${dateFrom}T00:00:00`).getTime()) return false;
-        if (dateTo && value > new Date(`${dateTo}T23:59:59.999`).getTime()) return false;
-        return true;
-      })
-      .filter(r => {
-        const q = search.trim().toLowerCase();
-        if (!q) return true;
-        return [
-          r.number,
-          r.subject,
-          r.rfiType,
-          rfiBallInCourtValue(r),
-          r.submittedByCompany,
-          r.submittedByContact,
-          r.submittedToCompany,
-          r.submittedToPerson,
-        ].some(value => String(value || "").toLowerCase().includes(q));
-      })
-      .sort((a, b) => {
-        if (sortBy === "created_desc") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        if (sortBy === "required_asc" || sortBy === "required_desc") {
-          const left = new Date(a.dateRequired || a.dueDate || "9999-12-31").getTime();
-          const right = new Date(b.dateRequired || b.dueDate || "9999-12-31").getTime();
-          return sortBy === "required_desc" ? right - left : left - right;
-        }
-        if (sortBy === "number_asc" || sortBy === "number_desc") {
-          const result = a.number.localeCompare(b.number, undefined, { numeric: true, sensitivity: "base" });
-          return sortBy === "number_desc" ? -result : result;
-        }
-        if (sortBy === "status_asc") return `${a.status}-${a.number}`.localeCompare(`${b.status}-${b.number}`, undefined, { numeric: true, sensitivity: "base" });
-        return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
-      });
-  }, [ballInCourtFilter, dateField, dateFrom, dateTo, rfis, search, sentToCompanyFilter, sortBy, statusFilter, typeFilter]);
-
-  const currentViewSummary = useMemo(() => [
-    `${w("View", "Vista", lang)}: ${view === "log" ? w("RFI Log", "Registro RFI", lang) : w("RFI List", "Lista RFI", lang)}`,
-    `${w("Status", "Estado", lang)}: ${statusFilter === "all" ? w("All", "Todos", lang) : getLabel("rfi_status", statusFilter)}`,
-    `${w("Type", "Tipo", lang)}: ${typeFilter === "all" ? w("All", "Todos", lang) : typeFilter}`,
-    search.trim() ? `${w("Search", "Busqueda", lang)}: ${search.trim()}` : "",
-    ballInCourtFilter !== "all" ? `${w("Ball in Court", "Responsable", lang)}: ${rfiBallInCourtDisplay(ballInCourtFilter)}` : "",
-    sentToCompanyFilter !== "all" ? `${w("Sent To Company", "Empresa Destino", lang)}: ${sentToCompanyFilter}` : "",
-    dateFrom || dateTo ? `${w("Date Range", "Rango de Fechas", lang)} (${dateField}): ${dateFrom || w("Any", "Cualquiera", lang)} - ${dateTo || w("Any", "Cualquiera", lang)}` : "",
-    `${w("Sort", "Orden", lang)}: ${sortBy.replace(/_/g, " ")}`,
-    `${w("Visible", "Visible", lang)}: ${filtered.length}/${rfis?.length ?? 0}`,
-  ].filter(Boolean), [ballInCourtFilter, dateField, dateFrom, dateTo, filtered.length, getLabel, lang, rfis?.length, search, sentToCompanyFilter, sortBy, statusFilter, typeFilter, view]);
-
   const stats = useMemo(() => ({
     total: rfis?.length ?? 0,
     open: rfis?.filter(r => r.status === "open").length ?? 0,
