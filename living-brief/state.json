@@ -2,12 +2,13 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "4fa559db38f88c96824b8f616026805cfa9869f1",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "fdd918100bba25612436d67200571825668cd2bedd33a8940c119aec0bd2db24",
+  "bundleSha256": "2be2a6bcad0a9b533b4b21da9d768451ffd3504cdf500226efccae6f9610232b",
   "impact": {
     "baselineCommit": "4fa559db38f88c96824b8f616026805cfa9869f1",
     "changedPaths": [
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json"
     ],
@@ -69,9 +70,9 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "78bdf050f585790dc92525ed3d668a4dccb8a963a5e2baf9a401052298dbb6d4",
-      "sourceChangedAt": "2026-09-21T06:35:16-04:00",
-      "changeState": "accepted",
+      "sha256": "900d2eab52f39be7e16adf66b5521cd5d2400c33eb1bd044c1a78a561e91ab76",
+      "sourceChangedAt": "2026-09-21T11:15:33.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "4fa559db38f88c96824b8f616026805cfa9869f1",
       "semanticReviewedThroughCommit": "4fa559db38f88c96824b8f616026805cfa9869f1",
       "semanticReviewTask": "bimlog-build210-endpoint-authority-reconciliation-20260921",
