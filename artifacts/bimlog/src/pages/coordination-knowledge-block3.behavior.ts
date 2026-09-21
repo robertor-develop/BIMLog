@@ -1,0 +1,17 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const read = (path: string) => readFileSync(fileURLToPath(new URL(path, import.meta.url)), "utf8");
+const app = read("../App.tsx"), page = read("./CoordinationKnowledgeLibrary.tsx"), css = read("./CoordinationKnowledgeLibrary.css");
+const sidebar = read("../components/layout/MasterSidebar.tsx"), accessibility = read("../components/layout/RouteAccessibility.tsx");
+
+assert.match(app, /Route path="\/knowledge"/);
+assert.match(app, /ProtectedRoute component=\{CoordinationKnowledgeLibrary\}/);
+assert.match(sidebar, /Coordination Knowledge/);
+assert.match(accessibility, /"\/knowledge": "Coordination Knowledge Library"/);
+for (const section of ["conflict-types", "rules", "methods", "lessons"]) assert.ok(page.includes(`id: "${section}"`));
+assert.match(page, /role="tablist"/); assert.match(page, /role="tab"/); assert.match(page, /role="tabpanel"/);
+assert.match(page, /ArrowRight/); assert.match(page, /ArrowLeft/); assert.match(page, /Home/); assert.match(page, /End/);
+assert.match(css, /@media \(max-width: 720px\)/); assert.doesNotMatch(page, /BIMLens/);
+console.log("Coordination Knowledge Build 236 workspace shell: navigation, responsive layout and keyboard tabs passed");

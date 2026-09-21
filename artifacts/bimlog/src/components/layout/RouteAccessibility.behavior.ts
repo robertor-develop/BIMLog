@@ -7,6 +7,7 @@ const expected = [
   "/dashboard", "/pending", "/lens-next", "/help", "/profile", "/admin",
   "/company-catalogs", "/company-workflows", "/company-workflow-governance",
   "/company-pricing-templates", "/total-control", "/living-brief",
+  "/knowledge",
 ];
 
 for (const route of expected) assert.ok(source.includes(`"${route}"`), `missing title contract for ${route}`);

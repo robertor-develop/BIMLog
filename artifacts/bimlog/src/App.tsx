@@ -45,6 +45,7 @@ const CompanyMasterCatalogs = namedPage(() => import("@/pages/CompanyMasterCatal
 const CompanyDeliveryWorkflows = namedPage(() => import("@/pages/CompanyDeliveryWorkflows"), "CompanyDeliveryWorkflows");
 const CompanyWorkflowGovernance = namedPage(() => import("@/pages/CompanyWorkflowGovernance"), "CompanyWorkflowGovernance");
 const CompanyPricingTemplates = namedPage(() => import("@/pages/CompanyPricingTemplates"), "CompanyPricingTemplates");
+const CoordinationKnowledgeLibrary = namedPage(() => import("@/pages/CoordinationKnowledgeLibrary"), "CoordinationKnowledgeLibrary");
 const TotalControl = namedPage(() => import("@/pages/TotalControl"), "TotalControl");
 const LivingBrief = namedPage(() => import("@/pages/LivingBrief"), "LivingBrief");
 const Pricing = namedPage(() => import("@/pages/Pricing"), "Pricing");
@@ -288,6 +289,9 @@ function Router() {
       </Route>
       <Route path="/company-pricing-templates">
         {() => <AccessRoute component={CompanyPricingTemplates} surface="company_pricing" />}
+      </Route>
+      <Route path="/knowledge">
+        {() => <ProtectedRoute component={CoordinationKnowledgeLibrary} />}
       </Route>
       <Route path="/admin">
         {() => <AccessRoute component={AdminPanel} surface="project_administration" />}

@@ -31,6 +31,7 @@ const exactTitles: Record<string, string> = {
   "/company-workflows": "Delivery Workflows",
   "/company-workflow-governance": "Workflow Governance",
   "/company-pricing-templates": "Company Pricing Templates",
+  "/knowledge": "Coordination Knowledge Library",
   "/total-control": "BIMLog Total Control",
   "/living-brief": "BIMLog Living Brief",
 };
