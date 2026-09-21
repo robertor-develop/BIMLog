@@ -80,7 +80,17 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 372,
+      "line": 357,
+      "provider": "anthropic",
+      "acquisition": "getAnthropicClientForUser",
+      "sourceContext": "authenticated route or project-scoped import context",
+      "costControl": "AI usage entitlement, limit, and provider selection enforced by governed client acquisition",
+      "outputAuthority": "draft_or_extraction_only; downstream mutation requires separate authenticated route authority",
+      "storedOutput": "route-specific persistence or ephemeral response; never autonomous approval/certification"
+    },
+    {
+      "file": "artifacts/api-server/src/routes/clash_reports.ts",
+      "line": 405,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -100,17 +110,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 496,
-      "provider": "anthropic",
-      "acquisition": "getAnthropicClientForUser",
-      "sourceContext": "authenticated route or project-scoped import context",
-      "costControl": "AI usage entitlement, limit, and provider selection enforced by governed client acquisition",
-      "outputAuthority": "draft_or_extraction_only; downstream mutation requires separate authenticated route authority",
-      "storedOutput": "route-specific persistence or ephemeral response; never autonomous approval/certification"
-    },
-    {
-      "file": "artifacts/api-server/src/routes/clash_reports.ts",
-      "line": 609,
+      "line": 521,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
