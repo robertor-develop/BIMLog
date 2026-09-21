@@ -72,6 +72,7 @@ import {
   RfiQueryValidationError,
   type RfiRegisterFilters,
 } from "../lib/rfi-query-service";
+import { canAdministerRfi, rfiAuditRecord } from "../lib/rfi-command-service";
 const router: IRouter = Router();
 
 class RfiReportSettingsOverrideError extends Error {
@@ -656,11 +657,10 @@ async function resolveLifecycleStatus(kind: "closed" | "open" | "responded"): Pr
 }
 
 async function isProjectAdmin(projectId: number, userId: number, isSuperAdmin?: boolean): Promise<boolean> {
-  if (isSuperAdmin) return true;
   const [member] = await db.select({ role: projectMembersTable.role }).from(projectMembersTable)
     .where(and(eq(projectMembersTable.projectId, projectId), eq(projectMembersTable.userId, userId)))
     .limit(1);
-  return member?.role === "project_admin";
+  return canAdministerRfi({ isSuperAdmin }, member?.role);
 }
 
 function settingsPreview(settings: RfiReportSettingsDocument) {
@@ -2190,11 +2190,10 @@ router.post("/projects/:projectId/rfis/:rfiId/close", authMiddleware, requirePer
       const [updated] = await tx.update(rfisTable).set({
         status: closedStatus, ballInCourt: null, closedAt, closedById: req.user!.userId, updatedAt: closedAt,
       }).where(eq(rfisTable.id, rfiId)).returning();
-      await tx.insert(activityLogTable).values({
-        projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
-        actionType: "close", entityType: "rfi", entityId: rfiId,
-        details: JSON.stringify({ event: "rfi.closed", number: existing.number, closedAt: closedAt.toISOString(), closedBy: req.user!.fullName, priorStatus: existing.status, priorCustody: openCustody ? { heldBy: openCustody.heldBy, heldByCompany: openCustody.heldByCompany } : null }),
-      });
+      await tx.insert(activityLogTable).values(rfiAuditRecord({
+        projectId, rfiId, actor: req.user!, actionType: "close",
+        details: { event: "rfi.closed", number: existing.number, closedAt: closedAt.toISOString(), closedBy: req.user!.fullName, priorStatus: existing.status, priorCustody: openCustody ? { heldBy: openCustody.heldBy, heldByCompany: openCustody.heldByCompany } : null },
+      }));
       await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:closed:${closedAt.toISOString()}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_closed",actorUserId:req.user!.userId});
       return { status: 200 as const, rfi: updated };
     });
@@ -2230,11 +2229,10 @@ router.post("/projects/:projectId/rfis/:rfiId/reopen", authMiddleware, requirePe
         ballInCourt: canRestoreCustody ? priorCustody.heldByCompany : null,
         reopenedAt, reopenedById: req.user!.userId, updatedAt: reopenedAt,
       }).where(eq(rfisTable.id, rfiId)).returning();
-      await tx.insert(activityLogTable).values({
-        projectId, userId: req.user!.userId, userFullName: req.user!.fullName, userCompanyName: req.user!.companyName,
-        actionType: "reopen", entityType: "rfi", entityId: rfiId,
-        details: JSON.stringify({ event: "rfi.reopened", number: existing.number, reopenedAt: reopenedAt.toISOString(), reopenedBy: req.user!.fullName, priorStatus: existing.status, restoredCustody: canRestoreCustody ? { heldBy: priorCustody.heldBy, heldByCompany: priorCustody.heldByCompany } : null, unsentAuthorHeld: !wasSent }),
-      });
+      await tx.insert(activityLogTable).values(rfiAuditRecord({
+        projectId, rfiId, actor: req.user!, actionType: "reopen",
+        details: { event: "rfi.reopened", number: existing.number, reopenedAt: reopenedAt.toISOString(), reopenedBy: req.user!.fullName, priorStatus: existing.status, restoredCustody: canRestoreCustody ? { heldBy: priorCustody.heldBy, heldByCompany: priorCustody.heldByCompany } : null, unsentAuthorHeld: !wasSent },
+      }));
       await recordRfiNotificationSourceEvent(tx,{canonicalEventId:`rfi:${rfiId}:reopened:${reopenedAt.toISOString()}`,companyId:req.user!.companyId,projectId,rfiId,eventKey:"rfi_reopened",actorUserId:req.user!.userId});
       return { status: 200 as const, rfi: updated };
     });
