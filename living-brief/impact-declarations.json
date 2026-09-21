@@ -36432,6 +36432,96 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block01-field-gate-reconciliation-20260921",
+      "reviewedThroughCommit": "ffbf6b53041b46f3dc1daa13dc4da0ed71e1a173",
+      "reviewedAt": "2026-09-21T12:45:00-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "full_pre_push_gate",
+          "field_boundary_regression",
+          "push_exact_fast_forward"
+        ],
+        "operatorOnly": [
+          "replit_publication_at_build235",
+          "ruben_physical_navisworks_2025_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "historical_field_gate_forward_compatibility",
+          "disposition": "corrected_and_regressed",
+          "authorities": [
+            "quality",
+            "open_loop"
+          ],
+          "summary": "Historical field-evidence gates now select the single current Navisworks field item by work class instead of rejecting independently authorized Lens Next product work."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product or stakeholder authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating boundary changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The field gate remains strict and now classifies concurrent work correctly."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No runtime platform behavior changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or plugin behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The current program status remains accurate."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Ruben's sole field-evidence item and the next product block remain unchanged."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The corrected assertions preserve the accepted field-evidence boundary."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
