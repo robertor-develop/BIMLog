@@ -36720,7 +36720,7 @@
     },
     {
       "taskId": "bimlog-coordination-knowledge-block04-source-candidate-20260921",
-      "reviewedThroughCommit": "6a2e920d0be0aa54944a69f457a7c2d62e1c220c",
+      "reviewedThroughCommit": "33b0a9cab2f107d0c3b612dc38ab98da33c96537",
       "reviewedAt": "2026-09-21T19:22:35-04:00",
       "status": "candidate",
       "capabilityPreflight": {
