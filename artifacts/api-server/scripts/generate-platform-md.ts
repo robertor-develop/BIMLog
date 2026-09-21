@@ -345,6 +345,12 @@ ${appRoutes()}
 - Builds 151–155 isolate RFI list/query state, create evidence state, and permission-aware action presentation under \`artifacts/bimlog/src/pages/project/rfi-frontend/\`.
 - The route, API contracts, database, customer data, Native boundary, installers, and release cadence are unchanged.
 - The permanent Block 31 regression covers cross-role status actions and project-scoped deep links.
+
+## Post-120 RFI backend decomposition — Build 160
+
+- RFI query parsing, date bounds, ball-in-court derivation, filtering, and sorting are owned by one project-scoped query service used by governed PDF and Excel exports.
+- Lifecycle administration and attributable audit-record construction are centralized without widening existing project-member, write, project-admin, or super-admin boundaries.
+- The permanent Block 32 negative matrix denies project/object mismatch, non-admin lifecycle authority, malformed filters, and contradictory date ranges.
 `;
 
   const outDir = path.join(REPO_ROOT, "living-brief");

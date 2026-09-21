@@ -529,6 +529,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/post120-build137-pdf-adapter.behavior.ts
 - artifacts/api-server/src/lib/post120-build138-operational-pdf-family.behavior.ts
 - artifacts/api-server/src/lib/post120-build139-directory-pdf-family.behavior.ts
+- artifacts/api-server/src/lib/post120-build159-rfi-negative-matrix.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts
@@ -555,8 +556,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/provider-governance.ts
 - artifacts/api-server/src/lib/release-metadata.behavior.ts
 - artifacts/api-server/src/lib/release-metadata.ts
+- artifacts/api-server/src/lib/rfi-command-service.ts
 - artifacts/api-server/src/lib/rfi-complete-package.behavior.ts
 - artifacts/api-server/src/lib/rfi-complete-package.ts
+- artifacts/api-server/src/lib/rfi-query-service.ts
 - artifacts/api-server/src/lib/rfi-register-export.ts
 - artifacts/api-server/src/lib/rfi-standard-exports.ts
 - artifacts/api-server/src/lib/runtime-resilience.ts
@@ -1005,3 +1008,9 @@ It changes only when the code structure or curated architectural facts change.
 - Builds 151–155 isolate RFI list/query state, create evidence state, and permission-aware action presentation under `artifacts/bimlog/src/pages/project/rfi-frontend/`.
 - The route, API contracts, database, customer data, Native boundary, installers, and release cadence are unchanged.
 - The permanent Block 31 regression covers cross-role status actions and project-scoped deep links.
+
+## Post-120 RFI backend decomposition — Build 160
+
+- RFI query parsing, date bounds, ball-in-court derivation, filtering, and sorting are owned by one project-scoped query service used by governed PDF and Excel exports.
+- Lifecycle administration and attributable audit-record construction are centralized without widening existing project-member, write, project-admin, or super-admin boundaries.
+- The permanent Block 32 negative matrix denies project/object mismatch, non-admin lifecycle authority, malformed filters, and contradictory date ranges.

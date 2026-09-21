@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Post-120 stabilization — Block 32 source acceptance — 2026-09-20
+
+- Builds 156–159 isolate RFI backend query and command authority, centralize project-admin/super-admin lifecycle predicates and attributable audit records, and make Excel/PDF exports consume the same project-scoped filter truth.
+- The permanent negative matrix rejects wrong project/object identity, non-admin close authority, malformed filters, invalid date ranges, and confirms attributable audit records.
+- Build 160 is the ten-build publication boundary. The full clean-tree gate, exact GitHub/Replit source identity, zero-change database receipt, and authenticated visible-Chrome RFI lifecycle/export/reload smoke remain active.
+- No schema, customer data, Native source, installer, package, bridge protocol, provider configuration, or outbound message changed; focused Navisworks smoke is not retriggered.
+
 ## Post-120 stabilization — Block 31 source acceptance — 2026-09-20
 
 - Builds 151–154 isolate RFI list/filter/export-query state, create-form evidence/upload state, and permission-aware action/status presentation without changing the RFI route, API contracts, stored data, or user-visible workflow meaning.

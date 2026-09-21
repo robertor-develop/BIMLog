@@ -81,7 +81,7 @@ Status: Builds 151–154 implemented and verified; Build 155 is the full-gate an
 
 ## Block 32 — Builds 156–160 — RFI backend decomposition
 
-Status: next authorized block; Build 160 is the next push, publication, and authenticated visible-Chrome acceptance boundary.
+Status: source accepted; Build 160 push, publication, and authenticated visible-Chrome acceptance are active.
 
 - 156: separate RFI command and query services.
 - 157: centralize authorization predicates and audit records.
