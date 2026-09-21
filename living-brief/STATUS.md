@@ -7,6 +7,7 @@
 - Physical Navisworks 2021 is closed with exactly Pulse plus Lens Next P36 active, Original/Legacy Lens and the retired direct loader absent, WebView2 complete, and licensing unchanged.
 - Ruben's physical Navisworks 2025 result remains open field evidence. It is not touched, simulated, waived, or treated as a Platform/code blocker; its result will be reconciled when Ruben provides it.
 - Block 45 changes no runtime product code, database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license. Build 225 is push-only; no publication or Chrome smoke is due at this five-build boundary.
+- Living Brief reconciliation follows exact Build 225 source commit `531f0e5998ada39aabceee81761a8ccc62aab6b1`; it changes evidence metadata only and does not create another product build.
 
 ## Post-120 stabilization — Block 42 source acceptance — 2026-09-21
 

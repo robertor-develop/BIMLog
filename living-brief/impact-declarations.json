@@ -35958,6 +35958,100 @@
         "scripts/test-post120-block44.mjs"
       ],
       "reviewedChangeSha256": "7e0e1c05ff33d2b92b45939c1dffecd73445d0b38c95530656560f33fa260593"
+    },
+    {
+      "taskId": "bimlog-builds221-225-post220-closure-20260921",
+      "reviewedThroughCommit": "531f0e5998ada39aabceee81761a8ccc62aab6b1",
+      "reviewedAt": "2026-09-21T10:20:00-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "edit_isolated_worktree",
+          "run_local_validation",
+          "push_exact_fast_forward"
+        ],
+        "operatorOnly": [
+          "ruben_physical_navisworks_2025_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "repeated_or_systemic_failure_class",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "plugin"
+          ],
+          "summary": "Post-publication records still described Build 220 and the verified physical 2021 cutover as pending. Builds 221-225 reconcile those exact facts while leaving Ruben's physical 2025 result open and untouched."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product purpose, stakeholder authority, and commercial boundaries remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push and ten-build publication workflow remains controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No acceptance or quality requirement changed."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision, customer promise, or roadmap scope changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform runtime, route, schema, provider binding, or customer-data behavior changed."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "Plugin authority now records the verified physical 2021 cutover as closed and leaves physical 2025 confirmation with Ruben."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Report rendering, templates, and design-system behavior remain unchanged."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata, applicability, evidence, or certification claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records exact Build 220 live acceptance, the verified 2021 closure, and Ruben's remaining 2025 field item."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop closes Build 220 provider work and the 2021 field item while preserving only Ruben's 2025 confirmation."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The five build reports and exact commit sequence preserve complete attribution."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "932e9ad99a61df74319aea940902cc37637a1959a44078d4e230ffce74f93a78"
     }
   ]
 }
