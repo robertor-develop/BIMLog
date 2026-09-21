@@ -7,6 +7,7 @@ const read = relative => fs.readFileSync(new URL(`../${relative}`, import.meta.u
 const recorded = JSON.parse(read("evidence/stabilization-program-20260919/ACCESSIBILITY_RESPONSIVE_MATRIX.json"));
 const matrix = buildAccessibilityResponsiveMatrix();
 const graph = buildRouteInterconnectionGraph();
+const routeAccessibility = read("artifacts/bimlog/src/components/layout/RouteAccessibility.tsx");
 
 assert.deepEqual(recorded, matrix, "the committed accessibility matrix must match tracked routes");
 assert.deepEqual(governedViewports.map(item => `${item.width}x${item.height}`), ["1440x900", "820x1180", "390x844"]);
@@ -23,4 +24,9 @@ for (const surface of matrix.surfaces) {
   assert.equal(surface.checks.length, 8, `${surface.path} has the complete acceptance contract`);
 }
 
-console.log(`POST120_BUILD196=PASS surfaces=${matrix.counts.customerSurfaces} viewportCases=${matrix.counts.viewportCases}`);
+assert.match(routeAccessibility, /MutationObserver\(refreshDialog\)/, "modal additions are observed");
+assert.match(routeAccessibility, /event\.key !== "Tab"/, "modal keyboard focus is contained");
+assert.match(routeAccessibility, /target\?\.isConnected/, "focus is restored after a modal closes");
+assert.match(routeAccessibility, /focusableElements\(activeDialog\)/, "dialogs receive deterministic initial focus");
+
+console.log(`POST120_BLOCK40=PASS surfaces=${matrix.counts.customerSurfaces} viewportCases=${matrix.counts.viewportCases} dialogFocus=PASS`);
