@@ -35765,7 +35765,7 @@
     },
     {
       "taskId": "bimlog-builds211-215-recovery-resilience-20260921",
-      "reviewedThroughCommit": "827cf53b704d1adb3851bd16c17931a256c78f3c",
+      "reviewedThroughCommit": "47bb79d85135a58ff90516611442feecee20e920",
       "reviewedAt": "2026-09-21T08:56:02-04:00",
       "status": "candidate",
       "capabilityPreflight": {
@@ -35835,13 +35835,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "Status records the live Block 42 identity and Block 43 source acceptance."
+          "result": "reviewed_no_semantic_change",
+          "reason": "Status was already reconciled in the reviewed Build 215 baseline; metadata refresh adds no new product state."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "The remaining Build 215 push and Build 220 publication boundary are explicit."
+          "result": "reviewed_no_semantic_change",
+          "reason": "Open Loop was already reconciled in the reviewed Build 215 baseline; metadata refresh adds no new work item."
         },
         {
           "key": "audit",
