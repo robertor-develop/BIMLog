@@ -21,7 +21,8 @@ for (const item of inventory.items) {
 }
 
 const currentItems = inventory.items.filter(item => item.currentAuthority);
-assert.ok(!currentItems.some(item => item.workClass === "PROVIDER_EVIDENCE"), "Build 190 publication no longer remains current provider work");
+assert.equal(currentItems.filter(item => item.workClass === "PROVIDER_EVIDENCE").length, 1, "only Build 210 publication remains current provider work");
+assert.ok(currentItems.some(item => item.statement.includes("Build 210") && item.workClass === "PROVIDER_EVIDENCE"), "Build 210 publication is the current provider boundary");
 assert.equal(currentItems.filter(item => item.workClass === "FIELD_EVIDENCE").length, 2, "2021 remediation and Ruben's 2025 confirmation remain current field evidence");
 assert.ok(inventory.items.some(item => item.statement.includes("Build 160") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 160 publication marker is closed");
 assert.ok(inventory.items.some(item => item.statement.includes("Builds 166–170") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 170 marker is closed");
