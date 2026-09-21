@@ -31,6 +31,7 @@ import {
   normalizeAiClashRows, parseAiJsonArray, selectClashSpreadsheetRows,
   type ClashColumnMapping, type ClashImportRow,
 } from "../lib/clash-report-contracts";
+import { clashReportScopeWhere, clashScopeWhere } from "../lib/clash-report-provenance";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -508,12 +509,12 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
   }
 );
 
-async function rankClashesWithAI(reportId: number, _projectId: number, clashList: any[], anthropicClient: { messages: { create: (input: any) => Promise<any> } }) {
+async function rankClashesWithAI(reportId: number, projectId: number, clashList: any[], anthropicClient: { messages: { create: (input: any) => Promise<any> } }) {
   try {
     console.log("[rankAI] Starting - clashList length:", clashList.length, "reportId:", reportId);
     if (clashList.length === 0) {
       console.log("[rankAI] EARLY EXIT - empty clashList");
-      await db.update(clashReportsTable).set({ status: "complete" }).where(eq(clashReportsTable.id, reportId));
+      await db.update(clashReportsTable).set({ status: "complete" }).where(clashReportScopeWhere(projectId, reportId));
       return;
     }
     const msg = await anthropicClient.messages.create({
@@ -549,7 +550,7 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
     const validPriorities = ["P1", "P2", "P3", "P4"];
     const validRanked = ranked.filter(r => validPriorities.includes(r.priority));
     console.log("[rankAI] Valid ranked:", validRanked.length);
-    const allClashes = await db.select().from(clashesTable).where(eq(clashesTable.clashReportId, reportId));
+    const allClashes = await db.select().from(clashesTable).where(clashScopeWhere(projectId, reportId));
     console.log("[rankAI] Clashes in DB for report:", allClashes.length);
     for (const r of validRanked) {
       if (allClashes[r.index]) {
@@ -568,11 +569,11 @@ Clashes: ${JSON.stringify(clashList.map((c, i) => ({ index: i, description: c.de
       status: "complete", p1Count: p1, p2Count: p2, p3Count: p3, p4Count: p4,
       aiSummary: `${p1} critical, ${p2} this week, ${p3} monitor, ${p4} low priority.`,
       updatedAt: new Date(),
-    }).where(eq(clashReportsTable.id, reportId));
+    }).where(clashReportScopeWhere(projectId, reportId));
     console.log("[rankAI] Report updated to complete.");
   } catch (err) {
     console.error("[rankClashesWithAI] FAILED:", err);
-    await db.update(clashReportsTable).set({ status: "complete" }).where(eq(clashReportsTable.id, reportId));
+    await db.update(clashReportsTable).set({ status: "complete" }).where(clashReportScopeWhere(projectId, reportId));
   }
 }
 
@@ -3473,7 +3474,7 @@ router.get(
         return;
       }
       const allClashes = await db.select().from(clashesTable)
-        .where(and(eq(clashesTable.clashReportId, reportId), isNull(clashesTable.deletedAt)));
+        .where(and(clashScopeWhere(projectId, reportId), isNull(clashesTable.deletedAt)));
       const order: Record<string, number> = { P1: 0, P2: 1, P3: 2, P4: 3 };
       const filtered = allClashes
         .filter(c => priority === "all" || c.priority === priority)
@@ -3657,7 +3658,7 @@ router.get("/projects/:projectId/clash-reports/:reportId", authMiddleware, requi
       res.status(404).json({ error: "not_found" });
       return;
     }
-    let clashes = await db.select().from(clashesTable).where(and(eq(clashesTable.clashReportId, reportId), isNull(clashesTable.deletedAt)));
+    let clashes = await db.select().from(clashesTable).where(and(clashScopeWhere(projectId, reportId), isNull(clashesTable.deletedAt)));
     const { priority, status, discipline } = req.query;
     if (typeof priority === "string" && priority !== "all") clashes = clashes.filter(c => c.priority === priority);
     if (typeof status === "string" && status !== "all") clashes = clashes.filter(c => c.status === status);
@@ -3676,10 +3677,10 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
     const reportId = Number(req.params.reportId);
     try {
       const [report] = await db.select().from(clashReportsTable)
-        .where(eq(clashReportsTable.id, reportId));
+        .where(clashReportScopeWhere(projectId, reportId));
       if (!report) { res.status(404).json({ error: "not_found" }); return; }
       const clashes = await db.select().from(clashesTable)
-        .where(eq(clashesTable.clashReportId, reportId));
+        .where(clashScopeWhere(projectId, reportId));
       console.log("[rerank] Report ID:", reportId, "Clashes found:", clashes.length);
       if (clashes.length === 0) {
         res.status(400).json({ error: "no_clashes", message: `No clashes found for report ${reportId}. Found 0 rows.` });
@@ -3695,7 +3696,7 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
       }));
       await db.update(clashReportsTable)
         .set({ status: "processing", p1Count: 0, p2Count: 0, p3Count: 0, p4Count: 0 })
-        .where(eq(clashReportsTable.id, reportId));
+        .where(clashReportScopeWhere(projectId, reportId));
       try {
         const anthropic = await getAnthropicClientForUser({
           userId: req.user!.userId,
@@ -3703,7 +3704,7 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
           feature: "clash_report_rerank",
         });
         await rankClashesWithAI(reportId, projectId, clashList, anthropic);
-        const updated = await db.select().from(clashReportsTable).where(eq(clashReportsTable.id, reportId));
+        const updated = await db.select().from(clashReportsTable).where(clashReportScopeWhere(projectId, reportId));
         await db.insert(activityLogTable).values({
           projectId,
           userId: req.user!.userId,
@@ -3728,6 +3729,7 @@ router.post("/projects/:projectId/clash-reports/:reportId/rerank",
 );
 
 router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", authMiddleware, requireProjectMember(), async (req, res) => {
+  const projectId = Number(req.params.projectId);
   const reportId = Number(req.params.reportId);
   const clashId = Number(req.params.clashId);
   try {
@@ -3748,7 +3750,7 @@ router.patch("/projects/:projectId/clash-reports/:reportId/clashes/:clashId", au
     if (priority !== undefined) allowed.priority = priority;
     allowed.updatedAt = new Date();
     const [updated] = await db.update(clashesTable).set(allowed)
-      .where(and(eq(clashesTable.id, clashId), eq(clashesTable.clashReportId, reportId))).returning();
+      .where(clashScopeWhere(projectId, reportId, clashId)).returning();
     if (!updated) {
       res.status(404).json({ error: "not_found" });
       return;
@@ -3784,7 +3786,7 @@ router.post("/projects/:projectId/clash-reports/:reportId/clashes",
       }).returning();
       await db.update(clashReportsTable)
         .set({ totalClashes: (report.totalClashes ?? 0) + 1 })
-        .where(eq(clashReportsTable.id, reportId));
+        .where(clashReportScopeWhere(projectId, reportId));
       res.status(201).json(clash);
     } catch (err) {
       res.status(500).json({ error: err instanceof Error ? err.message : String(err) });
@@ -3819,8 +3821,8 @@ router.delete("/projects/:projectId/clash-reports/:reportId", authMiddleware, re
   try {
     const [report] = await db.select().from(clashReportsTable).where(and(eq(clashReportsTable.id, reportId), eq(clashReportsTable.projectId, projectId)));
     if (!report) { res.status(404).json({ error: "not_found" }); return; }
-    await db.delete(clashesTable).where(eq(clashesTable.clashReportId, reportId));
-    await db.delete(clashReportsTable).where(eq(clashReportsTable.id, reportId));
+    await db.delete(clashesTable).where(clashScopeWhere(projectId, reportId));
+    await db.delete(clashReportsTable).where(clashReportScopeWhere(projectId, reportId));
     await db.insert(activityLogTable).values({
       projectId,
       userId: req.user!.userId,
@@ -3868,7 +3870,7 @@ router.get("/projects/:projectId/clash-reports/:reportId/pdf",
       if (!report) { res.status(404).json({ error: "Report not found" }); return; }
 
       const clashes = await db.select().from(clashesTable)
-        .where(eq(clashesTable.clashReportId, reportId));
+        .where(clashScopeWhere(projectId, reportId));
 
       clashes.sort((a, b) => {
         const order: Record<string, number> = { P1: 0, P2: 1, P3: 2, P4: 3 };
@@ -4097,12 +4099,12 @@ router.delete("/projects/:projectId/clash-reports/:reportId/clashes/:clashId",
       if (!report) { res.status(404).json({ error: "report_not_found" }); return; }
 
       const [existing] = await db.select().from(clashesTable)
-        .where(and(eq(clashesTable.id, clashId), eq(clashesTable.clashReportId, reportId)));
+        .where(clashScopeWhere(projectId, reportId, clashId));
       if (!existing) { res.status(404).json({ error: "not_found" }); return; }
 
       await db.update(clashesTable)
         .set({ deletedAt: new Date(), deleteReason: reason })
-        .where(and(eq(clashesTable.id, clashId), eq(clashesTable.clashReportId, reportId)));
+        .where(clashScopeWhere(projectId, reportId, clashId));
 
       await db.delete(linkedItemsTable).where(and(
         eq(linkedItemsTable.projectId, projectId),
