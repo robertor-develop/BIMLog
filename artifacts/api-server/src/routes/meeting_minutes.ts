@@ -75,6 +75,10 @@ import {
   parseMeetingCurrentViewQuery,
   safeMeetingReportText,
 } from "../lib/meeting-minute-contracts";
+import {
+  resolveMeetingActionInputs,
+  resolveMeetingParticipants,
+} from "../lib/meeting-participant-action-identity";
 
 const router: Router = Router();
 
@@ -1877,21 +1881,22 @@ router.post(
           })
           .returning();
 
-        if (body.attendees?.length) {
-          for (const attendee of body.attendees) {
-            await validateAttendeeCompanyAccess(tx, projectId, attendee.company_id);
-            await validateAttendeeDirectoryEntryAccess(tx, projectId, attendee.directory_entry_id, attendee.company_id);
+        const participants = resolveMeetingParticipants(body.attendees);
+        if (participants.length) {
+          for (const attendee of participants) {
+            await validateAttendeeCompanyAccess(tx, projectId, attendee.companyId);
+            await validateAttendeeDirectoryEntryAccess(tx, projectId, attendee.directoryEntryId, attendee.companyId);
           }
           await tx.insert(meetingAttendeesTable).values(
-            body.attendees.map((a) => ({
+            participants.map((attendee) => ({
               meetingId: created.id,
-              userId: a.user_id ?? null,
-              companyId: a.company_id ?? null,
-              directoryEntryId: a.directory_entry_id ?? null,
-              externalEmail: a.external_email ?? null,
-              fullName: a.full_name,
-              company: a.company ?? null,
-              role: a.role ?? null,
+              userId: attendee.userId,
+              companyId: attendee.companyId,
+              directoryEntryId: attendee.directoryEntryId,
+              externalEmail: attendee.externalEmail,
+              fullName: attendee.fullName,
+              company: attendee.company,
+              role: attendee.role,
             })),
           );
         }
@@ -3108,26 +3113,25 @@ router.patch(
           )
           .returning();
         if (Array.isArray(body.attendees)) {
-          if (body.attendees.some((attendee) => !attendee.full_name?.trim()))
-            throw new MeetingClashLinkError(400, "attendee_name_required");
-          for (const attendee of body.attendees) {
-            await validateAttendeeCompanyAccess(tx, projectId, attendee.company_id);
-            await validateAttendeeDirectoryEntryAccess(tx, projectId, attendee.directory_entry_id, attendee.company_id);
+          const participants = resolveMeetingParticipants(body.attendees);
+          for (const attendee of participants) {
+            await validateAttendeeCompanyAccess(tx, projectId, attendee.companyId);
+            await validateAttendeeDirectoryEntryAccess(tx, projectId, attendee.directoryEntryId, attendee.companyId);
           }
           await tx
             .delete(meetingAttendeesTable)
             .where(eq(meetingAttendeesTable.meetingId, meetingId));
-          if (body.attendees.length) {
+          if (participants.length) {
             await tx.insert(meetingAttendeesTable).values(
-              body.attendees.map((attendee) => ({
+              participants.map((attendee) => ({
                 meetingId,
-                userId: attendee.user_id ?? null,
-                companyId: attendee.company_id ?? null,
-                directoryEntryId: attendee.directory_entry_id ?? null,
-                externalEmail: attendee.external_email ?? null,
-                fullName: attendee.full_name.trim(),
-                company: attendee.company?.trim() || null,
-                role: attendee.role?.trim() || null,
+                userId: attendee.userId,
+                companyId: attendee.companyId,
+                directoryEntryId: attendee.directoryEntryId,
+                externalEmail: attendee.externalEmail,
+                fullName: attendee.fullName,
+                company: attendee.company,
+                role: attendee.role,
               })),
             );
           }
@@ -3247,17 +3251,18 @@ router.post(
       return;
     }
     try {
+      const actionInputs = resolveMeetingActionInputs(body);
       const created = await db
         .insert(actionItemsTable)
         .values(
-          body.items.map((i) => ({
+          actionInputs.map((item) => ({
             meetingId,
             projectId,
-            description: i.description,
-            assignedToId: i.assigned_to_id ?? null,
-            assignedToName: i.assigned_to_name ?? null,
-            assignedToExternalEmail: i.assigned_to_email ?? null,
-            dueDate: i.due_date ? new Date(i.due_date) : null,
+            description: item.description,
+            assignedToId: item.assignedToId,
+            assignedToName: item.assignedToName,
+            assignedToExternalEmail: item.assignedToExternalEmail,
+            dueDate: item.dueDate,
             status: "open" as const,
           })),
         )
