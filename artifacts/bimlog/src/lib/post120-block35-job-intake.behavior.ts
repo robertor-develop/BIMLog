@@ -24,7 +24,12 @@ assert.deepEqual(resolveJobIntakeRecovery(4, server, { revision: 4, data: partia
 assert.equal(resolveJobIntakeRecovery(5, server, { revision: 4, data: partial }).discardStale, true);
 assert.equal(resolveJobIntakeRecovery(4, server, { revision: 4, data: server }).resume, false);
 
-const spreadsheet = { id: "doc-1", extractionSummary: { sheets: [{ name: "Estimate", rowCount: 3, columnCount: 2 }] } };
+const spreadsheet = {
+  id: "doc-1",
+  extractionSummary: {
+    sheets: [{ name: "Estimate", rowCount: 3, columnCount: 2, rows: [["Item", "Quantity"]] }],
+  },
+};
 assert.deepEqual(defaultJobIntakeMappingForm(spreadsheet), { sheetName: "Estimate", headerRow: 1, nameColumn: 0, quantityColumn: 1 });
 assert.deepEqual(buildJobIntakeMappingRequest({ sheetName: "Estimate", headerRow: 2, nameColumn: 3, quantityColumn: 4 }), { sheetName: "Estimate", headerRow: 2, nameColumn: 3, quantityColumn: 4 });
 assert.deepEqual(jobIntakeDocumentAssistance(spreadsheet), { mode: "deterministic_spreadsheet", readsFile: true, usesAi: false, estimatedCostMicros: 0 });
