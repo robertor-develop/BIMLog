@@ -34651,6 +34651,83 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-build175-job-intake-reconciliation-20260921",
+      "reviewedThroughCommit": "f4d743248dbe694ce87e270456376e96aafb387d",
+      "reviewedAt": "2026-09-21T02:02:30-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The job-intake decomposition preserves established BIMLog ownership and product boundaries."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established five-build push and ten-build publication procedure is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 175 adds executable recovery, upload-failure, and AI cost-disclosure acceptance coverage."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product purpose and customer outcomes remain unchanged by the intake workspace refactor."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The Platform separates intake state and document contracts while preserving visible recovery and deterministic assistance boundaries."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native source, installer, package, or bridge protocol changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, XLSX, or report visual contract changed in this block."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, regulatory mapping, or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records Builds 171-175 as accepted source work and the Build 175 push boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The accepted execution plan continues to own remaining Builds 176-220."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused and full-gate evidence remains preserved in Git history and the Build 175 acceptance record."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/lib/job-intake-document-contract.ts",
+        "artifacts/bimlog/src/lib/job-intake-workspace-state.ts",
+        "artifacts/bimlog/src/lib/post120-block35-job-intake.behavior.ts",
+        "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx",
+        "evidence/stabilization-program-20260919/BUILD_175_SOURCE_ACCEPTANCE.md",
+        "evidence/stabilization-program-20260919/POST_120_BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "6999669bbe475d770de0161318b92eae5e4aba1012f4a2a78fe867c2c953b5bf"
     }
   ]
 }

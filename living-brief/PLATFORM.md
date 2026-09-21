@@ -860,6 +860,12 @@ It changes only when the code structure or curated architectural facts change.
   exposes only Contract Item Name and Quantity for 100-plus rows; unit, currency, APU/rate, calculated
   value, workflow, budget, and descriptive overrides remain explicit Advanced controls. Activation,
   rather than import preview, creates shared operational and entitled Commercial records.
+- Job Intake workspace state and document-assistance contracts are maintained outside the routed
+  page component. Browser recovery remains revision-bound: an equal-revision partial draft may be
+  resumed, a stale draft is discarded, and upload/save failures preserve the latest recoverable
+  state. Spreadsheet inspection and mapping remain deterministic and consume zero AI credits;
+  PDF/DOCX remain manual-review evidence. Any future AI text or file operation must fail closed
+  unless its funding source, estimated cost, and user confirmation are all visible first.
 - Build 3 multi-contract activation keeps up to 50 independent contract profiles in the same
   canonical Intake draft. Every Contract Item references one owning contract. Activation creates
   or reuses the canonical Commercial contract records, freezes the selected APU or pricing snapshot
