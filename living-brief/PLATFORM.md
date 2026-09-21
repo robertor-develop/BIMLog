@@ -252,6 +252,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/block24-final-release-contract.ts
 - artifacts/api-server/src/lib/build4-backend.behavior.ts
 - artifacts/api-server/src/lib/build4-pdf-ui-consistency.behavior.ts
+- artifacts/api-server/src/lib/clash-report-contracts.ts
+- artifacts/api-server/src/lib/clash-report-provenance.ts
+- artifacts/api-server/src/lib/clash-visual-package-truth.ts
 - artifacts/api-server/src/lib/cloud-files.ts
 - artifacts/api-server/src/lib/commercial-entitlement.behavior.ts
 - artifacts/api-server/src/lib/commercial-entitlement.ts
@@ -530,6 +533,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/post120-build138-operational-pdf-family.behavior.ts
 - artifacts/api-server/src/lib/post120-build139-directory-pdf-family.behavior.ts
 - artifacts/api-server/src/lib/post120-build159-rfi-negative-matrix.behavior.ts
+- artifacts/api-server/src/lib/post120-build161-clash-contracts.behavior.ts
+- artifacts/api-server/src/lib/post120-build162-clash-provenance.behavior.ts
+- artifacts/api-server/src/lib/post120-build163-clash-visual-truth.behavior.ts
+- artifacts/api-server/src/lib/post120-build164-clash-negative-matrix.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.behavior.ts
 - artifacts/api-server/src/lib/procore-coordination-return.ts
 - artifacts/api-server/src/lib/procore-rfi-import-atomic-store.behavior.ts
