@@ -69,44 +69,21 @@ import {
   reportFileName,
   REPORT_THEMES,
 } from "../lib/pdf-kit";
+import {
+  formatMeetingReportDate,
+  meetingCurrentViewSectionLabel,
+  parseMeetingCurrentViewQuery,
+  safeMeetingReportText,
+} from "../lib/meeting-minute-contracts";
 
 const router: Router = Router();
 
-const safePdfText = (value: unknown, fallback = "—") => {
-  if (value === null || value === undefined) return fallback;
-  const text = String(value).replace(/\s+/g, " ").trim();
-  return text || fallback;
-};
+const safePdfText = safeMeetingReportText;
 
-const formatPdfDate = (value: unknown, language: "en" | "es" = "en") => {
-  if (!value) return "—";
-  const date = new Date(value as string | Date);
-  if (Number.isNaN(date.getTime())) return "—";
-  return date.toLocaleString(language === "es" ? "es-US" : "en-US", {
-    year: "numeric",
-    month: "short",
-    day: "2-digit",
-    hour: "2-digit",
-    minute: "2-digit",
-  });
-};
+const formatPdfDate = formatMeetingReportDate;
 
 const labelFor = (language: "en" | "es", en: string, es: string) =>
   language === "es" ? es : en;
-
-const meetingCurrentViewSectionLabel = (
-  token: string,
-  language: "en" | "es",
-) => {
-  const labels: Record<string, { en: string; es: string }> = {
-    summary: { en: "Summary", es: "Resumen" },
-    meetings: { en: "Meeting Register", es: "Registro de reuniones" },
-    actions: { en: "Actions", es: "Acciones" },
-    linked_records: { en: "Linked Records", es: "Registros vinculados" },
-  };
-  const label = labels[token];
-  return label ? label[language] : "";
-};
 
 const draftKeyFor = (meetingId?: number | null) =>
   meetingId ? `edit:${meetingId}` : "new";
@@ -1396,22 +1373,7 @@ router.get(
   requireProjectMember(),
   async (req, res) => {
     const projectId = Number(req.params.projectId);
-    const language = req.query.lang === "es" ? "es" : "en";
-    const view = req.query.view === "actions" ? "actions" : "meetings";
-    const sectionInput =
-      typeof req.query.sections === "string" ? req.query.sections : "";
-    const allowedSections = new Set(["summary", "meetings", "actions", "linked_records"]);
-    const requestedSections = sectionInput
-      .split(",")
-      .map((value) => value.trim())
-      .filter((value) => allowedSections.has(value));
-    const sections = new Set(
-      requestedSections.length
-        ? requestedSections
-        : view === "actions"
-          ? ["summary", "actions"]
-          : ["summary", "meetings", "linked_records"],
-    );
+    const { language, view, sections } = parseMeetingCurrentViewQuery(req.query);
 
     try {
       const [project] = await db
