@@ -210,7 +210,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/meeting_minutes.ts",
-      "line": 3787,
+      "line": 3788,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -220,7 +220,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/meeting_minutes.ts",
-      "line": 3862,
+      "line": 3863,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
@@ -230,7 +230,7 @@
     },
     {
       "file": "artifacts/api-server/src/routes/meeting_minutes.ts",
-      "line": 3926,
+      "line": 3927,
       "provider": "anthropic",
       "acquisition": "getAnthropicClientForUser",
       "sourceContext": "authenticated route or project-scoped import context",
