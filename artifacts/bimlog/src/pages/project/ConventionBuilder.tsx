@@ -31,6 +31,8 @@ import {
   useConventionPhaseGuard,
   type ConventionFlowPhase,
 } from "./convention-builder/convention-navigation";
+import { ConventionPartyAssignment } from "./convention-builder/ConventionPartyAssignment";
+import { FINANCIAL_AND_PARTY_CLAUSE_CATEGORIES } from "./convention-builder/convention-clause-catalog";
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 function w(en: string, es: string, lang: string) { return lang === "es" ? es : en; }
@@ -160,37 +162,7 @@ const DOC_TYPE_CATEGORIES: { cat: string; types: Omit<DocTypeEntry,"id"|"selecte
     { code: "AS",  name: "Activity Schedule",     desc: "Work activity schedule" },
     { code: "LS",  name: "Look Ahead Schedule",   desc: "Short term look ahead" },
   ]},
-  { cat: "Cost & Quantity", types: [
-    { code: "ES",  name: "Estimate",              desc: "Cost estimate" },
-    { code: "BQ",  name: "Bill of Quantities",    desc: "Detailed BOQ" },
-    { code: "VO",  name: "Variation Order",       desc: "Change order document" },
-    { code: "CO",  name: "Change Order",          desc: "Contract change order" },
-    { code: "CL",  name: "Cost Log",              desc: "Running cost log" },
-    { code: "CB",  name: "Cost Breakdown",        desc: "Cost breakdown structure" },
-    { code: "CV",  name: "Cost Variation",        desc: "Cost variation report" },
-    { code: "TK",  name: "Takeoff",               desc: "Quantity takeoff" },
-    { code: "BU",  name: "Budget",                desc: "Project budget document" },
-    { code: "CFW", name: "Cash Flow",             desc: "Cash flow forecast" },
-  ]},
-  { cat: "Contracts & Legal", types: [
-    { code: "CT",  name: "Contract",              desc: "Contract document" },
-    { code: "AG",  name: "Agreement",             desc: "Project agreement" },
-    { code: "NDA", name: "Non Disclosure",        desc: "Confidentiality agreement" },
-    { code: "NL",  name: "Notice Letter",         desc: "Formal notice" },
-    { code: "EXT", name: "Extension of Time",     desc: "EOT claim document" },
-    { code: "NC",  name: "Non Conformance",       desc: "Non conformance report" },
-    { code: "RFI", name: "Request for Info",      desc: "Formal RFI document" },
-    { code: "RFC", name: "Request for Change",    desc: "Change request document" },
-    { code: "RFP", name: "Request for Proposal",  desc: "Procurement document" },
-    { code: "RFQ", name: "Request for Quotation", desc: "Tender document" },
-    { code: "TN",  name: "Tender",                desc: "Tender submission" },
-    { code: "BI",  name: "Bid",                   desc: "Bid document" },
-    { code: "PO",  name: "Purchase Order",        desc: "Procurement order" },
-    { code: "WO",  name: "Work Order",            desc: "Work instruction order" },
-    { code: "LI",  name: "Letter of Intent",      desc: "LOI document" },
-    { code: "PC",  name: "Practical Completion",  desc: "Completion certificate" },
-    { code: "DL",  name: "Defects List",          desc: "Snagging and defects list" },
-  ]},
+  ...FINANCIAL_AND_PARTY_CLAUSE_CATEGORIES,
   { cat: "Submittals & Transmittals", types: [
     { code: "SB",  name: "Submittal",             desc: "Formal submittal package" },
     { code: "TM",  name: "Transmittal",           desc: "Document transmittal record" },
@@ -582,94 +554,6 @@ function Card({ children, style }: { children: React.ReactNode; style?: React.CS
 
 // ─── API Base URL ────────────────────────────────────────────────────────────
 const API_BASE_CB = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
-
-function CompanyAssignmentBlock({ projectId, convention, lang, token, onRefresh }: {
-  projectId: number; convention: any; lang: string; token: string | null; onRefresh: () => void;
-}) {
-  const [assignCode, setAssignCode] = useState<string | null>(null);
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [companyName, setCompanyName] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-
-  const items: Array<{ code: string; hasUsers: boolean; companyName?: string }> = convention?.companyAssignmentStatus || [];
-
-  const handleAssign = async () => {
-    if (!assignCode || !token) return;
-    if (!fullName.trim() || !email.trim() || !companyName.trim()) { setError(w("All fields are required", "Todos los campos son requeridos", lang)); return; }
-    setSubmitting(true);
-    setError("");
-    try {
-      const r = await fetch(`${API_BASE_CB}/api/v1/projects/${projectId}/assign-company-user`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-        body: JSON.stringify({ companyCode: assignCode, newUserData: { fullName: fullName.trim(), email: email.trim().toLowerCase(), companyName: companyName.trim() } }),
-      });
-      if (r.ok) { setAssignCode(null); setFullName(""); setEmail(""); setCompanyName(""); onRefresh(); }
-      else {
-        const d = await r.json().catch(err => {
-          console.warn("[ConventionBuilder] failed to parse assignment error response:", err);
-          return null;
-        });
-        setError(d?.error || "Failed");
-      }
-    } catch (err) {
-      console.warn("[ConventionBuilder] assign-company-user failed:", err);
-      setError("Network error");
-    }
-    setSubmitting(false);
-  };
-
-  return (
-    <div style={{ marginTop: 12, padding: 10, borderRadius: 6, background: "#F9FAFB", border: "1px solid hsl(var(--border))" }}>
-      <div style={{ fontSize: 10, fontWeight: 700, textTransform: "uppercase", color: "#6B7280", marginBottom: 8 }}>
-        {w("User Assignment Status", "Estado de Asignacion de Usuarios", lang)}
-      </div>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: 6 }}>
-        {items.map(item => (
-          <span key={item.code} style={{
-            display: "inline-flex", alignItems: "center", gap: 4,
-            padding: "3px 8px", borderRadius: 16, fontSize: 11, fontWeight: 700,
-            background: item.hasUsers ? "#F0FDF4" : "#FEF2F2",
-            color: item.hasUsers ? "#15803D" : "#DC2626",
-            border: `1px solid ${item.hasUsers ? "#BBF7D0" : "#FECACA"}`,
-            cursor: item.hasUsers ? "default" : "pointer",
-          }}
-            onClick={() => { if (!item.hasUsers) { setAssignCode(item.code); setCompanyName(item.code); } }}
-          >
-            <span style={{ width: 6, height: 6, borderRadius: "50%", background: item.hasUsers ? "#16A34A" : "#DC2626" }} />
-            {item.code}
-            <span style={{ fontSize: 9, fontWeight: 600, opacity: 0.8 }}>
-              {item.hasUsers ? w("users assigned", "usuarios asignados", lang) : w("Assign User", "Asignar Usuario", lang)}
-            </span>
-          </span>
-        ))}
-      </div>
-      {assignCode && (
-        <div style={{ marginTop: 10, padding: 12, borderRadius: 6, background: "white", border: "1px solid #D1D5DB" }}>
-          <div style={{ fontSize: 12, fontWeight: 700, marginBottom: 8 }}>
-            {w(`Assign user to ${assignCode}`, `Asignar usuario a ${assignCode}`, lang)}
-          </div>
-          <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-            <input value={fullName} onChange={e => setFullName(e.target.value)} placeholder={w("Full Name", "Nombre Completo", lang)} style={{ padding: "6px 10px", border: "1px solid #D1D5DB", borderRadius: 5, fontSize: 12 }} />
-            <input value={email} onChange={e => setEmail(e.target.value)} placeholder="Email" type="email" style={{ padding: "6px 10px", border: "1px solid #D1D5DB", borderRadius: 5, fontSize: 12 }} />
-            <input value={companyName} onChange={e => setCompanyName(e.target.value)} placeholder={w("Company Name", "Nombre de Empresa", lang)} style={{ padding: "6px 10px", border: "1px solid #D1D5DB", borderRadius: 5, fontSize: 12 }} />
-          </div>
-          {error && <div style={{ color: "#DC2626", fontSize: 11, marginTop: 6 }}>{error}</div>}
-          <div style={{ display: "flex", gap: 8, marginTop: 10 }}>
-            <button onClick={() => { setAssignCode(null); setError(""); }} style={{ flex: 1, padding: "6px 0", border: "1px solid #D1D5DB", borderRadius: 5, background: "white", fontSize: 12, fontWeight: 600, cursor: "pointer" }}>
-              {w("Cancel", "Cancelar", lang)}
-            </button>
-            <button onClick={handleAssign} disabled={submitting} style={{ flex: 1, padding: "6px 0", border: "none", borderRadius: 5, background: "#1D4ED8", color: "white", fontSize: 12, fontWeight: 700, cursor: submitting ? "wait" : "pointer" }}>
-              {submitting ? "..." : w("Assign", "Asignar", lang)}
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
 
 // ─── Step 0: Project Convention Setup (front door) ───────────────────────────
 
@@ -3694,7 +3578,7 @@ function EditFoundationScreen({ ws, setWs, projectId, token, lang, onCancel, onS
           </div>
         )}
         {ws.companies.length > 0 && (ws as any)?.companyAssignmentStatus?.length > 0 && (
-          <CompanyAssignmentBlock
+          <ConventionPartyAssignment
             projectId={projectId}
             convention={ws as any}
             lang={lang}
