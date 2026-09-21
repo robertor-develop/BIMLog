@@ -133,6 +133,21 @@ function ProjectRoute({ component: Component }: { component: React.ComponentType
   return <>{context.kind === "global_super_admin" && <div role="status" style={{ padding: "6px 16px", background: "#EFF6FF", color: "#1E3A5F", fontSize: 12, fontWeight: 700 }}>Global Super Administrator context / Contexto global de Super Administrador</div>}<Component /></>;
 }
 
+function SetupGuideRedirect() {
+  const [, setLocation] = useLocation();
+  useEffect(() => setLocation("/help?topic=getting-started&view=manual", { replace: true }), [setLocation]);
+  return <RouteState kind="loading" title="Opening setup guide / Abriendo guía de configuración" />;
+}
+
+function LegacySubmittalTrackerRedirect() {
+  const [location, setLocation] = useLocation();
+  const projectId = location.match(/^\/projects\/(\d+)\/submittal-tracker/)?.[1];
+  useEffect(() => {
+    if (projectId) setLocation(`/projects/${projectId}/submittals?view=tracking`, { replace: true });
+  }, [projectId, setLocation]);
+  return <RouteState kind="loading" title="Opening Submittals tracking / Abriendo seguimiento de Submittals" />;
+}
+
 // F5 intercept: eligible admins (super admin or granted access) are sent to the
 // Living Brief instead of a browser refresh. Everyone else gets a normal F5 refresh.
 // Ctrl+R / Cmd+R are intentionally NOT intercepted.
@@ -216,6 +231,9 @@ function Router() {
       <Route path="/projects/:id/operations">
         {() => <ProjectRoute component={JobOperationsWorkspace} />}
       </Route>
+      <Route path="/projects/:id/submittal-tracker">
+        {() => <ProjectRoute component={LegacySubmittalTrackerRedirect} />}
+      </Route>
       <Route path="/projects/:id/:tab?">
         {() => <ProjectRoute component={ProjectDetail} />}
       </Route>
@@ -223,7 +241,7 @@ function Router() {
         {() => <ProtectedRoute component={HelpCenter} />}
       </Route>
       <Route path="/setup-guide">
-        {() => <ProtectedRoute component={HelpCenter} />}
+        {() => <ProtectedRoute component={SetupGuideRedirect} />}
       </Route>
       <Route path="/profile">
         {() => <ProtectedRoute component={Profile} />}

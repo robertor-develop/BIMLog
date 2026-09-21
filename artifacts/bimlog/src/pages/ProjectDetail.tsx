@@ -39,7 +39,6 @@ const PROJECT_TABS = new Set([
   "files",
   "rfis",
   "submittals",
-  "submittal-tracker",
   "activity",
   "team",
   "generator",
@@ -164,7 +163,7 @@ export function ProjectDetail() {
         projectCode={project.code}
         projectName={project.name}
         projectDesc={project.description ?? undefined}
-        activeTab={tab === "submittal-tracker" ? "submittals" : tab}
+        activeTab={tab}
         isAdmin={isAdmin}
         memberRole={memberRole}
       />
@@ -248,7 +247,6 @@ export function ProjectDetail() {
           {tab === "files"          && <FilesTab          projectId={projectId} canWrite={canWrite} />}
           {tab === "rfis"           && <RfisTab           projectId={projectId} canWrite={canWrite} />}
           {tab === "submittals"     && <SubmittalsTab     projectId={projectId} canWrite={canWrite} />}
-          {tab === "submittal-tracker" && <SubmittalsTab projectId={projectId} canWrite={canWrite} initialView="tracking" />}
           {tab === "activity"       && <ActivityTab       projectId={projectId} />}
           {tab === "team"           && <TeamTab           projectId={projectId} isAdmin={isAdmin} />}
           {tab === "generator"      && <NameGenerator     projectId={projectId} onGoToConvention={() => setLocation(`/projects/${projectId}/convention`)} />}
