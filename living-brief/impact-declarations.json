@@ -33954,6 +33954,76 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "a7078db4c19bcec412b44f147c18e54404734b9e60c5585a327e9c1f400162e6"
+    },
+    {
+      "taskId": "bimlog-build150-schema-identity-correction-20260920",
+      "reviewedThroughCommit": "b2eb3827c991494a60f04ceb0a3e19e630cf17e5",
+      "reviewedAt": "2026-09-20T21:15:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem or ownership boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established release procedure remains unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction makes source identity match both existing databases without changing a predicate or runtime behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Product direction and customer outcomes are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Five source CHECK identifiers are reconciled to the exact names already established in development and production; structural behavior is unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, Pulse, installer, package, bridge, or supported-year behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or claim changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Build 150 remains the active release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing Build 150 release loop remains active until publication acceptance."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction and repeated database receipt provide the evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/block22-build109-recovery-readiness.behavior.ts",
+        "evidence/stabilization-program-20260919/BUILD_150_SCHEMA_IDENTITY_CORRECTION.md",
+        "lib/db/src/schema/workflow-governance-policies.ts",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "222a5f1c93f1e8ca015a29dbcfc1416fcff47e65a40c3c553a0e0e328ff37b46"
     }
   ]
 }
