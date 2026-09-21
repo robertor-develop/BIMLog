@@ -1,5 +1,6 @@
 import { randomUUID } from "node:crypto";
 import {
+  assertKnowledgeTransition,
   CoordinationKnowledgeContractError,
   type ConflictTypeRevision,
   type CoordinationRuleRevision,
@@ -49,7 +50,7 @@ async function transaction<T>(pool: KnowledgeRepositoryPool, work: (client: Know
 export class CoordinationKnowledgeRepository {
   constructor(private readonly pool: KnowledgeRepositoryPool) {}
 
-  async getConflictType(companyIdInput: number, conflictTypeId: string, includeRetired = true): Promise<Record<string, unknown> | null> {
+  async getConflictType(companyIdInput: number, conflictTypeId: string, includeDrafts = true): Promise<Record<string, unknown> | null> {
     const companyId = positive(companyIdInput, "companyId");
     const result = await this.pool.query(`
       SELECT t.id,t.company_id,t.code,t.created_by_id,t.created_at,t.updated_at,
@@ -60,11 +61,91 @@ export class CoordinationKnowledgeRepository {
       JOIN LATERAL (
         SELECT * FROM coordination_conflict_type_revisions candidate
         WHERE candidate.conflict_type_id=t.id AND candidate.company_id=t.company_id
-          AND ($3::boolean OR candidate.status<>'retired')
+          AND ($3::boolean OR candidate.status='approved')
         ORDER BY candidate.revision DESC LIMIT 1
       ) r ON true
-      WHERE t.id=$1 AND t.company_id=$2`, [conflictTypeId, companyId, includeRetired]);
+      WHERE t.id=$1 AND t.company_id=$2`, [conflictTypeId, companyId, includeDrafts]);
     return result.rows[0] ?? null;
+  }
+
+  async listConflictTypes(companyIdInput: number, includeDrafts: boolean): Promise<Array<Record<string, unknown>>> {
+    const companyId = positive(companyIdInput, "companyId");
+    const result = await this.pool.query(`
+      SELECT t.id,t.company_id,t.code,t.created_by_id,t.created_at,t.updated_at,
+             r.id revision_id,r.revision,r.status,r.name,r.description,r.discipline_a,r.discipline_b,
+             r.element_type_a,r.element_type_b,r.conflict_category,r.coordination_stage,r.tags,
+             r.authored_by_id,r.approved_by_id,r.approved_at,r.retired_by_id,r.retired_at,r.created_at revision_created_at
+      FROM coordination_conflict_types t
+      JOIN LATERAL (
+        SELECT * FROM coordination_conflict_type_revisions candidate
+        WHERE candidate.conflict_type_id=t.id AND candidate.company_id=t.company_id
+          AND ($2::boolean OR candidate.status='approved')
+        ORDER BY candidate.revision DESC LIMIT 1
+      ) r ON true
+      WHERE t.company_id=$1
+      ORDER BY lower(r.name),t.code,t.id`, [companyId, includeDrafts]);
+    return result.rows;
+  }
+
+  async conflictTypeHistory(companyIdInput: number, conflictTypeId: string, includeDrafts = true): Promise<Array<Record<string, unknown>>> {
+    const companyId = positive(companyIdInput, "companyId");
+    const result = await this.pool.query(`SELECT revision.* FROM coordination_conflict_type_revisions revision
+      WHERE revision.conflict_type_id=$1 AND revision.company_id=$2 AND ($3::boolean OR revision.status='approved')
+      ORDER BY revision.revision DESC`, [conflictTypeId, companyId, includeDrafts]);
+    return result.rows;
+  }
+
+  async appendConflictTypeRevision(input: {
+    companyId: number;
+    conflictTypeId: string;
+    expectedRevision: number;
+    actorId: number;
+    action: "update_draft" | "submit_for_review" | "approve" | "revise" | "retire";
+    content?: Omit<ConflictTypeRevision, "id" | "conflictTypeId" | "companyId" | "revision" | "status" | "authoredById">;
+  }): Promise<Record<string, unknown>> {
+    return transaction(this.pool, async client => {
+      const current = (await client.query(`SELECT * FROM coordination_conflict_type_revisions
+        WHERE conflict_type_id=$1 AND company_id=$2 ORDER BY revision DESC LIMIT 1 FOR UPDATE`, [input.conflictTypeId, positive(input.companyId, "companyId")])).rows[0];
+      if (!current) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_CONFLICT_TYPE_NOT_FOUND", "Conflict Type not found.", 404);
+      if (Number(current.revision) !== input.expectedRevision) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_VERSION_CONFLICT", "Conflict Type revision is stale.", 409);
+      const from = String(current.status) as "draft" | "under_review" | "approved" | "retired";
+      let status = from;
+      if (input.action === "update_draft") {
+        if (from !== "draft") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_DRAFT_REQUIRED", "Only a draft may be edited.", 409);
+      } else if (input.action === "revise") {
+        if (from !== "approved" && from !== "retired") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_APPROVED_REVISION_REQUIRED", "Only approved or retired knowledge may start a new draft revision.", 409);
+        status = "draft";
+      } else {
+        status = input.action === "submit_for_review" ? "under_review" : input.action === "approve" ? "approved" : "retired";
+        assertKnowledgeTransition(from, status);
+      }
+      const next = validateConflictTypeRevision({
+        id: randomUUID(), conflictTypeId: input.conflictTypeId, companyId: input.companyId,
+        revision: input.expectedRevision + 1, status,
+        name: input.content?.name ?? current.name,
+        description: input.content?.description ?? current.description,
+        disciplineA: input.content?.disciplineA ?? current.discipline_a,
+        disciplineB: input.content?.disciplineB ?? current.discipline_b,
+        elementTypeA: input.content?.elementTypeA ?? current.element_type_a,
+        elementTypeB: input.content?.elementTypeB ?? current.element_type_b,
+        conflictCategory: input.content?.conflictCategory ?? current.conflict_category,
+        coordinationStage: input.content?.coordinationStage ?? current.coordination_stage,
+        tags: input.content?.tags ?? current.tags,
+        authoredById: input.actorId,
+      });
+      const approvalBy = status === "approved" || status === "retired" ? (status === "approved" ? input.actorId : current.approved_by_id) : null;
+      const approvalAt = status === "approved" || status === "retired" ? (status === "approved" ? new Date().toISOString() : current.approved_at) : null;
+      const retiredBy = status === "retired" ? input.actorId : null;
+      const retiredAt = status === "retired" ? new Date().toISOString() : null;
+      const inserted = await client.query(`INSERT INTO coordination_conflict_type_revisions
+        (id,conflict_type_id,company_id,revision,status,name,description,discipline_a,discipline_b,element_type_a,element_type_b,conflict_category,coordination_stage,tags,authored_by_id,approved_by_id,approved_at,retired_by_id,retired_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14::jsonb,$15,$16,$17,$18,$19) RETURNING *`,
+        [next.id,next.conflictTypeId,next.companyId,next.revision,next.status,next.name,next.description,next.disciplineA,next.disciplineB,next.elementTypeA,next.elementTypeB,next.conflictCategory,next.coordinationStage,JSON.stringify(next.tags),next.authoredById,approvalBy,approvalAt,retiredBy,retiredAt]);
+      await client.query(`UPDATE coordination_conflict_types SET updated_at=now() WHERE id=$1 AND company_id=$2`, [input.conflictTypeId,input.companyId]);
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,entity_type,entity_id,revision_id,action,actor_id,details)
+        VALUES($1,$2,'conflict_type',$3,$4,$5,$6,$7::jsonb)`, [randomUUID(),input.companyId,input.conflictTypeId,next.id,input.action,input.actorId,JSON.stringify({ from, to: status, expectedRevision: input.expectedRevision })]);
+      return inserted.rows[0];
+    });
   }
 
   async listApprovedRules(companyIdInput: number): Promise<Array<Record<string, unknown>>> {
