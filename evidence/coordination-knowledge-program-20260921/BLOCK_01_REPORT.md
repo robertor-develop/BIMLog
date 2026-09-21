@@ -29,6 +29,7 @@ Status: `PASS_SOURCE_CANDIDATE`
 - A controlled PostgreSQL 18 instance restored from `F:/BIMLog/TestProof/block22-build109-restore-20260920-retry/bimlog-rfi-test.backup` ran the migration twice.
 - Restored project and Lens viewpoint row counts were unchanged.
 - A real revision insert succeeded, a direct mutation was rejected by the immutable trigger, and the proof transaction left no synthetic knowledge row.
+- The database harness is valid for both a restored fixture with existing company data and a clean declared-schema fixture; when no actor exists it creates company/user proof rows inside the same rolled-back transaction.
 - The temporary restored database listener was stopped after the proof.
 
 ## Verification completed
