@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2a02390ec7fb8a23424ae0b6feb3b5f66a8e132fce75300dbf2e9a3fd290255d",
-  "itemCount": 145,
+  "sourceSha256": "59367d6429e8d34a57e2fd13cdfd9ce4c3d259cf2fdade2e09f616df3cb10f41",
+  "itemCount": 146,
   "counts": {
-    "ACTIVE": 112,
+    "ACTIVE": 113,
     "SUPERSEDED": 21,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -2678,6 +2678,24 @@
         "git:9dab04343e90e8ad94391c5967a4b9f804ee1f4d",
         "evidence/stabilization-program-20260919/BUILD_180_SOURCE_ACCEPTANCE.md",
         "test:gate:pre-push PASS through Build 185"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "1b7fdc598e8c2aa6",
+      "sourceLine": 3058,
+      "heading": "120-build stabilization program — 2026-09-19",
+      "statement": "Build 215: pass the exact complete pre-push gate and push both authoritative refs. Publication remains due only at Build 220.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Platform",
+        "route": "/dashboard",
+        "module": "artifacts/bimlog/src/App.tsx"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3058",
+        "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     }
