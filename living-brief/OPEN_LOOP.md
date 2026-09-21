@@ -7,7 +7,8 @@
 - [x] Build 155: exact source `fe36d1017ae99e335953e6e77a3c940f93155b08` passed the complete gate and was pushed normally to GitHub master and the stabilization branch.
 - [x] Builds 156–159: decompose RFI backend query/command authority, centralize admin and audit truth, align Excel/PDF filter scope, and add a permanent tenant/project/object/role negative matrix.
 - [ ] Build 160: pass the complete clean-tree gate, push, publish through Replit Shell without Replit Agents, verify `schemaAction=NONE`, and run authenticated visible-Chrome RFI lifecycle/export/reload acceptance.
-- [ ] Builds 161–165: decompose clash-report architecture and push the next five-build block.
+- [x] Builds 161–165: decompose clash-report architecture, pass the complete clean-tree gate, and push the exact five-build head. Publication remains due at Build 170.
+- [ ] Builds 166–170: decompose meeting-minutes backend, push, publish through Replit Shell without Replit Agents, and run full authenticated visible-Chrome acceptance.
 - Block 32 narrative reconciliation is bound to source-acceptance commit `e33640cc6be9394af805925cde9e050efb9cc1c8`.
 - Derived evidence reconciliation is complete through `89af9852`; Build 160 remains the active publication boundary.
 

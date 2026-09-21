@@ -34305,6 +34305,77 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2c241ad5e0f32c94a5f0b75b0a333f90c70feb7f69e27b94506ba48a361fe36f"
+    },
+    {
+      "taskId": "bimlog-build165-clash-report-architecture-reconciliation-20260920",
+      "reviewedThroughCommit": "67d1bb2f9be72bdc1eced945fcb26a1ac8e3e843",
+      "reviewedAt": "2026-09-20T23:30:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product ownership or ecosystem boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established push and publication cadence is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "updated",
+          "reason": "Records the permanent large-input, malformed-input, provenance, and Visual Package negative matrix."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Customer outcomes and product purpose are unchanged."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Records the accepted clash-report architecture and identity boundaries."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native source, installer, package, or bridge protocol changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF or report visual design changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 33 source acceptance and the Build 165 push boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 161–165 and activates the Build 170 publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Executable tests and exact Git history preserve the audit evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/stabilization-program-20260919/POST_120_EXECUTION_PLAN_100_BUILDS.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "6e372082d6df8e795456b30064ee13bb4c46b6532ba09207ee3f2f32f88fbcd0"
     }
   ]
 }

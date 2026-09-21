@@ -1014,3 +1014,10 @@ It changes only when the code structure or curated architectural facts change.
 - RFI query parsing, date bounds, ball-in-court derivation, filtering, and sorting are owned by one project-scoped query service used by governed PDF and Excel exports.
 - Lifecycle administration and attributable audit-record construction are centralized without widening existing project-member, write, project-admin, or super-admin boundaries.
 - The permanent Block 32 negative matrix denies project/object mismatch, non-admin lifecycle authority, malformed filters, and contradictory date ranges.
+
+## Post-120 clash-report architecture — Build 165
+
+- Clash import parsing, report-number allocation, and status presentation now have focused shared contracts instead of duplicated route-local implementations.
+- Classic clash reads and mutations bind project, report, and clash identity through shared provenance predicates; cross-project and cross-object identities fail closed.
+- Lens Next Visual Package completeness and reference-attachment presentation have one project-scoped truth source. Partial packages are explicitly invalid rather than silently presented as unavailable.
+- The permanent Block 33 matrix covers large reports, exact chunk preservation, malformed AI output, duplicate identities, cross-project/object denial, and incomplete Visual Package denial.

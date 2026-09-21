@@ -1,5 +1,12 @@
 # STATUS.md - Current Accepted Platform State
 
+## Post-120 stabilization — Block 33 source acceptance — 2026-09-20
+
+- Builds 161–164 separate clash-report parsing, report identity, status presentation, project/report/clash provenance, and Visual Package/reference truth from the monolithic route.
+- The permanent Block 33 matrix proves 12,000-row and multi-chunk handling, malformed-input refusal, cross-project/object denial, and partial Visual Package refusal.
+- Build 165 is the five-build push boundary. Publication and authenticated Chrome smoke remain scheduled after Build 170, within the ten-build ceiling.
+- No schema, customer data, Native source, installer, package, bridge protocol, provider configuration, publication, or production mutation is part of Block 33; focused Navisworks smoke is not retriggered.
+
 ## Post-120 stabilization — Block 32 source acceptance — 2026-09-20
 
 - Builds 156–159 isolate RFI backend query and command authority, centralize project-admin/super-admin lifecycle predicates and attributable audit records, and make Excel/PDF exports consume the same project-scoped filter truth.

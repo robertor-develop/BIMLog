@@ -97,6 +97,8 @@ Status: source accepted; Build 160 push, publication, and authenticated visible-
 - 164: add large-report, malformed-input, and authorization tests.
 - 165: run full gate and push; run focused Lens Next package smoke if shared contracts changed.
 
+Status: source accepted; Build 165 push is active. Native and installers did not change, so focused Navisworks smoke is not retriggered. Build 170 remains the next publication boundary.
+
 ## Block 34 — Builds 166–170 — meeting-minutes backend
 
 - 166: split minutes commands, queries, and rendering.
