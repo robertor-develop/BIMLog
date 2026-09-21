@@ -8,7 +8,12 @@ import {
   resolveKnowledgeAuthorizationContext,
   type KnowledgeCapability,
 } from "../lib/coordination-knowledge-authorization";
-import { CoordinationKnowledgeContractError, validateConflictTypeRevision } from "../lib/coordination-knowledge-contract";
+import {
+  CoordinationKnowledgeContractError,
+  validateConflictTypeRevision,
+  validateCoordinationRuleRevision,
+  validateResolutionMethodRevision,
+} from "../lib/coordination-knowledge-contract";
 import { CoordinationKnowledgeRepository, CoordinationKnowledgeRepositoryError } from "../lib/coordination-knowledge-repository";
 import { ensureCoordinationKnowledgeSchema } from "../lib/coordination-knowledge-migration";
 
@@ -37,6 +42,17 @@ function conflictContent(body: Record<string, unknown>, actorId: number, company
     conflictCategory: body.conflictCategory, coordinationStage: body.coordinationStage,
     tags: body.tags ?? [], authoredById: actorId,
   });
+}
+function ruleContent(body: Record<string, unknown>, actorId: number, companyId: number, ruleId: string, revision: number) {
+  return validateCoordinationRuleRevision({ id: randomUUID(), ruleId, companyId, revision, status: "draft",
+    title: body.title, guidance: body.guidance, applicability: body.applicability ?? {}, rationale: body.rationale,
+    exceptions: body.exceptions ?? [], references: body.references ?? [], authoredById: actorId });
+}
+function resolutionContent(body: Record<string, unknown>, actorId: number, companyId: number, resolutionMethodId: string, revision: number) {
+  return validateResolutionMethodRevision({ id: randomUUID(), resolutionMethodId, companyId, revision, status: "draft",
+    name: body.name, description: body.description, applicability: body.applicability ?? {}, responsibleTrade: body.responsibleTrade ?? null,
+    constraints: body.constraints ?? [], advantages: body.advantages ?? [], disadvantages: body.disadvantages ?? [], requiredApprovals: body.requiredApprovals ?? [],
+    rfiRequirement: body.rfiRequirement ?? "conditional", details: body.details ?? {}, conflictTypeIds: body.conflictTypeIds, ruleRevisionIds: body.ruleRevisionIds ?? [], authoredById: actorId });
 }
 function sendError(res: Response, error: unknown): void {
   if (error instanceof CoordinationKnowledgeAuthorizationError || error instanceof CoordinationKnowledgeRepositoryError) {
@@ -111,5 +127,19 @@ for (const action of ["submit_for_review", "approve", "revise", "retire"] as con
     } catch (error) { sendError(res, error); }
   });
 }
+
+router.get("/coordination-knowledge/rules", authMiddleware, async (req,res) => { try { const resolved=await context(req,"view_approved"); res.json({items:await repository.listRules(resolved.companyId,resolved.capabilities.has("view_draft"))}); } catch(error){ sendError(res,error); } });
+router.post("/coordination-knowledge/rules", authMiddleware, async (req,res) => { try { const resolved=await context(req,"create_draft"), id=randomUUID(), code=String(req.body?.code??"").trim().toUpperCase(); if(!codePattern.test(code)) throw new CoordinationKnowledgeContractError("COORDINATION_KNOWLEDGE_INVALID","code"); await repository.createRule({identity:{id,companyId:resolved.companyId,code,createdById:resolved.userId},revision:ruleContent(req.body??{},resolved.userId,resolved.companyId,id,1)}); res.status(201).json({item:await repository.getRule(resolved.companyId,id,true)}); } catch(error){ sendError(res,error); } });
+router.get("/coordination-knowledge/rules/:id/history", authMiddleware, async (req,res) => { try { const resolved=await context(req,"view_approved"),items=await repository.ruleHistory(resolved.companyId,parameter(req.params.id),resolved.capabilities.has("view_draft")); if(!items.length){res.status(404).json({code:"KNOWLEDGE_RULE_NOT_FOUND"});return;} res.json({items}); } catch(error){sendError(res,error);} });
+router.get("/coordination-knowledge/rules/:id", authMiddleware, async (req,res) => { try { const resolved=await context(req,"view_approved"),item=await repository.getRule(resolved.companyId,parameter(req.params.id),resolved.capabilities.has("view_draft")); if(!item){res.status(404).json({code:"KNOWLEDGE_RULE_NOT_FOUND"});return;} res.json({item}); } catch(error){sendError(res,error);} });
+router.patch("/coordination-knowledge/rules/:id", authMiddleware, async (req,res) => { try { const resolved=await context(req,"edit_draft"), expected=expectedRevision(req.body?.expectedRevision), id=parameter(req.params.id); const item=await repository.appendRuleRevision({companyId:resolved.companyId,ruleId:id,expectedRevision:expected,actorId:resolved.userId,action:"update_draft",content:ruleContent(req.body??{},resolved.userId,resolved.companyId,id,expected+1)}); res.json({item}); } catch(error){sendError(res,error);} });
+for(const action of ["submit_for_review","approve","revise","retire"] as const){ const capability:KnowledgeCapability=action==="approve"?"approve":action==="retire"?"retire":action==="submit_for_review"?"submit_for_review":"create_draft"; router.post(`/coordination-knowledge/rules/:id/${action.replaceAll("_","-")}`,authMiddleware,async(req,res)=>{try{const resolved=await context(req,capability);res.json({item:await repository.appendRuleRevision({companyId:resolved.companyId,ruleId:parameter(req.params.id),expectedRevision:expectedRevision(req.body?.expectedRevision),actorId:resolved.userId,action})});}catch(error){sendError(res,error);}}); }
+
+router.get("/coordination-knowledge/resolution-methods",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved");res.json({items:await repository.listResolutionMethods(resolved.companyId,resolved.capabilities.has("view_draft"))});}catch(error){sendError(res,error);}});
+router.post("/coordination-knowledge/resolution-methods",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"create_draft"),id=randomUUID(),code=String(req.body?.code??"").trim().toUpperCase();if(!codePattern.test(code))throw new CoordinationKnowledgeContractError("COORDINATION_KNOWLEDGE_INVALID","code");await repository.createResolutionMethod({identity:{id,companyId:resolved.companyId,code,createdById:resolved.userId},revision:resolutionContent(req.body??{},resolved.userId,resolved.companyId,id,1)});res.status(201).json({item:await repository.getResolutionMethod(resolved.companyId,id,true)});}catch(error){sendError(res,error);}});
+router.get("/coordination-knowledge/resolution-methods/:id/history",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved"),items=await repository.resolutionMethodHistory(resolved.companyId,parameter(req.params.id),resolved.capabilities.has("view_draft"));if(!items.length){res.status(404).json({code:"KNOWLEDGE_RESOLUTION_METHOD_NOT_FOUND"});return;}res.json({items});}catch(error){sendError(res,error);}});
+router.get("/coordination-knowledge/resolution-methods/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved"),item=await repository.getResolutionMethod(resolved.companyId,parameter(req.params.id),resolved.capabilities.has("view_draft"));if(!item){res.status(404).json({code:"KNOWLEDGE_RESOLUTION_METHOD_NOT_FOUND"});return;}res.json({item});}catch(error){sendError(res,error);}});
+router.patch("/coordination-knowledge/resolution-methods/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"edit_draft"),expected=expectedRevision(req.body?.expectedRevision),id=parameter(req.params.id);res.json({item:await repository.appendResolutionMethodRevision({companyId:resolved.companyId,resolutionMethodId:id,expectedRevision:expected,actorId:resolved.userId,action:"update_draft",content:resolutionContent(req.body??{},resolved.userId,resolved.companyId,id,expected+1)})});}catch(error){sendError(res,error);}});
+for(const action of ["submit_for_review","approve","revise","retire"] as const){const capability:KnowledgeCapability=action==="approve"?"approve":action==="retire"?"retire":action==="submit_for_review"?"submit_for_review":"create_draft";router.post(`/coordination-knowledge/resolution-methods/:id/${action.replaceAll("_","-")}`,authMiddleware,async(req,res)=>{try{const resolved=await context(req,capability);res.json({item:await repository.appendResolutionMethodRevision({companyId:resolved.companyId,resolutionMethodId:parameter(req.params.id),expectedRevision:expectedRevision(req.body?.expectedRevision),actorId:resolved.userId,action})});}catch(error){sendError(res,error);}});}
 
 export default router;

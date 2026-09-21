@@ -148,6 +148,119 @@ export class CoordinationKnowledgeRepository {
     });
   }
 
+  async listRules(companyIdInput: number, includeDrafts: boolean): Promise<Array<Record<string, unknown>>> {
+    const companyId = positive(companyIdInput, "companyId");
+    return (await this.pool.query(`SELECT base.*,revision.* FROM coordination_rules base JOIN LATERAL (
+      SELECT * FROM coordination_rule_revisions candidate WHERE candidate.rule_id=base.id AND candidate.company_id=base.company_id
+        AND ($2::boolean OR candidate.status='approved') ORDER BY candidate.revision DESC LIMIT 1
+      ) revision ON true WHERE base.company_id=$1 ORDER BY lower(revision.title),base.code,base.id`, [companyId, includeDrafts])).rows;
+  }
+
+  async getRule(companyIdInput: number, ruleId: string, includeDrafts = true): Promise<Record<string, unknown> | null> {
+    const companyId = positive(companyIdInput, "companyId");
+    return (await this.pool.query(`SELECT base.*,revision.* FROM coordination_rules base JOIN LATERAL (
+      SELECT * FROM coordination_rule_revisions candidate WHERE candidate.rule_id=base.id AND candidate.company_id=base.company_id
+        AND ($3::boolean OR candidate.status='approved') ORDER BY candidate.revision DESC LIMIT 1
+      ) revision ON true WHERE base.id=$1 AND base.company_id=$2`, [ruleId, companyId, includeDrafts])).rows[0] ?? null;
+  }
+
+  async ruleHistory(companyIdInput: number, ruleId: string, includeDrafts = true): Promise<Array<Record<string, unknown>>> {
+    const companyId = positive(companyIdInput, "companyId");
+    return (await this.pool.query(`SELECT * FROM coordination_rule_revisions WHERE rule_id=$1 AND company_id=$2
+      AND ($3::boolean OR status='approved') ORDER BY revision DESC`, [ruleId, companyId, includeDrafts])).rows;
+  }
+
+  async appendRuleRevision(input: { companyId: number; ruleId: string; expectedRevision: number; actorId: number;
+    action: "update_draft" | "submit_for_review" | "approve" | "revise" | "retire";
+    content?: Omit<CoordinationRuleRevision, "id" | "ruleId" | "companyId" | "revision" | "status" | "authoredById"> }): Promise<Record<string, unknown>> {
+    return transaction(this.pool, async client => {
+      const companyId = positive(input.companyId, "companyId");
+      const current = (await client.query(`SELECT * FROM coordination_rule_revisions WHERE rule_id=$1 AND company_id=$2 ORDER BY revision DESC LIMIT 1 FOR UPDATE`, [input.ruleId, companyId])).rows[0];
+      if (!current) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_RULE_NOT_FOUND", "Coordination Rule not found.", 404);
+      if (Number(current.revision) !== input.expectedRevision) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_VERSION_CONFLICT", "Coordination Rule revision is stale.", 409);
+      const from = String(current.status) as "draft" | "under_review" | "approved" | "retired";
+      let status = from;
+      if (input.action === "update_draft") { if (from !== "draft") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_DRAFT_REQUIRED", "Only a draft may be edited.", 409); }
+      else if (input.action === "revise") { if (from !== "approved" && from !== "retired") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_APPROVED_REVISION_REQUIRED", "Only approved or retired knowledge may start a new draft revision.", 409); status = "draft"; }
+      else { status = input.action === "submit_for_review" ? "under_review" : input.action === "approve" ? "approved" : "retired"; assertKnowledgeTransition(from, status); }
+      const next = validateCoordinationRuleRevision({ id: randomUUID(), ruleId: input.ruleId, companyId, revision: input.expectedRevision + 1, status,
+        title: input.content?.title ?? current.title, guidance: input.content?.guidance ?? current.guidance,
+        applicability: input.content?.applicability ?? current.applicability, rationale: input.content?.rationale ?? current.rationale,
+        exceptions: input.content?.exceptions ?? current.exceptions, references: input.content?.references ?? current.references, authoredById: input.actorId });
+      const approvedBy = status === "approved" ? input.actorId : status === "retired" ? current.approved_by_id : null;
+      const approvedAt = status === "approved" ? new Date().toISOString() : status === "retired" ? current.approved_at : null;
+      const inserted = await client.query(`INSERT INTO coordination_rule_revisions
+        (id,rule_id,company_id,revision,status,title,guidance,applicability,rationale,exceptions,"references",authored_by_id,approved_by_id,approved_at,retired_by_id,retired_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10::jsonb,$11::jsonb,$12,$13,$14,$15,$16) RETURNING *`,
+        [next.id,next.ruleId,next.companyId,next.revision,next.status,next.title,next.guidance,JSON.stringify(next.applicability),next.rationale,JSON.stringify(next.exceptions),JSON.stringify(next.references),next.authoredById,approvedBy,approvedAt,status === "retired" ? input.actorId : null,status === "retired" ? new Date().toISOString() : null]);
+      await client.query(`UPDATE coordination_rules SET updated_at=now() WHERE id=$1 AND company_id=$2`, [input.ruleId,companyId]);
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,entity_type,entity_id,revision_id,action,actor_id,details)
+        VALUES($1,$2,'coordination_rule',$3,$4,$5,$6,$7::jsonb)`, [randomUUID(),companyId,input.ruleId,next.id,input.action,input.actorId,JSON.stringify({ from,to:status,expectedRevision:input.expectedRevision })]);
+      return inserted.rows[0];
+    });
+  }
+
+  async listResolutionMethods(companyIdInput: number, includeDrafts: boolean): Promise<Array<Record<string, unknown>>> {
+    const companyId = positive(companyIdInput, "companyId");
+    return (await this.pool.query(`SELECT base.*,revision.* FROM coordination_resolution_methods base JOIN LATERAL (
+      SELECT * FROM coordination_resolution_method_revisions candidate WHERE candidate.resolution_method_id=base.id AND candidate.company_id=base.company_id
+        AND ($2::boolean OR candidate.status='approved') ORDER BY candidate.revision DESC LIMIT 1
+      ) revision ON true WHERE base.company_id=$1 ORDER BY lower(revision.name),base.code,base.id`, [companyId, includeDrafts])).rows;
+  }
+
+  async getResolutionMethod(companyIdInput: number, methodId: string, includeDrafts = true): Promise<Record<string, unknown> | null> {
+    const companyId = positive(companyIdInput, "companyId");
+    return (await this.pool.query(`SELECT base.*,revision.*,
+      COALESCE((SELECT jsonb_agg(jsonb_build_object('conflictTypeId',link.conflict_type_id,'displayOrder',link.display_order) ORDER BY link.display_order) FROM coordination_resolution_method_conflict_types link WHERE link.company_id=base.company_id AND link.resolution_method_revision_id=revision.id),'[]'::jsonb) conflict_types,
+      COALESCE((SELECT jsonb_agg(link.rule_revision_id) FROM coordination_resolution_method_rules link WHERE link.company_id=base.company_id AND link.resolution_method_revision_id=revision.id),'[]'::jsonb) rule_revision_ids
+      FROM coordination_resolution_methods base JOIN LATERAL (SELECT * FROM coordination_resolution_method_revisions candidate
+      WHERE candidate.resolution_method_id=base.id AND candidate.company_id=base.company_id AND ($3::boolean OR candidate.status='approved') ORDER BY candidate.revision DESC LIMIT 1) revision ON true
+      WHERE base.id=$1 AND base.company_id=$2`, [methodId,companyId,includeDrafts])).rows[0] ?? null;
+  }
+
+  async resolutionMethodHistory(companyIdInput: number, methodId: string, includeDrafts = true): Promise<Array<Record<string, unknown>>> {
+    const companyId = positive(companyIdInput, "companyId");
+    return (await this.pool.query(`SELECT revision.* FROM coordination_resolution_method_revisions revision WHERE revision.resolution_method_id=$1 AND revision.company_id=$2
+      AND ($3::boolean OR revision.status='approved') ORDER BY revision.revision DESC`, [methodId,companyId,includeDrafts])).rows;
+  }
+
+  async appendResolutionMethodRevision(input: { companyId: number; resolutionMethodId: string; expectedRevision: number; actorId: number;
+    action: "update_draft" | "submit_for_review" | "approve" | "revise" | "retire";
+    content?: Omit<ResolutionMethodRevision, "id" | "resolutionMethodId" | "companyId" | "revision" | "status" | "authoredById"> }): Promise<Record<string, unknown>> {
+    return transaction(this.pool, async client => {
+      const companyId = positive(input.companyId, "companyId");
+      const current = (await client.query(`SELECT * FROM coordination_resolution_method_revisions WHERE resolution_method_id=$1 AND company_id=$2 ORDER BY revision DESC LIMIT 1 FOR UPDATE`, [input.resolutionMethodId,companyId])).rows[0];
+      if (!current) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_RESOLUTION_METHOD_NOT_FOUND", "Resolution Method not found.", 404);
+      if (Number(current.revision) !== input.expectedRevision) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_VERSION_CONFLICT", "Resolution Method revision is stale.", 409);
+      const from = String(current.status) as "draft" | "under_review" | "approved" | "retired";
+      let status = from;
+      if (input.action === "update_draft") { if (from !== "draft") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_DRAFT_REQUIRED", "Only a draft may be edited.", 409); }
+      else if (input.action === "revise") { if (from !== "approved" && from !== "retired") throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_APPROVED_REVISION_REQUIRED", "Only approved or retired knowledge may start a new draft revision.", 409); status = "draft"; }
+      else { status = input.action === "submit_for_review" ? "under_review" : input.action === "approve" ? "approved" : "retired"; assertKnowledgeTransition(from,status); }
+      const oldConflicts = (await client.query(`SELECT conflict_type_id FROM coordination_resolution_method_conflict_types WHERE company_id=$1 AND resolution_method_revision_id=$2 ORDER BY display_order`, [companyId,current.id])).rows.map(row => String(row.conflict_type_id));
+      const oldRules = (await client.query(`SELECT rule_revision_id FROM coordination_resolution_method_rules WHERE company_id=$1 AND resolution_method_revision_id=$2`, [companyId,current.id])).rows.map(row => String(row.rule_revision_id));
+      const next = validateResolutionMethodRevision({ id:randomUUID(),resolutionMethodId:input.resolutionMethodId,companyId,revision:input.expectedRevision+1,status,
+        name:input.content?.name ?? current.name,description:input.content?.description ?? current.description,applicability:input.content?.applicability ?? current.applicability,
+        responsibleTrade:input.content?.responsibleTrade ?? current.responsible_trade,constraints:input.content?.constraints ?? current.constraints,advantages:input.content?.advantages ?? current.advantages,
+        disadvantages:input.content?.disadvantages ?? current.disadvantages,requiredApprovals:input.content?.requiredApprovals ?? current.required_approvals,
+        rfiRequirement:input.content?.rfiRequirement ?? current.rfi_requirement,details:input.content?.details ?? current.details,
+        conflictTypeIds:input.content?.conflictTypeIds ?? oldConflicts,ruleRevisionIds:input.content?.ruleRevisionIds ?? oldRules,authoredById:input.actorId });
+      const conflicts = await client.query(`SELECT id FROM coordination_conflict_types WHERE company_id=$1 AND id=ANY($2::text[])`, [companyId,next.conflictTypeIds]);
+      if (conflicts.rows.length !== next.conflictTypeIds.length) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_CROSS_TENANT_REFERENCE", "Every Conflict Type must belong to the Resolution Method organization.",403);
+      if (next.ruleRevisionIds.length) { const rules = await client.query(`SELECT id FROM coordination_rule_revisions WHERE company_id=$1 AND id=ANY($2::text[])`, [companyId,next.ruleRevisionIds]); if (rules.rows.length !== next.ruleRevisionIds.length) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_CROSS_TENANT_REFERENCE", "Every Coordination Rule revision must belong to the Resolution Method organization.",403); }
+      const approvedBy=status==="approved"?input.actorId:status==="retired"?current.approved_by_id:null, approvedAt=status==="approved"?new Date().toISOString():status==="retired"?current.approved_at:null;
+      const inserted=await client.query(`INSERT INTO coordination_resolution_method_revisions
+        (id,resolution_method_id,company_id,revision,status,name,description,applicability,responsible_trade,constraints,advantages,disadvantages,required_approvals,rfi_requirement,details,authored_by_id,approved_by_id,approved_at,retired_by_id,retired_at)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10::jsonb,$11::jsonb,$12::jsonb,$13::jsonb,$14,$15::jsonb,$16,$17,$18,$19,$20) RETURNING *`,
+        [next.id,next.resolutionMethodId,next.companyId,next.revision,next.status,next.name,next.description,JSON.stringify(next.applicability),next.responsibleTrade,JSON.stringify(next.constraints),JSON.stringify(next.advantages),JSON.stringify(next.disadvantages),JSON.stringify(next.requiredApprovals),next.rfiRequirement,JSON.stringify(next.details),next.authoredById,approvedBy,approvedAt,status==="retired"?input.actorId:null,status==="retired"?new Date().toISOString():null]);
+      for(const [index,conflictTypeId] of next.conflictTypeIds.entries()) await client.query(`INSERT INTO coordination_resolution_method_conflict_types(company_id,resolution_method_revision_id,conflict_type_id,display_order,linked_by_id) VALUES($1,$2,$3,$4,$5)`,[companyId,next.id,conflictTypeId,index,input.actorId]);
+      for(const ruleRevisionId of next.ruleRevisionIds) await client.query(`INSERT INTO coordination_resolution_method_rules(company_id,resolution_method_revision_id,rule_revision_id,linked_by_id) VALUES($1,$2,$3,$4)`,[companyId,next.id,ruleRevisionId,input.actorId]);
+      await client.query(`UPDATE coordination_resolution_methods SET updated_at=now() WHERE id=$1 AND company_id=$2`,[input.resolutionMethodId,companyId]);
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,'resolution_method',$3,$4,$5,$6,$7::jsonb)`,[randomUUID(),companyId,input.resolutionMethodId,next.id,input.action,input.actorId,JSON.stringify({from,to:status,expectedRevision:input.expectedRevision})]);
+      return inserted.rows[0];
+    });
+  }
+
   async listApprovedRules(companyIdInput: number): Promise<Array<Record<string, unknown>>> {
     const companyId = positive(companyIdInput, "companyId");
     const result = await this.pool.query(`
