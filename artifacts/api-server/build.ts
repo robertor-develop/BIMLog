@@ -41,6 +41,18 @@ async function removeGeneratedDirectory(target: string): Promise<void> {
   }
 }
 
+async function removeRetiredRuntimeClosures(distDir: string): Promise<void> {
+  const entries = await readdir(distDir, { withFileTypes: true }).catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") return [];
+    throw error;
+  });
+  for (const entry of entries) {
+    if (entry.isDirectory() && entry.name.startsWith("runtime-retired-")) {
+      await removeGeneratedDirectory(path.join(distDir, entry.name));
+    }
+  }
+}
+
 type LivingBriefBuildInput = {
   sourceRoot: string;
   sourceCommit: string;
@@ -1163,6 +1175,7 @@ async function buildAll() {
     if (retiredRuntime) console.log(`retired changed runtime closure without recursive pre-build deletion: ${retiredRuntime}`);
     await deployRuntimeClosure(runtimeDir, externalSpecifiers, { livingBrief });
   }
+  await removeRetiredRuntimeClosures(distDir);
 }
 
 if (path.resolve(process.argv[1] ?? "") === __filename) {
