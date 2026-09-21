@@ -35420,6 +35420,75 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d2f474d295a7bbfca8e402d75ab5a56dab2305972a0b539dadb4df2f015875f9"
+    },
+    {
+      "taskId": "bimlog-build200-authority-regression-reconciliation-20260921",
+      "reviewedThroughCommit": "8c396efe9825950a0be08ee570eb9dc8be9715e7",
+      "reviewedAt": "2026-09-21T05:40:00-04:00",
+      "status": "candidate",
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The stale assertion correction changes no ecosystem ownership or customer authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The regression continues to enforce the existing singular current-authority contract."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction restores the intended full-gate behavior without weakening acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer outcome, roadmap scope, or product promise changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Platform runtime, route, UI behavior, API, database, or schema changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native source, installer, bridge, package, or Autodesk state changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, export, rendering, or visual contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, or compliance statement changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the exact full-gate assertion correction and unchanged release boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Current authority records the correction while preserving both field-evidence items."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The failed gate, narrow correction, and repeated focused pass remain attributable."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "dbb8044b0b7991863fba6483fae2b496219d0c7e528cab2fd319be49c8ed3adb"
     }
   ]
 }

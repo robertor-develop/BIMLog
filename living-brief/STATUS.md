@@ -2282,3 +2282,4 @@ Builds 101–105 reconcile public and pricing claims with implemented behavior, 
 - Light/dark native controls, AA accent/destructive contrast, forced-colors focus, reduced motion, exact-390 containment, and 44px coarse-pointer controls are permanent pre-push contracts.
 - The known symbol-only saved-view marker is replaced with localized text. The blocking platform audit reports zero P0 and zero unexpected P1 identities.
 - Source acceptance is bound to `1400d050a0cb12e344717eb94dc0d101db37ef0a`. No Native, installer, database/schema, customer-data, provider, or Autodesk state changed. Build 200 remains a publication candidate until exact-head gate, push, Replit Shell publication without Agents, and authenticated visible-Chrome acceptance pass.
+- Full-gate correction `8c396efe9825950a0be08ee570eb9dc8be9715e7` updates the permanent current-authority assertion from Block 39 to Block 40; the field evidence, product behavior, and release scope are unchanged.
