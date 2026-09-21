@@ -13,7 +13,7 @@ import { authMiddleware, requireProjectMember, requirePermission } from "../midd
 import { getConfigOptionMeta, getDefaultValue } from "../middlewares/config-validator";
 import { singleFileUpload } from "../middlewares/multipart";
 import * as XLSX from "xlsx";
-import { canonicalSpreadsheetInput, canonicalSpreadsheetJsonOptions, canonicalSpreadsheetWriteOptions, spreadsheetDateOnlyToUtcDate } from "@workspace/api-zod";
+import { canonicalSpreadsheetInput, canonicalSpreadsheetWriteOptions } from "@workspace/api-zod";
 import { getAnthropicClientForUser, sendAiUsageError } from "../lib/ai-usage";
 import { createHash, randomUUID } from "crypto";
 import { LensImportValidationError, validateAndHashLensImportRequest } from "../lib/lens-import-contract";
@@ -25,6 +25,12 @@ import { serializeLensNextCreateFailure } from "../lib/lens-next-create-failure-
 import { storage } from "../lib/storage-adapter";
 import { reportOperationalFailure } from "../lib/operational-failure";
 import { LENS_REFERENCE_MAX_BYTES, validateLensReferenceFile } from "../lib/lens-next-reference-attachment";
+import {
+  chunkClashSource, clashImportFormat, clashStatusPresentation, deduplicateClashRows,
+  emptyClashColumnMapping, mapClashSpreadsheetRows, nextClashReportNumber,
+  normalizeAiClashRows, parseAiJsonArray, selectClashSpreadsheetRows,
+  type ClashColumnMapping, type ClashImportRow,
+} from "../lib/clash-report-contracts";
 
 function logLensImportInternal(scope: string, correlationId: string, err: unknown): void {
   const safe = err as { name?: string; code?: string };
@@ -213,19 +219,7 @@ const router: Router = Router();
 
 const currentViewLabel = (lang: "en" | "es", en: string, es: string) => (lang === "es" ? es : en);
 
-const clashStatusPdfLabel = (status: string, lang: "en" | "es") => {
-  const labels: Record<string, { en: string; es: string }> = {
-    all: { en: "All statuses", es: "Todos los estados" },
-    open: { en: "Active", es: "Activo" },
-    follow_up: { en: "Follow Up", es: "Seguimiento" },
-    waiting_design: { en: "Waiting Design", es: "Esperando Diseno" },
-    in_progress: { en: "In Progress", es: "En Progreso" },
-    approved: { en: "Approved", es: "Aprobado" },
-    resolved: { en: "Resolved", es: "Resuelto" },
-    wont_fix: { en: "Won't Fix", es: "No se corregira" },
-  };
-  return labels[status]?.[lang] || status.replace(/_/g, " ");
-};
+const clashStatusPdfLabel = clashStatusPresentation;
 
 // Thrown inside the reassign transaction when the old row is no longer active by
 // the time we go to supersede it (concurrent double-submit). Maps to HTTP 409.
@@ -300,13 +294,7 @@ router.post("/projects/:projectId/clash-reports", authMiddleware, requirePermiss
   try {
     const existingReports2 = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
     const [project2] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
-    const usedNums2 = new Set(existingReports2.map(r => r.reportNumber).filter(Boolean));
-    let seqNum2 = existingReports2.length + 1;
-    let autoNum2 = `${project2?.code ?? "PRJ"}-CR-${String(seqNum2).padStart(3, "0")}`;
-    while (usedNums2.has(autoNum2)) {
-      seqNum2++;
-      autoNum2 = `${project2?.code ?? "PRJ"}-CR-${String(seqNum2).padStart(3, "0")}`;
-    }
+    const autoNum2 = nextClashReportNumber(project2?.code, existingReports2.map(r => r.reportNumber));
     const [report] = await db.insert(clashReportsTable).values({
       projectId,
       uploadedById: req.user!.userId,
@@ -343,16 +331,15 @@ router.post("/projects/:projectId/clash-reports/upload",
         res.status(400).json({ error: "no_file", message: "No file uploaded" });
         return;
       }
-      const ext = req.file.originalname.split(".").pop()?.toLowerCase() ?? "";
-      const isSpreadsheet = ["xlsx", "xls", "csv"].includes(ext);
-      const isXml = ext === "xml";
+      const format = clashImportFormat(req.file.originalname);
+      const { extension: ext, spreadsheet: isSpreadsheet, xml: isXml } = format;
       const anthropic = await getAnthropicClientForUser({
         userId: req.user!.userId,
         projectId,
         feature: "clash_report_import",
       });
 
-      let parsed: { clashIdOriginal: string; description: string; holdUps: string; discipline1: string; level: string; assignedToName: string; resolutionNotes: string | null; status: string; dueDate: Date | null }[] = [];
+      let parsed: ClashImportRow[] = [];
 
       if (isXml) {
         try {
@@ -360,11 +347,7 @@ router.post("/projects/:projectId/clash-reports/upload",
           console.log("[clash-upload] XML file size:", xmlContent.length, "chars");
 
           // Split into chunks if large
-          const CHUNK_SIZE = 80000;
-          const xmlChunks: string[] = [];
-          for (let i = 0; i < xmlContent.length; i += CHUNK_SIZE) {
-            xmlChunks.push(xmlContent.slice(i, i + CHUNK_SIZE));
-          }
+          const xmlChunks = chunkClashSource(xmlContent);
           console.log("[clash-upload] XML chunks:", xmlChunks.length);
 
           for (const chunk of xmlChunks) {
@@ -395,20 +378,7 @@ ${chunk}`
               });
 
               const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
-              const chunkRecords = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
-              const mapped = chunkRecords
-                .filter((r: any) => r.description || r.viewpoint)
-                .map((r: any) => ({
-                  clashIdOriginal: String(r.viewpoint || ""),
-                  description: String(r.description || ""),
-                  holdUps: String(r.holdUps || ""),
-                  discipline1: String(r.discipline || "COORD"),
-                  level: String(r.level || ""),
-                  assignedToName: String(r.assignedToName || ""),
-                  resolutionNotes: r.resolutionNotes ? String(r.resolutionNotes) : null,
-                  status: r.status === "complete" || r.status === "resolved" ? "resolved" : "open",
-                  dueDate: r.dueDate ? new Date(r.dueDate) : null,
-                }));
+              const mapped = normalizeAiClashRows(parseAiJsonArray(extractText), "xml");
               parsed = [...parsed, ...mapped];
               console.log("[clash-upload] XML chunk extracted:", mapped.length, "viewpoints, total so far:", parsed.length);
             } catch (chunkErr) {
@@ -417,12 +387,7 @@ ${chunk}`
           }
 
           // Deduplicate by viewpoint ID
-          const seen = new Set<string>();
-          parsed = parsed.filter(r => {
-            if (seen.has(r.clashIdOriginal)) return false;
-            seen.add(r.clashIdOriginal);
-            return true;
-          });
+          parsed = deduplicateClashRows(parsed);
 
           console.log("[clash-upload] XML total after dedup:", parsed.length, "viewpoints");
         } catch (xmlErr) {
@@ -454,20 +419,7 @@ Return ONLY a JSON array, no markdown:
             }]
           });
           const extractText = extractMsg.content[0]?.type === "text" ? extractMsg.content[0].text : "[]";
-          const aiRecords = JSON.parse(extractText.replace(/```json\n?|```/g, "").trim()) as any[];
-          parsed = aiRecords
-            .filter((r: any) => r.description || r.viewpoint)
-            .map((r: any) => ({
-              clashIdOriginal: r.viewpoint || "",
-              description: r.description || "",
-              holdUps: r.holdUps || "",
-              discipline1: r.discipline || "",
-              level: r.level || "",
-              assignedToName: r.assignedTo || "",
-              resolutionNotes: r.resolutionNotes || null,
-              status: r.status === "complete" ? "resolved" : "open",
-              dueDate: spreadsheetDateOnlyToUtcDate(r.deadline),
-            }));
+          parsed = normalizeAiClashRows(parseAiJsonArray(extractText), "document");
           console.log("[clash-upload] AI extracted from non-spreadsheet:", parsed.length, "clashes");
         } catch (e) {
           console.error("[clash-upload] AI extraction failed:", e);
@@ -477,21 +429,9 @@ Return ONLY a JSON array, no markdown:
         // Spreadsheet: use column mapping
         const spreadsheet = canonicalSpreadsheetInput(req.file.buffer, req.file.originalname, "buffer", {});
         const workbook = XLSX.read(spreadsheet.data, spreadsheet.options);
-        let bestSheet = workbook.Sheets[workbook.SheetNames[0]];
-        let bestRowCount = 0;
-        for (const sheetName of workbook.SheetNames) {
-          const s = workbook.Sheets[sheetName];
-          const r = XLSX.utils.sheet_to_json(s, canonicalSpreadsheetJsonOptions({ header: 1, defval: "", raw: true })) as any[][];
-          const dataCount = r.filter((row: any[]) => row.filter((c: any) => String(c).trim()).length > 2).length;
-          if (dataCount > bestRowCount) { bestRowCount = dataCount; bestSheet = s; }
-        }
-        const allRows = XLSX.utils.sheet_to_json(bestSheet, canonicalSpreadsheetJsonOptions({ header: 1, defval: "", raw: true })) as any[][];
-        let hIdx = allRows.findIndex(r => r.filter((c: any) => String(c).trim()).length > 2);
-        if (hIdx === -1) hIdx = 0;
-        const hdrs = (allRows[hIdx] ?? []).map((h: any) => String(h).toLowerCase().trim());
-        const dataRows = allRows.slice(hIdx + 1).filter((r: any[]) => r.some((c: any) => String(c).trim()));
+        const { headers: hdrs, rows: dataRows } = selectClashSpreadsheetRows(workbook);
 
-        let mapping: Record<string, number> = { clashId: -1, description: -1, element1: -1, element2: -1, discipline: -1, level: -1, assignedTo: -1, status: -1, resolutionNotes: -1, deadline: -1, viewpoint: -1, holdUps: -1 };
+        let mapping: ClashColumnMapping = emptyClashColumnMapping();
         try {
           const mapMsg = await anthropic.messages.create({
             model: "claude-sonnet-4-5",
@@ -513,48 +453,18 @@ Rules: viewpoint=viewpoint ID (UG.001 etc), holdUps=blocking issues, resolutionN
           mapping = { clashId: 0, description: 3, holdUps: 7, discipline: 2, level: 1, assignedTo: 5, status: 8, resolutionNotes: 4, deadline: 9, viewpoint: 6, element1: -1, element2: -1 };
         }
 
-        const get = (row: any[], idx: number) => idx >= 0 && row[idx] !== undefined && row[idx] !== null ? String(row[idx]).trim() : "";
-        const getDate = (row: any[], idx: number) => {
-          if (idx < 0 || !row[idx]) return null;
-          try {
-            const val = row[idx];
-            return spreadsheetDateOnlyToUtcDate(val, serial => XLSX.SSF.parse_date_code(serial));
-          } catch (err) {
-            console.warn("[clash-upload] failed to parse date cell:", err);
-            return null;
-          }
-        };
-
-        parsed = dataRows
-          .map((row: any[]) => ({
-            clashIdOriginal: get(row, mapping.viewpoint) || get(row, mapping.clashId) || "",
-            description: get(row, mapping.description),
-            holdUps: get(row, mapping.holdUps),
-            discipline1: get(row, mapping.discipline),
-            level: get(row, mapping.level),
-            assignedToName: get(row, mapping.assignedTo),
-            resolutionNotes: get(row, mapping.resolutionNotes),
-            status: "open",
-            dueDate: getDate(row, mapping.deadline),
-          }))
-          .filter((r: any) => r.description || r.clashIdOriginal);
+        parsed = mapClashSpreadsheetRows(dataRows, mapping);
         console.log("[clash-upload] Parsed:", parsed.length, "rows. Sample:", JSON.stringify(parsed[0]));
       }
 
       const existingReports = await db.select({ reportNumber: clashReportsTable.reportNumber }).from(clashReportsTable).where(eq(clashReportsTable.projectId, projectId));
       const [project] = await db.select({ code: projectsTable.code }).from(projectsTable).where(eq(projectsTable.id, projectId));
-      const usedNums = new Set(existingReports.map(r => r.reportNumber).filter(Boolean));
-      let seqNum = existingReports.length + 1;
-      let autoReportNumber = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
-      while (usedNums.has(autoReportNumber)) {
-        seqNum++;
-        autoReportNumber = `${project?.code ?? "PRJ"}-CR-${String(seqNum).padStart(3, "0")}`;
-      }
+      const autoReportNumber = nextClashReportNumber(project?.code, existingReports.map(r => r.reportNumber));
       const [report] = await db.insert(clashReportsTable).values({
         projectId,
         uploadedById: req.user!.userId,
         fileName: req.file.originalname,
-        format: isSpreadsheet ? "excel" : ext || "other",
+        format: format.persistedFormat,
         totalClashes: parsed.length,
         status: "processing",
         reportNumber: autoReportNumber,
