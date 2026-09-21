@@ -10,6 +10,7 @@
 - This five-build boundary is push-only. No UI, Lens Next Native code, bridge protocol, installer, package, production database, or customer data changes are included; the blue-marked compact Lens panel remains scheduled for Builds 246–250.
 - Narrative reconciliation binds this accepted source scope to implementation commit `cce77c1d813b16952873a9faa192208276dd7b31`; the later reconciliation commit changes evidence metadata only.
 - Complete-gate correction `09e7d5232122cee15fcf5c775a3a85e842992b1a` makes the route/table inventory checkout-independent and removes unrelated import text from table ownership without changing any route, API, database, or customer workflow.
+- Database-proof correction `515a4eb5c4c3538d92fbd8dd3014e80679bd24d0` adds an explicit local `pg` type boundary and transaction-local actor setup so the same proof runs against both restored-data and clean-schema fixtures without persistent rows or runtime dependencies.
 
 ## Post-220 closure — Block 45 source acceptance — 2026-09-21
 

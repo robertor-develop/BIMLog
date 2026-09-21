@@ -5,6 +5,7 @@
 - [x] Builds 226–230 establish the canonical company-scoped domain, immutable revisions, tenant-bound repositories, additive migration, clean/repeat/rollback coverage, and restored-database preservation proof. This boundary is push-only and does not change the visible Lens Next workspace.
 - [x] Block 1 implementation authority is exact commit `cce77c1d813b16952873a9faa192208276dd7b31`; reconciliation may update evidence metadata but cannot silently change the accepted product scope.
 - [x] Complete-gate correction `09e7d5232122cee15fcf5c775a3a85e842992b1a` normalizes the deterministic route/table inventory across Windows checkouts and records only exact schema-table imports; it changes no route or runtime behavior.
+- [x] Database-proof correction `515a4eb5c4c3538d92fbd8dd3014e80679bd24d0` keeps the proof type-safe and self-contained across restored and clean fixtures; all synthetic actor and knowledge rows remain transactionally rolled back.
 - [ ] Builds 231–235 add server-authorized knowledge APIs, bounded search, existing-role integration, and complete product verification while preserving the current Lens Next experience.
 
 - [x] Builds 221–225 reconcile exact Build 220 live acceptance and close the verified physical Navisworks 2021 P36 installation. This five-build boundary is push-only and changes no runtime product code, database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license.

@@ -36246,6 +36246,101 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "96aee8f8e133a392afc55d2dfa52a2702c8d429c05e620f9914855d91bc9678f"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block01-db-proof-correction-20260921",
+      "reviewedThroughCommit": "515a4eb5c4c3538d92fbd8dd3014e80679bd24d0",
+      "reviewedAt": "2026-09-21T12:08:07-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "typecheck",
+          "clean_fixture_test",
+          "restored_fixture_test",
+          "push_exact_fast_forward"
+        ],
+        "operatorOnly": [
+          "replit_publication_at_build235",
+          "ruben_physical_navisworks_2025_field_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "database_proof_portability",
+          "disposition": "corrected_and_regressed",
+          "authorities": [
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The global typecheck and clean fixture required an explicit pg boundary and transaction-local actor setup; both paths now pass without persistent proof rows."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product authority changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating boundary changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The test now proves both fixture states without weakening assertions."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Only a test harness changed; runtime schema and behavior are unchanged."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standard changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Status records the database-proof correction."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Open Loop closes the proof correction without changing the next product block."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The test and report preserve exact evidence."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "1c5bc8537e601e2781491a1dac1327cf162ac84660edddfffc64ca293a09bf6c"
     }
   ]
 }
