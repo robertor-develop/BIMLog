@@ -36,6 +36,7 @@ import {
   type LensNextLinkedItemType,
   type LensNextProjectOption,
   type LensNextRefreshState,
+  type LensNextKnowledgeContext,
 } from "./lens-next-types";
 import {
   buildLensNextIssueGroups,
@@ -151,6 +152,8 @@ export function LensNextPanel({
   const [visualRepairMessage, setVisualRepairMessage] = useState<string | null>(null);
   const workingViewInFlight = useRef(false);
   const [workingViewState, setWorkingViewState] = useState<"idle" | "opening" | "success" | "error">("idle");
+  const [knowledgeContext,setKnowledgeContext]=useState<LensNextKnowledgeContext|"loading"|null>(null);
+  const [knowledgeError,setKnowledgeError]=useState<string|null>(null);
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -412,6 +415,14 @@ export function LensNextPanel({
       );
     }
   }, [apiClient, selectedIssue]);
+
+  const loadKnowledge=useCallback(async(signal?:AbortSignal)=>{
+    if(!apiClient||!selectedIssue){setKnowledgeContext(null);setKnowledgeError(null);return;}
+    setKnowledgeContext("loading");setKnowledgeError(null);
+    try{setKnowledgeContext(await apiClient.loadKnowledgeContext(selectedIssue.identity,signal));}
+    catch(error){if(!signal?.aborted){setKnowledgeContext(null);setKnowledgeError(error instanceof Error?error.message:"Coordination Knowledge could not be loaded");}}
+  },[apiClient,selectedIssue]);
+  useEffect(()=>{const controller=new AbortController();void loadKnowledge(controller.signal);return()=>controller.abort();},[loadKnowledge]);
 
   useEffect(() => {
     if (!apiClient || !selectedIssue) { setLinkedItems(null); setLinkedItemsError(null); return; }
@@ -785,6 +796,9 @@ export function LensNextPanel({
       onRemoveLinkedItem={(linkId) => void removeLinkedItem(linkId)}
       referenceAttachments={referenceAttachments}
       referenceAttachmentsError={referenceAttachmentsError}
+      knowledgeContext={knowledgeContext}
+      knowledgeError={knowledgeError}
+      onRetryKnowledge={()=>void loadKnowledge()}
       onUploadReferenceAttachment={(file) => void uploadReferenceAttachment(file)}
       onOpenReferenceAttachment={(attachment) => void openReferenceAttachment(attachment)}
       onRemoveReferenceAttachment={(attachmentId) => void removeReferenceAttachment(attachmentId)}

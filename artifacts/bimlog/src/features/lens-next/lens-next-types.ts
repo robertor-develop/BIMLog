@@ -227,6 +227,30 @@ export interface LensNextReferenceAttachment {
   createdAt: string; downloadUrl: string;
 }
 export interface LensNextAttachmentsResult { attachments: readonly LensNextReferenceAttachment[]; }
+export interface LensNextKnowledgeConflictType {
+  id: string; revisionId: string; revision: number; code: string; name: string;
+  description: string; disciplineA: string; disciplineB: string;
+  elementTypeA: string; elementTypeB: string; category: string;
+}
+export interface LensNextKnowledgeRule {
+  id: string; revisionId: string; revision: number; code: string; title: string; guidance: string;
+}
+export interface LensNextKnowledgeMethod {
+  id: string; revisionId: string; revision: number; code: string; name: string;
+  description: string; responsibleTrade: string | null; constraints: readonly string[];
+  requiredApprovals: readonly string[]; rfiRequirement: string; preferred: boolean;
+}
+export interface LensNextKnowledgeCase {
+  id: string; projectId: number; projectName: string; location: string | null;
+  actualResolution: string; rfiState: string; status: "resolved" | "verified";
+}
+export interface LensNextKnowledgeContext {
+  canClassify: boolean;
+  conflictType: LensNextKnowledgeConflictType | null;
+  rules: readonly LensNextKnowledgeRule[];
+  methods: readonly LensNextKnowledgeMethod[];
+  previousCases: readonly LensNextKnowledgeCase[];
+}
 export interface LensNextXmlExportSummary {
   requestedCount: number | null;
   serializedCount: number | null;

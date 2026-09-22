@@ -22,6 +22,7 @@ import type {
   LensNextCreateReceipt,
   LensNextLayoutItem,
   LensNextLayoutReceipt,
+  LensNextKnowledgeContext,
   LensNextLinksResult,
   LensNextAttachmentsResult,
   LensNextLinkedItemType,
@@ -137,6 +138,7 @@ export interface LensNextApiClient {
   uploadReferenceAttachment(identity: LensNextImmutableIssueIdentity, file: File, signal?: AbortSignal): Promise<LensNextAttachmentsResult>;
   removeReferenceAttachment(identity: LensNextImmutableIssueIdentity, attachmentId: number, signal?: AbortSignal): Promise<LensNextAttachmentsResult>;
   downloadReferenceAttachment(attachment: LensNextAttachmentsResult["attachments"][number], signal?: AbortSignal): Promise<Blob>;
+  loadKnowledgeContext(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal): Promise<LensNextKnowledgeContext>;
 }
 
 export function createLensNextApiClient(
@@ -331,6 +333,14 @@ export function createLensNextApiClient(
     async loadLinkedItems(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal) {
       const exact = assertLensNextImmutableIdentity(identity);
       return adaptLinks(await get(`/projects/${exact.projectId}/clash-reports/lens-next/issues/${exact.serverId}/links`, signal));
+    },
+    async loadKnowledgeContext(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal) {
+      const exact=assertLensNextImmutableIdentity(identity);
+      const raw=await get(`/coordination-knowledge/lens-context/${exact.serverId}?projectId=${exact.projectId}`,signal);
+      if(!raw||typeof raw!=="object"||Array.isArray(raw)) throw new Error("Coordination Knowledge response is invalid");
+      const body=raw as Record<string,unknown>;
+      if(!Array.isArray(body.rules)||!Array.isArray(body.methods)||!Array.isArray(body.previousCases)||typeof body.canClassify!=="boolean") throw new Error("Coordination Knowledge response is invalid");
+      return body as unknown as LensNextKnowledgeContext;
     },
     async linkBimlogItem(identity: LensNextImmutableIssueIdentity, targetType: LensNextLinkedItemType, targetId: number, signal?: AbortSignal) {
       const exact = assertLensNextImmutableIdentity(identity);

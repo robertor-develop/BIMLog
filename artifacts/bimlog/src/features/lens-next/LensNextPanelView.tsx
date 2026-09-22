@@ -7,7 +7,8 @@ import {
   type LensNextViewDimension,
   type LensNextViewPresetId,
 } from "./lens-next-view-settings";
-import type { LensNextAttachmentsResult, LensNextLinksResult, LensNextLinkedItemType, LensNextReferenceAttachment } from "./lens-next-types";
+import type { LensNextAttachmentsResult, LensNextKnowledgeContext, LensNextLinksResult, LensNextLinkedItemType, LensNextReferenceAttachment } from "./lens-next-types";
+import { LensNextKnowledgePanel } from "./LensNextKnowledgePanel";
 import type {
   LensNextConnectionState,
   LensNextCreateDraft,
@@ -362,6 +363,9 @@ export interface LensNextPanelViewProps {
   onRemoveLinkedItem(linkId: number): void;
   referenceAttachments: LensNextAttachmentsResult | "loading" | null;
   referenceAttachmentsError: string | null;
+  knowledgeContext: LensNextKnowledgeContext | "loading" | null;
+  knowledgeError: string | null;
+  onRetryKnowledge(): void;
   onUploadReferenceAttachment(file: File): void;
   onOpenReferenceAttachment(attachment: LensNextReferenceAttachment): void;
   onRemoveReferenceAttachment(attachmentId: number): void;
@@ -448,6 +452,9 @@ export function LensNextPanelView({
   onRemoveLinkedItem,
   referenceAttachments,
   referenceAttachmentsError,
+  knowledgeContext,
+  knowledgeError,
+  onRetryKnowledge,
   onUploadReferenceAttachment,
   onOpenReferenceAttachment,
   onRemoveReferenceAttachment,
@@ -497,7 +504,7 @@ export function LensNextPanelView({
   const [linkTargetId, setLinkTargetId] = React.useState("");
   const [guideOpen, setGuideOpen] = React.useState(false);
   const [issuePresentation, setIssuePresentation] = React.useState<"cards" | "table">("cards");
-  const [detailView, setDetailView] = React.useState<"overview" | "bimlog" | "properties" | "activity">("overview");
+  const [detailView, setDetailView] = React.useState<"overview" | "knowledge" | "bimlog" | "properties" | "activity">("overview");
   const [syncReviewFilter, setSyncReviewFilter] = React.useState<LensNextSyncReviewFilter>("all");
   const createSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const linkSectionRef = React.useRef<HTMLDetailsElement | null>(null);
@@ -1027,9 +1034,9 @@ export function LensNextPanelView({
             </button>
           </div>
           <nav className="lens-next__detail-tabs" aria-label="Issue detail views">
-            {(["overview", "bimlog", "properties", "activity"] as const).map(view => (
+            {(["overview", "knowledge", "bimlog", "properties", "activity"] as const).map(view => (
               <button key={view} type="button" aria-pressed={detailView === view} onClick={() => { setDetailView(view); if (view === "activity" && !history && !historyError) onLoadHistory(); }}>
-                {view === "overview" ? tt("Overview", "Resumen") : view === "bimlog" ? tt("BIMLog issue", "Incidencia BIMLog") : view === "properties" ? tt("Properties", "Propiedades") : tt("Activity", "Actividad")}
+                {view === "overview" ? tt("Overview", "Resumen") : view === "knowledge" ? tt("Coordination Knowledge", "Conocimiento de coordinación") : view === "bimlog" ? tt("BIMLog issue", "Incidencia BIMLog") : view === "properties" ? tt("Properties", "Propiedades") : tt("Activity", "Actividad")}
               </button>
             ))}
           </nav>
@@ -1043,6 +1050,7 @@ export function LensNextPanelView({
             </dl>
             <p className="lens-next__data-boundary">{tt("Clash pair, surrounding geometry, grid and distance are unavailable for this BIMLog issue until an exact project/model-bound clash link is verified. This image is a capture, not interactive 3D.", "El par de interferencia, la geometría cercana, la retícula y la distancia no están disponibles para esta incidencia BIMLog hasta verificar un vínculo exacto con la interferencia del proyecto y modelo. Esta imagen es una captura, no un modelo 3D interactivo.")}</p>
           </section>}
+          {detailView === "knowledge" && <LensNextKnowledgePanel context={knowledgeContext} error={knowledgeError} onRetry={onRetryKnowledge} />}
           {detailView === "properties" && <section className="lens-next__detail-panel" aria-label="Issue properties">
           <details className="lens-next__detail-section" open>
             <summary>Properties and model evidence</summary>

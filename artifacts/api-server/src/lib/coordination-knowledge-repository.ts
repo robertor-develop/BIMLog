@@ -416,4 +416,44 @@ export class CoordinationKnowledgeRepository {
       WHERE v.id=$1 AND v.project_id=$2 AND COALESCE(binding.company_id,creator.company_id)=$3`, [lensViewpointId, projectId, companyId]);
     if (!result.rows[0]) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_ISSUE_SCOPE_DENIED", "The canonical BIMLog issue is not available in this organization and project scope.", 403);
   }
+
+  async getLensContext(input: { companyId: number; projectId: number; lensViewpointId: number; allowCompanyPrecedent: boolean }): Promise<Record<string, unknown>> {
+    const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId");
+    await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
+    const current=(await this.pool.query(`SELECT project_case.id,project_case.conflict_type_revision_id,
+      conflict.id conflict_revision_id,conflict.conflict_type_id,conflict.revision,conflict.name,conflict.description,
+      conflict.discipline_a,conflict.discipline_b,conflict.element_type_a,conflict.element_type_b,conflict.conflict_category,
+      base.code
+      FROM coordination_project_cases project_case
+      LEFT JOIN coordination_conflict_type_revisions conflict ON conflict.id=project_case.conflict_type_revision_id AND conflict.company_id=project_case.company_id
+      LEFT JOIN coordination_conflict_types base ON base.id=conflict.conflict_type_id AND base.company_id=conflict.company_id
+      WHERE project_case.company_id=$1 AND project_case.project_id=$2 AND project_case.lens_viewpoint_id=$3`,[companyId,projectId,lensViewpointId])).rows[0]??null;
+    if(!current?.conflict_type_id) return {conflictType:null,rules:[],methods:[],previousCases:[]};
+    const conflictType={id:String(current.conflict_type_id),revisionId:String(current.conflict_revision_id),revision:Number(current.revision),code:String(current.code),name:String(current.name),description:String(current.description),disciplineA:String(current.discipline_a),disciplineB:String(current.discipline_b),elementTypeA:String(current.element_type_a),elementTypeB:String(current.element_type_b),category:String(current.conflict_category)};
+    const methods=(await this.pool.query(`SELECT method.id,revision.id revision_id,revision.revision,method.code,revision.name,revision.description,
+      revision.responsible_trade,revision.constraints,revision.required_approvals,revision.rfi_requirement,revision.details,link.display_order
+      FROM coordination_resolution_method_conflict_types link
+      JOIN coordination_resolution_method_revisions revision ON revision.id=link.resolution_method_revision_id AND revision.company_id=link.company_id AND revision.status='approved'
+      JOIN coordination_resolution_methods method ON method.id=revision.resolution_method_id AND method.company_id=revision.company_id
+      WHERE link.company_id=$1 AND link.conflict_type_id=$2
+      ORDER BY link.display_order,lower(revision.name),method.code,revision.revision DESC`,[companyId,current.conflict_type_id])).rows.map(row=>({id:String(row.id),revisionId:String(row.revision_id),revision:Number(row.revision),code:String(row.code),name:String(row.name),description:String(row.description),responsibleTrade:row.responsible_trade==null?null:String(row.responsible_trade),constraints:Array.isArray(row.constraints)?row.constraints.map(String):[],requiredApprovals:Array.isArray(row.required_approvals)?row.required_approvals.map(String):[],rfiRequirement:String(row.rfi_requirement),preferred:typeof row.details==="object"&&row.details!==null&&(row.details as Record<string,unknown>).preferred===true}));
+    const rules=(await this.pool.query(`SELECT DISTINCT rule.id,rule_revision.id revision_id,rule_revision.revision,rule.code,rule_revision.title,rule_revision.guidance
+      FROM coordination_resolution_method_conflict_types conflict_link
+      JOIN coordination_resolution_method_revisions method_revision ON method_revision.id=conflict_link.resolution_method_revision_id AND method_revision.company_id=conflict_link.company_id AND method_revision.status='approved'
+      JOIN coordination_resolution_method_rules method_rule ON method_rule.resolution_method_revision_id=method_revision.id AND method_rule.company_id=method_revision.company_id
+      JOIN coordination_rule_revisions rule_revision ON rule_revision.id=method_rule.rule_revision_id AND rule_revision.company_id=method_rule.company_id AND rule_revision.status='approved'
+      JOIN coordination_rules rule ON rule.id=rule_revision.rule_id AND rule.company_id=rule_revision.company_id
+      WHERE conflict_link.company_id=$1 AND conflict_link.conflict_type_id=$2
+      ORDER BY rule.code,rule_revision.revision DESC`,[companyId,current.conflict_type_id])).rows.map(row=>({id:String(row.id),revisionId:String(row.revision_id),revision:Number(row.revision),code:String(row.code),title:String(row.title),guidance:String(row.guidance)}));
+    const previousCases=(await this.pool.query(`SELECT precedent.id,precedent.project_id,project.name project_name,viewpoint.floor location,
+      precedent.actual_resolution,precedent.decision,precedent.status
+      FROM coordination_project_cases precedent
+      JOIN coordination_conflict_type_revisions precedent_conflict ON precedent_conflict.id=precedent.conflict_type_revision_id AND precedent_conflict.company_id=precedent.company_id
+      JOIN projects project ON project.id=precedent.project_id
+      JOIN lens_viewpoints viewpoint ON viewpoint.id=precedent.lens_viewpoint_id AND viewpoint.project_id=precedent.project_id
+      WHERE precedent.company_id=$1 AND precedent.lens_viewpoint_id<>$2 AND precedent_conflict.conflict_type_id=$3
+        AND precedent.status IN ('resolved','verified') AND ($4::boolean OR precedent.project_id=$5)
+      ORDER BY precedent.verified_at DESC NULLS LAST,precedent.resolved_at DESC NULLS LAST,precedent.id LIMIT 8`,[companyId,lensViewpointId,current.conflict_type_id,input.allowCompanyPrecedent,projectId])).rows.map(row=>({id:String(row.id),projectId:Number(row.project_id),projectName:String(row.project_name),location:row.location==null?null:String(row.location),actualResolution:String(row.actual_resolution),rfiState:String(row.decision??"Not recorded"),status:String(row.status)}));
+    return {conflictType,rules,methods,previousCases};
+  }
 }
