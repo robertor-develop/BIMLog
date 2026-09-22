@@ -191,6 +191,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.behavior.ts
 - artifacts/api-server/src/lib/bimlog-configuration-authorities.ts
 - artifacts/api-server/src/lib/bimlog-default-configuration-contract.behavior.ts
+- artifacts/api-server/src/lib/bimtech-coordination-starter-library.ts
 - artifacts/api-server/src/lib/block10-controlled-acceptance.behavior.ts
 - artifacts/api-server/src/lib/block11-financial-acceptance.behavior.ts
 - artifacts/api-server/src/lib/block12-build056-canonical-project-identity.behavior.ts
@@ -309,6 +310,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-knowledge-authorization.ts
 - artifacts/api-server/src/lib/coordination-knowledge-block6-activation.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-block7.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-build266.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-build267.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-build268.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-build269.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-build270.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-conflict-api.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-contract.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-contract.ts
@@ -328,6 +334,9 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-knowledge-repository.ts
 - artifacts/api-server/src/lib/coordination-knowledge-rules-methods-api.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-search.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-starter-import.ts
+- artifacts/api-server/src/lib/coordination-knowledge-starter-seed.ts
+- artifacts/api-server/src/lib/coordination-knowledge-taxonomy.ts
 - artifacts/api-server/src/lib/coordination-lesson-merge.behavior.ts
 - artifacts/api-server/src/lib/coordination-lesson-promotion.behavior.ts
 - artifacts/api-server/src/lib/coordination-lesson-proposal.behavior.ts

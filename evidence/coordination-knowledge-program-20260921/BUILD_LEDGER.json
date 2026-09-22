@@ -4,15 +4,15 @@
   "date": "2026-09-21",
   "range": {
     "firstBuild": 226,
-    "completedThrough": 265,
+    "completedThrough": 270,
     "finalBuild": 275
   },
   "currentBlock": {
-    "number": 8,
-    "builds": "261-265",
+    "number": 9,
+    "builds": "266-270",
     "status": "PASS_SOURCE_CANDIDATE",
     "pushDue": true,
-    "publicationDue": true
+    "publicationDue": false
   },
   "buildCommits": {
     "256": "7348fa39",
@@ -24,17 +24,23 @@
     "262": "4baab855",
     "263": "cbcfe347",
     "264": "49bd0258",
-    "265": "PENDING"
+    "265": "0b21c38d",
+    "266": "590f98d4",
+    "267": "79e8106d",
+    "268": "921b7ab2",
+    "269": "f134d5bd",
+    "270": "PENDING"
   },
-  "remainingBlocks": 2,
-  "remainingBuilds": 10,
-  "nextBlock": "Block 9 — Builds 266-270 — governance and reporting",
+  "remainingBlocks": 1,
+  "remainingBuilds": 5,
+  "nextBlock": "Block 10 — Builds 271-275 — final security, migration, UX and release acceptance",
   "database": {
     "changed": true,
     "destructiveStatements": 0,
     "productionApplied": false,
     "block7SchemaChange": "additive resolution record identities/revisions plus bounded evidence metadata; no destructive statements or production execution",
-    "block8SchemaChange": "none; reuses the additive Lesson Learned proposal tables delivered in Block 1"
+    "block8SchemaChange": "none; reuses the additive Lesson Learned proposal tables delivered in Block 1",
+    "block9SchemaChange": "additive company taxonomy identity/revision tables and immutable-history trigger; no destructive statements or production execution"
   },
   "lensNext": {
     "visibleWorkflowChanged": true,
@@ -48,6 +54,6 @@
     "databaseSafety": "PENDING_CLEAN_GATE",
     "security": "PENDING_CLEAN_GATE",
     "completePrePushGate": "PENDING_CLEAN_COMMIT",
-    "publication": "NOT_DUE"
+    "publication": "NOT_DUE_BUILD270_PUSH_ONLY"
   }
 }

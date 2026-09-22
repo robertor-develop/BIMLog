@@ -12,8 +12,8 @@ if (census.status !== "PASS" || census.totals.trackedFiles < 1 || census.totals.
   throw new Error("Build 216 repository census is missing or empty.");
 if (audit.status !== "PASS" || audit.counts.P0 !== 0 || audit.baseline.unexpectedP1.length !== 0)
   throw new Error("Final audit contains a P0 or an unclassified P1 identity.");
-if (provider.length !== 1 || !provider[0].statement.includes("Build 265") || field.length !== 1)
-  throw new Error("Current Block 7 authority must preserve the single deferred Navisworks 2025 field-evidence item and only the scheduled Build 265 provider boundary.");
+if (provider.length !== 1 || !provider[0].statement.includes("Build 275") || field.length !== 1)
+  throw new Error("Current Block 9 authority must preserve the single deferred Navisworks 2025 field-evidence item and only the scheduled Build 275 provider boundary.");
 if (!field[0].statement.includes("Navisworks 2025") || !field[0].statement.includes("Ruben"))
   throw new Error("Ruben's deferred physical Navisworks 2025 evidence item was not preserved.");
 if (product.some((item) => item.ownership?.module !== "artifacts/bimlog/src/features/lens-next"))

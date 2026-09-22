@@ -7,8 +7,8 @@ const inventory = JSON.parse(read("living-brief/OPEN_LOOP_DISPOSITIONS.json"));
 
 assert.equal(inventory.schemaVersion, 2, "open-loop inventory uses the typed ownership contract");
 assert.equal((openLoop.match(/CURRENT_OPEN_LOOP_AUTHORITY/g) ?? []).length, 1, "exactly one current authority marker exists");
-assert.equal(inventory.currentAuthority.heading, "Current open-loop authority — Coordination Knowledge Library Block 8 — 2026-09-22");
-assert.equal(inventory.currentAuthority.uncheckedItems.length, 3, "current authority preserves the next knowledge block, Build 265 publication, and Ruben's deferred 2025 field evidence");
+assert.equal(inventory.currentAuthority.heading, "Current open-loop authority — Coordination Knowledge Library Block 9 — 2026-09-22");
+assert.equal(inventory.currentAuthority.uncheckedItems.length, 3, "current authority preserves the final knowledge block, Build 275 publication, and Ruben's deferred 2025 field evidence");
 assert.deepEqual(inventory.duplicateStatements, [], "duplicate unchecked statements are prohibited");
 assert.equal(inventory.reconciledDuplicateGroups.length, 7, "all seven discovered historical duplicate loops remain explicitly reconciled");
 
@@ -21,11 +21,11 @@ for (const item of inventory.items) {
 }
 
 const currentItems = inventory.items.filter(item => item.currentAuthority);
-assert.equal(currentItems.filter(item => item.workClass === "PROVIDER_EVIDENCE").length, 1, "only the scheduled Build 265 publication remains current provider evidence");
+assert.equal(currentItems.filter(item => item.workClass === "PROVIDER_EVIDENCE").length, 1, "only the scheduled Build 275 publication remains current provider evidence");
 assert.equal(currentItems.filter(item => item.workClass === "FIELD_EVIDENCE").length, 1, "only Ruben's 2025 confirmation remains current field evidence");
 assert.equal(currentItems.filter(item => item.workClass === "PRODUCT_WORK").length, 1, "the next Coordination Knowledge block remains current product work");
-assert.ok(currentItems.some(item => item.statement.includes("Build 265")&&item.statement.includes("publish")), "the scheduled publication boundary remains explicit");
-assert.ok(currentItems.some(item => item.statement.includes("Builds 266–270")), "the next Coordination Knowledge product block remains explicit");
+assert.ok(currentItems.some(item => item.statement.includes("Build 275")&&item.statement.includes("publish")), "the scheduled publication boundary remains explicit");
+assert.ok(currentItems.some(item => item.statement.includes("Builds 271–275")), "the final Coordination Knowledge product block remains explicit");
 assert.ok(currentItems.some(item => item.statement.includes("Navisworks 2025") && item.statement.includes("Ruben")), "Ruben's 2025 confirmation remains explicit");
 assert.ok(inventory.items.some(item => item.statement.includes("Build 160") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 160 publication marker is closed");
 assert.ok(inventory.items.some(item => item.statement.includes("Builds 166–170") && item.workClass === "STALE_CONTRADICTION"), "obsolete Build 170 marker is closed");

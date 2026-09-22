@@ -20,10 +20,14 @@ import { CoordinationLessonWorkflowError, validateLessonPromotionRequest, valida
 import { lessonProposalStatuses, type LessonProposalStatus } from "../lib/coordination-knowledge-contract";
 import { CoordinationKnowledgeTaxonomyRepository } from "../lib/coordination-knowledge-taxonomy";
 import { starterTaxonomyKinds, type StarterTaxonomyKind } from "../lib/coordination-knowledge-starter-seed";
+import { BIMTECH_COORDINATION_STARTER_LIBRARY } from "../lib/bimtech-coordination-starter-library";
+import { CoordinationStarterLibraryImporter } from "../lib/coordination-knowledge-starter-import";
+import { starterSeedFingerprint } from "../lib/coordination-knowledge-starter-seed";
 
 const router = Router();
 const repository = new CoordinationKnowledgeRepository(pool);
 const taxonomyRepository = new CoordinationKnowledgeTaxonomyRepository(pool);
+const starterImporter = new CoordinationStarterLibraryImporter(pool);
 const parameter = (value: string | string[]) => Array.isArray(value) ? value[0] ?? "" : value;
 const codePattern = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
 
@@ -107,6 +111,8 @@ router.get("/coordination-knowledge/taxonomy", authMiddleware, async (req,res) =
 router.post("/coordination-knowledge/taxonomy",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"manage_taxonomy");res.status(201).json({item:await taxonomyRepository.create(resolved.companyId,resolved.userId,req.body??{})});}catch(error){sendError(res,error);}});
 router.patch("/coordination-knowledge/taxonomy/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"manage_taxonomy");res.json({item:await taxonomyRepository.revise(resolved.companyId,resolved.userId,parameter(req.params.id),expectedRevision(req.body?.expectedRevision),req.body??{})});}catch(error){sendError(res,error);}});
 router.post("/coordination-knowledge/taxonomy/:id/retire",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"retire");res.json({item:await taxonomyRepository.revise(resolved.companyId,resolved.userId,parameter(req.params.id),expectedRevision(req.body?.expectedRevision),{},true)});}catch(error){sendError(res,error);}});
+router.get("/coordination-knowledge/starter-library/bimtech",authMiddleware,async(req,res)=>{try{await context(req,"view_draft");const seed=BIMTECH_COORDINATION_STARTER_LIBRARY;res.json({seedKey:seed.seedKey,displayName:seed.displayName,fingerprint:starterSeedFingerprint(seed),provenance:seed.provenance,counts:{conflictTypes:seed.conflictTypes.length,rules:seed.rules.length,resolutionMethods:seed.resolutionMethods.length},items:seed});}catch(error){sendError(res,error);}});
+router.post("/coordination-knowledge/starter-library/bimtech/import",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"manage_taxonomy"),expected=req.body?.expectedFingerprint,actual=starterSeedFingerprint(BIMTECH_COORDINATION_STARTER_LIBRARY);if(expected!==actual)throw new CoordinationKnowledgeContractError("STARTER_IMPORT_FINGERPRINT_MISMATCH","expectedFingerprint");res.status(201).json({result:await starterImporter.import(resolved.companyId,resolved.userId,BIMTECH_COORDINATION_STARTER_LIBRARY)});}catch(error){sendError(res,error);}});
 
 router.get("/coordination-knowledge/lens-context/:lensViewpointId",authMiddleware,async(req,res)=>{try{
   const resolved=await context(req,"view_approved");

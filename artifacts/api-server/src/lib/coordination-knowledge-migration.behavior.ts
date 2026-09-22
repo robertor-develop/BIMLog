@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { COORDINATION_KNOWLEDGE_SCHEMA_SQL, COORDINATION_KNOWLEDGE_SCHEMA_VERSION, ensureCoordinationKnowledgeSchema, type CoordinationKnowledgeMigrationPool } from "./coordination-knowledge-migration";
 
-assert.equal(COORDINATION_KNOWLEDGE_SCHEMA_VERSION, 2);
+assert.equal(COORDINATION_KNOWLEDGE_SCHEMA_VERSION, 3);
 assert.doesNotMatch(COORDINATION_KNOWLEDGE_SCHEMA_SQL, /\b(?:DROP|TRUNCATE|ALTER\s+TABLE\s+\S+\s+RENAME|DELETE\s+FROM)\b/i, "migration must remain strictly additive");
 for (const table of [
   "coordination_conflict_types",
@@ -19,6 +19,8 @@ for (const table of [
   "coordination_lesson_proposals",
   "coordination_knowledge_evidence",
   "coordination_knowledge_events",
+  "coordination_knowledge_taxonomy_terms",
+  "coordination_knowledge_taxonomy_term_revisions",
 ]) assert.match(COORDINATION_KNOWLEDGE_SCHEMA_SQL, new RegExp(`CREATE TABLE IF NOT EXISTS ${table}\\b`));
 assert.match(COORDINATION_KNOWLEDGE_SCHEMA_SQL, /REFERENCES lens_viewpoints\(id\)/, "project cases must reference the canonical Lens issue instead of duplicating it");
 assert.match(COORDINATION_KNOWLEDGE_SCHEMA_SQL, /coord_lesson_proposal_case_scope_fk/, "lesson proposals must remain linked to their exact project case");

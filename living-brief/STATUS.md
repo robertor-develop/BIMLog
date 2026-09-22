@@ -1,5 +1,14 @@
 # STATUS.md - Current Accepted Platform State
 
+## Coordination Knowledge Library — Block 9 source candidate — 2026-09-22
+
+- Builds 266–270 add a controlled BIMTECH starter-library format, 24 synthetic draft Conflict Types, eight draft Coordination Rules, eight draft Resolution Methods, governed taxonomy administration, idempotent company-scoped import, and a professional-review package.
+- Starter content contains no project, customer, issue, model, or real precedent data. Every imported record is `draft`, explicitly synthetic and not professionally approved. No method is marked preferred and no import approves or publishes knowledge.
+- Import requires the existing company `manage_taxonomy` capability plus an exact seed fingerprint. Reimport is a no-op for existing codes and never overwrites company knowledge. Deterministic identities include company scope, so another tenant receives different identities.
+- Taxonomy terms use the existing company authorization model, normalized duplicate detection, optimistic revisions, append-only history, and retirement rather than deletion across disciplines, categories, element types, stages, and tags.
+- The schema change is additive: versioned taxonomy identity and revision tables plus an immutable-history trigger. Database safety passes with zero destructive statements. Production schema and rows are unchanged because Build 270 is push-only.
+- Block 9 changes no Native, bridge, camera, installer, package, Autodesk load path, or Navisworks-facing source. Focused Navisworks smoke is not applicable.
+
 ## Coordination Knowledge Library — Block 8 publication candidate — 2026-09-22
 
 - Builds 261–265 complete the governed Lesson Learned loop from an evidenced closed Lens issue to a company-scoped proposal and review queue.
@@ -8,7 +17,7 @@
 - Approved proposals may create or revise draft Conflict Types, Coordination Rules, or Resolution Methods only through a separate controlled action. No proposal automatically approves or publishes company knowledge.
 - The Lens Resolution panel provides the proposal action and status; the Coordination Knowledge Library provides the real permission-aware review queue and reload restoration.
 - Block 8 adds no schema and changes no Native, bridge, camera, installer, package, Autodesk load path, or Navisworks-facing source. Focused Navisworks smoke is not applicable.
-- Build 265 is the scheduled publication boundary. Exact clean-gate, push, Replit Shell publication, deployed identity, and authenticated Chrome acceptance remain required before live closure.
+- Build 265 reached exact source `0b21c38d0c235ae5a400fff9645c14437f9638e6`, was pushed and published through Replit Shell as deployment receipt `599a0299`, completed the validated additive production migration, and passed authenticated Chrome acceptance with zero browser errors.
 
 ## Coordination Knowledge Library — Block 7 source candidate — 2026-09-22
 

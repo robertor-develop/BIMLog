@@ -14,7 +14,7 @@ assert.equal(currentField.length, 1);
 assert.match(currentField[0].statement, /Navisworks 2025/);
 assert.match(currentField[0].statement, /Ruben/);
 assert.equal(currentProvider.length, 1);
-assert.match(currentProvider[0].statement,/Build 265/);
+assert.match(currentProvider[0].statement,/Build 275/);
 assert.equal(field.installed2021.retiredDirectLoad.state, "REMOVED_WITH_ROLLBACK_EVIDENCE");
 assert.equal(field.installed2021.retiredDirectLoad.activeAfterCutover, false);
 assert.equal(field.rubenPhysical2025.status, "DEFERRED_TO_RUBEN");

@@ -1,6 +1,6 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — Coordination Knowledge Library Block 8 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Current open-loop authority — Coordination Knowledge Library Block 9 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
 - [x] Builds 226–230 establish the canonical company-scoped domain, immutable revisions, tenant-bound repositories, additive migration, clean/repeat/rollback coverage, and restored-database preservation proof. This boundary is push-only and does not change the visible Lens Next workspace.
 - [x] Block 1 implementation authority is exact commit `cce77c1d813b16952873a9faa192208276dd7b31`; reconciliation may update evidence metadata but cannot silently change the accepted product scope.
@@ -16,8 +16,10 @@
 - [x] Historical Build 217, Build 223, and Block 45 field-boundary regressions now preserve their original sole-field-evidence rule while allowing only the explicitly active Build 255 publication item; stale provider debt remains prohibited.
 - [x] Builds 256–260 add the separate structured resolution-record workflow, project-scoped before/after evidence, guided Lens resolution UI, independent verification, reason-required reopening, immutable history, and integration hardening. Build 260 is push-only.
 - [x] Builds 261–264 add evidence-gated Lesson Learned proposal, company-scoped review, controlled draft promotion, and duplicate merge/rejection history.
-- [ ] Build 265 must pass the exact complete gate, push the five bounded commits, synchronize and publish through Replit Shell without Replit Agents, verify deployed identity, and pass full authenticated visible-Chrome acceptance.
-- [ ] Builds 266–270 create the organization-scoped draft BIMTECH starter library and governed taxonomy administration, verify idempotent import and tenant isolation, and produce the professional review package. Build 270 is push-only.
+- [x] Build 265 reached exact source `0b21c38d0c235ae5a400fff9645c14437f9638e6`, was pushed and published through Replit Shell as receipt `599a0299`, applied only the validated additive schema delta, and passed exact-identity authenticated Chrome acceptance with zero browser errors.
+- [x] Builds 266–270 create the organization-scoped synthetic draft BIMTECH starter library and governed versioned taxonomy administration, verify fingerprint-bound idempotent import and tenant-isolated identities, and produce the professional review package. Build 270 is push-only.
+- [ ] Builds 271–275 execute the final security, data-integrity, UX/accessibility/performance and complete-system regression program.
+- [ ] Build 275 must pass the exact complete gate, push the five bounded commits, synchronize and publish through Replit Shell without Replit Agents, verify deployed identity, and pass full authenticated visible-Chrome acceptance.
 
 - [x] Builds 221–225 reconcile exact Build 220 live acceptance and close the verified physical Navisworks 2021 P36 installation. This five-build boundary is push-only and changes no runtime product code, database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license.
 - [x] Builds 121–180 are complete. Build 180 source reached `origin/master` at `9dab04343e90e8ad94391c5967a4b9f804ee1f4d`, was published through the established Replit Shell path without Replit Agents, and passed authenticated production smoke.

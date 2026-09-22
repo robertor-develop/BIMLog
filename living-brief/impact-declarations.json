@@ -37576,6 +37576,111 @@
         "scripts/test-post120-block38.mjs"
       ],
       "reviewedChangeSha256": "4eaecd0601bc3b47cac0a0944455c9a351b19d55206ccf3dee76a45d13b8f8b2"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block09-20260922",
+      "reviewedThroughCommit": "f134d5bd3f0b65d95162e1181ac0e32fc4a35524",
+      "reviewedAt": "2026-09-22T04:45:00-04:00",
+      "id": "coordination-knowledge-block09-20260922",
+      "date": "2026-09-22",
+      "scope": "Builds 266-270",
+      "summary": "Adds the synthetic draft BIMTECH starter library, controlled idempotent import and company-scoped versioned taxonomy administration.",
+      "status": "push_candidate",
+      "database": {
+        "changed": true,
+        "productionApplied": false,
+        "destructiveStatements": 0,
+        "migration": "additive coordination knowledge taxonomy identity and immutable revision tables"
+      },
+      "externalActions": {
+        "authorized": [
+          "exact_fast_forward_push"
+        ],
+        "deferred": [
+          "publication_until_build_275",
+          "production_schema_application_until_build_275"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Company-owned reviewed knowledge remains the governing product boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution, evidence and push-only boundary controls remain applicable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing tenant, permission, persistence, migration and release gates remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Synthetic starter drafts implement the approved reusable coordination-knowledge roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Adds starter seed/import and taxonomy source plus API routes and additive schema authority."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, installer, package or Navisworks-facing source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The markdown review package does not change governed PDF, Word or spreadsheet reporting."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Starter candidates explicitly make no external-standard or professional-approval claim."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 9 source acceptance and Build 265 live closure."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 266-270 and advances the sole current program boundary to Builds 271-275."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Imports and taxonomy revisions use attributable append-only events and immutable history."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/coordination-knowledge-build270.behavior.ts",
+        "artifacts/api-server/src/lib/coordination-knowledge-migration.behavior.ts",
+        "artifacts/api-server/src/lib/coordination-knowledge-starter-import.ts",
+        "artifacts/api-server/src/routes/coordination-knowledge.ts",
+        "evidence/coordination-knowledge-program-20260921/BIMTECH_STARTER_LIBRARY_REVIEW.md",
+        "evidence/coordination-knowledge-program-20260921/BLOCK_09_REPORT.md",
+        "evidence/coordination-knowledge-program-20260921/BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/open-loop-dispositions.mjs",
+        "scripts/test-build217-final-reconciliation.mjs",
+        "scripts/test-build223-field-evidence-boundary.mjs",
+        "scripts/test-post120-block38.mjs",
+        "scripts/test-post220-block45.mjs"
+      ],
+      "reviewedChangeSha256": "7195f385ff1d8bf6e1db14d5790a3140ad9b3f5223e4b6281a101ee4347d6280"
     }
   ]
 }

@@ -6,7 +6,7 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 641,
+    "apiRoutes": 647,
     "frontendApiReferences": 245,
     "routeOwnedTables": 61
   },
@@ -2594,6 +2594,42 @@
     {
       "method": "GET",
       "path": "/coordination-knowledge/capabilities",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/taxonomy",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/taxonomy",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "PATCH",
+      "path": "/coordination-knowledge/taxonomy/:id",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/taxonomy/:id/retire",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/starter-library/bimtech",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/starter-library/bimtech/import",
       "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
       "tables": []
     },
