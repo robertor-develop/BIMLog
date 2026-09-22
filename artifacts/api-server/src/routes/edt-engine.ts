@@ -4,6 +4,7 @@ import { edtProjectId, resolveEdtRouteActor, sendEdtRouteError } from "../lib/ed
 import { approveEdtActivation, requestEdtActivation } from "../lib/edt-engine-activation-service";
 import { EdtEngineConflict } from "../lib/edt-engine-transaction";
 import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-engine-governed-change-service";
+import { createWorkItemEconomicPlan, transitionTimeEntry } from "../lib/edt-engine-economic-service";
 
 const router: IRouter = Router();
 
@@ -82,6 +83,31 @@ router.post("/projects/:projectId/edt-engine/change-requests/:requestId/decision
     const outcome=requiredText(body,"outcome");if(outcome!=="approved"&&outcome!=="rejected")throw new EdtEngineConflict("REQUEST_BODY_INVALID","outcome must be approved or rejected.");
     const result=await decideGovernedEdtChange({actor,companyId:actor.actorCompanyId,projectId,requestId:String(req.params.requestId),
       expectedFingerprint:requiredText(body,"expectedFingerprint"),outcome,reason:requiredText(body,"reason"),evidence:recordField(body,"evidence")});
+    res.json(result);
+  }catch(error){sendEdtRouteError(res,error);}
+});
+
+router.post("/projects/:projectId/edt-engine/economic-plans",authMiddleware,async(req,res):Promise<void>=>{
+  try{
+    const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);
+    const result=await createWorkItemEconomicPlan({actor,companyId:actor.actorCompanyId,projectId,
+      intakeId:requiredText(body,"intakeId"),workItemId:requiredText(body,"workItemId"),contractId:requiredText(body,"contractId"),
+      contractVersionId:requiredText(body,"contractVersionId"),pricingTemplateVersionId:requiredText(body,"pricingTemplateVersionId"),
+      deliveryWorkflowVersionId:requiredText(body,"deliveryWorkflowVersionId"),currency:requiredText(body,"currency"),
+      directProductionAmount:requiredText(body,"directProductionAmount"),projectAdministrativeAmount:requiredText(body,"projectAdministrativeAmount"),
+      incentiveReserveAmount:requiredText(body,"incentiveReserveAmount"),taskEarningsAmount:requiredText(body,"taskEarningsAmount"),
+      projectEarningsAmount:requiredText(body,"projectEarningsAmount"),resolvedAllocation:recordField(body,"resolvedAllocation"),sourceSnapshot:recordField(body,"sourceSnapshot")});
+    res.status(result.idempotent?200:201).json(result);
+  }catch(error){sendEdtRouteError(res,error);}
+});
+
+router.post("/projects/:projectId/edt-engine/time-entries/:entryId/transition",authMiddleware,async(req,res):Promise<void>=>{
+  try{
+    const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);
+    const decision=requiredText(body,"decision");if(!["submit","approve","reject"].includes(decision))throw new EdtEngineConflict("REQUEST_BODY_INVALID","decision is not supported.");
+    const pool=requiredText(body,"pool");if(pool!=="direct_production"&&pool!=="project_administrative")throw new EdtEngineConflict("REQUEST_BODY_INVALID","pool is not supported.");
+    const result=await transitionTimeEntry({actor,companyId:actor.actorCompanyId,projectId,entryId:String(req.params.entryId),expectedVersion:requiredInteger(body,"expectedVersion"),
+      decision:decision as "submit"|"approve"|"reject",budgetAccountId:requiredText(body,"budgetAccountId"),pool,amount:requiredText(body,"amount"),reason:requiredText(body,"reason"),evidence:recordField(body,"evidence")});
     res.json(result);
   }catch(error){sendEdtRouteError(res,error);}
 });
