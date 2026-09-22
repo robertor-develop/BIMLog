@@ -247,6 +247,7 @@ export interface LensNextKnowledgeCase {
 export interface LensNextKnowledgeContext {
   canClassify: boolean;
   conflictType: LensNextKnowledgeConflictType | null;
+  availableConflictTypes: readonly LensNextKnowledgeConflictType[];
   rules: readonly LensNextKnowledgeRule[];
   methods: readonly LensNextKnowledgeMethod[];
   previousCases: readonly LensNextKnowledgeCase[];

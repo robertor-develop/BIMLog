@@ -417,6 +417,26 @@ export class CoordinationKnowledgeRepository {
     if (!result.rows[0]) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_ISSUE_SCOPE_DENIED", "The canonical BIMLog issue is not available in this organization and project scope.", 403);
   }
 
+  async classifyLensIssue(input: { companyId: number; projectId: number; lensViewpointId: number; conflictTypeRevisionId: string | null; expectedConflictTypeRevisionId: string | null; actorId: number }): Promise<void> {
+    const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId"),actorId=positive(input.actorId,"actorId");
+    await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
+    await transaction(this.pool,async client=>{
+      const existing=(await client.query(`SELECT id,conflict_type_revision_id FROM coordination_project_cases WHERE company_id=$1 AND project_id=$2 AND lens_viewpoint_id=$3 FOR UPDATE`,[companyId,projectId,lensViewpointId])).rows[0]??null;
+      const observed=existing?.conflict_type_revision_id==null?null:String(existing.conflict_type_revision_id);
+      if(observed!==input.expectedConflictTypeRevisionId) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_CLASSIFICATION_STALE","The issue classification changed after it was loaded.",409);
+      if(input.conflictTypeRevisionId){
+        const approved=(await client.query(`SELECT id FROM coordination_conflict_type_revisions WHERE id=$1 AND company_id=$2 AND status='approved'`,[input.conflictTypeRevisionId,companyId])).rows[0];
+        if(!approved) throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_APPROVED_CLASSIFICATION_REQUIRED","Only an approved Conflict Type revision may classify an issue.",409);
+      }
+      if(observed===input.conflictTypeRevisionId) return;
+      const projectCaseId=existing?String(existing.id):randomUUID();
+      if(existing) await client.query(`UPDATE coordination_project_cases SET conflict_type_revision_id=$1,updated_at=now() WHERE id=$2 AND company_id=$3 AND project_id=$4`,[input.conflictTypeRevisionId,projectCaseId,companyId,projectId]);
+      else if(input.conflictTypeRevisionId) await client.query(`INSERT INTO coordination_project_cases(id,company_id,project_id,lens_viewpoint_id,conflict_type_revision_id,created_by_id) VALUES($1,$2,$3,$4,$5,$6)`,[projectCaseId,companyId,projectId,lensViewpointId,input.conflictTypeRevisionId,actorId]);
+      else return;
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,'project_case',$3,$4,'issue_classification_changed',$5,$6::jsonb)`,[randomUUID(),companyId,projectCaseId,input.conflictTypeRevisionId,actorId,JSON.stringify({fromConflictTypeRevisionId:observed,toConflictTypeRevisionId:input.conflictTypeRevisionId,projectId,lensViewpointId})]);
+    });
+  }
+
   async getLensContext(input: { companyId: number; projectId: number; lensViewpointId: number; allowCompanyPrecedent: boolean }): Promise<Record<string, unknown>> {
     const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId");
     await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
@@ -428,7 +448,10 @@ export class CoordinationKnowledgeRepository {
       LEFT JOIN coordination_conflict_type_revisions conflict ON conflict.id=project_case.conflict_type_revision_id AND conflict.company_id=project_case.company_id
       LEFT JOIN coordination_conflict_types base ON base.id=conflict.conflict_type_id AND base.company_id=conflict.company_id
       WHERE project_case.company_id=$1 AND project_case.project_id=$2 AND project_case.lens_viewpoint_id=$3`,[companyId,projectId,lensViewpointId])).rows[0]??null;
-    if(!current?.conflict_type_id) return {conflictType:null,rules:[],methods:[],previousCases:[]};
+    const availableConflictTypes=(await this.pool.query(`SELECT base.id,revision.id revision_id,revision.revision,base.code,revision.name,revision.description,revision.discipline_a,revision.discipline_b,revision.element_type_a,revision.element_type_b,revision.conflict_category
+      FROM coordination_conflict_types base JOIN LATERAL (SELECT * FROM coordination_conflict_type_revisions candidate WHERE candidate.conflict_type_id=base.id AND candidate.company_id=base.company_id AND candidate.status='approved' ORDER BY candidate.revision DESC LIMIT 1) revision ON true
+      WHERE base.company_id=$1 ORDER BY lower(revision.name),base.code`,[companyId])).rows.map(row=>({id:String(row.id),revisionId:String(row.revision_id),revision:Number(row.revision),code:String(row.code),name:String(row.name),description:String(row.description),disciplineA:String(row.discipline_a),disciplineB:String(row.discipline_b),elementTypeA:String(row.element_type_a),elementTypeB:String(row.element_type_b),category:String(row.conflict_category)}));
+    if(!current?.conflict_type_id) return {conflictType:null,availableConflictTypes,rules:[],methods:[],previousCases:[]};
     const conflictType={id:String(current.conflict_type_id),revisionId:String(current.conflict_revision_id),revision:Number(current.revision),code:String(current.code),name:String(current.name),description:String(current.description),disciplineA:String(current.discipline_a),disciplineB:String(current.discipline_b),elementTypeA:String(current.element_type_a),elementTypeB:String(current.element_type_b),category:String(current.conflict_category)};
     const methods=(await this.pool.query(`SELECT method.id,revision.id revision_id,revision.revision,method.code,revision.name,revision.description,
       revision.responsible_trade,revision.constraints,revision.required_approvals,revision.rfi_requirement,revision.details,link.display_order
@@ -454,6 +477,6 @@ export class CoordinationKnowledgeRepository {
       WHERE precedent.company_id=$1 AND precedent.lens_viewpoint_id<>$2 AND precedent_conflict.conflict_type_id=$3
         AND precedent.status IN ('resolved','verified') AND ($4::boolean OR precedent.project_id=$5)
       ORDER BY precedent.verified_at DESC NULLS LAST,precedent.resolved_at DESC NULLS LAST,precedent.id LIMIT 8`,[companyId,lensViewpointId,current.conflict_type_id,input.allowCompanyPrecedent,projectId])).rows.map(row=>({id:String(row.id),projectId:Number(row.project_id),projectName:String(row.project_name),location:row.location==null?null:String(row.location),actualResolution:String(row.actual_resolution),rfiState:String(row.rfi_state),status:String(row.status)}));
-    return {conflictType,rules,methods,previousCases};
+    return {conflictType,availableConflictTypes,rules,methods,previousCases};
   }
 }

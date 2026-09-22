@@ -139,6 +139,7 @@ export interface LensNextApiClient {
   removeReferenceAttachment(identity: LensNextImmutableIssueIdentity, attachmentId: number, signal?: AbortSignal): Promise<LensNextAttachmentsResult>;
   downloadReferenceAttachment(attachment: LensNextAttachmentsResult["attachments"][number], signal?: AbortSignal): Promise<Blob>;
   loadKnowledgeContext(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal): Promise<LensNextKnowledgeContext>;
+  classifyKnowledgeContext(identity: LensNextImmutableIssueIdentity, conflictTypeRevisionId: string | null, expectedConflictTypeRevisionId: string | null, signal?: AbortSignal): Promise<LensNextKnowledgeContext>;
 }
 
 export function createLensNextApiClient(
@@ -339,7 +340,14 @@ export function createLensNextApiClient(
       const raw=await get(`/coordination-knowledge/lens-context/${exact.serverId}?projectId=${exact.projectId}`,signal);
       if(!raw||typeof raw!=="object"||Array.isArray(raw)) throw new Error("Coordination Knowledge response is invalid");
       const body=raw as Record<string,unknown>;
-      if(!Array.isArray(body.rules)||!Array.isArray(body.methods)||!Array.isArray(body.previousCases)||typeof body.canClassify!=="boolean") throw new Error("Coordination Knowledge response is invalid");
+      if(!Array.isArray(body.availableConflictTypes)||!Array.isArray(body.rules)||!Array.isArray(body.methods)||!Array.isArray(body.previousCases)||typeof body.canClassify!=="boolean") throw new Error("Coordination Knowledge response is invalid");
+      return body as unknown as LensNextKnowledgeContext;
+    },
+    async classifyKnowledgeContext(identity, conflictTypeRevisionId, expectedConflictTypeRevisionId, signal) {
+      const exact=assertLensNextImmutableIdentity(identity);
+      const response=await fetchImpl(`${base}/coordination-knowledge/lens-context/${exact.serverId}/classification?projectId=${exact.projectId}`,{method:"PUT",credentials:"same-origin",headers:{Accept:"application/json","Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify({conflictTypeRevisionId,expectedConflictTypeRevisionId}),signal});
+      const body=await jsonBody(response,"BIMLog classification");
+      if(!body||typeof body!=="object"||Array.isArray(body)) throw new Error("Coordination Knowledge response is invalid");
       return body as unknown as LensNextKnowledgeContext;
     },
     async linkBimlogItem(identity: LensNextImmutableIssueIdentity, targetType: LensNextLinkedItemType, targetId: number, signal?: AbortSignal) {

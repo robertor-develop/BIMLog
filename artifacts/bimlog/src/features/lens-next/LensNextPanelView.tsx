@@ -366,6 +366,7 @@ export interface LensNextPanelViewProps {
   knowledgeContext: LensNextKnowledgeContext | "loading" | null;
   knowledgeError: string | null;
   onRetryKnowledge(): void;
+  onClassifyKnowledge(revisionId:string|null,expected:string|null):void;
   onUploadReferenceAttachment(file: File): void;
   onOpenReferenceAttachment(attachment: LensNextReferenceAttachment): void;
   onRemoveReferenceAttachment(attachmentId: number): void;
@@ -455,6 +456,7 @@ export function LensNextPanelView({
   knowledgeContext,
   knowledgeError,
   onRetryKnowledge,
+  onClassifyKnowledge,
   onUploadReferenceAttachment,
   onOpenReferenceAttachment,
   onRemoveReferenceAttachment,
@@ -1050,7 +1052,7 @@ export function LensNextPanelView({
             </dl>
             <p className="lens-next__data-boundary">{tt("Clash pair, surrounding geometry, grid and distance are unavailable for this BIMLog issue until an exact project/model-bound clash link is verified. This image is a capture, not interactive 3D.", "El par de interferencia, la geometría cercana, la retícula y la distancia no están disponibles para esta incidencia BIMLog hasta verificar un vínculo exacto con la interferencia del proyecto y modelo. Esta imagen es una captura, no un modelo 3D interactivo.")}</p>
           </section>}
-          {detailView === "knowledge" && <LensNextKnowledgePanel context={knowledgeContext} error={knowledgeError} onRetry={onRetryKnowledge} />}
+          {detailView === "knowledge" && <LensNextKnowledgePanel context={knowledgeContext} error={knowledgeError} onRetry={onRetryKnowledge} onClassify={onClassifyKnowledge} />}
           {detailView === "properties" && <section className="lens-next__detail-panel" aria-label="Issue properties">
           <details className="lens-next__detail-section" open>
             <summary>Properties and model evidence</summary>

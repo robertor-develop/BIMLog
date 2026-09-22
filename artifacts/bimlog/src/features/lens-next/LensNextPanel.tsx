@@ -799,6 +799,7 @@ export function LensNextPanel({
       knowledgeContext={knowledgeContext}
       knowledgeError={knowledgeError}
       onRetryKnowledge={()=>void loadKnowledge()}
+      onClassifyKnowledge={(revisionId,expected)=>{if(apiClient&&selectedIssue){setKnowledgeContext("loading");setKnowledgeError(null);void apiClient.classifyKnowledgeContext(selectedIssue.identity,revisionId,expected).then(setKnowledgeContext).catch(error=>{setKnowledgeContext(null);setKnowledgeError(error instanceof Error?error.message:"Classification update failed");});}}}
       onUploadReferenceAttachment={(file) => void uploadReferenceAttachment(file)}
       onOpenReferenceAttachment={(attachment) => void openReferenceAttachment(attachment)}
       onRemoveReferenceAttachment={(attachmentId) => void removeReferenceAttachment(attachmentId)}
