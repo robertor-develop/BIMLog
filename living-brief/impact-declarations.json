@@ -37261,8 +37261,8 @@
     },
     {
       "taskId": "bimlog-coordination-knowledge-block06-publication-candidate-20260921",
-      "reviewedThroughCommit": "f40a9b5974257b4c02e2f64461d9cfb95174af0e",
-      "reviewedAt": "2026-09-21T23:22:09-04:00",
+      "reviewedThroughCommit": "60e05b622f48fdf4d9064cc5b46e68133c5966e2",
+      "reviewedAt": "2026-09-21T23:27:35-04:00",
       "status": "candidate",
       "capabilityPreflight": {
         "checkedBeforeExecution": true,
@@ -37351,9 +37351,9 @@
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "scripts/open-loop-dispositions.mjs"
+        "scripts/test-post120-block38.mjs"
       ],
-      "reviewedChangeSha256": "b8877080472f93c1140b4dc9bbb5e025fa32fdf19f97763bbb171aca759de8d9"
+      "reviewedChangeSha256": "75240a3b362e56bec2bf8a4abaa39df77089369967da3b92e3071f16362f56a7"
     }
   ]
 }

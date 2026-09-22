@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "851813b34673a72f0383b9cdee53d56931dda7ae0d1f7db9411aa352c3bb14de",
+  "sourceSha256": "950d5b8af218579c21d6e1a2fce6cdcc984b888c36c97f88804c6db970841dca",
   "itemCount": 145,
   "counts": {
     "ACTIVE": 112,
@@ -82,7 +82,7 @@
     },
     {
       "id": "7d65701c1487070b",
-      "sourceLine": 15,
+      "sourceLine": 16,
       "heading": "Current open-loop authority — Coordination Knowledge Library Block 6 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
       "statement": "Builds 256–260 add the separate structured resolution-record workflow, before/after evidence, resolution UI, verification/reopening, and integration hardening. These later requirements are not silently claimed by Block 6.",
       "classification": "ACTIVE",
@@ -93,14 +93,14 @@
         "module": "artifacts/bimlog/src/features/lens-next"
       },
       "evidence": [
-        "OPEN_LOOP.md:15",
+        "OPEN_LOOP.md:16",
         "Current open-loop authority — Coordination Knowledge Library Block 6 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
       ],
       "currentAuthority": true
     },
     {
       "id": "4bea2d904a58e01e",
-      "sourceLine": 36,
+      "sourceLine": 37,
       "heading": "Current open-loop authority — Coordination Knowledge Library Block 6 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
       "statement": "Physical Navisworks 2025 confirmation remains assigned to Ruben as post-closure field evidence. It does not reopen Build 119 and does not block this Platform-only publication.",
       "classification": "ACTIVE",
@@ -111,14 +111,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:36",
+        "OPEN_LOOP.md:37",
         "Current open-loop authority — Coordination Knowledge Library Block 6 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
       ],
       "currentAuthority": true
     },
     {
       "id": "6b9832cf03f4e818",
-      "sourceLine": 46,
+      "sourceLine": 47,
       "heading": "Current open-loop authority — post-120 Block 32 — 2026-09-20",
       "statement": "Build 160: pass the complete clean-tree gate, push, publish through Replit Shell without Replit Agents, verify `schemaAction=NONE`, and run authenticated visible-Chrome RFI lifecycle/export/reload acceptance.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -137,7 +137,7 @@
     },
     {
       "id": "8851c325c1a60059",
-      "sourceLine": 48,
+      "sourceLine": 49,
       "heading": "Current open-loop authority — post-120 Block 32 — 2026-09-20",
       "statement": "Builds 166–170: decompose meeting-minutes backend, push, publish through Replit Shell without Replit Agents, and run full authenticated visible-Chrome acceptance.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -156,7 +156,7 @@
     },
     {
       "id": "8a138522fef877b2",
-      "sourceLine": 69,
+      "sourceLine": 70,
       "heading": "Current open-loop authority — post-120 Block 25 — 2026-09-20",
       "statement": "Physical Navisworks 2025 confirmation remains assigned to Ruben as post-closure field evidence. It does not reopen Build 119 and this platform-only block does not retrigger focused Navisworks smoke.",
       "classification": "ACTIVE",
@@ -167,14 +167,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:69",
+        "OPEN_LOOP.md:70",
         "Current open-loop authority — post-120 Block 25 — 2026-09-20"
       ],
       "currentAuthority": false
     },
     {
       "id": "386199a8fa481365",
-      "sourceLine": 82,
+      "sourceLine": 83,
       "heading": "Current open-loop authority — Block 23 frozen candidate — 2026-09-20",
       "statement": "[ACTIVE] Push the exact Build 115 head normally. Do not publish at this five-build boundary.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -193,7 +193,7 @@
     },
     {
       "id": "83cc58545e4e9091",
-      "sourceLine": 83,
+      "sourceLine": 84,
       "heading": "Current open-loop authority — Block 23 frozen candidate — 2026-09-20",
       "statement": "Complete Builds 116–120. Build 119 must close the real connected Navisworks 2021/2025/customer field evidence gap, including a Lens Next-only accepted installation. Build 120 is the final publication, authenticated Chrome smoke, exact identity reconciliation, rollback, and durable handoff boundary.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -212,7 +212,7 @@
     },
     {
       "id": "d8282c31165db05d",
-      "sourceLine": 84,
+      "sourceLine": 85,
       "heading": "Current open-loop authority — Block 23 frozen candidate — 2026-09-20",
       "statement": "The controlled 2021 NWD and Navisworks 2025 environment are unavailable on this workstation; live 2021 remains historical and still exposes Original Lens. This is explicit final-release evidence debt, not a silently waived product result.",
       "classification": "ACTIVE",
@@ -223,14 +223,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:84",
+        "OPEN_LOOP.md:85",
         "Current open-loop authority — Block 23 frozen candidate — 2026-09-20"
       ],
       "currentAuthority": false
     },
     {
       "id": "df921f27b8aff62c",
-      "sourceLine": 89,
+      "sourceLine": 90,
       "heading": "Current open-loop authority — 120-build stabilization program — 2026-09-19",
       "statement": "[ACTIVE] Complete the clean Build 100 release gate, push the exact Block 20 head, publish through the established Replit Shell path without Replit Agents, and pass immutable live identity plus full authenticated visible-Chrome standard/cold-start/multi-tab/resume/performance smoke. Do not start Build 101 before this closes.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -249,7 +249,7 @@
     },
     {
       "id": "8a1ccbb204c5b1f6",
-      "sourceLine": 101,
+      "sourceLine": 102,
       "heading": "Convention Builder live hook-order correction - 2026-09-18",
       "statement": "Pass the complete clean-source pre-push and production-artifact gates, push the exact corrective commit, synchronize/build/publish once through Replit Shell, and repeat the authenticated full-platform route and console-error sweep.",
       "classification": "SUPERSEDED",
@@ -267,7 +267,7 @@
     },
     {
       "id": "69a56bacdc64835e",
-      "sourceLine": 105,
+      "sourceLine": 106,
       "heading": "Dashboard mockup implementation - six blocks of five",
       "statement": "Block 6 local verification: 24 intercepted-API Chrome scenarios and scoped governance/runtime/database-safety regressions pass; denied/error state and exact-390 overflow are corrected. Complete independent review, clean-source full build and production artifact, authenticated PMO/Finance/read-only roles, and post-publication end-to-end browser acceptance before closing.",
       "classification": "ACTIVE",
@@ -278,14 +278,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:105",
+        "OPEN_LOOP.md:106",
         "Dashboard mockup implementation - six blocks of five"
       ],
       "currentAuthority": false
     },
     {
       "id": "257057b15caf0800",
-      "sourceLine": 106,
+      "sourceLine": 107,
       "heading": "Dashboard mockup implementation - six blocks of five",
       "statement": "Define and implement the missing runtime interpretation of approval thresholds, change-control rules, and company-role matrix. Do not treat stored policy rows as permissions or claim 100% mockup behavior; retain existing PMO/Finance and assigned task-role enforcement until the governed role mapping and actions are specified and tested.",
       "classification": "ACTIVE",
@@ -296,34 +296,16 @@
         "module": "artifacts/bimlog/src/pages/Dashboard.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:106",
+        "OPEN_LOOP.md:107",
         "Dashboard mockup implementation - six blocks of five"
       ],
       "currentAuthority": false
     },
     {
       "id": "ff1d43445a9aafe5",
-      "sourceLine": 108,
-      "heading": "Dashboard mockup implementation - six blocks of five",
-      "statement": "Block 2: versioned company Delivery Workflow allocation persistence, canonical Commercial APU resolution, PMO/Finance authority, and maker-checker audit. Focused tests and an authenticated isolated PostgreSQL cycle now pass for published-APU source, exact amounts, PMO/tenant denial, phase identity, separate Finance checker, stale revision/source, save/reload, immutable publication and audit. Exact production-artifact proof and independent review remain before acceptance. Published Commercial APU v1 records without phase defaults must fail closed, not be silently upgraded.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:108",
-        "Dashboard mockup implementation - six blocks of five"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "6cfc17f4da090c9f",
       "sourceLine": 109,
       "heading": "Dashboard mockup implementation - six blocks of five",
-      "statement": "Block 3: the existing Commercial APU editor now provides optional Direct Production nodes/phase defaults; the existing Delivery Workflow editor selects a published APU, explicitly aligns phases, edits all four proposals, previews server amounts and guards unsaved/stale-preview states. Frontend typecheck and encoding gate pass. Local Chrome production-component fixtures pass 24 pricing and 20 workflow scenarios across desktop/exact-390, English/Spanish, save/refresh/reopen, PMO/read-only/denied/empty and missing-APU states. Inspected screenshot defects were corrected and retested. The clean-source full workspace/production-assembly build passed at a4258c624dd9bddce28c86f79aa7f3b684fcfc83. Accessibility completion, real authenticated account/browser acceptance, exact mockup parity, isolated production-artifact proof and independent review remain open before acceptance.",
+      "statement": "Block 2: versioned company Delivery Workflow allocation persistence, canonical Commercial APU resolution, PMO/Finance authority, and maker-checker audit. Focused tests and an authenticated isolated PostgreSQL cycle now pass for published-APU source, exact amounts, PMO/tenant denial, phase identity, separate Finance checker, stale revision/source, save/reload, immutable publication and audit. Exact production-artifact proof and independent review remain before acceptance. Published Commercial APU v1 records without phase defaults must fail closed, not be silently upgraded.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -338,10 +320,10 @@
       "currentAuthority": false
     },
     {
-      "id": "54e0f7f4cb68adc7",
+      "id": "6cfc17f4da090c9f",
       "sourceLine": 110,
       "heading": "Dashboard mockup implementation - six blocks of five",
-      "statement": "Block 4 local source candidate: company-scoped Workflow Governance Policy contract, versioned storage, threshold/role/validation rules, PMO draft authority, separate company Finance checker, stale revision, immutable approved versions and audit, publish/supersede/retire lifecycle pass focused tests and guarded authenticated localhost HTTP proof. The configured permissions are policy data, not an authorization bypass; project budget governance remains separate. Independent review, exact production-artifact proof, live customer roles, and release gates remain open before acceptance.",
+      "statement": "Block 3: the existing Commercial APU editor now provides optional Direct Production nodes/phase defaults; the existing Delivery Workflow editor selects a published APU, explicitly aligns phases, edits all four proposals, previews server amounts and guards unsaved/stale-preview states. Frontend typecheck and encoding gate pass. Local Chrome production-component fixtures pass 24 pricing and 20 workflow scenarios across desktop/exact-390, English/Spanish, save/refresh/reopen, PMO/read-only/denied/empty and missing-APU states. Inspected screenshot defects were corrected and retested. The clean-source full workspace/production-assembly build passed at a4258c624dd9bddce28c86f79aa7f3b684fcfc83. Accessibility completion, real authenticated account/browser acceptance, exact mockup parity, isolated production-artifact proof and independent review remain open before acceptance.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -356,10 +338,10 @@
       "currentAuthority": false
     },
     {
-      "id": "668b27e3cacc74f5",
+      "id": "54e0f7f4cb68adc7",
       "sourceLine": 111,
       "heading": "Dashboard mockup implementation - six blocks of five",
-      "statement": "Block 5 local candidate: bilingual Governance Policy dashboard, scoped policy binding at new Work Item activation, immutable version/fingerprint snapshot and Operations display, overlap rejection, and guarded localhost API/runtime tests pass. Complete browser usability/accessibility, real PMO/Finance account permissions, broader rule enforcement, independent review and clean-source production artifact proof before acceptance. No historical Work Item is backfilled.",
+      "statement": "Block 4 local source candidate: company-scoped Workflow Governance Policy contract, versioned storage, threshold/role/validation rules, PMO draft authority, separate company Finance checker, stale revision, immutable approved versions and audit, publish/supersede/retire lifecycle pass focused tests and guarded authenticated localhost HTTP proof. The configured permissions are policy data, not an authorization bypass; project budget governance remains separate. Independent review, exact production-artifact proof, live customer roles, and release gates remain open before acceptance.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -374,10 +356,10 @@
       "currentAuthority": false
     },
     {
-      "id": "3c69c331a56b3735",
+      "id": "668b27e3cacc74f5",
       "sourceLine": 112,
       "heading": "Dashboard mockup implementation - six blocks of five",
-      "statement": "Block 6: end-to-end multi-contract, roles, negative-path, UI, accessibility, release-safety and live smoke gates. Push/publish only after a clean combined review and separate release authorization.",
+      "statement": "Block 5 local candidate: bilingual Governance Policy dashboard, scoped policy binding at new Work Item activation, immutable version/fingerprint snapshot and Operations display, overlap rejection, and guarded localhost API/runtime tests pass. Complete browser usability/accessibility, real PMO/Finance account permissions, broader rule enforcement, independent review and clean-source production artifact proof before acceptance. No historical Work Item is backfilled.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -392,28 +374,28 @@
       "currentAuthority": false
     },
     {
-      "id": "788c8856b523a251",
-      "sourceLine": 119,
-      "heading": "Lens Next FI-002 2025 Working View regression — 2026-09-18",
-      "statement": "Complete clean-commit API assembler and frontend build, review exact diff, push one verified commit, synchronize/publish via Replit Shell after zero-drop preview, and perform live Chrome checks without Replit Agents.",
+      "id": "3c69c331a56b3735",
+      "sourceLine": 113,
+      "heading": "Dashboard mockup implementation - six blocks of five",
+      "statement": "Block 6: end-to-end multi-contract, roles, negative-path, UI, accessibility, release-safety and live smoke gates. Push/publish only after a clean combined review and separate release authorization.",
       "classification": "ACTIVE",
-      "workClass": "FIELD_EVIDENCE",
+      "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
-        "owner": "Field acceptance",
+        "owner": "Release engineering",
         "route": null,
-        "module": "evidence/field-acceptance"
+        "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:119",
-        "Lens Next FI-002 2025 Working View regression — 2026-09-18"
+        "OPEN_LOOP.md:113",
+        "Dashboard mockup implementation - six blocks of five"
       ],
       "currentAuthority": false
     },
     {
-      "id": "56691b123d0e7c00",
+      "id": "788c8856b523a251",
       "sourceLine": 120,
       "heading": "Lens Next FI-002 2025 Working View regression — 2026-09-18",
-      "statement": "Install the new 2025 package only with target-specific authorization and verify FI-002 end-to-end in Ruben's open Navisworks model. Source/package/browser success alone is not field acceptance.",
+      "statement": "Complete clean-commit API assembler and frontend build, review exact diff, push one verified commit, synchronize/publish via Replit Shell after zero-drop preview, and perform live Chrome checks without Replit Agents.",
       "classification": "ACTIVE",
       "workClass": "FIELD_EVIDENCE",
       "ownership": {
@@ -428,8 +410,26 @@
       "currentAuthority": false
     },
     {
+      "id": "56691b123d0e7c00",
+      "sourceLine": 121,
+      "heading": "Lens Next FI-002 2025 Working View regression — 2026-09-18",
+      "statement": "Install the new 2025 package only with target-specific authorization and verify FI-002 end-to-end in Ruben's open Navisworks model. Source/package/browser success alone is not field acceptance.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:121",
+        "Lens Next FI-002 2025 Working View regression — 2026-09-18"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "0a7a75c8b1ecb414",
-      "sourceLine": 127,
+      "sourceLine": 128,
       "heading": "Lorena Block 9 pricing administration browser correction — 2026-09-17",
       "statement": "The fixture does not prove real PMO/Finance maker-checker publication, retirement, company isolation, live Intake/Operations/Commercial browser journeys, or Lorena's actual account access. Complete authenticated desktop/mobile field acceptance and independent combined-source review, then clean-source assembler/no-DROP preview and separately authorized push/publish. This local candidate remains uncommitted and unpublished.",
       "classification": "ACTIVE",
@@ -440,14 +440,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:127",
+        "OPEN_LOOP.md:128",
         "Lorena Block 9 pricing administration browser correction — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "83a06f352b26c0ed",
-      "sourceLine": 135,
+      "sourceLine": 136,
       "heading": "Lorena Block 8 authenticated multi-contract Intake cycle — 2026-09-17",
       "statement": "This local HTTP/database cycle is not a browser test or a customer-field cycle. Inspect authenticated desktop and 390px English/Spanish Intake, Operations, pricing administration, and Commercial pages with real roles; independently review combined Blocks 1–8, run clean-source production assembler and no-DROP/schema preview, then obtain separate push/publish authorization. No production or Replit data was changed.",
       "classification": "ACTIVE",
@@ -458,14 +458,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:135",
+        "OPEN_LOOP.md:136",
         "Lorena Block 8 authenticated multi-contract Intake cycle — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "05999a05747c443d",
-      "sourceLine": 150,
+      "sourceLine": 151,
       "heading": "Lorena Block 6 pricing-template retirement — 2026-09-17",
       "statement": "Visually verify the actual administration and Intake pages in authenticated desktop/mobile English/Spanish, including retirement confirmation, stale responses, save/refresh/reopen, historical contract display, and future-option exclusion. The HTTP test does not prove the browser experience.",
       "classification": "ACTIVE",
@@ -476,14 +476,14 @@
         "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:150",
+        "OPEN_LOOP.md:151",
         "Lorena Block 6 pricing-template retirement — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "f13ff2f6385f1fe9",
-      "sourceLine": 151,
+      "sourceLine": 152,
       "heading": "Lorena Block 6 pricing-template retirement — 2026-09-17",
       "statement": "Independently review Blocks 1–6, run clean-source API assembler and production no-DROP/schema preview, and obtain separate release authorization before push/publish. Nothing is deployed or customer accepted.",
       "classification": "ACTIVE",
@@ -494,14 +494,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:151",
+        "OPEN_LOOP.md:152",
         "Lorena Block 6 pricing-template retirement — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "e81a5ed2b14adac7",
-      "sourceLine": 158,
+      "sourceLine": 159,
       "heading": "Lorena Block 5 pricing-template reference bridge — 2026-09-17",
       "statement": "Run a full authenticated multi-contract Intake-to-Commercial database test and visually inspect desktop/mobile English/Spanish UI for selection, save, refresh, return, currency change, permission denial, and activated history. Current source/isolated helper tests do not prove the complete browser journey.",
       "classification": "ACTIVE",
@@ -512,14 +512,14 @@
         "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:158",
+        "OPEN_LOOP.md:159",
         "Lorena Block 5 pricing-template reference bridge — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "e71972c4af6a051d",
-      "sourceLine": 159,
+      "sourceLine": 160,
       "heading": "Lorena Block 5 pricing-template reference bridge — 2026-09-17",
       "statement": "Independently review combined Blocks 1–5, run clean-source API assembler and production no-DROP/schema preview, then seek explicit push/publish authorization. Nothing in this block is deployed or customer accepted.",
       "classification": "ACTIVE",
@@ -530,14 +530,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:159",
+        "OPEN_LOOP.md:160",
         "Lorena Block 5 pricing-template reference bridge — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "e74810d2c6163a29",
-      "sourceLine": 160,
+      "sourceLine": 161,
       "heading": "Lorena Block 5 pricing-template reference bridge — 2026-09-17",
       "statement": "Define separate economic rules if a reusable service template should create a project-specific Commercial APU or prefill a negotiated unit price. This block intentionally creates a versioned reference only, not a financial transformation.",
       "classification": "ACTIVE",
@@ -548,14 +548,14 @@
         "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:160",
+        "OPEN_LOOP.md:161",
         "Lorena Block 5 pricing-template reference bridge — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "17bc5c063f8779b0",
-      "sourceLine": 167,
+      "sourceLine": 168,
       "heading": "Lorena Block 4 company APU/Pricing template administration — 2026-09-17",
       "statement": "Inspect the actual new page in a local interactive browser at desktop and 390px in English/Spanish, including PMO author/checker separation, loading/error, save/refresh/reopen, and read-only/direct-URL denial. Source compilation and HTTP proof do not establish UI acceptance.",
       "classification": "ACTIVE",
@@ -566,14 +566,14 @@
         "module": "artifacts/bimlog/src/pages/FinancialApuWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:167",
+        "OPEN_LOOP.md:168",
         "Lorena Block 4 company APU/Pricing template administration — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "13001f3a8f13d3db",
-      "sourceLine": 168,
+      "sourceLine": 169,
       "heading": "Lorena Block 4 company APU/Pricing template administration — 2026-09-17",
       "statement": "Independently review the combined Blocks 1–4 diff and production bundle; run the API assembler from clean committed source and complete the production no-DROP/schema preview before any release claim.",
       "classification": "ACTIVE",
@@ -584,14 +584,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:168",
+        "OPEN_LOOP.md:169",
         "Lorena Block 4 company APU/Pricing template administration — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "57a2d15dc2990847",
-      "sourceLine": 171,
+      "sourceLine": 172,
       "heading": "Lorena Block 4 company APU/Pricing template administration — 2026-09-17",
       "statement": "Push/publish only after separate release authorization; then run authenticated Lorena/Ruben end-to-end field acceptance. This block is not deployed or customer accepted.",
       "classification": "ACTIVE",
@@ -602,14 +602,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:171",
+        "OPEN_LOOP.md:172",
         "Lorena Block 4 company APU/Pricing template administration — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "4558fb40c00ad12d",
-      "sourceLine": 180,
+      "sourceLine": 181,
       "heading": "Lorena Block 3 Delivery Workflow product and runtime — 2026-09-17",
       "statement": "Inspect the new administration, Intake selection, and Operations panel in a local interactive browser at desktop and 390px, including bilingual, permission, loading/error, save/refresh, and return states. Backend HTTP proof and a compiled frontend are not a full UI acceptance test.",
       "classification": "ACTIVE",
@@ -620,14 +620,14 @@
         "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:180",
+        "OPEN_LOOP.md:181",
         "Lorena Block 3 Delivery Workflow product and runtime — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "e80c4d1ce9f44ba4",
-      "sourceLine": 181,
+      "sourceLine": 182,
       "heading": "Lorena Block 3 Delivery Workflow product and runtime — 2026-09-17",
       "statement": "Independently review all Block 1–3 changes, schema mirror, and additive/no-DROP preview; run the clean-source API production assembler from a reviewed commit. Do not publish an uncommitted candidate.",
       "classification": "ACTIVE",
@@ -638,14 +638,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:181",
+        "OPEN_LOOP.md:182",
         "Lorena Block 3 Delivery Workflow product and runtime — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "51fefcec06d73cd6",
-      "sourceLine": 182,
+      "sourceLine": 183,
       "heading": "Lorena Block 3 Delivery Workflow product and runtime — 2026-09-17",
       "statement": "After separate release authorization, push and publish through governed Replit Shell, then run a complete authenticated Lorena/Ruben job cycle; do not call this local candidate published or field accepted. Existing activated Work Items must not receive invented historical workflow evidence.",
       "classification": "ACTIVE",
@@ -656,14 +656,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:182",
+        "OPEN_LOOP.md:183",
         "Lorena Block 3 Delivery Workflow product and runtime — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "66f0a84ae87adb21",
-      "sourceLine": 190,
+      "sourceLine": 191,
       "heading": "Lorena Block 2 Delivery Workflow engine — 2026-09-17",
       "statement": "Complete independent source review and the API production assembler from clean committed source before any release claim. Its clean-source guard correctly rejected this uncommitted candidate. No production schema application, push, or publication is authorized by this block.",
       "classification": "ACTIVE",
@@ -674,14 +674,14 @@
         "module": "artifacts/bimlog/src/pages/Dashboard.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:190",
+        "OPEN_LOOP.md:191",
         "Lorena Block 2 Delivery Workflow engine — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "13942b32a1054865",
-      "sourceLine": 192,
+      "sourceLine": 193,
       "heading": "Lorena Block 2 Delivery Workflow engine — 2026-09-17",
       "statement": "After separately approved release, inspect additive schema correspondence/no-DROP, publish via governed Replit Shell, and complete authenticated Lorena/Ruben live acceptance. Local HTTP proof cannot substitute for these gates.",
       "classification": "ACTIVE",
@@ -692,14 +692,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:192",
+        "OPEN_LOOP.md:193",
         "Lorena Block 2 Delivery Workflow engine — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "c299dd8c1bcb52df",
-      "sourceLine": 199,
+      "sourceLine": 200,
       "heading": "Lorena Block 1 follow-up — 2026-09-17",
       "statement": "Independently review the diff and complete the full local release gate. No push or publication is implied by this block.",
       "classification": "ACTIVE",
@@ -710,34 +710,16 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:199",
-        "Lorena Block 1 follow-up — 2026-09-17"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "7e1ef0c8c7a2e379",
-      "sourceLine": 200,
-      "heading": "Lorena Block 1 follow-up — 2026-09-17",
-      "statement": "With separate production approval, verify the migration preview and grant Lorena's existing account company-scoped PMO access; confirm her actual login sees the dedicated catalog route and controls, without global Super Administrator status.",
-      "classification": "ACTIVE",
-      "workClass": "FIELD_EVIDENCE",
-      "ownership": {
-        "owner": "Field acceptance",
-        "route": null,
-        "module": "evidence/field-acceptance"
-      },
-      "evidence": [
         "OPEN_LOOP.md:200",
         "Lorena Block 1 follow-up — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
-      "id": "5bd64fc588bb1e72",
+      "id": "7e1ef0c8c7a2e379",
       "sourceLine": 201,
       "heading": "Lorena Block 1 follow-up — 2026-09-17",
-      "statement": "Under authenticated production accounts, complete create/edit/deactivate/save/refresh/reopen and cross-project ID/history tests for all four catalogs; verify canonical Client correction path, classified Intake packages/tasks, activation, and real-project Operations filters/totals/exports. The local fixture cannot satisfy this field gate.",
+      "statement": "With separate production approval, verify the migration preview and grant Lorena's existing account company-scoped PMO access; confirm her actual login sees the dedicated catalog route and controls, without global Super Administrator status.",
       "classification": "ACTIVE",
       "workClass": "FIELD_EVIDENCE",
       "ownership": {
@@ -752,8 +734,26 @@
       "currentAuthority": false
     },
     {
+      "id": "5bd64fc588bb1e72",
+      "sourceLine": 202,
+      "heading": "Lorena Block 1 follow-up — 2026-09-17",
+      "statement": "Under authenticated production accounts, complete create/edit/deactivate/save/refresh/reopen and cross-project ID/history tests for all four catalogs; verify canonical Client correction path, classified Intake packages/tasks, activation, and real-project Operations filters/totals/exports. The local fixture cannot satisfy this field gate.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:202",
+        "Lorena Block 1 follow-up — 2026-09-17"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "726710a74813d59b",
-      "sourceLine": 208,
+      "sourceLine": 209,
       "heading": "Lens Next P32 bounded UI release — 2026-09-17",
       "statement": "Resolve the repeatable exact-artifact Windows startup miss (11.0/11.2 seconds against 8.0 seconds), then rerun the full pre-push gate and protected Lens Next behaviors; independently review the exact diff and commit. Do not simply increase or bypass the readiness budget.",
       "classification": "ACTIVE",
@@ -764,14 +764,14 @@
         "module": "artifacts/bimlog/src/features/lens-next"
       },
       "evidence": [
-        "OPEN_LOOP.md:208",
+        "OPEN_LOOP.md:209",
         "Lens Next P32 bounded UI release — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "e62d98c9214e19c8",
-      "sourceLine": 209,
+      "sourceLine": 210,
       "heading": "Lens Next P32 bounded UI release — 2026-09-17",
       "statement": "Push the reviewed code-only candidate, align exact Replit source, check two-way development/production schema correspondence and no destructive changes, publish through Replit Shell/UI, and run authenticated Chrome smoke. An unavailable provider SQL preview is not by itself a blocker.",
       "classification": "ACTIVE",
@@ -782,14 +782,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:209",
+        "OPEN_LOOP.md:210",
         "Lens Next P32 bounded UI release — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "71eb55743fddbe66",
-      "sourceLine": 210,
+      "sourceLine": 211,
       "heading": "Lens Next P32 bounded UI release — 2026-09-17",
       "statement": "Separately finish and govern the responsible-company database/API change; complete real-clash 2021/2025 proof and Blocks 3–4 before claiming full mockup parity.",
       "classification": "ACTIVE",
@@ -800,34 +800,16 @@
         "module": "artifacts/bimlog/src/features/lens-next"
       },
       "evidence": [
-        "OPEN_LOOP.md:210",
+        "OPEN_LOOP.md:211",
         "Lens Next P32 bounded UI release — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "095cd603e9983ab5",
-      "sourceLine": 217,
-      "heading": "Live QA financial attribution follow-up — 2026-09-17",
-      "statement": "Independently review the priced-time correction, run complete release gates, push/publish it, and repeat live Chrome time-entry QA with a fresh priced assignment. Do not rewrite the earlier unpriced QA entry without a separately governed correction path.",
-      "classification": "ACTIVE",
-      "workClass": "FIELD_EVIDENCE",
-      "ownership": {
-        "owner": "Field acceptance",
-        "route": null,
-        "module": "evidence/field-acceptance"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:217",
-        "Live QA financial attribution follow-up — 2026-09-17"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "62cb8fc1a372c561",
       "sourceLine": 218,
       "heading": "Live QA financial attribution follow-up — 2026-09-17",
-      "statement": "Verify Lorena's real company PMO catalog capability and governed Client/Discipline/Service/Phase administration under her account, second-user delegation, deliverable/submittal linking, and complete sample-job acceptance. The present Roberto Test 1 account cannot establish those acceptance claims.",
+      "statement": "Independently review the priced-time correction, run complete release gates, push/publish it, and repeat live Chrome time-entry QA with a fresh priced assignment. Do not rewrite the earlier unpriced QA entry without a separately governed correction path.",
       "classification": "ACTIVE",
       "workClass": "FIELD_EVIDENCE",
       "ownership": {
@@ -842,8 +824,26 @@
       "currentAuthority": false
     },
     {
+      "id": "62cb8fc1a372c561",
+      "sourceLine": 219,
+      "heading": "Live QA financial attribution follow-up — 2026-09-17",
+      "statement": "Verify Lorena's real company PMO catalog capability and governed Client/Discipline/Service/Phase administration under her account, second-user delegation, deliverable/submittal linking, and complete sample-job acceptance. The present Roberto Test 1 account cannot establish those acceptance claims.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:219",
+        "Live QA financial attribution follow-up — 2026-09-17"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "62c139a8f1149efa",
-      "sourceLine": 231,
+      "sourceLine": 232,
       "heading": "Lorena company catalog correction — 2026-09-16",
       "statement": "Exercise the actual production catalog UI in an authenticated browser at desktop and 390px in English and Spanish, including PMO edit, ordinary read-only, denial/retry, and Intake return/save/refresh; do not describe source assertions or typecheck as this acceptance.",
       "classification": "ACTIVE",
@@ -854,14 +854,14 @@
         "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:231",
+        "OPEN_LOOP.md:232",
         "Lorena company catalog correction — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "5657eafa815f77a7",
-      "sourceLine": 232,
+      "sourceLine": 233,
       "heading": "Lorena company catalog correction — 2026-09-16",
       "statement": "Reconcile the local API production build's deterministic `PLATFORM.md` additions for the Company Catalogs page and route; rerun the full build and Living Brief integrity gate.",
       "classification": "ACTIVE",
@@ -872,14 +872,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:232",
+        "OPEN_LOOP.md:233",
         "Lorena company catalog correction — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "312d50c16a20d921",
-      "sourceLine": 234,
+      "sourceLine": 235,
       "heading": "Lorena company catalog correction — 2026-09-16",
       "statement": "Complete independent UI/UX and production migration-preview review before publication.",
       "classification": "ACTIVE",
@@ -890,14 +890,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:234",
+        "OPEN_LOOP.md:235",
         "Lorena company catalog correction — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "7a57e89085aeae5a",
-      "sourceLine": 235,
+      "sourceLine": 236,
       "heading": "Lorena company catalog correction — 2026-09-16",
       "statement": "Production database migration and Lorena's actual company PMO grant require separate explicit authorization; then push, Replit publication, live Chrome verification, and Lorena field acceptance remain separate gates. The Operations financial-filter acceptance issue is not closed by this catalog correction.",
       "classification": "ACTIVE",
@@ -908,14 +908,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:235",
+        "OPEN_LOOP.md:236",
         "Lorena company catalog correction — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "832f423bf93d780a",
-      "sourceLine": 244,
+      "sourceLine": 245,
       "heading": "Operations Project Controls filter attribution — local candidate — 2026-09-16",
       "statement": "Inspect the production component at desktop and exact 390px in English and Spanish with populated, empty, loading/error, and permission-limited states, and compare against real project assignment totals after live publication. Source assertions and fixtures are not field acceptance.",
       "classification": "ACTIVE",
@@ -926,14 +926,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:244",
+        "OPEN_LOOP.md:245",
         "Operations Project Controls filter attribution — local candidate — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "9815890ddc92a966",
-      "sourceLine": 258,
+      "sourceLine": 259,
       "heading": "Lens Next modernization — authorized 2026-09-15",
       "statement": "Push and publish the exact P31 candidate under Roberto's 2026-09-16 authorization, then repeat acceptance against the deployed production surface and Navisworks host.",
       "classification": "ACTIVE",
@@ -944,14 +944,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:258",
+        "OPEN_LOOP.md:259",
         "Lens Next modernization — authorized 2026-09-15"
       ],
       "currentAuthority": false
     },
     {
       "id": "373a11706d82332f",
-      "sourceLine": 262,
+      "sourceLine": 263,
       "heading": "Product-default configuration and Intake reconciliation — authorized 2026-09-15",
       "statement": "Lorena's 2026-09-16 P31 acceptance findings remain open for release: remove Service/Phase from project setup while retaining task/package classification; provide a unified Client/Discipline/Service/Phase administration experience with explicit company/PMO authority; and verify Project Controls filters against real project rows, including whether package/member selections require attributable (rather than whole-scope) financial data. Local code correction and compilation are not production acceptance.",
       "classification": "ACTIVE",
@@ -962,34 +962,16 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:262",
+        "OPEN_LOOP.md:263",
         "Product-default configuration and Intake reconciliation — authorized 2026-09-15"
       ],
       "currentAuthority": false
     },
     {
       "id": "e90996ad61302c82",
-      "sourceLine": 272,
-      "heading": "Product-default configuration and Intake reconciliation — authorized 2026-09-15",
-      "statement": "Complete real-browser desktop, exact-390px, English, Spanish, and production persistence acceptance before recommending release; source-level activation, APU, Operations, and protected Lens regressions are part of Build 5.",
-      "classification": "ACTIVE",
-      "workClass": "FIELD_EVIDENCE",
-      "ownership": {
-        "owner": "Field acceptance",
-        "route": null,
-        "module": "evidence/field-acceptance"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:272",
-        "Product-default configuration and Intake reconciliation — authorized 2026-09-15"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "2094c4a7ca8e191f",
       "sourceLine": 273,
       "heading": "Product-default configuration and Intake reconciliation — authorized 2026-09-15",
-      "statement": "Reconcile Lorena's forthcoming EDT/task-management detail separately; the current screenshot is a reporting outcome, not sufficient authority for allocation formulas or task-state rules.",
+      "statement": "Complete real-browser desktop, exact-390px, English, Spanish, and production persistence acceptance before recommending release; source-level activation, APU, Operations, and protected Lens regressions are part of Build 5.",
       "classification": "ACTIVE",
       "workClass": "FIELD_EVIDENCE",
       "ownership": {
@@ -1004,8 +986,26 @@
       "currentAuthority": false
     },
     {
+      "id": "2094c4a7ca8e191f",
+      "sourceLine": 274,
+      "heading": "Product-default configuration and Intake reconciliation — authorized 2026-09-15",
+      "statement": "Reconcile Lorena's forthcoming EDT/task-management detail separately; the current screenshot is a reporting outcome, not sufficient authority for allocation formulas or task-state rules.",
+      "classification": "ACTIVE",
+      "workClass": "FIELD_EVIDENCE",
+      "ownership": {
+        "owner": "Field acceptance",
+        "route": null,
+        "module": "evidence/field-acceptance"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:274",
+        "Product-default configuration and Intake reconciliation — authorized 2026-09-15"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "67883518debdb902",
-      "sourceLine": 282,
+      "sourceLine": 283,
       "heading": "P30 Lens Next Platform-route independent-pane correction",
       "statement": "Complete real browser interaction acceptance against the P30 candidate, then push and publish only after explicit authorization.",
       "classification": "SUPERSEDED",
@@ -1023,7 +1023,7 @@
     },
     {
       "id": "f5c90438d00e771d",
-      "sourceLine": 291,
+      "sourceLine": 292,
       "heading": "P29 Lens Next working-viewport correction",
       "statement": "Embedded Navisworks 2025 field verification remains unavailable because the browser bridge reported disconnected despite Navisworks being open.",
       "classification": "ACTIVE",
@@ -1034,14 +1034,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:291",
+        "OPEN_LOOP.md:292",
         "P29 Lens Next working-viewport correction"
       ],
       "currentAuthority": false
     },
     {
       "id": "dc4251be8e19c36c",
-      "sourceLine": 299,
+      "sourceLine": 300,
       "heading": "P24 optional sharing publication and live acceptance — 2026-09-14",
       "statement": "Push and publish P26, resume controlled project 46 at initial budget creation, and complete the remaining review/approval/snapshot/contract/document/sharing live cycle.",
       "classification": "SUPERSEDED",
@@ -1059,7 +1059,7 @@
     },
     {
       "id": "37423c905d96ea6e",
-      "sourceLine": 302,
+      "sourceLine": 303,
       "heading": "P24 optional sharing publication and live acceptance — 2026-09-14",
       "statement": "Push and publish P27, verify RFI-0001 retains September 22, and finish the remaining controlled record and persistence gates.",
       "classification": "SUPERSEDED",
@@ -1077,7 +1077,7 @@
     },
     {
       "id": "297771568f50b72c",
-      "sourceLine": 303,
+      "sourceLine": 304,
       "heading": "P24 optional sharing publication and live acceptance — 2026-09-14",
       "statement": "Push the exact clean P24 commit to the governed GitHub production lineage.",
       "classification": "SUPERSEDED",
@@ -1095,7 +1095,7 @@
     },
     {
       "id": "e8ec357222e2bb63",
-      "sourceLine": 304,
+      "sourceLine": 305,
       "heading": "P24 optional sharing publication and live acceptance — 2026-09-14",
       "statement": "Synchronize that exact commit through Replit Shell and require a zero-drop production database preview.",
       "classification": "ACTIVE",
@@ -1106,14 +1106,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:304",
+        "OPEN_LOOP.md:305",
         "P24 optional sharing publication and live acceptance — 2026-09-14"
       ],
       "currentAuthority": false
     },
     {
       "id": "56cc3d85e1e6c994",
-      "sourceLine": 305,
+      "sourceLine": 306,
       "heading": "P24 optional sharing publication and live acceptance — 2026-09-14",
       "statement": "Publish once and verify the exact live version and health in Chrome.",
       "classification": "SUPERSEDED",
@@ -1131,7 +1131,7 @@
     },
     {
       "id": "57b102e7fc90db0f",
-      "sourceLine": 306,
+      "sourceLine": 307,
       "heading": "P24 optional sharing publication and live acceptance — 2026-09-14",
       "statement": "Complete a fresh sample Job Intake/APU/Operations cycle, including persistence, assignments, budget, Submittal, file, and controlled optional-sharing checks.",
       "classification": "ACTIVE",
@@ -1142,14 +1142,14 @@
         "module": "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:306",
+        "OPEN_LOOP.md:307",
         "P24 optional sharing publication and live acceptance — 2026-09-14"
       ],
       "currentAuthority": false
     },
     {
       "id": "9723602f5119cd76",
-      "sourceLine": 307,
+      "sourceLine": 308,
       "heading": "P24 optional sharing publication and live acceptance — 2026-09-14",
       "statement": "Obtain action-time confirmation before the final external Telegram send to Roberto's private test destination and record provider acknowledgement.",
       "classification": "ACTIVE",
@@ -1160,14 +1160,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:307",
+        "OPEN_LOOP.md:308",
         "P24 optional sharing publication and live acceptance — 2026-09-14"
       ],
       "currentAuthority": false
     },
     {
       "id": "240c934e04199f0e",
-      "sourceLine": 315,
+      "sourceLine": 316,
       "heading": "Optional email/Telegram sharing release gates — 2026-09-15",
       "statement": "Create or grant any production QA account/permission only after Roberto separately authorizes that exact production mutation.",
       "classification": "ACTIVE",
@@ -1178,14 +1178,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:315",
+        "OPEN_LOOP.md:316",
         "Optional email/Telegram sharing release gates — 2026-09-15"
       ],
       "currentAuthority": false
     },
     {
       "id": "99449afa6562c11d",
-      "sourceLine": 316,
+      "sourceLine": 317,
       "heading": "Optional email/Telegram sharing release gates — 2026-09-15",
       "statement": "Execute an actual Telegram delivery only after action-time confirmation for the exact artifact and Roberto private test destination.",
       "classification": "ACTIVE",
@@ -1196,14 +1196,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:316",
+        "OPEN_LOOP.md:317",
         "Optional email/Telegram sharing release gates — 2026-09-15"
       ],
       "currentAuthority": false
     },
     {
       "id": "3e64365a201992bc",
-      "sourceLine": 317,
+      "sourceLine": 318,
       "heading": "Optional email/Telegram sharing release gates — 2026-09-15",
       "statement": "Push, Replit synchronization, publication, deployment, live Chrome verification, and external acceptance remain separate authorization/evidence gates.",
       "classification": "SUPERSEDED",
@@ -1221,7 +1221,7 @@
     },
     {
       "id": "ee45f876808dfbe6",
-      "sourceLine": 324,
+      "sourceLine": 325,
       "heading": "P23 full live Job Intake smoke closure — 2026-09-14",
       "statement": "Pass governed regressions, publish P23 with zero-drop preview, and verify Operations progress and reload persistence.",
       "classification": "SUPERSEDED",
@@ -1239,7 +1239,7 @@
     },
     {
       "id": "27eacb5b7dedf044",
-      "sourceLine": 331,
+      "sourceLine": 332,
       "heading": "P22 full live Job Intake smoke closure — 2026-09-14",
       "statement": "Pass governed regressions, publish with zero-drop database preview, and repeat the complete live activation on a fresh QA project.",
       "classification": "ACTIVE",
@@ -1250,14 +1250,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:331",
+        "OPEN_LOOP.md:332",
         "P22 full live Job Intake smoke closure — 2026-09-14"
       ],
       "currentAuthority": false
     },
     {
       "id": "94ba873af434b1c0",
-      "sourceLine": 2565,
+      "sourceLine": 2566,
       "heading": "v1.05.N14-P10 integrated release gates",
       "statement": "The superseded N14-P10 package is not a current field-acceptance object. Final Navisworks field acceptance remains against the latest accepted N17 package and Platform descendant.",
       "classification": "ACCEPTED_LIMITATION",
@@ -1268,14 +1268,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2565",
+        "OPEN_LOOP.md:2566",
         "Preserved fail-closed product boundary"
       ],
       "currentAuthority": false
     },
     {
       "id": "c40493849346a7f2",
-      "sourceLine": 2583,
+      "sourceLine": 2584,
       "heading": "v1.05.N17-P12 Build 47 release-closure gates",
       "statement": "Obtain Ruben's final dual-project field confirmation against the latest accepted N17 package and current Platform descendant; do not infer customer acceptance from packaging or delivery.",
       "classification": "ACTIVE",
@@ -1286,14 +1286,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2583",
+        "OPEN_LOOP.md:2584",
         "v1.05.N17-P12 Build 47 release-closure gates"
       ],
       "currentAuthority": false
     },
     {
       "id": "39cf68662b2b84c0",
-      "sourceLine": 2595,
+      "sourceLine": 2596,
       "heading": "Prework 02 project-scope security gates",
       "statement": "Integrate only through a separately reviewed authoritative-lineage gate;",
       "classification": "ACTIVE",
@@ -1304,14 +1304,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2595",
+        "OPEN_LOOP.md:2596",
         "Prework 02 project-scope security gates"
       ],
       "currentAuthority": false
     },
     {
       "id": "e8126da4f63c40f6",
-      "sourceLine": 2604,
+      "sourceLine": 2605,
       "heading": "Prework 03 audited project-retirement gates",
       "statement": "Integrate/deploy only under a later separately reviewed release gate.",
       "classification": "ACTIVE",
@@ -1322,14 +1322,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2604",
+        "OPEN_LOOP.md:2605",
         "Prework 03 audited project-retirement gates"
       ],
       "currentAuthority": false
     },
     {
       "id": "82750d9a04324caa",
-      "sourceLine": 2613,
+      "sourceLine": 2614,
       "heading": "Prework 05 unified action/audit gates",
       "statement": "Adopt the projection contract incrementally in future Coordination Delivery builds; no mass rewrite is authorized.",
       "classification": "ACTIVE",
@@ -1340,14 +1340,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2613",
+        "OPEN_LOOP.md:2614",
         "Prework 05 unified action/audit gates"
       ],
       "currentAuthority": false
     },
     {
       "id": "749dcdf4833ab74d",
-      "sourceLine": 2622,
+      "sourceLine": 2623,
       "heading": "Prework 04 enterprise-identity gates",
       "statement": "Apply the explicit migration only under a later exact database authorization and verified backup/rollback gate.",
       "classification": "ACTIVE",
@@ -1358,14 +1358,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2622",
+        "OPEN_LOOP.md:2623",
         "Prework 04 enterprise-identity gates"
       ],
       "currentAuthority": false
     },
     {
       "id": "9ce84587b7374021",
-      "sourceLine": 2623,
+      "sourceLine": 2624,
       "heading": "Prework 04 enterprise-identity gates",
       "statement": "Integrate/deploy only under a later separately reviewed release gate.",
       "classification": "SUPERSEDED",
@@ -1383,7 +1383,7 @@
     },
     {
       "id": "db0059e0c6cdfa4f",
-      "sourceLine": 2632,
+      "sourceLine": 2633,
       "heading": "Prework 06 connector and Coordination File foundation gates",
       "statement": "Review and integrate this checkpoint into the authoritative delivery lineage before any database application.",
       "classification": "ACTIVE",
@@ -1394,34 +1394,16 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2632",
-        "Prework 06 connector and Coordination File foundation gates"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "891921c2eff266de",
-      "sourceLine": 2633,
-      "heading": "Prework 06 connector and Coordination File foundation gates",
-      "statement": "Apply the migration only under separate exact database authorization, backup, reconciliation and rollback gates.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
         "OPEN_LOOP.md:2633",
         "Prework 06 connector and Coordination File foundation gates"
       ],
       "currentAuthority": false
     },
     {
-      "id": "7628ceec15aa7928",
+      "id": "891921c2eff266de",
       "sourceLine": 2634,
       "heading": "Prework 06 connector and Coordination File foundation gates",
-      "statement": "Build SharePoint/Outlook connector behavior, routes, UI and live synchronization only in later bounded delivery builds.",
+      "statement": "Apply the migration only under separate exact database authorization, backup, reconciliation and rollback gates.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -1436,10 +1418,10 @@
       "currentAuthority": false
     },
     {
-      "id": "bc9b8499e8e21357",
-      "sourceLine": 2644,
-      "heading": "Coordination Delivery Release A — Build 1 gates",
-      "statement": "Implement the first provider adapter only in the next bounded build; no provider activation is part of Build 1.",
+      "id": "7628ceec15aa7928",
+      "sourceLine": 2635,
+      "heading": "Prework 06 connector and Coordination File foundation gates",
+      "statement": "Build SharePoint/Outlook connector behavior, routes, UI and live synchronization only in later bounded delivery builds.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -1448,16 +1430,16 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2644",
-        "Coordination Delivery Release A — Build 1 gates"
+        "OPEN_LOOP.md:2635",
+        "Prework 06 connector and Coordination File foundation gates"
       ],
       "currentAuthority": false
     },
     {
-      "id": "01f38e82d552346a",
+      "id": "bc9b8499e8e21357",
       "sourceLine": 2645,
       "heading": "Coordination Delivery Release A — Build 1 gates",
-      "statement": "Apply Prework migrations only under separate exact database authorization and verified backup/rollback gates.",
+      "statement": "Implement the first provider adapter only in the next bounded build; no provider activation is part of Build 1.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -1472,8 +1454,26 @@
       "currentAuthority": false
     },
     {
+      "id": "01f38e82d552346a",
+      "sourceLine": 2646,
+      "heading": "Coordination Delivery Release A — Build 1 gates",
+      "statement": "Apply Prework migrations only under separate exact database authorization and verified backup/rollback gates.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:2646",
+        "Coordination Delivery Release A — Build 1 gates"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "4f87a6bd51a7f31b",
-      "sourceLine": 2683,
+      "sourceLine": 2684,
       "heading": "UX workspace-width normalization gates",
       "statement": "Push/publication and post-publication Chrome comparison against IgniteSmart Operations remain separate release gates.",
       "classification": "ACTIVE",
@@ -1484,14 +1484,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2683",
+        "OPEN_LOOP.md:2684",
         "UX workspace-width normalization gates"
       ],
       "currentAuthority": false
     },
     {
       "id": "d0fd6d3a6ed71480",
-      "sourceLine": 2689,
+      "sourceLine": 2690,
       "heading": "Coordination Release C + UX Build 17 integration — 2026-09-10",
       "statement": "Provider activation and the explicitly deferred enterprise/connector migrations still require separate exact authorization, backup, rollback, and production verification.",
       "classification": "ACTIVE",
@@ -1502,14 +1502,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2689",
+        "OPEN_LOOP.md:2690",
         "Coordination Release C + UX Build 17 integration — 2026-09-10"
       ],
       "currentAuthority": false
     },
     {
       "id": "87403ae085388679",
-      "sourceLine": 2699,
+      "sourceLine": 2700,
       "heading": "v1.05.N17-P13 legacy Open Working View closure",
       "statement": "Obtain Ruben confirmation on one historical and one new viewpoint against the current accepted release; publication alone is not field acceptance.",
       "classification": "ACTIVE",
@@ -1520,14 +1520,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2699",
+        "OPEN_LOOP.md:2700",
         "v1.05.N17-P13 legacy Open Working View closure"
       ],
       "currentAuthority": false
     },
     {
       "id": "5aa1c169238566fa",
-      "sourceLine": 2707,
+      "sourceLine": 2708,
       "heading": "v1.05.N17-P14 historical digest contract closure",
       "statement": "Ruben field acceptance must prove one new and one historical Open Working View path, camera/sectioning, and one XML export smoke before final freeze audit.",
       "classification": "ACTIVE",
@@ -1538,14 +1538,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2707",
+        "OPEN_LOOP.md:2708",
         "v1.05.N17-P14 historical digest contract closure"
       ],
       "currentAuthority": false
     },
     {
       "id": "b7e500230390b8f9",
-      "sourceLine": 2737,
+      "sourceLine": 2738,
       "heading": "Build 21 sole-owner budget approval override",
       "statement": "Complete the external 20-row APU/Job Intake smoke-test return and, when controlled prerequisites exist, field-confirm the live sole-owner budget override with an effective approval policy. Do not invent customer financial policy or users to force this gate.",
       "classification": "ACTIVE",
@@ -1556,14 +1556,14 @@
         "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2737",
+        "OPEN_LOOP.md:2738",
         "Build 21 sole-owner budget approval override"
       ],
       "currentAuthority": false
     },
     {
       "id": "2fca48c7f5251d2f",
-      "sourceLine": 2746,
+      "sourceLine": 2747,
       "heading": "POST-P17 assurance Builds 01–05",
       "statement": "External user smoke-test return remains a separate field-acceptance gate; this internal block does not replace it.",
       "classification": "ACTIVE",
@@ -1574,14 +1574,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2746",
+        "OPEN_LOOP.md:2747",
         "POST-P17 assurance Builds 01–05"
       ],
       "currentAuthority": false
     },
     {
       "id": "0912ec6c93c1c2fb",
-      "sourceLine": 2755,
+      "sourceLine": 2756,
       "heading": "POST-P17 assurance Builds 06–10",
       "statement": "External user smoke-test return remains the field-acceptance authority and is not replaced by this internal block.",
       "classification": "ACTIVE",
@@ -1592,14 +1592,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2755",
+        "OPEN_LOOP.md:2756",
         "POST-P17 assurance Builds 06–10"
       ],
       "currentAuthority": false
     },
     {
       "id": "a8a346c8d29a854c",
-      "sourceLine": 2764,
+      "sourceLine": 2765,
       "heading": "POST-P17 assurance Builds 11–15",
       "statement": "External user smoke-test return remains required for field acceptance.",
       "classification": "ACTIVE",
@@ -1610,14 +1610,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2764",
+        "OPEN_LOOP.md:2765",
         "POST-P17 assurance Builds 11–15"
       ],
       "currentAuthority": false
     },
     {
       "id": "8ac1b0e08d02eb38",
-      "sourceLine": 2774,
+      "sourceLine": 2775,
       "heading": "POST-P17 assurance Builds 16–20",
       "statement": "External user smoke-test return remains the separate field-acceptance authority.",
       "classification": "ACTIVE",
@@ -1628,14 +1628,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2774",
+        "OPEN_LOOP.md:2775",
         "POST-P17 assurance Builds 16–20"
       ],
       "currentAuthority": false
     },
     {
       "id": "6aa7c7889e2f5fd3",
-      "sourceLine": 2785,
+      "sourceLine": 2786,
       "heading": "POST-P17 assurance Builds 21–25",
       "statement": "External user field acceptance remains separate from this internal assurance block.",
       "classification": "ACTIVE",
@@ -1646,14 +1646,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2785",
+        "OPEN_LOOP.md:2786",
         "POST-P17 assurance Builds 21–25"
       ],
       "currentAuthority": false
     },
     {
       "id": "5533a376a8675a1a",
-      "sourceLine": 2794,
+      "sourceLine": 2795,
       "heading": "APU/Job Intake assignment-to-Operations closure — 4 micro-builds",
       "statement": "Push, Replit publication, live Chrome verification, and Lorena/Ruben field acceptance remain separate explicit gates.",
       "classification": "ACTIVE",
@@ -1664,14 +1664,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2794",
+        "OPEN_LOOP.md:2795",
         "APU/Job Intake assignment-to-Operations closure — 4 micro-builds"
       ],
       "currentAuthority": false
     },
     {
       "id": "d1b5241b44103a3d",
-      "sourceLine": 2803,
+      "sourceLine": 2804,
       "heading": "POST-P17 assurance Builds 26–30",
       "statement": "External user field acceptance remains separate from this internal assurance block.",
       "classification": "SUPERSEDED",
@@ -1689,7 +1689,7 @@
     },
     {
       "id": "49d65ffa74e4f90b",
-      "sourceLine": 2812,
+      "sourceLine": 2813,
       "heading": "POST-P17 assurance Builds 31–35",
       "statement": "External user field acceptance remains separate from this internal assurance block.",
       "classification": "SUPERSEDED",
@@ -1707,7 +1707,7 @@
     },
     {
       "id": "bc4915ba2fdb99f4",
-      "sourceLine": 2822,
+      "sourceLine": 2823,
       "heading": "POST-P17 assurance Builds 36–40",
       "statement": "External user field acceptance remains separate from this internal assurance block.",
       "classification": "SUPERSEDED",
@@ -1725,7 +1725,7 @@
     },
     {
       "id": "15d581ee494f81de",
-      "sourceLine": 2831,
+      "sourceLine": 2832,
       "heading": "POST-P17 assurance Builds 41–45",
       "statement": "External user field acceptance remains separate from this internal assurance block.",
       "classification": "SUPERSEDED",
@@ -1743,7 +1743,7 @@
     },
     {
       "id": "3ced6667f9264a42",
-      "sourceLine": 2838,
+      "sourceLine": 2839,
       "heading": "POST-P17 assurance Builds 46–50",
       "statement": "External user field acceptance remains separate.",
       "classification": "ACTIVE",
@@ -1754,14 +1754,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2838",
+        "OPEN_LOOP.md:2839",
         "POST-P17 assurance Builds 46–50"
       ],
       "currentAuthority": false
     },
     {
       "id": "53aaf508089486c7",
-      "sourceLine": 2847,
+      "sourceLine": 2848,
       "heading": "POST-P17 assurance Builds 56–60",
       "statement": "External user field acceptance remains separate.",
       "classification": "SUPERSEDED",
@@ -1779,7 +1779,7 @@
     },
     {
       "id": "5989814b604e270c",
-      "sourceLine": 2856,
+      "sourceLine": 2857,
       "heading": "POST-P17 assurance Builds 51–55",
       "statement": "External user field acceptance remains separate.",
       "classification": "SUPERSEDED",
@@ -1797,7 +1797,7 @@
     },
     {
       "id": "c082add1bad13e10",
-      "sourceLine": 2884,
+      "sourceLine": 2885,
       "heading": "P21 Operations identity and safe Replit publication closure",
       "statement": "Push the exact accepted P21 lineage, synchronize through Replit Shell, confirm a non-destructive publication preview, publish once, and live-verify through Chrome.",
       "classification": "SUPERSEDED",
@@ -1815,7 +1815,7 @@
     },
     {
       "id": "8f3e2745b438dbf4",
-      "sourceLine": 2885,
+      "sourceLine": 2886,
       "heading": "P21 Operations identity and safe Replit publication closure",
       "statement": "Lorena/Ruben field acceptance remains separate.",
       "classification": "ACTIVE",
@@ -1826,14 +1826,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2885",
+        "OPEN_LOOP.md:2886",
         "P21 Operations identity and safe Replit publication closure"
       ],
       "currentAuthority": false
     },
     {
       "id": "70616ba1af39b265",
-      "sourceLine": 2903,
+      "sourceLine": 2904,
       "heading": "POST-P18 release hygiene Builds 76–80",
       "statement": "Synchronize the stale GitHub `main` ref only after Roberto separately authorizes the exact push.",
       "classification": "ACTIVE",
@@ -1844,14 +1844,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2903",
+        "OPEN_LOOP.md:2904",
         "POST-P18 release hygiene Builds 76–80"
       ],
       "currentAuthority": false
     },
     {
       "id": "b522809b8a13a4c8",
-      "sourceLine": 2904,
+      "sourceLine": 2905,
       "heading": "POST-P18 release hygiene Builds 76–80",
       "statement": "External Generic APU/Job Intake and Lens Next field acceptance remain separate.",
       "classification": "ACTIVE",
@@ -1862,14 +1862,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2904",
+        "OPEN_LOOP.md:2905",
         "POST-P18 release hygiene Builds 76–80"
       ],
       "currentAuthority": false
     },
     {
       "id": "d0a630aeea747b33",
-      "sourceLine": 2914,
+      "sourceLine": 2915,
       "heading": "APU/Job Intake empty-prerequisite correction Builds 1–5",
       "statement": "Push, Replit synchronization/publication, live production verification, and external user smoke-test acceptance require separate authorization and evidence.",
       "classification": "SUPERSEDED",
@@ -1887,7 +1887,7 @@
     },
     {
       "id": "fdf0c109ee051919",
-      "sourceLine": 2926,
+      "sourceLine": 2927,
       "heading": "Master catalogs and classified Operations Builds 1–10",
       "statement": "Independent review must inspect the Build 10 evidence and presentation before release acceptance.",
       "classification": "ACTIVE",
@@ -1898,14 +1898,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2926",
+        "OPEN_LOOP.md:2927",
         "Master catalogs and classified Operations Builds 1–10"
       ],
       "currentAuthority": false
     },
     {
       "id": "895ffcba3aa55afd",
-      "sourceLine": 2927,
+      "sourceLine": 2928,
       "heading": "Master catalogs and classified Operations Builds 1–10",
       "statement": "Push, Replit synchronization, production migration/publication, live Chrome verification, and Lorena/Ruben field acceptance require separate authorization and evidence.",
       "classification": "ACTIVE",
@@ -1916,14 +1916,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2927",
+        "OPEN_LOOP.md:2928",
         "Master catalogs and classified Operations Builds 1–10"
       ],
       "currentAuthority": false
     },
     {
       "id": "04eb305c4791b534",
-      "sourceLine": 2929,
+      "sourceLine": 2930,
       "heading": "Master catalogs and classified Operations Builds 1–10",
       "statement": "Repository-wide platform-audit P1 candidates remain a separate stabilization stream; zero P0 findings were reported and none of the printed findings targeted the audited Intake/APU/Operations files.",
       "classification": "ACTIVE",
@@ -1934,14 +1934,14 @@
         "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2929",
+        "OPEN_LOOP.md:2930",
         "Master catalogs and classified Operations Builds 1–10"
       ],
       "currentAuthority": false
     },
     {
       "id": "fb8b3c99c0f977e1",
-      "sourceLine": 2938,
+      "sourceLine": 2939,
       "heading": "Master catalogs and classified Operations Builds 1–10",
       "statement": "Complete the corrected Replit sync, inspect a non-destructive publish preview, publish P21, and verify the package-responsible save/reload path in live Chrome.",
       "classification": "SUPERSEDED",
@@ -1959,7 +1959,7 @@
     },
     {
       "id": "7f2603a67d7e6f55",
-      "sourceLine": 2946,
+      "sourceLine": 2947,
       "heading": "P28 Lens Next ELARA regression closure",
       "statement": "Push and publish the exact accepted P28 commit only after explicit authorization.",
       "classification": "SUPERSEDED",
@@ -1977,7 +1977,7 @@
     },
     {
       "id": "afdf65d161cc914b",
-      "sourceLine": 2947,
+      "sourceLine": 2948,
       "heading": "P28 Lens Next ELARA regression closure",
       "statement": "Verify ELARA XML export and current-record actions in live production after publication.",
       "classification": "ACTIVE",
@@ -1988,14 +1988,14 @@
         "module": "artifacts/bimlog/src/features/lens-next"
       },
       "evidence": [
-        "OPEN_LOOP.md:2947",
+        "OPEN_LOOP.md:2948",
         "P28 Lens Next ELARA regression closure"
       ],
       "currentAuthority": false
     },
     {
       "id": "dc879bf832ad3205",
-      "sourceLine": 2948,
+      "sourceLine": 2949,
       "heading": "P28 Lens Next ELARA regression closure",
       "statement": "Keep historical pre-digest packages quarantined unless separately recreated or repaired from an authoritative exact view.",
       "classification": "ACCEPTED_LIMITATION",
@@ -2006,14 +2006,14 @@
         "module": "artifacts/bimlog/src/features/lens-next"
       },
       "evidence": [
-        "OPEN_LOOP.md:2948",
+        "OPEN_LOOP.md:2949",
         "Preserved fail-closed product boundary"
       ],
       "currentAuthority": false
     },
     {
       "id": "388f4d60c54053f3",
-      "sourceLine": 2956,
+      "sourceLine": 2957,
       "heading": "P31 Lens Next modernization publication",
       "statement": "Complete Native-connected Working View, XML export, and Navisworks field acceptance with the bridge connected; browser-only verification must not substitute for this gate.",
       "classification": "ACTIVE",
@@ -2024,14 +2024,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2956",
+        "OPEN_LOOP.md:2957",
         "P31 Lens Next modernization publication"
       ],
       "currentAuthority": false
     },
     {
       "id": "4d7e461e13bf682d",
-      "sourceLine": 2962,
+      "sourceLine": 2963,
       "heading": "Lorena intake-controls publication preservation",
       "statement": "Pass the complete governed pre-push gate, record the corrected source commit, push it, and synchronize exact GitHub `master` in Replit Shell.",
       "classification": "ACTIVE",
@@ -2042,14 +2042,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2962",
+        "OPEN_LOOP.md:2963",
         "Lorena intake-controls publication preservation"
       ],
       "currentAuthority": false
     },
     {
       "id": "fe6edef3dab4b90d",
-      "sourceLine": 2964,
+      "sourceLine": 2965,
       "heading": "Lorena intake-controls publication preservation",
       "statement": "From exact pushed source, rerun two-way development/production schema correspondence and the no-new-DROP source gate. Inspect any actual Replit migration warning; an unavailable SQL preview is not a gate.",
       "classification": "ACTIVE",
@@ -2060,14 +2060,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2964",
+        "OPEN_LOOP.md:2965",
         "Lorena intake-controls publication preservation"
       ],
       "currentAuthority": false
     },
     {
       "id": "b7112fc4f04e9cc1",
-      "sourceLine": 2965,
+      "sourceLine": 2966,
       "heading": "Lorena intake-controls publication preservation",
       "statement": "Publish once after the correspondence and no-drop checks pass; verify exact live identity, health, authenticated Lorena/Intake/Operations paths, persistence, and unaffected baseline workflows in Chrome. External Lorena/Ruben field acceptance remains separate.",
       "classification": "ACTIVE",
@@ -2078,14 +2078,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2965",
+        "OPEN_LOOP.md:2966",
         "Lorena intake-controls publication preservation"
       ],
       "currentAuthority": false
     },
     {
       "id": "c458320492ac15f9",
-      "sourceLine": 2971,
+      "sourceLine": 2972,
       "heading": "Roberto live Job Intake / APU regression — 2026-09-16",
       "statement": "Complete whole-product build and independent review of the local correction, then MAIN-only governed push/Replit Shell synchronization, exact schema/no-drop verification, and publish.",
       "classification": "ACTIVE",
@@ -2096,14 +2096,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2971",
+        "OPEN_LOOP.md:2972",
         "Roberto live Job Intake / APU regression — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "0f8e4fed7d890cdb",
-      "sourceLine": 2972,
+      "sourceLine": 2973,
       "heading": "Roberto live Job Intake / APU regression — 2026-09-16",
       "statement": "Re-run a fresh named live job after publication; verify $75 × 80 = $6,000 across Intake, contract, Operations, reporting, refresh, and exports. Preserve project 50 as failed QA evidence; do not freeze its erroneous baseline.",
       "classification": "ACTIVE",
@@ -2114,14 +2114,14 @@
         "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2972",
+        "OPEN_LOOP.md:2973",
         "Roberto live Job Intake / APU regression — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "d56b3f650993becf",
-      "sourceLine": 2973,
+      "sourceLine": 2974,
       "heading": "Roberto live Job Intake / APU regression — 2026-09-16",
       "statement": "Diagnose missing catalog options using read-only production API/database evidence, then populate/govern the correct authority without blind production seeding; verify Lorena's company-scoped PMO access with her existing account.",
       "classification": "ACTIVE",
@@ -2132,14 +2132,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2973",
+        "OPEN_LOOP.md:2974",
         "Roberto live Job Intake / APU regression — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "624235a3b4a9ac35",
-      "sourceLine": 2974,
+      "sourceLine": 2975,
       "heading": "Roberto live Job Intake / APU regression — 2026-09-16",
       "statement": "Fix and retest intermittent Intake error toast, classification filters, approved-budget path under a genuinely authorized finance user, and multi-user assignment/redelegation under eligible existing users. Do not invent people or financial approvals.",
       "classification": "ACTIVE",
@@ -2150,14 +2150,14 @@
         "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2974",
+        "OPEN_LOOP.md:2975",
         "Roberto live Job Intake / APU regression — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "9870652fe40ddde6",
-      "sourceLine": 2976,
+      "sourceLine": 2977,
       "heading": "Roberto live Job Intake / APU regression — 2026-09-16",
       "statement": "Verify the local autosave error-banner recovery in a fresh published Chrome run; the local candidate clears only the prior matching autosave error after a successful retry.",
       "classification": "ACTIVE",
@@ -2168,14 +2168,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2976",
+        "OPEN_LOOP.md:2977",
         "Roberto live Job Intake / APU regression — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "b70220f0963275c1",
-      "sourceLine": 2978,
+      "sourceLine": 2979,
       "heading": "Roberto live Job Intake / APU regression — 2026-09-16",
       "statement": "Have the appropriate owner review each suspect record and its original pricing intent before any remediation claim or financial action. Preserve immutable baselines; do not repair by overwriting history.",
       "classification": "ACTIVE",
@@ -2186,34 +2186,16 @@
         "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:2978",
+        "OPEN_LOOP.md:2979",
         "Roberto live Job Intake / APU regression — 2026-09-16"
       ],
       "currentAuthority": false
     },
     {
       "id": "801509a379512f2e",
-      "sourceLine": 2984,
-      "heading": "Publication dependency-security gate — 2026-09-17",
-      "statement": "Inspect the exact package/lockfile semantic delta, run the complete local gate and affected generator check, obtain independent acceptance, commit and push the reviewed source, then synchronize exact clean source through Replit Shell without Replit Agents.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:2984",
-        "Publication dependency-security gate — 2026-09-17"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "77dbc0449c508b09",
       "sourceLine": 2985,
       "heading": "Publication dependency-security gate — 2026-09-17",
-      "statement": "Repeat the Replit build, schema-correspondence/no-drop check, security scan, and guarded publication; do not disable or bypass Replit's security protections or copy development data over production.",
+      "statement": "Inspect the exact package/lockfile semantic delta, run the complete local gate and affected generator check, obtain independent acceptance, commit and push the reviewed source, then synchronize exact clean source through Replit Shell without Replit Agents.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -2228,8 +2210,26 @@
       "currentAuthority": false
     },
     {
-      "id": "4adda1b7284ca55d",
+      "id": "77dbc0449c508b09",
       "sourceLine": 2986,
+      "heading": "Publication dependency-security gate — 2026-09-17",
+      "statement": "Repeat the Replit build, schema-correspondence/no-drop check, security scan, and guarded publication; do not disable or bypass Replit's security protections or copy development data over production.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:2986",
+        "Publication dependency-security gate — 2026-09-17"
+      ],
+      "currentAuthority": false
+    },
+    {
+      "id": "4adda1b7284ca55d",
+      "sourceLine": 2987,
       "heading": "Publication dependency-security gate — 2026-09-17",
       "statement": "After a verified publication, run the full authenticated Chrome Job Intake/APU/Operations smoke with a fresh sample job and record every unexercised permission, finance, multi-user, artifact, and Lorena field gate honestly.",
       "classification": "ACTIVE",
@@ -2240,14 +2240,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:2986",
+        "OPEN_LOOP.md:2987",
         "Publication dependency-security gate — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "3d54f9bc89770c20",
-      "sourceLine": 2995,
+      "sourceLine": 2996,
       "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
       "statement": "Blocks 2–10: implement and verify the actual mockup-inspired workflow against real authorized data; do not claim literal 3D/images/counts until provenance and feasibility gates close. Preserve P31 Working View, XML, digest and history behavior.",
       "classification": "SUPERSEDED",
@@ -2265,7 +2265,7 @@
     },
     {
       "id": "9432fdc131307101",
-      "sourceLine": 2996,
+      "sourceLine": 2997,
       "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
       "statement": "Publish only an accepted integrated release checkpoint after source review and non-destructive Replit Shell release verification; never use Replit Agents. Chrome smoke and Native 2021/2025 field proof remain separate after publication.",
       "classification": "ACTIVE",
@@ -2276,34 +2276,16 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:2996",
-        "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "451005a68ee836d0",
-      "sourceLine": 2997,
-      "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
-      "statement": "Block 2, Builds 6–10: prototype one exact clash's bounded 3D neighborhood—not just two elements and not the whole model—with spatial/relevance selection, clipping of long elements, stable IDs/transforms, local-only package size/rights controls, 2021/2025 proof, and interactive performance measurements. Gate Blocks 3–4 on its result.",
-      "classification": "ACTIVE",
-      "workClass": "PRODUCT_WORK",
-      "ownership": {
-        "owner": "Lens Next",
-        "route": "/lens-next",
-        "module": "artifacts/bimlog/src/features/lens-next"
-      },
-      "evidence": [
         "OPEN_LOOP.md:2997",
         "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
-      "id": "bc565d6694e03bf9",
+      "id": "451005a68ee836d0",
       "sourceLine": 2998,
       "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
-      "statement": "Block 3, Builds 11–15: after a passing prototype, implement versioned bridge, authorization/model binding, provenance and fail-closed export limits while preserving Working View/XML.",
+      "statement": "Block 2, Builds 6–10: prototype one exact clash's bounded 3D neighborhood—not just two elements and not the whole model—with spatial/relevance selection, clipping of long elements, stable IDs/transforms, local-only package size/rights controls, 2021/2025 proof, and interactive performance measurements. Gate Blocks 3–4 on its result.",
       "classification": "ACTIVE",
       "workClass": "PRODUCT_WORK",
       "ownership": {
@@ -2318,10 +2300,10 @@
       "currentAuthority": false
     },
     {
-      "id": "e9e2379fa4777305",
+      "id": "bc565d6694e03bf9",
       "sourceLine": 2999,
       "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
-      "statement": "Block 4, Builds 16–20: after bridge proof, integrate authenticated 3D context pane, highlights, expand-area action, responsive controls and honest unavailable fallback.",
+      "statement": "Block 3, Builds 11–15: after a passing prototype, implement versioned bridge, authorization/model binding, provenance and fail-closed export limits while preserving Working View/XML.",
       "classification": "ACTIVE",
       "workClass": "PRODUCT_WORK",
       "ownership": {
@@ -2336,8 +2318,26 @@
       "currentAuthority": false
     },
     {
+      "id": "e9e2379fa4777305",
+      "sourceLine": 3000,
+      "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
+      "statement": "Block 4, Builds 16–20: after bridge proof, integrate authenticated 3D context pane, highlights, expand-area action, responsive controls and honest unavailable fallback.",
+      "classification": "ACTIVE",
+      "workClass": "PRODUCT_WORK",
+      "ownership": {
+        "owner": "Lens Next",
+        "route": "/lens-next",
+        "module": "artifacts/bimlog/src/features/lens-next"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3000",
+        "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "4b15be187de94a72",
-      "sourceLine": 3005,
+      "sourceLine": 3006,
       "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
       "statement": "Block 10, Builds 46–50: Builds 46–49 have a local integration candidate. The Build 50 short-window UX continuation shows multiple issue cards beside selected details, keeps expanded Model tools and the list reachable by left-pane scrolling, passes 37/37 Lens Next behavior files, typecheck, bundle and exact-390 containment. Real project/model-bound clash linkage, bounded 3D imagery, Native 2021/2025 field runs, authenticated/live Chrome and customer acceptance remain open. No screenshot, synthetic image, title similarity or fixture may close those gates. Blocks 5–10 are local candidates, not a published accepted release; no Block 11 is approved in this roadmap.",
       "classification": "ACTIVE",
@@ -2348,14 +2348,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3005",
+        "OPEN_LOOP.md:3006",
         "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "ea0dc40f940fa9c4",
-      "sourceLine": 3008,
+      "sourceLine": 3009,
       "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
       "statement": "Build 8 field gate: run one genuine clash through the Native locator and fragment extractor, verify 2021/2025 API availability, stable identities, model transform/units and bounded geometry. A non-shipped 2021 COM spike compiles only; 2025 COM extraction and both live runs remain open.",
       "classification": "ACTIVE",
@@ -2366,14 +2366,14 @@
         "module": "artifacts/bimlog/src/features/lens-next"
       },
       "evidence": [
-        "OPEN_LOOP.md:3008",
+        "OPEN_LOOP.md:3009",
         "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "32767230d4317e95",
-      "sourceLine": 3010,
+      "sourceLine": 3011,
       "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
       "statement": "Build 10 interactive gate: an unmounted WebGL2 candidate and synthetic validator/navigation tests now exist; render the **real** bounded package on desktop/mobile, visually test orbit/focus/expansion, measure payload and latency, and compare against Navisworks. No synthetic-only pass may close this gate. The component is not wired to production and no browser visual acceptance is claimed.",
       "classification": "ACTIVE",
@@ -2384,14 +2384,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3010",
+        "OPEN_LOOP.md:3011",
         "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "c40ba2339fccd209",
-      "sourceLine": 3011,
+      "sourceLine": 3012,
       "heading": "Lens Next mockup parity — new 50-build program, Block 1 of 10 — 2026-09-17",
       "statement": "Do not start production bridge/UI integration Blocks 3–4 or publish a Native ZIP until Builds 8 and 10 provide the approved real-clash feasibility result.",
       "classification": "ACCEPTED_LIMITATION",
@@ -2402,14 +2402,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3011",
+        "OPEN_LOOP.md:3012",
         "Preserved fail-closed product boundary"
       ],
       "currentAuthority": false
     },
     {
       "id": "b3324fbfcd84a83b",
-      "sourceLine": 3015,
+      "sourceLine": 3016,
       "heading": "P32 bounded release gates — 2026-09-17",
       "statement": "Repeat the exact clean pre-push gate after reconciliation; a single warmed standalone Windows artifact result of 7555.4 ms is below the unchanged 8000 ms gate but has narrow margin. Do not represent it as production readiness by itself.",
       "classification": "ACTIVE",
@@ -2420,14 +2420,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:3015",
+        "OPEN_LOOP.md:3016",
         "P32 bounded release gates — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "d7304056bacce4f9",
-      "sourceLine": 3016,
+      "sourceLine": 3017,
       "heading": "P32 bounded release gates — 2026-09-17",
       "statement": "Complete independent source/schema/no-DROP review, exact-commit push, MAIN-only Replit Shell synchronization and publication, then live Chrome smoke. Keep Native 3D and responsible-company/schema fixes outside P32; they need their own verified releases.",
       "classification": "SUPERSEDED",
@@ -2445,7 +2445,7 @@
     },
     {
       "id": "f38fadbf5f22d785",
-      "sourceLine": 3017,
+      "sourceLine": 3018,
       "heading": "P32 bounded release gates — 2026-09-17",
       "statement": "Validate the deferred document-library candidate with affected PDF/BMP/workbook behavior, exact-artifact startup timing, full clean release gate, and no-regression review. Do not raise the 8000 ms readiness gate to make it pass.",
       "classification": "ACTIVE",
@@ -2456,14 +2456,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3017",
+        "OPEN_LOOP.md:3018",
         "P32 bounded release gates — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "644963ddbcf80033",
-      "sourceLine": 3019,
+      "sourceLine": 3020,
       "heading": "P32 bounded release gates — 2026-09-17",
       "statement": "Builds 201–205: pass the exact clean full gate and push Block 41. Publication and authenticated Chrome smoke remain due at Build 210; focused Navisworks smoke is not retriggered because Native and installers are unchanged.",
       "classification": "ACTIVE",
@@ -2474,34 +2474,16 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3019",
+        "OPEN_LOOP.md:3020",
         "P32 bounded release gates — 2026-09-17"
       ],
       "currentAuthority": false
     },
     {
       "id": "635b76e5cb21a85e",
-      "sourceLine": 3025,
-      "heading": "Dashboard/Governance integration release — 2026-09-18",
-      "statement": "Status remains `PUSHED_NOT_PUBLISHED`. MAIN must use the established signed-in visible Replit workspace and Replit Shell to prove clean workspace HEAD equals the exact remote commit, run applicable schema/restore/zero-destructive checks, publish once, and capture one complete durable receipt with deployment ID/status, live identity, health, authenticated smoke, database effects and rollback.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:3025",
-        "Dashboard/Governance integration release — 2026-09-18"
-      ],
-      "currentAuthority": false
-    },
-    {
-      "id": "1df9762ae8604005",
       "sourceLine": 3026,
       "heading": "Dashboard/Governance integration release — 2026-09-18",
-      "statement": "The occupied Chrome automation profile and failed sandbox launcher are `TOOL_BLOCKED`, not a product hold or Roberto decision. Use one bounded safe recovery without closing Roberto's browser or substituting an unproven isolated session. Roberto's existing publish instruction remains valid; do not request it again.",
+      "statement": "Status remains `PUSHED_NOT_PUBLISHED`. MAIN must use the established signed-in visible Replit workspace and Replit Shell to prove clean workspace HEAD equals the exact remote commit, run applicable schema/restore/zero-destructive checks, publish once, and capture one complete durable receipt with deployment ID/status, live identity, health, authenticated smoke, database effects and rollback.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
@@ -2516,8 +2498,26 @@
       "currentAuthority": false
     },
     {
+      "id": "1df9762ae8604005",
+      "sourceLine": 3027,
+      "heading": "Dashboard/Governance integration release — 2026-09-18",
+      "statement": "The occupied Chrome automation profile and failed sandbox launcher are `TOOL_BLOCKED`, not a product hold or Roberto decision. Use one bounded safe recovery without closing Roberto's browser or substituting an unproven isolated session. Roberto's existing publish instruction remains valid; do not request it again.",
+      "classification": "ACTIVE",
+      "workClass": "PROVIDER_EVIDENCE",
+      "ownership": {
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
+      },
+      "evidence": [
+        "OPEN_LOOP.md:3027",
+        "Dashboard/Governance integration release — 2026-09-18"
+      ],
+      "currentAuthority": false
+    },
+    {
       "id": "c3ab319313f0a5d7",
-      "sourceLine": 3040,
+      "sourceLine": 3041,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Preserve the cadence: push every five builds, publish every ten, never exceed ten unpublished builds, and run focused Navisworks smoke for every Native/installer-changing block.",
       "classification": "ACTIVE",
@@ -2528,14 +2528,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3040",
+        "OPEN_LOOP.md:3041",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "69f5260727f6b5d8",
-      "sourceLine": 3041,
+      "sourceLine": 3042,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Stop continuation only for a real failed test or production defect; correct it and repeat the affected gate under the existing authorization.",
       "classification": "ACTIVE",
@@ -2546,14 +2546,14 @@
         "module": "artifacts/bimlog/src/App.tsx"
       },
       "evidence": [
-        "OPEN_LOOP.md:3041",
+        "OPEN_LOOP.md:3042",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "c69d16da74474ffa",
-      "sourceLine": 3052,
+      "sourceLine": 3053,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Builds 066–070: complete Lens Next Platform sole-product scope, push Build 070, publish the ten-build batch, and run full authenticated visible-Chrome acceptance. Run focused Navisworks smoke only if this block changes Native or installers.",
       "classification": "ACTIVE",
@@ -2564,14 +2564,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3052",
+        "OPEN_LOOP.md:3053",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "6c77d43f94be4765",
-      "sourceLine": 3055,
+      "sourceLine": 3056,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Build 070 release: pass exact clean-head and focused dual-year metadata/package smoke, push, publish through Replit Shell without Agents, and pass exact-identity authenticated visible-Chrome Lens Next create/link/reconcile smoke.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -2590,7 +2590,7 @@
     },
     {
       "id": "b980542cb976ac69",
-      "sourceLine": 3061,
+      "sourceLine": 3062,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Repeat the exact clean gate and provider preview on the corrective Build 070 head; publish only when the preview contains no destructive task-lifecycle change, then complete authenticated live Lens Next acceptance.",
       "classification": "ACTIVE",
@@ -2601,14 +2601,14 @@
         "module": "docs/deployment"
       },
       "evidence": [
-        "OPEN_LOOP.md:3061",
+        "OPEN_LOOP.md:3062",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "8f462f9d87c378a3",
-      "sourceLine": 3064,
+      "sourceLine": 3065,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Builds 111–115: run complete clean-install, authenticated route, visual/accessibility, and dual-year Navisworks acceptance; burn down release-blocking findings and push Build 115.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -2627,7 +2627,7 @@
     },
     {
       "id": "b387daa9fb9c86d9",
-      "sourceLine": 3065,
+      "sourceLine": 3066,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Builds 106–110: complete security, privacy, retention and isolated recovery review; push and publish Build 110, then run exact-identity authenticated visible-Chrome smoke. No Native/installer smoke is required unless those paths change.",
       "classification": "CLOSED_WITH_EVIDENCE",
@@ -2646,7 +2646,7 @@
     },
     {
       "id": "9788301db013d48e",
-      "sourceLine": 3068,
+      "sourceLine": 3069,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "Run connected Navisworks Manage 2025 field acceptance on a workstation where 2025 is already installed; do not substitute simulation evidence or modify Navisworks licensing to manufacture this gate.",
       "classification": "ACTIVE",
@@ -2657,14 +2657,14 @@
         "module": "evidence/field-acceptance"
       },
       "evidence": [
-        "OPEN_LOOP.md:3068",
+        "OPEN_LOOP.md:3069",
         "120-build stabilization program — 2026-09-19"
       ],
       "currentAuthority": false
     },
     {
       "id": "4ac51eab4fb72a76",
-      "sourceLine": 3069,
+      "sourceLine": 3070,
       "heading": "120-build stabilization program — 2026-09-19",
       "statement": "After that connected 2025 result, complete Build 120 exact-source push, Replit Shell publication without Agents, and authenticated visible-Chrome smoke.",
       "classification": "CLOSED_WITH_EVIDENCE",

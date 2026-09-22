@@ -12,6 +12,7 @@
 - [ ] Build 255 must pass the exact complete gate, push the five bounded commits, synchronize and publish through Replit Shell without Replit Agents, verify deployed identity, and pass full authenticated visible-Chrome acceptance. Publication evidence remains open until observed live.
 - [x] The Build 255 pre-push gate detected and corrected a stale deterministic route inventory; the classification PUT route is now included before the gate is repeated.
 - [x] The same release gate refreshed the deterministic open-loop disposition inventory required by the current-state contract; no product scope changed.
+- [x] The release gate also advanced the permanent current-authority regression from the completed Block 5 boundary to the actual Block 6 publication state and next Builds 256–260 boundary.
 - [ ] Builds 256–260 add the separate structured resolution-record workflow, before/after evidence, resolution UI, verification/reopening, and integration hardening. These later requirements are not silently claimed by Block 6.
 
 - [x] Builds 221–225 reconcile exact Build 220 live acceptance and close the verified physical Navisworks 2021 P36 installation. This five-build boundary is push-only and changes no runtime product code, database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license.
