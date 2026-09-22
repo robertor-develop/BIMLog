@@ -37082,6 +37082,94 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block05-authority-regression-correction-20260921",
+      "reviewedThroughCommit": "8be96b1dec196115ebb4c2b426224f5bfdd18e54",
+      "reviewedAt": "2026-09-21T21:50:00-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "governance_generator_repair",
+          "permanent_regression_repair",
+          "local_regression",
+          "push_exact_fast_forward"
+        ],
+        "operatorOnly": []
+      },
+      "immediateFindings": [
+        {
+          "category": "current_authority_regression",
+          "disposition": "corrected",
+          "authorities": [
+            "quality",
+            "open_loop"
+          ],
+          "summary": "Advances the generated open-loop inventory and permanent regression from the completed Block 1 boundary to the actual Block 5 authority and next Builds 251–255 boundary exposed by the full gate. Product behavior is unchanged."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Governance evidence correction only."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating boundary changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction restores the existing current-authority and permanent regression gates."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No platform structure or runtime route changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, installer, or package path changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 5 remains push-only."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Builds 251–255 remain the next product block and Build 255 remains the publication boundary."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit authority changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
