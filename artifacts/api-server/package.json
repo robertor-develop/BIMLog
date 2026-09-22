@@ -22,6 +22,7 @@
     "test:edt-engine-build286": "tsx ./src/lib/edt-engine-hierarchy.behavior.ts",
     "test:edt-engine-build287": "tsx ./src/lib/edt-engine-governance-schema.behavior.ts",
     "test:edt-engine-build288": "tsx ./src/lib/edt-engine-economic-schema.behavior.ts",
+    "test:edt-engine-build289": "tsx ./src/lib/edt-engine-qc-import-schema.behavior.ts",
     "test:coordination-knowledge-block1": "tsx ./src/lib/coordination-knowledge-contract.behavior.ts && tsx ./src/lib/coordination-knowledge-migration.behavior.ts && tsx ./src/lib/coordination-knowledge-repository.behavior.ts",
     "test:coordination-knowledge-db": "tsx ./src/lib/coordination-knowledge-database.behavior.ts",
     "test:coordination-knowledge-block2": "tsx ./src/lib/coordination-knowledge-authorization.behavior.ts && tsx ./src/lib/coordination-knowledge-conflict-api.behavior.ts && tsx ./src/lib/coordination-knowledge-rules-methods-api.behavior.ts && tsx ./src/lib/coordination-knowledge-search.behavior.ts",

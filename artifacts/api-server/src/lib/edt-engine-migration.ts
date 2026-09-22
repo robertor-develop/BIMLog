@@ -163,6 +163,51 @@ DO $$ BEGIN
 END $$;
 `;
 
+export const EDT_ENGINE_QC_IMPORT_SQL = String.raw`
+CREATE TABLE IF NOT EXISTS job_activation_work_item_issuances (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), work_item_id text NOT NULL REFERENCES job_activation_work_items(id),
+  revision_number integer NOT NULL DEFAULT 0, issuance_version integer NOT NULL DEFAULT 0,
+  issuance_kind text NOT NULL CHECK (issuance_kind IN ('initial','internal_issuance','external_revision','corrected_resubmittal','reopen')),
+  state text NOT NULL DEFAULT 'prepared' CHECK (state IN ('prepared','submitted','approved','rejected','superseded','reopened')),
+  package_snapshot jsonb NOT NULL, evidence_file_id integer REFERENCES files(id), source_evidence jsonb NOT NULL DEFAULT '{}'::jsonb,
+  issuance_fingerprint text NOT NULL CHECK (issuance_fingerprint ~ '^[a-f0-9]{64}$'), optimistic_version integer NOT NULL DEFAULT 1 CHECK (optimistic_version > 0),
+  prepared_by_id integer NOT NULL REFERENCES users(id), submitted_by_id integer REFERENCES users(id), submitted_at timestamptz, closed_at timestamptz, created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_work_item_issuance_rv_uidx UNIQUE(work_item_id,revision_number,issuance_version),
+  CONSTRAINT job_activation_work_item_issuance_rv_chk CHECK (revision_number >= 0 AND issuance_version >= 0)
+);
+CREATE INDEX IF NOT EXISTS job_activation_work_item_issuance_project_idx ON job_activation_work_item_issuances(project_id,state,created_at);
+CREATE TABLE IF NOT EXISTS job_activation_qc_decisions (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), work_item_id text NOT NULL REFERENCES job_activation_work_items(id),
+  issuance_id text NOT NULL REFERENCES job_activation_work_item_issuances(id), decision_kind text NOT NULL CHECK (decision_kind IN ('review','final_approval','reopen_approval')),
+  outcome text NOT NULL CHECK (outcome IN ('approved','rejected')), reviewer_user_id integer NOT NULL REFERENCES users(id), eligible_role text NOT NULL,
+  conflict_evaluation jsonb NOT NULL, reason text NOT NULL, evidence jsonb NOT NULL DEFAULT '{}'::jsonb,
+  issuance_fingerprint text NOT NULL CHECK (issuance_fingerprint ~ '^[a-f0-9]{64}$'), created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_qc_decision_step_uidx UNIQUE(issuance_id,decision_kind)
+);
+CREATE INDEX IF NOT EXISTS job_activation_qc_decision_project_idx ON job_activation_qc_decisions(project_id,created_at);
+
+CREATE TABLE IF NOT EXISTS job_intake_import_batches (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), intake_id text NOT NULL REFERENCES job_intakes(id),
+  intake_revision integer NOT NULL CHECK (intake_revision > 0), file_id integer NOT NULL REFERENCES files(id), file_sha256 text NOT NULL CHECK (file_sha256 ~ '^[a-f0-9]{64}$'),
+  worksheet_name text NOT NULL DEFAULT 'Result' CHECK (worksheet_name='Result'), parser_version text NOT NULL, structural_range text NOT NULL,
+  preview_fingerprint text NOT NULL CHECK (preview_fingerprint ~ '^[a-f0-9]{64}$'), status text NOT NULL DEFAULT 'previewed' CHECK (status IN ('previewed','invalid','validated','reviewed','activated','rejected')),
+  requested_by_id integer NOT NULL REFERENCES users(id), reviewed_by_id integer REFERENCES users(id), activated_by_id integer REFERENCES users(id),
+  reviewed_at timestamptz, activated_at timestamptz, created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(intake_id,intake_revision,file_sha256,parser_version)
+);
+CREATE INDEX IF NOT EXISTS job_intake_import_batch_project_idx ON job_intake_import_batches(project_id,status,created_at);
+CREATE TABLE IF NOT EXISTS job_intake_import_rows (
+  id text PRIMARY KEY, batch_id text NOT NULL REFERENCES job_intake_import_batches(id), row_number integer NOT NULL CHECK (row_number > 1), raw_fields jsonb NOT NULL,
+  normalized_fields jsonb NOT NULL, validation_state text NOT NULL CHECK (validation_state IN ('valid','invalid','unsupported','duplicate')),
+  validation_errors jsonb NOT NULL DEFAULT '[]'::jsonb, mapped_identities jsonb NOT NULL DEFAULT '{}'::jsonb,
+  row_fingerprint text NOT NULL CHECK (row_fingerprint ~ '^[a-f0-9]{64}$'), created_at timestamptz NOT NULL DEFAULT now(), UNIQUE(batch_id,row_number)
+);
+CREATE INDEX IF NOT EXISTS job_intake_import_row_validation_idx ON job_intake_import_rows(batch_id,validation_state,row_number);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_activation_qc_decision_immutable') THEN CREATE TRIGGER job_activation_qc_decision_immutable BEFORE UPDATE OR DELETE ON job_activation_qc_decisions FOR EACH ROW EXECUTE FUNCTION job_edt_decision_immutability_guard(); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_intake_import_row_immutable') THEN CREATE TRIGGER job_intake_import_row_immutable BEFORE UPDATE OR DELETE ON job_intake_import_rows FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
+END $$;
+`;
+
 let startup: Promise<void> | null = null;
 type MigrationClient = { query(sql: string): Promise<unknown>; release(): void };
 type MigrationPool = { connect(): Promise<MigrationClient> };
@@ -175,6 +220,7 @@ async function runMigration(migrationPool: MigrationPool): Promise<void> {
     await client.query(EDT_ENGINE_HIERARCHY_SQL);
     await client.query(EDT_ENGINE_GOVERNANCE_SQL);
     await client.query(EDT_ENGINE_ECONOMIC_SQL);
+    await client.query(EDT_ENGINE_QC_IMPORT_SQL);
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
