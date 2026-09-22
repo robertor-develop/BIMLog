@@ -78,6 +78,7 @@
     "test:coordination-knowledge-build259": "pnpm --filter @workspace/api-server run test:coordination-knowledge-build259",
     "test:coordination-knowledge-block7": "pnpm --filter @workspace/api-server run test:coordination-knowledge-block7",
     "test:coordination-knowledge-block8": "pnpm --filter @workspace/api-server run test:coordination-knowledge-block8",
+    "test:coordination-knowledge-build266": "pnpm --filter @workspace/api-server run test:coordination-knowledge-build266",
     "test:build217-final-reconciliation": "node scripts/test-build217-final-reconciliation.mjs",
     "test:build219-publication-candidate": "node scripts/test-build219-publication-candidate.mjs",
     "generate:repository-census": "node scripts/repository-wide-census.mjs --output evidence/stabilization-program-20260919/BUILD_216_REPOSITORY_CENSUS.json && node scripts/platform-audit.mjs --output evidence/stabilization-program-20260919/BUILD_216_PLATFORM_AUDIT.json",
