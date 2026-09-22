@@ -231,7 +231,9 @@ export interface LensNextKnowledgeConflictType {
   id: string; revisionId: string; revision: number; code: string; name: string;
   description: string; disciplineA: string; disciplineB: string;
   elementTypeA: string; elementTypeB: string; category: string;
+  coordinationStage?: string;
 }
+export interface LensNextKnowledgeClassificationSuggestion { conflictType:LensNextKnowledgeConflictType;score:number;reasons:readonly string[];matchingSource:"approved structured fields"; }
 export interface LensNextKnowledgeRule {
   id: string; revisionId: string; revision: number; code: string; title: string; guidance: string;
 }
@@ -248,6 +250,7 @@ export interface LensNextKnowledgeContext {
   canClassify: boolean;
   conflictType: LensNextKnowledgeConflictType | null;
   availableConflictTypes: readonly LensNextKnowledgeConflictType[];
+  classificationSuggestions: readonly LensNextKnowledgeClassificationSuggestion[];
   rules: readonly LensNextKnowledgeRule[];
   methods: readonly LensNextKnowledgeMethod[];
   previousCases: readonly LensNextKnowledgeCase[];

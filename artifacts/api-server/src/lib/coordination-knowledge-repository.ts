@@ -448,10 +448,19 @@ export class CoordinationKnowledgeRepository {
       LEFT JOIN coordination_conflict_type_revisions conflict ON conflict.id=project_case.conflict_type_revision_id AND conflict.company_id=project_case.company_id
       LEFT JOIN coordination_conflict_types base ON base.id=conflict.conflict_type_id AND base.company_id=conflict.company_id
       WHERE project_case.company_id=$1 AND project_case.project_id=$2 AND project_case.lens_viewpoint_id=$3`,[companyId,projectId,lensViewpointId])).rows[0]??null;
-    const availableConflictTypes=(await this.pool.query(`SELECT base.id,revision.id revision_id,revision.revision,base.code,revision.name,revision.description,revision.discipline_a,revision.discipline_b,revision.element_type_a,revision.element_type_b,revision.conflict_category
+    const issue=(await this.pool.query(`SELECT trade,report_type FROM lens_viewpoints WHERE id=$1 AND project_id=$2`,[lensViewpointId,projectId])).rows[0]??{};
+    const availableConflictTypes=(await this.pool.query(`SELECT base.id,revision.id revision_id,revision.revision,base.code,revision.name,revision.description,revision.discipline_a,revision.discipline_b,revision.element_type_a,revision.element_type_b,revision.conflict_category,revision.coordination_stage
       FROM coordination_conflict_types base JOIN LATERAL (SELECT * FROM coordination_conflict_type_revisions candidate WHERE candidate.conflict_type_id=base.id AND candidate.company_id=base.company_id AND candidate.status='approved' ORDER BY candidate.revision DESC LIMIT 1) revision ON true
-      WHERE base.company_id=$1 ORDER BY lower(revision.name),base.code`,[companyId])).rows.map(row=>({id:String(row.id),revisionId:String(row.revision_id),revision:Number(row.revision),code:String(row.code),name:String(row.name),description:String(row.description),disciplineA:String(row.discipline_a),disciplineB:String(row.discipline_b),elementTypeA:String(row.element_type_a),elementTypeB:String(row.element_type_b),category:String(row.conflict_category)}));
-    if(!current?.conflict_type_id) return {conflictType:null,availableConflictTypes,rules:[],methods:[],previousCases:[]};
+      WHERE base.company_id=$1 ORDER BY lower(revision.name),base.code`,[companyId])).rows.map(row=>({id:String(row.id),revisionId:String(row.revision_id),revision:Number(row.revision),code:String(row.code),name:String(row.name),description:String(row.description),disciplineA:String(row.discipline_a),disciplineB:String(row.discipline_b),elementTypeA:String(row.element_type_a),elementTypeB:String(row.element_type_b),category:String(row.conflict_category),coordinationStage:String(row.coordination_stage)}));
+    const normalized=(value:unknown)=>String(value??"").trim().toLocaleLowerCase("en-US");
+    const issueTrade=normalized(issue.trade),issueReportType=normalized(issue.report_type);
+    const classificationSuggestions=availableConflictTypes.map(item=>{
+      const reasons:string[]=[];
+      if(issueTrade&&(normalized(item.disciplineA)===issueTrade||normalized(item.disciplineB)===issueTrade)) reasons.push(`Discipline matches issue trade: ${String(issue.trade).trim()}`);
+      if(issueReportType&&normalized(item.category)===issueReportType) reasons.push(`Conflict category matches report type: ${String(issue.report_type).trim()}`);
+      return {conflictType:item,score:reasons.length,reasons,matchingSource:"approved structured fields" as const};
+    }).filter(item=>item.score>0).sort((left,right)=>right.score-left.score||left.conflictType.code.localeCompare(right.conflictType.code));
+    if(!current?.conflict_type_id) return {conflictType:null,availableConflictTypes,classificationSuggestions,rules:[],methods:[],previousCases:[]};
     const conflictType={id:String(current.conflict_type_id),revisionId:String(current.conflict_revision_id),revision:Number(current.revision),code:String(current.code),name:String(current.name),description:String(current.description),disciplineA:String(current.discipline_a),disciplineB:String(current.discipline_b),elementTypeA:String(current.element_type_a),elementTypeB:String(current.element_type_b),category:String(current.conflict_category)};
     const methods=(await this.pool.query(`SELECT method.id,revision.id revision_id,revision.revision,method.code,revision.name,revision.description,
       revision.responsible_trade,revision.constraints,revision.required_approvals,revision.rfi_requirement,revision.details,link.display_order
@@ -477,6 +486,6 @@ export class CoordinationKnowledgeRepository {
       WHERE precedent.company_id=$1 AND precedent.lens_viewpoint_id<>$2 AND precedent_conflict.conflict_type_id=$3
         AND precedent.status IN ('resolved','verified') AND ($4::boolean OR precedent.project_id=$5)
       ORDER BY precedent.verified_at DESC NULLS LAST,precedent.resolved_at DESC NULLS LAST,precedent.id LIMIT 8`,[companyId,lensViewpointId,current.conflict_type_id,input.allowCompanyPrecedent,projectId])).rows.map(row=>({id:String(row.id),projectId:Number(row.project_id),projectName:String(row.project_name),location:row.location==null?null:String(row.location),actualResolution:String(row.actual_resolution),rfiState:String(row.rfi_state),status:String(row.status)}));
-    return {conflictType,availableConflictTypes,rules,methods,previousCases};
+    return {conflictType,availableConflictTypes,classificationSuggestions,rules,methods,previousCases};
   }
 }

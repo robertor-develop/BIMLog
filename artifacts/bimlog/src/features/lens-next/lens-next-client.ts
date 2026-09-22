@@ -340,7 +340,7 @@ export function createLensNextApiClient(
       const raw=await get(`/coordination-knowledge/lens-context/${exact.serverId}?projectId=${exact.projectId}`,signal);
       if(!raw||typeof raw!=="object"||Array.isArray(raw)) throw new Error("Coordination Knowledge response is invalid");
       const body=raw as Record<string,unknown>;
-      if(!Array.isArray(body.availableConflictTypes)||!Array.isArray(body.rules)||!Array.isArray(body.methods)||!Array.isArray(body.previousCases)||typeof body.canClassify!=="boolean") throw new Error("Coordination Knowledge response is invalid");
+      if(!Array.isArray(body.availableConflictTypes)||!Array.isArray(body.classificationSuggestions)||!Array.isArray(body.rules)||!Array.isArray(body.methods)||!Array.isArray(body.previousCases)||typeof body.canClassify!=="boolean") throw new Error("Coordination Knowledge response is invalid");
       return body as unknown as LensNextKnowledgeContext;
     },
     async classifyKnowledgeContext(identity, conflictTypeRevisionId, expectedConflictTypeRevisionId, signal) {

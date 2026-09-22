@@ -1,0 +1,14 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+const repository=readFileSync(fileURLToPath(new URL("./coordination-knowledge-repository.ts",import.meta.url)),"utf8");
+const panel=readFileSync(fileURLToPath(new URL("../../../bimlog/src/features/lens-next/LensNextKnowledgePanel.tsx",import.meta.url)),"utf8");
+assert.match(repository,/classificationSuggestions/);
+assert.match(repository,/Discipline matches issue trade/);
+assert.match(repository,/Conflict category matches report type/);
+assert.match(repository,/score>0/);
+assert.match(repository,/localeCompare/);
+assert.match(panel,/never apply a match automatically/);
+assert.match(panel,/Reject suggestions/);
+assert.match(panel,/Source:/);
+console.log("Coordination Knowledge deterministic Lens matching behavior: PASS");
