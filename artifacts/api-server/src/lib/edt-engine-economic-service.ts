@@ -1,0 +1,41 @@
+import { decideEdtRecordAuthorization,type EdtRecordAuthorizationInput } from "./edt-engine-authorization";
+import { deterministicEdtId,edtFingerprint,EdtEngineConflict,withEdtTransaction,type EdtTransactionHost } from "./edt-engine-transaction";
+type Actor=Pick<EdtRecordAuthorizationInput,"grants"|"actorUserId"|"actorCompanyId"|"actorProjectIds">&{eligibleRole:string};
+const decimal=/^(0|[1-9]\d*)(\.\d{1,6})?$/;
+function nonnegative(value:string,name:string){if(!decimal.test(value))throw new EdtEngineConflict("ECONOMIC_AMOUNT_INVALID",`${name} must be a non-negative decimal with at most six places.`);}
+function authorize(actor:Actor,permission:"TIME_SUBMIT"|"TIME_APPROVE",companyId:number,projectId:number,requester?:number){const decision=decideEdtRecordAuthorization({...actor,permission,recordCompanyId:companyId,recordProjectId:projectId,recordRequesterUserId:requester});if(!decision.allow)throw new EdtEngineConflict(decision.code,"Time-entry authorization denied.");}
+
+export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:number;projectId:number;intakeId:string;workItemId:string;contractId:string;contractVersionId:string;pricingTemplateVersionId:string;deliveryWorkflowVersionId:string;currency:string;directProductionAmount:string;projectAdministrativeAmount:string;incentiveReserveAmount:string;taskEarningsAmount:string;projectEarningsAmount:string;resolvedAllocation:Record<string,unknown>;sourceSnapshot:Record<string,unknown>},host?:EdtTransactionHost){
+  for(const [name,value] of Object.entries({directProductionAmount:input.directProductionAmount,projectAdministrativeAmount:input.projectAdministrativeAmount,incentiveReserveAmount:input.incentiveReserveAmount,taskEarningsAmount:input.taskEarningsAmount,projectEarningsAmount:input.projectEarningsAmount}))nonnegative(value,name);
+  if(!/^[A-Z]{3}$/.test(input.currency))throw new EdtEngineConflict("CURRENCY_INVALID","Currency must be an ISO-style three-letter code.");
+  const sourceFingerprint=edtFingerprint(input.sourceSnapshot);const planFingerprint=edtFingerprint({workItemId:input.workItemId,contractVersionId:input.contractVersionId,pricingTemplateVersionId:input.pricingTemplateVersionId,deliveryWorkflowVersionId:input.deliveryWorkflowVersionId,currency:input.currency,amounts:[input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount],resolvedAllocation:input.resolvedAllocation});
+  return withEdtTransaction(async client=>{
+    const item=(await client.query<any>("SELECT id,intake_id,project_id,contract_id,contract_version_id,economic_plan_fingerprint FROM job_activation_work_items WHERE id=$1 AND project_id=$2 FOR UPDATE",[input.workItemId,input.projectId])).rows[0];
+    if(!item||item.intake_id!==input.intakeId||item.contract_id!==input.contractId||item.contract_version_id!==input.contractVersionId)throw new EdtEngineConflict("ECONOMIC_SCOPE_MISMATCH","Economic plan does not match the activated Work Item contract.");
+    const existing=(await client.query<{plan_fingerprint:string}>("SELECT plan_fingerprint FROM job_activation_work_item_economic_plans WHERE work_item_id=$1",[input.workItemId])).rows[0];
+    if(existing){if(existing.plan_fingerprint!==planFingerprint)throw new EdtEngineConflict("ECONOMIC_PLAN_IMMUTABLE","An activated Work Item economic plan cannot be replaced.");return{planFingerprint,idempotent:true};}
+    const id=deterministicEdtId("economic-plan",input.workItemId);
+    await client.query("INSERT INTO job_activation_work_item_economic_plans(id,company_id,project_id,intake_id,work_item_id,contract_id,contract_version_id,pricing_template_version_id,delivery_workflow_version_id,currency,direct_production_amount,project_administrative_amount,incentive_reserve_amount,task_earnings_amount,project_earnings_amount,resolved_allocation,source_fingerprint,plan_fingerprint,created_by_id) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16::jsonb,$17,$18,$19)",[id,input.companyId,input.projectId,input.intakeId,input.workItemId,input.contractId,input.contractVersionId,input.pricingTemplateVersionId,input.deliveryWorkflowVersionId,input.currency,input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount,JSON.stringify(input.resolvedAllocation),sourceFingerprint,planFingerprint,input.actor.actorUserId]);
+    await client.query("UPDATE job_activation_work_items SET economic_plan_fingerprint=$2,updated_at=now() WHERE id=$1",[input.workItemId,planFingerprint]);
+    return{planFingerprint,idempotent:false};
+  },host);
+}
+
+export async function transitionTimeEntry(input:{actor:Actor;companyId:number;projectId:number;entryId:string;expectedVersion:number;decision:"submit"|"approve"|"reject";budgetAccountId:string;pool:"direct_production"|"project_administrative";amount:string;reason:string;evidence:Record<string,unknown>},host?:EdtTransactionHost){
+  nonnegative(input.amount,"amount");
+  return withEdtTransaction(async client=>{
+    const entry=(await client.query<any>("SELECT e.*,w.project_id,w.intake_id FROM job_activation_time_entries e JOIN job_activation_work_items w ON w.id=e.work_item_id WHERE e.id=$1 AND w.project_id=$2 FOR UPDATE OF e",[input.entryId,input.projectId])).rows[0];
+    if(!entry||Number(entry.optimistic_version)!==input.expectedVersion)throw new EdtEngineConflict("TIME_ENTRY_STALE","Time entry is missing or stale.");
+    const submit=input.decision==="submit";authorize(input.actor,submit?"TIME_SUBMIT":"TIME_APPROVE",input.companyId,input.projectId,submit?undefined:entry.submitted_by_id);
+    if(submit&&!(["draft","rejected"].includes(entry.status)))throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only draft or rejected time may be submitted.");
+    if(!submit&&entry.status!=="submitted")throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only submitted time may be decided.");
+    if(submit&&entry.user_id!==input.actor.actorUserId)throw new EdtEngineConflict("TIME_ENTRY_OWNER_REQUIRED","Only the time-entry owner may submit it.");
+    const next=submit?"submitted":input.decision==="approve"?"approved":"rejected";
+    const updated=await client.query("UPDATE job_activation_time_entries SET status=$2,optimistic_version=optimistic_version+1,submitted_by_id=CASE WHEN $2='submitted' THEN $3 ELSE submitted_by_id END,submitted_at=CASE WHEN $2='submitted' THEN now() ELSE submitted_at END,decided_by_id=CASE WHEN $2 IN ('approved','rejected') THEN $3 ELSE decided_by_id END,decided_at=CASE WHEN $2 IN ('approved','rejected') THEN now() ELSE decided_at END,decision_reason=$4 WHERE id=$1 AND optimistic_version=$5",[input.entryId,next,input.actor.actorUserId,input.reason,input.expectedVersion]);
+    if(updated.rowCount!==1)throw new EdtEngineConflict("TIME_ENTRY_STALE","Concurrent time-entry update detected.");
+    const base=`time:${input.entryId}:v${input.expectedVersion}:${input.decision}`;const ledger=async(state:string,amountDelta:string,hoursDelta:string,suffix:string)=>client.query("INSERT INTO job_activation_budget_ledger_entries(id,company_id,project_id,intake_id,budget_account_id,work_item_id,task_id,assignment_id,time_entry_id,pool,ledger_state,amount_delta,hours_delta,idempotency_key,source_version,source_fingerprint,actor_user_id,reason,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19::jsonb) ON CONFLICT(idempotency_key) DO NOTHING",[deterministicEdtId("budget-ledger",`${base}:${suffix}`),input.companyId,input.projectId,entry.intake_id,input.budgetAccountId,entry.work_item_id,entry.task_id,entry.assignment_id??null,input.entryId,input.pool,state,amountDelta,hoursDelta,`${base}:${suffix}`,input.expectedVersion,edtFingerprint({entryId:input.entryId,version:input.expectedVersion,decision:input.decision,suffix}),input.actor.actorUserId,input.reason,JSON.stringify(input.evidence)]);
+    if(submit)await ledger("committed_pending",`-${input.amount}`,`-${entry.hours}`,"commit");
+    else{await ledger("released",input.amount,String(entry.hours),"release");if(input.decision==="approve")await ledger("approved_consumed",`-${input.amount}`,`-${entry.hours}`,"consume");}
+    return{entryId:input.entryId,status:next,version:input.expectedVersion+1};
+  },host);
+}
