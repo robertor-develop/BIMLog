@@ -54,6 +54,7 @@ import deliveryWorkflowTemplatesRouter from "./delivery-workflow-templates";
 import companyPricingTemplatesRouter from "./company-pricing-templates";
 import workflowGovernancePoliciesRouter from "./workflow-governance-policies";
 import coordinationKnowledgeRouter from "./coordination-knowledge";
+import edtEngineRouter from "./edt-engine";
 
 const router: IRouter = Router();
 
@@ -112,6 +113,7 @@ router.use(deliveryWorkflowTemplatesRouter);
 router.use(companyPricingTemplatesRouter);
 router.use(workflowGovernancePoliciesRouter);
 router.use(coordinationKnowledgeRouter);
+router.use(edtEngineRouter);
 
 // Soft-delete routes are appended inside their existing route files:
 //   clash_reports.ts → DELETE /projects/:projectId/clash-reports/:reportId/clashes/:clashId
