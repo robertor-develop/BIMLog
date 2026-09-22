@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {fileURLToPath} from "node:url";
+const repository=readFileSync(fileURLToPath(new URL("./coordination-knowledge-repository.ts",import.meta.url)),"utf8");
+const panel=readFileSync(fileURLToPath(new URL("../../../bimlog/src/features/lens-next/LensNextKnowledgePanel.tsx",import.meta.url)),"utf8");
+assert.match(repository,/rule_revision\.status='approved'/);
+assert.match(repository,/method_revision\.status='approved'/);
+assert.match(panel,/Key Coordination Guidance/);
+assert.match(panel,/approved revision \{rule\.revision\}/);
+assert.match(panel,/No approved guidance is applicable/);
+console.log("Lens approved guidance behavior: PASS");

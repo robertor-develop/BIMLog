@@ -16,6 +16,7 @@ export function LensNextKnowledgePanel({context,error,onRetry}:{context:LensNext
         <p>{context.conflictType.category}</p><p>{context.conflictType.description}</p>
         <div className="lens-next-knowledge__links"><a href={`/knowledge?section=conflict-types&conflictTypeId=${encodeURIComponent(context.conflictType.id)}`}>View Full Conflict Type</a>{context.canClassify?<a href={`/knowledge?section=issue-classification&lensViewpointId=current`}>Change classification</a>:<span title="Your project role cannot classify issues.">Classification change unavailable</span>}</div>
       </div>}
+      {context&&context!=="loading"&&context.conflictType&&<section className="lens-next-knowledge__section" aria-labelledby="knowledge-guidance-title"><h3 id="knowledge-guidance-title">Key Coordination Guidance</h3>{context.rules.length?<ul>{context.rules.map(rule=><li key={rule.revisionId}><div><strong>{rule.title}</strong><small>{rule.code} · approved revision {rule.revision}</small></div><p>{rule.guidance}</p></li>)}</ul>:<p className="lens-next-knowledge__empty-copy">No approved guidance is applicable to this classification. Continue issue work using project controls.</p>}</section>}
     </div>}
   </section>;
 }
