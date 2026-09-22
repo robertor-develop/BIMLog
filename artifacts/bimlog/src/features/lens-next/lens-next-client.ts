@@ -26,6 +26,7 @@ import type {
   LensNextResolutionDraft,
   LensNextResolutionRecord,
   LensNextResolutionEvidence,
+  LensNextLessonProposal,
   LensNextLinksResult,
   LensNextAttachmentsResult,
   LensNextLinkedItemType,
@@ -148,6 +149,8 @@ export interface LensNextApiClient {
   transitionResolutionRecord(identity:LensNextImmutableIssueIdentity,action:"verify"|"reopen",expectedRevision:number,reason?:string|null,signal?:AbortSignal):Promise<LensNextResolutionRecord>;
   loadResolutionEvidence(identity:LensNextImmutableIssueIdentity,signal?:AbortSignal):Promise<readonly LensNextResolutionEvidence[]>;
   addResolutionEvidence(identity:LensNextImmutableIssueIdentity,resolutionRevisionId:string,fileId:number,evidenceRole:"before"|"after"|"supporting",signal?:AbortSignal):Promise<readonly LensNextResolutionEvidence[]>;
+  loadLessonProposal(identity:LensNextImmutableIssueIdentity,signal?:AbortSignal):Promise<LensNextLessonProposal|null>;
+  proposeLesson(identity:LensNextImmutableIssueIdentity,lesson:string,organizationalApplicability:string,signal?:AbortSignal):Promise<LensNextLessonProposal>;
 }
 
 export function createLensNextApiClient(
@@ -213,6 +216,7 @@ export function createLensNextApiClient(
     return Object.freeze({...current,recordId:String(item.id),projectCaseId:String(item.project_case_id),history:Object.freeze(history)});
   };
   const adaptResolutionEvidence=(raw:unknown):readonly LensNextResolutionEvidence[]=>{if(!raw||typeof raw!=="object"||Array.isArray(raw)||!Array.isArray((raw as Record<string,unknown>).items))throw new Error("Resolution evidence response is invalid");return Object.freeze(((raw as Record<string,unknown>).items as unknown[]).map(value=>{if(!value||typeof value!=="object"||Array.isArray(value))throw new Error("Resolution evidence response is invalid");const item=value as Record<string,unknown>,fileId=Number(item.file_id),role=String(item.evidence_role);if(!Number.isSafeInteger(fileId)||fileId<1||!["before","after","supporting"].includes(role))throw new Error("Resolution evidence response is invalid");return Object.freeze({id:String(item.id),revisionId:String(item.revision_id),evidenceRole:role as "before"|"after"|"supporting",fileId,fileName:String(item.file_name),fileType:String(item.file_type),fileSize:Number(item.file_size),metadata:typeof item.metadata==="object"&&item.metadata!==null&&!Array.isArray(item.metadata)?item.metadata as Record<string,unknown>:{},modelViewReference:typeof item.model_view_reference==="object"&&item.model_view_reference!==null&&!Array.isArray(item.model_view_reference)?item.model_view_reference as Record<string,unknown>:{},addedAt:String(item.added_at)});}));};
+  const adaptLessonProposal=(value:unknown):LensNextLessonProposal|null=>{if(value==null)return null;if(!value||typeof value!=="object"||Array.isArray(value))throw new Error("Lesson proposal response is invalid");const item=value as Record<string,unknown>,proposal=item.proposal;if(!proposal||typeof proposal!=="object"||Array.isArray(proposal))throw new Error("Lesson proposal response is invalid");const content=proposal as Record<string,unknown>,status=String(item.status);if(!item.id||!["proposed","under_review","approved","rejected","merged"].includes(status)||!String(content.lesson??"").trim()||!String(content.organizationalApplicability??"").trim())throw new Error("Lesson proposal response is invalid");return Object.freeze({id:String(item.id),status:status as LensNextLessonProposal["status"],lesson:String(content.lesson),organizationalApplicability:String(content.organizationalApplicability),evidenceCount:Number(item.evidence_count??0),proposedAt:item.proposed_at==null?null:String(item.proposed_at),reviewRationale:item.review_rationale==null?null:String(item.review_rationale)});};
   return Object.freeze({
     async resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId: number | null = null, signal?: AbortSignal) {
       const raw = await post("/lens-next/model-bindings/resolve", { modelBindingKey, modelDisplayName, managedProjectId, explicitProjectId }, signal);
@@ -395,6 +399,8 @@ export function createLensNextApiClient(
       await post(`/coordination-knowledge/lens-context/${exact.serverId}/resolution/evidence?projectId=${exact.projectId}`,{resolutionRevisionId,fileId,evidenceRole,metadata:{source:"lens-next-resolution"},modelViewReference:{viewpointId:exact.viewpointId,revisionNumber:exact.revisionNumber}},signal);
       return adaptResolutionEvidence(await get(`/coordination-knowledge/lens-context/${exact.serverId}/resolution/evidence?projectId=${exact.projectId}`,signal));
     },
+    async loadLessonProposal(identity:LensNextImmutableIssueIdentity,signal?:AbortSignal){const exact=assertLensNextImmutableIdentity(identity),raw=await get(`/coordination-knowledge/lens-context/${exact.serverId}/lesson-proposal?projectId=${exact.projectId}`,signal);if(!raw||typeof raw!=="object"||Array.isArray(raw))throw new Error("Lesson proposal response is invalid");return adaptLessonProposal((raw as Record<string,unknown>).item);},
+    async proposeLesson(identity:LensNextImmutableIssueIdentity,lesson:string,organizationalApplicability:string,signal?:AbortSignal){const exact=assertLensNextImmutableIdentity(identity),raw=await post(`/coordination-knowledge/lens-context/${exact.serverId}/lesson-proposal?projectId=${exact.projectId}`,{lesson,organizationalApplicability},signal);if(!raw||typeof raw!=="object"||Array.isArray(raw))throw new Error("Lesson proposal receipt is invalid");const item=adaptLessonProposal((raw as Record<string,unknown>).item);if(!item)throw new Error("Lesson proposal did not persist");return item;},
     async linkBimlogItem(identity: LensNextImmutableIssueIdentity, targetType: LensNextLinkedItemType, targetId: number, signal?: AbortSignal) {
       const exact = assertLensNextImmutableIdentity(identity);
       if (!["rfi", "submittal"].includes(targetType) || !Number.isSafeInteger(targetId) || targetId <= 0) throw new Error("A valid authoritative BIMLog item is required");

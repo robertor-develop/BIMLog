@@ -100,7 +100,7 @@ function Harness() {
     selectedServerId, selectedIssue, linkedItems: { links: [], eligible: [] }, linkedItemsError: null, onLinkBimlogItem: noop, onRemoveLinkedItem: noop,
     referenceAttachments: { attachments: [] }, referenceAttachmentsError: null, onUploadReferenceAttachment: noop, onOpenReferenceAttachment: noop, onRemoveReferenceAttachment: noop,
     knowledgeContext: { canClassify: false, conflictType: null, availableConflictTypes: [], classificationSuggestions: [], rules: [], methods: [], previousCases: [] }, knowledgeError: null, onRetryKnowledge: noop, onClassifyKnowledge: noop,
-    resolutionRecord: null, resolutionError: null, onRetryResolution: noop, onSaveResolution: async()=>{}, onTransitionResolution: async()=>{}, resolutionEvidence: [], onAddResolutionEvidence: async()=>{},
+    resolutionRecord: null, resolutionError: null, onRetryResolution: noop, onSaveResolution: async()=>{}, onTransitionResolution: async()=>{}, resolutionEvidence: [], onAddResolutionEvidence: async()=>{}, lessonProposal:null, onProposeLesson:async()=>{},
     filters, onFiltersChange: (next) => { setFilters(next); setPage(1); }, trades: ["HVAC", "Plumbing", "Fire Protection", "Electrical"], floors: ["L1", "L2", "L3", "Roof"],
     filterCompanies: ["BIMTech Corp", "Elara MEP"], filterReportTypes: ["Coordination"],
     createTrades: ["HVAC", "Plumbing"], createFloors: ["L1", "L2"], createResponsibleCompanies: ["BIMTech Corp"], createReportTypes: ["Coordination"],

@@ -272,6 +272,11 @@ export interface LensNextResolutionDraft {
   drawingSubmittalReference:string|null;
 }
 export interface LensNextResolutionEvidence { id:string;revisionId:string;evidenceRole:"before"|"after"|"supporting";fileId:number;fileName:string;fileType:string;fileSize:number;metadata:Record<string,unknown>;modelViewReference:Record<string,unknown>;addedAt:string; }
+export interface LensNextLessonProposal {
+  id:string;status:"proposed"|"under_review"|"approved"|"rejected"|"merged";
+  lesson:string;organizationalApplicability:string;evidenceCount:number;
+  proposedAt:string|null;reviewRationale:string|null;
+}
 export interface LensNextXmlExportSummary {
   requestedCount: number | null;
   serializedCount: number | null;

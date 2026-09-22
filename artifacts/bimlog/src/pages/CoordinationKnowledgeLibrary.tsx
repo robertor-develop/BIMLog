@@ -20,6 +20,7 @@ type RuleFilters = { search: string; applicability: string; status: string };
 type ResolutionMethodRecord = { id: string; resolution_method_id: string; code: string; revision: number; status: KnowledgeStatus; name: string; description: string; applicability: Record<string, unknown>; responsible_trade?: string | null; constraints: unknown[]; advantages: unknown[]; disadvantages: unknown[]; required_approvals: unknown[]; rfi_requirement: "required" | "never" | "conditional"; details: Record<string, unknown>; conflict_type_ids: string[]; rule_revision_ids: string[] };
 type MethodFilters = { search: string; conflictType: string; trade: string; discipline: string; rfi: string; approval: string; status: string };
 type LessonQueueState = "proposed" | "under_review" | "approved" | "rejected" | "merged";
+type LessonProposalRecord = { id:string; project_id:number; status:LessonQueueState; proposal:{lesson:string;organizationalApplicability:string}; proposed_at:string; review_rationale?:string|null; lens_viewpoint_id:number; promoted_entity_type?:string|null; promoted_entity_id?:string|null };
 
 const emptyConflictFilters: ConflictFilters = { search: "", discipline: "", element: "", category: "", status: "", tag: "" };
 const emptyRuleFilters: RuleFilters = { search: "", applicability: "", status: "" };
@@ -69,6 +70,10 @@ export function CoordinationKnowledgeLibrary() {
   const [methodReloadKey, setMethodReloadKey] = useState(0);
   const [selectedMethod, setSelectedMethod] = useState<ResolutionMethodRecord | null>(null);
   const [lessonQueueState, setLessonQueueState] = useState<LessonQueueState>("proposed");
+  const [lessons,setLessons]=useState<LessonProposalRecord[]>([]);
+  const [lessonState,setLessonState]=useState<"idle"|"loading"|"ready"|"error">("idle");
+  const [lessonError,setLessonError]=useState("");
+  const [lessonReloadKey,setLessonReloadKey]=useState(0);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
@@ -133,6 +138,22 @@ export function CoordinationKnowledgeLibrary() {
       .catch(error => { if (!controller.signal.aborted) { setMethods([]); setMethodState("error"); setMethodError(String(error instanceof Error ? error.message : error)); } });
     return () => controller.abort();
   }, [token, active, methodReloadKey]);
+
+  useEffect(()=>{
+    if(!token||active!=="lessons")return;
+    const controller=new AbortController();setLessonState("loading");setLessonError("");
+    fetch(`${API_BASE}/api/v1/coordination-knowledge/lesson-proposals?status=${encodeURIComponent(lessonQueueState)}`,{headers:{Authorization:`Bearer ${token}`},signal:controller.signal})
+      .then(async response=>{const payload=await response.json().catch(()=>({}));if(!response.ok)throw new Error(payload.code||`KNOWLEDGE_LESSONS_${response.status}`);return payload;})
+      .then(payload=>{setLessons(Array.isArray(payload.items)?payload.items:[]);setLessonState("ready");})
+      .catch(error=>{if(!controller.signal.aborted){setLessons([]);setLessonState("error");setLessonError(String(error instanceof Error?error.message:error));}});
+    return()=>controller.abort();
+  },[token,active,lessonQueueState,lessonReloadKey]);
+
+  const transitionLesson=async(item:LessonProposalRecord,action:"submit-review"|"return-proposed"|"approve"|"reject")=>{
+    if(!token)return;const terminal=action==="approve"||action==="reject";const rationale=terminal?window.prompt(t("Record the review rationale", "Registre la justificación de revisión")):null;if(terminal&&!rationale?.trim())return;
+    const response=await fetch(`${API_BASE}/api/v1/coordination-knowledge/lesson-proposals/${encodeURIComponent(item.id)}/${action}`,{method:"POST",headers:{Authorization:`Bearer ${token}`,"Content-Type":"application/json"},body:JSON.stringify({expectedStatus:item.status,rationale})});
+    const payload=await response.json().catch(()=>({}));if(!response.ok){setLessonError(payload.code||`KNOWLEDGE_LESSON_${response.status}`);setLessonState("error");return;}setLessonReloadKey(value=>value+1);
+  };
 
   const methodOptions = useMemo(() => ({
     trades: values(methods.map(item => item.responsible_trade ?? "")),
@@ -312,12 +333,15 @@ export function CoordinationKnowledgeLibrary() {
           </div>
           <div className="knowledge-lesson-tabs" role="tablist" aria-label={t("Lessons Learned queue status", "Estado de la cola de Lecciones Aprendidas")}>
             {lessonQueueStates.map(state => <button key={state.id} type="button" role="tab" aria-selected={lessonQueueState === state.id} onClick={() => setLessonQueueState(state.id)}>
-              <span>{es ? state.es : state.en}</span><span className="knowledge-lesson-count" aria-label={t("0 items", "0 elementos")}>0</span>
+              <span>{es ? state.es : state.en}</span><span className="knowledge-lesson-count">{state.id===lessonQueueState&&lessonState==="ready"?lessons.length:"—"}</span>
             </button>)}
           </div>
           <section className="knowledge-lesson-queue" role="tabpanel" aria-live="polite">
-            <div className="knowledge-lesson-queue-heading"><div><h3>{es ? lessonQueueStates.find(state => state.id === lessonQueueState)?.es : lessonQueueStates.find(state => state.id === lessonQueueState)?.en}</h3><p>{t("Company-scoped, permission-aware review queue", "Cola de revisión por empresa y controlada por permisos")}</p></div>{canProposeLessons && <button type="button" disabled title={t("Proposal authoring is delivered in the governed authoring milestone.", "La creación de propuestas se entrega en el hito de autoría gobernada.")}>{t("Propose from an issue", "Proponer desde un incidente")}</button>}</div>
-            <div className="knowledge-placeholder" role="status"><Lightbulb aria-hidden /><strong>{t("No lessons in this queue", "No hay lecciones en esta cola")}</strong><span>{t("A proposal will appear here only after it is created from a source issue with supporting evidence. No automatic approval is performed.", "Una propuesta aparecerá aquí solo después de crearse desde un incidente fuente con evidencia de respaldo. No se realiza ninguna aprobación automática.")}</span></div>
+            <div className="knowledge-lesson-queue-heading"><div><h3>{es ? lessonQueueStates.find(state => state.id === lessonQueueState)?.es : lessonQueueStates.find(state => state.id === lessonQueueState)?.en}</h3><p>{t("Company-scoped, permission-aware review queue", "Cola de revisión por empresa y controlada por permisos")}</p></div>{canProposeLessons&&<span>{t("Create proposals from a closed Lens issue", "Cree propuestas desde un incidente cerrado en Lens")}</span>}</div>
+            {lessonState==="loading"&&<div className="knowledge-placeholder" role="status"><span className="knowledge-spinner" aria-hidden/><strong>{t("Loading lessons…","Cargando lecciones…")}</strong></div>}
+            {lessonState==="error"&&<div className="knowledge-error" role="alert"><strong>{t("Lessons could not be loaded.","No se pudieron cargar las lecciones.")}</strong><span>{lessonError}</span><button type="button" onClick={()=>setLessonReloadKey(value=>value+1)}>{t("Try again","Reintentar")}</button></div>}
+            {lessonState==="ready"&&!lessons.length&&<div className="knowledge-placeholder" role="status"><Lightbulb aria-hidden /><strong>{t("No lessons in this queue", "No hay lecciones en esta cola")}</strong><span>{t("A proposal appears here only after it is created from a source issue with supporting evidence. No automatic approval is performed.", "Una propuesta aparece aquí solo después de crearse desde un incidente fuente con evidencia de respaldo. No se realiza ninguna aprobación automática.")}</span></div>}
+            {lessonState==="ready"&&lessons.map(item=><article className="knowledge-card" key={item.id}><div className="knowledge-card-top"><span className="knowledge-code">#{item.lens_viewpoint_id}</span><span className={`knowledge-status knowledge-status-${item.status}`}>{item.status.replace("_"," ")}</span></div><h3>{item.proposal.lesson}</h3><p>{item.proposal.organizationalApplicability}</p><div className="knowledge-card-footer"><span>{new Date(item.proposed_at).toLocaleString()}</span><span>{item.promoted_entity_id?t("Draft knowledge linked","Borrador vinculado"):t("Source retained","Fuente conservada")}</span></div>{canReviewLessons&&<div className="knowledge-lesson-actions">{item.status==="proposed"&&<button type="button" onClick={()=>void transitionLesson(item,"submit-review")}>{t("Start review","Iniciar revisión")}</button>}{item.status==="under_review"&&<><button type="button" onClick={()=>void transitionLesson(item,"return-proposed")}>{t("Return","Devolver")}</button><button type="button" onClick={()=>void transitionLesson(item,"approve")}>{t("Approve","Aprobar")}</button><button type="button" onClick={()=>void transitionLesson(item,"reject")}>{t("Reject","Rechazar")}</button></>}</div>}</article>)}
           </section>
           <div className="knowledge-lesson-contract" aria-label={t("Lesson proposal evidence contract", "Contrato de evidencia de propuesta")}>
             <div><strong>{t("Source issue", "Incidente fuente")}</strong><span>{t("Required immutable link", "Vínculo inmutable requerido")}</span></div>

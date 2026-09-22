@@ -1,5 +1,15 @@
 # STATUS.md - Current Accepted Platform State
 
+## Coordination Knowledge Library — Block 8 publication candidate — 2026-09-22
+
+- Builds 261–265 complete the governed Lesson Learned loop from an evidenced closed Lens issue to a company-scoped proposal and review queue.
+- Proposal requires an exact classified Project Case, completed Resolution Record, and linked evidence. It preserves the canonical Lens issue and does not alter the source issue.
+- Review uses explicit proposed, under-review, approved, rejected, and merged states with optimistic concurrency, attributable decisions, rationale, and immutable audit events.
+- Approved proposals may create or revise draft Conflict Types, Coordination Rules, or Resolution Methods only through a separate controlled action. No proposal automatically approves or publishes company knowledge.
+- The Lens Resolution panel provides the proposal action and status; the Coordination Knowledge Library provides the real permission-aware review queue and reload restoration.
+- Block 8 adds no schema and changes no Native, bridge, camera, installer, package, Autodesk load path, or Navisworks-facing source. Focused Navisworks smoke is not applicable.
+- Build 265 is the scheduled publication boundary. Exact clean-gate, push, Replit Shell publication, deployed identity, and authenticated Chrome acceptance remain required before live closure.
+
 ## Coordination Knowledge Library — Block 7 source candidate — 2026-09-22
 
 - Builds 256–260 add a separate Resolution Record linked to the canonical company/project/Lens issue and optional approved Resolution Method. Every save, completion, verification, and reopening appends an immutable revision with optimistic concurrency and audit events.

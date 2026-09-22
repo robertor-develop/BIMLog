@@ -328,6 +328,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-knowledge-repository.ts
 - artifacts/api-server/src/lib/coordination-knowledge-rules-methods-api.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-search.behavior.ts
+- artifacts/api-server/src/lib/coordination-lesson-merge.behavior.ts
+- artifacts/api-server/src/lib/coordination-lesson-promotion.behavior.ts
+- artifacts/api-server/src/lib/coordination-lesson-proposal.behavior.ts
+- artifacts/api-server/src/lib/coordination-lesson-review.behavior.ts
+- artifacts/api-server/src/lib/coordination-lesson-workflow.ts
 - artifacts/api-server/src/lib/coordination-release-readiness.behavior.ts
 - artifacts/api-server/src/lib/coordination-release-readiness.ts
 - artifacts/api-server/src/lib/coordination-resolution-evidence.behavior.ts
@@ -1115,3 +1120,11 @@ It changes only when the code structure or curated architectural facts change.
 - Completion may occur directly from a valid first submission. Verification is a separate accountable action, and the resolver cannot verify their own resolution. Reopening requires an attributable reason and preserves the prior completed and verified history.
 - Lens Next exposes this workflow in its existing issue-detail surface. The API, Platform client, and UI share the same action vocabulary, role checks, version, and audit outcome; Native bridge and installer contracts are unchanged.
 - Builds 256–260 are a source-only five-build push boundary. No provider migration, customer data mutation, Replit publication, or external delivery is implied; publication and authenticated Chrome acceptance remain due at Build 265.
+
+## Coordination Knowledge Lessons Learned — Builds 261–265
+
+- A Lesson Learned proposal is a company/project-scoped review object linked to the exact canonical Project Case, closed Resolution Record, classification, and supporting evidence. It never replaces or changes the source issue.
+- Lens Next exposes the proposal action only for a completed or verified outcome with evidence. The authenticated Coordination Knowledge Library exposes the live company-scoped queue and controlled proposed, under-review, approved, rejected, and merged states.
+- Reviewer decisions are optimistic-concurrency protected, attributable, rationale-bearing, and audited. Duplicate proposals may merge only into a same-company canonical proposal and retain their redirect history.
+- An approved proposal may create or revise draft Conflict Types, Coordination Rules, or Resolution Methods through a separate controlled action. No proposal, review transition, or merge automatically approves or publishes organizational knowledge.
+- Block 8 adds no schema and changes no Native, bridge, camera, installer, package, Autodesk load path, or Navisworks-facing source. Build 265 is the scheduled Replit publication and authenticated Chrome acceptance boundary.

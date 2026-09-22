@@ -4,37 +4,43 @@
   "date": "2026-09-21",
   "range": {
     "firstBuild": 226,
-    "completedThrough": 260,
+    "completedThrough": 265,
     "finalBuild": 275
   },
   "currentBlock": {
-    "number": 7,
-    "builds": "256-260",
+    "number": 8,
+    "builds": "261-265",
     "status": "PASS_SOURCE_CANDIDATE",
     "pushDue": true,
-    "publicationDue": false
+    "publicationDue": true
   },
   "buildCommits": {
     "256": "7348fa39",
     "257": "a79b54a5",
     "258": "e513cd73",
     "259": "4fbf1a48",
-    "260": "PENDING"
+    "260": "d94c00bb",
+    "261": "d8636865",
+    "262": "4baab855",
+    "263": "cbcfe347",
+    "264": "49bd0258",
+    "265": "PENDING"
   },
-  "remainingBlocks": 3,
-  "remainingBuilds": 15,
-  "nextBlock": "Block 8 — Builds 261-265 — lessons learned and publication",
+  "remainingBlocks": 2,
+  "remainingBuilds": 10,
+  "nextBlock": "Block 9 — Builds 266-270 — governance and reporting",
   "database": {
     "changed": true,
     "destructiveStatements": 0,
     "productionApplied": false,
-    "block7SchemaChange": "additive resolution record identities/revisions plus bounded evidence metadata; no destructive statements or production execution"
+    "block7SchemaChange": "additive resolution record identities/revisions plus bounded evidence metadata; no destructive statements or production execution",
+    "block8SchemaChange": "none; reuses the additive Lesson Learned proposal tables delivered in Block 1"
   },
   "lensNext": {
     "visibleWorkflowChanged": true,
     "nativeChanged": false,
     "installerChanged": false,
-    "panelImplementedBuilds": "246-260"
+    "panelImplementedBuilds": "246-265"
   },
   "tests": {
     "focused": "PASS",

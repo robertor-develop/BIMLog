@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const lensRoot=import.meta.dirname;
+const panel=readFileSync(join(lensRoot,"LensNextResolutionPanel.tsx"),"utf8");
+const client=readFileSync(join(lensRoot,"lens-next-client.ts"),"utf8");
+const library=readFileSync(join(lensRoot,"..","..","pages","CoordinationKnowledgeLibrary.tsx"),"utf8");
+assert.match(panel,/Propose as Lesson Learned/);
+assert.match(panel,/Submission does not approve or publish company knowledge/);
+assert.match(panel,/evidence\.length<1/);
+assert.match(client,/loadLessonProposal/);
+assert.match(client,/proposeLesson/);
+assert.match(client,/lesson-proposal\?projectId=/);
+assert.match(library,/lesson-proposals\?status=/);
+assert.match(library,/expectedStatus:item\.status/);
+assert.match(library,/Start review/);
+assert.match(library,/Approve/);
+assert.match(library,/Reject/);
+console.log("Build 265 closed-loop Lessons Learned UI contract: PASS");
