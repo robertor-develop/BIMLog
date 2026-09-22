@@ -1,0 +1,20 @@
+import assert from "node:assert/strict";
+import {createWorkItemEconomicPlan} from "./edt-engine-economic-service";
+import type {EdtTransactionClient,EdtTransactionHost} from "./edt-engine-transaction";
+
+let intakeStatus="ready",currency="USD",versionId="apu-1";
+const calls:string[]=[];
+const client:EdtTransactionClient={async query<Row>(sql:string){calls.push(sql);
+  if(sql.includes("FROM job_activation_work_items w"))return{rows:[{id:"w1",intake_id:"i1",project_id:11,contract_id:"c1",contract_version_id:"cv1",intake_status:intakeStatus}] as Row[]};
+  if(sql.includes("FROM financial_contract_versions v"))return{rows:[{currency,pricing_template_binding:{versionId}}] as Row[]};
+  return{rows:[]};
+}};
+const host:EdtTransactionHost={async connect(){return client}};
+const input={actor:{grants:["JOB_OPERATE"] as const,actorUserId:41,actorCompanyId:7,actorProjectIds:[11],eligibleRole:"OPERATIONS_DIRECTOR"},companyId:7,projectId:11,intakeId:"i1",workItemId:"w1",contractId:"c1",contractVersionId:"cv1",pricingTemplateVersionId:"apu-1",deliveryWorkflowVersionId:"dw1",currency:"USD",directProductionAmount:"1",projectAdministrativeAmount:"0",incentiveReserveAmount:"0",taskEarningsAmount:"0",projectEarningsAmount:"0",resolvedAllocation:{},sourceSnapshot:{}};
+await assert.rejects(()=>createWorkItemEconomicPlan(input,host),(e:unknown)=>e instanceof Error&&"code" in e&&e.code==="ECONOMIC_INTAKE_NOT_ACTIVATED");
+intakeStatus="activated";currency="EUR";
+await assert.rejects(()=>createWorkItemEconomicPlan(input,host),(e:unknown)=>e instanceof Error&&"code" in e&&e.code==="ECONOMIC_CONTRACT_VERSION_MISMATCH");
+currency="USD";versionId="apu-other";
+await assert.rejects(()=>createWorkItemEconomicPlan(input,host),(e:unknown)=>e instanceof Error&&"code" in e&&e.code==="ECONOMIC_CONTRACT_VERSION_MISMATCH");
+assert.equal(calls.some(sql=>sql.includes("INSERT INTO job_activation_work_item_economic_plans")),false);
+console.log("EDT_ENGINE_BUILD314_RESULT=PASS economic plan checks canonical activated contract APU and currency");
