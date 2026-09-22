@@ -6,7 +6,7 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 647,
+    "apiRoutes": 658,
     "frontendApiReferences": 245,
     "routeOwnedTables": 61
   },
@@ -2136,6 +2136,12 @@
       "tables": []
     },
     {
+      "method": "GET",
+      "path": "/company/master-catalogs/:kind/:id/usage",
+      "owner": "artifacts/api-server/src/routes/company-master-catalogs.ts",
+      "tables": []
+    },
+    {
       "method": "POST",
       "path": "/company/master-catalogs/:kind",
       "owner": "artifacts/api-server/src/routes/company-master-catalogs.ts",
@@ -3189,6 +3195,66 @@
       "method": "GET",
       "path": "/downloads/sync-agent-mac",
       "owner": "artifacts/api-server/src/routes/downloads.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/edt-engine/capabilities",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/activation-requests",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/activation-requests/:requestId/approve",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/change-requests",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/change-requests/:requestId/decision",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/economic-plans",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/time-entries/:entryId/transition",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/work-items/:workItemId/issuances",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/issuances/:issuanceId/qc-decisions",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/intakes/:intakeId/result-imports/preview",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
       "tables": []
     },
     {

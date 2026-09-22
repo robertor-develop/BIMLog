@@ -6,6 +6,7 @@
 - Governed EDT activation and immutable Economic Plan/time-impact HTTP mutations fail closed until the server derives versions, plans, pools and amounts from canonical records. The existing Job Intake activation and Operations routes are unchanged and remain the operational path.
 - The planned EDT UI/runtime integration is still open for Builds 306–310. Focused block tests pass; full release gate, exact push, publication and live authenticated Chrome acceptance are separate pending gates. No Native or installer source changed.
 - Release acceptance must verify that guarded mutation routes return explicit conflicts while the prior canonical Intake and Operations user journeys continue to work.
+- Pre-push review exposed a stale tracked route graph inherited from the Block 5 route additions. The graph was regenerated and the focused EDT block suite now runs the route-graph regression before the full gate.
 
 ## EDT and Engine Templates — Block 5 source candidate — 2026-09-22
 

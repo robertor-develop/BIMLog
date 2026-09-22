@@ -38185,7 +38185,7 @@
     },
     {
       "taskId": "bimlog-edt-engine-block06-20260922",
-      "reviewedThroughCommit": "9733492fc6e525ac6083f63401197fcbec47ef7c",
+      "reviewedThroughCommit": "ab0c61612a2195698700e39f39178b06a04b579e",
       "reviewedAt": "2026-09-22T19:20:00Z",
       "status": "remediation_source_candidate",
       "captureTiming": "immediate_same_task_chain",
@@ -38259,13 +38259,13 @@
         },
         {
           "key": "status",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The previous evidence commit recorded the remediation and separated local, push and live gates; this metadata-only reconciliation adds no new product state."
+          "result": "updated",
+          "reason": "Records the failed stale-graph check and its corrected early regression in the current release candidate."
         },
         {
           "key": "open_loop",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The previous evidence commit kept server-derived activation, economic integration and UI execution open; this metadata-only reconciliation adds no new work item."
+          "result": "updated",
+          "reason": "Closes the route-graph freshness defect while preserving the remaining server-derived EDT integration work."
         },
         {
           "key": "audit",
@@ -38274,9 +38274,15 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/impact-declarations.json"
+        "evidence/edt-engine-program-20260922/BLOCK_06_REPORT.md",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/test-edt-engine-block06.mjs"
       ],
-      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+      "reviewedChangeSha256": "764635dd724adf1c347cb3a41b297300b2f4e0b36113aad60cf14ccbed367ed1"
     }
   ]
 }
