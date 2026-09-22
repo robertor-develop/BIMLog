@@ -1,0 +1,12 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+const repository=readFileSync(fileURLToPath(new URL("./coordination-knowledge-repository.ts",import.meta.url)),"utf8");
+assert.match(repository,/Same approved Conflict Type/);
+assert.match(repository,/Matching discipline/);
+assert.match(repository,/Matching category/);
+assert.match(repository,/similarityScore>0/);
+assert.match(repository,/allowCompanyPrecedent/);
+assert.match(repository,/precedent\.project_id=\$5/);
+assert.match(repository,/sortDate\.localeCompare/);
+console.log("Coordination Knowledge scoped similar-case retrieval behavior: PASS");

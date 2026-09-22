@@ -245,6 +245,7 @@ export interface LensNextKnowledgeMethod {
 export interface LensNextKnowledgeCase {
   id: string; projectId: number; projectName: string; location: string | null;
   actualResolution: string; rfiState: string; status: "resolved" | "verified";
+  similarityScore:number; similarityReasons:readonly string[];
 }
 export interface LensNextKnowledgeContext {
   canClassify: boolean;

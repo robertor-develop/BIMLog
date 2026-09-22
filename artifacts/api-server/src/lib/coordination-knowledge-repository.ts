@@ -477,15 +477,22 @@ export class CoordinationKnowledgeRepository {
       JOIN coordination_rules rule ON rule.id=rule_revision.rule_id AND rule.company_id=rule_revision.company_id
       WHERE conflict_link.company_id=$1 AND conflict_link.conflict_type_id=$2
       ORDER BY rule.code,rule_revision.revision DESC`,[companyId,current.conflict_type_id])).rows.map(row=>({id:String(row.id),revisionId:String(row.revision_id),revision:Number(row.revision),code:String(row.code),title:String(row.title),guidance:String(row.guidance)}));
-    const previousCases=(await this.pool.query(`SELECT precedent.id,precedent.project_id,project.name project_name,viewpoint.floor location,
-      precedent.actual_resolution,precedent.status,CASE WHEN EXISTS(SELECT 1 FROM linked_items link WHERE link.project_id=precedent.project_id AND ((link.from_type='lens_viewpoint' AND link.from_id=precedent.lens_viewpoint_id AND link.to_type='rfi') OR (link.to_type='lens_viewpoint' AND link.to_id=precedent.lens_viewpoint_id AND link.from_type='rfi'))) THEN 'Linked' ELSE 'Not linked' END rfi_state
+    const previousCases=(await this.pool.query(`SELECT precedent.id,precedent.project_id,project.name project_name,viewpoint.floor location,viewpoint.trade,viewpoint.report_type,
+      precedent.actual_resolution,precedent.status,precedent.verified_at,precedent.resolved_at,precedent_conflict.conflict_type_id,precedent_conflict.discipline_a,precedent_conflict.discipline_b,precedent_conflict.conflict_category,
+      CASE WHEN EXISTS(SELECT 1 FROM linked_items link WHERE link.project_id=precedent.project_id AND ((link.from_type='lens_viewpoint' AND link.from_id=precedent.lens_viewpoint_id AND link.to_type='rfi') OR (link.to_type='lens_viewpoint' AND link.to_id=precedent.lens_viewpoint_id AND link.from_type='rfi'))) THEN 'Linked' ELSE 'Not linked' END rfi_state
       FROM coordination_project_cases precedent
       JOIN coordination_conflict_type_revisions precedent_conflict ON precedent_conflict.id=precedent.conflict_type_revision_id AND precedent_conflict.company_id=precedent.company_id
       JOIN projects project ON project.id=precedent.project_id
       JOIN lens_viewpoints viewpoint ON viewpoint.id=precedent.lens_viewpoint_id AND viewpoint.project_id=precedent.project_id
-      WHERE precedent.company_id=$1 AND precedent.lens_viewpoint_id<>$2 AND precedent_conflict.conflict_type_id=$3
+      WHERE precedent.company_id=$1 AND precedent.lens_viewpoint_id<>$2
         AND precedent.status IN ('resolved','verified') AND ($4::boolean OR precedent.project_id=$5)
-      ORDER BY precedent.verified_at DESC NULLS LAST,precedent.resolved_at DESC NULLS LAST,precedent.id LIMIT 8`,[companyId,lensViewpointId,current.conflict_type_id,input.allowCompanyPrecedent,projectId])).rows.map(row=>({id:String(row.id),projectId:Number(row.project_id),projectName:String(row.project_name),location:row.location==null?null:String(row.location),actualResolution:String(row.actual_resolution),rfiState:String(row.rfi_state),status:String(row.status)}));
+      ORDER BY precedent.id`,[companyId,lensViewpointId,current.conflict_type_id,input.allowCompanyPrecedent,projectId])).rows.map(row=>{
+        const similarityReasons:string[]=[];
+        if(String(row.conflict_type_id)===String(current.conflict_type_id)) similarityReasons.push("Same approved Conflict Type");
+        if(issueTrade&&(normalized(row.discipline_a)===issueTrade||normalized(row.discipline_b)===issueTrade||normalized(row.trade)===issueTrade)) similarityReasons.push(`Matching discipline: ${String(issue.trade).trim()}`);
+        if(issueReportType&&(normalized(row.conflict_category)===issueReportType||normalized(row.report_type)===issueReportType)) similarityReasons.push(`Matching category: ${String(issue.report_type).trim()}`);
+        return {id:String(row.id),projectId:Number(row.project_id),projectName:String(row.project_name),location:row.location==null?null:String(row.location),actualResolution:String(row.actual_resolution),rfiState:String(row.rfi_state),status:String(row.status),similarityScore:similarityReasons.length,similarityReasons,sortDate:String(row.verified_at??row.resolved_at??"")};
+      }).filter(item=>item.similarityScore>0).sort((left,right)=>right.similarityScore-left.similarityScore||right.sortDate.localeCompare(left.sortDate)||left.id.localeCompare(right.id)).slice(0,8).map(({sortDate:_,...item})=>item);
     return {conflictType,availableConflictTypes,classificationSuggestions,rules,methods,previousCases};
   }
 }
