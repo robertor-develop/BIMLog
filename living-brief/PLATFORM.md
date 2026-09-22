@@ -263,6 +263,8 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/commercial-entitlement.ts
 - artifacts/api-server/src/lib/commercial-project-scope.ts
 - artifacts/api-server/src/lib/company-master-catalog-migration.ts
+- artifacts/api-server/src/lib/company-master-catalog-usage.behavior.ts
+- artifacts/api-server/src/lib/company-master-catalog-usage.ts
 - artifacts/api-server/src/lib/company-master-catalog.behavior.ts
 - artifacts/api-server/src/lib/company-master-catalog.http-evidence.ts
 - artifacts/api-server/src/lib/company-pricing-template-binding.ts
@@ -382,6 +384,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts
 - artifacts/api-server/src/lib/design-comment-control.behavior.ts
 - artifacts/api-server/src/lib/design-comment-control.ts
+- artifacts/api-server/src/lib/edt-engine-authorization.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-authorization.ts
+- artifacts/api-server/src/lib/edt-engine-block02-acceptance.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-permissions.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-permissions.ts
 - artifacts/api-server/src/lib/email.ts
 - artifacts/api-server/src/lib/enterprise-identity-migration.behavior.ts
 - artifacts/api-server/src/lib/enterprise-identity-migration.ts
