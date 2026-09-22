@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT and Engine Templates program — Block 7 — 2026-09-22
+
+- [x] Builds 306–310 close five concrete backend integrity defects: absent Work Item company column in SQL, unsupported action approval without execution, stale Intake approval, cross-Intake time budget account, and incomplete/cross-Intake EDT plan approval.
+- [ ] The originally planned server-derived version selection, canonical EDT plan generation, economic/time amount derivation, and real Intake/Operations UI connection are **not** completed by this corrective block. The four fail-closed routes remain unavailable by design. Do not present this as an end-to-end EDT engine.
+- [ ] Block 7 full local gate, exact-source push and independent review remain separate from focused test results. This is a push-only five-build boundary; next publication and authenticated Chrome smoke are due after the next five builds.
+
+
 ## EDT and Engine Templates program — Block 6 — 2026-09-22
 
 - [x] Builds 276–280 verify the approved package, current source boundary, reuse-versus-gap classification, additive migration design and deterministic program ledger.
@@ -12,7 +19,7 @@
 - [x] Block 5 consolidated tests, TypeScript projects, Living Brief integrity and the full repository production build/runtime closure pass from clean committed source.
 - [x] Builds 301–305 repaired five fail-open boundaries in the newly exposed EDT routes: project-company authority, QC conflict derivation, retained import-source binding, browser-supplied activation plans, and browser-supplied economic/time amounts. The unsafe activation and economic/time routes explicitly refuse mutation until their server-derived integration is complete.
 - [ ] The planned UI/runtime integration was not completed by the remediation block. Builds 306–310 must implement server-derived versions, EDT plans and amounts before those guarded routes are enabled, then connect the real Intake/Operations UI; no mock or browser-computed authority is acceptable.
-- [ ] Build 305 is the scheduled exact-source push, zero-drop publication and authenticated Chrome boundary. Do not call this block published or live-verified before those gates pass.
+- [x] Build 305 exact source `5f41ccc5e847823d971b74839b683ed9e8b6ff7a` was pushed, Replit Shell built with a zero-drop database receipt, published as deployment `ba2118a5`, and authenticated Chrome regression-smoked. This did not prove the guarded EDT mutation routes end-to-end.
 - [ ] Confirm the four guarded EDT mutation routes remain non-operational by design until canonical server derivation is implemented; do not mistake an HTTP route or service function for completed product behavior.
 - [x] The stale route graph found by the first full pre-push gate was regenerated; the EDT block suite now checks route-graph freshness early for future route changes.
 - [x] The endpoint-authority matrix now recognizes the verified EDT server guard and its full matrix test runs in the focused block suite; all 658 route authority entries pass.

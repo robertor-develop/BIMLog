@@ -1,10 +1,17 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 7 local source candidate — 2026-09-22
+
+- Builds 306–310 corrected five backend integrity defects uncovered before guarded EDT mutations could be enabled: Work Item company scope now joins the canonical Intake; unimplemented governed actions cannot be falsely approved; stale Intake revisions cannot be approved; time-ledger budget accounts must belong to the same Intake/company; and empty, ambiguous or cross-Intake EDT plans cannot receive an approval decision.
+- These are safety corrections, not the originally planned server-derived activation/economic/runtime UI integration. The four guarded HTTP mutations remain fail-closed. Existing Intake and Operations remain the operational user journeys. The complete EDT workflow is still open and must not be claimed working.
+- No schema, production database, Lens Next Native or installer source changed. Block 7 is push-only under the approved cadence; publication and authenticated Chrome smoke are due after the next five-build block.
+
+
 ## EDT and Engine Templates — Block 6 release candidate — 2026-09-22
 
 - Builds 301–305 are a security remediation of the Block 5 routes, not the originally planned complete UI integration. Server authority now checks project-company binding before role grant; QC conflicts come from stored work-item assignments; Result previews require the retained Intake document's exact hash and remain unvalidated previews.
 - Governed EDT activation and immutable Economic Plan/time-impact HTTP mutations fail closed until the server derives versions, plans, pools and amounts from canonical records. The existing Job Intake activation and Operations routes are unchanged and remain the operational path.
-- The planned EDT UI/runtime integration is still open for Builds 306–310. Focused block tests pass; full release gate, exact push, publication and live authenticated Chrome acceptance are separate pending gates. No Native or installer source changed.
+- The planned EDT UI/runtime integration remains open after Builds 306–310, which instead corrected additional backend integrity defects. Exact Build 305 source `5f41ccc5e847823d971b74839b683ed9e8b6ff7a` was pushed, published as Replit deployment `ba2118a5`, and authenticated Chrome regression-smoked; that release did not activate guarded EDT mutation routes. No Native or installer source changed.
 - Release acceptance must verify that guarded mutation routes return explicit conflicts while the prior canonical Intake and Operations user journeys continue to work.
 - Pre-push review exposed a stale tracked route graph inherited from the Block 5 route additions. The graph was regenerated and the focused EDT block suite now runs the route-graph regression before the full gate.
 - Endpoint authority inventory now recognizes only the verified EDT server-side project/company guard; the focused block suite also runs the complete project-authority matrix so newly added routes cannot silently bypass the release contract.

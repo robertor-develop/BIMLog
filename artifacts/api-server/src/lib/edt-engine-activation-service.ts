@@ -43,9 +43,9 @@ export async function approveEdtActivation(input:{ actor:Actor; companyId:number
     for(const node of input.nodes){
       if(!node.sourceIdentity||!node.code||!node.name||!Number.isInteger(node.sequence)||node.sequence<=0)
         throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Every EDT node needs source identity, code, name and positive sequence.");
-      const key=`${node.kind}:${node.sourceIdentity}`;
+      const key=node.sourceIdentity;
       if(sourceKeys.has(key)||node.parentSourceIdentity&&!input.nodes.some(parent=>parent.sourceIdentity===node.parentSourceIdentity))
-        throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT node identities must be unique and parents must exist in this plan.");
+        throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT source identities must be globally unique and parents must exist in this plan.");
       sourceKeys.add(key);
     }
     if(input.workItems.some(item=>!item.id||!input.nodes.some(node=>node.sourceIdentity===item.edtNodeSourceIdentity)))

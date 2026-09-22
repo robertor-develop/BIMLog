@@ -38277,6 +38277,92 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block07-20260922",
+      "reviewedThroughCommit": "495607589c608eb96af2749a479a9137a048ba0b",
+      "reviewedAt": "2026-09-22T21:45:00Z",
+      "status": "corrective_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Five EDT service defects were corrected while guarded HTTP mutations remain unavailable pending canonical server-derived integration."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Intake and financial records remain the sole product authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed, source, behavior and release gates remain applicable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Current security, tenant, financial and truthful-evidence obligations already cover these corrections."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new roadmap promise or product positioning."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural API route, schema or runtime-component change; only existing EDT service internals changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, bridge, installer or Navisworks package change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export layout changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or edition changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Block 7 corrective source state and remaining runtime/UI limits are stated explicitly."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Five findings are recorded and originally planned EDT integration stays open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only audit behavior remains unchanged; no field acceptance claim."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/edt-engine-activation-service.ts",
+        "artifacts/api-server/src/lib/edt-engine-build310.behavior.ts",
+        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "50f596946127c3979a713b559b44ca2090240b017c41b02225b8d760439ff4a9"
     }
   ]
 }

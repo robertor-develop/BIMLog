@@ -18,6 +18,8 @@ assert.equal(calls.some(sql=>sql.includes("INSERT INTO job_activation_decisions"
 calls.length=0;
 const nodes=[{kind:"project" as const,sourceIdentity:"project-11",code:"P11",name:"Project 11",sequence:1,snapshot:{}}];
 const workItems=[{id:"item-1",edtNodeSourceIdentity:"project-11",locationIdentity:"L1",locationSnapshot:{},tradeIdentity:"HVAC",tradeSnapshot:{},deliverableTypeIdentity:"GENERAL",deliverableTypeSnapshot:{},displayCode:"P11-HVAC-L1"}];
+await assert.rejects(()=>approveEdtActivation({...base,nodes:[...nodes,{kind:"contract" as const,sourceIdentity:"project-11",parentSourceIdentity:"project-11",code:"C",name:"Contract",sequence:1,snapshot:{}}],workItems},host),(error:unknown)=>error instanceof Error&&"code" in error&&error.code==="EDT_PLAN_INCOMPLETE");
+calls.length=0;
 await assert.rejects(()=>approveEdtActivation({...base,nodes,workItems},host),(error:unknown)=>error instanceof Error&&"code" in error&&error.code==="EDT_WORK_ITEM_SCOPE_MISMATCH");
 assert.ok(calls.includes("ROLLBACK"));
 assert.equal(calls.some(sql=>sql.includes("INSERT INTO job_activation_decisions")),false);
