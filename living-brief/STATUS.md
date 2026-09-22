@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 6 release candidate — 2026-09-22
+
+- Builds 301–305 are a security remediation of the Block 5 routes, not the originally planned complete UI integration. Server authority now checks project-company binding before role grant; QC conflicts come from stored work-item assignments; Result previews require the retained Intake document's exact hash and remain unvalidated previews.
+- Governed EDT activation and immutable Economic Plan/time-impact HTTP mutations fail closed until the server derives versions, plans, pools and amounts from canonical records. The existing Job Intake activation and Operations routes are unchanged and remain the operational path.
+- The planned EDT UI/runtime integration is still open for Builds 306–310. Focused block tests pass; full release gate, exact push, publication and live authenticated Chrome acceptance are separate pending gates. No Native or installer source changed.
+
 ## EDT and Engine Templates — Block 5 source candidate — 2026-09-22
 
 - Builds 296–300 expose the approved Block 4 transactional operations through one authenticated project-scoped API surface without replacing existing Intake or Operations routes.
