@@ -1,59 +1,40 @@
 {
   "schemaVersion": 1,
   "program": "BIMLog Coordination Knowledge Library",
-  "date": "2026-09-21",
-  "range": {
-    "firstBuild": 226,
-    "completedThrough": 270,
-    "finalBuild": 275
-  },
-  "currentBlock": {
-    "number": 9,
-    "builds": "266-270",
-    "status": "PASS_SOURCE_CANDIDATE",
-    "pushDue": true,
-    "publicationDue": false
-  },
+  "date": "2026-09-22",
+  "range": { "firstBuild": 226, "completedThrough": 275, "finalBuild": 275 },
+  "currentBlock": { "number": 10, "builds": "271-275", "status": "PASS_SOURCE_CANDIDATE", "pushDue": true, "publicationDue": true },
   "buildCommits": {
-    "256": "7348fa39",
-    "257": "a79b54a5",
-    "258": "e513cd73",
-    "259": "4fbf1a48",
-    "260": "d94c00bb",
-    "261": "d8636865",
-    "262": "4baab855",
-    "263": "cbcfe347",
-    "264": "49bd0258",
-    "265": "0b21c38d",
-    "266": "590f98d4",
-    "267": "79e8106d",
-    "268": "921b7ab2",
-    "269": "f134d5bd",
-    "270": "PENDING"
+    "226": "cce77c1d", "227": "cce77c1d", "228": "cce77c1d", "229": "cce77c1d", "230": "cce77c1d",
+    "231": "a4c434c4", "232": "22eb4ff9", "233": "2c77a080", "234": "448d069e", "235": "dd68f4ea",
+    "236": "1be73dc1", "237": "d7df7610", "238": "b8819aab", "239": "39dba06c", "240": "7c6817e7",
+    "241": "b9aedeb0", "242": "e2613045", "243": "f2bf3d96", "244": "6ee6b97b", "245": "8130dfc4",
+    "246": "41135d30", "247": "6aef5a05", "248": "d05640ee", "249": "b2032e73", "250": "5a538501",
+    "251": "64931c32", "252": "8834a6e0", "253": "6ca0947d", "254": "630e340b", "255": "702dd22b",
+    "256": "7348fa39", "257": "a79b54a5", "258": "e513cd73", "259": "4fbf1a48", "260": "d94c00bb",
+    "261": "d8636865", "262": "4baab855", "263": "cbcfe347", "264": "49bd0258", "265": "0b21c38d",
+    "266": "590f98d4", "267": "79e8106d", "268": "921b7ab2", "269": "f134d5bd", "270": "253922f8",
+    "271": "595c972a", "272": "d5802408", "273": "1f405ae5", "274": "182a383a", "275": "PENDING"
   },
-  "remainingBlocks": 1,
-  "remainingBuilds": 5,
-  "nextBlock": "Block 10 — Builds 271-275 — final security, migration, UX and release acceptance",
+  "remainingBlocks": 0,
+  "remainingBuilds": 0,
+  "nextBlock": null,
   "database": {
     "changed": true,
     "destructiveStatements": 0,
     "productionApplied": false,
-    "block7SchemaChange": "additive resolution record identities/revisions plus bounded evidence metadata; no destructive statements or production execution",
-    "block8SchemaChange": "none; reuses the additive Lesson Learned proposal tables delivered in Block 1",
-    "block9SchemaChange": "additive company taxonomy identity/revision tables and immutable-history trigger; no destructive statements or production execution"
+    "schemaChange": "additive Coordination Knowledge v3 identities, immutable revisions, evidence, resolution, lesson and taxonomy structures; no destructive statements",
+    "preview": "DUE_BUILD275_REPLIT_SHELL"
   },
-  "lensNext": {
-    "visibleWorkflowChanged": true,
-    "nativeChanged": false,
-    "installerChanged": false,
-    "panelImplementedBuilds": "246-265"
-  },
+  "lensNext": { "visibleWorkflowChanged": true, "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
   "tests": {
     "focused": "PASS",
     "typecheck": "PASS",
-    "databaseSafety": "PENDING_CLEAN_GATE",
-    "security": "PENDING_CLEAN_GATE",
+    "migration": "PASS_DISPOSABLE_LOOPBACK",
+    "security": "PASS",
+    "accessibility": "PASS",
+    "completeRegression": "PASS",
     "completePrePushGate": "PENDING_CLEAN_COMMIT",
-    "publication": "NOT_DUE_BUILD270_PUSH_ONLY"
+    "publication": "DUE_BUILD275"
   }
 }

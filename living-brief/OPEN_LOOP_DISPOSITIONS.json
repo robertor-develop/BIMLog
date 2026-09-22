@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "0efd8a3b66f86cefd64aa02cca913b16d652c0eb6a4ecc42779bea2a6cb49070",
-  "itemCount": 145,
+  "sourceSha256": "0ed0967eb3e0cc3fa46d8eb267f46bbd4d0ad5a15a6477684baf2ba2da12b80c",
+  "itemCount": 144,
   "counts": {
-    "ACTIVE": 112,
+    "ACTIVE": 111,
     "SUPERSEDED": 21,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -23,11 +23,10 @@
   ],
   "currentAuthority": {
     "marker": "CURRENT_OPEN_LOOP_AUTHORITY",
-    "heading": "Current open-loop authority — Coordination Knowledge Library Block 9 — 2026-09-22",
+    "heading": "Current open-loop authority — Coordination Knowledge Library Block 10 — 2026-09-22",
     "uncheckedItems": [
-      "0e4ceb4a1cc8aa62",
-      "35a36dcfbad29fc7",
-      "5935241ca63c0a2d"
+      "18a03f24c4bc5d5a",
+      "cba2892499848769"
     ]
   },
   "duplicateStatements": [],
@@ -63,27 +62,9 @@
   ],
   "items": [
     {
-      "id": "0e4ceb4a1cc8aa62",
-      "sourceLine": 21,
-      "heading": "Current open-loop authority — Coordination Knowledge Library Block 9 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
-      "statement": "Builds 271–275 execute the final security, data-integrity, UX/accessibility/performance and complete-system regression program.",
-      "classification": "ACTIVE",
-      "workClass": "PRODUCT_WORK",
-      "ownership": {
-        "owner": "Lens Next",
-        "route": "/lens-next",
-        "module": "artifacts/bimlog/src/features/lens-next"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:21",
-        "Current open-loop authority — Coordination Knowledge Library Block 9 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
-      ],
-      "currentAuthority": true
-    },
-    {
-      "id": "35a36dcfbad29fc7",
+      "id": "18a03f24c4bc5d5a",
       "sourceLine": 22,
-      "heading": "Current open-loop authority — Coordination Knowledge Library Block 9 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
+      "heading": "Current open-loop authority — Coordination Knowledge Library Block 10 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
       "statement": "Build 275 must pass the exact complete gate, push the five bounded commits, synchronize and publish through Replit Shell without Replit Agents, verify deployed identity, and pass full authenticated visible-Chrome acceptance.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
@@ -94,14 +75,14 @@
       },
       "evidence": [
         "OPEN_LOOP.md:22",
-        "Current open-loop authority — Coordination Knowledge Library Block 9 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
+        "Current open-loop authority — Coordination Knowledge Library Block 10 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
       ],
       "currentAuthority": true
     },
     {
-      "id": "5935241ca63c0a2d",
+      "id": "cba2892499848769",
       "sourceLine": 43,
-      "heading": "Current open-loop authority — Coordination Knowledge Library Block 9 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
+      "heading": "Current open-loop authority — Coordination Knowledge Library Block 10 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->",
       "statement": "Physical Navisworks 2025 confirmation remains assigned to Ruben as post-closure field evidence. It does not reopen Build 119 and does not block this Platform-only publication.",
       "classification": "ACTIVE",
       "workClass": "FIELD_EVIDENCE",
@@ -112,7 +93,7 @@
       },
       "evidence": [
         "OPEN_LOOP.md:43",
-        "Current open-loop authority — Coordination Knowledge Library Block 9 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
+        "Current open-loop authority — Coordination Knowledge Library Block 10 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->"
       ],
       "currentAuthority": true
     },

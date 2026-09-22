@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## Coordination Knowledge Library — Block 10 release candidate — 2026-09-22
+
+- Builds 271–275 complete the 50-build program with tenant/role security, additive migration integrity, keyboard/responsive recovery, the 17-step closed-loop regression, and final release controls.
+- The complete local knowledge journey passes from an optional unclassified Lens issue through classification, approved guidance and methods, actual resolution, evidence, closure, verification, Lesson Learned review, draft promotion, professional approval and permitted reuse, including cross-tenant denial.
+- The additive v3 schema passes clean/repeat/rollback verification against a disposable loopback database with zero orphan relationships and all existing project, viewpoint and revision counts preserved. Production has not been changed by the local proof.
+- Builds 271–275 change no Native C#, loopback bridge command, Autodesk installer, plugin package or discovery path. Focused Navisworks smoke is therefore not applicable.
+- Build 275 is the scheduled publication boundary. Exact push, zero-drop Replit Shell preview, controlled publication, deployed identity/health and authenticated Chrome acceptance remain required before live status is claimed.
+
 ## Coordination Knowledge Library — Block 9 source candidate — 2026-09-22
 
 - Builds 266–270 add a controlled BIMTECH starter-library format, 24 synthetic draft Conflict Types, eight draft Coordination Rules, eight draft Resolution Methods, governed taxonomy administration, idempotent company-scoped import, and a professional-review package.

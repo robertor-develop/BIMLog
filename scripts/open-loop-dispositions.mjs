@@ -162,16 +162,16 @@ if (process.argv.includes("--write")) {
   const currentFieldEvidence = currentAuthorityItems.filter((item) => item.workClass === "FIELD_EVIDENCE");
   const currentProviderEvidence = currentAuthorityItems.filter((item) => item.workClass === "PROVIDER_EVIDENCE");
   if (
-    result.currentAuthority.uncheckedItems.length !== 2 + currentProviderEvidence.length ||
+    result.currentAuthority.uncheckedItems.length !== currentFieldEvidence.length + currentProviderEvidence.length ||
     currentFieldEvidence.length !== 1 ||
-    currentProductWork.length !== 1 ||
+    currentProductWork.length !== 0 ||
+    currentProviderEvidence.length !== 1 ||
     currentProviderEvidence.length > 1 ||
     currentProviderEvidence.some((item) => !/\bpublish\b|publication/i.test(item.statement)) ||
     !currentFieldEvidence.some((item) => item.statement.includes("Navisworks 2025")) ||
-    currentProviderEvidence.some((item) => !item.statement.includes("Build 275")) ||
-    !currentProductWork.some((item) => item.statement.includes("Builds 271–275"))
+    currentProviderEvidence.some((item) => !item.statement.includes("Build 275"))
   ) {
-    throw new Error("The marked current authority must contain the next Coordination Knowledge product block, any active publication boundary, and Ruben's deferred physical Navisworks 2025 field evidence");
+    throw new Error("The marked current authority must contain only the active Build 275 publication boundary and Ruben's deferred physical Navisworks 2025 field evidence");
   }
   console.log(JSON.stringify({ status: "PASS", itemCount: items.length, counts }));
 }
