@@ -157,7 +157,7 @@ if (process.argv.includes("--write")) {
     throw new Error("Every unchecked open-loop item requires a governed work class and owner binding");
   if (duplicateStatements.length) throw new Error(`Duplicate unchecked open-loop statements: ${JSON.stringify(duplicateStatements)}`);
   const currentAuthorityItems = items.filter((item) => item.currentAuthority);
-  if (result.currentAuthority.uncheckedItems.length !== 2 || currentAuthorityItems.filter((item) => item.workClass === "FIELD_EVIDENCE").length !== 1 || currentAuthorityItems.filter((item) => item.workClass === "PRODUCT_WORK").length !== 1 || currentAuthorityItems.some((item) => item.workClass === "PROVIDER_EVIDENCE") || !currentAuthorityItems.some((item) => item.statement.includes("Navisworks 2025")) || !currentAuthorityItems.some((item) => item.statement.includes("Builds 231–235"))) {
+  if (result.currentAuthority.uncheckedItems.length !== 2 || currentAuthorityItems.filter((item) => item.workClass === "FIELD_EVIDENCE").length !== 1 || currentAuthorityItems.filter((item) => item.workClass === "PRODUCT_WORK").length !== 1 || currentAuthorityItems.some((item) => item.workClass === "PROVIDER_EVIDENCE") || !currentAuthorityItems.some((item) => item.statement.includes("Navisworks 2025")) || !currentAuthorityItems.some((item) => item.statement.includes("Builds 251–255"))) {
     throw new Error("The marked current authority must contain the next Coordination Knowledge product block and Ruben's deferred physical Navisworks 2025 field evidence");
   }
   console.log(JSON.stringify({ status: "PASS", itemCount: items.length, counts }));
