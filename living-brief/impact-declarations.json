@@ -38355,14 +38355,16 @@
       "reviewedChangedPaths": [
         "artifacts/api-server/src/lib/edt-engine-activation-service.ts",
         "artifacts/api-server/src/lib/edt-engine-build310.behavior.ts",
+        "evidence/edt-engine-program-20260922/BLOCK_07_REPORT.md",
         "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
-        "package.json"
+        "package.json",
+        "scripts/test-edt-engine-block07.mjs"
       ],
-      "reviewedChangeSha256": "50f596946127c3979a713b559b44ca2090240b017c41b02225b8d760439ff4a9"
+      "reviewedChangeSha256": "e4e5985c6647febc0a2595326870366780321d9d0ce2571aa06e96d7ad93b4e6"
     }
   ]
 }
