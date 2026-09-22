@@ -38185,7 +38185,7 @@
     },
     {
       "taskId": "bimlog-edt-engine-block06-20260922",
-      "reviewedThroughCommit": "26f292ab0e103e75196b8eff3fe5124ebca1708f",
+      "reviewedThroughCommit": "864d07df681cb0412b63524c44c978dee4e4cb50",
       "reviewedAt": "2026-09-22T19:20:00Z",
       "status": "remediation_source_candidate",
       "captureTiming": "immediate_same_task_chain",
@@ -38259,13 +38259,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "Records both route-graph and endpoint-authority inventory corrections in the current release candidate."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The prior evidence commit recorded both inventory corrections; this metadata-only reconciliation changes no current product status."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "Closes both inventory freshness defects while preserving the remaining server-derived EDT integration work."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The prior evidence commit closed both inventory defects and retained the EDT integration work; this metadata-only reconciliation adds no new loop."
         },
         {
           "key": "audit",
@@ -38274,17 +38274,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/src/lib/edt-engine-build301.behavior.ts",
-        "evidence/edt-engine-program-20260922/BLOCK_06_REPORT.md",
-        "evidence/stabilization-program-20260919/ENDPOINT_AUTHORITY_MATRIX.json",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "scripts/endpoint-authority-matrix.mjs",
-        "scripts/test-edt-engine-block06.mjs"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "07638099c561fe35fdb5b0f1bf0ac76981e51b2188d698e1976c75200182cf9f"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
