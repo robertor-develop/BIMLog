@@ -129,9 +129,9 @@ router.post("/projects/:projectId/edt-engine/issuances/:issuanceId/qc-decisions"
     const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);
     const decisionKind=requiredText(body,"decisionKind"),outcome=requiredText(body,"outcome");
     if(!["review","final_approval","reopen_approval"].includes(decisionKind)||!["approved","rejected"].includes(outcome))throw new EdtEngineConflict("REQUEST_BODY_INVALID","QC decision is not supported.");
-    if(!Array.isArray(body.conflictUserIds)||body.conflictUserIds.some(value=>!Number.isInteger(value)))throw new EdtEngineConflict("REQUEST_BODY_INVALID","conflictUserIds must be an integer array.");
+    if ("conflictUserIds" in body) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "QC conflicts are resolved from stored assignments, not request input.");
     const result=await decideWorkItemQc({actor,companyId:actor.actorCompanyId,projectId,issuanceId:String(req.params.issuanceId),
-      decisionKind:decisionKind as Parameters<typeof decideWorkItemQc>[0]["decisionKind"],outcome:outcome as "approved"|"rejected",reason:requiredText(body,"reason"),evidence:recordField(body,"evidence"),conflictUserIds:body.conflictUserIds as number[]});
+      decisionKind:decisionKind as Parameters<typeof decideWorkItemQc>[0]["decisionKind"],outcome:outcome as "approved"|"rejected",reason:requiredText(body,"reason"),evidence:recordField(body,"evidence")});
     res.status(201).json(result);
   }catch(error){sendEdtRouteError(res,error);}
 });
