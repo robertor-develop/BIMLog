@@ -28,6 +28,7 @@ export const coordinationKnowledgeTaxonomyTermsTable = pgTable("coordination_kno
 }, t => [
   unique("coord_knowledge_taxonomy_scope_uq").on(t.id, t.companyId),
   unique("coord_knowledge_taxonomy_key_uq").on(t.companyId, t.kind, t.normalizedKey),
+  index("coord_knowledge_taxonomy_list_idx").on(t.companyId, t.kind, t.normalizedKey),
   check("coord_knowledge_taxonomy_kind_chk", sql`${t.kind} IN ('discipline','category','element_type','stage','tag')`),
 ]);
 
