@@ -23,6 +23,17 @@ export function validateEdtPlanNodes(nodes:readonly EdtPlanNode[]):void{
   }
 }
 
+export function validateEdtPlanWorkItems(nodes:readonly EdtPlanNode[],items:readonly EdtPlanWorkItem[]):void{
+  if(items.length===0)throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT approval requires Work Items.");
+  const nodeIds=new Set(nodes.map(node=>node.sourceIdentity));
+  const ids=new Set<string>(),codes=new Set<string>();
+  for(const item of items){
+    if(!item.id||!nodeIds.has(item.edtNodeSourceIdentity)||!item.locationIdentity||!item.tradeIdentity||!item.deliverableTypeIdentity||!item.displayCode||ids.has(item.id)||codes.has(item.displayCode))
+      throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Work Items need unique IDs and codes, a valid EDT node, and complete classification identities.");
+    ids.add(item.id);codes.add(item.displayCode);
+  }
+}
+
 function requireAuthorization(input: EdtRecordAuthorizationInput) {
   const decision = decideEdtRecordAuthorization(input);
   if (!decision.allow) throw new EdtEngineConflict(decision.code, "EDT activation authorization denied.");
@@ -60,11 +71,8 @@ export async function approveEdtActivation(input:{ actor:Actor; companyId:number
     }
     const intake=(await client.query<{revision:number;status:string}>("SELECT revision,status FROM job_intakes WHERE id=$1 AND project_id=$2 AND company_id=$3 FOR UPDATE",[request.intake_id,input.projectId,input.companyId])).rows[0];
     if(!intake||intake.revision!==request.intake_revision||intake.status==="activated"||request.state!=="pending")throw new EdtEngineConflict("INTAKE_REVISION_CONFLICT","The saved Intake changed or was activated after this EDT request. Create a new request from the current Intake.");
-    if(input.workItems.length===0)
-      throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT approval requires a complete project-rooted plan and Work Items.");
     validateEdtPlanNodes(input.nodes);
-    if(input.workItems.some(item=>!item.id||!input.nodes.some(node=>node.sourceIdentity===item.edtNodeSourceIdentity)))
-      throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Every Work Item must bind to a node in this plan.");
+    validateEdtPlanWorkItems(input.nodes,input.workItems);
     const decisionId=deterministicEdtId("activation-decision",`${request.id}:${input.expectedFingerprint}`);
     const existing=(await client.query<{id:string}>("SELECT id FROM job_activation_decisions WHERE request_id=$1",[request.id])).rows[0];
     if (existing) throw new EdtEngineConflict("ACTIVATION_DECISION_INCONSISTENT","Pending request already has an immutable decision.");
