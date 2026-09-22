@@ -12,11 +12,11 @@ if (census.status !== "PASS" || census.totals.trackedFiles < 1 || census.totals.
   throw new Error("Build 216 repository census is missing or empty.");
 if (audit.status !== "PASS" || audit.counts.P0 !== 0 || audit.baseline.unexpectedP1.length !== 0)
   throw new Error("Final audit contains a P0 or an unclassified P1 identity.");
-if (provider.length !== 0 || field.length !== 1)
-  throw new Error("Current open-loop authority must preserve the single deferred Navisworks 2025 field-evidence item and contain no provider-evidence release debt.");
+if (provider.length > 1 || provider.some((item) => !item.statement.includes("Build 255") || !/publish|publication/i.test(item.statement)) || field.length !== 1)
+  throw new Error("Current open-loop authority must preserve the single deferred Navisworks 2025 field-evidence item and allow only the active Build 255 publication boundary as provider evidence.");
 if (!field[0].statement.includes("Navisworks 2025") || !field[0].statement.includes("Ruben"))
   throw new Error("Ruben's deferred physical Navisworks 2025 evidence item was not preserved.");
 if (product.some((item) => item.ownership?.module !== "artifacts/bimlog/src/features/lens-next"))
   throw new Error("Any new current product work must remain explicitly owned by the Lens Next product boundary.");
 
-console.log(`BUILD217_FINAL_RECONCILIATION=PASS P0=0 P1=${audit.counts.P1} unexpectedP1=0 currentProvider=0 fieldEvidence=1 currentProduct=${product.length} activeHistorical=${open.counts.ACTIVE - current.length}`);
+console.log(`BUILD217_FINAL_RECONCILIATION=PASS P0=0 P1=${audit.counts.P1} unexpectedP1=0 currentProvider=${provider.length} fieldEvidence=1 currentProduct=${product.length} activeHistorical=${open.counts.ACTIVE - current.length}`);

@@ -10,6 +10,7 @@
 - The pre-push route-graph regression found and corrected the missing inventory entry for the new classification command; the generated graph now records 630 API routes.
 - The release gate also generalized the deterministic current-authority check so an active publication boundary can coexist with exactly one next product block and Ruben's deferred field evidence. This evidence-only correction changes no runtime behavior.
 - Its paired regression now asserts the Block 6 heading, Build 255 publication item, Builds 256–260 product boundary, and sole deferred Navisworks 2025 field item instead of the superseded Block 5 wording.
+- Older final-reconciliation and field-boundary regressions retain their historical guarantees while recognizing only the current Build 255 publication item; they still reject any unrelated provider debt.
 
 ## Coordination Knowledge Library — Block 5 source candidate — 2026-09-21
 
