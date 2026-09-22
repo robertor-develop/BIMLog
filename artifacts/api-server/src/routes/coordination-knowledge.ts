@@ -16,7 +16,7 @@ import {
 } from "../lib/coordination-knowledge-contract";
 import { CoordinationKnowledgeRepository, CoordinationKnowledgeRepositoryError } from "../lib/coordination-knowledge-repository";
 import { ensureCoordinationKnowledgeSchema } from "../lib/coordination-knowledge-migration";
-import { CoordinationLessonWorkflowError, validateLessonProposalContent } from "../lib/coordination-lesson-workflow";
+import { CoordinationLessonWorkflowError, validateLessonPromotionRequest, validateLessonProposalContent } from "../lib/coordination-lesson-workflow";
 import { lessonProposalStatuses, type LessonProposalStatus } from "../lib/coordination-knowledge-contract";
 
 const router = Router();
@@ -177,6 +177,22 @@ for(const action of ["submit-review","return-proposed","approve","reject"] as co
   if(typeof expected!=="string"||!lessonProposalStatuses.includes(expected as LessonProposalStatus))throw new CoordinationKnowledgeContractError("LESSON_PROPOSAL_INVALID","expectedStatus");
   const to:LessonProposalStatus=action==="submit-review"?"under_review":action==="return-proposed"?"proposed":action==="approve"?"approved":"rejected";
   const item=await repository.transitionLessonProposal({companyId:resolved.companyId,proposalId:parameter(req.params.id),actorId:resolved.userId,expectedStatus:expected as LessonProposalStatus,to,rationale:req.body?.rationale});res.json({item});
+}catch(error){sendError(res,error);}});
+router.post("/coordination-knowledge/lesson-proposals/:id/promote",authMiddleware,async(req,res)=>{try{
+  const resolved=await context(req,"promote_approved_lesson"),proposalId=parameter(req.params.id),promotion=validateLessonPromotionRequest(req.body??{}),content=objectValue(req.body?.content,"content");
+  await repository.assertApprovedLessonPromotion(resolved.companyId,proposalId);
+  let targetId=promotion.targetId??randomUUID();
+  if(promotion.mode==="create"){
+    if(!promotion.code||!codePattern.test(promotion.code))throw new CoordinationKnowledgeContractError("COORDINATION_KNOWLEDGE_INVALID","code");
+    if(promotion.targetEntityType==="conflict_type")await repository.createConflictType({identity:{id:targetId,companyId:resolved.companyId,code:promotion.code,createdById:resolved.userId},revision:conflictContent(content,resolved.userId,resolved.companyId,targetId,1)});
+    else if(promotion.targetEntityType==="coordination_rule")await repository.createRule({identity:{id:targetId,companyId:resolved.companyId,code:promotion.code,createdById:resolved.userId},revision:ruleContent(content,resolved.userId,resolved.companyId,targetId,1)});
+    else await repository.createResolutionMethod({identity:{id:targetId,companyId:resolved.companyId,code:promotion.code,createdById:resolved.userId},revision:resolutionContent(content,resolved.userId,resolved.companyId,targetId,1)});
+  }else{
+    if(promotion.targetEntityType==="conflict_type"){const current=await repository.getConflictType(resolved.companyId,targetId,true);if(!current)throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_CONFLICT_TYPE_NOT_FOUND","Conflict Type not found.",404);await repository.appendConflictTypeRevision({companyId:resolved.companyId,conflictTypeId:targetId,expectedRevision:Number(current.revision),actorId:resolved.userId,action:"revise",rationale:"Approved lesson promotion"});}
+    else if(promotion.targetEntityType==="coordination_rule"){const current=await repository.getRule(resolved.companyId,targetId,true);if(!current)throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_RULE_NOT_FOUND","Rule not found.",404);await repository.appendRuleRevision({companyId:resolved.companyId,ruleId:targetId,expectedRevision:Number(current.revision),actorId:resolved.userId,action:"revise",rationale:"Approved lesson promotion"});}
+    else{const current=await repository.getResolutionMethod(resolved.companyId,targetId,true);if(!current)throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_RESOLUTION_METHOD_NOT_FOUND","Resolution Method not found.",404);await repository.appendResolutionMethodRevision({companyId:resolved.companyId,resolutionMethodId:targetId,expectedRevision:Number(current.revision),actorId:resolved.userId,action:"revise",rationale:"Approved lesson promotion"});}
+  }
+  res.status(201).json({item:await repository.linkLessonPromotion({companyId:resolved.companyId,proposalId,actorId:resolved.userId,targetEntityType:promotion.targetEntityType,targetEntityId:targetId})});
 }catch(error){sendError(res,error);}});
 
 router.get("/coordination-knowledge/evidence/:entityType/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved"),entityType=evidenceChoice(parameter(req.params.entityType),evidenceEntityTypes,"entityType"),entityId=parameter(req.params.id);res.json({items:await repository.listEvidence(resolved.companyId,entityType,entityId)});}catch(error){sendError(res,error);}});

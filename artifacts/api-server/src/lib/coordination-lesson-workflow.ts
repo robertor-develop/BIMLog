@@ -11,6 +11,8 @@ function boundedText(value: unknown, field: string, maximum: number): string {
 }
 
 export type LessonProposalContent = Readonly<{ lesson: string; organizationalApplicability: string }>;
+export type LessonPromotionTarget = "conflict_type" | "coordination_rule" | "resolution_method";
+export type LessonPromotionRequest = Readonly<{ targetEntityType: LessonPromotionTarget; mode: "create" | "revise"; targetId: string | null; code: string | null }>;
 
 export function validateLessonProposalContent(input: unknown): LessonProposalContent {
   if (!input || typeof input !== "object" || Array.isArray(input))
@@ -31,3 +33,12 @@ export function validateLessonDecision(from: LessonProposalStatus, to: LessonPro
   return boundedText(rationale, "rationale", 2000);
 }
 
+export function validateLessonPromotionRequest(input: unknown): LessonPromotionRequest {
+  if (!input || typeof input !== "object" || Array.isArray(input)) throw new CoordinationLessonWorkflowError("LESSON_PROMOTION_INVALID", "promotion");
+  const value=input as Record<string,unknown>,targetEntityType=value.targetEntityType,mode=value.mode;
+  if(!["conflict_type","coordination_rule","resolution_method"].includes(String(targetEntityType)))throw new CoordinationLessonWorkflowError("LESSON_PROMOTION_INVALID","targetEntityType");
+  if(mode!=="create"&&mode!=="revise")throw new CoordinationLessonWorkflowError("LESSON_PROMOTION_INVALID","mode");
+  const targetId=value.targetId==null?null:boundedText(value.targetId,"targetId",64),code=value.code==null?null:boundedText(value.code,"code",64).toUpperCase();
+  if((mode==="revise")!==(targetId!==null)|| (mode==="create")!==(code!==null))throw new CoordinationLessonWorkflowError("LESSON_PROMOTION_INVALID",mode==="revise"?"targetId":"code");
+  return Object.freeze({targetEntityType:targetEntityType as LessonPromotionTarget,mode,targetId,code});
+}

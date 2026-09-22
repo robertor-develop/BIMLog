@@ -652,4 +652,27 @@ export class CoordinationKnowledgeRepository {
       return updated;
     });
   }
+
+  async assertApprovedLessonPromotion(companyIdInput:number,proposalId:string):Promise<Record<string,unknown>>{
+    const companyId=positive(companyIdInput,"companyId"),proposal=(await this.pool.query(`SELECT * FROM coordination_lesson_proposals WHERE id=$1 AND company_id=$2`,[proposalId,companyId])).rows[0];
+    if(!proposal)throw new CoordinationKnowledgeRepositoryError("LESSON_PROPOSAL_NOT_FOUND","Lesson Learned proposal not found.",404);
+    if(proposal.status!=="approved")throw new CoordinationKnowledgeRepositoryError("LESSON_APPROVAL_REQUIRED","Only an approved lesson proposal may create draft knowledge.",409);
+    if(proposal.promoted_entity_id)throw new CoordinationKnowledgeRepositoryError("LESSON_ALREADY_PROMOTED","The proposal already points to its promoted draft.",409);
+    return proposal;
+  }
+
+  async linkLessonPromotion(input:{companyId:number;proposalId:string;actorId:number;targetEntityType:"conflict_type"|"coordination_rule"|"resolution_method";targetEntityId:string}):Promise<Record<string,unknown>>{
+    const companyId=positive(input.companyId,"companyId"),actorId=positive(input.actorId,"actorId");
+    return transaction(this.pool,async client=>{
+      const proposal=(await client.query(`SELECT * FROM coordination_lesson_proposals WHERE id=$1 AND company_id=$2 FOR UPDATE`,[input.proposalId,companyId])).rows[0];
+      if(!proposal||proposal.status!=="approved"||proposal.promoted_entity_id)throw new CoordinationKnowledgeRepositoryError("LESSON_PROMOTION_STATE_INVALID","The proposal is not an unpromoted approved lesson.",409);
+      const table=input.targetEntityType==="conflict_type"?"coordination_conflict_type_revisions":input.targetEntityType==="coordination_rule"?"coordination_rule_revisions":"coordination_resolution_method_revisions";
+      const column=input.targetEntityType==="conflict_type"?"conflict_type_id":input.targetEntityType==="coordination_rule"?"rule_id":"resolution_method_id";
+      const target=(await client.query(`SELECT id,status FROM ${table} WHERE ${column}=$1 AND company_id=$2 ORDER BY revision DESC LIMIT 1`,[input.targetEntityId,companyId])).rows[0];
+      if(!target||target.status!=="draft")throw new CoordinationKnowledgeRepositoryError("LESSON_PROMOTION_DRAFT_REQUIRED","Promotion must point to a same-company draft knowledge revision.",409);
+      const updated=(await client.query(`UPDATE coordination_lesson_proposals SET promoted_entity_type=$1,promoted_entity_id=$2 WHERE id=$3 AND company_id=$4 RETURNING *`,[input.targetEntityType,input.targetEntityId,input.proposalId,companyId])).rows[0];
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,project_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,$3,'lesson_proposal',$4,$5,'lesson_promoted_to_draft',$6,$7::jsonb)`,[randomUUID(),companyId,proposal.project_id,input.proposalId,String(target.id),actorId,JSON.stringify({targetEntityType:input.targetEntityType,targetEntityId:input.targetEntityId})]);
+      return updated;
+    });
+  }
 }
