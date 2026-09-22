@@ -1,5 +1,13 @@
 # STATUS.md - Current Accepted Platform State
 
+## Coordination Knowledge Library — Block 6 publication candidate — 2026-09-21
+
+- Builds 251–255 add optional audited classification for new and existing Lens issues, approved-only deterministic suggestions, permission-safe similar-case ranking with explicit reasons, and context-preserving in-panel knowledge navigation.
+- Classification is server-authorized, company/project/issue scoped, concurrency-protected, optional, and never applied automatically. Knowledge failure does not remove issue creation, Working View, synchronization, or the active issue workspace.
+- Similar cases remain company-isolated. Ordinary members receive only their authorized project; company PMO and Super Administrators may receive permitted company precedent. Stable ranking uses only visible approved structured facts.
+- Knowledge detail navigation uses the current Lens panel and browser history instead of leaving the workspace. The selected issue stays active and no bridge, camera, Native, installer, or package path changes.
+- Build 255 is the scheduled publication boundary. Source validation, exact push, Replit Shell synchronization/publication, deployed identity, and authenticated Chrome acceptance must be recorded separately; no live state is claimed by this candidate entry.
+
 ## Coordination Knowledge Library — Block 5 source candidate — 2026-09-21
 
 - Builds 246–250 add the compact, collapsible Coordination Knowledge tab beside the currently selected Lens Next issue while preserving the model workspace, active selection, issue creation, controlled publishing, and existing tabs.

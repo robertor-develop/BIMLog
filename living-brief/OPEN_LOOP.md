@@ -1,6 +1,6 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — Coordination Knowledge Library Block 5 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Current open-loop authority — Coordination Knowledge Library Block 6 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
 - [x] Builds 226–230 establish the canonical company-scoped domain, immutable revisions, tenant-bound repositories, additive migration, clean/repeat/rollback coverage, and restored-database preservation proof. This boundary is push-only and does not change the visible Lens Next workspace.
 - [x] Block 1 implementation authority is exact commit `cce77c1d813b16952873a9faa192208276dd7b31`; reconciliation may update evidence metadata but cannot silently change the accepted product scope.
@@ -8,7 +8,9 @@
 - [x] Database-proof correction `515a4eb5c4c3538d92fbd8dd3014e80679bd24d0` keeps the proof type-safe and self-contained across restored and clean fixtures; all synthetic actor and knowledge rows remain transactionally rolled back.
 - [x] Builds 231–245 add server-authorized knowledge APIs, bounded search, existing-role integration, company administration, and governed authoring/review surfaces.
 - [x] Builds 246–250 add the compact Lens Next contextual knowledge tab with approved classification, approved revision-traceable guidance, deterministic approved resolution methods, and permission-scoped resolved/verified precedent. Build 250 is push-only.
-- [ ] Builds 251–255 add explicit contextual classification and resolution selection commands, guarded case outcome capture, lesson proposal entry, full regressions, publication, and authenticated Chrome acceptance.
+- [x] Builds 251–254 add optional audited classification, deterministic explainable suggestions, permission-safe similar-case retrieval, and context-preserving detail navigation without changing Native, bridge, installer, or package surfaces.
+- [ ] Build 255 must pass the exact complete gate, push the five bounded commits, synchronize and publish through Replit Shell without Replit Agents, verify deployed identity, and pass full authenticated visible-Chrome acceptance. Publication evidence remains open until observed live.
+- [ ] Builds 256–260 add the separate structured resolution-record workflow, before/after evidence, resolution UI, verification/reopening, and integration hardening. These later requirements are not silently claimed by Block 6.
 
 - [x] Builds 221–225 reconcile exact Build 220 live acceptance and close the verified physical Navisworks 2021 P36 installation. This five-build boundary is push-only and changes no runtime product code, database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license.
 - [x] Builds 121–180 are complete. Build 180 source reached `origin/master` at `9dab04343e90e8ad94391c5967a4b9f804ee1f4d`, was published through the established Replit Shell path without Replit Agents, and passed authenticated production smoke.

@@ -343,7 +343,7 @@ export function createLensNextApiClient(
       if(!Array.isArray(body.availableConflictTypes)||!Array.isArray(body.classificationSuggestions)||!Array.isArray(body.rules)||!Array.isArray(body.methods)||!Array.isArray(body.previousCases)||typeof body.canClassify!=="boolean") throw new Error("Coordination Knowledge response is invalid");
       return body as unknown as LensNextKnowledgeContext;
     },
-    async classifyKnowledgeContext(identity, conflictTypeRevisionId, expectedConflictTypeRevisionId, signal) {
+    async classifyKnowledgeContext(identity: LensNextImmutableIssueIdentity, conflictTypeRevisionId: string | null, expectedConflictTypeRevisionId: string | null, signal?: AbortSignal) {
       const exact=assertLensNextImmutableIdentity(identity);
       const response=await fetchImpl(`${base}/coordination-knowledge/lens-context/${exact.serverId}/classification?projectId=${exact.projectId}`,{method:"PUT",credentials:"same-origin",headers:{Accept:"application/json","Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify({conflictTypeRevisionId,expectedConflictTypeRevisionId}),signal});
       const body=await jsonBody(response,"BIMLog classification");

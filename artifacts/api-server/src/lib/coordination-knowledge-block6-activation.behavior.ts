@@ -1,0 +1,15 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+const panel=readFileSync(fileURLToPath(new URL("../../../bimlog/src/features/lens-next/LensNextPanel.tsx",import.meta.url)),"utf8");
+const view=readFileSync(fileURLToPath(new URL("../../../bimlog/src/features/lens-next/LensNextPanelView.tsx",import.meta.url)),"utf8");
+const client=readFileSync(fileURLToPath(new URL("../../../bimlog/src/features/lens-next/lens-next-client.ts",import.meta.url)),"utf8");
+assert.match(panel,/createIssue/);
+assert.match(panel,/openWorkingView/);
+assert.match(panel,/runReconciliation/);
+assert.match(panel,/classifyKnowledgeContext/);
+assert.match(view,/selectedIssue/);
+assert.match(view,/activeIssueKey/);
+assert.match(client,/loadIssues/);
+assert.match(client,/loadKnowledgeContext/);
+console.log("Coordination Knowledge Block 6 activation boundary: PASS");
