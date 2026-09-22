@@ -29,6 +29,7 @@
     "test:edt-engine-build292": "tsx ./src/lib/edt-engine-build292.behavior.ts",
     "test:edt-engine-build293": "tsx ./src/lib/edt-engine-build293.behavior.ts",
     "test:edt-engine-build294": "tsx ./src/lib/edt-engine-build294.behavior.ts",
+    "test:edt-engine-build295": "tsx ./src/lib/edt-engine-build295.behavior.ts",
     "test:edt-engine-block03": "pnpm run test:edt-engine-build286 && pnpm run test:edt-engine-build287 && pnpm run test:edt-engine-build288 && pnpm run test:edt-engine-build289 && pnpm run test:edt-engine-build290",
     "test:coordination-knowledge-block1": "tsx ./src/lib/coordination-knowledge-contract.behavior.ts && tsx ./src/lib/coordination-knowledge-migration.behavior.ts && tsx ./src/lib/coordination-knowledge-repository.behavior.ts",
     "test:coordination-knowledge-db": "tsx ./src/lib/coordination-knowledge-database.behavior.ts",

@@ -37975,6 +37975,109 @@
         "package.json"
       ],
       "reviewedChangeSha256": "bef0d28e64bb44248c1ea4cff37468061f6d5f4160a909860056936b9fb8e4ec"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block04-20260922",
+      "reviewedThroughCommit": "7d25bfb84c7897b72ce2110187a30de6196b9233",
+      "reviewedAt": "2026-09-22T13:09:00.000-04:00",
+      "status": "accepted_source_publication_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "implement_transactional_services",
+          "run_local_validation",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "production_database_preview",
+          "production_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Build 295 is a publication boundary with an additive startup migration; Replit publication must stop if the provider preview contains any destructive database operation."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The services preserve canonical ownership, human approval, audit history and bounded automation."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing transaction, release, evidence, database and provider boundaries remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing authorization, isolation, persistence, rollback and negative-test requirements remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded backend service layer implements the approved EDT direction without expanding product scope."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic platform inventory now includes the transactional EDT service modules and acceptance contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, installer, package or Navisworks-facing source changed in this block."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed report, export renderer or artifact presentation contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, citation or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the Block 4 service candidate and truthfully separates local acceptance from provider publication."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 291–295 implementation and carries provider publication plus later route integration forward."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only audit doctrine governs decisions, issuances, imports and budget ledger entries."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-edt-engine-block03.mjs"
+      ],
+      "reviewedChangeSha256": "81c12d82df35eece28a736506e9ae58fee00f6c01c74ca4fd3f499df1d486e8a"
     }
   ]
 }

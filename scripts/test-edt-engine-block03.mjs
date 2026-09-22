@@ -14,8 +14,7 @@ for (const protectedPrefix of ["BIMLogNavisPlugin/", "source-2021/", "installer/
 }
 
 const ledger = JSON.parse(fs.readFileSync(path.join(root, "evidence/edt-engine-program-20260922/BUILD_LEDGER.json"), "utf8"));
-assert.equal(ledger.range.completedThrough, 290);
-assert.equal(ledger.currentBlock.status, "PASS_LOCAL");
-assert.equal(ledger.currentBlock.publicationDue, false);
+assert.ok(ledger.range.completedThrough >= 290);
+for (const build of [286, 287, 288, 289, 290]) assert.match(ledger.buildCommits[String(build)], /^(?:[0-9a-f]{8,40}|SELF_BLOCK_END_COMMIT)$/);
 assert.equal(ledger.lensNext.focusedNavisworksSmoke, "NOT_REQUIRED");
 console.log("EDT_ENGINE_BLOCK03_RESULT=PASS");

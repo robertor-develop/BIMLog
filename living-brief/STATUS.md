@@ -1,5 +1,16 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 4 publication candidate — 2026-09-22
+
+- Builds 291–295 add the first callable transactional service layer over the additive Block 3 EDT persistence foundation. The services reuse canonical Job Intake, Work Item, Contract, budget-account and file identities rather than creating parallel authorities.
+- Activation requests bind the exact Intake revision, Governance/APU/Workflow versions and content fingerprint. Operations Director approval is separation-of-duties checked and atomically creates deterministic EDT nodes plus Work Item identity snapshots.
+- Governed changes are project/company scoped, optimistic, idempotent and reason/evidence bound. Visible-code correction preserves the previous code as an alias; other typed requests remain governed records for later specialized execution builds.
+- Immutable Economic Plans bind Contract/APU/Workflow versions. Time submission immediately records Committed/Pending ledger consumption; approval or rejection deterministically releases/reclassifies it without rewriting ledger history.
+- R/V issuance starts at R0-V0, preserves a monotonic V sequence, requires evidence for an external R increment and binds QC decisions to the exact issuance fingerprint with anti-self-approval/conflict denial.
+- `Result` imports require the original workbook hash, exact Intake revision, worksheet identity and row-level validation. Replay with the same identity but different parsed content fails closed.
+- The isolated transaction harness proves rollback and connection release on failure. Block 4 changes no Lens Next Native, bridge, installer or package, so focused Navisworks smoke is not applicable.
+- Publication is permitted only after the complete local gate, exact push, Replit Shell alignment and a zero-drop provider preview. Production migration/publication and authenticated Chrome results must be recorded separately after execution.
+
 ## EDT and Engine Templates — Block 3 source candidate — 2026-09-22
 
 - Builds 286–290 establish the additive persistence foundation for the approved Project → Contract → Deliverable → Location EDT hierarchy and permanent Work Item identity without replacing existing Intake, Operations, Commercial APU, Schedule, Change Order, file or audit authorities.
