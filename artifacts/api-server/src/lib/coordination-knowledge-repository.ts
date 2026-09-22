@@ -14,6 +14,7 @@ import {
   validateResolutionRecordRevision,
   type ResolutionRecordStatus,
 } from "./coordination-resolution-record-contract";
+import { validateLessonProposalContent } from "./coordination-lesson-workflow";
 
 type QueryResult = { rows: Array<Record<string, unknown>>; rowCount?: number | null };
 export type KnowledgeQueryClient = { query(sql: string, params?: unknown[]): Promise<QueryResult> };
@@ -593,5 +594,36 @@ export class CoordinationKnowledgeRepository {
         return {id:String(row.id),projectId:Number(row.project_id),projectName:String(row.project_name),location:row.location==null?null:String(row.location),actualResolution:String(row.actual_resolution),rfiState:String(row.rfi_state),status:String(row.status),similarityScore:similarityReasons.length,similarityReasons,sortDate:String(row.verified_at??row.resolved_at??"")};
       }).filter(item=>item.similarityScore>0).sort((left,right)=>right.similarityScore-left.similarityScore||right.sortDate.localeCompare(left.sortDate)||left.id.localeCompare(right.id)).slice(0,8).map(({sortDate:_,...item})=>item);
     return {conflictType,availableConflictTypes,classificationSuggestions,rules,methods,previousCases};
+  }
+
+  async getLessonProposal(input:{companyId:number;projectId:number;lensViewpointId:number}):Promise<Record<string,unknown>|null>{
+    const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId");
+    await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
+    return (await this.pool.query(`SELECT proposal.*,project_case.conflict_type_revision_id,
+      resolution.id resolution_revision_id,resolution.actual_resolution,resolution.method_revision_id,
+      (SELECT count(*)::integer FROM coordination_knowledge_evidence evidence WHERE evidence.company_id=proposal.company_id AND evidence.project_id=proposal.project_id AND evidence.entity_type='project_case' AND evidence.entity_id=proposal.project_case_id) evidence_count
+      FROM coordination_project_cases project_case
+      JOIN coordination_lesson_proposals proposal ON proposal.project_case_id=project_case.id AND proposal.company_id=project_case.company_id AND proposal.project_id=project_case.project_id
+      LEFT JOIN LATERAL (SELECT candidate.* FROM coordination_resolution_record_revisions candidate WHERE candidate.project_case_id=project_case.id AND candidate.company_id=project_case.company_id AND candidate.project_id=project_case.project_id ORDER BY candidate.revision DESC LIMIT 1) resolution ON true
+      WHERE project_case.company_id=$1 AND project_case.project_id=$2 AND project_case.lens_viewpoint_id=$3`,[companyId,projectId,lensViewpointId])).rows[0]??null;
+  }
+
+  async proposeLesson(input:{companyId:number;projectId:number;lensViewpointId:number;actorId:number;content:unknown}):Promise<Record<string,unknown>>{
+    const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId"),actorId=positive(input.actorId,"actorId"),content=validateLessonProposalContent(input.content);
+    await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
+    return transaction(this.pool,async client=>{
+      const source=(await client.query(`SELECT project_case.id,project_case.status,project_case.conflict_type_revision_id,
+        resolution.id resolution_revision_id,resolution.actual_resolution,resolution.method_revision_id,
+        (SELECT count(*)::integer FROM coordination_knowledge_evidence evidence WHERE evidence.company_id=project_case.company_id AND evidence.project_id=project_case.project_id AND evidence.entity_type='project_case' AND evidence.entity_id=project_case.id) evidence_count
+        FROM coordination_project_cases project_case
+        LEFT JOIN LATERAL (SELECT candidate.* FROM coordination_resolution_record_revisions candidate WHERE candidate.project_case_id=project_case.id AND candidate.company_id=project_case.company_id AND candidate.project_id=project_case.project_id ORDER BY candidate.revision DESC LIMIT 1) resolution ON true
+        WHERE project_case.company_id=$1 AND project_case.project_id=$2 AND project_case.lens_viewpoint_id=$3 FOR UPDATE OF project_case`,[companyId,projectId,lensViewpointId])).rows[0];
+      if(!source||!["resolved","verified"].includes(String(source.status))||!source.conflict_type_revision_id||!source.resolution_revision_id||Number(source.evidence_count)<1)
+        throw new CoordinationKnowledgeRepositoryError("LESSON_SOURCE_INCOMPLETE","A classified closed issue with a Resolution Record and evidence is required.",409);
+      const id=randomUUID();
+      const inserted=(await client.query(`INSERT INTO coordination_lesson_proposals(id,company_id,project_id,project_case_id,status,proposal,proposed_by_id) VALUES($1,$2,$3,$4,'proposed',$5,$6) RETURNING *`,[id,companyId,projectId,source.id,JSON.stringify(content),actorId])).rows[0];
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,project_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,$3,'lesson_proposal',$4,NULL,'lesson_proposed',$5,$6::jsonb)`,[randomUUID(),companyId,projectId,id,actorId,JSON.stringify({projectCaseId:source.id,lensViewpointId,conflictTypeRevisionId:source.conflict_type_revision_id,resolutionRevisionId:source.resolution_revision_id,evidenceCount:Number(source.evidence_count),content})]);
+      return {...inserted,conflict_type_revision_id:source.conflict_type_revision_id,resolution_revision_id:source.resolution_revision_id,evidence_count:Number(source.evidence_count)};
+    });
   }
 }

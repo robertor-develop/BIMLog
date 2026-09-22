@@ -16,6 +16,7 @@ import {
 } from "../lib/coordination-knowledge-contract";
 import { CoordinationKnowledgeRepository, CoordinationKnowledgeRepositoryError } from "../lib/coordination-knowledge-repository";
 import { ensureCoordinationKnowledgeSchema } from "../lib/coordination-knowledge-migration";
+import { CoordinationLessonWorkflowError, validateLessonProposalContent } from "../lib/coordination-lesson-workflow";
 
 const router = Router();
 const repository = new CoordinationKnowledgeRepository(pool);
@@ -82,6 +83,7 @@ function sendError(res: Response, error: unknown): void {
     res.status(error.status).json({ code: error.code }); return;
   }
   if (error instanceof CoordinationKnowledgeContractError) { res.status(400).json({ code: error.code, field: error.field }); return; }
+  if (error instanceof CoordinationLessonWorkflowError) { res.status(400).json({ code: error.code, field: error.field }); return; }
   if ((error as { code?: string })?.code === "23505") { res.status(409).json({ code: "KNOWLEDGE_DUPLICATE" }); return; }
   throw error;
 }
@@ -150,6 +152,18 @@ router.post("/coordination-knowledge/lens-context/:lensViewpointId/resolution/ev
   if(!resolutionRevisionId)throw new CoordinationKnowledgeContractError("RESOLUTION_EVIDENCE_INVALID","resolutionRevisionId");
   if(role!=="before"&&role!=="after"&&role!=="supporting")throw new CoordinationKnowledgeContractError("RESOLUTION_EVIDENCE_INVALID","evidenceRole");
   const item=await repository.addResolutionEvidence({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId,resolutionRevisionId,fileId,evidenceRole:role,metadata:objectValue(req.body?.metadata,"metadata"),modelViewReference:objectValue(req.body?.modelViewReference,"modelViewReference"),actorId:resolved.userId});
+  res.status(201).json({item});
+}catch(error){sendError(res,error);}});
+
+router.get("/coordination-knowledge/lens-context/:lensViewpointId/lesson-proposal",authMiddleware,async(req,res)=>{try{
+  const resolved=await context(req,"view_approved");if(!resolved.projectId)throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_REQUIRED","projectId");
+  const lensViewpointId=Number(parameter(req.params.lensViewpointId));if(!Number.isSafeInteger(lensViewpointId)||lensViewpointId<1)throw new CoordinationKnowledgeContractError("KNOWLEDGE_ISSUE_SCOPE_INVALID","lensViewpointId");
+  res.json({item:await repository.getLessonProposal({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId})});
+}catch(error){sendError(res,error);}});
+router.post("/coordination-knowledge/lens-context/:lensViewpointId/lesson-proposal",authMiddleware,async(req,res)=>{try{
+  const resolved=await context(req,"propose_lesson");if(!resolved.projectId)throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_REQUIRED","projectId");
+  const lensViewpointId=Number(parameter(req.params.lensViewpointId));if(!Number.isSafeInteger(lensViewpointId)||lensViewpointId<1)throw new CoordinationKnowledgeContractError("KNOWLEDGE_ISSUE_SCOPE_INVALID","lensViewpointId");
+  const content=validateLessonProposalContent(req.body??{});const item=await repository.proposeLesson({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId,actorId:resolved.userId,content});
   res.status(201).json({item});
 }catch(error){sendError(res,error);}});
 
