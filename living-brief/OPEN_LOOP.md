@@ -10,6 +10,7 @@
 - [x] Builds 246–250 add the compact Lens Next contextual knowledge tab with approved classification, approved revision-traceable guidance, deterministic approved resolution methods, and permission-scoped resolved/verified precedent. Build 250 is push-only.
 - [x] Builds 251–254 add optional audited classification, deterministic explainable suggestions, permission-safe similar-case retrieval, and context-preserving detail navigation without changing Native, bridge, installer, or package surfaces.
 - [ ] Build 255 must pass the exact complete gate, push the five bounded commits, synchronize and publish through Replit Shell without Replit Agents, verify deployed identity, and pass full authenticated visible-Chrome acceptance. Publication evidence remains open until observed live.
+- [x] The Build 255 pre-push gate detected and corrected a stale deterministic route inventory; the classification PUT route is now included before the gate is repeated.
 - [ ] Builds 256–260 add the separate structured resolution-record workflow, before/after evidence, resolution UI, verification/reopening, and integration hardening. These later requirements are not silently claimed by Block 6.
 
 - [x] Builds 221–225 reconcile exact Build 220 live acceptance and close the verified physical Navisworks 2021 P36 installation. This five-build boundary is push-only and changes no runtime product code, database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license.

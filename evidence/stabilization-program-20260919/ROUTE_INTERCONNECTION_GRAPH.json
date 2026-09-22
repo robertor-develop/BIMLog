@@ -6,7 +6,7 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 629,
+    "apiRoutes": 630,
     "frontendApiReferences": 243,
     "routeOwnedTables": 61
   },
@@ -2600,6 +2600,12 @@
     {
       "method": "GET",
       "path": "/coordination-knowledge/lens-context/:lensViewpointId",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "PUT",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/classification",
       "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
       "tables": []
     },

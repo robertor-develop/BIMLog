@@ -7,6 +7,7 @@
 - Similar cases remain company-isolated. Ordinary members receive only their authorized project; company PMO and Super Administrators may receive permitted company precedent. Stable ranking uses only visible approved structured facts.
 - Knowledge detail navigation uses the current Lens panel and browser history instead of leaving the workspace. The selected issue stays active and no bridge, camera, Native, installer, or package path changes.
 - Build 255 is the scheduled publication boundary. Source validation, exact push, Replit Shell synchronization/publication, deployed identity, and authenticated Chrome acceptance must be recorded separately; no live state is claimed by this candidate entry.
+- The pre-push route-graph regression found and corrected the missing inventory entry for the new classification command; the generated graph now records 630 API routes.
 
 ## Coordination Knowledge Library — Block 5 source candidate — 2026-09-21
 

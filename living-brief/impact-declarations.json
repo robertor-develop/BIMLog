@@ -37261,8 +37261,8 @@
     },
     {
       "taskId": "bimlog-coordination-knowledge-block06-publication-candidate-20260921",
-      "reviewedThroughCommit": "630e340b4baebbcee7c3d42b8dfe4cc5164cb95c",
-      "reviewedAt": "2026-09-21T22:45:00-04:00",
+      "reviewedThroughCommit": "702dd22b85e217677433bbe78b4cfd70ccf5ef3a",
+      "reviewedAt": "2026-09-21T22:59:00-04:00",
       "status": "candidate",
       "capabilityPreflight": {
         "checkedBeforeExecution": true,
@@ -37347,14 +37347,12 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/api-server/package.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
-        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json",
-        "package.json"
+        "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "50c324873708b14abb3999c212e44407e66eb5d5215e3f9e9dae1ad7dc823396"
+      "reviewedChangeSha256": "b68d77a1004d13067af1b8a1a5af76083cb977121f685da87276cfd6f4d6b175"
     }
   ]
 }
