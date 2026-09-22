@@ -1,14 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## EDT and Engine Templates program — Block 4 — 2026-09-22
+## EDT and Engine Templates program — Block 5 — 2026-09-22
 
 - [x] Builds 276–280 verify the approved package, current source boundary, reuse-versus-gap classification, additive migration design and deterministic program ledger.
 - [x] Builds 281–285 implement granular EDT permissions, record eligibility, catalog lifecycle usage and compact Company Catalog administration; exact Build 285 source was pushed, published and authenticated-smoked.
 - [x] Builds 286–290 implement the additive EDT hierarchy, Work Item identity/alias foundation, activation and governed-change request/decision records, Work Item Economic Plans, budget ledger, time-entry lifecycle columns, R/V issuance/QC records and governed `Result` import persistence.
 - [x] Block 3 migration source is additive, transaction-bound and Drizzle/runtime-correspondent across 12 new tables; production database execution remains `NO`.
 - [x] Builds 291–295 implement the first transactional service layer over this persistence foundation and prove rollback, idempotency, authorization and additive zero-drop behavior in an isolated transaction harness.
-- [ ] Complete the Build 295 provider boundary: full local build, exact push, Replit Shell alignment, zero-drop preview, one controlled publication and authenticated Chrome smoke.
-- [ ] Builds 296–300 expose and integrate the approved service operations through bounded server routes while preserving existing Intake and Operations compatibility.
+- [x] Build 295 provider boundary completed from exact source `863d6c9b5afec211e7635b60c02d13319f810c8d`: full local build, exact push, Replit Shell alignment, zero-drop preview, one controlled publication and authenticated Chrome smoke passed.
+- [x] Builds 296–300 expose and integrate the approved service operations through bounded authenticated server routes while preserving existing Intake and Operations compatibility.
+- [ ] Builds 301–305 implement the next approved UI/runtime integration block; Build 305 is the next publication and authenticated Chrome boundary.
 - [ ] Later blocks remain responsible for complete Delivery Workflow, Governance, APU/Pricing, Intake activation, EDT generation, hours/budget, R/V, QC, Change Order, split, import, reporting and final end-to-end acceptance behavior. Schema presence alone is not completion.
 - [x] Block 3 changes no Lens Next Native, Pulse, bridge, installer, package or Autodesk path; focused Navisworks smoke is not required.
 

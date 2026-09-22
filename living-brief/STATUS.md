@@ -1,6 +1,16 @@
 # STATUS.md - Current Accepted Platform State
 
-## EDT and Engine Templates — Block 4 publication candidate — 2026-09-22
+## EDT and Engine Templates — Block 5 source candidate — 2026-09-22
+
+- Builds 296–300 expose the approved Block 4 transactional operations through one authenticated project-scoped API surface without replacing existing Intake or Operations routes.
+- Eligible EDT roles and permissions are resolved server-side from the authenticated user, active project membership, company PMO authority and Super Administrator state. Request bodies cannot claim an actor, company, role or permission grant.
+- The bounded API covers capability discovery, activation request/approval, governed change request/decision, immutable Economic Plans, time-entry transitions, Work Item R/V issuance, QC decisions and `Result` import preview.
+- Route validation rejects unsupported actions, decisions, pools, malformed arrays and missing identities before service execution. The services retain transaction, idempotency, optimistic-concurrency, anti-self-approval and immutable history behavior.
+- A real integration finding was corrected before acceptance: governed-change and economic/time record reads now bind stored records to both company and project, preventing project membership from weakening tenant scope.
+- The five-build route suite, prior service regressions, API/frontend TypeScript projects and repository production gate pass. Block 5 is push-only; publication and authenticated Chrome smoke are due after Builds 301–305.
+- No Lens Next Native, bridge, installer, plugin package or Autodesk path changed, so focused Navisworks smoke is not applicable.
+
+## EDT and Engine Templates — Block 4 published — 2026-09-22
 
 - Builds 291–295 add the first callable transactional service layer over the additive Block 3 EDT persistence foundation. The services reuse canonical Job Intake, Work Item, Contract, budget-account and file identities rather than creating parallel authorities.
 - Activation requests bind the exact Intake revision, Governance/APU/Workflow versions and content fingerprint. Operations Director approval is separation-of-duties checked and atomically creates deterministic EDT nodes plus Work Item identity snapshots.
@@ -9,7 +19,7 @@
 - R/V issuance starts at R0-V0, preserves a monotonic V sequence, requires evidence for an external R increment and binds QC decisions to the exact issuance fingerprint with anti-self-approval/conflict denial.
 - `Result` imports require the original workbook hash, exact Intake revision, worksheet identity and row-level validation. Replay with the same identity but different parsed content fails closed.
 - The isolated transaction harness proves rollback and connection release on failure. Block 4 changes no Lens Next Native, bridge, installer or package, so focused Navisworks smoke is not applicable.
-- Publication is permitted only after the complete local gate, exact push, Replit Shell alignment and a zero-drop provider preview. Production migration/publication and authenticated Chrome results must be recorded separately after execution.
+- Exact source `863d6c9b5afec211e7635b60c02d13319f810c8d` was pushed, aligned and published through Replit Shell after a zero-drop schema preview. Live health reported `v1.05.N18-P36` and authenticated Chrome smoke passed Intake, Operations, Financial/APU, catalogs, workflows, governance, pricing and knowledge with no browser errors.
 
 ## EDT and Engine Templates — Block 3 source candidate — 2026-09-22
 

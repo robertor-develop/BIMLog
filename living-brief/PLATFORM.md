@@ -1164,3 +1164,11 @@ It changes only when the code structure or curated architectural facts change.
 - Reviewer decisions are optimistic-concurrency protected, attributable, rationale-bearing, and audited. Duplicate proposals may merge only into a same-company canonical proposal and retain their redirect history.
 - An approved proposal may create or revise draft Conflict Types, Coordination Rules, or Resolution Methods through a separate controlled action. No proposal, review transition, or merge automatically approves or publishes organizational knowledge.
 - Block 8 adds no schema and changes no Native, bridge, camera, installer, package, Autodesk load path, or Navisworks-facing source. Build 265 is the scheduled Replit publication and authenticated Chrome acceptance boundary.
+
+## EDT Engine bounded API surface — Builds 296–300
+
+- The authenticated project route family is `/api/v1/projects/:projectId/edt-engine/*`. Actor company, active membership, eligible EDT role and permission grants are resolved on the server; client bodies cannot supply them.
+- The route family exposes capability discovery plus the approved transactional activation, governed-change, Economic Plan, time-entry, R/V issuance, QC and `Result` import-preview operations.
+- Existing Job Intake and Job Operations endpoints remain canonical and unchanged. This API is an additive engine boundary for later UI/runtime integration, not a parallel Intake or Operations authority.
+- Stored governed-change, Work Item and time-entry reads bind both company and project before mutation. Transactional services retain idempotency, immutable fingerprints, optimistic concurrency and separation-of-duties checks.
+- Builds 296–300 change no database schema, Native code, bridge protocol, installer, plugin package or Autodesk integration.

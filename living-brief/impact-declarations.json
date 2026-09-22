@@ -38081,6 +38081,106 @@
         "scripts/test-edt-engine-block04.mjs"
       ],
       "reviewedChangeSha256": "fd8ba8fcc2025b181c50f32f00b4043ea51eed75eb837c9331ec359afe9394e0"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block05-20260922",
+      "reviewedThroughCommit": "ceee5db9f4f5c4bb86d0216e25f396f74f0fd855",
+      "reviewedAt": "2026-09-22T14:22:38-04:00",
+      "status": "accepted_source_push_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "implement_bounded_routes",
+          "run_local_validation",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "production_database_preview",
+          "production_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Build 300 corrected stored-record reads that bound project scope without also binding company scope before the block was accepted."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The routes preserve canonical records, human approval and controlled consequential actions."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing route, release, evidence, push and provider boundaries remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing authorization, tenant isolation, negative-test and persistence requirements remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The bounded route layer implements the approved EDT direction without expanding product scope."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Documents the authenticated EDT route family, canonical compatibility and corrected company/project binding."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, installer, package or Navisworks-facing source changed in this block."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report, export renderer or professional artifact presentation contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, certification, citation or compliance interpretation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records Block 5 source acceptance and the completed Block 4 publication evidence."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 296–300 and carries the next Builds 301–305 publication boundary forward."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only audit doctrine continues to govern every exposed service operation."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "9048a3b7a76b7f772697758c127ba4d21a02f4d6936b88d9788280a89ee3990a"
     }
   ]
 }
