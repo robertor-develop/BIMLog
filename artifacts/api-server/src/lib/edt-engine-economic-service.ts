@@ -3,6 +3,7 @@ import { deterministicEdtId,edtFingerprint,EdtEngineConflict,withEdtTransaction,
 type Actor=Pick<EdtRecordAuthorizationInput,"grants"|"actorUserId"|"actorCompanyId"|"actorProjectIds">&{eligibleRole:string};
 const decimal=/^(0|[1-9]\d*)(\.\d{1,6})?$/;
 function nonnegative(value:string,name:string){if(!decimal.test(value))throw new EdtEngineConflict("ECONOMIC_AMOUNT_INVALID",`${name} must be a non-negative decimal with at most six places.`);}
+function decimalUnits(value:string){const [whole,fraction=""]=value.replace(/^-/,"").split(".");return BigInt(whole)*1000000n+BigInt(fraction.padEnd(6,"0"));}
 function authorize(actor:Actor,permission:"JOB_OPERATE"|"TIME_SUBMIT"|"TIME_APPROVE",companyId:number,projectId:number,requester?:number){const decision=decideEdtRecordAuthorization({...actor,permission,recordCompanyId:companyId,recordProjectId:projectId,recordRequesterUserId:requester});if(!decision.allow)throw new EdtEngineConflict(decision.code,"Economic-operation authorization denied.");}
 
 export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:number;projectId:number;intakeId:string;workItemId:string;contractId:string;contractVersionId:string;pricingTemplateVersionId:string;deliveryWorkflowVersionId:string;currency:string;directProductionAmount:string;projectAdministrativeAmount:string;incentiveReserveAmount:string;taskEarningsAmount:string;projectEarningsAmount:string;resolvedAllocation:Record<string,unknown>;sourceSnapshot:Record<string,unknown>},host?:EdtTransactionHost){
@@ -37,6 +38,11 @@ export async function transitionTimeEntry(input:{actor:Actor;companyId:number;pr
     if(submit&&!(["draft","rejected"].includes(entry.status)))throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only draft or rejected time may be submitted.");
     if(!submit&&entry.status!=="submitted")throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only submitted time may be decided.");
     if(submit&&entry.user_id!==input.actor.actorUserId)throw new EdtEngineConflict("TIME_ENTRY_OWNER_REQUIRED","Only the time-entry owner may submit it.");
+    if(!submit){
+      const commitment=(await client.query<{budget_account_id:string;pool:string;amount_delta:string;hours_delta:string}>("SELECT budget_account_id,pool,amount_delta::text,hours_delta::text FROM job_activation_budget_ledger_entries WHERE time_entry_id=$1 AND source_version=$2 AND ledger_state='committed_pending' FOR UPDATE",[input.entryId,input.expectedVersion-1])).rows[0];
+      if(!commitment||commitment.budget_account_id!==input.budgetAccountId||commitment.pool!==input.pool||decimalUnits(commitment.amount_delta)!==decimalUnits(input.amount)||decimalUnits(commitment.hours_delta)!==decimalUnits(String(entry.hours)))
+        throw new EdtEngineConflict("TIME_COMMITMENT_MISMATCH","Time decision must use the stored submitted budget account, pool, amount and hours.");
+    }
     const next=submit?"submitted":input.decision==="approve"?"approved":"rejected";
     const updated=await client.query("UPDATE job_activation_time_entries SET status=$2,optimistic_version=optimistic_version+1,submitted_by_id=CASE WHEN $2='submitted' THEN $3 ELSE submitted_by_id END,submitted_at=CASE WHEN $2='submitted' THEN now() ELSE submitted_at END,decided_by_id=CASE WHEN $2 IN ('approved','rejected') THEN $3 ELSE decided_by_id END,decided_at=CASE WHEN $2 IN ('approved','rejected') THEN now() ELSE decided_at END,decision_reason=$4 WHERE id=$1 AND optimistic_version=$5",[input.entryId,next,input.actor.actorUserId,input.reason,input.expectedVersion]);
     if(updated.rowCount!==1)throw new EdtEngineConflict("TIME_ENTRY_STALE","Concurrent time-entry update detected.");
