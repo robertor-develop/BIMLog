@@ -1,9 +1,13 @@
 # BIMLog EDT and Engine Templates — Block 1 acceptance
 
-Date: 2026-09-22  
-Builds: 276–280  
-Result: `PASS_LOCAL`  
-Push boundary: due after Build 280  
+Date: 2026-09-22
+
+Builds: 276–280
+
+Result: `PASS_LOCAL`
+
+Push boundary: due after Build 280
+
 Publication boundary: not due until Build 285
 
 ## Accepted builds

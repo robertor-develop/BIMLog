@@ -1,8 +1,11 @@
 # Build 279 — additive EDT schema and migration plan
 
-Date: 2026-09-22  
-Result: `PASS_DESIGN_ONLY`  
-Database connected: `NO`  
+Date: 2026-09-22
+
+Result: `PASS_DESIGN_ONLY`
+
+Database connected: `NO`
+
 Migration executed: `NO`
 
 ## Existing authorities to extend

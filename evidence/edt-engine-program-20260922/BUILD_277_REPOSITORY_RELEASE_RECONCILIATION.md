@@ -1,6 +1,7 @@
 # Build 277 — repository and release-state reconciliation
 
-Date: 2026-09-22  
+Date: 2026-09-22
+
 Result: `PASS_SOURCE_BASELINE`
 
 ## Authoritative implementation lineage

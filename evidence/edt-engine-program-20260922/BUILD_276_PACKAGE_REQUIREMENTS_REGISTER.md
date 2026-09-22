@@ -1,8 +1,11 @@
 # Build 276 — package integrity and requirements register
 
-Date: 2026-09-22  
-Baseline: `c97efd491f15d393f7c432419f2e2d908cd574a8`  
-Scope: read-only package ingestion and authoritative requirement classification  
+Date: 2026-09-22
+
+Baseline: `c97efd491f15d393f7c432419f2e2d908cd574a8`
+
+Scope: read-only package ingestion and authoritative requirement classification
+
 Result: `PASS`
 
 ## Integrity
