@@ -75,6 +75,7 @@ export function CoordinationKnowledgeLibrary() {
   const [lessonError,setLessonError]=useState("");
   const [lessonReloadKey,setLessonReloadKey]=useState(0);
   const tabRefs = useRef<Array<HTMLButtonElement | null>>([]);
+  const lessonTabRefs = useRef<Array<HTMLButtonElement | null>>([]);
 
   useEffect(() => {
     if (!token) return;
@@ -202,6 +203,18 @@ export function CoordinationKnowledgeLibrary() {
     event.preventDefault();
     setActive(sections[next].id);
     tabRefs.current[next]?.focus();
+  };
+
+  const changeLessonTab = (event: KeyboardEvent<HTMLButtonElement>, index: number) => {
+    let next = index;
+    if (event.key === "ArrowRight") next = (index + 1) % lessonQueueStates.length;
+    else if (event.key === "ArrowLeft") next = (index - 1 + lessonQueueStates.length) % lessonQueueStates.length;
+    else if (event.key === "Home") next = 0;
+    else if (event.key === "End") next = lessonQueueStates.length - 1;
+    else return;
+    event.preventDefault();
+    setLessonQueueState(lessonQueueStates[next].id);
+    lessonTabRefs.current[next]?.focus();
   };
 
   const selected = sections.find(section => section.id === active)!;
@@ -332,11 +345,11 @@ export function CoordinationKnowledgeLibrary() {
             <div><strong>{t("Evidence before promotion", "Evidencia antes de promoción")}</strong><p>{t("Every proposal must retain its source issue and evidence link. Submission never approves or changes company knowledge automatically.", "Cada propuesta debe conservar el vínculo al incidente fuente y a su evidencia. El envío nunca aprueba ni cambia automáticamente el conocimiento de la empresa.")}</p></div>
           </div>
           <div className="knowledge-lesson-tabs" role="tablist" aria-label={t("Lessons Learned queue status", "Estado de la cola de Lecciones Aprendidas")}>
-            {lessonQueueStates.map(state => <button key={state.id} type="button" role="tab" aria-selected={lessonQueueState === state.id} onClick={() => setLessonQueueState(state.id)}>
+            {lessonQueueStates.map((state,index) => <button ref={node=>{lessonTabRefs.current[index]=node;}} key={state.id} id={`knowledge-lesson-tab-${state.id}`} type="button" role="tab" aria-selected={lessonQueueState === state.id} aria-controls="knowledge-lesson-panel" tabIndex={lessonQueueState===state.id?0:-1} onClick={() => setLessonQueueState(state.id)} onKeyDown={event=>changeLessonTab(event,index)}>
               <span>{es ? state.es : state.en}</span><span className="knowledge-lesson-count">{state.id===lessonQueueState&&lessonState==="ready"?lessons.length:"—"}</span>
             </button>)}
           </div>
-          <section className="knowledge-lesson-queue" role="tabpanel" aria-live="polite">
+          <section id="knowledge-lesson-panel" className="knowledge-lesson-queue" role="tabpanel" aria-labelledby={`knowledge-lesson-tab-${lessonQueueState}`} aria-live="polite">
             <div className="knowledge-lesson-queue-heading"><div><h3>{es ? lessonQueueStates.find(state => state.id === lessonQueueState)?.es : lessonQueueStates.find(state => state.id === lessonQueueState)?.en}</h3><p>{t("Company-scoped, permission-aware review queue", "Cola de revisión por empresa y controlada por permisos")}</p></div>{canProposeLessons&&<span>{t("Create proposals from a closed Lens issue", "Cree propuestas desde un incidente cerrado en Lens")}</span>}</div>
             {lessonState==="loading"&&<div className="knowledge-placeholder" role="status"><span className="knowledge-spinner" aria-hidden/><strong>{t("Loading lessons…","Cargando lecciones…")}</strong></div>}
             {lessonState==="error"&&<div className="knowledge-error" role="alert"><strong>{t("Lessons could not be loaded.","No se pudieron cargar las lecciones.")}</strong><span>{lessonError}</span><button type="button" onClick={()=>setLessonReloadKey(value=>value+1)}>{t("Try again","Reintentar")}</button></div>}
