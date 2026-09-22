@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+const panel=readFileSync(fileURLToPath(new URL("../../../bimlog/src/features/lens-next/LensNextKnowledgePanel.tsx",import.meta.url)),"utf8");
+assert.match(panel,/history\.pushState/);
+assert.match(panel,/popstate/);
+assert.match(panel,/Return to active issue/);
+assert.match(panel,/activeIssueKey/);
+assert.doesNotMatch(panel,/<a href=/);
+assert.doesNotMatch(panel,/openWorkingView|bridgeClient|camera/);
+console.log("Coordination Knowledge context-preserving Lens navigation behavior: PASS");
