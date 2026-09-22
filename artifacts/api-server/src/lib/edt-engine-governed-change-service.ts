@@ -32,6 +32,7 @@ export async function decideGovernedEdtChange(input:{actor:Actor;companyId:numbe
     authorize(input.actor,"GOVERNED_CHANGE_APPROVE",request.company_id,request.project_id,request.requested_by_id);
     if(request.company_id!==input.companyId||request.project_id!==input.projectId||request.request_fingerprint!==input.expectedFingerprint||request.state!=="pending")throw new EdtEngineConflict("CHANGE_REQUEST_CONFLICT","Governed change request is stale or mismatched.");
     if(!approverRoles[request.action_type as GovernedAction]?.includes(input.actor.eligibleRole))throw new EdtEngineConflict("APPROVER_ROLE_INELIGIBLE","Actor role cannot decide this change type.");
+    if(input.outcome==="approved"&&request.action_type!=="code_correction")throw new EdtEngineConflict("GOVERNED_ACTION_NOT_EXECUTABLE","This change action cannot be approved until its canonical execution is connected. It may be rejected with an audit reason.");
     const decisionId=deterministicEdtId("governed-change-decision",`${request.id}:${request.request_fingerprint}`);
     await client.query("INSERT INTO job_governed_change_decisions(id,request_id,company_id,project_id,outcome,request_fingerprint,decided_by_id,eligible_role,reason,evidence) VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10::jsonb)",[decisionId,request.id,input.companyId,input.projectId,input.outcome,input.expectedFingerprint,input.actor.actorUserId,input.actor.eligibleRole,input.reason,JSON.stringify(input.evidence)]);
     if(input.outcome==="approved"&&request.action_type==="code_correction"){
