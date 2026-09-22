@@ -3,6 +3,7 @@ import { Router, type Request, type Response } from "express";
 import { pool } from "@workspace/db";
 import { authMiddleware, isSuperAdminMiddleware } from "../middlewares/auth";
 import { ensureCompanyMasterCatalogSchema } from "../lib/company-master-catalog-migration";
+import { classificationColumn, normalizeCompanyCatalogUsage, type CompanyCatalogKind } from "../lib/company-master-catalog-usage";
 
 const router = Router();
 const kinds = new Set(["client", "discipline", "service", "phase"]);
@@ -76,6 +77,41 @@ router.get("/company/master-catalogs/:kind", authMiddleware, async (req, res): P
   const result = await pool.query(`SELECT id,kind,code,name,aliases,canonical_company_id "canonicalCompanyId",state,version,created_at "createdAt",updated_at "updatedAt"
     FROM company_master_catalog_entries WHERE company_id=$1 AND kind=$2 AND ($3::boolean OR state='active') ORDER BY name,id`, [current.companyId,kind,includeInactive]);
   res.json({ kind, companyId: current.companyId, canManage: current.isPmo || current.isSuperAdmin, entries: result.rows });
+});
+
+router.get("/company/master-catalogs/:kind/:id/usage", authMiddleware, async (req, res): Promise<void> => {
+  const kind = kindOf(req, res) as CompanyCatalogKind | null; if (!kind) return;
+  await ensureCompanyMasterCatalogSchema();
+  const current = await actor(req);
+  if (!current) { res.status(401).json({ code: "AUTHORITY_INVALID" }); return; }
+  const entry = (await pool.query(`SELECT id,company_id,kind,canonical_company_id "canonicalCompanyId",state,version
+    FROM company_master_catalog_entries entry WHERE entry.id=$1 AND entry.company_id=$2 AND entry.kind=$3 LIMIT 1`,
+    [parameter(req.params.id), current.companyId, kind])).rows[0];
+  if (!entry) { res.status(404).json({ code: "COMPANY_CATALOG_NOT_FOUND" }); return; }
+
+  if (kind === "client") {
+    const result = await pool.query(`SELECT
+      count(*)::int "intakeCount",
+      0::int "taskCount",
+      0::int "workPackageCount"
+      FROM job_intakes ji
+      WHERE ji.company_id=$2 AND ji.data #>> '{identity,clientCompanyId}'=$1`,
+    [String(entry.canonicalCompanyId ?? ""), current.companyId]);
+    res.json({ entry, usage: normalizeCompanyCatalogUsage(result.rows[0] ?? {}) }); return;
+  }
+
+  const column = classificationColumn(kind)!;
+  const result = await pool.query(`SELECT
+    (SELECT count(*)::int FROM job_intakes ji WHERE ji.company_id=$2 AND ji.data #>> ARRAY['classification',$3||'Id']=$1) "intakeCount",
+    (SELECT count(*)::int FROM job_activation_tasks task
+      JOIN job_activation_work_items item ON item.id=task.work_item_id
+      JOIN job_intakes ji ON ji.id=item.intake_id
+      WHERE ji.company_id=$2 AND task.${column}=$1) "taskCount",
+    (SELECT count(*)::int FROM job_activation_work_packages package
+      JOIN job_intakes ji ON ji.id=package.intake_id
+      WHERE ji.company_id=$2 AND package.${column}=$1) "workPackageCount"`,
+  [entry.id, current.companyId, kind]);
+  res.json({ entry, usage: normalizeCompanyCatalogUsage(result.rows[0] ?? {}) });
 });
 
 router.post("/company/master-catalogs/:kind", authMiddleware, async (req, res): Promise<void> => {
