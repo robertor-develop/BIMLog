@@ -113,6 +113,56 @@ DO $$ BEGIN
 END $$;
 `;
 
+export const EDT_ENGINE_ECONOMIC_SQL = String.raw`
+CREATE TABLE IF NOT EXISTS job_activation_work_item_economic_plans (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), intake_id text NOT NULL REFERENCES job_intakes(id),
+  work_item_id text NOT NULL UNIQUE REFERENCES job_activation_work_items(id), contract_id text NOT NULL REFERENCES financial_contracts(id), contract_version_id text NOT NULL REFERENCES financial_contract_versions(id),
+  pricing_template_version_id text NOT NULL, delivery_workflow_version_id text NOT NULL, currency text NOT NULL CHECK (currency ~ '^[A-Z]{3}$'),
+  direct_production_amount numeric(30,6) NOT NULL, project_administrative_amount numeric(30,6) NOT NULL, incentive_reserve_amount numeric(30,6) NOT NULL,
+  task_earnings_amount numeric(30,6) NOT NULL, project_earnings_amount numeric(30,6) NOT NULL, resolved_allocation jsonb NOT NULL,
+  source_fingerprint text NOT NULL CHECK (source_fingerprint ~ '^[a-f0-9]{64}$'), plan_fingerprint text NOT NULL CHECK (plan_fingerprint ~ '^[a-f0-9]{64}$'),
+  created_by_id integer NOT NULL REFERENCES users(id), created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_economic_plan_amounts_chk CHECK (direct_production_amount >= 0 AND project_administrative_amount >= 0 AND incentive_reserve_amount >= 0 AND task_earnings_amount >= 0 AND project_earnings_amount >= 0)
+);
+CREATE INDEX IF NOT EXISTS job_activation_economic_plan_project_idx ON job_activation_work_item_economic_plans(project_id,contract_id);
+
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS status text NOT NULL DEFAULT 'legacy_recorded';
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS optimistic_version integer NOT NULL DEFAULT 1;
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS submitted_by_id integer REFERENCES users(id);
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS submitted_at timestamptz;
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS decided_by_id integer REFERENCES users(id);
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS decided_at timestamptz;
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS decision_reason text;
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS corrects_entry_id text REFERENCES job_activation_time_entries(id);
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS superseded_by_entry_id text REFERENCES job_activation_time_entries(id);
+ALTER TABLE job_activation_time_entries ADD COLUMN IF NOT EXISTS source_fingerprint text;
+CREATE INDEX IF NOT EXISTS job_activation_time_status_idx ON job_activation_time_entries(project_id,status,work_date);
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='job_activation_time_status_chk') THEN ALTER TABLE job_activation_time_entries ADD CONSTRAINT job_activation_time_status_chk CHECK (status IN ('legacy_recorded','draft','submitted','approved','rejected','corrected','superseded')); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='job_activation_time_version_chk') THEN ALTER TABLE job_activation_time_entries ADD CONSTRAINT job_activation_time_version_chk CHECK (optimistic_version > 0); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_constraint WHERE conname='job_activation_time_fingerprint_chk') THEN ALTER TABLE job_activation_time_entries ADD CONSTRAINT job_activation_time_fingerprint_chk CHECK (source_fingerprint IS NULL OR source_fingerprint ~ '^[a-f0-9]{64}$'); END IF;
+END $$;
+
+CREATE TABLE IF NOT EXISTS job_activation_budget_ledger_entries (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), intake_id text NOT NULL REFERENCES job_intakes(id),
+  budget_account_id text NOT NULL REFERENCES job_activation_budget_accounts(id), work_item_id text REFERENCES job_activation_work_items(id), task_id text REFERENCES job_activation_tasks(id),
+  assignment_id text REFERENCES job_activation_resource_assignments(id), time_entry_id text REFERENCES job_activation_time_entries(id),
+  pool text NOT NULL CHECK (pool IN ('direct_production','project_administrative','incentive_reserve','task_earnings','project_earnings')),
+  ledger_state text NOT NULL CHECK (ledger_state IN ('budgeted','committed_pending','approved_consumed','released','corrected')),
+  amount_delta numeric(30,6) NOT NULL DEFAULT 0, hours_delta numeric(30,6) NOT NULL DEFAULT 0, idempotency_key text NOT NULL,
+  source_version integer NOT NULL CHECK (source_version > 0), source_fingerprint text NOT NULL CHECK (source_fingerprint ~ '^[a-f0-9]{64}$'),
+  actor_user_id integer NOT NULL REFERENCES users(id), reason text NOT NULL, evidence jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT job_activation_budget_ledger_idempotency_uidx UNIQUE(project_id,idempotency_key), CONSTRAINT job_activation_budget_ledger_delta_chk CHECK (amount_delta <> 0 OR hours_delta <> 0)
+);
+CREATE INDEX IF NOT EXISTS job_activation_budget_ledger_account_idx ON job_activation_budget_ledger_entries(budget_account_id,pool,created_at);
+CREATE INDEX IF NOT EXISTS job_activation_budget_ledger_work_item_idx ON job_activation_budget_ledger_entries(work_item_id,created_at);
+CREATE OR REPLACE FUNCTION job_edt_append_only_guard() RETURNS trigger AS $$ BEGIN RAISE EXCEPTION 'EDT financial history is append-only'; END; $$ LANGUAGE plpgsql;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_activation_economic_plan_immutable') THEN CREATE TRIGGER job_activation_economic_plan_immutable BEFORE UPDATE OR DELETE ON job_activation_work_item_economic_plans FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_activation_budget_ledger_immutable') THEN CREATE TRIGGER job_activation_budget_ledger_immutable BEFORE UPDATE OR DELETE ON job_activation_budget_ledger_entries FOR EACH ROW EXECUTE FUNCTION job_edt_append_only_guard(); END IF;
+END $$;
+`;
+
 let startup: Promise<void> | null = null;
 type MigrationClient = { query(sql: string): Promise<unknown>; release(): void };
 type MigrationPool = { connect(): Promise<MigrationClient> };
@@ -124,6 +174,7 @@ async function runMigration(migrationPool: MigrationPool): Promise<void> {
     await client.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:edt-engine:v1'))");
     await client.query(EDT_ENGINE_HIERARCHY_SQL);
     await client.query(EDT_ENGINE_GOVERNANCE_SQL);
+    await client.query(EDT_ENGINE_ECONOMIC_SQL);
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
