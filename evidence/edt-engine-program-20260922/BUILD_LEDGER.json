@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "program": "BIMLog EDT and Engine Templates",
   "date": "2026-09-22",
-  "range": { "firstBuild": 276, "completedThrough": 300, "finalBuild": 335 },
-  "currentBlock": { "number": 5, "builds": "296-300", "status": "PASS_LOCAL", "pushDue": true, "publicationDue": false },
+  "range": { "firstBuild": 276, "completedThrough": 305, "finalBuild": 335 },
+  "currentBlock": { "number": 6, "builds": "301-305", "status": "FOCUSED_PASS_FULL_GATE_PENDING", "pushDue": true, "publicationDue": true },
   "buildCommits": {
     "276": "ca399ae03d87435c5f24ece52f8f6e48e426d857",
     "277": "c33570ca36ea7c0574dac5b98cc88bc33dfb1d7f",
@@ -32,12 +32,17 @@
     "297": "1ba4e436983c455e10cf71a86b5166cbbe1b25ac",
     "298": "a8461bf5f4918baeb87d3c12dd49abc0156e3487",
     "299": "2ae90488430b84bec7b01619e5486af6f127844c",
-    "300": "ceee5db9f4f5c4bb86d0216e25f396f74f0fd855"
+    "300": "ceee5db9f4f5c4bb86d0216e25f396f74f0fd855",
+    "301": "1fb8a3689835256f5296d51d25b195f1744d1398",
+    "302": "1c57d6db15175961e472d9e1c93249ea38567d04",
+    "303": "2ff39c29d55c7567a4e26d397221ee0c9a159c92",
+    "304": "28646e79e35ed5b8ca489716fbd7170a26e31ce0",
+    "305": "592686e8da84f5149041c82dc1758edbee6fb111"
   },
-  "remainingBlocks": 7,
-  "remainingBuilds": 35,
-  "nextBlock": { "number": 6, "builds": "301-305" },
+  "remainingBlocks": 6,
+  "remainingBuilds": 30,
+  "nextBlock": { "number": 7, "builds": "306-310" },
   "database": { "changed": true, "productionApplied": false, "design": "additive-zero-drop" },
   "lensNext": { "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
-  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PASS", "productSourceChanged": true, "publication": "DUE_AFTER_305" }
+  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING", "productSourceChanged": true, "publication": "DUE_AFTER_305" }
 }

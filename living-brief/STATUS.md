@@ -5,6 +5,7 @@
 - Builds 301–305 are a security remediation of the Block 5 routes, not the originally planned complete UI integration. Server authority now checks project-company binding before role grant; QC conflicts come from stored work-item assignments; Result previews require the retained Intake document's exact hash and remain unvalidated previews.
 - Governed EDT activation and immutable Economic Plan/time-impact HTTP mutations fail closed until the server derives versions, plans, pools and amounts from canonical records. The existing Job Intake activation and Operations routes are unchanged and remain the operational path.
 - The planned EDT UI/runtime integration is still open for Builds 306–310. Focused block tests pass; full release gate, exact push, publication and live authenticated Chrome acceptance are separate pending gates. No Native or installer source changed.
+- Release acceptance must verify that guarded mutation routes return explicit conflicts while the prior canonical Intake and Operations user journeys continue to work.
 
 ## EDT and Engine Templates — Block 5 source candidate — 2026-09-22
 

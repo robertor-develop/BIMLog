@@ -13,6 +13,7 @@
 - [x] Builds 301–305 repaired five fail-open boundaries in the newly exposed EDT routes: project-company authority, QC conflict derivation, retained import-source binding, browser-supplied activation plans, and browser-supplied economic/time amounts. The unsafe activation and economic/time routes explicitly refuse mutation until their server-derived integration is complete.
 - [ ] The planned UI/runtime integration was not completed by the remediation block. Builds 306–310 must implement server-derived versions, EDT plans and amounts before those guarded routes are enabled, then connect the real Intake/Operations UI; no mock or browser-computed authority is acceptable.
 - [ ] Build 305 is the scheduled exact-source push, zero-drop publication and authenticated Chrome boundary. Do not call this block published or live-verified before those gates pass.
+- [ ] Confirm the four guarded EDT mutation routes remain non-operational by design until canonical server derivation is implemented; do not mistake an HTTP route or service function for completed product behavior.
 - [ ] Later blocks remain responsible for complete Delivery Workflow, Governance, APU/Pricing, Intake activation, EDT generation, hours/budget, R/V, QC, Change Order, split, import, reporting and final end-to-end acceptance behavior. Schema presence alone is not completion.
 - [x] Block 3 changes no Lens Next Native, Pulse, bridge, installer, package or Autodesk path; focused Navisworks smoke is not required.
 

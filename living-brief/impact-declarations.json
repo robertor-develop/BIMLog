@@ -38182,6 +38182,106 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "d72724ea3c162df37476a372bce0530259151e37a57d20236e3c56b22108c820"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block06-20260922",
+      "reviewedThroughCommit": "592686e8da84f5149041c82dc1758edbee6fb111",
+      "reviewedAt": "2026-09-22T19:20:00Z",
+      "status": "remediation_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "implement_bounded_security_fixes",
+          "run_local_validation",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "production_database_preview",
+          "production_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Block 5 EDT routes accepted browser-provided QC conflicts, activation plans and economic amounts; Builds 301–305 bound safe sources and disabled unsafe mutations pending server derivation."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical records, human decisions and tenant isolation remain the controlling product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release, evidence, Replit Shell and fail-closed boundaries remain controlling."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Security remediation reinforces current authorized evidence and negative-test quality obligations."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new product scope is introduced by the EDT route remediation."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated platform graph reflects the EDT route and guarded operational surface."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, installer, package or Navisworks-facing source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No professional report or export layout contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim, edition or applicability changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the five-build remediation candidate and clearly separates local, push and live gates."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps server-derived EDT activation, economic integration and full UI execution open for Builds 306–310."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only audit doctrine remains required for future governed activation and economic actions."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "cee5cb959d681763ce87363af3d7cf22fb845b2461f9c5ce82201d2968301d1b"
     }
   ]
 }
