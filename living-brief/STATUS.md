@@ -1,5 +1,14 @@
 # STATUS.md - Current Accepted Platform State
 
+## Coordination Knowledge Library — Block 5 source candidate — 2026-09-21
+
+- Builds 246–250 add the compact, collapsible Coordination Knowledge tab beside the currently selected Lens Next issue while preserving the model workspace, active selection, issue creation, controlled publishing, and existing tabs.
+- The context endpoint binds the authenticated company, authorized project, and canonical `lens_viewpoints` identity before returning data. Unclassified issues remain fully usable and receive no invented guidance.
+- The selected Conflict Type card exposes its approved revision and governed fields. Classification access is permission-aware and optional; read-only users receive no mutation surface.
+- Guidance and resolution methods include approved revisions only. Method order is deterministic, and “preferred” appears only from approved stored metadata; the panel explicitly does not decide or execute a resolution.
+- Previous cases are resolved or verified, same-classification precedent. Ordinary project members see their authorized project only; company PMO and super administrators may see company precedent. Precedent is explicitly not an organizational standard.
+- Block 5 is a push-only boundary. No Native, bridge-protocol, installer, package, database-schema, customer-row, Replit, or production mutation is included; focused Navisworks smoke and publication are not required until their applicable boundary.
+
 ## Coordination Knowledge Library — Block 1 source candidate — 2026-09-21
 
 - Builds 226–230 establish the organization-owned Coordination Knowledge domain without adding a second issue authority: Project Cases reference the existing canonical `lens_viewpoints` issue identity.

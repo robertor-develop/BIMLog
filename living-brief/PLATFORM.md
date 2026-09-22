@@ -311,6 +311,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-knowledge-contract.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-contract.ts
 - artifacts/api-server/src/lib/coordination-knowledge-database.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-lens-classification.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-lens-guidance.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-lens-methods.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-lens-panel.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-lens-precedent.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-migration.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-migration.ts
 - artifacts/api-server/src/lib/coordination-knowledge-repository.behavior.ts

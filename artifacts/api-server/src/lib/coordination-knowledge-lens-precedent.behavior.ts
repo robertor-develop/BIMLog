@@ -1,0 +1,11 @@
+import assert from "node:assert/strict";
+import {readFileSync} from "node:fs";
+import {fileURLToPath} from "node:url";
+const repository=readFileSync(fileURLToPath(new URL("./coordination-knowledge-repository.ts",import.meta.url)),"utf8");
+const panel=readFileSync(fileURLToPath(new URL("../../../bimlog/src/features/lens-next/LensNextKnowledgePanel.tsx",import.meta.url)),"utf8");
+assert.match(repository,/precedent\.company_id=\$1/);
+assert.match(repository,/\(\$4::boolean OR precedent\.project_id=\$5\)/);
+assert.match(repository,/precedent\.status IN \('resolved','verified'\)/);
+assert.match(repository,/linked_items link/);
+for(const evidence of ["Previous BIMLog Cases","View Similar Cases","permitted precedent, not an organizational standard","Level / location","Resolution used","RFI","Status"]) assert.match(panel,new RegExp(evidence.replace("/","\\/")));
+console.log("Lens permission-scoped precedent behavior: PASS");

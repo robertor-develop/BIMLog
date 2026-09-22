@@ -36809,6 +36809,106 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block05-source-candidate-20260921",
+      "reviewedThroughCommit": "b2032e7360f4525a29e677492e0cfcfc19416188",
+      "reviewedAt": "2026-09-21T20:10:00-04:00",
+      "status": "candidate",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "lens_context_implementation",
+          "local_regression",
+          "push_exact_fast_forward"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "authenticated_chrome_acceptance"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "lens_contextual_knowledge",
+          "disposition": "implemented_and_regressed",
+          "authorities": [
+            "platform",
+            "quality",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Builds 246–250 add a compact read-only contextual knowledge tab beside the active Lens issue, exposing only approved revisions and permission-scoped precedent without changing Native, bridge, issue authority, or issue execution."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem doctrine changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No operating boundary changed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing permission, evidence, database, and release gates remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Contextual reuse implements the approved Coordination Knowledge direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic inventory records the new Lens contextual panel and behavior proofs."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Native, bridge, installer, package, or Navisworks behavior changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Build 250 is a push-only source boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Contextual commands and Build 255 publication remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The panel reads existing immutable revision and case evidence and adds no competing authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/coordination-knowledge-repository.ts",
+        "artifacts/bimlog/src/features/lens-next/LensNextKnowledgePanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json"
+      ],
+      "reviewedChangeSha256": "538a99ad0bae7c794c8f006e0d427d598d5679d348ed3b992c4291a2243a7a0b"
     }
   ]
 }
