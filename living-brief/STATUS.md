@@ -1,5 +1,15 @@
 # STATUS.md - Current Accepted Platform State
 
+## Coordination Knowledge Library — Block 7 source candidate — 2026-09-22
+
+- Builds 256–260 add a separate Resolution Record linked to the canonical company/project/Lens issue and optional approved Resolution Method. Every save, completion, verification, and reopening appends an immutable revision with optimistic concurrency and audit events.
+- The Lens Next Resolution tab records the implemented outcome, responsible trade, changed discipline, RFI requirement/reference, drawing or submittal reference, project-file evidence, and chronological history without changing issue identity or inventing model data.
+- Before, after, and supporting evidence is project-scoped, file-authorized, revision-linked, and carries bounded structured metadata plus the exact Lens viewpoint reference.
+- Completion may occur directly or after draft saves. Verification requires the review capability and a user other than the resolver. Reopening a completed or verified outcome requires a recorded reason and retains prior immutable revisions and evidence.
+- Ordinary project contributors use the existing `document_outcome` capability; PMO/company authorities retain governed review access. All reads and writes verify company, project, canonical Lens issue, file, and approved-method scope.
+- The focused Block 7 suite, API/UI typechecks, and the complete prior Block 6 regression pass. This is a five-build push-only boundary; publication and authenticated Chrome smoke are due with Build 265.
+- No Native, loopback bridge, camera, installer, package, or Navisworks-facing source changed, so focused Navisworks smoke is not applicable to this block.
+
 ## Coordination Knowledge Library — Block 6 publication candidate — 2026-09-21
 
 - Builds 251–255 add optional audited classification for new and existing Lens issues, approved-only deterministic suggestions, permission-safe similar-case ranking with explicit reasons, and context-preserving in-panel knowledge navigation.

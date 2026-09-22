@@ -271,6 +271,7 @@ export interface LensNextResolutionDraft {
   disciplineChanged:string|null;responsibleTrade:string|null;rfiRequired:boolean;rfiReference:string|null;
   drawingSubmittalReference:string|null;
 }
+export interface LensNextResolutionEvidence { id:string;revisionId:string;evidenceRole:"before"|"after"|"supporting";fileId:number;fileName:string;fileType:string;fileSize:number;metadata:Record<string,unknown>;modelViewReference:Record<string,unknown>;addedAt:string; }
 export interface LensNextXmlExportSummary {
   requestedCount: number | null;
   serializedCount: number | null;

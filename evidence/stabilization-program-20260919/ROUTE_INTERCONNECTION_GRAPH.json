@@ -6,7 +6,7 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 630,
+    "apiRoutes": 635,
     "frontendApiReferences": 243,
     "routeOwnedTables": 61
   },
@@ -2606,6 +2606,36 @@
     {
       "method": "PUT",
       "path": "/coordination-knowledge/lens-context/:lensViewpointId/classification",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/resolution",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "PUT",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/resolution",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/resolution/${action}",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/resolution/evidence",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/resolution/evidence",
       "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
       "tables": []
     },

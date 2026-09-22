@@ -1,6 +1,6 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Current open-loop authority — Coordination Knowledge Library Block 6 — 2026-09-21 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
+## Current open-loop authority — Coordination Knowledge Library Block 7 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
 - [x] Builds 226–230 establish the canonical company-scoped domain, immutable revisions, tenant-bound repositories, additive migration, clean/repeat/rollback coverage, and restored-database preservation proof. This boundary is push-only and does not change the visible Lens Next workspace.
 - [x] Block 1 implementation authority is exact commit `cce77c1d813b16952873a9faa192208276dd7b31`; reconciliation may update evidence metadata but cannot silently change the accepted product scope.
@@ -9,12 +9,14 @@
 - [x] Builds 231–245 add server-authorized knowledge APIs, bounded search, existing-role integration, company administration, and governed authoring/review surfaces.
 - [x] Builds 246–250 add the compact Lens Next contextual knowledge tab with approved classification, approved revision-traceable guidance, deterministic approved resolution methods, and permission-scoped resolved/verified precedent. Build 250 is push-only.
 - [x] Builds 251–254 add optional audited classification, deterministic explainable suggestions, permission-safe similar-case retrieval, and context-preserving detail navigation without changing Native, bridge, installer, or package surfaces.
-- [ ] Build 255 must pass the exact complete gate, push the five bounded commits, synchronize and publish through Replit Shell without Replit Agents, verify deployed identity, and pass full authenticated visible-Chrome acceptance. Publication evidence remains open until observed live.
+- [x] Build 255 reached exact source `60f90bdad09fc66186ee92e657b220c39f6b4f58`, was synchronized and published through Replit Shell without Replit Agents, and passed authenticated Chrome acceptance. Its provider boundary is closed.
 - [x] The Build 255 pre-push gate detected and corrected a stale deterministic route inventory; the classification PUT route is now included before the gate is repeated.
 - [x] The same release gate refreshed the deterministic open-loop disposition inventory required by the current-state contract; no product scope changed.
 - [x] The release gate also advanced the permanent current-authority regression from the completed Block 5 boundary to the actual Block 6 publication state and next Builds 256–260 boundary.
 - [x] Historical Build 217, Build 223, and Block 45 field-boundary regressions now preserve their original sole-field-evidence rule while allowing only the explicitly active Build 255 publication item; stale provider debt remains prohibited.
-- [ ] Builds 256–260 add the separate structured resolution-record workflow, before/after evidence, resolution UI, verification/reopening, and integration hardening. These later requirements are not silently claimed by Block 6.
+- [x] Builds 256–260 add the separate structured resolution-record workflow, project-scoped before/after evidence, guided Lens resolution UI, independent verification, reason-required reopening, immutable history, and integration hardening. Build 260 is push-only.
+- [ ] Builds 261–264 add Lesson Learned proposal, curation, approval/promotion, and duplicate handling.
+- [ ] Build 265 must pass the exact complete gate, push the five bounded commits, synchronize and publish through Replit Shell without Replit Agents, verify deployed identity, and pass full authenticated visible-Chrome acceptance.
 
 - [x] Builds 221–225 reconcile exact Build 220 live acceptance and close the verified physical Navisworks 2021 P36 installation. This five-build boundary is push-only and changes no runtime product code, database/schema, customer data, Native source, installer, package, provider configuration, Autodesk load path, or Navisworks license.
 - [x] Builds 121–180 are complete. Build 180 source reached `origin/master` at `9dab04343e90e8ad94391c5967a4b9f804ee1f4d`, was published through the established Replit Shell path without Replit Agents, and passed authenticated production smoke.

@@ -40,6 +40,6 @@ export type ResolutionRecordRevision = z.infer<typeof resolutionRecordRevisionSc
 export function validateResolutionRecordRevision(value: unknown): ResolutionRecordRevision { return resolutionRecordRevisionSchema.parse(value); }
 
 export function assertResolutionRecordTransition(from: ResolutionRecordStatus | null, to: ResolutionRecordStatus, reopenReason: string | null): void {
-  const allowed = from === null ? to === "draft" : from === "draft" ? ["draft", "completed"].includes(to) : from === "completed" ? to === "verified" || (to === "draft" && !!reopenReason) : to === "draft" && !!reopenReason;
+  const allowed = from === null ? ["draft","completed"].includes(to) : from === "draft" ? ["draft", "completed"].includes(to) : from === "completed" ? to === "verified" || (to === "draft" && !!reopenReason) : to === "draft" && !!reopenReason;
   if (!allowed) throw new Error(`RESOLUTION_RECORD_TRANSITION_INVALID:${from ?? "none"}->${to}`);
 }

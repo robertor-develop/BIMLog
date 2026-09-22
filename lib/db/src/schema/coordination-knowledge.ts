@@ -1,6 +1,7 @@
 import { sql } from "drizzle-orm";
 import {
   check,
+  boolean,
   foreignKey,
   index,
   integer,
@@ -215,6 +216,38 @@ export const coordinationProjectCasesTable = pgTable("coordination_project_cases
   check("coord_project_case_verified_chk", sql`(${t.status} = 'verified') = (${t.verifiedById} IS NOT NULL AND ${t.verifiedAt} IS NOT NULL)`),
 ]);
 
+export const coordinationResolutionRecordsTable = pgTable("coordination_resolution_records", {
+  id: text("id").primaryKey(),
+  companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  projectId: integer("project_id").notNull().references(() => projectsTable.id),
+  projectCaseId: text("project_case_id").notNull(),
+  lensViewpointId: integer("lens_viewpoint_id").notNull().references(() => lensViewpointsTable.id),
+  createdById: integer("created_by_id").notNull().references(() => usersTable.id),
+  createdAt: utc("created_at").notNull().defaultNow(),
+  updatedAt: utc("updated_at").notNull().defaultNow(),
+}, t => [
+  foreignKey({ columns: [t.projectCaseId,t.companyId,t.projectId], foreignColumns: [coordinationProjectCasesTable.id,coordinationProjectCasesTable.companyId,coordinationProjectCasesTable.projectId], name: "coord_resolution_record_case_scope_fk" }),
+  unique("coord_resolution_record_case_uq").on(t.companyId,t.projectId,t.projectCaseId),
+  unique("coord_resolution_record_issue_uq").on(t.companyId,t.projectId,t.lensViewpointId),
+  unique("coord_resolution_record_scope_uq").on(t.id,t.companyId,t.projectId),
+]);
+
+export const coordinationResolutionRecordRevisionsTable = pgTable("coordination_resolution_record_revisions", {
+  id:text("id").primaryKey(),resolutionRecordId:text("resolution_record_id").notNull(),projectCaseId:text("project_case_id").notNull(),
+  companyId:integer("company_id").notNull(),projectId:integer("project_id").notNull(),lensViewpointId:integer("lens_viewpoint_id").notNull(),
+  revision:integer("revision").notNull(),status:text("status").notNull().default("draft"),methodRevisionId:text("method_revision_id"),actualResolution:text("actual_resolution"),
+  disciplineChanged:text("discipline_changed"),responsibleTrade:text("responsible_trade"),rfiRequired:boolean("rfi_required").notNull().default(false),rfiReference:text("rfi_reference"),drawingSubmittalReference:text("drawing_submittal_reference"),
+  resolvedById:integer("resolved_by_id").references(()=>usersTable.id),resolutionDate:utc("resolution_date"),verifiedById:integer("verified_by_id").references(()=>usersTable.id),verificationDate:utc("verification_date"),reopenReason:text("reopen_reason"),createdById:integer("created_by_id").notNull().references(()=>usersTable.id),createdAt:utc("created_at").notNull().defaultNow(),
+},t=>[
+  foreignKey({columns:[t.resolutionRecordId,t.companyId,t.projectId],foreignColumns:[coordinationResolutionRecordsTable.id,coordinationResolutionRecordsTable.companyId,coordinationResolutionRecordsTable.projectId],name:"coord_resolution_record_revision_scope_fk"}),
+  foreignKey({columns:[t.projectCaseId,t.companyId,t.projectId],foreignColumns:[coordinationProjectCasesTable.id,coordinationProjectCasesTable.companyId,coordinationProjectCasesTable.projectId],name:"coord_resolution_record_revision_case_fk"}),
+  foreignKey({columns:[t.methodRevisionId,t.companyId],foreignColumns:[coordinationResolutionMethodRevisionsTable.id,coordinationResolutionMethodRevisionsTable.companyId],name:"coord_resolution_record_revision_method_fk"}),
+  unique("coord_resolution_record_revision_uq").on(t.resolutionRecordId,t.revision),unique("coord_resolution_record_revision_scope_uq").on(t.id,t.companyId,t.projectId),
+  index("coord_resolution_record_history_idx").on(t.companyId,t.projectId,t.lensViewpointId,t.revision),
+  check("coord_resolution_record_revision_positive_chk",sql`${t.revision} > 0`),check("coord_resolution_record_status_chk",sql`${t.status} IN ('draft','completed','verified')`),
+  check("coord_resolution_record_rfi_chk",sql`NOT ${t.rfiRequired} OR ${t.rfiReference} IS NOT NULL`),check("coord_resolution_record_completed_chk",sql`${t.status} = 'draft' OR (${t.actualResolution} IS NOT NULL AND ${t.resolvedById} IS NOT NULL AND ${t.resolutionDate} IS NOT NULL)`),check("coord_resolution_record_verified_chk",sql`(${t.status} = 'verified') = (${t.verifiedById} IS NOT NULL AND ${t.verificationDate} IS NOT NULL)`),
+]);
+
 export const coordinationLessonProposalsTable = pgTable("coordination_lesson_proposals", {
   id: text("id").primaryKey(),
   companyId: integer("company_id").notNull(),
@@ -248,6 +281,8 @@ export const coordinationKnowledgeEvidenceTable = pgTable("coordination_knowledg
   revisionId: text("revision_id"),
   fileId: integer("file_id").notNull().references(() => filesTable.id),
   evidenceRole: text("evidence_role").notNull(),
+  metadata: jsonb("metadata").$type<Record<string,unknown>>().notNull().default({}),
+  modelViewReference: jsonb("model_view_reference").$type<Record<string,unknown>>().notNull().default({}),
   addedById: integer("added_by_id").notNull().references(() => usersTable.id),
   addedAt: utc("added_at").notNull().defaultNow(),
 }, t => [

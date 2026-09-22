@@ -25,6 +25,7 @@ import type {
   LensNextKnowledgeContext,
   LensNextResolutionDraft,
   LensNextResolutionRecord,
+  LensNextResolutionEvidence,
   LensNextLinksResult,
   LensNextAttachmentsResult,
   LensNextLinkedItemType,
@@ -145,6 +146,8 @@ export interface LensNextApiClient {
   loadResolutionRecord(identity: LensNextImmutableIssueIdentity, signal?:AbortSignal):Promise<LensNextResolutionRecord|null>;
   saveResolutionRecord(identity: LensNextImmutableIssueIdentity, draft:LensNextResolutionDraft, signal?:AbortSignal):Promise<LensNextResolutionRecord>;
   transitionResolutionRecord(identity:LensNextImmutableIssueIdentity,action:"verify"|"reopen",expectedRevision:number,reason?:string|null,signal?:AbortSignal):Promise<LensNextResolutionRecord>;
+  loadResolutionEvidence(identity:LensNextImmutableIssueIdentity,signal?:AbortSignal):Promise<readonly LensNextResolutionEvidence[]>;
+  addResolutionEvidence(identity:LensNextImmutableIssueIdentity,resolutionRevisionId:string,fileId:number,evidenceRole:"before"|"after"|"supporting",signal?:AbortSignal):Promise<readonly LensNextResolutionEvidence[]>;
 }
 
 export function createLensNextApiClient(
@@ -209,6 +212,7 @@ export function createLensNextApiClient(
     const item=value as Record<string,unknown>,current=adaptResolutionRevision(item),history=Array.isArray(item.history)?item.history.map(adaptResolutionRevision):[];
     return Object.freeze({...current,recordId:String(item.id),projectCaseId:String(item.project_case_id),history:Object.freeze(history)});
   };
+  const adaptResolutionEvidence=(raw:unknown):readonly LensNextResolutionEvidence[]=>{if(!raw||typeof raw!=="object"||Array.isArray(raw)||!Array.isArray((raw as Record<string,unknown>).items))throw new Error("Resolution evidence response is invalid");return Object.freeze(((raw as Record<string,unknown>).items as unknown[]).map(value=>{if(!value||typeof value!=="object"||Array.isArray(value))throw new Error("Resolution evidence response is invalid");const item=value as Record<string,unknown>,fileId=Number(item.file_id),role=String(item.evidence_role);if(!Number.isSafeInteger(fileId)||fileId<1||!["before","after","supporting"].includes(role))throw new Error("Resolution evidence response is invalid");return Object.freeze({id:String(item.id),revisionId:String(item.revision_id),evidenceRole:role as "before"|"after"|"supporting",fileId,fileName:String(item.file_name),fileType:String(item.file_type),fileSize:Number(item.file_size),metadata:typeof item.metadata==="object"&&item.metadata!==null&&!Array.isArray(item.metadata)?item.metadata as Record<string,unknown>:{},modelViewReference:typeof item.model_view_reference==="object"&&item.model_view_reference!==null&&!Array.isArray(item.model_view_reference)?item.model_view_reference as Record<string,unknown>:{},addedAt:String(item.added_at)});}));};
   return Object.freeze({
     async resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId: number | null = null, signal?: AbortSignal) {
       const raw = await post("/lens-next/model-bindings/resolve", { modelBindingKey, modelDisplayName, managedProjectId, explicitProjectId }, signal);
@@ -384,6 +388,12 @@ export function createLensNextApiClient(
       await jsonBody(response,action==="verify"?"BIMLog resolution verification":"BIMLog resolution reopening");
       const refreshed=await get(`/coordination-knowledge/lens-context/${exact.serverId}/resolution?projectId=${exact.projectId}`,signal),saved=refreshed&&typeof refreshed==="object"&&!Array.isArray(refreshed)?adaptResolutionRecord((refreshed as Record<string,unknown>).item):null;
       if(!saved)throw new Error("Resolution Record transition did not persist");return saved;
+    },
+    async loadResolutionEvidence(identity:LensNextImmutableIssueIdentity,signal?:AbortSignal){const exact=assertLensNextImmutableIdentity(identity);return adaptResolutionEvidence(await get(`/coordination-knowledge/lens-context/${exact.serverId}/resolution/evidence?projectId=${exact.projectId}`,signal));},
+    async addResolutionEvidence(identity:LensNextImmutableIssueIdentity,resolutionRevisionId:string,fileId:number,evidenceRole:"before"|"after"|"supporting",signal?:AbortSignal){
+      const exact=assertLensNextImmutableIdentity(identity);if(!resolutionRevisionId||!Number.isSafeInteger(fileId)||fileId<1)throw new Error("A saved resolution revision and project file are required");
+      await post(`/coordination-knowledge/lens-context/${exact.serverId}/resolution/evidence?projectId=${exact.projectId}`,{resolutionRevisionId,fileId,evidenceRole,metadata:{source:"lens-next-resolution"},modelViewReference:{viewpointId:exact.viewpointId,revisionNumber:exact.revisionNumber}},signal);
+      return adaptResolutionEvidence(await get(`/coordination-knowledge/lens-context/${exact.serverId}/resolution/evidence?projectId=${exact.projectId}`,signal));
     },
     async linkBimlogItem(identity: LensNextImmutableIssueIdentity, targetType: LensNextLinkedItemType, targetId: number, signal?: AbortSignal) {
       const exact = assertLensNextImmutableIdentity(identity);

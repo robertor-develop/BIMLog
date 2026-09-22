@@ -308,6 +308,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-knowledge-authorization.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-authorization.ts
 - artifacts/api-server/src/lib/coordination-knowledge-block6-activation.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-block7.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-conflict-api.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-contract.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-contract.ts
@@ -329,6 +330,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-knowledge-search.behavior.ts
 - artifacts/api-server/src/lib/coordination-release-readiness.behavior.ts
 - artifacts/api-server/src/lib/coordination-release-readiness.ts
+- artifacts/api-server/src/lib/coordination-resolution-evidence.behavior.ts
+- artifacts/api-server/src/lib/coordination-resolution-record-contract.behavior.ts
+- artifacts/api-server/src/lib/coordination-resolution-record-contract.ts
+- artifacts/api-server/src/lib/coordination-resolution-verification.behavior.ts
 - artifacts/api-server/src/lib/coordinator-action-register.ts
 - artifacts/api-server/src/lib/coordinator-bulk-action-migration.ts
 - artifacts/api-server/src/lib/coordinator-bulk-actions.ts
@@ -1101,3 +1106,12 @@ It changes only when the code structure or curated architectural facts change.
 - Anonymous startup excludes authenticated feedback tooling. Authenticated feedback mounts after a bounded 400 ms delay with teardown cancellation.
 - Capture markup editing is a separate deployment-recoverable dynamic entry keyed to the selected file, preventing stale editor state from crossing captures.
 - Reports and convention editing remain independently lazy project workspaces. Initial-entry, route-chunk, total-JavaScript, feedback, and editor size budgets run in the normal pre-push gate.
+
+## Coordination Knowledge Resolution Records — Builds 256–260
+
+- The canonical coordination issue remains `lens_viewpoints`. A Resolution Record is a company/project/issue-scoped outcome and history object; it never becomes a second issue authority and cannot be rebound across tenants, projects, or issues.
+- Resolution Records reference only reviewed Resolution Methods, preserve the selected method and actual field outcome, and append immutable revisions for draft save, completion, verification, and reopening. Optimistic concurrency rejects stale writers.
+- Before, after, and supporting evidence remain project-file/revision scoped. Linking evidence records metadata and the immutable model-view reference without copying file authority or weakening the established project attachment boundary.
+- Completion may occur directly from a valid first submission. Verification is a separate accountable action, and the resolver cannot verify their own resolution. Reopening requires an attributable reason and preserves the prior completed and verified history.
+- Lens Next exposes this workflow in its existing issue-detail surface. The API, Platform client, and UI share the same action vocabulary, role checks, version, and audit outcome; Native bridge and installer contracts are unchanged.
+- Builds 256–260 are a source-only five-build push boundary. No provider migration, customer data mutation, Replit publication, or external delivery is implied; publication and authenticated Chrome acceptance remain due at Build 265.

@@ -2,7 +2,7 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import { COORDINATION_KNOWLEDGE_SCHEMA_SQL, COORDINATION_KNOWLEDGE_SCHEMA_VERSION, ensureCoordinationKnowledgeSchema, type CoordinationKnowledgeMigrationPool } from "./coordination-knowledge-migration";
 
-assert.equal(COORDINATION_KNOWLEDGE_SCHEMA_VERSION, 1);
+assert.equal(COORDINATION_KNOWLEDGE_SCHEMA_VERSION, 2);
 assert.doesNotMatch(COORDINATION_KNOWLEDGE_SCHEMA_SQL, /\b(?:DROP|TRUNCATE|ALTER\s+TABLE\s+\S+\s+RENAME|DELETE\s+FROM)\b/i, "migration must remain strictly additive");
 for (const table of [
   "coordination_conflict_types",
@@ -14,6 +14,8 @@ for (const table of [
   "coordination_resolution_method_conflict_types",
   "coordination_resolution_method_rules",
   "coordination_project_cases",
+  "coordination_resolution_records",
+  "coordination_resolution_record_revisions",
   "coordination_lesson_proposals",
   "coordination_knowledge_evidence",
   "coordination_knowledge_events",

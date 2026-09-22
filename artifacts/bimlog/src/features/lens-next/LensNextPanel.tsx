@@ -39,6 +39,7 @@ import {
   type LensNextKnowledgeContext,
   type LensNextResolutionDraft,
   type LensNextResolutionRecord,
+  type LensNextResolutionEvidence,
 } from "./lens-next-types";
 import {
   buildLensNextIssueGroups,
@@ -158,6 +159,7 @@ export function LensNextPanel({
   const [knowledgeError,setKnowledgeError]=useState<string|null>(null);
   const [resolutionRecord,setResolutionRecord]=useState<LensNextResolutionRecord|"loading"|null>(null);
   const [resolutionError,setResolutionError]=useState<string|null>(null);
+  const [resolutionEvidence,setResolutionEvidence]=useState<readonly LensNextResolutionEvidence[]|"loading">([]);
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -428,14 +430,15 @@ export function LensNextPanel({
   },[apiClient,selectedIssue]);
   useEffect(()=>{const controller=new AbortController();void loadKnowledge(controller.signal);return()=>controller.abort();},[loadKnowledge]);
   const loadResolution=useCallback(async(signal?:AbortSignal)=>{
-    if(!apiClient||!selectedIssue){setResolutionRecord(null);setResolutionError(null);return;}
-    setResolutionRecord("loading");setResolutionError(null);
-    try{setResolutionRecord(await apiClient.loadResolutionRecord(selectedIssue.identity,signal));}
+    if(!apiClient||!selectedIssue){setResolutionRecord(null);setResolutionEvidence([]);setResolutionError(null);return;}
+    setResolutionRecord("loading");setResolutionEvidence("loading");setResolutionError(null);
+    try{const [record,evidence]=await Promise.all([apiClient.loadResolutionRecord(selectedIssue.identity,signal),apiClient.loadResolutionEvidence(selectedIssue.identity,signal)]);setResolutionRecord(record);setResolutionEvidence(evidence);}
     catch(error){if(!signal?.aborted){setResolutionRecord(null);setResolutionError(error instanceof Error?error.message:"Resolution Record could not be loaded");}}
   },[apiClient,selectedIssue]);
   useEffect(()=>{const controller=new AbortController();void loadResolution(controller.signal);return()=>controller.abort();},[loadResolution]);
   const saveResolution=useCallback(async(draft:LensNextResolutionDraft)=>{if(!apiClient||!selectedIssue)throw new Error("Select an active issue first.");const saved=await apiClient.saveResolutionRecord(selectedIssue.identity,draft);setResolutionRecord(saved);setResolutionError(null);},[apiClient,selectedIssue]);
   const transitionResolution=useCallback(async(action:"verify"|"reopen",expectedRevision:number,reason:string|null=null)=>{if(!apiClient||!selectedIssue)throw new Error("Select an active issue first.");const saved=await apiClient.transitionResolutionRecord(selectedIssue.identity,action,expectedRevision,reason);setResolutionRecord(saved);setResolutionError(null);},[apiClient,selectedIssue]);
+  const addResolutionEvidence=useCallback(async(fileId:number,role:"before"|"after"|"supporting")=>{if(!apiClient||!selectedIssue||!resolutionRecord||resolutionRecord==="loading")throw new Error("Save the Resolution Record before linking evidence.");const items=await apiClient.addResolutionEvidence(selectedIssue.identity,resolutionRecord.id,fileId,role);setResolutionEvidence(items);},[apiClient,selectedIssue,resolutionRecord]);
 
   useEffect(() => {
     if (!apiClient || !selectedIssue) { setLinkedItems(null); setLinkedItemsError(null); return; }
@@ -818,6 +821,8 @@ export function LensNextPanel({
       onRetryResolution={()=>void loadResolution()}
       onSaveResolution={saveResolution}
       onTransitionResolution={transitionResolution}
+      resolutionEvidence={resolutionEvidence}
+      onAddResolutionEvidence={addResolutionEvidence}
       onUploadReferenceAttachment={(file) => void uploadReferenceAttachment(file)}
       onOpenReferenceAttachment={(attachment) => void openReferenceAttachment(attachment)}
       onRemoveReferenceAttachment={(attachmentId) => void removeReferenceAttachment(attachmentId)}

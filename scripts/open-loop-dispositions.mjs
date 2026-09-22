@@ -168,7 +168,8 @@ if (process.argv.includes("--write")) {
     currentProviderEvidence.length > 1 ||
     currentProviderEvidence.some((item) => !/\bpublish\b|publication/i.test(item.statement)) ||
     !currentFieldEvidence.some((item) => item.statement.includes("Navisworks 2025")) ||
-    !currentProductWork.some((item) => item.statement.includes("Builds 256–260"))
+    currentProviderEvidence.some((item) => !item.statement.includes("Build 265")) ||
+    !currentProductWork.some((item) => item.statement.includes("Builds 261–264"))
   ) {
     throw new Error("The marked current authority must contain the next Coordination Knowledge product block, any active publication boundary, and Ruben's deferred physical Navisworks 2025 field evidence");
   }

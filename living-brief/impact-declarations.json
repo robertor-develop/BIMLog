@@ -37356,6 +37356,121 @@
         "scripts/test-post220-block45.mjs"
       ],
       "reviewedChangeSha256": "47b7493abe0491dd998df7701bbbe9a035324079679c9f459050cb5bb69e73b4"
+    },
+    {
+      "taskId": "bimlog-coordination-knowledge-block07-20260922",
+      "reviewedThroughCommit": "4fbf1a48772a88f5cdfbc5dd5ddf17c7a0162585",
+      "reviewedAt": "2026-09-22T01:50:00-04:00",
+      "id": "coordination-knowledge-block07-20260922",
+      "date": "2026-09-22",
+      "scope": "Builds 256-260",
+      "summary": "Adds company/project/issue-scoped immutable Resolution Records, bounded evidence, guided Lens Next outcome capture, independent verification and reason-required reopening.",
+      "status": "source_candidate_push_only",
+      "database": {
+        "changed": true,
+        "productionApplied": false,
+        "destructiveStatements": 0,
+        "migration": "additive_idempotent"
+      },
+      "externalActions": {
+        "authorized": [
+          "exact_fast_forward_push"
+        ],
+        "deferred": [
+          "replit_shell_publication_at_build_265",
+          "authenticated_visible_chrome_acceptance_at_build_265"
+        ]
+      },
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem boundary changed."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing execution and publication controls remain applicable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing authorization, persistence, UI and release gates remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The implementation follows the approved Coordination Knowledge roadmap."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The API inventory gains resolution and evidence routes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, installer, package or Navisworks-facing code changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No PDF, Word, Excel, or governed report behavior changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external industry standard or citation changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the complete Block 7 source candidate and push-only boundary."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Closes Builds 256-260 and advances active product work to Builds 261-265."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Resolution revisions, evidence and events are append-only and actor-bound."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/coordination-knowledge-block7.behavior.ts",
+        "artifacts/api-server/src/lib/coordination-knowledge-lens-panel.behavior.ts",
+        "artifacts/api-server/src/lib/coordination-knowledge-migration.behavior.ts",
+        "artifacts/api-server/src/lib/coordination-resolution-record-contract.behavior.ts",
+        "artifacts/api-server/src/lib/coordination-resolution-record-contract.ts",
+        "artifacts/api-server/src/routes/coordination-knowledge.ts",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextResolutionPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-client.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/features/lens-next/lens-next-types.ts",
+        "artifacts/bimlog/src/lens-next-acceptance-harness.tsx",
+        "evidence/coordination-knowledge-program-20260921/BLOCK_07_REPORT.md",
+        "evidence/coordination-knowledge-program-20260921/BUILD_LEDGER.json",
+        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "lib/db/src/schema/coordination-knowledge.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/open-loop-dispositions.mjs",
+        "scripts/test-build217-final-reconciliation.mjs",
+        "scripts/test-build223-field-evidence-boundary.mjs",
+        "scripts/test-post120-block38.mjs",
+        "scripts/test-post220-block45.mjs"
+      ],
+      "reviewedChangeSha256": "9c9c3dcc986716dd9e9fb385ce64406a4cc062d9b17232caefe1cd08a02defc1"
     }
   ]
 }

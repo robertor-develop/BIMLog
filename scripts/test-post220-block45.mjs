@@ -13,8 +13,8 @@ const currentProvider = current.filter(item => item.workClass === "PROVIDER_EVID
 assert.equal(currentField.length, 1);
 assert.match(currentField[0].statement, /Navisworks 2025/);
 assert.match(currentField[0].statement, /Ruben/);
-assert.ok(currentProvider.length <= 1);
-assert.ok(currentProvider.every(item => item.statement.includes("Build 255") && /publish|publication/i.test(item.statement)));
+assert.equal(currentProvider.length, 1);
+assert.match(currentProvider[0].statement,/Build 265/);
 assert.equal(field.installed2021.retiredDirectLoad.state, "REMOVED_WITH_ROLLBACK_EVIDENCE");
 assert.equal(field.installed2021.retiredDirectLoad.activeAfterCutover, false);
 assert.equal(field.rubenPhysical2025.status, "DEFERRED_TO_RUBEN");

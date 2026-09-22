@@ -8,6 +8,7 @@ assert.equal(validateResolutionRecordRevision(draft).status,"draft");
 assert.throws(()=>validateResolutionRecordRevision({...draft,status:"completed"}));
 assert.throws(()=>validateResolutionRecordRevision({...draft,rfiRequired:true}));
 assert.doesNotThrow(()=>assertResolutionRecordTransition(null,"draft",null));
+assert.doesNotThrow(()=>assertResolutionRecordTransition(null,"completed",null));
 assert.doesNotThrow(()=>assertResolutionRecordTransition("draft","completed",null));
 assert.throws(()=>assertResolutionRecordTransition("completed","draft",null));
 assert.doesNotThrow(()=>assertResolutionRecordTransition("verified","draft","Coordination condition changed."));

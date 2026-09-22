@@ -7,7 +7,7 @@ const view=readFileSync(fileURLToPath(new URL("../../../bimlog/src/features/lens
 const panel=readFileSync(fileURLToPath(new URL("../../../bimlog/src/features/lens-next/LensNextKnowledgePanel.tsx",import.meta.url)),"utf8");
 assert.match(route,/lens-context\/:lensViewpointId/);
 assert.match(route,/context\(req,"view_approved"\)/);
-assert.match(view,/"overview", "knowledge", "bimlog"/);
+assert.match(view,/"overview", "knowledge", "resolution", "bimlog"/);
 assert.match(panel,/Collapse/);
 assert.match(panel,/Issue work remains available/);
 assert.doesNotMatch(panel,/BIMLens/);

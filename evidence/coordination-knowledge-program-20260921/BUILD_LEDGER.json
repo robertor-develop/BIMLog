@@ -4,43 +4,43 @@
   "date": "2026-09-21",
   "range": {
     "firstBuild": 226,
-    "completedThrough": 240,
+    "completedThrough": 260,
     "finalBuild": 275
   },
   "currentBlock": {
-    "number": 3,
-    "builds": "236-240",
+    "number": 7,
+    "builds": "256-260",
     "status": "PASS_SOURCE_CANDIDATE",
     "pushDue": true,
     "publicationDue": false
   },
   "buildCommits": {
-    "236": "1be73dc1",
-    "237": "d7df7610",
-    "238": "b8819aab",
-    "239": "39dba06c",
-    "240": "PENDING"
+    "256": "7348fa39",
+    "257": "a79b54a5",
+    "258": "e513cd73",
+    "259": "4fbf1a48",
+    "260": "PENDING"
   },
-  "remainingBlocks": 7,
-  "remainingBuilds": 35,
-  "nextBlock": "Block 4 — Builds 241-245 — governed authoring and curation",
+  "remainingBlocks": 3,
+  "remainingBuilds": 15,
+  "nextBlock": "Block 8 — Builds 261-265 — lessons learned and publication",
   "database": {
-    "changed": false,
+    "changed": true,
     "destructiveStatements": 0,
     "productionApplied": false,
-    "block3SchemaChange": "none; workspace and catalog presentation only"
+    "block7SchemaChange": "additive resolution record identities/revisions plus bounded evidence metadata; no destructive statements or production execution"
   },
   "lensNext": {
-    "visibleWorkflowChanged": false,
+    "visibleWorkflowChanged": true,
     "nativeChanged": false,
     "installerChanged": false,
-    "panelScheduledBuilds": "246-250"
+    "panelImplementedBuilds": "246-260"
   },
   "tests": {
     "focused": "PASS",
     "typecheck": "PASS",
-    "databaseSafety": "PENDING_FINAL_GATE",
-    "security": "PENDING_FINAL_GATE",
+    "databaseSafety": "PENDING_CLEAN_GATE",
+    "security": "PENDING_CLEAN_GATE",
     "completePrePushGate": "PENDING_CLEAN_COMMIT",
     "publication": "NOT_DUE"
   }
