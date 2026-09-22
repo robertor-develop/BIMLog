@@ -69,6 +69,50 @@ CREATE UNIQUE INDEX IF NOT EXISTS job_activation_work_item_active_alias_uidx ON 
 CREATE INDEX IF NOT EXISTS job_activation_work_item_alias_lookup_idx ON job_activation_work_item_code_aliases(project_id,alias_code,valid_from);
 `;
 
+export const EDT_ENGINE_GOVERNANCE_SQL = String.raw`
+CREATE TABLE IF NOT EXISTS job_activation_requests (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), intake_id text NOT NULL REFERENCES job_intakes(id),
+  intake_revision integer NOT NULL CHECK (intake_revision > 0), governance_version_id text NOT NULL, pricing_version_id text NOT NULL, workflow_version_ids jsonb NOT NULL,
+  request_fingerprint text NOT NULL CHECK (request_fingerprint ~ '^[a-f0-9]{64}$'), state text NOT NULL DEFAULT 'pending' CHECK (state IN ('pending','approved','rejected','cancelled')),
+  optimistic_version integer NOT NULL DEFAULT 1 CHECK (optimistic_version > 0), idempotency_key text NOT NULL, requested_by_id integer NOT NULL REFERENCES users(id), eligible_role text NOT NULL,
+  reason text NOT NULL, evidence jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), decided_at timestamptz, UNIQUE(intake_id,idempotency_key)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS job_activation_request_open_uidx ON job_activation_requests(intake_id) WHERE state='pending';
+CREATE INDEX IF NOT EXISTS job_activation_request_project_idx ON job_activation_requests(project_id,state,created_at);
+CREATE TABLE IF NOT EXISTS job_activation_decisions (
+  id text PRIMARY KEY, request_id text NOT NULL UNIQUE REFERENCES job_activation_requests(id), company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id),
+  outcome text NOT NULL CHECK (outcome IN ('approved','rejected')), request_fingerprint text NOT NULL CHECK (request_fingerprint ~ '^[a-f0-9]{64}$'),
+  decided_by_id integer NOT NULL REFERENCES users(id), eligible_role text NOT NULL, reason text NOT NULL, evidence jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS job_activation_decision_project_idx ON job_activation_decisions(project_id,created_at);
+
+CREATE TABLE IF NOT EXISTS job_governed_change_requests (
+  id text PRIMARY KEY, company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id), work_item_id text REFERENCES job_activation_work_items(id),
+  action_type text NOT NULL CHECK (action_type IN ('redistribute_work_item','redistribute_contract','extra_hours','code_correction','split_work_item','reopen_work_item')),
+  target_version integer NOT NULL CHECK (target_version > 0), before_state jsonb NOT NULL, after_state jsonb NOT NULL,
+  request_fingerprint text NOT NULL CHECK (request_fingerprint ~ '^[a-f0-9]{64}$'), state text NOT NULL DEFAULT 'pending' CHECK (state IN ('pending','approved','rejected','cancelled')),
+  optimistic_version integer NOT NULL DEFAULT 1 CHECK (optimistic_version > 0), idempotency_key text NOT NULL, requested_by_id integer NOT NULL REFERENCES users(id), eligible_role text NOT NULL,
+  reason text NOT NULL, evidence jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now(), decided_at timestamptz, UNIQUE(project_id,idempotency_key)
+);
+CREATE UNIQUE INDEX IF NOT EXISTS job_governed_change_request_open_uidx ON job_governed_change_requests(project_id,action_type,work_item_id) WHERE state='pending';
+CREATE INDEX IF NOT EXISTS job_governed_change_request_project_idx ON job_governed_change_requests(project_id,state,created_at);
+CREATE TABLE IF NOT EXISTS job_governed_change_decisions (
+  id text PRIMARY KEY, request_id text NOT NULL UNIQUE REFERENCES job_governed_change_requests(id), company_id integer NOT NULL REFERENCES companies(id), project_id integer NOT NULL REFERENCES projects(id),
+  outcome text NOT NULL CHECK (outcome IN ('approved','rejected')), request_fingerprint text NOT NULL CHECK (request_fingerprint ~ '^[a-f0-9]{64}$'),
+  decided_by_id integer NOT NULL REFERENCES users(id), eligible_role text NOT NULL, reason text NOT NULL, evidence jsonb NOT NULL DEFAULT '{}'::jsonb, created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS job_governed_change_decision_project_idx ON job_governed_change_decisions(project_id,created_at);
+CREATE OR REPLACE FUNCTION job_edt_decision_immutability_guard() RETURNS trigger AS $$ BEGIN RAISE EXCEPTION 'EDT decisions are immutable'; END; $$ LANGUAGE plpgsql;
+DO $$ BEGIN
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_activation_decision_immutable') THEN
+    CREATE TRIGGER job_activation_decision_immutable BEFORE UPDATE OR DELETE ON job_activation_decisions FOR EACH ROW EXECUTE FUNCTION job_edt_decision_immutability_guard();
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='job_governed_change_decision_immutable') THEN
+    CREATE TRIGGER job_governed_change_decision_immutable BEFORE UPDATE OR DELETE ON job_governed_change_decisions FOR EACH ROW EXECUTE FUNCTION job_edt_decision_immutability_guard();
+  END IF;
+END $$;
+`;
+
 let startup: Promise<void> | null = null;
 type MigrationClient = { query(sql: string): Promise<unknown>; release(): void };
 type MigrationPool = { connect(): Promise<MigrationClient> };
@@ -79,6 +123,7 @@ async function runMigration(migrationPool: MigrationPool): Promise<void> {
     await client.query("BEGIN");
     await client.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:edt-engine:v1'))");
     await client.query(EDT_ENGINE_HIERARCHY_SQL);
+    await client.query(EDT_ENGINE_GOVERNANCE_SQL);
     await client.query("COMMIT");
   } catch (error) {
     await client.query("ROLLBACK");
