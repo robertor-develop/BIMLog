@@ -372,6 +372,7 @@ export interface LensNextPanelViewProps {
   resolutionError:string|null;
   onRetryResolution():void;
   onSaveResolution(draft:LensNextResolutionDraft):Promise<void>;
+  onTransitionResolution(action:"verify"|"reopen",expectedRevision:number,reason?:string|null):Promise<void>;
   onUploadReferenceAttachment(file: File): void;
   onOpenReferenceAttachment(attachment: LensNextReferenceAttachment): void;
   onRemoveReferenceAttachment(attachmentId: number): void;
@@ -462,7 +463,7 @@ export function LensNextPanelView({
   knowledgeError,
   onRetryKnowledge,
   onClassifyKnowledge,
-  resolutionRecord,resolutionError,onRetryResolution,onSaveResolution,
+  resolutionRecord,resolutionError,onRetryResolution,onSaveResolution,onTransitionResolution,
   onUploadReferenceAttachment,
   onOpenReferenceAttachment,
   onRemoveReferenceAttachment,
@@ -1059,7 +1060,7 @@ export function LensNextPanelView({
             <p className="lens-next__data-boundary">{tt("Clash pair, surrounding geometry, grid and distance are unavailable for this BIMLog issue until an exact project/model-bound clash link is verified. This image is a capture, not interactive 3D.", "El par de interferencia, la geometría cercana, la retícula y la distancia no están disponibles para esta incidencia BIMLog hasta verificar un vínculo exacto con la interferencia del proyecto y modelo. Esta imagen es una captura, no un modelo 3D interactivo.")}</p>
           </section>}
           {detailView === "knowledge" && selectedIssue && <LensNextKnowledgePanel context={knowledgeContext} error={knowledgeError} onRetry={onRetryKnowledge} onClassify={onClassifyKnowledge} activeIssueKey={`${selectedIssue.identity.serverId}:${selectedIssue.identity.revisionNumber}`} />}
-          {detailView === "resolution" && selectedIssue && <LensNextResolutionPanel record={resolutionRecord} knowledge={knowledgeContext} error={resolutionError} onRetry={onRetryResolution} onSave={onSaveResolution} activeIssueKey={`${selectedIssue.identity.serverId}:${selectedIssue.identity.revisionNumber}`} />}
+          {detailView === "resolution" && selectedIssue && <LensNextResolutionPanel record={resolutionRecord} knowledge={knowledgeContext} error={resolutionError} onRetry={onRetryResolution} onSave={onSaveResolution} onTransition={onTransitionResolution} activeIssueKey={`${selectedIssue.identity.serverId}:${selectedIssue.identity.revisionNumber}`} />}
           {detailView === "properties" && <section className="lens-next__detail-panel" aria-label="Issue properties">
           <details className="lens-next__detail-section" open>
             <summary>Properties and model evidence</summary>

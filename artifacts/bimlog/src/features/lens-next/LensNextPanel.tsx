@@ -435,6 +435,7 @@ export function LensNextPanel({
   },[apiClient,selectedIssue]);
   useEffect(()=>{const controller=new AbortController();void loadResolution(controller.signal);return()=>controller.abort();},[loadResolution]);
   const saveResolution=useCallback(async(draft:LensNextResolutionDraft)=>{if(!apiClient||!selectedIssue)throw new Error("Select an active issue first.");const saved=await apiClient.saveResolutionRecord(selectedIssue.identity,draft);setResolutionRecord(saved);setResolutionError(null);},[apiClient,selectedIssue]);
+  const transitionResolution=useCallback(async(action:"verify"|"reopen",expectedRevision:number,reason:string|null=null)=>{if(!apiClient||!selectedIssue)throw new Error("Select an active issue first.");const saved=await apiClient.transitionResolutionRecord(selectedIssue.identity,action,expectedRevision,reason);setResolutionRecord(saved);setResolutionError(null);},[apiClient,selectedIssue]);
 
   useEffect(() => {
     if (!apiClient || !selectedIssue) { setLinkedItems(null); setLinkedItemsError(null); return; }
@@ -816,6 +817,7 @@ export function LensNextPanel({
       resolutionError={resolutionError}
       onRetryResolution={()=>void loadResolution()}
       onSaveResolution={saveResolution}
+      onTransitionResolution={transitionResolution}
       onUploadReferenceAttachment={(file) => void uploadReferenceAttachment(file)}
       onOpenReferenceAttachment={(attachment) => void openReferenceAttachment(attachment)}
       onRemoveReferenceAttachment={(attachmentId) => void removeReferenceAttachment(attachmentId)}

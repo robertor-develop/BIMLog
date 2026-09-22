@@ -144,6 +144,7 @@ export interface LensNextApiClient {
   classifyKnowledgeContext(identity: LensNextImmutableIssueIdentity, conflictTypeRevisionId: string | null, expectedConflictTypeRevisionId: string | null, signal?: AbortSignal): Promise<LensNextKnowledgeContext>;
   loadResolutionRecord(identity: LensNextImmutableIssueIdentity, signal?:AbortSignal):Promise<LensNextResolutionRecord|null>;
   saveResolutionRecord(identity: LensNextImmutableIssueIdentity, draft:LensNextResolutionDraft, signal?:AbortSignal):Promise<LensNextResolutionRecord>;
+  transitionResolutionRecord(identity:LensNextImmutableIssueIdentity,action:"verify"|"reopen",expectedRevision:number,reason?:string|null,signal?:AbortSignal):Promise<LensNextResolutionRecord>;
 }
 
 export function createLensNextApiClient(
@@ -376,6 +377,13 @@ export function createLensNextApiClient(
       const raw=await jsonBody(response,"BIMLog resolution record");if(!raw||typeof raw!=="object"||Array.isArray(raw)||(raw as Record<string,unknown>).item==null)throw new Error("Resolution Record save receipt is invalid");
       const refreshed=await get(`/coordination-knowledge/lens-context/${exact.serverId}/resolution?projectId=${exact.projectId}`,signal),saved=refreshed&&typeof refreshed==="object"&&!Array.isArray(refreshed)?adaptResolutionRecord((refreshed as Record<string,unknown>).item):null;
       if(!saved)throw new Error("Resolution Record did not persist after save");return saved;
+    },
+    async transitionResolutionRecord(identity:LensNextImmutableIssueIdentity,action:"verify"|"reopen",expectedRevision:number,reason:string|null=null,signal?:AbortSignal){
+      const exact=assertLensNextImmutableIdentity(identity);if(!Number.isSafeInteger(expectedRevision)||expectedRevision<1)throw new Error("A current Resolution Record revision is required");
+      const response=await fetchImpl(`${base}/coordination-knowledge/lens-context/${exact.serverId}/resolution/${action}?projectId=${exact.projectId}`,{method:"POST",credentials:"same-origin",headers:{Accept:"application/json","Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify({expectedRevision,reason}),signal});
+      await jsonBody(response,action==="verify"?"BIMLog resolution verification":"BIMLog resolution reopening");
+      const refreshed=await get(`/coordination-knowledge/lens-context/${exact.serverId}/resolution?projectId=${exact.projectId}`,signal),saved=refreshed&&typeof refreshed==="object"&&!Array.isArray(refreshed)?adaptResolutionRecord((refreshed as Record<string,unknown>).item):null;
+      if(!saved)throw new Error("Resolution Record transition did not persist");return saved;
     },
     async linkBimlogItem(identity: LensNextImmutableIssueIdentity, targetType: LensNextLinkedItemType, targetId: number, signal?: AbortSignal) {
       const exact = assertLensNextImmutableIdentity(identity);

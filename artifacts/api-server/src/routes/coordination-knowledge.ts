@@ -121,13 +121,21 @@ router.get("/coordination-knowledge/lens-context/:lensViewpointId/resolution",au
   res.json({item:await repository.getResolutionRecord({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId})});
 }catch(error){sendError(res,error);}});
 router.put("/coordination-knowledge/lens-context/:lensViewpointId/resolution",authMiddleware,async(req,res)=>{try{
-  const resolved=await context(req,"edit_draft");if(!resolved.projectId)throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_REQUIRED","projectId");
+  const resolved=await context(req,"document_outcome");if(!resolved.projectId)throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_REQUIRED","projectId");
   const lensViewpointId=Number(parameter(req.params.lensViewpointId)),expected=Number(req.body?.expectedRevision??0),status=req.body?.status;
   if(!Number.isSafeInteger(lensViewpointId)||lensViewpointId<1)throw new CoordinationKnowledgeContractError("KNOWLEDGE_ISSUE_SCOPE_INVALID","lensViewpointId");
   if(!Number.isSafeInteger(expected)||expected<0)throw new CoordinationKnowledgeContractError("KNOWLEDGE_EXPECTED_REVISION_REQUIRED","expectedRevision");
   if(status!=="draft"&&status!=="completed")throw new CoordinationKnowledgeContractError("RESOLUTION_RECORD_INVALID","status");
   const item=await repository.appendResolutionRecordRevision({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId,expectedRevision:expected,actorId:resolved.userId,status,...resolutionRecordBody(req.body??{})});
   res.json({item});
+}catch(error){sendError(res,error);}});
+for(const action of ["verify","reopen"] as const)router.post(`/coordination-knowledge/lens-context/:lensViewpointId/resolution/${action}`,authMiddleware,async(req,res)=>{try{
+  const resolved=await context(req,action==="verify"?"review":"document_outcome");if(!resolved.projectId)throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_REQUIRED","projectId");
+  const lensViewpointId=Number(parameter(req.params.lensViewpointId)),expected=Number(req.body?.expectedRevision),reason=nullableText(req.body?.reason,"reason",2000);
+  if(!Number.isSafeInteger(lensViewpointId)||lensViewpointId<1)throw new CoordinationKnowledgeContractError("KNOWLEDGE_ISSUE_SCOPE_INVALID","lensViewpointId");
+  if(!Number.isSafeInteger(expected)||expected<1)throw new CoordinationKnowledgeContractError("KNOWLEDGE_EXPECTED_REVISION_REQUIRED","expectedRevision");
+  if(action==="reopen"&&!reason)throw new CoordinationKnowledgeContractError("RESOLUTION_REOPEN_REASON_REQUIRED","reason");
+  const item=await repository.transitionResolutionRecord({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId,expectedRevision:expected,actorId:resolved.userId,action,reason});res.json({item});
 }catch(error){sendError(res,error);}});
 router.get("/coordination-knowledge/lens-context/:lensViewpointId/resolution/evidence",authMiddleware,async(req,res)=>{try{
   const resolved=await context(req,"view_approved");if(!resolved.projectId)throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_REQUIRED","projectId");
