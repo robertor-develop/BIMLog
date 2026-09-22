@@ -1,5 +1,14 @@
 export const EDT_ENGINE_PERMISSIONS = [
   "JOB_OPERATE",
+  "JOB_ACTIVATION_REQUEST",
+  "JOB_ACTIVATION_APPROVE",
+  "GOVERNED_CHANGE_REQUEST",
+  "GOVERNED_CHANGE_APPROVE",
+  "TIME_SUBMIT",
+  "TIME_APPROVE",
+  "ISSUANCE_SUBMIT",
+  "QC_DECIDE",
+  "IMPORT_MANAGE",
   "TEAM_ASSIGN",
   "TEAM_REASSIGN",
   "WORK_ITEM_MANAGE",
@@ -53,4 +62,3 @@ export function decideEdtEnginePermission(
     required,
   });
 }
-
