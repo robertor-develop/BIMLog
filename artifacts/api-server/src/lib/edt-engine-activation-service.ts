@@ -35,6 +35,8 @@ export async function approveEdtActivation(input:{ actor:Actor; companyId:number
     if (!request) throw new EdtEngineConflict("ACTIVATION_REQUEST_NOT_FOUND","Activation request was not found.");
     requireAuthorization({ ...input.actor, permission:"JOB_ACTIVATION_APPROVE", recordCompanyId:request.company_id, recordProjectId:request.project_id, recordRequesterUserId:request.requested_by_id });
     if (request.company_id!==input.companyId || request.project_id!==input.projectId || request.request_fingerprint!==input.expectedFingerprint) throw new EdtEngineConflict("ACTIVATION_REQUEST_MISMATCH","Activation scope or fingerprint changed.");
+    const intake=(await client.query<{revision:number;status:string}>("SELECT revision,status FROM job_intakes WHERE id=$1 AND project_id=$2 AND company_id=$3 FOR UPDATE",[request.intake_id,input.projectId,input.companyId])).rows[0];
+    if(!intake||intake.revision!==request.intake_revision||intake.status==="activated"||request.state!=="pending")throw new EdtEngineConflict("INTAKE_REVISION_CONFLICT","The saved Intake changed or was activated after this EDT request. Create a new request from the current Intake.");
     const decisionId=deterministicEdtId("activation-decision",`${request.id}:${input.expectedFingerprint}`);
     const existing=(await client.query<{id:string}>("SELECT id FROM job_activation_decisions WHERE request_id=$1",[request.id])).rows[0];
     if (existing) return { decisionId:existing.id, idempotent:true };
