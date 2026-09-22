@@ -387,8 +387,14 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/edt-engine-authorization.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-authorization.ts
 - artifacts/api-server/src/lib/edt-engine-block02-acceptance.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-block03-acceptance.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-economic-schema.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-governance-schema.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-hierarchy.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-migration.ts
 - artifacts/api-server/src/lib/edt-engine-permissions.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-permissions.ts
+- artifacts/api-server/src/lib/edt-engine-qc-import-schema.behavior.ts
 - artifacts/api-server/src/lib/email.ts
 - artifacts/api-server/src/lib/enterprise-identity-migration.behavior.ts
 - artifacts/api-server/src/lib/enterprise-identity-migration.ts

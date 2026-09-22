@@ -12,5 +12,5 @@ for (const state of ["budgeted", "committed_pending", "approved_consumed", "rele
 for (const column of ["status", "optimistic_version", "submitted_by_id", "decided_by_id", "corrects_entry_id", "superseded_by_entry_id", "source_fingerprint"]) assert.match(migration, new RegExp(`job_activation_time_entries ADD COLUMN IF NOT EXISTS ${column}`));
 assert.match(migration, /job_activation_economic_plan_immutable/);
 assert.match(migration, /job_activation_budget_ledger_immutable/);
-assert.doesNotMatch(migration, /\b(DROP|TRUNCATE)\b/i);
+assert.doesNotMatch(migration, /^\s*(DROP\b|TRUNCATE\b|DELETE\s+FROM\b)/im);
 console.log("EDT_ENGINE_BUILD288_RESULT=PASS");

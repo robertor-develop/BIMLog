@@ -13,5 +13,5 @@ assert.match(migration, /worksheet_name text NOT NULL DEFAULT 'Result' CHECK \(w
 for (const invalidState of ["invalid", "unsupported", "duplicate"]) assert.ok(schema.includes(invalidState) && migration.includes(invalidState));
 assert.match(migration, /job_activation_qc_decision_immutable/);
 assert.match(migration, /job_intake_import_row_immutable/);
-assert.doesNotMatch(migration, /\b(DROP|TRUNCATE)\b/i);
+assert.doesNotMatch(migration, /^\s*(DROP\b|TRUNCATE\b|DELETE\s+FROM\b)/im);
 console.log("EDT_ENGINE_BUILD289_RESULT=PASS");

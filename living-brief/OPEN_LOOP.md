@@ -1,5 +1,15 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT and Engine Templates program — Block 3 — 2026-09-22
+
+- [x] Builds 276–280 verify the approved package, current source boundary, reuse-versus-gap classification, additive migration design and deterministic program ledger.
+- [x] Builds 281–285 implement granular EDT permissions, record eligibility, catalog lifecycle usage and compact Company Catalog administration; exact Build 285 source was pushed, published and authenticated-smoked.
+- [x] Builds 286–290 implement the additive EDT hierarchy, Work Item identity/alias foundation, activation and governed-change request/decision records, Work Item Economic Plans, budget ledger, time-entry lifecycle columns, R/V issuance/QC records and governed `Result` import persistence.
+- [x] Block 3 migration source is additive, transaction-bound and Drizzle/runtime-correspondent across 12 new tables; production database execution remains `NO`.
+- [ ] Builds 291–295 must implement the first transactional service layer over this persistence foundation, prove rollback/idempotency/authorization against an isolated database, run the ten-build release gate, push, execute a zero-drop production preview, publish through Replit Shell and complete authenticated Chrome smoke.
+- [ ] Later blocks remain responsible for complete Delivery Workflow, Governance, APU/Pricing, Intake activation, EDT generation, hours/budget, R/V, QC, Change Order, split, import, reporting and final end-to-end acceptance behavior. Schema presence alone is not completion.
+- [x] Block 3 changes no Lens Next Native, Pulse, bridge, installer, package or Autodesk path; focused Navisworks smoke is not required.
+
 ## Current open-loop authority — Coordination Knowledge Library Block 10 — 2026-09-22 <!-- CURRENT_OPEN_LOOP_AUTHORITY -->
 
 - [x] Builds 226–230 establish the canonical company-scoped domain, immutable revisions, tenant-bound repositories, additive migration, clean/repeat/rollback coverage, and restored-database preservation proof. This boundary is push-only and does not change the visible Lens Next workspace.

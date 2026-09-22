@@ -1,5 +1,16 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 3 source candidate — 2026-09-22
+
+- Builds 286–290 establish the additive persistence foundation for the approved Project → Contract → Deliverable → Location EDT hierarchy and permanent Work Item identity without replacing existing Intake, Operations, Commercial APU, Schedule, Change Order, file or audit authorities.
+- Work Items gain optional hierarchy, Location/Trade/Deliverable snapshots, deterministic active display codes, R0/V0 counters, split lineage and identity/economic fingerprints. Historical rows remain readable and code corrections preserve aliases.
+- Exact-revision activation requests, governed-change requests and immutable decisions record actor, eligible role, reason, evidence, before/after state, fingerprint, optimistic version and idempotency. This block creates persistence authority only; service routes and UI execution remain later builds.
+- Immutable Work Item Economic Plans and an append-only budget ledger distinguish Direct Production, Project Administrative Labor, incentive reserve, Task Earnings and Project Earnings, with explicit Budgeted, Committed/Pending, Approved/Consumed, Released and Corrected states.
+- Time-entry lifecycle fields are additive and classify existing rows as `legacy_recorded`; they do not silently convert historical hours into approved or pending balances.
+- Exact Work Item R/V issuances, issuance-bound QC decisions and governed `Result` worksheet import batches/rows preserve fingerprints, source evidence and row-level validation outcomes.
+- Drizzle/runtime migration correspondence covers all 12 new tables. The migration is additive and transactional, contains no destructive SQL, and has not been executed against production. Build 290 is push-only; publication and a zero-drop production preview are due after Build 295.
+- No Lens Next Native, Pulse, bridge, installer, package or Autodesk path changed, so focused Navisworks smoke is not applicable.
+
 ## Coordination Knowledge Library — Block 10 release candidate — 2026-09-22
 
 - Builds 271–275 complete the 50-build program with tenant/role security, additive migration integrity, keyboard/responsive recovery, the 17-step closed-loop regression, and final release controls.

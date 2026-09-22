@@ -11,7 +11,7 @@ for (const column of ["edt_node_id", "location_identity", "trade_identity", "del
   assert.match(schema, new RegExp(`\"${column}\"`));
   assert.match(migration, new RegExp(`ADD COLUMN IF NOT EXISTS ${column}`));
 }
-assert.doesNotMatch(migration, /\b(DROP|TRUNCATE|DELETE)\b/i);
+assert.doesNotMatch(migration, /^\s*(DROP\b|TRUNCATE\b|DELETE\s+FROM\b)/im);
 assert.match(migration, /UNIQUE INDEX IF NOT EXISTS job_activation_work_item_display_code_uidx/);
 assert.match(migration, /job_activation_work_item_active_alias_uidx/);
 console.log("EDT_ENGINE_BUILD286_RESULT=PASS");

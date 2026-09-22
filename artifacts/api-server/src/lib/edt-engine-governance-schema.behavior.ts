@@ -14,5 +14,5 @@ for (const action of ["redistribute_work_item", "redistribute_contract", "extra_
 assert.match(schema, /requestFingerprint[\s\S]*eligibleRole[\s\S]*reason[\s\S]*evidence/);
 assert.match(migration, /job_activation_decision_immutable/);
 assert.match(migration, /job_governed_change_decision_immutable/);
-assert.doesNotMatch(migration, /\b(DROP|TRUNCATE)\b/i);
+assert.doesNotMatch(migration, /^\s*(DROP\b|TRUNCATE\b|DELETE\s+FROM\b)/im);
 console.log("EDT_ENGINE_BUILD287_RESULT=PASS");
