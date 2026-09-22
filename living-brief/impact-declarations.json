@@ -37261,8 +37261,8 @@
     },
     {
       "taskId": "bimlog-coordination-knowledge-block06-publication-candidate-20260921",
-      "reviewedThroughCommit": "702dd22b85e217677433bbe78b4cfd70ccf5ef3a",
-      "reviewedAt": "2026-09-21T22:59:00-04:00",
+      "reviewedThroughCommit": "f40a9b5974257b4c02e2f64461d9cfb95174af0e",
+      "reviewedAt": "2026-09-21T23:22:09-04:00",
       "status": "candidate",
       "capabilityPreflight": {
         "checkedBeforeExecution": true,
@@ -37333,7 +37333,7 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Build 255 is recorded as a publication candidate without claiming live acceptance."
+          "reason": "Build 255 is recorded as a publication candidate without claiming live acceptance, and the deterministic current-authority contract now permits that explicit publication boundary."
         },
         {
           "key": "open_loop",
@@ -37347,12 +37347,13 @@
         }
       ],
       "reviewedChangedPaths": [
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
         "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
-        "living-brief/impact-declarations.json"
+        "living-brief/impact-declarations.json",
+        "scripts/open-loop-dispositions.mjs"
       ],
-      "reviewedChangeSha256": "b68d77a1004d13067af1b8a1a5af76083cb977121f685da87276cfd6f4d6b175"
+      "reviewedChangeSha256": "b8877080472f93c1140b4dc9bbb5e025fa32fdf19f97763bbb171aca759de8d9"
     }
   ]
 }

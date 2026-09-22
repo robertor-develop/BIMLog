@@ -158,8 +158,19 @@ if (process.argv.includes("--write")) {
     throw new Error("Every unchecked open-loop item requires a governed work class and owner binding");
   if (duplicateStatements.length) throw new Error(`Duplicate unchecked open-loop statements: ${JSON.stringify(duplicateStatements)}`);
   const currentAuthorityItems = items.filter((item) => item.currentAuthority);
-  if (result.currentAuthority.uncheckedItems.length !== 2 || currentAuthorityItems.filter((item) => item.workClass === "FIELD_EVIDENCE").length !== 1 || currentAuthorityItems.filter((item) => item.workClass === "PRODUCT_WORK").length !== 1 || currentAuthorityItems.some((item) => item.workClass === "PROVIDER_EVIDENCE") || !currentAuthorityItems.some((item) => item.statement.includes("Navisworks 2025")) || !currentAuthorityItems.some((item) => item.statement.includes("Builds 251–255"))) {
-    throw new Error("The marked current authority must contain the next Coordination Knowledge product block and Ruben's deferred physical Navisworks 2025 field evidence");
+  const currentProductWork = currentAuthorityItems.filter((item) => item.workClass === "PRODUCT_WORK");
+  const currentFieldEvidence = currentAuthorityItems.filter((item) => item.workClass === "FIELD_EVIDENCE");
+  const currentProviderEvidence = currentAuthorityItems.filter((item) => item.workClass === "PROVIDER_EVIDENCE");
+  if (
+    result.currentAuthority.uncheckedItems.length !== 2 + currentProviderEvidence.length ||
+    currentFieldEvidence.length !== 1 ||
+    currentProductWork.length !== 1 ||
+    currentProviderEvidence.length > 1 ||
+    currentProviderEvidence.some((item) => !/\bpublish\b|publication/i.test(item.statement)) ||
+    !currentFieldEvidence.some((item) => item.statement.includes("Navisworks 2025")) ||
+    !currentProductWork.some((item) => item.statement.includes("Builds 256–260"))
+  ) {
+    throw new Error("The marked current authority must contain the next Coordination Knowledge product block, any active publication boundary, and Ruben's deferred physical Navisworks 2025 field evidence");
   }
   console.log(JSON.stringify({ status: "PASS", itemCount: items.length, counts }));
 }
