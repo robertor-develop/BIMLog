@@ -87,7 +87,7 @@ export function FinancialProjectShell({ projectId, activeTab, children }: Financ
         <div className="project-context-bar">
           <div className="breadcrumb">
             <Link
-              href={`/projects/${projectId}/dashboard`}
+              href={`/projects/${projectId}/analytics`}
               style={{ display: "flex", alignItems: "center", gap: 4, color: "hsl(var(--muted-foreground))", textDecoration: "none" }}
             >
               <ChevronLeft style={{ width: 14, height: 14 }} />

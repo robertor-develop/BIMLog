@@ -11,3 +11,5 @@ Five bounded commits:
 Focused Block 8 checks and API TypeScript typecheck passed. An older Build 293 fixture was corrected to reflect the same-Intake account check added in Build 309; the Block 4 suite then passed. Full release gate, push, publication and live smoke are separately receipted when completed.
 
 Scope: backend integrity only. Four EDT mutation routes remain fail-closed. No Lens Next Native or installer changes. No production database action occurred in the five build commits.
+
+Post-publication acceptance defect: the authenticated Project Budget “Back to project” link resolved to `/projects/:id/dashboard`, a 404 because the Project Detail landing tab is `analytics`. A separate release hotfix updates the Budget, Intake and shared shell links to `/analytics` and retains a compatibility alias for old `/dashboard` links. The project-route regression and frontend typecheck pass; final gate, republish and live recheck must complete before Block 8 is accepted.

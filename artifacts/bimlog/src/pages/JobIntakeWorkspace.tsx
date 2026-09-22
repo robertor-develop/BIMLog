@@ -1101,7 +1101,7 @@ export function JobIntakeWorkspace() {
       <main className="ji">
         <div className="ji-head">
           <div>
-            <Link href={`/projects/${projectId}/dashboard`}>
+            <Link href={`/projects/${projectId}/analytics`}>
               <ArrowLeft size={14} />{" "}
               {tt("Back to project", "Volver al proyecto")}
             </Link>

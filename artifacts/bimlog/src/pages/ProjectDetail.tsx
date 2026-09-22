@@ -56,7 +56,8 @@ const PROJECT_TABS = new Set([
 export function ProjectDetail() {
   const [, params] = useRoute("/projects/:id/:tab");
   const projectId = params?.id ? parseInt(params.id) : 0;
-  const tab = params?.tab || "analytics";
+  // Older project links use /dashboard for the analytics landing page.
+  const tab = params?.tab === "dashboard" ? "analytics" : params?.tab || "analytics";
   const isKnownTab = PROJECT_TABS.has(tab);
 
   const [, setLocation] = useLocation();
