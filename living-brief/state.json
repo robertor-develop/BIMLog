@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "495607589c608eb96af2749a479a9137a048ba0b",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "fc5e420b82440a8c4bd027867884a3f66a1d3817e78695aece3d35f65844bafa",
+  "bundleSha256": "74c21799e2c13d916240a9b91121460ec97b28a99e3debcc2b97b5b51198e8a3",
   "impact": {
     "baselineCommit": "495607589c608eb96af2749a479a9137a048ba0b",
     "changedPaths": [
@@ -12,6 +12,7 @@
       "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
       "package.json",
@@ -76,13 +77,13 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "a2dbd2e765a4f71487c5041a1a845bedffffeedcdf305ac3fa29681c5c2ffe3e",
-      "sourceChangedAt": "2026-09-22T15:30:52-04:00",
-      "changeState": "accepted",
+      "sha256": "c347ed82f987082687194a4039abf62eecc9f7d02f2d9915b54ada65d760127b",
+      "sourceChangedAt": "2026-09-22T21:45:00.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "495607589c608eb96af2749a479a9137a048ba0b",
       "semanticReviewedThroughCommit": "495607589c608eb96af2749a479a9137a048ba0b",
       "semanticReviewTask": "bimlog-edt-engine-block07-20260922",
-      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewResult": "updated",
       "semanticReviewedAt": "2026-09-22T21:45:00Z"
     },
     {

@@ -38318,8 +38318,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No structural API route, schema or runtime-component change; only existing EDT service internals changed."
+          "result": "updated",
+          "reason": "The deterministic PLATFORM generator added the five new EDT behavior-test files to its structural inventory; no API route, schema or runtime-component contract changed."
         },
         {
           "key": "plugin",
@@ -38359,12 +38359,13 @@
         "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
         "package.json",
         "scripts/test-edt-engine-block07.mjs"
       ],
-      "reviewedChangeSha256": "e4e5985c6647febc0a2595326870366780321d9d0ce2571aa06e96d7ad93b4e6"
+      "reviewedChangeSha256": "40d17bc7f8ecc39e6bf6cecd11127b5f82e902e02313dfc6ac15997a01e2e59d"
     }
   ]
 }

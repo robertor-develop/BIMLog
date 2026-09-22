@@ -406,6 +406,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/edt-engine-build303.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-build304.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-build305.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build306.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build307.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build308.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build309.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build310.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-economic-schema.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-economic-service.ts
 - artifacts/api-server/src/lib/edt-engine-governance-schema.behavior.ts
