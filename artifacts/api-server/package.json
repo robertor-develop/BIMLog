@@ -22,6 +22,7 @@
     "test:edt-engine-build306": "tsx ./src/lib/edt-engine-build306.behavior.ts",
     "test:edt-engine-build307": "tsx ./src/lib/edt-engine-build307.behavior.ts",
     "test:edt-engine-build308": "tsx ./src/lib/edt-engine-build308.behavior.ts",
+    "test:edt-engine-build309": "tsx ./src/lib/edt-engine-build309.behavior.ts",
     "dev": "NODE_ENV=development tsx ./src/index.ts",
     "build": "tsx ./build.ts",
     "generate:platform": "tsx ./scripts/generate-platform-md.ts",

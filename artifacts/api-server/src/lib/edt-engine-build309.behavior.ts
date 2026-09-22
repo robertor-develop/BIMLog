@@ -1,0 +1,22 @@
+import assert from "node:assert/strict";
+import { transitionTimeEntry } from "./edt-engine-economic-service";
+import type { EdtTransactionClient, EdtTransactionHost } from "./edt-engine-transaction";
+
+let accountPresent=false;
+const calls:string[]=[];
+const client:EdtTransactionClient={async query<Row>(sql:string){calls.push(sql);
+  if(sql.includes("FROM job_activation_time_entries e"))return{rows:[{id:"time-1",intake_id:"intake-1",work_item_id:"item-1",task_id:"task-1",user_id:30,hours:"2",status:"draft",optimistic_version:1}] as Row[]};
+  if(sql.includes("FROM job_activation_budget_accounts a"))return{rows:(accountPresent?[{id:"account-1"}]:[]) as Row[]};
+  return{rows:[],rowCount:1};
+}};
+const host:EdtTransactionHost={async connect(){return client}};
+const actor={grants:["TIME_SUBMIT"] as const,actorUserId:30,actorCompanyId:7,actorProjectIds:[11],eligibleRole:"DRAFTER"};
+const input={actor,companyId:7,projectId:11,entryId:"time-1",expectedVersion:1,decision:"submit" as const,budgetAccountId:"other-company-account",pool:"direct_production" as const,amount:"100",reason:"timesheet",evidence:{}};
+await assert.rejects(()=>transitionTimeEntry(input,host),(error:unknown)=>error instanceof Error&&"code" in error&&error.code==="BUDGET_ACCOUNT_SCOPE_MISMATCH");
+assert.ok(calls.includes("ROLLBACK"));
+assert.equal(calls.some(sql=>sql.includes("INSERT INTO job_activation_budget_ledger_entries")),false);
+accountPresent=true;calls.length=0;
+const result=await transitionTimeEntry({...input,budgetAccountId:"account-1"},host);
+assert.equal(result.status,"submitted");
+assert.ok(calls.some(sql=>sql.includes("INSERT INTO job_activation_budget_ledger_entries")));
+console.log("EDT_ENGINE_BUILD309_RESULT=PASS time ledger rejects cross-Intake budget account");

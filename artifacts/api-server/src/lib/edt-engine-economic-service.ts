@@ -27,6 +27,8 @@ export async function transitionTimeEntry(input:{actor:Actor;companyId:number;pr
   return withEdtTransaction(async client=>{
     const entry=(await client.query<any>("SELECT e.*,w.project_id,w.intake_id FROM job_activation_time_entries e JOIN job_activation_work_items w ON w.id=e.work_item_id JOIN job_intakes i ON i.id=w.intake_id AND i.project_id=w.project_id WHERE e.id=$1 AND w.project_id=$2 AND i.company_id=$3 FOR UPDATE OF e",[input.entryId,input.projectId,input.companyId])).rows[0];
     if(!entry||Number(entry.optimistic_version)!==input.expectedVersion)throw new EdtEngineConflict("TIME_ENTRY_STALE","Time entry is missing or stale.");
+    const account=(await client.query<{id:string}>("SELECT a.id FROM job_activation_budget_accounts a JOIN job_intakes i ON i.id=a.intake_id AND i.project_id=a.project_id WHERE a.id=$1 AND a.intake_id=$2 AND a.project_id=$3 AND i.company_id=$4 FOR UPDATE OF a",[input.budgetAccountId,entry.intake_id,input.projectId,input.companyId])).rows[0];
+    if(!account)throw new EdtEngineConflict("BUDGET_ACCOUNT_SCOPE_MISMATCH","Time impact must use a budget account belonging to this Intake and company.");
     const submit=input.decision==="submit";authorize(input.actor,submit?"TIME_SUBMIT":"TIME_APPROVE",input.companyId,input.projectId,submit?undefined:entry.submitted_by_id);
     if(submit&&!(["draft","rejected"].includes(entry.status)))throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only draft or rejected time may be submitted.");
     if(!submit&&entry.status!=="submitted")throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only submitted time may be decided.");
