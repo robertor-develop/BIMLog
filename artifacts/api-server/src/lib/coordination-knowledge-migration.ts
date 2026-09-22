@@ -267,12 +267,16 @@ CREATE TABLE IF NOT EXISTS coordination_knowledge_evidence (
   revision_id text,
   file_id integer NOT NULL REFERENCES files(id),
   evidence_role text NOT NULL,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  model_view_reference jsonb NOT NULL DEFAULT '{}'::jsonb,
   added_by_id integer NOT NULL REFERENCES users(id),
   added_at timestamptz NOT NULL DEFAULT now(),
   CONSTRAINT coord_knowledge_evidence_link_uq UNIQUE(company_id,entity_type,entity_id,file_id,evidence_role),
   CONSTRAINT coord_knowledge_evidence_entity_chk CHECK (entity_type IN ('conflict_type','coordination_rule','resolution_method','project_case','lesson_proposal')),
   CONSTRAINT coord_knowledge_evidence_role_chk CHECK (evidence_role IN ('attachment','reference','before','after','supporting'))
 );
+ALTER TABLE coordination_knowledge_evidence ADD COLUMN IF NOT EXISTS metadata jsonb NOT NULL DEFAULT '{}'::jsonb;
+ALTER TABLE coordination_knowledge_evidence ADD COLUMN IF NOT EXISTS model_view_reference jsonb NOT NULL DEFAULT '{}'::jsonb;
 CREATE INDEX IF NOT EXISTS coord_knowledge_evidence_entity_idx ON coordination_knowledge_evidence(company_id,entity_type,entity_id,added_at);
 CREATE TABLE IF NOT EXISTS coordination_knowledge_events (
   id text PRIMARY KEY,

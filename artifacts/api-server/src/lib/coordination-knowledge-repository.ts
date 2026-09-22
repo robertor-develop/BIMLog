@@ -442,6 +442,32 @@ export class CoordinationKnowledgeRepository {
     });
   }
 
+  async addResolutionEvidence(input:{companyId:number;projectId:number;lensViewpointId:number;resolutionRevisionId:string;fileId:number;evidenceRole:"before"|"after"|"supporting";metadata:Record<string,unknown>;modelViewReference:Record<string,unknown>;actorId:number}):Promise<Record<string,unknown>>{
+    const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId"),fileId=positive(input.fileId,"fileId"),actorId=positive(input.actorId,"actorId");
+    await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
+    return transaction(this.pool,async client=>{
+      const revision=(await client.query(`SELECT revision.id,revision.project_case_id FROM coordination_resolution_record_revisions revision
+        WHERE revision.id=$1 AND revision.company_id=$2 AND revision.project_id=$3 AND revision.lens_viewpoint_id=$4`,[input.resolutionRevisionId,companyId,projectId,lensViewpointId])).rows[0];
+      if(!revision)throw new CoordinationKnowledgeRepositoryError("RESOLUTION_RECORD_REVISION_NOT_FOUND","The Resolution Record revision is unavailable in this project.",404);
+      const file=(await client.query(`SELECT id FROM files WHERE id=$1 AND project_id=$2`,[fileId,projectId])).rows[0];
+      if(!file)throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_EVIDENCE_FILE_SCOPE_INVALID","The file is unavailable in the authorized project.",403);
+      const inserted=(await client.query(`INSERT INTO coordination_knowledge_evidence(id,company_id,project_id,entity_type,entity_id,revision_id,file_id,evidence_role,metadata,model_view_reference,added_by_id)
+        VALUES($1,$2,$3,'project_case',$4,$5,$6,$7,$8::jsonb,$9::jsonb,$10) RETURNING *`,[randomUUID(),companyId,projectId,revision.project_case_id,input.resolutionRevisionId,fileId,input.evidenceRole,JSON.stringify(input.metadata),JSON.stringify(input.modelViewReference),actorId])).rows[0];
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,project_id,entity_type,entity_id,revision_id,action,actor_id,details)
+        VALUES($1,$2,$3,'project_case',$4,$5,'resolution_evidence_linked',$6,$7::jsonb)`,[randomUUID(),companyId,projectId,revision.project_case_id,input.resolutionRevisionId,actorId,JSON.stringify({fileId,evidenceRole:input.evidenceRole,metadata:input.metadata,modelViewReference:input.modelViewReference})]);
+      return inserted;
+    });
+  }
+
+  async listResolutionEvidence(input:{companyId:number;projectId:number;lensViewpointId:number}):Promise<Array<Record<string,unknown>>>{
+    const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId");
+    await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
+    return (await this.pool.query(`SELECT evidence.*,file.file_name,file.file_type,file.file_size FROM coordination_resolution_records record
+      JOIN coordination_knowledge_evidence evidence ON evidence.company_id=record.company_id AND evidence.project_id=record.project_id AND evidence.entity_type='project_case' AND evidence.entity_id=record.project_case_id
+      JOIN files file ON file.id=evidence.file_id
+      WHERE record.company_id=$1 AND record.project_id=$2 AND record.lens_viewpoint_id=$3 ORDER BY evidence.added_at DESC,evidence.id`,[companyId,projectId,lensViewpointId])).rows;
+  }
+
   async getResolutionRecord(input: { companyId: number; projectId: number; lensViewpointId: number }): Promise<Record<string, unknown> | null> {
     const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId");
     await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
