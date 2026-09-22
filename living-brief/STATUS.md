@@ -7,6 +7,7 @@
 - The planned EDT UI/runtime integration is still open for Builds 306–310. Focused block tests pass; full release gate, exact push, publication and live authenticated Chrome acceptance are separate pending gates. No Native or installer source changed.
 - Release acceptance must verify that guarded mutation routes return explicit conflicts while the prior canonical Intake and Operations user journeys continue to work.
 - Pre-push review exposed a stale tracked route graph inherited from the Block 5 route additions. The graph was regenerated and the focused EDT block suite now runs the route-graph regression before the full gate.
+- Endpoint authority inventory now recognizes only the verified EDT server-side project/company guard; the focused block suite also runs the complete project-authority matrix so newly added routes cannot silently bypass the release contract.
 
 ## EDT and Engine Templates — Block 5 source candidate — 2026-09-22
 

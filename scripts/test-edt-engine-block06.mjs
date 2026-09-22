@@ -12,4 +12,9 @@ const graph = spawnSync("pnpm", ["run", "test:post120-block37"], {
   shell: process.platform === "win32",
 });
 if (graph.status !== 0) process.exit(graph.status ?? 1);
+const authority = spawnSync("pnpm", ["run", "test:post120-block42"], {
+  stdio: "inherit",
+  shell: process.platform === "win32",
+});
+if (authority.status !== 0) process.exit(authority.status ?? 1);
 console.log("EDT_ENGINE_BLOCK06_RESULT=PASS");

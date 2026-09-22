@@ -38185,7 +38185,7 @@
     },
     {
       "taskId": "bimlog-edt-engine-block06-20260922",
-      "reviewedThroughCommit": "ab0c61612a2195698700e39f39178b06a04b579e",
+      "reviewedThroughCommit": "26f292ab0e103e75196b8eff3fe5124ebca1708f",
       "reviewedAt": "2026-09-22T19:20:00Z",
       "status": "remediation_source_candidate",
       "captureTiming": "immediate_same_task_chain",
@@ -38260,12 +38260,12 @@
         {
           "key": "status",
           "result": "updated",
-          "reason": "Records the failed stale-graph check and its corrected early regression in the current release candidate."
+          "reason": "Records both route-graph and endpoint-authority inventory corrections in the current release candidate."
         },
         {
           "key": "open_loop",
           "result": "updated",
-          "reason": "Closes the route-graph freshness defect while preserving the remaining server-derived EDT integration work."
+          "reason": "Closes both inventory freshness defects while preserving the remaining server-derived EDT integration work."
         },
         {
           "key": "audit",
@@ -38274,15 +38274,17 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/edt-engine-build301.behavior.ts",
         "evidence/edt-engine-program-20260922/BLOCK_06_REPORT.md",
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "evidence/stabilization-program-20260919/ENDPOINT_AUTHORITY_MATRIX.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
+        "scripts/endpoint-authority-matrix.mjs",
         "scripts/test-edt-engine-block06.mjs"
       ],
-      "reviewedChangeSha256": "764635dd724adf1c347cb3a41b297300b2f4e0b36113aad60cf14ccbed367ed1"
+      "reviewedChangeSha256": "07638099c561fe35fdb5b0f1bf0ac76981e51b2188d698e1976c75200182cf9f"
     }
   ]
 }

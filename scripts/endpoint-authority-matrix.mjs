@@ -21,6 +21,7 @@ const publicRules = [
 const serviceScopedFiles = new Set([
   "ai-control-plane.ts",
   "contract-item-workflows.ts",
+  "edt-engine.ts",
   "financial-apu.ts",
   "financial-budgets.ts",
   "financial-contracts.ts",

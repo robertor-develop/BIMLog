@@ -1,13 +1,13 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "artifacts/api-server/src/routes",
-  "endpointCount": 605,
+  "endpointCount": 658,
   "counts": {
     "public": 13,
-    "authenticated": 592,
-    "projectScoped": 368,
-    "objectScoped": 270,
-    "dynamic": 1
+    "authenticated": 645,
+    "projectScoped": 378,
+    "objectScoped": 306,
+    "dynamic": 6
   },
   "missingAuthentication": [],
   "missingProjectAuthority": [],
@@ -1700,7 +1700,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 46
+      "line": 47
     },
     {
       "file": "company-master-catalogs.ts",
@@ -1712,7 +1712,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 55
+      "line": 56
     },
     {
       "file": "company-master-catalogs.ts",
@@ -1726,7 +1726,22 @@
       "objectParams": [
         "kind"
       ],
-      "line": 70
+      "line": 71
+    },
+    {
+      "file": "company-master-catalogs.ts",
+      "method": "GET",
+      "path": "/company/master-catalogs/:kind/:id/usage",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "kind",
+        "id"
+      ],
+      "line": 82
     },
     {
       "file": "company-master-catalogs.ts",
@@ -1740,7 +1755,7 @@
       "objectParams": [
         "kind"
       ],
-      "line": 81
+      "line": 117
     },
     {
       "file": "company-master-catalogs.ts",
@@ -1755,7 +1770,7 @@
         "kind",
         "id"
       ],
-      "line": 123
+      "line": 159
     },
     {
       "file": "company-master-catalogs.ts",
@@ -1767,7 +1782,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 151
+      "line": 187
     },
     {
       "file": "company-master-catalogs.ts",
@@ -1781,7 +1796,7 @@
       "objectParams": [
         "companyId"
       ],
-      "line": 178
+      "line": 214
     },
     {
       "file": "company-master-catalogs.ts",
@@ -1793,7 +1808,7 @@
       "projectScoped": false,
       "projectAuthority": "not_applicable",
       "objectParams": [],
-      "line": 188
+      "line": 224
     },
     {
       "file": "company-master-catalogs.ts",
@@ -1807,7 +1822,7 @@
       "objectParams": [
         "id"
       ],
-      "line": 199
+      "line": 235
     },
     {
       "file": "company-pricing-templates.ts",
@@ -2421,6 +2436,571 @@
       "line": 148
     },
     {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/capabilities",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 99
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/taxonomy",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 106
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/taxonomy",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 111
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "PATCH",
+      "path": "/coordination-knowledge/taxonomy/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 112
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/taxonomy/:id/retire",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 113
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/starter-library/bimtech",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 114
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/starter-library/bimtech/import",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 115
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "lensViewpointId"
+      ],
+      "line": 117
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "PUT",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/classification",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "lensViewpointId"
+      ],
+      "line": 126
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/resolution",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "lensViewpointId"
+      ],
+      "line": 139
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "PUT",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/resolution",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "lensViewpointId"
+      ],
+      "line": 144
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "<dynamic:`/coordination-knowledge/lens-context/:lensViewpointId/resolution/${action}`>",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "lensViewpointId"
+      ],
+      "line": 153
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/resolution/evidence",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "lensViewpointId"
+      ],
+      "line": 161
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/resolution/evidence",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "lensViewpointId"
+      ],
+      "line": 166
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/lesson-proposal",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "lensViewpointId"
+      ],
+      "line": 177
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId/lesson-proposal",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "lensViewpointId"
+      ],
+      "line": 182
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/lesson-proposals",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 188
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "<dynamic:`/coordination-knowledge/lesson-proposals/:id/${action}`>",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 193
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/lesson-proposals/:id/promote",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 199
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/lesson-proposals/:id/merge",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 215
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/evidence/:entityType/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "entityType",
+        "id"
+      ],
+      "line": 222
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/events/:entityType/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "entityType",
+        "id"
+      ],
+      "line": 223
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/evidence/:entityType/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "entityType",
+        "id"
+      ],
+      "line": 224
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/search",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 226
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/conflict-types",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 243
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/conflict-types",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 250
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/conflict-types/:id/history",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 262
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/conflict-types/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 271
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "PATCH",
+      "path": "/coordination-knowledge/conflict-types/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 280
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "<dynamic:`/coordination-knowledge/conflict-types/:id/${action.replaceAll(\"_\", \"-\")}`>",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 292
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/rules",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 301
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/rules",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 302
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/rules/:id/history",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 303
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/rules/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 304
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "PATCH",
+      "path": "/coordination-knowledge/rules/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 305
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "<dynamic:`/coordination-knowledge/rules/:id/${action.replaceAll(\"_\",\"-\")}`>",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 306
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/resolution-methods",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 308
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "/coordination-knowledge/resolution-methods",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [],
+      "line": 309
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/resolution-methods/:id/history",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 310
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "GET",
+      "path": "/coordination-knowledge/resolution-methods/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 311
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "PATCH",
+      "path": "/coordination-knowledge/resolution-methods/:id",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 312
+    },
+    {
+      "file": "coordination-knowledge.ts",
+      "method": "POST",
+      "path": "<dynamic:`/coordination-knowledge/resolution-methods/:id/${action.replaceAll(\"_\",\"-\")}`>",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": false,
+      "projectAuthority": "not_applicable",
+      "objectParams": [
+        "id"
+      ],
+      "line": 313
+    },
+    {
       "file": "coordination.ts",
       "method": "GET",
       "path": "/projects/:projectId/coordination/events",
@@ -2847,6 +3427,138 @@
       "projectAuthority": "not_applicable",
       "objectParams": [],
       "line": 56
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/edt-engine/capabilities",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 28
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/activation-requests",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 38
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/activation-requests/:requestId/approve",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "requestId"
+      ],
+      "line": 46
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/change-requests",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 54
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/change-requests/:requestId/decision",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "requestId"
+      ],
+      "line": 68
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/economic-plans",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [],
+      "line": 78
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/time-entries/:entryId/transition",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "entryId"
+      ],
+      "line": 85
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/work-items/:workItemId/issuances",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "workItemId"
+      ],
+      "line": 92
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/issuances/:issuanceId/qc-decisions",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "issuanceId"
+      ],
+      "line": 103
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "POST",
+      "path": "/projects/:projectId/edt-engine/intakes/:intakeId/result-imports/preview",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "intakeId"
+      ],
+      "line": 115
     },
     {
       "file": "feature-policies.ts",
