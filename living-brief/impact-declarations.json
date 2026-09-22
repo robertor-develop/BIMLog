@@ -38068,6 +38068,8 @@
       ],
       "reviewedChangedPaths": [
         "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/edt-engine-build295.behavior.ts",
+        "evidence/edt-engine-program-20260922/BLOCK_04_REPORT.md",
         "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -38075,9 +38077,10 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
         "package.json",
-        "scripts/test-edt-engine-block03.mjs"
+        "scripts/test-edt-engine-block03.mjs",
+        "scripts/test-edt-engine-block04.mjs"
       ],
-      "reviewedChangeSha256": "81c12d82df35eece28a736506e9ae58fee00f6c01c74ca4fd3f499df1d486e8a"
+      "reviewedChangeSha256": "fd8ba8fcc2025b181c50f32f00b4043ea51eed75eb837c9331ec359afe9394e0"
     }
   ]
 }

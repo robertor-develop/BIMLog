@@ -7,6 +7,8 @@
     "baselineCommit": "7d25bfb84c7897b72ce2110187a30de6196b9233",
     "changedPaths": [
       "artifacts/api-server/package.json",
+      "artifacts/api-server/src/lib/edt-engine-build295.behavior.ts",
+      "evidence/edt-engine-program-20260922/BLOCK_04_REPORT.md",
       "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -14,7 +16,8 @@
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
       "package.json",
-      "scripts/test-edt-engine-block03.mjs"
+      "scripts/test-edt-engine-block03.mjs",
+      "scripts/test-edt-engine-block04.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
