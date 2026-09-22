@@ -109,7 +109,14 @@ export function decideEdtRecordAuthorization(
   input: EdtRecordAuthorizationInput,
 ): EdtRecordAuthorizationDecision {
   const permission = decideEdtEnginePermission(input.grants, input.permission);
-  if (!permission.allow) return Object.freeze({ allow: false, code: permission.code });
+  if (!permission.allow) {
+    return Object.freeze({
+      allow: false,
+      code: permission.code === "INVALID_PERMISSION_GRANT"
+        ? "INVALID_PERMISSION_GRANT"
+        : "PERMISSION_REQUIRED",
+    });
+  }
   if (input.actorCompanyId !== input.recordCompanyId) {
     return Object.freeze({ allow: false, code: "COMPANY_SCOPE_REQUIRED" });
   }
@@ -136,4 +143,3 @@ export function decideEdtRecordAuthorization(
   }
   return Object.freeze({ allow: true, code: "AUTHORIZED" });
 }
-
