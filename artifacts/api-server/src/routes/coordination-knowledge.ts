@@ -18,9 +18,12 @@ import { CoordinationKnowledgeRepository, CoordinationKnowledgeRepositoryError }
 import { ensureCoordinationKnowledgeSchema } from "../lib/coordination-knowledge-migration";
 import { CoordinationLessonWorkflowError, validateLessonPromotionRequest, validateLessonProposalContent } from "../lib/coordination-lesson-workflow";
 import { lessonProposalStatuses, type LessonProposalStatus } from "../lib/coordination-knowledge-contract";
+import { CoordinationKnowledgeTaxonomyRepository } from "../lib/coordination-knowledge-taxonomy";
+import { starterTaxonomyKinds, type StarterTaxonomyKind } from "../lib/coordination-knowledge-starter-seed";
 
 const router = Router();
 const repository = new CoordinationKnowledgeRepository(pool);
+const taxonomyRepository = new CoordinationKnowledgeTaxonomyRepository(pool);
 const parameter = (value: string | string[]) => Array.isArray(value) ? value[0] ?? "" : value;
 const codePattern = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
 
@@ -95,6 +98,15 @@ router.get("/coordination-knowledge/capabilities", authMiddleware, async (req, r
     res.json({ companyId: resolved.companyId, isCompanyPmo: resolved.isCompanyPmo, isSuperAdmin: resolved.isSuperAdmin, capabilities: [...resolved.capabilities] });
   } catch (error) { sendError(res, error); }
 });
+
+router.get("/coordination-knowledge/taxonomy", authMiddleware, async (req,res) => { try {
+  const resolved=await context(req,"view_approved"),raw=boundedQuery(req.query.kind,"kind",40);
+  if(raw&&!starterTaxonomyKinds.includes(raw as StarterTaxonomyKind))throw new CoordinationKnowledgeContractError("KNOWLEDGE_TAXONOMY_INVALID","kind");
+  res.json({items:await taxonomyRepository.list(resolved.companyId,raw as StarterTaxonomyKind|undefined,resolved.capabilities.has("manage_taxonomy"))});
+} catch(error){sendError(res,error);} });
+router.post("/coordination-knowledge/taxonomy",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"manage_taxonomy");res.status(201).json({item:await taxonomyRepository.create(resolved.companyId,resolved.userId,req.body??{})});}catch(error){sendError(res,error);}});
+router.patch("/coordination-knowledge/taxonomy/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"manage_taxonomy");res.json({item:await taxonomyRepository.revise(resolved.companyId,resolved.userId,parameter(req.params.id),expectedRevision(req.body?.expectedRevision),req.body??{})});}catch(error){sendError(res,error);}});
+router.post("/coordination-knowledge/taxonomy/:id/retire",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"retire");res.json({item:await taxonomyRepository.revise(resolved.companyId,resolved.userId,parameter(req.params.id),expectedRevision(req.body?.expectedRevision),{},true)});}catch(error){sendError(res,error);}});
 
 router.get("/coordination-knowledge/lens-context/:lensViewpointId",authMiddleware,async(req,res)=>{try{
   const resolved=await context(req,"view_approved");

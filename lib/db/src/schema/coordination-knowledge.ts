@@ -18,6 +18,38 @@ import { projectsTable } from "./projects";
 import { companiesTable, usersTable } from "./users";
 
 const utc = (name: string) => timestamp(name, { withTimezone: true });
+export const coordinationKnowledgeTaxonomyTermsTable = pgTable("coordination_knowledge_taxonomy_terms", {
+  id: text("id").primaryKey(),
+  companyId: integer("company_id").notNull().references(() => companiesTable.id),
+  kind: text("kind").notNull(),
+  normalizedKey: text("normalized_key").notNull(),
+  createdById: integer("created_by_id").notNull().references(() => usersTable.id),
+  createdAt: utc("created_at").notNull().defaultNow(),
+}, t => [
+  unique("coord_knowledge_taxonomy_scope_uq").on(t.id, t.companyId),
+  unique("coord_knowledge_taxonomy_key_uq").on(t.companyId, t.kind, t.normalizedKey),
+  check("coord_knowledge_taxonomy_kind_chk", sql`${t.kind} IN ('discipline','category','element_type','stage','tag')`),
+]);
+
+export const coordinationKnowledgeTaxonomyTermRevisionsTable = pgTable("coordination_knowledge_taxonomy_term_revisions", {
+  id: text("id").primaryKey(),
+  termId: text("term_id").notNull(),
+  companyId: integer("company_id").notNull(),
+  revision: integer("revision").notNull(),
+  status: text("status").notNull().default("active"),
+  code: text("code").notNull(),
+  label: text("label").notNull(),
+  updatedById: integer("updated_by_id").notNull().references(() => usersTable.id),
+  createdAt: utc("created_at").notNull().defaultNow(),
+}, t => [
+  foreignKey({ columns: [t.termId, t.companyId], foreignColumns: [coordinationKnowledgeTaxonomyTermsTable.id, coordinationKnowledgeTaxonomyTermsTable.companyId], name: "coord_knowledge_taxonomy_revision_scope_fk" }),
+  unique("coord_knowledge_taxonomy_revision_uq").on(t.termId, t.revision),
+  unique("coord_knowledge_taxonomy_revision_scope_uq").on(t.id, t.companyId),
+  check("coord_knowledge_taxonomy_revision_positive_chk", sql`${t.revision} > 0`),
+  check("coord_knowledge_taxonomy_status_chk", sql`${t.status} IN ('active','retired')`),
+  check("coord_knowledge_taxonomy_code_chk", sql`${t.code} ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$'`),
+]);
+
 export const coordinationConflictTypesTable = pgTable("coordination_conflict_types", {
   id: text("id").primaryKey(),
   companyId: integer("company_id").notNull().references(() => companiesTable.id),

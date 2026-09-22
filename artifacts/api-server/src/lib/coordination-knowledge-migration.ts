@@ -1,5 +1,35 @@
-export const COORDINATION_KNOWLEDGE_SCHEMA_VERSION = 2;
+export const COORDINATION_KNOWLEDGE_SCHEMA_VERSION = 3;
 export const COORDINATION_KNOWLEDGE_SCHEMA_SQL = String.raw`
+CREATE TABLE IF NOT EXISTS coordination_knowledge_taxonomy_terms (
+  id text PRIMARY KEY,
+  company_id integer NOT NULL REFERENCES companies(id),
+  kind text NOT NULL,
+  normalized_key text NOT NULL,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT coord_knowledge_taxonomy_scope_uq UNIQUE(id,company_id),
+  CONSTRAINT coord_knowledge_taxonomy_key_uq UNIQUE(company_id,kind,normalized_key),
+  CONSTRAINT coord_knowledge_taxonomy_kind_chk CHECK (kind IN ('discipline','category','element_type','stage','tag'))
+);
+CREATE TABLE IF NOT EXISTS coordination_knowledge_taxonomy_term_revisions (
+  id text PRIMARY KEY,
+  term_id text NOT NULL,
+  company_id integer NOT NULL,
+  revision integer NOT NULL,
+  status text NOT NULL DEFAULT 'active',
+  code text NOT NULL,
+  label text NOT NULL,
+  updated_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT coord_knowledge_taxonomy_revision_scope_fk FOREIGN KEY(term_id,company_id) REFERENCES coordination_knowledge_taxonomy_terms(id,company_id),
+  CONSTRAINT coord_knowledge_taxonomy_revision_uq UNIQUE(term_id,revision),
+  CONSTRAINT coord_knowledge_taxonomy_revision_scope_uq UNIQUE(id,company_id),
+  CONSTRAINT coord_knowledge_taxonomy_revision_positive_chk CHECK (revision>0),
+  CONSTRAINT coord_knowledge_taxonomy_status_chk CHECK (status IN ('active','retired')),
+  CONSTRAINT coord_knowledge_taxonomy_code_chk CHECK (code ~ '^[A-Z0-9][A-Z0-9._-]{0,63}$')
+);
+CREATE INDEX IF NOT EXISTS coord_knowledge_taxonomy_list_idx ON coordination_knowledge_taxonomy_terms(company_id,kind,normalized_key);
+
 CREATE TABLE IF NOT EXISTS coordination_conflict_types (
   id text PRIMARY KEY,
   company_id integer NOT NULL REFERENCES companies(id),
@@ -316,6 +346,9 @@ DO $$ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='coord_resolution_record_revision_immutable') THEN
     CREATE TRIGGER coord_resolution_record_revision_immutable BEFORE UPDATE OR DELETE ON coordination_resolution_record_revisions FOR EACH ROW EXECUTE FUNCTION coordination_knowledge_immutable_guard();
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='coord_knowledge_taxonomy_revision_immutable') THEN
+    CREATE TRIGGER coord_knowledge_taxonomy_revision_immutable BEFORE UPDATE OR DELETE ON coordination_knowledge_taxonomy_term_revisions FOR EACH ROW EXECUTE FUNCTION coordination_knowledge_immutable_guard();
   END IF;
 END $$;
 `;
