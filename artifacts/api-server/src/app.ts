@@ -78,6 +78,7 @@ import { ensureWorkflowGovernancePolicySchema } from "./lib/workflow-governance-
 import { ensureConnectorFoundationSchema } from "./lib/connector-foundation-migration";
 import { ensureDeliveryWorkflowRuntimeSchema } from "./lib/delivery-workflow-template-migration";
 import { ensureCoordinationKnowledgeSchema } from "./lib/coordination-knowledge-migration";
+import { ensureEdtEngineSchema } from "./lib/edt-engine-migration";
 import { requestDiagnostics } from "./middlewares/request-diagnostics";
 import { governedCorsOptions, resolveSessionSecret, securityHeaders } from "./lib/runtime-security";
 
@@ -1419,6 +1420,11 @@ const coordinationKnowledgeStartupBarrier = queueDatabaseStartup(async () => {
   console.log("[migration] Coordination Knowledge schema ensured");
 });
 
+const edtEngineStartupBarrier = queueDatabaseStartup(async () => {
+  await ensureEdtEngineSchema();
+  console.log("[migration] EDT engine additive schema ensured");
+});
+
 export const startupBarrier = Promise.all([
   waitForDatabaseStartup(),
   lensNextPublishingStartupBarrier,
@@ -1432,6 +1438,7 @@ export const startupBarrier = Promise.all([
   meetingLensStartupBarrier,
   deliveryWorkflowStartupBarrier,
   coordinationKnowledgeStartupBarrier,
+  edtEngineStartupBarrier,
   rfiMigrationReady.then((ready) => {
     if (!ready) throw new Error("RFI_SCHEMA_MIGRATION_FAILED");
   }),
