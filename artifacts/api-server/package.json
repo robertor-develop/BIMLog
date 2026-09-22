@@ -16,6 +16,7 @@
     "test:edt-engine-build300": "tsx ./src/lib/edt-engine-build300.behavior.ts",
     "test:edt-engine-build301": "tsx ./src/lib/edt-engine-build301.behavior.ts",
     "test:edt-engine-build302": "tsx ./src/lib/edt-engine-build302.behavior.ts",
+    "test:edt-engine-build303": "tsx ./src/lib/edt-engine-build303.behavior.ts",
     "dev": "NODE_ENV=development tsx ./src/index.ts",
     "build": "tsx ./build.ts",
     "generate:platform": "tsx ./scripts/generate-platform-md.ts",
