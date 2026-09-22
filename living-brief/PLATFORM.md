@@ -315,6 +315,10 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/coordination-knowledge-build268.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-build269.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-build270.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-build271-security.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-build272-migration.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-build274-platform-regression.behavior.ts
+- artifacts/api-server/src/lib/coordination-knowledge-build275-release.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-conflict-api.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-contract.behavior.ts
 - artifacts/api-server/src/lib/coordination-knowledge-contract.ts
