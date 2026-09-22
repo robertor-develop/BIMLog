@@ -3,6 +3,7 @@ import { authMiddleware } from "../middlewares/auth";
 import { edtProjectId, resolveEdtRouteActor, sendEdtRouteError } from "../lib/edt-engine-route-context";
 import { approveEdtActivation, requestEdtActivation } from "../lib/edt-engine-activation-service";
 import { EdtEngineConflict } from "../lib/edt-engine-transaction";
+import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-engine-governed-change-service";
 
 const router: IRouter = Router();
 
@@ -59,6 +60,30 @@ router.post("/projects/:projectId/edt-engine/activation-requests/:requestId/appr
       workItems: body.workItems as Parameters<typeof approveEdtActivation>[0]["workItems"] });
     res.json(result);
   } catch (error) { sendEdtRouteError(res,error); }
+});
+
+router.post("/projects/:projectId/edt-engine/change-requests", authMiddleware, async (req, res): Promise<void> => {
+  try {
+    const projectId=edtProjectId(req); const actor=await resolveEdtRouteActor(req,projectId); const body=bodyRecord(req.body);
+    const actionType=requiredText(body,"actionType");
+    if (!(["redistribute_work_item","redistribute_contract","extra_hours","code_correction","split_work_item","reopen_work_item"] as string[]).includes(actionType)) throw new EdtEngineConflict("REQUEST_BODY_INVALID","actionType is not supported.");
+    const result=await requestGovernedEdtChange({ actor,companyId:actor.actorCompanyId,projectId,
+      workItemId:typeof body.workItemId==="string"&&body.workItemId?body.workItemId:undefined,
+      actionType:actionType as Parameters<typeof requestGovernedEdtChange>[0]["actionType"],
+      targetVersion:requiredInteger(body,"targetVersion"),beforeState:recordField(body,"beforeState"),afterState:recordField(body,"afterState"),
+      reason:requiredText(body,"reason"),evidence:recordField(body,"evidence"),idempotencyKey:requiredText(body,"idempotencyKey") });
+    res.status(result.idempotent?200:201).json(result);
+  } catch(error){sendEdtRouteError(res,error);}
+});
+
+router.post("/projects/:projectId/edt-engine/change-requests/:requestId/decision", authMiddleware, async (req,res):Promise<void>=>{
+  try{
+    const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);
+    const outcome=requiredText(body,"outcome");if(outcome!=="approved"&&outcome!=="rejected")throw new EdtEngineConflict("REQUEST_BODY_INVALID","outcome must be approved or rejected.");
+    const result=await decideGovernedEdtChange({actor,companyId:actor.actorCompanyId,projectId,requestId:String(req.params.requestId),
+      expectedFingerprint:requiredText(body,"expectedFingerprint"),outcome,reason:requiredText(body,"reason"),evidence:recordField(body,"evidence")});
+    res.json(result);
+  }catch(error){sendEdtRouteError(res,error);}
 });
 
 export default router;
