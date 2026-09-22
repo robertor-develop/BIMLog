@@ -16,6 +16,7 @@
     "test:edt-engine-build281": "tsx ./src/lib/edt-engine-permissions.behavior.ts",
     "test:edt-engine-build282": "tsx ./src/lib/edt-engine-authorization.behavior.ts",
     "test:edt-engine-build283": "tsx ./src/lib/company-master-catalog-usage.behavior.ts",
+    "test:edt-engine-build284": "tsx ../bimlog/src/components/admin/CompanyMasterCatalogsTab.ux.behavior.tsx",
     "test:coordination-knowledge-block1": "tsx ./src/lib/coordination-knowledge-contract.behavior.ts && tsx ./src/lib/coordination-knowledge-migration.behavior.ts && tsx ./src/lib/coordination-knowledge-repository.behavior.ts",
     "test:coordination-knowledge-db": "tsx ./src/lib/coordination-knowledge-database.behavior.ts",
     "test:coordination-knowledge-block2": "tsx ./src/lib/coordination-knowledge-authorization.behavior.ts && tsx ./src/lib/coordination-knowledge-conflict-api.behavior.ts && tsx ./src/lib/coordination-knowledge-rules-methods-api.behavior.ts && tsx ./src/lib/coordination-knowledge-search.behavior.ts",

@@ -3,6 +3,7 @@ import { useCallback, useEffect, useState } from "react";
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
 type Kind = "client" | "discipline" | "service" | "phase";
 type Entry = { id: string; code: string; name: string; aliases: string[]; state: "active" | "inactive" | "retired"; version: number; canonicalCompanyId?: number | null };
+type Usage = { intakeCount: number; taskCount: number; workPackageCount: number; totalCount: number };
 type PolicyMode = "approved_only" | "defaults_allowed";
 type Capability = { companyId: number; canManage: boolean; isSuperAdmin: boolean; mode: PolicyMode; policyVersion: number | null };
 const kinds: Kind[] = ["client", "discipline", "service", "phase"];
@@ -17,6 +18,8 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
   const [grantEmail, setGrantEmail] = useState("");
   const [policyDraft, setPolicyDraft] = useState<PolicyMode>("defaults_allowed");
   const [editing, setEditing] = useState<{ kind: Kind; id: string; name: string; aliases: string; version: number } | null>(null);
+  const [selectedKind, setSelectedKind] = useState<Kind>("client");
+  const [usage, setUsage] = useState<Record<string, Usage | "loading" | "error">>({});
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(true);
@@ -94,6 +97,16 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
     } catch (error) { setMessage(String(error)); } finally { setBusy(false); }
   }
 
+  async function loadUsage(kind: Kind, entry: Entry) {
+    setUsage(current => ({ ...current, [entry.id]: "loading" }));
+    try {
+      const body = await request(`/company/master-catalogs/${kind}/${entry.id}/usage`);
+      setUsage(current => ({ ...current, [entry.id]: body.usage as Usage }));
+    } catch {
+      setUsage(current => ({ ...current, [entry.id]: "error" }));
+    }
+  }
+
   const ready = capability !== null && !loading && !loadError;
   return <section aria-labelledby="company-master-title" style={{ display: "grid", gap: 16, minWidth: 0, width: "100%" }}>
     <div><h2 id="company-master-title">{t("Company Master Catalogs", "Catálogos maestros de la empresa")}</h2><p>{t("Clients, disciplines, services, and phases are configured once for this company and reused across its projects. Changes do not rename historical project snapshots.", "Clientes, disciplinas, servicios y fases se configuran una vez para esta empresa y se reutilizan en sus proyectos. Los cambios no renombran registros históricos.")}</p></div>
@@ -104,7 +117,13 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
     {ready && capability && <section style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14, minWidth: 0 }}><h3>{t("Company catalog policy", "Política del catálogo de empresa")}</h3><p>{t("This policy remains in force even if the last PMO administrator is revoked. Approved-only requires active company values for new project selections; existing saved selections remain historical.", "Esta política sigue vigente aunque se revoque al último administrador PMO. Solo aprobados exige valores activos de la empresa para nuevas selecciones del proyecto; las selecciones guardadas permanecen como historial.")}</p><label style={{ display: "grid", gap: 5, minWidth: 0 }}>{t("Selection mode", "Modo de selección")} <select style={{ width: "100%", minWidth: 0 }} value={policyDraft} disabled={!capability.canManage || !capability.policyVersion || busy} onChange={event => setPolicyDraft(event.target.value as PolicyMode)}><option value="approved_only">{t("Approved company values only", "Solo valores aprobados de la empresa")}</option><option value="defaults_allowed">{t("Company values and BIMLog defaults", "Valores de empresa y predeterminados de BIMLog")}</option></select></label>{capability.canManage && <button type="button" disabled={busy || !capability.policyVersion || policyDraft === capability.mode} onClick={() => void savePolicy()}>{t("Save policy", "Guardar política")}</button>}</section>}
     {message && <p role="status" style={{ padding: 10, background: "#fef3c7", borderRadius: 8 }}>{message}</p>}
     {ready && capability?.isSuperAdmin && <section style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14 }}><h3>{t("Grant or revoke Company PMO access", "Otorgar o revocar acceso PMO de empresa")}</h3><p>{t("Enter the existing user's email. The server binds the grant to that user's own company; it does not grant global Super Admin.", "Ingrese el correo de la cuenta existente. El servidor vincula el permiso a la empresa de esa cuenta; no otorga Super Administrador global.")}</p><label>{t("User email", "Correo del usuario")} <input type="email" value={grantEmail} onChange={event => setGrantEmail(event.target.value)} /></label><div style={{ display: "flex", gap: 8, marginTop: 9 }}><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("grant")}>{t("Grant PMO", "Otorgar PMO")}</button><button type="button" disabled={busy || !grantEmail.includes("@")} onClick={() => void grant("revoke")}>{t("Revoke PMO", "Revocar PMO")}</button></div></section>}
-    {ready && capability && <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit,minmax(min(280px,100%),1fr))", gap: 14, minWidth: 0 }}>{kinds.map(kind => <section key={kind} style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14, minWidth: 0 }}><h3>{spanish ? labels[kind][1] : labels[kind][0]}</h3>
+    {ready && capability && <nav aria-label={t("Company catalog sections", "Secciones del catálogo de empresa")} style={{ display: "grid", gridTemplateColumns: "repeat(4,minmax(0,1fr))", gap: 8, position: "sticky", top: 0, zIndex: 2, padding: "8px 0", background: "white" }}>
+      {kinds.map(kind => <button key={kind} type="button" aria-pressed={selectedKind === kind} onClick={() => { setSelectedKind(kind); setEditing(null); }} style={{ minWidth: 0, padding: "10px 8px", borderRadius: 8, border: selectedKind === kind ? "2px solid #2563eb" : "1px solid #cbd5e1", background: selectedKind === kind ? "#eff6ff" : "white" }}>
+        <span style={{ display: "block", fontWeight: 700 }}>{spanish ? labels[kind][1] : labels[kind][0]}</span>
+        <small>{entries[kind].length} {t("values", "valores")}</small>
+      </button>)}
+    </nav>}
+    {ready && capability && <div style={{ display: "grid", gap: 14, minWidth: 0 }}>{kinds.filter(kind => kind === selectedKind).map(kind => <section key={kind} aria-labelledby={`catalog-${kind}-title`} style={{ border: "1px solid #cbd5e1", borderRadius: 10, padding: 14, minWidth: 0 }}><h3 id={`catalog-${kind}-title`}>{spanish ? labels[kind][1] : labels[kind][0]}</h3>
       {kind === "client" && <p>{t("Client names come from canonical Companies. Company PMO can add or deactivate options here; name corrections require Company Directory administration.", "Los nombres de clientes provienen de Empresas canónicas. PMO puede agregar o desactivar opciones aquí; las correcciones de nombres requieren administración del Directorio de Empresas.")}</p>}
       {capability?.canManage && <div style={{ display: "grid", gap: 7, marginBottom: 12, minWidth: 0 }}><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Code", "Código")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].code} maxLength={64} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], code: event.target.value.toUpperCase() } }))} /></label><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Name", "Nombre")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].name} maxLength={200} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], name: event.target.value } }))} /></label><label style={{ display: "grid", gap: 4, minWidth: 0 }}>{t("Aliases (comma separated)", "Alias (separados por comas)")} <input style={{ width: "100%", minWidth: 0 }} value={drafts[kind].aliases} maxLength={1000} onChange={event => setDrafts(old => ({ ...old, [kind]: { ...old[kind], aliases: event.target.value } }))} /></label><button type="button" disabled={busy || !drafts[kind].code.trim() || !drafts[kind].name.trim()} onClick={() => void create(kind)}>{t("Add to company catalog", "Agregar al catálogo de empresa")}</button></div>}
       {entries[kind].length === 0 && <p>{capability?.mode === "approved_only"
@@ -112,14 +131,22 @@ export function CompanyMasterCatalogsTab({ token, spanish }: { token: string; sp
         : t("No company values yet; BIMLog defaults remain available in project choices.", "Aún no hay valores de empresa; los valores predeterminados de BIMLog siguen disponibles en las opciones del proyecto.")}</p>}
       <div style={{ display: "grid", gap: 7 }}>{entries[kind].map(entry => {
         const isEditing = editing?.kind === kind && editing.id === entry.id;
+        const entryUsage = usage[entry.id];
         return <div key={entry.id} style={{ borderTop: "1px solid #e2e8f0", paddingTop: 7, display: "grid", gap: 7, minWidth: 0 }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "start", gap: 8, flexWrap: "wrap" }}>
             <span><strong>{entry.code} — {entry.name}</strong>{entry.aliases?.length > 0 && <small style={{ display: "block" }}>{t("Aliases", "Alias")}: {entry.aliases.join(", ")}</small>}<small style={{ display: "block" }}>{({ active: t("Active", "Activo"), inactive: t("Inactive", "Inactivo"), retired: t("Retired", "Retirado") })[entry.state]} · v{entry.version}</small></span>
-            {capability?.canManage && entry.state !== "retired" && <span style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+            <span style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
+              <button type="button" disabled={busy || entryUsage === "loading"} onClick={() => void loadUsage(kind, entry)}>{entryUsage === "loading" ? t("Checking…", "Consultando…") : t("View usage", "Ver uso")}</button>
+            {capability?.canManage && entry.state !== "retired" && <>
               {kind !== "client" && <button type="button" disabled={busy} onClick={() => setEditing({ kind, id: entry.id, name: entry.name, aliases: (entry.aliases ?? []).join(", "), version: entry.version })}>{t("Edit name and aliases", "Editar nombre y alias")}</button>}
               <button type="button" disabled={busy} onClick={() => void toggle(kind, entry)}>{entry.state === "active" ? t("Deactivate", "Desactivar") : t("Activate", "Activar")}</button>
-            </span>}
+            </>}
+            </span>
           </div>
+          {entryUsage === "error" && <p role="alert">{t("Usage could not be loaded. Retry.", "No se pudo cargar el uso. Vuelva a intentar.")}</p>}
+          {typeof entryUsage === "object" && <p role="status" style={{ margin: 0, padding: 8, background: "#f8fafc", borderRadius: 6 }}>
+            {t("Used in", "Usado en")}: {entryUsage.intakeCount} {t("intakes", "ingresos")}, {entryUsage.taskCount} {t("tasks", "tareas")}, {entryUsage.workPackageCount} {t("work packages", "paquetes de trabajo")} · {entryUsage.totalCount} {t("total references", "referencias totales")}
+          </p>}
           {isEditing && <div style={{ display: "flex", gap: 6, flexWrap: "wrap" }}>
             <label style={{ flex: "1 1 180px" }}>{t("New name", "Nuevo nombre")} <input style={{ width: "100%", minWidth: 0 }} value={editing.name} maxLength={200} onChange={event => setEditing({ ...editing, name: event.target.value })} /></label>
             <label style={{ flex: "1 1 180px" }}>{t("Aliases", "Alias")} <input style={{ width: "100%", minWidth: 0 }} value={editing.aliases} maxLength={1000} onChange={event => setEditing({ ...editing, aliases: event.target.value })} /></label>
