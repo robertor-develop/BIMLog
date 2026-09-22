@@ -38185,7 +38185,7 @@
     },
     {
       "taskId": "bimlog-edt-engine-block06-20260922",
-      "reviewedThroughCommit": "592686e8da84f5149041c82dc1758edbee6fb111",
+      "reviewedThroughCommit": "9733492fc6e525ac6083f63401197fcbec47ef7c",
       "reviewedAt": "2026-09-22T19:20:00Z",
       "status": "remediation_source_candidate",
       "captureTiming": "immediate_same_task_chain",
@@ -38239,8 +38239,8 @@
         },
         {
           "key": "platform",
-          "result": "updated",
-          "reason": "Generated platform graph reflects the EDT route and guarded operational surface."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The previous evidence commit generated and reviewed the guarded EDT route graph; this metadata-only reconciliation changes no platform source."
         },
         {
           "key": "plugin",
@@ -38259,13 +38259,13 @@
         },
         {
           "key": "status",
-          "result": "updated",
-          "reason": "Records the five-build remediation candidate and clearly separates local, push and live gates."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The previous evidence commit recorded the remediation and separated local, push and live gates; this metadata-only reconciliation adds no new product state."
         },
         {
           "key": "open_loop",
-          "result": "updated",
-          "reason": "Keeps server-derived EDT activation, economic integration and full UI execution open for Builds 306–310."
+          "result": "reviewed_no_semantic_change",
+          "reason": "The previous evidence commit kept server-derived activation, economic integration and UI execution open; this metadata-only reconciliation adds no new work item."
         },
         {
           "key": "audit",
@@ -38274,14 +38274,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
-        "living-brief/OPEN_LOOP.md",
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLATFORM.md",
-        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "cee5cb959d681763ce87363af3d7cf22fb845b2461f9c5ce82201d2968301d1b"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
