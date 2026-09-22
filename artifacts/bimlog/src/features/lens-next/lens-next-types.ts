@@ -256,6 +256,21 @@ export interface LensNextKnowledgeContext {
   methods: readonly LensNextKnowledgeMethod[];
   previousCases: readonly LensNextKnowledgeCase[];
 }
+export interface LensNextResolutionRecordRevision {
+  id:string;revision:number;status:"draft"|"completed"|"verified";methodRevisionId:string|null;
+  actualResolution:string|null;disciplineChanged:string|null;responsibleTrade:string|null;
+  rfiRequired:boolean;rfiReference:string|null;drawingSubmittalReference:string|null;
+  resolvedById:number|null;resolutionDate:string|null;verifiedById:number|null;verificationDate:string|null;
+  reopenReason:string|null;createdAt:string|null;
+}
+export interface LensNextResolutionRecord extends LensNextResolutionRecordRevision {
+  recordId:string;projectCaseId:string;history:readonly LensNextResolutionRecordRevision[];
+}
+export interface LensNextResolutionDraft {
+  expectedRevision:number;status:"draft"|"completed";methodRevisionId:string|null;actualResolution:string|null;
+  disciplineChanged:string|null;responsibleTrade:string|null;rfiRequired:boolean;rfiReference:string|null;
+  drawingSubmittalReference:string|null;
+}
 export interface LensNextXmlExportSummary {
   requestedCount: number | null;
   serializedCount: number | null;

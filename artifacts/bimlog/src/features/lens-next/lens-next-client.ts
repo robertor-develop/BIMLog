@@ -23,6 +23,8 @@ import type {
   LensNextLayoutItem,
   LensNextLayoutReceipt,
   LensNextKnowledgeContext,
+  LensNextResolutionDraft,
+  LensNextResolutionRecord,
   LensNextLinksResult,
   LensNextAttachmentsResult,
   LensNextLinkedItemType,
@@ -140,6 +142,8 @@ export interface LensNextApiClient {
   downloadReferenceAttachment(attachment: LensNextAttachmentsResult["attachments"][number], signal?: AbortSignal): Promise<Blob>;
   loadKnowledgeContext(identity: LensNextImmutableIssueIdentity, signal?: AbortSignal): Promise<LensNextKnowledgeContext>;
   classifyKnowledgeContext(identity: LensNextImmutableIssueIdentity, conflictTypeRevisionId: string | null, expectedConflictTypeRevisionId: string | null, signal?: AbortSignal): Promise<LensNextKnowledgeContext>;
+  loadResolutionRecord(identity: LensNextImmutableIssueIdentity, signal?:AbortSignal):Promise<LensNextResolutionRecord|null>;
+  saveResolutionRecord(identity: LensNextImmutableIssueIdentity, draft:LensNextResolutionDraft, signal?:AbortSignal):Promise<LensNextResolutionRecord>;
 }
 
 export function createLensNextApiClient(
@@ -192,6 +196,17 @@ export function createLensNextApiClient(
       return Object.freeze({ linkId, fileId, fileName: String(item.fileName ?? ""), fileSize, mimeType: mimeType as "application/pdf" | "image/png" | "image/jpeg", createdAt: String(item.createdAt ?? ""), downloadUrl: String(item.downloadUrl ?? "") });
     });
     return Object.freeze({ attachments });
+  };
+  const adaptResolutionRevision=(value:unknown)=>{
+    if(!value||typeof value!=="object"||Array.isArray(value))throw new Error("Resolution Record response is invalid");
+    const item=value as Record<string,unknown>,revision=Number(item.revision),status=String(item.status);
+    if(!Number.isSafeInteger(revision)||revision<1||!["draft","completed","verified"].includes(status)||!String(item.id??""))throw new Error("Resolution Record response is invalid");
+    return {id:String(item.id),revision,status:status as "draft"|"completed"|"verified",methodRevisionId:item.method_revision_id==null?null:String(item.method_revision_id),actualResolution:item.actual_resolution==null?null:String(item.actual_resolution),disciplineChanged:item.discipline_changed==null?null:String(item.discipline_changed),responsibleTrade:item.responsible_trade==null?null:String(item.responsible_trade),rfiRequired:item.rfi_required===true,rfiReference:item.rfi_reference==null?null:String(item.rfi_reference),drawingSubmittalReference:item.drawing_submittal_reference==null?null:String(item.drawing_submittal_reference),resolvedById:item.resolved_by_id==null?null:Number(item.resolved_by_id),resolutionDate:item.resolution_date==null?null:String(item.resolution_date),verifiedById:item.verified_by_id==null?null:Number(item.verified_by_id),verificationDate:item.verification_date==null?null:String(item.verification_date),reopenReason:item.reopen_reason==null?null:String(item.reopen_reason),createdAt:item.revision_created_at==null?(item.created_at==null?null:String(item.created_at)):String(item.revision_created_at)};
+  };
+  const adaptResolutionRecord=(value:unknown):LensNextResolutionRecord|null=>{
+    if(value==null)return null;if(typeof value!=="object"||Array.isArray(value))throw new Error("Resolution Record response is invalid");
+    const item=value as Record<string,unknown>,current=adaptResolutionRevision(item),history=Array.isArray(item.history)?item.history.map(adaptResolutionRevision):[];
+    return Object.freeze({...current,recordId:String(item.id),projectCaseId:String(item.project_case_id),history:Object.freeze(history)});
   };
   return Object.freeze({
     async resolveModelBinding(modelBindingKey: string, modelDisplayName: string | null, managedProjectId: number | null, explicitProjectId: number | null = null, signal?: AbortSignal) {
@@ -349,6 +364,18 @@ export function createLensNextApiClient(
       const body=await jsonBody(response,"BIMLog classification");
       if(!body||typeof body!=="object"||Array.isArray(body)) throw new Error("Coordination Knowledge response is invalid");
       return body as unknown as LensNextKnowledgeContext;
+    },
+    async loadResolutionRecord(identity:LensNextImmutableIssueIdentity,signal?:AbortSignal){
+      const exact=assertLensNextImmutableIdentity(identity),raw=await get(`/coordination-knowledge/lens-context/${exact.serverId}/resolution?projectId=${exact.projectId}`,signal);
+      if(!raw||typeof raw!=="object"||Array.isArray(raw))throw new Error("Resolution Record response is invalid");
+      return adaptResolutionRecord((raw as Record<string,unknown>).item);
+    },
+    async saveResolutionRecord(identity:LensNextImmutableIssueIdentity,draft:LensNextResolutionDraft,signal?:AbortSignal){
+      const exact=assertLensNextImmutableIdentity(identity);
+      const response=await fetchImpl(`${base}/coordination-knowledge/lens-context/${exact.serverId}/resolution?projectId=${exact.projectId}`,{method:"PUT",credentials:"same-origin",headers:{Accept:"application/json","Content-Type":"application/json",Authorization:`Bearer ${token}`},body:JSON.stringify(draft),signal});
+      const raw=await jsonBody(response,"BIMLog resolution record");if(!raw||typeof raw!=="object"||Array.isArray(raw)||(raw as Record<string,unknown>).item==null)throw new Error("Resolution Record save receipt is invalid");
+      const refreshed=await get(`/coordination-knowledge/lens-context/${exact.serverId}/resolution?projectId=${exact.projectId}`,signal),saved=refreshed&&typeof refreshed==="object"&&!Array.isArray(refreshed)?adaptResolutionRecord((refreshed as Record<string,unknown>).item):null;
+      if(!saved)throw new Error("Resolution Record did not persist after save");return saved;
     },
     async linkBimlogItem(identity: LensNextImmutableIssueIdentity, targetType: LensNextLinkedItemType, targetId: number, signal?: AbortSignal) {
       const exact = assertLensNextImmutableIdentity(identity);

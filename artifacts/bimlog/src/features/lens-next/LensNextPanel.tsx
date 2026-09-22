@@ -37,6 +37,8 @@ import {
   type LensNextProjectOption,
   type LensNextRefreshState,
   type LensNextKnowledgeContext,
+  type LensNextResolutionDraft,
+  type LensNextResolutionRecord,
 } from "./lens-next-types";
 import {
   buildLensNextIssueGroups,
@@ -154,6 +156,8 @@ export function LensNextPanel({
   const [workingViewState, setWorkingViewState] = useState<"idle" | "opening" | "success" | "error">("idle");
   const [knowledgeContext,setKnowledgeContext]=useState<LensNextKnowledgeContext|"loading"|null>(null);
   const [knowledgeError,setKnowledgeError]=useState<string|null>(null);
+  const [resolutionRecord,setResolutionRecord]=useState<LensNextResolutionRecord|"loading"|null>(null);
+  const [resolutionError,setResolutionError]=useState<string|null>(null);
 
   const authorizedProjectId = useMemo(() => {
     if (selectedProjectId === null) return null;
@@ -423,6 +427,14 @@ export function LensNextPanel({
     catch(error){if(!signal?.aborted){setKnowledgeContext(null);setKnowledgeError(error instanceof Error?error.message:"Coordination Knowledge could not be loaded");}}
   },[apiClient,selectedIssue]);
   useEffect(()=>{const controller=new AbortController();void loadKnowledge(controller.signal);return()=>controller.abort();},[loadKnowledge]);
+  const loadResolution=useCallback(async(signal?:AbortSignal)=>{
+    if(!apiClient||!selectedIssue){setResolutionRecord(null);setResolutionError(null);return;}
+    setResolutionRecord("loading");setResolutionError(null);
+    try{setResolutionRecord(await apiClient.loadResolutionRecord(selectedIssue.identity,signal));}
+    catch(error){if(!signal?.aborted){setResolutionRecord(null);setResolutionError(error instanceof Error?error.message:"Resolution Record could not be loaded");}}
+  },[apiClient,selectedIssue]);
+  useEffect(()=>{const controller=new AbortController();void loadResolution(controller.signal);return()=>controller.abort();},[loadResolution]);
+  const saveResolution=useCallback(async(draft:LensNextResolutionDraft)=>{if(!apiClient||!selectedIssue)throw new Error("Select an active issue first.");const saved=await apiClient.saveResolutionRecord(selectedIssue.identity,draft);setResolutionRecord(saved);setResolutionError(null);},[apiClient,selectedIssue]);
 
   useEffect(() => {
     if (!apiClient || !selectedIssue) { setLinkedItems(null); setLinkedItemsError(null); return; }
@@ -800,6 +812,10 @@ export function LensNextPanel({
       knowledgeError={knowledgeError}
       onRetryKnowledge={()=>void loadKnowledge()}
       onClassifyKnowledge={(revisionId,expected)=>{if(apiClient&&selectedIssue){setKnowledgeContext("loading");setKnowledgeError(null);void apiClient.classifyKnowledgeContext(selectedIssue.identity,revisionId,expected).then(setKnowledgeContext).catch(error=>{setKnowledgeContext(null);setKnowledgeError(error instanceof Error?error.message:"Classification update failed");});}}}
+      resolutionRecord={resolutionRecord}
+      resolutionError={resolutionError}
+      onRetryResolution={()=>void loadResolution()}
+      onSaveResolution={saveResolution}
       onUploadReferenceAttachment={(file) => void uploadReferenceAttachment(file)}
       onOpenReferenceAttachment={(attachment) => void openReferenceAttachment(attachment)}
       onRemoveReferenceAttachment={(attachmentId) => void removeReferenceAttachment(attachmentId)}
