@@ -23,7 +23,7 @@ The integration review found governed-change and economic/time record reads that
 - Prior service regression (`test:edt-engine-build293`): PASS
 - `pnpm run typecheck`: PASS
 - `pnpm run check:mojibake`: PASS
-- Full repository build: pending final Living Brief state reconciliation, then required before push
+- Full repository production build and runtime closure: PASS
 - Production database changed: NO
 - Production publication: NOT DUE
 - Lens Next Native/installer changed: NO

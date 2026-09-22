@@ -9,6 +9,7 @@
 - [x] Builds 291–295 implement the first transactional service layer over this persistence foundation and prove rollback, idempotency, authorization and additive zero-drop behavior in an isolated transaction harness.
 - [x] Build 295 provider boundary completed from exact source `863d6c9b5afec211e7635b60c02d13319f810c8d`: full local build, exact push, Replit Shell alignment, zero-drop preview, one controlled publication and authenticated Chrome smoke passed.
 - [x] Builds 296–300 expose and integrate the approved service operations through bounded authenticated server routes while preserving existing Intake and Operations compatibility.
+- [x] Block 5 consolidated tests, TypeScript projects, Living Brief integrity and the full repository production build/runtime closure pass from clean committed source.
 - [ ] Builds 301–305 implement the next approved UI/runtime integration block; Build 305 is the next publication and authenticated Chrome boundary.
 - [ ] Later blocks remain responsible for complete Delivery Workflow, Governance, APU/Pricing, Intake activation, EDT generation, hours/budget, R/V, QC, Change Order, split, import, reporting and final end-to-end acceptance behavior. Schema presence alone is not completion.
 - [x] Block 3 changes no Lens Next Native, Pulse, bridge, installer, package or Autodesk path; focused Navisworks smoke is not required.

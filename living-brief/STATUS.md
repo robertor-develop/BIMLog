@@ -7,7 +7,7 @@
 - The bounded API covers capability discovery, activation request/approval, governed change request/decision, immutable Economic Plans, time-entry transitions, Work Item R/V issuance, QC decisions and `Result` import preview.
 - Route validation rejects unsupported actions, decisions, pools, malformed arrays and missing identities before service execution. The services retain transaction, idempotency, optimistic-concurrency, anti-self-approval and immutable history behavior.
 - A real integration finding was corrected before acceptance: governed-change and economic/time record reads now bind stored records to both company and project, preventing project membership from weakening tenant scope.
-- The five-build route suite, prior service regressions, API/frontend TypeScript projects and repository production gate pass. Block 5 is push-only; publication and authenticated Chrome smoke are due after Builds 301–305.
+- The five-build route suite, prior service regressions, API/frontend TypeScript projects and full repository production build/runtime-closure gate pass. Block 5 is push-only; publication and authenticated Chrome smoke are due after Builds 301–305.
 - No Lens Next Native, bridge, installer, plugin package or Autodesk path changed, so focused Navisworks smoke is not applicable.
 
 ## EDT and Engine Templates — Block 4 published — 2026-09-22

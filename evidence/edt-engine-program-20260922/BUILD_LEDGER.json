@@ -39,5 +39,5 @@
   "nextBlock": { "number": 6, "builds": "301-305" },
   "database": { "changed": true, "productionApplied": false, "design": "additive-zero-drop" },
   "lensNext": { "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
-  "tests": { "focused": "PASS", "typecheck": "PASS", "productSourceChanged": true, "publication": "DUE_AFTER_305" }
+  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PASS", "productSourceChanged": true, "publication": "DUE_AFTER_305" }
 }
