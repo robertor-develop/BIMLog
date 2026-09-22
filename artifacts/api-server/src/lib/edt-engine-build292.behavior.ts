@@ -1,0 +1,10 @@
+import assert from "node:assert/strict";
+import { requestGovernedEdtChange } from "./edt-engine-governed-change-service";
+import type { EdtTransactionClient,EdtTransactionHost } from "./edt-engine-transaction";
+const calls:string[]=[];
+const client:EdtTransactionClient={async query<Row>(sql:string){calls.push(sql);if(sql.includes("FROM job_activation_work_items"))return{rows:[{id:"work-1"}] as Row[]};if(sql.includes("FROM job_governed_change_requests"))return{rows:[]};return{rows:[]};}};const host:EdtTransactionHost={async connect(){return client}};
+const actor={grants:["GOVERNED_CHANGE_REQUEST"],actorUserId:20,actorCompanyId:7,actorProjectIds:[11],eligibleRole:"PROJECT_LEADER"};
+const result=await requestGovernedEdtChange({actor,companyId:7,projectId:11,workItemId:"work-1",actionType:"code_correction",targetVersion:1,beforeState:{displayCode:"OLD"},afterState:{displayCode:"NEW"},reason:"Correct duplicate visible code",evidence:{ticket:"T-1"},idempotencyKey:"change-1"},host);
+assert.equal(result.state,"pending");assert.ok(calls.includes("COMMIT"));assert.ok(calls.some(sql=>sql.startsWith("INSERT INTO job_governed_change_requests")));
+await assert.rejects(()=>requestGovernedEdtChange({actor:{...actor,actorProjectIds:[]},companyId:7,projectId:11,workItemId:"work-1",actionType:"code_correction",targetVersion:1,beforeState:{},afterState:{},reason:"Unauthorized request",evidence:{},idempotencyKey:"change-2"},host),/authorization denied/);
+console.log("EDT_ENGINE_BUILD292_RESULT=PASS");
