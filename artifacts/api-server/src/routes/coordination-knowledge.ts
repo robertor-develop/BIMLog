@@ -194,6 +194,12 @@ router.post("/coordination-knowledge/lesson-proposals/:id/promote",authMiddlewar
   }
   res.status(201).json({item:await repository.linkLessonPromotion({companyId:resolved.companyId,proposalId,actorId:resolved.userId,targetEntityType:promotion.targetEntityType,targetEntityId:targetId})});
 }catch(error){sendError(res,error);}});
+router.post("/coordination-knowledge/lesson-proposals/:id/merge",authMiddleware,async(req,res)=>{try{
+  const resolved=await context(req,"review"),expected=req.body?.expectedStatus,canonicalProposalId=nullableText(req.body?.canonicalProposalId,"canonicalProposalId",64);
+  if(typeof expected!=="string"||!lessonProposalStatuses.includes(expected as LessonProposalStatus))throw new CoordinationKnowledgeContractError("LESSON_PROPOSAL_INVALID","expectedStatus");
+  if(!canonicalProposalId)throw new CoordinationKnowledgeContractError("LESSON_PROPOSAL_INVALID","canonicalProposalId");
+  res.json({item:await repository.mergeLessonProposal({companyId:resolved.companyId,proposalId:parameter(req.params.id),canonicalProposalId,actorId:resolved.userId,expectedStatus:expected as LessonProposalStatus,rationale:req.body?.rationale})});
+}catch(error){sendError(res,error);}});
 
 router.get("/coordination-knowledge/evidence/:entityType/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved"),entityType=evidenceChoice(parameter(req.params.entityType),evidenceEntityTypes,"entityType"),entityId=parameter(req.params.id);res.json({items:await repository.listEvidence(resolved.companyId,entityType,entityId)});}catch(error){sendError(res,error);}});
 router.get("/coordination-knowledge/events/:entityType/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved"),entityType=evidenceChoice(parameter(req.params.entityType),evidenceEntityTypes,"entityType"),entityId=parameter(req.params.id);res.json({items:await repository.listEvents(resolved.companyId,entityType,entityId)});}catch(error){sendError(res,error);}});

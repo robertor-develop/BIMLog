@@ -675,4 +675,20 @@ export class CoordinationKnowledgeRepository {
       return updated;
     });
   }
+
+  async mergeLessonProposal(input:{companyId:number;proposalId:string;canonicalProposalId:string;actorId:number;expectedStatus:LessonProposalStatus;rationale:unknown}):Promise<Record<string,unknown>>{
+    const companyId=positive(input.companyId,"companyId"),actorId=positive(input.actorId,"actorId");
+    if(input.proposalId===input.canonicalProposalId)throw new CoordinationKnowledgeRepositoryError("LESSON_MERGE_SELF_DENIED","A proposal cannot merge into itself.",409);
+    return transaction(this.pool,async client=>{
+      const source=(await client.query(`SELECT * FROM coordination_lesson_proposals WHERE id=$1 AND company_id=$2 FOR UPDATE`,[input.proposalId,companyId])).rows[0];
+      const target=(await client.query(`SELECT * FROM coordination_lesson_proposals WHERE id=$1 AND company_id=$2 FOR UPDATE`,[input.canonicalProposalId,companyId])).rows[0];
+      if(!source||!target)throw new CoordinationKnowledgeRepositoryError("LESSON_PROPOSAL_NOT_FOUND","Source or canonical lesson proposal not found.",404);
+      if(source.status!==input.expectedStatus)throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_VERSION_CONFLICT","Lesson proposal status changed after it was loaded.",409);
+      if(["rejected","merged"].includes(String(target.status)))throw new CoordinationKnowledgeRepositoryError("LESSON_MERGE_TARGET_INVALID","The canonical proposal must remain active or approved.",409);
+      let rationale:string;try{rationale=validateLessonDecision(String(source.status) as LessonProposalStatus,"merged",input.rationale)??"";}catch{throw new CoordinationKnowledgeRepositoryError("LESSON_TRANSITION_INVALID","The requested lesson merge is invalid.",409);}
+      const updated=(await client.query(`UPDATE coordination_lesson_proposals SET status='merged',reviewed_by_id=$1,reviewed_at=now(),review_rationale=$2,promoted_entity_type='lesson_proposal',promoted_entity_id=$3 WHERE id=$4 AND company_id=$5 RETURNING *`,[actorId,rationale,input.canonicalProposalId,input.proposalId,companyId])).rows[0];
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,project_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,$3,'lesson_proposal',$4,NULL,'lesson_merged',$5,$6::jsonb)`,[randomUUID(),companyId,source.project_id,input.proposalId,actorId,JSON.stringify({canonicalProposalId:input.canonicalProposalId,rationale})]);
+      return {...updated,canonical_proposal_id:input.canonicalProposalId};
+    });
+  }
 }
