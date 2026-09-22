@@ -32,15 +32,25 @@ export async function resolveEdtRouteActor(req: Request, projectId: number): Pro
     is_super_admin: boolean;
     is_company_pmo: boolean;
     project_role: string | null;
+    project_company_id: number | null;
   }>(`SELECT u.id,u.company_id,u.is_super_admin,
       EXISTS(SELECT 1 FROM company_master_catalog_admins a
         WHERE a.company_id=u.company_id AND a.user_id=u.id AND a.state='active') AS is_company_pmo,
       (SELECT pm.role FROM project_members pm
-        WHERE pm.project_id=$2 AND pm.user_id=u.id AND pm.status='active' LIMIT 1) AS project_role
+        WHERE pm.project_id=$2 AND pm.user_id=u.id AND pm.status='active' LIMIT 1) AS project_role,
+      (SELECT COALESCE(binding.company_id, owner.company_id)
+        FROM projects p
+        JOIN users owner ON owner.id=p.created_by_id
+        LEFT JOIN LATERAL (SELECT company_id FROM project_company_binding_versions
+          WHERE project_id=p.id ORDER BY version DESC LIMIT 1) binding ON true
+        WHERE p.id=$2 AND p.status<>'archived') AS project_company_id
     FROM users u WHERE u.id=$1`, [req.user.userId, projectId]);
   const row = result.rows[0];
   if (!row || Number(row.company_id) !== Number(req.user.companyId)) {
     throw new EdtEngineConflict("USER_COMPANY_MISMATCH", "Authenticated company identity is stale or invalid.");
+  }
+  if (row.project_company_id === null || Number(row.project_company_id) !== Number(row.company_id)) {
+    throw new EdtEngineConflict("PROJECT_COMPANY_MISMATCH", "Project is missing or outside the authenticated company.");
   }
   const role: EdtDefaultRoleProfile | undefined = row.is_super_admin
     ? "CEO"
