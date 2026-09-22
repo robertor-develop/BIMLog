@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 8 local source candidate — 2026-09-22
+
+- Builds 311–315 harden the EDT service layer: immutable-decision-bound approval retry, valid EDT tree and Work Item plan, activated contract/APU/currency binding for economic plans, and submitted-commitment binding for time decisions.
+- The four guarded EDT HTTP mutations remain fail-closed because server-derived activation versions, plan, economic amounts and time impact plus real Intake/Operations UI integration are unfinished. Existing canonical Intake and Operations workflows remain the product path; this block is not end-to-end EDT completion.
+- Focused tests and API typecheck pass. Full release gate, exact push, Replit Shell zero-drop publication and authenticated Chrome smoke are due at Build 315. No Lens Next Native or installer change.
+
 ## EDT and Engine Templates — Block 7 local source candidate — 2026-09-22
 
 - Builds 306–310 corrected five backend integrity defects uncovered before guarded EDT mutations could be enabled: Work Item company scope now joins the canonical Intake; unimplemented governed actions cannot be falsely approved; stale Intake revisions cannot be approved; time-ledger budget accounts must belong to the same Intake/company; and empty, ambiguous or cross-Intake EDT plans cannot receive an approval decision.

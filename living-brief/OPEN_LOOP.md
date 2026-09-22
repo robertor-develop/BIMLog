@@ -1,10 +1,17 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT and Engine Templates program — Block 8 — 2026-09-22
+
+- [x] Builds 311–315 harden the unpublished EDT engine service layer: approval retry is tied to the immutable decision; EDT nodes require an ordered acyclic hierarchy and unique sibling sequences; Work Item plans reject duplicate/incomplete identities; economic plans verify activated Intake and canonical contract APU/currency; time decisions match the stored submission commitment.
+- [x] Five bounded build commits exist and the focused Block 8 suite and API TypeScript typecheck pass. The older Block 4 fixture was corrected to represent a same-Intake budget account.
+- [ ] These repairs do **not** complete server-derived activation versions, EDT plan generation, economic/time amount calculation, or Intake/Operations UI wiring. The four guarded mutation routes stay fail-closed. Do not claim an end-to-end EDT engine or expose browser-supplied authority.
+- [ ] Complete the full clean local release gate, exact-source push, Replit Shell zero-drop preview/publication and authenticated Chrome smoke for the Build 315 publication boundary. No Lens Next Native or installer files changed, so focused Navisworks smoke is not triggered.
+
 ## EDT and Engine Templates program — Block 7 — 2026-09-22
 
 - [x] Builds 306–310 close five concrete backend integrity defects: absent Work Item company column in SQL, unsupported action approval without execution, stale Intake approval, cross-Intake time budget account, and incomplete/cross-Intake EDT plan approval.
 - [ ] The originally planned server-derived version selection, canonical EDT plan generation, economic/time amount derivation, and real Intake/Operations UI connection are **not** completed by this corrective block. The four fail-closed routes remain unavailable by design. Do not present this as an end-to-end EDT engine.
-- [ ] Block 7 full local gate, exact-source push and independent review remain separate from focused test results. This is a push-only five-build boundary; next publication and authenticated Chrome smoke are due after the next five builds.
+- [x] Block 7 full local gate passed and exact source `92762980df6ee57a11b17b54405ce26c39856e2e` was pushed to GitHub master. It was a push-only five-build boundary; publication and authenticated Chrome smoke are due at Build 315.
 
 
 ## EDT and Engine Templates program — Block 6 — 2026-09-22
