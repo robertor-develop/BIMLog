@@ -1,4 +1,4 @@
-export const COORDINATION_KNOWLEDGE_SCHEMA_VERSION = 1;
+export const COORDINATION_KNOWLEDGE_SCHEMA_VERSION = 2;
 export const COORDINATION_KNOWLEDGE_SCHEMA_SQL = String.raw`
 CREATE TABLE IF NOT EXISTS coordination_conflict_types (
   id text PRIMARY KEY,
@@ -185,6 +185,56 @@ CREATE TABLE IF NOT EXISTS coordination_project_cases (
 );
 CREATE INDEX IF NOT EXISTS coord_project_cases_project_status_idx ON coordination_project_cases(company_id,project_id,status);
 
+CREATE TABLE IF NOT EXISTS coordination_resolution_records (
+  id text PRIMARY KEY,
+  company_id integer NOT NULL REFERENCES companies(id),
+  project_id integer NOT NULL REFERENCES projects(id),
+  project_case_id text NOT NULL,
+  lens_viewpoint_id integer NOT NULL REFERENCES lens_viewpoints(id),
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  updated_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT coord_resolution_record_case_scope_fk FOREIGN KEY(project_case_id,company_id,project_id) REFERENCES coordination_project_cases(id,company_id,project_id),
+  CONSTRAINT coord_resolution_record_case_uq UNIQUE(company_id,project_id,project_case_id),
+  CONSTRAINT coord_resolution_record_issue_uq UNIQUE(company_id,project_id,lens_viewpoint_id),
+  CONSTRAINT coord_resolution_record_scope_uq UNIQUE(id,company_id,project_id)
+);
+CREATE TABLE IF NOT EXISTS coordination_resolution_record_revisions (
+  id text PRIMARY KEY,
+  resolution_record_id text NOT NULL,
+  project_case_id text NOT NULL,
+  company_id integer NOT NULL,
+  project_id integer NOT NULL,
+  lens_viewpoint_id integer NOT NULL,
+  revision integer NOT NULL,
+  status text NOT NULL DEFAULT 'draft',
+  method_revision_id text,
+  actual_resolution text,
+  discipline_changed text,
+  responsible_trade text,
+  rfi_required boolean NOT NULL DEFAULT false,
+  rfi_reference text,
+  drawing_submittal_reference text,
+  resolved_by_id integer REFERENCES users(id),
+  resolution_date timestamptz,
+  verified_by_id integer REFERENCES users(id),
+  verification_date timestamptz,
+  reopen_reason text,
+  created_by_id integer NOT NULL REFERENCES users(id),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT coord_resolution_record_revision_scope_fk FOREIGN KEY(resolution_record_id,company_id,project_id) REFERENCES coordination_resolution_records(id,company_id,project_id),
+  CONSTRAINT coord_resolution_record_revision_case_fk FOREIGN KEY(project_case_id,company_id,project_id) REFERENCES coordination_project_cases(id,company_id,project_id),
+  CONSTRAINT coord_resolution_record_revision_method_fk FOREIGN KEY(method_revision_id,company_id) REFERENCES coordination_resolution_method_revisions(id,company_id),
+  CONSTRAINT coord_resolution_record_revision_uq UNIQUE(resolution_record_id,revision),
+  CONSTRAINT coord_resolution_record_revision_scope_uq UNIQUE(id,company_id,project_id),
+  CONSTRAINT coord_resolution_record_revision_positive_chk CHECK (revision>0),
+  CONSTRAINT coord_resolution_record_status_chk CHECK (status IN ('draft','completed','verified')),
+  CONSTRAINT coord_resolution_record_rfi_chk CHECK (NOT rfi_required OR rfi_reference IS NOT NULL),
+  CONSTRAINT coord_resolution_record_completed_chk CHECK (status='draft' OR (actual_resolution IS NOT NULL AND resolved_by_id IS NOT NULL AND resolution_date IS NOT NULL)),
+  CONSTRAINT coord_resolution_record_verified_chk CHECK ((status='verified')=(verified_by_id IS NOT NULL AND verification_date IS NOT NULL))
+);
+CREATE INDEX IF NOT EXISTS coord_resolution_record_history_idx ON coordination_resolution_record_revisions(company_id,project_id,lens_viewpoint_id,revision DESC);
+
 CREATE TABLE IF NOT EXISTS coordination_lesson_proposals (
   id text PRIMARY KEY,
   company_id integer NOT NULL,
@@ -259,6 +309,9 @@ DO $$ BEGIN
   END IF;
   IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='coord_knowledge_events_immutable') THEN
     CREATE TRIGGER coord_knowledge_events_immutable BEFORE UPDATE OR DELETE ON coordination_knowledge_events FOR EACH ROW EXECUTE FUNCTION coordination_knowledge_immutable_guard();
+  END IF;
+  IF NOT EXISTS (SELECT 1 FROM pg_trigger WHERE tgname='coord_resolution_record_revision_immutable') THEN
+    CREATE TRIGGER coord_resolution_record_revision_immutable BEFORE UPDATE OR DELETE ON coordination_resolution_record_revisions FOR EACH ROW EXECUTE FUNCTION coordination_knowledge_immutable_guard();
   END IF;
 END $$;
 `;

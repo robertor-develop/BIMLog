@@ -53,6 +53,8 @@ function pageNumber(value: unknown, field: string, fallback: number, maximum: nu
 const evidenceEntityTypes=["conflict_type","coordination_rule","resolution_method","project_case","lesson_proposal"] as const;
 const evidenceRoles=["attachment","reference","before","after","supporting"] as const;
 function evidenceChoice(value:unknown,choices:readonly string[],field:string):string{if(typeof value!=="string"||!choices.includes(value))throw new CoordinationKnowledgeContractError("KNOWLEDGE_EVIDENCE_INVALID",field);return value;}
+function nullableText(value:unknown,field:string,maximum:number):string|null{if(value==null||value==="")return null;if(typeof value!=="string"||value.trim().length>maximum)throw new CoordinationKnowledgeContractError("RESOLUTION_RECORD_INVALID",field);return value.trim();}
+function resolutionRecordBody(body:Record<string,unknown>){return {methodRevisionId:nullableText(body.methodRevisionId,"methodRevisionId",64),actualResolution:nullableText(body.actualResolution,"actualResolution",8000),disciplineChanged:nullableText(body.disciplineChanged,"disciplineChanged",160),responsibleTrade:nullableText(body.responsibleTrade,"responsibleTrade",160),rfiRequired:body.rfiRequired===true,rfiReference:nullableText(body.rfiReference,"rfiReference",500),drawingSubmittalReference:nullableText(body.drawingSubmittalReference,"drawingSubmittalReference",1000)};}
 function conflictContent(body: Record<string, unknown>, actorId: number, companyId: number, conflictTypeId: string, revision: number) {
   return validateConflictTypeRevision({
     id: randomUUID(), conflictTypeId, companyId, revision, status: "draft",
@@ -110,6 +112,21 @@ router.put("/coordination-knowledge/lens-context/:lensViewpointId/classification
   if(expected!==null&&typeof expected!=="string") throw new CoordinationKnowledgeContractError("KNOWLEDGE_CLASSIFICATION_INVALID","expectedConflictTypeRevisionId");
   await repository.classifyLensIssue({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId,conflictTypeRevisionId:requested,expectedConflictTypeRevisionId:expected,actorId:resolved.userId});
   res.json({...await repository.getLensContext({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId,allowCompanyPrecedent:resolved.isCompanyPmo||resolved.isSuperAdmin}),canClassify:true});
+}catch(error){sendError(res,error);}});
+
+router.get("/coordination-knowledge/lens-context/:lensViewpointId/resolution",authMiddleware,async(req,res)=>{try{
+  const resolved=await context(req,"view_approved");if(!resolved.projectId)throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_REQUIRED","projectId");
+  const lensViewpointId=Number(parameter(req.params.lensViewpointId));if(!Number.isSafeInteger(lensViewpointId)||lensViewpointId<1)throw new CoordinationKnowledgeContractError("KNOWLEDGE_ISSUE_SCOPE_INVALID","lensViewpointId");
+  res.json({item:await repository.getResolutionRecord({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId})});
+}catch(error){sendError(res,error);}});
+router.put("/coordination-knowledge/lens-context/:lensViewpointId/resolution",authMiddleware,async(req,res)=>{try{
+  const resolved=await context(req,"edit_draft");if(!resolved.projectId)throw new CoordinationKnowledgeContractError("KNOWLEDGE_PROJECT_SCOPE_REQUIRED","projectId");
+  const lensViewpointId=Number(parameter(req.params.lensViewpointId)),expected=Number(req.body?.expectedRevision??0),status=req.body?.status;
+  if(!Number.isSafeInteger(lensViewpointId)||lensViewpointId<1)throw new CoordinationKnowledgeContractError("KNOWLEDGE_ISSUE_SCOPE_INVALID","lensViewpointId");
+  if(!Number.isSafeInteger(expected)||expected<0)throw new CoordinationKnowledgeContractError("KNOWLEDGE_EXPECTED_REVISION_REQUIRED","expectedRevision");
+  if(status!=="draft"&&status!=="completed")throw new CoordinationKnowledgeContractError("RESOLUTION_RECORD_INVALID","status");
+  const item=await repository.appendResolutionRecordRevision({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId,expectedRevision:expected,actorId:resolved.userId,status,...resolutionRecordBody(req.body??{})});
+  res.json({item});
 }catch(error){sendError(res,error);}});
 
 router.get("/coordination-knowledge/evidence/:entityType/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved"),entityType=evidenceChoice(parameter(req.params.entityType),evidenceEntityTypes,"entityType"),entityId=parameter(req.params.id);res.json({items:await repository.listEvidence(resolved.companyId,entityType,entityId)});}catch(error){sendError(res,error);}});

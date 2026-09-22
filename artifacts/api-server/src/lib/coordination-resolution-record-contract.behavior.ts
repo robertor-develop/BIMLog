@@ -1,0 +1,23 @@
+import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { assertResolutionRecordTransition, validateResolutionRecordRevision } from "./coordination-resolution-record-contract";
+
+const draft = { id:crypto.randomUUID(),resolutionRecordId:crypto.randomUUID(),projectCaseId:crypto.randomUUID(),companyId:7,projectId:41,lensViewpointId:73,revision:1,status:"draft",methodRevisionId:null,actualResolution:null,disciplineChanged:null,responsibleTrade:null,rfiRequired:false,rfiReference:null,drawingSubmittalReference:null,resolvedById:null,resolutionDate:null,verifiedById:null,verificationDate:null,reopenReason:null,createdById:9 } as const;
+assert.equal(validateResolutionRecordRevision(draft).status,"draft");
+assert.throws(()=>validateResolutionRecordRevision({...draft,status:"completed"}));
+assert.throws(()=>validateResolutionRecordRevision({...draft,rfiRequired:true}));
+assert.doesNotThrow(()=>assertResolutionRecordTransition(null,"draft",null));
+assert.doesNotThrow(()=>assertResolutionRecordTransition("draft","completed",null));
+assert.throws(()=>assertResolutionRecordTransition("completed","draft",null));
+assert.doesNotThrow(()=>assertResolutionRecordTransition("verified","draft","Coordination condition changed."));
+const repository=readFileSync(join(import.meta.dirname,"coordination-knowledge-repository.ts"),"utf8");
+const routes=readFileSync(join(import.meta.dirname,"../routes/coordination-knowledge.ts"),"utf8");
+const migration=readFileSync(join(import.meta.dirname,"coordination-knowledge-migration.ts"),"utf8");
+assert.match(repository,/appendResolutionRecordRevision/);
+assert.match(repository,/KNOWLEDGE_VERSION_CONFLICT/);
+assert.match(repository,/Only an approved Resolution Method revision may be selected/);
+assert.match(routes,/lens-context\/:lensViewpointId\/resolution/);
+assert.match(migration,/coordination_resolution_record_revisions/);
+assert.match(migration,/coord_resolution_record_revision_immutable/);
+console.log("Build 256 resolution record contract: PASS");

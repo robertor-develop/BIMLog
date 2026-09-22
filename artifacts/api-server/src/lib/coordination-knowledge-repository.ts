@@ -9,6 +9,11 @@ import {
   validateCoordinationRuleRevision,
   validateResolutionMethodRevision,
 } from "./coordination-knowledge-contract";
+import {
+  assertResolutionRecordTransition,
+  validateResolutionRecordRevision,
+  type ResolutionRecordStatus,
+} from "./coordination-resolution-record-contract";
 
 type QueryResult = { rows: Array<Record<string, unknown>>; rowCount?: number | null };
 export type KnowledgeQueryClient = { query(sql: string, params?: unknown[]): Promise<QueryResult> };
@@ -434,6 +439,55 @@ export class CoordinationKnowledgeRepository {
       else if(input.conflictTypeRevisionId) await client.query(`INSERT INTO coordination_project_cases(id,company_id,project_id,lens_viewpoint_id,conflict_type_revision_id,created_by_id) VALUES($1,$2,$3,$4,$5,$6)`,[projectCaseId,companyId,projectId,lensViewpointId,input.conflictTypeRevisionId,actorId]);
       else return;
       await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,'project_case',$3,$4,'issue_classification_changed',$5,$6::jsonb)`,[randomUUID(),companyId,projectCaseId,input.conflictTypeRevisionId,actorId,JSON.stringify({fromConflictTypeRevisionId:observed,toConflictTypeRevisionId:input.conflictTypeRevisionId,projectId,lensViewpointId})]);
+    });
+  }
+
+  async getResolutionRecord(input: { companyId: number; projectId: number; lensViewpointId: number }): Promise<Record<string, unknown> | null> {
+    const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId");
+    await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
+    const record=(await this.pool.query(`SELECT record.id,record.project_case_id,record.company_id,record.project_id,record.lens_viewpoint_id,record.created_by_id,record.created_at,record.updated_at,
+      revision.id revision_id,revision.revision,revision.status,revision.method_revision_id,revision.actual_resolution,revision.discipline_changed,revision.responsible_trade,
+      revision.rfi_required,revision.rfi_reference,revision.drawing_submittal_reference,revision.resolved_by_id,revision.resolution_date,
+      revision.verified_by_id,revision.verification_date,revision.reopen_reason,revision.created_by_id revision_created_by_id,revision.created_at revision_created_at
+      FROM coordination_resolution_records record
+      JOIN LATERAL (SELECT * FROM coordination_resolution_record_revisions candidate WHERE candidate.resolution_record_id=record.id AND candidate.company_id=record.company_id AND candidate.project_id=record.project_id ORDER BY candidate.revision DESC LIMIT 1) revision ON true
+      WHERE record.company_id=$1 AND record.project_id=$2 AND record.lens_viewpoint_id=$3`,[companyId,projectId,lensViewpointId])).rows[0]??null;
+    if(!record)return null;
+    const history=(await this.pool.query(`SELECT revision.* FROM coordination_resolution_record_revisions revision
+      WHERE revision.resolution_record_id=$1 AND revision.company_id=$2 AND revision.project_id=$3 ORDER BY revision.revision DESC`,[record.id,companyId,projectId])).rows;
+    return {...record,history};
+  }
+
+  async appendResolutionRecordRevision(input:{companyId:number;projectId:number;lensViewpointId:number;expectedRevision:number;actorId:number;status:"draft"|"completed";methodRevisionId:string|null;actualResolution:string|null;disciplineChanged:string|null;responsibleTrade:string|null;rfiRequired:boolean;rfiReference:string|null;drawingSubmittalReference:string|null}):Promise<Record<string,unknown>>{
+    const companyId=positive(input.companyId,"companyId"),projectId=positive(input.projectId,"projectId"),lensViewpointId=positive(input.lensViewpointId,"lensViewpointId"),actorId=positive(input.actorId,"actorId");
+    await this.assertCanonicalIssueScope(companyId,projectId,lensViewpointId);
+    return transaction(this.pool,async client=>{
+      let projectCase=(await client.query(`SELECT * FROM coordination_project_cases WHERE company_id=$1 AND project_id=$2 AND lens_viewpoint_id=$3 FOR UPDATE`,[companyId,projectId,lensViewpointId])).rows[0]??null;
+      if(!projectCase){
+        const projectCaseId=randomUUID();
+        projectCase=(await client.query(`INSERT INTO coordination_project_cases(id,company_id,project_id,lens_viewpoint_id,created_by_id) VALUES($1,$2,$3,$4,$5) RETURNING *`,[projectCaseId,companyId,projectId,lensViewpointId,actorId])).rows[0];
+      }
+      let record=(await client.query(`SELECT * FROM coordination_resolution_records WHERE company_id=$1 AND project_id=$2 AND lens_viewpoint_id=$3 FOR UPDATE`,[companyId,projectId,lensViewpointId])).rows[0]??null;
+      if(!record){
+        const recordId=randomUUID();
+        record=(await client.query(`INSERT INTO coordination_resolution_records(id,company_id,project_id,project_case_id,lens_viewpoint_id,created_by_id) VALUES($1,$2,$3,$4,$5,$6) RETURNING *`,[recordId,companyId,projectId,projectCase.id,lensViewpointId,actorId])).rows[0];
+      }
+      const current=(await client.query(`SELECT * FROM coordination_resolution_record_revisions WHERE resolution_record_id=$1 AND company_id=$2 AND project_id=$3 ORDER BY revision DESC LIMIT 1 FOR UPDATE`,[record.id,companyId,projectId])).rows[0]??null;
+      const observed=current?Number(current.revision):0;
+      if(observed!==input.expectedRevision)throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_VERSION_CONFLICT","Resolution Record revision is stale.",409);
+      const from=current?String(current.status) as ResolutionRecordStatus:null;
+      try{assertResolutionRecordTransition(from,input.status,null);}catch{throw new CoordinationKnowledgeRepositoryError("RESOLUTION_RECORD_TRANSITION_INVALID","The requested Resolution Record transition is invalid.",409);}
+      if(input.methodRevisionId){
+        const method=(await client.query(`SELECT id FROM coordination_resolution_method_revisions WHERE id=$1 AND company_id=$2 AND status='approved'`,[input.methodRevisionId,companyId])).rows[0];
+        if(!method)throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_APPROVED_RESOLUTION_METHOD_REQUIRED","Only an approved Resolution Method revision may be selected.",409);
+      }
+      const now=new Date().toISOString(),next=validateResolutionRecordRevision({id:randomUUID(),resolutionRecordId:String(record.id),projectCaseId:String(projectCase.id),companyId,projectId,lensViewpointId,revision:observed+1,status:input.status,methodRevisionId:input.methodRevisionId,actualResolution:input.actualResolution,disciplineChanged:input.disciplineChanged,responsibleTrade:input.responsibleTrade,rfiRequired:input.rfiRequired,rfiReference:input.rfiReference,drawingSubmittalReference:input.drawingSubmittalReference,resolvedById:input.status==="completed"?actorId:null,resolutionDate:input.status==="completed"?now:null,verifiedById:null,verificationDate:null,reopenReason:null,createdById:actorId});
+      const inserted=(await client.query(`INSERT INTO coordination_resolution_record_revisions(id,resolution_record_id,project_case_id,company_id,project_id,lens_viewpoint_id,revision,status,method_revision_id,actual_resolution,discipline_changed,responsible_trade,rfi_required,rfi_reference,drawing_submittal_reference,resolved_by_id,resolution_date,verified_by_id,verification_date,reopen_reason,created_by_id)
+        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21) RETURNING *`,[next.id,next.resolutionRecordId,next.projectCaseId,next.companyId,next.projectId,next.lensViewpointId,next.revision,next.status,next.methodRevisionId,next.actualResolution,next.disciplineChanged,next.responsibleTrade,next.rfiRequired,next.rfiReference,next.drawingSubmittalReference,next.resolvedById,next.resolutionDate,next.verifiedById,next.verificationDate,next.reopenReason,next.createdById])).rows[0];
+      await client.query(`UPDATE coordination_resolution_records SET updated_at=now() WHERE id=$1 AND company_id=$2 AND project_id=$3`,[record.id,companyId,projectId]);
+      await client.query(`UPDATE coordination_project_cases SET resolution_method_revision_id=$1,status=$2,actual_resolution=$3,resolved_by_id=$4,resolved_at=$5,verified_by_id=NULL,verified_at=NULL,updated_at=now() WHERE id=$6 AND company_id=$7 AND project_id=$8`,[next.methodRevisionId,next.status==="completed"?"resolved":"open",next.status==="completed"?next.actualResolution:null,next.resolvedById,next.resolutionDate,projectCase.id,companyId,projectId]);
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,project_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,$3,'project_case',$4,$5,$6,$7,$8::jsonb)`,[randomUUID(),companyId,projectId,projectCase.id,next.id,next.status==="completed"?"resolution_completed":"resolution_draft_saved",actorId,JSON.stringify({from,to:next.status,revision:next.revision,lensViewpointId})]);
+      return inserted;
     });
   }
 
