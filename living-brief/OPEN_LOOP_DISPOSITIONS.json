@@ -69,9 +69,9 @@
       "classification": "ACTIVE",
       "workClass": "PRODUCT_WORK",
       "ownership": {
-        "owner": "Platform",
-        "route": "/dashboard",
-        "module": "artifacts/bimlog/src/App.tsx"
+        "owner": "Lens Next",
+        "route": "/lens-next",
+        "module": "artifacts/bimlog/src/features/lens-next"
       },
       "evidence": [
         "OPEN_LOOP.md:11",

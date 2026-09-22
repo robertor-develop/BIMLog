@@ -33,6 +33,7 @@ const knownClosedCheckpointPattern = /Build 100 release|Build 115 head|Builds 11
 
 function productOwner(heading, statement) {
   const value = `${heading} ${statement}`;
+  if (/Coordination Knowledge Library/i.test(value)) return { owner: "Lens Next", route: "/lens-next", module: "artifacts/bimlog/src/features/lens-next" };
   if (/Lens|Navisworks|clash/i.test(value)) return { owner: "Lens Next", route: "/lens-next", module: "artifacts/bimlog/src/features/lens-next" };
   if (/RFI/i.test(value)) return { owner: "RFI", route: "/projects/:id/rfis", module: "artifacts/bimlog/src/pages/project/RfisTab.tsx" };
   if (/Submittal/i.test(value)) return { owner: "Submittals", route: "/projects/:id/submittals", module: "artifacts/bimlog/src/pages/project/SubmittalsTab.tsx" };
