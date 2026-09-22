@@ -38366,6 +38366,95 @@
         "scripts/test-edt-engine-block07.mjs"
       ],
       "reviewedChangeSha256": "40d17bc7f8ecc39e6bf6cecd11127b5f82e902e02313dfc6ac15997a01e2e59d"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block08-20260922",
+      "reviewedThroughCommit": "909604f45caa0dd9b376e3c0ba3e782e339213d4",
+      "reviewedAt": "2026-09-22T22:52:57Z",
+      "status": "corrective_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Five EDT service integrity defects corrected; four guarded browser mutations remain fail-closed until canonical server derivation and UI integration."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Intake and financial records remain authoritative."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing fail-closed and release gates remain applicable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing security, financial and evidence requirements apply."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new product roadmap promise."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated inventory includes five new EDT tests and service behavior changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native or installer source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export presentation changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Block 8 source and release limitations are explicit."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Release gates and EDT integration remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only audit behavior remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/edt-engine-build293.behavior.ts",
+        "evidence/edt-engine-program-20260922/BLOCK_08_REPORT.md",
+        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "package.json",
+        "scripts/test-edt-engine-block08.mjs"
+      ],
+      "reviewedChangeSha256": "d3674349de2de4308a9863cf494d47d8ff01c91a136b8c3d8e3ba1e1571a5e69"
     }
   ]
 }
