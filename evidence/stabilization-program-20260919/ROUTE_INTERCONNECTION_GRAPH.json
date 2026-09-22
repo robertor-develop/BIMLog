@@ -6,8 +6,8 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 625,
-    "frontendApiReferences": 236,
+    "apiRoutes": 629,
+    "frontendApiReferences": 243,
     "routeOwnedTables": 61
   },
   "compatibilityRedirects": [
@@ -2594,6 +2594,30 @@
     {
       "method": "GET",
       "path": "/coordination-knowledge/capabilities",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/lens-context/:lensViewpointId",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/evidence/:entityType/:id",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/coordination-knowledge/events/:entityType/:id",
+      "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
+      "tables": []
+    },
+    {
+      "method": "POST",
+      "path": "/coordination-knowledge/evidence/:entityType/:id",
       "owner": "artifacts/api-server/src/routes/coordination-knowledge.ts",
       "tables": []
     },
@@ -8772,6 +8796,34 @@
     {
       "screen": "artifacts/bimlog/src/pages/Contact.tsx",
       "apiPath": "${API_BASE}/api/v1/contact"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/coordination-knowledge-block4.behavior.ts",
+      "apiPath": "/api/v1/projects/${entry.project_id}/files/${entry.file_id}/download"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/${kind}/${encodeURIComponent(entityId)}/${action}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/evidence/${entityType}/${encodeURIComponent(entityId)}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/events/${entityType}/${encodeURIComponent(entityId)}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+      "apiPath": "/api/v1/projects/${entry.project_id}/files/${entry.file_id}/download"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/conflict-types/${encodeURIComponent(entityId)}${path}"
+    },
+    {
+      "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeAuthoring.tsx",
+      "apiPath": "${API_BASE}/api/v1/coordination-knowledge/${kind}/${encodeURIComponent(entityId)}"
     },
     {
       "screen": "artifacts/bimlog/src/pages/CoordinationKnowledgeLibrary.tsx",
