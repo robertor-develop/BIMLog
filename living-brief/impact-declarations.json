@@ -37776,6 +37776,100 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "ffc6d73c1dc97395eb6055a734cc41d03a5bc143d58bfdc8ce83dbc71fd48dac"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block02-release-20260922",
+      "reviewedThroughCommit": "11f0af43ff4f82d140b19452347af397ae04ff3a",
+      "reviewedAt": "2026-09-22T11:00:38.7166827-04:00",
+      "status": "release_reconciliation",
+      "captureTiming": "immediate_same_task_chain",
+      "capabilityPreflight": {
+        "checkedBeforeExecution": true,
+        "agentCapable": [
+          "read_repository",
+          "run_local_validation",
+          "create_clean_commit",
+          "normal_push"
+        ],
+        "operatorOnly": [
+          "replit_shell_publication",
+          "production_database_preview",
+          "production_smoke"
+        ]
+      },
+      "immediateFindings": [
+        {
+          "category": "migration_git_publish_deployment_or_rollback_hazard",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "Builds 281-285 add granular EDT authorization contracts and compact company-catalog administration without schema, Native, installer, destructive database, or automated send changes. Publication requires exact-source Replit Shell deployment and authenticated Chrome verification."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Company-owned reusable configuration and canonical operational evidence remain the governing ecosystem boundary."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing MAIN-only Replit, evidence, acceptance, and terminal reporting controls remain applicable."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established security, accessibility, regression, clean-build, and live acceptance gates remain controlling."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "This block implements the approved governed EDT authorization and company configuration direction."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The deterministic structural inventory now includes the EDT permission, eligibility, catalog-usage, and acceptance contracts."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, loopback bridge, installer, package, discovery path, or Navisworks-facing source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No governed PDF, Word, spreadsheet, or report visual contract changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external industry standard, professional citation, or standards authority changed."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The block evidence ledger records local completion without pre-claiming production acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing program open loop remains active through later EDT implementation blocks."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only decision, evidence, lifecycle, and attribution requirements remain unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
