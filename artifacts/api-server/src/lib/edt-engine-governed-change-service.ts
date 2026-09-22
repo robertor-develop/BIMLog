@@ -16,7 +16,7 @@ export async function requestGovernedEdtChange(input:{actor:Actor;companyId:numb
   const fingerprint=edtFingerprint({actionType:input.actionType,workItemId:input.workItemId??null,targetVersion:input.targetVersion,beforeState:input.beforeState,afterState:input.afterState});
   return withEdtTransaction(async client=>{
     await client.query("SELECT pg_advisory_xact_lock(hashtext($1))",[`edt-change:${input.projectId}:${input.idempotencyKey}`]);
-    if(input.workItemId){const item=(await client.query<{id:string}>("SELECT id FROM job_activation_work_items WHERE id=$1 AND project_id=$2 FOR UPDATE",[input.workItemId,input.projectId])).rows[0];if(!item)throw new EdtEngineConflict("WORK_ITEM_SCOPE_MISMATCH","Work Item is outside this project.");}
+    if(input.workItemId){const item=(await client.query<{id:string}>("SELECT id FROM job_activation_work_items WHERE id=$1 AND project_id=$2 AND company_id=$3 FOR UPDATE",[input.workItemId,input.projectId,input.companyId])).rows[0];if(!item)throw new EdtEngineConflict("WORK_ITEM_SCOPE_MISMATCH","Work Item is outside this company/project.");}
     const existing=(await client.query<{id:string;request_fingerprint:string;state:string}>("SELECT id,request_fingerprint,state FROM job_governed_change_requests WHERE project_id=$1 AND idempotency_key=$2",[input.projectId,input.idempotencyKey])).rows[0];
     if(existing){if(existing.request_fingerprint!==fingerprint)throw new EdtEngineConflict("IDEMPOTENCY_CONFLICT","Idempotency key represents different change content.");return{id:existing.id,fingerprint,state:existing.state,idempotent:true};}
     const id=deterministicEdtId("governed-change",`${input.projectId}:${input.idempotencyKey}`);
@@ -27,7 +27,7 @@ export async function requestGovernedEdtChange(input:{actor:Actor;companyId:numb
 
 export async function decideGovernedEdtChange(input:{actor:Actor;companyId:number;projectId:number;requestId:string;expectedFingerprint:string;outcome:"approved"|"rejected";reason:string;evidence:Record<string,unknown>},host?:EdtTransactionHost){
   return withEdtTransaction(async client=>{
-    const request=(await client.query<any>("SELECT * FROM job_governed_change_requests WHERE id=$1 FOR UPDATE",[input.requestId])).rows[0];
+    const request=(await client.query<any>("SELECT * FROM job_governed_change_requests WHERE id=$1 AND project_id=$2 AND company_id=$3 FOR UPDATE",[input.requestId,input.projectId,input.companyId])).rows[0];
     if(!request)throw new EdtEngineConflict("CHANGE_REQUEST_NOT_FOUND","Governed change request was not found.");
     authorize(input.actor,"GOVERNED_CHANGE_APPROVE",request.company_id,request.project_id,request.requested_by_id);
     if(request.company_id!==input.companyId||request.project_id!==input.projectId||request.request_fingerprint!==input.expectedFingerprint||request.state!=="pending")throw new EdtEngineConflict("CHANGE_REQUEST_CONFLICT","Governed change request is stale or mismatched.");

@@ -11,7 +11,7 @@ export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:nu
   if(!/^[A-Z]{3}$/.test(input.currency))throw new EdtEngineConflict("CURRENCY_INVALID","Currency must be an ISO-style three-letter code.");
   const sourceFingerprint=edtFingerprint(input.sourceSnapshot);const planFingerprint=edtFingerprint({workItemId:input.workItemId,contractVersionId:input.contractVersionId,pricingTemplateVersionId:input.pricingTemplateVersionId,deliveryWorkflowVersionId:input.deliveryWorkflowVersionId,currency:input.currency,amounts:[input.directProductionAmount,input.projectAdministrativeAmount,input.incentiveReserveAmount,input.taskEarningsAmount,input.projectEarningsAmount],resolvedAllocation:input.resolvedAllocation});
   return withEdtTransaction(async client=>{
-    const item=(await client.query<any>("SELECT id,intake_id,project_id,contract_id,contract_version_id,economic_plan_fingerprint FROM job_activation_work_items WHERE id=$1 AND project_id=$2 FOR UPDATE",[input.workItemId,input.projectId])).rows[0];
+    const item=(await client.query<any>("SELECT id,intake_id,project_id,contract_id,contract_version_id,economic_plan_fingerprint FROM job_activation_work_items WHERE id=$1 AND project_id=$2 AND company_id=$3 FOR UPDATE",[input.workItemId,input.projectId,input.companyId])).rows[0];
     if(!item||item.intake_id!==input.intakeId||item.contract_id!==input.contractId||item.contract_version_id!==input.contractVersionId)throw new EdtEngineConflict("ECONOMIC_SCOPE_MISMATCH","Economic plan does not match the activated Work Item contract.");
     const existing=(await client.query<{plan_fingerprint:string}>("SELECT plan_fingerprint FROM job_activation_work_item_economic_plans WHERE work_item_id=$1",[input.workItemId])).rows[0];
     if(existing){if(existing.plan_fingerprint!==planFingerprint)throw new EdtEngineConflict("ECONOMIC_PLAN_IMMUTABLE","An activated Work Item economic plan cannot be replaced.");return{planFingerprint,idempotent:true};}
@@ -25,7 +25,7 @@ export async function createWorkItemEconomicPlan(input:{actor:Actor;companyId:nu
 export async function transitionTimeEntry(input:{actor:Actor;companyId:number;projectId:number;entryId:string;expectedVersion:number;decision:"submit"|"approve"|"reject";budgetAccountId:string;pool:"direct_production"|"project_administrative";amount:string;reason:string;evidence:Record<string,unknown>},host?:EdtTransactionHost){
   nonnegative(input.amount,"amount");
   return withEdtTransaction(async client=>{
-    const entry=(await client.query<any>("SELECT e.*,w.project_id,w.intake_id FROM job_activation_time_entries e JOIN job_activation_work_items w ON w.id=e.work_item_id WHERE e.id=$1 AND w.project_id=$2 FOR UPDATE OF e",[input.entryId,input.projectId])).rows[0];
+    const entry=(await client.query<any>("SELECT e.*,w.project_id,w.intake_id FROM job_activation_time_entries e JOIN job_activation_work_items w ON w.id=e.work_item_id WHERE e.id=$1 AND w.project_id=$2 AND w.company_id=$3 FOR UPDATE OF e",[input.entryId,input.projectId,input.companyId])).rows[0];
     if(!entry||Number(entry.optimistic_version)!==input.expectedVersion)throw new EdtEngineConflict("TIME_ENTRY_STALE","Time entry is missing or stale.");
     const submit=input.decision==="submit";authorize(input.actor,submit?"TIME_SUBMIT":"TIME_APPROVE",input.companyId,input.projectId,submit?undefined:entry.submitted_by_id);
     if(submit&&!(["draft","rejected"].includes(entry.status)))throw new EdtEngineConflict("TIME_TRANSITION_INVALID","Only draft or rejected time may be submitted.");

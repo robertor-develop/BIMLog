@@ -5,6 +5,7 @@ import { approveEdtActivation, requestEdtActivation } from "../lib/edt-engine-ac
 import { EdtEngineConflict } from "../lib/edt-engine-transaction";
 import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-engine-governed-change-service";
 import { createWorkItemEconomicPlan, transitionTimeEntry } from "../lib/edt-engine-economic-service";
+import { decideWorkItemQc, previewResultImport, submitWorkItemIssuance } from "../lib/edt-engine-qc-import-service";
 
 const router: IRouter = Router();
 
@@ -109,6 +110,39 @@ router.post("/projects/:projectId/edt-engine/time-entries/:entryId/transition",a
     const result=await transitionTimeEntry({actor,companyId:actor.actorCompanyId,projectId,entryId:String(req.params.entryId),expectedVersion:requiredInteger(body,"expectedVersion"),
       decision:decision as "submit"|"approve"|"reject",budgetAccountId:requiredText(body,"budgetAccountId"),pool,amount:requiredText(body,"amount"),reason:requiredText(body,"reason"),evidence:recordField(body,"evidence")});
     res.json(result);
+  }catch(error){sendEdtRouteError(res,error);}
+});
+
+router.post("/projects/:projectId/edt-engine/work-items/:workItemId/issuances",authMiddleware,async(req,res):Promise<void>=>{
+  try{
+    const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);const kind=requiredText(body,"kind");
+    if(!["initial","internal_issuance","external_revision","corrected_resubmittal","reopen"].includes(kind))throw new EdtEngineConflict("REQUEST_BODY_INVALID","kind is not supported.");
+    const evidenceFileId=body.evidenceFileId===undefined?undefined:requiredInteger(body,"evidenceFileId");
+    const result=await submitWorkItemIssuance({actor,companyId:actor.actorCompanyId,projectId,workItemId:String(req.params.workItemId),
+      kind:kind as Parameters<typeof submitWorkItemIssuance>[0]["kind"],packageSnapshot:recordField(body,"packageSnapshot"),evidenceFileId,sourceEvidence:recordField(body,"sourceEvidence")});
+    res.status(result.idempotent?200:201).json(result);
+  }catch(error){sendEdtRouteError(res,error);}
+});
+
+router.post("/projects/:projectId/edt-engine/issuances/:issuanceId/qc-decisions",authMiddleware,async(req,res):Promise<void>=>{
+  try{
+    const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);
+    const decisionKind=requiredText(body,"decisionKind"),outcome=requiredText(body,"outcome");
+    if(!["review","final_approval","reopen_approval"].includes(decisionKind)||!["approved","rejected"].includes(outcome))throw new EdtEngineConflict("REQUEST_BODY_INVALID","QC decision is not supported.");
+    if(!Array.isArray(body.conflictUserIds)||body.conflictUserIds.some(value=>!Number.isInteger(value)))throw new EdtEngineConflict("REQUEST_BODY_INVALID","conflictUserIds must be an integer array.");
+    const result=await decideWorkItemQc({actor,companyId:actor.actorCompanyId,projectId,issuanceId:String(req.params.issuanceId),
+      decisionKind:decisionKind as Parameters<typeof decideWorkItemQc>[0]["decisionKind"],outcome:outcome as "approved"|"rejected",reason:requiredText(body,"reason"),evidence:recordField(body,"evidence"),conflictUserIds:body.conflictUserIds as number[]});
+    res.status(201).json(result);
+  }catch(error){sendEdtRouteError(res,error);}
+});
+
+router.post("/projects/:projectId/edt-engine/intakes/:intakeId/result-imports/preview",authMiddleware,async(req,res):Promise<void>=>{
+  try{
+    const projectId=edtProjectId(req);const actor=await resolveEdtRouteActor(req,projectId);const body=bodyRecord(req.body);
+    if(!Array.isArray(body.rows))throw new EdtEngineConflict("REQUEST_BODY_INVALID","rows must be an array.");
+    const result=await previewResultImport({actor,companyId:actor.actorCompanyId,projectId,intakeId:String(req.params.intakeId),intakeRevision:requiredInteger(body,"intakeRevision"),
+      fileId:requiredInteger(body,"fileId"),fileSha256:requiredText(body,"fileSha256"),parserVersion:requiredText(body,"parserVersion"),structuralRange:requiredText(body,"structuralRange"),rows:body.rows as Parameters<typeof previewResultImport>[0]["rows"]});
+    res.status(result.idempotent?200:201).json(result);
   }catch(error){sendEdtRouteError(res,error);}
 });
 
