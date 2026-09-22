@@ -1,7 +1,6 @@
 import { Router, type IRouter } from "express";
 import { authMiddleware } from "../middlewares/auth";
 import { edtProjectId, resolveEdtRouteActor, sendEdtRouteError } from "../lib/edt-engine-route-context";
-import { approveEdtActivation, requestEdtActivation } from "../lib/edt-engine-activation-service";
 import { EdtEngineConflict } from "../lib/edt-engine-transaction";
 import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-engine-governed-change-service";
 import { createWorkItemEconomicPlan, transitionTimeEntry } from "../lib/edt-engine-economic-service";
@@ -39,28 +38,17 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
 
 router.post("/projects/:projectId/edt-engine/activation-requests", authMiddleware, async (req, res): Promise<void> => {
   try {
-    const projectId = edtProjectId(req); const actor = await resolveEdtRouteActor(req, projectId); const body = bodyRecord(req.body);
-    const workflowVersionIds = body.workflowVersionIds;
-    if (!Array.isArray(workflowVersionIds) || workflowVersionIds.some(value => typeof value !== "string" || !value)) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "workflowVersionIds must be a string array.");
-    const result = await requestEdtActivation({ actor, companyId: actor.actorCompanyId, projectId,
-      intakeId: requiredText(body,"intakeId"), intakeRevision: requiredInteger(body,"intakeRevision"),
-      governanceVersionId: requiredText(body,"governanceVersionId"), pricingVersionId: requiredText(body,"pricingVersionId"),
-      workflowVersionIds, reason: requiredText(body,"reason"), evidence: recordField(body,"evidence"),
-      idempotencyKey: requiredText(body,"idempotencyKey") });
-    res.status(result.idempotent ? 200 : 201).json(result);
+    const projectId = edtProjectId(req);
+    await resolveEdtRouteActor(req, projectId);
+    throw new EdtEngineConflict("ACTIVATION_PLAN_NOT_SERVER_RESOLVED", "Governed EDT activation cannot start until versions and the EDT plan are resolved from saved server records. Use the existing Intake activation for now.");
   } catch (error) { sendEdtRouteError(res,error); }
 });
 
 router.post("/projects/:projectId/edt-engine/activation-requests/:requestId/approve", authMiddleware, async (req, res): Promise<void> => {
   try {
-    const projectId = edtProjectId(req); const actor = await resolveEdtRouteActor(req, projectId); const body = bodyRecord(req.body);
-    if (!Array.isArray(body.nodes) || !Array.isArray(body.workItems)) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "nodes and workItems must be arrays.");
-    const result = await approveEdtActivation({ actor, companyId: actor.actorCompanyId, projectId,
-      requestId: String(req.params.requestId), expectedFingerprint: requiredText(body,"expectedFingerprint"),
-      reason: requiredText(body,"reason"), evidence: recordField(body,"evidence"),
-      nodes: body.nodes as Parameters<typeof approveEdtActivation>[0]["nodes"],
-      workItems: body.workItems as Parameters<typeof approveEdtActivation>[0]["workItems"] });
-    res.json(result);
+    const projectId = edtProjectId(req);
+    await resolveEdtRouteActor(req, projectId);
+    throw new EdtEngineConflict("ACTIVATION_PLAN_NOT_SERVER_RESOLVED", "Governed EDT activation cannot approve a client-supplied plan. Complete the existing Intake activation while server-side plan resolution is integrated.");
   } catch (error) { sendEdtRouteError(res,error); }
 });
 
