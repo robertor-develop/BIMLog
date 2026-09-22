@@ -37,6 +37,19 @@ export async function approveEdtActivation(input:{ actor:Actor; companyId:number
     if (request.company_id!==input.companyId || request.project_id!==input.projectId || request.request_fingerprint!==input.expectedFingerprint) throw new EdtEngineConflict("ACTIVATION_REQUEST_MISMATCH","Activation scope or fingerprint changed.");
     const intake=(await client.query<{revision:number;status:string}>("SELECT revision,status FROM job_intakes WHERE id=$1 AND project_id=$2 AND company_id=$3 FOR UPDATE",[request.intake_id,input.projectId,input.companyId])).rows[0];
     if(!intake||intake.revision!==request.intake_revision||intake.status==="activated"||request.state!=="pending")throw new EdtEngineConflict("INTAKE_REVISION_CONFLICT","The saved Intake changed or was activated after this EDT request. Create a new request from the current Intake.");
+    if(input.nodes.length===0||input.workItems.length===0||input.nodes.filter(node=>node.kind==="project").length!==1)
+      throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT approval requires a complete project-rooted plan and Work Items.");
+    const sourceKeys=new Set<string>();
+    for(const node of input.nodes){
+      if(!node.sourceIdentity||!node.code||!node.name||!Number.isInteger(node.sequence)||node.sequence<=0)
+        throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Every EDT node needs source identity, code, name and positive sequence.");
+      const key=`${node.kind}:${node.sourceIdentity}`;
+      if(sourceKeys.has(key)||node.parentSourceIdentity&&!input.nodes.some(parent=>parent.sourceIdentity===node.parentSourceIdentity))
+        throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT node identities must be unique and parents must exist in this plan.");
+      sourceKeys.add(key);
+    }
+    if(input.workItems.some(item=>!item.id||!input.nodes.some(node=>node.sourceIdentity===item.edtNodeSourceIdentity)))
+      throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Every Work Item must bind to a node in this plan.");
     const decisionId=deterministicEdtId("activation-decision",`${request.id}:${input.expectedFingerprint}`);
     const existing=(await client.query<{id:string}>("SELECT id FROM job_activation_decisions WHERE request_id=$1",[request.id])).rows[0];
     if (existing) return { decisionId:existing.id, idempotent:true };
@@ -47,7 +60,8 @@ export async function approveEdtActivation(input:{ actor:Actor; companyId:number
     }
     for(const item of input.workItems){
       const identity={locationIdentity:item.locationIdentity,tradeIdentity:item.tradeIdentity,deliverableTypeIdentity:item.deliverableTypeIdentity};
-      await client.query("UPDATE job_activation_work_items SET edt_node_id=$2,location_identity=$3,location_snapshot=$4::jsonb,trade_identity=$5,trade_snapshot=$6::jsonb,deliverable_type_identity=$7,deliverable_type_snapshot=$8::jsonb,display_code=$9,revision_number=0,issuance_version=0,identity_fingerprint=$10,updated_at=now() WHERE id=$1 AND project_id=$11",[item.id,bySource.get(item.edtNodeSourceIdentity),item.locationIdentity,JSON.stringify(item.locationSnapshot),item.tradeIdentity,JSON.stringify(item.tradeSnapshot),item.deliverableTypeIdentity,JSON.stringify(item.deliverableTypeSnapshot),item.displayCode,edtFingerprint(identity),input.projectId]);
+      const updated=await client.query("UPDATE job_activation_work_items SET edt_node_id=$2,location_identity=$3,location_snapshot=$4::jsonb,trade_identity=$5,trade_snapshot=$6::jsonb,deliverable_type_identity=$7,deliverable_type_snapshot=$8::jsonb,display_code=$9,revision_number=0,issuance_version=0,identity_fingerprint=$10,updated_at=now() WHERE id=$1 AND project_id=$11 AND intake_id=$12",[item.id,bySource.get(item.edtNodeSourceIdentity),item.locationIdentity,JSON.stringify(item.locationSnapshot),item.tradeIdentity,JSON.stringify(item.tradeSnapshot),item.deliverableTypeIdentity,JSON.stringify(item.deliverableTypeSnapshot),item.displayCode,edtFingerprint(identity),input.projectId,request.intake_id]);
+      if(updated.rowCount!==1)throw new EdtEngineConflict("EDT_WORK_ITEM_SCOPE_MISMATCH","Every planned Work Item must exist in this Intake before approval.");
     }
     await client.query("INSERT INTO job_activation_decisions(id,request_id,company_id,project_id,outcome,request_fingerprint,decided_by_id,eligible_role,reason,evidence) VALUES($1,$2,$3,$4,'approved',$5,$6,$7,$8,$9::jsonb)",[decisionId,request.id,input.companyId,input.projectId,input.expectedFingerprint,input.actor.actorUserId,input.actor.eligibleRole,input.reason,JSON.stringify(input.evidence)]);
     await client.query("UPDATE job_activation_requests SET state='approved',decided_at=now(),optimistic_version=optimistic_version+1 WHERE id=$1 AND state='pending'",[request.id]);
