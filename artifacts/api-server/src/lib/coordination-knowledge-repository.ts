@@ -14,7 +14,8 @@ import {
   validateResolutionRecordRevision,
   type ResolutionRecordStatus,
 } from "./coordination-resolution-record-contract";
-import { validateLessonProposalContent } from "./coordination-lesson-workflow";
+import { validateLessonDecision, validateLessonProposalContent } from "./coordination-lesson-workflow";
+import type { LessonProposalStatus } from "./coordination-knowledge-contract";
 
 type QueryResult = { rows: Array<Record<string, unknown>>; rowCount?: number | null };
 export type KnowledgeQueryClient = { query(sql: string, params?: unknown[]): Promise<QueryResult> };
@@ -624,6 +625,31 @@ export class CoordinationKnowledgeRepository {
       const inserted=(await client.query(`INSERT INTO coordination_lesson_proposals(id,company_id,project_id,project_case_id,status,proposal,proposed_by_id) VALUES($1,$2,$3,$4,'proposed',$5,$6) RETURNING *`,[id,companyId,projectId,source.id,JSON.stringify(content),actorId])).rows[0];
       await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,project_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,$3,'lesson_proposal',$4,NULL,'lesson_proposed',$5,$6::jsonb)`,[randomUUID(),companyId,projectId,id,actorId,JSON.stringify({projectCaseId:source.id,lensViewpointId,conflictTypeRevisionId:source.conflict_type_revision_id,resolutionRevisionId:source.resolution_revision_id,evidenceCount:Number(source.evidence_count),content})]);
       return {...inserted,conflict_type_revision_id:source.conflict_type_revision_id,resolution_revision_id:source.resolution_revision_id,evidence_count:Number(source.evidence_count)};
+    });
+  }
+
+  async listLessonProposals(input:{companyId:number;projectId:number|null;includeProjectWide:boolean;status:LessonProposalStatus|null}):Promise<Array<Record<string,unknown>>>{
+    const companyId=positive(input.companyId,"companyId");
+    return (await this.pool.query(`SELECT proposal.*,project_case.lens_viewpoint_id,project_case.conflict_type_revision_id,project_case.status project_case_status,
+      CASE WHEN proposal.status='merged' THEN proposal.promoted_entity_id ELSE NULL END canonical_proposal_id
+      FROM coordination_lesson_proposals proposal JOIN coordination_project_cases project_case ON project_case.id=proposal.project_case_id AND project_case.company_id=proposal.company_id AND project_case.project_id=proposal.project_id
+      WHERE proposal.company_id=$1 AND ($2::integer IS NULL OR proposal.project_id=$2) AND ($3::text IS NULL OR proposal.status=$3)
+      ORDER BY proposal.proposed_at DESC,proposal.id`,[companyId,input.includeProjectWide?input.projectId:null,input.status])).rows;
+  }
+
+  async transitionLessonProposal(input:{companyId:number;proposalId:string;actorId:number;expectedStatus:LessonProposalStatus;to:LessonProposalStatus;rationale:unknown}):Promise<Record<string,unknown>>{
+    const companyId=positive(input.companyId,"companyId"),actorId=positive(input.actorId,"actorId");
+    return transaction(this.pool,async client=>{
+      const current=(await client.query(`SELECT * FROM coordination_lesson_proposals WHERE id=$1 AND company_id=$2 FOR UPDATE`,[input.proposalId,companyId])).rows[0];
+      if(!current)throw new CoordinationKnowledgeRepositoryError("LESSON_PROPOSAL_NOT_FOUND","Lesson Learned proposal not found.",404);
+      const observed=String(current.status) as LessonProposalStatus;
+      if(observed!==input.expectedStatus)throw new CoordinationKnowledgeRepositoryError("KNOWLEDGE_VERSION_CONFLICT","Lesson proposal status changed after it was loaded.",409);
+      let rationale:string|null;
+      try{rationale=validateLessonDecision(observed,input.to,input.rationale);}catch{throw new CoordinationKnowledgeRepositoryError("LESSON_TRANSITION_INVALID","The requested lesson proposal transition is invalid.",409);}
+      const terminal=["approved","rejected","merged"].includes(input.to);
+      const updated=(await client.query(`UPDATE coordination_lesson_proposals SET status=$1,reviewed_by_id=$2,reviewed_at=$3,review_rationale=$4 WHERE id=$5 AND company_id=$6 RETURNING *`,[input.to,terminal?actorId:null,terminal?new Date().toISOString():null,terminal?rationale:null,input.proposalId,companyId])).rows[0];
+      await client.query(`INSERT INTO coordination_knowledge_events(id,company_id,project_id,entity_type,entity_id,revision_id,action,actor_id,details) VALUES($1,$2,$3,'lesson_proposal',$4,NULL,$5,$6,$7::jsonb)`,[randomUUID(),companyId,current.project_id,input.proposalId,`lesson_${input.to}`,actorId,JSON.stringify({from:observed,to:input.to,rationale})]);
+      return updated;
     });
   }
 }

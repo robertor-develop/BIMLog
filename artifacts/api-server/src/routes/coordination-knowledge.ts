@@ -17,6 +17,7 @@ import {
 import { CoordinationKnowledgeRepository, CoordinationKnowledgeRepositoryError } from "../lib/coordination-knowledge-repository";
 import { ensureCoordinationKnowledgeSchema } from "../lib/coordination-knowledge-migration";
 import { CoordinationLessonWorkflowError, validateLessonProposalContent } from "../lib/coordination-lesson-workflow";
+import { lessonProposalStatuses, type LessonProposalStatus } from "../lib/coordination-knowledge-contract";
 
 const router = Router();
 const repository = new CoordinationKnowledgeRepository(pool);
@@ -165,6 +166,17 @@ router.post("/coordination-knowledge/lens-context/:lensViewpointId/lesson-propos
   const lensViewpointId=Number(parameter(req.params.lensViewpointId));if(!Number.isSafeInteger(lensViewpointId)||lensViewpointId<1)throw new CoordinationKnowledgeContractError("KNOWLEDGE_ISSUE_SCOPE_INVALID","lensViewpointId");
   const content=validateLessonProposalContent(req.body??{});const item=await repository.proposeLesson({companyId:resolved.companyId,projectId:resolved.projectId,lensViewpointId,actorId:resolved.userId,content});
   res.status(201).json({item});
+}catch(error){sendError(res,error);}});
+router.get("/coordination-knowledge/lesson-proposals",authMiddleware,async(req,res)=>{try{
+  const resolved=await context(req,"view_draft"),statusRaw=boundedQuery(req.query.status,"status",40),status=statusRaw as LessonProposalStatus|undefined;
+  if(status&&!lessonProposalStatuses.includes(status))throw new CoordinationKnowledgeContractError("LESSON_PROPOSAL_INVALID","status");
+  res.json({items:await repository.listLessonProposals({companyId:resolved.companyId,projectId:resolved.projectId,includeProjectWide:resolved.projectId!==null,status:status??null})});
+}catch(error){sendError(res,error);}});
+for(const action of ["submit-review","return-proposed","approve","reject"] as const)router.post(`/coordination-knowledge/lesson-proposals/:id/${action}`,authMiddleware,async(req,res)=>{try{
+  const capability:KnowledgeCapability=action==="approve"?"approve":"review",resolved=await context(req,capability),expected=req.body?.expectedStatus;
+  if(typeof expected!=="string"||!lessonProposalStatuses.includes(expected as LessonProposalStatus))throw new CoordinationKnowledgeContractError("LESSON_PROPOSAL_INVALID","expectedStatus");
+  const to:LessonProposalStatus=action==="submit-review"?"under_review":action==="return-proposed"?"proposed":action==="approve"?"approved":"rejected";
+  const item=await repository.transitionLessonProposal({companyId:resolved.companyId,proposalId:parameter(req.params.id),actorId:resolved.userId,expectedStatus:expected as LessonProposalStatus,to,rationale:req.body?.rationale});res.json({item});
 }catch(error){sendError(res,error);}});
 
 router.get("/coordination-knowledge/evidence/:entityType/:id",authMiddleware,async(req,res)=>{try{const resolved=await context(req,"view_approved"),entityType=evidenceChoice(parameter(req.params.entityType),evidenceEntityTypes,"entityType"),entityId=parameter(req.params.id);res.json({items:await repository.listEvidence(resolved.companyId,entityType,entityId)});}catch(error){sendError(res,error);}});
