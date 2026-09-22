@@ -5,6 +5,24 @@ type Actor = Pick<EdtRecordAuthorizationInput,"grants"|"actorUserId"|"actorCompa
 export type EdtPlanNode = Readonly<{ kind:"project"|"contract"|"deliverable"|"location"; sourceIdentity:string; parentSourceIdentity?:string; code:string; name:string; sequence:number; snapshot:Record<string,unknown> }>;
 export type EdtPlanWorkItem = Readonly<{ id:string; edtNodeSourceIdentity:string; locationIdentity:string; locationSnapshot:Record<string,unknown>; tradeIdentity:string; tradeSnapshot:Record<string,unknown>; deliverableTypeIdentity:string; deliverableTypeSnapshot:Record<string,unknown>; displayCode:string }>;
 
+export function validateEdtPlanNodes(nodes:readonly EdtPlanNode[]):void{
+  if(nodes.length===0||nodes[0].kind!=="project"||nodes.filter(node=>node.kind==="project").length!==1)
+    throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT nodes must begin with exactly one project root.");
+  const seen=new Map<string,EdtPlanNode>();
+  const siblingSequences=new Set<string>();
+  const expectedParent:Record<EdtPlanNode["kind"],EdtPlanNode["kind"]|null>={project:null,contract:"project",deliverable:"contract",location:"deliverable"};
+  for(const node of nodes){
+    if(!node.sourceIdentity||!node.code||!node.name||!Number.isInteger(node.sequence)||node.sequence<=0||seen.has(node.sourceIdentity))
+      throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT nodes require unique identities, code, name and positive sequence.");
+    const parent=node.parentSourceIdentity?seen.get(node.parentSourceIdentity):undefined;
+    if(expectedParent[node.kind]===null?Boolean(node.parentSourceIdentity):!parent||parent.kind!==expectedParent[node.kind])
+      throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT nodes must be ordered project, contract, deliverable, location with a valid parent.");
+    const siblingKey=`${node.parentSourceIdentity??"<root>"}:${node.sequence}`;
+    if(siblingSequences.has(siblingKey))throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Sibling EDT sequences must be unique.");
+    siblingSequences.add(siblingKey);seen.set(node.sourceIdentity,node);
+  }
+}
+
 function requireAuthorization(input: EdtRecordAuthorizationInput) {
   const decision = decideEdtRecordAuthorization(input);
   if (!decision.allow) throw new EdtEngineConflict(decision.code, "EDT activation authorization denied.");
@@ -42,17 +60,9 @@ export async function approveEdtActivation(input:{ actor:Actor; companyId:number
     }
     const intake=(await client.query<{revision:number;status:string}>("SELECT revision,status FROM job_intakes WHERE id=$1 AND project_id=$2 AND company_id=$3 FOR UPDATE",[request.intake_id,input.projectId,input.companyId])).rows[0];
     if(!intake||intake.revision!==request.intake_revision||intake.status==="activated"||request.state!=="pending")throw new EdtEngineConflict("INTAKE_REVISION_CONFLICT","The saved Intake changed or was activated after this EDT request. Create a new request from the current Intake.");
-    if(input.nodes.length===0||input.workItems.length===0||input.nodes.filter(node=>node.kind==="project").length!==1)
+    if(input.workItems.length===0)
       throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT approval requires a complete project-rooted plan and Work Items.");
-    const sourceKeys=new Set<string>();
-    for(const node of input.nodes){
-      if(!node.sourceIdentity||!node.code||!node.name||!Number.isInteger(node.sequence)||node.sequence<=0)
-        throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Every EDT node needs source identity, code, name and positive sequence.");
-      const key=node.sourceIdentity;
-      if(sourceKeys.has(key)||node.parentSourceIdentity&&!input.nodes.some(parent=>parent.sourceIdentity===node.parentSourceIdentity))
-        throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT source identities must be globally unique and parents must exist in this plan.");
-      sourceKeys.add(key);
-    }
+    validateEdtPlanNodes(input.nodes);
     if(input.workItems.some(item=>!item.id||!input.nodes.some(node=>node.sourceIdentity===item.edtNodeSourceIdentity)))
       throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Every Work Item must bind to a node in this plan.");
     const decisionId=deterministicEdtId("activation-decision",`${request.id}:${input.expectedFingerprint}`);
