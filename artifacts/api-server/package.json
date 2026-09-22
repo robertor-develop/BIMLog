@@ -40,6 +40,7 @@
     "test:coordination-knowledge-build270": "tsx ./src/lib/coordination-knowledge-build270.behavior.ts",
     "test:coordination-knowledge-block9": "pnpm run test:coordination-knowledge-build266 && pnpm run test:coordination-knowledge-build267 && pnpm run test:coordination-knowledge-build268 && pnpm run test:coordination-knowledge-build269 && pnpm run test:coordination-knowledge-build270",
     "test:coordination-knowledge-build271": "tsx ./src/lib/coordination-knowledge-build271-security.behavior.ts",
+    "test:coordination-knowledge-build272": "tsx ./src/lib/coordination-knowledge-build272-migration.behavior.ts",
     "test:multipart-security": "tsx ./scripts/test-multipart-security.ts",
     "test:feedback-addendum": "tsx ./src/lib/feedback-evidence-contract.behavior.ts && tsx ./src/lib/storage-adapter.behavior.ts && tsx ./src/lib/feedback-backup-worker.behavior.ts && tsx ./src/lib/feedback-package.behavior.ts && tsx ./src/lib/feedback-follow-up.behavior.ts && tsx ./src/lib/feedback-scanner.behavior.ts && tsx ./src/lib/feedback-scan-worker.behavior.ts && tsx ./src/lib/feedback-notification-worker.behavior.ts && tsx ./src/lib/feedback-telegram-worker.behavior.ts && tsx ./src/lib/feedback-reviewer-projection.behavior.ts && tsx ./src/lib/feedback-route-authority.behavior.ts",
     "test:feedback-addendum-db": "tsx ./src/lib/feedback-http-db.behavior.ts",
