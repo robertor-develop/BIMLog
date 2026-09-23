@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { previewActivatedEdtPlan } from "./edt-engine-plan-projection";
+import { previewEdtActivationCandidate } from "./edt-engine-activation-candidate";
 import type { EdtTransactionHost } from "./edt-engine-transaction";
 import { BIMLOG_DELIVERY_WORKFLOWS } from "./delivery-workflow-defaults";
 // @ts-expect-error Runtime pg dependency is installed; isolated SQL proof does not require optional declarations.
@@ -16,7 +17,8 @@ const host: EdtTransactionHost = { async connect() { return { async query<Row>(s
   if (sql.includes("FROM job_intakes")) return { rows: [{ id: "intake-1", company_id: 7, project_id: 11, status: "activated", revision: 4,
     data: { commercial: { contracts: [{ id: "BASE", contractNumber: "B1", title: "Base" }] }, scopeItems: [{ id: "scope-1", contractId: "BASE", deliverableType: "SLEEVE",
       workPackages: [{ id: "wp-1", dimensionType: "floor", dimensionValue: "L2", classification: { disciplineId: "trade-1", disciplineCode: "HVAC" } }] }] },
-    activation_summary: { contracts: [{ profileId: "BASE", contractId: "contract-1", contractVersionId: "version-1" }] } }] as Row[] };
+    activation_summary: { configurationSnapshot: { budgetGovernancePolicy: "standard", deliveryMethod: workflow.code },
+      contracts: [{ profileId: "BASE", contractId: "contract-1", contractVersionId: "version-1" }] } }] as Row[] };
   if (sql.includes("FROM projects")) return { rows: [{ id: 11, code: "P11", name: "Project 11" }] as Row[] };
   if (sql.includes("FROM job_activation_work_items")) return { rows: [{ id: "wi-1", stableScopeItemId: "scope-1", contractId: "contract-1", contractVersionId: "version-1", status: "active" }] as Row[] };
   if (sql.includes("FROM financial_contracts")) return { rows: fault === "contract" ? [] : [{ contractId: "contract-1", versionId: "version-1", currency: "USD", contentFingerprint: "a".repeat(64) }] as Row[] };
@@ -28,6 +30,10 @@ const host: EdtTransactionHost = { async connect() { return { async query<Row>(s
 
 const input = { companyId: 7, projectId: 11, intakeId: "intake-1" };
 const plan = await previewActivatedEdtPlan(input, host);
+const candidate = await previewEdtActivationCandidate(input, host);
+assert.equal(candidate.sourceFingerprint, plan.sourceFingerprint);
+assert.equal(candidate.plan.workItems.length, 1);
+assert.equal(candidate.workflowVersionIds.length, 1);
 assert.equal(plan.workItems.length, 1);
 assert.match(plan.sourceFingerprint, /^[a-f0-9]{64}$/);
 assert.equal(statements.at(-1), "COMMIT");

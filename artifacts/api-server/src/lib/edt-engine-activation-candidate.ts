@@ -1,6 +1,6 @@
 import { projectActivatedEdtPlan, type ProjectedEdtPlan } from "./edt-engine-plan-projection";
 import { loadActivatedEdtSource, type ActivatedEdtSource } from "./edt-engine-source-service";
-import { edtFingerprint, EdtEngineConflict, type EdtTransactionClient } from "./edt-engine-transaction";
+import { edtFingerprint, EdtEngineConflict, withEdtTransaction, type EdtTransactionClient, type EdtTransactionHost } from "./edt-engine-transaction";
 
 export type EdtActivationCandidate = Readonly<{
   intakeId: string;
@@ -52,4 +52,8 @@ export function deriveEdtActivationCandidate(source: ActivatedEdtSource): EdtAct
 
 export async function loadEdtActivationCandidate(client: EdtTransactionClient, input: { companyId: number; projectId: number; intakeId: string }): Promise<EdtActivationCandidate> {
   return deriveEdtActivationCandidate(await loadActivatedEdtSource(client, input));
+}
+
+export async function previewEdtActivationCandidate(input: { companyId: number; projectId: number; intakeId: string }, host?: EdtTransactionHost): Promise<EdtActivationCandidate> {
+  return withEdtTransaction(client => loadEdtActivationCandidate(client, input), host);
 }

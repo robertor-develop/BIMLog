@@ -1,12 +1,12 @@
 {
   "schemaVersion": 1,
   "generatedFrom": "artifacts/api-server/src/routes",
-  "endpointCount": 658,
+  "endpointCount": 660,
   "counts": {
     "public": 13,
-    "authenticated": 645,
-    "projectScoped": 378,
-    "objectScoped": 306,
+    "authenticated": 647,
+    "projectScoped": 380,
+    "objectScoped": 308,
     "dynamic": 6
   },
   "missingAuthentication": [],
@@ -3438,7 +3438,35 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 28
+      "line": 30
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/edt-engine/intakes/:intakeId/plan-preview",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "intakeId"
+      ],
+      "line": 40
+    },
+    {
+      "file": "edt-engine.ts",
+      "method": "GET",
+      "path": "/projects/:projectId/edt-engine/intakes/:intakeId/activation-candidate",
+      "public": false,
+      "authenticated": true,
+      "role": "authenticated_user",
+      "projectScoped": true,
+      "projectAuthority": "authenticated_service_boundary",
+      "objectParams": [
+        "intakeId"
+      ],
+      "line": 51
     },
     {
       "file": "edt-engine.ts",
@@ -3450,7 +3478,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 38
+      "line": 62
     },
     {
       "file": "edt-engine.ts",
@@ -3464,7 +3492,7 @@
       "objectParams": [
         "requestId"
       ],
-      "line": 46
+      "line": 70
     },
     {
       "file": "edt-engine.ts",
@@ -3476,7 +3504,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 54
+      "line": 78
     },
     {
       "file": "edt-engine.ts",
@@ -3490,7 +3518,7 @@
       "objectParams": [
         "requestId"
       ],
-      "line": 68
+      "line": 92
     },
     {
       "file": "edt-engine.ts",
@@ -3502,7 +3530,7 @@
       "projectScoped": true,
       "projectAuthority": "authenticated_service_boundary",
       "objectParams": [],
-      "line": 78
+      "line": 102
     },
     {
       "file": "edt-engine.ts",
@@ -3516,7 +3544,7 @@
       "objectParams": [
         "entryId"
       ],
-      "line": 85
+      "line": 109
     },
     {
       "file": "edt-engine.ts",
@@ -3530,7 +3558,7 @@
       "objectParams": [
         "workItemId"
       ],
-      "line": 92
+      "line": 116
     },
     {
       "file": "edt-engine.ts",
@@ -3544,7 +3572,7 @@
       "objectParams": [
         "issuanceId"
       ],
-      "line": 103
+      "line": 127
     },
     {
       "file": "edt-engine.ts",
@@ -3558,7 +3586,7 @@
       "objectParams": [
         "intakeId"
       ],
-      "line": 115
+      "line": 139
     },
     {
       "file": "feature-policies.ts",
