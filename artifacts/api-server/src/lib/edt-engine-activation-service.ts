@@ -1,9 +1,21 @@
+import { createHash } from "node:crypto";
 import { decideEdtRecordAuthorization, type EdtRecordAuthorizationInput } from "./edt-engine-authorization";
 import { deterministicEdtId, edtFingerprint, EdtEngineConflict, withEdtTransaction, type EdtTransactionHost } from "./edt-engine-transaction";
 
 type Actor = Pick<EdtRecordAuthorizationInput,"grants"|"actorUserId"|"actorCompanyId"|"actorProjectIds"> & { eligibleRole: string };
 export type EdtPlanNode = Readonly<{ kind:"project"|"contract"|"deliverable"|"location"; sourceIdentity:string; parentSourceIdentity?:string; code:string; name:string; sequence:number; snapshot:Record<string,unknown> }>;
 export type EdtPlanWorkItem = Readonly<{ id:string; edtNodeSourceIdentity:string; contractSourceIdentity:string; locationIdentity:string; locationSnapshot:Record<string,unknown>; tradeIdentity:string; tradeSnapshot:Record<string,unknown>; deliverableTypeIdentity:string; deliverableTypeSnapshot:Record<string,unknown>; displayCode:string }>;
+
+export function makeEdtWorkItemCode(input:{project:EdtPlanNode;contract:EdtPlanNode;deliverable:EdtPlanNode;location:EdtPlanNode;tradeIdentity:string}):string{
+  const segments=[input.project.code,input.contract.code,input.deliverable.code,input.location.code,input.tradeIdentity].map(value=>{
+    const code=value.trim().toUpperCase().replace(/[^A-Z0-9]+/g,"-").replace(/^-|-$/g,"");
+    if(!code||code.length>24)throw new EdtEngineConflict("EDT_CODE_INVALID","EDT identity codes must be nonempty and at most 24 normalized characters.");
+    return code;
+  });
+  const identity=[input.project.sourceIdentity,input.contract.sourceIdentity,input.deliverable.sourceIdentity,input.location.sourceIdentity,input.tradeIdentity];
+  const suffix=createHash("sha256").update(JSON.stringify(identity)).digest("hex").slice(0,10).toUpperCase();
+  return `WI-${segments.join("-")}-${suffix}`;
+}
 
 export function validateEdtPlanNodes(nodes:readonly EdtPlanNode[]):void{
   if(nodes.length===0||nodes[0].kind!=="project"||nodes.filter(node=>node.kind==="project").length!==1)
@@ -31,8 +43,11 @@ export function validateEdtPlanWorkItems(nodes:readonly EdtPlanNode[],items:read
     const location=nodeById.get(item.edtNodeSourceIdentity);
     const deliverable=nodeById.get(location?.parentSourceIdentity??"");
     const contract=nodeById.get(deliverable?.parentSourceIdentity??"");
-    if(!item.id||location?.kind!=="location"||deliverable?.kind!=="deliverable"||contract?.kind!=="contract"||contract.sourceIdentity!==item.contractSourceIdentity||deliverable.sourceIdentity!==item.deliverableTypeIdentity||!item.locationIdentity||item.locationIdentity!==item.edtNodeSourceIdentity||!item.tradeIdentity||!item.displayCode||ids.has(item.id)||codes.has(item.displayCode))
+    const project=nodeById.get(contract?.parentSourceIdentity??"");
+    if(!item.id||location?.kind!=="location"||deliverable?.kind!=="deliverable"||contract?.kind!=="contract"||project?.kind!=="project"||contract.sourceIdentity!==item.contractSourceIdentity||deliverable.sourceIdentity!==item.deliverableTypeIdentity||!item.locationIdentity||item.locationIdentity!==item.edtNodeSourceIdentity||!item.tradeIdentity||!item.displayCode||ids.has(item.id)||codes.has(item.displayCode))
       throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Work Items need unique IDs and codes, a valid EDT node, and complete classification identities.");
+    if(item.displayCode!==makeEdtWorkItemCode({project,contract,deliverable,location,tradeIdentity:item.tradeIdentity}))
+      throw new EdtEngineConflict("EDT_CODE_INVALID","Work Item visible code must be derived from its immutable classification identities.");
     ids.add(item.id);codes.add(item.displayCode);
   }
 }
