@@ -107,7 +107,8 @@ export function projectActivatedEdtPlan(source: ActivatedEdtSource): ProjectedEd
   validateEdtPlanWorkItems(nodes,workItems);
   validateEdtPlanCoverage(source.workItems.map(item=>item.id),workItems);
   validateEdtPlanSourceBindings(source.workItems.map(item=>({id:item.id,contractId:item.contractId,stableScopeItemId:item.stableScopeItemId})),workItems);
-  return {nodes,workItems,sourceFingerprint:edtFingerprint({project:source.project,intakeId:source.intake.id,revision:source.intake.revision,nodes,workItems})};
+  return {nodes,workItems,sourceFingerprint:edtFingerprint({project:source.project,intakeId:source.intake.id,revision:source.intake.revision,
+    intakeData:source.intake.data,activationSummary:source.intake.activationSummary,nodes,workItems})};
 }
 
 export async function previewActivatedEdtPlan(input: { companyId: number; projectId: number; intakeId: string }, host?: EdtTransactionHost): Promise<ProjectedEdtPlan> {
