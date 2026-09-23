@@ -386,6 +386,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts
 - artifacts/api-server/src/lib/design-comment-control.behavior.ts
 - artifacts/api-server/src/lib/design-comment-control.ts
+- artifacts/api-server/src/lib/edt-engine-activation-candidate.ts
 - artifacts/api-server/src/lib/edt-engine-activation-service.ts
 - artifacts/api-server/src/lib/edt-engine-authorization.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-authorization.ts
@@ -435,6 +436,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/edt-engine-build332.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-build333.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-build335.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build337.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-economic-schema.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-economic-service.ts
 - artifacts/api-server/src/lib/edt-engine-governance-schema.behavior.ts

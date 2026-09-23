@@ -39112,6 +39112,92 @@
         "scripts/test-edt-engine-block12.mjs"
       ],
       "reviewedChangeSha256": "99801b0bbf763b7f82efc0a7edef50f6b11dbf701797ea9eb6e595e54aa56edc"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block13-server-candidate-20260923",
+      "reviewedThroughCommit": "1e588fcf6cf0f95100c4c133bbfe374927b242c4",
+      "reviewedAt": "2026-09-23T09:03:36Z",
+      "status": "local_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "summary": "A browser-supplied EDT activation plan is still unsafe; Block 13 derives only a read-only candidate from frozen company-scoped source records and keeps all four mutation routes closed."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Contract, company, workflow and project ownership remains unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing five-build push and ten-build publication cadence remains in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Real-schema SQL, frontend parsing and fail-closed tests extend existing quality controls."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new customer-facing product vision or workflow authority was asserted."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated source inventory includes the new EDT activation candidate and acceptance tests."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, Navisworks bridge, package or installer source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer report, export or generated deliverable changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition or applicability assertion was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Corrective Block 12 publication and Block 13 push-only candidate status are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Governed EDT mutations and positive end-to-end activation remain explicitly open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The dated historical audit ledger remains append-only and unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/edt-engine-program-20260922/BLOCK_13_REPORT.md",
+        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "3de6ed5574b4ee039a1066867d2d816cebb50fc77da82bef41b3b83751a80ea4"
     }
   ]
 }

@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT Block 13 read-only activation candidate — 2026-09-23
+
+- Corrective Block 12 source `bd3be0742d702ba7d186d6a47b87830b526a183b` passed the full gate, exact GitHub push, clean Replit Shell build and zero-drop preview (`schemaAction=NONE`, development-data copy `OFF_REQUIRED`), and was republished. Live health reported `status=ok` with the exact source. Authenticated Chrome EDT readiness on historical project 53 returned the expected canonical Contract-source conflict rather than HTTP 500, also after refresh/retry. Neighboring Headquarters, catalogs, workflows, governance, pricing validation, Intake, Operations, Budget, Contracts and Knowledge surfaces loaded without a new visible crash. This was broad release regression, not complete platform or positive EDT activation acceptance.
+- Builds 336–340 now return validated frozen Contract/Workflow bindings, derive a server-owned read-only activation candidate, expose it through a scoped authenticated endpoint, show it in Operations, and enforce a focused real-schema/negative/UI gate. Block 13 is push-only; exact full gate and push remain open until verified. The next publication is due after the following five-build block. No Native/installer change; focused Navisworks smoke is not triggered.
+- The four guarded EDT mutation routes remain closed. This candidate is not governed activation, economic/time execution, or end-to-end EDT acceptance.
+
 ## EDT Block 12 production project-lookup correction — 2026-09-23
 
 - Exact corrective source `7b3b1130b0395f53cce0b4d2be28245982ab0099` passed the full local gate, reached GitHub master, passed a Replit Shell zero-drop preview with development-data copy off, and published as deployment `d5fe7f41`; live health matched. Authenticated Chrome still found HTTP 500 in the read-only EDT readiness preview. Production logs reported `column "company_id" does not exist`.

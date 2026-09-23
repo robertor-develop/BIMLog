@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT Block 13 — server-owned read-only candidate — 2026-09-23
+
+- [x] Corrective Block 12 `bd3be0742d702ba7d186d6a47b87830b526a183b` was built and published through Replit Shell/UI after a zero-drop database preview with development-data copy off; exact live health and authenticated Chrome readiness retry passed. Historical project 53 remains in a correctly explained Contract-source conflict and was not mutated.
+- [x] Five bounded Builds 336–340 derive and display a read-only EDT activation candidate from frozen activated Intake, canonical Contract, Governance and Delivery Workflow records. The focused block gate compiles the preview reads against isolated PostgreSQL, checks UI parsing and confirms guarded mutations remain closed.
+- [ ] Complete Block 13 full clean gate and exact-head GitHub push. Do not publish this five-build-only block; the next publication and full authenticated Chrome smoke occur after the following five builds. No Lens Next Native/installer change occurred, so focused Navisworks smoke is not triggered.
+- [ ] Complete governed EDT activation, server-derived economic/time calculations, their operational UI and positive end-to-end acceptance. The read-only candidate and broad route smoke do not prove the whole platform or a positive EDT activation.
+
 ## EDT Block 12 — project-schema corrective repeat — 2026-09-23
 
 - [x] Published `7b3b1130b0395f53cce0b4d2be28245982ab0099` as Replit deployment `d5fe7f41` after a clean full gate and zero-drop preview; authenticated Chrome still reproduced HTTP 500 in read-only EDT readiness. Production logs identified a missing `company_id` column in the project read, not a migration requirement.
