@@ -3,7 +3,7 @@ import { deterministicEdtId, edtFingerprint, EdtEngineConflict, withEdtTransacti
 
 type Actor = Pick<EdtRecordAuthorizationInput,"grants"|"actorUserId"|"actorCompanyId"|"actorProjectIds"> & { eligibleRole: string };
 export type EdtPlanNode = Readonly<{ kind:"project"|"contract"|"deliverable"|"location"; sourceIdentity:string; parentSourceIdentity?:string; code:string; name:string; sequence:number; snapshot:Record<string,unknown> }>;
-export type EdtPlanWorkItem = Readonly<{ id:string; edtNodeSourceIdentity:string; locationIdentity:string; locationSnapshot:Record<string,unknown>; tradeIdentity:string; tradeSnapshot:Record<string,unknown>; deliverableTypeIdentity:string; deliverableTypeSnapshot:Record<string,unknown>; displayCode:string }>;
+export type EdtPlanWorkItem = Readonly<{ id:string; edtNodeSourceIdentity:string; contractSourceIdentity:string; locationIdentity:string; locationSnapshot:Record<string,unknown>; tradeIdentity:string; tradeSnapshot:Record<string,unknown>; deliverableTypeIdentity:string; deliverableTypeSnapshot:Record<string,unknown>; displayCode:string }>;
 
 export function validateEdtPlanNodes(nodes:readonly EdtPlanNode[]):void{
   if(nodes.length===0||nodes[0].kind!=="project"||nodes.filter(node=>node.kind==="project").length!==1)
@@ -28,7 +28,10 @@ export function validateEdtPlanWorkItems(nodes:readonly EdtPlanNode[],items:read
   const nodeById=new Map(nodes.map(node=>[node.sourceIdentity,node]));
   const ids=new Set<string>(),codes=new Set<string>();
   for(const item of items){
-    if(!item.id||nodeById.get(item.edtNodeSourceIdentity)?.kind!=="location"||!item.locationIdentity||item.locationIdentity!==item.edtNodeSourceIdentity||!item.tradeIdentity||!item.deliverableTypeIdentity||!item.displayCode||ids.has(item.id)||codes.has(item.displayCode))
+    const location=nodeById.get(item.edtNodeSourceIdentity);
+    const deliverable=nodeById.get(location?.parentSourceIdentity??"");
+    const contract=nodeById.get(deliverable?.parentSourceIdentity??"");
+    if(!item.id||location?.kind!=="location"||deliverable?.kind!=="deliverable"||contract?.kind!=="contract"||contract.sourceIdentity!==item.contractSourceIdentity||deliverable.sourceIdentity!==item.deliverableTypeIdentity||!item.locationIdentity||item.locationIdentity!==item.edtNodeSourceIdentity||!item.tradeIdentity||!item.displayCode||ids.has(item.id)||codes.has(item.displayCode))
       throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Work Items need unique IDs and codes, a valid EDT node, and complete classification identities.");
     ids.add(item.id);codes.add(item.displayCode);
   }
