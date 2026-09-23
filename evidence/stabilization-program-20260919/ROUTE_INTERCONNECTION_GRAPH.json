@@ -6,7 +6,7 @@
     "projectTabs": 18,
     "sidebarTabs": 18,
     "sidebarLinks": 4,
-    "apiRoutes": 658,
+    "apiRoutes": 659,
     "frontendApiReferences": 245,
     "routeOwnedTables": 61
   },
@@ -3200,6 +3200,12 @@
     {
       "method": "GET",
       "path": "/projects/:projectId/edt-engine/capabilities",
+      "owner": "artifacts/api-server/src/routes/edt-engine.ts",
+      "tables": []
+    },
+    {
+      "method": "GET",
+      "path": "/projects/:projectId/edt-engine/intakes/:intakeId/plan-preview",
       "owner": "artifacts/api-server/src/routes/edt-engine.ts",
       "tables": []
     },
