@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT and Engine Templates — Block 12 corrective live smoke — 2026-09-23
+
+- [x] First Block 12 push, exact Replit Shell build and zero-drop preview passed; deployment `401fd326` reported the exact source and healthy live status.
+- [x] Authenticated Chrome exposed a generic error on the historical QA Operations EDT readiness action. Hotfix `57186c0f` adds actionable bilingual source-conflict guidance; focused test and frontend typecheck pass.
+- [ ] Run the full gate, push the exact corrective source, republish via Replit Shell with another zero-drop preview and development-data copy off, then repeat authenticated Chrome smoke. First-publication smoke is not accepted as complete.
+- [ ] Complete server-derived pre-activation plan/version, economic/time authority and guarded EDT actions. The read-only preview cannot be called full end-to-end EDT delivery.
+
 ## EDT and Engine Templates program — Block 12 — 2026-09-23
 
 - [x] Builds 331–335 add canonical Contract/version, workflow and company trade verification, a manual read-only Operations preview, and combined fail-closed regression. Focused tests and API/frontend typechecks pass.

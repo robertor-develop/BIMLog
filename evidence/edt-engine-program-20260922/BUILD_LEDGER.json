@@ -70,7 +70,8 @@
     "332": "49545e1bc777a27e45ccfe24fa04bc7071bb96b6",
     "333": "a9b8e66c5407ccdb858f5ff41487ae445984ff0e",
     "334": "b3339fa0fcd2dfee2ef496622cf15402555b728e",
-    "335": "0facb112b42ebb6cd95967b06b9df9ed154e7bd4"
+    "335": "0facb112b42ebb6cd95967b06b9df9ed154e7bd4",
+    "block12SmokeHotfix": "57186c0f9b1dd62b3c97999d9d8b2161cf6fee49"
   },
   "remainingBlocks": null,
   "remainingBuilds": null,
@@ -78,5 +79,5 @@
   "reassessmentRequired": "The original 335-build target does not constitute complete EDT activation: guarded mutations and canonical server-derived economic/time authority remain open. Scope the next work from current evidence after this publication.",
   "database": { "changed": false, "productionApplied": false, "design": "zero-drop" },
   "lensNext": { "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
-  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING", "productSourceChanged": true, "publication": "DUE_NOW_AFTER_335" }
+  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING_RETEST", "productSourceChanged": true, "publication": "CORRECTIVE_REPUBLICATION_DUE" }
 }

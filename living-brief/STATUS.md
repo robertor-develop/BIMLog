@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 12 live-smoke correction — 2026-09-23
+
+- Exact Block 12 source `cceb5293d181dcde013c06ffcd08e815f3c83bd9` passed the full local gate, was pushed, built in clean Replit Shell, received a zero-change production/development database preview with data copy off required, and published as Replit deployment `401fd326`; live health matched the source.
+- Authenticated Chrome found the historical QA Operations EDT readiness control showing only “The request failed.” on expected fail-closed source rejection. Corrective source `57186c0f` adds bilingual, code-specific guidance and a safe fallback; focused test and frontend typecheck pass. Full re-gate, push, republish and live recheck are pending. Do not mark the first publication smoke as passed.
+- The EDT preview is read-only. Guarded governed activation/economic/time mutations remain closed and end-to-end EDT program acceptance remains open.
+
 ## EDT and Engine Templates — Block 12 local candidate — 2026-09-23
 
 - Builds 331–335 verify activated Contract/version, Delivery Workflow and company trade identities before projecting EDT; Operations now offers a manual read-only plan preview. Combined regression proves rollback and no mutation SQL. Focused tests and API/frontend typechecks pass; full release gate, push, Replit Shell publication and authenticated Chrome smoke are pending at this source checkpoint.

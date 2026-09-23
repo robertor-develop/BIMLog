@@ -11,3 +11,9 @@ This ten-build publication boundary includes the earlier push-only Block 11. Bui
 Focused Block 12 tests and both API/frontend TypeScript checks passed. Full repository gate, exact remote push, Replit Shell zero-drop publication, live identity and authenticated Chrome smoke are release-boundary steps, not assumed by this report.
 
 This is **not full EDT program acceptance**. Pre-activation plan/version authority, governed activation, economic/time calculation and their operational UI remain open. The original Build 335 target is exhausted; further scope requires evidence-based planning, not a false completion claim.
+
+## First publication and corrective smoke finding
+
+The full pre-push gate passed, exact source `cceb5293d181dcde013c06ffcd08e815f3c83bd9` was pushed and built in the clean Replit Shell worktree. Replit database receipt `ab04a21ea3f0964041b8113cbb4c1e980b49b10b18f66ba52c472653bdaa7790` reported both schemas exact, `schemaAction: NONE`, `publishable: true`, development-data copy `OFF_REQUIRED`. Replit deployment `401fd326` completed; live health reported the exact source and `status: ok`.
+
+Authenticated Chrome smoke found a customer-visible defect on the historical QA project `/projects/53/operations`: clicking **Check EDT readiness** returned only “The request failed.” The backend correctly rejects incomplete historical EDT source; Operations discarded its string error and did not translate the stable EDT code into actionable guidance. Hotfix `57186c0f` maps known Contract, location, trade and workflow conflict codes to bilingual, no-mutation guidance and replaces the generic fallback. Focused behavior and frontend typecheck passed. Full re-gate, corrective push, republish and live recheck are still required; the first publication is not accepted as a passing smoke.
