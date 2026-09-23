@@ -2,6 +2,8 @@
 
 ## EDT and Engine Templates — Block 8 local source candidate — 2026-09-22
 
+- Post-publication Chrome acceptance found a Project Budget breadcrumb linking to unsupported `/projects/:id/dashboard`, yielding a 404. Release hotfix `3f26e8fcc40c5a0840bf331dffc6a68efe594539` points Budget, Intake and shared shell project links to `/analytics` and supports legacy dashboard URLs as an alias. Focused regression and frontend typecheck passed; full gate, corrective push, republish and authenticated smoke are required before acceptance.
+
 - Builds 311–315 harden the EDT service layer: immutable-decision-bound approval retry, valid EDT tree and Work Item plan, activated contract/APU/currency binding for economic plans, and submitted-commitment binding for time decisions.
 - The four guarded EDT HTTP mutations remain fail-closed because server-derived activation versions, plan, economic amounts and time impact plus real Intake/Operations UI integration are unfinished. Existing canonical Intake and Operations workflows remain the product path; this block is not end-to-end EDT completion.
 - Focused tests and API typecheck pass. Full release gate, exact push, Replit Shell zero-drop publication and authenticated Chrome smoke are due at Build 315. No Lens Next Native or installer change.

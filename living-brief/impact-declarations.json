@@ -38455,6 +38455,87 @@
         "scripts/test-edt-engine-block08.mjs"
       ],
       "reviewedChangeSha256": "d3674349de2de4308a9863cf494d47d8ff01c91a136b8c3d8e3ba1e1571a5e69"
+    },
+    {
+      "taskId": "bimlog-edt-block08-project-navigation-hotfix-20260922",
+      "reviewedThroughCommit": "3f26e8fcc40c5a0840bf331dffc6a68efe594539",
+      "reviewedAt": "2026-09-22T23:57:34Z",
+      "status": "corrective_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Authenticated Project Budget back link led to a 404; canonical links and legacy alias corrected, republish remains required."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Project navigation correction does not alter product doctrine."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release and live acceptance rules apply."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Route regression and live recheck enforce current quality contract."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product scope change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing project landing workspace remains canonical."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or installer change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report output change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim or edition changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the live defect and corrective release gate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Tracks corrective republish and authenticated verification."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing audit behavior unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "4f2856d80609cffe7ac58e52a1f37329d5911f18edeca9df0272e14c44d4b93d"
     }
   ]
 }

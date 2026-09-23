@@ -2,6 +2,8 @@
 
 ## EDT and Engine Templates program — Block 8 — 2026-09-22
 
+- [ ] Complete the Project Budget navigation hotfix release: full exact-source gate, corrective push, zero-drop Replit Shell republish with development-database copy disabled, and authenticated Chrome budget-to-project recheck. The first Block 8 publication exposed a 404 at `/projects/:id/dashboard`; hotfix `3f26e8fcc40c5a0840bf331dffc6a68efe594539` adds the `/analytics` links and backward-compatible alias.
+
 - [x] Builds 311–315 harden the unpublished EDT engine service layer: approval retry is tied to the immutable decision; EDT nodes require an ordered acyclic hierarchy and unique sibling sequences; Work Item plans reject duplicate/incomplete identities; economic plans verify activated Intake and canonical contract APU/currency; time decisions match the stored submission commitment.
 - [x] Five bounded build commits exist and the focused Block 8 suite and API TypeScript typecheck pass. The older Block 4 fixture was corrected to represent a same-Intake budget account.
 - [ ] These repairs do **not** complete server-derived activation versions, EDT plan generation, economic/time amount calculation, or Intake/Operations UI wiring. The four guarded mutation routes stay fail-closed. Do not claim an end-to-end EDT engine or expose browser-supplied authority.
