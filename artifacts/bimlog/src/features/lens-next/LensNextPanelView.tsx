@@ -522,6 +522,8 @@ export function LensNextPanelView({
   const [detailView, setDetailView] = React.useState<"overview" | "knowledge" | "resolution" | "bimlog" | "properties" | "activity">("overview");
   const [syncReviewFilter, setSyncReviewFilter] = React.useState<LensNextSyncReviewFilter>("all");
   const [activeWorkspace, setActiveWorkspace] = React.useState<"filters" | "viewpoints" | "create" | "settings">("viewpoints");
+  const [compactDetailOpen, setCompactDetailOpen] = React.useState(false);
+  const listScrollTop = React.useRef(0);
   const createSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const settingsSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const filterPaneRef = React.useRef<HTMLElement | null>(null);
@@ -532,6 +534,7 @@ export function LensNextPanelView({
   const helpCloseRef = React.useRef<HTMLButtonElement | null>(null);
   const lensRootRef = React.useRef<HTMLElement | null>(null);
   const [availableWidth, setAvailableWidth] = React.useState(0);
+  const dockWidth = lensNextDockWidth(availableWidth);
   React.useLayoutEffect(() => {
     const root = lensRootRef.current;
     if (!root) return;
@@ -549,9 +552,12 @@ export function LensNextPanelView({
   React.useEffect(() => setDetailView("overview"), [selectedIssue?.identity.serverId]);
   React.useEffect(() => setPublishReviewReady(false), [publishKind, publishStatus, publishText, publishReason, selectedIssue?.identity.serverId, selectedIssue?.mutationVersion]);
   React.useEffect(() => {
-    if (!selectedIssue || typeof window === "undefined" || !window.matchMedia("(max-width: 760px)").matches) return;
-    selectedIssueRef.current?.scrollIntoView({ block: "start", behavior: "auto" });
-  }, [selectedIssue?.identity.serverId]);
+    if (!selectedIssue) setCompactDetailOpen(false);
+  }, [selectedIssue]);
+  React.useLayoutEffect(() => {
+    if (dockWidth === "wide" || activeWorkspace !== "viewpoints" || compactDetailOpen) return;
+    if (issueListRef.current) issueListRef.current.scrollTop = listScrollTop.current;
+  }, [dockWidth, activeWorkspace, compactDetailOpen]);
   React.useEffect(() => {
     if (!guideOpen) return;
     helpCloseRef.current?.focus();
@@ -573,8 +579,23 @@ export function LensNextPanelView({
     setActiveWorkspace(next);
     if (next === "create") revealSection(createSectionRef.current);
     if (next === "settings") revealSection(settingsSectionRef.current);
-    if (next === "filters") filterPaneRef.current?.scrollIntoView({ block: "nearest" });
-    if (next === "viewpoints") issueListRef.current?.scrollIntoView({ block: "nearest" });
+    if (dockWidth === "wide" && next === "filters") filterPaneRef.current?.scrollIntoView({ block: "nearest" });
+    if (dockWidth === "wide" && next === "viewpoints") issueListRef.current?.scrollIntoView({ block: "nearest" });
+  };
+  const selectIssue = (serverId: number) => {
+    listScrollTop.current = issueListRef.current?.scrollTop ?? listScrollTop.current;
+    setCompactDetailOpen(true);
+    setActiveWorkspace("viewpoints");
+    onSelectIssue(serverId);
+  };
+  const backToList = () => {
+    setCompactDetailOpen(false);
+    window.requestAnimationFrame(() => {
+      if (issueListRef.current) {
+        issueListRef.current.scrollTop = listScrollTop.current;
+        issueListRef.current.focus({ preventScroll: true });
+      }
+    });
   };
   const previousIssue = selectedIssue
     ? lensNextSelectionTarget(filteredIssues, selectedIssue.identity.serverId, "previous", issuePageSize)
@@ -591,11 +612,11 @@ export function LensNextPanelView({
     const target = direction === "previous" ? previousIssue : nextIssue;
     if (!target) return;
     if (target.page !== issuePage) onIssuePageChange(target.page);
-    onSelectIssue(target.issue.identity.serverId);
+    selectIssue(target.issue.identity.serverId);
   };
   const preparedAction: LensNextPublishAction = publishKind === "status" ? { type: "status", status: publishStatus } : publishKind === "comment" ? { type: "comment", comment: publishText.trim() } : { type: "assignment", responsibleCompany: publishText.trim() };
   return (
-    <aside ref={lensRootRef} className="lens-next" data-dock-width={lensNextDockWidth(availableWidth)} data-workspace={activeWorkspace} aria-label="BIMLog Lens Next controlled issue workspace" aria-busy={refreshState === "refreshing" || reconciliationState === "running"}>
+    <aside ref={lensRootRef} className="lens-next" data-dock-width={dockWidth} data-workspace={activeWorkspace} data-detail-open={compactDetailOpen && !!selectedIssue} aria-label="BIMLog Lens Next controlled issue workspace" aria-busy={refreshState === "refreshing" || reconciliationState === "running"}>
       <nav className="lens-next__side-rail" aria-label="Lens workspaces">
         {([
           ["filters", Filter, tt("Filters", "Filtros")],
@@ -774,7 +795,7 @@ export function LensNextPanelView({
                   {lensNextSyncRecoveryGuidance(item.disposition, item.platformServerId !== null, language) && (
                     <div className="lens-next__sync-recovery">
                       <span>{lensNextSyncRecoveryGuidance(item.disposition, item.platformServerId !== null, language)}</span>
-                      {item.platformServerId !== null && <button type="button" onClick={() => onSelectIssue(item.platformServerId!)}>{tt("Review record", "Revisar registro")}</button>}
+                       {item.platformServerId !== null && <button type="button" onClick={() => selectIssue(item.platformServerId!)}>{tt("Review record", "Revisar registro")}</button>}
                     </div>
                   )}
                 </li>
@@ -1024,10 +1045,10 @@ export function LensNextPanelView({
           <IssueGroups
             groups={issueGroups}
             selectedServerId={selectedServerId}
-            onSelectIssue={onSelectIssue}
+            onSelectIssue={selectIssue}
           />
         ) : (
-          <IssueTable issues={visibleIssues} selectedServerId={selectedServerId} onSelectIssue={onSelectIssue} />
+          <IssueTable issues={visibleIssues} selectedServerId={selectedServerId} onSelectIssue={selectIssue} />
         )}
           </section>
           <nav className="lens-next__pagination" aria-label="Issue list pages"><button type="button" disabled={issuePage<=1} onClick={()=>onIssuePageChange(issuePage-1)}>Previous</button><span>{filteredIssues.length===0?"0":`${(issuePage-1)*issuePageSize+1}–${Math.min(issuePage*issuePageSize,filteredIssues.length)}`} of {filteredIssues.length} · Page {issuePage} of {issuePageCount}</span><button type="button" disabled={issuePage>=issuePageCount} onClick={()=>onIssuePageChange(issuePage+1)}>Next</button><label>Show <select aria-label="Issues per page" value={issuePageSize} onChange={event=>onIssuePageSizeChange(Number(event.target.value))}>{[20,50,100].map(size=><option key={size} value={size}>{size}</option>)}</select></label></nav>
@@ -1044,6 +1065,7 @@ export function LensNextPanelView({
           className="lens-next__details"
           aria-label="Selected issue details"
         >
+          <button type="button" className="lens-next__back-to-list" onClick={backToList}>{tt("← Back to list", "← Volver a la lista")}</button>
           <header className="lens-next__detail-header">
             <Thumbnail issue={selectedIssue} />
             <div className="lens-next__detail-heading">
@@ -1067,7 +1089,7 @@ export function LensNextPanelView({
                 type="button"
                 className="lens-next__close"
                 aria-label={tt("Close issue details", "Cerrar detalles de la incidencia")}
-                onClick={onCloseIssue}
+                onClick={() => { onCloseIssue(); backToList(); }}
               >
                 <X aria-hidden="true" size={18} />
               </button>

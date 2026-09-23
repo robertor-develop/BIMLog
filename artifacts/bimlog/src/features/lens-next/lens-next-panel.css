@@ -1291,3 +1291,15 @@
   min-height: 0;
   overflow-y: auto;
 }
+.lens-next__back-to-list { display: none; }
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__details { display: none; }
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="viewpoints"][data-detail-open="true"] .lens-next__browser { display: none; }
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="viewpoints"][data-detail-open="true"] .lens-next__details:not(.lens-next__details--empty) {
+  display: block;
+  overflow-y: auto;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="viewpoints"][data-detail-open="true"] .lens-next__back-to-list {
+  display: block;
+  min-height: 44px;
+  margin: 6px 8px;
+}
