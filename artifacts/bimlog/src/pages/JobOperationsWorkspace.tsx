@@ -25,6 +25,7 @@ import { useI18n } from "@/lib/i18n";
 import { BudgetGovernancePanel } from "@/components/job-operations/BudgetGovernancePanel";
 import { ProjectControlsDashboard } from "@/components/job-operations/ProjectControlsDashboard";
 import { WorkItemDeliveryWorkflowPanel } from "@/components/job-operations/WorkItemDeliveryWorkflowPanel";
+import { EdtPlanPreviewPanel } from "@/components/job-operations/EdtPlanPreviewPanel";
 import {
   emptyOperationsClassificationFilters,
   matchesOperationsClassification,
@@ -1329,6 +1330,12 @@ export function JobOperationsWorkspace() {
             </button>
           </div>
         </header>
+        {data.identity?.intakeId && <EdtPlanPreviewPanel
+          projectId={projectId}
+          intakeId={String(data.identity.intakeId)}
+          loadPlan={() => api(`/projects/${projectId}/edt-engine/intakes/${encodeURIComponent(String(data.identity.intakeId))}/plan-preview`)}
+          tt={tt}
+        />}
         {(data.reportingContracts?.length ?? 0) > 0 && (
           <section className="jo-card">
             <h2>
