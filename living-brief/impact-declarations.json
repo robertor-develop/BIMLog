@@ -38537,6 +38537,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "01bcaf025ce5f0bc164a3c6e0b2de09881437fb5a9a130ca50f14191aedea7d7"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block09-20260922",
+      "reviewedThroughCommit": "c26639ad5002461754ec9f79e3e9f99a31b387ee",
+      "reviewedAt": "2026-09-23T00:55:00Z",
+      "status": "corrective_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "EDT approval must reject mismatched location, Contract and deliverable ancestry, arbitrary visible codes, and partial saved Work Item coverage."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Work Item identities and source authority remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing five-build verification and release boundaries still apply."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Current traceability and negative-test expectations cover these guards."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product direction or feature scope was changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural platform route or module authority changed."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge or installer code was changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or generated customer artifact changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim or edition was introduced."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 9 status and release correction were already captured in the reconciled-through commit."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Block 9 unfinished EDT work was already captured in the reconciled-through commit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing append-only audit history remains the operational authority."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "7f152a7ae598730c04bff372f01ceb80d88edef5e3e27767a106f01fb4b2c376"
     }
   ]
 }
