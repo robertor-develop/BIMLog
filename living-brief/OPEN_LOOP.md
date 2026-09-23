@@ -3,7 +3,8 @@
 ## EDT and Engine Templates program — Block 10 — 2026-09-22
 
 - [x] Build 321–325 read activated canonical Intake/Work Item data and project a deterministic multi-contract EDT plan; expose a company-scoped authenticated read-only preview. Ambiguous floor/zone/trade and incomplete saved scope coverage fail closed.
-- [ ] Finish the Block 10 full release gate, exact-head push, zero-drop Replit Shell publication with development-data copy off, and full authenticated Chrome smoke. Do not claim publication until exact live source is verified.
+- [x] Block 10 full release gate, exact-head push and Replit Shell publication completed at `b350ab5bbf0a6ce9dcf1155db63dbb5eec8ac786`; live health matched. Database receipt was zero-drop and required development-data copy off. Authenticated Chrome smoke covered Headquarters, company governance/catalogs/workflows/pricing, project Intake, Operations, Budget, Knowledge and navigation.
+- [ ] Correct the pricing-template validation/error-state defect found in the live smoke, rerun the full gate, push/republish and recheck the live draft-preservation behavior. Continue broader Chrome smoke and report gaps honestly; historical QA Intake cannot validate the positive EDT preview without canonical floor/zone and trade records.
 - [ ] Complete pre-activation version/plan derivation, governed approval, canonical economic/time calculations and Intake/Operations EDT UI. The four guarded mutations remain closed; a preview is not an end-to-end EDT workflow.
 
 ## EDT and Engine Templates program — Block 9 — 2026-09-22

@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
+import { pricingErrorMessage } from "./company-pricing-errors";
 import "./CompanyPricingTemplates.css";
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
@@ -57,7 +58,7 @@ export function CompanyPricingTemplates() {
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(response.status === 403
       ? t("You do not have company permission to view pricing templates.", "No tiene permiso de la empresa para ver las plantillas de precios.")
-      : payload.code || t("Request failed", "La solicitud falló"));
+      : pricingErrorMessage(payload, es));
     return payload;
   }, [token, lang]);
 
@@ -141,7 +142,7 @@ export function CompanyPricingTemplates() {
         <button type="button" onClick={newTemplate} disabled={!canManage || busy}>{t("New template", "Nueva plantilla")}</button>
       </header>
       {loading && <p role="status">{t("Loading pricing templates…", "Cargando plantillas de precios…")}</p>}
-      {error && <div role="alert" style={{ color: "#991B1B", padding: 12, border: "1px solid #FCA5A5" }}>{error} <button type="button" onClick={() => void reload()}>{t("Retry", "Reintentar")}</button></div>}
+      {error && <div role="alert" style={{ color: "#991B1B", padding: 12, border: "1px solid #FCA5A5" }}>{error} {listError && <button type="button" onClick={() => void reload()}>{t("Retry", "Reintentar")}</button>}</div>}
       {notice && <p role="status" style={{ color: "#166534" }}>{notice}</p>}
       {!loading && !listError && <div className="company-pricing-layout" style={{ display: "grid", gap: 20 }}>
         <section aria-label={t("Template list", "Lista de plantillas")} style={{ minWidth: 0 }}>

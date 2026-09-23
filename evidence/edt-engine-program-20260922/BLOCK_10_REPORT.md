@@ -9,3 +9,9 @@ The five bounded commits add read-only server projection of the **already activa
 - 325 `a9bf345986bcae1cb0545b50471105c93b592064`: expose authenticated, company-scoped, read-only `/projects/:projectId/edt-engine/intakes/:intakeId/plan-preview` with rollback and isolation checks.
 
 The preview requires one floor/zone Work Package and a permanent discipline ID/code for each saved Work Item. Existing activated Intake data that lack this structure return an explicit conflict; the service must not invent trade or location identities. Approval still needs pre-activation server-derived versions/plan, and financial/time values need saved-record derivation. This block is not an end-to-end EDT acceptance claim. No Native/installer or database schema changes occurred.
+
+## Publication and corrective live-smoke finding
+
+The full local gate passed; source `b350ab5bbf0a6ce9dcf1155db63dbb5eec8ac786` was pushed, synchronized through Replit Shell and published. Replit's database receipt reported `schemaAction: NONE`, `publishable: true` and `developmentDataCopy: OFF_REQUIRED`; live `/api/v1/healthz` returned the exact source. Authenticated Chrome smoke covered company governance, catalogs, workflows, pricing, project administration, Intake, Operations, Budget, dashboard and Knowledge. The historical QA project has an activated core Intake but lacks the required floor/zone and permanent trade coverage, so it cannot demonstrate a positive EDT preview. This is a fail-closed limitation, not an accepted end-to-end EDT result.
+
+Live finding: on `/company-pricing-templates`, Preview with a blank name displayed raw `PRICING_TEMPLATE_TEXT_INVALID`; its Retry button reloaded the list and could discard the unsaved draft. Corrective source now translates validation to bilingual guidance and shows Retry only for list-load failures. Focused regression and frontend typecheck passed; full re-gate, corrective publication and authenticated Chrome retest are pending.

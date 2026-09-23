@@ -1,8 +1,8 @@
 # STATUS.md - Current Accepted Platform State
 
-## EDT and Engine Templates — Block 10 release candidate — 2026-09-22
+## EDT and Engine Templates — Block 10 published, pricing smoke correction — 2026-09-23
 
-- Builds 321–325 read the saved, activated Intake and canonical Work Items under company/project scope, derive deterministic EDT nodes and Work Item codes from saved contract, deliverable, floor/zone and discipline identities, and expose an authenticated read-only plan preview. Normalized multi-contract fixtures and ambiguity/tenant-denial checks pass; full release gate, push, Replit publication and authenticated Chrome smoke are still due.
+- Builds 321–325 read the saved, activated Intake and canonical Work Items under company/project scope, derive deterministic EDT nodes and Work Item codes from saved contract, deliverable, floor/zone and discipline identities, and expose an authenticated read-only plan preview. Normalized multi-contract fixtures and ambiguity/tenant-denial checks and the full local gate passed. Exact source `b350ab5bbf0a6ce9dcf1155db63dbb5eec8ac786` was pushed and Replit-published; live health reported that source. Authenticated Chrome smoke found a pricing-template validation error displaying a raw code with a misleading Retry action that could discard unsaved draft work. The corrective source maps validation to actionable text and limits Retry to list-load failures; its re-publication and live retest remain due.
 - The plan preview cannot repair incomplete historical Intake classification; it fails closed. The governed pre-activation decision chain, server-derived APU/workflow/governance version resolution, economic/time calculations and real Intake/Operations EDT UI remain unfinished. No guarded mutation route was opened, and this is not full EDT acceptance.
 - No Lens Next Native/installer or database schema change in this block; focused Navisworks smoke is not triggered. Block 9 exact source `f122afdd4ba53870c3c2e296355e8982132a29f5` passed the full gate and was pushed only, per the ten-build publication cadence.
 
