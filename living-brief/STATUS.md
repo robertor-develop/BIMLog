@@ -1,9 +1,15 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 10 release candidate — 2026-09-22
+
+- Builds 321–325 read the saved, activated Intake and canonical Work Items under company/project scope, derive deterministic EDT nodes and Work Item codes from saved contract, deliverable, floor/zone and discipline identities, and expose an authenticated read-only plan preview. Normalized multi-contract fixtures and ambiguity/tenant-denial checks pass; full release gate, push, Replit publication and authenticated Chrome smoke are still due.
+- The plan preview cannot repair incomplete historical Intake classification; it fails closed. The governed pre-activation decision chain, server-derived APU/workflow/governance version resolution, economic/time calculations and real Intake/Operations EDT UI remain unfinished. No guarded mutation route was opened, and this is not full EDT acceptance.
+- No Lens Next Native/installer or database schema change in this block; focused Navisworks smoke is not triggered. Block 9 exact source `f122afdd4ba53870c3c2e296355e8982132a29f5` passed the full gate and was pushed only, per the ten-build publication cadence.
+
 ## EDT and Engine Templates — Block 9 local source candidate — 2026-09-22
 
 - Block 8 Budget navigation regression was corrected at exact source `944f35c2671e25f81251b017ede03afaaa939891`, pushed, republished through Replit Shell with a zero-drop preview and development-data copy off, and authenticated Chrome-smoked. Budget → Project and legacy `/projects/:id/dashboard` both resolved; Intake/Operations and Headquarters routes loaded, with no Chrome console errors in the checked journeys. This is not a full EDT workflow acceptance claim.
-- Builds 316–320 tighten EDT plan location/Contract/deliverable ancestry, deterministic Work Item codes, exact saved Work Item coverage and canonical Contract binding before approval. Focused behavior and API typecheck passed. Block 9 is push-only; full gate and exact remote push remain pending.
+- Builds 316–320 tighten EDT plan location/Contract/deliverable ancestry, deterministic Work Item codes, exact saved Work Item coverage and canonical Contract binding before approval. The full gate passed and exact source `f122afdd4ba53870c3c2e296355e8982132a29f5` was pushed. Block 9 was push-only.
 - Server-derived version selection, EDT plan generation, economic/time amounts and Intake/Operations UI remain unfinished. The four guarded mutations stay fail-closed. No Native/installer delta or production database mutation in Block 9.
 
 ## EDT and Engine Templates — Block 8 local source candidate — 2026-09-22

@@ -1,10 +1,16 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT and Engine Templates program — Block 10 — 2026-09-22
+
+- [x] Build 321–325 read activated canonical Intake/Work Item data and project a deterministic multi-contract EDT plan; expose a company-scoped authenticated read-only preview. Ambiguous floor/zone/trade and incomplete saved scope coverage fail closed.
+- [ ] Finish the Block 10 full release gate, exact-head push, zero-drop Replit Shell publication with development-data copy off, and full authenticated Chrome smoke. Do not claim publication until exact live source is verified.
+- [ ] Complete pre-activation version/plan derivation, governed approval, canonical economic/time calculations and Intake/Operations EDT UI. The four guarded mutations remain closed; a preview is not an end-to-end EDT workflow.
+
 ## EDT and Engine Templates program — Block 9 — 2026-09-22
 
 - [x] Block 8 Budget → Project 404 repaired and live rechecked on published `944f35c2671e25f81251b017ede03afaaa939891`; legacy dashboard links resolve to analytics. Zero-drop database receipt and development-data-copy-off publish were verified.
 - [x] Builds 316–320 require location leaf and Contract/deliverable ancestry, deterministic Work Item codes, exact coverage of saved active Work Items and preserved canonical Contract/scope binding. Focused tests and API typecheck pass.
-- [ ] Finish the Block 9 full release gate and exact-head GitHub push. Do not publish this five-build-only boundary; the next publication is due after Build 325.
+- [x] Block 9 full release gate and exact-head GitHub push passed at `f122afdd4ba53870c3c2e296355e8982132a29f5`. This five-build-only boundary was not published; the next publication is due after Build 325.
 - [ ] Implement server-derived versions and generated EDT plans from saved authority, canonical economic/time amounts, and real Intake/Operations UI. Four guarded routes stay fail-closed; these checks do not prove the complete EDT workflow.
 
 ## EDT and Engine Templates program — Block 8 — 2026-09-22

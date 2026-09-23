@@ -421,6 +421,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/edt-engine-build318.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-build319.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-build320.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build321.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build322.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build323.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build324.behavior.ts
+- artifacts/api-server/src/lib/edt-engine-build325.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-economic-schema.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-economic-service.ts
 - artifacts/api-server/src/lib/edt-engine-governance-schema.behavior.ts
@@ -429,9 +434,11 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/edt-engine-migration.ts
 - artifacts/api-server/src/lib/edt-engine-permissions.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-permissions.ts
+- artifacts/api-server/src/lib/edt-engine-plan-projection.ts
 - artifacts/api-server/src/lib/edt-engine-qc-import-schema.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-qc-import-service.ts
 - artifacts/api-server/src/lib/edt-engine-route-context.ts
+- artifacts/api-server/src/lib/edt-engine-source-service.ts
 - artifacts/api-server/src/lib/edt-engine-transaction.ts
 - artifacts/api-server/src/lib/email.ts
 - artifacts/api-server/src/lib/enterprise-identity-migration.behavior.ts
