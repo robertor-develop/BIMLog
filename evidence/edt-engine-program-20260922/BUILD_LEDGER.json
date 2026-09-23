@@ -85,5 +85,5 @@
   "reassessmentRequired": "The original 335-build target does not constitute complete EDT activation: guarded mutations and canonical server-derived economic/time authority remain open. Scope the next work from current evidence after this publication.",
   "database": { "changed": false, "productionApplied": false, "design": "zero-drop" },
   "lensNext": { "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
-  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING_BLOCK13_GATE", "productSourceChanged": true, "publication": "BLOCK12_CORRECTIVE_PUBLISHED_BLOCK13_PUSH_ONLY" }
+  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PASS_BLOCK13_C137FE60", "productSourceChanged": true, "publication": "BLOCK12_CORRECTIVE_PUBLISHED_BLOCK13_PUSH_ONLY" }
 }

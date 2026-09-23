@@ -39115,7 +39115,7 @@
     },
     {
       "taskId": "bimlog-edt-engine-block13-server-candidate-20260923",
-      "reviewedThroughCommit": "357fedec4ee0559e009898e39243014135f99b4a",
+      "reviewedThroughCommit": "c137fe608c7685c79205196f9beedce6f29c5339",
       "reviewedAt": "2026-09-23T09:03:36Z",
       "status": "local_source_candidate",
       "captureTiming": "immediate_same_task_chain",
@@ -39190,13 +39190,13 @@
       ],
       "reviewedChangedPaths": [
         "evidence/edt-engine-program-20260922/BLOCK_13_REPORT.md",
-        "evidence/stabilization-program-20260919/ROUTE_INTERCONNECTION_GRAPH.json",
+        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "2b3cd98939545bd62acf9dd9bb5969cd69369467e6cae03b92d41fa5d8bed1d1"
+      "reviewedChangeSha256": "9cd45687c22ec108cceeb147a808b4c4dd4fec5d12696e5aa0c20b2abf83b7df"
     }
   ]
 }
