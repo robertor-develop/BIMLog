@@ -25,10 +25,10 @@ export function validateEdtPlanNodes(nodes:readonly EdtPlanNode[]):void{
 
 export function validateEdtPlanWorkItems(nodes:readonly EdtPlanNode[],items:readonly EdtPlanWorkItem[]):void{
   if(items.length===0)throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT approval requires Work Items.");
-  const nodeIds=new Set(nodes.map(node=>node.sourceIdentity));
+  const nodeById=new Map(nodes.map(node=>[node.sourceIdentity,node]));
   const ids=new Set<string>(),codes=new Set<string>();
   for(const item of items){
-    if(!item.id||!nodeIds.has(item.edtNodeSourceIdentity)||!item.locationIdentity||!item.tradeIdentity||!item.deliverableTypeIdentity||!item.displayCode||ids.has(item.id)||codes.has(item.displayCode))
+    if(!item.id||nodeById.get(item.edtNodeSourceIdentity)?.kind!=="location"||!item.locationIdentity||item.locationIdentity!==item.edtNodeSourceIdentity||!item.tradeIdentity||!item.deliverableTypeIdentity||!item.displayCode||ids.has(item.id)||codes.has(item.displayCode))
       throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Work Items need unique IDs and codes, a valid EDT node, and complete classification identities.");
     ids.add(item.id);codes.add(item.displayCode);
   }
