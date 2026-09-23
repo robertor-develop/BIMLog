@@ -52,6 +52,13 @@ export function validateEdtPlanWorkItems(nodes:readonly EdtPlanNode[],items:read
   }
 }
 
+export function validateEdtPlanCoverage(savedWorkItemIds:readonly string[],plannedItems:readonly EdtPlanWorkItem[]):void{
+  const saved=new Set(savedWorkItemIds);
+  const planned=new Set(plannedItems.map(item=>item.id));
+  if(saved.size===0||saved.size!==savedWorkItemIds.length||planned.size!==plannedItems.length||saved.size!==planned.size||[...saved].some(id=>!planned.has(id)))
+    throw new EdtEngineConflict("EDT_PLAN_COVERAGE_MISMATCH","The EDT plan must cover every saved Work Item in this Intake exactly once.");
+}
+
 function requireAuthorization(input: EdtRecordAuthorizationInput) {
   const decision = decideEdtRecordAuthorization(input);
   if (!decision.allow) throw new EdtEngineConflict(decision.code, "EDT activation authorization denied.");
@@ -91,6 +98,8 @@ export async function approveEdtActivation(input:{ actor:Actor; companyId:number
     if(!intake||intake.revision!==request.intake_revision||intake.status==="activated"||request.state!=="pending")throw new EdtEngineConflict("INTAKE_REVISION_CONFLICT","The saved Intake changed or was activated after this EDT request. Create a new request from the current Intake.");
     validateEdtPlanNodes(input.nodes);
     validateEdtPlanWorkItems(input.nodes,input.workItems);
+    const savedWorkItems=(await client.query<{id:string}>("SELECT id FROM job_activation_work_items WHERE intake_id=$1 AND project_id=$2 AND status<>'cancelled' ORDER BY id FOR UPDATE",[request.intake_id,input.projectId])).rows;
+    validateEdtPlanCoverage(savedWorkItems.map(item=>item.id),input.workItems);
     const decisionId=deterministicEdtId("activation-decision",`${request.id}:${input.expectedFingerprint}`);
     const existing=(await client.query<{id:string}>("SELECT id FROM job_activation_decisions WHERE request_id=$1",[request.id])).rows[0];
     if (existing) throw new EdtEngineConflict("ACTIVATION_DECISION_INCONSISTENT","Pending request already has an immutable decision.");
