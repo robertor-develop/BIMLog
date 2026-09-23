@@ -98,9 +98,11 @@
 .lens-next__global-context strong { font-size: 13px; }
 .lens-next__global-context span { color: #147b5b; font-size: 10px; font-weight: 700; }
 .lens-next__global-context small { max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--lens-next-muted); font-size: 10px; }
+.lens-next__global-context .lens-next__publishing-label { max-width: none; }
 .lens-next[data-dock-width="narrow"] .lens-next__header { min-height: 0; padding: 7px 8px; gap: 6px; }
 .lens-next[data-dock-width="narrow"] .lens-next__global-context { gap: 0 6px; }
 .lens-next[data-dock-width="narrow"] .lens-next__global-context small { max-width: 11ch; }
+.lens-next[data-dock-width="narrow"] .lens-next__global-context .lens-next__publishing-label { display: none; }
 .lens-next[data-dock-width="narrow"] .lens-next__connections { padding: 2px 8px 6px; flex-wrap: wrap; }
 
 .lens-next__header-actions { display: flex; align-items: center; gap: 0.5rem; }

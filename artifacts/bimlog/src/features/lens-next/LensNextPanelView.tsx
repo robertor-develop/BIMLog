@@ -616,6 +616,7 @@ export function LensNextPanelView({
         <div className="lens-next__global-context">
           <strong>BIMLog Lens Next</strong>
           <span>{BIMLOG_RELEASE_VERSION}</span>
+          <small className="lens-next__publishing-label">BIMLog · Controlled publishing</small>
           <small title={activeProject?.name ?? "No BIMLog project"}>{activeProject?.name ?? "No BIMLog project"}</small>
           <small title={bridgeDisplayName ?? "No active Navisworks model"}>{bridgeDisplayName ?? "No active Navisworks model"}</small>
         </div>
