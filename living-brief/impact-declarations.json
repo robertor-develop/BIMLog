@@ -39283,6 +39283,89 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b5e9e796b1c76b078497d7e35d06f59a8cbb466aa725434dbb9a30e6ce243fba"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block14-publication-receipt-20260923",
+      "reviewedThroughCommit": "e3a8626014260da5dd485e6cfb25ebd6187f0a6c",
+      "reviewedAt": "2026-09-23T11:21:01Z",
+      "status": "published_release_evidence",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Block 14 published safely, but the live historical QA fixture lacks canonical Contract evidence and cannot prove positive EDT activation; guarded routes remain closed."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The release preserves canonical Intake, Contract, Workflow and Project authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing GitHub, Replit Shell and Chrome release procedure was followed."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The complete local gate, read-only parity and authenticated regression extend evidence only."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new product mission or customer scope is introduced by the receipt."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The deployed source is unchanged; this follow-up records verified publication evidence."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native source, Navisworks bridge or installer changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer-facing report layout or document output changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards or compliance claims were added."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The exact pushed and published source, gates and live regression limits are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The release boundary is closed while role authority and positive EDT acceptance remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The append-only historical audit doctrine is unchanged by the release receipt."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/edt-engine-program-20260922/BLOCK_14_REPORT.md",
+        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "78ab278a0a42371910f036840f73bba4d69c8baae78e97bf4a3a0d2ecb6bd383"
     }
   ]
 }
