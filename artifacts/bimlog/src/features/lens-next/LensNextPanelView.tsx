@@ -1,4 +1,5 @@
 import React from "react";
+import { BIMLOG_RELEASE_VERSION } from "@workspace/api-zod";
 import { Columns3, Eye, Filter, HelpCircle, ImageOff, List, PanelLeftClose, PanelLeftOpen, Plus, Settings, Table2, X } from "lucide-react";
 import { LENS_NEXT_DEFAULT_FILTERS, LENS_NEXT_STATUSES } from "./lens-next-types";
 import {
@@ -585,6 +586,7 @@ export function LensNextPanelView({
     ? filteredIssues.findIndex(issue => issue.identity.serverId === selectedIssue.identity.serverId)
     : -1;
   const issueSummary = React.useMemo(() => summarizeLensNextIssues(filteredIssues), [filteredIssues]);
+  const activeProject = authorizedProjects.find(project => project.id === selectedProjectId);
   const navigateSelectedIssue = (direction: LensNextSelectionDirection) => {
     const target = direction === "previous" ? previousIssue : nextIssue;
     if (!target) return;
@@ -611,8 +613,11 @@ export function LensNextPanelView({
         {selectedIssue && <a href="#lens-next-selected-issue">{tt("Skip to selected issue", "Saltar a la incidencia seleccionada")}</a>}
       </nav>
       <header className="lens-next__header">
-        <div>
-          <p className="lens-next__eyebrow">BIMLog · Controlled publishing</p>
+        <div className="lens-next__global-context">
+          <strong>BIMLog Lens Next</strong>
+          <span>{BIMLOG_RELEASE_VERSION}</span>
+          <small title={activeProject?.name ?? "No BIMLog project"}>{activeProject?.name ?? "No BIMLog project"}</small>
+          <small title={bridgeDisplayName ?? "No active Navisworks model"}>{bridgeDisplayName ?? "No active Navisworks model"}</small>
         </div>
         <div className="lens-next__header-actions">
           <button ref={helpButtonRef} type="button" className="lens-next__help" onClick={() => setGuideOpen(true)}><HelpCircle aria-hidden="true" size={16} /> Help &amp; Guide</button>

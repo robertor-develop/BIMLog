@@ -94,6 +94,14 @@
   padding: 16px 16px 10px;
   background: linear-gradient(145deg, #ffffff, #edf7f1);
 }
+.lens-next__global-context { display: flex; min-width: 0; align-items: baseline; flex-wrap: wrap; gap: 2px 8px; }
+.lens-next__global-context strong { font-size: 13px; }
+.lens-next__global-context span { color: #147b5b; font-size: 10px; font-weight: 700; }
+.lens-next__global-context small { max-width: 18ch; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--lens-next-muted); font-size: 10px; }
+.lens-next[data-dock-width="narrow"] .lens-next__header { min-height: 0; padding: 7px 8px; gap: 6px; }
+.lens-next[data-dock-width="narrow"] .lens-next__global-context { gap: 0 6px; }
+.lens-next[data-dock-width="narrow"] .lens-next__global-context small { max-width: 11ch; }
+.lens-next[data-dock-width="narrow"] .lens-next__connections { padding: 2px 8px 6px; flex-wrap: wrap; }
 
 .lens-next__header-actions { display: flex; align-items: center; gap: 0.5rem; }
 .lens-next__record-summary { display: flex; flex-wrap: wrap; align-items: center; gap: 3px 12px; min-width: 0; padding: 5px 14px; border-bottom: 1px solid var(--lens-next-line); background: #fff; font-size: 11px; }
