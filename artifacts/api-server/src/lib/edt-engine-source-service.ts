@@ -81,5 +81,22 @@ export async function loadActivatedEdtSource(client: EdtTransactionClient, input
       throw new EdtEngineConflict("EDT_WORKFLOW_SOURCE_MISMATCH", "An activated Delivery Workflow definition failed integrity verification.");
     }
   }
+  const scopeItems = intake.data.scopeItems;
+  if (Array.isArray(scopeItems)) {
+    const tradeIds = [...new Set(scopeItems.flatMap(item => objectRecord(item) && Array.isArray(item.workPackages)
+      ? item.workPackages.map(workPackage => objectRecord(workPackage) && objectRecord(workPackage.classification)
+        ? workPackage.classification.disciplineId : null)
+      : []).filter((value): value is string => typeof value === "string" && value.length > 0))];
+    if (tradeIds.length) {
+      const catalogRows = (await client.query<{ id: string }>(
+        `SELECT id::text AS id FROM enterprise_trades WHERE id::text=ANY($1::text[])
+          UNION SELECT id FROM company_master_catalog_entries
+          WHERE id=ANY($1::text[]) AND company_id=$2 AND kind='discipline'`,
+        [tradeIds, input.companyId])).rows;
+      const catalogIds = new Set(catalogRows.map(row => String(row.id)));
+      if (tradeIds.some(id => !catalogIds.has(id)))
+        throw new EdtEngineConflict("EDT_TRADE_SOURCE_MISMATCH", "A saved Work Package trade is not a BIMLog default or this company's master-catalog discipline.");
+    }
+  }
   return { project, intake: { id: intake.id, revision: intake.revision, data: intake.data, activationSummary: intake.activation_summary }, workItems };
 }

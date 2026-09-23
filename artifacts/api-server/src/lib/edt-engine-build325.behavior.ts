@@ -13,6 +13,7 @@ const host: EdtTransactionHost = { async connect() { return { async query<Row>(s
   if (sql.includes("FROM job_activation_work_items")) return { rows: [{ id: "wi-1", stableScopeItemId: "scope-1", contractId: "contract-1", contractVersionId: "version-1", status: "active" }] as Row[] };
   if (sql.includes("FROM financial_contracts")) return { rows: [{ contractId: "contract-1", versionId: "version-1", currency: "USD", contentFingerprint: "a".repeat(64) }] as Row[] };
   if (sql.includes("FROM company_delivery_workflow_work_items")) return { rows: [{ workItemId: "wi-1", source: "bimlog", versionId: null, templateCode: BIMLOG_DELIVERY_WORKFLOWS[0].code, templateVersion: 1, definition: BIMLOG_DELIVERY_WORKFLOWS[0].definition, fingerprint: BIMLOG_DELIVERY_WORKFLOWS[0].fingerprint }] as Row[] };
+  if (sql.includes("FROM enterprise_trades")) return { rows: [{ id: "discipline-1" }] as Row[] };
   return { rows: [] };
 }, release() {} }; } };
 const result = await previewActivatedEdtPlan({ companyId: 7, projectId: 11, intakeId: "intake-1" }, host);
