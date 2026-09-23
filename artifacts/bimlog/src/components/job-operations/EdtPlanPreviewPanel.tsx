@@ -4,6 +4,28 @@ type PlanNode = { kind: "project" | "contract" | "deliverable" | "location"; sou
 type PlanWorkItem = { id: string; displayCode: string; tradeIdentity: string; locationIdentity: string };
 export type EdtPlanPreview = { nodes: PlanNode[]; workItems: PlanWorkItem[]; sourceFingerprint: string };
 
+export function describeEdtPreviewError(cause: unknown, tt: (english: string, spanish: string) => string): string {
+  const code = cause && typeof cause === "object" && "code" in cause ? String(cause.code ?? "") : "";
+  if (code === "EDT_CONTRACT_SOURCE_MISSING" || code === "EDT_CONTRACT_SOURCE_MISMATCH")
+    return tt("This activated Intake has no verifiable canonical Contract version. Existing work is unchanged; complete the Contract source before using the EDT preview.",
+      "Este ingreso activado no tiene una versión verificable del contrato canónico. El trabajo existente no cambió; complete el contrato de origen antes de usar la vista EDT.");
+  if (code === "EDT_LOCATION_AMBIGUOUS" || code === "EDT_PLAN_COVERAGE_MISMATCH")
+    return tt("This Intake needs exactly one saved floor or area Work Package for each Work Item before an EDT plan can be projected.",
+      "Este ingreso necesita exactamente un paquete de trabajo de piso o área guardado por cada elemento de trabajo antes de proyectar el plan EDT.");
+  if (code === "EDT_TRADE_SOURCE_MISMATCH" || code === "EDT_SOURCE_AMBIGUOUS")
+    return tt("This Intake is missing a verifiable saved discipline or scope identity. Check its original Work Packages and company catalog; no records were changed.",
+      "Este ingreso no tiene una identidad verificable de disciplina o alcance guardada. Revise los paquetes originales y el catálogo de la empresa; no se cambió ningún registro.");
+  if (code === "EDT_WORKFLOW_SOURCE_MISSING" || code === "EDT_WORKFLOW_SOURCE_MISMATCH")
+    return tt("An activated Work Item is missing a verifiable Delivery Workflow. Check its saved workflow binding before previewing EDT.",
+      "Un elemento activado no tiene un flujo de entrega verificable. Revise su vínculo guardado antes de ver la EDT.");
+  if (code === "INTAKE_NOT_FOUND" || code === "PROJECT_COMPANY_MISMATCH" || code === "ACTIVE_PROJECT_ROLE_REQUIRED")
+    return tt("This Intake is unavailable in your current project or role. Reopen the correct project or ask its administrator to check access.",
+      "Este ingreso no está disponible en su proyecto o rol actual. Abra el proyecto correcto o pida al administrador revisar el acceso.");
+  return cause instanceof Error && cause.message && cause.message !== "The request failed." && cause.message !== "La solicitud falló."
+    ? cause.message : tt("EDT preview is unavailable. Refresh and try again; no records were changed.",
+      "La vista EDT no está disponible. Actualice e intente de nuevo; no se cambió ningún registro.");
+}
+
 export function parseEdtPlanPreview(value: unknown): EdtPlanPreview {
   const input = value as Record<string, unknown> | null;
   if (!input || !Array.isArray(input.nodes) || !Array.isArray(input.workItems) ||
@@ -41,7 +63,7 @@ export function EdtPlanPreviewPanel({ projectId, intakeId, loadPlan, tt }: {
       setPlan(next); setStatus("ready");
     } catch (cause) {
       if (current !== generation.current) return;
-      setPlan(null); setError(cause instanceof Error ? cause.message : String(cause)); setStatus("error");
+      setPlan(null); setError(describeEdtPreviewError(cause, tt)); setStatus("error");
     }
   };
   return <section className="jo-card" aria-labelledby="edt-preview-title">
