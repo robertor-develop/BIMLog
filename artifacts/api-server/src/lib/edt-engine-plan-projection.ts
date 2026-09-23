@@ -35,11 +35,14 @@ export function projectActivatedEdtPlan(source: ActivatedEdtSource): ProjectedEd
   if (!profiles.length || !scopeItems.length || !activatedContracts.length)
     throw new EdtEngineConflict("EDT_SOURCE_AMBIGUOUS", "Commercial contracts and scope must be present in the activated Intake.");
   const byProfile = new Map(activatedContracts.map(entry => [required(entry.profileId,"activated contract profile"),entry]));
-  if (byProfile.size !== activatedContracts.length)
+  if (byProfile.size !== activatedContracts.length || byProfile.size !== profiles.length)
     throw new EdtEngineConflict("EDT_SOURCE_AMBIGUOUS", "Activated contract profiles must be unique.");
   const byScope = new Map(scopeItems.map(entry => [required(entry.id,"scope item ID"),entry]));
   if (byScope.size !== scopeItems.length)
     throw new EdtEngineConflict("EDT_SOURCE_AMBIGUOUS", "Saved scope item IDs must be unique.");
+  const savedScopeIds = new Set(source.workItems.map(item => required(item.stableScopeItemId,"saved Work Item scope ID")));
+  if (savedScopeIds.size !== source.workItems.length || savedScopeIds.size !== byScope.size || [...byScope.keys()].some(id => !savedScopeIds.has(id)))
+    throw new EdtEngineConflict("EDT_PLAN_COVERAGE_MISMATCH", "Every activated Intake scope item must have exactly one saved Work Item.");
   const projectNode: EdtPlanNode = {
     kind:"project",sourceIdentity:`project:${source.project.id}`,code:required(source.project.code,"project code"),
     name:required(source.project.name,"project name"),sequence:1,snapshot:{projectId:source.project.id,code:source.project.code,name:source.project.name},
