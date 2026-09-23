@@ -25,6 +25,7 @@ import type {
   LensNextRefreshState,
 } from "./lens-next-types";
 import { readLensNextWorkspaceLayout, writeLensNextWorkspaceLayout } from "./lens-next-workspace-layout";
+import { lensNextDockWidth } from "./lens-next-dock-width";
 import type { LensNextIssueSort } from "./lens-next-model";
 import { LENS_NEXT_STATUS_LABELS, lensNextIssueAccessibleLabel, lensNextIssueDescription, lensNextPriorityLabel } from "./lens-next-issue-presentation";
 import { lensNextSyncLabel, lensNextSyncPlanSummary, lensNextSyncRecoveryGuidance, lensNextSyncReviewCount, lensNextSyncReviewItems, type LensNextSyncReviewFilter } from "./lens-next-sync-presentation";
@@ -524,6 +525,18 @@ export function LensNextPanelView({
   const selectedIssueRef = React.useRef<HTMLElement | null>(null);
   const helpButtonRef = React.useRef<HTMLButtonElement | null>(null);
   const helpCloseRef = React.useRef<HTMLButtonElement | null>(null);
+  const lensRootRef = React.useRef<HTMLElement | null>(null);
+  const [availableWidth, setAvailableWidth] = React.useState(0);
+  React.useLayoutEffect(() => {
+    const root = lensRootRef.current;
+    if (!root) return;
+    const measure = () => setAvailableWidth(root.getBoundingClientRect().width);
+    measure();
+    if (typeof ResizeObserver === "undefined") return;
+    const observer = new ResizeObserver(measure);
+    observer.observe(root);
+    return () => observer.disconnect();
+  }, []);
   const [workspaceLayout,setWorkspaceLayout]=React.useState(()=>readLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage));
   React.useEffect(()=>writeLensNextWorkspaceLayout(typeof window==="undefined"?null:window.localStorage,workspaceLayout),[workspaceLayout]);
   React.useEffect(() => { setPublishText(""); setPublishReason(""); }, [selectedIssue?.identity.serverId]);
@@ -569,7 +582,7 @@ export function LensNextPanelView({
   };
   const preparedAction: LensNextPublishAction = publishKind === "status" ? { type: "status", status: publishStatus } : publishKind === "comment" ? { type: "comment", comment: publishText.trim() } : { type: "assignment", responsibleCompany: publishText.trim() };
   return (
-    <aside className="lens-next" aria-label="BIMLog Lens Next controlled issue workspace" aria-busy={refreshState === "refreshing" || reconciliationState === "running"}>
+    <aside ref={lensRootRef} className="lens-next" data-dock-width={lensNextDockWidth(availableWidth)} aria-label="BIMLog Lens Next controlled issue workspace" aria-busy={refreshState === "refreshing" || reconciliationState === "running"}>
       <nav className="lens-next__skip-links" aria-label="Skip within Lens Next">
         <a href="#lens-next-issue-list">{tt("Skip to issues", "Saltar a incidencias")}</a>
         {selectedIssue && <a href="#lens-next-selected-issue">{tt("Skip to selected issue", "Saltar a la incidencia seleccionada")}</a>}
