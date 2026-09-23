@@ -39529,6 +39529,7 @@
       "reviewedChangedPaths": [
         "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
         "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-build33-mobile-acceptance.behavior.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-dock-compact-shell.behavior.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-dock-create.behavior.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-dock-filters.behavior.ts",
@@ -39542,7 +39543,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "f1badceadd5dd9682a1b85f3876093e8511113d0a4ce202dcaa0321afe946e23"
+      "reviewedChangeSha256": "b944d5c2a00b1eb6515a0f625938e6000a453416f894ec04b69f57b77e255ae2"
     }
   ]
 }

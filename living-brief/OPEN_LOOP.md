@@ -5,6 +5,7 @@
 - [x] Record existing Lens behavior; add actual container-width classification, the persistent four-workspace rail with Viewpoints default, compact global context, and width-bounded preservation of the wide three-pane layout in five bounded source commits. Restore the Controlled publishing label after its regression test failed.
 - [x] Block 1 passed the full gate and reached GitHub `master` at `a6ab1142b2684bde017e445e72affe0ebde9de1b`; publication was correctly deferred to the ten-build boundary.
 - [x] Build 6–10 compact single-workspace shell, functional Filters, Viewpoints List/Details/Back with scroll preservation, Create/Cancel/new-issue selection, and Settings. Focused tests, frontend typecheck, and local Chrome production-component fixture behavior pass at narrow/medium/wide widths. No Native/installer files changed.
+- [x] Correct the older exact-390 regression check after it required superseded viewport auto-scroll behavior; the affected Lens suite passes with the measured-container transition asserted.
 - [ ] Complete the exact-head full gate, push Block 2, synchronize and publish through Replit Shell without Replit Agents, then run full authenticated live Chrome smoke. Do not call local fixture data a real Navisworks capture, successful production Create, or customer acceptance.
 - [ ] Continue remaining responsive-dock accessibility, connected Navisworks and field acceptance after this release checkpoint; preserve the verified Working View, identity, publishing and attachment behaviors.
 
