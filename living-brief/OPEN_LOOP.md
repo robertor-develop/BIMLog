@@ -1,13 +1,20 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT and Engine Templates program — Block 9 — 2026-09-22
+
+- [x] Block 8 Budget → Project 404 repaired and live rechecked on published `944f35c2671e25f81251b017ede03afaaa939891`; legacy dashboard links resolve to analytics. Zero-drop database receipt and development-data-copy-off publish were verified.
+- [x] Builds 316–320 require location leaf and Contract/deliverable ancestry, deterministic Work Item codes, exact coverage of saved active Work Items and preserved canonical Contract/scope binding. Focused tests and API typecheck pass.
+- [ ] Finish the Block 9 full release gate and exact-head GitHub push. Do not publish this five-build-only boundary; the next publication is due after Build 325.
+- [ ] Implement server-derived versions and generated EDT plans from saved authority, canonical economic/time amounts, and real Intake/Operations UI. Four guarded routes stay fail-closed; these checks do not prove the complete EDT workflow.
+
 ## EDT and Engine Templates program — Block 8 — 2026-09-22
 
-- [ ] Complete the Project Budget navigation hotfix release: full exact-source gate, corrective push, zero-drop Replit Shell republish with development-database copy disabled, and authenticated Chrome budget-to-project recheck. The first Block 8 publication exposed a 404 at `/projects/:id/dashboard`; hotfix `3f26e8fcc40c5a0840bf331dffc6a68efe594539` adds the `/analytics` links and backward-compatible alias.
+- [x] Complete the Project Budget navigation hotfix release: full exact-source gate, corrective push, zero-drop Replit Shell republish with development-database copy disabled, and authenticated Chrome budget-to-project recheck. The first Block 8 publication exposed a 404 at `/projects/:id/dashboard`; exact live-corrected source is `944f35c2671e25f81251b017ede03afaaa939891`.
 
 - [x] Builds 311–315 harden the unpublished EDT engine service layer: approval retry is tied to the immutable decision; EDT nodes require an ordered acyclic hierarchy and unique sibling sequences; Work Item plans reject duplicate/incomplete identities; economic plans verify activated Intake and canonical contract APU/currency; time decisions match the stored submission commitment.
 - [x] Five bounded build commits exist and the focused Block 8 suite and API TypeScript typecheck pass. The older Block 4 fixture was corrected to represent a same-Intake budget account.
 - [ ] These repairs do **not** complete server-derived activation versions, EDT plan generation, economic/time amount calculation, or Intake/Operations UI wiring. The four guarded mutation routes stay fail-closed. Do not claim an end-to-end EDT engine or expose browser-supplied authority.
-- [ ] Complete the full clean local release gate, exact-source push, Replit Shell zero-drop preview/publication and authenticated Chrome smoke for the Build 315 publication boundary. No Lens Next Native or installer files changed, so focused Navisworks smoke is not triggered.
+- [x] Complete the full clean local release gate, exact-source push, Replit Shell zero-drop preview/publication and authenticated Chrome regression smoke for the Build 315 publication boundary. No Lens Next Native or installer files changed, so focused Navisworks smoke was not triggered.
 
 ## EDT and Engine Templates program — Block 7 — 2026-09-22
 

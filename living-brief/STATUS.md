@@ -1,8 +1,14 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 9 local source candidate — 2026-09-22
+
+- Block 8 Budget navigation regression was corrected at exact source `944f35c2671e25f81251b017ede03afaaa939891`, pushed, republished through Replit Shell with a zero-drop preview and development-data copy off, and authenticated Chrome-smoked. Budget → Project and legacy `/projects/:id/dashboard` both resolved; Intake/Operations and Headquarters routes loaded, with no Chrome console errors in the checked journeys. This is not a full EDT workflow acceptance claim.
+- Builds 316–320 tighten EDT plan location/Contract/deliverable ancestry, deterministic Work Item codes, exact saved Work Item coverage and canonical Contract binding before approval. Focused behavior and API typecheck passed. Block 9 is push-only; full gate and exact remote push remain pending.
+- Server-derived version selection, EDT plan generation, economic/time amounts and Intake/Operations UI remain unfinished. The four guarded mutations stay fail-closed. No Native/installer delta or production database mutation in Block 9.
+
 ## EDT and Engine Templates — Block 8 local source candidate — 2026-09-22
 
-- Post-publication Chrome acceptance found a Project Budget breadcrumb linking to unsupported `/projects/:id/dashboard`, yielding a 404. Release hotfix `3f26e8fcc40c5a0840bf331dffc6a68efe594539` points Budget, Intake and shared shell project links to `/analytics` and supports legacy dashboard URLs as an alias. Focused regression and frontend typecheck passed; full gate, corrective push, republish and authenticated smoke are required before acceptance.
+- Post-publication Chrome acceptance found a Project Budget breadcrumb linking to unsupported `/projects/:id/dashboard`, yielding a 404. Release hotfix `3f26e8fcc40c5a0840bf331dffc6a68efe594539` points Budget, Intake and shared shell project links to `/analytics` and supports legacy dashboard URLs as an alias. The corrective release and authenticated recheck completed at `944f35c2671e25f81251b017ede03afaaa939891`.
 
 - Builds 311–315 harden the EDT service layer: immutable-decision-bound approval retry, valid EDT tree and Work Item plan, activated contract/APU/currency binding for economic plans, and submitted-commitment binding for time decisions.
 - The four guarded EDT HTTP mutations remain fail-closed because server-derived activation versions, plan, economic amounts and time impact plus real Intake/Operations UI integration are unfinished. Existing canonical Intake and Operations workflows remain the product path; this block is not end-to-end EDT completion.

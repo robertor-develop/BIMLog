@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "program": "BIMLog EDT and Engine Templates",
   "date": "2026-09-22",
-  "range": { "firstBuild": 276, "completedThrough": 315, "finalBuild": 335 },
-  "currentBlock": { "number": 8, "builds": "311-315", "status": "FOCUSED_PASS_FULL_GATE_PENDING", "pushDue": true, "publicationDue": true },
+  "range": { "firstBuild": 276, "completedThrough": 320, "finalBuild": 335 },
+  "currentBlock": { "number": 9, "builds": "316-320", "status": "FOCUSED_PASS_FULL_GATE_PENDING", "pushDue": true, "publicationDue": false },
   "buildCommits": {
     "276": "ca399ae03d87435c5f24ece52f8f6e48e426d857",
     "277": "c33570ca36ea7c0574dac5b98cc88bc33dfb1d7f",
@@ -48,12 +48,18 @@
     "312": "22a9f7ec11e5a50552b6ac15a81f1c2f368c568f",
     "313": "aeafd6e97955fc3bbf2472f75749b91220af8315",
     "314": "647f82a8630bd9be911c0911b36a48f8b4cd6450",
-    "315": "909604f45caa0dd9b376e3c0ba3e782e339213d4"
+    "315": "909604f45caa0dd9b376e3c0ba3e782e339213d4",
+    "block08PublicationHotfix": "944f35c2671e25f81251b017ede03afaaa939891",
+    "316": "a391ceecf98f3ba9cb18d22f8a160e5a9a262369",
+    "317": "6a651f8f73437ead079d5b964bcc00bf12884c3d",
+    "318": "f513d987a417f3226029c14e0612c76194aea054",
+    "319": "03efb23b61abb71fc4298aef1f9cf979a1f72538",
+    "320": "936e86ec5ca26837a5243fad7d441542b89feb1a"
   },
-  "remainingBlocks": 4,
-  "remainingBuilds": 20,
-  "nextBlock": { "number": 9, "builds": "316-320" },
+  "remainingBlocks": 3,
+  "remainingBuilds": 15,
+  "nextBlock": { "number": 10, "builds": "321-325" },
   "database": { "changed": true, "productionApplied": false, "design": "additive-zero-drop" },
   "lensNext": { "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
-  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING", "productSourceChanged": true, "publication": "DUE_AFTER_315" }
+  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING", "productSourceChanged": true, "publication": "DUE_AFTER_325" }
 }
