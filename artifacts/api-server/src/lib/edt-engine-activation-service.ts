@@ -6,8 +6,9 @@ type Actor = Pick<EdtRecordAuthorizationInput,"grants"|"actorUserId"|"actorCompa
 export type EdtPlanNode = Readonly<{ kind:"project"|"contract"|"deliverable"|"location"; sourceIdentity:string; parentSourceIdentity?:string; code:string; name:string; sequence:number; snapshot:Record<string,unknown> }>;
 export type EdtPlanWorkItem = Readonly<{ id:string; edtNodeSourceIdentity:string; contractSourceIdentity:string; locationIdentity:string; locationSnapshot:Record<string,unknown>; tradeIdentity:string; tradeSnapshot:Record<string,unknown>; deliverableTypeIdentity:string; deliverableTypeSnapshot:Record<string,unknown>; displayCode:string }>;
 
-export function makeEdtWorkItemCode(input:{project:EdtPlanNode;contract:EdtPlanNode;deliverable:EdtPlanNode;location:EdtPlanNode;tradeIdentity:string}):string{
-  const segments=[input.project.code,input.contract.code,input.deliverable.code,input.location.code,input.tradeIdentity].map(value=>{
+export function makeEdtWorkItemCode(input:{project:EdtPlanNode;contract:EdtPlanNode;deliverable:EdtPlanNode;location:EdtPlanNode;tradeIdentity:string;tradeCode?:string}):string{
+  if(!input.tradeIdentity.trim())throw new EdtEngineConflict("EDT_CODE_INVALID","A stable trade identity is required.");
+  const segments=[input.project.code,input.contract.code,input.deliverable.code,input.location.code,input.tradeCode??input.tradeIdentity].map(value=>{
     const code=value.trim().toUpperCase().replace(/[^A-Z0-9]+/g,"-").replace(/^-|-$/g,"");
     if(!code||code.length>24)throw new EdtEngineConflict("EDT_CODE_INVALID","EDT identity codes must be nonempty and at most 24 normalized characters.");
     return code;
@@ -46,7 +47,7 @@ export function validateEdtPlanWorkItems(nodes:readonly EdtPlanNode[],items:read
     const project=nodeById.get(contract?.parentSourceIdentity??"");
     if(!item.id||location?.kind!=="location"||deliverable?.kind!=="deliverable"||contract?.kind!=="contract"||project?.kind!=="project"||contract.sourceIdentity!==item.contractSourceIdentity||deliverable.sourceIdentity!==item.deliverableTypeIdentity||!item.locationIdentity||item.locationIdentity!==item.edtNodeSourceIdentity||!item.tradeIdentity||!item.displayCode||ids.has(item.id)||codes.has(item.displayCode))
       throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Work Items need unique IDs and codes, a valid EDT node, and complete classification identities.");
-    if(item.displayCode!==makeEdtWorkItemCode({project,contract,deliverable,location,tradeIdentity:item.tradeIdentity}))
+    if(item.displayCode!==makeEdtWorkItemCode({project,contract,deliverable,location,tradeIdentity:item.tradeIdentity,tradeCode:typeof item.tradeSnapshot.code==="string"?item.tradeSnapshot.code:undefined}))
       throw new EdtEngineConflict("EDT_CODE_INVALID","Work Item visible code must be derived from its immutable classification identities.");
     ids.add(item.id);codes.add(item.displayCode);
   }
