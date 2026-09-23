@@ -38540,7 +38540,7 @@
     },
     {
       "taskId": "bimlog-edt-engine-block09-20260922",
-      "reviewedThroughCommit": "c26639ad5002461754ec9f79e3e9f99a31b387ee",
+      "reviewedThroughCommit": "1962c24cf9efbf08c4f07823d8e525b2c90935f1",
       "reviewedAt": "2026-09-23T00:55:00Z",
       "status": "corrective_source_candidate",
       "captureTiming": "immediate_same_task_chain",
@@ -38578,8 +38578,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "No structural platform route or module authority changed."
+          "result": "updated",
+          "reason": "Generated structural inventory now includes the five bounded EDT behavior files."
         },
         {
           "key": "plugin",
@@ -38613,10 +38613,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "7f152a7ae598730c04bff372f01ceb80d88edef5e3e27767a106f01fb4b2c376"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
