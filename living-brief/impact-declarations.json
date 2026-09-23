@@ -38619,7 +38619,7 @@
     },
     {
       "taskId": "bimlog-edt-engine-block10-20260922",
-      "reviewedThroughCommit": "3218053447749ab1f1a542ee74eeb4a110af7ed5",
+      "reviewedThroughCommit": "f5414ffed9814ce2ce9de65df418f726fb755d8d",
       "reviewedAt": "2026-09-23T02:10:01Z",
       "status": "corrective_source_candidate",
       "captureTiming": "immediate_same_task_chain",
@@ -38692,10 +38692,9 @@
         }
       ],
       "reviewedChangedPaths": [
-        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "6cb438a7aa0eca5771e45665b5fea947d438567002009b1000e1616be7b87fd2"
+      "reviewedChangeSha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
     }
   ]
 }
