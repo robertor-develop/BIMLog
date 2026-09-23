@@ -1258,6 +1258,11 @@
   flex-direction: column;
   overflow: hidden;
 }
+/* Override the older viewport-based :has() list/detail switch when a different
+   side workspace is active; selection must not hide Filters/Create/Settings. */
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__body:has(> .lens-next__details:not(.lens-next__details--empty)) > .lens-next__browser {
+  display: flex;
+}
 .lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__browser-grid {
   display: flex;
   flex: 1 1 auto;
@@ -1293,7 +1298,7 @@
 }
 .lens-next__back-to-list { display: none; }
 .lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__details { display: none; }
-.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="viewpoints"][data-detail-open="true"] .lens-next__browser { display: none; }
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="viewpoints"][data-detail-open="true"] .lens-next__body > .lens-next__browser { display: none; }
 .lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="viewpoints"][data-detail-open="true"] .lens-next__details:not(.lens-next__details--empty) {
   display: block;
   overflow-y: auto;
@@ -1317,4 +1322,16 @@
 .lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="create"] .lens-next__create-cancel {
   min-height: 44px;
   margin: 8px;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="settings"] .lens-next__browser {
+  overflow-y: auto;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="settings"] .lens-next__browser-grid {
+  display: none;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="settings"] .lens-next__browser > .lens-next__field {
+  display: grid;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="settings"] .lens-next__browser > :is(.lens-next__active-model, .lens-next__view-settings) {
+  display: block;
 }

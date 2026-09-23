@@ -8,6 +8,6 @@ assert.match(view, /listScrollTop\.current = issueListRef\.current\?\.scrollTop/
 assert.match(view, /setCompactDetailOpen\(true\);[\s\S]*?onSelectIssue\(serverId\)/);
 assert.match(view, /setCompactDetailOpen\(false\);[\s\S]*?issueListRef\.current\.scrollTop = listScrollTop\.current/);
 assert.match(view, /className="lens-next__back-to-list" onClick=\{backToList\}/);
-assert.match(css, /\[data-detail-open="true"\] \.lens-next__browser \{ display: none; \}/);
+assert.match(css, /\[data-detail-open="true"\] \.lens-next__body > \.lens-next__browser \{ display: none; \}/);
 assert.match(css, /\[data-detail-open="true"\] \.lens-next__details:not\(\.lens-next__details--empty\)/);
 console.log("Lens Next compact list/detail/back state contract: PASS");
