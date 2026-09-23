@@ -23,6 +23,7 @@ export function validateEdtPlanNodes(nodes:readonly EdtPlanNode[]):void{
     throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT nodes must begin with exactly one project root.");
   const seen=new Map<string,EdtPlanNode>();
   const siblingSequences=new Set<string>();
+  const siblingCodes=new Set<string>();
   const expectedParent:Record<EdtPlanNode["kind"],EdtPlanNode["kind"]|null>={project:null,contract:"project",deliverable:"contract",location:"deliverable"};
   for(const node of nodes){
     if(!node.sourceIdentity||!node.code||!node.name||!Number.isInteger(node.sequence)||node.sequence<=0||seen.has(node.sourceIdentity))
@@ -32,7 +33,9 @@ export function validateEdtPlanNodes(nodes:readonly EdtPlanNode[]):void{
       throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","EDT nodes must be ordered project, contract, deliverable, location with a valid parent.");
     const siblingKey=`${node.parentSourceIdentity??"<root>"}:${node.sequence}`;
     if(siblingSequences.has(siblingKey))throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Sibling EDT sequences must be unique.");
-    siblingSequences.add(siblingKey);seen.set(node.sourceIdentity,node);
+    const siblingCodeKey=JSON.stringify([node.parentSourceIdentity??null,node.code.trim().toUpperCase()]);
+    if(siblingCodes.has(siblingCodeKey))throw new EdtEngineConflict("EDT_CODE_INVALID","Sibling EDT codes must be unique without regard to case.");
+    siblingSequences.add(siblingKey);siblingCodes.add(siblingCodeKey);seen.set(node.sourceIdentity,node);
   }
 }
 
