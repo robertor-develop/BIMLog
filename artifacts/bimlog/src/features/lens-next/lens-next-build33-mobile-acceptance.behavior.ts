@@ -20,8 +20,10 @@ assert.match(css, /\.lens-next__browser,[\s\S]*\.lens-next__body > \.lens-next__
 assert.match(css, /\.lens-next__details > header \{ order: 1; \}/);
 assert.match(css, /\.lens-next__details > \.lens-next__actions \{ order: 2; \}/);
 assert.match(css, /\.lens-next__details > \.lens-next__detail-section \{ order: 3; \}/);
-assert.match(view, /matchMedia\("\(max-width: 760px\)"\)/);
-assert.match(view, /selectedIssueRef\.current\?\.scrollIntoView\(\{ block: "start", behavior: "auto" \}\)/);
+assert.match(view, /const dockWidth = lensNextDockWidth\(availableWidth\)/);
+assert.match(view, /className="lens-next__back-to-list" onClick=\{backToList\}/);
+assert.match(view, /listScrollTop\.current = issueListRef\.current\?\.scrollTop/);
+assert.match(css, /\[data-workspace="viewpoints"\]\[data-detail-open="true"\] \.lens-next__body > \.lens-next__browser \{ display: none; \}/);
 assert.equal(evidence.checks.viewportWidth, 390);
 assert.equal(evidence.checks.horizontalOverflow, false);
 assert.equal(evidence.checks.issueBrowserHiddenWhileDetailSelected, true);
