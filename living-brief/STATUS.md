@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT Block 12 production role-lookup correction — 2026-09-23
+
+- Corrective source `ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e` passed the full gate and Replit zero-drop publication as deployment `c7f3590f`; live health matched. Authenticated Chrome still found HTTP 500 in EDT readiness. Production logs proved a wrong PMO table name, not missing data or a required migration.
+- The source now uses canonical `company_master_catalog_administrators` and the authorization regression checks that name. A stale Build 300 query-text assertion was aligned with its existing Intake-joined company scope. Focused Block 5/12 tests and API typecheck pass. Full gate, exact push, republish and authenticated live recheck remain open. Neither prior live smoke is accepted as passed.
+- The readiness preview remains read-only; governed EDT mutations and full program acceptance remain open.
+
 ## EDT and Engine Templates — Block 12 live-smoke correction — 2026-09-23
 
 - Exact Block 12 source `cceb5293d181dcde013c06ffcd08e815f3c83bd9` passed the full local gate, was pushed, built in clean Replit Shell, received a zero-change production/development database preview with data copy off required, and published as Replit deployment `401fd326`; live health matched the source.

@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT Block 12 — second corrective publication — 2026-09-23
+
+- [x] Production logs isolated the authenticated EDT readiness HTTP 500 to a misspelled PMO table in the route role lookup. Correct the source to the existing company master catalog administrator table, with no migration or data change.
+- [x] Focused Block 5 and Block 12 regression suites and API typecheck pass; Build 300's stale assertion now matches the secure Intake-joined company query.
+- [ ] Pass the full local release gate, push exact corrective source, preserve Replit's publish-marker branch, run a zero-drop preview with development-data copy off, republish through Replit Shell/UI, and repeat authenticated Chrome smoke. Do not claim the first or second smoke passed.
+- [ ] Keep guarded EDT mutations closed until canonical version, economic and time authority and operational UI are finished and tested.
+
 ## EDT and Engine Templates — Block 12 corrective live smoke — 2026-09-23
 
 - [x] First Block 12 push, exact Replit Shell build and zero-drop preview passed; deployment `401fd326` reported the exact source and healthy live status.

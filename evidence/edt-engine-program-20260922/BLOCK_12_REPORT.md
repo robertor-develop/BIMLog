@@ -12,6 +12,10 @@ Focused Block 12 tests and both API/frontend TypeScript checks passed. Full repo
 
 This is **not full EDT program acceptance**. Pre-activation plan/version authority, governed activation, economic/time calculation and their operational UI remain open. The original Build 335 target is exhausted; further scope requires evidence-based planning, not a false completion claim.
 
+## Second live-smoke finding
+
+Corrective source `ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e` passed the full local gate, was pushed, passed a clean Replit Shell build and zero-drop preview, and published as deployment `c7f3590f`. Live health matched the exact source. The authenticated Chrome recheck proved the UI no longer displays the first generic string, but the readiness request still returned HTTP 500. Replit production logs identified a wrong PMO table name in `edt-engine-route-context.ts`: `company_master_catalog_admins` instead of the existing `company_master_catalog_administrators`. The request was read-only and changed no records. The lookup and Build 296 regression are corrected locally. A stale Build 300 assertion was also aligned with its current, Intake-joined company-scope query. Block 5 and Block 12 focused tests and API typecheck pass; full gate, corrective push, zero-drop republish and authenticated retest are pending. Do not count either live smoke as passed.
+
 ## First publication and corrective smoke finding
 
 The full pre-push gate passed, exact source `cceb5293d181dcde013c06ffcd08e815f3c83bd9` was pushed and built in the clean Replit Shell worktree. Replit database receipt `ab04a21ea3f0964041b8113cbb4c1e980b49b10b18f66ba52c472653bdaa7790` reported both schemas exact, `schemaAction: NONE`, `publishable: true`, development-data copy `OFF_REQUIRED`. Replit deployment `401fd326` completed; live health reported the exact source and `status: ok`.

@@ -34,7 +34,7 @@ export async function resolveEdtRouteActor(req: Request, projectId: number): Pro
     project_role: string | null;
     project_company_id: number | null;
   }>(`SELECT u.id,u.company_id,u.is_super_admin,
-      EXISTS(SELECT 1 FROM company_master_catalog_admins a
+      EXISTS(SELECT 1 FROM company_master_catalog_administrators a
         WHERE a.company_id=u.company_id AND a.user_id=u.id AND a.state='active') AS is_company_pmo,
       (SELECT pm.role FROM project_members pm
         WHERE pm.project_id=$2 AND pm.user_id=u.id AND pm.status='active' LIMIT 1) AS project_role,

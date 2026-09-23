@@ -38937,9 +38937,9 @@
       "reviewedChangeSha256": "62bff83b88ec761cd907130e1110bb3b04116de5e346858e7d88905d50c2c991"
     },
     {
-      "taskId": "bimlog-edt-engine-block12-smoke-hotfix-20260923",
-      "reviewedThroughCommit": "449f59bf7cd32f3421770852fa51d35fe1e133f5",
-      "reviewedAt": "2026-09-23T05:44:54Z",
+      "taskId": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
+      "reviewedAt": "2026-09-23T06:42:35Z",
       "status": "local_source_candidate",
       "captureTiming": "immediate_same_task_chain",
       "immediateFindings": [
@@ -38950,7 +38950,7 @@
             "status",
             "open_loop"
           ],
-          "summary": "Live historical Intake preview correctly failed closed, but Operations hid the source error behind a generic request failure; bilingual guidance is a release-blocking UX repair."
+          "summary": "Live EDT readiness returned HTTP 500 because its authorization query named a nonexistent PMO table; the correction restores the existing company-scoped administrator authority without a schema or data change."
         }
       ],
       "authorities": [
@@ -38977,7 +38977,7 @@
         {
           "key": "platform",
           "result": "reviewed_no_semantic_change",
-          "reason": "No structural Platform inventory change occurred."
+          "reason": "The existing PMO administrator table name is corrected; no structural Platform inventory or schema change occurred."
         },
         {
           "key": "plugin",
@@ -38997,12 +38997,12 @@
         {
           "key": "status",
           "result": "reviewed_no_semantic_change",
-          "reason": "The live finding and corrective release gate were captured in the reconciled-through commit."
+          "reason": "The second live finding and pending corrective release gate are captured in current Status."
         },
         {
           "key": "open_loop",
           "result": "reviewed_no_semantic_change",
-          "reason": "The failed first smoke and required repeat were captured in the reconciled-through commit."
+          "reason": "Both failed live smokes and the required corrective repeat are captured in Open Loop."
         },
         {
           "key": "audit",
@@ -39011,10 +39011,16 @@
         }
       ],
       "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/edt-engine-build296.behavior.ts",
+        "artifacts/api-server/src/lib/edt-engine-build300.behavior.ts",
+        "artifacts/api-server/src/lib/edt-engine-route-context.ts",
+        "evidence/edt-engine-program-20260922/BLOCK_12_REPORT.md",
+        "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "346c0f97f3ee388d68549419ab88e7e0bdb306af307189e07953ff12cc7a74cd"
+      "reviewedChangeSha256": "30956ad91bb332be60a94ffdfd33bd4a2de696e5aff7b778667fc7b68b617f87"
     }
   ]
 }
