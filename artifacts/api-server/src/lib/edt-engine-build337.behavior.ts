@@ -21,8 +21,13 @@ assert.equal(candidate.intakeRevision, 4);
 assert.match(candidate.governanceVersionId, /^activated-governance:[a-f0-9]{64}$/);
 assert.match(candidate.pricingVersionId, /^activated-commercial:[a-f0-9]{64}$/);
 assert.equal(candidate.workflowVersionIds.length, 1);
+assert.match(candidate.requestFingerprint, /^[a-f0-9]{64}$/);
 assert.equal(candidate.plan.workItems.length, 1);
 assert.deepEqual(deriveEdtActivationCandidate(source), candidate);
+assert.notEqual(deriveEdtActivationCandidate({ ...source, canonicalContracts: [{ ...source.canonicalContracts![0], contentFingerprint: "d".repeat(64) }] }).requestFingerprint,
+  candidate.requestFingerprint, "canonical Contract content changes must invalidate the candidate");
+assert.notEqual(deriveEdtActivationCandidate({ ...source, workflowBindings: [{ ...source.workflowBindings![0], fingerprint: "e".repeat(64) }] }).requestFingerprint,
+  candidate.requestFingerprint, "saved Workflow content changes must invalidate the candidate");
 assert.throws(() => deriveEdtActivationCandidate({ ...source, workflowBindings: [] }),
   (error: unknown) => error instanceof Error && "code" in error && error.code === "EDT_ACTIVATION_SOURCE_INCOMPLETE");
 assert.throws(() => deriveEdtActivationCandidate({ ...source, intake: { ...source.intake, activationSummary: { contracts: source.intake.activationSummary.contracts } } }),

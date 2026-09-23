@@ -9,8 +9,16 @@ export type EdtActivationCandidate = Readonly<{
   pricingVersionId: string;
   workflowVersionIds: readonly string[];
   sourceFingerprint: string;
+  requestFingerprint: string;
   plan: ProjectedEdtPlan;
 }>;
+
+export function fingerprintEdtActivationCandidate(candidate: Pick<EdtActivationCandidate,
+  "intakeId" | "intakeRevision" | "governanceVersionId" | "pricingVersionId" | "workflowVersionIds" | "sourceFingerprint">): string {
+  return edtFingerprint({ intakeId: candidate.intakeId, intakeRevision: candidate.intakeRevision,
+    governanceVersionId: candidate.governanceVersionId, pricingVersionId: candidate.pricingVersionId,
+    workflowVersionIds: [...candidate.workflowVersionIds].sort(), sourceFingerprint: candidate.sourceFingerprint });
+}
 
 function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value))
@@ -44,10 +52,11 @@ export function deriveEdtActivationCandidate(source: ActivatedEdtSource): EdtAct
   const governanceVersionId = `activated-governance:${edtFingerprint(configuration)}`;
   const pricingVersionId = `activated-commercial:${edtFingerprint({ contracts: contractVersions, baseline: source.intake.activationSummary.commercialBaselineFingerprint ?? null })}`;
   const workflowVersionIds = workflowVersions.map(binding => `activated-workflow:${edtFingerprint(binding)}`);
-  return {
+  const candidate = {
     intakeId: source.intake.id, intakeRevision: source.intake.revision,
     governanceVersionId, pricingVersionId, workflowVersionIds, sourceFingerprint: plan.sourceFingerprint, plan,
   };
+  return { ...candidate, requestFingerprint: fingerprintEdtActivationCandidate(candidate) };
 }
 
 export async function loadEdtActivationCandidate(client: EdtTransactionClient, input: { companyId: number; projectId: number; intakeId: string }): Promise<EdtActivationCandidate> {
