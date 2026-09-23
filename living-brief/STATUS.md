@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 12 local candidate — 2026-09-23
+
+- Builds 331–335 verify activated Contract/version, Delivery Workflow and company trade identities before projecting EDT; Operations now offers a manual read-only plan preview. Combined regression proves rollback and no mutation SQL. Focused tests and API/frontend typechecks pass; full release gate, push, Replit Shell publication and authenticated Chrome smoke are pending at this source checkpoint.
+- Block 11 exact source `3828fc67b8b33a9506b70ec1cea7f7965fc97efe` was pushed only. Block 12 is the ten-build publication boundary. No database schema, Lens Next Native or installer change; focused Navisworks smoke is not triggered.
+- The original Build 335 target does **not** close governed EDT activation, server-derived economic/time authority or their operational UI. Four guarded mutations remain closed. Do not present the read-only preview as full EDT end-to-end acceptance.
+
 ## EDT and Engine Templates — Block 11 local candidate — 2026-09-23
 
 - Builds 326–330 harden the activated-Intake EDT preview: the project lookup is tenant-bound, canonical Contract versions cannot be reused across Contracts, sibling EDT codes cannot collide, Work Item snapshots cannot contradict their hierarchy/trade identities, and the source fingerprint covers the complete saved Intake and activation snapshot. Focused tests and API typecheck pass; full pre-push gate and push are still pending at this source checkpoint.

@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
   "program": "BIMLog EDT and Engine Templates",
-  "date": "2026-09-22",
-  "range": { "firstBuild": 276, "completedThrough": 330, "finalBuild": 335 },
-  "currentBlock": { "number": 11, "builds": "326-330", "status": "FOCUSED_PASS_FULL_GATE_PENDING", "pushDue": true, "publicationDue": false },
+  "date": "2026-09-23",
+  "range": { "firstBuild": 276, "completedThrough": 335, "originalPlannedFinalBuild": 335, "programComplete": false },
+  "currentBlock": { "number": 12, "builds": "331-335", "status": "FOCUSED_PASS_FULL_GATE_PENDING", "pushDue": true, "publicationDue": true },
   "buildCommits": {
     "276": "ca399ae03d87435c5f24ece52f8f6e48e426d857",
     "277": "c33570ca36ea7c0574dac5b98cc88bc33dfb1d7f",
@@ -65,12 +65,18 @@
     "327": "c6e1a989",
     "328": "2e9ceed4",
     "329": "9550fc3d",
-    "330": "ba18cdbe"
+    "330": "ba18cdbe",
+    "331": "83a16f8f96645c84b21fe16806134e457bbea16a",
+    "332": "49545e1bc777a27e45ccfe24fa04bc7071bb96b6",
+    "333": "a9b8e66c5407ccdb858f5ff41487ae445984ff0e",
+    "334": "b3339fa0fcd2dfee2ef496622cf15402555b728e",
+    "335": "0facb112b42ebb6cd95967b06b9df9ed154e7bd4"
   },
-  "remainingBlocks": 1,
-  "remainingBuilds": 5,
-  "nextBlock": { "number": 12, "builds": "331-335" },
+  "remainingBlocks": null,
+  "remainingBuilds": null,
+  "nextBlock": null,
+  "reassessmentRequired": "The original 335-build target does not constitute complete EDT activation: guarded mutations and canonical server-derived economic/time authority remain open. Scope the next work from current evidence after this publication.",
   "database": { "changed": false, "productionApplied": false, "design": "zero-drop" },
   "lensNext": { "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
-  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING", "productSourceChanged": true, "publication": "DUE_AFTER_335" }
+  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING", "productSourceChanged": true, "publication": "DUE_NOW_AFTER_335" }
 }

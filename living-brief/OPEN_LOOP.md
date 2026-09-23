@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT and Engine Templates program — Block 12 — 2026-09-23
+
+- [x] Builds 331–335 add canonical Contract/version, workflow and company trade verification, a manual read-only Operations preview, and combined fail-closed regression. Focused tests and API/frontend typechecks pass.
+- [ ] Complete full clean gate, exact-head GitHub push, Replit Shell zero-drop publication with development-data copy off, exact live health verification and full authenticated Chrome smoke. Ten builds have accumulated since the last publication; do not begin another block until this boundary is released and tested.
+- [ ] Scope the remaining governed EDT work from evidence. The original 335-build count is exhausted, but pre-activation canonical derivation, approval, economic/time authority and operational UI remain incomplete. Four guarded mutation routes stay closed.
+
 ## EDT and Engine Templates program — Block 11 — 2026-09-23
 
 - [x] Builds 326–330 add tenant, canonical Contract-version, hierarchy-code, snapshot and complete-source-fingerprint guards to the read-only activated EDT plan. Focused tests and API typecheck pass.
