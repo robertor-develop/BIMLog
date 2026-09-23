@@ -4,7 +4,8 @@ import {
   type EdtPlanNode, type EdtPlanWorkItem,
 } from "./edt-engine-activation-service";
 import type { ActivatedEdtSource } from "./edt-engine-source-service";
-import { edtFingerprint, EdtEngineConflict } from "./edt-engine-transaction";
+import { loadActivatedEdtSource } from "./edt-engine-source-service";
+import { edtFingerprint, EdtEngineConflict, withEdtTransaction, type EdtTransactionHost } from "./edt-engine-transaction";
 
 function record(value: unknown): Record<string, unknown> {
   if (!value || typeof value !== "object" || Array.isArray(value))
@@ -104,4 +105,8 @@ export function projectActivatedEdtPlan(source: ActivatedEdtSource): ProjectedEd
   validateEdtPlanCoverage(source.workItems.map(item=>item.id),workItems);
   validateEdtPlanSourceBindings(source.workItems.map(item=>({id:item.id,contractId:item.contractId,stableScopeItemId:item.stableScopeItemId})),workItems);
   return {nodes,workItems,sourceFingerprint:edtFingerprint({project:source.project,intakeId:source.intake.id,revision:source.intake.revision,nodes,workItems})};
+}
+
+export async function previewActivatedEdtPlan(input: { companyId: number; projectId: number; intakeId: string }, host?: EdtTransactionHost): Promise<ProjectedEdtPlan> {
+  return withEdtTransaction(async client => projectActivatedEdtPlan(await loadActivatedEdtSource(client, input)), host);
 }

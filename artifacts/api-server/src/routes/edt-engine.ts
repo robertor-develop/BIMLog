@@ -4,6 +4,7 @@ import { edtProjectId, resolveEdtRouteActor, sendEdtRouteError } from "../lib/ed
 import { EdtEngineConflict } from "../lib/edt-engine-transaction";
 import { decideGovernedEdtChange, requestGovernedEdtChange } from "../lib/edt-engine-governed-change-service";
 import { decideWorkItemQc, previewResultImport, submitWorkItemIssuance } from "../lib/edt-engine-qc-import-service";
+import { previewActivatedEdtPlan } from "../lib/edt-engine-plan-projection";
 
 const router: IRouter = Router();
 
@@ -33,6 +34,17 @@ router.get("/projects/:projectId/edt-engine/capabilities", authMiddleware, async
   } catch (error) {
     sendEdtRouteError(res, error);
   }
+});
+
+router.get("/projects/:projectId/edt-engine/intakes/:intakeId/plan-preview", authMiddleware, async (req, res): Promise<void> => {
+  try {
+    const projectId = edtProjectId(req);
+    const actor = await resolveEdtRouteActor(req, projectId);
+    const intakeId = String(req.params.intakeId ?? "").trim();
+    if (!intakeId) throw new EdtEngineConflict("REQUEST_BODY_INVALID", "An Intake ID is required.");
+    const plan = await previewActivatedEdtPlan({ companyId: actor.actorCompanyId, projectId, intakeId });
+    res.json({ projectId, intakeId, ...plan });
+  } catch (error) { sendEdtRouteError(res, error); }
 });
 
 router.post("/projects/:projectId/edt-engine/activation-requests", authMiddleware, async (req, res): Promise<void> => {
