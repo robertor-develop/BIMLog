@@ -983,6 +983,7 @@ export function LensNextPanelView({
             <small>These filters use BIMLog issue records. Clash severity and clash source are not available here.</small>
           </div>
         </details>
+        <button type="button" className="lens-next__filter-results" onClick={() => activateWorkspace("viewpoints")}>{tt("View results", "Ver resultados")} ({filteredIssues.length})</button>
       </section>
 
       {(apiError || bridgeError) && (

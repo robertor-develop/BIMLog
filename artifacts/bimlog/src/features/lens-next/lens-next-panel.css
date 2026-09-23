@@ -1252,3 +1252,42 @@
 .lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__record-summary {
   display: none;
 }
+.lens-next__filter-results { display: none; }
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__browser {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__browser-grid {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__browser > :is(.lens-next__field, .lens-next__active-model, .lens-next__create, .lens-next__view-settings) {
+  display: none;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="viewpoints"] .lens-next__filter-pane,
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="filters"] :is(.lens-next__list-heading, .lens-next__issue-list, .lens-next__pagination, .lens-next__pane-size--list) {
+  display: none;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="filters"] .lens-next__filter-pane {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  border-right: 0;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="filters"] .lens-next__filter-results {
+  display: block;
+  width: 100%;
+  min-height: 44px;
+  margin-top: 10px;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="viewpoints"] .lens-next__issue-list {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+}
