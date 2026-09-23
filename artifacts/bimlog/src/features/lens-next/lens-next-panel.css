@@ -16,6 +16,9 @@
   --lens-next-muted: #607067;
   --lens-next-line: #dbe5df;
   display: flex;
+  position: relative;
+  box-sizing: border-box;
+  padding-left: 48px;
   width: min(100%, 430px);
   min-width: 280px;
   height: 100%;
@@ -36,6 +39,35 @@
     "Segoe UI",
     sans-serif;
 }
+
+.lens-next__side-rail {
+  position: absolute;
+  z-index: 20;
+  inset: 0 auto 0 0;
+  display: flex;
+  width: 48px;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 2px;
+  box-sizing: border-box;
+  border-right: 1px solid #cbdcd2;
+  background: #173d2b;
+}
+.lens-next__side-rail button {
+  display: grid;
+  width: 42px;
+  min-height: 44px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #e9f6ee;
+  cursor: pointer;
+}
+.lens-next__side-rail button[aria-pressed="true"] { background: #147b5b; color: #fff; }
+.lens-next__side-rail button:hover { background: #236949; }
 
 .lens-next button,
 .lens-next input,

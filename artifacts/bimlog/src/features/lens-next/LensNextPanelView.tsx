@@ -1,5 +1,5 @@
 import React from "react";
-import { Columns3, HelpCircle, ImageOff, List, PanelLeftClose, PanelLeftOpen, Table2, X } from "lucide-react";
+import { Columns3, Eye, Filter, HelpCircle, ImageOff, List, PanelLeftClose, PanelLeftOpen, Plus, Settings, Table2, X } from "lucide-react";
 import { LENS_NEXT_DEFAULT_FILTERS, LENS_NEXT_STATUSES } from "./lens-next-types";
 import {
   LENS_NEXT_VIEW_DIMENSIONS,
@@ -520,7 +520,11 @@ export function LensNextPanelView({
   const [issuePresentation, setIssuePresentation] = React.useState<"cards" | "table">("cards");
   const [detailView, setDetailView] = React.useState<"overview" | "knowledge" | "resolution" | "bimlog" | "properties" | "activity">("overview");
   const [syncReviewFilter, setSyncReviewFilter] = React.useState<LensNextSyncReviewFilter>("all");
+  const [activeWorkspace, setActiveWorkspace] = React.useState<"filters" | "viewpoints" | "create" | "settings">("viewpoints");
   const createSectionRef = React.useRef<HTMLDetailsElement | null>(null);
+  const settingsSectionRef = React.useRef<HTMLDetailsElement | null>(null);
+  const filterPaneRef = React.useRef<HTMLElement | null>(null);
+  const issueListRef = React.useRef<HTMLElement | null>(null);
   const linkSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const selectedIssueRef = React.useRef<HTMLElement | null>(null);
   const helpButtonRef = React.useRef<HTMLButtonElement | null>(null);
@@ -564,6 +568,13 @@ export function LensNextPanelView({
     section.scrollIntoView({ block: "nearest", behavior: "smooth" });
     window.setTimeout(() => section.querySelector<HTMLElement>("select, input, textarea, button")?.focus(), 250);
   }, []);
+  const activateWorkspace = (next: typeof activeWorkspace) => {
+    setActiveWorkspace(next);
+    if (next === "create") revealSection(createSectionRef.current);
+    if (next === "settings") revealSection(settingsSectionRef.current);
+    if (next === "filters") filterPaneRef.current?.scrollIntoView({ block: "nearest" });
+    if (next === "viewpoints") issueListRef.current?.scrollIntoView({ block: "nearest" });
+  };
   const previousIssue = selectedIssue
     ? lensNextSelectionTarget(filteredIssues, selectedIssue.identity.serverId, "previous", issuePageSize)
     : null;
@@ -582,7 +593,19 @@ export function LensNextPanelView({
   };
   const preparedAction: LensNextPublishAction = publishKind === "status" ? { type: "status", status: publishStatus } : publishKind === "comment" ? { type: "comment", comment: publishText.trim() } : { type: "assignment", responsibleCompany: publishText.trim() };
   return (
-    <aside ref={lensRootRef} className="lens-next" data-dock-width={lensNextDockWidth(availableWidth)} aria-label="BIMLog Lens Next controlled issue workspace" aria-busy={refreshState === "refreshing" || reconciliationState === "running"}>
+    <aside ref={lensRootRef} className="lens-next" data-dock-width={lensNextDockWidth(availableWidth)} data-workspace={activeWorkspace} aria-label="BIMLog Lens Next controlled issue workspace" aria-busy={refreshState === "refreshing" || reconciliationState === "running"}>
+      <nav className="lens-next__side-rail" aria-label="Lens workspaces">
+        {([
+          ["filters", Filter, tt("Filters", "Filtros")],
+          ["viewpoints", Eye, tt("Viewpoints", "Puntos de vista")],
+          ["create", Plus, tt("Create", "Crear")],
+          ["settings", Settings, tt("Settings", "Configuración")],
+        ] as const).map(([workspace, Icon, label]) => (
+          <button key={workspace} type="button" title={label} aria-label={label} aria-pressed={activeWorkspace === workspace} onClick={() => activateWorkspace(workspace)}>
+            <Icon aria-hidden="true" size={20} />
+          </button>
+        ))}
+      </nav>
       <nav className="lens-next__skip-links" aria-label="Skip within Lens Next">
         <a href="#lens-next-issue-list">{tt("Skip to issues", "Saltar a incidencias")}</a>
         {selectedIssue && <a href="#lens-next-selected-issue">{tt("Skip to selected issue", "Saltar a la incidencia seleccionada")}</a>}
@@ -795,7 +818,7 @@ export function LensNextPanelView({
         {createMessage && <p role={createState === "error" ? "alert" : "status"}>{createMessage}</p>}
       </details>
 
-      <details className="lens-next__view-settings" aria-label="Personal issue view">
+      <details ref={settingsSectionRef} className="lens-next__view-settings" aria-label="Personal issue view">
         <summary>My view settings</summary>
         <div className="lens-next__view-settings-content">
           <label className="lens-next__field lens-next__field--wide">
@@ -839,7 +862,7 @@ export function LensNextPanelView({
       </details>
 
       <div className="lens-next__browser-grid">
-      <section className={`lens-next__filters lens-next__filter-pane${workspaceLayout.filtersCollapsed?" lens-next__filter-pane--collapsed":""}`} aria-label="Issue filters">
+      <section ref={filterPaneRef} className={`lens-next__filters lens-next__filter-pane${workspaceLayout.filtersCollapsed?" lens-next__filter-pane--collapsed":""}`} aria-label="Issue filters">
         <div className="lens-next__filter-heading"><strong>Filters</strong><button type="button" onClick={()=>onFiltersChange({...LENS_NEXT_DEFAULT_FILTERS})}>Reset</button></div>
         <div className="lens-next__pane-size"><label>Filter width <input aria-label="Filter pane width" type="range" min="180" max="360" value={workspaceLayout.filtersWidth} onChange={event=>setWorkspaceLayout(current=>({...current,filtersWidth:Number(event.target.value)}))}/></label></div>
         <label className="lens-next__field lens-next__field--wide">
@@ -977,6 +1000,7 @@ export function LensNextPanelView({
         </small>
       </div>
       <section
+        ref={issueListRef}
         id="lens-next-issue-list"
         tabIndex={-1}
         className="lens-next__issue-list"
