@@ -17,6 +17,9 @@ const client: EdtTransactionClient = { async query<Row>(sql: string, values?: re
 } };
 const source = await loadActivatedEdtSource(client, { companyId: 7, projectId: 11, intakeId: "intake-1" });
 assert.equal(source.workItems[0].contractId, "contract-1");
+assert.deepEqual(source.canonicalContracts, [{ contractId: "contract-1", versionId: "version-1", currency: "USD", contentFingerprint: "a".repeat(64) }]);
+assert.deepEqual(source.workflowBindings, [{ workItemId: "wi-1", source: "bimlog", versionId: null,
+  templateCode: BIMLOG_DELIVERY_WORKFLOWS[0].code, templateVersion: 1, fingerprint: BIMLOG_DELIVERY_WORKFLOWS[0].fingerprint }]);
 assert.deepEqual(queries[0].values, ["intake-1", 7, 11]);
 status = "ready";
 await assert.rejects(() => loadActivatedEdtSource(client, { companyId: 7, projectId: 11, intakeId: "intake-1" }), (error: unknown) => error instanceof Error && "code" in error && error.code === "EDT_SOURCE_NOT_ACTIVATED");

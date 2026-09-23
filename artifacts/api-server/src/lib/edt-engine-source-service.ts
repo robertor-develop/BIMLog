@@ -13,6 +13,8 @@ export type ActivatedEdtSource = Readonly<{
   project: { id: number; code: string; name: string };
   intake: { id: string; revision: number; data: Record<string, unknown>; activationSummary: Record<string, unknown> };
   workItems: readonly ActivatedEdtWorkItem[];
+  canonicalContracts?: readonly Readonly<{ contractId: string; versionId: string; currency: string; contentFingerprint: string }>[];
+  workflowBindings?: readonly Readonly<{ workItemId: string; source: string; versionId: string | null; templateCode: string; templateVersion: number; fingerprint: string }>[];
 }>;
 
 export const activatedEdtProjectSql = `SELECT p.id,p.code,p.name FROM projects p
@@ -105,5 +107,8 @@ export async function loadActivatedEdtSource(client: EdtTransactionClient, input
         throw new EdtEngineConflict("EDT_TRADE_SOURCE_MISMATCH", "A saved Work Package trade is not a BIMLog default or this company's master-catalog discipline.");
     }
   }
-  return { project, intake: { id: intake.id, revision: intake.revision, data: intake.data, activationSummary: intake.activation_summary }, workItems };
+  return { project, intake: { id: intake.id, revision: intake.revision, data: intake.data, activationSummary: intake.activation_summary }, workItems,
+    canonicalContracts: canonical.map(({ contractId, versionId, currency, contentFingerprint }) => ({ contractId, versionId, currency, contentFingerprint })),
+    workflowBindings: workflowBindings.map(({ workItemId, source, versionId, templateCode, templateVersion, fingerprint }) =>
+      ({ workItemId, source, versionId, templateCode, templateVersion, fingerprint })) };
 }
