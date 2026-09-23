@@ -1226,3 +1226,29 @@
 }
 .lens-next[data-dock-width="wide"] .lens-next__browser,
 .lens-next[data-dock-width="wide"] .lens-next__details { min-width: 0; }
+
+/* Compact presentation follows the measured Lens container, including a wide
+   Navisworks dock, rather than the outer browser or application viewport. */
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) {
+  width: 100%;
+  min-width: 0;
+  min-height: 0;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__body {
+  display: block;
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__browser,
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__details {
+  width: 100%;
+  height: 100%;
+  min-width: 0;
+  min-height: 0;
+  max-height: none;
+  box-sizing: border-box;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"]) .lens-next__record-summary {
+  display: none;
+}
