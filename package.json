@@ -17,6 +17,7 @@
     "test:edt-engine-block09": "node ./scripts/test-edt-engine-block09.mjs",
     "test:edt-engine-block10": "node ./scripts/test-edt-engine-block10.mjs",
     "test:edt-engine-block11": "node ./scripts/test-edt-engine-block11.mjs",
+    "test:edt-engine-block12": "node ./scripts/test-edt-engine-block12.mjs",
     "preinstall": "sh -c 'rm -f package-lock.json yarn.lock; case \"$npm_config_user_agent\" in pnpm/*) ;; *) echo \"Use pnpm instead\" >&2; exit 1 ;; esac'",
     "audit:platform": "node scripts/platform-audit.mjs",
     "audit:platform:blocking": "node scripts/platform-audit.mjs --enforce",
