@@ -89,7 +89,7 @@ function Harness() {
     bridgeDisplayName: "35-45 41ST_COORD_MODEL.nwf", bridgeModelFingerprint: "acceptance-model-fingerprint", bridgeBindingSource: "verified BIMLog marker",
     inventorySummary: { matched: 63, platformOnly: 37, navisworksOnly: 0, conflicted: 0, unresolved: 0 },
     synchronizationPlan: { items: synchronizationItems, inSync: synchronizedCount, confirmLocalIdentity: 0, pullFromBimlog: pullCount, uploadToBimlog: 0, manualConflict: 0, blocked: 0, executable: pullCount > 0 }, uploadableLocalViewpoints: [], localUploadState: "idle", localUploadMessage: null, onUploadLocalViewpoint: noop,
-    createEnabled: true, createState: "idle", createMessage: null, onCreateIssue: noop,
+    createEnabled: true, createState: "idle", createMessage: null, createdIssueServerId: null, onCreateIssue: noop,
     layoutEnabled: true, layoutState: "idle", layoutMessage: null, onMaterializeMyView: noop,
     reconciliationState: "idle", reconciliationMessage: null, onRunReconciliation: noop,
     platformPullState: "idle", platformPullMessage: null, onPullPlatformViewpoints: noop,

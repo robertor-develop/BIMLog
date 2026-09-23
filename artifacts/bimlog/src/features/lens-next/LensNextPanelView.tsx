@@ -334,6 +334,7 @@ export interface LensNextPanelViewProps {
   createEnabled: boolean;
   createState: "idle" | "capturing" | "creating" | "success" | "error";
   createMessage: string | null;
+  createdIssueServerId: number | null;
   onCreateIssue(draft: LensNextCreateDraft, reason: string): void;
   layoutEnabled: boolean;
   layoutState: "idle" | "running" | "success" | "error";
@@ -433,6 +434,7 @@ export function LensNextPanelView({
   createEnabled,
   createState,
   createMessage,
+  createdIssueServerId,
   onCreateIssue,
   layoutEnabled,
   layoutState,
@@ -524,6 +526,7 @@ export function LensNextPanelView({
   const [activeWorkspace, setActiveWorkspace] = React.useState<"filters" | "viewpoints" | "create" | "settings">("viewpoints");
   const [compactDetailOpen, setCompactDetailOpen] = React.useState(false);
   const listScrollTop = React.useRef(0);
+  const handledCreatedIssueId = React.useRef<number | null>(null);
   const createSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const settingsSectionRef = React.useRef<HTMLDetailsElement | null>(null);
   const filterPaneRef = React.useRef<HTMLElement | null>(null);
@@ -554,6 +557,12 @@ export function LensNextPanelView({
   React.useEffect(() => {
     if (!selectedIssue) setCompactDetailOpen(false);
   }, [selectedIssue]);
+  React.useEffect(() => {
+    if (createState !== "success" || createdIssueServerId === null || selectedIssue?.identity.serverId !== createdIssueServerId || handledCreatedIssueId.current === createdIssueServerId) return;
+    handledCreatedIssueId.current = createdIssueServerId;
+    setActiveWorkspace("viewpoints");
+    setCompactDetailOpen(true);
+  }, [createState, createdIssueServerId, selectedIssue?.identity.serverId]);
   React.useLayoutEffect(() => {
     if (dockWidth === "wide" || activeWorkspace !== "viewpoints" || compactDetailOpen) return;
     if (issueListRef.current) issueListRef.current.scrollTop = listScrollTop.current;
@@ -577,8 +586,8 @@ export function LensNextPanelView({
   }, []);
   const activateWorkspace = (next: typeof activeWorkspace) => {
     setActiveWorkspace(next);
-    if (next === "create") revealSection(createSectionRef.current);
-    if (next === "settings") revealSection(settingsSectionRef.current);
+    if (next === "create") window.requestAnimationFrame(() => revealSection(createSectionRef.current));
+    if (next === "settings") window.requestAnimationFrame(() => revealSection(settingsSectionRef.current));
     if (dockWidth === "wide" && next === "filters") filterPaneRef.current?.scrollIntoView({ block: "nearest" });
     if (dockWidth === "wide" && next === "viewpoints") issueListRef.current?.scrollIntoView({ block: "nearest" });
   };
@@ -673,7 +682,7 @@ export function LensNextPanelView({
         <ConnectionBadge label="BIMLog" state={apiState} />
         <ConnectionBadge label="Navisworks" state={bridgeState} />
         <div className="lens-next__workspace-controls" aria-label="Workspace layout controls">
-          <button type="button" className="lens-next__primary" disabled={!createEnabled} onClick={() => revealSection(createSectionRef.current)}>{tt("Create issue", "Crear incidencia")}</button>
+          <button type="button" className="lens-next__primary" disabled={!createEnabled} onClick={() => activateWorkspace("create")}>{tt("Create issue", "Crear incidencia")}</button>
           <Columns3 aria-hidden="true" size={15}/>
           <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,filtersCollapsed:!current.filtersCollapsed}))}>{workspaceLayout.filtersCollapsed?<><PanelLeftOpen aria-hidden="true" size={14}/> Show filters</>:<><PanelLeftClose aria-hidden="true" size={14}/> Hide filters</>}</button>
           <button type="button" onClick={()=>setWorkspaceLayout(current=>({...current,listCollapsed:!current.listCollapsed}))}>{workspaceLayout.listCollapsed?"Show issue list":"Hide issue list"}</button>
@@ -843,6 +852,7 @@ export function LensNextPanelView({
           <OperationStatus label="Issue creation" state={createState} />
         </div>
         {createMessage && <p role={createState === "error" ? "alert" : "status"}>{createMessage}</p>}
+        <button type="button" className="lens-next__create-cancel" disabled={createState === "capturing" || createState === "creating"} onClick={() => { setCreateReviewReady(false); activateWorkspace("viewpoints"); }}>{tt("Cancel and return to viewpoints", "Cancelar y volver a puntos de vista")}</button>
       </details>
 
       <details ref={settingsSectionRef} className="lens-next__view-settings" aria-label="Personal issue view">

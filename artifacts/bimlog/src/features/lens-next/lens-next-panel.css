@@ -1303,3 +1303,18 @@
   min-height: 44px;
   margin: 6px 8px;
 }
+.lens-next__create-cancel { display: none; }
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="create"] .lens-next__browser {
+  overflow-y: auto;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="create"] .lens-next__browser-grid {
+  display: none;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="create"] .lens-next__browser > .lens-next__create,
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="create"] .lens-next__create-cancel {
+  display: block;
+}
+.lens-next:is([data-dock-width="narrow"], [data-dock-width="medium"])[data-workspace="create"] .lens-next__create-cancel {
+  min-height: 44px;
+  margin: 8px;
+}

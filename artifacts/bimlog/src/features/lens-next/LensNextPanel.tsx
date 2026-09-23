@@ -143,6 +143,7 @@ export function LensNextPanel({
   const [localUploadMessage, setLocalUploadMessage] = useState<string | null>(null);
   const [createState, setCreateState] = useState<"idle" | "capturing" | "creating" | "success" | "error">("idle");
   const [createMessage, setCreateMessage] = useState<string | null>(null);
+  const [createdIssueServerId, setCreatedIssueServerId] = useState<number | null>(null);
   const [layoutState, setLayoutState] = useState<"idle" | "running" | "success" | "error">("idle");
   const [layoutMessage, setLayoutMessage] = useState<string | null>(null);
   const [reconciliationState, setReconciliationState] = useState<"idle" | "running" | "success" | "error">("idle");
@@ -614,12 +615,15 @@ export function LensNextPanel({
     if (!apiClient || !bridgeClient || !bridgeContext || authorizedProjectId === null || bridgeContext.projectId !== authorizedProjectId) return;
     const viewpointId = crypto.randomUUID();
     const auditReason = reason.trim() || "Created through Lens Next";
+    setCreatedIssueServerId(null);
     setCreateMessage(null); setCreateState("capturing");
     try {
       const navigationView = await bridgeClient.captureNewIssueNavigationView(viewpointId, bridgeContext);
       setCreateState("creating");
       const receipt = await apiClient.createIssue(authorizedProjectId, viewpointId, bridgeContext.modelFingerprint, navigationView, draft, auditReason);
       await loadIssues("refresh");
+      setSelectedServerId(receipt.serverId);
+      setCreatedIssueServerId(receipt.serverId);
       setCreateState("success");
       setCreateMessage(`Created issue ${receipt.displayId} in BIMLog with its lightweight navigation view and screenshot. Open Working View returns to the captured camera. No local Saved Viewpoint was created.`);
     } catch (error) {
@@ -776,6 +780,7 @@ export function LensNextPanel({
       createEnabled={bridgeState === "connected" && apiState === "connected" && bridgeContext?.projectId === authorizedProjectId}
       createState={createState}
       createMessage={createMessage}
+      createdIssueServerId={createdIssueServerId}
       onCreateIssue={(draft, reason) => void createIssue(draft, reason)}
       layoutEnabled={bridgeState === "connected" && bridgeContext?.projectId === authorizedProjectId}
       layoutState={layoutState}
