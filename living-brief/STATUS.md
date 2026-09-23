@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Lens Next responsive dock — live Filters correction — 2026-09-23
+
+- Builds 1–10 passed the exact-head gate and were pushed to GitHub `master` at `42f8744d66e81a7a45086ee5b2af4b01b50dcfd2`. Replit Shell aligned cleanly to that source, the no-drop publication receipt and production build passed, and the controlled publish completed. Live health reported the exact bound source and P36 release.
+- Authenticated Chrome smoke found an actual wide-dock regression: a persisted older `filtersCollapsed` preference kept the pane hidden when the new Filters rail tab was selected. The correction makes selecting Filters reopen that pane and preserves the existing filter state. Focused regression and frontend typecheck pass; full gate, push, republish and live recheck of this correction remain pending. Do not start Builds 11–15 until the recheck passes.
+
 ## Lens Next responsive dock — Block 2 local candidate — 2026-09-23
 
 - Block 1's five source builds passed the complete pre-push gate and reached GitHub `master` at `a6ab1142b2684bde017e445e72affe0ebde9de1b`; it was intentionally not published at the five-build boundary.

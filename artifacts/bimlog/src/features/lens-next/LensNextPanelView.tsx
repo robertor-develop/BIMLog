@@ -586,9 +586,14 @@ export function LensNextPanelView({
   }, []);
   const activateWorkspace = (next: typeof activeWorkspace) => {
     setActiveWorkspace(next);
+    if (next === "filters") {
+      setWorkspaceLayout((current) => current.filtersCollapsed
+        ? { ...current, filtersCollapsed: false }
+        : current);
+    }
     if (next === "create") window.requestAnimationFrame(() => revealSection(createSectionRef.current));
     if (next === "settings") window.requestAnimationFrame(() => revealSection(settingsSectionRef.current));
-    if (dockWidth === "wide" && next === "filters") filterPaneRef.current?.scrollIntoView({ block: "nearest" });
+    if (dockWidth === "wide" && next === "filters") window.requestAnimationFrame(() => filterPaneRef.current?.scrollIntoView({ block: "nearest" }));
     if (dockWidth === "wide" && next === "viewpoints") issueListRef.current?.scrollIntoView({ block: "nearest" });
   };
   const selectIssue = (serverId: number) => {

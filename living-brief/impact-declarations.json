@@ -39452,9 +39452,9 @@
       "reviewedChangeSha256": "c28beb0547a9be85b5a32b0c7e3110995868ccece3a6b78abdce381818204d62"
     },
     {
-      "taskId": "bimlog-lens-next-responsive-dock-block02-20260923",
-      "reviewedThroughCommit": "a6ab1142b2684bde017e445e72affe0ebde9de1b",
-      "reviewedAt": "2026-09-23T15:40:18Z",
+      "taskId": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
+      "reviewedAt": "2026-09-23T21:12:18Z",
       "status": "local_candidate",
       "captureTiming": "immediate_same_task_chain",
       "immediateFindings": [
@@ -39527,23 +39527,14 @@
         }
       ],
       "reviewedChangedPaths": [
-        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
         "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
-        "artifacts/bimlog/src/features/lens-next/lens-next-build33-mobile-acceptance.behavior.ts",
-        "artifacts/bimlog/src/features/lens-next/lens-next-dock-compact-shell.behavior.ts",
-        "artifacts/bimlog/src/features/lens-next/lens-next-dock-create.behavior.ts",
         "artifacts/bimlog/src/features/lens-next/lens-next-dock-filters.behavior.ts",
-        "artifacts/bimlog/src/features/lens-next/lens-next-dock-navigation.behavior.ts",
-        "artifacts/bimlog/src/features/lens-next/lens-next-dock-settings.behavior.ts",
-        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
-        "artifacts/bimlog/src/lens-next-acceptance-harness.tsx",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
-        "living-brief/PLUGIN.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "b944d5c2a00b1eb6515a0f625938e6000a453416f894ec04b69f57b77e255ae2"
+      "reviewedChangeSha256": "02e0128d62fc9f3f46a59a9849117091fe40db9f0d5713016313b6d503bd2b33"
     }
   ]
 }

@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lens Next responsive dock — live Filters correction — 2026-09-23
+
+- [x] Push and publish Builds 1–10 at exact source `42f8744d66e81a7a45086ee5b2af4b01b50dcfd2`; Replit Shell build and bound live health passed.
+- [x] Authenticated Chrome exposed the wide-dock persisted-collapse defect; implement the Filters rail reopening behavior and focused regression. Frontend typecheck passes.
+- [ ] Complete the full gate, exact fast-forward push, clean Replit Shell republish, and authenticated live Filters recheck before Builds 11–15.
+
 ## Lens Next responsive dock — Block 2 — 2026-09-23
 
 - [x] Record existing Lens behavior; add actual container-width classification, the persistent four-workspace rail with Viewpoints default, compact global context, and width-bounded preservation of the wide three-pane layout in five bounded source commits. Restore the Controlled publishing label after its regression test failed.
