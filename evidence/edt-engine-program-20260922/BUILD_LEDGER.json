@@ -71,13 +71,18 @@
     "333": "a9b8e66c5407ccdb858f5ff41487ae445984ff0e",
     "334": "b3339fa0fcd2dfee2ef496622cf15402555b728e",
     "335": "0facb112b42ebb6cd95967b06b9df9ed154e7bd4",
-    "block12SmokeHotfix": "57186c0f9b1dd62b3c97999d9d8b2161cf6fee49"
+    "block12SmokeHotfix": "57186c0f9b1dd62b3c97999d9d8b2161cf6fee49",
+    "block12FinalProjectSqlHotfix": "bd3be0742d702ba7d186d6a47b87830b526a183b",
+    "336": "c50b18d59d5f72b7122957be032571c6f5075723",
+    "337": "9e7cb9305e9a95dbe5aee96003a0e978905c2efe",
+    "338": "fbc0ed55fad415eaeb1826337531873fba266eed",
+    "339": "d11357c3f58304642ff2904113424aa2b3383433"
   },
   "remainingBlocks": null,
   "remainingBuilds": null,
-  "nextBlock": null,
+  "nextBlock": "13: server-derived read-only EDT activation candidate; push-only boundary",
   "reassessmentRequired": "The original 335-build target does not constitute complete EDT activation: guarded mutations and canonical server-derived economic/time authority remain open. Scope the next work from current evidence after this publication.",
   "database": { "changed": false, "productionApplied": false, "design": "zero-drop" },
   "lensNext": { "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
-  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING_RETEST", "productSourceChanged": true, "publication": "CORRECTIVE_REPUBLICATION_DUE" }
+  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PENDING_BLOCK13_GATE", "productSourceChanged": true, "publication": "BLOCK12_CORRECTIVE_PUBLISHED_BLOCK13_PUSH_ONLY" }
 }
