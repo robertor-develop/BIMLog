@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT Block 14 server-resolved approval preparation — 2026-09-23
+
+- Builds 341–345 bind the full frozen-source candidate fingerprint, prepare server-derived request and independent approval transactions, prove authorization/stale-source/idempotent replay behavior, and compile their write statements against the isolated real PostgreSQL schema. The focused Block 14 gate and API typecheck pass.
+- The HTTP activation, Economic Plan and time-impact mutation routes remain closed. An Operations Director is required for approval but is not yet assignable through the actual project-role directory; silently treating Project Administrator, PMO or CEO as that role would expand authority. No production schema/data, Lens Next Native or installer changed.
+- This is the second five-build block after Block 13, so the full local gate, exact push, zero-drop Replit Shell publication and authenticated Chrome smoke are due. Neither the service fixture nor the read-only SQL plan proves a positive production EDT approval.
+
 ## EDT Block 13 read-only activation candidate — 2026-09-23
 
 - Corrective Block 12 source `bd3be0742d702ba7d186d6a47b87830b526a183b` passed the full gate, exact GitHub push, clean Replit Shell build and zero-drop preview (`schemaAction=NONE`, development-data copy `OFF_REQUIRED`), and was republished. Live health reported `status=ok` with the exact source. Authenticated Chrome EDT readiness on historical project 53 returned the expected canonical Contract-source conflict rather than HTTP 500, also after refresh/retry. Neighboring Headquarters, catalogs, workflows, governance, pricing validation, Intake, Operations, Budget, Contracts and Knowledge surfaces loaded without a new visible crash. This was broad release regression, not complete platform or positive EDT activation acceptance.

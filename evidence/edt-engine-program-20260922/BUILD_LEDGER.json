@@ -2,8 +2,8 @@
   "schemaVersion": 1,
   "program": "BIMLog EDT and Engine Templates",
   "date": "2026-09-23",
-  "range": { "firstBuild": 276, "completedThrough": 335, "originalPlannedFinalBuild": 335, "programComplete": false },
-  "currentBlock": { "number": 12, "builds": "331-335", "status": "FOCUSED_PASS_FULL_GATE_PENDING", "pushDue": true, "publicationDue": true },
+  "range": { "firstBuild": 276, "completedThrough": 345, "originalPlannedFinalBuild": 335, "programComplete": false },
+  "currentBlock": { "number": 14, "builds": "341-345", "status": "FOCUSED_PASS_FULL_GATE_PENDING", "pushDue": true, "publicationDue": true },
   "buildCommits": {
     "276": "ca399ae03d87435c5f24ece52f8f6e48e426d857",
     "277": "c33570ca36ea7c0574dac5b98cc88bc33dfb1d7f",
@@ -77,13 +77,18 @@
     "337": "9e7cb9305e9a95dbe5aee96003a0e978905c2efe",
     "338": "fbc0ed55fad415eaeb1826337531873fba266eed",
     "339": "d11357c3f58304642ff2904113424aa2b3383433",
-    "340": "1e588fcf"
+    "340": "1e588fcf",
+    "341": "dd5d2a87ebae22256896b7eb5c77677879336bbc",
+    "342": "2d3da351e5cd9c0efae3f31b007f17280741bd41",
+    "343": "fbafc852d36c8a33b652c9a36dc060a5978c78f0",
+    "344": "2927fe59a917508814804598329a3a5ede3de3d2",
+    "345": "6f7b8ec1632e48c46d4aaf8916948318ee39b004"
   },
   "remainingBlocks": null,
   "remainingBuilds": null,
-  "nextBlock": "13: server-derived read-only EDT activation candidate; push-only boundary",
-  "reassessmentRequired": "The original 335-build target does not constitute complete EDT activation: guarded mutations and canonical server-derived economic/time authority remain open. Scope the next work from current evidence after this publication.",
+  "nextBlock": "15: assignable Operations Director authority and guarded EDT route integration after Block 14 publication acceptance",
+  "reassessmentRequired": "The original 335-build target does not constitute complete EDT activation: guarded HTTP mutations, assignable Operations Director authority, and canonical server-derived economic/time authority remain open.",
   "database": { "changed": false, "productionApplied": false, "design": "zero-drop" },
   "lensNext": { "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
-  "tests": { "focused": "PASS", "typecheck": "PASS", "fullBuild": "PASS_BLOCK13_C137FE60", "productSourceChanged": true, "publication": "BLOCK12_CORRECTIVE_PUBLISHED_BLOCK13_PUSH_ONLY" }
+  "tests": { "focused": "PASS_BLOCK14", "typecheck": "PASS_API", "fullBuild": "PENDING_BLOCK14", "productSourceChanged": true, "publication": "DUE_AFTER_BUILD345" }
 }

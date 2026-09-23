@@ -39197,6 +39197,91 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "9cd45687c22ec108cceeb147a808b4c4dd4fec5d12696e5aa0c20b2abf83b7df"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block14-resolved-approval-preparation-20260923",
+      "reviewedThroughCommit": "6f7b8ec1632e48c46d4aaf8916948318ee39b004",
+      "reviewedAt": "2026-09-23T10:18:10Z",
+      "status": "local_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "summary": "Server-owned EDT request/approval services are prepared, but the actual project directory has no assignable Operations Director approval identity. Public mutation routes remain closed; no substitute role is granted."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical Intake, Contract, Workflow and Project sources remain authoritative."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release cadence and provider procedure are unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Focused negative, transaction fixture and isolated PostgreSQL proof extend existing quality controls."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new market or product doctrine is introduced."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "Generated source inventory includes the new server-owned EDT service and tests."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, bridge, Navisworks package or installer changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No generated customer deliverable changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standards claim was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Block 14 preparation and remaining role/runtime gaps are recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Assignability, guarded routes, economic/time authority and live acceptance remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical audit remains unchanged."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "bcf48d51fa5e37287aa5131d37ab0fe6a0b05cf15dd8a66ef4ba442deb3608bd"
     }
   ]
 }

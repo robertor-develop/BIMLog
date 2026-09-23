@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT Block 14 — governed activation preparation — 2026-09-23
+
+- [x] Build 341–345 as five bounded commits with full-source fingerprint, server-owned request and approval transactions, focused transaction negative tests and real-schema read-only SQL compilation.
+- [ ] Complete the ten-build release boundary: full clean gate, exact GitHub push, clean Replit Shell alignment, zero-drop/no-copy preview, publication and full authenticated Chrome smoke. No Native/installer smoke is triggered by this block.
+- [ ] Bind the approved Operations Director authority to an actually assignable company/project identity without broadening PMO, Project Administrator or CEO privileges; only then open the governed EDT request/approval routes and run a real-database, role-separated, save/refresh/reopen end-to-end activation test.
+- [ ] Complete server-calculated Economic Plans, time impacts and operational UI. A prepared internal service and synthetic transaction test are not field acceptance.
+
 ## EDT Block 13 — server-owned read-only candidate — 2026-09-23
 
 - [x] Corrective Block 12 `bd3be0742d702ba7d186d6a47b87830b526a183b` was built and published through Replit Shell/UI after a zero-drop database preview with development-data copy off; exact live health and authenticated Chrome readiness retry passed. Historical project 53 remains in a correctly explained Contract-source conflict and was not mutated.
