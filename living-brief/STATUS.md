@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT and Engine Templates — Block 11 local candidate — 2026-09-23
+
+- Builds 326–330 harden the activated-Intake EDT preview: the project lookup is tenant-bound, canonical Contract versions cannot be reused across Contracts, sibling EDT codes cannot collide, Work Item snapshots cannot contradict their hierarchy/trade identities, and the source fingerprint covers the complete saved Intake and activation snapshot. Focused tests and API typecheck pass; full pre-push gate and push are still pending at this source checkpoint.
+- Block 10 pricing validation/draft-preservation hotfix was subsequently pushed and Replit-published at exact source `5e20eec65374006ae10b709538d0fabf6baa2492`; authenticated Chrome retest passed. Block 11 is push-only, with publication and authenticated Chrome smoke due after Build 335. No Native/installer or schema change occurs here.
+- This block does not complete governed EDT activation. Server-derived pre-activation versions/plan, economics/time decisions and Intake/Operations UI remain unfinished, and the four guarded mutation routes stay closed.
+
 ## EDT and Engine Templates — Block 10 published, pricing smoke correction — 2026-09-23
 
 - Builds 321–325 read the saved, activated Intake and canonical Work Items under company/project scope, derive deterministic EDT nodes and Work Item codes from saved contract, deliverable, floor/zone and discipline identities, and expose an authenticated read-only plan preview. Normalized multi-contract fixtures and ambiguity/tenant-denial checks and the full local gate passed. Exact source `b350ab5bbf0a6ce9dcf1155db63dbb5eec8ac786` was pushed and Replit-published; live health reported that source. Authenticated Chrome smoke found a pricing-template validation error displaying a raw code with a misleading Retry action that could discard unsaved draft work. The corrective source maps validation to actionable text and limits Retry to list-load failures; its re-publication and live retest remain due.

@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT and Engine Templates program — Block 11 — 2026-09-23
+
+- [x] Builds 326–330 add tenant, canonical Contract-version, hierarchy-code, snapshot and complete-source-fingerprint guards to the read-only activated EDT plan. Focused tests and API typecheck pass.
+- [x] Block 10 pricing-template hotfix `5e20eec65374006ae10b709538d0fabf6baa2492` was pushed, republished and authenticated Chrome-retested; the previously observed draft-loss/error-code defect was corrected.
+- [ ] Complete Block 11 full clean gate and exact-head push. Do not publish this five-build-only block; next publication and full authenticated Chrome smoke are due after Build 335. No Native/installer smoke is triggered by this block.
+- [ ] Complete pre-activation version/plan derivation, governed approval, canonical economic/time calculations and Intake/Operations EDT UI. The four guarded mutations remain closed; the five remaining originally scheduled builds must not be misrepresented as guaranteed end-to-end closure if the actual gap is larger.
+
 ## EDT and Engine Templates program — Block 10 — 2026-09-22
 
 - [x] Build 321–325 read activated canonical Intake/Work Item data and project a deterministic multi-contract EDT plan; expose a company-scoped authenticated read-only preview. Ambiguous floor/zone/trade and incomplete saved scope coverage fail closed.
