@@ -2,7 +2,9 @@ import { useEffect, useRef, useState } from "react";
 
 type PlanNode = { kind: "project" | "contract" | "deliverable" | "location"; sourceIdentity: string; name: string; code: string };
 type PlanWorkItem = { id: string; displayCode: string; tradeIdentity: string; locationIdentity: string };
-export type EdtPlanPreview = { nodes: PlanNode[]; workItems: PlanWorkItem[]; sourceFingerprint: string };
+export type EdtPlanPreview = { nodes: PlanNode[]; workItems: PlanWorkItem[]; sourceFingerprint: string; activationEvidence?: {
+  workflowCount: number; governanceVerified: true; commercialVerified: true;
+} };
 
 export function describeEdtPreviewError(cause: unknown, tt: (english: string, spanish: string) => string): string {
   const code = cause && typeof cause === "object" && "code" in cause ? String(cause.code ?? "") : "";
@@ -18,6 +20,9 @@ export function describeEdtPreviewError(cause: unknown, tt: (english: string, sp
   if (code === "EDT_WORKFLOW_SOURCE_MISSING" || code === "EDT_WORKFLOW_SOURCE_MISMATCH")
     return tt("An activated Work Item is missing a verifiable Delivery Workflow. Check its saved workflow binding before previewing EDT.",
       "Un elemento activado no tiene un flujo de entrega verificable. Revise su vínculo guardado antes de ver la EDT.");
+  if (code === "EDT_GOVERNANCE_SOURCE_MISSING" || code === "EDT_ACTIVATION_SOURCE_INCOMPLETE")
+    return tt("The activated Intake lacks a complete frozen Governance, Contract, or Workflow source for EDT. Review its saved configuration; no records were changed.",
+      "El ingreso activado no tiene un origen congelado y completo de Gobernanza, Contrato o Flujo para la EDT. Revise la configuración guardada; no se cambió ningún registro.");
   if (code === "INTAKE_NOT_FOUND" || code === "PROJECT_COMPANY_MISMATCH" || code === "ACTIVE_PROJECT_ROLE_REQUIRED")
     return tt("This Intake is unavailable in your current project or role. Reopen the correct project or ask its administrator to check access.",
       "Este ingreso no está disponible en su proyecto o rol actual. Abra el proyecto correcto o pida al administrador revisar el acceso.");
@@ -27,7 +32,8 @@ export function describeEdtPreviewError(cause: unknown, tt: (english: string, sp
 }
 
 export function parseEdtPlanPreview(value: unknown): EdtPlanPreview {
-  const input = value as Record<string, unknown> | null;
+  const envelope = value as Record<string, unknown> | null;
+  const input = (envelope?.plan && typeof envelope.plan === "object" ? envelope.plan : value) as Record<string, unknown> | null;
   if (!input || !Array.isArray(input.nodes) || !Array.isArray(input.workItems) ||
     typeof input.sourceFingerprint !== "string" || !/^[a-f0-9]{64}$/.test(input.sourceFingerprint))
     throw new Error("The EDT preview response is incomplete.");
@@ -39,6 +45,16 @@ export function parseEdtPlanPreview(value: unknown): EdtPlanPreview {
       typeof item.tradeIdentity !== "string" || !item.tradeIdentity || typeof item.locationIdentity !== "string" || !item.locationIdentity ||
       !nodes.some(node => node.kind === "location" && node.sourceIdentity === item.locationIdentity)))
     throw new Error("The EDT preview response is incomplete.");
+  if (envelope?.plan) {
+    if (envelope.sourceFingerprint !== input.sourceFingerprint || typeof envelope.governanceVersionId !== "string" ||
+      !/^activated-governance:[a-f0-9]{64}$/.test(envelope.governanceVersionId) ||
+      typeof envelope.pricingVersionId !== "string" || !/^activated-commercial:[a-f0-9]{64}$/.test(envelope.pricingVersionId) ||
+      !Array.isArray(envelope.workflowVersionIds) || envelope.workflowVersionIds.length !== workItems.length ||
+      envelope.workflowVersionIds.some(id => typeof id !== "string" || !/^activated-workflow:[a-f0-9]{64}$/.test(id)))
+      throw new Error("The EDT activation candidate is incomplete.");
+    return { nodes, workItems, sourceFingerprint: input.sourceFingerprint,
+      activationEvidence: { workflowCount: envelope.workflowVersionIds.length, governanceVerified: true, commercialVerified: true } };
+  }
   return { nodes, workItems, sourceFingerprint: input.sourceFingerprint };
 }
 
@@ -80,6 +96,7 @@ export function EdtPlanPreviewPanel({ projectId, intakeId, loadPlan, tt }: {
       {status === "error" && <p className="jo-error" role="alert">{error}</p>}
       {status === "ready" && plan && <div role="status">
         <p>{tt("Verified read-only preview", "Vista previa verificada de solo lectura")}: {plan.nodes.length} {tt("nodes", "nodos")}, {plan.workItems.length} {tt("work items", "elementos de trabajo")}.</p>
+        {plan.activationEvidence && <p className="jo-muted">{tt("Frozen Governance and Commercial sources verified; Delivery Workflow bindings", "Orígenes congelados de Gobernanza y Comercial verificados; vínculos de flujo de entrega")}: {plan.activationEvidence.workflowCount}. {tt("Governed EDT activation is not yet enabled.", "La activación gobernada de la EDT aún no está habilitada.")}</p>}
         <div style={{ overflowX: "auto" }}><table className="jo-table"><thead><tr><th>{tt("Work Item code", "Código del elemento")}</th><th>{tt("Trade", "Disciplina")}</th><th>{tt("Location", "Ubicación")}</th></tr></thead>
           <tbody>{plan.workItems.slice(0, 20).map(item => <tr key={item.id}><td>{item.displayCode}</td><td>{item.tradeIdentity}</td><td>{plan.nodes.find(node => node.sourceIdentity === item.locationIdentity)?.name ?? item.locationIdentity}</td></tr>)}</tbody></table></div>
         {plan.workItems.length > 20 && <p className="jo-muted">{tt("Showing the first 20 work items; the full plan remains on the server.", "Se muestran los primeros 20 elementos; el plan completo permanece en el servidor.")}</p>}

@@ -6,6 +6,13 @@ const valid = { sourceFingerprint: "a".repeat(64), nodes: [
   { kind: "location", sourceIdentity: "location:w1", name: "L2", code: "L2" },
 ], workItems: [{ id: "w1", displayCode: "T-C-S-L2-HVAC", tradeIdentity: "hvac", locationIdentity: "location:w1" }] };
 assert.equal(parseEdtPlanPreview(valid).workItems[0].displayCode, "T-C-S-L2-HVAC");
+const candidate = { plan: valid, sourceFingerprint: valid.sourceFingerprint,
+  governanceVersionId: `activated-governance:${"b".repeat(64)}`,
+  pricingVersionId: `activated-commercial:${"c".repeat(64)}`,
+  workflowVersionIds: [`activated-workflow:${"d".repeat(64)}`] };
+assert.equal(parseEdtPlanPreview(candidate).activationEvidence?.workflowCount, 1);
+assert.throws(() => parseEdtPlanPreview({ ...candidate, pricingVersionId: "browser-supplied" }), /incomplete/);
+assert.throws(() => parseEdtPlanPreview({ ...candidate, workflowVersionIds: [] }), /incomplete/);
 for (const invalid of [null, {}, { ...valid, sourceFingerprint: "bad" }, { ...valid, workItems: [] },
   { ...valid, nodes: [{ ...valid.nodes[0], kind: "unknown" }] },
   { ...valid, workItems: [{ ...valid.workItems[0], locationIdentity: "" }] }]) {
@@ -14,5 +21,6 @@ for (const invalid of [null, {}, { ...valid, sourceFingerprint: "bad" }, { ...va
 const tt = (english: string) => english;
 assert.match(describeEdtPreviewError(Object.assign(new Error("The request failed."), { code: "EDT_CONTRACT_SOURCE_MISSING" }), tt), /canonical Contract version/);
 assert.match(describeEdtPreviewError(Object.assign(new Error("The request failed."), { code: "EDT_LOCATION_AMBIGUOUS" }), tt), /floor or area Work Package/);
+assert.match(describeEdtPreviewError(Object.assign(new Error("The request failed."), { code: "EDT_GOVERNANCE_SOURCE_MISSING" }), tt), /frozen Governance/);
 assert.match(describeEdtPreviewError(new Error("The request failed."), tt), /Refresh and try again/);
 console.log("EDT_ENGINE_BUILD334_RESULT=PASS read-only Operations preview accepts complete plans and rejects incomplete responses");
