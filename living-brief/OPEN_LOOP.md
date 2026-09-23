@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Lens Next responsive dock — Block 1 — 2026-09-23
+
+- [x] Record existing Lens behavior; add actual container-width classification, the persistent four-workspace rail with Viewpoints default, compact global context, and width-bounded preservation of the wide three-pane layout in five bounded source commits. Restore the Controlled publishing label after its regression test failed.
+- [ ] Complete the full pre-push gate and exact-head GitHub push for this five-build-only block. Do not publish this incomplete workspace. No Native/installer files changed, so focused Navisworks smoke is not triggered by Block 1.
+- [ ] Finish narrow and medium Viewpoints List/Details/Back state restoration, Filters, Create, Settings, live resize, accessibility, connected Navisworks and authenticated Chrome acceptance in the remaining responsive-dock blocks. Do not present the current rail as completed functional side-tab navigation.
+
 ## EDT Block 14 — governed activation preparation — 2026-09-23
 
 - [x] Build 341–345 as five bounded commits with full-source fingerprint, server-owned request and approval transactions, focused transaction negative tests and real-schema read-only SQL compilation.

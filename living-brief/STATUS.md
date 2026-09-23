@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## Lens Next responsive dock — Block 1 local candidate — 2026-09-23
+
+- Five bounded source builds establish a frozen-behavior baseline, classify the actual Lens container at narrow/medium/wide widths, add the four-icon workspace rail with Viewpoints selected by default, show compact shared project/model/release context, and retain simultaneous wide Filters/List/Details columns. A focused corrective commit restores the existing Controlled publishing label. No issue identity, API, Working View, Native bridge, installer, schema, or customer data changed.
+- Focused Lens tests, frontend typecheck, and the production frontend build pass. The complete pre-push gate and exact GitHub push are still pending at this local checkpoint; no Replit publication or authenticated Chrome/physical Navisworks acceptance is claimed.
+- This is **not** the completed responsive dock UX. Narrow List-to-Details/Back restoration, functional single-workspace Filters/Create/Settings, live resize continuity, and the full 320/480/800-pixel connected acceptance remain for later blocks. The accepted live P36 deployment and Native fallback are unchanged.
+
 ## EDT Block 14 server-resolved approval preparation — 2026-09-23
 
 - Builds 341–345 bind the full frozen-source candidate fingerprint, prepare server-derived request and independent approval transactions, prove authorization/stale-source/idempotent replay behavior, and compile their write statements against the isolated real PostgreSQL schema. The focused Block 14 gate and API typecheck pass.

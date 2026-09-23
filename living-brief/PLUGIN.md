@@ -551,3 +551,6 @@ Build 50 local UX continuation (2026-09-17): a short floating Native-sized viewp
 # Build 080 shared release compatibility
 
 - Platform candidate `v1.05.N18-P36` / `1.5.18.36` changes no Lens Next native behavior. The shared metadata contract required deterministic package-only rebuilds for Navisworks 2021 and 2025; both passed without installation. Installed compatibility and absence of customer-facing Legacy Lens remain a focused post-publication scan.
+## Lens Next responsive dock — Block 1 Platform-only candidate — 2026-09-23
+
+The WebView presentation now measures its own content width and carries a persistent Filters/Viewpoints/Create/Settings rail, Viewpoints default, compact context and a wide-pane width guard. This first block does not yet provide the finished narrow List/Details/Back or separate functional workspaces. Native bridge, toolbar, Working View, installer and 2021/2025 packages are unchanged; no physical Navisworks acceptance or publication is claimed.
