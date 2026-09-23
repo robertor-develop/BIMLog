@@ -6,6 +6,7 @@
   "impact": {
     "baselineCommit": "6f7b8ec1632e48c46d4aaf8916948318ee39b004",
     "changedPaths": [
+      "evidence/edt-engine-program-20260922/BLOCK_14_REPORT.md",
       "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",

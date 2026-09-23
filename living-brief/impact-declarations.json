@@ -39274,6 +39274,7 @@
         }
       ],
       "reviewedChangedPaths": [
+        "evidence/edt-engine-program-20260922/BLOCK_14_REPORT.md",
         "evidence/edt-engine-program-20260922/BUILD_LEDGER.json",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
@@ -39281,7 +39282,7 @@
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "bcf48d51fa5e37287aa5131d37ab0fe6a0b05cf15dd8a66ef4ba442deb3608bd"
+      "reviewedChangeSha256": "b5e9e796b1c76b078497d7e35d06f59a8cbb466aa725434dbb9a30e6ce243fba"
     }
   ]
 }
