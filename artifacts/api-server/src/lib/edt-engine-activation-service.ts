@@ -52,6 +52,12 @@ export function validateEdtPlanWorkItems(nodes:readonly EdtPlanNode[],items:read
       throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE","Work Items need unique IDs and codes, a valid EDT node, and complete classification identities.");
     if(item.displayCode!==makeEdtWorkItemCode({project,contract,deliverable,location,tradeIdentity:item.tradeIdentity,tradeCode:typeof item.tradeSnapshot.code==="string"?item.tradeSnapshot.code:undefined}))
       throw new EdtEngineConflict("EDT_CODE_INVALID","Work Item visible code must be derived from its immutable classification identities.");
+    if(Object.keys(item.locationSnapshot).length && JSON.stringify(item.locationSnapshot)!==JSON.stringify(location.snapshot))
+      throw new EdtEngineConflict("EDT_PLAN_SOURCE_MISMATCH","Work Item location snapshot differs from its EDT location node.");
+    if(Object.keys(item.deliverableTypeSnapshot).length && JSON.stringify(item.deliverableTypeSnapshot)!==JSON.stringify(deliverable.snapshot))
+      throw new EdtEngineConflict("EDT_PLAN_SOURCE_MISMATCH","Work Item deliverable snapshot differs from its EDT parent node.");
+    if(typeof item.tradeSnapshot.id==="string" && item.tradeSnapshot.id!==item.tradeIdentity)
+      throw new EdtEngineConflict("EDT_PLAN_SOURCE_MISMATCH","Work Item trade snapshot differs from its permanent trade identity.");
     ids.add(item.id);codes.add(item.displayCode);
   }
 }
