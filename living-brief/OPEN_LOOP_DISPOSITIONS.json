@@ -1,10 +1,10 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "7c425eac2fd9f3b9301677a5ceaa1675a10c5093bcdf588d65363047dedc2876",
-  "itemCount": 166,
+  "sourceSha256": "94be342a66d84d7ba942a30991b8e81c577f71a4b39d397c36b718d6c1091469",
+  "itemCount": 165,
   "counts": {
-    "ACTIVE": 133,
+    "ACTIVE": 132,
     "SUPERSEDED": 21,
     "ACCEPTED_LIMITATION": 3,
     "CLOSED_WITH_EVIDENCE": 9
@@ -61,24 +61,6 @@
     }
   ],
   "items": [
-    {
-      "id": "c5cb7be30c189612",
-      "sourceLine": 6,
-      "heading": "EDT Block 14 — governed activation preparation — 2026-09-23",
-      "statement": "Complete the ten-build release boundary: full clean gate, exact GitHub push, clean Replit Shell alignment, zero-drop/no-copy preview, publication and full authenticated Chrome smoke. No Native/installer smoke is triggered by this block.",
-      "classification": "ACTIVE",
-      "workClass": "PROVIDER_EVIDENCE",
-      "ownership": {
-        "owner": "Release engineering",
-        "route": null,
-        "module": "docs/deployment"
-      },
-      "evidence": [
-        "OPEN_LOOP.md:6",
-        "EDT Block 14 — governed activation preparation — 2026-09-23"
-      ],
-      "currentAuthority": false
-    },
     {
       "id": "e1b8a1fdf3dc6104",
       "sourceLine": 7,
