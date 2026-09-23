@@ -48,6 +48,7 @@
     "test:edt-engine-build332": "tsx ./src/lib/edt-engine-build332.behavior.ts",
     "test:edt-engine-build333": "tsx ./src/lib/edt-engine-build333.behavior.ts",
     "test:edt-engine-build335": "tsx ./src/lib/edt-engine-build335.behavior.ts",
+    "test:edt-engine-read-sql": "tsx ./src/lib/edt-engine-read-sql.behavior.ts",
     "dev": "NODE_ENV=development tsx ./src/index.ts",
     "build": "tsx ./build.ts",
     "generate:platform": "tsx ./scripts/generate-platform-md.ts",

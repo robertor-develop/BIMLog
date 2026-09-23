@@ -1,19 +1,22 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
+  "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "444a5732acc4455aa0045c4da461e905de8b8134148dc1e3c3f5449bd1c5e015",
+  "bundleSha256": "231ac91ab653abefd18e61946c2f92bd7b7851cc38d250d5a7b27fbec367343c",
   "impact": {
-    "baselineCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
+    "baselineCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
     "changedPaths": [
-      "artifacts/api-server/src/lib/edt-engine-build296.behavior.ts",
-      "artifacts/api-server/src/lib/edt-engine-build300.behavior.ts",
+      "artifacts/api-server/package.json",
+      "artifacts/api-server/src/lib/edt-engine-build326.behavior.ts",
+      "artifacts/api-server/src/lib/edt-engine-build335.behavior.ts",
       "artifacts/api-server/src/lib/edt-engine-route-context.ts",
+      "artifacts/api-server/src/lib/edt-engine-source-service.ts",
       "evidence/edt-engine-program-20260922/BLOCK_12_REPORT.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/STATUS.md",
-      "living-brief/impact-declarations.json"
+      "living-brief/impact-declarations.json",
+      "scripts/test-edt-engine-block12.mjs"
     ],
     "affectedDocuments": [
       "CLAUDE.md",
@@ -29,11 +32,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "claude",
@@ -41,11 +44,11 @@
       "sha256": "90538da58f64a59e860713face1fefeff05dcfb598472fd0b06e4b56f2e590c8",
       "sourceChangedAt": "2026-09-21T03:45:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "quality",
@@ -53,11 +56,11 @@
       "sha256": "b6cced2db201c506cda5eb1ac6f7d03167c8893de71f880eda4ccef3b51d2829",
       "sourceChangedAt": "2026-09-21T09:39:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "vision",
@@ -65,11 +68,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "platform",
@@ -77,11 +80,11 @@
       "sha256": "f53f21a6a43f0070dd8ed11cf3dc25e0db163c4b6711ff4ede0802ff6c56d5db",
       "sourceChangedAt": "2026-09-23T01:00:47-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "plugin",
@@ -89,11 +92,11 @@
       "sha256": "7569d939830415524ee1fc2cc2b584e74695e6f0c1ab4d3b7544b96fb9c84ea6",
       "sourceChangedAt": "2026-09-21T10:07:09-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "report_design_system",
@@ -101,11 +104,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "standards_register",
@@ -113,35 +116,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "2fee5dbbdbadcbac1b7cad4e8fcd8ad35d7675e46cd8f9ace26b8b1d85a6b57a",
-      "sourceChangedAt": "2026-09-23T06:42:35.000Z",
+      "sha256": "67de4975997f68f330abf0182b5de8dd2c4f42b4c741bd46ea7ad73782ead599",
+      "sourceChangedAt": "2026-09-23T07:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "5758b06ef073f8f0ec987461844b66579bd189ed9e1fb4915d3a10f3be01ef02",
-      "sourceChangedAt": "2026-09-23T06:42:35.000Z",
+      "sha256": "76fbcfc21c33593d3f41ddcd4d58c69259b56ad929dde7299ddd72c551532de6",
+      "sourceChangedAt": "2026-09-23T07:30:00.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
-      "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
+      "semanticReviewResult": "updated",
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {
       "key": "audit",
@@ -149,11 +152,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewedThroughCommit": "ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e",
-      "semanticReviewTask": "bimlog-edt-engine-block12-pmo-lookup-correction-20260923",
+      "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T06:42:35Z"
+      "semanticReviewedAt": "2026-09-23T07:30:00Z"
     }
   ]
 }

@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { loadActivatedEdtSource } from "./edt-engine-source-service";
+import { activatedEdtProjectSql, loadActivatedEdtSource } from "./edt-engine-source-service";
 import type { EdtTransactionClient } from "./edt-engine-transaction";
 import { BIMLOG_DELIVERY_WORKFLOWS } from "./delivery-workflow-defaults";
 
@@ -14,5 +14,5 @@ const client: EdtTransactionClient = { async query<Row>(sql: string, values?: re
 }, release() {} };
 const source = await loadActivatedEdtSource(client, { companyId: 7, projectId: 11, intakeId: "intake" });
 assert.equal(source.project.id, 11);
-assert.ok(queries.some(query => query.sql.includes("FROM projects") && query.sql.includes("company_id=$2") && query.values?.[1] === 7));
+assert.ok(queries.some(query => query.sql === activatedEdtProjectSql && query.sql.includes("COALESCE(binding.company_id,creator.company_id)=$2") && query.values?.[1] === 7));
 console.log("EDT_ENGINE_BUILD326_RESULT=PASS canonical project lookup remains company-scoped");

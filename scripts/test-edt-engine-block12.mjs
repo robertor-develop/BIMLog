@@ -6,4 +6,6 @@ for (const build of [331, 332, 333, 335]) {
 }
 const ui = spawnSync("pnpm", ["--filter", "@workspace/bimlog", "run", "test:edt-engine-build334"], { stdio: "inherit", shell: process.platform === "win32" });
 if (ui.status !== 0) process.exit(ui.status ?? 1);
+const sql = spawnSync("pnpm", ["--filter", "@workspace/api-server", "run", "test:edt-engine-read-sql"], { stdio: "inherit", shell: process.platform === "win32" });
+if (sql.status !== 0) process.exit(sql.status ?? 1);
 console.log("EDT_ENGINE_BLOCK12_RESULT=PASS");

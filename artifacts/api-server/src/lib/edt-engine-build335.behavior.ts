@@ -2,13 +2,17 @@ import assert from "node:assert/strict";
 import { previewActivatedEdtPlan } from "./edt-engine-plan-projection";
 import type { EdtTransactionHost } from "./edt-engine-transaction";
 import { BIMLOG_DELIVERY_WORKFLOWS } from "./delivery-workflow-defaults";
+// @ts-expect-error Runtime pg dependency is installed; isolated SQL proof does not require optional declarations.
+import pg from "pg";
 
 type Fault = "none" | "contract" | "workflow" | "trade";
 let fault: Fault = "none";
 const statements: string[] = [];
+const readStatements: { sql: string; values: readonly unknown[] }[] = [];
 const workflow = BIMLOG_DELIVERY_WORKFLOWS[0];
-const host: EdtTransactionHost = { async connect() { return { async query<Row>(sql: string) {
+const host: EdtTransactionHost = { async connect() { return { async query<Row>(sql: string, values?: readonly unknown[]) {
   statements.push(sql);
+  if (/^\s*SELECT\b/i.test(sql)) readStatements.push({ sql, values: values ?? [] });
   if (sql.includes("FROM job_intakes")) return { rows: [{ id: "intake-1", company_id: 7, project_id: 11, status: "activated", revision: 4,
     data: { commercial: { contracts: [{ id: "BASE", contractNumber: "B1", title: "Base" }] }, scopeItems: [{ id: "scope-1", contractId: "BASE", deliverableType: "SLEEVE",
       workPackages: [{ id: "wp-1", dimensionType: "floor", dimensionValue: "L2", classification: { disciplineId: "trade-1", disciplineCode: "HVAC" } }] }] },
@@ -33,4 +37,15 @@ for (const [mode, code] of [["contract", "EDT_CONTRACT_SOURCE_MISMATCH"], ["work
   assert.equal(statements.at(-1), "ROLLBACK");
 }
 assert.ok(statements.every(sql => !/^\s*(INSERT|UPDATE|DELETE|ALTER|DROP)\b/i.test(sql)));
+const connectionString = process.env.BIMLOG_COORDINATION_KNOWLEDGE_TEST_DATABASE_URL;
+assert.ok(connectionString, "An isolated database is required to validate every EDT preview read against its schema.");
+const schemaClient = new pg.Client({ connectionString });
+await schemaClient.connect();
+try {
+  await schemaClient.query("BEGIN READ ONLY");
+  for (const { sql, values } of readStatements) await schemaClient.query(`EXPLAIN ${sql}`, [...values]);
+} finally {
+  await schemaClient.query("ROLLBACK");
+  await schemaClient.end();
+}
 console.log("EDT_ENGINE_BUILD335_RESULT=PASS canonical source chain, read-only preview, and fail-closed rollback");

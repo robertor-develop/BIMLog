@@ -1,5 +1,11 @@
 # STATUS.md - Current Accepted Platform State
 
+## EDT Block 12 production project-lookup correction — 2026-09-23
+
+- Exact corrective source `7b3b1130b0395f53cce0b4d2be28245982ab0099` passed the full local gate, reached GitHub master, passed a Replit Shell zero-drop preview with development-data copy off, and published as deployment `d5fe7f41`; live health matched. Authenticated Chrome still found HTTP 500 in the read-only EDT readiness preview. Production logs reported `column "company_id" does not exist`.
+- The cause is a second schema-assumption defect in the EDT read path: `projects` has no `company_id`; the canonical company scope comes from the latest project-company binding or legacy creator company. The candidate now uses that scoped lookup. The route-role and complete preview read SQL are compiled with `EXPLAIN` against the isolated real PostgreSQL schema during Block 12 regression. Focused Block 12 tests pass; full release gate, exact push, zero-drop republish and authenticated recheck remain open.
+- The publication is not accepted while the readiness action fails. Guarded EDT mutations and full program acceptance remain open; no production data/schema or Native/installer change is part of this correction.
+
 ## EDT Block 12 production role-lookup correction — 2026-09-23
 
 - Corrective source `ef9e5d8b0bc8dd559ec2b15b1cf1b738e011bd0e` passed the full gate and Replit zero-drop publication as deployment `c7f3590f`; live health matched. Authenticated Chrome still found HTTP 500 in EDT readiness. Production logs proved a wrong PMO table name, not missing data or a required migration.

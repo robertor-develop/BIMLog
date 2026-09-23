@@ -1,5 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## EDT Block 12 — project-schema corrective repeat — 2026-09-23
+
+- [x] Published `7b3b1130b0395f53cce0b4d2be28245982ab0099` as Replit deployment `d5fe7f41` after a clean full gate and zero-drop preview; authenticated Chrome still reproduced HTTP 500 in read-only EDT readiness. Production logs identified a missing `company_id` column in the project read, not a migration requirement.
+- [x] Replace the invalid direct project-company predicate with the canonical latest binding/legacy creator-company scope and compile both role and preview read SQL against the isolated PostgreSQL schema in the focused regression. No customer data or schema mutation.
+- [ ] Pass the exact full gate, push the corrective commit, repeat the zero-drop Replit Shell publication with data copy off, and run authenticated Chrome EDT readiness, reload and relevant platform smoke. Do not start the next build block or call this publication accepted before the live result passes.
+- [ ] Preserve closed governed EDT mutation routes until canonical version, economic and time authority and their operational UI are delivered and verified.
+
 ## EDT Block 12 — second corrective publication — 2026-09-23
 
 - [x] Production logs isolated the authenticated EDT readiness HTTP 500 to a misspelled PMO table in the route role lookup. Correct the source to the existing company master catalog administrator table, with no migration or data change.

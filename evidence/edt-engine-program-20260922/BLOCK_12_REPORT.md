@@ -1,5 +1,9 @@
 # EDT Engine Block 12 — Builds 331–335
 
+## Third live-smoke finding
+
+Corrective source `7b3b1130b0395f53cce0b4d2be28245982ab0099` passed the full local gate, exact GitHub push, Replit Shell zero-drop preview with development-data copy off, and publication as deployment `d5fe7f41`. Live health reported the same source, but authenticated Chrome still returned HTTP 500 from the read-only EDT readiness request. Production logs reported `column "company_id" does not exist`. The source query assumed `projects.company_id`, which the actual schema does not have. The correction uses the latest project-company binding, falling back to the legacy creator company, and keeps the project/archive/tenant check. Block 12 now compiles both route-role and every preview read statement against the isolated PostgreSQL schema. Focused tests pass; full gate, corrective push, zero-drop republish and authenticated retest are pending. No schema, customer data, Native or installer change is involved. The third live smoke is not accepted as passed.
+
 This ten-build publication boundary includes the earlier push-only Block 11. Builds 331–335 harden and expose a read-only activated-Intake EDT preview. No guarded EDT mutation is enabled; no database schema, production data, Lens Next Native or installer files are changed.
 
 - 331 `83a16f8f`: verify each activated Contract/version against canonical company/project Contract records and a retained fingerprint.

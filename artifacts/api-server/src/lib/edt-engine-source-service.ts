@@ -15,6 +15,13 @@ export type ActivatedEdtSource = Readonly<{
   workItems: readonly ActivatedEdtWorkItem[];
 }>;
 
+export const activatedEdtProjectSql = `SELECT p.id,p.code,p.name FROM projects p
+    JOIN users creator ON creator.id=p.created_by_id
+    LEFT JOIN LATERAL (SELECT company_id FROM project_company_binding_versions
+      WHERE project_id=p.id ORDER BY version DESC LIMIT 1) binding ON true
+    WHERE p.id=$1 AND COALESCE(binding.company_id,creator.company_id)=$2
+      AND p.status<>'archived'`;
+
 function objectRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
@@ -35,7 +42,7 @@ export async function loadActivatedEdtSource(client: EdtTransactionClient, input
     throw new EdtEngineConflict("EDT_SOURCE_NOT_ACTIVATED", "The EDT source requires a saved activated Intake snapshot.");
 
   const project = (await client.query<{ id: number; code: string; name: string }>(
-    "SELECT id,code,name FROM projects WHERE id=$1 AND company_id=$2 AND status<>'archived'", [input.projectId, input.companyId])).rows[0];
+    activatedEdtProjectSql, [input.projectId, input.companyId])).rows[0];
   if (!project || !project.code?.trim() || !project.name?.trim())
     throw new EdtEngineConflict("EDT_PROJECT_SOURCE_MISSING", "The saved project identity is unavailable.");
 

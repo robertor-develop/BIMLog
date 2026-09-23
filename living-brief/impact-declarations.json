@@ -39021,6 +39021,95 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "30956ad91bb332be60a94ffdfd33bd4a2de696e5aff7b778667fc7b68b617f87"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block12-project-sql-correction-20260923",
+      "reviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
+      "reviewedAt": "2026-09-23T07:30:00Z",
+      "status": "local_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Second live EDT readiness HTTP 500 came from a project-company column absent from the actual schema; canonical binding-based scope and database-backed SQL regression restore the tenant boundary."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical project identity and governed source ownership remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction follows the existing exact-source release and live verification process."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live defect is corrected and the database-backed regression enforces trustworthy behavior."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product vision or customer workflow definition changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing project-company binding is reused without schema or structural inventory change."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, Navisworks bridge, package or installer source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer report, export or generated deliverable changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard, edition or applicability claim was introduced."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The third failed live smoke and project-schema correction are recorded as current status."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The failed publication, corrective repeat and still-closed governed mutations are recorded."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The dated historical audit ledger remains append-only and was not changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/package.json",
+        "artifacts/api-server/src/lib/edt-engine-build326.behavior.ts",
+        "artifacts/api-server/src/lib/edt-engine-build335.behavior.ts",
+        "artifacts/api-server/src/lib/edt-engine-route-context.ts",
+        "artifacts/api-server/src/lib/edt-engine-source-service.ts",
+        "evidence/edt-engine-program-20260922/BLOCK_12_REPORT.md",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json",
+        "scripts/test-edt-engine-block12.mjs"
+      ],
+      "reviewedChangeSha256": "805f8461b5a21a3b7d051d9d6e26e770d16d3875bd4a1e57bc5c12ce6d81b3f8"
     }
   ]
 }
