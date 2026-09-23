@@ -37,7 +37,7 @@ let contractFingerprint = "a".repeat(64);
 const queryLog: string[] = [];
 const host: EdtTransactionHost = { async connect() { return { async query<Row>(sql: string, values: readonly unknown[] = []) {
   queryLog.push(sql);
-  const result = (rows: unknown[] = [], rowCount = rows.length) => ({ rows: rows as Row[], rowCount });
+  const result = (rows: readonly unknown[] = [], rowCount = rows.length) => ({ rows: [...rows] as Row[], rowCount });
   if (sql.startsWith("BEGIN") || sql === "COMMIT" || sql === "ROLLBACK" || sql.includes("pg_advisory_xact_lock")) return result();
   if (sql.includes("FROM job_intakes")) return result([{ id: source.intake.id, company_id: 7, project_id: 11,
     status: "activated", revision: source.intake.revision, data: source.intake.data,

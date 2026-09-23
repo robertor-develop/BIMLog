@@ -5,6 +5,20 @@ import { deterministicEdtId, edtFingerprint, EdtEngineConflict, withEdtTransacti
 
 type Actor = Pick<EdtRecordAuthorizationInput, "grants" | "actorUserId" | "actorCompanyId" | "actorProjectIds"> & { eligibleRole: string };
 
+export const EDT_RESOLVED_REQUEST_INSERT_SQL = `INSERT INTO job_activation_requests(id,company_id,project_id,intake_id,intake_revision,governance_version_id,
+  pricing_version_id,workflow_version_ids,request_fingerprint,idempotency_key,requested_by_id,eligible_role,reason,evidence)
+  VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11,$12,$13,'{}'::jsonb)`;
+export const EDT_RESOLVED_NODE_INSERT_SQL = `INSERT INTO job_activation_edt_nodes(id,company_id,project_id,intake_id,parent_id,node_kind,
+  source_identity,code,name,sequence,source_snapshot,source_fingerprint,created_by_id)
+  VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13)`;
+export const EDT_RESOLVED_WORK_ITEM_UPDATE_SQL = `UPDATE job_activation_work_items SET edt_node_id=$2,location_identity=$3,
+  location_snapshot=$4::jsonb,trade_identity=$5,trade_snapshot=$6::jsonb,deliverable_type_identity=$7,
+  deliverable_type_snapshot=$8::jsonb,display_code=$9,revision_number=0,issuance_version=0,
+  identity_fingerprint=$10,updated_at=now() WHERE id=$1 AND project_id=$11 AND intake_id=$12 AND edt_node_id IS NULL`;
+export const EDT_RESOLVED_DECISION_INSERT_SQL = `INSERT INTO job_activation_decisions(id,request_id,company_id,project_id,outcome,request_fingerprint,
+  decided_by_id,eligible_role,reason,evidence)
+  VALUES($1,$2,$3,$4,'approved',$5,$6,$7,$8,$9::jsonb)`;
+
 function requireEdtPermission(actor: Actor, permission: EdtRecordAuthorizationInput["permission"], companyId: number, projectId: number,
   requesterId?: number): void {
   const decision = decideEdtRecordAuthorization({ ...actor, permission, recordCompanyId: companyId,
@@ -58,9 +72,7 @@ export async function requestResolvedEdtActivation(input: {
       [input.intakeId, input.companyId, input.projectId])).rows;
     if (nodes.length) throw new EdtEngineConflict("EDT_ALREADY_ACTIVATED", "This Intake already has saved EDT nodes.");
     const id = deterministicEdtId("activation-request", `${input.intakeId}:${input.idempotencyKey}`);
-    await client.query(`INSERT INTO job_activation_requests(id,company_id,project_id,intake_id,intake_revision,governance_version_id,
-      pricing_version_id,workflow_version_ids,request_fingerprint,idempotency_key,requested_by_id,eligible_role,reason,evidence)
-      VALUES($1,$2,$3,$4,$5,$6,$7,$8::jsonb,$9,$10,$11,$12,$13,'{}'::jsonb)`,
+    await client.query(EDT_RESOLVED_REQUEST_INSERT_SQL,
       [id, input.companyId, input.projectId, input.intakeId, candidate.intakeRevision, candidate.governanceVersionId,
         candidate.pricingVersionId, JSON.stringify(candidate.workflowVersionIds), candidate.requestFingerprint,
         input.idempotencyKey, input.actor.actorUserId, input.actor.eligibleRole, input.reason.trim()]);
@@ -142,19 +154,14 @@ export async function approveResolvedEdtActivation(input: {
       if (node.parentSourceIdentity && !parentId)
         throw new EdtEngineConflict("EDT_PLAN_INCOMPLETE", "An EDT node parent is missing.");
       nodeIds.set(node.sourceIdentity, id);
-      await client.query(`INSERT INTO job_activation_edt_nodes(id,company_id,project_id,intake_id,parent_id,node_kind,
-        source_identity,code,name,sequence,source_snapshot,source_fingerprint,created_by_id)
-        VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11::jsonb,$12,$13)`,
+      await client.query(EDT_RESOLVED_NODE_INSERT_SQL,
         [id, input.companyId, input.projectId, request.intake_id, parentId, node.kind, node.sourceIdentity,
           node.code, node.name, node.sequence, JSON.stringify(node.snapshot), edtFingerprint(node.snapshot), input.actor.actorUserId]);
     }
     for (const item of candidate.plan.workItems) {
       const identity = { locationIdentity: item.locationIdentity, tradeIdentity: item.tradeIdentity,
         deliverableTypeIdentity: item.deliverableTypeIdentity };
-      const updated = await client.query(`UPDATE job_activation_work_items SET edt_node_id=$2,location_identity=$3,
-        location_snapshot=$4::jsonb,trade_identity=$5,trade_snapshot=$6::jsonb,deliverable_type_identity=$7,
-        deliverable_type_snapshot=$8::jsonb,display_code=$9,revision_number=0,issuance_version=0,
-        identity_fingerprint=$10,updated_at=now() WHERE id=$1 AND project_id=$11 AND intake_id=$12 AND edt_node_id IS NULL`,
+      const updated = await client.query(EDT_RESOLVED_WORK_ITEM_UPDATE_SQL,
         [item.id, nodeIds.get(item.edtNodeSourceIdentity), item.locationIdentity, JSON.stringify(item.locationSnapshot),
           item.tradeIdentity, JSON.stringify(item.tradeSnapshot), item.deliverableTypeIdentity,
           JSON.stringify(item.deliverableTypeSnapshot), item.displayCode, edtFingerprint(identity),
@@ -163,9 +170,7 @@ export async function approveResolvedEdtActivation(input: {
         throw new EdtEngineConflict("EDT_WORK_ITEM_SCOPE_MISMATCH", "A planned Work Item changed during EDT approval.");
     }
     const decisionId = deterministicEdtId("activation-decision", `${request.id}:${request.request_fingerprint}`);
-    await client.query(`INSERT INTO job_activation_decisions(id,request_id,company_id,project_id,outcome,request_fingerprint,
-      decided_by_id,eligible_role,reason,evidence)
-      VALUES($1,$2,$3,$4,'approved',$5,$6,$7,$8,$9::jsonb)`,
+    await client.query(EDT_RESOLVED_DECISION_INSERT_SQL,
       [decisionId, request.id, input.companyId, input.projectId, request.request_fingerprint,
         input.actor.actorUserId, input.actor.eligibleRole, input.reason.trim(),
         JSON.stringify({ sourceFingerprint: candidate.sourceFingerprint })]);

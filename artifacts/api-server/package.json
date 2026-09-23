@@ -52,6 +52,7 @@
     "test:edt-engine-build342": "tsx ./src/lib/edt-engine-build342.behavior.ts",
     "test:edt-engine-build343": "tsx ./src/lib/edt-engine-build343.behavior.ts",
     "test:edt-engine-build344": "tsx ./src/lib/edt-engine-build344.behavior.ts",
+    "test:edt-engine-build345": "tsx ./src/lib/edt-engine-build345.behavior.ts",
     "test:edt-engine-read-sql": "tsx ./src/lib/edt-engine-read-sql.behavior.ts",
     "dev": "NODE_ENV=development tsx ./src/index.ts",
     "build": "tsx ./build.ts",
