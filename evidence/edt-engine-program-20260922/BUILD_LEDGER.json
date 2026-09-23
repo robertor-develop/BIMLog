@@ -3,7 +3,7 @@
   "program": "BIMLog EDT and Engine Templates",
   "date": "2026-09-23",
   "range": { "firstBuild": 276, "completedThrough": 345, "originalPlannedFinalBuild": 335, "programComplete": false },
-  "currentBlock": { "number": 14, "builds": "341-345", "status": "FOCUSED_PASS_FULL_GATE_PENDING", "pushDue": true, "publicationDue": true },
+  "currentBlock": { "number": 14, "builds": "341-345", "status": "PUSHED_PUBLISHED_AUTHENTICATED_REGRESSION_PASS_LIMITED", "pushDue": false, "publicationDue": false, "publishedSource": "e3a8626014260da5dd485e6cfb25ebd6187f0a6c" },
   "buildCommits": {
     "276": "ca399ae03d87435c5f24ece52f8f6e48e426d857",
     "277": "c33570ca36ea7c0574dac5b98cc88bc33dfb1d7f",
@@ -90,5 +90,5 @@
   "reassessmentRequired": "The original 335-build target does not constitute complete EDT activation: guarded HTTP mutations, assignable Operations Director authority, and canonical server-derived economic/time authority remain open.",
   "database": { "changed": false, "productionApplied": false, "design": "zero-drop" },
   "lensNext": { "nativeChanged": false, "installerChanged": false, "focusedNavisworksSmoke": "NOT_REQUIRED" },
-  "tests": { "focused": "PASS_BLOCK14", "typecheck": "PASS_API", "fullBuild": "PENDING_BLOCK14", "productSourceChanged": true, "publication": "DUE_AFTER_BUILD345" }
+  "tests": { "focused": "PASS_BLOCK14", "typecheck": "PASS_API", "fullBuild": "PASS_BLOCK14", "productSourceChanged": true, "publication": "PASS_ZERO_DROP_EXACT_SOURCE", "authenticatedChrome": "PASS_BROAD_REGRESSION_POSITIVE_EDT_NOT_PROVEN" }
 }

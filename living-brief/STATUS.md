@@ -4,7 +4,8 @@
 
 - Builds 341–345 bind the full frozen-source candidate fingerprint, prepare server-derived request and independent approval transactions, prove authorization/stale-source/idempotent replay behavior, and compile their write statements against the isolated real PostgreSQL schema. The focused Block 14 gate and API typecheck pass.
 - The HTTP activation, Economic Plan and time-impact mutation routes remain closed. An Operations Director is required for approval but is not yet assignable through the actual project-role directory; silently treating Project Administrator, PMO or CEO as that role would expand authority. No production schema/data, Lens Next Native or installer changed.
-- This is the second five-build block after Block 13, so the full local gate, exact push, zero-drop Replit Shell publication and authenticated Chrome smoke are due. Neither the service fixture nor the read-only SQL plan proves a positive production EDT approval.
+- This second five-build block passed the complete local pre-push gate, was pushed to GitHub `master` at exact source `e3a8626014260da5dd485e6cfb25ebd6187f0a6c`, and was published through Replit Shell with source-tree attestation, pre/post exact database parity and development-data copy off. Live health reported the same bound source. Authenticated Chrome regression covered Headquarters, company configuration, project Intake/Operations, Budget, Contracts, APU and Knowledge; the historical QA fixture correctly failed EDT readiness for missing canonical Contract evidence. The exact observations and limits are in `evidence/edt-engine-program-20260922/BLOCK_14_REPORT.md`.
+- Neither the service fixture nor read-only SQL planning proves a positive production EDT approval. The request/approval routes remain closed pending assignable Operations Director authority; this is not end-to-end EDT acceptance. No Native/installer change required Navisworks smoke.
 
 ## EDT Block 13 read-only activation candidate — 2026-09-23
 

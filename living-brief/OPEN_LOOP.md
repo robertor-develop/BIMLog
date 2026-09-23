@@ -3,7 +3,7 @@
 ## EDT Block 14 — governed activation preparation — 2026-09-23
 
 - [x] Build 341–345 as five bounded commits with full-source fingerprint, server-owned request and approval transactions, focused transaction negative tests and real-schema read-only SQL compilation.
-- [ ] Complete the ten-build release boundary: full clean gate, exact GitHub push, clean Replit Shell alignment, zero-drop/no-copy preview, publication and full authenticated Chrome smoke. No Native/installer smoke is triggered by this block.
+- [x] Complete the ten-build release boundary: full clean gate, exact GitHub push at `e3a8626014260da5dd485e6cfb25ebd6187f0a6c`, clean Replit Shell alignment, read-only pre/post schema parity, no-copy publication and authenticated Chrome release regression. The historical QA fixture lacks canonical Contract evidence, so positive EDT activation remains unproven. No Native/installer smoke was triggered. See `evidence/edt-engine-program-20260922/BLOCK_14_REPORT.md`.
 - [ ] Bind the approved Operations Director authority to an actually assignable company/project identity without broadening PMO, Project Administrator or CEO privileges; only then open the governed EDT request/approval routes and run a real-database, role-separated, save/refresh/reopen end-to-end activation test.
 - [ ] Complete server-calculated Economic Plans, time impacts and operational UI. A prepared internal service and synthetic transaction test are not field acceptance.
 
