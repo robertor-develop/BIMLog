@@ -59,6 +59,15 @@ export function validateEdtPlanCoverage(savedWorkItemIds:readonly string[],plann
     throw new EdtEngineConflict("EDT_PLAN_COVERAGE_MISMATCH","The EDT plan must cover every saved Work Item in this Intake exactly once.");
 }
 
+export function validateEdtPlanSourceBindings(savedRows:readonly {id:string;contractId:string|null;stableScopeItemId:string}[],plannedItems:readonly EdtPlanWorkItem[]):void{
+  const saved=new Map(savedRows.map(row=>[row.id,row]));
+  for(const item of plannedItems){
+    const row=saved.get(item.id);
+    if(!row?.contractId||row.contractId!==item.contractSourceIdentity||!row.stableScopeItemId)
+      throw new EdtEngineConflict("EDT_PLAN_SOURCE_MISMATCH","Every EDT Work Item must retain its saved canonical Contract and scope identity.");
+  }
+}
+
 function requireAuthorization(input: EdtRecordAuthorizationInput) {
   const decision = decideEdtRecordAuthorization(input);
   if (!decision.allow) throw new EdtEngineConflict(decision.code, "EDT activation authorization denied.");
@@ -98,8 +107,9 @@ export async function approveEdtActivation(input:{ actor:Actor; companyId:number
     if(!intake||intake.revision!==request.intake_revision||intake.status==="activated"||request.state!=="pending")throw new EdtEngineConflict("INTAKE_REVISION_CONFLICT","The saved Intake changed or was activated after this EDT request. Create a new request from the current Intake.");
     validateEdtPlanNodes(input.nodes);
     validateEdtPlanWorkItems(input.nodes,input.workItems);
-    const savedWorkItems=(await client.query<{id:string}>("SELECT id FROM job_activation_work_items WHERE intake_id=$1 AND project_id=$2 AND status<>'cancelled' ORDER BY id FOR UPDATE",[request.intake_id,input.projectId])).rows;
+    const savedWorkItems=(await client.query<{id:string;contractId:string|null;stableScopeItemId:string}>("SELECT id,contract_id AS \"contractId\",stable_scope_item_id AS \"stableScopeItemId\" FROM job_activation_work_items WHERE intake_id=$1 AND project_id=$2 AND status<>'cancelled' ORDER BY id FOR UPDATE",[request.intake_id,input.projectId])).rows;
     validateEdtPlanCoverage(savedWorkItems.map(item=>item.id),input.workItems);
+    validateEdtPlanSourceBindings(savedWorkItems,input.workItems);
     const decisionId=deterministicEdtId("activation-decision",`${request.id}:${input.expectedFingerprint}`);
     const existing=(await client.query<{id:string}>("SELECT id FROM job_activation_decisions WHERE request_id=$1",[request.id])).rows[0];
     if (existing) throw new EdtEngineConflict("ACTIVATION_DECISION_INCONSISTENT","Pending request already has an immutable decision.");
