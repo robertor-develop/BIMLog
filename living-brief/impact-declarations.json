@@ -38935,6 +38935,86 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "62bff83b88ec761cd907130e1110bb3b04116de5e346858e7d88905d50c2c991"
+    },
+    {
+      "taskId": "bimlog-edt-engine-block12-smoke-hotfix-20260923",
+      "reviewedThroughCommit": "449f59bf7cd32f3421770852fa51d35fe1e133f5",
+      "reviewedAt": "2026-09-23T05:44:54Z",
+      "status": "local_source_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Live historical Intake preview correctly failed closed, but Operations hid the source error behind a generic request failure; bilingual guidance is a release-blocking UX repair."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical source and project/company boundaries remain unchanged."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The corrective publication follows the same exact-source release path."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Live-smoke defects require fix, re-gate and re-test."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Error guidance does not change product vision."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No structural Platform inventory change occurred."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, Navisworks or installer source changed."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No customer report or generated deliverable changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No external standard or edition was introduced."
+        },
+        {
+          "key": "status",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The live finding and corrective release gate were captured in the reconciled-through commit."
+        },
+        {
+          "key": "open_loop",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The failed first smoke and required repeat were captured in the reconciled-through commit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit event or customer acceptance semantics changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "346c0f97f3ee388d68549419ab88e7e0bdb306af307189e07953ff12cc7a74cd"
     }
   ]
 }
