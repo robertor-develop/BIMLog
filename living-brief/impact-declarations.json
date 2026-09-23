@@ -39450,6 +39450,99 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "c28beb0547a9be85b5a32b0c7e3110995868ccece3a6b78abdce381818204d62"
+    },
+    {
+      "taskId": "bimlog-lens-next-responsive-dock-block02-20260923",
+      "reviewedThroughCommit": "a6ab1142b2684bde017e445e72affe0ebde9de1b",
+      "reviewedAt": "2026-09-23T15:40:18Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "protected_behavioral_baseline",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "plugin"
+          ],
+          "summary": "A viewport-based selected-issue rule hid the compact browser even when Filters, Create or Settings was active; the container-width workspace rule now overrides that legacy behavior without changing Working View or issue authority."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Responsive presentation does not alter ecosystem ownership or canonical authority."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing bounded release, Native and field-verification rules remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The prescribed source, UI, artifact and deployment gates remain in force."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or market-scope change is introduced."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No API route, schema or generated Platform architecture is changed."
+        },
+        {
+          "key": "plugin",
+          "result": "updated",
+          "reason": "The Platform-only compact dock behavior and unchanged Native boundary are recorded."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report or export presentation changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards or compliance claim changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The second five-build candidate and local Chrome evidence are stated separately from publication."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The due push, publish, live Chrome and connected field work remain explicit."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The append-only historical audit is not reinterpreted by this UI work."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/features/lens-next/LensNextPanel.tsx",
+        "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
+        "artifacts/bimlog/src/features/lens-next/lens-next-dock-compact-shell.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-dock-create.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-dock-filters.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-dock-navigation.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-dock-settings.behavior.ts",
+        "artifacts/bimlog/src/features/lens-next/lens-next-panel.css",
+        "artifacts/bimlog/src/lens-next-acceptance-harness.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLUGIN.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "f1badceadd5dd9682a1b85f3876093e8511113d0a4ce202dcaa0321afe946e23"
     }
   ]
 }

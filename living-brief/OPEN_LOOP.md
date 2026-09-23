@@ -1,10 +1,12 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
-## Lens Next responsive dock — Block 1 — 2026-09-23
+## Lens Next responsive dock — Block 2 — 2026-09-23
 
 - [x] Record existing Lens behavior; add actual container-width classification, the persistent four-workspace rail with Viewpoints default, compact global context, and width-bounded preservation of the wide three-pane layout in five bounded source commits. Restore the Controlled publishing label after its regression test failed.
-- [ ] Complete the full pre-push gate and exact-head GitHub push for this five-build-only block. Do not publish this incomplete workspace. No Native/installer files changed, so focused Navisworks smoke is not triggered by Block 1.
-- [ ] Finish narrow and medium Viewpoints List/Details/Back state restoration, Filters, Create, Settings, live resize, accessibility, connected Navisworks and authenticated Chrome acceptance in the remaining responsive-dock blocks. Do not present the current rail as completed functional side-tab navigation.
+- [x] Block 1 passed the full gate and reached GitHub `master` at `a6ab1142b2684bde017e445e72affe0ebde9de1b`; publication was correctly deferred to the ten-build boundary.
+- [x] Build 6–10 compact single-workspace shell, functional Filters, Viewpoints List/Details/Back with scroll preservation, Create/Cancel/new-issue selection, and Settings. Focused tests, frontend typecheck, and local Chrome production-component fixture behavior pass at narrow/medium/wide widths. No Native/installer files changed.
+- [ ] Complete the exact-head full gate, push Block 2, synchronize and publish through Replit Shell without Replit Agents, then run full authenticated live Chrome smoke. Do not call local fixture data a real Navisworks capture, successful production Create, or customer acceptance.
+- [ ] Continue remaining responsive-dock accessibility, connected Navisworks and field acceptance after this release checkpoint; preserve the verified Working View, identity, publishing and attachment behaviors.
 
 ## EDT Block 14 — governed activation preparation — 2026-09-23
 

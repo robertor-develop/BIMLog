@@ -1,10 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
-## Lens Next responsive dock — Block 1 local candidate — 2026-09-23
+## Lens Next responsive dock — Block 2 local candidate — 2026-09-23
 
-- Five bounded source builds establish a frozen-behavior baseline, classify the actual Lens container at narrow/medium/wide widths, add the four-icon workspace rail with Viewpoints selected by default, show compact shared project/model/release context, and retain simultaneous wide Filters/List/Details columns. A focused corrective commit restores the existing Controlled publishing label. No issue identity, API, Working View, Native bridge, installer, schema, or customer data changed.
-- Focused Lens tests, frontend typecheck, and the production frontend build pass. The complete pre-push gate and exact GitHub push are still pending at this local checkpoint; no Replit publication or authenticated Chrome/physical Navisworks acceptance is claimed.
-- This is **not** the completed responsive dock UX. Narrow List-to-Details/Back restoration, functional single-workspace Filters/Create/Settings, live resize continuity, and the full 320/480/800-pixel connected acceptance remain for later blocks. The accepted live P36 deployment and Native fallback are unchanged.
+- Block 1's five source builds passed the complete pre-push gate and reached GitHub `master` at `a6ab1142b2684bde017e445e72affe0ebde9de1b`; it was intentionally not published at the five-build boundary.
+- Block 2's next five bounded builds now make measured narrow/medium presentation single-workspace: Filters reuse the existing issue filter state; Viewpoints defaults to the List and moves to Details/Back without clearing selection or list scroll; Create reuses the canonical capture/save action and returns to the created issue when the verified record reloads; Settings exposes existing project/model/My View controls. Wide Filters/List/Details remain simultaneous. No issue identity, API, Working View, Native bridge, installer, schema, or customer data changed.
+- Focused docked-workspace behavior and frontend typecheck pass. Local Chrome exercised the real production component with fixture issues at approximately 320/480/800 widths, filter/search/results, list/detail/back with a nonzero scroll restoration, Create/Cancel, Settings, wide-to-narrow resizing and no observed horizontal overflow or console errors. The fixture does not prove authenticated production, a successful Navisworks capture, or a controlled publication. The full exact-head gate, GitHub push, Replit Shell publication and authenticated Chrome smoke remain due at this ten-build boundary; accepted live P36 and the Native fallback are unchanged until then.
 
 ## EDT Block 14 server-resolved approval preparation — 2026-09-23
 
