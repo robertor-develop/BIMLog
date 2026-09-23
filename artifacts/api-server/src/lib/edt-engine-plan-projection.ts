@@ -38,6 +38,9 @@ export function projectActivatedEdtPlan(source: ActivatedEdtSource): ProjectedEd
   const byProfile = new Map(activatedContracts.map(entry => [required(entry.profileId,"activated contract profile"),entry]));
   if (byProfile.size !== activatedContracts.length || byProfile.size !== profiles.length)
     throw new EdtEngineConflict("EDT_SOURCE_AMBIGUOUS", "Activated contract profiles must be unique.");
+  const activatedVersionIds = activatedContracts.map(entry => required(entry.contractVersionId, "canonical Contract version ID"));
+  if (new Set(activatedVersionIds).size !== activatedVersionIds.length)
+    throw new EdtEngineConflict("EDT_SOURCE_AMBIGUOUS", "Each activated Contract must have its own immutable version.");
   const byScope = new Map(scopeItems.map(entry => [required(entry.id,"scope item ID"),entry]));
   if (byScope.size !== scopeItems.length)
     throw new EdtEngineConflict("EDT_SOURCE_AMBIGUOUS", "Saved scope item IDs must be unique.");
