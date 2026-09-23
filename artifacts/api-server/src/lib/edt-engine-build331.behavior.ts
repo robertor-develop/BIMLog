@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { loadActivatedEdtSource } from "./edt-engine-source-service";
 import type { EdtTransactionClient } from "./edt-engine-transaction";
+import { BIMLOG_DELIVERY_WORKFLOWS } from "./delivery-workflow-defaults";
 
 let canonicalContractId = "contract-1";
 let canonicalCompany = 7;
@@ -12,6 +13,7 @@ const client: EdtTransactionClient = { async query<Row>(sql: string, values?: re
   if (sql.includes("FROM projects")) return { rows: [{ id: 11, code: "P11", name: "Project" }] as Row[] };
   if (sql.includes("FROM job_activation_work_items")) return { rows: [{ id: "w", stableScopeItemId: "scope", contractId: "contract-1", contractVersionId: "version-1", status: "active" }] as Row[] };
   if (sql.includes("FROM financial_contracts")) return { rows: canonicalCompany === 7 ? [{ contractId: canonicalContractId, versionId: "version-1", currency: "USD", contentFingerprint: "b".repeat(64) }] as Row[] : [] };
+  if (sql.includes("FROM company_delivery_workflow_work_items")) return { rows: [{ workItemId: "w", source: "bimlog", versionId: null, templateCode: BIMLOG_DELIVERY_WORKFLOWS[0].code, templateVersion: 1, definition: BIMLOG_DELIVERY_WORKFLOWS[0].definition, fingerprint: BIMLOG_DELIVERY_WORKFLOWS[0].fingerprint }] as Row[] };
   return { rows: [] };
 }, release() {} };
 await loadActivatedEdtSource(client, { companyId: 7, projectId: 11, intakeId: "i" });

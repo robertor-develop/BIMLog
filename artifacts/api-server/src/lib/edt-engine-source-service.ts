@@ -1,4 +1,5 @@
 import { EdtEngineConflict, type EdtTransactionClient } from "./edt-engine-transaction";
+import { deliveryWorkflowFingerprint, validateDeliveryWorkflowDefinition } from "./delivery-workflow-template-contract";
 
 export type ActivatedEdtWorkItem = Readonly<{
   id: string;
@@ -61,5 +62,24 @@ export async function loadActivatedEdtSource(client: EdtTransactionClient, input
     const row = versions.get(String(binding.contractVersionId));
     return !row || row.contractId !== binding.contractId || !row.currency?.trim() || !/^[a-f0-9]{64}$/.test(row.contentFingerprint);
   })) throw new EdtEngineConflict("EDT_CONTRACT_SOURCE_MISMATCH", "An activated Contract version is missing, outside this company/project, or differs from its saved binding.");
+  const workflowBindings = (await client.query<{ workItemId: string; source: string; versionId: string | null; templateCode: string; templateVersion: number; definition: unknown; fingerprint: string }>(
+    `SELECT work_item_id AS "workItemId",source,version_id AS "versionId",template_code AS "templateCode",
+      template_version AS "templateVersion",definition,fingerprint FROM company_delivery_workflow_work_items
+      WHERE company_id=$1 AND project_id=$2 AND work_item_id=ANY($3::text[])`,
+    [input.companyId, input.projectId, workItems.map(item => item.id)])).rows;
+  const workflows = new Map(workflowBindings.map(row => [row.workItemId, row]));
+  if (workflows.size !== workItems.length || workItems.some(item => !workflows.has(item.id)))
+    throw new EdtEngineConflict("EDT_WORKFLOW_SOURCE_MISSING", "Every saved Work Item requires its own activated Delivery Workflow binding.");
+  for (const binding of workflowBindings) {
+    if (!binding.templateCode?.trim() || !Number.isSafeInteger(binding.templateVersion) || binding.templateVersion < 1 ||
+      !((binding.source === "company" && binding.versionId) || (binding.source === "bimlog" && binding.versionId === null)))
+      throw new EdtEngineConflict("EDT_WORKFLOW_SOURCE_MISMATCH", "A Delivery Workflow binding has an invalid source or version identity.");
+    try {
+      if (deliveryWorkflowFingerprint(validateDeliveryWorkflowDefinition(binding.definition)) !== binding.fingerprint)
+        throw new Error("fingerprint mismatch");
+    } catch {
+      throw new EdtEngineConflict("EDT_WORKFLOW_SOURCE_MISMATCH", "An activated Delivery Workflow definition failed integrity verification.");
+    }
+  }
   return { project, intake: { id: intake.id, revision: intake.revision, data: intake.data, activationSummary: intake.activation_summary }, workItems };
 }

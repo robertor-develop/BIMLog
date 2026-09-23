@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { previewActivatedEdtPlan } from "./edt-engine-plan-projection";
 import type { EdtTransactionHost } from "./edt-engine-transaction";
+import { BIMLOG_DELIVERY_WORKFLOWS } from "./delivery-workflow-defaults";
 
 const statements: string[] = [];
 const host: EdtTransactionHost = { async connect() { return { async query<Row>(sql: string, values?: readonly unknown[]) {
@@ -11,6 +12,7 @@ const host: EdtTransactionHost = { async connect() { return { async query<Row>(s
   if (sql.includes("FROM projects")) return { rows: [{ id: 11, code: "P11", name: "Project 11" }] as Row[] };
   if (sql.includes("FROM job_activation_work_items")) return { rows: [{ id: "wi-1", stableScopeItemId: "scope-1", contractId: "contract-1", contractVersionId: "version-1", status: "active" }] as Row[] };
   if (sql.includes("FROM financial_contracts")) return { rows: [{ contractId: "contract-1", versionId: "version-1", currency: "USD", contentFingerprint: "a".repeat(64) }] as Row[] };
+  if (sql.includes("FROM company_delivery_workflow_work_items")) return { rows: [{ workItemId: "wi-1", source: "bimlog", versionId: null, templateCode: BIMLOG_DELIVERY_WORKFLOWS[0].code, templateVersion: 1, definition: BIMLOG_DELIVERY_WORKFLOWS[0].definition, fingerprint: BIMLOG_DELIVERY_WORKFLOWS[0].fingerprint }] as Row[] };
   return { rows: [] };
 }, release() {} }; } };
 const result = await previewActivatedEdtPlan({ companyId: 7, projectId: 11, intakeId: "intake-1" }, host);
