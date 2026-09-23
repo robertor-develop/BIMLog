@@ -39100,6 +39100,7 @@
         "artifacts/api-server/package.json",
         "artifacts/api-server/src/lib/edt-engine-build326.behavior.ts",
         "artifacts/api-server/src/lib/edt-engine-build335.behavior.ts",
+        "artifacts/api-server/src/lib/edt-engine-read-sql.behavior.ts",
         "artifacts/api-server/src/lib/edt-engine-route-context.ts",
         "artifacts/api-server/src/lib/edt-engine-source-service.ts",
         "evidence/edt-engine-program-20260922/BLOCK_12_REPORT.md",
@@ -39109,7 +39110,7 @@
         "living-brief/impact-declarations.json",
         "scripts/test-edt-engine-block12.mjs"
       ],
-      "reviewedChangeSha256": "805f8461b5a21a3b7d051d9d6e26e770d16d3875bd4a1e57bc5c12ce6d81b3f8"
+      "reviewedChangeSha256": "37a40bdd8d18fb506b3ad3890736ec97484d37237d1c9d21fc0b0a0cdad4e6e9"
     }
   ]
 }

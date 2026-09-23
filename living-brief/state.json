@@ -9,6 +9,7 @@
       "artifacts/api-server/package.json",
       "artifacts/api-server/src/lib/edt-engine-build326.behavior.ts",
       "artifacts/api-server/src/lib/edt-engine-build335.behavior.ts",
+      "artifacts/api-server/src/lib/edt-engine-read-sql.behavior.ts",
       "artifacts/api-server/src/lib/edt-engine-route-context.ts",
       "artifacts/api-server/src/lib/edt-engine-source-service.ts",
       "evidence/edt-engine-program-20260922/BLOCK_12_REPORT.md",
