@@ -2,7 +2,7 @@
   "schemaVersion": 1,
   "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "231ac91ab653abefd18e61946c2f92bd7b7851cc38d250d5a7b27fbec367343c",
+  "bundleSha256": "a08992eb086ae430f615cdb3a639ff4f00bbaab5973748a9737ca154512d030f",
   "impact": {
     "baselineCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
     "changedPaths": [
@@ -15,6 +15,7 @@
       "evidence/edt-engine-program-20260922/BLOCK_12_REPORT.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+      "living-brief/PLATFORM.md",
       "living-brief/STATUS.md",
       "living-brief/impact-declarations.json",
       "scripts/test-edt-engine-block12.mjs"
@@ -78,13 +79,13 @@
     {
       "key": "platform",
       "file": "PLATFORM.md",
-      "sha256": "f53f21a6a43f0070dd8ed11cf3dc25e0db163c4b6711ff4ede0802ff6c56d5db",
-      "sourceChangedAt": "2026-09-23T01:00:47-04:00",
-      "changeState": "accepted",
+      "sha256": "e3045828d31ac464220cee39eac8beea12e74deb7773ccfb5f591345582e1004",
+      "sourceChangedAt": "2026-09-23T07:30:00.000Z",
+      "changeState": "candidate",
       "reconciledThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
       "semanticReviewedThroughCommit": "7b3b1130b0395f53cce0b4d2be28245982ab0099",
       "semanticReviewTask": "bimlog-edt-engine-block12-project-sql-correction-20260923",
-      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewResult": "updated",
       "semanticReviewedAt": "2026-09-23T07:30:00Z"
     },
     {

@@ -39062,8 +39062,8 @@
         },
         {
           "key": "platform",
-          "result": "reviewed_no_semantic_change",
-          "reason": "The existing project-company binding is reused without schema or structural inventory change."
+          "result": "updated",
+          "reason": "The generator added the new database-backed EDT SQL regression file to the structural source inventory; the existing project-company binding is reused without schema change."
         },
         {
           "key": "plugin",
@@ -39106,11 +39106,12 @@
         "evidence/edt-engine-program-20260922/BLOCK_12_REPORT.md",
         "living-brief/OPEN_LOOP.md",
         "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json",
         "scripts/test-edt-engine-block12.mjs"
       ],
-      "reviewedChangeSha256": "37a40bdd8d18fb506b3ad3890736ec97484d37237d1c9d21fc0b0a0cdad4e6e9"
+      "reviewedChangeSha256": "99801b0bbf763b7f82efc0a7edef50f6b11dbf701797ea9eb6e595e54aa56edc"
     }
   ]
 }

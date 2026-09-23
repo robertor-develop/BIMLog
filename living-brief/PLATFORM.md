@@ -446,6 +446,7 @@ It changes only when the code structure or curated architectural facts change.
 - artifacts/api-server/src/lib/edt-engine-plan-projection.ts
 - artifacts/api-server/src/lib/edt-engine-qc-import-schema.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-qc-import-service.ts
+- artifacts/api-server/src/lib/edt-engine-read-sql.behavior.ts
 - artifacts/api-server/src/lib/edt-engine-route-context.ts
 - artifacts/api-server/src/lib/edt-engine-source-service.ts
 - artifacts/api-server/src/lib/edt-engine-transaction.ts
