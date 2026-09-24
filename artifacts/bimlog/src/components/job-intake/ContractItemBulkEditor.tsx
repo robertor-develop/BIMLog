@@ -321,7 +321,7 @@ export function ContractItemBulkEditor(props: Props) {
               </option>
               {props.snapshots.map((snapshot: any) => (
                 <option key={snapshot.id} value={snapshot.id}>
-                  v{snapshot.budgetVersion || snapshot.version} · {snapshot.total}
+                  v{snapshot.budget_version ?? snapshot.budgetVersion ?? snapshot.version} · {snapshot.total} {snapshot.currency ?? props.currency}
                 </option>
               ))}
             </select>

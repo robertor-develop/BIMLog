@@ -3,6 +3,7 @@ import { pool } from "@workspace/db";
 import { FinancialControlError } from "./financial-control-contract";
 import { authorizeFinancialOperation } from "./financial-control-service";
 import { waitForFinancialContractMigration } from "./financial-contract-migration";
+import { pinContractItemApuSnapshot } from "./financial-contract-apu-binding";
 import { resolveCompanyPricingTemplateBinding } from "./company-pricing-template-binding";
 import { boundedText, decimalFromScaled, positiveId, scaledSignedDecimal } from "./financial-budget-contract";
 import {
@@ -124,20 +125,7 @@ async function pinContractItemApuSnapshots(client: Client, projectId: number, cu
     if (version == null) throw new FinancialControlError(400, "CONTRACT_ITEM_APU_REQUIRED", "Each new Contract Item requires a saved APU version.");
     const source = byVersion.get(version);
     if (!source) throw new FinancialControlError(400, "CONTRACT_ITEM_APU_INVALID", "The selected APU version does not exist in this project.");
-    if (contractCurrency(source.content?.currency) !== currency)
-      throw new FinancialControlError(400, "CONTRACT_ITEM_APU_CURRENCY_MISMATCH", "Contract Item APU currency must match the Contract currency.");
-    const unitRate = exactPositiveAmount(String(source.content?.sellingPrice ?? ""), "apu.sellingPrice");
-    if (scaledSignedDecimal(unitRate) !== scaledSignedDecimal(line.contractItem.unitRate))
-      throw new FinancialControlError(400, "CONTRACT_ITEM_APU_RATE_MISMATCH", "Contract Item Unit Rate must equal the selected APU selling price.");
-    return {
-      ...line,
-      contractItem: {
-        ...line.contractItem,
-        apuFingerprint: String(source.content_fingerprint),
-        apuContent: source.content as Record<string, unknown>,
-        apuEvaluation: source.evaluation as Record<string, unknown>,
-      },
-    };
+    return pinContractItemApuSnapshot(line, source, currency);
   });
 }
 

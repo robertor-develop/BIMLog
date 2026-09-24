@@ -101,7 +101,7 @@ const populatedStateMarkup = renderToStaticMarkup(
     budgetSnapshotId="snapshot-1"
     budgetLines={[{ id: "line-1", project_code: "PL", project_name: "Plumbing", amount: "100", project_cost_node_id: "node-1" }]}
     onBudgetSnapshotChange={() => undefined}
-    snapshots={[{ id: "snapshot-1", budgetVersion: 2, total: "100" }]}
+    snapshots={[{ id: "snapshot-1", budget_version: 2, total: "100", currency: "USD" }]}
     onOpenCostValuePlanner={() => undefined}
     onOpenProjectBudget={() => undefined}
     tt={(en) => en}
@@ -111,7 +111,7 @@ const populatedStateMarkup = renderToStaticMarkup(
 );
 assert.match(populatedStateMarkup, /Select saved APU version/);
 assert.match(populatedStateMarkup, /v3 · Approved · plan total 37\.99 USD/);
-assert.match(populatedStateMarkup, /v2 · 100/);
+assert.match(populatedStateMarkup, /v2 · 100 USD/);
 assert.match(populatedStateMarkup, /PL · Plumbing · 100/);
 
 console.log("ContractItemBulkEditor.behavior: PASS");

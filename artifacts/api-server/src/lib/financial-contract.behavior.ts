@@ -7,6 +7,7 @@ import { PDFParse } from "pdf-parse";
 import { evaluateFinancialAuthorization, type ApprovalPolicy, type EffectiveGrant } from "./financial-control-contract";
 import { assertReconciledTotal, contractCurrency, contractLineTotal, contractPermission, contractPerspective, contractType, exactDelta, exactVariance, higherLimitIsStrict, normalizeContractLines, safeCommercialMetadata } from "./financial-contract-contract";
 import { buildContractPdf, buildContractXlsx } from "./financial-contract-export";
+import { pinContractItemApuSnapshot } from "./financial-contract-apu-binding";
 
 const checks: Array<{ number: number; name: string; evidence: string }> = [];
 const check = (name: string, evidence: string) => checks.push({ number: checks.length + 1, name, evidence });
@@ -61,6 +62,21 @@ assert.equal(contractItem.contractItem.contractValue, "5531.4");
 assert.equal(contractItem.contractItem.displayName, "Basement Composite");
 assert.equal(contractItem.contractItem.unit, "Hours");
 check("Contract Item exact value", "180 Hours multiplied by 30.73 equals 5531.40 without floating arithmetic");
+const pinnedItem = pinContractItemApuSnapshot(
+  contractItem,
+  { content: { currency: "USD", sellingPrice: "10000" }, evaluation: {}, content_fingerprint: "apu-fixture" },
+  "USD",
+);
+assert.equal(pinnedItem.contractItem.unitRate, "30.73");
+assert.equal(pinnedItem.contractItem.contractValue, "5531.4");
+assert.equal(pinnedItem.contractItem.apuContent?.sellingPrice, "10000");
+assert.equal(pinnedItem.contractItem.apuFingerprint, "apu-fixture");
+check("Generic APU total does not replace Contract Item rate", "saved plan snapshot is pinned while quantity × item rate remains authoritative");
+assert.throws(
+  () => pinContractItemApuSnapshot(contractItem, { content: { currency: "CAD", sellingPrice: "10000" }, evaluation: {}, content_fingerprint: "apu-fixture" }, "USD"),
+  (error: any) => error?.code === "CONTRACT_ITEM_APU_CURRENCY_MISMATCH",
+);
+check("APU currency mismatch remains denied", "decoupling plan total from item rate does not weaken currency isolation");
 const provenanceItem = normalizeContractLines([
   {
     ...contractItem,
