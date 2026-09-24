@@ -10,7 +10,7 @@ import { previewGovernedWorkflowAllocation } from "../lib/delivery-workflow-allo
 import { EconomicAllocationError } from "../lib/delivery-workflow-economic-allocation";
 import { FinancialControlError } from "../lib/financial-control-contract";
 import { waitForFinancialControlMigration } from "../lib/financial-control-migration";
-import { economicCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
+import { economicCheckerAllowed, workflowTemplateCheckerAllowed } from "../lib/delivery-workflow-allocation-source-contract";
 
 const router = Router();
 const templateCode = /^[A-Z0-9][A-Z0-9._-]{0,63}$/;
@@ -202,6 +202,11 @@ router.post("/company/delivery-workflows/:id/versions/:versionId/approve", authM
     }
     const definition = validateDeliveryWorkflowDefinition(version.definition);
     const allocation = await economicPreview(connection, actor, definition);
+    if (!workflowTemplateCheckerAllowed({
+      creatorId: Number(version.created_by_id), lastEditorId: Number(version.updated_by_id), checkerId: actor.userId,
+    })) {
+      await connection.query("ROLLBACK"); res.status(403).json({ code: "DELIVERY_WORKFLOW_INDEPENDENT_CHECKER_REQUIRED" }); return;
+    }
     if (allocation && !economicCheckerAllowed({
       creatorId: Number(version.created_by_id), lastEditorId: Number(version.updated_by_id),
       checkerId: actor.userId, hasFinanceGrant: await canApproveEconomics(connection, actor),
