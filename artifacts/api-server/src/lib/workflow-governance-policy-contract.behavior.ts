@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, workflowPolicyIndependentCheckerAllowed, WorkflowGovernancePolicyError } from "./workflow-governance-policy-contract";
 import { applicablePublishedGovernance } from "./workflow-governance-binding";
 
@@ -29,6 +30,10 @@ assert.throws(() => applicablePublishedGovernance([published, { ...published, po
   (error: unknown) => (error as { code?: string }).code === "WORKFLOW_POLICY_AMBIGUOUS");
 assert.throws(() => applicablePublishedGovernance([{ ...published, fingerprint: "0".repeat(64) }], null),
   (error: unknown) => (error as { code?: string }).code === "WORKFLOW_POLICY_FINGERPRINT_MISMATCH");
+const policyRoutes = readFileSync(new URL("../routes/workflow-governance-policies.ts", import.meta.url), "utf8");
+const workflowRoutes = readFileSync(new URL("../routes/delivery-workflow-templates.ts", import.meta.url), "utf8");
+assert.match(policyRoutes.slice(policyRoutes.indexOf('versions/:versionId/retire')), /pg_advisory_xact_lock\(hashtext\('bimlog:workflow-policy-publish'\)/);
+assert.match(workflowRoutes.slice(workflowRoutes.indexOf('versions/:versionId/publish')), /pg_advisory_xact_lock\(hashtext\('bimlog:workflow-policy-publish'\)/);
 function invalid(change: (value: ReturnType<typeof copy>) => void, field: string) {
   const candidate = copy(); change(candidate);
   assert.throws(() => validateWorkflowGovernancePolicy(candidate), (error: unknown) => error instanceof WorkflowGovernancePolicyError && error.field === field);

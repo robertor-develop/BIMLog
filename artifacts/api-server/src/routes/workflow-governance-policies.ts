@@ -240,6 +240,7 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/retir
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const current = await policy(client, actor, param(req.params.id), true);
     if (!current) { await client.query("ROLLBACK"); res.status(404).json({ code: "WORKFLOW_POLICY_NOT_FOUND" }); return; }
     if (!await financeChecker(client, actor)) { await client.query("ROLLBACK"); res.status(403).json({ code: "WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED" }); return; }

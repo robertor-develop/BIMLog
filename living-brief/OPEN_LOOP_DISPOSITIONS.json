@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "bbfde788998ac6475c8042c41ebcaa931b57f3386db6d6a54ccf849422d2df34",
+  "sourceSha256": "a9e1276eec527a64ef7892f3b254330bd45239ead3194318ce08d362fbabd57f",
   "itemCount": 170,
   "counts": {
     "ACTIVE": 137,
@@ -62,10 +62,10 @@
   ],
   "items": [
     {
-      "id": "30d53ac22984fe4d",
+      "id": "869435eb2ca75718",
       "sourceLine": 7,
       "heading": "Urgent Template / Intake integration gap — 2026-09-23",
-      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–20 reached GitHub and were published through Build 20 at `5e704afa5a13908698d1a471e7eb44ed5d49dfd6`; authenticated Chrome covered Governance draft/reopen and self-approval denial, not the six-role end-to-end path. Local Builds 21–25 expose the applicable published Governance version and known incompatibility on Intake's workflow choice; the ten-build publication boundary is Build 30. The policy approval/change/role matrices remain intent rather than complete runtime execution authority, and activation's canonical validation remains authoritative.",
+      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–20 reached GitHub and were published through Build 20 at `5e704afa5a13908698d1a471e7eb44ed5d49dfd6`; authenticated Chrome covered Governance draft/reopen and self-approval denial, not the six-role end-to-end path. Builds 21–25 reached GitHub `master` at `e1ccebbcecb11e25819875b84649be20398dfe36` and remain unpublished until the Build 30 checkpoint. Local Builds 26–30 add a publication-time compatibility guard with isolated positive/negative HTTP proof and bilingual denial guidance. The policy approval/change/role matrices remain intent rather than complete runtime execution authority; activation's canonical validation remains authoritative.",
       "classification": "ACTIVE",
       "workClass": "PROVIDER_EVIDENCE",
       "ownership": {

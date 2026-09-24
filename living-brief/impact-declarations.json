@@ -39994,6 +39994,96 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "2e4be52fd94044cf3773e914bf856cdff65d06be9313147f58a7ef65750a59c4"
+    },
+    {
+      "taskId": "bimlog-template-governance-repair-block06-20260924",
+      "reviewedThroughCommit": "e1ccebbcecb11e25819875b84649be20398dfe36",
+      "reviewedAt": "2026-09-24T07:17:37Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Workflow publication previously allowed incompatibility with the applicable published Governance Policy; a rejected publish must preserve the preceding live version. Policy retirement shares the company-scoped publication lock."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No duplicate template or policy store was introduced."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The established ten-build release boundary remains in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Positive and negative HTTP proof remains distinct from field acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No new endpoint or schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or installer change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Records the pushed Build 25 boundary and local Build 30 candidate without implying publication."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps six-role Template-to-EDT field proof and runtime policy matrix enforcement open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Append-only historical audit content was not changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/delivery-workflow-selection.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-template.http-evidence.ts",
+        "artifacts/api-server/src/lib/workflow-governance-binding.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy-contract.behavior.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/api-server/src/routes/workflow-governance-policies.ts",
+        "artifacts/bimlog/src/lib/workflow-approval-error.behavior.ts",
+        "artifacts/bimlog/src/lib/workflow-approval-error.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "372911f9d33c78761552ae4f544699caa30edef260c8794cc84ee46b961d6bea"
     }
   ]
 }
