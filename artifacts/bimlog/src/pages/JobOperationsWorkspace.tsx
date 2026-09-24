@@ -26,6 +26,7 @@ import { BudgetGovernancePanel } from "@/components/job-operations/BudgetGoverna
 import { ProjectControlsDashboard } from "@/components/job-operations/ProjectControlsDashboard";
 import { WorkItemDeliveryWorkflowPanel } from "@/components/job-operations/WorkItemDeliveryWorkflowPanel";
 import { EdtPlanPreviewPanel } from "@/components/job-operations/EdtPlanPreviewPanel";
+import { EdtDirectorAssignmentPanel } from "@/components/job-operations/EdtDirectorAssignmentPanel";
 import {
   emptyOperationsClassificationFilters,
   matchesOperationsClassification,
@@ -835,7 +836,7 @@ export function DocumentConnectionsPanel({
 }
 
 export function JobOperationsWorkspace() {
-  const { token } = useAuthStore();
+  const { token, user } = useAuthStore();
   const { language, tt } = useI18n();
   const [, route] = useRoute("/projects/:id/operations");
   const projectId = Number(route?.id);
@@ -1330,6 +1331,8 @@ export function JobOperationsWorkspace() {
             </button>
           </div>
         </header>
+        {Boolean((user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin) &&
+          <EdtDirectorAssignmentPanel projectId={projectId} api={api} tt={tt} />}
         {data.identity?.intakeId && <EdtPlanPreviewPanel
           projectId={projectId}
           intakeId={String(data.identity.intakeId)}
