@@ -9,6 +9,7 @@ import { ChevronLeft, Shield } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ROLES, getRole, type RoleKey } from "@/lib/roles";
 import { loadDeploymentModule } from "@/lib/deployment-module-recovery";
+import { projectPageMembershipDenied, resolveProjectPageRole } from "@/lib/access-profile";
 
 const namedProjectTab = (loader: () => Promise<object>, name: string) =>
   React.lazy(async () => ({ default: (await loadDeploymentModule(loader) as Record<string, React.ComponentType<any>>)[name] }));
@@ -81,7 +82,9 @@ export function ProjectDetail() {
   } = useListMembers(projectId);
 
   const currentMember = members?.find(m => m.userId === user?.id);
-  const memberRole = currentMember?.role || "";
+  const elevatedUser = user as (typeof user & { isSuperAdmin?: boolean; is_super_admin?: boolean });
+  const isSuperAdmin = elevatedUser?.isSuperAdmin === true || elevatedUser?.is_super_admin === true;
+  const memberRole = resolveProjectPageRole(isSuperAdmin, currentMember?.role);
   const isAdmin = adminRoles.includes(memberRole);
   const canWrite = writeRoles.includes(memberRole);
   const canEditConvention = memberRole === "project_admin" || memberRole === "convention_manager";
@@ -116,7 +119,7 @@ export function ProjectDetail() {
   const loadStatus = typeof loadError === "object" && loadError !== null && "status" in loadError
     ? Number((loadError as { status?: number }).status)
     : undefined;
-  const membershipDenied = Boolean(project && members && !currentMember);
+  const membershipDenied = projectPageMembershipDenied(Boolean(project), Boolean(members), Boolean(currentMember), isSuperAdmin);
   if (projectIsError || membersIsError || !project || membershipDenied) {
     const denied = loadStatus === 403 || membershipDenied;
     const missing = loadStatus === 404 || (!project && !projectIsError);

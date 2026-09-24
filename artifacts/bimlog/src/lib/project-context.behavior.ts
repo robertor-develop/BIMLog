@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { resolveProjectContext, type AccessProfile } from "./access-profile";
+import { projectPageMembershipDenied, resolveProjectContext, resolveProjectPageRole, type AccessProfile } from "./access-profile";
 
 const profile = (overrides: Partial<AccessProfile["facts"]> = {}): AccessProfile => ({
   facts: {
@@ -20,5 +20,10 @@ assert.deepEqual(resolveProjectContext(profile({ activeProjectRoles: ["member"],
 assert.deepEqual(resolveProjectContext(profile({ activeProjectRoles: ["member"], activeProjects: [{ id: 7, role: "member" }] }), 8), { allow: false, kind: "project_denied", projectId: 8, role: null });
 assert.deepEqual(resolveProjectContext(profile(), 8), { allow: false, kind: "zero_project", projectId: 8, role: null });
 assert.deepEqual(resolveProjectContext(profile(), null), { allow: false, kind: "zero_project", projectId: null, role: null });
+assert.equal(resolveProjectPageRole(true, undefined), "project_admin");
+assert.equal(projectPageMembershipDenied(true, true, false, true), false);
+assert.equal(resolveProjectPageRole(false, undefined), "");
+assert.equal(projectPageMembershipDenied(true, true, false, false), true);
+assert.equal(resolveProjectPageRole(false, "reviewer"), "reviewer");
 
-console.log("project context: 5/5 passed");
+console.log("project context: 10/10 passed");

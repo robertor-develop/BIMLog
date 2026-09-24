@@ -26,6 +26,14 @@ export type ProjectContext =
   | { allow: true; kind: "global_super_admin" | "project_membership"; projectId: number; role: string }
   | { allow: false; kind: "zero_project" | "project_denied"; projectId: number | null; role: null };
 
+export function resolveProjectPageRole(isSuperAdmin: boolean, memberRole: string | null | undefined): string {
+  return isSuperAdmin ? "project_admin" : memberRole ?? "";
+}
+
+export function projectPageMembershipDenied(hasProject: boolean, hasMembers: boolean, hasCurrentMember: boolean, isSuperAdmin: boolean): boolean {
+  return hasProject && hasMembers && !hasCurrentMember && !isSuperAdmin;
+}
+
 export function resolveProjectContext(profile: AccessProfile, requestedProjectId: number | null): ProjectContext {
   if (!requestedProjectId || !Number.isSafeInteger(requestedProjectId) || requestedProjectId <= 0)
     return { allow: false, kind: profile.facts.activeProjects.length ? "project_denied" : "zero_project", projectId: null, role: null };

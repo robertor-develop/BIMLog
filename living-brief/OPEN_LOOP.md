@@ -1,5 +1,11 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Super Administrator project-route mismatch — 2026-09-24
+
+- [x] Authenticated Chrome reproduced a Super Administrator opening synthetic BIMCorp project `QA-AI-0924` from Control Total, then being denied by the project page despite the server and outer project route allowing global Super Administrator access. The page's extra membership check was the cause.
+- [x] Align the project page's effective role and membership check with the existing server-authorized Super Administrator contract. Preserve ordinary project-member denial and the independent budget maker/checker rule. Focused context regressions, frontend typecheck and frontend build pass locally.
+- [ ] Complete Living Brief and release gates, push/publish the accepted correction, then retest Super Administrator project access, the submitted synthetic budget's independent review/approval, and the downstream Intake/EDT journey in live Chrome. No production access or financial approval is claimed from the local fix.
+
 ## Urgent Template / Intake integration gap — 2026-09-23
 
 - [x] Reject the 2026-09-18 Job Intake PDF and L04 as completion evidence after Rubén/Lorena's field findings. The initial five-build evidence inventory is under `evidence/template-intake-gap-20260923/`; it is source and Roberto/RRY live observation, not BIMTECH role acceptance.

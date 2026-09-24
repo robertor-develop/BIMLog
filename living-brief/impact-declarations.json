@@ -40452,6 +40452,94 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "979df222d7171f56d7a49ed12a8a9d3b6164e1aa3e4a0539eef7ccb333e13cd7"
+    },
+    {
+      "taskId": "bimlog-super-admin-project-page-access-20260924",
+      "reviewedThroughCommit": "321fb7c3a5edae59a8677eda3049ebed1f535176",
+      "reviewedAt": "2026-09-24T16:18:41Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "platform",
+            "status",
+            "open_loop"
+          ],
+          "summary": "The project page denied a current Super Administrator whom the server and outer project route authorized; the local correction preserves ordinary membership denial and independent budget maker/checker behavior."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Canonical project authority and human financial approval remain intact."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The documented server-side Super Administrator membership bypass is unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Live behavior, maker/checker, and deployment gates remain separate."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No roadmap or market direction changes."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated architecture note now requires project-page parity with the existing Super Administrator membership bypass."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native, bridge, or installer change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report renderer or export change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim changes."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The live defect and local candidate are distinguished from publication and acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Push, publication, budget review and end-to-end acceptance remain open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit-history schema or rule changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/bimlog/src/lib/access-profile.ts",
+        "artifacts/bimlog/src/lib/project-context.behavior.ts",
+        "artifacts/bimlog/src/pages/ProjectDetail.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "b41f8e5834290f2a558e170b02942f924d6f0d4556340f7b94514a301b67bf79"
     }
   ]
 }

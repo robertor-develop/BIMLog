@@ -942,6 +942,8 @@ It changes only when the code structure or curated architectural facts change.
 - Auth: JWT Bearer; payload carries isSuperAdmin. authMiddleware verifies; requireProjectMember
   / requirePermission gate project access (super admins bypass membership);
   isSuperAdminMiddleware re-checks users.is_super_admin.
+- The Platform project route and project page must honor that Super Administrator membership
+  bypass consistently; ordinary accounts still require their own active project membership.
 - Schema changes go in BOTH the drizzle schema file AND the idempotent startup migration block
   in artifacts/api-server/src/app.ts (ALTER TABLE / CREATE TABLE ... IF NOT EXISTS).
 - Declarative schemas preserve established production constraint, foreign-key, unique, check, and index names

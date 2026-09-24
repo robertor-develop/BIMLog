@@ -1,5 +1,10 @@
 # STATUS.md - Current Accepted Platform State
 
+## Super Administrator project access correction — local candidate — 2026-09-24
+
+- Live Chrome showed the RRY Super Administrator could see synthetic BIMCorp project `QA-AI-0924` in Control Total but ProjectDetail denied entry solely because the administrator was not also listed as a project member. The server-side project membership middleware and outer project route already support global Super Administrator access.
+- The project page now uses the current account's Super Administrator status to derive its effective project administrator role and excludes that account from the redundant membership denial. Ordinary nonmember denial and budget maker/checker checks remain unchanged. Focused context regression, frontend typecheck and frontend build pass locally. The candidate is not pushed, published or live verified; budget approval and full Intake acceptance remain open.
+
 ## Template / Intake field-package rejection and audit candidate — 2026-09-23
 
 - Rubén and Lorena rejected the 2026-09-18 Job Intake guide as insufficient for company Delivery Workflow and Governance template authoring. The published L04 client/floor instruction is ambiguous, and the currently published Quick Start still shows Service and Phase as project classifications. The first five-build source/live inventory is under `evidence/template-intake-gap-20260923/`; it is not product or customer acceptance.
