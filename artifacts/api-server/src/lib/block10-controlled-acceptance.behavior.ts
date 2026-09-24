@@ -30,7 +30,9 @@ assert.match(workflowRoute, /DELIVERY_WORKFLOW_NOT_APPROVED_OR_STALE/);
 
 // Intake exposes only governed IDs and the server independently revalidates
 // company, classification, workflow, pricing, budget, and staffing authority.
-assert.match(intakeUi, /"disciplines", "services", "phases"/);
+assert.match(intakeUi, /\/master-catalogs\/disciplines/);
+assert.doesNotMatch(intakeUi, /<select[^>]*service/i);
+assert.doesNotMatch(intakeUi, /<select[^>]*phase/i);
 assert.doesNotMatch(intakeUi, /<input/);
 for (const boundary of [
   "JOB_INTAKE_COMPANY_MISMATCH",
