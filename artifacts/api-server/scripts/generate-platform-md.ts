@@ -174,6 +174,12 @@ ${appRoutes()}
   Optional section guidance, automatic detail-line remainder/equal splits, and exact save-readiness
   explanations make the complete allocation actionable. Draft and saved plans can be exported as CSV
   or generated through the governed Print PDF flow; saved plan versions remain immutable.
+- Company Delivery Workflow and Workflow Governance publication share a company-scoped advisory
+  boundary. Independent approval also rechecks published-policy compatibility and policy scope;
+  publication rechecks again before replacing a live version. The governed runtime freezes the
+  selected policy and workflow definition by version and fingerprint. Policy threshold and
+  company-role matrices remain recorded intent rather than independent execution grants; the
+  guarded EDT mutations are not represented as a completed six-role production journey.
 - Smart Intake uses the existing project-scoped \`job_intakes.data\` draft as its only pre-activation
   authority. Preserved XLS/XLSX/XLSM/CSV sources expose bounded multi-sheet previews; the user must
   explicitly choose the sheet, header row, Contract Item Name column, and Quantity column. A

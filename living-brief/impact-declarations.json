@@ -40174,6 +40174,97 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "062424ac63693c5080f49cfeeb15e91c0d9daf1a192a7054380a91268149ecae"
+    },
+    {
+      "taskId": "bimlog-template-governance-repair-block08-20260924",
+      "reviewedThroughCommit": "c9995eaccf30a19ac8847c8c0141bf83eb774ad7",
+      "reviewedAt": "2026-09-24T10:05:31Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop",
+            "platform"
+          ],
+          "summary": "Workflow approval could race company policy publication and Governance approval could accept incompatible published workflows or overlapping live scope. The shared company lock and early checks narrow that gap; role grants and six-role EDT execution remain open."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction retains canonical company policy, workflow and Commercial authorities without a parallel configuration store."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The existing push and publish cadence, fail-closed release gate and task ownership remain in force."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Isolated HTTP proof and local release tests do not replace deployed or customer six-role acceptance."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction or BIMTECH final template authority is changed by the approval checks."
+        },
+        {
+          "key": "platform",
+          "result": "updated",
+          "reason": "The generated platform contract records company-lock approval, publication rechecks and the remaining role enforcement boundary."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Lens Next Native and installer source are unchanged by this Platform governance block."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report layout, renderer, document export or design-system authority changed."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards citation, external specification or jurisdictional rule changed."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "The exact pushed Build 35 source and bounded Build 36 through 40 release candidate are stated without claiming customer acceptance."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "The governed role, threshold and Template-to-EDT six-role acceptance gaps remain explicitly open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Historical append-only audit narrative and existing policy event contracts were not changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/scripts/generate-platform-md.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy.http-evidence.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/api-server/src/routes/workflow-governance-policies.ts",
+        "artifacts/bimlog/src/lib/workflow-policy-error.behavior.ts",
+        "artifacts/bimlog/src/lib/workflow-policy-error.ts",
+        "artifacts/bimlog/src/pages/CompanyWorkflowGovernance.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/PLATFORM.md",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "c54751cac0a8d9606f8444548ac6764c5a76cfee273a779106c96d87af342af8"
     }
   ]
 }
