@@ -1,13 +1,16 @@
 {
   "schemaVersion": 1,
-  "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
+  "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
   "catalogSha256": "dc5f759ff121fabd0f4d84bca362dc75a8f290bb38638f2eb4859c10132291a2",
-  "bundleSha256": "17eee4f76409ff301cd9b8c82d3c174ec994559f7e90eec502bcf7b3076d40bf",
+  "bundleSha256": "8b3637b765f9a27ee9134e34d192e73051c8661d113f03f5e2a0cc3a232ddf67",
   "impact": {
-    "baselineCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
+    "baselineCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
     "changedPaths": [
-      "artifacts/bimlog/src/features/lens-next/LensNextPanelView.tsx",
-      "artifacts/bimlog/src/features/lens-next/lens-next-dock-filters.behavior.ts",
+      "evidence/template-intake-gap-20260923/B01_BASELINE.md",
+      "evidence/template-intake-gap-20260923/B02_HEADQUARTERS_INVENTORY.md",
+      "evidence/template-intake-gap-20260923/B03_ROLE_BOUNDARIES.md",
+      "evidence/template-intake-gap-20260923/B04_SHOP_SLEEVE_TRACE.md",
+      "evidence/template-intake-gap-20260923/B05_GAP_MATRIX.md",
       "living-brief/OPEN_LOOP.md",
       "living-brief/OPEN_LOOP_DISPOSITIONS.json",
       "living-brief/STATUS.md",
@@ -16,7 +19,6 @@
     "affectedDocuments": [
       "CLAUDE.md",
       "OPEN_LOOP.md",
-      "PLATFORM.md",
       "STATUS.md"
     ]
   },
@@ -27,11 +29,11 @@
       "sha256": "7bb114ece3c8ad10660c7cc8716253dd6a276535ed10cf91d097851fe9ad7241",
       "sourceChangedAt": "2026-08-05T17:48:26-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "claude",
@@ -39,11 +41,11 @@
       "sha256": "90538da58f64a59e860713face1fefeff05dcfb598472fd0b06e4b56f2e590c8",
       "sourceChangedAt": "2026-09-21T03:45:21-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "quality",
@@ -51,11 +53,11 @@
       "sha256": "b6cced2db201c506cda5eb1ac6f7d03167c8893de71f880eda4ccef3b51d2829",
       "sourceChangedAt": "2026-09-21T09:39:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "vision",
@@ -63,11 +65,11 @@
       "sha256": "c99033a8b02a4f52d59a108d233abef6cbd690fb0a307a07a7dbc18b78926631",
       "sourceChangedAt": "2026-09-14T22:42:41-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "platform",
@@ -75,11 +77,11 @@
       "sha256": "1b4ec8bfe0368d3dda3a67b68c3ae7747821b51a83d7ebb953ec471b6c33658b",
       "sourceChangedAt": "2026-09-23T06:23:52-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "plugin",
@@ -87,11 +89,11 @@
       "sha256": "812ec9814ea5bd043051ec97d9c54d468c9c84855ee1136250ce5c8df798b71d",
       "sourceChangedAt": "2026-09-23T11:41:51-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
-      "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
+      "semanticReviewResult": "reviewed_no_semantic_change",
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "report_design_system",
@@ -99,11 +101,11 @@
       "sha256": "2af57cb46bbbd6a79bd3a375d5321eb4adc8d5d9e4e4bc95ac5a39fddba98620",
       "sourceChangedAt": "2026-08-01T10:49:37-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "standards_register",
@@ -111,35 +113,35 @@
       "sha256": "74ebce76aa03b9e1301dbbac9342793d76cccf7281c8550f7bef6acfe4a5ad45",
       "sourceChangedAt": "2026-07-13T19:31:40-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "status",
       "file": "STATUS.md",
-      "sha256": "8e240127e4cb09c8627c92f9c9f6a144a073c5fffa19478c76f917f495f8e798",
-      "sourceChangedAt": "2026-09-23T21:12:18.000Z",
+      "sha256": "9f75fb17fcdfa5ffa9fd1c541e95721a043790bc735496e469c8fa9ef2b031ab",
+      "sourceChangedAt": "2026-09-24T02:37:39.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "open_loop",
       "file": "OPEN_LOOP.md",
-      "sha256": "a2872d552896344c482866a290c6127822f08438c428135fa27b03786c07fa2e",
-      "sourceChangedAt": "2026-09-23T21:12:18.000Z",
+      "sha256": "e84a0412a5629be86cd0dbd0a7ab9874607985a8ab9a5fb74ca7ad5a8a51a9ea",
+      "sourceChangedAt": "2026-09-24T02:37:39.000Z",
       "changeState": "candidate",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "updated",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     },
     {
       "key": "audit",
@@ -147,11 +149,11 @@
       "sha256": "484d56e4c79f6ab2ba75f0d6f194a426967d96e9d31145e0ce1905da35554e72",
       "sourceChangedAt": "2026-09-20T18:50:14-04:00",
       "changeState": "accepted",
-      "reconciledThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewedThroughCommit": "42f8744d66e81a7a45086ee5b2af4b01b50dcfd2",
-      "semanticReviewTask": "bimlog-lens-next-responsive-dock-live-filters-correction-20260923",
+      "reconciledThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewedThroughCommit": "49e0c9013028fd007ef81ae27603e33c52ca224e",
+      "semanticReviewTask": "bimlog-template-intake-field-gap-audit-block01-20260923",
       "semanticReviewResult": "reviewed_no_semantic_change",
-      "semanticReviewedAt": "2026-09-23T21:12:18Z"
+      "semanticReviewedAt": "2026-09-24T02:37:39Z"
     }
   ]
 }

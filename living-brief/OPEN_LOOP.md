@@ -1,10 +1,23 @@
 # OPEN_LOOP.md - BIMLog Open Product Loops
 
+## Urgent Template / Intake integration gap — 2026-09-23
+
+- [x] Reject the 2026-09-18 Job Intake PDF and L04 as completion evidence after Rubén/Lorena's field findings. The initial five-build evidence inventory is under `evidence/template-intake-gap-20260923/`; it is source and Roberto/RRY live observation, not BIMTECH role acceptance.
+- [ ] Remove the contradictory global Service/Phase controls from Quick Start without erasing historical saved classifications; keep Client at project/contract and floors at EDT/Work Item scope.
+- [ ] Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Governance approval/change/role matrices presently describe intent rather than complete runtime execution authority.
+- [ ] Prove synthetic Shop Drawing and Sleeve company templates with distinct economics through canonical Contract/APU, approved synthetic budget, Intake, governed EDT/Work Items, immutable snapshots, roles, tasks, hours, QC, Operations and reports under separate authorized accounts. Guarded new EDT mutations remain closed at this baseline.
+- [ ] Only after the complete deployed path passes, replace the rejected guide with the exact published UI and invite Rubén/Lorena to field test. Preserve all completed source and avoid representing BIMLog defaults as BIMTECH-approved templates.
+
+## Lens Next responsive dock — paused after published Build 10 — 2026-09-23
+
+- [x] The Filters-rail hotfix passed the full exact-head gate, reached GitHub `master` at `49e0c9013028fd007ef81ae27603e33c52ca224e`, was published through Replit Shell/UI, and passed authenticated Chrome Filters/reload recheck. Platform P36; no Native/installer change.
+- [ ] Resume Builds 11–25 only after the urgent Template/Intake repair reaches its acceptance gate. Connected Navisworks field proof remains separate.
+
 ## Lens Next responsive dock — live Filters correction — 2026-09-23
 
 - [x] Push and publish Builds 1–10 at exact source `42f8744d66e81a7a45086ee5b2af4b01b50dcfd2`; Replit Shell build and bound live health passed.
 - [x] Authenticated Chrome exposed the wide-dock persisted-collapse defect; implement the Filters rail reopening behavior and focused regression. Frontend typecheck passes.
-- [ ] Complete the full gate, exact fast-forward push, clean Replit Shell republish, and authenticated live Filters recheck before Builds 11–15.
+- [x] Complete the full gate, exact fast-forward push, clean Replit Shell republish, and authenticated live Filters recheck at `49e0c9013028fd007ef81ae27603e33c52ca224e`. Builds 11–15 are now paused behind the urgent Template/Intake repair.
 
 ## Lens Next responsive dock — Block 2 — 2026-09-23
 
@@ -12,7 +25,7 @@
 - [x] Block 1 passed the full gate and reached GitHub `master` at `a6ab1142b2684bde017e445e72affe0ebde9de1b`; publication was correctly deferred to the ten-build boundary.
 - [x] Build 6–10 compact single-workspace shell, functional Filters, Viewpoints List/Details/Back with scroll preservation, Create/Cancel/new-issue selection, and Settings. Focused tests, frontend typecheck, and local Chrome production-component fixture behavior pass at narrow/medium/wide widths. No Native/installer files changed.
 - [x] Correct the older exact-390 regression check after it required superseded viewport auto-scroll behavior; the affected Lens suite passes with the measured-container transition asserted.
-- [ ] Complete the exact-head full gate, push Block 2, synchronize and publish through Replit Shell without Replit Agents, then run full authenticated live Chrome smoke. Do not call local fixture data a real Navisworks capture, successful production Create, or customer acceptance.
+- [x] Complete the exact-head full gate, push Block 2, synchronize and publish through Replit Shell without Replit Agents, then run authenticated live Chrome smoke. The persisted Filters-collapse defect was corrected and republished at `49e0c9013028fd007ef81ae27603e33c52ca224e`. The live QA project had no issues or connected Navisworks bridge, so successful production Create and Working View remain unproven.
 - [ ] Continue remaining responsive-dock accessibility, connected Navisworks and field acceptance after this release checkpoint; preserve the verified Working View, identity, publishing and attachment behaviors.
 
 ## EDT Block 14 — governed activation preparation — 2026-09-23

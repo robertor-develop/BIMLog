@@ -1,9 +1,15 @@
 # STATUS.md - Current Accepted Platform State
 
+## Template / Intake field-package rejection and audit candidate — 2026-09-23
+
+- Rubén and Lorena rejected the 2026-09-18 Job Intake guide as insufficient for company Delivery Workflow and Governance template authoring. The L04 client/floor instruction is ambiguous, and live Quick Start still shows Service and Phase as project classifications. The first five-build source/live inventory is under `evidence/template-intake-gap-20260923/`; it is not a product fix or customer acceptance.
+- Source and published UI expose company Delivery Workflow, Workflow Governance and APU/Pricing authoring. Roberto's RRY company has no saved company workflow or pricing template in the observed session; that says nothing about BIMTECH data. The Governance UI explicitly states its approval/change/role matrix is policy intent, not execution permission. The newer governed EDT mutation routes remain guarded; read-only readiness and legacy activation are not the requested complete path.
+- The urgent repair takes priority. Lens Next responsive dock is paused after published Build 10/hotfix, not reset or discarded. No BIMTECH production template, financial approval or customer data mutation occurred in this audit block.
+
 ## Lens Next responsive dock — live Filters correction — 2026-09-23
 
 - Builds 1–10 passed the exact-head gate and were pushed to GitHub `master` at `42f8744d66e81a7a45086ee5b2af4b01b50dcfd2`. Replit Shell aligned cleanly to that source, the no-drop publication receipt and production build passed, and the controlled publish completed. Live health reported the exact bound source and P36 release.
-- Authenticated Chrome smoke found an actual wide-dock regression: a persisted older `filtersCollapsed` preference kept the pane hidden when the new Filters rail tab was selected. The correction makes selecting Filters reopen that pane and preserves the existing filter state. Focused regression and frontend typecheck pass; full gate, push, republish and live recheck of this correction remain pending. Do not start Builds 11–15 until the recheck passes.
+- Authenticated Chrome smoke found an actual wide-dock regression: a persisted older `filtersCollapsed` preference kept the pane hidden when the new Filters rail tab was selected. The correction makes selecting Filters reopen that pane and preserves the existing filter state. The full gate, push and Replit Shell/UI republish completed at `49e0c9013028fd007ef81ae27603e33c52ca224e`; authenticated Chrome Filters/reload recheck passed. Builds 11–15 are paused while the urgent Template/Intake integration gap is repaired.
 
 ## Lens Next responsive dock — Block 2 local candidate — 2026-09-23
 
