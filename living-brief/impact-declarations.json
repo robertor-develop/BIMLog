@@ -40789,10 +40789,11 @@
       ],
       "reviewedChangedPaths": [
         "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
         "living-brief/STATUS.md",
         "living-brief/impact-declarations.json"
       ],
-      "reviewedChangeSha256": "21ffa1fce9aabf8424a7beb3ff29158736e7432e30acc6cdbc6c21394c3b4582"
+      "reviewedChangeSha256": "52a3b92a17da40b99de8fc078dcb5ecec756df1c266085ddd3ef5ffee04099c2"
     }
   ]
 }
