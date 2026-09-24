@@ -168,6 +168,7 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/appro
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
+    await client.query("SELECT pg_advisory_xact_lock(hashtext('bimlog:workflow-policy-publish'),$1::integer)",[actor.companyId]);
     const current = await policy(client, actor, param(req.params.id), true);
     if (!current) { await client.query("ROLLBACK"); res.status(404).json({ code: "WORKFLOW_POLICY_NOT_FOUND" }); return; }
     const row = (await client.query(`SELECT id,definition,revision,state,created_by_id,updated_by_id FROM company_workflow_governance_versions
@@ -184,6 +185,7 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/appro
     if (!await financeChecker(client, actor)) {
       await client.query("ROLLBACK"); res.status(403).json({ code: "WORKFLOW_POLICY_FINANCE_CHECKER_REQUIRED" }); return;
     }
+    await validatePublishedWorkflowsForPolicy(client, actor.companyId, value);
     const fingerprint = workflowGovernancePolicyFingerprint(value);
     await client.query(`UPDATE company_workflow_governance_versions SET state='approved',fingerprint=$2,
       approved_by_id=$3,approved_at=now(),revision=revision+1,updated_by_id=$3,updated_at=now() WHERE id=$1`,
@@ -191,7 +193,13 @@ router.post("/company/workflow-governance-policies/:id/versions/:versionId/appro
     await event(client, actor, current.id, row.id, "approved", { fingerprint });
     await client.query("COMMIT");
     res.json({ versionId: row.id, state: "approved", fingerprint, revision: revision + 1 });
-  } catch (error) { await client.query("ROLLBACK"); if (error instanceof WorkflowGovernancePolicyError) res.status(409).json({ code: error.code, field: error.field }); else throw error; }
+  } catch (error) {
+    await client.query("ROLLBACK");
+    if (error instanceof WorkflowGovernancePolicyError || error instanceof DeliveryWorkflowDefinitionError)
+      res.status(409).json({ code: error.code, field: error.field });
+    else if (error instanceof FinancialControlError) res.status(error.status).json({ code: error.code });
+    else throw error;
+  }
   finally { client.release(); }
 });
 

@@ -101,16 +101,14 @@ try {
     [workflowVersionId,workflowId,JSON.stringify(legacyWorkflow),deliveryWorkflowFingerprint(legacyWorkflow),owner.id]);
   const incompatiblePolicy = await call(maker,`/company/workflow-governance-policies/${id}/versions`,{});
   assert.equal(incompatiblePolicy.status,201,JSON.stringify(incompatiblePolicy.body));
-  assert.equal((await call(checker,`/company/workflow-governance-policies/${id}/versions/${incompatiblePolicy.body.versionId}/approve`,
-    {expectedRevision:1})).status,200);
-  const deniedForLegacy = await call(checker,`/company/workflow-governance-policies/${id}/versions/${incompatiblePolicy.body.versionId}/publish`,
-    {expectedRevision:2});
+  const deniedForLegacy = await call(checker,`/company/workflow-governance-policies/${id}/versions/${incompatiblePolicy.body.versionId}/approve`,
+    {expectedRevision:1});
   assert.equal(deniedForLegacy.status,409,JSON.stringify(deniedForLegacy.body));
   assert.equal(deniedForLegacy.body.code,"WORKFLOW_POLICY_FINAL_APPROVAL_REQUIRED");
   const history = await call(maker,`/company/workflow-governance-policies/${id}`);
   assert.equal(history.body.versions.find((x: any) => x.versionId === v1).state,"superseded");
   assert.equal(history.body.versions.find((x: any) => x.versionId === v2).state,"published");
-  assert.equal(history.body.versions.find((x: any) => x.versionId === incompatiblePolicy.body.versionId).state,"approved");
+  assert.equal(history.body.versions.find((x: any) => x.versionId === incompatiblePolicy.body.versionId).state,"draft");
   assert.ok(history.body.history.some((x: any) => x.action === "superseded"));
   assert.ok(history.body.history.some((x: any) => x.action === "approved" && x.actorId === checker.id && x.actorName === checker.full_name));
   assert.equal(history.body.versions.find((x: any) => x.versionId === v2).approvedById,checker.id);
