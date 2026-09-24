@@ -3,6 +3,7 @@ import { useLocation } from "wouter";
 import { useAuthStore } from "@/store/auth";
 import { useI18n } from "@/lib/i18n";
 import { MasterSidebar } from "@/components/layout/MasterSidebar";
+import { workflowPolicyErrorMessage } from "@/lib/workflow-policy-error";
 import "./CompanyWorkflowGovernance.css";
 
 const base = (import.meta.env.VITE_API_URL as string | undefined) ?? "";
@@ -73,9 +74,9 @@ export function CompanyWorkflowGovernance() {
     const response = await fetch(`${base}/api/v1${path}`, { method,headers:{ Authorization:`Bearer ${token}`,"Content-Type":"application/json" },
       body:body === undefined ? undefined : JSON.stringify(body) });
     const value = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(value.field ? `${value.code}: ${value.field}` : value.code ?? `HTTP ${response.status}`);
+    if (!response.ok) throw new Error(workflowPolicyErrorMessage(value.code, spanish));
     return value;
-  },[token]);
+  },[token,spanish]);
   const load = useCallback(async (id?:string) => {
     const listing = await request("/company/workflow-governance-policies");
     setLoadFailed(false);
