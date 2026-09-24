@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, WorkflowGovernancePolicyError } from "./workflow-governance-policy-contract";
+import { validateWorkflowGovernancePolicy, workflowGovernancePolicyFingerprint, workflowPolicyIndependentCheckerAllowed, WorkflowGovernancePolicyError } from "./workflow-governance-policy-contract";
 
 const actions = ["create_work_item", "complete_phase", "complete_deliverable", "economic_change", "template_update", "activate_version"];
 const changes = ["edit_phases", "edit_tasks_roles", "edit_allocation", "change_apu", "edit_approved_work_item", "retire_version"];
@@ -16,6 +16,10 @@ const copy = () => structuredClone(valid);
 assert.deepEqual(validateWorkflowGovernancePolicy(valid).scope, valid.scope);
 assert.match(workflowGovernancePolicyFingerprint(valid), /^[a-f0-9]{64}$/);
 assert.equal(workflowGovernancePolicyFingerprint(valid), workflowGovernancePolicyFingerprint(copy()));
+assert.equal(workflowPolicyIndependentCheckerAllowed({ actorUserId: 4, createdById: 4, updatedById: 5 }), false);
+assert.equal(workflowPolicyIndependentCheckerAllowed({ actorUserId: 5, createdById: 4, updatedById: 5 }), false);
+assert.equal(workflowPolicyIndependentCheckerAllowed({ actorUserId: 6, createdById: 4, updatedById: 5 }), true);
+assert.equal(workflowPolicyIndependentCheckerAllowed({ actorUserId: 0, createdById: 4, updatedById: 5 }), false);
 function invalid(change: (value: ReturnType<typeof copy>) => void, field: string) {
   const candidate = copy(); change(candidate);
   assert.throws(() => validateWorkflowGovernancePolicy(candidate), (error: unknown) => error instanceof WorkflowGovernancePolicyError && error.field === field);

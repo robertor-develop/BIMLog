@@ -106,3 +106,12 @@ export function validateWorkflowGovernancePolicy(input: unknown): WorkflowGovern
 export function workflowGovernancePolicyFingerprint(input: unknown): string {
   return createHash("sha256").update(JSON.stringify(validateWorkflowGovernancePolicy(input))).digest("hex");
 }
+
+export function workflowPolicyIndependentCheckerAllowed(input: {
+  actorUserId: number;
+  createdById: number;
+  updatedById: number;
+}): boolean {
+  return Number.isSafeInteger(input.actorUserId) && input.actorUserId > 0 &&
+    input.actorUserId !== input.createdById && input.actorUserId !== input.updatedById;
+}
