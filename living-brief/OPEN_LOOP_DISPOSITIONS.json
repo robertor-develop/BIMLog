@@ -1,7 +1,7 @@
 {
   "schemaVersion": 2,
   "generatedFrom": "living-brief/OPEN_LOOP.md",
-  "sourceSha256": "2e4a3310f466e13ec1f324719a991c78e62a69bbeb16231bad3575740a495cb5",
+  "sourceSha256": "bbfde788998ac6475c8042c41ebcaa931b57f3386db6d6a54ccf849422d2df34",
   "itemCount": 170,
   "counts": {
     "ACTIVE": 137,
@@ -62,16 +62,16 @@
   ],
   "items": [
     {
-      "id": "43a7ddd1c4acec63",
+      "id": "30d53ac22984fe4d",
       "sourceLine": 7,
       "heading": "Urgent Template / Intake integration gap — 2026-09-23",
-      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–15 passed the full local gate and reached GitHub `master` at `a632bb3cb69e4d3d588431a7164031299e599624` but await the ten-build publication boundary. Local Builds 16–20 separate PMO maker-checker from Finance denial, expose review actor and version evidence, and improve bilingual Governance lifecycle guidance. The policy approval/change/role matrices remain intent rather than complete runtime execution authority; do not claim end-to-end acceptance from this block.",
+      "statement": "Complete and field-prove company Delivery Workflow and Governance authoring, independent approval, publication, activation, versioning, supersession and audit. Builds 11–20 reached GitHub and were published through Build 20 at `5e704afa5a13908698d1a471e7eb44ed5d49dfd6`; authenticated Chrome covered Governance draft/reopen and self-approval denial, not the six-role end-to-end path. Local Builds 21–25 expose the applicable published Governance version and known incompatibility on Intake's workflow choice; the ten-build publication boundary is Build 30. The policy approval/change/role matrices remain intent rather than complete runtime execution authority, and activation's canonical validation remains authoritative.",
       "classification": "ACTIVE",
-      "workClass": "PRODUCT_WORK",
+      "workClass": "PROVIDER_EVIDENCE",
       "ownership": {
-        "owner": "Job Intake",
-        "route": "/projects/:id/intake",
-        "module": "artifacts/bimlog/src/pages/JobIntakeWorkspace.tsx"
+        "owner": "Release engineering",
+        "route": null,
+        "module": "docs/deployment"
       },
       "evidence": [
         "OPEN_LOOP.md:7",

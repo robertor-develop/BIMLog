@@ -39905,6 +39905,95 @@
         "living-brief/impact-declarations.json"
       ],
       "reviewedChangeSha256": "b2af3065205fefecfec2512dae2afe1d199063853cba99ac2c224cba5d138ba4"
+    },
+    {
+      "taskId": "bimlog-template-governance-repair-block05-20260924",
+      "reviewedThroughCommit": "5e704afa5a13908698d1a471e7eb44ed5d49dfd6",
+      "reviewedAt": "2026-09-24T06:49:30Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "security_privacy_tenancy_authorization_idempotency_concurrency_evidence_or_financial_finding",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Published company policy binding was not visible during Intake selection. Canonical activation remains authoritative; policy matrices are not yet full runtime permissions."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "One canonical policy and workflow source remains required."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Push and publication boundaries remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Field and role-separated acceptance remain mandatory."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No product-direction change."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing options response is enriched without a new route or schema."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Native or installer change."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No report artifact change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards claim change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Separates published Build 20 from local Intake governance-binding candidate."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Keeps full policy enforcement and six-role flow open."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No historical audit event was changed."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/api-server/src/lib/delivery-workflow-defaults.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.behavior.ts",
+        "artifacts/api-server/src/lib/delivery-workflow-selection.ts",
+        "artifacts/api-server/src/lib/workflow-governance-binding.ts",
+        "artifacts/api-server/src/lib/workflow-governance-policy-contract.behavior.ts",
+        "artifacts/api-server/src/routes/delivery-workflow-templates.ts",
+        "artifacts/bimlog/src/components/job-intake/ContractItemBulkEditor.tsx",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "2e4be52fd94044cf3773e914bf856cdff65d06be9313147f58a7ef65750a59c4"
     }
   ]
 }
