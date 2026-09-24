@@ -40628,6 +40628,90 @@
         "scripts/test-super-admin-project-insights-access.mjs"
       ],
       "reviewedChangeSha256": "e5d962efea67573b2c4e0a27f631f56aac97691626032cb441ee745183d3e549"
+    },
+    {
+      "taskId": "bimlog-edt-prerequisite-guidance-20260924",
+      "reviewedThroughCommit": "f476c84a1dc0fb330d87d03e384072a215657124",
+      "reviewedAt": "2026-09-24T19:30:07Z",
+      "status": "local_candidate",
+      "captureTiming": "immediate_same_task_chain",
+      "immediateFindings": [
+        {
+          "category": "customer_defect_or_regression",
+          "disposition": "captured_immediately",
+          "authorities": [
+            "status",
+            "open_loop"
+          ],
+          "summary": "Operations EDT readiness gave a generic error before Intake activation. The focused bilingual candidate explains the prerequisite while preserving the server denial and outstanding live acceptance."
+        }
+      ],
+      "authorities": [
+        {
+          "key": "ecosystem_doctrine",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No ecosystem identity or product-boundary change."
+        },
+        {
+          "key": "claude",
+          "result": "reviewed_no_semantic_change",
+          "reason": "Existing release, audit, and acceptance controls remain unchanged."
+        },
+        {
+          "key": "quality",
+          "result": "reviewed_no_semantic_change",
+          "reason": "The correction improves a tested error state but still requires deployed visual proof."
+        },
+        {
+          "key": "vision",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No market or roadmap direction is changed."
+        },
+        {
+          "key": "platform",
+          "result": "reviewed_no_semantic_change",
+          "reason": "EDT API authority and source contracts are unchanged; only error guidance changes."
+        },
+        {
+          "key": "plugin",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No Lens Next Native, bridge, or installer file changes."
+        },
+        {
+          "key": "report_design_system",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No reports or PDF presentation contracts change."
+        },
+        {
+          "key": "standards_register",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No standards metadata or claims change."
+        },
+        {
+          "key": "status",
+          "result": "updated",
+          "reason": "Published Analytics source and local EDT guidance candidate are separately recorded."
+        },
+        {
+          "key": "open_loop",
+          "result": "updated",
+          "reason": "Live EDT and Analytics proof remain open after the focused candidate."
+        },
+        {
+          "key": "audit",
+          "result": "reviewed_no_semantic_change",
+          "reason": "No audit schema, evidence contract, or event history changes."
+        }
+      ],
+      "reviewedChangedPaths": [
+        "artifacts/bimlog/src/components/job-operations/EdtPlanPreviewPanel.tsx",
+        "artifacts/bimlog/src/components/job-operations/edt-plan-preview.behavior.ts",
+        "living-brief/OPEN_LOOP.md",
+        "living-brief/OPEN_LOOP_DISPOSITIONS.json",
+        "living-brief/STATUS.md",
+        "living-brief/impact-declarations.json"
+      ],
+      "reviewedChangeSha256": "648b9cd9116452106deaa379c493c3879ab0f98125efb50a4fc5d4cb06b06b57"
     }
   ]
 }

@@ -22,5 +22,6 @@ const tt = (english: string) => english;
 assert.match(describeEdtPreviewError(Object.assign(new Error("The request failed."), { code: "EDT_CONTRACT_SOURCE_MISSING" }), tt), /canonical Contract version/);
 assert.match(describeEdtPreviewError(Object.assign(new Error("The request failed."), { code: "EDT_LOCATION_AMBIGUOUS" }), tt), /floor or area Work Package/);
 assert.match(describeEdtPreviewError(Object.assign(new Error("The request failed."), { code: "EDT_GOVERNANCE_SOURCE_MISSING" }), tt), /frozen Governance/);
+assert.match(describeEdtPreviewError(Object.assign(new Error("The request failed."), { code: "EDT_SOURCE_NOT_ACTIVATED" }), tt), /after this Job Intake is activated/);
 assert.match(describeEdtPreviewError(new Error("The request failed."), tt), /Refresh and try again/);
 console.log("EDT_ENGINE_BUILD334_RESULT=PASS read-only Operations preview accepts complete plans and rejects incomplete responses");

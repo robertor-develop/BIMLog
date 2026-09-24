@@ -8,6 +8,9 @@ export type EdtPlanPreview = { nodes: PlanNode[]; workItems: PlanWorkItem[]; sou
 
 export function describeEdtPreviewError(cause: unknown, tt: (english: string, spanish: string) => string): string {
   const code = cause && typeof cause === "object" && "code" in cause ? String(cause.code ?? "") : "";
+  if (code === "EDT_SOURCE_NOT_ACTIVATED")
+    return tt("EDT readiness can be checked after this Job Intake is activated. Finish the required template, governance, contract, and budget approvals in Intake first; no work was changed.",
+      "La preparación de la EDT se puede verificar después de activar este ingreso de trabajo. Primero complete en Ingreso las aprobaciones requeridas de plantilla, gobernanza, contrato y presupuesto; no se cambió ningún trabajo.");
   if (code === "EDT_CONTRACT_SOURCE_MISSING" || code === "EDT_CONTRACT_SOURCE_MISMATCH")
     return tt("This activated Intake has no verifiable canonical Contract version. Existing work is unchanged; complete the Contract source before using the EDT preview.",
       "Este ingreso activado no tiene una versión verificable del contrato canónico. El trabajo existente no cambió; complete el contrato de origen antes de usar la vista EDT.");
